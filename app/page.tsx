@@ -24,7 +24,7 @@ export default function Home() {
             <Link
               key={tool.href}
               href={tool.href}
-              className="border border-neutral-800 rounded-xl p-4 hover:border-indigo-500 transition"
+              className="border border-neutral-800 rounded-xl p-4 hover:border-indigo-500 transition block"
             >
               <h2 className="font-semibold text-lg">{tool.name}</h2>
               <p className="text-neutral-400 text-sm mt-1">{tool.desc}</p>
