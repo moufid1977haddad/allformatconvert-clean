@@ -180,9 +180,10 @@ function ProtectPDFTool() {
     const { PDFDocument } = await import('pdf-lib');
     const bytes = await file.arrayBuffer();
     const pdf = await PDFDocument.load(bytes);
-    pdf.encrypt({ userPassword: password, ownerPassword: password, permissions: { printing: 'highResolution' } });
+    pdf.encrypt({ userPassword: password, ownerPassword: password });
     const protectedBytes = await pdf.save();
-    const url = URL.createObjectURL(new Blob([protectedBytes.buffer], { type: 'application/pdf' }));
+    const blob = new Blob([protectedBytes.buffer], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = 'protected.pdf';
