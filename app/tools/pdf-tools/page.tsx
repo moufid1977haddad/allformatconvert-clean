@@ -1,13 +1,9 @@
 ﻿'use client';
 import { useState } from 'react';
 
-// Composant pour chaque outil PDF
 function PdfToolCard({ title, description, icon, onClick }: { title: string; description: string; icon: string; onClick: () => void }) {
   return (
-    <button
-      onClick={onClick}
-      className="border border-neutral-800 rounded-xl p-4 hover:border-indigo-500 transition text-left w-full"
-    >
+    <button onClick={onClick} className="border border-neutral-800 rounded-xl p-4 hover:border-indigo-500 transition text-left w-full">
       <div className="text-3xl mb-2">{icon}</div>
       <h3 className="font-semibold text-lg">{title}</h3>
       <p className="text-neutral-400 text-sm mt-1">{description}</p>
@@ -15,7 +11,6 @@ function PdfToolCard({ title, description, icon, onClick }: { title: string; des
   );
 }
 
-// Modal pour chaque outil
 function PdfToolModal({ isOpen, onClose, title, children }: { isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }) {
   if (!isOpen) return null;
   return (
@@ -25,15 +20,12 @@ function PdfToolModal({ isOpen, onClose, title, children }: { isOpen: boolean; o
           <h2 className="text-xl font-bold">{title}</h2>
           <button onClick={onClose} className="text-neutral-400 hover:text-white text-2xl">&times;</button>
         </div>
-        <div className="p-4">
-          {children}
-        </div>
+        <div className="p-4">{children}</div>
       </div>
     </div>
   );
 }
 
-// Outil Fusion PDF
 function MergePDFTool() {
   const [files, setFiles] = useState<File[]>([]);
   const [output, setOutput] = useState<Blob | null>(null);
@@ -59,7 +51,7 @@ function MergePDFTool() {
       pages.forEach(page => mergedPdf.addPage(page));
     }
     const mergedBytes = await mergedPdf.save();
-    setOutput(new Blob([mergedBytes], { type: 'application/pdf' }));
+    setOutput(new Blob([mergedBytes.buffer], { type: 'application/pdf' }));
     setProcessing(false);
   };
 
@@ -75,15 +67,10 @@ function MergePDFTool() {
 
   return (
     <div>
-      <div
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={handleDrop}
-        className="border-2 border-dashed border-neutral-700 rounded-lg p-8 text-center hover:border-indigo-500 transition cursor-pointer"
-      >
+      <div onDragOver={(e) => e.preventDefault()} onDrop={handleDrop} className="border-2 border-dashed border-neutral-700 rounded-lg p-8 text-center hover:border-indigo-500 transition cursor-pointer">
         <p>📁 Glissez vos PDF ici</p>
         <p className="text-neutral-500 text-sm mt-1">2 fichiers minimum</p>
       </div>
-      
       {files.length > 0 && (
         <div className="mt-4">
           <p className="text-sm mb-2">{files.length} fichier(s) sélectionné(s)</p>
@@ -98,7 +85,6 @@ function MergePDFTool() {
   );
 }
 
-// Outil Découpe PDF
 function SplitPDFTool() {
   const [file, setFile] = useState<File | null>(null);
   const [ranges, setRanges] = useState('1-2,4');
@@ -117,7 +103,6 @@ function SplitPDFTool() {
     const bytes = await file.arrayBuffer();
     const pdf = await PDFDocument.load(bytes);
     const totalPages = pdf.getPageCount();
-    
     const rangesArray: [number, number][] = [];
     const parts = ranges.replace(/\s/g, '').split(',');
     for (const part of parts) {
@@ -129,9 +114,7 @@ function SplitPDFTool() {
         if (p >= 1 && p <= totalPages) rangesArray.push([p, p]);
       }
     }
-    
     if (rangesArray.length === 0) return;
-    
     const newPdf = await PDFDocument.create();
     for (const [s, e] of rangesArray) {
       const pageIndices = Array.from({ length: e - s + 1 }, (_, i) => s + i - 1);
@@ -139,7 +122,7 @@ function SplitPDFTool() {
       pages.forEach(page => newPdf.addPage(page));
     }
     const newBytes = await newPdf.save();
-    setOutput(new Blob([newBytes], { type: 'application/pdf' }));
+    setOutput(new Blob([newBytes.buffer], { type: 'application/pdf' }));
     setProcessing(false);
   };
 
@@ -167,16 +150,10 @@ function SplitPDFTool() {
   );
 }
 
-// Outil Compresser PDF
 function CompressPDFTool() {
   const [file, setFile] = useState<File | null>(null);
   const [output, setOutput] = useState<Blob | null>(null);
-  
-  const compressPDF = () => {
-    if (!file) return;
-    setOutput(file);
-  };
-  
+  const compressPDF = () => { if (file) setOutput(file); };
   const download = () => {
     if (!output) return;
     const url = URL.createObjectURL(output);
@@ -186,7 +163,6 @@ function CompressPDFTool() {
     a.click();
     URL.revokeObjectURL(url);
   };
-  
   return (
     <div>
       <input type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0] || null)} className="mb-4" />
@@ -196,11 +172,9 @@ function CompressPDFTool() {
   );
 }
 
-// Outil Protéger PDF
 function ProtectPDFTool() {
   const [file, setFile] = useState<File | null>(null);
   const [password, setPassword] = useState('');
-  
   const protectPDF = async () => {
     if (!file || !password) return;
     const { PDFDocument } = await import('pdf-lib');
@@ -208,14 +182,13 @@ function ProtectPDFTool() {
     const pdf = await PDFDocument.load(bytes);
     pdf.encrypt({ userPassword: password, ownerPassword: password, permissions: { printing: 'highResolution' } });
     const protectedBytes = await pdf.save();
-    const url = URL.createObjectURL(new Blob([protectedBytes], { type: 'application/pdf' }));
+    const url = URL.createObjectURL(new Blob([protectedBytes.buffer], { type: 'application/pdf' }));
     const a = document.createElement('a');
     a.href = url;
     a.download = 'protected.pdf';
     a.click();
     URL.revokeObjectURL(url);
   };
-  
   return (
     <div>
       <input type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0] || null)} className="mb-4" />
@@ -225,7 +198,6 @@ function ProtectPDFTool() {
   );
 }
 
-// Outils temporaires
 function RotatePDFTool() { return <div className="text-center py-8">🔄 Fonctionnalité Rotater pages à venir</div>; }
 function WatermarkPDFTool() { return <div className="text-center py-8">💧 Fonctionnalité Filigrane à venir</div>; }
 function ImageToPDFTool() { return <div className="text-center py-8">🖼️ Fonctionnalité Image → PDF à venir</div>; }
@@ -253,30 +225,17 @@ const pdfTools = [
 export default function PdfToolsPage() {
   const [activeTool, setActiveTool] = useState<string | null>(null);
   const ActiveComponent = activeTool ? pdfTools.find(t => t.id === activeTool)?.component : null;
-
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 p-6">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">📄 Outils PDF</h1>
         <p className="text-neutral-400 text-center mb-8">Tous vos outils PDF en un seul endroit</p>
-        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {pdfTools.map((tool) => (
-            <PdfToolCard
-              key={tool.id}
-              title={tool.title}
-              description={tool.description}
-              icon={tool.icon}
-              onClick={() => setActiveTool(tool.id)}
-            />
+            <PdfToolCard key={tool.id} title={tool.title} description={tool.description} icon={tool.icon} onClick={() => setActiveTool(tool.id)} />
           ))}
         </div>
-        
-        <PdfToolModal
-          isOpen={!!activeTool}
-          onClose={() => setActiveTool(null)}
-          title={pdfTools.find(t => t.id === activeTool)?.title || ''}
-        >
+        <PdfToolModal isOpen={!!activeTool} onClose={() => setActiveTool(null)} title={pdfTools.find(t => t.id === activeTool)?.title || ''}>
           {ActiveComponent && <ActiveComponent />}
         </PdfToolModal>
       </div>
