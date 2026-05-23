@@ -2,7 +2,7 @@
 import { useState } from 'react';
 
 // Composant pour chaque outil PDF
-function PdfToolCard({ title, description, icon, onClick }) {
+function PdfToolCard({ title, description, icon, onClick }: { title: string; description: string; icon: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
@@ -16,7 +16,7 @@ function PdfToolCard({ title, description, icon, onClick }) {
 }
 
 // Modal pour chaque outil
-function PdfToolModal({ isOpen, onClose, title, children }) {
+function PdfToolModal({ isOpen, onClose, title, children }: { isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }) {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
@@ -35,11 +35,11 @@ function PdfToolModal({ isOpen, onClose, title, children }) {
 
 // Outil Fusion PDF
 function MergePDFTool() {
-  const [files, setFiles] = useState([]);
-  const [output, setOutput] = useState(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [output, setOutput] = useState<Blob | null>(null);
   const [processing, setProcessing] = useState(false);
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const dropped = Array.from(e.dataTransfer.files);
     const pdfs = dropped.filter(f => f.type === 'application/pdf');
@@ -100,12 +100,12 @@ function MergePDFTool() {
 
 // Outil Découpe PDF
 function SplitPDFTool() {
-  const [file, setFile] = useState(null);
+  const [file, setFile] = useState<File | null>(null);
   const [ranges, setRanges] = useState('1-2,4');
-  const [output, setOutput] = useState(null);
+  const [output, setOutput] = useState<Blob | null>(null);
   const [processing, setProcessing] = useState(false);
 
-  const handleFile = (e) => {
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (f && f.type === 'application/pdf') setFile(f);
   };
@@ -118,7 +118,7 @@ function SplitPDFTool() {
     const pdf = await PDFDocument.load(bytes);
     const totalPages = pdf.getPageCount();
     
-    const rangesArray = [];
+    const rangesArray: [number, number][] = [];
     const parts = ranges.replace(/\s/g, '').split(',');
     for (const part of parts) {
       if (part.includes('-')) {
@@ -167,14 +167,13 @@ function SplitPDFTool() {
   );
 }
 
-// Outil Compresser PDF (simulation)
+// Outil Compresser PDF
 function CompressPDFTool() {
-  const [file, setFile] = useState(null);
-  const [output, setOutput] = useState(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [output, setOutput] = useState<Blob | null>(null);
   
-  const compressPDF = async () => {
+  const compressPDF = () => {
     if (!file) return;
-    // Simulation de compression (à améliorer avec pdf-lib)
     setOutput(file);
   };
   
@@ -190,16 +189,16 @@ function CompressPDFTool() {
   
   return (
     <div>
-      <input type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0])} className="mb-4" />
+      <input type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0] || null)} className="mb-4" />
       <button onClick={compressPDF} disabled={!file} className="bg-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-500 disabled:opacity-50">Compresser</button>
       {output && <button onClick={download} className="mt-2 ml-2 bg-green-600 px-4 py-2 rounded-lg hover:bg-green-500">Télécharger</button>}
     </div>
   );
 }
 
-// Outil Protéger PDF (chiffrement)
+// Outil Protéger PDF
 function ProtectPDFTool() {
-  const [file, setFile] = useState(null);
+  const [file, setFile] = useState<File | null>(null);
   const [password, setPassword] = useState('');
   
   const protectPDF = async () => {
@@ -219,31 +218,40 @@ function ProtectPDFTool() {
   
   return (
     <div>
-      <input type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0])} className="mb-4" />
+      <input type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0] || null)} className="mb-4" />
       <input type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 mb-4" />
       <button onClick={protectPDF} disabled={!file || !password} className="bg-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-500 disabled:opacity-50">Protéger</button>
     </div>
   );
 }
 
-// Liste de tous les outils
+// Outils temporaires
+function RotatePDFTool() { return <div className="text-center py-8">🔄 Fonctionnalité Rotater pages à venir</div>; }
+function WatermarkPDFTool() { return <div className="text-center py-8">💧 Fonctionnalité Filigrane à venir</div>; }
+function ImageToPDFTool() { return <div className="text-center py-8">🖼️ Fonctionnalité Image → PDF à venir</div>; }
+function PDFToImageTool() { return <div className="text-center py-8">📸 Fonctionnalité PDF → Image à venir</div>; }
+function WordToPDFTool() { return <div className="text-center py-8">📝 Fonctionnalité Word → PDF à venir</div>; }
+function ExcelToPDFTool() { return <div className="text-center py-8">📊 Fonctionnalité Excel → PDF à venir</div>; }
+function HtmlToPDFTool() { return <div className="text-center py-8">🌐 Fonctionnalité HTML → PDF à venir</div>; }
+function TextToPDFTool() { return <div className="text-center py-8">📄 Fonctionnalité Texte → PDF à venir</div>; }
+
 const pdfTools = [
   { id: 'merge', title: 'Fusion PDF', description: 'Combinez plusieurs PDF en un seul', icon: '🔗', component: MergePDFTool },
   { id: 'split', title: 'Découpe PDF', description: 'Extrayez des pages spécifiques', icon: '✂️', component: SplitPDFTool },
   { id: 'compress', title: 'Compresser PDF', description: 'Réduisez la taille du fichier', icon: '📦', component: CompressPDFTool },
   { id: 'protect', title: 'Protéger PDF', description: 'Chiffrez avec mot de passe', icon: '🔒', component: ProtectPDFTool },
-  { id: 'rotate', title: 'Rotater pages', description: 'Tournez les pages à 90°, 180°, 270°', icon: '🔄', component: () => <div>Fonctionnalité à venir</div> },
-  { id: 'watermark', title: 'Filigrane', description: 'Ajoutez un texte en watermark', icon: '💧', component: () => <div>Fonctionnalité à venir</div> },
-  { id: 'imagetopdf', title: 'Image → PDF', description: 'Convertissez des images en PDF', icon: '🖼️', component: () => <div>Fonctionnalité à venir</div> },
-  { id: 'pdftoimage', title: 'PDF → Image', description: 'Convertissez PDF en images', icon: '📸', component: () => <div>Fonctionnalité à venir</div> },
-  { id: 'wordtopdf', title: 'Word → PDF', description: 'Convertissez DOCX en PDF', icon: '📝', component: () => <div>Fonctionnalité à venir</div> },
-  { id: 'excelpdf', title: 'Excel → PDF', description: 'Convertissez XLSX en PDF', icon: '📊', component: () => <div>Fonctionnalité à venir</div> },
-  { id: 'htmlpdf', title: 'HTML → PDF', description: 'Convertissez du HTML en PDF', icon: '🌐', component: () => <div>Fonctionnalité à venir</div> },
-  { id: 'textpdf', title: 'Texte → PDF', description: 'Convertissez du texte en PDF', icon: '📄', component: () => <div>Fonctionnalité à venir</div> },
+  { id: 'rotate', title: 'Rotater pages', description: 'Tournez les pages à 90°, 180°, 270°', icon: '🔄', component: RotatePDFTool },
+  { id: 'watermark', title: 'Filigrane', description: 'Ajoutez un texte en watermark', icon: '💧', component: WatermarkPDFTool },
+  { id: 'imagetopdf', title: 'Image → PDF', description: 'Convertissez des images en PDF', icon: '🖼️', component: ImageToPDFTool },
+  { id: 'pdftoimage', title: 'PDF → Image', description: 'Convertissez PDF en images', icon: '📸', component: PDFToImageTool },
+  { id: 'wordtopdf', title: 'Word → PDF', description: 'Convertissez DOCX en PDF', icon: '📝', component: WordToPDFTool },
+  { id: 'excelpdf', title: 'Excel → PDF', description: 'Convertissez XLSX en PDF', icon: '📊', component: ExcelToPDFTool },
+  { id: 'htmlpdf', title: 'HTML → PDF', description: 'Convertissez du HTML en PDF', icon: '🌐', component: HtmlToPDFTool },
+  { id: 'textpdf', title: 'Texte → PDF', description: 'Convertissez du texte en PDF', icon: '📄', component: TextToPDFTool },
 ];
 
 export default function PdfToolsPage() {
-  const [activeTool, setActiveTool] = useState(null);
+  const [activeTool, setActiveTool] = useState<string | null>(null);
   const ActiveComponent = activeTool ? pdfTools.find(t => t.id === activeTool)?.component : null;
 
   return (
