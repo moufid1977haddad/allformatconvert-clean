@@ -51,7 +51,8 @@ function MergePDFTool() {
       pages.forEach(page => mergedPdf.addPage(page));
     }
     const mergedBytes = await mergedPdf.save();
-    setOutput(new Blob([mergedBytes.buffer], { type: 'application/pdf' }));
+    const arrayBuffer = mergedBytes.buffer.slice(mergedBytes.byteOffset, mergedBytes.byteOffset + mergedBytes.byteLength);
+    setOutput(new Blob([arrayBuffer], { type: 'application/pdf' }));
     setProcessing(false);
   };
 
@@ -122,7 +123,8 @@ function SplitPDFTool() {
       pages.forEach(page => newPdf.addPage(page));
     }
     const newBytes = await newPdf.save();
-    setOutput(new Blob([newBytes.buffer], { type: 'application/pdf' }));
+    const arrayBuffer = newBytes.buffer.slice(newBytes.byteOffset, newBytes.byteOffset + newBytes.byteLength);
+    setOutput(new Blob([arrayBuffer], { type: 'application/pdf' }));
     setProcessing(false);
   };
 
@@ -182,7 +184,8 @@ function ProtectPDFTool() {
     const pdf = await PDFDocument.load(bytes);
     pdf.encrypt({ userPassword: password, ownerPassword: password });
     const protectedBytes = await pdf.save();
-    const blob = new Blob([protectedBytes.buffer], { type: 'application/pdf' });
+    const arrayBuffer = protectedBytes.buffer.slice(protectedBytes.byteOffset, protectedBytes.byteOffset + protectedBytes.byteLength);
+    const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
