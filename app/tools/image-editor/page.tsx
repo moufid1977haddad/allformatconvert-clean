@@ -2,10 +2,10 @@
 import { useState, useRef, useCallback } from 'react';
 
 export default function ImageEditorPage() {
-  const [image, setImage] = useState(null);
-  const [originalImage, setOriginalImage] = useState(null);
+  const [image, setImage] = useState<string | null>(null);
+  const [originalImage, setOriginalImage] = useState<HTMLImageElement | null>(null);
   const [activeTab, setActiveTab] = useState('adjust');
-  const canvasRef = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [brightness, setBrightness] = useState(0);
   const [contrast, setContrast] = useState(0);
   const [saturation, setSaturation] = useState(0);
@@ -24,7 +24,7 @@ export default function ImageEditorPage() {
   const [noiseIntensity, setNoiseIntensity] = useState(0);
   const [vignetteStrength, setVignetteStrength] = useState(0);
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
@@ -32,7 +32,7 @@ export default function ImageEditorPage() {
       const img = new Image();
       img.onload = () => {
         setOriginalImage(img);
-        setImage(event.target?.result);
+        setImage(event.target?.result as string);
         const canvas = canvasRef.current;
         if (canvas) {
           canvas.width = img.width;
@@ -41,7 +41,7 @@ export default function ImageEditorPage() {
           ctx?.drawImage(img, 0, 0);
         }
       };
-      img.src = event.target?.result;
+      img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
   };
@@ -136,7 +136,7 @@ export default function ImageEditorPage() {
     if (cornerRadius > 0) {
       ctx.save();
       ctx.beginPath();
-      ctx.roundRect(0, 0, width, height, cornerRadius);
+      (ctx as any).roundRect(0, 0, width, height, cornerRadius);
       ctx.clip();
       ctx.drawImage(canvas, 0, 0);
       ctx.restore();
@@ -167,7 +167,7 @@ export default function ImageEditorPage() {
     }
     if (textOverlay.trim()) {
       ctx.save();
-      ctx.font = textSize + 'px Arial';
+      ctx.font = `${textSize}px Arial`;
       ctx.fillStyle = textColor;
       ctx.fillText(textOverlay, 20, textSize + 20);
       ctx.restore();
