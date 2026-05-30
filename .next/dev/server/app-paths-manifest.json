@@ -1,7 +1,3 @@
 {
-  "/api/ai/route": "app/api/ai/route.js",
-  "/tools/ai-tools/ai-translator/page": "app/tools/ai-tools/ai-translator/page.js",
-  "/tools/ai-tools/text-summarizer/page": "app/tools/ai-tools/text-summarizer/page.js",
-  "/tools/ai-tools/grammar-fixer/page": "app/tools/ai-tools/grammar-fixer/page.js",
   "/page": "app/page.js"
 }

@@ -13,19 +13,17 @@ export default function KeywordExtractorPage() {
     setOutput('');
     setError('');
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
           system: 'You are a keyword extraction expert. Extract the most important keywords and key phrases from the provided text. Return them as a numbered list with brief explanations of why each is important.',
-          messages: [{ role: 'user', content: input }]
-        })
+          prompt: input,
+        }),
       });
       const data = await response.json();
-      if (data.content && data.content[0]) setOutput(data.content[0].text);
-      else setError('No response received');
+      if (data.text) setOutput(data.text);
+      else setError(data.error || 'No response received');
     } catch(e) { setError('Error: ' + e.message); }
     setLoading(false);
   };

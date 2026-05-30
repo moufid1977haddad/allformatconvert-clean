@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 const categories = [
   {
-    icon: '📄',
+    icon: 'PDF',
     color: 'text-red-400',
     title: 'PDF Tools',
     description: 'Merge, split, compress, and convert PDFs',
@@ -12,7 +12,7 @@ const categories = [
     count: 21,
   },
   {
-    icon: '🖼️',
+    icon: 'IMG',
     color: 'text-pink-400',
     title: 'Image Tools',
     description: 'Convert, compress, and edit images',
@@ -21,16 +21,16 @@ const categories = [
     count: 36,
   },
   {
-    icon: '📝',
-    color: 'text-green-400',
-    title: 'Text Tools',
-    description: 'Word count, case conversion, text formatting',
-    href: '/tools/text-tools',
-    tools: ['Word Counter', 'Case Converter', 'Text Reverser'],
-    count: 17,
+    icon: 'GIF',
+    color: 'text-purple-500',
+    title: 'GIF Tools',
+    description: 'Convert videos and images to GIF format',
+    href: '/tools/gif-tools',
+    tools: ['Video to GIF', 'MP4 to GIF', 'GIF to MP4'],
+    count: 9,
   },
   {
-    icon: '🎬',
+    icon: 'VID',
     color: 'text-blue-400',
     title: 'Media Tools',
     description: 'Convert, compress, and extract from videos',
@@ -39,7 +39,16 @@ const categories = [
     count: 28,
   },
   {
-    icon: '📁',
+    icon: 'TXT',
+    color: 'text-green-400',
+    title: 'Text Tools',
+    description: 'Word count, case conversion, text formatting',
+    href: '/tools/text-tools',
+    tools: ['Word Counter', 'Case Converter', 'Text Reverser'],
+    count: 17,
+  },
+  {
+    icon: 'ZIP',
     color: 'text-orange-400',
     title: 'File Tools',
     description: 'ZIP compression, file conversion, Base64',
@@ -48,7 +57,7 @@ const categories = [
     count: 9,
   },
   {
-    icon: '📱',
+    icon: 'QR',
     color: 'text-teal-400',
     title: 'QR & Barcodes Tools',
     description: 'Generate and scan QR codes and barcodes',
@@ -57,7 +66,7 @@ const categories = [
     count: 3,
   },
   {
-    icon: '🔄',
+    icon: 'CNV',
     color: 'text-yellow-400',
     title: 'Converter Tools',
     description: 'Convert units, colors, and currencies',
@@ -66,7 +75,7 @@ const categories = [
     count: 4,
   },
   {
-    icon: '💻',
+    icon: 'DEV',
     color: 'text-purple-400',
     title: 'Developer Tools',
     description: 'JSON, Base64, URL encoding, and more',
@@ -75,7 +84,7 @@ const categories = [
     count: 54,
   },
   {
-    icon: '🔢',
+    icon: 'MTH',
     color: 'text-indigo-400',
     title: 'Math Tools',
     description: 'Number conversion, percentage calculator',
@@ -83,17 +92,8 @@ const categories = [
     tools: ['Number Base Converter', 'Percentage Calculator', 'Roman Numeral Converter'],
     count: 6,
   },
-    {
-    icon: '🎞️',
-    color: 'text-purple-500',
-    title: 'GIF Tools',
-    description: 'Convert videos and images to GIF format',
-    href: '/tools/gif-tools',
-    tools: ['Video to GIF', 'MP4 to GIF', 'GIF to MP4'],
-    count: 9,
-  },
-{
-    icon: '🤖',
+  {
+    icon: 'AI',
     color: 'text-cyan-400',
     title: 'AI Tools',
     description: 'AI-powered image and text tools',
@@ -120,7 +120,7 @@ export default function Home() {
               <p className="text-neutral-500 text-sm mb-4">{cat.description}</p>
               <div className="space-y-1 w-full text-center">
                 {cat.tools.map(tool => (
-                  <div key={tool} className="text-neutral-500 text-xs">• {tool}</div>
+                  <div key={tool} className="text-neutral-500 text-xs flex items-center justify-center gap-1"><span className="inline-block w-1 h-1 rounded-full bg-neutral-500"></span>{tool}</div>
                 ))}
                 <div className="text-indigo-500 text-xs font-semibold mt-2">+{cat.count - cat.tools.length} more tools</div>
               </div>
@@ -131,4 +131,3 @@ export default function Home() {
     </div>
   );
 }
-

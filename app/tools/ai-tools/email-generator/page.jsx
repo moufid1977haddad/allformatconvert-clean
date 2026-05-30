@@ -1,11 +1,14 @@
 'use client';
 import { useState } from 'react';
 
+const tones = ['Professional', 'Friendly', 'Formal', 'Casual', 'Persuasive'];
+
 export default function EmailGeneratorPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [tone, setTone] = useState('Professional');
 
   const process = async () => {
     if (!input.trim()) return;
@@ -13,19 +16,17 @@ export default function EmailGeneratorPage() {
     setOutput('');
     setError('');
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: 'You are a professional email writer. Generate a well-structured, professional email based on the user description. Include subject line, greeting, body, and closing.',
-          messages: [{ role: 'user', content: input }]
-        })
+          system: `You are a professional email writer. Generate a well-structured ${tone.toLowerCase()} email based on the user description. Include subject line, greeting, body, and closing.`,
+          prompt: input,
+        }),
       });
       const data = await response.json();
-      if (data.content && data.content[0]) setOutput(data.content[0].text);
-      else setError('No response received');
+      if (data.text) setOutput(data.text);
+      else setError(data.error || 'No response received');
     } catch(e) { setError('Error: ' + e.message); }
     setLoading(false);
   };
@@ -36,9 +37,15 @@ export default function EmailGeneratorPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Email Generator</h1>
         <p className="text-neutral-500 text-center mb-8">Generate professional emails with AI</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
+          <div>
+            <label className="block text-sm text-neutral-500 mb-1">Tone</label>
+            <select value={tone} onChange={e => setTone(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2 text-sm">
+              {tones.map(t => <option key={t}>{t}</option>)}
+            </select>
+          </div>
           <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Describe the email you need..." value={input} onChange={e => setInput(e.target.value)} />
           <button onClick={process} disabled={!input.trim() || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">
-            {loading ? 'Processing...' : 'Generate Email'}
+            {loading ? 'Generating...' : 'Generate Email'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {output && (
