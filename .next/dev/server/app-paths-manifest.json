@@ -1,0 +1,8 @@
+{
+  "/page": "app/page.js",
+  "/tools/pdf-tools/pdf-merge/page": "app/tools/pdf-tools/pdf-merge/page.js",
+  "/tools/page": "app/tools/page.js",
+  "/tools/pdf-tools/page": "app/tools/pdf-tools/page.js",
+  "/tools/image-tools/page": "app/tools/image-tools/page.js",
+  "/tools/text-tools/page": "app/tools/text-tools/page.js"
+}

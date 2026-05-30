@@ -1,0 +1,1 @@
+require('fs').writeFileSync('app/tools/pdf-compress/page.jsx', require('fs').readFileSync('create-compress.js').toString())
