@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 const categories = [
   {
-    icon: 'PDF',
+    icon: '📄',
     color: 'text-red-400',
     title: 'PDF Tools',
     description: 'Merge, split, compress, and convert PDFs',
@@ -12,7 +12,7 @@ const categories = [
     count: 21,
   },
   {
-    icon: 'IMG',
+    icon: '🖼️',
     color: 'text-pink-400',
     title: 'Image Tools',
     description: 'Convert, compress, and edit images',
@@ -20,8 +20,8 @@ const categories = [
     tools: ['Image Compressor', 'Image Converter', 'Image Resizer'],
     count: 36,
   },
-  {
-    icon: 'GIF',
+    {
+    icon: '🎞️',
     color: 'text-purple-500',
     title: 'GIF Tools',
     description: 'Convert videos and images to GIF format',
@@ -30,16 +30,7 @@ const categories = [
     count: 9,
   },
   {
-    icon: 'VID',
-    color: 'text-blue-400',
-    title: 'Media Tools',
-    description: 'Convert, compress, and extract from videos',
-    href: '/tools/media-tools',
-    tools: ['Video to Audio', 'Video Compressor', 'Video Converter'],
-    count: 28,
-  },
-  {
-    icon: 'TXT',
+    icon: '📝',
     color: 'text-green-400',
     title: 'Text Tools',
     description: 'Word count, case conversion, text formatting',
@@ -48,7 +39,16 @@ const categories = [
     count: 17,
   },
   {
-    icon: 'ZIP',
+    icon: '🎬',
+    color: 'text-blue-400',
+    title: 'Media Tools',
+    description: 'Convert, compress, and extract from videos',
+    href: '/tools/media-tools',
+    tools: ['Video to Audio', 'Video Compressor', 'Video Converter'],
+    count: 28,
+  },
+  {
+    icon: '📁',
     color: 'text-orange-400',
     title: 'File Tools',
     description: 'ZIP compression, file conversion, Base64',
@@ -57,7 +57,7 @@ const categories = [
     count: 9,
   },
   {
-    icon: 'QR',
+    icon: '📱',
     color: 'text-teal-400',
     title: 'QR & Barcodes Tools',
     description: 'Generate and scan QR codes and barcodes',
@@ -66,7 +66,7 @@ const categories = [
     count: 3,
   },
   {
-    icon: 'CNV',
+    icon: '🔄',
     color: 'text-yellow-400',
     title: 'Converter Tools',
     description: 'Convert units, colors, and currencies',
@@ -75,7 +75,7 @@ const categories = [
     count: 4,
   },
   {
-    icon: 'DEV',
+    icon: '💻',
     color: 'text-purple-400',
     title: 'Developer Tools',
     description: 'JSON, Base64, URL encoding, and more',
@@ -84,7 +84,7 @@ const categories = [
     count: 54,
   },
   {
-    icon: 'MTH',
+    icon: '🔢',
     color: 'text-indigo-400',
     title: 'Math Tools',
     description: 'Number conversion, percentage calculator',
@@ -93,7 +93,7 @@ const categories = [
     count: 6,
   },
   {
-    icon: 'AI',
+    icon: '🤖',
     color: 'text-cyan-400',
     title: 'AI Tools',
     description: 'AI-powered image and text tools',
@@ -120,7 +120,7 @@ export default function Home() {
               <p className="text-neutral-500 text-sm mb-4">{cat.description}</p>
               <div className="space-y-1 w-full text-center">
                 {cat.tools.map(tool => (
-                  <div key={tool} className="text-neutral-500 text-xs flex items-center justify-center gap-1"><span className="inline-block w-1 h-1 rounded-full bg-neutral-500"></span>{tool}</div>
+                  <div key={tool} className="text-neutral-500 text-xs">• {tool}</div>
                 ))}
                 <div className="text-indigo-500 text-xs font-semibold mt-2">+{cat.count - cat.tools.length} more tools</div>
               </div>
@@ -131,3 +131,4 @@ export default function Home() {
     </div>
   );
 }
+
