@@ -13,19 +13,17 @@ export default function TextSummarizerPage() {
     setOutput('');
     setError('');
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: 'You are a text summarizer. Create a concise summary of the provided text. Keep the key points and main ideas.',
-          messages: [{ role: 'user', content: input }]
-        })
+          system: 'You are a text summarizer. Create a concise summary of the provided text. Keep the key points and main ideas. Return only the summary.',
+          prompt: input,
+        }),
       });
       const data = await response.json();
-      if (data.content && data.content[0]) setOutput(data.content[0].text);
-      else setError('No response received');
+      if (data.text) setOutput(data.text);
+      else setError(data.error || 'No response received');
     } catch(e) { setError('Error: ' + e.message); }
     setLoading(false);
   };
@@ -38,7 +36,7 @@ export default function TextSummarizerPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste text to summarize..." value={input} onChange={e => setInput(e.target.value)} />
           <button onClick={process} disabled={!input.trim() || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">
-            {loading ? 'Processing...' : 'Summarize'}
+            {loading ? 'Summarizing...' : 'Summarize'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {output && (

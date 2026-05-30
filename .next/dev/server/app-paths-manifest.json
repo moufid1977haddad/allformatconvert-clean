@@ -1,8 +1,7 @@
 {
-  "/page": "app/page.js",
-  "/tools/pdf-tools/pdf-merge/page": "app/tools/pdf-tools/pdf-merge/page.js",
-  "/tools/page": "app/tools/page.js",
-  "/tools/pdf-tools/page": "app/tools/pdf-tools/page.js",
-  "/tools/image-tools/page": "app/tools/image-tools/page.js",
-  "/tools/text-tools/page": "app/tools/text-tools/page.js"
+  "/api/ai/route": "app/api/ai/route.js",
+  "/tools/ai-tools/ai-translator/page": "app/tools/ai-tools/ai-translator/page.js",
+  "/tools/ai-tools/text-summarizer/page": "app/tools/ai-tools/text-summarizer/page.js",
+  "/tools/ai-tools/grammar-fixer/page": "app/tools/ai-tools/grammar-fixer/page.js",
+  "/page": "app/page.js"
 }
