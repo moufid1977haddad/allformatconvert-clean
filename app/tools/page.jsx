@@ -20,6 +20,15 @@ const categories = [
     tools: ['Image Compressor', 'Image Converter', 'Image Resizer'],
     count: 36,
   },
+    {
+    icon: '🎞️',
+    color: 'text-purple-500',
+    title: 'GIF Tools',
+    description: 'Convert videos and images to GIF format',
+    href: '/tools/gif-tools',
+    tools: ['Video to GIF', 'MP4 to GIF', 'GIF to MP4'],
+    count: 9,
+  },
   {
     icon: '📝',
     color: 'text-green-400',
@@ -105,7 +114,7 @@ export default function ToolsPage() {
             <Link key={cat.href} href={cat.href} className="bg-white border border-neutral-200 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)]">
               <div className="flex justify-between items-center w-full mb-3">
                 <div className={`text-3xl ${cat.color}`}>{cat.icon}</div>
-                <span className="text-xs text-neutral-500 bg-neutral-100 rounded-full px-2 py-1">{cat.count} tools</span>
+                <span className="text-xs text-neutral-400 bg-neutral-100 rounded-full px-2 py-1">{cat.count} tools</span>
               </div>
               <h2 className="font-bold text-lg mb-1 text-neutral-800 group-hover:text-indigo-600 transition">{cat.title}</h2>
               <p className="text-neutral-500 text-sm mb-4">{cat.description}</p>
@@ -122,3 +131,4 @@ export default function ToolsPage() {
     </div>
   );
 }
+
