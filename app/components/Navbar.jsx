@@ -57,6 +57,13 @@ const allTools = [
   { name: 'PDF Sign', href: '/tools/pdf-tools/pdf-sign' },
 ];
 
+const tickerTools = [
+  '📄 Merge PDF', '🖼️ Resize Image', '🎬 Convert Video', '🤖 Remove Background',
+  '🎵 Trim Audio', '📊 Format JSON', '🔒 Encrypt PDF', '🎞️ Make GIF',
+  '📝 Count Words', '🔄 Convert Units', '💻 Encode Base64', '📱 Generate QR Code',
+  '🗜️ Compress Files', '🎨 Convert Colors', '🔊 Extract Audio', '✨ Fix Grammar',
+];
+
 export default function Navbar() {
   const pathname = usePathname();
   const [dark, setDark] = useState(false);
@@ -105,115 +112,160 @@ export default function Navbar() {
     tryTranslate(10);
   };
 
+  const doubled = [...tickerTools, ...tickerTools];
+
   return (
-    <header className="bg-white border-b border-neutral-200 sticky top-0 z-50">
-      <div className="w-full px-4 py-2 flex items-center gap-2" style={{ minHeight: '52px' }}>
+    <>
+      <style>{`
+        @keyframes ticker-scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .ticker-track {
+          display: flex;
+          width: max-content;
+          animation: ticker-scroll 28s linear infinite;
+        }
+        .ticker-track:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
 
-        {/* Logo - fixed width */}
-        <div className="shrink-0" style={{ width: '140px' }}>
-          <Link href="/" className="text-base font-bold text-indigo-600 tracking-tight notranslate">
-            AllFormatConvert
-          </Link>
-        </div>
+      <header className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700 sticky top-0 z-50">
 
-        {/* Categories - centered, truncated */}
-        <nav className="hidden lg:flex items-center justify-center flex-1 gap-0.5 overflow-hidden">
-          {categories.map((cat) => (
-            <Link
-              key={cat.href}
-              href={cat.href}
-              className={`text-xs font-medium px-1.5 py-1 rounded-lg transition hover:bg-indigo-50 hover:text-indigo-600 whitespace-nowrap ${
-                pathname.startsWith(cat.href) ? 'text-indigo-600 bg-indigo-50' : 'text-neutral-600'
-              }`}
-            >
-              {cat.label}
+        {/* ── Main navbar ── */}
+        <div className="w-full px-4 py-2 flex items-center gap-2" style={{ minHeight: '52px' }}>
+
+          {/* Logo */}
+          <div className="shrink-0" style={{ width: '140px' }}>
+            <Link href="/" className="text-base font-bold text-indigo-600 tracking-tight notranslate">
+              AllFormatConvert
             </Link>
-          ))}
-        </nav>
-
-        {/* Right side - fixed width */}
-        <div className="shrink-0 flex items-center gap-1.5" style={{ width: '320px', justifyContent: 'flex-end' }}>
-
-          {/* Search */}
-          <div className="relative">
-            <input
-              type="text"
-              value={search}
-              onChange={handleSearch}
-              placeholder="Search tools..."
-              className="w-36 bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-indigo-400"
-            />
-            {results.length > 0 && (
-              <div className="absolute top-full right-0 mt-1 w-52 bg-white border border-neutral-200 rounded-xl shadow-lg z-50">
-                {results.map((r) => (
-                  <Link
-                    key={r.href}
-                    href={r.href}
-                    onClick={() => { setSearch(''); setResults([]); }}
-                    className="block px-3 py-2 text-xs text-neutral-700 hover:bg-indigo-50 hover:text-indigo-600 transition"
-                  >
-                    {r.name}
-                  </Link>
-                ))}
-              </div>
-            )}
           </div>
 
-          {/* Language Selector - notranslate */}
-          <div className="relative notranslate" ref={langRef}>
+          {/* Categories */}
+          <nav className="hidden lg:flex items-center justify-center flex-1 gap-0.5 overflow-hidden">
+            {categories.map((cat) => (
+              <Link
+                key={cat.href}
+                href={cat.href}
+                className={`text-xs font-medium px-1.5 py-1 rounded-lg transition hover:bg-indigo-50 hover:text-indigo-600 whitespace-nowrap ${
+                  pathname.startsWith(cat.href) ? 'text-indigo-600 bg-indigo-50' : 'text-neutral-600 dark:text-neutral-300'
+                }`}
+              >
+                {cat.label}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Right side */}
+          <div className="shrink-0 flex items-center gap-1.5" style={{ width: '320px', justifyContent: 'flex-end' }}>
+
+            {/* Search */}
+            <div className="relative">
+              <input
+                type="text"
+                value={search}
+                onChange={handleSearch}
+                placeholder="Search tools..."
+                className="w-36 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-indigo-400 dark:text-white"
+              />
+              {results.length > 0 && (
+                <div className="absolute top-full right-0 mt-1 w-52 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-xl shadow-lg z-50">
+                  {results.map((r) => (
+                    <Link
+                      key={r.href}
+                      href={r.href}
+                      onClick={() => { setSearch(''); setResults([]); }}
+                      className="block px-3 py-2 text-xs text-neutral-700 dark:text-neutral-200 hover:bg-indigo-50 hover:text-indigo-600 transition"
+                    >
+                      {r.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Language Selector */}
+            <div className="relative notranslate" ref={langRef}>
+              <button
+                onClick={() => setLangOpen(!langOpen)}
+                className="flex items-center gap-0.5 px-1.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-700 dark:text-neutral-200 text-xs font-bold"
+              >
+                <span>{currentLang.short}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {langOpen && (
+                <div className="absolute top-full right-0 mt-1 w-40 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto">
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => changeLanguage(lang)}
+                      className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs hover:bg-indigo-50 hover:text-indigo-600 transition text-left ${currentLang.code === lang.code ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-neutral-700 dark:text-neutral-200'}`}
+                    >
+                      <span className="font-bold w-5">{lang.short}</span>
+                      <span>{lang.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Dark mode */}
             <button
-              onClick={() => setLangOpen(!langOpen)}
-              className="flex items-center gap-0.5 px-1.5 py-1 rounded-lg border border-neutral-200 hover:bg-neutral-100 transition text-neutral-700 text-xs font-bold"
+              onClick={() => setDark(!dark)}
+              className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-600 dark:text-neutral-300 shrink-0"
             >
-              <span>{currentLang.short}</span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              {dark ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
             </button>
-            {langOpen && (
-              <div className="absolute top-full right-0 mt-1 w-40 bg-white border border-neutral-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto">
-                {languages.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => changeLanguage(lang)}
-                    className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs hover:bg-indigo-50 hover:text-indigo-600 transition text-left ${currentLang.code === lang.code ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-neutral-700'}`}
-                  >
-                    <span className="font-bold w-5">{lang.short}</span>
-                    <span>{lang.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+
+            {/* Login */}
+            <Link href="/login" className="text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-indigo-600 transition whitespace-nowrap">
+              Login
+            </Link>
+
+            {/* Sign Up */}
+            <Link href="/signup" className="text-xs font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg transition whitespace-nowrap">
+              Sign Up
+            </Link>
+
           </div>
-
-          {/* Dark mode */}
-          <button
-            onClick={() => setDark(!dark)}
-            className="p-1 rounded-lg hover:bg-neutral-100 transition text-neutral-600 shrink-0"
-          >
-            {dark ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-            )}
-          </button>
-
-          {/* Login */}
-          <Link href="/login" className="text-xs font-medium text-neutral-700 hover:text-indigo-600 transition whitespace-nowrap">
-            Login
-          </Link>
-
-          {/* Sign Up */}
-          <Link href="/signup" className="text-xs font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg transition whitespace-nowrap">
-            Sign Up
-          </Link>
-
         </div>
-      </div>
-    </header>
+
+        {/* ── Ticker strip — juste sous la navbar ── */}
+        <div style={{
+          background: '#eef2ff',
+          padding: '7px 0',
+          overflow: 'hidden',
+          borderTop: '1px solid #e0e7ff',
+        }}>
+          <div className="ticker-track">
+            {doubled.map((tool, i) => (
+              <span key={i} style={{
+                whiteSpace: 'nowrap',
+                padding: '0 24px',
+                fontSize: '12px',
+                color: '#4338ca',
+                fontWeight: '500',
+                borderRight: '1px solid #c7d2fe',
+              }}>
+                {tool}
+              </span>
+            ))}
+          </div>
+        </div>
+
+      </header>
+    </>
   );
 }
