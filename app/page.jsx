@@ -9,7 +9,7 @@ const categories = [
     description: 'Merge, split, compress, and convert PDFs',
     href: '/tools/pdf-tools',
     tools: ['Merge PDF', 'Split PDF', 'Compress PDF'],
-    count: 21,
+    count: 39,
   },
   {
     icon: '🖼️',
@@ -37,6 +37,15 @@ const categories = [
     href: '/tools/text-tools',
     tools: ['Word Counter', 'Case Converter', 'Text Reverser'],
     count: 17,
+  },
+  {
+    icon: '🎵',
+    color: 'text-yellow-500',
+    title: 'Audio Tools',
+    description: 'Convert, compress, and edit audio files',
+    href: '/tools/audio-tools',
+    tools: ['Audio Converter', 'Audio Trimmer', 'Audio Compressor'],
+    count: 11,
   },
   {
     icon: '🎬',

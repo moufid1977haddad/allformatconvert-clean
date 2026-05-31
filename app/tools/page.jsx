@@ -9,7 +9,7 @@ const categories = [
     description: 'Merge, split, compress, and convert PDFs',
     href: '/tools/pdf-tools',
     tools: ['Merge PDF', 'Split PDF', 'Compress PDF'],
-    count: 21,
+    count: 39,
   },
   {
     icon: '🖼️',
