@@ -92,6 +92,7 @@ export default function Navbar() {
   const changeLanguage = (lang) => {
     setCurrentLang(lang);
     setLangOpen(false);
+    document.documentElement.dir = lang.code === 'ar' ? 'rtl' : 'ltr';
     const tryTranslate = (attempts) => {
       const select = document.querySelector('.goog-te-combo');
       if (select) {
