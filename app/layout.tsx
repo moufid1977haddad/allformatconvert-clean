@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -45,11 +46,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en-US" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
+        <div id="google_translate_element" style={{ display: 'none' }} />
         <Navbar />
         {children}
         <Footer />
+        <Script
+          src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+          strategy="afterInteractive"
+        />
+        <Script id="google-translate-init" strategy="afterInteractive">
+          {`
+            function googleTranslateElementInit() {
+              new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'en,fr,es,zh-CN,ar,de,pt,ja,ru,it,ko,hi,tr',
+                autoDisplay: false,
+              }, 'google_translate_element');
+            }
+          `}
+        </Script>
       </body>
     </html>
   );

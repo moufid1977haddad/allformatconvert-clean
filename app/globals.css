@@ -92,3 +92,9 @@ body {
   border-color: #444444 !important;
   color: #ededed !important;
 }
+
+/* Hide Google Translate bar */
+.goog-te-banner-frame { display: none !important; }
+.goog-te-menu-value:hover { text-decoration: none !important; }
+body { top: 0 !important; }
+.skiptranslate { display: none !important; }
