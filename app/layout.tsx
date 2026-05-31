@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-<<<<<<< HEAD
 import Navbar from "./components/Navbar";
-=======
->>>>>>> fecb1eb1c2dc3ded98dd81b3d1b9d08424c1d704
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-<<<<<<< HEAD
   title: {
     default: "AllFormatConvert - Free Online Tools",
     template: "%s | AllFormatConvert",
@@ -40,10 +36,6 @@ export const metadata: Metadata = {
       follow: true,
     },
   },
-=======
-  title: "allformatconvert",
-  description: "Convertisseurs tout-en-un 100% local",
->>>>>>> fecb1eb1c2dc3ded98dd81b3d1b9d08424c1d704
 };
 
 export default function RootLayout({
@@ -52,14 +44,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-<<<<<<< HEAD
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
         <Navbar />
-=======
-    <html lang="fr" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
->>>>>>> fecb1eb1c2dc3ded98dd81b3d1b9d08424c1d704
         {children}
       </body>
     </html>
