@@ -117,7 +117,6 @@ export default function Navbar() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&display=swap');
         @keyframes ticker-scroll {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
@@ -130,16 +129,6 @@ export default function Navbar() {
         .ticker-track:hover {
           animation-play-state: paused;
         }
-        .logo-text {
-          font-family: 'Nunito', sans-serif;
-          font-weight: 900;
-          font-size: 18px;
-          background: linear-gradient(135deg, #4338ca, #6366f1);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          letter-spacing: -0.5px;
-        }
       `}</style>
 
       <header className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700 sticky top-0 z-50">
@@ -149,8 +138,8 @@ export default function Navbar() {
 
           {/* Logo */}
           <div className="shrink-0">
-            <Link href="/" className="flex items-center px-3 py-1.5 rounded-lg border border-indigo-100 dark:border-neutral-600 hover:bg-indigo-50 dark:hover:bg-neutral-700 transition notranslate">
-              <span className="logo-text">AllFormatConvert</span>
+            <Link href="/" className="flex items-center px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-indigo-600 text-sm font-bold notranslate">
+              AllFormatConvert
             </Link>
           </div>
 
@@ -250,10 +239,10 @@ export default function Navbar() {
 
         {/* ── Ticker strip — juste sous la navbar ── */}
         <div style={{
-          background: '#eef2ff',
+          background: dark ? '#111111' : '#eef2ff',
           padding: '7px 0',
           overflow: 'hidden',
-          borderTop: '1px solid #e0e7ff',
+          borderTop: dark ? '1px solid #222222' : '1px solid #e0e7ff',
         }}>
           <div className="ticker-track">
             {doubled.map((tool, i) => (
@@ -261,9 +250,9 @@ export default function Navbar() {
                 whiteSpace: 'nowrap',
                 padding: '0 24px',
                 fontSize: '12px',
-                color: '#4338ca',
+                color: dark ? 'rgba(255,255,255,0.7)' : '#4338ca',
                 fontWeight: '500',
-                borderRight: '1px solid #c7d2fe',
+                borderRight: dark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #c7d2fe',
               }}>
                 {tool}
               </span>
