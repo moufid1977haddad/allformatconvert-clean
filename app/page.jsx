@@ -78,7 +78,7 @@ function useCountUp(target, duration = 1800, start = false) {
 function StatCard({ value, label, suffix, icon, animate, dark }) {
   const count = useCountUp(value, 1600, animate);
   return (
-    <div style={{ background: dark ? '#111111' : '#ffffff', border: dark ? '1px solid #222222' : '1px solid #e2e8f0', borderRadius:'16px', padding:'20px 24px', textAlign:'center' }}>
+    <div style={{ background: dark ? '#1c1c1e' : '#ffffff', border: dark ? '1px solid #2c2c2e' : '1px solid #e2e8f0', borderRadius:'16px', padding:'20px 24px', textAlign:'center' }}>
       <div style={{ fontSize:'28px', marginBottom:'4px' }}>{icon}</div>
       <div style={{ fontSize:'32px', fontWeight:'800', color: dark ? '#f1f5f9' : '#0f172a', lineHeight:1 }}>{animate ? count : value}{suffix}</div>
       <div style={{ fontSize:'12px', color: dark ? '#94a3b8' : '#64748b', marginTop:'4px', letterSpacing:'0.05em', textTransform:'uppercase' }}>{label}</div>
@@ -210,7 +210,7 @@ export default function Home() {
           </p>
           <div style={{ display:'flex', flexWrap:'wrap', gap:'12px', justifyContent:'center', marginBottom:'40px' }}>
             {['✨ Grammar Fixer','🌍 AI Translator','📝 Text Summarizer','🎨 Background Remover','🔍 Image Upscaler','🎙️ Audio Transcriber','💬 AI Chatbot','📧 Email Generator'].map(t => (
-              <span key={t} style={{ background: dark ? '#111111' : '#e2e8f0', border: dark ? '1px solid #334155' : '1px solid #cbd5e1', borderRadius:'999px', padding:'8px 18px', fontSize:'13px', color: dark ? '#cbd5e1' : '#334155', fontWeight:'500' }}>{t}</span>
+              <span key={t} style={{ background: dark ? '#1c1c1e' : '#e2e8f0', border: dark ? '1px solid #2c2c2e' : '1px solid #cbd5e1', borderRadius:'999px', padding:'8px 18px', fontSize:'13px', color: dark ? '#cbd5e1' : '#334155', fontWeight:'500' }}>{t}</span>
             ))}
           </div>
           <Link href="/tools/ai-tools" style={{ display:'inline-block', background:'#6366f1', color:'#fff', padding:'16px 36px', borderRadius:'14px', fontWeight:'700', fontSize:'16px', textDecoration:'none', boxShadow:'0 8px 30px rgba(99,102,241,0.25)' }}>
