@@ -137,8 +137,8 @@ export default function Navbar() {
         <div className="w-full px-4 py-2 flex items-center gap-2" style={{ minHeight: '52px' }}>
 
           {/* Logo */}
-          <div className="shrink-0" style={{ width: '140px' }}>
-            <Link href="/" className="text-base font-bold text-indigo-600 tracking-tight notranslate">
+          <div className="shrink-0">
+            <Link href="/" className="flex items-center px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-indigo-600 text-sm font-bold notranslate">
               AllFormatConvert
             </Link>
           </div>
@@ -149,8 +149,8 @@ export default function Navbar() {
               <Link
                 key={cat.href}
                 href={cat.href}
-                className={`text-xs font-medium px-1.5 py-1 rounded-lg transition hover:bg-indigo-50 hover:text-indigo-600 whitespace-nowrap ${
-                  pathname.startsWith(cat.href) ? 'text-indigo-600 bg-indigo-50' : 'text-neutral-600 dark:text-neutral-300'
+                className={`text-xs font-bold px-1.5 py-1 rounded-lg border transition whitespace-nowrap ${
+                  pathname.startsWith(cat.href) ? 'text-indigo-600 border-indigo-300 bg-indigo-50' : 'text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700'
                 }`}
               >
                 {cat.label}
@@ -159,7 +159,7 @@ export default function Navbar() {
           </nav>
 
           {/* Right side */}
-          <div className="shrink-0 flex items-center gap-1.5" style={{ width: '260px', justifyContent: 'flex-end' }}>
+          <div className="shrink-0 flex items-center gap-1.5" style={{ width: '320px', justifyContent: 'flex-end' }}>
 
             {/* Search */}
             <div className="relative">
@@ -229,8 +229,8 @@ export default function Navbar() {
               )}
             </button>
 
-            {/* Sign In */}
-            <Link href="/signin" className="text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-indigo-600 transition whitespace-nowrap">
+            {/* Login */}
+            <Link href="/signin" className="flex items-center px-2 py-1 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-700 dark:text-neutral-200 text-xs font-bold whitespace-nowrap">
               Sign In
             </Link>
 
