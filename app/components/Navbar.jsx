@@ -159,7 +159,7 @@ export default function Navbar() {
           </nav>
 
           {/* Right side */}
-          <div className="shrink-0 flex items-center gap-1.5" style={{ width: '320px', justifyContent: 'flex-end' }}>
+          <div className="shrink-0 flex items-center gap-1.5" style={{ width: '260px', justifyContent: 'flex-end' }}>
 
             {/* Search */}
             <div className="relative">
@@ -232,11 +232,6 @@ export default function Navbar() {
             {/* Sign In */}
             <Link href="/signin" className="text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-indigo-600 transition whitespace-nowrap">
               Sign In
-            </Link>
-
-            {/* Sign Up */}
-            <Link href="/signup" className="text-xs font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg transition whitespace-nowrap">
-              Sign Up
             </Link>
 
           </div>
