@@ -1,22 +1,43 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
 export default function SignUpPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
     if (form.password !== form.confirm) {
-      alert('Passwords do not match');
+      setError('Passwords do not match');
       return;
     }
+    if (form.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
     setLoading(true);
-    setTimeout(() => { setLoading(false); setSuccess(true); }, 1500);
+
+    const { error } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+      options: { data: { full_name: form.name } }
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else {
+      setSuccess(true);
+    }
   };
 
   if (success) {
@@ -29,10 +50,11 @@ export default function SignUpPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-neutral-800 mb-2">Account created!</h2>
-            <p className="text-neutral-500 text-sm mb-6">Welcome to AllFormatConvert. You can now sign in.</p>
-            <Link href="/login" className="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition text-center">
-              Go to Login
+            <h2 className="text-xl font-bold text-neutral-800 mb-2">Account created! 🎉</h2>
+            <p className="text-neutral-500 text-sm mb-2">Welcome to AllFormatConvert.</p>
+            <p className="text-neutral-400 text-xs mb-6">Please check your email and confirm your account before signing in.</p>
+            <Link href="/signin" className="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition text-center">
+              Go to Sign In
             </Link>
           </div>
         </div>
@@ -49,15 +71,16 @@ export default function SignUpPage() {
           <p className="text-neutral-500 text-sm mt-1">Join thousands of users today</p>
         </div>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-8">
+          {error && (
+            <div className="mb-4 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3">
+              {error}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Full Name</label>
               <input
-                type="text"
-                name="name"
-                required
-                value={form.name}
-                onChange={handleChange}
+                type="text" name="name" required value={form.name} onChange={handleChange}
                 placeholder="John Doe"
                 className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-400"
               />
@@ -65,11 +88,7 @@ export default function SignUpPage() {
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Email</label>
               <input
-                type="email"
-                name="email"
-                required
-                value={form.email}
-                onChange={handleChange}
+                type="email" name="email" required value={form.email} onChange={handleChange}
                 placeholder="your@email.com"
                 className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-400"
               />
@@ -77,11 +96,7 @@ export default function SignUpPage() {
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Password</label>
               <input
-                type="password"
-                name="password"
-                required
-                value={form.password}
-                onChange={handleChange}
+                type="password" name="password" required value={form.password} onChange={handleChange}
                 placeholder="••••••••"
                 className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-400"
               />
@@ -89,18 +104,13 @@ export default function SignUpPage() {
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Confirm Password</label>
               <input
-                type="password"
-                name="confirm"
-                required
-                value={form.confirm}
-                onChange={handleChange}
+                type="password" name="confirm" required value={form.confirm} onChange={handleChange}
                 placeholder="••••••••"
                 className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-400"
               />
             </div>
             <button
-              type="submit"
-              disabled={loading}
+              type="submit" disabled={loading}
               className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-neutral-300 text-white font-semibold py-2.5 rounded-lg transition"
             >
               {loading ? 'Creating account...' : 'Create Account'}
@@ -108,7 +118,7 @@ export default function SignUpPage() {
           </form>
           <div className="mt-6 text-center text-sm text-neutral-500">
             Already have an account?{' '}
-            <Link href="/login" className="text-indigo-600 font-medium hover:underline">Sign In</Link>
+            <Link href="/signin" className="text-indigo-600 font-medium hover:underline">Sign In</Link>
           </div>
         </div>
       </div>

@@ -11,6 +11,7 @@
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
+    "@supabase/supabase-js": "^2.106.2",
     "docx": "^9.7.0",
     "gif.js": "^0.2.0",
     "heic2any": "^0.0.4",

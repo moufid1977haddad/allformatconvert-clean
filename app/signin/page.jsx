@@ -1,16 +1,29 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
-export default function LoginPage() {
+export default function SignInPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const router = useRouter();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => setLoading(false), 1500);
+    setError('');
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else {
+      router.push('/');
+    }
   };
 
   return (
@@ -22,6 +35,11 @@ export default function LoginPage() {
           <p className="text-neutral-500 text-sm mt-1">Sign in to your account</p>
         </div>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-8">
+          {error && (
+            <div className="mb-4 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3">
+              {error}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Email</label>
