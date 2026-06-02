@@ -17,7 +17,7 @@ export default function AboutPage() {
           <h2 className="text-xl font-bold text-neutral-800 mb-3">What is AllFormatConvert?</h2>
           <p className="text-neutral-600 text-sm leading-relaxed">
             AllFormatConvert is a free, all-in-one platform offering 200+ online tools for converting,
-            compressing, and editing files â€” including PDFs, images, videos, audio, and more.
+            compressing, and editing files — including PDFs, images, videos, audio, and more.
             Everything runs locally in your browser, so your files never leave your device.
           </p>
         </div>
@@ -26,7 +26,7 @@ export default function AboutPage() {
           <h2 className="text-xl font-bold text-neutral-800 mb-3">Our Mission</h2>
           <p className="text-neutral-600 text-sm leading-relaxed">
             We believe powerful tools should be free and accessible to everyone. No sign-up required,
-            no watermarks, no limits â€” just fast, reliable tools that work right in your browser.
+            no watermarks, no limits — just fast, reliable tools that work right in your browser.
           </p>
         </div>
 

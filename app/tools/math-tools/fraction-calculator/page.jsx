@@ -42,7 +42,7 @@ export default function FractionCalculatorPage() {
             </div>
             <div className="flex flex-col gap-2">
               {['+','-','*','/'].map(o => (
-                <button key={o} onClick={() => setOp(o)} className={`w-10 h-10 rounded-lg font-bold transition ${op === o ? 'bg-indigo-600' : 'bg-neutral-800 hover:bg-neutral-100'}`}>{o}</button>
+                <button key={o} onClick={() => setOp(o)} className={`w-10 h-10 rounded-lg font-bold transition ${op === o ? 'bg-indigo-600 text-white' : 'bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-800 dark:text-white'}`}>{o}</button>
               ))}
             </div>
             <div className="text-center">
