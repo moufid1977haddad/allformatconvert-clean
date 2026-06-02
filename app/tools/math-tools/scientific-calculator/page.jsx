@@ -25,7 +25,6 @@ export default function ScientificCalculatorPage() {
     const end = input.selectionEnd;
     const newVal = expression.slice(0, start) + before + after + expression.slice(end);
     setExpression(newVal);
-    // Place cursor between before and after
     setTimeout(() => {
       input.focus();
       input.setSelectionRange(start + before.length, start + before.length);
@@ -42,29 +41,17 @@ export default function ScientificCalculatorPage() {
       if (start === 0) return;
       const newVal = expression.slice(0, start - 1) + expression.slice(start);
       setExpression(newVal);
-      setTimeout(() => {
-        input.focus();
-        input.setSelectionRange(start - 1, start - 1);
-      }, 0);
+      setTimeout(() => { input.focus(); input.setSelectionRange(start - 1, start - 1); }, 0);
       return;
     }
-
     const funcs = ['sin(', 'cos(', 'tan(', 'log(', 'ln(', 'sqrt('];
-    if (funcs.includes(val)) {
-      insertAtCursor(val, ')');
-      return;
-    }
-
+    if (funcs.includes(val)) { insertAtCursor(val, ')'); return; }
     insertAtCursor(val);
   };
 
-  // Enter key = calculate
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        setResult(evaluate(expression));
-      }
+      if (e.key === 'Enter') { e.preventDefault(); setResult(evaluate(expression)); }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
@@ -86,11 +73,17 @@ export default function ScientificCalculatorPage() {
     ['='],
   ];
 
+  const getBtnClass = (btn) => {
+    if (btn === '=') return 'bg-indigo-600 hover:bg-indigo-500 text-white';
+    if (btn === 'C') return 'bg-red-600 hover:bg-red-500 text-white';
+    return 'bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-900 dark:text-white';
+  };
+
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 p-6">
       <div className="max-w-sm mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-2 dark:text-white">Scientific Calculator</h1>
-        <p className="text-neutral-500 text-center mb-8">Advanced scientific calculator</p>
+        <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">Scientific Calculator</h1>
+        <p className="text-neutral-500 dark:text-neutral-400 text-center mb-8">Advanced scientific calculator</p>
         <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-4 space-y-3">
           <div className="bg-neutral-50 dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 p-4 text-right">
             <input
@@ -103,16 +96,13 @@ export default function ScientificCalculatorPage() {
               placeholder="Type or click buttons..."
               autoFocus
             />
-            <div className="text-2xl font-bold font-mono mt-1 break-all dark:text-white">{result}</div>
+            <div className="text-2xl font-bold font-mono mt-1 break-all text-neutral-800 dark:text-white">{result}</div>
           </div>
           {buttons.map((row, i) => (
             <div key={i} className={`grid gap-2 ${row.length === 1 ? 'grid-cols-1' : 'grid-cols-4'}`}>
               {row.map(btn => (
-                <button key={btn} onMouseDown={e => { e.preventDefault(); handleBtn(btn); }} className={`py-3 rounded-xl font-semibold transition text-sm ${
-                  btn === '=' ? 'bg-indigo-600 hover:bg-indigo-500 text-white' :
-                  btn === 'C' ? 'bg-red-600 hover:bg-red-500 text-white' :
-                  'bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-800 dark:text-white'
-                }`}>
+                <button key={btn} onMouseDown={e => { e.preventDefault(); handleBtn(btn); }}
+                  className={`py-3 rounded-xl font-semibold transition text-sm ${getBtnClass(btn)}`}>
                   {getLabel(btn)}
                 </button>
               ))}
