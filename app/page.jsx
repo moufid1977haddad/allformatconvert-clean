@@ -44,18 +44,18 @@ const badges = [
 ];
 
 const floatingIcons = [
-  { icon: '📄', label: 'PDF',     color: '#fef2f2', border: '#fca5a5', anim: 'floatA', dur: '3.2s', delay: '0s'    },
-  { icon: '🖼️', label: 'Image',   color: '#fdf4ff', border: '#e879f9', anim: 'floatB', dur: '3.8s', delay: '0.3s'  },
-  { icon: '🎬', label: 'Video',   color: '#eff6ff', border: '#93c5fd', anim: 'floatC', dur: '3.5s', delay: '0.1s'  },
-  { icon: '🤖', label: 'AI',      color: '#ecfeff', border: '#67e8f9', anim: 'floatA', dur: '4.0s', delay: '0.5s'  },
-  { icon: '🎵', label: 'Audio',   color: '#fefce8', border: '#fde047', anim: 'floatB', dur: '3.3s', delay: '0.2s'  },
-  { icon: '💻', label: 'Dev',     color: '#f5f3ff', border: '#c4b5fd', anim: 'floatC', dur: '3.7s', delay: '0.4s'  },
-  { icon: '📁', label: 'Files',   color: '#fff7ed', border: '#fdba74', anim: 'floatA', dur: '4.2s', delay: '0.6s'  },
-  { icon: '🔢', label: 'Math',    color: '#eef2ff', border: '#a5b4fc', anim: 'floatB', dur: '3.6s', delay: '0.35s' },
-  { icon: '🎞️', label: 'GIF',     color: '#faf5ff', border: '#d8b4fe', anim: 'floatC', dur: '3.9s', delay: '0.15s' },
-  { icon: '📝', label: 'Text',    color: '#f0fdf4', border: '#86efac', anim: 'floatA', dur: '3.4s', delay: '0.55s' },
-  { icon: '📱', label: 'QR',      color: '#f0fdfa', border: '#5eead4', anim: 'floatB', dur: '4.1s', delay: '0.25s' },
-  { icon: '🔄', label: 'Convert', color: '#fffbeb', border: '#fcd34d', anim: 'floatC', dur: '3.6s', delay: '0.45s' },
+  { icon: '📄', label: 'PDF',     href: '/tools/pdf-tools',         color: '#fef2f2', border: '#fca5a5', anim: 'floatA', dur: '3.2s', delay: '0s'    },
+  { icon: '🖼️', label: 'Image',   href: '/tools/image-tools',       color: '#fdf4ff', border: '#e879f9', anim: 'floatB', dur: '3.8s', delay: '0.3s'  },
+  { icon: '🎬', label: 'Video',   href: '/tools/media-tools',       color: '#eff6ff', border: '#93c5fd', anim: 'floatC', dur: '3.5s', delay: '0.1s'  },
+  { icon: '🤖', label: 'AI',      href: '/tools/ai-tools',          color: '#ecfeff', border: '#67e8f9', anim: 'floatA', dur: '4.0s', delay: '0.5s'  },
+  { icon: '🎵', label: 'Audio',   href: '/tools/audio-tools',       color: '#fefce8', border: '#fde047', anim: 'floatB', dur: '3.3s', delay: '0.2s'  },
+  { icon: '💻', label: 'Dev',     href: '/tools/developer-tools',   color: '#f5f3ff', border: '#c4b5fd', anim: 'floatC', dur: '3.7s', delay: '0.4s'  },
+  { icon: '📁', label: 'Files',   href: '/tools/file-tools',        color: '#fff7ed', border: '#fdba74', anim: 'floatA', dur: '4.2s', delay: '0.6s'  },
+  { icon: '🔢', label: 'Math',    href: '/tools/math-tools',        color: '#eef2ff', border: '#a5b4fc', anim: 'floatB', dur: '3.6s', delay: '0.35s' },
+  { icon: '🎞️', label: 'GIF',     href: '/tools/gif-tools',         color: '#faf5ff', border: '#d8b4fe', anim: 'floatC', dur: '3.9s', delay: '0.15s' },
+  { icon: '📝', label: 'Text',    href: '/tools/text-tools',        color: '#f0fdf4', border: '#86efac', anim: 'floatA', dur: '3.4s', delay: '0.55s' },
+  { icon: '📱', label: 'QR',      href: '/tools/qr-barcodes-tools', color: '#f0fdfa', border: '#5eead4', anim: 'floatB', dur: '4.1s', delay: '0.25s' },
+  { icon: '🔄', label: 'Convert', href: '/tools/converter-tools',   color: '#fffbeb', border: '#fcd34d', anim: 'floatC', dur: '3.6s', delay: '0.45s' },
 ];
 
 function useCountUp(target, duration = 1800, start = false) {
@@ -143,10 +143,10 @@ export default function Home() {
           {/* RIGHT — 12 floating icons */}
           <div style={{ flex:'0 0 360px', display:'grid', gridTemplateColumns:'repeat(3, 110px)', gap:'12px', justifyContent:'center', animation:'fadeUp 0.9s ease 0.2s both' }}>
             {floatingIcons.map(item => (
-              <div key={item.label} style={{ width:'110px', height:'88px', background: dark ? '#1c1c1e' : item.color, border: dark ? '1.5px solid #2c2c2e' : `1.5px solid ${item.border}`, borderRadius:'18px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'6px', animation:`${item.anim} ${item.dur} ease-in-out ${item.delay} infinite`, boxShadow:'0 6px 20px rgba(0,0,0,0.10)' }}>
+              <Link key={item.label} href={item.href} style={{ width:'110px', height:'88px', background: dark ? '#1c1c1e' : item.color, border: dark ? '1.5px solid #2c2c2e' : `1.5px solid ${item.border}`, borderRadius:'18px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'6px', animation:`${item.anim} ${item.dur} ease-in-out ${item.delay} infinite`, boxShadow:'0 6px 20px rgba(0,0,0,0.10)', textDecoration:'none' }}>
                 <span style={{ fontSize:'28px' }}>{item.icon}</span>
                 <span style={{ fontSize:'11px', fontWeight:'600', color: dark ? '#94a3b8' : '#374151' }}>{item.label}</span>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

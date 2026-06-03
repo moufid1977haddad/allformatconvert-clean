@@ -58,10 +58,22 @@ const allTools = [
 ];
 
 const tickerTools = [
-  '📄 Merge PDF', '🖼️ Resize Image', '🎬 Convert Video', '🤖 Remove Background',
-  '🎵 Trim Audio', '📊 Format JSON', '🔒 Encrypt PDF', '🎞️ Make GIF',
-  '📝 Count Words', '🔄 Convert Units', '💻 Encode Base64', '📱 Generate QR Code',
-  '🗜️ Compress Files', '🎨 Convert Colors', '🔊 Extract Audio', '✨ Fix Grammar',
+  { label: '📄 Merge PDF',        href: '/tools/pdf-tools/pdf-merge' },
+  { label: '🖼️ Resize Image',     href: '/tools/image-tools/image-resizer' },
+  { label: '🎬 Convert Video',     href: '/tools/media-tools/video-converter' },
+  { label: '🤖 Remove Background', href: '/tools/ai-tools/background-remover' },
+  { label: '🎵 Trim Audio',        href: '/tools/audio-tools/audio-trimmer' },
+  { label: '📊 Format JSON',       href: '/tools/developer-tools/json-formatter' },
+  { label: '🔒 Encrypt PDF',       href: '/tools/pdf-tools/pdf-encrypt' },
+  { label: '🎞️ Make GIF',          href: '/tools/gif-tools/gif-maker' },
+  { label: '📝 Count Words',       href: '/tools/text-tools/word-counter' },
+  { label: '🔄 Convert Units',     href: '/tools/converter-tools/unit-converter' },
+  { label: '💻 Encode Base64',     href: '/tools/developer-tools/base64-encoder' },
+  { label: '📱 Generate QR Code',  href: '/tools/qr-barcodes-tools/qr-generator' },
+  { label: '🗜️ Compress Files',    href: '/tools/file-tools/zip-creator' },
+  { label: '🎨 Convert Colors',    href: '/tools/converter-tools/color-converter' },
+  { label: '🔊 Extract Audio',     href: '/tools/media-tools/video-to-audio' },
+  { label: '✨ Fix Grammar',        href: '/tools/ai-tools/grammar-fixer' },
 ];
 
 export default function Navbar() {
@@ -246,16 +258,17 @@ export default function Navbar() {
         }}>
           <div className="ticker-track">
             {doubled.map((tool, i) => (
-              <span key={i} style={{
+              <Link key={i} href={tool.href} style={{
                 whiteSpace: 'nowrap',
                 padding: '0 24px',
                 fontSize: '12px',
                 color: dark ? 'rgba(255,255,255,0.7)' : '#4338ca',
                 fontWeight: '500',
                 borderRight: dark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #c7d2fe',
+                textDecoration: 'none',
               }}>
-                {tool}
-              </span>
+                {tool.label}
+              </Link>
             ))}
           </div>
         </div>
