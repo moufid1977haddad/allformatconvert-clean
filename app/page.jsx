@@ -109,7 +109,7 @@ export default function Home() {
       `}</style>
 
       {/* ═══ HERO ═══ */}
-      <section style={{ background: dark ? '#111111' : '#f8fafc', padding:'80px 24px 60px', position:'relative', overflow:'hidden' }}>
+      <section style={{ background: dark ? '#111111' : '#f8fafc', padding:'80px 24px 60px', position:'relative', overflow:'hidden', boxSizing:'border-box' }}>
         <div style={{ position:'absolute', inset:0, overflow:'hidden', pointerEvents:'none' }}>
           <div style={{ position:'absolute', top:'-80px', right:'-80px', width:'400px', height:'400px', background: dark ? 'transparent' : 'rgba(226,232,240,0.5)', borderRadius:'50%', filter:'blur(60px)' }} />
           <div style={{ position:'absolute', bottom:'-100px', left:'-60px', width:'350px', height:'350px', background: dark ? 'transparent' : 'rgba(226,232,240,0.3)', borderRadius:'50%', filter:'blur(80px)' }} />
@@ -117,7 +117,7 @@ export default function Home() {
         <div style={{ maxWidth:'1100px', margin:'0 auto', display:'flex', gap:'48px', alignItems:'center', position:'relative', zIndex:1 }}>
 
           {/* LEFT */}
-          <div style={{ flex:1, animation:'fadeUp 0.7s ease both' }}>
+          <div className='hero-left' style={{ flex:1, animation:'fadeUp 0.7s ease both' }}>
             <div style={{ display:'inline-flex', alignItems:'center', gap:'8px', background: dark ? '#111111' : '#e2e8f0', border: dark ? '1px solid #334155' : '1px solid #cbd5e1', borderRadius:'999px', padding:'6px 16px', marginBottom:'24px', fontSize:'13px', color: dark ? '#94a3b8' : '#475569' }}>
               ✨ 232+ free tools · No signup · No limits
             </div>
