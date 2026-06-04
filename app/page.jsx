@@ -106,6 +106,12 @@ export default function Home() {
         @keyframes floatB  { 0%,100% { transform:translateY(0px) rotate(3deg);  } 50% { transform:translateY(-16px) rotate(-1deg); } }
         @keyframes floatC  { 0%,100% { transform:translateY(0px) rotate(-1deg); } 50% { transform:translateY(-10px) rotate(3deg);  } }
         .badge-pill:hover  { background: #e2e8f0 !important; }
+        .hero-icons-grid   { flex: 0 0 360px; display: grid; grid-template-columns: repeat(3, 110px); gap: 12px; justify-content: center; animation: fadeUp 0.9s ease 0.2s both; }
+        @media (max-width: 768px) {
+          .hero-wrapper      { flex-direction: column; gap: 24px; }
+          .hero-icons-grid   { display: none; }
+          .hero-left         { width: 100%; }
+        }
       `}</style>
 
       {/* ═══ HERO ═══ */}
@@ -141,7 +147,7 @@ export default function Home() {
           </div>
 
           {/* RIGHT — 12 floating icons */}
-          <div style={{ flex:'0 0 360px', display:'grid', gridTemplateColumns:'repeat(3, 110px)', gap:'12px', justifyContent:'center', animation:'fadeUp 0.9s ease 0.2s both' }}>
+          <div className="hero-icons-grid">
             {floatingIcons.map(item => (
               <Link key={item.label} href={item.href} style={{ width:'110px', height:'88px', background: dark ? '#1c1c1e' : item.color, border: dark ? '1.5px solid #2c2c2e' : `1.5px solid ${item.border}`, borderRadius:'18px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'6px', animation:`${item.anim} ${item.dur} ease-in-out ${item.delay} infinite`, boxShadow:'0 6px 20px rgba(0,0,0,0.10)', textDecoration:'none' }}>
                 <span style={{ fontSize:'28px' }}>{item.icon}</span>
