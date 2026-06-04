@@ -143,7 +143,7 @@ export default function Navbar() {
         }
       `}</style>
 
-      <header className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700 sticky top-0 z-50">
+      <header className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700 sticky top-0 z-50" style={{ overflow: 'hidden', width: '100%', maxWidth: '100vw' }}>
 
         {/* ── Main navbar ── */}
         <div className="w-full px-4 py-2 flex items-center gap-2" style={{ minHeight: '52px' }}>
@@ -255,6 +255,9 @@ export default function Navbar() {
           padding: '7px 0',
           overflow: 'hidden',
           borderTop: dark ? '1px solid #222222' : '1px solid #e0e7ff',
+          width: '100%',
+          maxWidth: '100vw',
+          boxSizing: 'border-box',
         }}>
           <div className="ticker-track">
             {doubled.map((tool, i) => (
