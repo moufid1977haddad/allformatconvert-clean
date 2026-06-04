@@ -106,11 +106,35 @@ export default function Home() {
         @keyframes floatB  { 0%,100% { transform:translateY(0px) rotate(3deg);  } 50% { transform:translateY(-16px) rotate(-1deg); } }
         @keyframes floatC  { 0%,100% { transform:translateY(0px) rotate(-1deg); } 50% { transform:translateY(-10px) rotate(3deg);  } }
         .badge-pill:hover  { background: #e2e8f0 !important; }
-        .hero-icons-grid   { flex: 0 0 360px; display: grid; grid-template-columns: repeat(3, 110px); gap: 12px; justify-content: center; animation: fadeUp 0.9s ease 0.2s both; }
-        @media (max-width: 768px) {
-          .hero-wrapper      { flex-direction: column; gap: 24px; }
-          .hero-icons-grid   { display: none; }
-          .hero-left         { width: 100%; }
+
+        /* ── DESKTOP : hero côte à côte ── */
+        .hero-wrapper      { max-width:1100px; margin:0 auto; display:flex; gap:48px; align-items:center; position:relative; z-index:1; }
+        .hero-left         { flex:1; animation:fadeUp 0.7s ease both; }
+        .hero-icons-grid   { flex:0 0 360px; display:grid; grid-template-columns:repeat(3, 110px); gap:12px; justify-content:center; animation:fadeUp 0.9s ease 0.2s both; }
+        .hero-icon-card    { width:110px; height:88px; border-radius:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; box-shadow:0 6px 20px rgba(0,0,0,0.10); text-decoration:none; }
+        .hero-icon-card span.ico { font-size:28px; }
+        .hero-icon-card span.lbl { font-size:11px; font-weight:600; }
+
+        /* ── MOBILE PORTRAIT ≤ 640px ── */
+        @media (max-width: 640px) {
+          .hero-wrapper    { flex-direction:column; gap:28px; }
+          .hero-left       { width:100%; }
+          .hero-icons-grid {
+            flex:none; width:100%;
+            grid-template-columns: repeat(4, 1fr);
+            gap:10px;
+          }
+          .hero-icon-card  { width:100%; height:72px; border-radius:14px; }
+          .hero-icon-card span.ico { font-size:22px; }
+          .hero-icon-card span.lbl { font-size:10px; }
+        }
+
+        /* ── TABLETTE 641–1024px ── */
+        @media (min-width:641px) and (max-width:1024px) {
+          .hero-icons-grid { flex:0 0 300px; grid-template-columns:repeat(3, 90px); gap:10px; }
+          .hero-icon-card  { width:90px; height:76px; border-radius:16px; }
+          .hero-icon-card span.ico { font-size:24px; }
+          .hero-icon-card span.lbl { font-size:10px; }
         }
       `}</style>
 
@@ -120,7 +144,7 @@ export default function Home() {
           <div style={{ position:'absolute', top:'-80px', right:'-80px', width:'400px', height:'400px', background: dark ? 'transparent' : 'rgba(226,232,240,0.5)', borderRadius:'50%', filter:'blur(60px)' }} />
           <div style={{ position:'absolute', bottom:'-100px', left:'-60px', width:'350px', height:'350px', background: dark ? 'transparent' : 'rgba(226,232,240,0.3)', borderRadius:'50%', filter:'blur(80px)' }} />
         </div>
-        <div className='hero-wrapper' style={{ maxWidth:'1100px', margin:'0 auto', display:'flex', gap:'48px', alignItems:'center', position:'relative', zIndex:1 }}>
+        <div className='hero-wrapper'>
 
           {/* LEFT */}
           <div className='hero-left' style={{ flex:1, animation:'fadeUp 0.7s ease both' }}>
@@ -149,9 +173,9 @@ export default function Home() {
           {/* RIGHT — 12 floating icons */}
           <div className="hero-icons-grid">
             {floatingIcons.map(item => (
-              <Link key={item.label} href={item.href} style={{ width:'110px', height:'88px', background: dark ? '#1c1c1e' : item.color, border: dark ? '1.5px solid #2c2c2e' : `1.5px solid ${item.border}`, borderRadius:'18px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'6px', animation:`${item.anim} ${item.dur} ease-in-out ${item.delay} infinite`, boxShadow:'0 6px 20px rgba(0,0,0,0.10)', textDecoration:'none' }}>
-                <span style={{ fontSize:'28px' }}>{item.icon}</span>
-                <span style={{ fontSize:'11px', fontWeight:'600', color: dark ? '#94a3b8' : '#374151' }}>{item.label}</span>
+              <Link key={item.label} href={item.href} className="hero-icon-card" style={{ background: dark ? '#1c1c1e' : item.color, border: dark ? '1.5px solid #2c2c2e' : `1.5px solid ${item.border}`, animation:`${item.anim} ${item.dur} ease-in-out ${item.delay} infinite` }}>
+                <span className="ico">{item.icon}</span>
+                <span className="lbl" style={{ color: dark ? '#94a3b8' : '#374151' }}>{item.label}</span>
               </Link>
             ))}
           </div>
