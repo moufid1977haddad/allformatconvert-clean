@@ -10,7 +10,7 @@ const tools = [
   { icon: '🔄', title: 'Rotate PDF', description: 'Rotate pages 90, 180, 270', href: '/tools/pdf-tools/pdf-rotate' },
   { icon: '💧', title: 'Watermark PDF', description: 'Add text watermark to PDF', href: '/tools/pdf-tools/pdf-watermark' },
   { icon: '🖼️', title: 'Image to PDF', description: 'Convert images to PDF', href: '/tools/pdf-tools/image-to-pdf' },
-  { icon: '📷', title: 'PDF to Image', description: 'Convert PDF pages to images', href: '/tools/pdf-tools/pdf-to-image' },
+  { icon: '🗃️', title: 'PDF to Image', description: 'Convert PDF pages to images', href: '/tools/pdf-tools/pdf-to-image' },
   { icon: '📷', title: 'PDF to JPG', description: 'Convert PDF pages to JPG', href: '/tools/pdf-tools/pdf-to-jpg' },
   { icon: '📸', title: 'JPG to PDF', description: 'Convert JPG images to PDF', href: '/tools/pdf-tools/jpg-to-pdf' },
   { icon: '📝', title: 'Word to PDF', description: 'Convert DOCX to PDF', href: '/tools/pdf-tools/word-to-pdf' },
