@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -51,7 +51,7 @@ export default function SignUpPage() {
               </svg>
             </div>
             <h2 className="text-xl font-bold text-neutral-800 mb-2">Account created! 🎉</h2>
-            <p className="text-neutral-500 text-sm mb-2">Welcome to AllFormatConvert.</p>
+            <p className="text-neutral-500 text-sm mb-2">Welcome to OnlineConvertTools.</p>
             <p className="text-neutral-400 text-xs mb-6">Please check your email and confirm your account before signing in.</p>
             <Link href="/signin" className="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition text-center">
               Go to Sign In
@@ -66,7 +66,7 @@ export default function SignUpPage() {
     <div className="min-h-screen bg-neutral-100 flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-indigo-600">AllFormatConvert</Link>
+          <Link href="/" className="text-2xl font-bold text-indigo-600">OnlineConvertTools</Link>
           <h1 className="text-2xl font-bold text-neutral-800 mt-4">Create an account</h1>
           <p className="text-neutral-500 text-sm mt-1">Join thousands of users today</p>
         </div>

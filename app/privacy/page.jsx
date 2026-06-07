@@ -1,4 +1,4 @@
-export default function PrivacyPage() {
+﻿export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
@@ -8,7 +8,7 @@ export default function PrivacyPage() {
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">1. Introduction</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">AllFormatConvert ("we", "us", or "our") operates the website allformatconvert.com. This Privacy Policy explains how we collect, use, and protect your information when you use our service. By using AllFormatConvert, you agree to the collection and use of information in accordance with this policy.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">OnlineConvertTools ("we", "us", or "our") operates the website OnlineConvertTools.com. This Privacy Policy explains how we collect, use, and protect your information when you use our service. By using OnlineConvertTools, you agree to the collection and use of information in accordance with this policy.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
@@ -53,7 +53,7 @@ export default function PrivacyPage() {
               <li><strong>Right to Erasure:</strong> Request deletion of your personal data.</li>
               <li><strong>Right to Opt-Out:</strong> Opt out of the sale of your personal data (California residents).</li>
             </ul>
-            <p className="text-neutral-600 text-sm leading-relaxed mt-3">To exercise any of these rights, please contact us at <a href="mailto:contact@allformatconvert.com" className="text-indigo-600 hover:underline">contact@allformatconvert.com</a>.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed mt-3">To exercise any of these rights, please contact us at <a href="mailto:contact@OnlineConvertTools.com" className="text-indigo-600 hover:underline">contact@OnlineConvertTools.com</a>.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
@@ -74,8 +74,8 @@ export default function PrivacyPage() {
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">9. Contact Us</h2>
             <p className="text-neutral-600 text-sm leading-relaxed">If you have any questions about this Privacy Policy, please contact us at:<br /><br />
-            <strong>Email:</strong> <a href="mailto:contact@allformatconvert.com" className="text-indigo-600 hover:underline">contact@allformatconvert.com</a><br />
-            <strong>Website:</strong> <a href="/contact" className="text-indigo-600 hover:underline">allformatconvert.com/contact</a></p>
+            <strong>Email:</strong> <a href="mailto:contact@OnlineConvertTools.com" className="text-indigo-600 hover:underline">contact@OnlineConvertTools.com</a><br />
+            <strong>Website:</strong> <a href="/contact" className="text-indigo-600 hover:underline">OnlineConvertTools.com/contact</a></p>
           </div>
 
         </div>

@@ -1,4 +1,4 @@
-export default function TermsPage() {
+﻿export default function TermsPage() {
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
@@ -8,17 +8,17 @@ export default function TermsPage() {
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">1. Acceptance of Terms</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">By accessing and using AllFormatConvert ("Service"), you confirm that you are at least 13 years of age and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our service.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">By accessing and using OnlineConvertTools ("Service"), you confirm that you are at least 13 years of age and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our service.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">2. Description of Service</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">AllFormatConvert provides free online tools for converting, compressing, and editing files including PDFs, images, videos, audio, and more. Some features are powered by third-party AI services. The service is provided "as is" and may be updated, modified, or discontinued at any time.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">OnlineConvertTools provides free online tools for converting, compressing, and editing files including PDFs, images, videos, audio, and more. Some features are powered by third-party AI services. The service is provided "as is" and may be updated, modified, or discontinued at any time.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">3. Permitted Use</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed mb-3">You may use AllFormatConvert for personal and commercial purposes. You agree NOT to:</p>
+            <p className="text-neutral-600 text-sm leading-relaxed mb-3">You may use OnlineConvertTools for personal and commercial purposes. You agree NOT to:</p>
             <ul className="text-neutral-600 text-sm leading-relaxed space-y-2 list-disc pl-5">
               <li>Use the service for any unlawful purpose</li>
               <li>Upload or process illegal, harmful, or offensive content</li>
@@ -31,27 +31,27 @@ export default function TermsPage() {
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">4. Intellectual Property</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">The content, features, design, and functionality of AllFormatConvert are owned by AllFormatConvert and protected by international copyright, trademark, and other intellectual property laws. You retain all rights to files you process through our service.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">The content, features, design, and functionality of OnlineConvertTools are owned by OnlineConvertTools and protected by international copyright, trademark, and other intellectual property laws. You retain all rights to files you process through our service.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">5. Third-Party Services</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">Some features use third-party APIs including OpenAI and Remove.bg. By using AI-powered tools, you agree to the respective terms of service of these providers. AllFormatConvert is not responsible for the performance or availability of third-party services.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">Some features use third-party APIs including OpenAI and Remove.bg. By using AI-powered tools, you agree to the respective terms of service of these providers. OnlineConvertTools is not responsible for the performance or availability of third-party services.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">6. Advertising</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">AllFormatConvert may display advertisements provided by Google AdSense and other advertising networks. These advertisements help us keep the service free. By using our service, you consent to the display of such advertisements.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">OnlineConvertTools may display advertisements provided by Google AdSense and other advertising networks. These advertisements help us keep the service free. By using our service, you consent to the display of such advertisements.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">7. Disclaimer of Warranties</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">AllFormatConvert is provided on an "as is" and "as available" basis without warranties of any kind, either express or implied. We do not warrant that the service will be uninterrupted, error-free, secure, or free of viruses or other harmful components.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">OnlineConvertTools is provided on an "as is" and "as available" basis without warranties of any kind, either express or implied. We do not warrant that the service will be uninterrupted, error-free, secure, or free of viruses or other harmful components.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">8. Limitation of Liability</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">To the maximum extent permitted by law, AllFormatConvert shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the service, including but not limited to loss of data or profits.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">To the maximum extent permitted by law, OnlineConvertTools shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the service, including but not limited to loss of data or profits.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
@@ -72,8 +72,8 @@ export default function TermsPage() {
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">12. Contact Us</h2>
             <p className="text-neutral-600 text-sm leading-relaxed">If you have any questions about these Terms of Service, please contact us at:<br /><br />
-            <strong>Email:</strong> <a href="mailto:contact@allformatconvert.com" className="text-indigo-600 hover:underline">contact@allformatconvert.com</a><br />
-            <strong>Website:</strong> <a href="/contact" className="text-indigo-600 hover:underline">allformatconvert.com/contact</a></p>
+            <strong>Email:</strong> <a href="mailto:contact@OnlineConvertTools.com" className="text-indigo-600 hover:underline">contact@OnlineConvertTools.com</a><br />
+            <strong>Website:</strong> <a href="/contact" className="text-indigo-600 hover:underline">OnlineConvertTools.com/contact</a></p>
           </div>
 
         </div>

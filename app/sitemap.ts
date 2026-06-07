@@ -1,7 +1,7 @@
 ﻿import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://allformatconvert.com";
+  const baseUrl = "https://OnlineConvertTools.com";
 
   const tools = [
     // PDF Tools

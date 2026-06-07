@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 
 export default function ContactPage() {
@@ -27,7 +27,7 @@ export default function ContactPage() {
               Contact
             </h1>
             <p className="text-neutral-500 dark:text-neutral-400 text-lg leading-relaxed">
-              Contact us if you want to report a bug, ask a question about AllFormatConvert, or get more information.
+              Contact us if you want to report a bug, ask a question about OnlineConvertTools, or get more information.
             </p>
           </div>
 
