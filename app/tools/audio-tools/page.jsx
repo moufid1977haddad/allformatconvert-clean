@@ -4,7 +4,7 @@ import Link from 'next/link';
 const tools = [
   { icon: '🔄', title: 'Audio Converter', description: 'Convert audio to different formats', href: '/tools/audio-tools/audio-converter' },
   { icon: '✂️', title: 'Audio Trimmer', description: 'Trim and cut audio files', href: '/tools/audio-tools/audio-trimmer' },
-  { icon: '🔇', title: 'Audio Compressor', description: 'Compress audio files', href: '/tools/audio-tools/audio-compressor' },
+  { icon: '🗜️', title: 'Audio Compressor', description: 'Compress audio files', href: '/tools/audio-tools/audio-compressor' },
   { icon: '🎚️', title: 'Audio Merger', description: 'Merge multiple audio files', href: '/tools/audio-tools/audio-merger' },
   { icon: '📻', title: 'Audio Splitter', description: 'Split audio into parts', href: '/tools/audio-tools/audio-splitter' },
   { icon: '📢', title: 'Audio Booster', description: 'Boost audio volume', href: '/tools/audio-tools/audio-booster' },
@@ -19,7 +19,7 @@ export default function AudioToolsPage() {
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-2">Audio Tools</h1>
+        <h1 className="text-4xl font-bold text-center mb-2">🎵 Audio Tools</h1>
         <p className="text-neutral-500 text-center mb-10">All your audio tools in one place - {tools.length} tools</p>
         <div className="flex flex-wrap gap-4 justify-center">
           {tools.map((tool) => (

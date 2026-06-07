@@ -11,6 +11,8 @@ const tools = [
   { icon: '🖼️', title: 'Image to GIF', description: 'Create animated GIF from images', href: '/tools/gif-tools/image-to-gif' },
   { icon: '🎬', title: 'MOV to GIF', description: 'Convert MOV video to GIF', href: '/tools/gif-tools/mov-to-gif' },
   { icon: '🎬', title: 'AVI to GIF', description: 'Convert AVI video to GIF', href: '/tools/gif-tools/avi-to-gif' },
+  { icon: '🎞️', title: 'GIF Maker', description: 'Create GIF from images', href: '/tools/gif-tools/gif-maker' },
+  { icon: '🖼️', title: 'GIF Compressor', description: 'Compress GIF files', href: '/tools/gif-tools/gif-compressor' },
 ];
 
 export default function GifToolsPage() {

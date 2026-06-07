@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 
 export default function Footer() {
   return (
@@ -14,7 +14,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link href="/tools/pdf-tools" className="hover:text-indigo-600 transition font-medium">PDF Tools</Link></li>
               <li><Link href="/tools/image-tools" className="hover:text-indigo-600 transition font-medium">Image Tools</Link></li>
-              <li><Link href="/tools/media-tools" className="hover:text-indigo-600 transition font-medium">Media Tools</Link></li>
+              <li><Link href="/tools/video-tools" className="hover:text-indigo-600 transition font-medium">Video Tools</Link></li>
               <li><Link href="/tools/ai-tools" className="hover:text-indigo-600 transition font-medium">AI Tools</Link></li>
               <li><Link href="/tools/developer-tools" className="hover:text-indigo-600 transition font-medium">Developer Tools</Link></li>
             </ul>

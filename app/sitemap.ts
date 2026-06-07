@@ -1,4 +1,4 @@
-import { MetadataRoute } from "next";
+﻿import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://allformatconvert.com";
@@ -65,7 +65,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   const categories = [
-    "pdf-tools", "image-tools", "text-tools", "media-tools", "file-tools",
+    "pdf-tools", "image-tools", "text-tools", "video-tools", "file-tools",
     "qr-barcodes-tools", "converter-tools", "developer-tools", "math-tools",
     "gif-tools", "ai-tools",
   ];
