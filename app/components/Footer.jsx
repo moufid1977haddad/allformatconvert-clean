@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 
 export default function Footer() {
   return (
@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-black text-xl mb-3 bg-gradient-to-r from-indigo-600 to-violet-500 bg-clip-text text-transparent notranslate">OnlineConvertTools</h3>
+            <h3 className="font-black text-xl mb-3 bg-gradient-to-r from-indigo-600 to-violet-500 bg-clip-text text-transparent notranslate">onlineconvertools</h3>
             <p className="text-sm text-neutral-400 leading-relaxed font-light">200+ free online tools for converting, compressing and editing files. No sign-up required.</p>
           </div>
           <div>
@@ -40,7 +40,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-neutral-200 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-neutral-400 font-light tracking-wide">© 2025 OnlineConvertTools. All rights reserved.</p>
+          <p className="text-sm text-neutral-400 font-light tracking-wide">© 2025 onlineconvertools. All rights reserved.</p>
           <div className="flex gap-6 text-sm">
             <Link href="/privacy" className="hover:text-indigo-600 transition font-medium">Privacy</Link>
             <Link href="/terms" className="hover:text-indigo-600 transition font-medium">Terms</Link>

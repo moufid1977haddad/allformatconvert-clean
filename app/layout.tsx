@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
@@ -9,25 +9,25 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: "OnlineConvertTools - Free Online Tools",
-    template: "%s | OnlineConvertTools",
+    default: "onlineconvertools - Free Online Tools",
+    template: "%s | onlineconvertools",
   },
   description: "200+ free online tools for converting, compressing and editing PDFs, images, videos, audio and more. No sign-up, no watermarks, 100% local.",
   keywords: ["pdf converter", "image converter", "video converter", "free online tools", "file converter", "compress pdf", "compress image"],
-  authors: [{ name: "OnlineConvertTools" }],
-  creator: "OnlineConvertTools",
+  authors: [{ name: "onlineconvertools" }],
+  creator: "onlineconvertools",
   metadataBase: new URL("https://onlineconvertools.com"),
   openGraph: {
-    title: "OnlineConvertTools - Free Online Tools",
+    title: "onlineconvertools - Free Online Tools",
     description: "200+ free online tools for converting, compressing and editing files. No sign-up required.",
     url: "https://onlineconvertools.com",
-    siteName: "OnlineConvertTools",
+    siteName: "onlineconvertools",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "OnlineConvertTools - Free Online Tools",
+    title: "onlineconvertools - Free Online Tools",
     description: "200+ free online tools for converting, compressing and editing files.",
   },
   robots: {
