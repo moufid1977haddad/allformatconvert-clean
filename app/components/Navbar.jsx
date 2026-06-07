@@ -271,18 +271,18 @@ const categoryTools = {
 
 const languages = [
   { code: 'en', label: 'English', short: 'EN' },
-  { code: 'fr', label: 'FranÃ§ais', short: 'FR' },
-  { code: 'es', label: 'EspaÃ±ol', short: 'ES' },
+  { code: 'fr', label: 'Français', short: 'FR' },
+  { code: 'es', label: 'Español', short: 'ES' },
   { code: 'zh-CN', label: 'Chinese', short: 'CN' },
-  { code: 'ar', label: 'Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©', short: 'AR' },
+  { code: 'ar', label: 'العربية', short: 'AR' },
   { code: 'de', label: 'Deutsch', short: 'DE' },
-  { code: 'pt', label: 'PortuguÃªs', short: 'PT' },
+  { code: 'pt', label: 'Português', short: 'PT' },
   { code: 'ja', label: 'Japanese', short: 'JP' },
   { code: 'ru', label: 'Russian', short: 'RU' },
   { code: 'it', label: 'Italiano', short: 'IT' },
   { code: 'ko', label: 'Korean', short: 'KO' },
   { code: 'hi', label: 'Hindi', short: 'HI' },
-  { code: 'tr', label: 'TÃ¼rkÃ§e', short: 'TR' },
+  { code: 'tr', label: 'Türkçe', short: 'TR' },
 ];
 
 const allTools = [
