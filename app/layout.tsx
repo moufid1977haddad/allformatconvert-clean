@@ -9,25 +9,25 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: "AllFormatConvert - Free Online Tools",
-    template: "%s | AllFormatConvert",
+    default: "OnlineConvertTools - Free Online Tools",
+    template: "%s | OnlineConvertTools",
   },
   description: "200+ free online tools for converting, compressing and editing PDFs, images, videos, audio and more. No sign-up, no watermarks, 100% local.",
   keywords: ["pdf converter", "image converter", "video converter", "free online tools", "file converter", "compress pdf", "compress image"],
-  authors: [{ name: "AllFormatConvert" }],
-  creator: "AllFormatConvert",
-  metadataBase: new URL("https://allformatconvert.com"),
+  authors: [{ name: "OnlineConvertTools" }],
+  creator: "OnlineConvertTools",
+  metadataBase: new URL("https://onlineconvertools.com"),
   openGraph: {
-    title: "AllFormatConvert - Free Online Tools",
+    title: "OnlineConvertTools - Free Online Tools",
     description: "200+ free online tools for converting, compressing and editing files. No sign-up required.",
-    url: "https://allformatconvert.com",
-    siteName: "AllFormatConvert",
+    url: "https://onlineconvertools.com",
+    siteName: "OnlineConvertTools",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AllFormatConvert - Free Online Tools",
+    title: "OnlineConvertTools - Free Online Tools",
     description: "200+ free online tools for converting, compressing and editing files.",
   },
   robots: {
