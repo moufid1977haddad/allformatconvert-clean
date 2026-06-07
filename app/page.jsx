@@ -15,18 +15,18 @@ function useDarkMode() {
 }
 
 const categories = [
-  { icon: '📄', color: 'text-red-400',    title: 'PDF Tools',        description: 'Merge, split, compress, and convert PDFs',        href: '/tools/pdf-tools',           tools: ['Merge PDF', 'Split PDF', 'Compress PDF'],                          count: 39 },
-  { icon: '🖼️', color: 'text-pink-400',   title: 'Image Tools',      description: 'Convert, compress, and edit images',               href: '/tools/image-tools',         tools: ['Image Compressor', 'Image Converter', 'Image Resizer'],            count: 36 },
-  { icon: '🎞️', color: 'text-purple-500', title: 'GIF Tools',        description: 'Convert videos and images to GIF format',          href: '/tools/gif-tools',           tools: ['Video to GIF', 'MP4 to GIF', 'GIF to MP4'],                        count: 9  },
-  { icon: '📝', color: 'text-green-400',  title: 'Text Tools',       description: 'Word count, case conversion, text formatting',     href: '/tools/text-tools',          tools: ['Word Counter', 'Case Converter', 'Text Reverser'],                 count: 17 },
-  { icon: '🎵', color: 'text-yellow-500', title: 'Audio Tools',      description: 'Convert, compress, and edit audio files',          href: '/tools/audio-tools',         tools: ['Audio Converter', 'Audio Trimmer', 'Audio Compressor'],           count: 11 },
-  { icon: '🎬', color: 'text-blue-400',   title: 'Media Tools',      description: 'Convert, compress, and extract from videos',       href: '/tools/media-tools',         tools: ['Video to Audio', 'Video Compressor', 'Video Converter'],           count: 28 },
-  { icon: '📁', color: 'text-orange-400', title: 'File Tools',       description: 'ZIP compression, file conversion, Base64',         href: '/tools/file-tools',          tools: ['ZIP Extractor', 'ZIP Creator', 'TAR Extractor'],                   count: 9  },
-  { icon: '📱', color: 'text-teal-400',   title: 'QR & Barcodes',   description: 'Generate and scan QR codes and barcodes',          href: '/tools/qr-barcodes-tools',   tools: ['QR Generator', 'Barcode Generator', 'QR Scanner'],                count: 3  },
-  { icon: '🔄', color: 'text-yellow-400', title: 'Converter Tools',  description: 'Convert units, colors, and currencies',            href: '/tools/converter-tools',     tools: ['Currency Converter', 'Unit Converter', 'Color Converter'],         count: 4  },
-  { icon: '💻', color: 'text-purple-400', title: 'Developer Tools',  description: 'JSON, Base64, URL encoding, and more',             href: '/tools/developer-tools',     tools: ['XML to JSON', 'JSON Formatter', 'Hash Generator'],                 count: 54 },
-  { icon: '🔢', color: 'text-indigo-400', title: 'Math Tools',       description: 'Number conversion, percentage calculator',         href: '/tools/math-tools',          tools: ['Number Base Converter', 'Percentage Calculator', 'Roman Numeral Converter'], count: 6 },
-  { icon: '🤖', color: 'text-cyan-400',   title: 'AI Tools',         description: 'AI-powered image and text tools',                  href: '/tools/ai-tools',            tools: ['Background Remover', 'Image Upscaler', 'Grammar Fixer'],          count: 16 },
+  { icon: '📄', color: 'text-red-400',    title: 'PDF Tools',        description: 'Merge, split, compress, and convert PDFs',        href: '/tools/pdf-tools',           slug: 'pdf-tools',           tools: ['Merge PDF', 'Split PDF', 'Compress PDF'],                                    count: 39 },
+  { icon: '🖼️', color: 'text-pink-400',   title: 'Image Tools',      description: 'Convert, compress, and edit images',               href: '/tools/image-tools',         slug: 'image-tools',         tools: ['Image Compressor', 'Image Converter', 'Image Resizer'],                      count: 37 },
+  { icon: '🎞️', color: 'text-purple-500', title: 'GIF Tools',        description: 'Convert videos and images to GIF format',          href: '/tools/gif-tools',           slug: 'gif-tools',           tools: ['Video to GIF', 'MP4 to GIF', 'GIF Maker'],                                   count: 11 },
+  { icon: '📝', color: 'text-green-400',  title: 'Text Tools',       description: 'Word count, case conversion, text formatting',     href: '/tools/text-tools',          slug: 'text-tools',          tools: ['Word Counter', 'Case Converter', 'Text Reverser'],                            count: 17 },
+  { icon: '🎵', color: 'text-yellow-500', title: 'Audio Tools',      description: 'Convert, compress, and edit audio files',          href: '/tools/audio-tools',         slug: 'audio-tools',         tools: ['Audio Converter', 'Audio Trimmer', 'Voice Recorder'],                        count: 11 },
+  { icon: '🎬', color: 'text-blue-400',   title: 'Video Tools',      description: 'Convert, compress, and edit videos',               href: '/tools/video-tools',         slug: 'video-tools',         tools: ['Video Converter', 'Video Compressor', 'Video Trimmer'],                      count: 15 },
+  { icon: '📁', color: 'text-orange-400', title: 'File Tools',       description: 'ZIP compression, file conversion, Base64',         href: '/tools/file-tools',          slug: 'file-tools',          tools: ['ZIP Extractor', 'ZIP Creator', 'TAR Extractor'],                              count: 9  },
+  { icon: '📱', color: 'text-teal-400',   title: 'QR & Barcodes',   description: 'Generate and scan QR codes and barcodes',          href: '/tools/qr-barcodes-tools',   slug: 'qr-barcodes-tools',   tools: ['QR Generator', 'Barcode Generator', 'QR Scanner'],                           count: 3  },
+  { icon: '🔄', color: 'text-yellow-400', title: 'Converter Tools',  description: 'Convert units, colors, and currencies',            href: '/tools/converter-tools',     slug: 'converter-tools',     tools: ['Currency Converter', 'Unit Converter', 'Color Converter'],                    count: 4  },
+  { icon: '💻', color: 'text-purple-400', title: 'Developer Tools',  description: 'JSON, Base64, URL encoding, and more',             href: '/tools/developer-tools',     slug: 'developer-tools',     tools: ['JSON Formatter', 'XML to JSON', 'Hash Generator'],                           count: 57 },
+  { icon: '🔢', color: 'text-indigo-400', title: 'Math Tools',       description: 'Number conversion, percentage calculator',         href: '/tools/math-tools',          slug: 'math-tools',          tools: ['Number Base Converter', 'Percentage Calculator', 'Roman Numeral Converter'],  count: 6  },
+  { icon: '🤖', color: 'text-cyan-400',   title: 'AI Tools',         description: 'AI-powered image and text tools',                  href: '/tools/ai-tools',            slug: 'ai-tools',            tools: ['Background Remover', 'Image Upscaler', 'Grammar Fixer'],                     count: 16 },
 ];
 
 const stats = [
@@ -89,6 +89,10 @@ function StatCard({ value, label, suffix, icon, animate, dark }) {
 export default function Home() {
   const dark = useDarkMode();
   const [statsVisible, setStatsVisible] = useState(false);
+  const [toolCounts, setToolCounts] = useState({});
+  useEffect(() => {
+    fetch('/api/tool-counts').then(r => r.json()).then(data => setToolCounts(data)).catch(() => {});
+  }, []);
   const statsRef = useRef(null);
 
   useEffect(() => {
@@ -214,7 +218,7 @@ export default function Home() {
               <Link key={cat.href} href={cat.href} className="bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)]">
                 <div className="flex justify-between items-center w-full mb-3">
                   <div className={`text-3xl ${cat.color}`}>{cat.icon}</div>
-                  <span className="text-xs text-neutral-400 dark:text-neutral-500 bg-neutral-100 dark:bg-neutral-700 rounded-full px-2 py-1">{cat.count} tools</span>
+                  <span className="text-xs text-neutral-400 dark:text-neutral-500 bg-neutral-100 dark:bg-neutral-700 rounded-full px-2 py-1">{toolCounts[cat.slug] || cat.count} tools</span>
                 </div>
                 <h2 className="font-bold text-lg mb-1 text-neutral-800 dark:text-white group-hover:text-indigo-600 transition">{cat.title}</h2>
                 <p className="text-neutral-500 dark:text-neutral-400 text-sm mb-4">{cat.description}</p>
@@ -222,7 +226,7 @@ export default function Home() {
                   {cat.tools.map(tool => (
                     <div key={tool} className="text-neutral-500 dark:text-neutral-400 text-xs">• {tool}</div>
                   ))}
-                  <div className="text-indigo-500 text-xs font-semibold mt-2">+{cat.count - cat.tools.length} more tools</div>
+                  <div className="text-indigo-500 text-xs font-semibold mt-2">+{Math.max(0, (toolCounts[cat.slug] || cat.count) - cat.tools.length)} more tools</div>
                 </div>
               </Link>
             ))}
