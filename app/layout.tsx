@@ -4,9 +4,7 @@ import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Script from "next/script";
-
 const inter = Inter({ subsets: ["latin"] });
-
 export const metadata: Metadata = {
   title: {
     default: "OnlineConverTools - Free Online Tools",
@@ -19,7 +17,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://onlineconvertools.com"),
   openGraph: {
     title: "OnlineConverTools - Free Online Tools",
-    description: "200+ free online tools for converting, compressing and editing files. No sign-up required.",
+    description: "232+ free online tools for converting, compressing and editing files. No sign-up required.",
     url: "https://onlineconvertools.com",
     siteName: "OnlineConverTools",
     locale: "en_US",
@@ -28,7 +26,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "OnlineConverTools - Free Online Tools",
-    description: "200+ free online tools for converting, compressing and editing files.",
+    description: "232+ free online tools for converting, compressing and editing files.",
   },
   robots: {
     index: true,
@@ -39,7 +37,6 @@ export const metadata: Metadata = {
     },
   },
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -48,45 +45,30 @@ export default function RootLayout({
   return (
     <html lang="en-US" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
-        <div id="google_translate_element" style={{ display: 'none' }} />
+        <div id="google_translate_element" style={{ display: "none" }} />
         <Navbar />
         {children}
         <Footer />
-        
-        {/* Google Analytics */}
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-7GFHW05JLH" strategy="afterInteractive" />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {+""+
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-7GFHW05JLH');
-          +""+}
-        </Script><Script
+        <Script id="google-analytics" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: `
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-7GFHW05JLH');
+        `}} />
+        <Script
           src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
           strategy="afterInteractive"
         />
-        
-        {/* Google Analytics */}
-        <Script src="https://www.googletagmanager.com/gtag/js?id=G-7GFHW05JLH" strategy="afterInteractive" />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {+""+
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-7GFHW05JLH');
-          +""+}
-        </Script><Script id="google-translate-init" strategy="afterInteractive">
-          {`
-            function googleTranslateElementInit() {
-              new google.translate.TranslateElement({
-                pageLanguage: 'en',
-                includedLanguages: 'en,fr,es,zh-CN,ar,de,pt,ja,ru,it,ko,hi,tr',
-                autoDisplay: false,
-              }, 'google_translate_element');
-            }
-          `}
-        </Script>
+        <Script id="google-translate-init" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: `
+          function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+              pageLanguage: 'en',
+              includedLanguages: 'en,fr,es,zh-CN,ar,de,pt,ja,ru,it,ko,hi,tr',
+              autoDisplay: false,
+            }, 'google_translate_element');
+          }
+        `}} />
       </body>
     </html>
   );
