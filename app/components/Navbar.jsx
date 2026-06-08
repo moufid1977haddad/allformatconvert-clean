@@ -633,7 +633,7 @@ export default function Navbar() {
           {/* Logo */}
           <div className="shrink-0">
             <Link href="/" className="flex items-center px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-indigo-600 text-sm font-bold notranslate">
-              onlineconvertools
+              OnlineConverTools
             </Link>
           </div>
 
