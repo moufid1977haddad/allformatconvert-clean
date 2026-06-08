@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
@@ -632,7 +632,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <div className="shrink-0">
-            <Link href="/" className="flex items-center px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-indigo-600 text-sm font-bold notranslate">
+            <Link href="/" className="flex items-center px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-indigo-600 text-lg font-bold notranslate">
               OnlineConverTools
             </Link>
           </div>
