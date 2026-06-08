@@ -8,7 +8,7 @@
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">1. Introduction</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">onlineconvertools ("we", "us", or "our") operates the website onlineconvertools.com. This Privacy Policy explains how we collect, use, and protect your information when you use our service. By using onlineconvertools, you agree to the collection and use of information in accordance with this policy.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">OnlineConverTools ("we", "us", or "our") operates the website onlineconvertools.com. This Privacy Policy explains how we collect, use, and protect your information when you use our service. By using OnlineConverTools, you agree to the collection and use of information in accordance with this policy.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">

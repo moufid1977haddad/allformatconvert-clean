@@ -202,7 +202,7 @@ export default function Home() {
           </p>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'12px' }}>
             <div style={{ width:'40px', height:'2px', background: dark ? '#475569' : '#9ca3af' }} />
-            <span style={{ fontSize:'13px', color: dark ? '#64748b' : '#9ca3af', fontWeight:'500', letterSpacing:'0.05em', textTransform:'uppercase' }}>onlineconvertools · Trusted in 190+ countries</span>
+            <span style={{ fontSize:'13px', color: dark ? '#64748b' : '#9ca3af', fontWeight:'500', letterSpacing:'0.05em', textTransform:'uppercase' }}>OnlineConverTools · Trusted in 190+ countries</span>
             <div style={{ width:'40px', height:'2px', background: dark ? '#475569' : '#9ca3af' }} />
           </div>
         </div>
