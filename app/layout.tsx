@@ -52,11 +52,31 @@ export default function RootLayout({
         <Navbar />
         {children}
         <Footer />
-        <Script
+        
+        {/* Google Analytics */}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-7GFHW05JLH" strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {+""+
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-7GFHW05JLH');
+          +""+}
+        </Script><Script
           src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
           strategy="afterInteractive"
         />
-        <Script id="google-translate-init" strategy="afterInteractive">
+        
+        {/* Google Analytics */}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-7GFHW05JLH" strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {+""+
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-7GFHW05JLH');
+          +""+}
+        </Script><Script id="google-translate-init" strategy="afterInteractive">
           {`
             function googleTranslateElementInit() {
               new google.translate.TranslateElement({
