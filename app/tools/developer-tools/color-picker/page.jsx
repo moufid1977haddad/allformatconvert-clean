@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 export default function ColorPickerPage() {
   const [color, setColor] = useState('#3b82f6');
@@ -17,6 +17,22 @@ export default function ColorPickerPage() {
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3 text-center"><div className="text-neutral-500 text-xs mb-1">RGB</div><div className="font-mono text-indigo-400 text-xs">{rgb ? `${rgb.r},${rgb.g},${rgb.b}` : ''}</div><button onClick={() => navigator.clipboard.writeText(rgb ? `rgb(${rgb.r},${rgb.g},${rgb.b})` : '')} className="text-xs text-neutral-500 hover:text-neutral-300">Copy</button></div>
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3 text-center"><div className="text-neutral-500 text-xs mb-1">Input</div><input type="text" value={color} onChange={e => setColor(e.target.value)} className="w-full bg-neutral-200 rounded p-1 text-center font-mono text-sm" /></div>
           </div>
+        </div>
+      </div>
+      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Color Picker</h2>
+          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Free online Color Picker tool. No signup required, no watermark, works on all devices.</p>
+        </div>
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Why use OnlineConverTools?</h2>
+          <ul className="space-y-2">
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>100% free — no hidden fees</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>No signup or account required</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Files processed locally — your data stays private</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Works on all devices — desktop, tablet, mobile</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>No watermarks added to your files</li>
+          </ul>
         </div>
       </div>
     </div>
