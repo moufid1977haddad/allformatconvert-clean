@@ -61,7 +61,7 @@ export default function JsonToPythonPage() {
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
           <ul className="space-y-2">
             <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Validate your JSON syntax before conversion to ensure accurate Python output and avoid formatting errors</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the converted Python code as variable assignments by assigning the output to a variable name like data = {...}</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the converted Python code as variable assignments by assigning the output to a variable name like data = {'...'}</li>
             <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For large JSON files, the tool processes data efficiently in seconds without performance degradation</li>
             <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Copy the entire output at once using the copy button for faster workflow instead of manual selection</li>
           </ul>
