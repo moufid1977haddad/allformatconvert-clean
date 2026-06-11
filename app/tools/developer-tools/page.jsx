@@ -80,16 +80,33 @@ export default function DeveloperToolsPage() {
       <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Developer Tools</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Free online Developer Tools tool. No signup required, no watermark, works on all devices.</p>
+          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Developer Tools is a comprehensive free online suite designed to help programmers, web developers, and tech professionals streamline their workflow with essential utilities. From code formatting and API testing to debugging and performance analysis, this all-in-one platform eliminates the need for multiple subscriptions and installations.</p>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Why use OnlineConverTools?</h2>
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Developer Tools</h2>
+          <ol className="space-y-2">
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Navigate to the Developer Tools website and select the specific tool you need from the main dashboard menu</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Input your code, data, or configuration into the provided text area or upload your file directly</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Configure any optional settings or parameters relevant to your task using the intuitive control panel</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the execute or process button to run the tool and instantly view results in the output section</li>
+          </ol>
+        </div>
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Developer Tools really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, all core features of Developer Tools are completely free with no hidden charges, registration requirements, or usage limits.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to install software to use Developer Tools?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Developer Tools is entirely web-based and runs directly in your browser, requiring no downloads or installations.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my code and data secure when using Developer Tools?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, all data is processed locally in your browser or on secure servers with encryption, and we never store or share your personal code or information.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What programming languages does Developer Tools support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Developer Tools supports all major languages including JavaScript, Python, Java, C++, PHP, Ruby, Go, and many others across various utility functions.</p></div>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
           <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>100% free — no hidden fees</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>No signup or account required</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Files processed locally — your data stays private</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Works on all devices — desktop, tablet, mobile</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>No watermarks added to your files</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Bookmark Developer Tools for quick access and save time on repetitive development tasks throughout your workflow</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Explore the batch processing feature to handle multiple files at once, significantly increasing your productivity</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use keyboard shortcuts to speed up navigation between different tools within the platform</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Check the documentation and tutorial section regularly to discover new features and advanced techniques for maximizing tool capabilities</li>
           </ul>
         </div>
       </div>

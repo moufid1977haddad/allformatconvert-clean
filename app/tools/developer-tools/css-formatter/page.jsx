@@ -28,16 +28,33 @@ export default function CssFormatterPage() {
       <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Css Formatter</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Free online Css Formatter tool. No signup required, no watermark, works on all devices.</p>
+          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">CSS Formatter is a free online tool that automatically beautifies and organizes your CSS code for improved readability and consistency. It removes unnecessary whitespace, fixes indentation, and formats your stylesheets according to industry standards.</p>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Why use OnlineConverTools?</h2>
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Css Formatter</h2>
+          <ol className="space-y-2">
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste or upload your CSS code into the input area on the CSS Formatter tool</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Select your preferred formatting options such as indentation style and spacing preferences</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the Format button to instantly process and beautify your CSS code</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the formatted output to your clipboard or download it as a file for use in your project</li>
+          </ol>
+        </div>
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is CSS Formatter completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, CSS Formatter is 100% free to use with no registration required. You can format unlimited CSS files without any limitations or hidden charges.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I format minified CSS code?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Absolutely. CSS Formatter can take compressed, minified CSS and expand it into a readable format with proper indentation and line breaks.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Does the tool support all CSS versions?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, CSS Formatter supports CSS2, CSS3, and modern CSS specifications including variables, grid, flexbox, and other contemporary features.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my code secure when using CSS Formatter?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Your code is processed locally in your browser and is never stored on our servers, ensuring complete privacy and security of your CSS files.</p></div>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
           <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>100% free — no hidden fees</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>No signup or account required</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Files processed locally — your data stays private</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Works on all devices — desktop, tablet, mobile</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>No watermarks added to your files</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use CSS Formatter before committing code to maintain consistent formatting standards across your team's codebase</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Customize the indentation settings to match your project's style guide for seamless integration with existing code</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Format your CSS regularly during development to catch syntax errors and improve code maintainability early on</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Copy the formatted output and use it as a reference for learning proper CSS structure and best practices</li>
           </ul>
         </div>
       </div>

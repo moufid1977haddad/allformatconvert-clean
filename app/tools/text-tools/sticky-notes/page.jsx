@@ -44,16 +44,33 @@ export default function StickyNotesPage() {
       <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Sticky Notes</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Free online Sticky Notes tool. No signup required, no watermark, works on all devices.</p>
+          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Sticky Notes is a free online tool that allows you to create, organize, and manage digital notes instantly without requiring any downloads or registrations. Perfect for students, professionals, and anyone who needs to keep track of ideas, tasks, and reminders in one convenient place.</p>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Why use OnlineConverTools?</h2>
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Sticky Notes</h2>
+          <ol className="space-y-2">
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Sticky Notes website and open the application in your web browser</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the 'Create New Note' button to start writing your first sticky note</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Type your content into the note and customize the color by selecting from the available palette</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Save your note automatically or manually, and access it anytime from any device by logging in</li>
+          </ol>
+        </div>
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Sticky Notes really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Sticky Notes is completely free with no hidden charges or premium requirements. All basic features are available at no cost.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I access my notes on mobile devices?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Sticky Notes is fully responsive and works seamlessly on smartphones, tablets, and desktop computers through any web browser.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my notes be saved automatically?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, your notes are automatically saved to the cloud, ensuring you never lose your important information.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I share my sticky notes with others?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can generate shareable links or invite collaborators to view and edit notes together in real-time.</p></div>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
           <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>100% free — no hidden fees</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>No signup or account required</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Files processed locally — your data stays private</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Works on all devices — desktop, tablet, mobile</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>No watermarks added to your files</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use different colors for different categories such as work, personal, or urgent items to quickly identify note types</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Add due dates and reminders to your notes to ensure important tasks are never forgotten</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Organize notes into folders or boards to keep related items grouped together for better productivity</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use keyboard shortcuts and search functionality to quickly find and manage notes in your growing collection</li>
           </ul>
         </div>
       </div>

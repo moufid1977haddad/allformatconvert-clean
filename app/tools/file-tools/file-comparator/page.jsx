@@ -46,16 +46,33 @@ export default function FileComparatorPage() {
       <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About File Comparator</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Free online File Comparator tool. No signup required, no watermark, works on all devices.</p>
+          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">File Comparator is a free online tool that allows you to quickly compare two files side-by-side to identify differences in content, structure, and formatting. Whether you're checking code changes, document revisions, or data files, this powerful utility highlights variations instantly without requiring any software installation.</p>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Why use OnlineConverTools?</h2>
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use File Comparator</h2>
+          <ol className="space-y-2">
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload or paste the content of the first file into the left panel of the File Comparator interface</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Upload or paste the content of the second file into the right panel to begin the comparison process</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Compare' button to analyze both files and generate a detailed difference report</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Review the highlighted differences in the results, where additions, deletions, and modifications are color-coded for easy identification</li>
+          </ol>
+        </div>
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file formats does File Comparator support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">File Comparator supports a wide range of formats including text files, code files (JavaScript, Python, Java), JSON, XML, CSV, and plain text documents. You can upload files directly or paste content as text.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for comparison?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">File Comparator can handle most standard files, though very large files (over 10MB) may experience slower processing times. For optimal performance, keep files under 5MB when possible.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I save or export the comparison results?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can download the comparison report as a text file or HTML document. The results include all identified differences with line numbers for easy reference.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my data secure and private when using File Comparator?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">All files are processed locally in your browser and are never stored on our servers. Your data remains completely private and secure during the comparison process.</p></div>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
           <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>100% free — no hidden fees</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>No signup or account required</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Files processed locally — your data stays private</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Works on all devices — desktop, tablet, mobile</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>No watermarks added to your files</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the color-coded highlighting feature to quickly spot additions (green), deletions (red), and modifications (yellow) between your files</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For better readability with large files, expand the comparison view to full-screen mode to see more content details at once</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Copy and paste code snippets directly into the tool instead of uploading files for faster comparison of small code segments</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Bookmark frequently compared file types or use the history feature to quickly re-compare similar documents without re-uploading</li>
           </ul>
         </div>
       </div>

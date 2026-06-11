@@ -75,16 +75,33 @@ export default function PdfDeletePagesPage() {
       <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Delete Pages</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Free online Pdf Delete Pages tool. No signup required, no watermark, works on all devices.</p>
+          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF Delete Pages is a free online tool that allows you to easily remove unwanted pages from your PDF documents without requiring any software installation. Simply upload your PDF file, select the pages you want to delete, and download your edited document instantly.</p>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Why use OnlineConverTools?</h2>
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Delete Pages</h2>
+          <ol className="space-y-2">
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the PDF Delete Pages website and click the 'Upload PDF' button to select your document from your computer</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Review the PDF preview and click on the page numbers you wish to remove from your document</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Delete Selected Pages' button to remove all marked pages from your PDF</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your edited PDF file to your computer by clicking the 'Download' button</li>
+          </ol>
+        </div>
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF Delete Pages really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF Delete Pages is completely free with no hidden charges, subscriptions, or watermarks added to your documents.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is the maximum file size I can upload?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can upload PDF files up to 100MB in size. For larger files, consider splitting your document into smaller parts.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my PDF file secure when using this tool?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, all uploaded files are processed securely and automatically deleted from our servers within 24 hours for your privacy.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I delete multiple pages at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Absolutely, you can select and delete multiple pages simultaneously by clicking on each page number you want to remove.</p></div>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
           <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>100% free — no hidden fees</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>No signup or account required</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Files processed locally — your data stays private</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Works on all devices — desktop, tablet, mobile</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>No watermarks added to your files</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Preview your PDF before deleting pages to ensure you're removing the correct ones and avoid accidental deletion</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Download a backup copy of your original PDF before making changes in case you need to reference the complete document later</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the search or filter feature if your PDF has many pages to quickly locate and select specific pages for deletion</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Consider organizing pages logically before deletion to maintain document flow and readability after removing unwanted content</li>
           </ul>
         </div>
       </div>

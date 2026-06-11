@@ -59,16 +59,33 @@ export default function SubtitleGeneratorPage() {
       <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Subtitle Generator</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Free online Subtitle Generator tool. No signup required, no watermark, works on all devices.</p>
+          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Subtitle Generator is a free online tool that automatically creates accurate subtitles for your videos in multiple languages within seconds. Perfect for content creators, educators, and businesses looking to make their videos more accessible and engaging to a global audience.</p>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Why use OnlineConverTools?</h2>
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Subtitle Generator</h2>
+          <ol className="space-y-2">
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload or paste your video URL into the Subtitle Generator tool</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Select your desired output language and subtitle format from the available options</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Generate' button and wait for the AI to process and create subtitles</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your generated subtitles in your preferred format (SRT, VTT, or ASS) and add them to your video</li>
+          </ol>
+        </div>
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Subtitle Generator completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Subtitle Generator is completely free with no hidden fees, registration required, or usage limits on most features.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What video formats does Subtitle Generator support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Subtitle Generator supports all major video formats including MP4, WebM, MOV, AVI, and can also process YouTube links directly.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How many languages can Subtitle Generator generate subtitles in?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Subtitle Generator supports over 50 languages including English, Spanish, French, German, Chinese, Japanese, and many more.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How accurate are the generated subtitles?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Subtitle Generator uses advanced AI and machine learning to achieve 95%+ accuracy for clear audio, though you can manually edit subtitles for perfection.</p></div>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
           <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>100% free — no hidden fees</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>No signup or account required</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Files processed locally — your data stays private</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Works on all devices — desktop, tablet, mobile</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>No watermarks added to your files</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For best results, use videos with clear audio and minimal background noise to ensure maximum subtitle accuracy</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Review and edit the generated subtitles to fix any technical terms or names that the AI may have misinterpreted</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the timestamp adjustment feature to perfectly sync subtitles with your video if there are minor timing issues</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Export subtitles in multiple formats (SRT, VTT) to ensure compatibility with different video platforms and players</li>
           </ul>
         </div>
       </div>

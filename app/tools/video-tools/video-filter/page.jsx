@@ -76,16 +76,33 @@ export default function VideoFilterPage() {
       <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Video Filter</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Free online Video Filter tool. No signup required, no watermark, works on all devices.</p>
+          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Video Filter is a free online tool that allows you to apply professional-quality filters and effects to your videos instantly without requiring any software downloads or technical expertise. Transform your videos with stunning visual enhancements, color corrections, and creative effects in just a few clicks.</p>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Why use OnlineConverTools?</h2>
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Video Filter</h2>
+          <ol className="space-y-2">
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Video Filter website and click the 'Upload Video' button to select your video file from your device</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose from a variety of available filters and effects such as vintage, black and white, blur, brightness, and contrast adjustments</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Preview your video with the selected filter applied and adjust intensity settings to customize the effect to your preference</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the 'Download' or 'Export' button to save your filtered video to your device in your desired format</li>
+          </ol>
+        </div>
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Video Filter really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Video Filter is completely free to use with no hidden charges, subscriptions, or premium tiers required for basic filtering functionality.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What video formats does Video Filter support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Video Filter supports all major video formats including MP4, AVI, MOV, WebM, and MKV, making it compatible with videos from most devices and cameras.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How long does it take to process and download a filtered video?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Processing time depends on your video length and file size, typically ranging from a few seconds to a few minutes for videos under 100MB.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I apply multiple filters to the same video?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Video Filter allows you to layer multiple filters and effects on a single video to create unique, customized looks for your content.</p></div>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
           <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>100% free — no hidden fees</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>No signup or account required</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Files processed locally — your data stays private</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Works on all devices — desktop, tablet, mobile</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>No watermarks added to your files</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Start with subtle filter adjustments and gradually increase intensity to avoid over-processing your video and maintaining natural quality</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Preview filters in full-screen mode before downloading to ensure the effect looks good on different screen sizes and lighting conditions</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Combine complementary filters like brightness and contrast adjustments with color filters for more professional and polished results</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Export your filtered video in the same resolution as your original to maintain video quality and avoid unnecessary file size increases</li>
           </ul>
         </div>
       </div>
