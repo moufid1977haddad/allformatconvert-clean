@@ -1,7 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import { PDFDocument } from 'pdf-lib';
-import SeoContent from '../../components/SeoContent';
+import SeoContent from '../../../components/SeoContent';
 
 export default function PdfMergePage() {
   const [files, setFiles] = useState([]);
