@@ -1,4 +1,6 @@
-﻿type SeoContentProps = {
+﻿'use client';
+
+type SeoContentProps = {
   title: string;
   description: string;
   howTo?: string[];
