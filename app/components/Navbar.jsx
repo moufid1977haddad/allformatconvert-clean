@@ -611,6 +611,7 @@ export default function Navbar() {
   return (
     <>
       <style>{`
+        @keyframes pulse-glow { 0%,100% { opacity:1; box-shadow:0 0 0 0 rgba(99,102,241,0.4); } 50% { opacity:0.85; box-shadow:0 0 0 6px rgba(99,102,241,0); } }
         @keyframes ticker-scroll {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
@@ -632,8 +633,14 @@ export default function Navbar() {
 
           {/* Logo */}
           <div className="shrink-0">
-            <Link href="/" className="flex items-center px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-indigo-600 text-lg font-bold notranslate">
-              OnlineConverTools
+            <Link href="/" className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-950 transition notranslate">
+              <div style={{width:"28px",height:"28px",background:"#6366f1",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",animation:"pulse-glow 2s ease-in-out infinite",flexShrink:0}}>
+                <span style={{color:"#fff",fontSize:"11px",fontWeight:"700"}}>OCT</span>
+              </div>
+              <div style={{display:"flex",flexDirection:"column",lineHeight:"1.1"}}>
+                <span style={{color:"#6366f1",fontSize:"15px",fontWeight:"800"}}>OnlineConver<span style={{color:"#4f46e5"}}>Tools</span></span>
+                <span style={{color:"#a5b4fc",fontSize:"9px",letterSpacing:"1px"}}>FREE ONLINE TOOLS</span>
+              </div>
             </Link>
           </div>
 
@@ -699,7 +706,7 @@ export default function Navbar() {
                 value={search}
                 onChange={handleSearch}
                 placeholder="Search tools..."
-                className="w-36 bg-transparent border border-black dark:border-white rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-black text-black dark:text-white placeholder-black dark:placeholder-white"
+                className="w-36 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-indigo-400 text-neutral-700 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-400"
               />
               {results.length > 0 && (
                 <div className="absolute top-full right-0 mt-1 w-52 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-xl shadow-lg z-[9999]">
@@ -721,7 +728,7 @@ export default function Navbar() {
             <div className="relative notranslate" ref={langRef}>
               <button
                 onClick={() => setLangOpen(!langOpen)}
-                className="flex items-center gap-0.5 px-1.5 py-1 rounded-lg border border-black dark:border-white hover:bg-black hover:text-white transition text-black dark:text-white text-xs font-bold"
+                className="flex items-center gap-0.5 px-1.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-700 dark:text-neutral-200 text-xs font-bold"
               >
                 <span>{currentLang.short}</span>
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -747,7 +754,7 @@ export default function Navbar() {
             {/* Dark mode */}
             <button
               onClick={() => setDark(!dark)}
-              className="p-1 rounded-lg border border-black dark:border-white hover:bg-black hover:text-white transition text-black dark:text-white shrink-0"
+              className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-600 dark:text-neutral-300 shrink-0"
             >
               {dark ? (
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -761,7 +768,7 @@ export default function Navbar() {
             </button>
 
             {/* Login */}
-            <Link href="/signin" className="flex items-center px-2 py-1 rounded-lg border border-black dark:border-white hover:bg-black hover:text-white transition text-black dark:text-white text-xs font-bold whitespace-nowrap">
+            <Link href="/signin" className="flex items-center px-2 py-1 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-700 dark:text-neutral-200 text-xs font-bold whitespace-nowrap">
               Sign In
             </Link>
 
