@@ -47,7 +47,7 @@ export default function PdfToolsPage() {
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-2 text-neutral-800">PDF Tools</h1>
+        <h1 className="text-4xl font-bold text-center mb-2 text-neutral-800">📄 PDF Tools</h1>
         <p className="text-neutral-500 text-center mb-10">All your PDF tools in one place - {tools.length} tools</p>
         <div className="flex flex-wrap gap-4 justify-center">
           {tools.map((tool) => (
