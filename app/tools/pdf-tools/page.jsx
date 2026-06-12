@@ -2,9 +2,9 @@
 import Link from 'next/link';
 
 const tools = [
-  { icon: '🔗', title: 'Merge PDF', description: 'Combine multiple PDFs into one', href: '/tools/pdf-tools/pdf-merge' },
+  { icon: '📄', title: 'Merge PDF', description: 'Combine multiple PDFs into one', href: '/tools/pdf-tools/pdf-merge' },
   { icon: '✂️', title: 'Split PDF', description: 'Extract specific pages from PDF', href: '/tools/pdf-tools/pdf-split' },
-  { icon: '📦', title: 'Compress PDF', description: 'Reduce PDF file size', href: '/tools/pdf-tools/pdf-compress' },
+  { icon: '🗜️', title: 'Compress PDF', description: 'Reduce PDF file size', href: '/tools/pdf-tools/pdf-compress' },
   { icon: '🔒', title: 'Protect PDF', description: 'Encrypt PDF with password', href: '/tools/pdf-tools/pdf-protect' },
   { icon: '🔓', title: 'Unlock PDF', description: 'Remove password from PDF', href: '/tools/pdf-tools/pdf-unlock' },
   { icon: '🔄', title: 'Rotate PDF', description: 'Rotate pages 90, 180, 270', href: '/tools/pdf-tools/pdf-rotate' },

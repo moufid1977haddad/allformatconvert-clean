@@ -2,10 +2,10 @@
 import Link from 'next/link';
 
 const tools = [
-  { icon: '🔄', title: 'XML to JSON', description: 'Convert XML to JSON format', href: '/tools/developer-tools/xml-to-json' },
-  { icon: '🔄', title: 'JSON to XML', description: 'Convert JSON to XML format', href: '/tools/developer-tools/json-to-xml' },
-  { icon: '📊', title: 'TSV to CSV', description: 'Convert TSV to CSV format', href: '/tools/developer-tools/tsv-to-csv' },
-  { icon: '📊', title: 'CSV to TSV', description: 'Convert CSV to TSV format', href: '/tools/developer-tools/csv-to-tsv' },
+  { icon: '📋', title: 'XML to JSON', description: 'Convert XML to JSON format', href: '/tools/developer-tools/xml-to-json' },
+  { icon: '📋', title: 'JSON to XML', description: 'Convert JSON to XML format', href: '/tools/developer-tools/json-to-xml' },
+  { icon: '📑', title: 'TSV to CSV', description: 'Convert TSV to CSV format', href: '/tools/developer-tools/tsv-to-csv' },
+  { icon: '📑', title: 'CSV to TSV', description: 'Convert CSV to TSV format', href: '/tools/developer-tools/csv-to-tsv' },
   { icon: '📗', title: 'Excel to JSON', description: 'Convert Excel files to JSON', href: '/tools/developer-tools/excel-to-json' },
   { icon: '📗', title: 'Excel to CSV', description: 'Convert Excel files to CSV', href: '/tools/developer-tools/excel-to-csv' },
   { icon: '📗', title: 'CSV to Excel', description: 'Convert CSV to Excel format', href: '/tools/developer-tools/csv-to-excel' },

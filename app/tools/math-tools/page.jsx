@@ -3,9 +3,9 @@ import Link from 'next/link';
 
 const tools = [
   { icon: '🔢', title: 'Number Base Converter', description: 'Convert between binary, decimal, hex', href: '/tools/math-tools/number-base-converter' },
-  { icon: '📊', title: 'Percentage Calculator', description: 'Calculate percentages easily', href: '/tools/math-tools/percentage-calculator' },
+  { icon: '💯', title: 'Percentage Calculator', description: 'Calculate percentages easily', href: '/tools/math-tools/percentage-calculator' },
   { icon: '🔣', title: 'Roman Numeral Converter', description: 'Convert to and from Roman numerals', href: '/tools/math-tools/roman-numeral-converter' },
-  { icon: '📐', title: 'Scientific Calculator', description: 'Advanced scientific calculator', href: '/tools/math-tools/scientific-calculator' },
+  { icon: '🔬', title: 'Scientific Calculator', description: 'Advanced scientific calculator', href: '/tools/math-tools/scientific-calculator' },
   { icon: '📏', title: 'Fraction Calculator', description: 'Add, subtract, multiply fractions', href: '/tools/math-tools/fraction-calculator' },
   { icon: '📉', title: 'Statistics Calculator', description: 'Mean, median, mode and more', href: '/tools/math-tools/statistics-calculator' },
 ];
