@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function DuplicateRemoverPage() {
   const [text, setText] = useState('');
@@ -25,39 +26,28 @@ export default function DuplicateRemoverPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Duplicate Remover</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Duplicate Remover is a free online tool that instantly identifies and eliminates duplicate entries from your text, lists, and data without requiring any software installation. Simply paste your content and let our efficient algorithm clean up redundant items, saving you time and improving data quality.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Duplicate Remover</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Duplicate Remover website and locate the text input area on the main page</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Paste your text, list, or data containing duplicate entries into the designated input field</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Remove Duplicates' button to process your content and identify all redundant items</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the cleaned results from the output field and use your duplicate-free data wherever needed</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Duplicate Remover truly free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Duplicate Remover is completely free with no hidden charges, registration requirements, or premium versions needed to access full functionality.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can Duplicate Remover handle large files or lists?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Duplicate Remover can process large amounts of text efficiently, though extremely large files may take a few additional seconds to process depending on your internet connection.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my data be saved or shared when using Duplicate Remover?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, your data is processed locally and never stored on our servers, ensuring complete privacy and security for your sensitive information.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Does Duplicate Remover work on mobile devices?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Duplicate Remover is fully responsive and works seamlessly on smartphones, tablets, and desktop computers through any modern web browser.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use Duplicate Remover before importing data into spreadsheets or databases to ensure clean, accurate records</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Try the 'Case Sensitive' option if you need to preserve capitalization differences when identifying duplicates</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Copy and paste your results into a document immediately to avoid losing your cleaned data</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use Duplicate Remover regularly when managing email lists, inventory data, or customer databases for optimal data quality</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Duplicate Remover"
+        description="Duplicate Remover strips out repeated lines from a block of text, keeping only the first occurrence of each line, entirely in your browser."
+        howTo={[
+          "Paste your text into the input field, with one entry per line.",
+          "Click \"Remove Duplicates\" to process your content.",
+          "Review the deduplicated result in the output box.",
+          "Click \"Copy\" to copy the cleaned text to your clipboard."
+        ]}
+        faqs={[
+          { q: "Is Duplicate Remover free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Is duplicate detection case-sensitive?", a: "Yes, always — \"Apple\" and \"apple\" are treated as different lines. There's no toggle to make matching case-insensitive." },
+          { q: "Can it handle large lists?", a: "Yes, though very large lists are limited only by your browser's performance since everything runs locally." },
+          { q: "Is my data private?", a: "Yes, deduplication happens entirely in your browser — your text is never uploaded to a server." }
+        ]}
+        tips={[
+          "Use Duplicate Remover before importing lists into spreadsheets to catch accidental repeat entries.",
+          "Since matching is case-sensitive, normalize your text's capitalization first with Case Converter if you want \"Apple\" and \"apple\" treated as the same entry.",
+          "Only the first occurrence of each line is kept — remaining copies are removed, not merged or counted.",
+          "Copy your cleaned results right after processing, since the tool doesn't save your data between visits."
+        ]}
+      />
     </div>
   );
 }

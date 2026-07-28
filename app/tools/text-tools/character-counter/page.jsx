@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function CharacterCounterPage() {
   const [text, setText] = useState('');
@@ -25,39 +26,28 @@ export default function CharacterCounterPage() {
           <button onClick={() => setText('')} className="w-full bg-neutral-200 hover:bg-neutral-200 rounded-xl py-2 font-semibold transition">Clear</button>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Character Counter</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Character Counter is a free online tool that instantly counts characters, words, sentences, and paragraphs in any text you paste or type. Perfect for writers, students, and professionals who need to monitor text length for essays, tweets, social media posts, and content optimization.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Character Counter</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Character Counter tool on our website</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Paste or type your text into the input box</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>View real-time character and word counts displayed instantly</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Use the results to adjust your content to meet specific length requirements</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Character Counter really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Character Counter is completely free with no hidden charges, registration required, or premium features.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Does the tool count spaces as characters?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, by default spaces are included in the character count, but you can toggle this option to exclude them if needed.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I use this tool on mobile devices?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Absolutely, Character Counter works on all devices including smartphones, tablets, and desktop computers with any modern browser.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is the maximum text length I can analyze?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">There is no practical limit to the text length you can analyze with our Character Counter tool.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use Character Counter to ensure your social media posts fit within platform character limits like Twitter's 280-character restriction</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Monitor your essay or article length in real-time to stay within assignment requirements and word count guidelines</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Utilize the word count feature to estimate reading time and adjust content density for better audience engagement</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Toggle between different counting modes to exclude spaces or special characters when optimizing for specific content guidelines</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Character Counter"
+        description="Character Counter instantly breaks down any text into total characters, letters, numbers, spaces, and special characters, updating live as you type — entirely in your browser."
+        howTo={[
+          "Paste or type your text into the input box.",
+          "Watch the five counts update in real time as you type: Total Characters, Letters, Numbers, Spaces, and Special.",
+          "Edit your text and the counts refresh automatically.",
+          "Click \"Clear\" to reset the text box and start over."
+        ]}
+        faqs={[
+          { q: "Is Character Counter free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Does it count words, sentences, or paragraphs?", a: "No — this tool breaks text down into characters, letters, numbers, spaces, and special characters only. For word or sentence counts, use the Word Counter tool instead." },
+          { q: "Can I exclude spaces from the count?", a: "Not as a toggle — spaces are always shown as their own separate count alongside the total." },
+          { q: "Is there a maximum text length?", a: "No hard limit is enforced — very long text is limited only by your browser's performance." }
+        ]}
+        tips={[
+          "Use the \"Total Characters\" number to check against platform limits like social media post length.",
+          "The \"Special\" count includes punctuation and symbols — handy for spotting stray characters in data you're cleaning up.",
+          "For word or sentence counts and reading time estimates, use the dedicated Word Counter tool.",
+          "Click \"Clear\" between texts rather than manually selecting and deleting to reset all five counts at once."
+        ]}
+      />
     </div>
   );
 }

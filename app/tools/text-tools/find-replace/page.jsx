@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function FindReplacePage() {
   const [text, setText] = useState('');
@@ -43,39 +44,28 @@ export default function FindReplacePage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Find Replace</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Find Replace is a free online tool that allows you to quickly search for and replace text in any document or content with just a few clicks. Whether you're editing code, documents, or bulk text, this powerful utility saves time by automating repetitive find and replace operations.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Find Replace</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste or type your text into the input field at the top of the tool</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Enter the text you want to find in the 'Find' box and the replacement text in the 'Replace' box</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Replace All' button to replace all instances at once, or use 'Replace' to change them one at a time</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy your updated text from the output field and use it wherever you need</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Find Replace completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Find Replace is 100% free with no hidden charges, registrations, or premium features required.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Does this tool support regular expressions?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Our basic version supports standard text matching. For advanced regex patterns, enable the regex mode in settings.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my text data saved or stored on your servers?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, all text processing happens locally in your browser. Your data is never uploaded or stored on our servers.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I replace text in large documents?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Find Replace can handle large documents and texts, making it ideal for bulk editing tasks.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use 'Replace All' for efficiency when you need to replace multiple instances of the same text throughout your document</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Enable case sensitivity in settings if you need to distinguish between uppercase and lowercase versions of your search term</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Copy your original text before making replacements so you always have a backup of the original content</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the preview feature to review changes before applying them, helping you avoid accidental replacements</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Find and Replace"
+        description="Find and Replace searches your text for every match of a pattern and swaps it with your replacement text, entirely in your browser. Note: the \"Find\" field is always interpreted as a regular expression, not plain literal text — special characters like . * + ( ) [ ] have regex meaning."
+        howTo={[
+          "Paste your text into the main text box.",
+          "Enter your search pattern in the \"Find\" field and your replacement text in the \"Replace with\" field.",
+          "Click \"Replace All\" to replace every match in one pass.",
+          "Copy your updated text from the output field."
+        ]}
+        faqs={[
+          { q: "Does this tool support regular expressions?", a: "It always uses them — the \"Find\" field is passed directly into a regular expression, so characters like . * + ( ) [ ] ^ $ have special meaning rather than matching themselves literally." },
+          { q: "How do I search for a literal special character?", a: "Escape it with a backslash, e.g. use \"3\\.50\" to match the literal text \"3.50\" instead of \"3\" followed by any character followed by \"50\"." },
+          { q: "Is matching case-sensitive?", a: "Yes, always — there's no case-insensitive option." },
+          { q: "Is my data private?", a: "Yes, all text processing happens locally in your browser — nothing is uploaded to a server." }
+        ]}
+        tips={[
+          "If you just want to replace plain text and your search term contains ., *, +, (, ), [, or ], escape those characters with a backslash first.",
+          "\"Replace All\" always replaces every match in one click — there's no separate single-replacement mode.",
+          "Keep a copy of your original text before replacing, since there's no undo button.",
+          "Use regex groups like (\\w+) with backreferences in your replacement text for more advanced find-and-replace patterns."
+        ]}
+      />
     </div>
   );
 }

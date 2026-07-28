@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function WhitespaceRemoverPage() {
   const [text, setText] = useState('');
@@ -29,39 +30,28 @@ export default function WhitespaceRemoverPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Whitespace Remover</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Whitespace Remover is a free online tool that eliminates extra spaces, tabs, and line breaks from your text instantly. Perfect for cleaning up code, formatting documents, and preparing text for processing without any downloads or sign-ups required.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Whitespace Remover</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste or type your text into the input field on the Whitespace Remover page</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the 'Remove Whitespace' button to process your text automatically</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Review the cleaned text in the output field, which removes all unnecessary spaces and line breaks</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the result to your clipboard using the 'Copy' button and paste it wherever needed</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Does Whitespace Remover remove all spaces from my text?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, it removes only extra and unnecessary whitespace while preserving single spaces between words for readability and proper formatting.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my data safe when using this tool?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, all processing happens directly in your browser and no data is stored on our servers or sent anywhere else.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I use Whitespace Remover on mobile devices?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Absolutely, the tool is fully responsive and works seamlessly on smartphones, tablets, and desktop computers.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What types of whitespace does this tool remove?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">It removes extra spaces, tabs, multiple line breaks, and leading/trailing whitespace while maintaining the structure of your content.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use Whitespace Remover before pasting code into documentation or forums to ensure clean, properly formatted snippets</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Remove excess whitespace from CSV or data files to improve compatibility with spreadsheet applications and databases</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Clean up text copied from PDFs or web pages that often contain unnecessary formatting and extra spaces</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Process multiple pieces of text sequentially by clearing the fields and repeating the process for different content blocks</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Whitespace Remover"
+        description="Whitespace Remover offers four ways to clean up spacing in your text — collapse all whitespace, collapse only spaces and tabs, trim leading spaces per line, or trim trailing spaces per line — entirely in your browser."
+        howTo={[
+          "Paste your text into the input field.",
+          "Click \"Remove All Extra\" to collapse every run of whitespace (including line breaks) to a single space, or pick a more targeted option.",
+          "\"Remove Extra Spaces\" collapses repeated spaces/tabs but keeps your line breaks; \"Remove Leading\" and \"Remove Trailing\" trim each line individually.",
+          "Click \"Copy\" to copy the cleaned text to your clipboard."
+        ]}
+        faqs={[
+          { q: "Does it remove all spaces?", a: "No — it collapses extra or unwanted whitespace while keeping single spaces between words." },
+          { q: "Is Whitespace Remover free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "What's the difference between the four buttons?", a: "\"Remove All Extra\" collapses everything including line breaks into single spaces. \"Remove Extra Spaces\" keeps line breaks but collapses repeated spaces/tabs. \"Remove Leading\"/\"Remove Trailing\" trim whitespace from the start or end of each line without touching spacing inside the line." },
+          { q: "Is my data private?", a: "Yes, all processing happens locally in your browser — nothing is sent to a server." }
+        ]}
+        tips={[
+          "Use \"Remove Extra Spaces\" instead of \"Remove All Extra\" when you need to keep your paragraph or line breaks intact.",
+          "\"Remove Leading\"/\"Remove Trailing\" are useful for cleaning up indentation copied from emails or PDFs without collapsing spacing within each line.",
+          "Clean up code snippets with \"Remove Trailing\" to strip accidental trailing spaces before sharing them.",
+          "Run \"Remove All Extra\" on data copied from PDFs or web pages, which often carries inconsistent spacing and line breaks."
+        ]}
+      />
     </div>
   );
 }

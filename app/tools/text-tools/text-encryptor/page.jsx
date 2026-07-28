@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function TextEncryptorPage() {
   const [text, setText] = useState('');
@@ -48,39 +49,28 @@ export default function TextEncryptorPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Text Encryptor</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Text Encryptor is a free online tool that allows you to quickly encrypt and decrypt text messages using advanced encryption algorithms to protect your sensitive information. It provides a simple, user-friendly interface for securing your data without requiring any software installation or technical knowledge.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Text Encryptor</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Enter or paste the text you want to encrypt into the input field on the Text Encryptor homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your preferred encryption method from the available options such as AES, Caesar Cipher, or Base64 encoding</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the Encrypt button to instantly convert your text into an encrypted format that cannot be easily read by unauthorized users</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the encrypted text from the output field and share it securely, or use the Decrypt feature with the correct password to reveal the original message</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Text Encryptor completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Text Encryptor is 100% free and requires no registration or payment. You can encrypt and decrypt unlimited amounts of text without any hidden fees or limitations.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How secure is the encryption provided by Text Encryptor?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Text Encryptor uses industry-standard encryption algorithms like AES-256, which provides military-grade security. However, the security level depends on the encryption method you choose and the strength of your password.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I use Text Encryptor on mobile devices?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Text Encryptor is fully responsive and works on all mobile devices including smartphones and tablets. You can access it through any web browser without installing an app.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my encrypted text stored on your servers?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Text Encryptor does not store any of your data. All encryption and decryption processes happen directly in your browser, ensuring complete privacy and security of your information.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use strong, unique passwords when encrypting sensitive information to ensure maximum security and prevent unauthorized access to your encrypted messages</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep a backup of your encryption passwords in a secure location, as losing them may make it impossible to decrypt your messages in the future</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the AES encryption method for highly sensitive data as it offers superior security compared to simpler encryption techniques like Caesar Cipher</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test your encrypted and decrypted text to ensure accuracy before sharing sensitive information with others using the same encryption method and password</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Text Encryptor"
+        description="Text Encryptor obfuscates text with a password-based XOR cipher and Base64 encoding, entirely in your browser. It's a quick way to make text unreadable to a casual viewer without the password, though it is not a substitute for strong encryption standards like AES when protecting truly sensitive information."
+        howTo={[
+          "Enter or paste the text you want to encrypt.",
+          "Type a secret key — this becomes your password, so remember it exactly.",
+          "Click \"Encrypt\" to scramble the text, or \"Decrypt\" to reverse a previously encrypted message with the same key.",
+          "Copy the result from the output field."
+        ]}
+        faqs={[
+          { q: "Is Text Encryptor completely free to use?", a: "Yes, it's 100% free with no signup and no limits on how much text you can process." },
+          { q: "How secure is this encryption?", a: "It uses a password-based XOR cipher followed by Base64 encoding — not AES or any \"military-grade\" standard. It's a fast way to obfuscate text so it isn't readable at a glance, but it shouldn't be relied on to protect highly sensitive or confidential information." },
+          { q: "What if I forget my key?", a: "The text can't be recovered without the exact original key — there's no password recovery option." },
+          { q: "Is my data uploaded anywhere?", a: "No, encryption and decryption both happen entirely in your browser — your text and key are never sent to a server." }
+        ]}
+        tips={[
+          "Use a key you'll remember exactly — even one character off will produce garbled, unrecoverable output when decrypting.",
+          "This tool suits casual privacy (keeping a note unreadable at a glance), not protecting data against a determined attacker.",
+          "Always keep a copy of your original text, since there's no way to verify the key before you've already encrypted or decrypted.",
+          "AES and Caesar Cipher options aren't available — the encrypt/decrypt buttons both use the same XOR + Base64 method regardless of what you type."
+        ]}
+      />
     </div>
   );
 }
