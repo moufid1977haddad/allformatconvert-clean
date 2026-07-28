@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function ZipCreatorPage() {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -45,39 +46,28 @@ export default function ZipCreatorPage() {
           {downloadUrl && <a href={downloadUrl} download="archive.zip" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download ZIP</a>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Zip Creator</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Zip Creator is a free online tool that allows you to compress and bundle multiple files into a single ZIP archive without installing any software. Simply upload your files, customize your archive settings, and download your compressed file instantly from any device.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Zip Creator</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Zip Creator website and click the 'Select Files' button to upload the files you want to compress</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose additional options such as compression level and archive name to customize your ZIP file</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Review your selected files and settings, then click the 'Create ZIP' button to start the compression process</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Wait for processing to complete, then click 'Download' to save your ZIP file to your computer</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Zip Creator completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Zip Creator is 100% free with no hidden charges, registration requirements, or premium features. You can create unlimited ZIP files at no cost.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is the maximum file size I can upload?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Zip Creator supports files up to 2GB in size per upload session, allowing you to compress large documents, videos, and archives efficiently.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do you store my uploaded files?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Zip Creator does not store your files. All uploads are processed temporarily and automatically deleted after your download is complete for privacy and security.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file types can I compress?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Zip Creator accepts all file types including documents, images, videos, audio files, and more. There are no restrictions on the types of files you can add to your ZIP archive.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Organize your files into logical groups before uploading to make it easier to manage and locate files within your ZIP archive</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use descriptive names for your ZIP archives to quickly identify the contents, especially when storing multiple compressed files</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Take advantage of compression level settings to balance between file size reduction and processing speed based on your needs</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Create ZIP files for backup purposes by regularly compressing important documents and storing them in a secure location</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="ZIP Creator"
+        description="ZIP Creator is a free online tool that bundles multiple files into a single ZIP archive, entirely in your browser using JSZip — no upload, no software, and works with any file type."
+        howTo={[
+          "Click the upload area and select one or more files to add to your archive.",
+          "Remove any files you don't want by clicking \"Remove\" next to them.",
+          "Click \"Create ZIP\" to bundle everything into a single archive locally.",
+          "Click \"Download ZIP\" to save the resulting archive.zip file."
+        ]}
+        faqs={[
+          { q: "Is ZIP Creator free to use?", a: "Yes, it's completely free with no signup and no limit on how many ZIP files you can create." },
+          { q: "What file types can I zip?", a: "Any file type — there are no format restrictions since files are added to the archive as-is." },
+          { q: "Do you store my uploaded files?", a: "No. The ZIP is built entirely in your browser — files are never uploaded to a server." },
+          { q: "Can I rename the archive or set a compression level?", a: "Not currently — the tool creates a file named archive.zip using JSZip's default settings." }
+        ]}
+        tips={[
+          "Add all the files you need before clicking \"Create ZIP\" — use the Remove button to fix any mistakes first.",
+          "Large batches of files may take longer to process since compression runs in your browser.",
+          "Rename the downloaded archive.zip file afterward if you need a more descriptive name.",
+          "Great for bundling multiple documents or images into a single file before emailing or uploading elsewhere."
+        ]}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function FileConverterPage() {
   const [file, setFile] = useState(null);
   const [format, setFormat] = useState('txt');
@@ -32,39 +33,28 @@ export default function FileConverterPage() {
           {downloadUrl && <a href={downloadUrl} download={file.name.replace(/.[^.]+$/, '') + '.' + format} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About File Converter</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">File Converter is a free online tool that instantly converts files between multiple formats including images, documents, videos, and audio without requiring software installation. Simply upload your file, select your desired output format, and download the converted result in seconds.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use File Converter</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the File Converter website and click the 'Upload File' button to select the file you want to convert from your device</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your desired output format from the dropdown menu or format selection panel</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Convert' button to process your file through our secure conversion engine</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your converted file instantly once the conversion is complete, with no registration required</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is File Converter really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, File Converter is completely free with no hidden charges, registration requirements, or premium upgrades needed for basic conversions.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file formats does File Converter support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">File Converter supports a wide range of formats including PDF, JPG, PNG, MP4, MP3, DOCX, XLSX, and many more for images, documents, videos, and audio files.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my uploaded file safe and private?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, all uploaded files are processed securely and deleted automatically after conversion. We do not store your files or share them with third parties.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How large can my files be for conversion?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">File Converter typically supports files up to 500MB, though limits may vary by file type. For larger files, consider splitting them into smaller segments.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Batch convert multiple files by uploading them one after another to save time when converting several documents or images</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Check the file quality settings before conversion if available, as lower quality settings result in smaller file sizes but reduced clarity</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use File Converter for format compatibility issues when opening files in different applications or devices</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep your browser updated and use a stable internet connection for faster and more reliable file conversions</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="File Converter"
+        description="File Converter is a free online tool that converts plain-text-based files between TXT, JSON, CSV, and HTML formats — entirely in your browser, with nothing uploaded to a server. It's a quick way to reformat text data or make it compatible with another tool or workflow."
+        howTo={[
+          "Click the upload area and select a text-based file (.txt, .csv, .json, .html, or .md).",
+          "Choose your target format from the dropdown: TXT, JSON, CSV, or HTML.",
+          "Click \"Convert\" to transform the file's content locally.",
+          "Click \"Download\" to save the converted file."
+        ]}
+        faqs={[
+          { q: "Is File Converter free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can convert." },
+          { q: "What formats does File Converter support?", a: "Text-based formats only: it accepts .txt, .csv, .json, .html, and .md files, and converts between TXT, JSON, CSV, and HTML. It does not convert images, video, audio, or PDFs." },
+          { q: "Is my file uploaded anywhere?", a: "No. The conversion runs entirely in your browser — your file is never sent to a server." },
+          { q: "How does the CSV conversion work?", a: "It's a simple tab-to-comma replacement. For complex spreadsheet data with embedded commas or quotes, a dedicated spreadsheet tool will give more reliable results." }
+        ]}
+        tips={[
+          "JSON output wraps your file's text in a {\"content\": \"...\"} object rather than parsing it into structured data.",
+          "HTML conversion wraps your text in a basic <pre> tag — it won't add rich formatting or document structure.",
+          "For binary files like images, PDFs, or Word documents, use a format-specific converter instead — this tool works with plain text content only.",
+          "Double-check your file has one of the supported extensions (.txt, .csv, .json, .html, .md) before uploading."
+        ]}
+      />
     </div>
   );
 }

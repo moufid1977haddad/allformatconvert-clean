@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function FileEncryptorPage() {
   const [file, setFile] = useState(null);
   const [password, setPassword] = useState('');
@@ -40,39 +41,28 @@ export default function FileEncryptorPage() {
           {downloadUrl && <a href={downloadUrl} download={file.name + (mode === 'encrypt' ? '.encrypted' : '.decrypted')} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About File Encryptor</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">File Encryptor is a free online tool that secures your sensitive documents and data by encrypting them with advanced algorithms, protecting your privacy without requiring software installation. Easily encrypt and decrypt files directly in your browser while maintaining complete control over your encryption keys.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use File Encryptor</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the File Encryptor website and click the 'Choose File' button to select the document you want to encrypt</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Create a strong password that will be used as your encryption key, then confirm it in the password field</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Encrypt' button and wait for the encryption process to complete</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your encrypted file and store it securely; you'll need the same password to decrypt it later</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is File Encryptor really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, File Encryptor is completely free with no hidden charges, subscription fees, or premium versions required for basic encryption functionality.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file types can I encrypt?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">File Encryptor supports all file types including documents, images, videos, archives, and more with no size restrictions on most standard files.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my data safe with File Encryptor?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Your files are encrypted locally in your browser using military-grade encryption standards, and we don't store or access your files on our servers.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What if I forget my encryption password?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Unfortunately, encrypted files cannot be recovered without the original password due to the strength of the encryption, so please store your passwords securely.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use a password that combines uppercase letters, lowercase letters, numbers, and special characters to maximize encryption security</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep a backup of your original unencrypted files in a safe location before encrypting important documents</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Store your encryption passwords in a password manager to avoid losing access to your encrypted files</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test the decryption process with a non-critical file first to ensure you remember your password correctly before encrypting sensitive data</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="File Encryptor"
+        description="File Encryptor is a free online tool that obfuscates any file with a password-based XOR cipher, entirely in your browser — no upload, no software installation. It's a quick way to make a file unreadable to a casual viewer without the password, though it is not a substitute for strong encryption standards like AES when protecting highly sensitive data."
+        howTo={[
+          "Choose \"Encrypt\" or \"Decrypt\" mode — the underlying operation is the same XOR process either way.",
+          "Click the upload area and select the file you want to process.",
+          "Enter a password — this becomes your key, so make sure you remember it exactly.",
+          "Click the button to process the file, then download the result."
+        ]}
+        faqs={[
+          { q: "Is File Encryptor free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can process." },
+          { q: "What kind of encryption does it use?", a: "A password-based XOR cipher applied to every byte of the file. It's a fast way to obfuscate a file so it isn't readable without the password, but it is not equivalent to strong standards like AES and shouldn't be relied on to protect highly sensitive or confidential data." },
+          { q: "What file types can I process?", a: "Any file type — there are no format restrictions since the cipher works on raw bytes." },
+          { q: "What happens if I forget my password?", a: "The file can't be restored without the exact original password — XOR decoding requires the identical key, and there's no recovery option." }
+        ]}
+        tips={[
+          "Because XOR is symmetric, running the same password through \"Decrypt\" simply reverses whatever \"Encrypt\" did — the two modes only change the button label and the downloaded file's name.",
+          "Use a password you'll remember exactly — even one character off will produce garbled, unrecoverable output.",
+          "This tool suits casual privacy (keeping a file unreadable at a glance), not protecting data against a determined attacker.",
+          "Always keep a backup of your original file — there's no way to verify the password before downloading, so mistakes can't be undone afterward."
+        ]}
+      />
     </div>
   );
 }
