@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function QrScannerPage() {
   const [result, setResult] = useState('');
@@ -61,39 +62,28 @@ export default function QrScannerPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Qr Scanner</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">QR Scanner is a free online tool that instantly decodes QR codes without requiring any software installation or registration. Simply upload an image or scan a QR code directly from your device to retrieve the encoded information in seconds.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Qr Scanner</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the QR Scanner website and choose between uploading an image file or using your device's camera</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>If uploading, select a QR code image from your computer or mobile device and wait for processing</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>If using the camera option, allow browser permissions and point your device at the QR code</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>View the decoded information instantly, including URLs, text, contact details, or any other encoded data</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is QR Scanner free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, QR Scanner is completely free and requires no registration or payment to decode unlimited QR codes.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to download any software?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, QR Scanner is a web-based tool that works directly in your browser without any downloads or installations.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What types of QR codes can it scan?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">QR Scanner can decode standard QR codes containing URLs, text, phone numbers, emails, contact information, Wi-Fi credentials, and more.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my data secure when using QR Scanner?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, QR Scanner processes data locally in your browser and does not store or transmit your scanned information to external servers.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For best results, ensure the QR code image is clear, well-lit, and not distorted or damaged</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>If using the camera feature, hold your device steady and allow adequate lighting for accurate scanning</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>You can scan multiple QR codes in succession without needing to refresh the page</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Always verify URLs and contact information decoded from QR codes before clicking or saving them</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="QR Code Scanner"
+        description="QR Code Scanner is a free online tool that decodes any QR code image directly in your browser — no software installation, no registration, and no image ever leaves your device. Upload a photo or screenshot of a QR code and instantly retrieve the URL, text, or other data it contains."
+        howTo={[
+          "Click the upload area and select an image file containing a QR code.",
+          "Wait a moment while the tool decodes the image locally in your browser.",
+          "View the decoded text or URL displayed on screen.",
+          "Click \"Copy\" to copy the result to your clipboard for use elsewhere."
+        ]}
+        faqs={[
+          { q: "Is QR Code Scanner free to use?", a: "Yes, it's completely free and requires no registration to decode unlimited QR codes." },
+          { q: "Do I need to install any software?", a: "No, QR Code Scanner is a web-based tool that works directly in your browser without any downloads or installations." },
+          { q: "What kinds of QR codes can it read?", a: "Any standard QR code containing text or a URL — photos of printed codes, screenshots, and exported images all work as long as the code is clearly visible." },
+          { q: "Is my data private?", a: "Yes. The image is decoded entirely in your browser and is never uploaded to a server." }
+        ]}
+        tips={[
+          "For best results, use a clear, well-lit, undistorted image of the QR code.",
+          "If scanning fails on a full photo, try cropping the image tightly around just the QR code.",
+          "Always verify a decoded URL before opening it — QR codes can be used to hide malicious links.",
+          "Screenshots work just as well as photos, so you can scan QR codes shared in chats or emails."
+        ]}
+      />
     </div>
   );
 }

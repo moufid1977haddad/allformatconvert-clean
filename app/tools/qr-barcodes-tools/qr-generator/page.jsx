@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useEffect, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function QrGeneratorPage() {
   const [text, setText] = useState('');
@@ -38,39 +39,28 @@ export default function QrGeneratorPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Qr Generator</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">QR Generator is a free online tool that instantly converts text, URLs, and other data into scannable QR codes. Create professional QR codes in seconds without downloading software or paying for subscriptions.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Qr Generator</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Enter your text, URL, or data into the input field on the QR Generator homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Customize your QR code by selecting size, color, and format preferences if desired</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the Generate button to create your unique QR code instantly</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your QR code as PNG, JPG, or SVG format and use it anywhere you need</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is QR Generator really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, QR Generator is completely free with no hidden charges, registration requirements, or premium plans. You can generate unlimited QR codes at no cost.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What information can I encode in a QR code?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can encode URLs, text, phone numbers, email addresses, WiFi credentials, vCard contact information, and much more into your QR codes.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I customize the appearance of my QR code?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, QR Generator allows you to customize colors, size, and design elements to match your branding while maintaining scannability.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to install anything to use QR Generator?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No installation is required. QR Generator is a web-based tool that works directly in your browser on any device with internet access.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use contrasting colors for your QR code to ensure it scans reliably on all devices and in different lighting conditions</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test your QR code with multiple smartphone cameras before sharing it widely to verify functionality</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Include a clear call-to-action near your QR code to encourage people to scan it and understand what it leads to</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Generate QR codes with adequate white space around them for optimal scanning performance and better user experience</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="QR Code Generator"
+        description="QR Code Generator is a free online tool that instantly turns any text or URL into a scannable QR code, right in your browser. There's nothing to install and nothing is uploaded to a server — adjust the size to fit your use case, from business cards to large-format posters, and download it in seconds."
+        howTo={[
+          "Type or paste the text, URL, or data you want to encode into the input field.",
+          "Use the slider to set the QR code size (100–400px) to match how it will be printed or displayed.",
+          "Click \"Generate QR Code\" to render it instantly.",
+          "Download the QR code as a PNG image and use it wherever you need."
+        ]}
+        faqs={[
+          { q: "Is QR Code Generator free to use?", a: "Yes, it's completely free with no signup and no limit on how many QR codes you can generate." },
+          { q: "What can I encode in a QR code?", a: "Any text string — URLs, plain messages, or formatted data like WiFi credentials or vCard text — just enter it exactly as you want it decoded." },
+          { q: "Can I customize the color or add a logo to my QR code?", a: "Currently you can adjust the size only; color and logo customization aren't supported yet." },
+          { q: "Is my data private?", a: "Yes. The QR code is generated entirely in your browser — nothing you type is sent to a server." }
+        ]}
+        tips={[
+          "Use a larger size (300px or more) for QR codes that will be printed small or viewed from a distance, like on posters.",
+          "Keep the encoded text as short as possible — shorter data produces a simpler, more reliably scannable code.",
+          "Test the QR code with your phone's camera before printing or publishing it widely.",
+          "Regenerate and re-download the code any time you edit the text, since it doesn't update automatically."
+        ]}
+      />
     </div>
   );
 }
