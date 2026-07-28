@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useEffect } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 const CONVERSIONS = {
   Length: { m: 1, km: 0.001, cm: 100, mm: 1000, ft: 3.28084, inch: 39.3701, mile: 0.000621371, yard: 1.09361 },
@@ -122,39 +123,28 @@ export default function UnitConverterPage() {
 
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Unit Converter</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Unit Converter is a free online tool that instantly converts between thousands of different units of measurement including length, weight, temperature, volume, and more. Whether you're a student, professional, or hobbyist, this powerful converter eliminates calculation errors and saves valuable time on unit conversions.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Unit Converter</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Select the type of unit you want to convert from the category menu (length, weight, temperature, volume, etc.)</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Enter the numerical value you wish to convert in the input field</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Choose the unit you're converting from using the first dropdown menu</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Select the target unit you want to convert to using the second dropdown menu, and the result will display instantly</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Unit Converter really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Unit Converter is completely free with no hidden charges, registration requirements, or premium features. You can convert unlimited units without any restrictions.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What types of units can I convert?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Unit Converter supports conversions for length, weight, temperature, volume, area, speed, pressure, energy, power, and many more measurement categories.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How accurate are the conversion results?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Our tool uses internationally standardized conversion formulas and provides highly accurate results up to multiple decimal places for precise calculations.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I use Unit Converter on mobile devices?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Unit Converter is fully responsive and works seamlessly on smartphones, tablets, and desktop computers without requiring any app installation.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Bookmark the Unit Converter for quick access to common conversions you use regularly in your work or studies</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the decimal point feature for precise conversions when working with scientific or technical measurements</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Try converting between multiple unit systems to better understand the relationships between different measurement standards</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Clear your previous conversions frequently to keep your workflow organized and avoid confusion when switching between different conversion types</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Unit Converter"
+        description="Unit Converter converts between units across six categories — Length, Weight, Temperature, Speed, Area, and Volume — entirely in your browser, with results updating instantly as you type."
+        howTo={[
+          "Click a category button (Length, Weight, Temperature, Speed, Area, or Volume) to select what you're converting.",
+          "Enter the value you want to convert.",
+          "Choose your source unit in the \"From\" dropdown and your target unit in the \"To\" dropdown.",
+          "Read the converted result, updated instantly below."
+        ]}
+        faqs={[
+          { q: "Is Unit Converter free to use?", a: "Yes, it's completely free with no signup and no limits." },
+          { q: "What categories are supported?", a: "Length, Weight, Temperature, Speed, Area, and Volume — pressure, energy, and power aren't currently included." },
+          { q: "How accurate are the results?", a: "Conversions use standard formulas and are shown to 4 decimal places." },
+          { q: "Is my data private?", a: "Yes, everything is calculated locally in your browser — nothing is sent to a server." }
+        ]}
+        tips={[
+          "Switch categories using the buttons at the top — your \"From\" and \"To\" units reset to that category's first two units.",
+          "For temperature, remember the conversion isn't a simple multiplier like the other categories, since Celsius, Fahrenheit, and Kelvin use different zero points.",
+          "Use decimal values in the input field for more precise conversions.",
+          "Bookmark this page for quick access to conversions you use often in cooking, DIY, or technical work."
+        ]}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function MobiToEpubPage() {
   const [file, setFile] = useState(null);
@@ -68,39 +69,28 @@ export default function MobiToEpubPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Mobi To Epub</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Mobi To Epub is a free online conversion tool that instantly transforms your Mobi eBook files into the universally compatible Epub format. Perfect for readers who want to use their eBooks across multiple devices and platforms without any software installation required.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Mobi To Epub</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Mobi To Epub tool website and locate the file upload area on the homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the upload button and select your Mobi file from your computer or drag and drop it into the designated zone</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Wait a few seconds for the tool to process and convert your file automatically</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your converted Epub file and enjoy reading on any compatible device or eReader</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Mobi To Epub really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Mobi To Epub is completely free with no hidden charges, registration requirements, or premium features. You can convert as many files as you need without spending a single dollar.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What devices can open Epub files?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Epub files are supported by most eReaders including Kobo, Apple Books, Google Play Books, and many others. They also work on tablets and smartphones through various eBook reading applications.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will the conversion affect the quality of my eBook?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Mobi To Epub maintains the original formatting, text quality, and embedded images during conversion. Your eBook content remains intact and readable on all compatible devices.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How long does the conversion process take?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most Mobi files convert to Epub format within seconds. The speed depends on your file size and internet connection, but the process is typically very fast.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Ensure your Mobi file is not corrupted before uploading to get the best conversion results and avoid errors during processing</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Download your converted Epub file immediately after conversion to prevent accidental loss due to session timeouts</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test your converted Epub file on your target device before deleting the original to ensure compatibility and proper formatting</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep your Mobi files organized and named clearly so you can easily identify and manage your converted eBooks across different formats</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="MOBI to EPUB"
+        description="This tool attempts to extract text from a MOBI file and package it into an EPUB-like file, entirely in your browser. Important limitation: MOBI is a binary ebook format, and this tool currently decodes the raw file as plain UTF-8 text rather than properly parsing MOBI's internal structure — for genuine MOBI ebooks, this typically produces garbled text, and the output isn't a standards-compliant ZIP-based EPUB, so it's unlikely to open correctly in most e-reader apps."
+        howTo={[
+          "Click the upload area and select a .mobi, .azw, or .azw3 file.",
+          "Click \"Convert to EPUB\" to process the file locally.",
+          "Wait for the \"Done!\" message to appear.",
+          "Download the resulting file, and verify it opens correctly in your e-reader before relying on it — results vary with real MOBI files."
+        ]}
+        faqs={[
+          { q: "Will this reliably convert my MOBI ebook to a working EPUB?", a: "Not currently for most real MOBI files. MOBI uses a binary/compressed internal format, and this tool reads the raw bytes as plain text rather than decoding MOBI's actual structure, which typically produces garbled or incomplete text and an output file that isn't a valid ZIP-based EPUB package." },
+          { q: "Is MOBI to EPUB free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "What file types can I upload?", a: ".mobi, .azw, and .azw3 files are accepted, though conversion quality depends heavily on the source file's internal format, as noted above." },
+          { q: "Is my file uploaded anywhere?", a: "No. All processing happens locally in your browser — your file is never uploaded to a server." }
+        ]}
+        tips={[
+          "Always open and check the converted file in your target e-reader app before deleting your original MOBI file.",
+          "If the output text looks garbled, that's expected for most real MOBI files given this tool's current text-extraction approach — a dedicated desktop tool like Calibre offers more reliable MOBI-to-EPUB conversion.",
+          "Keep your original MOBI file as a backup regardless of the conversion outcome.",
+          "Results are more likely to be readable for simple, mostly plain-text MOBI files than for image-heavy or DRM-protected ebooks."
+        ]}
+      />
     </div>
   );
 }

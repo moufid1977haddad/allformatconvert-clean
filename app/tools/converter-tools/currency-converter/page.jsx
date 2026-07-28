@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useEffect } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 const CURRENCIES = ['USD','EUR','CAD','GBP','JPY','AUD','CHF','CNY','INR','BRL','MXN','ZAR','SEK','NOK','DKK','SGD','HKD','NZD','KRW','TRY','SAR','AED','MAD','TND'];
 
@@ -78,39 +79,28 @@ export default function CurrencyConverterPage() {
           <button onClick={loadRates} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl py-2 font-semibold transition">Refresh Rates</button>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Currency Converter</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Currency Converter is a free online tool that instantly converts between multiple world currencies with real-time exchange rates. Get accurate currency conversions for travel, business, or personal finance needs without any hidden fees or subscriptions.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Currency Converter</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Enter the amount you want to convert in the input field</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Select your source currency from the dropdown menu</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Choose your target currency for conversion</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>View the converted amount instantly displayed on your screen</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Currency Converter really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Currency Converter is completely free with no hidden charges, registration requirements, or premium subscriptions needed to access full functionality.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How often are the exchange rates updated?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Exchange rates are updated in real-time throughout the day, ensuring you always get the most current conversion rates for accurate transactions.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert multiple currencies at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can perform multiple conversions sequentially by simply changing the currency selections and amounts for each new conversion.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Which currencies does the tool support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Currency Converter supports all major world currencies including USD, EUR, GBP, JPY, CAD, AUD, and many others for comprehensive global coverage.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Bookmark the tool for quick access during travel or when making international purchases online</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Check exchange rates during off-peak market hours for potentially more favorable conversion rates</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the converter to compare prices when shopping on international websites</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep historical conversion rates in mind, as rates fluctuate daily based on market conditions</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Currency Converter"
+        description="Currency Converter converts between 24 major world currencies using exchange rates fetched directly in your browser from a free public API (exchangerate-api.com). Rates from this free tier are typically refreshed about once a day, not continuously in real time."
+        howTo={[
+          "Enter the amount you want to convert.",
+          "Select your source currency from the \"From\" dropdown.",
+          "Select your target currency from the \"To\" dropdown, or use the swap button (⇄) to flip both.",
+          "The converted amount appears instantly; click \"Refresh Rates\" to fetch the latest available rates."
+        ]}
+        faqs={[
+          { q: "Is Currency Converter free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "How often are the exchange rates updated?", a: "Rates come from a free public exchange-rate API that's typically refreshed roughly once a day — not continuously throughout the day." },
+          { q: "Which currencies are supported?", a: "24 major currencies, including USD, EUR, GBP, JPY, CAD, and AUD — see the dropdown for the full list." },
+          { q: "Is my data private?", a: "The amount and currency codes you select are sent to a public third-party exchange-rate API to fetch rates; no personal or financial account information is involved." }
+        ]}
+        tips={[
+          "Click \"Refresh Rates\" if you've had the page open a while, to make sure you're using the latest available rates.",
+          "Use the swap button (⇄) to quickly flip your \"From\" and \"To\" currencies.",
+          "Since rates update roughly daily, don't rely on this tool for time-sensitive trading decisions.",
+          "Bookmark the tool for quick reference during travel or online shopping in another currency."
+        ]}
+      />
     </div>
   );
 }
