@@ -46,7 +46,7 @@ export default function FindReplacePage() {
       </div>
       <SeoContent
         title="Find and Replace"
-        description="Find and Replace searches your text for every match of a pattern and swaps it with your replacement text, entirely in your browser. Note: the \"Find\" field is always interpreted as a regular expression, not plain literal text — special characters like . * + ( ) [ ] have regex meaning."
+        description={"Find and Replace searches your text for every match of a pattern and swaps it with your replacement text, entirely in your browser. Note: the \"Find\" field is always interpreted as a regular expression, not plain literal text — special characters like . * + ( ) [ ] have regex meaning."}
         howTo={[
           "Paste your text into the main text box.",
           "Enter your search pattern in the \"Find\" field and your replacement text in the \"Replace with\" field.",

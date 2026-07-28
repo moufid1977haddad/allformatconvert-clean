@@ -51,7 +51,7 @@ export default function LoremIpsumPage() {
       </div>
       <SeoContent
         title="Lorem Ipsum Generator"
-        description="Lorem Ipsum Generator produces placeholder text for mockups and prototypes, entirely in your browser, in paragraphs, sentences, or words. Note: \"Sentences\" mode currently repeats the full ~69-word source passage rather than producing short individual sentences, and \"Words\" mode can't exceed the ~69 words available in the source text."
+        description={"Lorem Ipsum Generator produces placeholder text for mockups and prototypes, entirely in your browser, in paragraphs, sentences, or words. Note: \"Sentences\" mode currently repeats the full ~69-word source passage rather than producing short individual sentences, and \"Words\" mode can't exceed the ~69 words available in the source text."}
         howTo={[
           "Choose a type: Paragraphs, Sentences, or Words.",
           "Set the amount you want (1–100).",

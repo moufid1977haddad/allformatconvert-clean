@@ -48,7 +48,7 @@ export default function TextTruncatorPage() {
       </div>
       <SeoContent
         title="Text Truncator"
-        description="Text Truncator shortens text to a character or word limit you set, adding \"...\" when it cuts the text short, entirely in your browser."
+        description={"Text Truncator shortens text to a character or word limit you set, adding \"...\" when it cuts the text short, entirely in your browser."}
         howTo={[
           "Paste or type your text into the input field.",
           "Type your desired limit into the \"Limit\" field, and choose \"Characters\" or \"Words\" as the unit.",
