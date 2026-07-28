@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function AIParaphraserPage() {
   const [input, setInput] = useState('');
@@ -48,39 +49,28 @@ export default function AIParaphraserPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Ai Paraphraser</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">AI Paraphraser is a free online tool that uses advanced artificial intelligence to rewrite and rephrase your text while maintaining its original meaning and context. Perfect for students, writers, and professionals who need to create unique content quickly and efficiently.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Ai Paraphraser</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the AI Paraphraser website and locate the text input box on the homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Paste or type the text you want to paraphrase into the input field</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Paraphrase' button to let the AI generate alternative versions of your content</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy your favorite paraphrased version and use it in your document or project</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is AI Paraphraser really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, AI Paraphraser is completely free with no hidden charges or premium subscriptions required for basic paraphrasing.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I paraphrase long documents?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">AI Paraphraser can handle various text lengths, though optimal results are typically achieved with paragraphs and shorter sections of text.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will the paraphrased content be plagiarism-free?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, AI Paraphraser creates original text that maintains meaning while using different words and sentence structures to ensure uniqueness.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to create an account to use this tool?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No account is necessary to use AI Paraphraser; you can access all features immediately without registration.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For best results, paraphrase one paragraph at a time rather than submitting entire essays at once</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the tool multiple times on the same text to generate different variations and choose the best one</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Always review the paraphrased content to ensure it accurately conveys your original message and intent</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Combine AI Paraphraser with manual editing to achieve perfectly polished and personalized content</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="AI Paraphraser"
+        description="AI Paraphraser is a free online tool that uses OpenAI's GPT-4o mini model to rewrite your text with different words and sentence structures while preserving its original meaning. Paste your text, and the AI returns a single rewritten version — useful for varying phrasing in essays, articles, or messages."
+        howTo={[
+          "Paste or type the text you want to paraphrase into the input field.",
+          "Click the 'Paraphrase' button to send it to the AI.",
+          "Wait a moment while the AI rewrites your text.",
+          "Copy the paraphrased result and use it in your document or project."
+        ]}
+        faqs={[
+          { q: "Is AI Paraphraser really free to use?", a: "Yes, AI Paraphraser is free to use with no signup or subscription required." },
+          { q: "Can I paraphrase long documents?", a: "The tool works best on paragraphs and shorter passages. Very long text may be truncated by the underlying AI model's response limit, so it's best to paraphrase one section at a time." },
+          { q: "Will the paraphrased content be plagiarism-free?", a: "The AI generates a genuinely reworded version of your input, but no tool can guarantee a result is undetectable by plagiarism checkers — always review the output before using it." },
+          { q: "Do I need to create an account to use this tool?", a: "No account is necessary; you can use AI Paraphraser immediately without registration." }
+        ]}
+        tips={[
+          "For best results, paraphrase one paragraph at a time rather than submitting entire essays at once.",
+          "Run the same text through the tool again if you want an alternative version to compare against.",
+          "Always review the paraphrased content to make sure it still conveys your original meaning.",
+          "Combine AI Paraphraser with your own manual editing for a more polished, personal result."
+        ]}
+      />
     </div>
   );
 }

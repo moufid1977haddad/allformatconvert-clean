@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function KeywordExtractorPage() {
   const [input, setInput] = useState('');
@@ -48,39 +49,28 @@ export default function KeywordExtractorPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Keyword Extractor</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Keyword Extractor is a free online tool that automatically identifies and extracts the most relevant keywords from any text, document, or webpage to help optimize your SEO strategy. Simply paste your content and instantly discover high-value keywords that can improve your search engine rankings and content visibility.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Keyword Extractor</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste your text, article, or webpage content into the input field on the Keyword Extractor homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the 'Extract Keywords' button to analyze your content and identify relevant keywords</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Review the extracted keywords displayed in order of relevance and frequency</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the keywords to use them in your SEO strategy, meta tags, and content optimization</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Keyword Extractor really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Keyword Extractor is completely free with no hidden fees, registrations, or premium subscriptions required. You can extract unlimited keywords from unlimited content pieces.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How does the keyword extraction algorithm work?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool uses advanced natural language processing and machine learning to analyze text structure, frequency, and relevance to identify the most important keywords that represent your content's main topics.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I extract keywords from PDFs or only text?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Currently, Keyword Extractor works best with plain text input. You can copy and paste text from PDFs, Word documents, or any other source into the tool.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How many keywords will be extracted from my content?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The number of extracted keywords varies based on your content length and complexity. The tool typically returns 10-50 relevant keywords ranked by importance and frequency.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the extracted keywords to optimize your meta descriptions, title tags, and header tags for better SEO performance</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Focus on long-tail keywords identified by the tool, as they often have less competition and higher conversion rates</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Compare keywords from multiple articles in your niche to identify content gaps and opportunities for new blog posts</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Regularly extract keywords from competitor content to discover trending topics and keywords you may have missed</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Keyword Extractor"
+        description="Keyword Extractor is a free online tool that uses OpenAI's GPT-4o mini model to identify the most important keywords and key phrases in a piece of text, along with a brief explanation of why each one matters. Paste in an article or piece of content and get a numbered list of keywords back — useful for SEO research and content planning."
+        howTo={[
+          "Paste your text, article, or webpage content into the input field.",
+          "Click the 'Extract Keywords' button to send it to the AI.",
+          "Wait a moment while the AI identifies relevant keywords.",
+          "Copy the numbered list of keywords to use in your SEO strategy or content planning."
+        ]}
+        faqs={[
+          { q: "Is Keyword Extractor really free to use?", a: "Yes, Keyword Extractor is free to use with no signup or subscription required." },
+          { q: "How does the keyword extraction work?", a: "It sends your text to an AI language model, which analyzes the content and returns a numbered list of what it judges to be the most important keywords and phrases, with a short explanation for each." },
+          { q: "Can I extract keywords from PDFs or only text?", a: "Keyword Extractor only accepts pasted plain text — there's no file upload. You can copy text from a PDF or Word document and paste it into the tool." },
+          { q: "How many keywords will be extracted from my content?", a: "The number varies based on content length and what the AI judges to be relevant; there's no fixed count." }
+        ]}
+        tips={[
+          "Use the extracted keywords to inform your meta descriptions, title tags, and header tags.",
+          "Look for long-tail phrases in the results, as they often have less competition.",
+          "Compare keyword lists from multiple articles in your niche to spot content gaps.",
+          "Run competitor content through the tool to see what topics and phrasing they emphasize."
+        ]}
+      />
     </div>
   );
 }

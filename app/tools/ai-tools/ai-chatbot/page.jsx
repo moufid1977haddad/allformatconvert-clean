@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function AIChatbotPage() {
   const [messages, setMessages] = useState([]);
@@ -56,39 +57,28 @@ export default function AIChatbotPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Ai Chatbot</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">AI Chatbot is a free online tool that leverages artificial intelligence to provide instant responses and assistance for a wide range of queries and conversations. Whether you need quick answers, creative writing help, or general information, this intelligent chatbot is available 24/7 to support your needs.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Ai Chatbot</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the AI Chatbot website and locate the chat interface on the homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Type your question or message into the text input field at the bottom of the chat window</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Press Enter or click the Send button to submit your message to the AI</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Wait for the chatbot to process and generate a response, which will appear in the conversation thread above</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is AI Chatbot completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, AI Chatbot is completely free to use with no hidden charges or premium subscriptions required for basic functionality.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to create an account to use AI Chatbot?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No account creation is required to start using AI Chatbot immediately, though creating an account allows you to save conversation history.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What types of questions can I ask the AI Chatbot?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can ask the chatbot a wide variety of questions including general knowledge, writing assistance, coding help, creative ideas, and more.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my conversation data stored and kept private?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">AI Chatbot respects your privacy and follows data protection standards, with conversation data handled securely and not shared with third parties.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Be specific and detailed in your questions to receive more accurate and relevant responses from the chatbot</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use natural language as you would speak to a person, and the AI will understand and respond conversationally</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Break complex questions into smaller, simpler parts if you're not getting satisfactory answers on the first try</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Bookmark the tool for quick access and consider creating an account to maintain a history of your most useful conversations</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="AI Chatbot"
+        description="AI Chatbot is a free online tool that uses OpenAI's GPT-4o mini model to provide instant answers and conversational assistance for a wide range of questions. Each message you send is sent to our server, forwarded to OpenAI for processing, and the reply is streamed back to your chat window — no software installation or signup required."
+        howTo={[
+          "Type your question or message into the text input field at the bottom of the chat window.",
+          "Press Enter or click the Send button to submit your message to the AI.",
+          "Wait a moment while the message is processed, which will appear as 'Thinking...'.",
+          "Read the AI's response in the conversation thread above and continue the conversation."
+        ]}
+        faqs={[
+          { q: "Is AI Chatbot completely free to use?", a: "Yes, AI Chatbot is free to use with no signup or subscription required for the current version." },
+          { q: "Do I need to create an account to use AI Chatbot?", a: "No account is required. Conversations exist only in your current browser session and are not saved — refreshing the page clears the chat history." },
+          { q: "What types of questions can I ask the AI Chatbot?", a: "You can ask general knowledge questions, request writing help, brainstorm ideas, or have a casual conversation. Responses are generated by an AI model and can occasionally be inaccurate." },
+          { q: "Is my conversation data private?", a: "Your messages are sent to OpenAI's API to generate a response. They are not stored on our servers or shared for any purpose beyond generating your reply." }
+        ]}
+        tips={[
+          "Be specific and detailed in your questions to get more accurate and relevant responses.",
+          "Use natural language, as you would speak to a person — the AI understands conversational phrasing.",
+          "Break complex questions into smaller parts if the first answer isn't quite what you needed.",
+          "Since chat history isn't saved, copy any response you want to keep before refreshing the page."
+        ]}
+      />
     </div>
   );
 }

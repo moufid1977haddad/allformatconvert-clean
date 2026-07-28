@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function ImageUpscalerPage() {
   const [image, setImage] = useState(null);
@@ -73,39 +74,28 @@ export default function ImageUpscalerPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Image Upscaler</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Image Upscaler is a free online tool that enhances and enlarges your images without losing quality using advanced AI technology. Perfect for photographers, designers, and content creators who need to improve image resolution instantly.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Image Upscaler</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Image Upscaler website and click the upload button to select your image file</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your desired upscaling factor (2x, 4x, or 8x) from the available options</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Upscale' button and wait for the AI to process your image</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your enhanced high-resolution image to your device</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Image Upscaler really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Image Upscaler is completely free with no hidden charges, subscriptions, or watermarks on your upscaled images.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats are supported?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Image Upscaler supports all common formats including JPG, PNG, WebP, and BMP files.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How long does it take to upscale an image?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most images are upscaled within seconds to a few minutes depending on file size and selected upscaling factor.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will upscaling reduce image quality?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, our advanced AI technology maintains or improves image quality while enlarging it, preserving details and sharpness.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For best results, start with the highest quality original image available</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use 2x upscaling for small quality improvements and 8x for dramatic enlargements</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test with a small batch of images first to ensure the upscaling meets your needs</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Save your upscaled images immediately after processing to prevent data loss</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Image Upscaler"
+        description="Image Upscaler is a free online tool that enlarges your images entirely in your browser using the HTML canvas element with high-quality smoothing. Choose a scale factor from 2x to 8x and get a larger PNG instantly — everything runs locally on your device, so your image is never uploaded to a server. Note that this resizes and smooths the image rather than using AI to invent new detail, so very large scale factors will look softer than the original."
+        howTo={[
+          "Click the upload area and select an image from your device.",
+          "Choose your desired scale factor: 2x, 3x, 4x, 6x, or 8x.",
+          "Click the 'Upscale Image' button to resize it instantly in your browser.",
+          "Download your enlarged PNG image to your device."
+        ]}
+        faqs={[
+          { q: "Is Image Upscaler really free to use?", a: "Yes, Image Upscaler is completely free with no hidden charges, subscriptions, or watermarks on your upscaled images." },
+          { q: "What image formats are supported?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The output is always a PNG file." },
+          { q: "Does this use AI to add detail?", a: "No. Image Upscaler enlarges your image using the browser's built-in canvas smoothing rather than an AI super-resolution model, so it won't invent new detail — it's best for moderate enlargements rather than recovering fine detail from a very small source image." },
+          { q: "Is my image uploaded to a server?", a: "No, everything happens locally in your browser. Your image is never sent to a server, which also means processing is instant." }
+        ]}
+        tips={[
+          "For best results, start with the highest quality original image available.",
+          "Use smaller scale factors like 2x or 3x for the sharpest-looking results; higher factors like 8x will look noticeably softer.",
+          "Since processing happens in your browser, very large images at high scale factors may take a moment or use significant memory.",
+          "Download your upscaled image right away, since it isn't saved anywhere after you leave the page."
+        ]}
+      />
     </div>
   );
 }

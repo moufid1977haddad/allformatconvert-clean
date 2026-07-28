@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function DataExtractorPage() {
   const [input, setInput] = useState('');
@@ -48,39 +49,28 @@ export default function DataExtractorPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Data Extractor</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Data Extractor is a free online tool that automatically extracts and organizes data from documents, websites, and text files into structured formats. It helps users save time by converting unstructured information into clean, usable datasets without requiring coding knowledge.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Data Extractor</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload or paste your source material into the Data Extractor tool interface</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Select the type of data you want to extract and define your extraction parameters</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Let the tool process and identify relevant data patterns automatically</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your extracted data in your preferred format such as CSV, JSON, or Excel</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Data Extractor really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Data Extractor is completely free with no hidden charges or premium requirements for basic extraction tasks.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file formats does Data Extractor support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Data Extractor supports multiple input formats including PDF, text files, HTML, and direct URL input, with output options in CSV, JSON, XML, and Excel.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How secure is my data when using Data Extractor?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Data Extractor uses encrypted connections and does not store your uploaded files permanently, ensuring your information remains confidential.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I extract data from images or scanned documents?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Data Extractor can process scanned documents and images using OCR technology to extract text and structured data.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use clear, well-formatted source data for more accurate extraction results and faster processing times</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Specify extraction rules and patterns upfront to customize the tool's output to your exact requirements</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test with a small sample of your data first to ensure the extraction settings work before processing large datasets</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Take advantage of the preview feature to review extracted data before downloading to catch any formatting issues</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Data Extractor"
+        description="Data Extractor is a free online tool that uses OpenAI's GPT-4o mini model to pull structured information out of pasted text. Paste in text containing names, dates, prices, or other details, and the AI returns the extracted data organized as JSON or a table, ready to copy into your own spreadsheet or document."
+        howTo={[
+          "Paste your source text into the input field.",
+          "Click the 'Extract Data' button to send it to the AI.",
+          "Wait a moment while the AI identifies and organizes the relevant data.",
+          "Copy the structured result and paste it into your spreadsheet or document."
+        ]}
+        faqs={[
+          { q: "Is Data Extractor really free to use?", a: "Yes, Data Extractor is free to use with no signup or subscription required." },
+          { q: "What input does Data Extractor accept?", a: "You paste plain text directly into the tool. There is no file upload — if your source is a PDF or webpage, copy the text from it first and paste it in." },
+          { q: "What format is the extracted data in?", a: "The AI returns the extracted data as readable text formatted as JSON or a table, which you can copy. There is no direct file download to CSV or Excel." },
+          { q: "Can Data Extractor read scanned documents or images?", a: "No, this tool only processes text you paste in — it doesn't perform OCR on images or scanned documents." }
+        ]}
+        tips={[
+          "Use clear, well-formatted source text for more accurate extraction results.",
+          "Mention what kind of data you want extracted at the start of your pasted text to guide the AI.",
+          "Test with a small sample first to see how the output is structured before processing a larger document.",
+          "Copy the result into a spreadsheet app if you want to convert it into a CSV or table yourself."
+        ]}
+      />
     </div>
   );
 }
