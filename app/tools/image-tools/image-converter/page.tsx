@@ -1,5 +1,6 @@
 'use client';
 import { useState, useCallback, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 interface ConvertedFile {
   originalName: string;
@@ -240,6 +241,28 @@ export default function ImageConverterPage() {
         </div>
 
       </div>
+      <SeoContent
+        title="Image Converter"
+        description="Image Converter is a free online tool that converts images between PNG, JPG, WebP, and AVIF entirely in your browser — nothing is ever uploaded to a server. Drop in one or many images, pick your target format and quality, and download the results instantly, with a live before/after size comparison for every file."
+        howTo={[
+          "Drop or click to upload one or more images (PNG, JPG, WebP, AVIF, GIF, BMP, or TIFF are all accepted).",
+          "Choose your output format: WebP, PNG, JPG, or AVIF.",
+          "Adjust the quality slider to balance file size against image quality.",
+          "Click Convert, then download each result individually or use \"Download all\" for the whole batch."
+        ]}
+        faqs={[
+          { q: "Is Image Converter free to use?", a: "Yes, it's completely free with no signup and no limit on how many images you can convert." },
+          { q: "Are my images uploaded anywhere?", a: "No. Every conversion happens locally in your browser using the Canvas API — your files never leave your device." },
+          { q: "Which formats are supported?", a: "You can upload PNG, JPG, WebP, AVIF, GIF, BMP, or TIFF images, and convert them to WebP, PNG, JPG, or AVIF." },
+          { q: "Can I convert several images at once?", a: "Yes, you can add multiple files and convert them all in one batch, then download them individually or together." }
+        ]}
+        tips={[
+          "WebP usually gives the best balance of quality and file size for web use — a solid default choice.",
+          "The quality slider only affects lossy formats (JPG, WebP, AVIF); PNG output is always lossless, so it won't change PNG file size.",
+          "AVIF encoding support varies by browser — if a conversion to AVIF fails, WebP is a reliable alternative with similarly small files.",
+          "Check the size comparison shown next to each result (green for smaller, orange for larger) before choosing which files to keep."
+        ]}
+      />
     </div>
   );
 }

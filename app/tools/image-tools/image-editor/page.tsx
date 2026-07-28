@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef, useCallback } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function ImageEditorPage() {
   const [image, setImage] = useState<string | null>(null);
@@ -268,6 +269,28 @@ export default function ImageEditorPage() {
           </div>
         </div>
       </div>
+      <SeoContent
+        title="Image Editor"
+        description="Image Editor is a free, full-featured photo editor that runs entirely in your browser — no upload, no signup, and no software to install. Adjust colors, transform and crop, apply creative effects like pixelation and vignette, and decorate your image with borders and text, then download the result as a PNG."
+        howTo={[
+          "Upload an image from your device to load it into the canvas editor.",
+          "Use the Adjust, Transform, Effects, and Decorate tabs to tweak brightness, contrast, saturation, rotation, flips, pixelation, noise, vignette, borders, and text.",
+          "Click \"Apply\" to render your changes onto the preview.",
+          "Click \"Download\" to save the edited image as a PNG once you're happy with the result."
+        ]}
+        faqs={[
+          { q: "Is Image Editor free to use?", a: "Yes, it's completely free with no signup and no limit on how many images you can edit." },
+          { q: "Is my image uploaded to a server?", a: "No. All editing happens locally in your browser using the Canvas API — your image never leaves your device." },
+          { q: "What kinds of edits can I make?", a: "Color adjustments (brightness, contrast, saturation, grayscale, invert), transforms (rotate, flip, pixelate), effects (noise/grain, vignette), and decorations (rounded corners, borders, text overlay)." },
+          { q: "What format can I download my edited image in?", a: "Edited images are downloaded as PNG files." }
+        ]}
+        tips={[
+          "Changes only appear after you click \"Apply\" — adjusting a slider or checkbox doesn't update the preview until you do.",
+          "Use \"Reinitialiser\" (Reset) to clear every adjustment and start over without re-uploading the image.",
+          "Combine desaturation with a vignette for a quick vintage or moody look.",
+          "Rounded corners and a border are a fast way to turn a photo into a ready-to-use avatar or card image."
+        ]}
+      />
     </div>
   );
 }
