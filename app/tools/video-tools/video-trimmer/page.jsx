@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function VideoTrimmerPage() {
   const [file, setFile] = useState(null);
   const [duration, setDuration] = useState(0);
@@ -67,39 +68,28 @@ export default function VideoTrimmerPage() {
           {result && <div className="space-y-2"><video controls src={result} className="w-full rounded-xl" /><a href={result} download="trimmed.webm" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Video Trimmer</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Video Trimmer is a free online tool that allows you to quickly cut and trim videos without downloading software or losing quality. Simply upload your video, select the start and end points, and download your trimmed file instantly.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Video Trimmer</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Video Trimmer website and click the 'Upload Video' button to select your video file from your computer.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Use the timeline scrubber to set your desired start point by clicking and dragging or entering specific timestamps.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Set your end point using the same method, ensuring you've selected the exact portion of video you want to keep.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the 'Trim' or 'Export' button and wait for processing to complete, then download your trimmed video file.</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What video formats does Video Trimmer support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Video Trimmer supports all popular formats including MP4, AVI, MOV, WebM, MKV, FLV, and more. The tool automatically detects and processes your file format.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for uploading videos?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most free versions support files up to 500MB to 2GB depending on your internet connection. For larger files, consider breaking your video into smaller segments.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will trimming my video reduce the quality?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Video Trimmer preserves the original video quality by simply removing unwanted sections without re-encoding the entire file.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to create an account to use Video Trimmer?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Video Trimmer is completely free and requires no account creation or login to trim and download your videos.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Preview your trimmed video before downloading to ensure you've selected the correct start and end points.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use keyboard shortcuts for faster trimming: arrow keys to navigate frame-by-frame and spacebar to play/pause.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For precise cuts, zoom in on the timeline to get a better view of the exact frames where you want to trim.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Save your original video file as a backup before trimming, in case you need to make additional edits later.</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Video Trimmer"
+        description="Video Trimmer cuts a section from your video by playing it and re-recording just that range using the browser's native MediaRecorder API, entirely client-side. Output is always WebM. Note: since trimming works by playing through the selected range in real time, processing takes as long as the trimmed clip's duration, not the length of your original file."
+        howTo={[
+          "Click the upload area and select a video file.",
+          "Use the Start and End sliders to set the section you want to keep.",
+          "Click \"Trim Video\" — the selected range plays through once while it's recorded.",
+          "Preview and download the trimmed WebM file."
+        ]}
+        faqs={[
+          { q: "Does trimming preserve the exact original quality?", a: "Not quite — the clip is re-encoded through the browser's WebM encoder rather than cut losslessly." },
+          { q: "What output format do I get?", a: "Always WebM, regardless of your original file's format." },
+          { q: "Is audio preserved?", a: "Yes, audio is captured along with the video track." },
+          { q: "Is my file uploaded anywhere?", a: "No, trimming happens entirely in your browser." }
+        ]}
+        tips={[
+          "Trimming takes about as long as your selected clip's duration, since it plays through in real time while recording — a 30-second trim takes about 30 seconds.",
+          "Keep the browser tab open and active while trimming, since the video needs to actively play for the recording to capture it.",
+          "Preview your start and end points on the full video before trimming to avoid re-doing the process.",
+          "If you need a format other than WebM, convert the trimmed result afterward with a dedicated converter."
+        ]}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function VideoResizerPage() {
   const [file, setFile] = useState(null);
   const [width, setWidth] = useState(1280);
@@ -63,39 +64,28 @@ export default function VideoResizerPage() {
           {result && <div className="space-y-2"><video controls src={result} className="w-full rounded-xl" /><a href={result} download="resized.webm" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Video Resizer</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Video Resizer is a free online tool that allows you to quickly resize videos to any dimensions without quality loss or software installation. Perfect for social media, presentations, and web optimization, it supports all popular video formats and resolutions.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Video Resizer</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload your video file by clicking the upload button or dragging and dropping it into the interface</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Select your desired output resolution from preset options or enter custom width and height dimensions</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Choose your preferred video format and quality settings to optimize file size</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the resize button and download your resized video once processing is complete</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What video formats does Video Resizer support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Video Resizer supports all major video formats including MP4, AVI, MOV, MKV, WebM, FLV, and more for both upload and download.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for uploading videos?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">We support videos up to 2GB in size, which covers most common use cases for social media and web content.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will resizing my video reduce its quality?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Our advanced compression algorithm minimizes quality loss while reducing file size, maintaining excellent visual clarity at your target resolution.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How long does the resizing process take?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Processing time depends on your video length and desired resolution, typically ranging from a few seconds to a few minutes for standard videos.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use 1920x1080 (Full HD) for YouTube uploads and 1280x720 (HD) for faster processing times</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Select a lower bitrate when resizing for social media platforms to reduce file size without noticeable quality reduction</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Resize to 9:16 aspect ratio for vertical videos optimized for TikTok, Instagram Reels, and YouTube Shorts</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Always test your resized video on your target platform before sharing to ensure proper playback and quality</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Video Resizer"
+        description="Video Resizer redraws your video at a new width and height on a canvas and records the result, entirely in your browser. Note: the output is always WebM and has no audio, since canvas recordings don't carry sound, and dimensions aren't aspect-ratio-locked — entering a width/height that doesn't match your source video's proportions will stretch the result."
+        howTo={[
+          "Click the upload area and select a video file — its native dimensions fill the Width/Height fields automatically.",
+          "Enter custom dimensions, or click a preset (720p, 1080p, or 480p).",
+          "Click \"Resize Video\" — the video plays through once while the resized version is recorded.",
+          "Preview and download the resized WebM file."
+        ]}
+        faqs={[
+          { q: "Does it preserve aspect ratio automatically?", a: "No — enter a width and height that match your source video's proportions yourself, or the result will be stretched." },
+          { q: "Does the resized video have audio?", a: "No — since resizing works by drawing frames to a canvas, and canvas recordings never carry audio, the output is silent." },
+          { q: "What output format do I get?", a: "Always WebM." },
+          { q: "Is my file uploaded anywhere?", a: "No, resizing happens entirely in your browser." }
+        ]}
+        tips={[
+          "Divide your source video's width and height by the same number to keep proportions correct and avoid a stretched result.",
+          "Since output has no audio, only use this when sound isn't needed, or re-add audio afterward with an editing tool.",
+          "Resizing takes about as long as the video's full duration, since frames are captured as it plays in real time.",
+          "Use the 720p/1080p/480p presets for common platform-ready sizes instead of typing custom numbers."
+        ]}
+      />
     </div>
   );
 }

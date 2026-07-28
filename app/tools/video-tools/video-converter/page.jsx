@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function VideoConverterPage() {
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState('');
@@ -51,39 +52,28 @@ export default function VideoConverterPage() {
           {result && <div className="space-y-2"><video controls src={result} className="w-full rounded-xl" /><a href={result} download="converted.webm" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download WebM</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Video Converter</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Video Converter is a free online tool that allows you to convert video files between multiple formats including MP4, AVI, MOV, WebM, and more without installing any software. Simply upload your video, select your desired output format, and download the converted file instantly with no quality loss.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Video Converter</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Click the upload button and select the video file you want to convert from your device</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your desired output format from the available options (MP4, AVI, MOV, WebM, FLV, etc.)</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Optionally adjust video settings such as resolution, bitrate, and quality to meet your needs</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the convert button and wait for the process to complete, then download your converted video</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What video formats does this converter support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Our Video Converter supports all popular formats including MP4, AVI, MOV, WebM, FLV, MKV, WMV, 3GP, and many more.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for conversions?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">We support video files up to 2GB. For larger files, you may need to compress or split your video before conversion.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How long does the conversion process take?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Conversion time depends on your video's size and length, but most files are processed within 5-15 minutes.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do you store my uploaded videos?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, we automatically delete all uploaded files after 24 hours and do not store or share your videos with third parties.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For faster conversions, reduce the video resolution or quality settings before uploading</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use MP4 format for maximum compatibility across devices, browsers, and social media platforms</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Enable hardware acceleration in your browser settings to speed up the conversion process</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep your internet connection stable during conversion to avoid interruptions and ensure successful file downloads</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Video Converter"
+        description="Video Converter re-encodes your video to WebM using the browser's native MediaRecorder API, entirely client-side. Note: WebM is the only output format — there's no selector for MP4, AVI, MOV, or other targets — and since it works by playing and re-recording the video in real time, conversion takes as long as the video's actual duration."
+        howTo={[
+          "Click the upload area and select a video file.",
+          "Click \"Convert to WebM\" — the video plays through once while it's re-recorded.",
+          "Wait for the process to finish (roughly the length of the video).",
+          "Preview and download the resulting WebM file."
+        ]}
+        faqs={[
+          { q: "What formats can I convert to?", a: "WebM only — despite the tool's name, there's no format selector for MP4, AVI, MOV, or other targets." },
+          { q: "Is there quality loss?", a: "Yes, some — this re-encodes your video through the browser's WebM encoder, so it isn't a lossless conversion." },
+          { q: "How long does conversion take?", a: "Roughly as long as the source video's duration, since it plays and re-records the video in real time." },
+          { q: "Is my file uploaded anywhere?", a: "No, conversion runs entirely in your browser using the MediaRecorder API." }
+        ]}
+        tips={[
+          "Keep the browser tab open and active while converting, since the video needs to play through for the recording to work.",
+          "If you need a format other than WebM, use this to get a WebM file first, then convert that with a dedicated format-specific converter.",
+          "Test the converted WebM file in your target player before deleting the original, since some older devices have limited WebM support.",
+          "For long source videos, expect the conversion itself to take about as long as the video runs."
+        ]}
+      />
     </div>
   );
 }

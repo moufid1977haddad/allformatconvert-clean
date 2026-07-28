@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function VideoToGifPage() {
   const [file, setFile] = useState(null);
   const [frames, setFrames] = useState([]);
@@ -69,39 +70,28 @@ export default function VideoToGifPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Video To Gif</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Video To Gif is a free online tool that instantly converts your video files into animated GIFs without requiring any software installation or registration. Perfect for creating shareable animations from YouTube videos, MP4 files, or any video format, this tool makes it easy to extract the exact moments you want as GIFs.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Video To Gif</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Video To Gif website and click the 'Upload Video' button to select your video file from your computer or paste a video URL</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Trim the video to your desired length by setting the start and end timestamps using the timeline scrubber or input fields</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Adjust the GIF settings such as frame rate, quality, and size to optimize the output for your needs</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the 'Convert to GIF' button and wait for processing to complete, then download your new animated GIF file</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What video formats does Video To Gif support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Video To Gif supports most common video formats including MP4, MOV, AVI, WebM, MKV, and FLV, as well as URLs from YouTube and other video platforms</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for uploading videos?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most free online versions support files up to 100-500MB depending on the specific tool configuration, though larger files may take longer to process</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I adjust the speed and quality of the output GIF?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Video To Gif allows you to customize frame rate, resolution, and quality settings to create the perfect animated GIF for your needs</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to create an account to use Video To Gif?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Video To Gif is completely free and requires no account creation, registration, or login to convert your videos</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep your GIF file size small by selecting a lower resolution and reducing the frame rate, which helps with faster loading on social media platforms</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For best results, trim your video to 5-10 seconds as longer GIFs take more time to process and create larger file sizes</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Experiment with different frame rates between 5-15 fps to find the perfect balance between smooth animation and file size</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Preview your GIF before downloading to ensure the timing, speed, and quality match your expectations before sharing</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Video to GIF"
+        description="Video to GIF extracts a series of still frames from your video, entirely in your browser, with adjustable frame rate (1–15 FPS) and capture duration (1–10 seconds). Each frame downloads individually as a PNG. Note: it doesn't currently assemble the frames into a single animated GIF file, and there's no support for pasting a YouTube or other video URL — only local file uploads work."
+        howTo={[
+          "Click the upload area and select a video file from your device.",
+          "Set your desired FPS and capture duration using the sliders.",
+          "Click \"Capture Frames\" to extract evenly spaced still frames from the start of the video.",
+          "Download each frame individually as a PNG using the buttons below the grid."
+        ]}
+        faqs={[
+          { q: "Does this produce a single animated GIF file?", a: "Not currently — it captures a set of still frames (FPS × duration) that you download individually; combining them into an animated GIF requires a separate tool." },
+          { q: "Can I paste a YouTube link instead of uploading a file?", a: "No, only local video file uploads are supported." },
+          { q: "How many frames can I capture?", a: "Up to 15 FPS for up to 10 seconds, so as many as 150 frames." },
+          { q: "Is my file uploaded anywhere?", a: "No, everything runs locally in your browser." }
+        ]}
+        tips={[
+          "Combine the downloaded frames using a dedicated GIF-assembly tool if you need a true animated GIF file.",
+          "Frames are captured starting from the beginning of the video — trim your source video first if you need frames from later on.",
+          "A lower FPS (5–8) is usually enough once frames are assembled into a GIF elsewhere.",
+          "Higher FPS and longer duration settings capture more frames but take longer to process."
+        ]}
+      />
     </div>
   );
 }

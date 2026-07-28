@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function VideoRotatorPage() {
   const [file, setFile] = useState(null);
   const [angle, setAngle] = useState(90);
@@ -65,39 +66,28 @@ export default function VideoRotatorPage() {
           {result && <div className="space-y-2"><video controls src={result} className="w-full rounded-xl" /><a href={result} download="rotated.webm" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Video Rotator</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Video Rotator is a free online tool that allows you to rotate videos to any angle without losing quality or requiring software installation. Perfect for fixing sideways videos, creating unique content angles, and adjusting video orientation instantly in your browser.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Video Rotator</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Video Rotator website and click the upload button to select your video file from your device</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your desired rotation angle (90Â°, 180Â°, 270Â°, or custom angles) from the rotation options menu</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Preview your rotated video in the player to ensure it looks correct before processing</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the download button to save your rotated video to your computer in your preferred format</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What video formats does Video Rotator support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Video Rotator supports all common video formats including MP4, AVI, MOV, WebM, MKV, and more. The tool automatically detects and processes your file format.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for uploading videos?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Video Rotator can handle videos up to 2GB in size. For larger files, we recommend splitting your video or compressing it before upload.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will rotating my video reduce its quality?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Video Rotator uses lossless rotation technology that preserves your original video quality and resolution without any degradation.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How long does it take to rotate a video?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Processing time depends on your video length and file size, typically ranging from a few seconds to a few minutes. The tool works faster with shorter videos.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the preview feature before downloading to ensure your video is rotated exactly as you want it</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For batch processing multiple videos, rotate them one at a time and organize them in a dedicated folder</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>If your video plays sideways on mobile devices, a 90Â° rotation will fix the orientation issue automatically</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Consider reducing video resolution before upload if you experience slow processing times with large files</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Video Rotator"
+        description="Video Rotator rotates your video by 90°, 180°, or 270° by redrawing each frame on a rotated canvas and recording the result, entirely in your browser. Note: the output is always WebM and has no audio, since canvas recordings don't carry sound, and only these three fixed angles are available — there's no custom-angle option."
+        howTo={[
+          "Click the upload area and select a video file.",
+          "Click 90°, 180°, or 270° to choose your rotation angle.",
+          "Click \"Rotate Video\" — the video plays through once while the rotated version is recorded.",
+          "Preview and download the rotated WebM file."
+        ]}
+        faqs={[
+          { q: "Can I rotate by a custom angle?", a: "Not currently — only 90°, 180°, and 270° are available." },
+          { q: "Does the rotated video have audio?", a: "No — since rotating works by drawing frames to a canvas, and canvas recordings never carry audio, the output is silent." },
+          { q: "Does rotating reduce quality?", a: "Yes, some — the video is re-encoded through the canvas and MediaRecorder, so it isn't a lossless operation." },
+          { q: "Is my file uploaded anywhere?", a: "No, rotation happens entirely in your browser." }
+        ]}
+        tips={[
+          "Use 90° to fix a video recorded holding your phone sideways.",
+          "Since output has no audio, only use this when sound isn't needed, or re-add audio afterward with an editing tool.",
+          "Rotating takes about as long as the video's full duration, since it plays through in real time while recording.",
+          "Preview the live player after selecting an angle — it shows the CSS-rotated preview before you commit to the full render."
+        ]}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function VideoMetadataPage() {
   const [metadata, setMetadata] = useState(null);
   const [file, setFile] = useState(null);
@@ -50,39 +51,28 @@ export default function VideoMetadataPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Video Metadata</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Video Metadata is a free online tool that extracts and displays detailed information about your video files, including duration, resolution, codec, bitrate, and frame rate. Quickly analyze video properties without installing any software or plugins.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Video Metadata</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Video Metadata tool website and locate the upload area on the homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the upload button or drag and drop your video file into the designated zone</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Wait for the tool to process your video and extract all metadata information</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Review the detailed metadata results displayed on your screen and download the report if needed</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What video formats does Video Metadata support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Video Metadata supports all major video formats including MP4, AVI, MOV, MKV, WebM, FLV, WMV, and more.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for uploading videos?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool can process videos up to 2GB in size. For larger files, consider compressing or splitting your video.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do you store my uploaded videos?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, all uploaded videos are processed temporarily and automatically deleted after analysis. Your privacy is protected.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I use Video Metadata on mobile devices?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Video Metadata is fully responsive and works on smartphones, tablets, and desktop computers.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use Video Metadata to verify video specifications before uploading to streaming platforms like YouTube or Vimeo</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Export metadata reports to document your video files for archival or professional purposes</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Compare metadata from multiple videos to ensure consistent quality and specifications across your content library</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Check bitrate and resolution information to optimize your videos for different devices and internet speeds</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Video Metadata"
+        description="Video Metadata reads a video file's basic properties — name, size, type, duration, resolution, and last-modified date — directly in your browser using the native HTML5 video element. Note: it doesn't extract codec, bitrate, or frame rate information."
+        howTo={[
+          "Click the upload area and select a video file.",
+          "The video loads into the player and its metadata is read automatically.",
+          "Review the properties listed below the player.",
+          "Upload a different file at any time to see its metadata instead."
+        ]}
+        faqs={[
+          { q: "What information does it show?", a: "File name, size, MIME type, duration, width, height, and last-modified date." },
+          { q: "Does it show codec, bitrate, or frame rate?", a: "Not currently — only the properties listed above are extracted." },
+          { q: "Can I download a metadata report?", a: "Not currently — the information is displayed on the page only, with no export button." },
+          { q: "Is my file uploaded anywhere?", a: "No, metadata is read entirely in your browser via the File and video APIs." }
+        ]}
+        tips={[
+          "Use the duration and resolution fields to quickly confirm you have the right video file before further editing.",
+          "The \"type\" field shows your browser's detected MIME type, which can help spot mislabeled file extensions.",
+          "For deeper technical details like codec or bitrate, you'll need a dedicated media-inspection tool.",
+          "Check the file size here before uploading elsewhere if a platform has strict size limits."
+        ]}
+      />
     </div>
   );
 }

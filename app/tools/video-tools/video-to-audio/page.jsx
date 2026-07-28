@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function VideoToAudioPage() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
@@ -54,39 +55,28 @@ export default function VideoToAudioPage() {
           {result && <div className="space-y-2"><audio controls src={result} className="w-full" /><a href={result} download="audio.wav" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download WAV</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Video To Audio</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Video To Audio is a free online tool that converts your video files into high-quality audio formats instantly without any software installation required. Simply upload your video and download the extracted audio in MP3, WAV, or other popular formats within seconds.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Video To Audio</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Video To Audio website and click the 'Upload Video' button to select your video file from your computer</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your desired output audio format (MP3, WAV, AAC, OGG, or FLAC) from the format selection dropdown menu</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Convert' button and wait for the tool to process and extract the audio from your video</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Once conversion is complete, click the 'Download' button to save your audio file to your device</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What video formats does Video To Audio support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool supports all major video formats including MP4, AVI, MOV, WMV, FLV, MKV, WEBM, and more.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for uploads?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most videos up to 500MB can be converted. For larger files, consider splitting your video or compressing it first.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to create an account to use Video To Audio?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No account is required. The tool is completely free to use without registration or login.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How long does the conversion process take?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Conversion time depends on your video length and file size, but typically takes between 30 seconds to 2 minutes.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For faster conversion, upload videos shorter than 10 minutes and ensure your internet connection is stable</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Choose MP3 format if you want maximum compatibility with all devices and media players</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Trim your video before conversion if you only need audio from a specific section to reduce file size</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Check the audio bitrate settings before conversion if you need higher quality audio for professional use</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Video to Audio"
+        description="Video to Audio extracts the audio track from a video file using the Web Audio API, entirely in your browser. Note: the output is always a mono WAV file — only the first audio channel is extracted, so stereo sources are downmixed to a single channel, and there's no MP3, AAC, or OGG export option."
+        howTo={[
+          "Click the upload area and select a video file.",
+          "Click \"Extract Audio\" to decode and render the audio track locally.",
+          "Preview the result in the audio player.",
+          "Click \"Download WAV\" to save the extracted audio."
+        ]}
+        faqs={[
+          { q: "What audio format do I get?", a: "Always mono WAV — MP3, AAC, OGG, and FLAC aren't available." },
+          { q: "Does it keep stereo audio?", a: "No — only the first channel is extracted, so stereo or multi-channel sources are effectively downmixed to mono." },
+          { q: "Is Video to Audio free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Is my file uploaded anywhere?", a: "No, extraction happens entirely in your browser via the Web Audio API." }
+        ]}
+        tips={[
+          "If you need stereo or a compressed format like MP3, convert the downloaded WAV afterward with a dedicated audio converter.",
+          "This works on the video's decodable audio track — if your browser can't decode the video's specific audio codec, extraction will fail.",
+          "WAV files are large and uncompressed — convert to MP3 afterward if file size matters for sharing.",
+          "Extraction is usually much faster than the video's actual duration, unlike the canvas-based video tools that re-record in real time."
+        ]}
+      />
     </div>
   );
 }

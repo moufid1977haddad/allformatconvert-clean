@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function VideoScreenshotPage() {
   const [file, setFile] = useState(null);
   const [screenshots, setScreenshots] = useState([]);
@@ -59,39 +60,28 @@ export default function VideoScreenshotPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Video Screenshot</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Video Screenshot is a free online tool that allows you to capture and extract frames from any video instantly without downloading software. Simply upload your video, select the frame you want, and download your screenshot in seconds.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Video Screenshot</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload your video file by clicking the upload button or dragging and dropping a video onto the tool</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Use the video player controls to navigate to the exact frame you want to capture as a screenshot</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the screenshot button to capture the current frame from the video player</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your screenshot image to your device in your preferred format</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What video formats does Video Screenshot support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Video Screenshot supports all major video formats including MP4, AVI, MOV, MKV, FLV, WMV, and WebM formats.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for uploading videos?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">While most browsers can handle videos up to several gigabytes, we recommend keeping videos under 2GB for optimal performance.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I edit the screenshot after capturing it?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Video Screenshot focuses on capturing frames, but you can use any image editor to further enhance or edit your downloaded screenshot.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do you store my videos after I use the tool?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, all videos and screenshots are processed locally in your browser and are not stored on our servers for privacy protection.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the timeline slider for precise frame selection by clicking and dragging along the video progress bar</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Pause the video before clicking screenshot to ensure you capture the exact moment you want without motion blur</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Try adjusting your browser zoom level if you need to see more detail before capturing your screenshot</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Download screenshots in PNG format for better quality and lossless compression compared to JPEG</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Video Screenshot"
+        description="Video Screenshot captures the current frame of a video as a PNG image, entirely in your browser — pause or seek to the moment you want, then capture as many stills as you need."
+        howTo={[
+          "Click the upload area and select a video file.",
+          "Use the player controls to pause on the exact frame you want.",
+          "Click \"Capture Screenshot\" to save that frame — repeat for as many frames as you like.",
+          "Click \"Download\" under any captured image to save it as a PNG."
+        ]}
+        faqs={[
+          { q: "What image format do screenshots download as?", a: "PNG only." },
+          { q: "Can I capture multiple frames?", a: "Yes, click \"Capture Screenshot\" as many times as you like at different points in the video." },
+          { q: "Is Video Screenshot free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Is my file uploaded anywhere?", a: "No, capturing happens entirely in your browser using canvas — your video is never uploaded to a server." }
+        ]}
+        tips={[
+          "Pause the video before capturing to avoid motion blur from a frame mid-transition.",
+          "Use the timeline scrubber for precise frame selection rather than relying on play/pause timing.",
+          "Capture several nearby frames if you need to pick the sharpest one afterward.",
+          "PNG is lossless, so captured screenshots retain full quality for further editing."
+        ]}
+      />
     </div>
   );
 }

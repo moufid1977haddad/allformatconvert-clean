@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function VideoCompressorPage() {
   const [file, setFile] = useState(null);
   const [quality, setQuality] = useState(0.5);
@@ -66,39 +67,28 @@ export default function VideoCompressorPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Video Compressor</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Video Compressor is a free online tool that reduces video file sizes without sacrificing quality, making it easy to share, upload, and store your videos. Simply upload your video, select your preferred compression settings, and download the optimized file in seconds.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Video Compressor</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Video Compressor website and click the 'Upload Video' button to select your video file from your device</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your desired compression level and output format from the available options to customize the compression settings</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Compress' button and wait for the tool to process and reduce your video file size</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your compressed video file once processing is complete and use it for sharing, uploading, or storage</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What video formats does Video Compressor support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Video Compressor supports all major video formats including MP4, AVI, MOV, MKV, FLV, WMV, and more.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for uploading videos?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most free online video compressors support files up to 500MB to 2GB depending on your internet connection and server capacity.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will compression reduce video quality?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Video Compressor uses advanced algorithms to minimize quality loss while significantly reducing file size, giving you the best balance between size and quality.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How long does it take to compress a video?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Compression time depends on video length and file size, typically ranging from a few seconds to several minutes for larger files.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Start with a lower compression level if you want to maintain higher video quality, and increase compression only if needed for smaller file sizes</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Choose the MP4 format for best compatibility across devices and platforms when sharing your compressed videos online</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Compress videos during off-peak hours for faster processing times, especially if working with large video files</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test compressed videos on different devices before final distribution to ensure quality meets your requirements and expectations</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Video Compressor"
+        description="Video Compressor re-records your video at a lower bitrate using the browser's native MediaRecorder API, entirely client-side. Output is always WebM. Note: since it works by playing and re-recording your video in real time, processing takes as long as the video's actual duration."
+        howTo={[
+          "Click the upload area and select a video file.",
+          "Set your target quality using the slider (10%–100%, which scales the output bitrate).",
+          "Click \"Compress Video\" — the video plays through once while it's re-recorded at the new bitrate.",
+          "Compare the before/after size, then download the result."
+        ]}
+        faqs={[
+          { q: "What output format do I get?", a: "Always WebM, regardless of your original format." },
+          { q: "Is audio preserved?", a: "Yes, audio is captured along with the video track." },
+          { q: "How long does compression take?", a: "As long as the video's full duration, since it works by playing and re-recording it in real time rather than processing frames instantly." },
+          { q: "Is my file uploaded anywhere?", a: "No, everything happens locally using your browser's MediaRecorder API." }
+        ]}
+        tips={[
+          "Lower quality settings produce smaller files but more visible compression artifacts — start around 50% and adjust from there.",
+          "Don't close or minimize the tab while compressing, since the video needs to actively play through for the recording to capture it.",
+          "For very long videos, expect compression to take just as long as watching the video.",
+          "If you need MP4 output instead of WebM, convert the compressed file afterward with a dedicated converter."
+        ]}
+      />
     </div>
   );
 }

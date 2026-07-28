@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function VideoFilterPage() {
   const [file, setFile] = useState(null);
   const [filter, setFilter] = useState('none');
@@ -73,39 +74,28 @@ export default function VideoFilterPage() {
           {result && <div className="space-y-2"><video controls src={result} className="w-full rounded-xl" /><a href={result} download="filtered.webm" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Video Filter</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Video Filter is a free online tool that allows you to apply professional-quality filters and effects to your videos instantly without requiring any software downloads or technical expertise. Transform your videos with stunning visual enhancements, color corrections, and creative effects in just a few clicks.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Video Filter</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Video Filter website and click the 'Upload Video' button to select your video file from your device</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose from a variety of available filters and effects such as vintage, black and white, blur, brightness, and contrast adjustments</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Preview your video with the selected filter applied and adjust intensity settings to customize the effect to your preference</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the 'Download' or 'Export' button to save your filtered video to your device in your desired format</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Video Filter really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Video Filter is completely free to use with no hidden charges, subscriptions, or premium tiers required for basic filtering functionality.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What video formats does Video Filter support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Video Filter supports all major video formats including MP4, AVI, MOV, WebM, and MKV, making it compatible with videos from most devices and cameras.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How long does it take to process and download a filtered video?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Processing time depends on your video length and file size, typically ranging from a few seconds to a few minutes for videos under 100MB.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I apply multiple filters to the same video?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Video Filter allows you to layer multiple filters and effects on a single video to create unique, customized looks for your content.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Start with subtle filter adjustments and gradually increase intensity to avoid over-processing your video and maintaining natural quality</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Preview filters in full-screen mode before downloading to ensure the effect looks good on different screen sizes and lighting conditions</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Combine complementary filters like brightness and contrast adjustments with color filters for more professional and polished results</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Export your filtered video in the same resolution as your original to maintain video quality and avoid unnecessary file size increases</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Video Filter"
+        description="Video Filter applies one visual effect (Grayscale, Sepia, Invert, Blur, Brightness, Contrast, or Saturate) to your video by redrawing each frame on a canvas and re-recording it, entirely in your browser. Note: the output is always WebM and has no audio, since canvas recordings don't carry sound; only one filter can be active at a time, each at a fixed intensity."
+        howTo={[
+          "Click the upload area and select a video file.",
+          "Click one of the 8 filter buttons to preview it live on the video player.",
+          "Click \"Apply Filter\" — the video plays through once while the filtered version is recorded.",
+          "Preview and download the filtered WebM file."
+        ]}
+        faqs={[
+          { q: "Can I combine multiple filters?", a: "No, only one filter can be applied at a time — selecting a new one replaces the previous choice." },
+          { q: "Can I adjust filter intensity?", a: "Not currently — each filter uses a fixed preset value (e.g., Blur is always 3px, Contrast is always 200%)." },
+          { q: "Does the output have sound?", a: "No — filtering re-records the video through a canvas, and canvas recordings never include audio, so the filtered result is silent." },
+          { q: "Is my file uploaded anywhere?", a: "No, filtering happens entirely in your browser." }
+        ]}
+        tips={[
+          "Preview the filter on the live player (it updates instantly) before committing to the longer \"Apply Filter\" render step.",
+          "Since output has no audio, only use this on videos where sound doesn't matter, or re-add audio afterward with an editing tool.",
+          "Applying a filter takes as long as the video's full duration, since frames are captured in real time as it plays.",
+          "Trim your video first if you only need a filtered clip from a longer video, to reduce processing time."
+        ]}
+      />
     </div>
   );
 }

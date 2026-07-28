@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function VideoWatermarkPage() {
   const [file, setFile] = useState(null);
   const [text, setText] = useState('Watermark');
@@ -63,39 +64,28 @@ export default function VideoWatermarkPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Video Watermark</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Video Watermark is a free online tool that allows you to easily add watermarks to your videos without any software installation or subscription fees. Protect your video content and brand identity by adding text, image, or logo watermarks in just a few clicks.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Video Watermark</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload your video file by clicking the upload button or dragging and dropping your video onto the platform</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your watermark type (text, image, or logo) and customize its appearance, size, position, and opacity</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Preview your watermarked video to ensure the watermark placement and styling matches your preferences</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the download button to save your watermarked video to your device in your preferred format</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What video formats does Video Watermark support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Video Watermark supports all major video formats including MP4, AVI, MOV, WMV, FLV, MKV, and WebM for both uploading and downloading.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for uploading videos?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The free version supports videos up to 500MB. For larger files, you can split your video into smaller segments or consider upgrading to a premium plan.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I add multiple watermarks to a single video?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Video Watermark allows you to add multiple watermarks by layering text, images, and logos at different positions and with different opacity levels.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will the watermark quality affect my video quality?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, adding a watermark does not reduce your video quality. Your video maintains its original resolution and bitrate after watermarking.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Position your watermark in the corner of your video to minimize obstruction of important content while maintaining brand visibility</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use semi-transparent watermarks (30-50% opacity) to protect your content without making the watermark overly distracting to viewers</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test different watermark sizes on sample videos before watermarking your entire collection to find the optimal balance</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Consider using your logo as a watermark instead of text for stronger brand recognition and more professional appearance</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Video Watermark"
+        description="This tool captures a still frame from your video with a text watermark burned in, producing a downloadable PNG image — not a watermarked video file. Note: it works one frame at a time; there's no way to watermark the entire video and export it as a video, and only text watermarks are supported (no image or logo watermarks)."
+        howTo={[
+          "Click the upload area and select a video file.",
+          "Type your watermark text and choose a position from the 5 corner/center presets.",
+          "Navigate to the frame you want, then click \"Capture Frame with Watermark\".",
+          "Repeat for additional frames, and click \"Download\" under any image to save it as a PNG."
+        ]}
+        faqs={[
+          { q: "Does this add a watermark to my whole video?", a: "No — it captures individual still frames as watermarked PNG images, not a continuous watermarked video file." },
+          { q: "Can I use an image or logo as the watermark?", a: "Not currently — only text watermarks are supported, in a fixed font, size, and opacity." },
+          { q: "Can I adjust the watermark's opacity or font size?", a: "Not currently — it's fixed at bold 32px Arial, white at 70% opacity." },
+          { q: "Is my file uploaded anywhere?", a: "No, everything happens locally in your browser using canvas." }
+        ]}
+        tips={[
+          "Capture one frame per key moment you want a watermarked still of — this doesn't process the whole video at once.",
+          "Since only text watermarks are available, keep your text short so it doesn't get cut off near the frame's edges.",
+          "Choose a position over a less busy part of the frame so your watermark text stays readable.",
+          "For a genuinely watermarked video file (not just still images), you'll need a dedicated video-editing tool."
+        ]}
+      />
     </div>
   );
 }
