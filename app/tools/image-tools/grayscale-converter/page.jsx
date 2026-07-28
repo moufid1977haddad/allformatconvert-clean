@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function GrayscaleConverterPage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
@@ -36,39 +37,28 @@ export default function GrayscaleConverterPage() {
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="grayscale.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Grayscale Converter</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Grayscale Converter is a free online tool that instantly transforms your color images into professional grayscale versions without any software installation required. Simply upload your image and convert it to black and white in seconds with just a few clicks.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Grayscale Converter</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Grayscale Converter tool on our website and locate the upload area</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the upload button and select your color image from your computer or device</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the Convert to Grayscale button to process your image</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your converted grayscale image by clicking the download button</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats does Grayscale Converter support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Our tool supports all popular image formats including JPG, PNG, GIF, BMP, and WebP files.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for uploading images?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can upload images up to 10MB in size. For larger files, consider compressing your image first.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will the tool reduce the quality of my image?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, our converter maintains the original resolution and quality of your image during the grayscale conversion process.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert multiple images at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Currently, the tool converts one image at a time, but you can process multiple images sequentially by uploading them one after another.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For best results with portraits, ensure good lighting in the original image before converting to grayscale</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Save your converted image in PNG format to preserve quality without compression loss</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test the grayscale conversion on different images to find the style that works best for your project</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use grayscale images for professional documents, resumes, and formal publications for a classic look</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Grayscale Converter"
+        description="Grayscale Converter turns a color image into black and white by averaging each pixel's red, green, and blue values, entirely in your browser. Your image is never uploaded to a server."
+        howTo={[
+          "Click the upload area and select a color image from your device.",
+          "Click 'Convert to Grayscale' to process the image.",
+          "Preview the result.",
+          "Click the download button to save your grayscale PNG image."
+        ]}
+        faqs={[
+          { q: "What image formats does Grayscale Converter support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The output is always a PNG file." },
+          { q: "Is there a file size limit for uploading images?", a: "There's no fixed size limit — processing happens locally in your browser, so it's limited only by your device's available memory." },
+          { q: "Will the tool reduce the quality of my image?", a: "No, the original resolution is preserved — only the color information is changed." },
+          { q: "Can I convert multiple images at once?", a: "No, the tool converts one image at a time — there's no batch upload." }
+        ]}
+        tips={[
+          "Well-lit portraits with clear contrast tend to convert to grayscale most effectively.",
+          "The output is always saved as PNG, which keeps full quality with no compression loss.",
+          "Try converting a few different photos to see which ones look best in black and white.",
+          "Grayscale images work well for formal documents, resumes, and prints where color isn't needed."
+        ]}
+      />
     </div>
   );
 }

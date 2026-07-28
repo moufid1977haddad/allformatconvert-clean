@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function ImageCompressorPage() {
   const [image, setImage] = useState(null);
   const [quality, setQuality] = useState(80);
@@ -32,39 +33,28 @@ export default function ImageCompressorPage() {
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="compressed.jpg" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Image Compressor</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Image Compressor is a free online tool that reduces image file sizes without compromising quality, helping you optimize photos for web use, email sharing, and storage. Simply upload your images and instantly download compressed versions that load faster and take up less space.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Image Compressor</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Image Compressor website and click the upload button to select one or multiple images from your device</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your desired compression level (low, medium, or high) based on how much file size reduction you need</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the compress button and wait a few seconds for the tool to process your images</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download the compressed images individually or as a ZIP file to your device</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Image Compressor really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Image Compressor is completely free with no hidden charges, registration requirements, or premium upgrades needed for basic compression.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats does Image Compressor support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Image Compressor supports all major formats including JPG, PNG, GIF, WebP, BMP, and TIFF files.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will compression affect image quality?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Image Compressor uses advanced algorithms to minimize quality loss while achieving significant file size reduction, with adjustable compression levels to suit your needs.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for uploads?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most images can be compressed without issues, though very large files may have limitations depending on your browser and internet connection.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use high compression for web thumbnails and social media sharing where extreme quality isn't critical</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Start with medium compression and adjust based on results to find the perfect balance between quality and file size</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Compress images in batch mode when possible to save time and process multiple files simultaneously</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Always keep your original uncompressed images as backups before deleting them, in case you need higher quality versions later</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Image Compressor"
+        description="Image Compressor reduces an image's file size by re-encoding it as a JPEG at an adjustable quality level, entirely in your browser using the canvas element — your image is never uploaded to a server. Note that the output is always converted to JPEG, even if you upload a PNG or other format."
+        howTo={[
+          "Click the upload area and select an image from your device.",
+          "Adjust the quality slider (10–100%) to set the compression level.",
+          "Click 'Compress' to process the image.",
+          "Click the download button to save your compressed JPG file."
+        ]}
+        faqs={[
+          { q: "Is Image Compressor really free to use?", a: "Yes, it's completely free with no registration required." },
+          { q: "What image formats does Image Compressor support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP, for upload. The output is always a JPG file." },
+          { q: "Will compression affect image quality?", a: "Yes — lowering the quality slider reduces file size but also introduces JPEG compression artifacts. Higher settings preserve more quality at a larger file size." },
+          { q: "Can I compress multiple images at once?", a: "No, only one image at a time — there's no batch upload or ZIP download." }
+        ]}
+        tips={[
+          "If you need to keep transparency, don't use this tool — JPEG output doesn't support transparent backgrounds.",
+          "Start around 70-80% quality and adjust based on the result to find your ideal balance of size and clarity.",
+          "Compress images one at a time and download each before moving to the next.",
+          "Keep your original file as a backup in case you need a higher-quality version later."
+        ]}
+      />
     </div>
   );
 }

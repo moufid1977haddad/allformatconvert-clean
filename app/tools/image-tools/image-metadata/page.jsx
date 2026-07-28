@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function ImageMetadataPage() {
   const [metadata, setMetadata] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -28,39 +29,28 @@ export default function ImageMetadataPage() {
           {metadata && <div className="space-y-2">{Object.entries(metadata).map(([k,v]) => <div key={k} className="flex justify-between bg-neutral-50 rounded-lg border border-neutral-200 p-3"><span className="text-neutral-500 capitalize">{k}</span><span className="text-indigo-400 font-mono">{v}</span></div>)}</div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Image Metadata</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Image Metadata is a free online tool that extracts and displays detailed information from your photos, including EXIF data, creation date, camera settings, and file properties. Instantly view hidden metadata embedded in your images without downloading software or compromising your privacy.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Image Metadata</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Image Metadata tool on your browser and locate the upload area on the homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the upload button or drag and drop your image file into the designated zone</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Wait a few seconds for the tool to process and analyze your image file</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>View all extracted metadata information displayed in an organized, easy-to-read format on your screen</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my image data stored on your servers?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Image Metadata processes images locally in your browser. Your files are never uploaded to our servers, ensuring complete privacy and security.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file formats does the tool support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Image Metadata supports all common image formats including JPG, PNG, GIF, BMP, TIFF, WebP, and more.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I remove metadata from my images?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">While Image Metadata displays metadata, some versions include options to strip or remove sensitive EXIF data before downloading.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Why should I check image metadata?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Viewing metadata helps you verify photo authenticity, check camera settings, identify location data, and understand copyright information.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Remove location data from photos before sharing on social media to protect your privacy and security</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the metadata viewer to verify authentic photos and detect edited or manipulated images</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Check camera settings and EXIF data to improve your photography skills and learn from other photographers</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Batch process multiple images by uploading them one at a time to compare metadata across different photos</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Image Metadata Viewer"
+        description="Image Metadata Viewer reads basic file information from an image you upload — file name, file size, MIME type, pixel dimensions, and last-modified date — entirely in your browser. It does not parse embedded EXIF data, so it can't show camera settings, GPS location, or other camera-recorded metadata."
+        howTo={[
+          "Click the upload area and select an image from your device.",
+          "The tool reads the file's properties automatically once selected.",
+          "View the extracted information — name, size, type, dimensions, and last-modified date.",
+          "Upload a different image to view its properties instead."
+        ]}
+        faqs={[
+          { q: "Is my image data stored on your servers?", a: "No, the file's properties are read directly in your browser. Your image is never uploaded to a server." },
+          { q: "Does this tool show EXIF data like camera settings or GPS location?", a: "No. It only reads basic browser-accessible file properties (name, size, type, dimensions, last-modified date) — it does not parse the image's embedded EXIF metadata." },
+          { q: "Can I remove metadata from my images with this tool?", a: "No, this tool only displays basic file properties — it doesn't offer a way to strip EXIF data from a file." },
+          { q: "What file formats does the tool support?", a: "It accepts common image formats your browser can open, such as JPG, PNG, GIF, and WebP." }
+        ]}
+        tips={[
+          "If you need to inspect actual EXIF data — like GPS coordinates or camera settings — use a dedicated EXIF viewer, since this tool doesn't read that data.",
+          "The 'last modified' date reflects your local file's timestamp, not necessarily when the photo was taken.",
+          "Use this tool for a quick check of an image's pixel dimensions and file size before uploading it elsewhere.",
+          "Check one image at a time — there's no batch view for comparing multiple files."
+        ]}
+      />
     </div>
   );
 }

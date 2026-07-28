@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function ImagePixelatorPage() {
   const [image, setImage] = useState(null);
@@ -47,39 +48,28 @@ export default function ImagePixelatorPage() {
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="pixelated.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Image Pixelator</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Image Pixelator is a free online tool that instantly blurs and pixelates images to protect privacy and hide sensitive information without requiring any downloads or software installation. Simply upload your image, adjust the pixelation level, and download the modified image in seconds.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Image Pixelator</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Image Pixelator website and click the upload button to select an image from your computer or device</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Adjust the pixelation intensity using the slider to control how much the image will be blurred or pixelated</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Select the specific areas you want to pixelate by drawing rectangles or circles on the image preview</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the download button to save your pixelated image to your device in your preferred format</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Image Pixelator really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Image Pixelator is completely free with no hidden charges, subscriptions, or premium features required to pixelate your images.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats does Image Pixelator support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Image Pixelator supports all common image formats including JPG, PNG, GIF, BMP, WebP, and TIFF for both uploading and downloading.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my image data secure and private?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, all images are processed locally in your browser and are never stored on our servers, ensuring complete privacy and security.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I pixelate multiple images at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Image Pixelator processes one image at a time, but you can quickly pixelate multiple images by repeating the process for each image.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use a higher pixelation level for more sensitive information like faces and license plates, and lower levels for general privacy needs</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Take advantage of the selection tools to pixelate only specific areas rather than the entire image for better results</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Experiment with different pixelation levels on a copy of your image first to find the perfect balance between privacy and visibility</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Resize your image before uploading for faster processing times, especially if you're working with high-resolution or large file images</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Image Pixelator"
+        description="Image Pixelator applies a mosaic effect across your entire image by averaging blocks of pixels at a size you choose, entirely in your browser using the canvas element. Your image is never uploaded to a server."
+        howTo={[
+          "Click the upload area and select an image from your device.",
+          "Adjust the pixel size slider (2–50px) to set the block size.",
+          "Click 'Apply Pixelate' to process the image.",
+          "Click the download button to save your pixelated PNG image."
+        ]}
+        faqs={[
+          { q: "Is Image Pixelator really free to use?", a: "Yes, it's completely free with no registration required." },
+          { q: "What image formats does Image Pixelator support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The output is always a PNG file." },
+          { q: "Is my image data secure and private?", a: "Yes, all processing happens locally in your browser — your image is never uploaded to a server." },
+          { q: "Can I pixelate only a specific area, like a face?", a: "No, the effect is applied uniformly across the whole image — there's no selection tool for pixelating a specific region." }
+        ]}
+        tips={[
+          "Use a larger pixel size for stronger privacy protection on sensitive details, and a smaller size for a subtler mosaic look.",
+          "Since the effect applies to the whole image, crop out just the area you want obscured first if you don't want the rest pixelated.",
+          "Try a couple of pixel sizes on a copy of your image to find the right balance between privacy and visibility.",
+          "Pixelate one image at a time — there's no batch processing option."
+        ]}
+      />
     </div>
   );
 }

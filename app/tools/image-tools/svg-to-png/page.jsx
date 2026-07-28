@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function SvgToPngPage() {
   const [file, setFile] = useState(null);
@@ -63,39 +64,28 @@ export default function SvgToPngPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Svg To Png</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">SVG to PNG is a free online conversion tool that instantly transforms vector SVG files into raster PNG images with high quality and transparency support. Perfect for designers and developers who need to convert scalable graphics into portable image formats without installing any software.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Svg To Png</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the SVG to PNG converter tool on our website and locate the upload area</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the upload button or drag and drop your SVG file directly into the designated zone</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Adjust conversion settings such as resolution, background color, and scaling if needed</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the Convert button and download your PNG file instantly to your device</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is the maximum file size I can convert?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most SVG to PNG converters support files up to 50MB. Check your specific tool's limits as they may vary by platform.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will the conversion maintain transparency?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PNG format supports transparency, and most converters will preserve transparent areas from your SVG file by default.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert multiple SVG files at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Many online converters support batch conversion, allowing you to upload and convert multiple SVG files simultaneously for efficiency.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What resolution should I use for my PNG output?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Choose resolution based on your needs: 72 DPI for web use, 300 DPI for printing. Most tools offer preset options for common use cases.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For best results, ensure your SVG file is properly formatted and contains only vector elements without embedded raster images</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use higher DPI settings when converting SVGs intended for print media to maintain sharpness and quality</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Take advantage of batch conversion features to save time when converting multiple SVG files to PNG format</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Always download your converted PNG files promptly as temporary files may be deleted automatically after a certain period</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="SVG to PNG"
+        description="SVG to PNG rasterizes a vector SVG file into a PNG image at the exact pixel width and height you specify, entirely in your browser using the canvas element — your file is never uploaded to a server. Transparency in the SVG is preserved in the PNG output."
+        howTo={[
+          "Click the upload area and select an SVG file from your device.",
+          "Set your desired output width and height in pixels.",
+          "Click 'Convert to PNG' to render the image.",
+          "Click the download button to save your PNG file."
+        ]}
+        faqs={[
+          { q: "What is the maximum file size I can convert?", a: "There's no fixed size limit — processing happens locally, and SVG files are typically small text-based files anyway." },
+          { q: "Will the conversion maintain transparency?", a: "Yes, PNG supports transparency, and any transparent areas in your SVG carry over to the output." },
+          { q: "Can I convert multiple SVG files at once?", a: "No, only one file can be converted at a time — there's no batch upload." },
+          { q: "Can I set a DPI or background color for the output?", a: "No, you only set pixel width and height — there's no DPI or background color option." }
+        ]}
+        tips={[
+          "Set the width and height to match the resolution you actually need — the SVG is rasterized fresh at those dimensions, so there's no quality loss from scaling up within reason.",
+          "For print use, calculate the pixel dimensions you need at your target DPI and enter those directly.",
+          "Make sure your SVG doesn't rely on external resources (like linked fonts or images) that the browser can't load, since those won't render.",
+          "Convert one file at a time and download each result before starting the next."
+        ]}
+      />
     </div>
   );
 }

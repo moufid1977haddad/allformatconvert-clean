@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function ImageComparisonPage() {
   const [image1, setImage1] = useState(null);
@@ -41,39 +42,28 @@ export default function ImageComparisonPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Image Comparison</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Image Comparison is a free online tool that allows you to compare two images side-by-side to identify differences, similarities, and changes. Perfect for photographers, designers, and anyone needing to spot variations between visual content quickly and easily.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Image Comparison</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload or select your first image by clicking the upload button or dragging it into the designated area</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Upload your second image in the same way to the comparison panel</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Use the slider or toggle feature to move between the two images and identify differences</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your comparison results or share them directly with others using the export options</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats does Image Comparison support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Image Comparison supports all major image formats including JPG, PNG, GIF, WebP, and BMP files up to 10MB each.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my image data stored or shared?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Image Comparison processes all images locally in your browser and does not store or share your data with any servers.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I compare more than two images at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Currently, Image Comparison allows side-by-side comparison of two images at a time for optimal clarity and accuracy.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to create an account to use this tool?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No account is required. Image Comparison is completely free and available to use without registration or login.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the zoom feature to examine specific areas in detail and catch subtle differences you might otherwise miss</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Try the opacity slider mode for a smooth transition between images, which is great for spotting gradual changes</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Save your comparisons as screenshots or use the share feature to collaborate with team members and get feedback</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Ensure both images are similarly sized and oriented for the most accurate and useful comparison results</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Image Comparison"
+        description="Image Comparison shows two images stacked with a draggable vertical divider, letting you slide between a 'before' and 'after' view to spot differences. Both images stay in your browser — nothing is uploaded to a server."
+        howTo={[
+          "Click the first box and upload your 'before' image.",
+          "Click the second box and upload your 'after' image.",
+          "Drag the slider left and right to reveal more or less of each image.",
+          "Compare the two visually — there's no export or download for the comparison itself."
+        ]}
+        faqs={[
+          { q: "What image formats does Image Comparison support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP." },
+          { q: "Is my image data stored or shared?", a: "No, both images stay in your browser and are never uploaded to a server." },
+          { q: "Can I compare more than two images at once?", a: "No, the tool only supports comparing two images at a time." },
+          { q: "Can I export or download the comparison view?", a: "No, there's no export or screenshot feature built in — the slider is for on-screen viewing only." }
+        ]}
+        tips={[
+          "Use images with the same dimensions and framing for the most useful comparison.",
+          "Drag the slider slowly across areas you want to inspect closely.",
+          "If you want to share the comparison, take a manual screenshot of your browser window.",
+          "This is a visual before/after tool, not a pixel-difference detector — it won't highlight changes automatically."
+        ]}
+      />
     </div>
   );
 }

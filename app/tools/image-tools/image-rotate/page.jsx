@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function ImageRotatePage() {
   const [image, setImage] = useState(null);
   const [angle, setAngle] = useState(90);
@@ -38,39 +39,28 @@ export default function ImageRotatePage() {
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="rotated.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Image Rotate</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Image Rotate is a free online tool that allows you to quickly rotate images in any direction without downloading software or creating an account. Perfect for photographers, content creators, and anyone who needs to adjust image orientation instantly.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Image Rotate</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Image Rotate website and click the upload button to select an image from your device</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your desired rotation angle using the preset options (90Â°, 180Â°, 270Â°) or enter a custom angle</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Preview your rotated image to ensure it meets your requirements</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the download button to save your rotated image to your computer in original quality</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Image Rotate really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Image Rotate is completely free with no hidden charges, registration requirements, or premium upgrades needed.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats does Image Rotate support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Image Rotate supports all common image formats including JPG, PNG, GIF, BMP, WebP, and TIFF files.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will rotating my image reduce its quality?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Image Rotate maintains your original image quality and resolution when rotating, ensuring lossless output.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I rotate multiple images at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Currently, Image Rotate processes one image at a time, but you can quickly rotate multiple images by uploading them sequentially.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the preview feature before downloading to ensure the rotation angle is exactly what you need</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For landscape to portrait conversions, try 90Â° or 270Â° rotation depending on your preferred orientation</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep your original image files as backups before rotating, or download rotated versions with different names</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use custom angle rotation for fine-tuning images that need slight adjustments beyond standard 90Â° increments</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Image Rotate"
+        description="Image Rotate turns your image by a preset (90°, 180°, 270°) or custom angle, entirely in your browser using the canvas element — your image is never uploaded to a server."
+        howTo={[
+          "Click the upload area and select an image from your device.",
+          "Pick a preset angle (90°, 180°, 270°) or drag the slider for a custom angle.",
+          "Click 'Rotate' to process the image.",
+          "Click the download button to save your rotated PNG image."
+        ]}
+        faqs={[
+          { q: "Is Image Rotate really free to use?", a: "Yes, it's completely free with no registration required." },
+          { q: "What image formats does Image Rotate support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The output is always a PNG file." },
+          { q: "Will rotating my image reduce its quality?", a: "No, the pixels are redrawn at the same resolution with no compression applied." },
+          { q: "Can I rotate multiple images at once?", a: "No, the tool processes one image at a time — there's no batch upload." }
+        ]}
+        tips={[
+          "Preview the rotated result before downloading to confirm the angle is what you wanted.",
+          "For a quick landscape-to-portrait swap, use the 90° or 270° preset rather than the custom slider.",
+          "Keep your original file as a backup before rotating, in case you want to start over.",
+          "Use the custom-angle slider for fine adjustments beyond the standard 90° increments."
+        ]}
+      />
     </div>
   );
 }

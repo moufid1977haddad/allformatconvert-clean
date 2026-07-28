@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function AddNoisePage() {
   const [image, setImage] = useState(null);
@@ -48,39 +49,28 @@ export default function AddNoisePage() {
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="noisy.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Add Noise</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Add Noise is a free online tool that allows you to instantly add various types of noise effects to your images, including grain, dust, and static textures. Enhance your photos with professional-quality noise filters without requiring any software installation or technical expertise.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Add Noise</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Add Noise tool and click the upload button to select an image from your computer or device</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your preferred noise type from the available options such as Gaussian, salt and pepper, or Poisson noise</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Adjust the noise intensity slider to control how much noise is added to your image</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the Download button to save your noise-enhanced image to your device in your preferred format</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Add Noise completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Add Noise is completely free with no hidden fees, watermarks, or premium subscriptions required for any features.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats does Add Noise support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Add Noise supports all common image formats including JPG, PNG, GIF, WebP, and BMP for both uploading and downloading.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I undo or adjust the noise effect after adding it?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can adjust the noise intensity before downloading, and you can re-upload your original image to start over at any time.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my image data secure and private?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Your images are processed securely and are not stored on our servers after processing, ensuring your privacy and data protection.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Start with a lower noise intensity and gradually increase it to find the perfect balance for your specific image and desired effect</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Experiment with different noise types on the same image to discover which style best matches your creative vision or project needs</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Add Noise works best on photos with good lighting and clear subjects, as noise effects enhance detail and texture visibility</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the noise effect sparingly on portraits to avoid unwanted grain, but apply it generously to landscape or artistic photos for dramatic impact</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Add Noise"
+        description="Add Noise applies a random film-grain effect to your image by adding random variation to each pixel's brightness, entirely in your browser. It's a single adjustable-intensity effect — not a choice of different noise types — and your image never leaves your device."
+        howTo={[
+          "Click the upload area and select an image from your device.",
+          "Adjust the intensity slider to control how much grain is added.",
+          "Click 'Add Noise' to apply the effect.",
+          "Click the download button to save your noisy PNG image."
+        ]}
+        faqs={[
+          { q: "Is Add Noise completely free to use?", a: "Yes, Add Noise is completely free with no watermarks or subscriptions required." },
+          { q: "What image formats does Add Noise support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The output is always a PNG file." },
+          { q: "Can I choose between different noise types like Gaussian or salt-and-pepper?", a: "No, there's a single grain effect with an adjustable intensity slider — no separate noise-type selector." },
+          { q: "Is my image data secure and private?", a: "Yes — everything happens locally in your browser. Your image is never uploaded to a server." }
+        ]}
+        tips={[
+          "Start with a lower intensity and increase it gradually to find the right balance for your image.",
+          "Add Noise works well on photos with good lighting and clear subjects, since grain can obscure fine detail on darker images.",
+          "Re-upload your original image if you want to try a different intensity from scratch.",
+          "Use a lighter touch on portraits and a heavier one on landscapes or artistic shots for a more dramatic effect."
+        ]}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function HeicToPngPage() {
   const [file, setFile] = useState(null);
@@ -52,39 +53,28 @@ export default function HeicToPngPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Heic To Png</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Heic To Png is a free online converter tool that instantly transforms HEIC image files into PNG format without requiring any software installation or account creation. Perfect for users who need compatible image formats for web sharing, email, or universal device compatibility.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Heic To Png</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Heic To Png tool website and locate the upload area on the homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the upload button and select your HEIC image file from your computer or device</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>The tool automatically processes your image and converts it to PNG format within seconds</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your converted PNG file by clicking the download button and save it to your desired location</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Heic To Png completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Heic To Png is 100% free to use with no hidden charges, subscriptions, or premium features required for basic conversion.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file size limit does Heic To Png support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool supports HEIC files up to 50MB in size, making it suitable for most standard digital camera photos and screenshots.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to create an account to convert images?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No account creation is necessary. You can start converting your HEIC files immediately without any registration or login.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my uploaded images be kept private?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">All uploaded files are processed securely and automatically deleted from our servers after conversion, ensuring your privacy and data protection.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Batch upload multiple HEIC files at once to convert them all to PNG format in a single session for greater efficiency</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Check your image quality after conversion by opening the PNG file to ensure it meets your requirements before deleting the original</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use Heic To Png when sharing photos on social media platforms or websites that may not support HEIC format natively</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Save converted PNG files with descriptive names to easily organize and identify them in your file system</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="HEIC to PNG"
+        description="HEIC to PNG converts an iPhone HEIC photo to PNG format entirely in your browser, using the open-source heic2any library — your photo is never uploaded to a server."
+        howTo={[
+          "Click the upload area and select a HEIC or HEIF file from your device.",
+          "Click 'Convert to PNG' and wait a few seconds for the conversion to finish.",
+          "Preview the converted image.",
+          "Click the download button to save your PNG file."
+        ]}
+        faqs={[
+          { q: "Is HEIC to PNG completely free to use?", a: "Yes, it's 100% free with no account creation required." },
+          { q: "What file size limit does HEIC to PNG support?", a: "There's no fixed size limit — conversion happens locally in your browser, so it's limited only by your device's available memory." },
+          { q: "Do I need to create an account to convert images?", a: "No account is necessary — you can start converting immediately." },
+          { q: "Will my uploaded images be kept private?", a: "Yes. Conversion happens entirely in your browser using the heic2any library — your photo is never uploaded to a server." }
+        ]}
+        tips={[
+          "Convert one HEIC file at a time — there's no batch upload option.",
+          "Check the converted PNG right after downloading to confirm it looks the way you expect.",
+          "Use HEIC to PNG when sharing photos on platforms that don't support Apple's HEIC format natively.",
+          "PNG files are larger than HEIC, so expect the output to take up more storage space."
+        ]}
+      />
     </div>
   );
 }

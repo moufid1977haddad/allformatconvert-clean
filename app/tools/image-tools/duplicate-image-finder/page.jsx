@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function DuplicateImageFinderPage() {
   const [images, setImages] = useState([]);
   const [duplicates, setDuplicates] = useState([]);
@@ -44,39 +45,28 @@ export default function DuplicateImageFinderPage() {
           {duplicates.map(([a, b], i) => <div key={i} className="bg-red-900/30 rounded-xl p-3 text-sm"><span className="text-red-400">Duplicate: </span>{a} = {b}</div>)}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Duplicate Image Finder</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Duplicate Image Finder is a free online tool that helps you identify and remove duplicate images from your computer or cloud storage. Simply upload your images and the tool will scan them for duplicates, saving you storage space and keeping your photo library organized.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Duplicate Image Finder</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Duplicate Image Finder website and click the 'Upload Images' button to select photos from your device or folder</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Wait for the tool to scan and analyze all uploaded images using advanced image recognition technology</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Review the results as the tool displays groups of duplicate and similar images side by side for easy comparison</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Select which duplicate images you want to delete and click 'Remove Duplicates' to clean up your photo library</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Duplicate Image Finder really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Duplicate Image Finder is completely free with no hidden charges or premium features required to find and remove duplicate images.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How many images can I upload at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can upload up to 1000 images per session, though processing time may vary depending on file sizes and your internet connection.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my images be stored on your servers?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, your images are processed locally in your browser and automatically deleted after the scan completes. We do not store any of your personal photos.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can it find similar images or just exact duplicates?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Duplicate Image Finder can detect both exact duplicates and similar images with slight variations like different resolutions or minor edits.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Organize your images into folders before uploading to make it easier to manage and review duplicate results by category</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the similarity slider to adjust how strictly the tool matches images, helping you find near-duplicates with slight differences</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Backup your original images before removing duplicates to ensure you don't accidentally lose photos you want to keep</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Run the tool regularly on your photo library to maintain organization and free up storage space over time</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Duplicate Image Finder"
+        description="Duplicate Image Finder scans a batch of images you select and flags pairs that appear to be exact duplicates, entirely in your browser — nothing is uploaded to a server. It works by comparing the beginning of each image's encoded data, so it catches identical files reliably but does not detect visually similar images with different resolutions or edits."
+        howTo={[
+          "Click the upload area and select multiple images from your device.",
+          "Click 'Find Duplicates' to scan the batch.",
+          "Review the list of detected duplicate pairs.",
+          "Manually delete the duplicate files from your device using your file manager — the tool doesn't remove files itself."
+        ]}
+        faqs={[
+          { q: "Is Duplicate Image Finder really free to use?", a: "Yes, it's completely free with no account required." },
+          { q: "How many images can I upload at once?", a: "There's no fixed limit — you can select as many as your browser can comfortably load at once, though very large batches will take longer." },
+          { q: "Will my images be stored on your servers?", a: "No, images are read and compared entirely in your browser using the File API. They are never uploaded anywhere." },
+          { q: "Can it find similar images, or just exact duplicates?", a: "It only flags images whose encoded data matches at the start, so it's best at catching exact duplicate files. It does not use visual similarity matching, so resized, cropped, or edited copies of the same photo generally won't be flagged." }
+        ]}
+        tips={[
+          "This tool doesn't delete anything for you — it only identifies duplicate pairs, so remove files manually afterward.",
+          "For very similar-looking but non-identical photos (different resolution, slight edits), you'll need to compare them visually yourself.",
+          "Back up your images before deleting anything, just in case.",
+          "Run the tool again after reorganizing your photos to catch any duplicates you missed."
+        ]}
+      />
     </div>
   );
 }

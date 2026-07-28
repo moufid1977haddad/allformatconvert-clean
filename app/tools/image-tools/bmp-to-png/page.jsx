@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function BMPtoPNGPage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
@@ -29,39 +30,28 @@ export default function BMPtoPNGPage() {
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="converted.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Bmp To Png</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Bmp To Png is a free online converter tool that allows you to instantly transform BMP image files into PNG format without any software installation required. This web-based solution maintains image quality while reducing file size, making it perfect for web optimization and cross-platform compatibility.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Bmp To Png</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Bmp To Png tool website and locate the upload area on the homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the upload button or drag and drop your BMP file into the designated zone</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Wait for the conversion process to complete automatically</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your converted PNG file by clicking the download button</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Bmp To Png completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Bmp To Png is 100% free with no hidden charges, registration requirements, or premium features.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Does the tool support batch conversion?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most versions allow single file conversion at a time, though some instances may support multiple files depending on the platform version.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my images be deleted after conversion?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, all uploaded files are automatically deleted from the server after a short period for privacy and security purposes.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file size limits does Bmp To Png have?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool typically accepts files up to 50MB, though limits may vary depending on your internet connection and server capacity.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For best results, ensure your BMP file is properly formatted and not corrupted before uploading to the converter</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>PNG format is ideal for images with transparency, so consider this format if your BMP contains alpha channels</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Compress your PNG output by using online optimization tools after conversion to further reduce file size for web use</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep a backup of your original BMP files before conversion in case you need to revert to the original format</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="BMP to PNG"
+        description="BMP to PNG converts a BMP image to PNG format entirely in your browser using the HTML canvas — your file is never uploaded to a server. Upload a BMP, click Convert, and download the resulting PNG."
+        howTo={[
+          "Click the upload area and select a BMP file from your device.",
+          "Click 'Convert' to render it to PNG.",
+          "Preview the converted image.",
+          "Click the download button to save your PNG file."
+        ]}
+        faqs={[
+          { q: "Is BMP to PNG completely free to use?", a: "Yes, it's 100% free with no registration required." },
+          { q: "Does the tool support batch conversion?", a: "No, only one file can be converted at a time — there's no multi-file upload." },
+          { q: "Will my images be uploaded to a server?", a: "No. Conversion happens entirely in your browser using the canvas element — your file never leaves your device." },
+          { q: "What file size limits does BMP to PNG have?", a: "There's no fixed size limit — processing happens locally, so it's limited only by your device's available memory." }
+        ]}
+        tips={[
+          "For best results, make sure your BMP file isn't corrupted before uploading.",
+          "PNG supports transparency, so it's a good target format if your source has an alpha channel.",
+          "Run your PNG through an image compressor afterward if you need a smaller file size for the web.",
+          "Keep a backup of your original BMP file in case you need it again later."
+        ]}
+      />
     </div>
   );
 }

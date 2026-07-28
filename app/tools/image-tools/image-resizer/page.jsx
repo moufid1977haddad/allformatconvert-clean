@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function ImageResizerPage() {
   const [image, setImage] = useState(null);
   const [width, setWidth] = useState(800);
@@ -35,39 +36,28 @@ export default function ImageResizerPage() {
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="resized.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Image Resizer</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Image Resizer is a free online tool that allows you to quickly resize images to any dimension without installing software or creating an account. Perfect for web optimization, social media, and preparing images for various platforms, this tool maintains image quality while reducing file sizes.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Image Resizer</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Image Resizer website and click the upload button to select an image from your computer</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Enter your desired width and height dimensions or choose from preset sizes for popular platforms</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Preview your resized image and adjust settings like format or quality if needed</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the download button to save your resized image to your device</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats does Image Resizer support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Image Resizer supports all major formats including JPG, PNG, GIF, WebP, and BMP for both uploading and downloading.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a limit to how large an image I can resize?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most images up to 50MB can be resized, though optimal performance is achieved with files under 10MB.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will resizing my image reduce its quality?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Image Resizer uses advanced compression algorithms to maintain quality, though very large reductions may affect clarity slightly.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do you store my images after I resize them?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Image Resizer does not store any images on our servers; all files are deleted immediately after download for privacy.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the preset dimensions for Instagram (1080x1080), Twitter (1200x675), or Facebook (1200x628) to ensure optimal display on social media</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Reduce file size by converting to WebP format, which provides better compression while maintaining quality compared to traditional JPG</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Maintain aspect ratio when resizing to avoid distorting your images; enable the lock option to automatically adjust one dimension based on the other</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Batch resize multiple images by using the queue feature, saving time when preparing images for websites or marketing campaigns</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Image Resizer"
+        description="Image Resizer lets you set an exact pixel width and height and redraws your image at that size, entirely in your browser using the canvas element — your image is never uploaded to a server. It pre-fills the fields with your image's original dimensions, which you can then edit."
+        howTo={[
+          "Click the upload area and select an image from your device.",
+          "Edit the width and height fields to your target pixel dimensions.",
+          "Click 'Resize' to process the image.",
+          "Click the download button to save your resized PNG image."
+        ]}
+        faqs={[
+          { q: "What image formats does Image Resizer support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The output is always a PNG file." },
+          { q: "Is there a limit to how large an image I can resize?", a: "There's no fixed size limit — processing happens locally in your browser, so it's limited only by your device's available memory." },
+          { q: "Does it have preset sizes for Instagram, Twitter, or Facebook?", a: "No, there are no built-in presets — you enter the exact width and height in pixels yourself." },
+          { q: "Do you store my images after I resize them?", a: "No, Image Resizer processes everything locally and never uploads your file to a server." }
+        ]}
+        tips={[
+          "There's no aspect-ratio lock, so calculate proportional dimensions yourself if you want to avoid stretching or squashing the image.",
+          "For common social sizes, enter the target dimensions manually — for example 1080x1080 for a square Instagram post.",
+          "Resizing to smaller dimensions reduces the pixel count but the output is still saved as an uncompressed PNG, which may be larger than the original file.",
+          "Resize one image at a time — there's no batch or queue feature."
+        ]}
+      />
     </div>
   );
 }

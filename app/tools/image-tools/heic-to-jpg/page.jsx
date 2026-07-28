@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function HeicToJpgPage() {
   const [file, setFile] = useState(null);
@@ -61,39 +62,28 @@ export default function HeicToJpgPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Heic To Jpg</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Heic To Jpg is a free online conversion tool that instantly transforms HEIC image files to JPG format without requiring any software installation. This web-based converter maintains high image quality while making your photos compatible with all devices and platforms.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Heic To Jpg</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Heic To Jpg website and locate the upload area on the homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the upload button or drag and drop your HEIC image file into the designated zone</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Wait for the conversion process to complete automatically, which typically takes just a few seconds</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your converted JPG file by clicking the download button</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Heic To Jpg completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Heic To Jpg is completely free with no hidden charges, registration requirements, or premium features.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert multiple HEIC files at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, the tool supports batch conversion, allowing you to upload and convert multiple HEIC files simultaneously.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my image quality be reduced during conversion?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Heic To Jpg maintains the original image quality and resolution during the conversion process.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to install any software?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Heic To Jpg is a web-based tool that works directly in your browser without any downloads or installations.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Batch upload multiple HEIC files to save time if you need to convert several images at once</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Ensure your internet connection is stable for faster and more reliable conversions</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Check the output quality immediately after conversion to verify the JPG meets your requirements</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use JPG format for better compatibility when sharing images across different devices and social media platforms</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="HEIC to JPG"
+        description="HEIC to JPG converts an iPhone HEIC photo to standard JPG format entirely in your browser, using the open-source heic2any library — your photo is never uploaded to a server. Choose a JPEG quality level before converting to balance file size and image quality."
+        howTo={[
+          "Click the upload area and select a HEIC or HEIF file from your device.",
+          "Adjust the quality slider (10–100%) to set the JPEG output quality.",
+          "Click 'Convert to JPG' and wait a few seconds for the conversion to finish.",
+          "Click the download button to save your JPG file."
+        ]}
+        faqs={[
+          { q: "Is HEIC to JPG completely free to use?", a: "Yes, it's completely free with no registration required." },
+          { q: "Can I convert multiple HEIC files at once?", a: "No, only one file can be converted at a time — there's no batch upload." },
+          { q: "Will my image quality be reduced during conversion?", a: "Some quality loss is expected since JPEG uses lossy compression — use a higher quality setting on the slider to minimize it." },
+          { q: "Do I need to install any software?", a: "No, conversion happens directly in your browser without any downloads or installations, and your photo never leaves your device." }
+        ]}
+        tips={[
+          "Use a quality setting of 85% or higher if you plan to print or edit the photo further.",
+          "Lower the quality slider for smaller file sizes if you're just sharing the photo online.",
+          "Convert HEIC photos to JPG before sharing with people on devices or apps that don't support Apple's HEIC format.",
+          "Check the converted JPG immediately after downloading to confirm it looks the way you expect."
+        ]}
+      />
     </div>
   );
 }

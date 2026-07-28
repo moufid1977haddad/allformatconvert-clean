@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function SepiaFilterPage() {
   const [image, setImage] = useState(null);
   const [intensity, setIntensity] = useState(100);
@@ -41,39 +42,28 @@ export default function SepiaFilterPage() {
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="sepia.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Sepia Filter</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Sepia Filter is a free online tool that instantly transforms your photos with a warm, vintage sepia tone effect. Simply upload your image and apply the classic brown-tinted filter to create nostalgic, timeless-looking pictures in seconds.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Sepia Filter</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Click the upload button to select an image from your device or paste an image URL</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Preview your photo and adjust the sepia intensity using the slider to customize the effect strength</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Apply Filter' button to process your image with the sepia tone effect</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your filtered image by clicking the download button or share it directly to social media</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Sepia Filter completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Sepia Filter is 100% free. There are no hidden fees, subscriptions, or premium features required to apply sepia effects to your photos.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats are supported?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Sepia Filter supports all common image formats including JPG, PNG, GIF, WebP, and BMP. The tool automatically handles format conversion.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do you store my uploaded images?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, your images are processed directly in your browser and are never stored on our servers. Your privacy and data security are completely protected.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I adjust the sepia filter intensity?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can customize the sepia effect with an intensity slider ranging from subtle to strong, allowing you to achieve your desired vintage look.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For best results, use high-resolution images as the sepia filter preserves image quality while adding the vintage effect</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Experiment with different intensity levels to find the perfect balance between the original color and the sepia tone for your specific photo</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Sepia filters work especially well on black and white photos, landscape images, and portrait photography to enhance their vintage appeal</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Save multiple versions of your sepia-filtered images with different intensity levels to compare and choose your favorite result</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Sepia Filter"
+        description="Sepia Filter applies a warm, vintage brown tone to your photo using a standard sepia color matrix, with an adjustable intensity slider, entirely in your browser. Your image is never uploaded to a server."
+        howTo={[
+          "Click the upload area and select an image from your device.",
+          "Adjust the intensity slider to set how strong the sepia effect is.",
+          "Click 'Apply Sepia' to process the image.",
+          "Click the download button to save your sepia-toned PNG image."
+        ]}
+        faqs={[
+          { q: "Is Sepia Filter completely free to use?", a: "Yes, it's 100% free with no subscriptions required." },
+          { q: "What image formats are supported?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The output is always a PNG file." },
+          { q: "Do you store my uploaded images?", a: "No, your images are processed directly in your browser and are never uploaded to a server." },
+          { q: "Can I upload an image by pasting a URL?", a: "No, only file upload from your device is supported — there's no URL input option." }
+        ]}
+        tips={[
+          "Use high-resolution source images since the sepia effect preserves the original resolution.",
+          "Try different intensity levels to find the balance between original color and sepia tone that suits your photo.",
+          "Sepia works especially well on portraits and landscapes for a nostalgic look.",
+          "Download a few versions at different intensities if you want to compare before picking a favorite."
+        ]}
+      />
     </div>
   );
 }

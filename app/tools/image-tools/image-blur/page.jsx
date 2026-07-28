@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function ImageBlurPage() {
   const [image, setImage] = useState(null);
   const [blur, setBlur] = useState(5);
@@ -33,39 +34,28 @@ export default function ImageBlurPage() {
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="blurred.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Image Blur</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Image Blur is a free online tool that allows you to quickly and easily blur any image without downloading software or creating an account. Perfect for protecting privacy, hiding sensitive information, or creating artistic effects on your photos.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Image Blur</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Image Blur tool website and click the 'Upload Image' button to select a photo from your computer or device.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Use the blur intensity slider to adjust how much blur you want to apply to your image, ranging from subtle to heavy blur effects.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Select the blur area by either applying blur to the entire image or using the selection tool to blur specific regions or faces.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the 'Download' button to save your blurred image as a PNG or JPG file to your device.</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Image Blur really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Image Blur is completely free with no hidden charges, registration requirements, or premium subscriptions needed to access all features.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats does Image Blur support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Image Blur supports all major image formats including JPG, PNG, GIF, WebP, and BMP files for uploading and downloading.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my uploaded images be stored or shared?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, your images are processed locally in your browser and are never stored on our servers or shared with third parties.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I blur only specific parts of my image?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Image Blur offers a selection tool that lets you choose which areas of your image to blur while keeping other parts clear.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use a blur intensity of 30-50% for subtle privacy protection that maintains image quality while hiding sensitive details.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For protecting faces in group photos, use the circular selection tool to precisely target and blur individual faces without affecting the background.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Experiment with different blur types like Gaussian blur for smooth effects or pixelation blur for a more dramatic appearance.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Always download your blurred image before closing the browser to avoid losing your edits, as the tool doesn't save your work history.</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Image Blur"
+        description="Image Blur applies a uniform blur effect across your entire image using the browser's built-in canvas blur filter, with an adjustable intensity from 1 to 20 pixels. Everything happens locally on your device — your image is never uploaded to a server."
+        howTo={[
+          "Click the upload area and select an image from your device.",
+          "Adjust the blur slider (1–20px) to set the blur intensity.",
+          "Click 'Apply Blur' to process the image.",
+          "Click the download button to save your blurred PNG image."
+        ]}
+        faqs={[
+          { q: "Is Image Blur really free to use?", a: "Yes, it's completely free with no registration required." },
+          { q: "What image formats does Image Blur support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The output is always a PNG file." },
+          { q: "Will my uploaded images be stored or shared?", a: "No, your images are processed entirely in your browser and are never uploaded to a server." },
+          { q: "Can I blur only specific parts of my image, like a face?", a: "No, the blur is applied uniformly across the whole image — there's no selection tool for blurring specific regions or faces." }
+        ]}
+        tips={[
+          "Use a lower blur value (2–6px) for a subtle softening effect, and higher values for a stronger privacy effect.",
+          "Since blurring applies to the whole image, crop out the sensitive area first if you only want to obscure part of a photo.",
+          "There's a single blur algorithm — try different intensity values rather than looking for a 'blur type' setting.",
+          "Download your result before navigating away, since it isn't saved anywhere after you leave the page."
+        ]}
+      />
     </div>
   );
 }

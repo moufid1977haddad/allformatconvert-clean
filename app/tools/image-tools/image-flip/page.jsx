@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function ImageFlipPage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
@@ -35,39 +36,28 @@ export default function ImageFlipPage() {
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="flipped.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Image Flip</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Image Flip is a free online tool that allows you to quickly flip, rotate, and mirror images without any software installation or sign-up required. Perfect for editing photos, graphics, and pictures for social media, web design, or personal use.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Image Flip</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Image Flip website and click on the upload button to select an image from your device</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your desired flip option such as horizontal flip, vertical flip, or rotate by a specific angle</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Preview your edited image to ensure it meets your requirements before finalizing</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the download button to save your flipped image to your computer in your preferred format</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Image Flip really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Image Flip is completely free with no hidden charges, subscriptions, or premium features required to flip your images.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats does Image Flip support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Image Flip supports all popular image formats including JPG, PNG, GIF, BMP, and WebP for both upload and download.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to create an account to use Image Flip?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Image Flip requires no registration or account creation. Simply visit the website and start flipping images immediately.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my uploaded image data secure and private?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, all images are processed securely and are not stored on our servers after you download them, ensuring complete privacy.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use horizontal flip to create mirror images perfect for design symmetry and artistic compositions</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Combine multiple rotations with flips to achieve any desired angle orientation for your images</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Export your flipped images in PNG format to preserve transparency if your original image contains it</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Batch process multiple images by opening Image Flip in separate browser tabs for efficient editing workflows</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Image Flip"
+        description="Image Flip mirrors your image horizontally or vertically, entirely in your browser using the canvas element — your image is never uploaded to a server. For rotating by a specific angle instead, use the separate Image Rotate tool."
+        howTo={[
+          "Click the upload area and select an image from your device.",
+          "Click 'Flip Horizontal' to mirror left-right, or 'Flip Vertical' to mirror top-bottom.",
+          "Preview the flipped result.",
+          "Click the download button to save your flipped PNG image."
+        ]}
+        faqs={[
+          { q: "Is Image Flip really free to use?", a: "Yes, it's completely free with no registration required." },
+          { q: "What image formats does Image Flip support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The output is always a PNG file." },
+          { q: "Can I rotate by a specific angle here?", a: "No, this tool only mirrors horizontally or vertically. Use the separate Image Rotate tool for custom-angle rotation." },
+          { q: "Is my uploaded image data secure and private?", a: "Yes, images are processed entirely in your browser and are never uploaded to a server." }
+        ]}
+        tips={[
+          "Use horizontal flip to create a mirror image for design symmetry or artistic compositions.",
+          "Combine a flip with the Image Rotate tool if you need both a mirror and an angle change.",
+          "PNG output preserves transparency, so any transparent background in your source image carries over.",
+          "Flip one image at a time — there's no batch processing built in."
+        ]}
+      />
     </div>
   );
 }

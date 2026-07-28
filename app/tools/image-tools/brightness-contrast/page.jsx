@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function BrightnessContrastPage() {
   const [image, setImage] = useState(null);
   const [brightness, setBrightness] = useState(100);
@@ -35,39 +36,28 @@ export default function BrightnessContrastPage() {
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="adjusted.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Brightness Contrast</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Brightness Contrast is a free online tool that allows you to adjust the brightness and contrast of your images instantly without any software installation. Perfect for enhancing photos, improving visibility, and achieving the ideal lighting for your visual content.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Brightness Contrast</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload your image by clicking the upload button or dragging and dropping a file into the editor</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Use the brightness slider to increase or decrease the overall lightness of your image</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Adjust the contrast slider to enhance or reduce the difference between light and dark areas</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your edited image by clicking the download button to save it to your device</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Brightness Contrast free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Brightness Contrast is completely free with no hidden fees, registration, or premium upgrades required.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats does this tool support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool supports all common image formats including JPG, PNG, GIF, WebP, and BMP files.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my images be saved or shared?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, all image processing happens on your browser. Your images are never uploaded to our servers and remain completely private.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I undo my changes?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can reset the brightness and contrast sliders to their default values at any time before downloading.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Start with small adjustments to brightness and contrast, then fine-tune gradually for the best results</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Increase contrast to make dull photos pop and bring out more detail in shadows and highlights</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use brightness adjustment to fix underexposed or overexposed photos without affecting other properties</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Preview your changes in real-time before downloading to ensure you achieve your desired look</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Brightness and Contrast"
+        description="Brightness and Contrast lets you adjust an image's brightness and contrast with two sliders, applied via the browser's canvas filter, entirely on your device. Your image is never uploaded to a server."
+        howTo={[
+          "Click the upload area and select an image from your device.",
+          "Use the brightness slider to lighten or darken the image.",
+          "Use the contrast slider to increase or decrease the difference between light and dark areas.",
+          "Click 'Apply' to render the result, then download it."
+        ]}
+        faqs={[
+          { q: "Is Brightness and Contrast free to use?", a: "Yes, it's completely free with no registration required." },
+          { q: "What image formats does this tool support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The output is always a PNG file." },
+          { q: "Will my images be saved or shared?", a: "No, all image processing happens in your browser. Your images are never uploaded to a server." },
+          { q: "Can I preview changes before applying them?", a: "No, there's no live preview — move the sliders to your desired values, then click Apply to see and download the result." }
+        ]}
+        tips={[
+          "Start with small adjustments and fine-tune gradually rather than large jumps.",
+          "Increase contrast to make a flat, dull photo pop and bring out shadow and highlight detail.",
+          "Use the brightness slider to fix underexposed or overexposed photos.",
+          "If a result isn't quite right, re-upload the original and try again with different values."
+        ]}
+      />
     </div>
   );
 }

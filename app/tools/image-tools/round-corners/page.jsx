@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function RoundCornersPage() {
   const [image, setImage] = useState(null);
@@ -53,39 +54,28 @@ export default function RoundCornersPage() {
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="rounded.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Round Corners</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Round Corners is a free online tool that allows you to easily add rounded corners to images and photos with just a few clicks. Perfect for creating professional-looking graphics, profile pictures, and thumbnails without needing expensive design software.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Round Corners</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload your image by clicking the upload button or dragging and dropping your file into the tool</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Adjust the corner radius slider to set how rounded you want the corners to be</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Preview your image in real-time to ensure the rounded corners look exactly as you want them</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your edited image in your preferred format by clicking the download button</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats does Round Corners support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Round Corners supports all major image formats including PNG, JPG, JPEG, GIF, WebP, and BMP files.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for uploading images?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most images up to 10MB can be processed. For larger files, consider compressing your image first.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I adjust the corner radius independently for each corner?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The current version applies the same radius to all four corners, but you can adjust the overall radius value to your preference.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to create an account to use Round Corners?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Round Corners is completely free and requires no account creation or login.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use a radius of 10-15 pixels for subtle rounded corners that work well for profile pictures and social media images</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For modern flat design aesthetics, try higher radius values between 20-30 pixels for a softer, more contemporary look</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Always preview your image before downloading to ensure the rounded corners don't cut off important content</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Combine rounded corners with a subtle drop shadow for a polished, professional appearance on web designs</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Round Corners"
+        description="Round Corners clips your image to a rounded-rectangle shape at a radius you choose, entirely in your browser using the canvas element — your image is never uploaded to a server. The clipped-away areas become transparent, so the output is always a PNG."
+        howTo={[
+          "Click the upload area and select an image from your device.",
+          "Adjust the corner radius slider (1–50%) to set how rounded the corners are.",
+          "Click 'Apply Round Corners' to process the image.",
+          "Click the download button to save your rounded PNG image."
+        ]}
+        faqs={[
+          { q: "What image formats does Round Corners support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The output is always a PNG file so the rounded corners can be transparent." },
+          { q: "Is there a file size limit for uploading images?", a: "There's no fixed size limit — processing happens locally in your browser, so it's limited only by your device's available memory." },
+          { q: "Can I adjust the corner radius independently for each corner?", a: "No, the same radius is applied to all four corners — there's no per-corner control." },
+          { q: "Do I need to create an account to use Round Corners?", a: "No, it's completely free with no account or login required." }
+        ]}
+        tips={[
+          "Use a radius around 10–15% for subtle rounding on profile pictures and thumbnails.",
+          "Try higher radius values (20–30%+) for a softer, more contemporary look.",
+          "Preview the result before downloading to make sure the rounding doesn't cut off important content near the edges.",
+          "Since the output is a transparent PNG, it layers well on top of colored backgrounds in web or graphic design."
+        ]}
+      />
     </div>
   );
 }
