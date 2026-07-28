@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
+import SeoContent from '../../../components/SeoContent';
 
 export default function AudioSplitterPage() {
   const [file, setFile] = useState(null);
@@ -67,39 +68,28 @@ export default function AudioSplitterPage() {
           ))}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Audio Splitter</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Audio Splitter is a free online tool that allows you to easily divide audio files into multiple segments without any software installation. Whether you need to split podcasts, music tracks, or voice recordings, this tool provides a simple and efficient solution for all your audio editing needs.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Audio Splitter</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload your audio file by clicking the upload button or dragging and dropping your file into the designated area.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Use the timeline editor to mark the points where you want to split your audio file by clicking at the desired positions.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Adjust the split points precisely using the playback controls and preview your selections to ensure accuracy.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the split or download button to process your audio and save the individual segments to your device.</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What audio formats does Audio Splitter support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Audio Splitter supports all major audio formats including MP3, WAV, FLAC, OGG, M4A, AAC, and WMA files.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for uploading audio files?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most free versions support files up to 500MB, but larger files may be processed depending on your browser and internet speed.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to create an account to use Audio Splitter?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Audio Splitter is completely free and requires no account creation or registration to use.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my uploaded files be stored or shared?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Your files are processed securely and deleted immediately after the session; they are never stored or shared with third parties.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use headphones while previewing your audio to accurately identify the exact split points for better precision.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Save your split audio files with descriptive names immediately after downloading to avoid confusion and maintain organization.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For podcasts, consider splitting by chapters or segments to create more manageable content for distribution and archiving.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test the split audio files on your target platform before finalizing to ensure compatibility and quality meet your requirements.</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Audio Splitter"
+        description="Audio Splitter cuts an audio file into two parts at a single point you choose, using ffmpeg.wasm entirely in your browser — nothing is uploaded to a server. Move the slider to set exactly where the split happens."
+        howTo={[
+          "Click the upload area and select an audio file.",
+          "Use the slider to set the exact second where you want to split the file.",
+          "Click \"Split Audio\" to process it locally.",
+          "Preview and download Part 1 and Part 2 separately."
+        ]}
+        faqs={[
+          { q: "Can I split into more than two parts?", a: "Not in a single pass — this tool creates exactly two parts at one split point. Run the tool again on one of the resulting parts if you need further splits." },
+          { q: "What output format do the parts use?", a: "Both parts are saved as MP3, regardless of your original file's format." },
+          { q: "Is there a file size limit?", a: "No hard limit is enforced by the tool — you're limited by your browser's available memory." },
+          { q: "Is my file uploaded anywhere?", a: "No. Everything happens locally via ffmpeg.wasm — your file is never uploaded to a server." }
+        ]}
+        tips={[
+          "Preview the audio near your intended split point first to make sure you're cutting at the right moment.",
+          "Both output parts are saved as MP3 regardless of your original file's format.",
+          "To split a file into more than two pieces, run this tool again on each resulting part.",
+          "The first split after loading the page takes longer since the ffmpeg.wasm engine needs to download."
+        ]}
+      />
     </div>
   );
 }

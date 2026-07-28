@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function AudioToTextPage() {
   // Mode : 'mic' ou 'file'
@@ -189,39 +190,28 @@ export default function AudioToTextPage() {
 
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Audio To Text</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Audio To Text is a free online tool that converts speech and audio files into written text with high accuracy. Perfect for transcribing meetings, lectures, podcasts, and interviews without any cost or software installation required.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Audio To Text</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Audio To Text website and click the 'Upload' button to select your audio file from your device.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your audio file format (MP3, WAV, M4A, OGG, or FLAC) and wait for the file to upload completely.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Convert' button to start the transcription process, which typically completes within minutes depending on file length.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your transcribed text as a document or copy it directly from the text editor for immediate use.</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What audio formats does Audio To Text support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool supports MP3, WAV, M4A, OGG, FLAC, and other common audio formats. You can upload files up to 500MB in size.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a limit to how many files I can convert?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Audio To Text is completely free with unlimited conversions. You can transcribe as many audio files as you need without any restrictions.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How accurate is the transcription?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool uses advanced AI technology to achieve 85-95% accuracy depending on audio quality, background noise, and speaker clarity. You can easily edit any mistakes in the text editor.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my audio data safe and private?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, all uploaded files are processed securely and automatically deleted after transcription. We do not store or share your audio files or transcripts.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For best results, ensure your audio is clear with minimal background noise and a consistent speaking pace.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>If transcription accuracy is low, try re-recording the audio at a higher bitrate or use a better quality microphone.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the built-in text editor to quickly correct any transcription errors before downloading your final document.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Save your transcripts in cloud storage or locally for easy reference and sharing with colleagues or team members.</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Audio to Text"
+        description="Audio to Text offers two ways to get a transcript: live microphone dictation using your browser's built-in Speech Recognition (works best in Chrome, entirely local), or file upload, which sends your audio to a server-side AI transcription API and returns the text."
+        howTo={[
+          "Choose \"Use Microphone\" for live dictation, or \"Upload Audio File\" to transcribe an existing recording.",
+          "For mic mode, click \"Start Transcription\" and speak — text appears as you talk.",
+          "For file mode, upload your audio and click \"Transcribe Audio\" to send it for AI transcription.",
+          "Copy the transcript or download it as a .txt file."
+        ]}
+        faqs={[
+          { q: "Is my audio uploaded to a server?", a: "It depends on the mode: microphone dictation runs entirely in your browser via the Web Speech API and isn't uploaded anywhere. Uploaded audio files are sent to a server-side transcription API to generate the text." },
+          { q: "Which browsers support microphone dictation?", a: "It relies on the Web Speech API, which works best in Google Chrome; other browsers may not support it." },
+          { q: "What audio formats can I upload?", a: "Common formats like MP3, WAV, and M4A." },
+          { q: "Is Audio to Text free to use?", a: "Yes, both the microphone and file-upload modes are free to use." }
+        ]}
+        tips={[
+          "For live dictation, speak clearly at a steady pace and keep background noise low for the best accuracy.",
+          "If microphone mode shows \"not supported,\" switch to Chrome or use file upload instead.",
+          "Always proofread AI-generated transcripts before using them somewhere important — accuracy varies with audio quality.",
+          "Download your transcript right after generating it, since it isn't saved automatically if you navigate away."
+        ]}
+      />
     </div>
   );
 }

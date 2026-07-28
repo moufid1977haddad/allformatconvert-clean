@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
+import SeoContent from '../../../components/SeoContent';
 
 export default function AudioMergerPage() {
   const [files, setFiles] = useState([]);
@@ -62,39 +63,28 @@ export default function AudioMergerPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Audio Merger</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Audio Merger is a free online tool that allows you to combine multiple audio files into a single track without requiring any software installation. Whether you're creating podcasts, music compilations, or audio projects, Audio Merger makes it easy to merge MP3, WAV, and other audio formats seamlessly.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Audio Merger</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Audio Merger website and click the 'Upload Files' button to select multiple audio files from your device</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Arrange the audio tracks in your desired order by dragging and dropping them in the queue</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Adjust volume levels and add fade-in or fade-out effects if needed using the available controls</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the 'Merge' button to combine all files and download your final merged audio file</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What audio formats does Audio Merger support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Audio Merger supports popular formats including MP3, WAV, OGG, M4A, FLAC, and AAC files.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a limit to how many files I can merge?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can merge up to 10 audio files in a single session, with a maximum total file size of 500MB.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to create an account to use Audio Merger?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Audio Merger is completely free and requires no account creation or login.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How long does it take to merge audio files?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Merging time depends on file size and internet speed, typically ranging from a few seconds to a few minutes.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Normalize audio levels before merging to ensure consistent volume across all tracks and prevent sudden loud spikes</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the preview feature to listen to your merged audio before downloading to catch any issues</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep audio files in the same format and sample rate for the best quality results</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Add short silence gaps between tracks using the transition settings for a more professional-sounding final product</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Audio Merger"
+        description="Audio Merger joins two or more audio files into one, using ffmpeg's stream-copy concat feature entirely in your browser via ffmpeg.wasm — nothing is uploaded to a server. Files are combined in the order you select them; there's no drag-to-reorder, fade, or volume-leveling controls."
+        howTo={[
+          "Click the upload area and select two or more audio files — they'll merge in the order you pick them.",
+          "Review the list of selected files.",
+          "Click \"Merge Audio Files\" to combine them locally.",
+          "Preview and download the merged MP3."
+        ]}
+        faqs={[
+          { q: "Can I reorder files before merging?", a: "Not currently — files merge in the order they were selected during upload." },
+          { q: "Does merging work with mixed formats?", a: "It works best when all files share the same codec/format, since the process uses fast stream-copy rather than re-encoding; mixing very different formats can sometimes fail." },
+          { q: "Is there a limit on file count or size?", a: "No hard limit is enforced by the tool — you're limited by your browser's available memory." },
+          { q: "Is my data private?", a: "Yes. Everything happens locally via ffmpeg.wasm — files are never uploaded to a server." }
+        ]}
+        tips={[
+          "For the most reliable results, merge files that share the same format and bitrate (e.g., all MP3 at 128kbps).",
+          "Double-check the file order in the list before merging, since there's no drag-to-reorder — remove and re-add files in the order you want if needed.",
+          "If merging fails, try converting all files to the same format first with the Audio Converter tool.",
+          "The first merge after loading the page takes longer since the ffmpeg.wasm engine needs to download."
+        ]}
+      />
     </div>
   );
 }

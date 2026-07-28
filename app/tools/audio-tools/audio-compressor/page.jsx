@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
+import SeoContent from '../../../components/SeoContent';
 
 export default function AudioCompressorPage() {
   const [file, setFile] = useState(null);
@@ -67,39 +68,28 @@ export default function AudioCompressorPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Audio Compressor</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Audio Compressor is a free online tool that reduces the dynamic range of your audio files, making quiet parts louder and loud parts quieter for a more balanced sound. Perfect for podcasts, music production, and voice recordings, our compressor requires no software installation or technical expertise.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Audio Compressor</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload your audio file by clicking the upload button or dragging and dropping your file into the tool</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Adjust the compression settings including ratio, threshold, attack, and release to suit your audio needs</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Preview your compressed audio to ensure the settings produce the desired effect</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the download button to save your compressed audio file to your device</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What audio formats does Audio Compressor support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Our tool supports MP3, WAV, OGG, FLAC, and M4A audio formats for both upload and download.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for compression?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can compress audio files up to 500MB in size. For larger files, consider splitting them into smaller segments.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do you store my audio files after compression?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, we do not store any of your files. All audio is processed and deleted immediately after download for your privacy.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is the difference between ratio and threshold settings?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Threshold sets the level at which compression begins, while ratio determines how much the audio is compressed once it exceeds the threshold.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Start with a low compression ratio of 2:1 or 4:1 for subtle compression, then gradually increase for more noticeable effects</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use a shorter attack time for drums and percussion to catch transients quickly, and longer attack times for vocals and melodic instruments</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Lower the threshold setting to compress more of your audio, or raise it to compress only the loudest peaks</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Always compare your compressed audio with the original by using the preview feature to ensure you haven't over-compressed and lost dynamic character</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Audio Compressor"
+        description="Audio Compressor reduces an audio file's size by re-encoding it at a lower bitrate (64–320 kbps) using ffmpeg.wasm, entirely in your browser. Note: this is bitrate-based file-size compression — it does not apply dynamic-range compression (threshold/ratio/attack/release) despite the tool's name."
+        howTo={[
+          "Click the upload area and select an audio file.",
+          "Choose a target bitrate from the presets (64k–320k).",
+          "Click \"Compress Audio\" to re-encode the file locally.",
+          "Compare the before/after size and download the result as MP3."
+        ]}
+        faqs={[
+          { q: "Does this apply dynamic-range compression?", a: "No — despite the name, this tool re-encodes your audio at a lower bitrate to shrink file size. It doesn't touch the audio's dynamic range (loud vs. quiet parts)." },
+          { q: "What output format do I get?", a: "Always MP3, regardless of the format you uploaded." },
+          { q: "Is there a file size limit?", a: "No hard limit is enforced by the tool — very large files are limited only by your browser's available memory." },
+          { q: "Is my file uploaded anywhere?", a: "No. Everything is processed client-side via ffmpeg.wasm — nothing is uploaded to a server." }
+        ]}
+        tips={[
+          "128 kbps is a reasonable default for most music; drop to 64–96 kbps for voice-only content where size matters most.",
+          "Lower bitrates noticeably reduce quality for complex music — compare the audio preview before committing.",
+          "The first compression after loading the page takes longer since the ffmpeg.wasm engine needs to download.",
+          "If you need real dynamic-range compression (leveling loud and quiet parts), you'll need a dedicated audio-editing tool — this one only changes bitrate."
+        ]}
+      />
     </div>
   );
 }

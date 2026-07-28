@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import SeoContent from '../../../components/SeoContent';
 
 export default function AudioWaveformPage() {
   const [file, setFile] = useState(null);
@@ -58,39 +59,28 @@ export default function AudioWaveformPage() {
           {audioUrl && <audio controls src={audioUrl} className="w-full" />}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Audio Waveform</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Audio Waveform is a free online tool that visualizes audio files by displaying their waveforms in an interactive, easy-to-understand format. Perfect for musicians, podcasters, and audio engineers who need quick waveform analysis without installing software.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Audio Waveform</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Audio Waveform website and click the upload button to select your audio file</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Wait for the tool to process and generate the visual waveform representation of your audio</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Use the interactive controls to zoom, pan, and analyze specific sections of the waveform</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Export or download your waveform visualization in your preferred format for use in projects</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What audio formats does Audio Waveform support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Audio Waveform supports all major audio formats including MP3, WAV, FLAC, OGG, M4A, and more, making it compatible with virtually any audio file you have.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Audio Waveform really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Audio Waveform is completely free with no hidden fees, subscriptions, or premium tiers required for full access to all features.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I use Audio Waveform on mobile devices?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Audio Waveform is fully responsive and works on smartphones, tablets, and desktop computers through any modern web browser.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do you store my audio files after I upload them?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, your audio files are processed securely and are not stored on our servers after the session ends, ensuring complete privacy.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the zoom feature to examine detailed sections of your audio for precise editing and analysis work</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Export waveforms as high-resolution images for documentation, presentations, or educational purposes</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Compare multiple audio files by opening them in separate browser tabs to analyze differences in loudness and frequency patterns</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Take advantage of the tool's color-coded visualization to quickly identify peaks, valleys, and potential audio problems</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Audio Waveform"
+        description="Audio Waveform draws a static visual waveform of your audio file directly in your browser using the Web Audio API and canvas — nothing is uploaded to a server. Note: it renders a single static image; there's currently no zoom, pan, or export/download feature for the waveform itself."
+        howTo={[
+          "Click the upload area and select an audio file.",
+          "The tool decodes the audio and renders its waveform on the canvas automatically.",
+          "Use the audio player below the waveform to listen to the file.",
+          "Upload a different file any time to see its waveform instead."
+        ]}
+        faqs={[
+          { q: "Can I zoom or pan the waveform?", a: "Not currently — it renders as a single static image sized to the canvas." },
+          { q: "Can I export or download the waveform image?", a: "Not currently — there's no export button; a screenshot of the canvas is the only option if you want to save the visualization." },
+          { q: "What audio formats are supported?", a: "Any format your browser's Web Audio API can decode, such as MP3, WAV, FLAC, or OGG." },
+          { q: "Is my file uploaded anywhere?", a: "No. Decoding and rendering happen entirely in your browser — your file is never uploaded to a server." }
+        ]}
+        tips={[
+          "The waveform reflects the file's full length compressed into the canvas width, so very short spikes may be visually averaged with neighboring samples.",
+          "Use this for a quick visual check of a recording (spotting silence or clipping) rather than detailed sample-level editing.",
+          "If you need an exportable waveform image, a screenshot of the canvas is currently the only option.",
+          "Very large audio files may take a moment to decode before the waveform appears."
+        ]}
+      />
     </div>
   );
 }

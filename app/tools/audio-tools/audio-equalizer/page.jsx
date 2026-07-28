@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import SeoContent from '../../../components/SeoContent';
 
 export default function AudioEqualizerPage() {
   const [file, setFile] = useState(null);
@@ -72,39 +73,28 @@ export default function AudioEqualizerPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Audio Equalizer</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Audio Equalizer is a free online tool that allows you to adjust the frequency response of your audio files with precision control over multiple frequency bands. Enhance your music, podcasts, and videos by boosting or cutting specific frequencies to achieve the perfect sound for your needs.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Audio Equalizer</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload your audio file by clicking the upload button or dragging and dropping your file into the tool</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Use the frequency sliders to adjust different frequency bands according to your preferences</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Preview your changes in real-time by clicking the play button to hear the modified audio</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your equalized audio file by clicking the download button when satisfied with the adjustments</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What audio formats does Audio Equalizer support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Audio Equalizer supports popular formats including MP3, WAV, OGG, and FLAC files for both uploading and downloading.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my audio file stored on your servers?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, your audio files are processed directly in your browser and are never stored on our servers, ensuring complete privacy.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I save my equalizer settings as presets?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can save your custom equalizer settings as presets that you can quickly apply to other audio files.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Does Audio Equalizer work on mobile devices?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Audio Equalizer is fully responsive and works on smartphones, tablets, and desktop devices.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Start with preset profiles designed for different genres like pop, rock, jazz, and classical to quickly achieve professional-sounding results</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the bass frequency slider (20-250 Hz) to add warmth and depth to your audio without introducing unwanted noise</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Apply subtle adjustments rather than extreme boosts or cuts to maintain audio quality and prevent distortion</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the presence peak around 2-4 kHz to enhance vocal clarity and make instruments stand out in your mix</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Audio Equalizer"
+        description="Audio Equalizer lets you shape an audio file's bass, mid, and treble in real time as it plays, using the Web Audio API entirely in your browser. Note: this is a live playback effect only — there's currently no way to export or download the equalized audio, and settings aren't saved as presets."
+        howTo={[
+          "Click the upload area and select an audio file.",
+          "Press play on the audio player to start listening.",
+          "Adjust the Bass, Mid, and Treble sliders (-12dB to +12dB) while it plays.",
+          "Keep tweaking until the sound matches what you want — changes apply live to playback only."
+        ]}
+        faqs={[
+          { q: "Can I download the equalized audio file?", a: "Not currently — the EQ only affects live playback through your speakers; there's no export or save-to-file feature yet." },
+          { q: "Can I save my EQ settings as a preset?", a: "Not currently — each adjustment only applies to the current playback session." },
+          { q: "What audio formats can I upload?", a: "Any format your browser can play, such as MP3, WAV, OGG, or FLAC." },
+          { q: "Is my file uploaded anywhere?", a: "No. Everything happens locally in your browser via the Web Audio API — your file is never uploaded to a server." }
+        ]}
+        tips={[
+          "Make small adjustments and listen carefully — extreme boosts near ±12dB can introduce distortion.",
+          "Boost the bass shelf for warmth, cut the mid range to reduce muddiness, and boost treble for clarity and presence.",
+          "Since changes aren't saved, note down settings you like so you can reapply them manually next time.",
+          "Use headphones for the most accurate sense of how your adjustments affect the sound."
+        ]}
+      />
     </div>
   );
 }
