@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useEffect } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
 const simplify = (num, den) => {
@@ -108,39 +109,28 @@ export default function FractionCalculatorPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Fraction Calculator</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Fraction Calculator is a free online tool that helps you quickly solve fraction problems including addition, subtraction, multiplication, and division. Whether you're a student learning mathematics or someone needing quick fraction conversions, this calculator simplifies complex calculations instantly.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Fraction Calculator</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Enter your first fraction by typing the numerator and denominator in the input fields</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Select the mathematical operation you want to perform from the dropdown menu</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Enter your second fraction's numerator and denominator values</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the Calculate button to instantly see your answer displayed in simplified form</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Does this calculator simplify fractions automatically?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, the Fraction Calculator automatically reduces all results to their simplest form for easy understanding.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I use this tool on my mobile device?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Absolutely, the Fraction Calculator is fully responsive and works seamlessly on smartphones, tablets, and desktop computers.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What operations can I perform with this calculator?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can add, subtract, multiply, and divide fractions. The tool handles both proper and improper fractions.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a limit to the numbers I can use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The calculator works with whole numbers and fractions up to very large values, making it suitable for most mathematical problems.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Convert your final answer to a mixed number by noting the whole number part and remaining fraction for easier interpretation</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Double-check your numerator and denominator entries before calculating to ensure accurate results</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use this tool to verify your manual fraction calculations and improve your mathematical skills</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Bookmark this page for quick access whenever you need to solve fraction problems in the future</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Fraction Calculator"
+        description="Fraction Calculator adds, subtracts, multiplies, and divides two fractions entirely in your browser, automatically reducing every result to its simplest form and showing the decimal equivalent alongside it."
+        howTo={[
+          "Enter the numerator and denominator of your first fraction.",
+          "Click one of the four operator buttons (+, −, ×, ÷) to choose the operation.",
+          "Enter the numerator and denominator of your second fraction.",
+          "Click \"Calculate\" to see the simplified result and its decimal equivalent."
+        ]}
+        faqs={[
+          { q: "Does this calculator simplify fractions automatically?", a: "Yes, every result is automatically reduced to its lowest terms using the greatest common divisor." },
+          { q: "Is Fraction Calculator free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "What operations can I perform?", a: "Addition, subtraction, multiplication, and division, working with positive and negative whole-number numerators and denominators." },
+          { q: "Does it show a decimal equivalent?", a: "Yes, the decimal value is displayed alongside the simplified fraction result." }
+        ]}
+        tips={[
+          "Enter a negative sign in the numerator field to work with negative fractions.",
+          "Use the decimal result shown alongside the fraction to sanity-check your answer.",
+          "Make sure your second fraction's numerator isn't zero when dividing — division by zero won't produce a valid result.",
+          "Bookmark this page for quick access whenever you need to check fraction homework or calculations."
+        ]}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function StatisticsCalculatorPage() {
   const [input, setInput] = useState('');
@@ -56,39 +57,28 @@ export default function StatisticsCalculatorPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Statistics Calculator</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Statistics Calculator is a free online tool designed to help you quickly compute essential statistical measures including mean, median, mode, standard deviation, and variance from any dataset. Whether you're a student, researcher, or data analyst, this calculator simplifies complex statistical computations with an intuitive interface and instant results.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Statistics Calculator</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Enter your numerical data points into the input field, separating each value with a comma or space</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Select which statistical measures you want to calculate from the available options</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Calculate' button to process your data and generate results</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>View your results instantly and download or share the calculations as needed</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What statistical measures can this calculator compute?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The Statistics Calculator can compute mean, median, mode, standard deviation, variance, range, and quartiles for your datasets.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a limit to how many data points I can enter?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, the calculator can handle datasets of any size, making it suitable for both small and large statistical analyses.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I use decimal numbers and negative values?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, the calculator supports both decimal numbers and negative values for accurate statistical calculations.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my data saved or stored when I use this tool?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, all calculations are performed locally in your browser and no data is stored or transmitted to external servers.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the clear button to reset your data quickly if you need to perform calculations on a new dataset</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Copy the results directly from the output fields to paste them into documents or spreadsheets</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For large datasets, paste data from Excel or CSV files directly into the input field</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Double-check your data entry by reviewing the count of data points shown in the results</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Statistics Calculator"
+        description="Statistics Calculator computes count, sum, mean, median, mode, standard deviation, variance, range, minimum, and maximum from a comma-separated list of numbers, entirely in your browser."
+        howTo={[
+          "Enter your numbers into the text box, separated by commas (e.g., \"1, 2, 3, 4, 5\").",
+          "Click \"Calculate\" to process your dataset.",
+          "Review all ten statistics displayed at once: count, sum, mean, median, mode, standard deviation, variance, range, min, and max.",
+          "Edit your data and recalculate any time to analyze a different dataset."
+        ]}
+        faqs={[
+          { q: "What does it compute?", a: "Count, sum, mean, median, mode, standard deviation, variance, range, minimum, and maximum — quartiles aren't currently included." },
+          { q: "Does it use population or sample variance?", a: "Population variance and standard deviation (divides by the count of values, N) — not the sample formula (N−1)." },
+          { q: "How should I separate my numbers?", a: "Use commas between values (e.g., \"1, 2, 3\"). Space-separated numbers without commas won't be parsed correctly." },
+          { q: "Is there a size limit?", a: "No hard limit is enforced — very large datasets are limited only by your browser's performance." }
+        ]}
+        tips={[
+          "Always separate values with commas, even if you're pasting a column of numbers from a spreadsheet.",
+          "Check the \"Count\" result to confirm all your values were parsed correctly, especially after pasting data.",
+          "This calculator uses population variance (÷N) — if you need sample variance (÷N−1) for inferential statistics, adjust manually.",
+          "Non-numeric entries are silently skipped, so double-check your input if the count looks lower than expected."
+        ]}
+      />
     </div>
   );
 }
