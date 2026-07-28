@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function WebmToGifPage() {
   const [file, setFile] = useState(null);
   const [frames, setFrames] = useState([]);
@@ -58,39 +59,28 @@ export default function WebmToGifPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Webm To Gif</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Webm To Gif is a free online converter that transforms WebM video files into animated GIF images instantly without requiring any software installation. Perfect for creating shareable animations from your WebM videos, this tool preserves quality while reducing file sizes for easy distribution across social media and web platforms.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Webm To Gif</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Webm To Gif tool on your web browser and locate the upload area on the homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the upload button or drag and drop your WebM file into the designated conversion zone</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Adjust any optional settings such as frame rate, quality, or size preferences if needed</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the convert button and wait for the process to complete, then download your new GIF file</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Webm To Gif completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Webm To Gif is 100% free with no hidden charges, registration requirements, or premium upgrades needed to convert your files.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file size limitations exist for WebM uploads?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most free online converters support files up to 100-500MB depending on server capacity, though larger files may take longer to process.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert multiple WebM files at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Some versions of Webm To Gif support batch conversion, allowing you to upload and convert multiple files simultaneously for increased efficiency.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will the conversion maintain the original video quality?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The GIF output quality depends on your chosen settings, but Webm To Gif optimizes files to balance quality with smaller file sizes suitable for web sharing.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Trim your WebM video before conversion to reduce file size and focus only on the essential animated portion you need as a GIF</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Experiment with different frame rate settings to find the optimal balance between animation smoothness and final GIF file size</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use lower resolution settings for GIFs intended for social media to ensure faster loading times and better compatibility across platforms</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test your converted GIF files across different browsers and devices to ensure compatibility before sharing with your audience</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="WEBM to GIF"
+        description="WEBM to GIF extracts a series of still frames from your WebM video, entirely in your browser — up to 10 frames from the first 5 seconds, each downscaled to a max of 480×270. Note: it doesn't currently assemble the frames into a single animated GIF file. WebM plays reliably in Chrome and Firefox, but Safari's WebM support is more limited."
+        howTo={[
+          "Click the upload area and select a WebM file from your device.",
+          "If your browser can decode the file, a preview appears in the video player.",
+          "Click \"Convert to GIF\" to capture 10 evenly spaced still frames from the first 5 seconds.",
+          "Review the extracted frames in the grid below the player."
+        ]}
+        faqs={[
+          { q: "Does this produce a downloadable GIF file?", a: "Not currently — it extracts up to 10 still frames as a preview grid; there's no built-in download button or GIF assembly on this page." },
+          { q: "Will my WebM file work in every browser?", a: "WebM plays reliably in Chrome and Firefox. Safari's WebM support is more limited, so playback may fail there depending on the file's codec." },
+          { q: "Is WEBM to GIF free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can process." },
+          { q: "Is my file uploaded anywhere?", a: "No. Everything runs locally in your browser — your video is never uploaded to a server." }
+        ]}
+        tips={[
+          "If your WebM won't load, try converting it to MP4 first with a dedicated video converter for the widest browser support.",
+          "Frames are limited to the first 5 seconds of the video — trim longer clips beforehand if you need frames from later on.",
+          "Right-click any frame in the grid to save it as an individual image.",
+          "For a real animated GIF output, use a dedicated GIF-encoding tool with the extracted frames."
+        ]}
+      />
     </div>
   );
 }

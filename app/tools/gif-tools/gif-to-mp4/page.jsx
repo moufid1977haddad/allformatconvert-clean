@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function GifToMp4Page() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
@@ -49,39 +50,28 @@ export default function GifToMp4Page() {
           {result && <div className="space-y-2"><video controls src={result} className="w-full rounded-xl" /><a href={result} download="converted.webm" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Gif To Mp4</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Gif To Mp4 is a free online conversion tool that instantly transforms animated GIF files into high-quality MP4 video format without requiring any software installation. This versatile converter maintains animation quality while reducing file size, making it perfect for sharing videos on social media platforms and websites.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Gif To Mp4</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Gif To Mp4 website and locate the upload area on the homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the upload button or drag and drop your GIF file into the designated conversion zone</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Wait for the tool to automatically process and convert your GIF to MP4 format</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your converted MP4 file by clicking the download button</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Gif To Mp4 completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Gif To Mp4 is 100% free with no hidden charges, registration requirements, or premium subscriptions needed for basic conversions.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file size limits does Gif To Mp4 have?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Gif To Mp4 supports GIF files up to 500MB, allowing you to convert even large animated files without complications.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How long does the conversion process take?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most GIF to MP4 conversions complete within seconds to a few minutes depending on your file size and internet connection speed.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my converted MP4 maintain the same animation quality?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Gif To Mp4 preserves the original animation quality and frame rate while often reducing the overall file size for better compatibility.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Compress your GIF file before uploading to speed up conversion time and reduce processing load on the server</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use MP4 format for better compatibility with social media platforms like Facebook, Instagram, and TikTok</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep your MP4 files under 100MB for optimal performance when uploading to most websites and messaging applications</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Convert multiple GIFs in batches by uploading them sequentially to save time on repetitive conversion tasks</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="GIF to MP4"
+        description="This tool loads your GIF's first frame and records a short WebM video clip from it, entirely in your browser using the MediaRecorder API. Note: it currently captures a fixed 2-second clip of a single still frame (not the GIF's full animated sequence), and the output format is WebM rather than true MP4."
+        howTo={[
+          "Click the upload area and select a GIF file from your device.",
+          "Click \"Convert to MP4\" to start a short local recording of the loaded frame.",
+          "Wait about 2 seconds while your browser's MediaRecorder captures the clip.",
+          "Preview and download the resulting WebM video file."
+        ]}
+        faqs={[
+          { q: "Does the output preserve my GIF's animation?", a: "Not currently — it records a fixed 2-second clip of a single static frame from the GIF, not the full animated sequence." },
+          { q: "What format is the output actually in?", a: "A WebM video file (video/webm), produced via the browser's MediaRecorder API — despite \"MP4\" in the tool's name." },
+          { q: "Is GIF to MP4 free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Is my file uploaded anywhere?", a: "No. Recording happens entirely in your browser via canvas and MediaRecorder — nothing is uploaded to a server." }
+        ]}
+        tips={[
+          "If you need an actual MP4 container, convert the downloaded WebM file with a dedicated video converter afterward.",
+          "Browser support for MediaRecorder and WebM encoding varies — this works most reliably in Chrome and Firefox.",
+          "Since the output is a static-frame clip, treat this as a quick way to get a short video placeholder rather than a faithful animated conversion.",
+          "Keep your original GIF — you'll need it if you later use a tool that preserves the full animation."
+        ]}
+      />
     </div>
   );
 }

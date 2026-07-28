@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function Mp4ToGifPage() {
   const [file, setFile] = useState(null);
   const [frames, setFrames] = useState([]);
@@ -61,39 +62,28 @@ export default function Mp4ToGifPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Mp4 To Gif</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Mp4 To Gif is a free online tool that instantly converts your MP4 video files into animated GIF format without requiring any software installation. Perfect for creating shareable social media content, this tool maintains high quality while reducing file sizes for easy sharing across all platforms.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Mp4 To Gif</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Mp4 To Gif website and click the upload button to select your MP4 video file from your device</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your desired GIF settings such as frame rate, resolution, and quality to customize the output</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the convert button and wait for the tool to process your video file into GIF format</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your newly created GIF file and share it on social media or use it wherever needed</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Mp4 To Gif really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Mp4 To Gif is completely free with no hidden charges, registration requirements, or premium features to unlock.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is the maximum file size I can convert?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most free online converters support files up to 100-500MB depending on server capacity, though we recommend keeping files under 100MB for faster processing.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my video quality be affected during conversion?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool preserves good quality, but GIFs are generally larger files than compressed videos, so slight quality adjustments may occur depending on your settings.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert multiple MP4 files at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most free versions process one file at a time, but you can queue multiple conversions and download them sequentially.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Trim your MP4 video before conversion to reduce file size and create shorter, more shareable GIFs</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Lower the frame rate to 10-15 fps for smaller file sizes while maintaining smooth animation quality</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Reduce the resolution to 480p or lower if file size is a concern without sacrificing too much visual quality</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the tool during off-peak hours for faster conversion speeds and more reliable processing</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="MP4 to GIF"
+        description="MP4 to GIF extracts a series of still frames from your MP4 video, entirely in your browser — up to 10 frames from the first 5 seconds, each downscaled to a max of 480×270 and downloadable individually as a PNG. Note: it doesn't currently assemble the frames into a single animated GIF file. MP4 (H.264) is the most broadly browser-compatible video format, so playback and frame capture are generally reliable."
+        howTo={[
+          "Click the upload area and select an MP4 file from your device.",
+          "Preview the video in the player that appears.",
+          "Click \"Convert to GIF\" to capture 10 evenly spaced still frames from the first 5 seconds.",
+          "Download each frame individually as a PNG using the buttons below the grid."
+        ]}
+        faqs={[
+          { q: "Does this produce a single downloadable GIF file?", a: "Not currently — it extracts up to 10 still frames, each downloadable separately as a PNG; assembling them into an animated GIF requires a separate tool." },
+          { q: "What's the frame limit?", a: "Up to 10 frames are captured from the first 5 seconds of the video, each capped at 480×270 resolution." },
+          { q: "Is MP4 to GIF free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can process." },
+          { q: "Is my file uploaded anywhere?", a: "No. Everything runs locally in your browser — your video is never uploaded to a server." }
+        ]}
+        tips={[
+          "Combine the downloaded frames using a dedicated GIF-assembly tool if you need a true animated GIF file.",
+          "Trim your MP4 to the segment you care about beforehand, since only the first 5 seconds are captured.",
+          "MP4 is widely supported, so this tool works reliably across most modern browsers.",
+          "You can also right-click any frame in the preview grid to save it individually."
+        ]}
+      />
     </div>
   );
 }

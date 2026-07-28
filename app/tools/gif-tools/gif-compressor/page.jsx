@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function GifCompressorPage() {
   const [file, setFile] = useState(null);
   const [quality, setQuality] = useState(80);
@@ -50,39 +51,28 @@ export default function GifCompressorPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Gif Compressor</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Gif Compressor is a free online tool that reduces GIF file sizes without sacrificing quality, making it easier to share animations across web and social media platforms. Simply upload your GIF, adjust compression settings, and download your optimized file instantly.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Gif Compressor</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Gif Compressor website and click the upload button to select your GIF file from your device</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your desired compression level using the slider or preset options to balance quality and file size</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Preview the compressed result to ensure it meets your quality standards before downloading</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the download button to save your compressed GIF to your computer</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file formats does Gif Compressor support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Gif Compressor primarily works with GIF files, but some versions may support other animation formats like WebP and APNG.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for uploads?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most free versions support files up to 100-200MB, though limits may vary depending on your browser and internet connection.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will compression affect the animation quality?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Compression may reduce color depth and frame quality slightly, but you can adjust settings to find the best balance for your needs.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do you store my uploaded GIF files?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Gif Compressor processes files locally in your browser and doesn't store your uploads on our servers for privacy protection.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Start with medium compression settings and preview the results before trying higher compression for better quality control</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Reduce the number of colors in your GIF to achieve smaller file sizes while maintaining visual appeal</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Remove unnecessary frames or reduce frame duration to decrease file size without losing animation smoothness</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test your compressed GIF across different platforms before finalizing to ensure compatibility and quality on your intended platform</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="GIF Compressor"
+        description="This tool loads your GIF and re-exports it in your browser. Note: it currently captures only the GIF's first frame and outputs a static PNG image, not a compressed animated GIF — and because PNG is a lossless format, the quality slider doesn't reduce its file size the way it would for a JPG."
+        howTo={[
+          "Click the upload area and select a GIF file.",
+          "Adjust the quality slider if you like (see the FAQ below for why it may not change the result much).",
+          "Click \"Compress\" to process the file.",
+          "Review the before/after size comparison and download the result."
+        ]}
+        faqs={[
+          { q: "Does this reduce my GIF's file size?", a: "Not reliably in its current form — it captures only the first frame of the GIF and re-exports it as a PNG. PNG is lossless, so the quality slider has little to no effect on its size." },
+          { q: "Does the output stay animated?", a: "No — the current output is a static PNG of the GIF's first frame, not an animated file." },
+          { q: "Is GIF Compressor free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can process." },
+          { q: "Is my file uploaded anywhere?", a: "No. Processing happens entirely in your browser — your file is never uploaded to a server." }
+        ]}
+        tips={[
+          "Since the output loses animation, use this only if you want a static thumbnail from your GIF's first frame — not to shrink an animated GIF's file size.",
+          "For true GIF compression that preserves animation, use a dedicated animated-GIF optimizer.",
+          "If the before/after sizes look nearly identical, that's expected given PNG's lossless encoding.",
+          "Keep your original GIF, since the output here isn't an equivalent animated replacement."
+        ]}
+      />
     </div>
   );
 }

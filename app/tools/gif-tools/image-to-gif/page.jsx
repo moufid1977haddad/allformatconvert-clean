@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function ImageToGifPage() {
   const [images, setImages] = useState([]);
   const [delay, setDelay] = useState(200);
@@ -67,39 +68,28 @@ export default function ImageToGifPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Image To Gif</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Image To Gif is a free online tool that converts your static images into animated GIF files instantly without requiring any software installation. Create engaging animated GIFs from multiple images or image sequences with just a few clicks.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Image To Gif</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Image To Gif website and click the upload button to select your images from your computer</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Arrange your images in the desired order and set the delay time between frames to control animation speed</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Preview your GIF animation to ensure it looks correct before finalizing</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the download button to save your animated GIF file to your device</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats does Image To Gif support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Image To Gif supports all common image formats including JPG, PNG, BMP, GIF, and WebP files.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for uploading images?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most images up to 50MB can be uploaded, though larger files may take longer to process.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I adjust the speed of my GIF animation?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can set custom delay times between frames to make your GIF faster or slower as needed.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to create an account to use Image To Gif?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Image To Gif is completely free and requires no account creation or login.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use consistent image dimensions for the best results and smoother animations</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Start with a delay of 100-200 milliseconds between frames for natural-looking animations</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Arrange images in chronological order to create logical animation sequences</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Compress your images before uploading to speed up processing and reduce file size of the final GIF</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Image to GIF"
+        description="Image to GIF lets you upload multiple images, preview them as an animated sequence with an adjustable frame delay, and download each frame individually — entirely in your browser. Note: it doesn't currently assemble the frames into a single GIF file; you'll combine the downloaded frames using a separate GIF-assembly tool."
+        howTo={[
+          "Click the upload area and add two or more images.",
+          "Set your frame delay using the slider.",
+          "Click \"Create GIF Preview\" to see the frames in sequence.",
+          "Download each frame individually, then combine them with a GIF-assembly tool to produce the final animated file."
+        ]}
+        faqs={[
+          { q: "Does this create a downloadable GIF file directly?", a: "Not yet — it lets you preview the sequence and download each frame as a separate PNG; assembling them into one animated GIF requires a separate tool." },
+          { q: "What image formats can I upload?", a: "Any format your browser supports, including JPG, PNG, BMP, GIF, and WebP." },
+          { q: "Is Image to GIF free to use?", a: "Yes, it's completely free with no account creation or login required." },
+          { q: "Is my data private?", a: "Yes. Everything happens locally in your browser — nothing is uploaded to a server." }
+        ]}
+        tips={[
+          "Use consistent image dimensions across frames for the smoothest final animation.",
+          "Number your downloaded frames in order so your assembly tool combines them correctly.",
+          "Start with a 100–200ms delay as a good default before fine-tuning the animation speed.",
+          "Compress your source images beforehand for faster processing and smaller final frame files."
+        ]}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function AviToGifPage() {
   const [file, setFile] = useState(null);
   const [frames, setFrames] = useState([]);
@@ -58,39 +59,28 @@ export default function AviToGifPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Avi To Gif</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Avi To Gif is a free online conversion tool that instantly transforms AVI video files into animated GIF format without requiring any software installation. Perfect for creating shareable animations, memes, and social media content from your video clips.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Avi To Gif</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Avi To Gif website and click the 'Upload' button to select your AVI file from your computer</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your desired output settings such as frame rate, quality, and size to customize your GIF</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Convert' button to begin the conversion process, which typically completes in seconds</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your newly created GIF file and share it on social media, messaging apps, or websites</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Avi To Gif completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Avi To Gif is 100% free with no hidden fees, account requirements, or premium upgrades needed.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file size limits does Avi To Gif have?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most conversions support files up to 500MB, though larger files may take longer to process depending on server capacity.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert multiple AVI files at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can convert files one at a time through the web interface, or check if batch processing is available in your account settings.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my uploaded files be kept private?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">All uploaded files are automatically deleted after conversion and are never stored or shared with third parties.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Trim your AVI video before conversion to reduce file size and create more focused, shareable GIFs</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Lower the frame rate during conversion if you want smaller file sizes while maintaining acceptable animation quality</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Experiment with different dimensions to optimize GIF size for specific platforms like Twitter, Discord, or Slack</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Convert short video clips under 30 seconds for the best results and fastest processing times</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="AVI to GIF"
+        description="AVI to GIF extracts a series of still frames from your AVI video, entirely in your browser — up to 10 frames from the first 5 seconds, each downscaled to a max of 480×270. Note: it doesn't currently assemble the frames into a single animated GIF file, and playback may fail for AVI files using codecs your browser can't decode natively — AVI has particularly inconsistent browser codec support."
+        howTo={[
+          "Click the upload area and select an AVI file from your device.",
+          "If your browser can decode the file's codec, a preview appears in the video player.",
+          "Click \"Convert to GIF\" to capture 10 evenly spaced still frames from the first 5 seconds.",
+          "Review the extracted frames in the grid below the player."
+        ]}
+        faqs={[
+          { q: "Does this produce a downloadable GIF file?", a: "Not currently — it extracts up to 10 still frames as a preview grid; there's no built-in download button or GIF assembly on this page." },
+          { q: "Why won't my AVI file play or convert?", a: "AVI is a container format that can hold many different video codecs, and browsers only support a subset of them natively. If the video doesn't appear in the preview player, your browser can't decode that particular file." },
+          { q: "Is AVI to GIF free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can process." },
+          { q: "Is my file uploaded anywhere?", a: "No. Everything runs locally in your browser — your video is never uploaded to a server." }
+        ]}
+        tips={[
+          "If your AVI won't load, try converting it to MP4 first with a dedicated video converter — MP4 (H.264) has far more reliable browser support.",
+          "Frames are limited to the first 5 seconds of the video — trim longer clips beforehand if you need frames from later on.",
+          "Right-click any frame in the grid to save it as an individual image.",
+          "For a real animated GIF output, use a dedicated GIF-encoding tool with the extracted frames."
+        ]}
+      />
     </div>
   );
 }
