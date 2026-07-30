@@ -1,5 +1,6 @@
 ﻿'use client';
 import Link from 'next/link';
+import SeoContent from '../../../components/SeoContent';
 
 export default function Page() {
   return (
@@ -20,39 +21,10 @@ export default function Page() {
           <p className="text-neutral-500 text-sm">We are working hard to bring you this tool. Stay tuned!</p>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Editor</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF Editor is a free online tool that allows you to edit, annotate, and modify PDF documents directly in your browser without installing any software. With an intuitive interface and powerful features, you can add text, images, signatures, and make other changes to your PDFs instantly.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Editor</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload your PDF file by clicking the upload button or dragging and dropping your document into the editor</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Select the editing tool you need from the toolbar, such as text, drawing, annotation, or image insertion</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Make your desired changes to the PDF by clicking on the document and applying edits to specific areas</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your edited PDF file to your computer by clicking the download button when finished</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF Editor really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF Editor is completely free to use with no hidden fees, subscriptions, or premium upgrades required for basic editing features.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to install software to use PDF Editor?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, PDF Editor is a web-based tool that works directly in your browser, so no installation or downloads are necessary.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my PDF file secure when using PDF Editor?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, your files are processed securely and are typically deleted from our servers after a short period for your privacy protection.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file formats can I edit with PDF Editor?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">PDF Editor primarily works with PDF files, and you can export your edited documents back to PDF format after making changes.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the zoom feature to get a closer look at specific areas of your PDF for more precise editing and text placement</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Take advantage of the undo and redo buttons if you make a mistake, allowing you to revert changes quickly</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Organize your edits by using different colors for annotations and highlights to distinguish between different types of changes</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Save your work frequently by downloading intermediate versions of your PDF to avoid losing any important edits</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="PDF Editor"
+        description="A full PDF Editor for adding text, images, and annotations directly onto a document is not yet available — this feature is under development. In the meantime, other tools on this site cover specific PDF edits: Watermark, Number Pages, Sign, Crop, Rotate, and Delete Pages."
+      />
     </div>
   );
 }

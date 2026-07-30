@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import { PDFDocument } from 'pdf-lib';
+import SeoContent from '../../../components/SeoContent';
 
 export default function PdfReorderPagesPage() {
   const [file, setFile] = useState(null);
@@ -79,39 +80,28 @@ export default function PdfReorderPagesPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Reorder Pages</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF Reorder Pages is a free online tool that allows you to quickly rearrange the pages of your PDF documents in any order you desire. Simply upload your PDF, drag and drop pages to reorder them, and download your reorganized file instantly without any software installation or registration required.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Reorder Pages</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload your PDF file by clicking the upload button or dragging and dropping it into the designated area on the page</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>View all pages of your PDF displayed as thumbnails where you can easily see and select the pages you want to reorder</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Drag and drop individual pages to rearrange them in your desired order using an intuitive interface</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the download button to save your newly reordered PDF file to your computer</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF Reorder Pages completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF Reorder Pages is completely free with no hidden fees, subscriptions, or premium features required to reorder your PDF pages.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to create an account to use this tool?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No account or registration is necessary to use PDF Reorder Pages, making it quick and convenient to access anytime.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my PDF file secure when I upload it?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, your PDF files are processed securely and are automatically deleted from our servers after processing for your privacy protection.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is the maximum file size I can upload?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most PDFs up to 50MB can be uploaded and processed through our tool, covering the vast majority of standard documents.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the zoom feature to get a better view of individual pages before reordering, especially for documents with many pages</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>You can reorder multiple pages at once by selecting them with checkboxes and moving them as a group to save time</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Preview your reordered PDF before downloading to ensure all pages are in the correct sequence and nothing was missed</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For large documents, organize pages in sections first by grouping related pages together before making your final arrangement</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="PDF Reorder Pages"
+        description="PDF Reorder Pages lets you rearrange a PDF's pages by typing the new page order as a comma-separated list, using the pdf-lib library entirely in your browser — your file is never uploaded to a server. There are no page thumbnails or drag-and-drop; the field is pre-filled with the original order for you to edit."
+        howTo={[
+          "Click the upload area and select a PDF file — the total page count and a pre-filled order field appear.",
+          "Edit the comma-separated list of page numbers into your desired order (e.g. 3, 1, 2).",
+          "Click 'Reorder Pages' to build the PDF in that order.",
+          "Click 'Download' to save the result."
+        ]}
+        faqs={[
+          { q: "Is PDF Reorder Pages free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Can I drag and drop page thumbnails to reorder them?", a: "No — there are no visual thumbnails. You type the new page order as a comma-separated list of page numbers." },
+          { q: "Can I leave out pages I don't want in the final PDF?", a: "Yes — any page number you don't include in the list is simply left out of the reordered file." },
+          { q: "Is my file uploaded to a server?", a: "No, everything happens locally in your browser using the pdf-lib library." }
+        ]}
+        tips={[
+          "The order field starts pre-filled with the original sequence (1, 2, 3, ...) — edit only the numbers you want to move.",
+          "Leaving a page number out of the list removes that page from the output, so double-check the list includes every page you want to keep.",
+          "Page numbers are 1-indexed and must reference valid pages in the source document; invalid ones are skipped.",
+          "Since there's no preview, download and check the result on a short document before relying on it for something important."
+        ]}
+      />
     </div>
   );
 }

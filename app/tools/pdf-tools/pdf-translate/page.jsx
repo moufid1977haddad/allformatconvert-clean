@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
+import SeoContent from '../../../components/SeoContent';
 
 const languages = ['English', 'French', 'Spanish', 'German', 'Arabic', 'Chinese', 'Japanese', 'Portuguese', 'Italian', 'Russian'];
 
@@ -73,39 +74,28 @@ export default function Page() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Translate</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF Translate is a free online tool that instantly converts PDF documents into multiple languages while preserving the original formatting and layout. Simply upload your PDF file and select your target language to get accurate translations in seconds without any software installation.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Translate</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the PDF Translate website and click the 'Upload PDF' button to select your document from your device</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your source language (auto-detect is available) and select the target language you want to translate to</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Translate' button and wait for the tool to process and translate your entire PDF document</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download the translated PDF file to your computer by clicking the 'Download' button once the translation is complete</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF Translate completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF Translate is 100% free with no hidden charges, registration requirements, or premium features. You can translate as many PDFs as you need without any limitations.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How many languages does PDF Translate support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">PDF Translate supports over 100 languages including Spanish, French, German, Chinese, Japanese, Arabic, and many more, making it suitable for global users.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will the formatting of my PDF be preserved after translation?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF Translate maintains the original formatting, layout, images, and structure of your document, ensuring the translated PDF looks professional and readable.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is the maximum file size I can upload?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">PDF Translate can handle most standard PDF files up to 50MB in size, making it suitable for documents, reports, presentations, and more.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use PDF Translate for business documents, academic papers, contracts, and reports to break language barriers and communicate effectively with international audiences</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For best results with scanned PDFs or image-based documents, ensure the text is clear and legible before uploading to get accurate translations</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Translate important documents and review the output carefully, especially for legal or medical content, to ensure accuracy meets your specific needs</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Bookmark PDF Translate for quick access and share it with colleagues or friends who need to translate PDF documents in different languages</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="PDF Translate"
+        description="PDF Translate extracts text from the first 5 pages of your PDF in your browser using PDF.js, then sends up to the first 3,000 characters of that text to our server, which forwards it to OpenAI's API for translation. The result is plain translated text, not a new PDF — there's no reconstructed document with the original formatting, images, or layout."
+        howTo={[
+          "Click the upload area and select a PDF file from your device.",
+          "Choose a target language from the dropdown (10 languages available).",
+          "Click 'Translate PDF' to send the extracted text for translation.",
+          "Click 'Copy Translation' to copy the result — there's no PDF download."
+        ]}
+        faqs={[
+          { q: "Is PDF Translate free to use?", a: "Yes, it's free with no signup required." },
+          { q: "How many languages does it support?", a: "10: English, French, Spanish, German, Arabic, Chinese, Japanese, Portuguese, Italian, and Russian." },
+          { q: "Will the formatting of my PDF be preserved?", a: "No — the output is plain translated text in a text box, not a formatted PDF. Images, layout, and structure aren't recreated." },
+          { q: "How much of my PDF actually gets translated?", a: "Only the first 5 pages are extracted, and only the first 3,000 characters of that extracted text are sent for translation — longer documents get cut off." }
+        ]}
+        tips={[
+          "For long documents, only about the first 3,000 characters of extracted text (from up to the first 5 pages) get translated — split up longer PDFs if you need the rest covered.",
+          "Only the extracted text is sent to our server for translation, not the original PDF file — but scanned pages without a text layer won't produce any translatable text.",
+          "Review important translations carefully, since automated translation can miss nuance, especially for legal or technical content.",
+          "Copy the translation into a document editor if you want to format or save it as a file, since there's no direct download option here."
+        ]}
+      />
     </div>
   );
 }

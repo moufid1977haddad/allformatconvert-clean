@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import { PDFDocument } from 'pdf-lib';
+import SeoContent from '../../../components/SeoContent';
 
 export default function PdfSplitPage() {
   const [file, setFile] = useState(null);
@@ -90,39 +91,28 @@ export default function PdfSplitPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Split</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF Split is a free online tool that allows you to easily divide PDF documents into separate files or extract specific pages without any software installation. Simply upload your PDF, select the pages you want to split, and download your new files instantly.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Split</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the PDF Split website and click the 'Upload PDF' button to select your document from your computer</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Select the pages you want to split by clicking on page numbers or using the range selection feature</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Choose your splitting method: split by page, extract specific pages, or divide into equal parts</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the 'Split' button and download your newly created PDF files instantly</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF Split free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF Split is completely free with no hidden charges, registration requirements, or premium features locked behind a paywall.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to install any software?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, PDF Split is a web-based tool that works directly in your browser, so there is no software to download or install.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my PDF file secure?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Your uploaded files are processed securely and automatically deleted from our servers after processing is complete.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is the file size limit?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">PDF Split can handle most standard PDF files, typically up to 100MB, allowing you to split large documents without issues.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the preview feature to see your pages before splitting to ensure you select the correct ones</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For large PDFs, consider splitting into sections rather than individual pages for easier management</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Bookmark important pages in your original PDF before uploading to quickly identify which pages to extract</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Download your split files immediately as temporary files may be cleared periodically from the server</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="PDF Split"
+        description="PDF Split creates a separate PDF file for each comma-separated range or page number you type (e.g. '1-3, 4-6, 7'), using the pdf-lib library entirely in your browser — your file is never uploaded to a server. There's no page-thumbnail selector or automatic equal-parts option; ranges are entered as text."
+        howTo={[
+          "Click the upload area and select a PDF file — the total page count appears.",
+          "Type comma-separated ranges or page numbers, e.g. \"1-3, 4-6, 7\" — each one becomes its own PDF.",
+          "Click 'Split PDF' to generate the files.",
+          "Click each 'Download' link to save the resulting PDFs individually."
+        ]}
+        faqs={[
+          { q: "Is PDF Split free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Can I click page thumbnails to select what to split?", a: "No — there's no visual page selector. You type comma-separated ranges or page numbers as text." },
+          { q: "Can I split a PDF into equal-sized parts automatically?", a: "No, there's no automatic equal-parts option — you specify each range yourself." },
+          { q: "Do I get one zip file, or separate downloads?", a: "Each range you specify produces its own separate PDF download link — there's no single bundled zip." }
+        ]}
+        tips={[
+          "Separate ranges with commas and use a hyphen for a range (e.g. \"1-3, 5, 8-10\") — each becomes its own PDF.",
+          "Page numbers are 1-indexed and match the total page count shown after upload.",
+          "For many output files, you'll click through multiple individual download buttons rather than getting one zip.",
+          "Double-check your range syntax before splitting, since there's no preview of which pages land in each output file."
+        ]}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function PdfExtractTextPage() {
   const [file, setFile] = useState(null);
@@ -73,39 +74,28 @@ export default function PdfExtractTextPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Extract Text</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF Extract Text is a free online tool that allows you to quickly extract text from PDF documents without requiring any software installation or registration. Simply upload your PDF file and instantly retrieve all the text content in an easy-to-copy format.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Extract Text</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the PDF Extract Text tool website and locate the upload button on the main page</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the upload button and select your PDF file from your computer or drag and drop it into the designated area</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Wait for the tool to process your PDF file and extract all the text content automatically</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the extracted text to your clipboard or download it as a text file for later use</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF Extract Text completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF Extract Text is 100% free with no hidden charges, registration requirements, or premium upgrades needed.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file formats does PDF Extract Text support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool primarily supports PDF files of all sizes and can extract text from both scanned and digital PDFs.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my uploaded PDF file secure and private?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Your privacy is protected as uploaded files are processed securely and automatically deleted after extraction without being stored on our servers.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I extract text from scanned or image-based PDFs?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">PDF Extract Text works best with text-based PDFs; scanned PDFs may require OCR technology which is not available in the basic free version.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For faster extraction, try breaking down large PDF files into smaller sections before uploading</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Copy the extracted text directly to your clipboard and paste it into your preferred document editor or application</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the extracted text for content repurposing, data analysis, or creating searchable documents from image-heavy PDFs</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Check the extracted text for formatting accuracy and manually correct any OCR errors if you're working with scanned documents</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="PDF Extract Text"
+        description="PDF Extract Text pulls the text layer out of your PDF page by page, entirely in your browser using the PDF.js library — your file is never uploaded to a server. It only reads text that's actually embedded in the PDF; scanned or image-only pages have no text layer, and since no OCR is performed, those pages come out blank."
+        howTo={[
+          "Click the upload area and select a PDF file from your device.",
+          "Click 'Extract Text' to pull the text content from every page.",
+          "Read the result in the text box, grouped and labeled by page number.",
+          "Click 'Copy' to copy it, or 'Download .txt' to save it as a text file."
+        ]}
+        faqs={[
+          { q: "Is PDF Extract Text completely free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "What file formats does it support?", a: "PDF files only." },
+          { q: "Is my uploaded PDF file secure and private?", a: "Yes — text extraction happens entirely in your browser using the PDF.js library, so your file is never uploaded to a server." },
+          { q: "Can I extract text from scanned or image-based PDFs?", a: "No. This tool doesn't perform OCR — it only reads a PDF's existing text layer, so scanned pages without embedded text come out blank." }
+        ]}
+        tips={[
+          "Output is grouped by page (\"Page 1:\", \"Page 2:\", etc.) so you can tell where each chunk of text came from.",
+          "Works only on PDFs that already have a text layer — scanned or image-only pages won't produce any text.",
+          "Copy the text directly to your clipboard if you just need to paste it elsewhere, without downloading a file.",
+          "Word spacing in the output may not exactly match the original layout, since extracted text items are joined with a single space."
+        ]}
+      />
     </div>
   );
 }

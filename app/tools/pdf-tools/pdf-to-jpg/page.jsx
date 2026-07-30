@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
+import SeoContent from '../../../components/SeoContent';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -62,39 +63,28 @@ export default function Page() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf To Jpg</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF to JPG is a free online conversion tool that instantly transforms your PDF documents into high-quality JPG image files without requiring any software installation. Whether you need to convert single or multiple pages, this fast and reliable converter maintains excellent image quality while supporting batch processing.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf To Jpg</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the PDF to JPG converter website and click the 'Choose File' button to select your PDF document from your computer</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Wait a few seconds for the tool to process and convert your PDF file into JPG format automatically</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Preview the converted JPG images and adjust quality settings if needed before downloading</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the 'Download' button to save your JPG files to your device or choose 'Download All' for multiple pages</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF to JPG converter really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, our PDF to JPG converter is completely free with no hidden charges, registration requirements, or file size limitations for most conversions.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert multiple PDF files at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, the tool supports batch conversion allowing you to upload and convert multiple PDF documents simultaneously to save time.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What quality will my JPG images have after conversion?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The converter maintains high-quality JPG output with adjustable compression settings, allowing you to balance file size and image clarity based on your needs.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my data secure when using this converter?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, your files are processed securely on our servers and automatically deleted after conversion for complete privacy and data protection.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Adjust the JPG quality slider before conversion to optimize file size without sacrificing important visual details in your images</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Convert only specific pages you need instead of entire PDFs to reduce processing time and file size of your output</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the preview feature to verify conversion results before downloading to ensure quality meets your requirements</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Organize converted JPG files by renaming them immediately after download to easily manage and identify different document conversions</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="PDF to JPG"
+        description="PDF to JPG renders every page onto a canvas at 2x scale and exports each as a separate JPG at a fixed quality setting, using the PDF.js library entirely in your browser — your file is never uploaded to a server. There's no quality slider, no batch upload of multiple PDFs, and no single 'Download All' button — each page downloads individually."
+        howTo={[
+          "Click the upload area and select a single PDF file.",
+          "Click 'Convert to JPG' to render every page.",
+          "Preview each page's image as it appears below the button.",
+          "Click 'Download Page N' under each image to save it."
+        ]}
+        faqs={[
+          { q: "Is PDF to JPG really free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Can I convert multiple PDF files at once?", a: "No, only one PDF at a time — but every page inside it is converted." },
+          { q: "Can I adjust JPG quality or compression?", a: "No, every image is exported at a fixed quality setting; there's no quality slider." },
+          { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser using the PDF.js library." }
+        ]}
+        tips={[
+          "Each page downloads separately — there's no single \"Download All\" button, so expect to click through each page for a multi-page PDF.",
+          "Images render at 2x scale for reasonably sharp text and detail, good for screen viewing; check the result yourself if you need print quality.",
+          "For very long PDFs, converting many pages at once can take a moment and use noticeable browser memory.",
+          "Everything happens locally, so there's no upload wait — the limiting factor is your device's available memory."
+        ]}
+      />
     </div>
   );
 }

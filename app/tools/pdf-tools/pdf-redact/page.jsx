@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
+import SeoContent from '../../../components/SeoContent';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -69,39 +70,28 @@ export default function Page() {
           {result && <a href={result} download="redacted.pdf" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download Redacted PDF</a>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Redact</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF Redact is a free online tool that allows you to securely remove sensitive information from PDF documents without downloading software or installing plugins. Simply upload your PDF, select the text or areas you want to redact, and download your protected document instantly.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Redact</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload your PDF file by clicking the upload button or dragging and dropping your document into the tool</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Use the redaction tool to highlight and select the sensitive information you want to remove from the document</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Preview your changes to ensure all sensitive data has been properly redacted before finalizing</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your redacted PDF file to your computer and securely store or share it as needed</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF Redact completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF Redact is entirely free with no hidden charges, account requirements, or premium subscriptions needed.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Are my uploaded files secure and private?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Your files are processed securely on our servers and are automatically deleted after a short period. We do not store or share your documents with third parties.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file size limits does PDF Redact have?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">PDF Redact can handle most standard PDF files up to 50MB in size without performance issues.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I redact multiple pages in one document?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can redact content across all pages of your PDF document in a single session.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the zoom feature to get a closer look at small text before redacting to ensure you select the correct information</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Save a backup copy of your original PDF before redacting in case you need to reference the unredacted version later</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Double-check all redacted areas in the preview before downloading to avoid missing any sensitive information</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use consistent redaction styles throughout your document for a professional appearance when sharing with others</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="PDF Redact"
+        description="PDF Redact searches your PDF's text for a keyword using the PDF.js library and draws a black rectangle over each match using pdf-lib, entirely in your browser — your file is never uploaded to a server. Important: it only visually covers the matched text; the original text stays inside the PDF's content and can still be recovered by selecting or extracting it, so this is not secure redaction for genuinely sensitive information."
+        howTo={[
+          "Click the upload area and select a PDF file from your device.",
+          "Type the exact word or phrase to redact into the text field.",
+          "Click 'Redact PDF' — every occurrence of that text is covered with a black box.",
+          "Click 'Download Redacted PDF' to save the result."
+        ]}
+        faqs={[
+          { q: "Is PDF Redact free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Does this tool truly remove sensitive text from the PDF?", a: "No — it only draws a black rectangle on top of matching text. The original text stays inside the file and can still be extracted by copying it or using a text-extraction tool, so this method isn't secure for genuinely confidential information." },
+          { q: "Can I visually select an area to redact, or preview matches first?", a: "No — there's no click-to-select or highlighting interface. You type a keyword, and every matching instance is covered automatically with no preview step." },
+          { q: "Is my file uploaded to a server?", a: "No, matching and redaction both happen locally in your browser." }
+        ]}
+        tips={[
+          "Because the underlying text isn't deleted, never rely on this tool alone to redact truly confidential data like ID numbers or passwords — the covered text is still extractable.",
+          "Search terms are matched as a case-insensitive substring, so short or common keywords can over-match and cover text you didn't intend to hide.",
+          "After downloading, try selecting text inside the black boxes in a PDF reader to see what's actually still there.",
+          "For genuinely secure redaction, use dedicated redaction software that permanently strips the underlying text rather than drawing over it."
+        ]}
+      />
     </div>
   );
 }

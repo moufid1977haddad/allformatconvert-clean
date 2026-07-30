@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import SeoContent from '../../../components/SeoContent';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -94,39 +95,28 @@ export default function Page() {
           {result && <a href={result} download="signed.pdf" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download Signed PDF</a>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Sign</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF Sign is a free online tool that allows you to digitally sign PDF documents without downloading any software or creating an account. Securely add your signature, initials, or stamp to any PDF file and save it instantly.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Sign</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the PDF Sign website and click 'Upload PDF' to select your document from your computer or drag and drop it onto the page.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click on the PDF where you want to place your signature and choose to draw, type, or upload an image of your signature.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Customize your signature by adjusting the size, color, and position to match your preferences.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click 'Download' to save your signed PDF file to your device or share it directly with others.</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF Sign completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF Sign is 100% free with no hidden fees, subscriptions, or premium plans required to sign your documents.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my PDF file secure when I upload it to PDF Sign?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Your files are processed securely and automatically deleted from our servers after a short period. We use encryption to protect your data during upload and processing.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I sign multiple PDFs at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can sign multiple PDFs by uploading and processing them one at a time. Each document is handled individually on our platform.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file formats does PDF Sign support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">PDF Sign specifically works with PDF files. If you have documents in other formats, you'll need to convert them to PDF first before signing.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Save your signature as an image after creating it so you can quickly reuse it on future documents without redrawing it each time.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the zoom feature to ensure precise signature placement on your PDF, especially for documents with small signature fields.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test your signature on a sample PDF first to get the size and style exactly right before signing important documents.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep a backup copy of your original unsigned PDF before signing, in case you need to refer to the unmodified version later.</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="PDF Sign"
+        description="PDF Sign lets you draw a signature with your mouse or finger on a canvas and stamps it into the bottom-right corner of your PDF's last page, using the pdf-lib library entirely in your browser — your file is never uploaded to a server. You can only draw a signature, not type or upload an image of one, and it isn't a cryptographic digital signature — just an image placed on the page."
+        howTo={[
+          "Click the upload area and select a PDF file from your device.",
+          "Draw your signature with your mouse or touchscreen in the canvas box.",
+          "Click 'Add Signature to PDF' to stamp it onto the last page's bottom-right corner.",
+          "Click 'Download Signed PDF' to save the result."
+        ]}
+        faqs={[
+          { q: "Is PDF Sign free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Can I type my signature or upload an image instead of drawing it?", a: "No — this tool only supports drawing a signature by hand with your mouse or touchscreen." },
+          { q: "Can I choose where on the page, or which page, the signature goes?", a: "No — the signature is always placed at a fixed position in the bottom-right corner of the document's last page." },
+          { q: "Is this a legally binding digital signature?", a: "No. It's a drawn image placed on the page, not a cryptographic digital signature with identity verification, so it may not satisfy requirements for legally binding e-signatures." }
+        ]}
+        tips={[
+          "Draw slowly on a larger screen for a cleaner signature, since the canvas captures your exact mouse movement.",
+          "Click 'Clear signature' to redraw if you're not happy with the result before adding it to the PDF.",
+          "Because the signature always lands on the last page, make sure that page has room in its bottom-right corner.",
+          "Since this isn't a legally binding e-signature, check whether your document requires a certified digital signature before relying on this for contracts or official use."
+        ]}
+      />
     </div>
   );
 }

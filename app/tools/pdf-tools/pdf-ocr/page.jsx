@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
+import SeoContent from '../../../components/SeoContent';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -56,39 +57,28 @@ export default function Page() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Ocr</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF OCR is a free online tool that converts scanned PDF documents and images into editable, searchable text using advanced optical character recognition technology. Extract text from PDFs instantly without downloading software or paying subscription fees.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Ocr</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the PDF OCR website and click the 'Upload PDF' button to select your document from your computer</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your preferred output format (text, Word document, or searchable PDF) and select the language of your document</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Convert' button and wait for the OCR engine to process and extract text from your PDF</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your converted file immediately or copy the extracted text directly to use in your projects</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file formats does PDF OCR support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">PDF OCR supports PDF files, PNG, JPG, JPEG, TIFF, and BMP image formats for text extraction and conversion.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for uploads?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">PDF OCR accepts files up to 50MB in size, allowing you to process large documents and multi-page PDFs without restrictions.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How accurate is the text recognition?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">PDF OCR uses advanced machine learning to achieve 95%+ accuracy for most documents, though quality depends on image clarity and document condition.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do you store my uploaded files?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, PDF OCR automatically deletes all uploaded files within 24 hours and does not store or share your documents for privacy protection.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For best results, upload high-resolution scans (300 DPI or higher) with clear text and minimal background noise</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>If your document contains multiple languages, specify all languages used to improve OCR accuracy and text extraction</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Preview the extracted text before downloading to verify accuracy and make quick edits directly in the editor</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the searchable PDF output format to maintain document formatting while making text fully indexed and searchable</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="PDF OCR"
+        description="Despite its name, this tool does not perform optical character recognition on scanned images — it extracts a PDF's existing text layer entirely in your browser using the PDF.js library, the same way as our PDF Extract Text tool. It only reads text that's already embedded in the PDF; scanned or image-only pages have no text layer, so this tool cannot read them."
+        howTo={[
+          "Click the upload area and select a PDF file from your device.",
+          "Click 'Extract Text (OCR)' to pull each page's existing text layer.",
+          "Read the result, grouped by page number, in the text box.",
+          "Click 'Copy Text' to copy it to your clipboard."
+        ]}
+        faqs={[
+          { q: "What file formats does this tool support?", a: "PDF files only." },
+          { q: "Is there a file size limit?", a: "There's no fixed limit — it's bound by your browser's available memory." },
+          { q: "How accurate is the text recognition?", a: "This tool doesn't perform image-based character recognition at all — it only reads text that's already selectable in the PDF. For a scanned page with no text layer, it will report \"No text found in this PDF.\"" },
+          { q: "Do you store my uploaded files?", a: "No, everything happens locally in your browser. Your file is never uploaded to a server." }
+        ]}
+        tips={[
+          "Works only on PDFs that already contain selectable text — it can't recognize text inside scanned images.",
+          "If the output says \"No text found in this PDF,\" your file is likely a scan without an underlying text layer, and this tool can't process it.",
+          "For genuinely scanned documents, you'll need a dedicated image-based OCR tool, since this one only reads existing text layers.",
+          "Copy the extracted text directly to your clipboard if you just need to reuse it elsewhere."
+        ]}
+      />
     </div>
   );
 }

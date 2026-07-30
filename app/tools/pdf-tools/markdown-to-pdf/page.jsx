@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function MarkdownToPdfPage() {
   const [file, setFile] = useState(null);
@@ -73,39 +74,28 @@ export default function MarkdownToPdfPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Markdown To Pdf</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Markdown to PDF is a free online tool that instantly converts your Markdown documents into professionally formatted PDF files without requiring any software installation. Perfect for developers, writers, and content creators who need to transform plain text markdown into shareable, print-ready PDF documents.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Markdown To Pdf</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste your Markdown content into the editor window or upload a .md file from your computer</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Customize PDF settings such as page size, margins, fonts, and styling preferences</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Convert to PDF' button to process your markdown document</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your generated PDF file instantly to your device</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Markdown to PDF really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Markdown to PDF is completely free with no hidden charges, registration requirements, or premium tiers. You can convert unlimited documents at no cost.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What markdown syntax is supported?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool supports standard markdown syntax including headers, bold, italics, lists, links, code blocks, tables, blockquotes, and images.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my markdown content stored or shared?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, your markdown files are processed locally in your browser and are never stored on our servers or shared with third parties.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I customize the appearance of my PDF?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can adjust fonts, colors, margins, page size, line spacing, and other formatting options before converting to PDF.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use proper markdown heading hierarchy (H1, H2, H3) to automatically generate a table of contents in your PDF</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Include alt text for images in your markdown to ensure they display correctly and improve accessibility</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test complex markdown formatting in a preview pane before converting to PDF to catch any syntax errors</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Save your markdown source file separately so you can make updates and reconvert to PDF whenever needed</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Markdown to PDF"
+        description="Markdown to PDF renders your Markdown as styled HTML in a new browser tab, entirely on your device — your content is never uploaded to a server. It doesn't generate a PDF file directly: instead, it opens your browser's print dialog, where you choose 'Save as PDF' to produce the actual file."
+        howTo={[
+          "Choose 'Upload File' to select a .md file, or 'Paste Text' to type or paste Markdown directly.",
+          "Click 'Convert to PDF' — a new tab renders your Markdown and the browser's print dialog appears.",
+          "In the print dialog, choose 'Save as PDF' (or your OS equivalent) as the destination.",
+          "Save the resulting PDF file to your device."
+        ]}
+        faqs={[
+          { q: "Is Markdown to PDF really free to use?", a: "Yes, it's completely free with no signup or usage limits." },
+          { q: "What markdown syntax is supported?", a: "Standard Markdown: headings, bold, italics, lists, links, code blocks, tables, blockquotes, and images." },
+          { q: "Is my markdown content stored or shared?", a: "No, your content is rendered entirely in your browser and is never uploaded to a server." },
+          { q: "Can I customize fonts, margins, or page size?", a: "Headings, code blocks, and blockquotes get a built-in style, but page size and margins come from your browser's print dialog, not from settings on this page." }
+        ]}
+        tips={[
+          "Use proper heading hierarchy (# H1, ## H2, ### H3) since it maps directly to styled headings in the output.",
+          "Add alt text to images in your markdown for accessibility, even though it won't render visually.",
+          "Preview complex formatting by checking the rendered tab before saving as PDF, so you can catch syntax issues first.",
+          "Keep your original .md file as your source of truth — the PDF is a rendered export, not something you can edit back."
+        ]}
+      />
     </div>
   );
 }

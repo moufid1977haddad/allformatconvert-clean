@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function PdfToImagePage() {
   const [file, setFile] = useState(null);
@@ -70,39 +71,28 @@ export default function PdfToImagePage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf To Image</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF to Image is a free online tool that converts your PDF documents into high-quality image files in seconds without requiring any software installation. Transform single or multiple pages into JPG, PNG, or other image formats while maintaining excellent clarity and resolution.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf To Image</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the PDF to Image converter tool on our website</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the upload button and select your PDF file from your computer</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Choose your desired image format (JPG, PNG, etc.) and quality settings</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click Convert and download your image files instantly</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF to Image completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, our PDF to Image tool is 100% free with no hidden charges, registration required, or premium features.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats can I convert PDFs to?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can convert PDFs to multiple formats including JPG, PNG, GIF, BMP, and TIFF with customizable quality settings.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How many PDF files can I convert at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can convert multiple PDF files simultaneously, and there are no limits on the number of conversions per day.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my uploaded files be stored or shared?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, your files are processed securely and deleted automatically after conversion. We never store or share your documents.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For best results with scanned documents, adjust the DPI settings to 300 for crisp, clear images</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Convert PDFs in batch mode to save time when you have multiple documents to process</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Choose PNG format if you need transparent backgrounds, or JPG for smaller file sizes with good quality</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>If your PDF has multiple pages, select which pages to convert to avoid unnecessary image files</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="PDF to Image"
+        description="PDF to Image renders every page of your PDF onto a canvas at 2x scale and exports each as a separate PNG, using the PDF.js library entirely in your browser — your file is never uploaded to a server. Output is always PNG at a fixed scale; there's no format picker, quality setting, or batch upload of multiple PDFs."
+        howTo={[
+          "Click the upload area and select a single PDF file.",
+          "Click 'Convert to Images' to render every page.",
+          "Preview each page's image inline once rendering finishes.",
+          "Click 'Download Page N' under each image to save it individually."
+        ]}
+        faqs={[
+          { q: "Is PDF to Image completely free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "What image formats can I convert PDFs to?", a: "PNG only — there's no option to export as JPG, GIF, BMP, or TIFF." },
+          { q: "Can I adjust quality or DPI settings?", a: "No, every page is rendered at a fixed 2x scale; there are no quality or resolution controls." },
+          { q: "Can I convert multiple PDF files at once?", a: "No, only one PDF at a time — but every page within it is converted." }
+        ]}
+        tips={[
+          "Each page downloads as its own PNG file, so for a long document you'll click through several individual downloads rather than getting one zip.",
+          "Rendering happens on a canvas at 2x scale, so larger or high-page-count PDFs may take longer and use more browser memory.",
+          "Use another image tool afterward if you need to convert the PNGs to JPG or resize them.",
+          "Everything happens locally, so there's no upload wait — the limiting factor is your device's available memory."
+        ]}
+      />
     </div>
   );
 }

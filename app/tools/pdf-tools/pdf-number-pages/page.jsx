@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import SeoContent from '../../../components/SeoContent';
 
 export default function PdfNumberPagesPage() {
   const [file, setFile] = useState(null);
@@ -81,39 +82,28 @@ export default function PdfNumberPagesPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Number Pages</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF Number Pages is a free online tool that automatically adds page numbers to your PDF documents without requiring any software installation or registration. Simply upload your PDF file and customize the numbering style, position, and format to create professionally numbered documents in seconds.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Number Pages</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload your PDF file by clicking the upload button or dragging and dropping your document into the tool</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose your numbering preferences including position (top, bottom, left, right), format (1, i, a, etc.), and starting number</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Preview your changes to ensure the page numbers appear exactly where you want them</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click download to save your numbered PDF file to your device</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF Number Pages completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF Number Pages is 100% free with no hidden fees, subscriptions, or premium versions required to access all features.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to install any software to use this tool?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, PDF Number Pages is a web-based tool that works directly in your browser, so no installation or downloads are necessary.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my PDF file be kept private?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Your uploaded files are processed securely and are not stored on our servers after processing is complete for your privacy protection.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I add page numbers to large PDF files?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF Number Pages can handle PDF files of various sizes, though very large files may take slightly longer to process.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Start numbering from a specific page by using the start number option to skip the cover page or introduction</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Experiment with different numbering formats like roman numerals for front matter and regular numbers for the main content</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Position page numbers consistently by choosing a single location, such as bottom center, for a professional appearance</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test your settings on a small section first by adjusting the preview before downloading the final numbered PDF</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="PDF Number Pages"
+        description="PDF Number Pages stamps a “current / total” label (e.g. “1 / 12”) onto every page of your PDF entirely in your browser using the pdf-lib library — your file is never uploaded to a server. Numbering always starts at 1 on the first page in that fixed format; there's no custom numbering style, starting number, or preview."
+        howTo={[
+          "Click the upload area and select a PDF file from your device.",
+          "Choose a position for the page numbers from the six options (top or bottom, left, center, or right).",
+          "Click 'Add Page Numbers' to stamp every page.",
+          "Click 'Download' to save the result."
+        ]}
+        faqs={[
+          { q: "Is PDF Number Pages free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Can I choose the number format, like Roman numerals?", a: "No — every page gets a plain \"current / total\" label in Arabic numerals; there's no format picker." },
+          { q: "Can I start numbering from a different number or skip a cover page?", a: "No, numbering always starts at 1 on the very first page and runs through every page in the document." },
+          { q: "Is my PDF uploaded to a server?", a: "No. Page numbers are added entirely in your browser using the pdf-lib library." }
+        ]}
+        tips={[
+          "Bottom-center is the most common, professional-looking placement for page numbers.",
+          "Numbers are drawn on top of existing page content, so check that your chosen position doesn't overlap existing text or footers.",
+          "If you need to skip a cover page or use a custom starting number, this tool can't do that directly — you'd need to edit specific pages afterward with another PDF tool.",
+          "Since there's no in-tool preview, download and check the result on a short test PDF before processing an important document."
+        ]}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function MobiToPdfPage() {
   const [file, setFile] = useState(null);
@@ -65,39 +66,28 @@ export default function MobiToPdfPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Mobi To Pdf</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Mobi To Pdf is a free online conversion tool that instantly transforms MOBI eBook files into PDF format without requiring any software installation or registration. This tool preserves the original formatting and layout of your MOBI files while producing high-quality PDF documents that are compatible with any device.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Mobi To Pdf</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Mobi To Pdf website and locate the file upload area on the homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the upload button and select your MOBI file from your computer or drag and drop it into the designated zone</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Wait for the conversion process to complete, which typically takes only a few seconds</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your converted PDF file by clicking the download button and saving it to your device</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Mobi To Pdf completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Mobi To Pdf is entirely free with no hidden charges, registration requirements, or premium subscriptions needed for basic conversions.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file size limitations exist for uploads?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Mobi To Pdf typically supports files up to 50MB, allowing you to convert most standard eBooks without any issues.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my files be stored or deleted after conversion?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Your files are automatically deleted from our servers within 24 hours for privacy and security purposes, and we never store personal data.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert multiple MOBI files at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most versions support batch conversion, allowing you to upload and convert multiple MOBI files simultaneously for increased efficiency.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For best results, ensure your MOBI file is not corrupted before uploading by testing it in a compatible reader first</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>If your PDF has formatting issues, try re-exporting the original MOBI file and converting again using the tool</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the tool's preview feature if available to verify the conversion quality before downloading your final PDF</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep your browser updated and clear your cache regularly to ensure smooth operation and faster conversion speeds</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="MOBI to PDF"
+        description="MOBI to PDF is a lightweight, browser-only tool: it reads the raw bytes of your MOBI file, strips out anything that looks like a markup tag, and displays the leftover text in a print-ready tab — your file is never uploaded to a server. MOBI is a compressed binary ebook format, and this simple approach does not decode that compression, so results are reliable mainly for MOBI files that store their text with little or no compression; heavily compressed books may come out with garbled or unreadable text."
+        howTo={[
+          "Click the upload area and select a .mobi, .azw, or .azw3 file from your device.",
+          "Click 'Convert to PDF' — a new tab opens with the extracted text and the browser's print dialog appears.",
+          "Check that the text is readable, not garbled, before proceeding.",
+          "In the print dialog, choose 'Save as PDF' to produce the file."
+        ]}
+        faqs={[
+          { q: "Is MOBI to PDF completely free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Will this work for every MOBI file?", a: "Not reliably. This tool does basic byte decoding without a real MOBI/PalmDOC decompressor, so compressed ebook content can come out as garbled text. If the output looks like gibberish, this tool isn't a good fit for that file." },
+          { q: "Will my files be uploaded to a server?", a: "No. Your file is read and processed entirely in your browser." },
+          { q: "Can I convert multiple MOBI files at once?", a: "No, only one file at a time." }
+        ]}
+        tips={[
+          "Always check the rendered tab before saving — if the text looks like random characters, the file's compression isn't supported by this simple tool.",
+          "The output is plain text only, without the original book's images, fonts, or page layout.",
+          "For a book with garbled output, consider converting it with a dedicated ebook tool first, then use this converter on the resulting file.",
+          "Keep your original MOBI file, since this process can't be reversed."
+        ]}
+      />
     </div>
   );
 }

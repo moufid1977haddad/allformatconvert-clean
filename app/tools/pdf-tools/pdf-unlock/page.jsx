@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
+import SeoContent from '../../../components/SeoContent';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -49,39 +50,28 @@ export default function Page() {
           {result && <a href={result} download="unlocked.pdf" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download Unlocked PDF</a>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Unlock</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF Unlock is a free online tool that removes password protection and restrictions from PDF files in seconds without requiring software installation. Whether your PDF is encrypted with user or owner passwords, this simple solution lets you regain full access to edit, copy, and print your documents.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Unlock</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the PDF Unlock website and locate the upload area on the homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the upload button and select your password-protected PDF file from your device</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Wait for the tool to process and automatically remove the password protection</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your unlocked PDF file and open it with any PDF reader to verify access</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF Unlock safe to use with my sensitive documents?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF Unlock uses secure SSL encryption and automatically deletes all uploaded files after processing. Your documents are never stored or shared with third parties.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What types of PDF passwords can PDF Unlock remove?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">PDF Unlock can remove user passwords that restrict opening files and owner passwords that restrict editing, copying, and printing. However, it cannot bypass 256-bit AES encryption or military-grade security.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to install any software to use PDF Unlock?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, PDF Unlock is completely web-based and works directly in your browser. There is no software to download or install, making it accessible from any device with internet access.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Are there any file size limitations or fees for using PDF Unlock?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">PDF Unlock is completely free with no hidden costs or subscriptions. Most files process quickly, though very large PDFs may take slightly longer to unlock.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep your original PDF file as a backup before unlocking in case you need to reference the original protected version</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>If the unlock fails on the first attempt, try uploading the PDF again as temporary processing issues can occur</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use PDF Unlock when you own the document or have permission from the copyright holder to remove restrictions</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Clear your browser cache after unlocking sensitive documents to ensure no temporary files remain on your device</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="PDF Unlock"
+        description="PDF Unlock attempts to open a password-protected PDF using the pdf-lib library entirely in your browser — your file is never uploaded to a server. Note: the version of pdf-lib this tool relies on does not implement PDF decryption, so any genuinely password-protected PDF will currently fail to load here regardless of the password you enter."
+        howTo={[
+          "Click the upload area and select a password-protected PDF file.",
+          "Type the PDF's password into the field.",
+          "Click 'Unlock PDF'.",
+          "If it succeeds, click 'Download Unlocked PDF' to save the result."
+        ]}
+        faqs={[
+          { q: "Is PDF Unlock free to use?", a: "Yes, it's free with no signup required." },
+          { q: "Can this actually remove a real password from an encrypted PDF?", a: "Currently, no — the underlying library can't decrypt genuinely encrypted PDFs, so a real password-protected file will fail to open here no matter what password you enter." },
+          { q: "What types of PDF passwords can it remove?", a: "None reliably at the moment — this feature doesn't yet work as intended for actually encrypted files." },
+          { q: "Is my file uploaded to a server?", a: "No, everything is attempted locally in your browser." }
+        ]}
+        tips={[
+          "If you see \"Could not unlock PDF. Wrong password?\" on a file you know the correct password for, that's a limitation of this tool rather than an incorrect password.",
+          "For a genuinely password-protected PDF, use desktop software or another service that supports real PDF decryption.",
+          "Check back later, since this feature is still being developed.",
+          "Keep your original file safe regardless, since this tool can't modify a PDF it fails to open."
+        ]}
+      />
     </div>
   );
 }

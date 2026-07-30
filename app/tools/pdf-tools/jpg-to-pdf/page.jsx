@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { PDFDocument } from 'pdf-lib';
+import SeoContent from '../../../components/SeoContent';
 
 export default function Page() {
   const [files, setFiles] = useState([]);
@@ -58,39 +59,28 @@ export default function Page() {
           {result && <a href={result} download="converted.pdf" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download PDF</a>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Jpg To Pdf</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Jpg To Pdf is a free online tool that converts JPEG images into PDF documents instantly without requiring any software installation or account creation. Perfect for students, professionals, and anyone needing to combine or convert image files into a portable PDF format.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Jpg To Pdf</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Jpg To Pdf tool website and locate the upload area on the homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the upload button and select one or multiple JPG files from your computer</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Adjust settings such as page size, orientation, or image quality if desired</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the Convert button and download your PDF file to your device</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Jpg To Pdf really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Jpg To Pdf is completely free with no hidden fees, subscriptions, or premium upgrades required for basic conversions.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert multiple JPG images at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, most Jpg To Pdf tools allow batch conversion, enabling you to upload and convert multiple JPEG files simultaneously.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my files be deleted after conversion?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">For security and privacy, files are typically deleted from servers within 24 hours, though it's recommended to delete them immediately after download.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats besides JPG can be converted?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most Jpg To Pdf tools support additional formats including PNG, BMP, GIF, and TIFF for conversion to PDF.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For best results, ensure your JPG images are clear and properly scanned before uploading to the converter</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Arrange multiple images in the correct order before conversion if creating a multi-page PDF document</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Compress large image files before upload to ensure faster conversion processing times</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the preview feature to verify the PDF output quality before finalizing your download</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="JPG to PDF"
+        description="JPG to PDF combines JPG and PNG images into a single PDF file entirely in your browser using the pdf-lib library — your images are never uploaded to a server. Each image becomes its own page, sized to match that image's exact pixel dimensions."
+        howTo={[
+          "Click the upload area and select one or more JPG or PNG images from your device.",
+          "Review the selected files listed below the upload area.",
+          "Click 'Convert to PDF' to combine them into a single PDF.",
+          "Click 'Download PDF' to save the file."
+        ]}
+        faqs={[
+          { q: "Is JPG to PDF really free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Can I convert multiple JPG images at once?", a: "Yes, you can select multiple images at once, and they're combined into one multi-page PDF." },
+          { q: "Will my files be uploaded to a server?", a: "No. Conversion happens entirely in your browser — your images are never uploaded anywhere." },
+          { q: "What image formats besides JPG can be converted?", a: "PNG is also supported. Other formats you select are silently skipped during conversion." }
+        ]}
+        tips={[
+          "Select your images in the order you want them to appear, since there's no reordering step after upload.",
+          "Each page matches its source image's exact pixel dimensions, so very differently sized images will produce pages of different sizes.",
+          "Stick to JPG or PNG — other formats you select won't be included in the output.",
+          "Download the result right away; it isn't saved anywhere after you leave the page."
+        ]}
+      />
     </div>
   );
 }

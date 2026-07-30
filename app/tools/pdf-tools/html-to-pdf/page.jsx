@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import SeoContent from '../../../components/SeoContent';
 
 export default function HtmlToPdfPage() {
   const [file, setFile] = useState(null);
@@ -71,39 +72,28 @@ export default function HtmlToPdfPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Html To Pdf</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">HTML To PDF is a free online conversion tool that instantly transforms HTML code, web pages, and HTML files into professional PDF documents without requiring any software installation. Perfect for developers, designers, and content creators who need quick and reliable HTML to PDF conversion with advanced formatting preservation.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Html To Pdf</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste your HTML code directly into the input field or upload an HTML file from your computer</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Customize conversion settings such as page size, margins, orientation, and header/footer options if needed</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Convert to PDF' button to process your HTML document</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download the generated PDF file to your device or share it directly with others</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is HTML To PDF completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, HTML To PDF is 100% free with no hidden fees, registration requirements, or usage limits for converting your documents.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert large HTML files?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Our tool supports HTML files of various sizes, though extremely large files may take slightly longer to process depending on server capacity.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my HTML documents be kept private?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, all uploaded files are processed securely and automatically deleted after conversion for complete privacy protection.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What HTML features are supported in the conversion?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">HTML To PDF supports CSS styling, images, tables, forms, and most modern HTML5 elements, maintaining your original formatting in the PDF output.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Optimize your CSS styling before conversion to ensure fonts, colors, and layouts appear exactly as intended in the final PDF</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use absolute URLs for images in your HTML to prevent broken image links in the converted PDF document</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test your HTML in a browser first to verify formatting, as the PDF output will closely match your browser's rendering</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Adjust margin and padding settings in your conversion options to control white space and improve document appearance</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="HTML to PDF"
+        description="HTML to PDF opens your HTML code or file — including its CSS — in a new browser tab, entirely on your device, and never uploads it to a server. It doesn't generate a PDF file directly: instead, it opens your browser's print dialog, where you choose 'Save as PDF' to produce the actual file, so the output matches how your browser renders the page."
+        howTo={[
+          "Choose 'Upload File' to select an .html file, or 'Paste Code' to type or paste HTML directly.",
+          "Click 'Convert to PDF' — a new tab renders your HTML and the browser's print dialog appears.",
+          "In the print dialog, choose 'Save as PDF' (or your OS equivalent) as the destination.",
+          "Save the resulting PDF file to your device."
+        ]}
+        faqs={[
+          { q: "Is HTML to PDF completely free to use?", a: "Yes, it's completely free with no signup or usage limits." },
+          { q: "Can I customize page size, margins, or headers/footers?", a: "Not in this tool directly — those options come from your browser's print dialog, which appears after conversion, rather than from settings on this page." },
+          { q: "Will my HTML documents be uploaded to a server?", a: "No. The HTML is rendered entirely in your browser — it's never uploaded anywhere." },
+          { q: "What HTML features are supported?", a: "Whatever your browser can render: CSS styling, images, tables, and most modern HTML5 elements. Since it's just your browser's own rendering engine, the PDF looks like the page would look printed from that browser." }
+        ]}
+        tips={[
+          "Use absolute image URLs (starting with https://) rather than relative paths, since a relative path may not resolve correctly in the print preview.",
+          "Preview your HTML in a normal browser tab first — the PDF output will closely match what you see there.",
+          "Use the print dialog's margin and page size options to fine-tune the final layout.",
+          "For pasted code, make sure to include a full HTML document (with <html> and <body> tags) for the most reliable rendering."
+        ]}
+      />
     </div>
   );
 }

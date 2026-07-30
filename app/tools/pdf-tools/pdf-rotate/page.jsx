@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import { PDFDocument, degrees } from 'pdf-lib';
+import SeoContent from '../../../components/SeoContent';
 
 export default function PdfRotatePage() {
   const [file, setFile] = useState(null);
@@ -66,39 +67,28 @@ export default function PdfRotatePage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Rotate</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF Rotate is a free online tool that allows you to quickly rotate PDF pages in any direction without installing software or creating an account. Simply upload your PDF file, select your rotation preference, and download your modified document instantly.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Rotate</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the PDF Rotate website and click the upload button to select your PDF file from your computer</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose the rotation angle you need such as 90 degrees clockwise, 90 degrees counterclockwise, or 180 degrees</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Select whether you want to rotate all pages or specific pages within your document</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the rotate button and download your updated PDF file to your device</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF Rotate completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF Rotate is completely free with no hidden fees, subscriptions, or premium features required to rotate your documents.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to create an account to use PDF Rotate?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No account or registration is necessary. You can start rotating PDFs immediately without providing any personal information.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my uploaded PDF files be stored or shared?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Your files are processed securely and deleted automatically after conversion. We do not store or share any of your documents.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file size limit does PDF Rotate have?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">PDF Rotate supports files up to 50MB in size, making it suitable for most standard and large PDF documents.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the preview feature before downloading to ensure your pages are rotated exactly as needed</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>You can rotate multiple PDFs in succession without waiting for page reloads between uploads</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For batch processing multiple files, consider uploading them one at a time and organizing them by rotation angle needed</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Check your rotated PDF on different devices to ensure the layout appears correct on mobile phones and tablets</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="PDF Rotate"
+        description="PDF Rotate rotates every page of a PDF by a fixed angle you choose — 90°, 180°, or 270° — using the pdf-lib library entirely in your browser. Your file is never uploaded to a server. The rotation applies to the whole document at once; there's no option to rotate individual pages differently."
+        howTo={[
+          "Click the upload area and select a PDF file from your device.",
+          "Choose a rotation angle: 90°, 180°, or 270°.",
+          "Click 'Rotate PDF' to apply it to every page.",
+          "Click 'Download' to save the rotated file."
+        ]}
+        faqs={[
+          { q: "Is PDF Rotate free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Can I rotate individual pages differently?", a: "No — the angle you choose is applied to every page in the document at once." },
+          { q: "What rotation angles are available?", a: "90°, 180°, and 270° clockwise. There's no separate counter-clockwise option, but choosing 270° produces the same result as rotating 90° counter-clockwise." },
+          { q: "Is my file uploaded to a server?", a: "No, rotation happens entirely in your browser using the pdf-lib library." }
+        ]}
+        tips={[
+          "To rotate 90° counter-clockwise, choose 270° — it produces the same visual result.",
+          "Since rotation applies to the whole document, split out any pages that need a different rotation beforehand with another tool.",
+          "There's no preview, so download and check a page or two before using the result for something important.",
+          "Rotation changes the page's orientation setting rather than redrawing content, so text and images stay sharp at any angle."
+        ]}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
+import SeoContent from '../../../components/SeoContent';
 
 export default function Page() {
   const [file1, setFile1] = useState(null);
@@ -73,39 +74,28 @@ export default function Page() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Compare</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF Compare is a free online tool that allows you to quickly identify differences between two PDF documents by comparing their content, layout, and formatting side-by-side. Whether you're reviewing contracts, checking document versions, or validating changes, PDF Compare helps you spot variations instantly without downloading software.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Compare</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload your first PDF file by clicking the 'Choose File' button or dragging it into the designated area</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Upload your second PDF file using the same method to load the document you want to compare against</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Compare' button to analyze both documents and generate a detailed comparison report</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Review the highlighted differences showing added, removed, or modified content between the two PDFs</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF Compare completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF Compare is 100% free with no hidden charges, registration requirements, or premium features. You can compare unlimited PDFs without any restrictions.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file size limits does PDF Compare support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">PDF Compare supports PDF files up to 50MB in size, allowing you to compare large documents with detailed content and multiple pages.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I compare more than two PDF files at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">PDF Compare is designed to compare two documents at a time for optimal clarity and accuracy. For multiple comparisons, you can run several comparisons sequentially.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my data secure when using PDF Compare?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, your files are processed securely and deleted immediately after comparison. We do not store or share your documents with third parties.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use PDF Compare to track version changes in contracts, agreements, and legal documents to ensure all modifications are intentional and approved</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Compare software documentation updates to quickly identify new features, removed sections, and changed specifications between releases</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Validate form submissions and templates by comparing the original template with completed versions to spot unauthorized alterations</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Review research papers and reports across versions to maintain version control and ensure proper attribution of all changes and updates</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Compare PDF"
+        description="Compare PDF extracts the text content of two PDF files entirely in your browser using the PDF.js library, then displays both extractions side by side as plain text for you to read — it does not highlight differences, detect changes, or generate an automated comparison report."
+        howTo={[
+          "Click the left box and upload your first PDF file.",
+          "Click the right box and upload your second PDF file.",
+          "Click 'Compare PDFs' to extract the text from both files.",
+          "Read the two text panels side by side to spot differences yourself."
+        ]}
+        faqs={[
+          { q: "Is PDF Compare free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Does it highlight the differences between the two documents?", a: "No — it shows each PDF's extracted text side by side as plain text. It doesn't mark additions, deletions, or changes for you." },
+          { q: "Are my files uploaded to a server?", a: "No, text extraction happens entirely in your browser using the PDF.js library." },
+          { q: "Can it compare scanned PDFs?", a: "Not usefully — extraction only pulls text that's actually embedded in the file. Scanned or image-only pages have no text layer, so those panels will come out empty." }
+        ]}
+        tips={[
+          "For a true line-by-line diff, copy each panel's text into a dedicated text-comparison tool.",
+          "Works best on text-based PDFs; scanned documents without a text layer won't produce readable output.",
+          "Only raw text is extracted — page layout, images, and formatting are not compared.",
+          "For long documents, use your browser's find (Ctrl/Cmd+F) inside each panel to jump to a specific term."
+        ]}
+      />
     </div>
   );
 }

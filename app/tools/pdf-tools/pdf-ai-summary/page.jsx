@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
+import SeoContent from '../../../components/SeoContent';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -57,39 +58,28 @@ export default function Page() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Ai Summary</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF AI Summary is a free online tool that uses artificial intelligence to automatically generate concise summaries of PDF documents in seconds. Simply upload your PDF file and let our advanced AI technology extract the key points and create a readable summary without any cost or registration required.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Ai Summary</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the PDF AI Summary website and locate the upload section on the homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the upload button and select your PDF file from your computer or drag and drop it into the designated area</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Wait for the AI to process and analyze your document, which typically takes just a few seconds depending on file size</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Review your generated summary and download or copy the text to use in your documents or notes</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF AI Summary really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF AI Summary is completely free to use with no hidden charges, registration fees, or premium upgrades required for basic summarization.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file sizes can PDF AI Summary handle?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Our tool can process PDF files up to 50MB in size, covering most standard documents, research papers, and business reports.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How accurate are the AI-generated summaries?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Our AI uses advanced natural language processing to extract key information and generate summaries with high accuracy, though we recommend reviewing summaries for critical documents.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my uploaded PDF file kept private and secure?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, we take privacy seriously and automatically delete uploaded files from our servers after processing is complete. Your data is never stored or shared with third parties.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For best results, use clear and well-formatted PDF documents as the AI performs better with readable text and standard layouts</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Adjust the summary length preference if available to get either a brief overview or a more detailed summary based on your needs</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use PDF AI Summary for research papers, business reports, articles, and lengthy documents to save time on reading and information gathering</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Copy and paste the summary into your note-taking app or document immediately after generation to ensure you don't lose the content</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="AI PDF Summary"
+        description="AI PDF Summary sends your file to our server, which passes it to OpenAI's gpt-4o-mini model for a text summary. Rather than extracting the PDF's actual text first, it base64-encodes the raw file and forwards only the first 5,000 characters of that encoding — for anything but short, simple PDFs, the model is working from a small slice of raw binary data rather than the document's full content."
+        howTo={[
+          "Click the upload area and select a PDF file from your device.",
+          "Click 'Summarize PDF' to send it to the AI model.",
+          "Wait a few seconds for the summary to appear below.",
+          "Click 'Copy Summary' to copy the result to your clipboard."
+        ]}
+        faqs={[
+          { q: "Is AI PDF Summary free to use?", a: "Yes, it's free with no signup required." },
+          { q: "Does it read my entire PDF?", a: "No — only roughly the first 5,000 characters of the file's base64-encoded bytes are sent to the AI, so anything beyond the very start of the file isn't seen by the model." },
+          { q: "Is my file uploaded to a server?", a: "Yes. Unlike most tools on this site, your file is sent to our server and forwarded to OpenAI's API to generate the summary." },
+          { q: "Why does the summary sometimes look unrelated to my document?", a: "The tool sends raw file bytes rather than properly extracted text, so the model can end up summarizing binary noise instead of your document's actual content, especially for longer or image-heavy PDFs." }
+        ]}
+        tips={[
+          "This tool works best on short, simple, text-based PDFs, since only the beginning of the raw file reaches the AI.",
+          "For longer documents, use PDF Extract Text first, then paste that extracted text into a general-purpose AI summarizer for a more reliable result.",
+          "Treat the summary as a rough starting point and verify it against the original document.",
+          "Copy the summary right away — it isn't saved anywhere after you leave the page."
+        ]}
+      />
     </div>
   );
 }

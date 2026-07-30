@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import { PDFDocument } from 'pdf-lib';
+import SeoContent from '../../../components/SeoContent';
 
 export default function PdfDeletePagesPage() {
   const [file, setFile] = useState(null);
@@ -72,39 +73,28 @@ export default function PdfDeletePagesPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Delete Pages</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF Delete Pages is a free online tool that allows you to easily remove unwanted pages from your PDF documents without requiring any software installation. Simply upload your PDF file, select the pages you want to delete, and download your edited document instantly.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Delete Pages</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the PDF Delete Pages website and click the 'Upload PDF' button to select your document from your computer</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Review the PDF preview and click on the page numbers you wish to remove from your document</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Delete Selected Pages' button to remove all marked pages from your PDF</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your edited PDF file to your computer by clicking the 'Download' button</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF Delete Pages really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF Delete Pages is completely free with no hidden charges, subscriptions, or watermarks added to your documents.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is the maximum file size I can upload?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can upload PDF files up to 100MB in size. For larger files, consider splitting your document into smaller parts.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my PDF file secure when using this tool?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, all uploaded files are processed securely and automatically deleted from our servers within 24 hours for your privacy.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I delete multiple pages at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Absolutely, you can select and delete multiple pages simultaneously by clicking on each page number you want to remove.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Preview your PDF before deleting pages to ensure you're removing the correct ones and avoid accidental deletion</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Download a backup copy of your original PDF before making changes in case you need to reference the complete document later</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the search or filter feature if your PDF has many pages to quickly locate and select specific pages for deletion</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Consider organizing pages logically before deletion to maintain document flow and readability after removing unwanted content</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="PDF Delete Pages"
+        description="PDF Delete Pages removes the page numbers you specify from a PDF entirely in your browser using the pdf-lib library — your file is never uploaded to a server. There's no visual page preview or thumbnails; you type the page numbers to remove into a text field."
+        howTo={[
+          "Click the upload area and select a PDF file — the total page count appears once it loads.",
+          "Type the page numbers to delete into the text field, separated by commas (e.g. 1, 3, 5).",
+          "Click 'Delete Pages' to remove them.",
+          "Click 'Download' to save the edited PDF."
+        ]}
+        faqs={[
+          { q: "Is PDF Delete Pages free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Is there a visual preview to click on pages?", a: "No — there are no page thumbnails. You enter the page numbers as text, based on their position in the document." },
+          { q: "Is my PDF file uploaded to a server?", a: "No. Pages are removed entirely in your browser using the pdf-lib library." },
+          { q: "Can I delete multiple pages at once?", a: "Yes, list multiple page numbers separated by commas and they're all removed in one pass." }
+        ]}
+        tips={[
+          "Page numbers are 1-indexed and match the total page count shown after you upload the file.",
+          "Double-check page numbers against the original document, since there's no visual preview before deleting.",
+          "Duplicate or out-of-range page numbers you enter are automatically ignored.",
+          "Keep your original file until you've confirmed the downloaded result looks right — the tool can't undo a deletion."
+        ]}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import { PDFDocument } from 'pdf-lib';
+import SeoContent from '../../../components/SeoContent';
 
 export default function PdfCompressPage() {
   const [file, setFile] = useState(null);
@@ -71,39 +72,28 @@ export default function PdfCompressPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Compress</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF Compress is a free online tool that reduces PDF file sizes without compromising quality, making it easy to share and store large documents. Simply upload your PDF and instantly download a compressed version that's perfect for email attachments and cloud storage.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Compress</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the PDF Compress website and click the 'Upload PDF' button to select your file from your computer</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>The tool automatically compresses your PDF while maintaining readable quality and formatting</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Preview the compressed file to ensure it meets your needs before downloading</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click 'Download' to save your compressed PDF to your device instantly</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF Compress really free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF Compress is completely free with no hidden fees, registration required, or download limits.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How much can I reduce my PDF file size?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Compression rates vary depending on your PDF content, but most users experience 30-70% file size reduction while maintaining quality.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my PDF file secure when I upload it?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, files are processed securely and automatically deleted from our servers after compression is complete.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What's the maximum file size I can compress?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">PDF Compress supports files up to 100MB, making it suitable for most document types and multi-page PDFs.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>For scanned documents with images, compression is most effective and can significantly reduce file size</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Check your compressed PDF on different devices to ensure text remains clear and readable after compression</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use PDF Compress before sending files via email to avoid attachment size limitations</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Compress PDFs regularly when managing large document libraries to save storage space and improve backup efficiency</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="PDF Compress"
+        description="PDF Compress rewrites your PDF's internal structure entirely in your browser using the pdf-lib library, condensing its objects into compact object streams — your file is never uploaded to a server. It does not re-encode or downsample images, so savings are typically modest and depend heavily on the source file."
+        howTo={[
+          "Click the upload area and select a PDF file from your device.",
+          "Click 'Compress PDF' to rewrite the file's internal structure.",
+          "Review the before/after size and percentage saved.",
+          "Click 'Download' to save the compressed PDF."
+        ]}
+        faqs={[
+          { q: "Is PDF Compress free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "How much can I reduce my PDF's file size?", a: "It varies widely. PDFs with many pages, fonts, or objects tend to benefit most from the streamlined internal structure; already-optimized or small PDFs may shrink only slightly." },
+          { q: "Does it reduce image quality?", a: "No — images are left untouched rather than re-encoded, so visual quality is unaffected. That also means it won't meaningfully shrink files whose size mostly comes from large embedded images." },
+          { q: "Is my PDF uploaded to a server?", a: "No. Compression happens entirely in your browser using the pdf-lib library." }
+        ]}
+        tips={[
+          "Works best on PDFs with many pages, embedded fonts, or form fields, where restructuring internal objects saves the most space.",
+          "Won't meaningfully shrink scanned or image-heavy PDFs, since embedded images aren't recompressed.",
+          "Check the before/after sizes shown after compressing — if savings are minimal, your file is likely already well-optimized.",
+          "There's no fixed file-size limit, but very large files are bound by your browser's available memory."
+        ]}
+      />
     </div>
   );
 }

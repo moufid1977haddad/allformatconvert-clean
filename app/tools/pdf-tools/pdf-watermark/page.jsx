@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib';
+import SeoContent from '../../../components/SeoContent';
 
 export default function PdfWatermarkPage() {
   const [file, setFile] = useState(null);
@@ -80,39 +81,28 @@ export default function PdfWatermarkPage() {
           )}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Watermark</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF Watermark is a free online tool that allows you to add text or image watermarks to your PDF documents instantly without requiring any software installation. Protect your intellectual property, brand your documents, or mark files as confidential with ease using our user-friendly watermarking solution.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Watermark</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload your PDF file by clicking the upload button or dragging and dropping it into the designated area</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Choose whether you want to add a text watermark or image watermark and customize your watermark content and styling</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Adjust the size, opacity, rotation, and position of your watermark to achieve your desired appearance</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the download button to save your watermarked PDF to your computer</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is PDF Watermark completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, PDF Watermark is completely free with no hidden charges or premium features. You can watermark unlimited PDF files without any restrictions.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my PDF files be secure when I upload them?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Your privacy is important to us. All uploaded files are processed securely and automatically deleted from our servers after processing is complete.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I watermark multiple PDF files at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can watermark multiple PDF files by uploading them one at a time or using our batch processing feature if available in your region.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file formats can I use for image watermarks?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can use common image formats such as PNG, JPG, and GIF for image watermarks. PNG format is recommended as it supports transparency.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use semi-transparent watermarks to ensure your document content remains readable while protecting your intellectual property</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Place watermarks diagonally across pages for maximum visibility and to prevent easy removal or obscuring of the mark</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test your watermark settings on a single page before applying to the entire document to ensure the desired appearance</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use high-resolution images for image watermarks to maintain quality when scaled across your PDF pages</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="PDF Watermark"
+        description="PDF Watermark stamps a diagonal, semi-transparent text watermark across the center of every page, using the pdf-lib library entirely in your browser — your file is never uploaded to a server. You can customize the text and its opacity; there's no image watermark option, and the rotation (45°), color (gray), and position (page center) are fixed."
+        howTo={[
+          "Click the upload area and select a PDF file from your device.",
+          "Type the watermark text (defaults to \"CONFIDENTIAL\").",
+          "Adjust the opacity slider to your preference.",
+          "Click 'Add Watermark', then 'Download' to save the result."
+        ]}
+        faqs={[
+          { q: "Is PDF Watermark free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Can I add an image watermark, like a logo?", a: "No — only text watermarks are supported; there's no option to upload an image." },
+          { q: "Can I change the watermark's color, angle, or position?", a: "No — the watermark is always gray, rotated 45°, and centered on the page. Only the text and opacity are adjustable." },
+          { q: "Can I watermark multiple PDFs at once?", a: "No, only one file at a time — upload and process additional files separately." }
+        ]}
+        tips={[
+          "Lower opacity values (around 20-30%) keep the underlying content easy to read while still visibly marking the page.",
+          "Since the position and angle are fixed, try a few different lengths of watermark text to see what looks best on your document.",
+          "The font size automatically scales to the page dimensions, so the watermark looks proportionate across different page sizes.",
+          "For a logo or image watermark, you'll need a different tool, since only text is supported here."
+        ]}
+      />
     </div>
   );
 }
