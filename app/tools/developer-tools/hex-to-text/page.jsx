@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function HexToTextPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -19,39 +20,28 @@ export default function HexToTextPage() {
           {output && <div className="space-y-2"><textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" value={output} readOnly /><button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Hex To Text</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Hex To Text is a free online conversion tool that instantly transforms hexadecimal code into readable text characters. Perfect for developers, programmers, and anyone needing to decode hex values quickly and accurately.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Hex To Text</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste or type your hexadecimal code into the input field</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Ensure each hex pair (like 48, 65, 6C) is separated by spaces or on new lines</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the Convert button to process your hex string</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the decoded text output from the results area</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is hexadecimal and why convert it to text?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Hexadecimal is a base-16 number system used in computing. Converting hex to text helps decode data stored in hex format, which is common in programming, networking, and data analysis.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Hex To Text completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Hex To Text is 100% free and requires no registration, login, or subscription. You can use it unlimited times without any restrictions.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert large hexadecimal strings?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, the tool can handle large hex strings, though performance may vary depending on your browser and device specifications.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What format should my hex input be in?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Enter hex values as pairs of characters separated by spaces (48 65 6C 6C 6F) or on separate lines. The tool accepts both uppercase and lowercase hex characters.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use uppercase or lowercase hex characters interchangeably - the tool recognizes both formats equally well</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Separate hex pairs with spaces for clarity, making it easier to identify individual character codes</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Copy and save your converted text immediately, as page refreshes will clear your results</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Double-check your hex input for accuracy, as incorrect values will produce garbled or unexpected text output</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Hex to Text"
+        description="Hex to Text converts between plain text and hexadecimal character codes entirely in your browser using JavaScript's built-in character-code functions — nothing is uploaded to a server. It reliably round-trips Latin1 text (character codes 0-255); characters outside that range (emoji, most non-Latin scripts) produce hex codes wider than the standard 2-digit pairs, which won't convert back correctly since the reverse direction always splits the hex into fixed 2-character chunks."
+        howTo={[
+          "Paste or type text or hex into the input box.",
+          "Click 'Text to Hex' to convert text into space-free hex character codes, or 'Hex to Text' to convert hex back into text.",
+          "Read the result in the output box.",
+          "Click 'Copy' to copy it to your clipboard."
+        ]}
+        faqs={[
+          { q: "Is Hex to Text free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "What hex format does it expect?", a: "Two-character hex pairs, with or without spaces between them (e.g. 48656c6c6f or 48 65 6c 6c 6f). Both uppercase and lowercase are accepted." },
+          { q: "Does it work with any Unicode text, like emoji?", a: "Not reliably — it works cleanly for Latin1 text (character codes 0-255). Characters outside that range produce hex wider than 2 digits, which the hex-to-text direction can't correctly reconstruct since it always reads fixed 2-character chunks." },
+          { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser." }
+        ]}
+        tips={[
+          "Stick to Latin1 text (standard Latin letters, digits, and common punctuation) for reliable round-trip conversion.",
+          "If Hex to Text shows 'Invalid hex', check for an odd number of hex digits or stray non-hex characters in your input.",
+          "For text with accented or non-Latin characters, expect the hex output to not cleanly convert back — that's a limitation of this simple character-code approach.",
+          "Copy your result right away, since it isn't saved after you leave the page."
+        ]}
+      />
     </div>
   );
 }

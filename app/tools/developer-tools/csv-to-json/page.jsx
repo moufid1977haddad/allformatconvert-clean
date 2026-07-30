@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function CsvToJsonPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -30,39 +31,28 @@ export default function CsvToJsonPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Csv To Json</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">CSV to JSON is a free online tool that instantly converts comma-separated values (CSV) files into JavaScript Object Notation (JSON) format without any software installation required. This converter supports large files, maintains data integrity, and is perfect for developers, data analysts, and anyone working with data integration and API development.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Csv To Json</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload or paste your CSV file content into the input field on the CSV to JSON converter page</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Review the preview to ensure your data is formatted correctly with proper headers and delimiters</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the Convert button to instantly transform your CSV data into JSON format</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download the converted JSON file or copy the formatted output directly to your clipboard for immediate use</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is the maximum file size I can convert?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Our CSV to JSON converter supports files up to 50MB in size, making it suitable for most common data conversion tasks.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to install any software to use this tool?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, CSV to JSON is completely free and web-based, requiring only a modern browser and internet connection.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my data be kept private?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, all conversions are processed locally in your browser and no data is stored on our servers or shared with third parties.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert JSON back to CSV?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, we offer a complementary JSON to CSV converter for easy bidirectional data format conversion.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Ensure your CSV file has a header row as the first line, which will become the keys in your JSON objects</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use consistent delimiters throughout your CSV file; the tool auto-detects commas, semicolons, tabs, and pipes</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Remove any extra blank rows or columns from your CSV before conversion to avoid unnecessary null values in JSON</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Validate your JSON output using a JSON linter before integrating it into your applications or APIs</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="CSV to JSON"
+        description="CSV to JSON parses pasted CSV text and converts it to an array of JSON objects entirely in your browser — nothing is uploaded to a server. The first line is treated as the header row, and each subsequent line is split on plain commas; it doesn't handle quoted fields that contain commas or other delimiters like semicolons or tabs."
+        howTo={[
+          "Paste your CSV text into the input box, with a header row as the first line.",
+          "Click 'Convert' to generate the JSON array.",
+          "Read the result in the output box.",
+          "Click 'Copy' to copy it to your clipboard."
+        ]}
+        faqs={[
+          { q: "Does it support file upload, or only pasted text?", a: "Only pasted text — there's no file picker or drag-and-drop upload." },
+          { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser." },
+          { q: "Does it support delimiters other than commas, like semicolons or tabs?", a: "No, splitting is done on commas only." },
+          { q: "Can I download the JSON as a file?", a: "No, there's only a 'Copy' button — you'd need to paste the copied text into a file yourself." }
+        ]}
+        tips={[
+          "Include a header row as the first line — those values become the keys in each JSON object.",
+          "Avoid commas inside individual values, since quoted fields with embedded commas aren't parsed correctly and will shift into the wrong keys.",
+          "Rows with fewer values than headers get empty strings for the missing fields.",
+          "Validate the resulting JSON with a linter before using it in an application, especially for CSVs with unusual formatting."
+        ]}
+      />
     </div>
   );
 }

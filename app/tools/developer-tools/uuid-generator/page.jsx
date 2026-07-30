@@ -1,11 +1,19 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function UuidGeneratorPage() {
   const [uuids, setUuids] = useState([]);
   const [count, setCount] = useState(1);
+  const generateUuid = () => {
+    const bytes = crypto.getRandomValues(new Uint8Array(31));
+    let i = 0;
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = bytes[i++] % 16;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  };
   const generate = () => {
-    const newUuids = Array.from({length: count}, () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random()*16|0; return (c==='x'?r:(r&0x3|0x8)).toString(16); }));
-    setUuids(newUuids);
+    setUuids(Array.from({length: count}, generateUuid));
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -18,39 +26,28 @@ export default function UuidGeneratorPage() {
           {uuids.length > 0 && <div className="space-y-2">{uuids.map((u,i) => <div key={i} className="flex justify-between items-center bg-neutral-50 rounded-lg border border-neutral-200 p-3"><span className="font-mono text-sm">{u}</span><button onClick={() => navigator.clipboard.writeText(u)} className="text-xs text-neutral-500 hover:text-white ml-2">Copy</button></div>)}</div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Uuid Generator</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">UUID Generator is a free online tool that creates universally unique identifiers (UUIDs) instantly with no registration required. Generate single or multiple UUIDs in various formats for your development, database, and application needs.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Uuid Generator</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the UUID Generator tool on our website</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the 'Generate' button to create a new UUID</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Select your preferred UUID version and format from the available options</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the generated UUID to your clipboard and use it in your project</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is a UUID and why do I need one?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">A UUID (Universally Unique Identifier) is a 128-bit number used to identify information uniquely. UUIDs are essential for databases, APIs, distributed systems, and any application requiring unique identifiers without centralized coordination.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is the UUID Generator tool free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, the UUID Generator is completely free with no hidden charges, registration requirements, or usage limits. You can generate as many UUIDs as you need.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What UUID versions does this tool support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Our tool supports UUID versions 1, 3, 4, and 5. Version 4 (random) is the most commonly used, while other versions serve specific purposes like timestamp-based or namespace-based generation.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I generate multiple UUIDs at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can specify the number of UUIDs you want to generate and our tool will create them all at once, allowing you to copy them individually or as a batch.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use UUID v4 for most applications as it generates random, collision-resistant identifiers suitable for databases and distributed systems</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Copy UUIDs immediately after generation or save them to a file to prevent losing them, as new generations will overwrite previous results</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>UUID v1 is useful when you need timestamp information embedded in the identifier, tracking when the UUID was created</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Always validate that your application correctly handles UUID formats (with or without hyphens) by testing the generated UUIDs before deploying to production</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="UUID Generator"
+        description="UUID Generator creates version 4 (random) UUIDs using the Web Crypto API's crypto.getRandomValues() for cryptographically strong randomness, entirely in your browser — nothing is uploaded to a server. It only generates version 4 UUIDs; there's no support for version 1 (timestamp-based), 3, or 5 (namespace-based) formats, and no format options like uppercase or no-hyphen output."
+        howTo={[
+          "Set how many UUIDs you want (1 to 20) in the Count field.",
+          "Click 'Generate' to create that many random UUIDs.",
+          "Click 'Copy' next to any UUID to copy it to your clipboard.",
+          "Generating again replaces the current list — copy anything you need first."
+        ]}
+        faqs={[
+          { q: "What is a UUID?", a: "A 128-bit identifier designed to be unique across systems without central coordination — commonly used for database keys, request IDs, and API resource identifiers." },
+          { q: "Is the UUID Generator free to use?", a: "Yes, completely free with no registration required." },
+          { q: "What UUID version does this generate?", a: "Only version 4 (random) UUIDs — versions 1, 3, and 5 aren't supported." },
+          { q: "Are these UUIDs safe to use as unguessable tokens?", a: "Yes — they're generated with the Web Crypto API's cryptographically secure random number generator, not Math.random(), so they aren't predictable." }
+        ]}
+        tips={[
+          "Copy each UUID you need right away, since generating a new batch replaces the current list without saving the old one.",
+          "The maximum is 20 UUIDs per click; click 'Generate' again for more.",
+          "All UUIDs are version 4 with standard lowercase, hyphenated formatting (8-4-4-4-12 hex digits).",
+          "If you need UUID v1, v3, or v5, use a library or tool built for that specific version."
+        ]}
+      />
     </div>
   );
 }

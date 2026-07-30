@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function SqlToCsvPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -37,39 +38,28 @@ export default function SqlToCsvPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Sql To Csv</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">SQL To CSV is a free online tool that instantly converts SQL query results into CSV format for easy data export and analysis. Perfect for database administrators, developers, and data analysts who need to quickly transform structured query data into spreadsheet-compatible files.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Sql To Csv</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste your SQL query into the input field or upload a SQL file</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the 'Convert' button to execute the transformation</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Preview the generated CSV output in the results panel</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download the CSV file to your computer with a single click</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What SQL databases does this tool support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">SQL To CSV supports standard SQL syntax compatible with MySQL, PostgreSQL, SQL Server, SQLite, and other major relational databases.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for conversions?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool can handle most standard SQL queries, but very large datasets may be limited to 10,000 rows for optimal performance.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I customize the CSV delimiter?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can choose between comma, semicolon, tab, and pipe delimiters in the output settings before downloading.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do you store my SQL queries or data?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, all conversions are processed locally in your browser and no data is stored on our servers for privacy protection.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use column aliases in your SELECT statement to create meaningful CSV headers that are easy to understand</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Include a WHERE clause to filter results before conversion and reduce unnecessary data in your CSV output</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test your SQL query in your database first to ensure it returns the correct results before conversion</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Export multiple related tables separately then use spreadsheet tools to combine them if needed for complex data structures</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="SQL to CSV"
+        description="SQL to CSV extracts data from INSERT INTO ... VALUES (...) statements in pasted SQL text and turns them into CSV rows, entirely in your browser — nothing is uploaded to a server. It doesn't run a database or execute SELECT queries; it only pattern-matches INSERT statements, and values are split on commas without respecting quoted strings, so a value containing a comma will be split into extra columns."
+        howTo={[
+          "Paste SQL text containing one or more INSERT INTO ... VALUES (...) statements.",
+          "Click 'Convert' to extract the column names and values into CSV rows.",
+          "Review the output, especially for values containing commas.",
+          "Click 'Copy' to copy the CSV to your clipboard."
+        ]}
+        faqs={[
+          { q: "Does it run my SQL against a database or convert SELECT query results?", a: "No — it doesn't execute any SQL. It only pattern-matches the text of INSERT INTO ... VALUES (...) statements you paste in." },
+          { q: "Is SQL to CSV free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Can I customize the CSV delimiter?", a: "No, output always uses commas — there's no option for semicolons, tabs, or pipes." },
+          { q: "Does it handle values containing commas?", a: "No — values are split on commas without regard for quotes, so a value like 'Smith, John' will be split into two columns instead of staying as one." }
+        ]}
+        tips={[
+          "This tool only works with INSERT statement text — it can't process SELECT queries or connect to an actual database.",
+          "Avoid commas inside individual values, since splitting doesn't respect quoted strings.",
+          "Headers come from the column list in the first matching INSERT statement — make sure it's representative of the rest.",
+          "Double-check the output alignment for any row whose values include commas or unusual quoting."
+        ]}
+      />
     </div>
   );
 }

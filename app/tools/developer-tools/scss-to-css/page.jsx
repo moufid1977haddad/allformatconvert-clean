@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function ScssToCssPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -23,39 +24,28 @@ export default function ScssToCssPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Scss To Css</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">SCSS to CSS is a free online converter tool that instantly transforms your SCSS (Sass) code into standard CSS. Streamline your stylesheet development and ensure cross-browser compatibility with this fast and reliable conversion utility.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Scss To Css</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste your SCSS code into the input textarea on the left side of the tool</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the 'Convert' button to automatically compile your SCSS into CSS</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Review the generated CSS output displayed on the right side</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the CSS code using the copy button and paste it into your project files</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is SCSS and why convert it to CSS?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">SCSS is a CSS preprocessor that adds features like variables, nesting, and mixins. Browsers only understand standard CSS, so conversion is necessary for web deployment.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is this tool free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, the SCSS to CSS converter is completely free with no registration required. You can convert unlimited SCSS files without any limitations.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my code be saved or shared?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, your code remains private and is processed only in your browser. We do not store, save, or share any of the code you convert.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert CSS back to SCSS?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">This tool specifically converts SCSS to CSS. For the reverse conversion, you would need a different tool, as CSS to SCSS conversion is more complex.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use variables in your SCSS to maintain consistent colors and sizes, then convert to CSS for deployment</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Nest your selectors logically in SCSS before conversion to keep your code organized and maintainable</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test the converted CSS output in your browser to ensure all styles render correctly across different devices</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep your original SCSS files for future edits, and regenerate CSS whenever you make updates</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="SCSS to CSS"
+        description="SCSS to CSS is a very lightweight text transform, not a real Sass compiler: it strips // comments and rewrites simple &:hover / &.class parent-selector patterns, entirely in your browser. It does not flatten nested rule blocks, resolve $variables, expand mixins, or evaluate math — nested SCSS selectors are passed through as literally nested braces, which is not valid CSS."
+        howTo={[
+          "Paste simple, mostly-flat SCSS into the input box.",
+          "Click 'Convert' to strip comments and simplify basic & parent-selector patterns.",
+          "Check the output carefully — nested rules, variables, and mixins won't be resolved.",
+          "Click 'Copy' to copy the result to your clipboard."
+        ]}
+        faqs={[
+          { q: "Does this tool fully compile SCSS, like the real Sass compiler?", a: "No — it only strips comments and rewrites a couple of & selector patterns. Nesting, $variables, @mixin, @import, and Sass math aren't processed at all." },
+          { q: "Is SCSS to CSS free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "What happens to nested selectors, like .parent { .child { ... } }?", a: "They're left as literally nested braces in the output, which isn't valid CSS — nesting isn't flattened by this tool." },
+          { q: "Is my code uploaded to a server?", a: "No, processing happens entirely in your browser." }
+        ]}
+        tips={[
+          "This tool works best on SCSS that's already close to flat CSS, using only & for pseudo-classes or chained class selectors.",
+          "For real SCSS features — nesting, variables, mixins, imports, math — use an actual Sass compiler (like the sass npm package or Dart Sass), not this tool.",
+          "Since comment-stripping isn't string-aware, a // sequence inside a url() value (like a URL) could be stripped incorrectly — check the output for such cases.",
+          "Always review the output for validity before shipping it, since this isn't a full CSS/Sass parser."
+        ]}
+      />
     </div>
   );
 }

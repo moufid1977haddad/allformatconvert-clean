@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function HashGeneratorPage() {
   const [input, setInput] = useState('');
   const [hashes, setHashes] = useState(null);
@@ -27,39 +28,28 @@ export default function HashGeneratorPage() {
           ))}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Hash Generator</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Hash Generator is a free online tool that instantly converts any text or file into secure hash values using popular algorithms like MD5, SHA-1, SHA-256, and SHA-512. Perfect for developers, security professionals, and anyone needing to generate cryptographic hashes for passwords, checksums, or data verification.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Hash Generator</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Hash Generator tool on our website</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Enter your text or upload a file in the input field</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Select your preferred hashing algorithm from the dropdown menu</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the Generate button to instantly receive your hash output</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is a hash and why do I need it?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">A hash is a unique digital fingerprint of data created by a mathematical algorithm. Hashes are essential for password storage, file integrity verification, and ensuring data hasn't been tampered with during transmission.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Which hashing algorithms does this tool support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Our Hash Generator supports multiple algorithms including MD5, SHA-1, SHA-256, SHA-384, SHA-512, and other popular cryptographic hash functions used across the web.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my data secure when using this free tool?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, the Hash Generator processes all data locally in your browser without sending information to any server, ensuring complete privacy and security of your input data.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I generate hashes for large files?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, the tool can process both text input and file uploads of various sizes, making it ideal for verifying file integrity and checksums for downloads.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use SHA-256 or SHA-512 for password hashing as MD5 is considered cryptographically weak for security purposes</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Compare generated hashes with source hashes to verify file integrity and detect any corruption or unauthorized modifications</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Generate hashes for backup verification to ensure your backup files haven't been altered or damaged during storage</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use this tool to create unique identifiers for data tracking, logging, and database indexing without storing sensitive information</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Hash Generator"
+        description="Hash Generator computes SHA-1, SHA-256, and SHA-512 hashes of the text you type, using the browser's built-in Web Crypto API — nothing is sent to a server. All three hashes are generated together automatically; there's no algorithm picker, no MD5 (the Web Crypto API doesn't provide it), and no file upload — only pasted or typed text."
+        howTo={[
+          "Type or paste text into the input box.",
+          "Click 'Generate Hashes' to compute all three hashes at once.",
+          "Read the SHA-1, SHA-256, and SHA-512 results below.",
+          "Click 'Copy' next to any hash to copy it to your clipboard."
+        ]}
+        faqs={[
+          { q: "What is a hash used for?", a: "A hash is a fixed-length fingerprint of input data, used for verifying data integrity, checksums, and (with appropriately slow, salted algorithms — not these general-purpose ones) password storage." },
+          { q: "Which algorithms does this tool support?", a: "SHA-1, SHA-256, and SHA-512, computed together every time. MD5 and SHA-384 aren't available, since this tool relies on the browser's Web Crypto API, which doesn't provide MD5." },
+          { q: "Is my data uploaded to a server?", a: "No, hashing happens entirely in your browser using the Web Crypto API." },
+          { q: "Can I hash a file instead of typed text?", a: "No — only text you type or paste into the box can be hashed; there's no file upload option." }
+        ]}
+        tips={[
+          "Avoid SHA-1 for anything security-sensitive — it's included for compatibility with older systems, but SHA-256 or SHA-512 are the safer general-purpose choices.",
+          "None of these are appropriate for hashing passwords directly — use a dedicated slow, salted algorithm (like bcrypt or Argon2) for that instead.",
+          "To hash a file's contents, you'd need to extract the text first, since this tool only accepts typed or pasted text.",
+          "Even a one-character difference in the input produces a completely different hash — useful for verifying exact text matches."
+        ]}
+      />
     </div>
   );
 }

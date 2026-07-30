@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function JsonToPhpPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -35,39 +36,28 @@ export default function JsonToPhpPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Json To Php</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Json To Php is a free online conversion tool that instantly transforms JSON data into PHP arrays and objects. This powerful utility eliminates manual coding and saves developers time when working with JSON data in PHP applications.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Json To Php</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste or upload your JSON data into the input field on the Json To Php tool homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the 'Convert' button to instantly transform your JSON into PHP code</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Review the generated PHP array or object in the output panel</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the PHP code to your clipboard and paste it directly into your project</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Json To Php completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Json To Php is completely free with no hidden fees, registration requirements, or usage limits. You can convert unlimited JSON files without any cost.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What PHP versions does the tool support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Json To Php generates PHP code compatible with PHP 5.4 and all modern versions including PHP 7.x and PHP 8.x, ensuring broad compatibility across projects.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert large JSON files?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Json To Php can handle large JSON files efficiently. However, for extremely large datasets, processing may take a few seconds depending on your browser's performance.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my data safe when using Json To Php?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Your data privacy is protected as Json To Php processes conversions entirely in your browser without storing or transmitting any information to external servers.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Validate your JSON data before conversion to ensure it's properly formatted and free of syntax errors</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the formatted output option to get nicely indented PHP code that's easier to read and maintain</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Copy the entire output or select specific sections to integrate into your PHP files based on your needs</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Bookmark Json To Php for quick access when you frequently need to convert between JSON and PHP data formats</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="JSON to PHP Class"
+        description="JSON to PHP Class generates a class definition with one typed property per top-level JSON key — not a PHP array or object populated with your actual data — entirely in your browser. It uses PHP 7.4+ typed property syntax (e.g. public float $age;), so the output requires PHP 7.4 or later and is not compatible with PHP 5.4 as sometimes assumed."
+        howTo={[
+          "Paste your JSON into the input box.",
+          "Click 'Convert' to generate a PHP class with typed properties.",
+          "Review the output — this defines the shape of your data, not a filled-in array.",
+          "Click 'Copy' to copy the code into your project."
+        ]}
+        faqs={[
+          { q: "Is JSON to PHP Class free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Does it generate a PHP array or object containing my actual JSON data?", a: "No — it generates a class definition with typed property declarations, such as public string $name;, not a populated array like ['name' => 'John']." },
+          { q: "What PHP version does the generated code require?", a: "PHP 7.4 or later, since it uses typed property syntax. It will not work on PHP 5.4 through 7.3." },
+          { q: "Does it handle nested JSON objects?", a: "No — only top-level keys become typed properties; nested objects are typed as mixed and arrays as array, without generating separate nested classes." }
+        ]}
+        tips={[
+          "If you need your actual JSON values as a PHP array, use PHP's own json_decode($json, true) instead — this tool only generates a class shape, not populated data.",
+          "For nested objects, manually create additional classes and update the generated property types to reference them.",
+          "Typed properties require PHP 7.4+; avoid them or add compatibility handling if you must support older PHP.",
+          "Property names are used exactly as written in your JSON, without case conversion — rename them by hand if you want camelCase."
+        ]}
+      />
     </div>
   );
 }

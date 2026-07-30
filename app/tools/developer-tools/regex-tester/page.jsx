@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function RegexTesterPage() {
   const [pattern, setPattern] = useState('');
   const [flags, setFlags] = useState('g');
@@ -27,39 +28,28 @@ export default function RegexTesterPage() {
           {matches && (matches.error ? <p className="text-red-400 text-center">{matches.error}</p> : <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 space-y-2"><div className={matches.isMatch ? 'text-green-400' : 'text-red-400'} >{matches.isMatch ? 'Match found!' : 'No match'}</div><div className="text-neutral-500 text-sm">{matches.count} match(es)</div>{matches.matches.map((m,i) => <div key={i} className="font-mono text-sm bg-neutral-200 rounded p-2">{m}</div>)}</div>)}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Regex Tester</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Regex Tester is a free online tool that allows developers and programmers to test, validate, and debug regular expressions in real-time. It supports multiple regex flavors and provides instant feedback with detailed match results and explanations.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Regex Tester</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Enter or paste your regular expression pattern into the Pattern field at the top of the tool</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Input the text you want to test against the pattern in the Test String field</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Select your preferred regex flavor (JavaScript, Python, PHP, etc.) from the dropdown menu</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>View the results instantly as matches are highlighted and detailed information is displayed below</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is a regular expression?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">A regular expression is a sequence of characters that define a search pattern, commonly used for pattern matching and text validation in programming.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Which regex flavors does Regex Tester support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Regex Tester supports multiple popular flavors including JavaScript, Python, PHP, Java, .NET, and Perl regex syntax.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I save my regex patterns?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can save your patterns to your browser's local storage or copy them for use in your projects.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Regex Tester completely free?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Regex Tester is completely free to use with no registration required and no limitations on the number of patterns you can test.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the provided regex cheat sheet to quickly reference common patterns like email validation, URLs, and phone numbers</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test edge cases and special characters to ensure your regex pattern works correctly in all scenarios</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Utilize the explanation panel to understand how your regex is being interpreted and which parts match your test string</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Copy working regex patterns to a personal library or documentation for reuse across multiple projects</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Regex Tester"
+        description="Regex Tester runs your pattern against JavaScript's native RegExp engine, entirely in your browser — nothing is uploaded to a server. It only tests JavaScript regex syntax; there's no flavor selector for Python, PHP, Java, or other engines, no match highlighting within the text, no explanation panel, and no saved pattern library — just a match count and a list of matched substrings."
+        howTo={[
+          "Type or paste your regex pattern into the Pattern field.",
+          "Set flags (e.g. gi for global, case-insensitive) in the Flags field.",
+          "Paste the text you want to test into the text area.",
+          "Click 'Test' to see whether it matches, how many matches were found, and each matched substring."
+        ]}
+        faqs={[
+          { q: "What is a regular expression?", a: "A pattern-matching syntax used to search, validate, or extract text based on rules rather than exact strings." },
+          { q: "Which regex flavors does it support?", a: "Only JavaScript's native regex syntax — there's no flavor selector for Python, PHP, Java, .NET, or Perl." },
+          { q: "Does it highlight matches within my text?", a: "No — matched substrings are listed separately below the result, not highlighted inline within the test text." },
+          { q: "Can I save my regex patterns?", a: "No, there's no save feature or pattern library — copy patterns elsewhere if you want to keep them." }
+        ]}
+        tips={[
+          "Use the g flag to see every match rather than stopping at the first one.",
+          "If your pattern throws an error, check for unescaped special characters or unbalanced parentheses/brackets.",
+          "Since only JavaScript regex syntax is supported, patterns relying on features specific to other languages (like Python's named groups syntax) may behave differently or fail.",
+          "Test with a range of inputs, including edge cases and empty strings, to confirm your pattern behaves as expected."
+        ]}
+      />
     </div>
   );
 }

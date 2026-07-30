@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function JsonMinifierPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -23,39 +24,28 @@ export default function JsonMinifierPage() {
           {output && <p className="text-neutral-500 text-sm text-center">Saved {input.length - output.length} characters ({Math.round((1 - output.length/input.length)*100)}%)</p>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Json Minifier</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Json Minifier is a free online tool that compresses and optimizes JSON files by removing unnecessary whitespace, line breaks, and indentation while preserving functionality. This tool helps reduce file size, improve loading times, and enhance website performance without altering your JSON data structure.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Json Minifier</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste or upload your JSON code into the input field on the Json Minifier homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the 'Minify' button to instantly compress and remove all unnecessary whitespace from your JSON</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Copy the minified JSON output from the result panel using the copy button</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Use the optimized JSON in your project to improve performance and reduce bandwidth usage</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Json Minifier completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Json Minifier is 100% free with no hidden charges, registration requirements, or usage limits.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will minifying my JSON affect its functionality?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, minifying only removes formatting and whitespace while preserving all the original data and structure of your JSON.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I minify large JSON files?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Json Minifier can handle JSON files of various sizes, though extremely large files may take a few seconds to process.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do you store my JSON data on your servers?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Json Minifier processes your data locally in your browser without storing or transmitting it to any external servers.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use Json Minifier before deploying JSON files to production to reduce bandwidth costs and improve API response times</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Minify configuration files and API responses to speed up data transmission across networks and mobile connections</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep a backup of your original formatted JSON for debugging purposes, while using minified versions for live applications</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Combine Json Minifier with other optimization tools to achieve maximum performance improvements in your web applications</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="JSON Minifier"
+        description="JSON Minifier parses your JSON with the browser's built-in JSON.parse and re-serializes it with JSON.stringify (no spacing argument), entirely in your browser — nothing is uploaded to a server. Because it goes through a real parser rather than a text-based whitespace strip, invalid JSON is caught and reported instead of silently producing broken output."
+        howTo={[
+          "Paste your JSON into the input box.",
+          "Click 'Minify' to compress it to a single line.",
+          "Review the result and the size-reduction percentage shown below.",
+          "Click 'Copy' to copy the minified JSON to your clipboard."
+        ]}
+        faqs={[
+          { q: "Is JSON Minifier free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Will minifying change my data?", a: "No — parsing and re-serializing preserves the exact same data and structure; only whitespace and indentation are removed." },
+          { q: "What happens if my JSON is invalid?", a: "You'll see an 'Invalid JSON' message instead of output, since the tool relies on the browser's real JSON parser rather than a best-effort text strip." },
+          { q: "Is my data uploaded to a server?", a: "No, minifying happens entirely in your browser." }
+        ]}
+        tips={[
+          "The percentage shown reflects real character-count savings for your specific JSON — heavily indented JSON with long key names shrinks the most.",
+          "Keep your original formatted JSON for debugging; use the minified version for production or network transfer.",
+          "If minifying fails with 'Invalid JSON,' check for trailing commas or unquoted keys, which JSON doesn't allow.",
+          "There's no file upload or download — paste JSON in and copy the minified result out."
+        ]}
+      />
     </div>
   );
 }

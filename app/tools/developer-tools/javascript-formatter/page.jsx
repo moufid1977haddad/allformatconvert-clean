@@ -1,22 +1,181 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
+
+// Word after which a leading '/' is a regex literal, not a division operator.
+const REGEX_CONTEXT_KEYWORDS = /^(return|typeof|instanceof|in|of|new|delete|void|throw|yield|case|do|else)$/;
+
+function looksLikeRegexStart(emittedSoFar) {
+  let j = emittedSoFar.length - 1;
+  while (j >= 0 && /\s/.test(emittedSoFar[j])) j--;
+  if (j < 0) return true; // start of input
+  const ch = emittedSoFar[j];
+  if (/[\w$]/.test(ch)) {
+    let k = j;
+    while (k >= 0 && /[\w$]/.test(emittedSoFar[k])) k--;
+    return REGEX_CONTEXT_KEYWORDS.test(emittedSoFar.slice(k + 1, j + 1));
+  }
+  return /[([{,;:=!&|?+\-*%^~<>]/.test(ch);
+}
+
+// Adds line breaks/indentation around { [ } ] ; , without touching the contents
+// of string/template literals, regex literals, or comments — a bare per-character
+// scan can't tell a comma inside a string from a real statement separator.
+function formatJs(input) {
+  let out = '';
+  let indent = 0;
+  let i = 0;
+  const n = input.length;
+  while (i < n) {
+    const c = input[i];
+    const c2 = input[i + 1];
+    if (c === '/' && c2 === '/') {
+      const start = i;
+      while (i < n && input[i] !== '\n') i++;
+      out += input.slice(start, i);
+      continue;
+    }
+    if (c === '/' && c2 === '*') {
+      const start = i;
+      i += 2;
+      while (i < n && !(input[i] === '*' && input[i + 1] === '/')) i++;
+      i += 2;
+      out += input.slice(start, i);
+      continue;
+    }
+    if (c === '"' || c === "'" || c === '`') {
+      const start = i;
+      const quote = c;
+      i++;
+      while (i < n) {
+        if (input[i] === '\\') { i += 2; continue; }
+        if (input[i] === quote) { i++; break; }
+        i++;
+      }
+      out += input.slice(start, i);
+      continue;
+    }
+    if (c === '/' && looksLikeRegexStart(out)) {
+      const start = i;
+      i++;
+      let inClass = false;
+      while (i < n) {
+        if (input[i] === '\\') { i += 2; continue; }
+        if (input[i] === '[') inClass = true;
+        else if (input[i] === ']') inClass = false;
+        if (input[i] === '/' && !inClass) { i++; break; }
+        if (input[i] === '\n') break;
+        i++;
+      }
+      while (i < n && /[a-z]/i.test(input[i])) i++;
+      out += input.slice(start, i);
+      continue;
+    }
+    if (c === '{' || c === '[') {
+      indent++;
+      out += c + '\n' + '  '.repeat(indent);
+      i++;
+      continue;
+    }
+    if (c === '}' || c === ']') {
+      indent = Math.max(0, indent - 1);
+      out += '\n' + '  '.repeat(indent) + c;
+      i++;
+      continue;
+    }
+    if (c === ';' || c === ',') {
+      out += c + '\n' + '  '.repeat(indent);
+      i++;
+      continue;
+    }
+    out += c;
+    i++;
+  }
+  return out.trim();
+}
+
+const MINIFY_OPERATOR_CHARS = new Set(['{', '}', '[', ']', '(', ')', ';', ',']);
+
+// Same string/regex/comment-aware scanning as formatJs, but collapsing
+// whitespace and tightening spacing around punctuation instead of breaking lines.
+function minifyJs(input) {
+  let out = '';
+  let i = 0;
+  const n = input.length;
+  let pendingSpace = false;
+  const lastRealChar = () => (out.length ? out[out.length - 1] : '');
+  const flushSpaceUnlessTight = (nextIsOperator) => {
+    if (pendingSpace) {
+      const prevIsOperator = MINIFY_OPERATOR_CHARS.has(lastRealChar());
+      if (!prevIsOperator && !nextIsOperator) out += ' ';
+      pendingSpace = false;
+    }
+  };
+  while (i < n) {
+    const c = input[i];
+    const c2 = input[i + 1];
+    if (c === '/' && c2 === '/') {
+      while (i < n && input[i] !== '\n') i++;
+      continue;
+    }
+    if (c === '/' && c2 === '*') {
+      i += 2;
+      while (i < n && !(input[i] === '*' && input[i + 1] === '/')) i++;
+      i += 2;
+      pendingSpace = false;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === '`') {
+      flushSpaceUnlessTight(false);
+      const quote = c;
+      let str = c;
+      i++;
+      while (i < n) {
+        if (input[i] === '\\') { str += input[i] + (input[i + 1] || ''); i += 2; continue; }
+        if (input[i] === quote) { str += input[i]; i++; break; }
+        str += input[i]; i++;
+      }
+      out += str;
+      pendingSpace = false;
+      continue;
+    }
+    if (c === '/' && looksLikeRegexStart(out)) {
+      flushSpaceUnlessTight(false);
+      let re = c;
+      i++;
+      let inClass = false;
+      while (i < n) {
+        if (input[i] === '\\') { re += input[i] + (input[i + 1] || ''); i += 2; continue; }
+        if (input[i] === '[') inClass = true;
+        else if (input[i] === ']') inClass = false;
+        if (input[i] === '/' && !inClass) { re += input[i]; i++; break; }
+        if (input[i] === '\n') break;
+        re += input[i]; i++;
+      }
+      while (i < n && /[a-z]/i.test(input[i])) { re += input[i]; i++; }
+      out += re;
+      pendingSpace = false;
+      continue;
+    }
+    if (/\s/.test(c)) {
+      pendingSpace = true;
+      i++;
+      continue;
+    }
+    const isOp = MINIFY_OPERATOR_CHARS.has(c);
+    flushSpaceUnlessTight(isOp);
+    out += c;
+    pendingSpace = false;
+    i++;
+  }
+  return out.trim();
+}
+
 export default function JavascriptFormatterPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const format = () => {
-    let indent = 0;
-    let result = '';
-    for (let i = 0; i < input.length; i++) {
-      const ch = input[i];
-      if (ch === '{' || ch === '[') { result += ch + '\n' + '  '.repeat(++indent); }
-      else if (ch === '}' || ch === ']') { result += '\n' + '  '.repeat(--indent) + ch; }
-      else if (ch === ';') { result += ch + '\n' + '  '.repeat(indent); }
-      else if (ch === ',') { result += ch + '\n' + '  '.repeat(indent); }
-      else { result += ch; }
-    }
-    setOutput(result.trim());
-  };
-  const minify = () => setOutput(input.replace(/\s+/g,' ').replace(/\s*([{}\[\]();,])\s*/g,'$1').trim());
+  const format = () => setOutput(formatJs(input));
+  const minify = () => setOutput(minifyJs(input));
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-4xl mx-auto">
@@ -34,39 +193,28 @@ export default function JavascriptFormatterPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Javascript Formatter</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">The Javascript Formatter is a free online tool that automatically formats and beautifies your JavaScript code for improved readability and consistency. It helps developers quickly clean up messy code, fix indentation issues, and maintain proper code structure without any installation required.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Javascript Formatter</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste or type your JavaScript code into the input editor on the left side of the tool</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the 'Format' button to automatically format your code according to standard conventions</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Adjust formatting options if needed, such as indentation size, line length, or quote style</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the formatted code from the output panel on the right side to use in your project</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is the Javascript Formatter free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, the Javascript Formatter is completely free and requires no registration or payment to use.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Does this tool support minified code?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, the formatter can beautify minified JavaScript code and expand it into a readable format with proper indentation.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I customize the formatting rules?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, the tool offers customizable options for indentation size, line breaks, quote preferences, and spacing to match your coding style.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my code secure when using this tool?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, your code is processed locally in your browser and is never stored on any server, ensuring complete privacy and security.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use consistent indentation settings across your projects by setting your preferred tab size before formatting multiple files</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Copy the formatting options you prefer and apply them to similar files to maintain uniform code style across your codebase</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Combine the formatter with a linter to not only beautify your code but also catch potential errors and style violations</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Take advantage of the quick copy feature to instantly transfer formatted code to your clipboard without manual selection</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="JavaScript Formatter"
+        description="JavaScript Formatter adds line breaks and indentation around braces, brackets, semicolons, and commas entirely in your browser, and its Minify button does the reverse. Both are string- and regex-aware: they never insert line breaks into or alter the contents of quoted strings, template literals, or /regex/ literals, so a comma or semicolon inside a string stays part of that string's value instead of corrupting it."
+        howTo={[
+          "Paste your JavaScript into the input box.",
+          "Click 'Format' to add line breaks and 2-space indentation, or 'Minify' to compress it back down.",
+          "Review the result in the output box.",
+          "Click 'Copy' to copy it to your clipboard."
+        ]}
+        faqs={[
+          { q: "Is JavaScript Formatter free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Does it support minified code?", a: "Yes — Format expands minified code by breaking lines at braces, brackets, semicolons, and commas, while leaving string and regex contents untouched." },
+          { q: "Can I customize indentation size or style?", a: "No, formatting always uses 2-space indentation — there's no configuration for tab size, quote style, or line length." },
+          { q: "Is my code uploaded to a server?", a: "No, both formatting and minifying happen entirely in your browser." }
+        ]}
+        tips={[
+          "A comma, semicolon, brace, or bracket inside a string or template literal is treated as plain text, not a structural character — it won't trigger a line break or get compressed away.",
+          "Comments are preserved during Format (kept as-is) and stripped during Minify, matching typical formatter/minifier behavior.",
+          "This reformats structure only — it doesn't rename variables, reorder code, or fix logic errors.",
+          "Review the output before using it in production, as with any automated code transformation."
+        ]}
+      />
     </div>
   );
 }

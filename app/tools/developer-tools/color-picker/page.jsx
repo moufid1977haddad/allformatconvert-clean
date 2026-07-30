@@ -1,8 +1,9 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function ColorPickerPage() {
   const [color, setColor] = useState('#3b82f6');
-  const hexToRgb = (hex) => { const r = /^#?([a-fd]{2})([a-fd]{2})([a-fd]{2})$/i.exec(hex); return r ? { r: parseInt(r[1],16), g: parseInt(r[2],16), b: parseInt(r[3],16) } : null; };
+  const hexToRgb = (hex) => { const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex); return r ? { r: parseInt(r[1],16), g: parseInt(r[2],16), b: parseInt(r[3],16) } : null; };
   const rgb = hexToRgb(color);
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -19,39 +20,28 @@ export default function ColorPickerPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Color Picker</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Color Picker is a free online tool that allows you to easily identify, extract, and convert colors from images, web pages, or color codes. Whether you need hex, RGB, or HSL values, this tool provides instant color information for designers, developers, and creative professionals.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Color Picker</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Color Picker tool and select your preferred input method: upload an image, enter a URL, or paste a color code</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click on the image or color area you want to analyze, or input the specific color code you need to convert</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>The tool will instantly display the color values in multiple formats including hex, RGB, HSL, and CMYK</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the color code in your preferred format to use in your design, development, or branding projects</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What color formats does Color Picker support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Color Picker supports multiple formats including hexadecimal (HEX), RGB, RGBA, HSL, HSLA, and CMYK values for comprehensive color conversion needs.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I use Color Picker to extract colors from images?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can upload images or provide image URLs, and Color Picker will allow you to click on any part of the image to extract the exact color code.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Color Picker free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Absolutely! Color Picker is completely free with no registration required. You can use all features without any limitations or hidden charges.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I save my color palette for later use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">While the basic tool is free, you can manually save color codes to a document or take screenshots. Some versions may offer palette-saving features for registered users.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the eyedropper feature to sample colors directly from websites by uploading screenshots or using browser extensions for seamless color matching</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Compare multiple color values by keeping the tool open in multiple tabs or windows to ensure color consistency across your design projects</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Export your color palettes as CSS variables or design tokens to streamline your workflow and maintain brand consistency</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Utilize the color harmony and contrast features to ensure your selected colors meet accessibility standards for web and print design</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Color Picker"
+        description="Color Picker lets you pick a color with your browser's native color picker or type a hex code directly, and shows the matching HEX and RGB values, entirely client-side. It converts any standard 6-digit hex code (with or without a leading #, either case) to RGB; it doesn't accept 3-digit shorthand hex or named CSS colors like 'red' for the RGB conversion, and there's no image upload, URL input, or HSL/CMYK display."
+        howTo={[
+          "Click the color swatch to open your browser's native color picker, or type a hex code directly into the Input box.",
+          "The large preview box updates instantly to show the selected color.",
+          "Read the matching HEX and RGB values in the cards below.",
+          "Click 'Copy' under HEX or RGB to copy that value to your clipboard."
+        ]}
+        faqs={[
+          { q: "What color formats does Color Picker support?", a: "HEX and RGB. There's no HSL, HSLA, or CMYK conversion, and no RGBA/alpha channel." },
+          { q: "Can I extract colors from an image?", a: "No — there's no image upload, URL input, or eyedropper for sampling colors from a picture or webpage." },
+          { q: "Is Color Picker free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Can I type a color name or 3-digit hex code?", a: "You can type it, and the preview swatch will still render it correctly since browsers understand those formats — but the RGB conversion only recognizes full 6-digit hex codes, so it will show blank for shorthand hex or named colors like 'red'." }
+        ]}
+        tips={[
+          "Use the native color picker (click the swatch) for the easiest way to browse and select a color visually.",
+          "Type a full 6-digit hex code (e.g. 3b82f6 or #3B82F6) in the Input box if you already know the exact color you want — the leading # is optional and case doesn't matter.",
+          "If the RGB card looks empty, check that you entered a full 6-digit hex value rather than a 3-digit shorthand or color name.",
+          "There's no save or palette feature, so copy each value you need before navigating away."
+        ]}
+      />
     </div>
   );
 }

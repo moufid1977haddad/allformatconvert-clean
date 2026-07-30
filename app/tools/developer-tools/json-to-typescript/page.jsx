@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function JsonToTypescriptPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -34,39 +35,28 @@ export default function JsonToTypescriptPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Json To Typescript</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Json To Typescript is a free online tool that instantly converts JSON data into TypeScript interfaces and type definitions. This powerful utility helps developers save time and reduce errors by automatically generating strongly-typed TypeScript code from any JSON structure.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Json To Typescript</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste or upload your JSON data into the input field on the tool's interface</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the 'Convert' or 'Generate' button to process your JSON structure</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Review the generated TypeScript interfaces and type definitions in the output panel</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the generated code and paste it directly into your TypeScript project files</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Json To Typescript completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Json To Typescript is completely free and requires no registration or subscription to use.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert complex nested JSON structures?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, the tool handles complex nested JSON objects and arrays, generating appropriate TypeScript interfaces for each level of nesting.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What if my JSON contains special characters or unusual field names?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool intelligently handles special characters and will generate valid TypeScript field names, using bracket notation when necessary for non-standard identifiers.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I export the generated TypeScript code?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can copy the generated code directly from the output panel or download it as a TypeScript file.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use representative sample JSON data for the most accurate TypeScript interface generation</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Review optional fields in your JSON and manually add the optional property marker (?) if needed in the generated code</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Consider renaming generated interfaces to match your application's naming conventions after generation</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Validate your JSON syntax before conversion to ensure accurate TypeScript type definitions are produced</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="JSON to TypeScript"
+        description="JSON to TypeScript generates a single Root interface with one field per top-level JSON key, entirely in your browser — nothing is uploaded to a server. Strings, numbers, and booleans map directly to their TypeScript types; arrays are typed as any[] and nested objects as object, since nested values aren't recursively converted into their own interfaces. Field names are inserted as plain identifiers with no quoting, so a JSON key containing a hyphen or space will produce invalid TypeScript."
+        howTo={[
+          "Paste your JSON into the input box.",
+          "Click 'Convert' to generate a TypeScript interface from the top-level properties.",
+          "Review the output and add nested interfaces by hand where needed.",
+          "Click 'Copy' to copy the code into your project."
+        ]}
+        faqs={[
+          { q: "Is JSON to TypeScript free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Does it generate nested interfaces for nested JSON?", a: "No — only top-level keys become typed fields. Nested objects are typed as object and arrays as any[], rather than generating separate nested interfaces." },
+          { q: "What if my JSON has unusual field names, like ones with hyphens or spaces?", a: "Field names are inserted as plain TypeScript identifiers with no quoting, so a key like \"first-name\" produces invalid syntax — you'll need to manually wrap such names in quotes." },
+          { q: "Can I download the generated code as a file?", a: "No, there's only a 'Copy' button — paste the copied code into a file yourself." }
+        ]}
+        tips={[
+          "For nested objects or arrays of objects, manually define additional interfaces and update the field types to reference them.",
+          "Rename the generated interface from Root to something more specific to your data.",
+          "If your JSON has field names that aren't valid identifiers (hyphens, spaces, leading digits), wrap them in quotes by hand, e.g. 'first-name': string;.",
+          "Review whether any fields should be optional (marked with ?) based on your actual data, since the tool always generates required fields."
+        ]}
+      />
     </div>
   );
 }

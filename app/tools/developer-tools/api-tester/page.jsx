@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function ApiTesterPage() {
   const [url, setUrl] = useState('');
   const [method, setMethod] = useState('GET');
@@ -38,39 +39,28 @@ export default function ApiTesterPage() {
           {response && <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 space-y-2"><div className={response.error ? 'text-red-400' : response.status < 400 ? 'text-green-400' : 'text-yellow-400'}>{response.error ? response.error : `${response.status} ${response.statusText}`}</div><pre className="font-mono text-sm overflow-x-auto text-indigo-400">{JSON.stringify(response.data, null, 2)}</pre></div>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Api Tester</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Api Tester is a free online tool that allows developers to test and debug API endpoints without requiring any installation or setup. It provides a simple interface to send HTTP requests, inspect responses, and validate API functionality in real-time.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Api Tester</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Enter your API endpoint URL in the designated field and select the HTTP method (GET, POST, PUT, DELETE, etc.) you want to use</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Add any required headers, authentication tokens, or query parameters in their respective sections</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Input your request body or payload data if needed, and format it as JSON or form data</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the Send button to execute the request and view the response status, headers, and body data instantly</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Api Tester completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Api Tester is completely free to use with no hidden charges, registration requirements, or premium features.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I test APIs from different domains?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Api Tester can test APIs from any domain, though some APIs may have CORS restrictions that could prevent testing from a browser environment.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What HTTP methods does Api Tester support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Api Tester supports all standard HTTP methods including GET, POST, PUT, DELETE, PATCH, HEAD, and OPTIONS.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I save my API requests for later use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Api Tester allows you to save your requests locally in your browser for future reference and quick access.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the Headers section to add authentication tokens like Bearer tokens or API keys to ensure your requests are properly authenticated</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Format your JSON payload correctly before sending POST or PUT requests to avoid validation errors from the API</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Check the response status codes to quickly identify issues: 2xx for success, 4xx for client errors, and 5xx for server errors</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Enable pretty-print formatting to make large JSON responses more readable and easier to debug</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="API Tester"
+        description="API Tester sends HTTP requests directly from your browser to the endpoint you specify, using the browser's own fetch() API, and shows the response status and body. Nothing passes through our servers, but since it's a request from your browser, cross-origin APIs that don't send permissive CORS headers will block the response just like on any web page."
+        howTo={[
+          "Select the HTTP method (GET, POST, PUT, DELETE, or PATCH) and type the endpoint URL.",
+          "Optionally add request headers as JSON, e.g. {\"Authorization\": \"Bearer token\"}.",
+          "For non-GET methods, add a request body.",
+          "Click 'Send Request' to view the response status and body."
+        ]}
+        faqs={[
+          { q: "Is API Tester free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Can I test APIs from different domains?", a: "Yes, but the browser's CORS policy still applies — if the API doesn't send permissive CORS headers, the browser will block reading the response, same as on any web page." },
+          { q: "What HTTP methods are supported?", a: "GET, POST, PUT, DELETE, and PATCH. HEAD and OPTIONS aren't available in the method selector." },
+          { q: "Can I save my requests for later?", a: "No, there's no save or history feature — each request is one-off, and refreshing the page clears everything." }
+        ]}
+        tips={[
+          "Headers must be valid JSON, e.g. {\"Authorization\": \"Bearer token\"} — invalid JSON will prevent the request from sending.",
+          "CORS restrictions are enforced by the browser, not by this tool, so some APIs are only testable from a server-side tool without those restrictions.",
+          "The response body is pretty-printed automatically when it's valid JSON; otherwise it displays as raw text.",
+          "Since nothing is saved, copy down any request details you want to reuse before navigating away."
+        ]}
+      />
     </div>
   );
 }

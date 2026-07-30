@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function JsonToTomlPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -41,39 +42,28 @@ export default function JsonToTomlPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Json To Toml</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Json To Toml is a free online converter that instantly transforms JSON data into TOML format without requiring any software installation. This powerful tool is perfect for developers, DevOps engineers, and configuration managers who need seamless format conversion.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Json To Toml</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste your JSON code into the input field on the left side of the converter</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the 'Convert' button to automatically transform your JSON into TOML format</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Review the converted TOML output displayed on the right side of the screen</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the TOML result and paste it into your configuration files or text editor</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is the difference between JSON and TOML?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">JSON is a lightweight data interchange format using curly braces and quotes, while TOML is a configuration file format designed for human readability with simpler syntax and minimal punctuation.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my data secure when using Json To Toml?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, all conversions are processed directly in your browser without sending data to external servers, ensuring complete privacy and security of your information.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert large JSON files?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Json To Toml can handle most JSON files, though extremely large files may take a few moments to process depending on your browser's performance capabilities.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to sign up or install anything?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, Json To Toml is completely free and requires no registration, login, or software installation to use.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Validate your JSON syntax before conversion to ensure accurate TOML output and avoid conversion errors</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use Json To Toml for configuration files in projects using languages like Rust, Python, or Ruby that commonly use TOML</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Copy your converted TOML output immediately after conversion as browser tabs may refresh and lose the result</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Compare the original JSON and converted TOML side-by-side to understand how nested objects translate into TOML table syntax</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="JSON to TOML"
+        description="JSON to TOML converts a flat or one-level-nested JSON object into TOML text, entirely in your browser — nothing is uploaded to a server. One level of nested objects correctly becomes a TOML table section, but JSON arrays are mishandled — converted into numbered keys instead of a proper TOML array — and objects nested two or more levels deep produce invalid, literal object-text rather than valid TOML."
+        howTo={[
+          "Paste a flat or one-level-nested JSON object into the input box.",
+          "Click 'Convert' to generate TOML text.",
+          "Review the output carefully, especially for arrays or deeply nested values.",
+          "Click 'Copy' to copy the result to your clipboard."
+        ]}
+        faqs={[
+          { q: "Is JSON to TOML free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Does it convert JSON arrays correctly?", a: "No — array values are converted into numbered keys (0, 1, 2, ...) inside a table instead of proper TOML array syntax like tags = [\"a\", \"b\"]." },
+          { q: "Does it handle deeply nested JSON?", a: "Only one level of nesting converts correctly into a TOML table. Objects nested two or more levels deep produce invalid output instead of valid TOML." },
+          { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser." }
+        ]}
+        tips={[
+          "Stick to flat JSON, or JSON with at most one level of nested objects, for reliable results.",
+          "Avoid JSON arrays in your input, since they're not converted into valid TOML array syntax — rewrite them by hand afterward.",
+          "For deeply nested JSON, flatten or restructure it before converting, since anything past one level of nesting won't convert correctly.",
+          "Always validate the output with a TOML linter or parser before using it in a real configuration file."
+        ]}
+      />
     </div>
   );
 }

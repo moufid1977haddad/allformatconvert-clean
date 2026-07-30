@@ -1,5 +1,124 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
+
+// Word after which a leading '/' is a regex literal, not a division operator.
+const REGEX_CONTEXT_KEYWORDS = /^(return|typeof|instanceof|in|of|new|delete|void|throw|yield|case|do|else)$/;
+
+function looksLikeRegexStart(emittedSoFar) {
+  let j = emittedSoFar.length - 1;
+  while (j >= 0 && /\s/.test(emittedSoFar[j])) j--;
+  if (j < 0) return true; // start of input
+  const ch = emittedSoFar[j];
+  if (/[\w$]/.test(ch)) {
+    let k = j;
+    while (k >= 0 && /[\w$]/.test(emittedSoFar[k])) k--;
+    return REGEX_CONTEXT_KEYWORDS.test(emittedSoFar.slice(k + 1, j + 1));
+  }
+  // After an operator/punctuation, '/' starts a regex rather than dividing.
+  return /[([{,;:=!&|?+\-*%^~<>]/.test(ch);
+}
+
+// Strips // and /* */ comments and collapses whitespace, without touching the
+// contents of string literals ('...', "...", `...`) or regex literals (/.../),
+// since a bare textual replace can't tell '//' inside a string from a real comment.
+function minifyJsLike(input) {
+  let out = '';
+  let i = 0;
+  const n = input.length;
+  let pendingSpace = false;
+  while (i < n) {
+    const c = input[i];
+    const c2 = input[i + 1];
+    if (c === '/' && c2 === '/') {
+      while (i < n && input[i] !== '\n') i++;
+      continue;
+    }
+    if (c === '/' && c2 === '*') {
+      i += 2;
+      while (i < n && !(input[i] === '*' && input[i + 1] === '/')) i++;
+      i += 2;
+      pendingSpace = false;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === '`') {
+      if (pendingSpace) { out += ' '; pendingSpace = false; }
+      const quote = c;
+      let str = c;
+      i++;
+      while (i < n) {
+        if (input[i] === '\\') { str += input[i] + (input[i + 1] || ''); i += 2; continue; }
+        if (input[i] === quote) { str += input[i]; i++; break; }
+        str += input[i]; i++;
+      }
+      out += str;
+      pendingSpace = false;
+      continue;
+    }
+    if (c === '/' && looksLikeRegexStart(out)) {
+      if (pendingSpace) { out += ' '; pendingSpace = false; }
+      let re = c;
+      i++;
+      let inClass = false;
+      while (i < n) {
+        if (input[i] === '\\') { re += input[i] + (input[i + 1] || ''); i += 2; continue; }
+        if (input[i] === '[') inClass = true;
+        else if (input[i] === ']') inClass = false;
+        if (input[i] === '/' && !inClass) { re += input[i]; i++; break; }
+        if (input[i] === '\n') break; // unterminated on this line; bail out of regex mode
+        re += input[i]; i++;
+      }
+      while (i < n && /[a-z]/i.test(input[i])) { re += input[i]; i++; }
+      out += re;
+      pendingSpace = false;
+      continue;
+    }
+    if (/\s/.test(c)) {
+      pendingSpace = true;
+      i++;
+      continue;
+    }
+    if (pendingSpace) { out += ' '; pendingSpace = false; }
+    out += c;
+    i++;
+  }
+  return out.trim();
+}
+
+// Same idea for CSS: only '/* */' comments exist, but whitespace/punctuation
+// collapsing must skip over quoted string values so e.g. content: "a: b" isn't altered.
+function minifyCss(input) {
+  const segments = [];
+  let i = 0;
+  const n = input.length;
+  let buf = '';
+  while (i < n) {
+    const c = input[i];
+    if (c === '"' || c === "'") {
+      if (buf) { segments.push({ code: buf }); buf = ''; }
+      const quote = c;
+      let str = c;
+      i++;
+      while (i < n) {
+        if (input[i] === '\\') { str += input[i] + (input[i + 1] || ''); i += 2; continue; }
+        if (input[i] === quote) { str += input[i]; i++; break; }
+        str += input[i]; i++;
+      }
+      segments.push({ string: str });
+      continue;
+    }
+    buf += c;
+    i++;
+  }
+  if (buf) segments.push({ code: buf });
+  return segments
+    .map(seg => seg.string !== undefined
+      ? seg.string
+      : seg.code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ').replace(/\s*([{}:;,])\s*/g, '$1'))
+    .join('')
+    .trim();
+}
+
 export default function CodeMinifierPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -7,9 +126,9 @@ export default function CodeMinifierPage() {
   const minify = () => {
     let result = input;
     if (lang === 'js' || lang === 'ts') {
-      result = result.replace(/\/\/[^\n]*/g,'').replace(/\/\*[\s\S]*?\*\//g,'').replace(/\s+/g,' ').trim();
+      result = minifyJsLike(result);
     } else if (lang === 'css') {
-      result = result.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\s+/g,' ').replace(/\s*([{}:;,])\s*/g,'$1').trim();
+      result = minifyCss(result);
     } else if (lang === 'html') {
       result = result.replace(/<!--[\s\S]*?-->/g,'').replace(/\s+/g,' ').replace(/> </g,'><').trim();
     }
@@ -33,39 +152,28 @@ export default function CodeMinifierPage() {
           {output && <p className="text-neutral-500 text-sm text-center">Saved {input.length - output.length} characters</p>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Code Minifier</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Code Minifier is a free online tool that reduces file size by removing unnecessary characters from your code without changing its functionality. It supports multiple programming languages including JavaScript, CSS, HTML, and JSON, helping you optimize your web applications for faster loading times.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Code Minifier</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste or upload your code into the input field on the Code Minifier homepage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Select the programming language of your code from the dropdown menu</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Minify' button to process your code and remove unnecessary characters</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the minified code from the output area or download it as a file to use in your project</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Code Minifier completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Code Minifier is 100% free with no hidden charges, registration requirements, or usage limits.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will minification break my code or change its functionality?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, minification only removes whitespace and unnecessary characters while preserving all code functionality and logic.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file formats does Code Minifier support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Code Minifier supports JavaScript, CSS, HTML, JSON, and other popular web development languages.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I minify large files with this tool?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Code Minifier can handle large files, though extremely large files may take a few extra seconds to process.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Always keep a backup of your original code before minifying, especially for important projects or production environments</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test your minified code thoroughly in all target browsers to ensure complete compatibility and functionality</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Combine minification with gzip compression on your server for even greater file size reduction and faster loading</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use Code Minifier regularly during your development workflow to maintain optimized file sizes across your entire project</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Code Minifier"
+        description="Code Minifier strips comments and collapses whitespace for JS, TS, CSS, and HTML entirely in your browser — nothing is uploaded to a server. For JS/TS and CSS, it's string-aware: it never touches the contents of quoted strings, template literals, or /regex/ literals, so a URL like https://example.com inside a string or a template literal containing // won't get corrupted. This is a lightweight text-based minifier, not a full parser — it doesn't rename variables or eliminate dead code like tools such as Terser."
+        howTo={[
+          "Choose JS, TS, CSS, or HTML from the language buttons.",
+          "Paste your code into the input box.",
+          "Click 'Minify' to strip comments and collapse whitespace.",
+          "Click 'Copy' to copy the result, or check the characters-saved count below."
+        ]}
+        faqs={[
+          { q: "Is Code Minifier free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Will minification break my code?", a: "For JS, TS, and CSS, comment-stripping and whitespace-collapsing skip over string, template literal, and regex contents, so things like URLs inside strings are left intact. The HTML minifier is simpler and just collapses whitespace and inter-tag gaps, which can occasionally affect visible spacing inside whitespace-sensitive tags like <pre> or <textarea>." },
+          { q: "What languages does it support?", a: "JavaScript, TypeScript, CSS, and HTML. There's no JSON-specific mode (use JSON Minifier for that) or support for other languages." },
+          { q: "Does it store or upload my code?", a: "No, everything runs locally in your browser; your code is never sent to a server." }
+        ]}
+        tips={[
+          "For JS/TS, whitespace inside strings, template literals, and regex literals is preserved exactly as written — only whitespace and comments in actual code get collapsed or removed.",
+          "For CSS, quoted string values (e.g. content: \"a: b\") are left untouched even though spacing and punctuation elsewhere gets tightened.",
+          "The HTML minifier doesn't parse embedded <script> or <style> blocks specially, so review the output if your HTML has inline JS or CSS with meaningful whitespace.",
+          "Keep a copy of your original code before minifying, since there's no undo once you navigate away."
+        ]}
+      />
     </div>
   );
 }

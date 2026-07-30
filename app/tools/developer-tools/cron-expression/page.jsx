@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function CronExpressionPage() {
   const [minute, setMinute] = useState('*');
   const [hour, setHour] = useState('*');
@@ -23,39 +24,28 @@ export default function CronExpressionPage() {
           <div><label className="block text-sm text-neutral-500 mb-2">Presets</label><div className="grid grid-cols-2 gap-2">{presets.map(([label,p]) => <button key={label} onClick={() => applyPreset(p)} className="bg-neutral-800 hover:bg-neutral-100 rounded-lg p-2 text-sm text-left transition"><div className="font-semibold">{label}</div><div className="text-neutral-500 font-mono text-xs">{p}</div></button>)}</div></div>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Cron Expression</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Cron Expression is a free online tool that helps you create, validate, and understand cron syntax for scheduling automated tasks and jobs. Whether you're managing server maintenance, backups, or recurring processes, this tool simplifies complex cron scheduling with an intuitive interface and instant validation.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Cron Expression</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Enter your cron expression in the input field using the standard five-field format (minute, hour, day of month, month, day of week)</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Use the visual cron builder to select specific times, days, and frequencies instead of typing raw syntax if you prefer a guided approach</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the validate button to check your expression for errors and see if it's properly formatted according to cron standards</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Review the next run times displayed below to confirm your schedule executes when intended, then copy your validated expression for use in your system</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is a cron expression?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">A cron expression is a string of five fields separated by spaces that defines when a scheduled task should run. Each field represents minute, hour, day of month, month, and day of week, allowing precise scheduling of recurring jobs.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I use this tool for any programming language?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, cron expressions are universal and work with Unix/Linux systems, cron daemon, task schedulers, and most programming frameworks that support cron syntax including Python, Node.js, Java, and PHP.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What do asterisks mean in cron expressions?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">An asterisk in a cron field means any value is allowed for that field. For example, an asterisk in the hour field means the task will run every hour.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How far in advance can I see upcoming run times?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool displays the next several upcoming execution times for your cron expression, typically showing the next 10-20 occurrences so you can verify your schedule is correct.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the */n syntax to create intervals, such as */5 in the minute field to run every 5 minutes, or */2 in the hour field to run every 2 hours</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Remember that cron uses 24-hour time format and day of week starts with 0 for Sunday through 6 for Saturday to avoid scheduling errors</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Combine multiple values with commas to specify exact times, like 0,6,12,18 in the hour field to run at midnight, 6 AM, noon, and 6 PM</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test your cron expressions with this tool before deploying them to production to ensure they run at the intended times and avoid missed or duplicate executions</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="Cron Expression"
+        description="Cron Expression lets you build a 5-field cron expression (minute, hour, day, month, weekday) by typing directly into five text boxes, or by clicking one of six presets, entirely in your browser. There's no syntax validation, no next-run-time preview, and no visual calendar or dropdown pickers — whatever you type in each field is joined as-is into the final expression."
+        howTo={[
+          "Type values into the Minute, Hour, Day, Month, and Weekday fields, or click a preset below to fill them in automatically.",
+          "Watch the generated cron expression update live as you type.",
+          "Click 'Copy' to copy the expression to your clipboard.",
+          "Paste it into your cron job, task scheduler, or scheduling library."
+        ]}
+        faqs={[
+          { q: "What is a cron expression?", a: "A string of five space-separated fields — minute, hour, day of month, month, and day of week — that defines when a scheduled task should run." },
+          { q: "Is Cron Expression free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Does it validate my expression or show upcoming run times?", a: "No — there's no syntax checking or 'next run' preview. Whatever you type in each field is joined directly into the output, so double-check the syntax yourself." },
+          { q: "Can I paste an existing cron expression to see what it means in plain English?", a: "No, there's no parser that decodes an expression back into a description — you can only build one field by field, or use a preset." }
+        ]}
+        tips={[
+          "Presets fill in all five fields at once for common schedules like 'every hour' or 'every month' — a fast starting point you can then tweak.",
+          "Cron fields are minute (0-59), hour (0-23), day of month (1-31), month (1-12), and day of week (0-6, Sunday=0).",
+          "Since there's no validation, test your expression in your actual scheduler or a dedicated cron-syntax checker before relying on it in production.",
+          "Use */n syntax (e.g. */5 in the minute field) for interval-based schedules like 'every 5 minutes.'"
+        ]}
+      />
     </div>
   );
 }

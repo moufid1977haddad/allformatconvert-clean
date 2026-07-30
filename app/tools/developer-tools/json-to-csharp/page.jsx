@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function JsonToCsharpPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -36,39 +37,28 @@ export default function JsonToCsharpPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Json To Csharp</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Json To Csharp is a free online tool that instantly converts JSON data into C# class definitions, saving developers time on manual coding. It supports complex nested structures and generates clean, ready-to-use C# code that integrates seamlessly into your projects.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Json To Csharp</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste your JSON data into the input field on the Json To Csharp converter</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the 'Convert' button to instantly generate C# classes from your JSON structure</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Review the generated C# code in the output panel</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the generated code and paste it directly into your C# project</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Json To Csharp completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Json To Csharp is 100% free and requires no registration or subscription to convert JSON to C# code.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can this tool handle nested and complex JSON structures?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Absolutely, Json To Csharp supports deeply nested objects and arrays, converting them into properly structured C# classes with appropriate data types.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Does the generated C# code require any modifications?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The generated code is production-ready in most cases, though you may want to review property names and add custom logic based on your specific project requirements.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What data types does Json To Csharp support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool supports all standard JSON types including strings, numbers, booleans, null, arrays, and objects, converting them to appropriate C# equivalents.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Ensure your JSON is properly formatted and valid before converting to avoid errors in the generated C# code</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use meaningful JSON property names as they will be converted to C# property names, following camelCase to PascalCase conventions</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Consider adding XML documentation comments to the generated C# classes for better code documentation</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test the generated C# classes with sample JSON data to ensure deserialization works correctly in your application</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="JSON to C# Class"
+        description="JSON to C# Class generates a single 'Root' class with one property per top-level JSON key, entirely in your browser — nothing is uploaded to a server. Strings, numbers, and booleans map to string, double, and bool; arrays always become a generic List of object, and nested objects become plain object, since nested values aren't recursively converted into their own classes."
+        howTo={[
+          "Paste your JSON into the input box.",
+          "Click 'Convert' to generate a C# class from the top-level properties.",
+          "Review the output — adjust types and add nested classes by hand where needed.",
+          "Click 'Copy' to copy the code into your project."
+        ]}
+        faqs={[
+          { q: "Is JSON to C# Class free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Does it handle nested objects and arrays as their own classes?", a: "No — only top-level keys become typed properties. Nested objects are typed as plain object and arrays as List<object>, rather than generating separate nested classes." },
+          { q: "Is the generated code ready to use as-is?", a: "For flat JSON with simple string, number, and boolean values, yes. For nested data, you'll need to manually define and wire up additional classes for the nested structures." },
+          { q: "Is my data uploaded to a server?", a: "No, generation happens entirely in your browser." }
+        ]}
+        tips={[
+          "Property names are capitalized only on the first letter (e.g. first_name becomes First_name, not FirstName) — rename them by hand if you want strict PascalCase.",
+          "For nested objects or arrays of objects, manually create additional classes and update the generated property types to match.",
+          "Numbers always map to double, even if your data is really an integer — change the type if you need int or decimal precision.",
+          "Test deserialization with real sample data, especially for any properties you retype after generation."
+        ]}
+      />
     </div>
   );
 }

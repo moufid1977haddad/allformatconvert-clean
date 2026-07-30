@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function EnvToJsonPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -39,39 +40,28 @@ export default function EnvToJsonPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Env To Json</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Env To Json is a free online tool that instantly converts environment variables from .env files into properly formatted JSON objects. Simplify your configuration management and API integration by transforming your environment settings into structured JSON data without any coding required.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Env To Json</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste your .env file content or individual environment variables into the input field on the Env To Json converter</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>The tool automatically parses KEY=VALUE pairs and formats them into valid JSON structure</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the 'Convert' button to generate your JSON output instantly</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the resulting JSON code and use it in your application, configuration files, or documentation</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Env To Json completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Env To Json is completely free with no hidden charges, registration requirements, or usage limits for converting your environment variables.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What format should my environment variables be in?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Your environment variables should follow the standard format: KEY=VALUE, with each variable on a new line, just like a typical .env file.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert multiple .env files at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can paste multiple environment variables from different sources into the tool, and it will convert them all into a single JSON object.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my data secure when using Env To Json?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, all conversions are processed locally in your browser, and no data is stored on our servers, ensuring complete privacy and security.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use descriptive variable names in your .env files to make the resulting JSON more readable and easier to maintain in your projects</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Remove any comments or empty lines from your .env content before conversion for cleaner JSON output without parsing errors</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Validate your JSON output using a JSON validator tool to ensure proper formatting before implementing it in production environments</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep sensitive information like API keys and passwords secure even after conversion, and never commit raw JSON with credentials to version control</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title=".env to JSON"
+        description=".env to JSON parses KEY=VALUE lines into a JSON object, and can also convert a flat JSON object back into .env lines, entirely in your browser — nothing is uploaded to a server. It skips blank lines and lines starting with #, and strips a single matching pair of surrounding quotes from each value; it doesn't expand variable references like ${OTHER_VAR} or support multi-line values."
+        howTo={[
+          "Paste your .env content into the input box, or a flat JSON object to convert the other way.",
+          "Click '.env to JSON' or 'JSON to .env' depending on the direction you need.",
+          "Review the result in the output box.",
+          "Click 'Copy' to copy it to your clipboard."
+        ]}
+        faqs={[
+          { q: "Is .env to JSON free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "What .env syntax does it understand?", a: "KEY=VALUE lines, blank lines, and # comments (both ignored). A single pair of surrounding single or double quotes is stripped from each value." },
+          { q: "Does it expand variable references like ${OTHER_VAR}?", a: "No, values are taken literally as plain text — variable interpolation isn't resolved." },
+          { q: "Is my data uploaded to a server?", a: "No, parsing and conversion happen entirely in your browser." }
+        ]}
+        tips={[
+          "Every value becomes a string in the resulting JSON, even ones that look numeric or boolean — convert types yourself if your application needs them typed.",
+          "JSON to .env only works with a flat JSON object; nested objects or arrays as values will be stringified oddly rather than expanded.",
+          "Comments and blank lines are dropped when converting .env to JSON, so JSON to .env won't reproduce them.",
+          "Since output may contain secrets like API keys, avoid pasting it somewhere it could be logged or committed to version control."
+        ]}
+      />
     </div>
   );
 }

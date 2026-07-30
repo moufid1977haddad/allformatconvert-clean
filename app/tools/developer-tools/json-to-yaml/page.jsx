@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function JsonToYamlPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -29,39 +30,28 @@ export default function JsonToYamlPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Json To Yaml</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Json To Yaml is a free online tool that instantly converts JSON (JavaScript Object Notation) data into YAML (YAML Ain't Markup Language) format without requiring any installation or signup. This converter helps developers, DevOps engineers, and configuration managers streamline their workflow by transforming structured data between these two popular formats.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Json To Yaml</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste or upload your JSON code into the input field on the left side of the converter</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the 'Convert' button to automatically transform your JSON into YAML format</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Review the converted YAML output displayed on the right side of the tool</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the YAML result to your clipboard or download it as a file for use in your project</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is the difference between JSON and YAML?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">JSON uses braces and brackets with explicit syntax, while YAML uses indentation and is more human-readable. YAML is commonly used for configuration files, whereas JSON is primarily used for data interchange between web services.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Json To Yaml tool completely free?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Json To Yaml is 100% free to use with no hidden charges, registration requirements, or usage limits. You can convert unlimited JSON files to YAML format without any restrictions.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert large JSON files?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool can handle most standard JSON files efficiently. However, extremely large files may take slightly longer to process, but there are no strict size limitations for typical use cases.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my data secure when using this converter?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, your data is processed locally in your browser and is not stored on any server. The conversion happens entirely on your device, ensuring complete privacy and security.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the validator feature to check your JSON syntax before conversion to ensure error-free results</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Copy the converted YAML directly to your configuration files for Kubernetes, Docker, Ansible, and other tools that support YAML</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Preserve formatting by reviewing the output indentation, as YAML is whitespace-sensitive and proper indentation is crucial</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Compare your original JSON with the YAML output to ensure data integrity and that all nested structures were converted correctly</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="JSON to YAML"
+        description="JSON to YAML recursively converts JSON objects into indented YAML, entirely in your browser — nothing is uploaded to a server. Nested objects convert cleanly at any depth, but two gaps are worth knowing: JSON arrays are converted into numbered keys (0, 1, 2...) rather than proper YAML list items, and string values are inserted without quoting, so a value containing a colon-plus-space can produce invalid YAML."
+        howTo={[
+          "Paste your JSON into the input box.",
+          "Click 'Convert' to generate indented YAML.",
+          "Review the output, especially for arrays or values containing a colon.",
+          "Click 'Copy' to copy the result to your clipboard."
+        ]}
+        faqs={[
+          { q: "Is JSON to YAML free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Does it handle nested JSON objects?", a: "Yes — nested objects convert into properly indented YAML at any depth." },
+          { q: "Does it convert JSON arrays correctly?", a: "No — array items are converted into numbered keys like 0: a and 1: b, which a YAML parser reads back as an object with keys \"0\" and \"1\", not as a list." },
+          { q: "Does it handle values containing special YAML characters, like a colon?", a: "Not reliably — values are inserted without quoting, so a string containing a colon followed by a space (e.g. \"Note: important\") can produce YAML that fails to parse." }
+        ]}
+        tips={[
+          "Rewrite array values as YAML list syntax by hand afterward, since numbered keys parse back as an object, not a list.",
+          "If a value contains a colon followed by a space, wrap it in quotes manually in the output to keep it valid YAML.",
+          "Nested objects are this tool's strength — nesting converts correctly at any depth.",
+          "Validate the output with a YAML parser or linter before using it in a real configuration file, especially for free-form text values."
+        ]}
+      />
     </div>
   );
 }

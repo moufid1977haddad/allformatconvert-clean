@@ -1,11 +1,106 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
+
+// Word after which a leading '/' is a regex literal, not a division operator.
+const REGEX_CONTEXT_KEYWORDS = /^(return|typeof|instanceof|in|of|new|delete|void|throw|yield|case|do|else)$/;
+
+function looksLikeRegexStart(emittedSoFar) {
+  let j = emittedSoFar.length - 1;
+  while (j >= 0 && /\s/.test(emittedSoFar[j])) j--;
+  if (j < 0) return true; // start of input
+  const ch = emittedSoFar[j];
+  if (/[\w$]/.test(ch)) {
+    let k = j;
+    while (k >= 0 && /[\w$]/.test(emittedSoFar[k])) k--;
+    return REGEX_CONTEXT_KEYWORDS.test(emittedSoFar.slice(k + 1, j + 1));
+  }
+  return /[([{,;:=!&|?+\-*%^~<>]/.test(ch);
+}
+
+const OPERATOR_CHARS = new Set(['{', '}', '(', ')', ';', ',', '=', '+', '-', '*', '/', '<', '>', '!', '&', '|']);
+
+// Strips comments and tightens spacing around operators, without touching the
+// contents of string literals ('...', "...", `...`) or regex literals (/.../),
+// since a bare textual replace can't tell '//' inside a string from a real comment.
+function minifyJs(input) {
+  let out = '';
+  let i = 0;
+  const n = input.length;
+  let pendingSpace = false;
+  const lastRealChar = () => (out.length ? out[out.length - 1] : '');
+  const flushSpaceUnlessTight = (nextIsOperator) => {
+    if (pendingSpace) {
+      const prevIsOperator = OPERATOR_CHARS.has(lastRealChar());
+      if (!prevIsOperator && !nextIsOperator) out += ' ';
+      pendingSpace = false;
+    }
+  };
+  while (i < n) {
+    const c = input[i];
+    const c2 = input[i + 1];
+    if (c === '/' && c2 === '/') {
+      while (i < n && input[i] !== '\n') i++;
+      continue;
+    }
+    if (c === '/' && c2 === '*') {
+      i += 2;
+      while (i < n && !(input[i] === '*' && input[i + 1] === '/')) i++;
+      i += 2;
+      pendingSpace = false;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === '`') {
+      flushSpaceUnlessTight(false);
+      const quote = c;
+      let str = c;
+      i++;
+      while (i < n) {
+        if (input[i] === '\\') { str += input[i] + (input[i + 1] || ''); i += 2; continue; }
+        if (input[i] === quote) { str += input[i]; i++; break; }
+        str += input[i]; i++;
+      }
+      out += str;
+      pendingSpace = false;
+      continue;
+    }
+    if (c === '/' && looksLikeRegexStart(out)) {
+      flushSpaceUnlessTight(false);
+      let re = c;
+      i++;
+      let inClass = false;
+      while (i < n) {
+        if (input[i] === '\\') { re += input[i] + (input[i + 1] || ''); i += 2; continue; }
+        if (input[i] === '[') inClass = true;
+        else if (input[i] === ']') inClass = false;
+        if (input[i] === '/' && !inClass) { re += input[i]; i++; break; }
+        if (input[i] === '\n') break; // unterminated on this line; bail out of regex mode
+        re += input[i]; i++;
+      }
+      while (i < n && /[a-z]/i.test(input[i])) { re += input[i]; i++; }
+      out += re;
+      pendingSpace = false;
+      continue;
+    }
+    if (/\s/.test(c)) {
+      pendingSpace = true;
+      i++;
+      continue;
+    }
+    const isOp = OPERATOR_CHARS.has(c);
+    flushSpaceUnlessTight(isOp);
+    out += c;
+    pendingSpace = false;
+    i++;
+  }
+  return out.trim();
+}
+
 export default function JsMinifierPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const minify = () => {
-    const minified = input.replace(/\/\/[^\n]*/g,'').replace(/\/\*[\s\S]*?\*\//g,'').replace(/\s+/g,' ').replace(/\s*([{}();,=+\-*/<>!&|])\s*/g,'$1').trim();
-    setOutput(minified);
+    setOutput(minifyJs(input));
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -24,39 +119,28 @@ export default function JsMinifierPage() {
           {output && <p className="text-neutral-500 text-sm text-center">Saved {input.length - output.length} characters</p>}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Js Minifier</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">JS Minifier is a free online tool that compresses and optimizes your JavaScript code by removing unnecessary characters without affecting functionality. This reduces file size, improves page load speed, and enhances overall website performance.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Js Minifier</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste your JavaScript code into the input field or upload a .js file from your computer</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the 'Minify' button to process and compress your code instantly</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Review the minified output in the result panel and check the file size reduction percentage</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the minified code to clipboard or download it as a new file for use in your project</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is JS Minifier safe to use with my production code?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, JS Minifier is completely safe. It only removes whitespace, comments, and unnecessary characters while preserving all code functionality. Always test minified code before deployment.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How much file size reduction can I expect?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Typical JavaScript files see 30-50% size reduction after minification, though results vary depending on code structure, comments, and variable naming conventions.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I minify minified code again?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can minify already minified code, but the additional size reduction will be minimal since most optimization has already been applied.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Does JS Minifier work with ES6 and modern JavaScript?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, JS Minifier supports modern JavaScript syntax including ES6, arrow functions, async/await, and other contemporary language features.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep backups of your original unminified code for easier debugging and future maintenance</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use source maps alongside minified code in development to help with debugging and error tracking</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Combine minification with gzip compression on your server for even greater file size reduction</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test your minified code thoroughly in different browsers to ensure all functionality works as expected</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="JS Minifier"
+        description="JS Minifier strips comments and tightens spacing around punctuation entirely in your browser — nothing is uploaded to a server. It's string- and regex-aware: it never alters the contents of quoted strings, template literals, or /regex/ literals, so a URL like https://example.com inside a string won't get corrupted the way a naive comment-stripping approach would."
+        howTo={[
+          "Paste your JavaScript into the input box.",
+          "Click 'Minify' to strip comments and tighten spacing.",
+          "Review the result and the characters-saved count below.",
+          "Click 'Copy' to copy the minified code."
+        ]}
+        faqs={[
+          { q: "Is JS Minifier safe to use with my code?", a: "Yes — comment-stripping and spacing changes skip over string, template literal, and regex contents, so values like URLs inside strings are left intact. Always review and test minified output before deploying it, as with any automated code transformation." },
+          { q: "Is JS Minifier free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Does it rename variables or remove dead code?", a: "No — this is a lightweight text-based minifier that removes comments and unnecessary whitespace, not a full build-tool-grade minifier like Terser or esbuild." },
+          { q: "Is my code uploaded to a server?", a: "No, minification happens entirely in your browser." }
+        ]}
+        tips={[
+          "Whitespace inside strings, template literals, and regex literals is preserved exactly as written — only whitespace and comments in actual code get removed or tightened.",
+          "Spacing is only tightened around punctuation like braces, parentheses, and semicolons — spacing around = and other operators is left as-is.",
+          "For deeper size reduction (variable renaming, dead-code elimination), use a dedicated build-tool minifier alongside this one.",
+          "Keep a copy of your original code before minifying, since there's no undo once you navigate away."
+        ]}
+      />
     </div>
   );
 }

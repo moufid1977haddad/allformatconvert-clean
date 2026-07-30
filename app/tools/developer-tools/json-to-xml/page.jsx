@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function JsonToXmlPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -33,39 +34,28 @@ export default function JsonToXmlPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Json To Xml</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Json To Xml is a free online converter tool that instantly transforms JSON data into XML format without requiring any software installation or technical expertise. This powerful utility helps developers, data analysts, and IT professionals seamlessly convert structured data between these two popular formats for better compatibility and integration.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Json To Xml</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste your JSON data into the input field on the left side of the tool</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the Convert button to instantly process your JSON code</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Review the converted XML output displayed on the right side</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the XML result and paste it into your application or file as needed</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Json To Xml completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Json To Xml is completely free with no hidden charges, registration requirements, or usage limits for conversion.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert large JSON files with this tool?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool can handle most standard JSON files, though extremely large files may have processing limitations depending on your browser.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my data be saved or shared after conversion?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No, your data is processed locally in your browser and is never stored on our servers or shared with third parties.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What happens if my JSON is invalid or malformed?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool will display an error message indicating the issue, helping you identify and fix syntax problems in your JSON.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Validate your JSON syntax before conversion to ensure accurate XML output without errors</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the copy button to quickly transfer your converted XML to clipboard for easy pasting elsewhere</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Bookmark this tool for frequent use to save time on repetitive JSON to XML conversions</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Test the conversion with sample data first if you are unfamiliar with XML structure to understand the format</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="JSON to XML"
+        description="JSON to XML recursively converts JSON into nested XML tags — each key becomes a tag name, with objects nesting naturally — entirely in your browser. Two real gaps to know about: text values are inserted directly without XML-escaping, so a value containing an ampersand or a less-than sign produces invalid XML, and array items become numbered tags like <0> and <1>, which aren't valid XML tag names."
+        howTo={[
+          "Paste your JSON into the input box.",
+          "Click 'Convert' to generate nested XML tags.",
+          "Review the output, especially for arrays or text containing & or <.",
+          "Click 'Copy' to copy the result to your clipboard."
+        ]}
+        faqs={[
+          { q: "Is JSON to XML free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Does it handle nested JSON objects?", a: "Yes — unlike some of our other JSON code-generator tools, this one recursively converts nested objects into properly nested XML tags at any depth." },
+          { q: "Does it escape special characters like & and <?", a: "No — text values are inserted as-is, so a value containing an ampersand or a less-than sign produces invalid, non-well-formed XML. Replace those characters with &amp; and &lt; yourself, or avoid them in your data." },
+          { q: "Does it convert JSON arrays correctly?", a: "No — array items become numbered tags like <0> and <1>, which are not valid XML tag names since tags can't start with a digit." }
+        ]}
+        tips={[
+          "Manually replace & with &amp; and < with &lt; in any text values before converting, since the tool doesn't escape them automatically.",
+          "Avoid JSON arrays in your input, or restructure them as objects with named keys, since array items don't convert to valid XML tags.",
+          "Nested objects convert cleanly at any depth — this tool's main strength over some of the similar converters here.",
+          "Validate the output with an XML parser before using it in a real system, especially if your data includes free-form text."
+        ]}
+      />
     </div>
   );
 }

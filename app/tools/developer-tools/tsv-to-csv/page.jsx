@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function TsvToCsvPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -20,39 +21,28 @@ export default function TsvToCsvPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Tsv To Csv</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">TSV to CSV is a free online conversion tool that instantly transforms tab-separated values files into comma-separated values format. Perfect for data migration, spreadsheet compatibility, and file format standardization without requiring any software installation.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Tsv To Csv</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Upload your TSV file by clicking the upload button or drag and drop it into the designated area</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>The tool automatically detects and previews your file contents to ensure proper formatting</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Click the convert button to transform your TSV file into CSV format</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your converted CSV file instantly and use it in your preferred spreadsheet application</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is the difference between TSV and CSV files?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">TSV files use tabs as delimiters between data fields, while CSV files use commas. This tool converts tab-separated data into comma-separated format for better compatibility.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my file data secure when using this tool?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, your files are processed securely and are not stored on our servers. All conversions happen locally in your browser for maximum privacy.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I convert multiple files at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can convert files one at a time using our tool. For bulk conversions, simply repeat the process for each TSV file you need to convert.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file size limit does this tool support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Our free tool supports TSV files up to 50MB in size, making it suitable for most standard data conversion tasks.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Ensure your TSV file is properly formatted with consistent tab delimiters before conversion to avoid data misalignment</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Preview the converted CSV file before downloading to verify that all data has been correctly transferred</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use this tool to prepare data for Excel, Google Sheets, or other spreadsheet applications that prefer CSV format</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep a backup of your original TSV file before conversion in case you need to reference the original tab-separated format</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="TSV to CSV"
+        description="TSV to CSV replaces every tab character with a comma, line by line, entirely in your browser — nothing is uploaded to a server. It's a straight text substitution: there's no file upload, only pasted text, and if any value itself contains a comma, the resulting CSV field won't be quoted, so that comma will look like an extra column when opened in a spreadsheet."
+        howTo={[
+          "Paste your TSV text into the input box (there's no file upload — paste the contents directly).",
+          "Click 'Convert' to replace tabs with commas.",
+          "Review the result in the output box.",
+          "Click 'Copy' to copy it to your clipboard."
+        ]}
+        faqs={[
+          { q: "What's the difference between TSV and CSV?", a: "TSV separates values with tabs; CSV uses commas. This tool converts the delimiter from tabs to commas." },
+          { q: "Does it support file upload, or only pasted text?", a: "Only pasted text — there's no file picker or drag-and-drop upload." },
+          { q: "Is my data uploaded to a server?", a: "No, the conversion happens entirely in your browser." },
+          { q: "Does it handle values that already contain a comma?", a: "Not safely — the output isn't quoted, so a value containing a comma will look like an extra column when the CSV is opened in a spreadsheet." }
+        ]}
+        tips={[
+          "Works cleanly for TSV data that doesn't contain commas within individual values.",
+          "If a value already contains a comma, consider wrapping that field in quotes yourself after conversion, since the tool doesn't do this automatically.",
+          "There's no file size limit enforced by the tool, but very large pastes are limited by your browser's performance.",
+          "Copy the result right away, since there's no download button or saved history."
+        ]}
+      />
     </div>
   );
 }

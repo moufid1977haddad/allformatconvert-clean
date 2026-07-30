@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function JwtDecoderPage() {
   const [token, setToken] = useState('');
   const [decoded, setDecoded] = useState(null);
@@ -26,39 +27,28 @@ export default function JwtDecoderPage() {
           {decoded && ['header','payload'].map(k => <div key={k} className="bg-neutral-50 rounded-xl border border-neutral-200 p-4"><div className="text-neutral-500 text-sm mb-2 uppercase">{k}</div><pre className="font-mono text-sm text-indigo-400 overflow-x-auto">{JSON.stringify(decoded[k], null, 2)}</pre></div>)}
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Jwt Decoder</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">JWT Decoder is a free online tool that instantly decodes and validates JSON Web Tokens to reveal their payload, header, and signature information. Perfect for developers, security professionals, and API testers who need to inspect JWT tokens without installation or authentication.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Jwt Decoder</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste your JWT token into the input field at the top of the decoder</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>The tool automatically decodes and displays the header, payload, and signature sections</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Review the decoded JSON data to verify token claims, expiration time, and user information</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Check the signature validation status to ensure the token hasn't been tampered with</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What is a JWT token?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">A JWT (JSON Web Token) is a compact, URL-safe string used for securely transmitting information between parties. It consists of three parts separated by dots: header, payload, and signature.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my token data secure when using this decoder?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, JWT Decoder processes tokens entirely in your browser without sending data to any server. Your tokens remain completely private and secure.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I use this tool for production environments?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Absolutely. JWT Decoder is ideal for debugging, testing, and validating tokens during development and production troubleshooting.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What information can I see when decoding a JWT?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can view the token's header (algorithm and type), payload (claims and user data), and signature validation status to identify potential issues.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Always validate the signature to ensure the token hasn't been modified or forged by unauthorized parties</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Check the 'exp' claim in the payload to verify if your token has expired before using it</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use this tool to debug authentication issues by comparing expected and actual token claims</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Bookmark this tool for quick reference during API integration and troubleshooting sessions</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="JWT Decoder"
+        description="JWT Decoder splits a JWT into its header and payload, base64url-decodes each, and pretty-prints the resulting JSON, entirely in your browser — nothing is uploaded to a server. It decodes only: it does not verify the signature, so it cannot tell you whether a token is authentic or has been tampered with. Any string with the correct three-part, base64url-encoded-JSON shape will decode successfully, valid signature or not."
+        howTo={[
+          "Paste a JWT into the input box (three base64url segments separated by dots).",
+          "Click 'Decode' to view the header and payload as formatted JSON.",
+          "Read the claims — common ones include exp (expiration), iat (issued at), and sub (subject).",
+          "If the format is invalid, you'll see an 'Invalid JWT token' error."
+        ]}
+        faqs={[
+          { q: "What is a JWT?", a: "A compact, URL-safe token format with three dot-separated parts — header, payload, and signature — commonly used to carry authentication claims." },
+          { q: "Does this tool verify the signature?", a: "No. It only decodes the header and payload; the signature segment isn't checked or even displayed. A forged or tampered token with the right shape will decode exactly like a genuine one." },
+          { q: "Is my token uploaded to a server?", a: "No, decoding happens entirely in your browser." },
+          { q: "Can I use this to confirm a token is valid or trustworthy?", a: "No — decoding is not validation. To actually verify a token, check its signature against the issuer's key using a JWT library on a server or trusted environment, not by eye in a decoder like this." }
+        ]}
+        tips={[
+          "Never treat a successfully decoded token as proof of authenticity — decoding always succeeds regardless of whether the signature is valid.",
+          "Check the exp claim to see when a token expires, but remember this is just reading a field, not confirming the token wasn't forged.",
+          "Useful for quickly inspecting claims during development, not for making trust decisions about a token's origin.",
+          "Be cautious pasting real production tokens here or anywhere — anyone who has the token text can read its (unencrypted) payload."
+        ]}
+      />
     </div>
   );
 }

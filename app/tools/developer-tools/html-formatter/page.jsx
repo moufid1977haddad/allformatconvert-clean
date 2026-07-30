@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState } from 'react';
+import SeoContent from '../../../components/SeoContent';
 export default function HtmlFormatterPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -30,39 +31,28 @@ export default function HtmlFormatterPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Html Formatter</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">HTML Formatter is a free online tool that automatically formats and beautifies your HTML code for improved readability and proper indentation. It helps developers organize messy HTML markup into clean, well-structured code that follows best practices.</p>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Html Formatter</h2>
-          <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Paste or upload your HTML code into the input field at the top of the tool</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Click the 'Format' button to instantly process and beautify your code</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Customize formatting options like indent size and line breaks if needed</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Copy the formatted output to your clipboard or download it as a file</li>
-          </ol>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is HTML Formatter free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, HTML Formatter is completely free with no hidden charges, registration requirements, or usage limits.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What file sizes can I format?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The tool can handle HTML files of various sizes, typically supporting files up to several megabytes without performance issues.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will the formatter validate my HTML code?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">While primarily a formatting tool, it will highlight basic syntax errors and help identify common HTML structure issues.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I customize the indentation style?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, you can select different indent styles including spaces or tabs and adjust the indent size to your preference.</p></div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
-          <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the formatter before deploying code to ensure consistency across your project and make future maintenance easier</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Copy the formatted HTML and compare it with your original to identify structural problems in your markup</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Combine the formatter with a HTML validator tool for comprehensive code quality assurance</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Format code regularly during development to maintain clean code practices and improve team collaboration</li>
-          </ul>
-        </div>
-      </div>
+      <SeoContent
+        title="HTML Formatter"
+        description="HTML Formatter adds line breaks and indentation to HTML entirely in your browser using simple pattern-based rules — splitting on adjacent tags and tracking nesting depth — rather than a full HTML parser. It recognizes common self-closing tags (br, hr, img, input, link, meta) so they don't affect indentation depth, but it doesn't validate your markup or offer indentation customization."
+        howTo={[
+          "Paste your HTML into the input box.",
+          "Click 'Format' to add line breaks and indent nested tags.",
+          "Review the result in the output box.",
+          "Click 'Copy' to copy it to your clipboard."
+        ]}
+        faqs={[
+          { q: "Is HTML Formatter free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Will it validate my HTML or flag errors?", a: "No — it only reformats indentation and line breaks; it doesn't check for invalid or malformed markup." },
+          { q: "Can I customize indentation size or style?", a: "No, indentation is always 2 spaces per nesting level — there's no option to change it." },
+          { q: "Is my code uploaded to a server?", a: "No, formatting happens entirely in your browser." }
+        ]}
+        tips={[
+          "Works well for typical, well-formed HTML with standard tags; unusual or deeply nested markup may not indent perfectly since it's pattern-based, not a full parser.",
+          "Self-closing tags like br, hr, img, input, link, and meta are recognized and won't throw off indentation — other void elements (like source or wbr) aren't specifically handled.",
+          "Text content isn't specially protected, so a stray > < sequence inside text (rare, but possible) could affect line breaks.",
+          "Copy the result right away, since there's no file download or save feature."
+        ]}
+      />
     </div>
   );
 }
