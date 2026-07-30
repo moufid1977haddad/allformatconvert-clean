@@ -18,30 +18,78 @@ export default function Page() {
     setLoading(true);
     setError('');
     try {
-      const { PDFDocument, rgb } = await import('pdf-lib');
+      const { PDFDocument, degrees } = await import('pdf-lib');
       const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
       const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer);
-      const pages = pdfDoc.getPages();
+      const srcDoc = await PDFDocument.load(arrayBuffer);
+      const outDoc = await PDFDocument.create();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      for (let i = 0; i < pages.length; i++) {
+      const kw = keyword.trim().toLowerCase();
+      const scale = 2;
+      let totalMatches = 0;
+
+      for (let i = 0; i < pdf.numPages; i++) {
         const page = await pdf.getPage(i + 1);
         const content = await page.getTextContent();
-        const { height } = pages[i].getSize();
-        for (const item of content.items) {
-          if (item.str.toLowerCase().includes(keyword.toLowerCase())) {
-            const [a, b, c, d, tx, ty] = item.transform;
-            pages[i].drawRectangle({
-              x: tx, y: ty,
-              width: item.width || 50,
-              height: item.height || 12,
-              color: rgb(0, 0, 0),
-            });
-          }
+        const matches = content.items.filter(item => item.str.toLowerCase().includes(kw));
+
+        if (matches.length === 0) {
+          const [copied] = await outDoc.copyPages(srcDoc, [i]);
+          outDoc.addPage(copied);
+          continue;
         }
+        totalMatches += matches.length;
+
+        // A black rectangle drawn on top of the page still leaves the
+        // original text operators in the content stream, so the "hidden"
+        // text stays selectable/extractable underneath. pdf-lib and
+        // @cantoo/pdf-lib both only expose page/content-stream *construction*
+        // APIs, not a supported way to excise specific text runs from an
+        // existing content stream. So instead: rasterize this page to a
+        // bitmap, black out the matched regions in the pixels themselves,
+        // and rebuild the page from that image with no vector content
+        // underneath at all — there is no text left to extract because the
+        // page no longer contains any text objects, matched or not.
+        const rotation = page.rotate;
+        page.cleanup();
+        const renderPage = await pdf.getPage(i + 1);
+        const viewport = renderPage.getViewport({ scale, rotation: 0 });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d');
+        await renderPage.render({ canvasContext: ctx, viewport }).promise;
+
+        ctx.fillStyle = '#000000';
+        const pad = 1;
+        for (const item of matches) {
+          const [, , , , tx, ty] = item.transform;
+          const wPt = (item.width || 50) + pad * 2;
+          const hPt = (item.height || 12) + pad * 2;
+          const xPt = tx - pad;
+          const yPt = ty - pad;
+          const x = xPt * scale;
+          const yTop = viewport.height - (yPt + hPt) * scale;
+          ctx.fillRect(x, yTop, wPt * scale, hPt * scale);
+        }
+
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const imgBytes = await blob.arrayBuffer();
+        const embeddedImg = await outDoc.embedPng(imgBytes);
+        const { width: pw, height: ph } = page.getViewport({ scale: 1, rotation: 0 });
+        const newPage = outDoc.addPage([pw, ph]);
+        newPage.drawImage(embeddedImg, { x: 0, y: 0, width: pw, height: ph });
+        if (rotation) newPage.setRotation(degrees(rotation));
       }
-      const pdfBytes = await pdfDoc.save();
+
+      if (totalMatches === 0) {
+        setError('No matches found for that text.');
+        setLoading(false);
+        return;
+      }
+
+      const pdfBytes = await outDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setResult(URL.createObjectURL(blob));
     } catch(e) { setError('Redaction failed: ' + e.message); }
@@ -72,24 +120,25 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Redact"
-        description="PDF Redact searches your PDF's text for a keyword using the PDF.js library and draws a black rectangle over each match using pdf-lib, entirely in your browser — your file is never uploaded to a server. Important: it only visually covers the matched text; the original text stays inside the PDF's content and can still be recovered by selecting or extracting it, so this is not secure redaction for genuinely sensitive information."
+        description="PDF Redact searches your PDF's text for a keyword using PDF.js, then permanently destroys the matched text rather than just covering it: any page containing a match is rendered to a flattened image with the matched areas blacked out in the pixels themselves, and that image replaces the page's original content entirely — so there are no text objects left on that page to select, copy, or extract. Pages with no match are left untouched, keeping their original selectable, searchable text. Everything runs locally in your browser; your file is never uploaded to a server."
         howTo={[
           "Click the upload area and select a PDF file from your device.",
           "Type the exact word or phrase to redact into the text field.",
-          "Click 'Redact PDF' — every occurrence of that text is covered with a black box.",
+          "Click 'Redact PDF' — pages containing a match are flattened to an image with the text permanently blacked out.",
           "Click 'Download Redacted PDF' to save the result."
         ]}
         faqs={[
           { q: "Is PDF Redact free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does this tool truly remove sensitive text from the PDF?", a: "No — it only draws a black rectangle on top of matching text. The original text stays inside the file and can still be extracted by copying it or using a text-extraction tool, so this method isn't secure for genuinely confidential information." },
-          { q: "Can I visually select an area to redact, or preview matches first?", a: "No — there's no click-to-select or highlighting interface. You type a keyword, and every matching instance is covered automatically with no preview step." },
+          { q: "Does this tool truly remove sensitive text from the PDF, or just cover it up?", a: "It truly removes it. Any page with a match is rendered to a flattened image with the matched text blacked out in the pixels, and that image replaces the page's content — the underlying text is gone, not just hidden, so it can't be recovered by selecting or extracting text from that page." },
+          { q: "Does this affect other text on the same page that I didn't ask to redact?", a: "Yes — a matched page is flattened entirely, so all text on that page becomes a static image and loses selectability and searchability, not just the redacted word. Pages with no match are left as original, fully searchable text." },
+          { q: "Can I visually select an area to redact, or preview matches first?", a: "No — there's no click-to-select or highlighting interface. You type a keyword, and every page containing a match is processed automatically with no preview step." },
           { q: "Is my file uploaded to a server?", a: "No, matching and redaction both happen locally in your browser." }
         ]}
         tips={[
-          "Because the underlying text isn't deleted, never rely on this tool alone to redact truly confidential data like ID numbers or passwords — the covered text is still extractable.",
-          "Search terms are matched as a case-insensitive substring, so short or common keywords can over-match and cover text you didn't intend to hide.",
-          "After downloading, try selecting text inside the black boxes in a PDF reader to see what's actually still there.",
-          "For genuinely secure redaction, use dedicated redaction software that permanently strips the underlying text rather than drawing over it."
+          "Because matched pages are fully flattened to images, expect some loss of text searchability and a larger file size for those pages — that trade-off is what makes the redaction genuinely irreversible.",
+          "Search terms are matched as a case-insensitive substring, so short or common keywords can over-match and flatten more pages than intended — use a specific phrase rather than a short fragment.",
+          "After downloading, try selecting or searching for the redacted text in a PDF reader — it should no longer be selectable or found on that page.",
+          "Pages that don't contain your search term are left completely untouched, preserving their original text quality and searchability."
         ]}
       />
     </div>
