@@ -2,16 +2,28 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 export default function FindReplacePage() {
   const [text, setText] = useState('');
   const [find, setFind] = useState('');
   const [replace, setReplace] = useState('');
+  const [useRegex, setUseRegex] = useState(false);
   const [result, setResult] = useState('');
   const [count, setCount] = useState(0);
+  const [error, setError] = useState('');
 
   const doReplace = () => {
     if (!find) return;
-    const regex = new RegExp(find, 'g');
+    setError('');
+    let regex;
+    try {
+      regex = new RegExp(useRegex ? find : escapeRegex(find), 'g');
+    } catch (e) {
+      setError(e.message);
+      setResult('');
+      return;
+    }
     const matches = (text.match(regex) || []).length;
     setCount(matches);
     setResult(text.replace(regex, replace));
@@ -34,7 +46,12 @@ export default function FindReplacePage() {
               <input type="text" value={replace} onChange={e => setReplace(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" placeholder="Replace with..." />
             </div>
           </div>
+          <label className="flex items-center gap-2 text-sm text-neutral-600">
+            <input type="checkbox" checked={useRegex} onChange={e => setUseRegex(e.target.checked)} />
+            Use regular expression
+          </label>
           <button onClick={doReplace} disabled={!text || !find} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Replace All</button>
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {result && (
             <div className="space-y-2">
               <p className="text-green-400 text-sm text-center">{count} replacement(s) made</p>
@@ -46,24 +63,24 @@ export default function FindReplacePage() {
       </div>
       <SeoContent
         title="Find and Replace"
-        description={"Find and Replace searches your text for every match of a pattern and swaps it with your replacement text, entirely in your browser. Note: the \"Find\" field is always interpreted as a regular expression, not plain literal text — special characters like . * + ( ) [ ] have regex meaning."}
+        description={"Find and Replace searches your text for every match of your \"Find\" term and swaps it with your replacement text, entirely in your browser. By default, \"Find\" is treated as plain literal text — characters like . * + ( ) [ ] match themselves, not regex syntax. Check \"Use regular expression\" to opt into full regex matching, including capture groups and backreferences in the replacement."}
         howTo={[
           "Paste your text into the main text box.",
-          "Enter your search pattern in the \"Find\" field and your replacement text in the \"Replace with\" field.",
-          "Click \"Replace All\" to replace every match in one pass.",
-          "Copy your updated text from the output field."
+          "Enter your search text in the \"Find\" field and your replacement text in the \"Replace with\" field.",
+          "Check \"Use regular expression\" only if you want regex matching — leave it unchecked for plain literal text.",
+          "Click \"Replace All\" to replace every match in one pass, then copy your updated text from the output field."
         ]}
         faqs={[
-          { q: "Does this tool support regular expressions?", a: "It always uses them — the \"Find\" field is passed directly into a regular expression, so characters like . * + ( ) [ ] ^ $ have special meaning rather than matching themselves literally." },
-          { q: "How do I search for a literal special character?", a: "Escape it with a backslash, e.g. use \"3\\.50\" to match the literal text \"3.50\" instead of \"3\" followed by any character followed by \"50\"." },
+          { q: "Does this tool support regular expressions?", a: "Yes, as an opt-in — check \"Use regular expression\" to have the \"Find\" field interpreted as a regex, with special characters like . * + ( ) [ ] ^ $ taking on their regex meaning. Leave it unchecked for plain literal matching." },
+          { q: "Do I need to escape special characters by default?", a: "No — with \"Use regular expression\" unchecked (the default), your search text is matched literally, so characters like . and ( match themselves." },
           { q: "Is matching case-sensitive?", a: "Yes, always — there's no case-insensitive option." },
           { q: "Is my data private?", a: "Yes, all text processing happens locally in your browser — nothing is uploaded to a server." }
         ]}
         tips={[
-          "If you just want to replace plain text and your search term contains ., *, +, (, ), [, or ], escape those characters with a backslash first.",
+          "Leave \"Use regular expression\" unchecked for straightforward text replacement — no need to escape special characters.",
+          "Enable regex mode for advanced patterns, like using groups such as (\\w+) with backreferences in your replacement text.",
           "\"Replace All\" always replaces every match in one click — there's no separate single-replacement mode.",
-          "Keep a copy of your original text before replacing, since there's no undo button.",
-          "Use regex groups like (\\w+) with backreferences in your replacement text for more advanced find-and-replace patterns."
+          "Keep a copy of your original text before replacing, since there's no undo button."
         ]}
       />
     </div>
