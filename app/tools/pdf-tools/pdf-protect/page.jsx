@@ -1,6 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument } from '@cantoo/pdf-lib';
 import SeoContent from '../../../components/SeoContent';
 
 export default function PdfProtectPage() {
@@ -25,7 +25,7 @@ export default function PdfProtectPage() {
     try {
       const arrayBuffer = await file.arrayBuffer();
       const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-      const pdfBytes = await pdfDoc.save({
+      pdfDoc.encrypt({
         userPassword: password,
         ownerPassword: password + '_owner',
         permissions: {
@@ -35,6 +35,7 @@ export default function PdfProtectPage() {
           annotating: false,
         },
       });
+      const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setDownloadUrl(URL.createObjectURL(blob));
       setStatus('');
@@ -72,24 +73,24 @@ export default function PdfProtectPage() {
       </div>
       <SeoContent
         title="PDF Protect"
-        description="PDF Protect attempts to set a password on your PDF using the pdf-lib library entirely in your browser — your file is never uploaded to a server. Note: the version of pdf-lib this tool relies on does not implement PDF encryption, so the password and permission settings you enter are accepted by the interface but have no effect on the downloaded file, which is not actually password-protected."
+        description="PDF Protect encrypts your PDF with the password you enter, using the @cantoo/pdf-lib library's standard PDF security handler entirely in your browser — your file is never uploaded to a server. The password is set as the document's user password (required to open it), while a separate, non-user-facing owner password retains full permissions; printing, editing, copying, and annotating are restricted for anyone opening it with the password you set."
         howTo={[
           "Click the upload area and select a PDF file from your device.",
           "Type a password into the field.",
-          "Click 'Protect PDF' to process the file.",
-          "Click 'Download' to save the result."
+          "Click 'Protect PDF' to encrypt the file with that password.",
+          "Click 'Download' to save the password-protected PDF."
         ]}
         faqs={[
           { q: "Is PDF Protect free to use?", a: "Yes, it's free with no signup required." },
-          { q: "How secure is the encryption?", a: "Currently, this tool does not apply real password protection or encryption — the underlying library doesn't support setting a PDF password, so the downloaded file is not actually locked. Don't rely on it to secure sensitive documents." },
-          { q: "Will my file be uploaded to a server?", a: "No, processing happens entirely in your browser." },
-          { q: "Can I set separate owner and user passwords or custom permissions?", a: "No, there's only a single password field, and permission settings aren't configurable — though as noted above, none of this is currently enforced on the output file either." }
+          { q: "How secure is the encryption?", a: "It uses the PDF standard security handler (RC4/AES depending on the source document's PDF version) via the pdf-lib encryption implementation. Anyone opening the file will be required to enter the password you set." },
+          { q: "Will my file be uploaded to a server?", a: "No, encryption happens entirely in your browser." },
+          { q: "Can I set separate owner and user passwords or custom permissions?", a: "The password you enter becomes the user password needed to open the file, and printing, editing, copying, and annotating are restricted by default. There's no UI yet to customize permissions or set a different owner password." }
         ]}
         tips={[
-          "Don't rely on this tool to secure sensitive documents at this time, since the resulting PDF isn't actually encrypted.",
-          "If you need genuine password protection, use desktop software or another service that confirms real PDF encryption.",
-          "Check back later for updates, since this feature is still being developed.",
-          "For controlling who can view a file, consider restricting access to where you share it instead."
+          "Remember your password — there's no recovery option, and losing it means losing access to the protected file.",
+          "Use the PDF Unlock tool with the same password if you need to remove protection later.",
+          "Since editing, copying, and printing restrictions are enforced via the PDF standard, a determined user with specialized software may still be able to bypass permission restrictions (though not the password itself) — don't treat this as airtight DRM.",
+          "Test opening the downloaded file with your password in a PDF reader before sharing it, to confirm it was protected as expected."
         ]}
       />
     </div>

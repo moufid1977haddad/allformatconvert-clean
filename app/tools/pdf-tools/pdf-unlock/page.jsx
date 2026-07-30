@@ -18,9 +18,15 @@ export default function Page() {
     setLoading(true);
     setError('');
     try {
-      const { PDFDocument } = await import('pdf-lib');
+      const { PDFDocument } = await import('@cantoo/pdf-lib');
       const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer, { password });
+      const decryptedDoc = await PDFDocument.load(arrayBuffer, { password });
+      // Rebuild into a brand new document rather than re-saving decryptedDoc directly:
+      // the source file's now-orphaned /Encrypt dictionary and old xref data can otherwise
+      // get carried over as unreferenced objects, causing some readers to still flag the file as encrypted.
+      const pdfDoc = await PDFDocument.create();
+      const copiedPages = await pdfDoc.copyPages(decryptedDoc, decryptedDoc.getPageIndices());
+      copiedPages.forEach(p => pdfDoc.addPage(p));
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setResult(URL.createObjectURL(blob));
@@ -52,24 +58,24 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Unlock"
-        description="PDF Unlock attempts to open a password-protected PDF using the pdf-lib library entirely in your browser — your file is never uploaded to a server. Note: the version of pdf-lib this tool relies on does not implement PDF decryption, so any genuinely password-protected PDF will currently fail to load here regardless of the password you enter."
+        description="PDF Unlock decrypts a password-protected PDF using the password you provide, via the @cantoo/pdf-lib library's standard PDF security handler entirely in your browser — your file is never uploaded to a server. It then re-saves the document without encryption, so the downloaded copy opens without a password."
         howTo={[
           "Click the upload area and select a password-protected PDF file.",
           "Type the PDF's password into the field.",
-          "Click 'Unlock PDF'.",
-          "If it succeeds, click 'Download Unlocked PDF' to save the result."
+          "Click 'Unlock PDF' to decrypt it.",
+          "Click 'Download Unlocked PDF' to save the password-free result."
         ]}
         faqs={[
           { q: "Is PDF Unlock free to use?", a: "Yes, it's free with no signup required." },
-          { q: "Can this actually remove a real password from an encrypted PDF?", a: "Currently, no — the underlying library can't decrypt genuinely encrypted PDFs, so a real password-protected file will fail to open here no matter what password you enter." },
-          { q: "What types of PDF passwords can it remove?", a: "None reliably at the moment — this feature doesn't yet work as intended for actually encrypted files." },
-          { q: "Is my file uploaded to a server?", a: "No, everything is attempted locally in your browser." }
+          { q: "Can this remove a real password from an encrypted PDF?", a: "Yes — given the correct password, it decrypts the document's standard PDF encryption and re-saves it without protection." },
+          { q: "What if I enter the wrong password?", a: "Decryption fails and you'll see \"Could not unlock PDF. Wrong password?\" — double-check the password and try again." },
+          { q: "Is my file uploaded to a server?", a: "No, decryption happens entirely in your browser using the pdf-lib library." }
         ]}
         tips={[
-          "If you see \"Could not unlock PDF. Wrong password?\" on a file you know the correct password for, that's a limitation of this tool rather than an incorrect password.",
-          "For a genuinely password-protected PDF, use desktop software or another service that supports real PDF decryption.",
-          "Check back later, since this feature is still being developed.",
-          "Keep your original file safe regardless, since this tool can't modify a PDF it fails to open."
+          "You need the PDF's actual password (user or owner) — this tool removes protection, it doesn't crack or guess unknown passwords.",
+          "If the PDF isn't password-protected at all, you can leave the password field blank and it will still process normally.",
+          "Download and reopen the result to confirm it no longer prompts for a password.",
+          "Keep your original protected file as a backup until you've confirmed the unlocked version looks correct."
         ]}
       />
     </div>
