@@ -24,21 +24,27 @@ export default function GifMakerPage() {
     if (images.length < 2) return;
     setLoading(true);
     try {
+      const { GIFEncoder, quantize, applyPalette } = await import('gifenc');
       const canvas = document.createElement('canvas');
-      const img = new Image();
-      await new Promise(r => { img.onload = r; img.src = images[0].src; });
-      canvas.width = img.width;
-      canvas.height = img.height;
+      const firstImg = new Image();
+      await new Promise((res, rej) => { firstImg.onload = res; firstImg.onerror = rej; firstImg.src = images[0].src; });
+      canvas.width = firstImg.width;
+      canvas.height = firstImg.height;
       const ctx = canvas.getContext('2d');
-      const frames = [];
+      const gif = GIFEncoder();
       for (const image of images) {
         const im = new Image();
-        await new Promise(r => { im.onload = r; im.src = image.src; });
+        await new Promise((res, rej) => { im.onload = res; im.onerror = rej; im.src = image.src; });
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(im, 0, 0, canvas.width, canvas.height);
-        frames.push(canvas.toDataURL('image/png'));
+        const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const palette = quantize(data, 256);
+        const index = applyPalette(data, palette);
+        gif.writeFrame(index, canvas.width, canvas.height, { palette, delay });
       }
-      setResult({ frames, delay });
+      gif.finish();
+      const blob = new Blob([gif.bytes()], { type: 'image/gif' });
+      setResult({ url: URL.createObjectURL(blob), frameCount: images.length });
     } catch(e) { alert('Error: ' + e.message); }
     setLoading(false);
   };
@@ -65,38 +71,37 @@ export default function GifMakerPage() {
             </div>
           )}
           <div><label className="block text-sm text-neutral-500 mb-1">Frame Delay: {delay}ms</label><input type="range" min="50" max="1000" value={delay} onChange={e => setDelay(parseInt(e.target.value))} className="w-full" /></div>
-          <button onClick={createGif} disabled={images.length < 2 || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">{loading ? 'Creating...' : 'Preview GIF'}</button>
+          <button onClick={createGif} disabled={images.length < 2 || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">{loading ? 'Creating...' : 'Create GIF'}</button>
           {result && (
             <div className="text-center space-y-3">
-              <p className="text-green-400">Preview frames ({result.frames.length} frames at {result.delay}ms)</p>
-              <div className="grid grid-cols-4 gap-2">
-                {result.frames.map((f, i) => <img key={i} src={f} className="w-full rounded" />)}
-              </div>
-              <p className="text-neutral-500 text-sm">Note: Download individual frames and use an online GIF assembler for the final GIF</p>
+              <p className="text-green-400">GIF created ({result.frameCount} frames)</p>
+              <img src={result.url} className="max-w-full mx-auto rounded-xl border border-neutral-200" />
+              <a href={result.url} download="animated.gif" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download GIF</a>
             </div>
           )}
         </div>
       </div>
       <SeoContent
         title="GIF Maker"
-        description="GIF Maker lets you upload multiple images and preview them as an animation sequence with an adjustable frame delay, entirely in your browser. Note: it currently generates a live preview only — there's no built-in button to download an assembled GIF file, so you'll need to save individual frames and combine them with a separate GIF-assembly tool."
+        description="GIF Maker assembles your uploaded images into a real, downloadable animated GIF file with an adjustable frame delay, using the gifenc library entirely in your browser — nothing is uploaded to a server. Each frame is quantized to its own 256-color palette; images with different dimensions are scaled to match the first image's size, which can stretch photos with a different aspect ratio."
         howTo={[
           "Click the upload area and add two or more images to use as frames.",
           "Remove any image using the \"x\" button on its thumbnail.",
           "Set your frame delay using the slider.",
-          "Click \"Preview GIF\" to see the frames in sequence, then right-click and save individual frames to assemble elsewhere."
+          "Click \"Create GIF\", then preview and download the resulting animated GIF file."
         ]}
         faqs={[
-          { q: "Can I download a finished GIF file directly?", a: "Not yet — this tool only generates a live preview. Right-click and save each frame image, then combine them with a dedicated GIF-assembly tool." },
+          { q: "Can I download a finished GIF file directly?", a: "Yes — click \"Create GIF\" and a \"Download GIF\" button appears with the finished, real animated GIF file." },
           { q: "What image formats can I use as frames?", a: "Any image format your browser supports, such as JPG, PNG, WebP, or GIF." },
+          { q: "Will photos look as good as flat graphics or icons?", a: "Simple, flat-color images tend to look best. The underlying encoder doesn't apply dithering, so photos or gradients with fine color detail may show some visible color banding after being reduced to a 256-color palette." },
           { q: "Is GIF Maker free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Is my data private?", a: "Yes. Everything happens locally in your browser — your images are never uploaded to a server." }
         ]}
         tips={[
-          "Use images with the same dimensions for the smoothest-looking preview.",
-          "Since there's no direct GIF export yet, a tool like ezgif.com or ImageMagick can assemble your saved frames into a real animated GIF.",
-          "A shorter delay (50–150ms) creates faster, more fluid-looking motion in the preview.",
-          "Keep the frame count reasonable — a large number of high-resolution images can slow the preview down."
+          "Use images with the same dimensions to avoid any of them being stretched to fit the first image's size.",
+          "For photos or images with smooth gradients, expect some color banding since the encoder doesn't dither — flat-color graphics and icons encode more cleanly.",
+          "A shorter delay (50–150ms) creates faster, more fluid-looking motion; longer delays (300ms+) work well for slideshow-style GIFs.",
+          "Keep the frame count and image resolution reasonable — a large number of high-resolution images takes longer to quantize and encode."
         ]}
       />
     </div>
