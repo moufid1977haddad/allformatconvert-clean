@@ -67,7 +67,7 @@ export default function PdfCompressPage() {
                 <div><div className="text-neutral-500">After</div><div className="font-bold text-indigo-400">{formatSize(result.newSize)}</div></div>
                 <div><div className="text-neutral-500">Saved</div><div className="font-bold text-green-400">{result.ratio}%</div></div>
               </div>
-              <a href={result.url} download={result.name.replace('.pdf', '-compressed.pdf')} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition">Download</a>
+              <a href={result.url} download={result.name.replace(/\.pdf$/i, '-compressed.pdf')} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition">Download</a>
             </div>
           )}
         </div>

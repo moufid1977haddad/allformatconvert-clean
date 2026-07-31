@@ -66,7 +66,7 @@ export default function PdfProtectPage() {
           {downloadUrl && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
               <div className="text-green-400 text-xl font-bold mb-3">Done!</div>
-              <a href={downloadUrl} download={file.name.replace('.pdf', '-protected.pdf')} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition">Download</a>
+              <a href={downloadUrl} download={file.name.replace(/\.pdf$/i, '-protected.pdf')} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition">Download</a>
             </div>
           )}
         </div>

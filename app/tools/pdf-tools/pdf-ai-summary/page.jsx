@@ -18,7 +18,12 @@ export default function Page() {
     setError('');
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      // Only the first 5000 base64 chars are ever used below, so only encode
+      // enough of the file's start to cover that — encoding the whole buffer
+      // via String.fromCharCode(...bytes) blows the call-stack argument limit
+      // for any realistically-sized PDF (crashes above ~100KB).
+      const prefixBytes = new Uint8Array(arrayBuffer).slice(0, 4000);
+      const base64 = btoa(String.fromCharCode(...prefixBytes));
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

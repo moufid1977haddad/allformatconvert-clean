@@ -45,7 +45,7 @@ export default function PdfExtractTextPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = file.name.replace('.pdf', '.txt');
+    a.download = file.name.replace(/\.pdf$/i, '.txt');
     a.click();
   };
 
