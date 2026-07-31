@@ -45,6 +45,25 @@ export default function ColorConverterPage() {
     setHsl(rgbToHsl(newRgb.r, newRgb.g, newRgb.b));
   };
 
+  const hslToRgb = (h, s, l) => {
+    s /= 100; l /= 100;
+    const k = n => (n + h / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    return { r: Math.round(f(0) * 255), g: Math.round(f(8) * 255), b: Math.round(f(4) * 255) };
+  };
+
+  const handleHsl = (key, val) => {
+    const max = key === 'h' ? 360 : 100;
+    const newHsl = { ...hsl, [key]: Math.max(0, Math.min(max, parseInt(val) || 0)) };
+    setHsl(newHsl);
+    const newRgb = hslToRgb(newHsl.h, newHsl.s, newHsl.l);
+    setRgb(newRgb);
+    setHex(rgbToHex(newRgb.r, newRgb.g, newRgb.b));
+  };
+
+  const copy = (text) => navigator.clipboard.writeText(text);
+
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
@@ -71,35 +90,55 @@ export default function ColorConverterPage() {
                 </div>
               ))}
             </div>
-            <p className="text-neutral-500 text-sm mt-2 text-center font-mono">rgb({rgb.r}, {rgb.g}, {rgb.b})</p>
+            <div className="flex items-center justify-center gap-2 mt-2">
+              <p className="text-neutral-500 text-sm font-mono">rgb({rgb.r}, {rgb.g}, {rgb.b})</p>
+              <button onClick={() => copy(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`)} className="text-xs text-indigo-500 hover:text-indigo-400">Copy</button>
+            </div>
           </div>
-          <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 text-center">
-            <p className="text-neutral-500 text-sm">HSL</p>
-            <p className="font-mono text-indigo-400">hsl({hsl.h}, {hsl.s}%, {hsl.l}%)</p>
+          <div>
+            <label className="block text-sm text-neutral-500 mb-1">HSL</label>
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="block text-xs text-neutral-500 mb-1">H</label>
+                <input type="number" min="0" max="360" value={hsl.h} onChange={e => handleHsl('h', e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center" />
+              </div>
+              <div>
+                <label className="block text-xs text-neutral-500 mb-1">S%</label>
+                <input type="number" min="0" max="100" value={hsl.s} onChange={e => handleHsl('s', e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center" />
+              </div>
+              <div>
+                <label className="block text-xs text-neutral-500 mb-1">L%</label>
+                <input type="number" min="0" max="100" value={hsl.l} onChange={e => handleHsl('l', e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center" />
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-2 mt-2">
+              <p className="text-neutral-500 text-sm font-mono">hsl({hsl.h}, {hsl.s}%, {hsl.l}%)</p>
+              <button onClick={() => copy(`hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`)} className="text-xs text-indigo-500 hover:text-indigo-400">Copy</button>
+            </div>
           </div>
-          <button onClick={() => navigator.clipboard.writeText(hex)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy HEX</button>
+          <button onClick={() => copy(hex)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy HEX</button>
         </div>
       </div>
       <SeoContent
         title="Color Converter"
-        description="Color Converter converts between HEX and RGB color values live, entirely in your browser, and also shows the equivalent HSL value. Edit the color using the picker, the HEX field, or the individual RGB fields — everything updates instantly."
+        description="Color Converter converts between HEX, RGB, and HSL color values live, entirely in your browser. Edit the color using the picker, the HEX field, the individual RGB fields, or the individual HSL fields — any of them updates all the others instantly, and each format has its own one-click copy button."
         howTo={[
-          "Use the color picker, type a HEX code, or enter RGB values (0–255) — any of these update the others automatically.",
+          "Use the color picker, type a HEX code, enter RGB values (0–255), or enter HSL values (H: 0–360, S/L: 0–100%) — any of these update the others automatically.",
           "Watch the color preview swatch update live as you adjust any field.",
-          "Read the equivalent HSL value shown below the RGB fields.",
-          "Click \"Copy HEX\" to copy the current color's HEX code to your clipboard."
+          "Click \"Copy\" next to the RGB or HSL value, or \"Copy HEX\", to copy that format to your clipboard.",
+          "Switch between formats freely — there's no need to convert manually."
         ]}
         faqs={[
-          { q: "What color formats does Color Converter support?", a: "HEX and RGB are both editable inputs; HSL is calculated and displayed automatically but isn't an editable input field." },
+          { q: "What color formats does Color Converter support?", a: "HEX, RGB, and HSL are all directly editable, and each has its own copy button." },
           { q: "Is Color Converter free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "Does it support RGBA, HSLA, HSV, or named colors?", a: "Not currently — only HEX and RGB accept direct input." },
+          { q: "Does it support RGBA, HSLA, HSV, or named colors?", a: "Not currently — only HEX, RGB, and HSL accept direct input, without an alpha/transparency channel." },
           { q: "Is my data private?", a: "Yes, all color math happens locally in your browser — nothing is sent to a server." }
         ]}
         tips={[
-          "Use the color picker swatch for quick visual selection instead of typing HEX codes manually.",
-          "Type RGB values directly if you're matching a color from a design spec that lists RGB rather than HEX.",
-          "The HSL value is handy for CSS since adjusting the \"L\" (lightness) number lets you create lighter or darker variants of the same hue.",
-          "Only the HEX value has a one-click copy button — manually select the RGB or HSL text if you need to copy those."
+          "Use the color picker swatch for quick visual selection instead of typing values manually.",
+          "Edit HSL directly if you're fine-tuning lightness or saturation — it's often more intuitive than guessing RGB values.",
+          "The HSL value is handy for CSS since adjusting just the \"L\" (lightness) field lets you create lighter or darker variants of the same hue.",
+          "Each format (HEX, RGB, HSL) has its own copy button, so you can grab exactly the syntax your code needs."
         ]}
       />
     </div>

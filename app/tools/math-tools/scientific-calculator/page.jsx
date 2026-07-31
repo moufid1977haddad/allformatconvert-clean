@@ -5,6 +5,7 @@ import SeoContent from '../../../components/SeoContent';
 export default function ScientificCalculatorPage() {
   const [expression, setExpression] = useState('');
   const [result, setResult] = useState('0');
+  const [memory, setMemory] = useState(0);
   const inputRef = useRef(null);
 
   const evaluate = (expr) => {
@@ -13,7 +14,12 @@ export default function ScientificCalculatorPage() {
         .replace(/sin\(/g, 'Math.sin(').replace(/cos\(/g, 'Math.cos(')
         .replace(/tan\(/g, 'Math.tan(').replace(/log\(/g, 'Math.log10(')
         .replace(/ln\(/g, 'Math.log(').replace(/sqrt\(/g, 'Math.sqrt(')
-        .replace(/π/g, 'Math.PI').replace(/\^/g, '**');
+        .replace(/π/g, 'Math.PI')
+        // Only a standalone "e" (not preceded by a digit) means Euler's
+        // number — an "e" directly after a digit is scientific notation
+        // (e.g. "2e5"), which must be left alone.
+        .replace(/(?<![0-9.])e(?![0-9])/g, 'Math.E')
+        .replace(/\^/g, '**');
       const r = eval(e);
       return parseFloat(r.toFixed(10)).toString();
     } catch { return 'Error'; }
@@ -49,6 +55,13 @@ export default function ScientificCalculatorPage() {
     if (funcs.includes(val)) { insertAtCursor(val, ')'); return; }
     insertAtCursor(val);
   };
+
+  const memoryAdd = () => {
+    const val = parseFloat(result);
+    if (!isNaN(val)) setMemory(m => m + val);
+  };
+  const memoryRecall = () => insertAtCursor(String(memory));
+  const memoryClear = () => setMemory(0);
 
   useEffect(() => {
     const handleKey = (e) => {
@@ -97,7 +110,15 @@ export default function ScientificCalculatorPage() {
               placeholder="Type or click buttons..."
               autoFocus
             />
-            <div className="text-2xl font-bold font-mono mt-1 break-all text-neutral-800 dark:text-white">{result}</div>
+            <div className="text-2xl font-bold font-mono mt-1 break-all text-neutral-800 dark:text-white">
+              {memory !== 0 && <span className="text-xs font-sans text-indigo-500 mr-2 align-middle">M</span>}
+              {result}
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <button onMouseDown={e => { e.preventDefault(); memoryClear(); }} className="py-3 rounded-xl font-semibold transition text-sm bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-900 dark:text-white">MC</button>
+            <button onMouseDown={e => { e.preventDefault(); memoryRecall(); }} className="py-3 rounded-xl font-semibold transition text-sm bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-900 dark:text-white">MR</button>
+            <button onMouseDown={e => { e.preventDefault(); memoryAdd(); }} className="py-3 rounded-xl font-semibold transition text-sm bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-900 dark:text-white">M+</button>
           </div>
           {buttons.map((row, i) => (
             <div key={i} className={`grid gap-2 ${row.length === 1 ? 'grid-cols-1' : 'grid-cols-4'}`}>
@@ -113,7 +134,7 @@ export default function ScientificCalculatorPage() {
       </div>
       <SeoContent
         title="Scientific Calculator"
-        description="Scientific Calculator evaluates expressions with trigonometric functions, logarithms, square roots, exponents, and parentheses, entirely in your browser — type an expression or build it with the buttons, and press equals for an instant result."
+        description="Scientific Calculator evaluates expressions with trigonometric functions, logarithms, square roots, exponents, and parentheses, entirely in your browser — type an expression or build it with the buttons, and press equals for an instant result. Includes a memory register (M+/MR/MC) and a working Euler's number button."
         howTo={[
           "Type an expression directly into the display, or build it using the number and function buttons.",
           "Use function buttons like sin(, cos(, log(, sqrt( to insert scientific functions — they auto-add closing parentheses.",
@@ -122,15 +143,15 @@ export default function ScientificCalculatorPage() {
         ]}
         faqs={[
           { q: "Are trig functions in degrees or radians?", a: "Radians only — sin(, cos(, and tan( all operate in radians; there's no degree mode toggle. To work with degrees, convert first (degrees × π / 180)." },
-          { q: "Does the \"e\" button insert Euler's number?", a: "Not on its own — pressing \"e\" by itself inserts a raw letter that produces an error, since it isn't mapped to Math.E. It works fine as part of scientific notation, like typing \"2e5\" directly." },
-          { q: "Does it have memory functions or factorial?", a: "No — this calculator covers basic arithmetic, trig, log/ln, square root, exponents, and parentheses only; there's no M+/MR/MC or factorial button." },
+          { q: "Does the \"e\" button insert Euler's number?", a: "Yes — pressing \"e\" on its own inserts Euler's number (≈2.71828). It also correctly leaves scientific notation alone, so typing \"2e5\" directly still means 2×10⁵, not 2×Euler's number×5." },
+          { q: "Does it have memory functions?", a: "Yes — M+ adds the current result to memory, MR recalls the stored value into the expression, and MC clears memory. An \"M\" indicator appears next to the result whenever memory holds a non-zero value. There's no factorial button." },
           { q: "Is Scientific Calculator free to use?", a: "Yes, it's completely free with no signup, running entirely in your browser." }
         ]}
         tips={[
           "For degree-based trig, convert your angle to radians first (degrees × π / 180) before using sin(/cos(/tan(.",
           "log( computes the base-10 logarithm; use ln( for the natural logarithm (base e).",
-          "Avoid the standalone \"e\" button if you want Euler's number — it currently produces an error; use scientific notation like \"2e3\" instead where applicable.",
-          "Press \"C\" to clear the expression completely before starting a new calculation."
+          "Use M+ to accumulate a running total across several calculations, then MR to bring it back into a new expression.",
+          "Press \"C\" to clear the expression (memory is kept separately — use \"MC\" to clear that)."
         ]}
       />
     </div>
