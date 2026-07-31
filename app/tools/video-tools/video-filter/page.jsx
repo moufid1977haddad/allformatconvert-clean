@@ -8,6 +8,7 @@ export default function VideoFilterPage() {
   const [status, setStatus] = useState('');
   const videoRef = useRef();
   const inputRef = useRef();
+  const audioGraphRef = useRef(null);
 
   const filters = [
     { name: 'None', value: 'none', css: '' },
@@ -35,6 +36,33 @@ export default function VideoFilterPage() {
     if (file && videoRef.current) videoRef.current.src = URL.createObjectURL(file);
   }, [file]);
 
+  // createMediaElementSource() can only be called once per <video> element,
+  // so the Web Audio graph (context, source, and stream destination) is
+  // built once and cached — a second "Apply Filter" click on the same video
+  // would otherwise throw InvalidStateError. The source is connected to both
+  // the stream destination (for recording) and audioContext.destination (so
+  // the preview stays audible during processing, since routing an element
+  // through Web Audio detaches it from its default audio output).
+  const getAudioTrack = () => {
+    try {
+      if (!audioGraphRef.current) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const audioContext = new AudioCtx();
+        const destination = audioContext.createMediaStreamDestination();
+        const source = audioContext.createMediaElementSource(videoRef.current);
+        source.connect(destination);
+        source.connect(audioContext.destination);
+        audioGraphRef.current = { audioContext, destination };
+      }
+      if (audioGraphRef.current.audioContext.state === 'suspended') {
+        audioGraphRef.current.audioContext.resume();
+      }
+      return audioGraphRef.current.destination.stream.getAudioTracks()[0] || null;
+    } catch (e) {
+      return null;
+    }
+  };
+
   const applyFilter = async () => {
     if (!file || !videoRef.current) return;
     setStatus('Applying filter...');
@@ -45,8 +73,13 @@ export default function VideoFilterPage() {
       const ctx = canvas.getContext('2d');
       const selectedFilter = filters.find(f => f.value === filter);
       ctx.filter = selectedFilter.css || 'none';
-      const stream = canvas.captureStream(30);
-      const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+      const videoStream = canvas.captureStream(30);
+      const audioTrack = getAudioTrack();
+      const combinedStream = new MediaStream([
+        ...videoStream.getVideoTracks(),
+        ...(audioTrack ? [audioTrack] : []),
+      ]);
+      const recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
       const chunks = [];
       recorder.ondataavailable = e => chunks.push(e.data);
       recorder.onstop = () => { setResult(URL.createObjectURL(new Blob(chunks, { type: 'video/webm' }))); setStatus(''); };
@@ -83,23 +116,23 @@ export default function VideoFilterPage() {
       </div>
       <SeoContent
         title="Video Filter"
-        description="Video Filter applies one visual effect (Grayscale, Sepia, Invert, Blur, Brightness, Contrast, or Saturate) to your video by redrawing each frame on a canvas and re-recording it, entirely in your browser. Note: the output is always WebM and has no audio, since canvas recordings don't carry sound; only one filter can be active at a time, each at a fixed intensity."
+        description="Video Filter applies one visual effect (Grayscale, Sepia, Invert, Blur, Brightness, Contrast, or Saturate) to your video by redrawing each frame on a canvas and re-recording it, entirely in your browser. The original audio is preserved by routing it through the Web Audio API alongside the filtered video track, so the output isn't silent. Note: the output is always WebM, and only one filter can be active at a time, each at a fixed intensity."
         howTo={[
           "Click the upload area and select a video file.",
           "Click one of the 8 filter buttons to preview it live on the video player.",
-          "Click \"Apply Filter\" — the video plays through once while the filtered version is recorded.",
+          "Click \"Apply Filter\" — the video plays through once while the filtered version (with its original audio) is recorded.",
           "Preview and download the filtered WebM file."
         ]}
         faqs={[
           { q: "Can I combine multiple filters?", a: "No, only one filter can be applied at a time — selecting a new one replaces the previous choice." },
           { q: "Can I adjust filter intensity?", a: "Not currently — each filter uses a fixed preset value (e.g., Blur is always 3px, Contrast is always 200%)." },
-          { q: "Does the output have sound?", a: "No — filtering re-records the video through a canvas, and canvas recordings never include audio, so the filtered result is silent." },
+          { q: "Does the output have sound?", a: "Yes — the source video's original audio is captured alongside the filtered picture and included in the output; it isn't altered by the visual filter." },
           { q: "Is my file uploaded anywhere?", a: "No, filtering happens entirely in your browser." }
         ]}
         tips={[
           "Preview the filter on the live player (it updates instantly) before committing to the longer \"Apply Filter\" render step.",
-          "Since output has no audio, only use this on videos where sound doesn't matter, or re-add audio afterward with an editing tool.",
-          "Applying a filter takes as long as the video's full duration, since frames are captured in real time as it plays.",
+          "The audio is carried straight through unchanged — the visual filter has no effect on sound.",
+          "Applying a filter takes as long as the video's full duration, since frames and audio are captured in real time as it plays.",
           "Trim your video first if you only need a filtered clip from a longer video, to reduce processing time."
         ]}
       />

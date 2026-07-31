@@ -9,6 +9,7 @@ export default function VideoResizerPage() {
   const [status, setStatus] = useState('');
   const videoRef = useRef();
   const inputRef = useRef();
+  const audioGraphRef = useRef(null);
 
   const handleFile = (e) => {
     const f = e.target.files[0];
@@ -28,6 +29,31 @@ export default function VideoResizerPage() {
     }
   }, [file]);
 
+  // createMediaElementSource() can only be called once per <video> element,
+  // so the Web Audio graph (context, source, and stream destination) is
+  // built once and cached — a second "Resize Video" click on the same video
+  // would otherwise throw InvalidStateError. The source is connected to both
+  // the stream destination (for recording) and audioContext.destination (so
+  // the preview stays audible during processing, since routing an element
+  // through Web Audio detaches it from its default audio output).
+  const getAudioTrack = () => {
+    try {
+      if (!audioGraphRef.current) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const audioContext = new AudioCtx();
+        const destination = audioContext.createMediaStreamDestination();
+        const source = audioContext.createMediaElementSource(videoRef.current);
+        source.connect(destination);
+        source.connect(audioContext.destination);
+        audioGraphRef.current = { audioContext, destination };
+      }
+      if (audioGraphRef.current.audioContext.state === 'suspended') {
+        audioGraphRef.current.audioContext.resume();
+      }
+      return audioGraphRef.current.destination.stream.getAudioTracks()[0] || null;
+    } catch (e) { return null; }
+  };
+
   const resize = async () => {
     if (!file || !videoRef.current) return;
     setStatus('Resizing...');
@@ -35,8 +61,13 @@ export default function VideoResizerPage() {
       const canvas = document.createElement('canvas');
       canvas.width = width; canvas.height = height;
       const ctx = canvas.getContext('2d');
-      const stream = canvas.captureStream(30);
-      const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+      const videoStream = canvas.captureStream(30);
+      const audioTrack = getAudioTrack();
+      const combinedStream = new MediaStream([
+        ...videoStream.getVideoTracks(),
+        ...(audioTrack ? [audioTrack] : []),
+      ]);
+      const recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
       const chunks = [];
       recorder.ondataavailable = e => chunks.push(e.data);
       recorder.onstop = () => { setResult(URL.createObjectURL(new Blob(chunks, { type: 'video/webm' }))); setStatus(''); };
@@ -72,23 +103,23 @@ export default function VideoResizerPage() {
       </div>
       <SeoContent
         title="Video Resizer"
-        description="Video Resizer redraws your video at a new width and height on a canvas and records the result, entirely in your browser. Note: the output is always WebM and has no audio, since canvas recordings don't carry sound, and dimensions aren't aspect-ratio-locked — entering a width/height that doesn't match your source video's proportions will stretch the result."
+        description="Video Resizer redraws your video at a new width and height on a canvas and records the result, entirely in your browser. The original audio is preserved by routing it through the Web Audio API alongside the resized video track, so the output isn't silent. Note: the output is always WebM, and dimensions aren't aspect-ratio-locked — entering a width/height that doesn't match your source video's proportions will stretch the result."
         howTo={[
           "Click the upload area and select a video file — its native dimensions fill the Width/Height fields automatically.",
           "Enter custom dimensions, or click a preset (720p, 1080p, or 480p).",
-          "Click \"Resize Video\" — the video plays through once while the resized version is recorded.",
+          "Click \"Resize Video\" — the video plays through once while the resized version (with its original audio) is recorded.",
           "Preview and download the resized WebM file."
         ]}
         faqs={[
           { q: "Does it preserve aspect ratio automatically?", a: "No — enter a width and height that match your source video's proportions yourself, or the result will be stretched." },
-          { q: "Does the resized video have audio?", a: "No — since resizing works by drawing frames to a canvas, and canvas recordings never carry audio, the output is silent." },
+          { q: "Does the resized video have audio?", a: "Yes — the source video's original audio is captured alongside the resized picture and included in the output unchanged." },
           { q: "What output format do I get?", a: "Always WebM." },
           { q: "Is my file uploaded anywhere?", a: "No, resizing happens entirely in your browser." }
         ]}
         tips={[
           "Divide your source video's width and height by the same number to keep proportions correct and avoid a stretched result.",
-          "Since output has no audio, only use this when sound isn't needed, or re-add audio afterward with an editing tool.",
-          "Resizing takes about as long as the video's full duration, since frames are captured as it plays in real time.",
+          "The audio is carried straight through unchanged — resizing only affects the picture.",
+          "Resizing takes about as long as the video's full duration, since frames and audio are captured as it plays in real time.",
           "Use the 720p/1080p/480p presets for common platform-ready sizes instead of typing custom numbers."
         ]}
       />

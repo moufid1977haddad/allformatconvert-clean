@@ -8,6 +8,7 @@ export default function VideoRotatorPage() {
   const [status, setStatus] = useState('');
   const videoRef = useRef();
   const inputRef = useRef();
+  const audioGraphRef = useRef(null);
 
   const handleFile = (e) => {
     const f = e.target.files[0];
@@ -24,6 +25,31 @@ export default function VideoRotatorPage() {
     if (file && videoRef.current) videoRef.current.src = URL.createObjectURL(file);
   }, [file]);
 
+  // createMediaElementSource() can only be called once per <video> element,
+  // so the Web Audio graph (context, source, and stream destination) is
+  // built once and cached — a second "Rotate Video" click on the same video
+  // would otherwise throw InvalidStateError. The source is connected to both
+  // the stream destination (for recording) and audioContext.destination (so
+  // the preview stays audible during processing, since routing an element
+  // through Web Audio detaches it from its default audio output).
+  const getAudioTrack = () => {
+    try {
+      if (!audioGraphRef.current) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const audioContext = new AudioCtx();
+        const destination = audioContext.createMediaStreamDestination();
+        const source = audioContext.createMediaElementSource(videoRef.current);
+        source.connect(destination);
+        source.connect(audioContext.destination);
+        audioGraphRef.current = { audioContext, destination };
+      }
+      if (audioGraphRef.current.audioContext.state === 'suspended') {
+        audioGraphRef.current.audioContext.resume();
+      }
+      return audioGraphRef.current.destination.stream.getAudioTracks()[0] || null;
+    } catch (e) { return null; }
+  };
+
   const rotate = async () => {
     if (!file || !videoRef.current) return;
     setStatus('Rotating...');
@@ -34,8 +60,13 @@ export default function VideoRotatorPage() {
       if (angle === 90 || angle === 270) { canvas.width = vh; canvas.height = vw; }
       else { canvas.width = vw; canvas.height = vh; }
       const ctx = canvas.getContext('2d');
-      const stream = canvas.captureStream(30);
-      const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+      const videoStream = canvas.captureStream(30);
+      const audioTrack = getAudioTrack();
+      const combinedStream = new MediaStream([
+        ...videoStream.getVideoTracks(),
+        ...(audioTrack ? [audioTrack] : []),
+      ]);
+      const recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
       const chunks = [];
       recorder.ondataavailable = e => chunks.push(e.data);
       recorder.onstop = () => { setResult(URL.createObjectURL(new Blob(chunks, { type: 'video/webm' }))); setStatus(''); };
@@ -75,22 +106,22 @@ export default function VideoRotatorPage() {
       </div>
       <SeoContent
         title="Video Rotator"
-        description="Video Rotator rotates your video by 90°, 180°, or 270° by redrawing each frame on a rotated canvas and recording the result, entirely in your browser. Note: the output is always WebM and has no audio, since canvas recordings don't carry sound, and only these three fixed angles are available — there's no custom-angle option."
+        description="Video Rotator rotates your video by 90°, 180°, or 270° by redrawing each frame on a rotated canvas and recording the result, entirely in your browser. The original audio is preserved by routing it through the Web Audio API alongside the rotated video track, so the output isn't silent. Note: the output is always WebM, and only these three fixed angles are available — there's no custom-angle option."
         howTo={[
           "Click the upload area and select a video file.",
           "Click 90°, 180°, or 270° to choose your rotation angle.",
-          "Click \"Rotate Video\" — the video plays through once while the rotated version is recorded.",
+          "Click \"Rotate Video\" — the video plays through once while the rotated version (with its original audio) is recorded.",
           "Preview and download the rotated WebM file."
         ]}
         faqs={[
           { q: "Can I rotate by a custom angle?", a: "Not currently — only 90°, 180°, and 270° are available." },
-          { q: "Does the rotated video have audio?", a: "No — since rotating works by drawing frames to a canvas, and canvas recordings never carry audio, the output is silent." },
+          { q: "Does the rotated video have audio?", a: "Yes — the source video's original audio is captured alongside the rotated picture and included in the output unchanged." },
           { q: "Does rotating reduce quality?", a: "Yes, some — the video is re-encoded through the canvas and MediaRecorder, so it isn't a lossless operation." },
           { q: "Is my file uploaded anywhere?", a: "No, rotation happens entirely in your browser." }
         ]}
         tips={[
           "Use 90° to fix a video recorded holding your phone sideways.",
-          "Since output has no audio, only use this when sound isn't needed, or re-add audio afterward with an editing tool.",
+          "The audio is carried straight through unchanged — rotating only affects the picture.",
           "Rotating takes about as long as the video's full duration, since it plays through in real time while recording.",
           "Preview the live player after selecting an angle — it shows the CSS-rotated preview before you commit to the full render."
         ]}
