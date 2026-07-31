@@ -31,7 +31,7 @@ export default function FractionCalculatorPage() {
 
   const calculate = () => {
     const a = parseInt(n1), b = parseInt(d1), c = parseInt(n2), d = parseInt(d2);
-    if (!a || !b || !c || !d) return;
+    if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d) || b === 0 || d === 0) return;
     let num, den;
     if (op === '+') { num = a*d + c*b; den = b*d; }
     else if (op === '-') { num = a*d - c*b; den = b*d; }
