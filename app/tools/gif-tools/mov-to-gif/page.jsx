@@ -1,9 +1,10 @@
 ﻿'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 export default function MovToGifPage() {
   const [file, setFile] = useState(null);
   const [frames, setFrames] = useState([]);
+  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const videoRef = useRef();
   const inputRef = useRef();
@@ -13,27 +14,47 @@ export default function MovToGifPage() {
     if (!f) return;
     setFile(f);
     setFrames([]);
-    if (videoRef.current) videoRef.current.src = URL.createObjectURL(f);
+    setResult(null);
   };
+
+  useEffect(() => {
+    // videoRef.current is only guaranteed to exist after this render commits
+    // (the <video> element only mounts once `file` is set), so the src must
+    // be assigned here rather than inline in handleFile — otherwise the very
+    // first file selection silently fails to load since the ref is still null.
+    if (file && videoRef.current) videoRef.current.src = URL.createObjectURL(file);
+  }, [file]);
 
   const convert = async () => {
     if (!videoRef.current || !file) return;
     setLoading(true);
-    const video = videoRef.current;
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.min(video.videoWidth, 480);
-    canvas.height = Math.min(video.videoHeight, 270);
-    const ctx = canvas.getContext('2d');
-    const capturedFrames = [];
-    const totalFrames = 10;
-    const dur = Math.min(video.duration, 5);
-    for (let i = 0; i < totalFrames; i++) {
-      video.currentTime = (i / totalFrames) * dur;
-      await new Promise(r => { video.onseeked = r; });
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      capturedFrames.push(canvas.toDataURL('image/png'));
-    }
-    setFrames(capturedFrames);
+    try {
+      const { GIFEncoder, quantize, applyPalette } = await import('gifenc');
+      const video = videoRef.current;
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.min(video.videoWidth, 480);
+      canvas.height = Math.min(video.videoHeight, 270);
+      const ctx = canvas.getContext('2d');
+      const capturedFrames = [];
+      const totalFrames = 10;
+      const dur = Math.min(video.duration, 5);
+      const delay = Math.round((dur * 1000) / totalFrames);
+      const gif = GIFEncoder();
+      for (let i = 0; i < totalFrames; i++) {
+        video.currentTime = (i / totalFrames) * dur;
+        await new Promise(r => { video.onseeked = r; });
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        capturedFrames.push(canvas.toDataURL('image/png'));
+        const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const palette = quantize(data, 256);
+        const index = applyPalette(data, palette);
+        gif.writeFrame(index, canvas.width, canvas.height, { palette, delay });
+      }
+      gif.finish();
+      const blob = new Blob([gif.bytes()], { type: 'image/gif' });
+      setFrames(capturedFrames);
+      setResult(URL.createObjectURL(blob));
+    } catch(e) { alert('Error: ' + e.message); }
     setLoading(false);
   };
 
@@ -57,28 +78,35 @@ export default function MovToGifPage() {
               </div>
             </div>
           )}
+          {result && (
+            <div className="space-y-2">
+              <img src={result} className="max-w-full mx-auto rounded-xl border border-neutral-200" />
+              <a href={result} download="converted.gif" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download GIF</a>
+            </div>
+          )}
         </div>
       </div>
       <SeoContent
         title="MOV to GIF"
-        description="MOV to GIF extracts a series of still frames from your QuickTime MOV video, entirely in your browser — up to 10 frames from the first 5 seconds, each downscaled to a max of 480×270. Note: it doesn't currently assemble the frames into a single animated GIF file, and playback depends on your browser supporting the file's specific codec — H.264-encoded MOV usually works, while ProRes and some other codecs often don't play in browsers."
+        description="MOV to GIF extracts up to 10 evenly spaced frames from the first 5 seconds of your QuickTime MOV video and encodes them into a real, downloadable animated GIF using the gifenc library, entirely in your browser — each frame is downscaled to a max of 480×270 and quantized to its own 256-color palette. Playback depends on your browser supporting the file's specific codec — H.264-encoded MOV usually works, while ProRes and some other codecs often don't play in browsers."
         howTo={[
           "Click the upload area and select a MOV file from your device.",
           "If your browser can decode the file's codec, a preview appears in the video player.",
-          "Click \"Convert to GIF\" to capture 10 evenly spaced still frames from the first 5 seconds.",
-          "Review the extracted frames in the grid below the player."
+          "Click \"Convert to GIF\" to capture 10 evenly spaced frames from the first 5 seconds and encode them into a GIF.",
+          "Review the extracted frame grid, then download the assembled animated GIF."
         ]}
         faqs={[
-          { q: "Does this produce a downloadable GIF file?", a: "Not currently — it extracts up to 10 still frames as a preview grid; there's no built-in download button or GIF assembly on this page." },
+          { q: "Does this produce a downloadable GIF file?", a: "Yes — after conversion, a \"Download GIF\" button appears with the finished, real animated GIF assembled from the extracted frames." },
           { q: "Why won't my MOV file play or convert?", a: "MOV is a container that can hold different video codecs. H.264-encoded MOV files usually play fine in browsers, but codecs like ProRes typically don't." },
+          { q: "Will the GIF preserve full video quality?", a: "No — only 10 frames from the first 5 seconds are captured (not the full frame rate or duration), each downscaled to 480×270 max, and the encoder doesn't dither, so photographic content may show some color banding." },
           { q: "Is MOV to GIF free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can process." },
           { q: "Is my file uploaded anywhere?", a: "No. Everything runs locally in your browser — your video is never uploaded to a server." }
         ]}
         tips={[
           "If your MOV won't load, try converting it to MP4 (H.264) first with a dedicated video converter for more reliable browser support.",
           "Frames are limited to the first 5 seconds of the video — trim longer clips beforehand if you need frames from later on.",
-          "Right-click any frame in the grid to save it as an individual image.",
-          "For a real animated GIF output, use a dedicated GIF-encoding tool with the extracted frames."
+          "The 10 frames are spread evenly across the captured duration, so the GIF's playback speed roughly matches the source video's pace within that window.",
+          "For smoother motion or a longer captured clip, this tool isn't a substitute for a dedicated video-to-GIF converter with full frame-rate control."
         ]}
       />
     </div>
