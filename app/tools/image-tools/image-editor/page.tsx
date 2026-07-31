@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 
 export default function ImageEditorPage() {
@@ -34,18 +34,25 @@ export default function ImageEditorPage() {
       img.onload = () => {
         setOriginalImage(img);
         setImage(event.target?.result as string);
-        const canvas = canvasRef.current;
-        if (canvas) {
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0);
-        }
       };
       img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
   };
+
+  useEffect(() => {
+    // canvasRef.current is only guaranteed to exist after this render commits
+    // (the <canvas> element only mounts once `image` is set), so the initial
+    // draw must happen here rather than inline in handleImageUpload's
+    // img.onload — otherwise the very first upload silently fails to draw
+    // since the ref is still null at that point.
+    if (!originalImage || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    canvas.width = originalImage.width;
+    canvas.height = originalImage.height;
+    const ctx = canvas.getContext('2d');
+    ctx?.drawImage(originalImage, 0, 0);
+  }, [originalImage]);
 
   const applyEffects = useCallback(() => {
     if (!originalImage || !canvasRef.current) return;

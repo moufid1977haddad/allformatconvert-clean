@@ -57,7 +57,7 @@ export default function HeicToJpgPage() {
           {result && (
             <div className="space-y-2">
               <img src={result} className="max-h-48 mx-auto rounded" />
-              <a href={result} download={file.name.replace(/\.heic$/i, '.jpg')} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download JPG</a>
+              <a href={result} download={file.name.replace(/\.hei[cf]$/i, '.jpg')} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download JPG</a>
             </div>
           )}
         </div>

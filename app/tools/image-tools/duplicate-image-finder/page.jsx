@@ -19,7 +19,7 @@ export default function DuplicateImageFinderPage() {
     const seen = {};
     const dups = [];
     images.forEach(img => {
-      const key = img.data.slice(0, 100);
+      const key = img.data;
       if (seen[key]) dups.push([seen[key], img.name]);
       else seen[key] = img.name;
     });
@@ -47,7 +47,7 @@ export default function DuplicateImageFinderPage() {
       </div>
       <SeoContent
         title="Duplicate Image Finder"
-        description="Duplicate Image Finder scans a batch of images you select and flags pairs that appear to be exact duplicates, entirely in your browser — nothing is uploaded to a server. It works by comparing the beginning of each image's encoded data, so it catches identical files reliably but does not detect visually similar images with different resolutions or edits."
+        description="Duplicate Image Finder scans a batch of images you select and flags pairs that are byte-for-byte identical, entirely in your browser — nothing is uploaded to a server. It works by comparing each image's full encoded data, so it only flags true exact duplicates and does not detect visually similar images with different resolutions or edits."
         howTo={[
           "Click the upload area and select multiple images from your device.",
           "Click 'Find Duplicates' to scan the batch.",
@@ -58,7 +58,7 @@ export default function DuplicateImageFinderPage() {
           { q: "Is Duplicate Image Finder really free to use?", a: "Yes, it's completely free with no account required." },
           { q: "How many images can I upload at once?", a: "There's no fixed limit — you can select as many as your browser can comfortably load at once, though very large batches will take longer." },
           { q: "Will my images be stored on your servers?", a: "No, images are read and compared entirely in your browser using the File API. They are never uploaded anywhere." },
-          { q: "Can it find similar images, or just exact duplicates?", a: "It only flags images whose encoded data matches at the start, so it's best at catching exact duplicate files. It does not use visual similarity matching, so resized, cropped, or edited copies of the same photo generally won't be flagged." }
+          { q: "Can it find similar images, or just exact duplicates?", a: "It only flags images whose full encoded data matches exactly, so it's reliable for catching true duplicate files without false positives. It does not use visual similarity matching, so resized, cropped, or edited copies of the same photo generally won't be flagged." }
         ]}
         tips={[
           "This tool doesn't delete anything for you — it only identifies duplicate pairs, so remove files manually afterward.",
