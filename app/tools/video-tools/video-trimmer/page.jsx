@@ -1,5 +1,5 @@
 ﻿'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 export default function VideoTrimmerPage() {
   const [file, setFile] = useState(null);
@@ -16,15 +16,21 @@ export default function VideoTrimmerPage() {
     if (!f) return;
     setFile(f);
     setResult(null);
-    const url = URL.createObjectURL(f);
-    if (videoRef.current) {
-      videoRef.current.src = url;
+  };
+
+  useEffect(() => {
+    // videoRef.current is only guaranteed to exist after this render commits
+    // (the <video> element only mounts once `file` is set), so the src must
+    // be assigned here rather than inline in handleFile — otherwise the very
+    // first file selection silently fails to load since the ref is still null.
+    if (file && videoRef.current) {
+      videoRef.current.src = URL.createObjectURL(file);
       videoRef.current.onloadedmetadata = () => {
         setDuration(Math.floor(videoRef.current.duration));
         setEnd(Math.floor(videoRef.current.duration));
       };
     }
-  };
+  }, [file]);
 
   const trim = async () => {
     if (!file || !videoRef.current) return;

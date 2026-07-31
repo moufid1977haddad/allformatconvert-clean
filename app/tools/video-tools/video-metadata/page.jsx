@@ -1,5 +1,5 @@
 ﻿'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 export default function VideoMetadataPage() {
   const [metadata, setMetadata] = useState(null);
@@ -25,8 +25,15 @@ export default function VideoMetadataPage() {
       });
     };
     video.src = url;
-    if (videoRef.current) videoRef.current.src = url;
   };
+
+  useEffect(() => {
+    // videoRef.current is only guaranteed to exist after this render commits
+    // (the <video> element only mounts once `file` is set), so the src must
+    // be assigned here rather than inline in handleFile — otherwise the very
+    // first file selection silently fails to load since the ref is still null.
+    if (file && videoRef.current) videoRef.current.src = URL.createObjectURL(file);
+  }, [file]);
 
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
