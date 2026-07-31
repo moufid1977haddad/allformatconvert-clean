@@ -31,7 +31,7 @@ export default function MobiToEpubPage() {
       const epub = `<?xml version="1.0" encoding="UTF-8"?>
 <package xmlns="http://www.idpf.org/2007/opf" version="2.0">
   <metadata>
-    <dc:title>${file.name.replace('.mobi', '')}</dc:title>
+    <dc:title>${file.name.replace(/\.(mobi|azw3?)$/i, '')}</dc:title>
   </metadata>
   <manifest>
     <item id="content" href="content.html" media-type="application/xhtml+xml"/>
@@ -64,7 +64,7 @@ export default function MobiToEpubPage() {
           {downloadUrl && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
               <div className="text-green-400 text-xl font-bold mb-3">Done!</div>
-              <a href={downloadUrl} download={file.name.replace('.mobi', '.epub')} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition">Download EPUB</a>
+              <a href={downloadUrl} download={file.name.replace(/\.(mobi|azw3?)$/i, '') + '.epub'} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition">Download EPUB</a>
             </div>
           )}
         </div>
