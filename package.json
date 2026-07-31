@@ -16,6 +16,7 @@
     "docx": "^9.7.0",
     "gif.js": "^0.2.0",
     "gifenc": "^1.0.3",
+    "gifsicle-wasm-browser": "^1.5.19",
     "gifuct-js": "^2.1.2",
     "heic2any": "^0.0.4",
     "html2pdf.js": "^0.14.0",

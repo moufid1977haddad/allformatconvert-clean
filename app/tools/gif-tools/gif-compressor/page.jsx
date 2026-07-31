@@ -5,24 +5,28 @@ export default function GifCompressorPage() {
   const [file, setFile] = useState(null);
   const [quality, setQuality] = useState(80);
   const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef();
 
   const handleFile = (e) => { setFile(e.target.files[0]); setResult(null); };
 
   const compress = async () => {
     if (!file) return;
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      canvas.getContext('2d').drawImage(img, 0, 0);
-      canvas.toBlob(blob => {
-        setResult({ url: URL.createObjectURL(blob), originalSize: file.size, newSize: blob.size });
-      }, 'image/png', quality / 100);
-    };
-    img.src = url;
+    setLoading(true);
+    try {
+      const gifsicle = (await import('gifsicle-wasm-browser')).default;
+      // Quality 100 -> --lossy=0 (no lossy compression, still gets -O2's
+      // lossless optimization); quality 10 -> --lossy=180, near the top of
+      // gifsicle's 1-200 lossy range.
+      const lossy = Math.round((100 - quality) * 2);
+      const outFiles = await gifsicle.run({
+        input: [{ file, name: 'input.gif' }],
+        command: [`-O2 --lossy=${lossy} input.gif -o /out/output.gif`],
+      });
+      const outBlob = outFiles[0];
+      setResult({ url: URL.createObjectURL(outBlob), originalSize: file.size, newSize: outBlob.size });
+    } catch(e) { alert('Error: ' + e.message); }
+    setLoading(false);
   };
 
   const formatSize = (b) => b < 1024 ? b + ' B' : b < 1024*1024 ? (b/1024).toFixed(1) + ' KB' : (b/(1024*1024)).toFixed(2) + ' MB';
@@ -38,39 +42,41 @@ export default function GifCompressorPage() {
             <input ref={inputRef} type="file" accept=".gif" className="hidden" onChange={handleFile} />
           </div>
           <div><label className="block text-sm text-neutral-500 mb-1">Quality: {quality}%</label><input type="range" min="10" max="100" value={quality} onChange={e => setQuality(parseInt(e.target.value))} className="w-full" /></div>
-          <button onClick={compress} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Compress</button>
+          <button onClick={compress} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">{loading ? 'Compressing...' : 'Compress'}</button>
           {result && (
             <div className="space-y-3">
+              <img src={result.url} className="max-h-48 mx-auto rounded border border-neutral-200" />
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">Before</div><div className="font-bold">{formatSize(result.originalSize)}</div></div>
                 <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">After</div><div className="font-bold text-indigo-400">{formatSize(result.newSize)}</div></div>
-                <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">Saved</div><div className="font-bold text-green-400">{Math.round((1-result.newSize/result.originalSize)*100)}%</div></div>
+                <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">Saved</div><div className="font-bold text-green-400">{Math.max(0, Math.round((1-result.newSize/result.originalSize)*100))}%</div></div>
               </div>
-              <a href={result.url} download="compressed.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a>
+              <a href={result.url} download="compressed.gif" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a>
             </div>
           )}
         </div>
       </div>
       <SeoContent
         title="GIF Compressor"
-        description="This tool loads your GIF and re-exports it in your browser. Note: it currently captures only the GIF's first frame and outputs a static PNG image, not a compressed animated GIF — and because PNG is a lossless format, the quality slider doesn't reduce its file size the way it would for a JPG."
+        description="GIF Compressor shrinks your animated GIF's file size while keeping the animation intact, using gifsicle compiled to WebAssembly (gifsicle-wasm-browser) entirely in your browser — nothing is uploaded to a server. The quality slider controls gifsicle's lossy compression level: higher quality applies less lossy compression (relying mainly on lossless optimization), while lower quality allows more aggressive lossy compression for a smaller file."
         howTo={[
           "Click the upload area and select a GIF file.",
-          "Adjust the quality slider if you like (see the FAQ below for why it may not change the result much).",
-          "Click \"Compress\" to process the file.",
-          "Review the before/after size comparison and download the result."
+          "Adjust the quality slider — lower values compress more aggressively but can introduce visible noise.",
+          "Click \"Compress\" to process the file locally.",
+          "Review the before/after size comparison, preview the animated result, and download it."
         ]}
         faqs={[
-          { q: "Does this reduce my GIF's file size?", a: "Not reliably in its current form — it captures only the first frame of the GIF and re-exports it as a PNG. PNG is lossless, so the quality slider has little to no effect on its size." },
-          { q: "Does the output stay animated?", a: "No — the current output is a static PNG of the GIF's first frame, not an animated file." },
+          { q: "Does this reduce my GIF's file size while keeping it animated?", a: "Yes — it uses gifsicle's real GIF optimization and lossy compression, and the output stays a fully animated GIF." },
+          { q: "How much can I expect to save?", a: "It depends heavily on the source GIF and the quality setting — simple, few-color animations may shrink only modestly since they're already efficient, while complex or noisy ones can shrink substantially at lower quality settings." },
+          { q: "Will lower quality settings look noticeably worse?", a: "Yes, at more aggressive settings — gifsicle's lossy compression can introduce visible speckled noise, especially on flat-color areas. If that's noticeable, raise the quality slider and re-compress." },
           { q: "Is GIF Compressor free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can process." },
-          { q: "Is my file uploaded anywhere?", a: "No. Processing happens entirely in your browser — your file is never uploaded to a server." }
+          { q: "Is my file uploaded anywhere?", a: "No. Processing happens entirely in your browser via WebAssembly — your file is never uploaded to a server." }
         ]}
         tips={[
-          "Since the output loses animation, use this only if you want a static thumbnail from your GIF's first frame — not to shrink an animated GIF's file size.",
-          "For true GIF compression that preserves animation, use a dedicated animated-GIF optimizer.",
-          "If the before/after sizes look nearly identical, that's expected given PNG's lossless encoding.",
-          "Keep your original GIF, since the output here isn't an equivalent animated replacement."
+          "Start around 70-80% quality and lower it only if you need a smaller file — gifsicle's lossy noise becomes more visible below that.",
+          "GIFs with fewer colors and simpler animation compress more predictably than photographic or noisy content.",
+          "The first compression after loading the page takes longer since the gifsicle WebAssembly module needs to download.",
+          "If the saved percentage is low, your source GIF may already be well-optimized — try a lower quality value to see the trade-off."
         ]}
       />
     </div>

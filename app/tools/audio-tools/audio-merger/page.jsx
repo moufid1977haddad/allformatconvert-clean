@@ -17,18 +17,19 @@ export default function AudioMergerPage() {
     setLoading(true);
     setError('');
     try {
-      const { createFFmpeg, fetchFile } = await import('@ffmpeg/ffmpeg');
-      const ffmpeg = createFFmpeg({ log: false });
+      const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+      const { fetchFile } = await import('@ffmpeg/util');
+      const ffmpeg = new FFmpeg();
       await ffmpeg.load();
       const inputs = [];
       for (let i = 0; i < files.length; i++) {
         const name = `input${i}.mp3`;
-        ffmpeg.FS('writeFile', name, await fetchFile(files[i]));
+        await ffmpeg.writeFile(name, await fetchFile(files[i]));
         inputs.push(`file '${name}'`);
       }
-      ffmpeg.FS('writeFile', 'list.txt', new TextEncoder().encode(inputs.join('\n')));
-      await ffmpeg.run('-f', 'concat', '-safe', '0', '-i', 'list.txt', '-c', 'copy', 'output.mp3');
-      const data = ffmpeg.FS('readFile', 'output.mp3');
+      await ffmpeg.writeFile('list.txt', new TextEncoder().encode(inputs.join('\n')));
+      await ffmpeg.exec(['-f', 'concat', '-safe', '0', '-i', 'list.txt', '-c', 'copy', 'output.mp3']);
+      const data = await ffmpeg.readFile('output.mp3');
       const url = URL.createObjectURL(new Blob([data.buffer], { type: 'audio/mp3' }));
       setResult({ url, name: 'merged_audio.mp3' });
     } catch(e) { setError('Merge failed: ' + e.message); }

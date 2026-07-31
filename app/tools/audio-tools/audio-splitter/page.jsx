@@ -21,14 +21,15 @@ export default function AudioSplitterPage() {
     setLoading(true);
     setError('');
     try {
-      const { createFFmpeg, fetchFile } = await import('@ffmpeg/ffmpeg');
-      const ffmpeg = createFFmpeg({ log: false });
+      const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+      const { fetchFile } = await import('@ffmpeg/util');
+      const ffmpeg = new FFmpeg();
       await ffmpeg.load();
-      ffmpeg.FS('writeFile', 'input.mp3', await fetchFile(file));
-      await ffmpeg.run('-i', 'input.mp3', '-t', String(splitAt), 'part1.mp3');
-      await ffmpeg.run('-i', 'input.mp3', '-ss', String(splitAt), 'part2.mp3');
-      const data1 = ffmpeg.FS('readFile', 'part1.mp3');
-      const data2 = ffmpeg.FS('readFile', 'part2.mp3');
+      await ffmpeg.writeFile('input.mp3', await fetchFile(file));
+      await ffmpeg.exec(['-i', 'input.mp3', '-t', String(splitAt), 'part1.mp3']);
+      await ffmpeg.exec(['-i', 'input.mp3', '-ss', String(splitAt), 'part2.mp3']);
+      const data1 = await ffmpeg.readFile('part1.mp3');
+      const data2 = await ffmpeg.readFile('part2.mp3');
       setResults([
         { url: URL.createObjectURL(new Blob([data1.buffer], { type: 'audio/mp3' })), name: 'part1_' + file.name },
         { url: URL.createObjectURL(new Blob([data2.buffer], { type: 'audio/mp3' })), name: 'part2_' + file.name },
