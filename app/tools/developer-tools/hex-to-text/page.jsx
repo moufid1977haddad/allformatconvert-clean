@@ -5,7 +5,11 @@ export default function HexToTextPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const toHex = () => setOutput(input.split('').map(c => c.charCodeAt(0).toString(16).padStart(2,'0')).join(' '));
-  const fromHex = () => { try { setOutput(input.replace(/\s/g,'').match(/.{2}/g).map(h => String.fromCharCode(parseInt(h,16))).join('')); } catch(e) { setOutput('Invalid hex'); } };
+  const fromHex = () => {
+    const cleaned = input.replace(/\s/g,'');
+    if (!/^([0-9a-fA-F]{2})+$/.test(cleaned)) { setOutput('Invalid hex'); return; }
+    setOutput(cleaned.match(/.{2}/g).map(h => String.fromCharCode(parseInt(h,16))).join(''));
+  };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
