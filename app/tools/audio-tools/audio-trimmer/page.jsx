@@ -34,14 +34,15 @@ export default function AudioTrimmerPage() {
     setLoading(true);
     setError('');
     try {
-      const { createFFmpeg, fetchFile } = await import('@ffmpeg/ffmpeg');
-      const ffmpeg = createFFmpeg({ log: false });
+      const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+      const { fetchFile } = await import('@ffmpeg/util');
+      const ffmpeg = new FFmpeg();
       await ffmpeg.load();
       const inputName = 'input.' + file.name.split('.').pop();
       const outputName = 'output.mp3';
-      ffmpeg.FS('writeFile', inputName, await fetchFile(file));
-      await ffmpeg.run('-i', inputName, '-ss', String(start), '-to', String(end), '-c', 'copy', outputName);
-      const data = ffmpeg.FS('readFile', outputName);
+      await ffmpeg.writeFile(inputName, await fetchFile(file));
+      await ffmpeg.exec(['-i', inputName, '-ss', String(start), '-to', String(end), '-c', 'copy', outputName]);
+      const data = await ffmpeg.readFile(outputName);
       const url = URL.createObjectURL(new Blob([data.buffer], { type: 'audio/mp3' }));
       setResult({ url, name: 'trimmed_' + file.name.replace(/\.[^.]+$/, '') + '.mp3' });
     } catch(e) {

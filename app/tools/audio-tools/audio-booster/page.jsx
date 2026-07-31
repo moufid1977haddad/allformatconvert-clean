@@ -18,12 +18,13 @@ export default function AudioBoosterPage() {
     setLoading(true);
     setError('');
     try {
-      const { createFFmpeg, fetchFile } = await import('@ffmpeg/ffmpeg');
-      const ffmpeg = createFFmpeg({ log: false });
+      const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+      const { fetchFile } = await import('@ffmpeg/util');
+      const ffmpeg = new FFmpeg();
       await ffmpeg.load();
-      ffmpeg.FS('writeFile', 'input.mp3', await fetchFile(file));
-      await ffmpeg.run('-i', 'input.mp3', '-af', `volume=${volume}`, 'output.mp3');
-      const data = ffmpeg.FS('readFile', 'output.mp3');
+      await ffmpeg.writeFile('input.mp3', await fetchFile(file));
+      await ffmpeg.exec(['-i', 'input.mp3', '-af', `volume=${volume}`, 'output.mp3']);
+      const data = await ffmpeg.readFile('output.mp3');
       const url = URL.createObjectURL(new Blob([data.buffer], { type: 'audio/mp3' }));
       setResult({ url, name: 'boosted_' + file.name });
     } catch(e) { setError('Boost failed: ' + e.message); }

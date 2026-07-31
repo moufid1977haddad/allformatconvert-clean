@@ -24,14 +24,15 @@ export default function AudioConverterPage() {
     setLoading(true);
     setError('');
     try {
-      const { createFFmpeg, fetchFile } = await import('@ffmpeg/ffmpeg');
-      const ffmpeg = createFFmpeg({ log: false });
+      const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+      const { fetchFile } = await import('@ffmpeg/util');
+      const ffmpeg = new FFmpeg();
       await ffmpeg.load();
       const inputName = 'input.' + file.name.split('.').pop();
       const outputName = 'output.' + format;
-      ffmpeg.FS('writeFile', inputName, await fetchFile(file));
-      await ffmpeg.run('-i', inputName, outputName);
-      const data = ffmpeg.FS('readFile', outputName);
+      await ffmpeg.writeFile(inputName, await fetchFile(file));
+      await ffmpeg.exec(['-i', inputName, outputName]);
+      const data = await ffmpeg.readFile(outputName);
       const url = URL.createObjectURL(new Blob([data.buffer], { type: 'audio/' + format }));
       setResult({ url, name: file.name.replace(/\.[^.]+$/, '') + '.' + format });
     } catch(e) {
