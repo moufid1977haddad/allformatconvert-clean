@@ -8,19 +8,28 @@ export default function TextEncryptorPage() {
   const [result, setResult] = useState('');
 
   const encrypt = () => {
-    const encrypted = text.split('').map((char, i) => {
-      return String.fromCharCode(char.charCodeAt(0) ^ key.charCodeAt(i % key.length));
-    }).join('');
-    setResult(btoa(encrypted));
+    try {
+      const bytes = new TextEncoder().encode(text);
+      const keyBytes = new TextEncoder().encode(key);
+      let binary = '';
+      for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i] ^ keyBytes[i % keyBytes.length]);
+      }
+      setResult(btoa(binary));
+    } catch(e) {
+      setResult('Encryption failed: ' + e.message);
+    }
   };
 
   const decrypt = () => {
     try {
-      const decoded = atob(text);
-      const decrypted = decoded.split('').map((char, i) => {
-        return String.fromCharCode(char.charCodeAt(0) ^ key.charCodeAt(i % key.length));
-      }).join('');
-      setResult(decrypted);
+      const binary = atob(text);
+      const keyBytes = new TextEncoder().encode(key);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i) ^ keyBytes[i % keyBytes.length];
+      }
+      setResult(new TextDecoder().decode(bytes));
     } catch(e) {
       setResult('Invalid encrypted text');
     }

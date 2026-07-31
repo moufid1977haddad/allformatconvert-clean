@@ -8,7 +8,14 @@ export default function TextSorterPage() {
   const sortAZ = () => setResult(text.split('\n').sort().join('\n'));
   const sortZA = () => setResult(text.split('\n').sort().reverse().join('\n'));
   const sortByLength = () => setResult(text.split('\n').sort((a, b) => a.length - b.length).join('\n'));
-  const shuffle = () => setResult(text.split('\n').sort(() => Math.random() - 0.5).join('\n'));
+  const shuffle = () => {
+    const lines = text.split('\n');
+    for (let i = lines.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [lines[i], lines[j]] = [lines[j], lines[i]];
+    }
+    setResult(lines.join('\n'));
+  };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
