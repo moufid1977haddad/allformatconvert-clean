@@ -8,6 +8,14 @@ export default function ColorConverterPage() {
   const [hsl, setHsl] = useState({ h: 217, s: 91, l: 60 });
 
   const hexToRgb = (hex) => {
+    const shorthand = /^#?([a-f\d])([a-f\d])([a-f\d])$/i.exec(hex);
+    if (shorthand) {
+      return {
+        r: parseInt(shorthand[1] + shorthand[1], 16),
+        g: parseInt(shorthand[2] + shorthand[2], 16),
+        b: parseInt(shorthand[3] + shorthand[3], 16),
+      };
+    }
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null;
   };
@@ -39,7 +47,8 @@ export default function ColorConverterPage() {
   };
 
   const handleRgb = (key, val) => {
-    const newRgb = { ...rgb, [key]: parseInt(val) || 0 };
+    const clamped = Math.max(0, Math.min(255, parseInt(val) || 0));
+    const newRgb = { ...rgb, [key]: clamped };
     setRgb(newRgb);
     setHex(rgbToHex(newRgb.r, newRgb.g, newRgb.b));
     setHsl(rgbToHsl(newRgb.r, newRgb.g, newRgb.b));

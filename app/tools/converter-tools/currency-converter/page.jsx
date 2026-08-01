@@ -31,7 +31,7 @@ export default function CurrencyConverterPage() {
   };
 
   const convert = () => {
-    if (!rates || !amount) return '—';
+    if (!rates || isNaN(amount)) return '—';
     const amountInUSD = from === 'USD' ? amount : amount / rates[from];
     const result = to === 'USD' ? amountInUSD : amountInUSD * rates[to];
     return result.toFixed(4);

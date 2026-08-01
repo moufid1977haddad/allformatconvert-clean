@@ -11,9 +11,15 @@ export default function MobiToEpubPage() {
 
   const handleFile = (e) => {
     setFile(e.target.files[0]);
+    e.target.value = '';
     setStatus('');
     setDownloadUrl(null);
   };
+
+  const escapeXml = (str) => str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 
   const convert = async () => {
     if (!file) return;
@@ -27,11 +33,11 @@ export default function MobiToEpubPage() {
       let text = decoder.decode(bytes);
       text = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
       const chunks = text.match(/.{1,3000}/g) || [];
-      const chapters = chunks.map((chunk, i) => `<chapter id="chapter${i+1}"><title>Chapter ${i+1}</title><p>${chunk}</p></chapter>`).join('\n');
+      const chapters = chunks.map((chunk, i) => `<chapter id="chapter${i+1}"><title>Chapter ${i+1}</title><p>${escapeXml(chunk)}</p></chapter>`).join('\n');
       const epub = `<?xml version="1.0" encoding="UTF-8"?>
 <package xmlns="http://www.idpf.org/2007/opf" version="2.0">
   <metadata>
-    <dc:title>${file.name.replace(/\.(mobi|azw3?)$/i, '')}</dc:title>
+    <dc:title>${escapeXml(file.name.replace(/\.(mobi|azw3?)$/i, ''))}</dc:title>
   </metadata>
   <manifest>
     <item id="content" href="content.html" media-type="application/xhtml+xml"/>

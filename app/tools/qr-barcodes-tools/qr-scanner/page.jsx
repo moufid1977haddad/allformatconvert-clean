@@ -10,6 +10,7 @@ export default function QrScannerPage() {
 
   const scanFile = async (e) => {
     const file = e.target.files[0];
+    e.target.value = '';
     if (!file) return;
     setLoading(true);
     setStatus('Scanning...');
@@ -32,6 +33,11 @@ export default function QrScannerPage() {
         } else {
           setStatus('No QR code found in image');
         }
+        setLoading(false);
+        URL.revokeObjectURL(url);
+      };
+      img.onerror = () => {
+        setStatus('Could not load image file');
         setLoading(false);
         URL.revokeObjectURL(url);
       };

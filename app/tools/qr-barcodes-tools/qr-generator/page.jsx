@@ -6,14 +6,21 @@ export default function QrGeneratorPage() {
   const [text, setText] = useState('');
   const [size, setSize] = useState(200);
   const [qrUrl, setQrUrl] = useState('');
+  const [status, setStatus] = useState('');
   const canvasRef = useRef(null);
 
   const generate = async () => {
     if (!text) return;
-    const QRCode = (await import('qrcode')).default;
-    const canvas = canvasRef.current;
-    await QRCode.toCanvas(canvas, text, { width: size, margin: 2 });
-    setQrUrl(canvas.toDataURL());
+    setStatus('');
+    setQrUrl('');
+    try {
+      const QRCode = (await import('qrcode')).default;
+      const canvas = canvasRef.current;
+      await QRCode.toCanvas(canvas, text, { width: size, margin: 2 });
+      setQrUrl(canvas.toDataURL());
+    } catch (err) {
+      setStatus(err.message || 'Failed to generate QR code');
+    }
   };
 
   return (
@@ -31,6 +38,7 @@ export default function QrGeneratorPage() {
             <input type="range" min="100" max="400" value={size} onChange={e => setSize(parseInt(e.target.value))} className="w-full" />
           </div>
           <button onClick={generate} disabled={!text} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Generate QR Code</button>
+          {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
           <div className="flex justify-center">
             <canvas ref={canvasRef} className="rounded-xl" />
           </div>

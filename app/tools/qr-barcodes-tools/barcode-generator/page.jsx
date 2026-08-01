@@ -13,9 +13,9 @@ export default function BarcodeGeneratorPage() {
     if (!text) return;
     setStatus('Generating...');
     setBarcodeUrl('');
+    const canvas = canvasRef.current;
     try {
       const JsBarcode = (await import('jsbarcode')).default;
-      const canvas = canvasRef.current;
       JsBarcode(canvas, text, {
         format,
         width: 2,
@@ -27,10 +27,11 @@ export default function BarcodeGeneratorPage() {
       setBarcodeUrl(canvas.toDataURL());
       setStatus('');
     } catch (err) {
-      if (format === 'EAN13') setStatus('EAN13 requires exactly 12 or 13 digits');
-else if (format === 'EAN8') setStatus('EAN8 requires exactly 7 or 8 digits');
-else if (format === 'UPC') setStatus('UPC requires exactly 11 or 12 digits');
-else setStatus('Error: ' + err.message);
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const message = typeof err === 'string' ? err : err.message;
+      setStatus(message || 'Failed to generate barcode');
     }
   };
 
