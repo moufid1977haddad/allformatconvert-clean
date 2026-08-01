@@ -10,7 +10,9 @@ export default function WordToPdfPage() {
   const inputRef = useRef();
 
   const handleFile = (e) => {
-    setFile(e.target.files[0]);
+    const f = e.target.files[0];
+    e.target.value = '';
+    setFile(f);
     setStatus('');
     setDone(false);
   };

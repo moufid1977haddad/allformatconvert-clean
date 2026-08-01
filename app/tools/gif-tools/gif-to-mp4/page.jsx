@@ -8,7 +8,7 @@ export default function GifToMp4Page() {
   const [error, setError] = useState('');
   const inputRef = useRef();
 
-  const handleFile = (e) => { setFile(e.target.files[0]); setResult(null); setError(''); };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setResult(null); setError(''); };
 
   const convert = async () => {
     if (!file) return;

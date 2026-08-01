@@ -27,6 +27,7 @@ const fromRoman = (str) => {
 export default function RomanNumeralConverterPage() {
   const [number, setNumber] = useState('');
   const [roman, setRoman] = useState('');
+  const [copyError, setCopyError] = useState(false);
 
   const handleNumber = (val) => {
     setNumber(val);
@@ -63,7 +64,8 @@ export default function RomanNumeralConverterPage() {
               <div className="text-neutral-500 mt-2">{number} = {roman}</div>
             </div>
           )}
-          <button onClick={() => navigator.clipboard.writeText(roman)} disabled={!roman} className="w-full bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 rounded-xl py-2 font-semibold transition">Copy Roman Numeral</button>
+          <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(roman).catch(() => setCopyError(true)); }} disabled={!roman} className="w-full bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 rounded-xl py-2 font-semibold transition">Copy Roman Numeral</button>
+          {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
         </div>
       </div>
       <SeoContent

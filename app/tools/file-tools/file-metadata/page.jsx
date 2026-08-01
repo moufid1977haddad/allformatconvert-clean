@@ -6,6 +6,7 @@ export default function FileMetadataPage() {
   const inputRef = useRef();
   const analyze = (e) => {
     const file = e.target.files[0];
+    e.target.value = '';
     if (!file) return;
     setMetadata({
       name: file.name,

@@ -13,7 +13,7 @@ export default function AudioSplitterPage() {
   const fileRef = useRef();
   const audioRef = useRef();
 
-  const handleFile = (e) => { setFile(e.target.files[0]); setResults([]); };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setResults([]); };
   const onLoaded = () => { setDuration(Math.floor(audioRef.current.duration)); };
 
   const split = async () => {

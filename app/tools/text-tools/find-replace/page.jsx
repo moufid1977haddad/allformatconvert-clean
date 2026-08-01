@@ -12,6 +12,7 @@ export default function FindReplacePage() {
   const [result, setResult] = useState('');
   const [count, setCount] = useState(0);
   const [error, setError] = useState('');
+  const [copyError, setCopyError] = useState(false);
 
   const doReplace = () => {
     if (!find) return;
@@ -56,7 +57,8 @@ export default function FindReplacePage() {
             <div className="space-y-2">
               <p className="text-green-400 text-sm text-center">{count} replacement(s) made</p>
               <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-40 resize-none" value={result} readOnly />
-              <button onClick={() => navigator.clipboard.writeText(result)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
+              <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
+              {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
             </div>
           )}
         </div>

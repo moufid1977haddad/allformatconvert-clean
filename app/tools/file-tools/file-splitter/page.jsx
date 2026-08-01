@@ -8,7 +8,7 @@ export default function FileSplitterPage() {
   const [chunks, setChunks] = useState([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef();
-  const handleFile = (e) => { setFile(e.target.files[0]); setChunks([]); };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setChunks([]); };
   const split = async () => {
     if (!file) return;
     setLoading(true);

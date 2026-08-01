@@ -4,15 +4,20 @@ import SeoContent from '../../../components/SeoContent';
 export default function DuplicateImageFinderPage() {
   const [images, setImages] = useState([]);
   const [duplicates, setDuplicates] = useState([]);
+  const [error, setError] = useState('');
   const inputRef = useRef();
   const handleFiles = (e) => {
     const files = Array.from(e.target.files);
-    const readers = files.map(file => new Promise(resolve => {
+    e.target.value = '';
+    const readers = files.map(file => new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve({ name: file.name, data: reader.result });
+      reader.onerror = () => reject(new Error(`Failed to read ${file.name}. It may be corrupted or unreadable.`));
       reader.readAsDataURL(file);
     }));
-    Promise.all(readers).then(setImages);
+    Promise.all(readers)
+      .then(imgs => { setImages(imgs); setError(''); })
+      .catch(err => setError(err.message || 'Failed to read one or more of the selected images.'));
     setDuplicates([]);
   };
   const findDuplicates = () => {
@@ -35,6 +40,7 @@ export default function DuplicateImageFinderPage() {
             <p className="text-neutral-500">{images.length > 0 ? images.length + ' images loaded' : 'Click to select multiple images'}</p>
             <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
           </div>
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {images.length > 0 && (
             <div className="grid grid-cols-4 gap-2">
               {images.map((img, i) => <div key={i} className="relative"><img src={img.data} className="w-full h-16 object-cover rounded" /><p className="text-xs text-neutral-500 truncate">{img.name}</p></div>)}

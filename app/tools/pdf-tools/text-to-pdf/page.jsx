@@ -14,6 +14,7 @@ export default function TextToPdfPage() {
 
   const handleFile = async (e) => {
     const f = e.target.files[0];
+    e.target.value = '';
     setFile(f);
     const content = await f.text();
     setText(content);

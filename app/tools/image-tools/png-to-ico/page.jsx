@@ -10,7 +10,9 @@ export default function PngToIcoPage() {
   const inputRef = useRef();
 
   const handleFile = (e) => {
-    setFile(e.target.files[0]);
+    const f = e.target.files[0];
+    e.target.value = '';
+    setFile(f);
     setResult(null);
     setStatus('');
   };
@@ -30,6 +32,10 @@ export default function PngToIcoPage() {
         setResult(URL.createObjectURL(blob));
         setStatus('');
       }, 'image/png');
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = () => {
+      setStatus('Error: could not load image file');
       URL.revokeObjectURL(url);
     };
     img.src = url;

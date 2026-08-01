@@ -13,6 +13,7 @@ export default function VideoToGifPage() {
   const handleFile = (e) => {
     const f = e.target.files[0];
     if (!f) return;
+    e.target.value = '';
     setFile(f);
     setFrames([]);
   };

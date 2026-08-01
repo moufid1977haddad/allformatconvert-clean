@@ -6,7 +6,7 @@ export default function FileConverterPage() {
   const [format, setFormat] = useState('txt');
   const [downloadUrl, setDownloadUrl] = useState(null);
   const inputRef = useRef();
-  const handleFile = (e) => { setFile(e.target.files[0]); setDownloadUrl(null); };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setDownloadUrl(null); };
   const convert = async () => {
     if (!file) return;
     const text = await file.text();

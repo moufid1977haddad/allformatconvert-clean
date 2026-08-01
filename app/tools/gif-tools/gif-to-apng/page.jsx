@@ -9,6 +9,7 @@ export default function GifToApngPage() {
 
   const handleFile = (e) => {
     const f = e.target.files[0];
+    e.target.value = '';
     if (!f) return;
     setFile(f);
     setResult(null);

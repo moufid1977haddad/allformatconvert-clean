@@ -12,6 +12,7 @@ export default function AudioTranscriberPage() {
   const handleFile = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    e.target.value = '';
     setFileName(file.name);
     setLoading(true);
     setOutput('');

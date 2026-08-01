@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 
 export default function CaseConverterPage() {
   const [text, setText] = useState('');
+  const [copyError, setCopyError] = useState(false);
   const toUpper = () => setText(text.toUpperCase());
   const toLower = () => setText(text.toLowerCase());
   const toTitle = () => setText(text.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()));
@@ -24,7 +25,8 @@ export default function CaseConverterPage() {
             <button onClick={toAlternate} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition">aLtErNaTe</button>
             <button onClick={() => setText('')} className="bg-neutral-200 hover:bg-neutral-200 rounded-xl py-2 font-semibold transition">Clear</button>
           </div>
-          <button onClick={() => navigator.clipboard.writeText(text)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
+          <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(text).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
+          {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
         </div>
       </div>
       <SeoContent

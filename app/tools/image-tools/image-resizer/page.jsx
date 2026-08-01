@@ -6,10 +6,13 @@ export default function ImageResizerPage() {
   const [width, setWidth] = useState(800);
   const [height, setHeight] = useState(600);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
   const inputRef = useRef();
-  const handleFile = (e) => { const f = e.target.files[0]; if (f) { const url = URL.createObjectURL(f); setImage(url); const img = new Image(); img.onload = () => { setWidth(img.width); setHeight(img.height); }; img.src = url; setResult(null); } };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setError(''); const url = URL.createObjectURL(f); setImage(url); const img = new Image(); img.onload = () => { setWidth(img.width); setHeight(img.height); }; img.onerror = () => setError('Could not load image file'); img.src = url; setResult(null); } };
   const resize = () => {
+    setError('');
     const img = new Image();
+    img.onerror = () => setError('Could not load image file');
     img.onload = () => {
       const canvas = document.createElement('canvas');
       canvas.width = width; canvas.height = height;
@@ -33,6 +36,7 @@ export default function ImageResizerPage() {
             <div><label className="block text-sm text-neutral-500 mb-1">Height (px)</label><input type="number" value={height} onChange={e => setHeight(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
           </div>
           <button onClick={resize} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Resize</button>
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="resized.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>

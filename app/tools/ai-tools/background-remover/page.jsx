@@ -12,8 +12,10 @@ export default function BackgroundRemoverPage() {
   const handleFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    e.target.value = '';
     const reader = new FileReader();
     reader.onload = (ev) => { setPreview(ev.target.result); setResult(''); setError(''); };
+    reader.onerror = () => { setPreview(''); setResult(''); setError('Failed to read the image file. It may be corrupt or in an unsupported format.'); };
     reader.readAsDataURL(file);
   };
 

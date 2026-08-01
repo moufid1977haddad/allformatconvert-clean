@@ -13,6 +13,7 @@ export default function MarkdownToPdfPage() {
 
   const handleFile = async (e) => {
     const f = e.target.files[0];
+    e.target.value = '';
     setFile(f);
     setDone(false);
     setStatus('');

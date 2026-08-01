@@ -16,6 +16,7 @@ export default function ImageConverterPage() {
   const [converted, setConverted] = useState<ConvertedFile[]>([]);
   const [processing, setProcessing] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const addFiles = (incoming: File[]) => {
@@ -31,7 +32,7 @@ export default function ImageConverterPage() {
   }, []);
 
   const convertImage = async (file: File): Promise<Blob> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const img = new Image();
       img.src = URL.createObjectURL(file);
       img.onload = () => {
@@ -47,22 +48,31 @@ export default function ImageConverterPage() {
         canvas.toBlob((blob) => resolve(blob!), mime, quality / 100);
         URL.revokeObjectURL(img.src);
       };
+      img.onerror = () => {
+        URL.revokeObjectURL(img.src);
+        reject(new Error(`Failed to load "${file.name}". It may be corrupted or in an unsupported format.`));
+      };
     });
   };
 
   const handleConvert = async () => {
     setProcessing(true);
+    setError('');
     const results: ConvertedFile[] = [];
-    for (const file of files) {
-      const convertedBlob = await convertImage(file);
-      results.push({
-        originalName: file.name,
-        originalSize: file.size,
-        convertedBlob,
-        convertedSize: convertedBlob.size,
-      });
+    try {
+      for (const file of files) {
+        const convertedBlob = await convertImage(file);
+        results.push({
+          originalName: file.name,
+          originalSize: file.size,
+          convertedBlob,
+          convertedSize: convertedBlob.size,
+        });
+      }
+      setConverted(results);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to convert one or more files.');
     }
-    setConverted(results);
     setProcessing(false);
   };
 
@@ -118,12 +128,17 @@ export default function ImageConverterPage() {
             multiple
             accept="image/*"
             className="hidden"
-            onChange={(e) => addFiles(Array.from(e.target.files || []))}
+            onChange={(e) => {
+              addFiles(Array.from(e.target.files || []));
+              e.target.value = '';
+            }}
           />
           <div className="text-4xl mb-3">📁</div>
           <p className="text-neutral-700 dark:text-neutral-300 font-semibold text-lg">Drop your images here</p>
           <p className="text-neutral-400 dark:text-neutral-500 text-sm mt-1">or click to browse — PNG, JPG, WebP, AVIF, GIF, BMP, TIFF</p>
         </div>
+
+        {error && <p className="text-red-500 text-center text-sm mt-4">{error}</p>}
 
         {/* File list */}
         {files.length > 0 && (

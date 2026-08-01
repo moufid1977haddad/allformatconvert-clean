@@ -4,8 +4,9 @@ import SeoContent from '../../../components/SeoContent';
 export default function ImageFlipPage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
   const inputRef = useRef();
-  const handleFile = (e) => { const f = e.target.files[0]; if (f) { setImage(URL.createObjectURL(f)); setResult(null); } };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setResult(null); setError(''); } };
   const flip = (horizontal) => {
     const img = new Image();
     img.onload = () => {
@@ -16,6 +17,10 @@ export default function ImageFlipPage() {
       else { ctx.translate(0, img.height); ctx.scale(1, -1); }
       ctx.drawImage(img, 0, 0);
       setResult(canvas.toDataURL('image/png'));
+      setError('');
+    };
+    img.onerror = () => {
+      setError('Could not load this image. The file may be corrupted or in an unsupported format.');
     };
     img.src = image;
   };
@@ -29,6 +34,7 @@ export default function ImageFlipPage() {
             {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <div className="grid grid-cols-2 gap-3">
             <button onClick={() => flip(true)} disabled={!image} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Flip Horizontal</button>
             <button onClick={() => flip(false)} disabled={!image} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Flip Vertical</button>

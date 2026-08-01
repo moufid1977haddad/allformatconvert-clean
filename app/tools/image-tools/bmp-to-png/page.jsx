@@ -4,8 +4,9 @@ import SeoContent from '../../../components/SeoContent';
 export default function BMPtoPNGPage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
   const inputRef = useRef();
-  const handleFile = (e) => { const f = e.target.files[0]; if (f) { setImage(URL.createObjectURL(f)); setResult(null); } };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setResult(null); setError(''); } };
   const convert = () => {
     const img = new Image();
     img.onload = () => {
@@ -13,6 +14,10 @@ export default function BMPtoPNGPage() {
       canvas.width = img.width; canvas.height = img.height;
       canvas.getContext('2d').drawImage(img, 0, 0);
       setResult(canvas.toDataURL('image/png'));
+      setError('');
+    };
+    img.onerror = () => {
+      setError('Could not load this image. The file may be corrupted or in an unsupported format.');
     };
     img.src = image;
   };
@@ -26,6 +31,7 @@ export default function BMPtoPNGPage() {
             {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept=".bmp" className="hidden" onChange={handleFile} />
           </div>
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <button onClick={convert} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Convert</button>
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="converted.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>

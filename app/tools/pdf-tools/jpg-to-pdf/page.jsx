@@ -11,7 +11,7 @@ export default function Page() {
   const [error, setError] = useState('');
   const fileRef = useRef();
 
-  const handleFiles = (e) => { setFiles(Array.from(e.target.files)); setResult(null); };
+  const handleFiles = (e) => { const newFiles = Array.from(e.target.files); e.target.value = ''; setFiles(newFiles); setResult(null); };
 
   const convert = async () => {
     if (!files.length) return;

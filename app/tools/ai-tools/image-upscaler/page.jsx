@@ -8,13 +8,23 @@ export default function ImageUpscalerPage() {
   const [scale, setScale] = useState(2);
   const [loading, setLoading] = useState(false);
   const [info, setInfo] = useState(null);
+  const [error, setError] = useState('');
   const inputRef = useRef();
 
-  const handleFile = (e) => { setImage(URL.createObjectURL(e.target.files[0])); setResult(null); setInfo(null); };
+  const handleFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    e.target.value = '';
+    setImage(URL.createObjectURL(file));
+    setResult(null);
+    setInfo(null);
+    setError('');
+  };
 
   const upscale = () => {
     if (!image) return;
     setLoading(true);
+    setError('');
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
@@ -27,6 +37,10 @@ export default function ImageUpscalerPage() {
       setResult(canvas.toDataURL('image/png'));
       setInfo({ original: img.width + 'x' + img.height, upscaled: canvas.width + 'x' + canvas.height });
       setLoading(false);
+    };
+    img.onerror = () => {
+      setLoading(false);
+      setError('Failed to load image. The file may be corrupt or in an unsupported format.');
     };
     img.src = image;
   };
@@ -54,6 +68,7 @@ export default function ImageUpscalerPage() {
           <button onClick={upscale} disabled={!image || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">
             {loading ? 'Upscaling...' : 'Upscale Image'}
           </button>
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {info && (
             <div className="grid grid-cols-2 gap-3 text-center">
               <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3">

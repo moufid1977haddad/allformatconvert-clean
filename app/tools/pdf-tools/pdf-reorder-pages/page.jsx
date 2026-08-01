@@ -14,15 +14,23 @@ export default function PdfReorderPagesPage() {
 
   const handleFile = async (e) => {
     const f = e.target.files[0];
+    e.target.value = '';
     setFile(f);
     setStatus('');
     setDownloadUrl(null);
     setOrder('');
-    const arrayBuffer = await f.arrayBuffer();
-    const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-    const count = pdfDoc.getPageCount();
-    setPageCount(count);
-    setOrder(Array.from({ length: count }, (_, i) => i + 1).join(', '));
+    setPageCount(0);
+    try {
+      const arrayBuffer = await f.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+      const count = pdfDoc.getPageCount();
+      setPageCount(count);
+      setOrder(Array.from({ length: count }, (_, i) => i + 1).join(', '));
+    } catch (err) {
+      setStatus('Error: ' + err.message);
+      setPageCount(0);
+      setOrder('');
+    }
   };
 
   const reorder = async () => {

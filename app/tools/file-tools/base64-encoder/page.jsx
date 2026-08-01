@@ -8,6 +8,7 @@ export default function FileBase64EncoderPage() {
   const inputRef = useRef();
   const encode = async (e) => {
     const file = e.target.files[0];
+    e.target.value = '';
     if (!file) return;
     setLoading(true);
     setFileName(file.name);

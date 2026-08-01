@@ -12,6 +12,7 @@ export default function AudioMetadataPage() {
 
   const handleFile = (e) => {
     const f = e.target.files[0];
+    e.target.value = '';
     setFile(f);
     const url = URL.createObjectURL(f);
     setAudioUrl(url);

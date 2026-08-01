@@ -13,7 +13,7 @@ export default function Page() {
   const [error, setError] = useState('');
   const fileRef = useRef();
 
-  const handleFile = (e) => { setFile(e.target.files[0]); setOutput(''); };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setOutput(''); };
 
   const translate = async () => {
     if (!file) return;

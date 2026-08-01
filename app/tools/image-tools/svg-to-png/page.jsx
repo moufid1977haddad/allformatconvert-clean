@@ -11,7 +11,9 @@ export default function SvgToPngPage() {
   const inputRef = useRef();
 
   const handleFile = (e) => {
-    setFile(e.target.files[0]);
+    const f = e.target.files[0];
+    e.target.value = '';
+    setFile(f);
     setResult(null);
     setStatus('');
   };
@@ -32,6 +34,10 @@ export default function SvgToPngPage() {
         ctx.drawImage(img, 0, 0, width, height);
         setResult(canvas.toDataURL('image/png'));
         setStatus('');
+        URL.revokeObjectURL(url);
+      };
+      img.onerror = () => {
+        setStatus('Error: could not render SVG as an image');
         URL.revokeObjectURL(url);
       };
       img.src = url;

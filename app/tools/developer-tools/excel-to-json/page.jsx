@@ -7,6 +7,7 @@ export default function ExcelToJsonPage() {
   const inputRef = useRef();
   const convert = async (e) => {
     const file = e.target.files[0];
+    e.target.value = '';
     if (!file) return;
     setStatus('Converting...');
     try {

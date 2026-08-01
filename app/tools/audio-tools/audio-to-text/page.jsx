@@ -55,7 +55,7 @@ export default function AudioToTextPage() {
   };
 
   // ── File functions ──
-  const handleFile = (e) => { setFile(e.target.files[0]); setFileTranscript(''); setError(''); };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setFileTranscript(''); setError(''); };
 
   const transcribeFile = async () => {
     if (!file) return;

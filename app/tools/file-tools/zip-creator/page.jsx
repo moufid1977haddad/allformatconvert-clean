@@ -6,7 +6,11 @@ export default function ZipCreatorPage() {
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState(null);
   const inputRef = useRef();
-  const addFiles = (e) => setFiles(prev => [...prev, ...Array.from(e.target.files)]);
+  const addFiles = (e) => {
+    const newFiles = Array.from(e.target.files);
+    e.target.value = '';
+    setFiles(prev => [...prev, ...newFiles]);
+  };
   const removeFile = (i) => setFiles(prev => prev.filter((_,idx) => idx !== i));
   const createZip = async () => {
     setLoading(true);

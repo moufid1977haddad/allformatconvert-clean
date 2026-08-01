@@ -10,6 +10,7 @@ export default function GifMakerPage() {
 
   const handleFiles = (e) => {
     const files = Array.from(e.target.files);
+    e.target.value = '';
     const readers = files.map(f => new Promise(resolve => {
       const reader = new FileReader();
       reader.onload = () => resolve({ name: f.name, src: reader.result });

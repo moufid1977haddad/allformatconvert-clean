@@ -12,6 +12,7 @@ export default function ImageToPdfPage() {
 
   const handleFiles = (e) => {
     const newFiles = Array.from(e.target.files);
+    e.target.value = '';
     setFiles(prev => [...prev, ...newFiles]);
     setStatus('');
     setDownloadUrl(null);

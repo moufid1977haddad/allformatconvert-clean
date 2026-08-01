@@ -8,7 +8,7 @@ export default function FileEncryptorPage() {
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [mode, setMode] = useState('encrypt');
   const inputRef = useRef();
-  const handleFile = (e) => { setFile(e.target.files[0]); setDownloadUrl(null); };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setDownloadUrl(null); };
   const process = async () => {
     if (!file || !password) return;
     setLoading(true);

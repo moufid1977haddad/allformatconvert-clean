@@ -10,7 +10,7 @@ export default function Page() {
   const [error, setError] = useState('');
   const fileRef = useRef();
 
-  const handleFile = (e) => { setFile(e.target.files[0]); setImages([]); };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setImages([]); };
 
   const convert = async () => {
     if (!file) return;

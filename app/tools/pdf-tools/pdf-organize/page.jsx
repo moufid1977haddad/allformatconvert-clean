@@ -14,15 +14,25 @@ export default function Page() {
 
   const handleFile = async (e) => {
     const f = e.target.files[0];
+    e.target.value = '';
     setFile(f);
     setResult(null);
-    const pdfjsLib = await import('pdfjs-dist');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
-    const arrayBuffer = await f.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    const n = pdf.numPages;
-    setNumPages(n);
-    setOrder(Array.from({ length: n }, (_, i) => i + 1));
+    setError('');
+    setNumPages(0);
+    setOrder([]);
+    try {
+      const pdfjsLib = await import('pdfjs-dist');
+      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
+      const arrayBuffer = await f.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const n = pdf.numPages;
+      setNumPages(n);
+      setOrder(Array.from({ length: n }, (_, i) => i + 1));
+    } catch (err) {
+      setError('Failed to read PDF: ' + err.message);
+      setNumPages(0);
+      setOrder([]);
+    }
   };
 
   const moveUp = (i) => {

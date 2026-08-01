@@ -10,11 +10,16 @@ export default function AddTextToImagePage() {
   const [posX, setPosX] = useState(50);
   const [posY, setPosY] = useState(50);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
   const inputRef = useRef();
 
   const handleFile = (e) => {
-    setImage(URL.createObjectURL(e.target.files[0]));
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    setImage(URL.createObjectURL(f));
     setResult(null);
+    setError('');
   };
 
   const apply = () => {
@@ -30,6 +35,10 @@ export default function AddTextToImagePage() {
       ctx.textAlign = 'center';
       ctx.fillText(text, img.width * posX / 100, img.height * posY / 100);
       setResult(canvas.toDataURL('image/png'));
+      setError('');
+    };
+    img.onerror = () => {
+      setError('Could not load this image. The file may be corrupted or in an unsupported format.');
     };
     img.src = image;
   };
@@ -44,6 +53,7 @@ export default function AddTextToImagePage() {
             {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <div><label className="block text-sm text-neutral-500 mb-1">Text</label><input type="text" value={text} onChange={e => setText(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
           <div className="grid grid-cols-2 gap-4">
             <div><label className="block text-sm text-neutral-500 mb-1">Font Size: {fontSize}px</label><input type="range" min="10" max="200" value={fontSize} onChange={e => setFontSize(parseInt(e.target.value))} className="w-full" /></div>

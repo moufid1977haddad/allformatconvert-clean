@@ -5,8 +5,16 @@ export default function AddVignettePage() {
   const [image, setImage] = useState(null);
   const [intensity, setIntensity] = useState(50);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
   const inputRef = useRef();
-  const handleFile = (e) => { setImage(URL.createObjectURL(e.target.files[0])); setResult(null); };
+  const handleFile = (e) => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    setImage(URL.createObjectURL(f));
+    setResult(null);
+    setError('');
+  };
   const apply = () => {
     const img = new Image();
     img.onload = () => {
@@ -20,6 +28,10 @@ export default function AddVignettePage() {
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       setResult(canvas.toDataURL('image/png'));
+      setError('');
+    };
+    img.onerror = () => {
+      setError('Could not load this image. The file may be corrupted or in an unsupported format.');
     };
     img.src = image;
   };
@@ -33,6 +45,7 @@ export default function AddVignettePage() {
             {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <div><label className="block text-sm text-neutral-500 mb-1">Intensity: {intensity}%</label><input type="range" min="1" max="100" value={intensity} onChange={e => setIntensity(parseInt(e.target.value))} className="w-full" /></div>
           <button onClick={apply} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Add Vignette</button>
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="vignette.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}

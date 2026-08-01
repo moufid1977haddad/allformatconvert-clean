@@ -12,8 +12,11 @@ export default function ImageCaptionerPage() {
   const handleFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    e.target.value = '';
+    setError('');
     const reader = new FileReader();
     reader.onload = (ev) => setPreview(ev.target.result);
+    reader.onerror = () => setError('Failed to read the image file. It may be corrupt or in an unsupported format.');
     reader.readAsDataURL(file);
   };
 

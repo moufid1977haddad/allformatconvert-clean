@@ -7,6 +7,7 @@ export default function ZipExtractorPage() {
   const inputRef = useRef();
   const extract = async (e) => {
     const file = e.target.files[0];
+    e.target.value = '';
     if (!file) return;
     setLoading(true);
     try {

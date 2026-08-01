@@ -4,16 +4,21 @@ import SeoContent from '../../../components/SeoContent';
 export default function ImageMetadataPage() {
   const [metadata, setMetadata] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [error, setError] = useState('');
   const inputRef = useRef();
   const analyze = (e) => {
     const file = e.target.files[0];
+    e.target.value = '';
     if (!file) return;
+    setError('');
+    setMetadata(null);
     const url = URL.createObjectURL(file);
     setPreview(url);
     const img = new Image();
     img.onload = () => {
       setMetadata({ name: file.name, size: (file.size/1024).toFixed(2) + ' KB', type: file.type, width: img.width + ' px', height: img.height + ' px', lastModified: new Date(file.lastModified).toLocaleString() });
     };
+    img.onerror = () => setError('Could not load image file');
     img.src = url;
   };
   return (
@@ -26,6 +31,7 @@ export default function ImageMetadataPage() {
             {preview ? <img src={preview} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={analyze} />
           </div>
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {metadata && <div className="space-y-2">{Object.entries(metadata).map(([k,v]) => <div key={k} className="flex justify-between bg-neutral-50 rounded-lg border border-neutral-200 p-3"><span className="text-neutral-500 capitalize">{k}</span><span className="text-indigo-400 font-mono">{v}</span></div>)}</div>}
         </div>
       </div>

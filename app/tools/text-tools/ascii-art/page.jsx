@@ -35,6 +35,7 @@ const CHARS = {
 export default function AsciiArtPage() {
   const [text, setText] = useState('');
   const [result, setResult] = useState('');
+  const [copyError, setCopyError] = useState(false);
 
   const generate = () => {
     const upper = text.toUpperCase();
@@ -57,7 +58,8 @@ export default function AsciiArtPage() {
           {result && (
             <div className="space-y-2">
               <pre className="w-full bg-neutral-50 rounded-xl border border-neutral-200 p-4 text-xs font-mono overflow-x-auto">{result}</pre>
-              <button onClick={() => navigator.clipboard.writeText(result)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
+              <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
+              {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
             </div>
           )}
         </div>

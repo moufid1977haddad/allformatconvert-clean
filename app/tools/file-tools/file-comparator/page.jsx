@@ -25,11 +25,11 @@ export default function FileComparatorPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="border-2 border-dashed border-neutral-200 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => ref1.current.click()}>
               <p className="text-neutral-500 text-sm">{file1 ? file1.name : 'File 1'}</p>
-              <input ref={ref1} type="file" className="hidden" onChange={e => setFile1(e.target.files[0])} />
+              <input ref={ref1} type="file" className="hidden" onChange={e => { const f = e.target.files[0]; e.target.value = ''; setFile1(f); }} />
             </div>
             <div className="border-2 border-dashed border-neutral-200 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => ref2.current.click()}>
               <p className="text-neutral-500 text-sm">{file2 ? file2.name : 'File 2'}</p>
-              <input ref={ref2} type="file" className="hidden" onChange={e => setFile2(e.target.files[0])} />
+              <input ref={ref2} type="file" className="hidden" onChange={e => { const f = e.target.files[0]; e.target.value = ''; setFile2(f); }} />
             </div>
           </div>
           <button onClick={compare} disabled={!file1 || !file2} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Compare Files</button>

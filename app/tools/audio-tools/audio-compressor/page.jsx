@@ -11,7 +11,7 @@ export default function AudioCompressorPage() {
   const [error, setError] = useState('');
   const fileRef = useRef();
 
-  const handleFile = (e) => { setFile(e.target.files[0]); setResult(null); };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setResult(null); };
 
   const compress = async () => {
     if (!file) return;

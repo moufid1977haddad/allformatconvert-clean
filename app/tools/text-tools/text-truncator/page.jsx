@@ -7,6 +7,7 @@ export default function TextTruncatorPage() {
   const [limit, setLimit] = useState(100);
   const [type, setType] = useState('characters');
   const [result, setResult] = useState('');
+  const [copyError, setCopyError] = useState(false);
 
   const truncate = () => {
     if (type === 'characters') {
@@ -41,7 +42,8 @@ export default function TextTruncatorPage() {
           {result && (
             <div className="space-y-2">
               <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={result} readOnly />
-              <button onClick={() => navigator.clipboard.writeText(result)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
+              <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
+              {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
             </div>
           )}
         </div>

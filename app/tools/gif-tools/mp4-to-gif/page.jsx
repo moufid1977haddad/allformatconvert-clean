@@ -11,6 +11,7 @@ export default function Mp4ToGifPage() {
 
   const handleFile = (e) => {
     const f = e.target.files[0];
+    e.target.value = '';
     if (!f) return;
     setFile(f);
     setFrames([]);

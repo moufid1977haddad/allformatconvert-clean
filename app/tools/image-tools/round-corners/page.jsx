@@ -6,15 +6,22 @@ export default function RoundCornersPage() {
   const [image, setImage] = useState(null);
   const [radius, setRadius] = useState(20);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
   const inputRef = useRef();
 
   const handleFile = (e) => {
-    setImage(URL.createObjectURL(e.target.files[0]));
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    setImage(URL.createObjectURL(f));
     setResult(null);
+    setError('');
   };
 
   const apply = () => {
+    setError('');
     const img = new Image();
+    img.onerror = () => setError('Could not load image file');
     img.onload = () => {
       const canvas = document.createElement('canvas');
       canvas.width = img.width;
@@ -51,6 +58,7 @@ export default function RoundCornersPage() {
           </div>
           <div><label className="block text-sm text-neutral-500 mb-1">Corner Radius: {radius}%</label><input type="range" min="1" max="50" value={radius} onChange={e => setRadius(parseInt(e.target.value))} className="w-full" /></div>
           <button onClick={apply} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Apply Round Corners</button>
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="rounded.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>

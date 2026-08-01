@@ -7,7 +7,11 @@ export default function VideoMergerPage() {
   const [status, setStatus] = useState('');
   const inputRef = useRef();
 
-  const handleFiles = (e) => setFiles(prev => [...prev, ...Array.from(e.target.files)]);
+  const handleFiles = (e) => {
+    const newFiles = Array.from(e.target.files);
+    e.target.value = '';
+    setFiles(prev => [...prev, ...newFiles]);
+  };
   const removeFile = (i) => setFiles(prev => prev.filter((_,idx) => idx !== i));
 
   const merge = async () => {
@@ -15,10 +19,11 @@ export default function VideoMergerPage() {
     setStatus('Merging videos...');
     try {
       const canvas = document.createElement('canvas');
-      const videos = await Promise.all(files.map(f => new Promise(resolve => {
+      const videos = await Promise.all(files.map(f => new Promise((resolve, reject) => {
         const v = document.createElement('video');
-        v.src = URL.createObjectURL(f);
         v.onloadedmetadata = () => resolve(v);
+        v.onerror = () => reject(new Error(`Failed to load video: ${f.name}`));
+        v.src = URL.createObjectURL(f);
       })));
       canvas.width = videos[0].videoWidth;
       canvas.height = videos[0].videoHeight;

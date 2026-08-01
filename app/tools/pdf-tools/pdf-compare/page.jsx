@@ -54,8 +54,8 @@ export default function Page() {
               {file2 ? <p className="text-neutral-700 text-sm font-medium">{file2.name}</p> : <p className="text-neutral-400 text-sm">Click to upload PDF 2</p>}
             </div>
           </div>
-          <input ref={file1Ref} type="file" accept=".pdf" className="hidden" onChange={e => setFile1(e.target.files[0])} />
-          <input ref={file2Ref} type="file" accept=".pdf" className="hidden" onChange={e => setFile2(e.target.files[0])} />
+          <input ref={file1Ref} type="file" accept=".pdf" className="hidden" onChange={e => { const f = e.target.files[0]; e.target.value = ''; setFile1(f); }} />
+          <input ref={file2Ref} type="file" accept=".pdf" className="hidden" onChange={e => { const f = e.target.files[0]; e.target.value = ''; setFile2(f); }} />
           <button onClick={compare} disabled={!file1 || !file2 || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">
             {loading ? 'Comparing...' : 'Compare PDFs'}
           </button>

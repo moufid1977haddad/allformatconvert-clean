@@ -4,13 +4,17 @@ import SeoContent from '../../../components/SeoContent';
 export default function VideoMetadataPage() {
   const [metadata, setMetadata] = useState(null);
   const [file, setFile] = useState(null);
+  const [error, setError] = useState('');
   const videoRef = useRef();
   const inputRef = useRef();
 
   const handleFile = (e) => {
     const f = e.target.files[0];
     if (!f) return;
+    e.target.value = '';
     setFile(f);
+    setMetadata(null);
+    setError('');
     const url = URL.createObjectURL(f);
     const video = document.createElement('video');
     video.onloadedmetadata = () => {
@@ -24,6 +28,7 @@ export default function VideoMetadataPage() {
         lastModified: new Date(f.lastModified).toLocaleString(),
       });
     };
+    video.onerror = () => setError('Failed to read video metadata. The file may be corrupt or in an unsupported format.');
     video.src = url;
   };
 
@@ -46,6 +51,7 @@ export default function VideoMetadataPage() {
             <input ref={inputRef} type="file" accept="video/*" className="hidden" onChange={handleFile} />
           </div>
           {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" />}
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {metadata && (
             <div className="space-y-2">
               {Object.entries(metadata).map(([k, v]) => (

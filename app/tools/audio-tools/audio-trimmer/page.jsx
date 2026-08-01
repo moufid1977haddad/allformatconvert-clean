@@ -17,6 +17,7 @@ export default function AudioTrimmerPage() {
 
   const handleFile = (e) => {
     const f = e.target.files[0];
+    e.target.value = '';
     setFile(f);
     setResult(null);
     const url = URL.createObjectURL(f);

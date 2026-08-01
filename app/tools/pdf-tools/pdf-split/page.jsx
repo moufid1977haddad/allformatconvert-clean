@@ -14,13 +14,20 @@ export default function PdfSplitPage() {
 
   const handleFile = async (e) => {
     const f = e.target.files[0];
+    e.target.value = '';
     setFile(f);
     setStatus('');
     setDownloadUrls([]);
     setRanges('');
-    const arrayBuffer = await f.arrayBuffer();
-    const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-    setPageCount(pdfDoc.getPageCount());
+    setPageCount(0);
+    try {
+      const arrayBuffer = await f.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+      setPageCount(pdfDoc.getPageCount());
+    } catch (err) {
+      setStatus('Error: ' + err.message);
+      setPageCount(0);
+    }
   };
 
   const split = async () => {

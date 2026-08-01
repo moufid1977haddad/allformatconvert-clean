@@ -5,6 +5,7 @@ import SeoContent from '../../../components/SeoContent';
 export default function NumberBaseConverterPage() {
   const [value, setValue] = useState('');
   const [fromBase, setFromBase] = useState('10');
+  const [copyError, setCopyError] = useState(false);
 
   const convert = (base) => {
     try {
@@ -43,11 +44,12 @@ export default function NumberBaseConverterPage() {
                 <div className="text-neutral-500 text-sm mb-1">{label}</div>
                 <div className="font-mono text-indigo-400 text-lg font-bold break-all">{value ? convert(base).toUpperCase() : '—'}</div>
                 {value && convert(base) !== 'Invalid' && (
-                  <button onClick={() => navigator.clipboard.writeText(convert(base))} className="text-xs text-neutral-500 hover:text-neutral-300 mt-1">Copy</button>
+                  <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(convert(base)).catch(() => setCopyError(true)); }} className="text-xs text-neutral-500 hover:text-neutral-300 mt-1">Copy</button>
                 )}
               </div>
             ))}
           </div>
+          {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
         </div>
       </div>
       <SeoContent
