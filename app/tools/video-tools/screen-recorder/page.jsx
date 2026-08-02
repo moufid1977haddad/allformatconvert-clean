@@ -5,28 +5,42 @@ export default function ScreenRecorderPage() {
   const [recording, setRecording] = useState(false);
   const [videoUrl, setVideoUrl] = useState(null);
   const [duration, setDuration] = useState(0);
+  const [error, setError] = useState('');
   const mediaRecorder = useRef(null);
   const chunks = useRef([]);
   const timer = useRef(null);
   const preview = useRef(null);
 
   const start = async () => {
-    const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-    if (preview.current) preview.current.srcObject = stream;
-    mediaRecorder.current = new MediaRecorder(stream);
-    chunks.current = [];
-    mediaRecorder.current.ondataavailable = e => chunks.current.push(e.data);
-    mediaRecorder.current.onstop = () => {
-      const blob = new Blob(chunks.current, { type: 'video/webm' });
-      setVideoUrl(URL.createObjectURL(blob));
+    setError('');
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      if (preview.current) preview.current.srcObject = stream;
+      mediaRecorder.current = new MediaRecorder(stream);
+      chunks.current = [];
+      mediaRecorder.current.ondataavailable = e => chunks.current.push(e.data);
+      mediaRecorder.current.onstop = () => {
+        const blob = new Blob(chunks.current, { type: 'video/webm' });
+        setVideoUrl(URL.createObjectURL(blob));
+        if (preview.current) preview.current.srcObject = null;
+        stream.getTracks().forEach(t => t.stop());
+      };
+      stream.getVideoTracks()[0].onended = () => stop();
+      mediaRecorder.current.start();
+      setRecording(true);
+      setDuration(0);
+      timer.current = setInterval(() => setDuration(d => d + 1), 1000);
+    } catch (err) {
+      // Stop any tracks we managed to acquire before the failure (e.g. MediaRecorder
+      // construction/start throwing after the user granted screen access) so the
+      // browser's sharing indicator doesn't stay on with no way to turn it off.
+      if (stream) stream.getTracks().forEach(t => t.stop());
       if (preview.current) preview.current.srcObject = null;
-      stream.getTracks().forEach(t => t.stop());
-    };
-    stream.getVideoTracks()[0].onended = () => stop();
-    mediaRecorder.current.start();
-    setRecording(true);
-    setDuration(0);
-    timer.current = setInterval(() => setDuration(d => d + 1), 1000);
+      setRecording(false);
+      clearInterval(timer.current);
+      setError(err?.name === 'NotAllowedError' ? 'Screen share was cancelled.' : 'Recording failed: ' + (err?.message || 'unknown error'));
+    }
   };
 
   const stop = () => {
@@ -54,6 +68,7 @@ export default function ScreenRecorderPage() {
               )}
             </div>
           </div>
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {videoUrl && (
             <div className="space-y-3">
               <video controls src={videoUrl} className="w-full rounded-xl" />

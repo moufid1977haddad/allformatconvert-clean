@@ -205,7 +205,18 @@ export default function ImageEditorPage() {
     setNoiseIntensity(0);
     setVignetteStrength(0);
     setTextOverlay('');
-    applyEffects();
+    // Redraw directly from originalImage instead of calling applyEffects():
+    // applyEffects is a useCallback closed over the pre-reset state values,
+    // and the setState calls above haven't flushed yet, so calling it here
+    // would repaint with the OLD effect values instead of the reset ones.
+    const canvas = canvasRef.current;
+    if (canvas && originalImage) {
+      canvas.width = originalImage.width;
+      canvas.height = originalImage.height;
+      const ctx = canvas.getContext('2d');
+      ctx?.clearRect(0, 0, canvas.width, canvas.height);
+      ctx?.drawImage(originalImage, 0, 0);
+    }
   };
 
   return (

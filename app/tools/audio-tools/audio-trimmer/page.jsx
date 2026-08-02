@@ -20,18 +20,27 @@ export default function AudioTrimmerPage() {
     e.target.value = '';
     setFile(f);
     setResult(null);
+    setError('');
+    setStart(0);
+    setEnd(0);
+    setDuration(0);
     const url = URL.createObjectURL(f);
     setAudioUrl(url);
   };
 
   const onLoaded = () => {
-    const dur = audioRef.current.duration;
-    setDuration(Math.floor(dur));
-    setEnd(Math.floor(dur));
+    const dur = Math.floor(audioRef.current.duration);
+    setDuration(dur);
+    setStart(s => Math.min(s, dur));
+    setEnd(dur);
   };
 
   const trim = async () => {
     if (!file) return;
+    if (start >= end) {
+      setError('Start time must be before end time.');
+      return;
+    }
     setLoading(true);
     setError('');
     try {

@@ -30,7 +30,16 @@ export default function Page() {
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setResult(URL.createObjectURL(blob));
-    } catch(e) { setError('Could not unlock PDF. Wrong password?'); }
+    } catch(e) {
+      const msg = e?.message || '';
+      if (msg === 'NEEDS PASSWORD') {
+        setError('This PDF is password-protected. Please enter the password.');
+      } else if (msg === 'Password incorrect') {
+        setError('Could not unlock PDF. Wrong password?');
+      } else {
+        setError('Could not unlock PDF: ' + (msg || 'the file may be corrupted or not a valid PDF.'));
+      }
+    }
     setLoading(false);
   };
 

@@ -3,21 +3,53 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 export default function ImageCropperPage() {
   const [image, setImage] = useState(null);
+  const [imgDims, setImgDims] = useState({ width: 0, height: 0 });
   const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
   const [crop, setCrop] = useState({ x: 0, y: 0, w: 100, h: 100 });
   const inputRef = useRef();
   const imgRef = useRef();
-  const handleFile = (e) => { setImage(URL.createObjectURL(e.target.files[0])); setResult(null); };
-  const applyCrop = () => {
+  const handleFile = (e) => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    setImage(URL.createObjectURL(f));
+    setResult(null);
+    setError('');
+    setImgDims({ width: 0, height: 0 });
+    setCrop({ x: 0, y: 0, w: 100, h: 100 });
+  };
+  const onImageLoad = () => {
     const img = imgRef.current;
     if (!img) return;
-    const canvas = document.createElement('canvas');
+    setImgDims({ width: img.width, height: img.height });
+    setCrop(p => ({
+      x: Math.max(0, Math.min(p.x, img.width)),
+      y: Math.max(0, Math.min(p.y, img.height)),
+      w: Math.max(1, Math.min(p.w, img.width)),
+      h: Math.max(1, Math.min(p.h, img.height)),
+    }));
+  };
+  const applyCrop = () => {
+    setError('');
+    setResult(null);
+    const img = imgRef.current;
+    if (!img) return;
     const scaleX = img.naturalWidth / img.width;
     const scaleY = img.naturalHeight / img.height;
-    canvas.width = crop.w * scaleX;
-    canvas.height = crop.h * scaleY;
+    const x = Math.max(0, Math.min(crop.x, img.width));
+    const y = Math.max(0, Math.min(crop.y, img.height));
+    const w = Math.max(0, Math.min(crop.w, img.width - x));
+    const h = Math.max(0, Math.min(crop.h, img.height - y));
+    if (w <= 0 || h <= 0) {
+      setError('Crop area is outside the image bounds. Adjust X/Y/Width/Height.');
+      return;
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(w * scaleX);
+    canvas.height = Math.round(h * scaleY);
     const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, crop.x * scaleX, crop.y * scaleY, crop.w * scaleX, crop.h * scaleY, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, x * scaleX, y * scaleY, w * scaleX, h * scaleY, 0, 0, canvas.width, canvas.height);
     setResult(canvas.toDataURL('image/png'));
   };
   return (
@@ -27,18 +59,19 @@ export default function ImageCropperPage() {
         <p className="text-neutral-500 text-center mb-8">Crop images with custom dimensions</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            {image ? <img ref={imgRef} src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
+            {image ? <img ref={imgRef} src={image} onLoad={onImageLoad} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
           {image && (
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="block text-sm text-neutral-500 mb-1">X: {crop.x}px</label><input type="range" min="0" max="500" value={crop.x} onChange={e => setCrop(p => ({...p, x: parseInt(e.target.value)}))} className="w-full" /></div>
-              <div><label className="block text-sm text-neutral-500 mb-1">Y: {crop.y}px</label><input type="range" min="0" max="500" value={crop.y} onChange={e => setCrop(p => ({...p, y: parseInt(e.target.value)}))} className="w-full" /></div>
-              <div><label className="block text-sm text-neutral-500 mb-1">Width: {crop.w}px</label><input type="range" min="10" max="1000" value={crop.w} onChange={e => setCrop(p => ({...p, w: parseInt(e.target.value)}))} className="w-full" /></div>
-              <div><label className="block text-sm text-neutral-500 mb-1">Height: {crop.h}px</label><input type="range" min="10" max="1000" value={crop.h} onChange={e => setCrop(p => ({...p, h: parseInt(e.target.value)}))} className="w-full" /></div>
+              <div><label className="block text-sm text-neutral-500 mb-1">X: {crop.x}px</label><input type="range" min="0" max={Math.max(imgDims.width, 1)} value={crop.x} onChange={e => setCrop(p => ({...p, x: parseInt(e.target.value)}))} className="w-full" /></div>
+              <div><label className="block text-sm text-neutral-500 mb-1">Y: {crop.y}px</label><input type="range" min="0" max={Math.max(imgDims.height, 1)} value={crop.y} onChange={e => setCrop(p => ({...p, y: parseInt(e.target.value)}))} className="w-full" /></div>
+              <div><label className="block text-sm text-neutral-500 mb-1">Width: {crop.w}px</label><input type="range" min="1" max={Math.max(imgDims.width, 1)} value={crop.w} onChange={e => setCrop(p => ({...p, w: parseInt(e.target.value)}))} className="w-full" /></div>
+              <div><label className="block text-sm text-neutral-500 mb-1">Height: {crop.h}px</label><input type="range" min="1" max={Math.max(imgDims.height, 1)} value={crop.h} onChange={e => setCrop(p => ({...p, h: parseInt(e.target.value)}))} className="w-full" /></div>
             </div>
           )}
           <button onClick={applyCrop} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Crop Image</button>
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="cropped.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>

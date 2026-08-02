@@ -24,6 +24,7 @@ export default function ImageToGifPage() {
   const createGif = async () => {
     if (images.length < 2) return;
     setLoading(true);
+    setResult(null);
     try {
       const { GIFEncoder, quantize, applyPalette } = await import('gifenc');
       const canvas = document.createElement('canvas');

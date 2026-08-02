@@ -7,10 +7,14 @@ export default function FileSplitterPage() {
   const [unit, setUnit] = useState('MB');
   const [chunks, setChunks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const inputRef = useRef();
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setChunks([]); };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setChunks([]); setError(''); };
+  const chunkSizeValid = Number.isFinite(chunkSize) && chunkSize > 0;
   const split = async () => {
     if (!file) return;
+    if (!chunkSizeValid) { setError('Chunk size must be a positive number.'); return; }
+    setError('');
     setLoading(true);
     const sizes = { B: 1, KB: 1024, MB: 1024*1024 };
     const bytesPerChunk = chunkSize * sizes[unit];
@@ -40,7 +44,8 @@ export default function FileSplitterPage() {
             <div><label className="block text-sm text-neutral-500 mb-1">Chunk Size</label><input type="number" min="1" value={chunkSize} onChange={e => setChunkSize(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
             <div><label className="block text-sm text-neutral-500 mb-1">Unit</label><select value={unit} onChange={e => setUnit(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3"><option>B</option><option>KB</option><option>MB</option></select></div>
           </div>
-          <button onClick={split} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">{loading ? 'Splitting...' : 'Split File'}</button>
+          <button onClick={split} disabled={!file || loading || !chunkSizeValid} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">{loading ? 'Splitting...' : 'Split File'}</button>
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {chunks.length > 0 && (
             <div className="space-y-2">
               <p className="text-green-400 text-center">{chunks.length} part(s) created</p>

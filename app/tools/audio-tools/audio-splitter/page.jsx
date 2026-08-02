@@ -13,11 +13,27 @@ export default function AudioSplitterPage() {
   const fileRef = useRef();
   const audioRef = useRef();
 
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setResults([]); };
-  const onLoaded = () => { setDuration(Math.floor(audioRef.current.duration)); };
+  const handleFile = (e) => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    setFile(f);
+    setResults([]);
+    setError('');
+    setDuration(0);
+    setSplitAt(30);
+  };
+  const onLoaded = () => {
+    const dur = Math.floor(audioRef.current.duration);
+    setDuration(dur);
+    setSplitAt(s => Math.min(Math.max(s, 1), Math.max(dur - 1, 1)));
+  };
 
   const split = async () => {
     if (!file) return;
+    if (splitAt <= 0 || splitAt >= duration) {
+      setError('Split point must be within the audio duration.');
+      return;
+    }
     setLoading(true);
     setError('');
     try {

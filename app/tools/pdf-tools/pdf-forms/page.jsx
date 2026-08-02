@@ -17,6 +17,9 @@ export default function Page() {
     e.target.value = '';
     setFile(f);
     setResult(null);
+    setError('');
+    setFields([]);
+    setValues({});
     setLoading(true);
     try {
       const { PDFDocument } = await import('pdf-lib');
@@ -28,7 +31,11 @@ export default function Page() {
       const vals = {};
       fieldList.forEach(f => vals[f.name] = '');
       setValues(vals);
-    } catch(e) { setError('Could not read form fields: ' + e.message); }
+    } catch(e) {
+      setError('Could not read form fields: ' + e.message);
+      setFields([]);
+      setValues({});
+    }
     setLoading(false);
   };
 

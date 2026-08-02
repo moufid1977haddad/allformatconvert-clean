@@ -59,8 +59,9 @@ export default function ImageConverterPage() {
     setProcessing(true);
     setError('');
     const results: ConvertedFile[] = [];
-    try {
-      for (const file of files) {
+    const failures: string[] = [];
+    for (const file of files) {
+      try {
         const convertedBlob = await convertImage(file);
         results.push({
           originalName: file.name,
@@ -68,10 +69,13 @@ export default function ImageConverterPage() {
           convertedBlob,
           convertedSize: convertedBlob.size,
         });
+      } catch (err) {
+        failures.push(`${file.name}: ${err instanceof Error ? err.message : 'conversion failed'}`);
       }
-      setConverted(results);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to convert one or more files.');
+    }
+    setConverted(results);
+    if (failures.length > 0) {
+      setError(`${failures.length} file${failures.length > 1 ? 's' : ''} failed to convert:\n` + failures.join('\n'));
     }
     setProcessing(false);
   };
@@ -138,7 +142,7 @@ export default function ImageConverterPage() {
           <p className="text-neutral-400 dark:text-neutral-500 text-sm mt-1">or click to browse — PNG, JPG, WebP, AVIF, GIF, BMP, TIFF</p>
         </div>
 
-        {error && <p className="text-red-500 text-center text-sm mt-4">{error}</p>}
+        {error && <p className="text-red-500 text-center text-sm mt-4 whitespace-pre-line">{error}</p>}
 
         {/* File list */}
         {files.length > 0 && (
