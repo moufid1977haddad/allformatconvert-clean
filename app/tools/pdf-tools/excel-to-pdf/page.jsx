@@ -23,7 +23,8 @@ export default function ExcelToPdfPage() {
     setDone(false);
     setStatus('Converting...');
     try {
-      const XLSX = (await import('xlsx')).default;
+      const xlsxModule = await import('xlsx');
+      const XLSX = xlsxModule.default || xlsxModule;
       const arrayBuffer = await file.arrayBuffer();
       const workbook = XLSX.read(arrayBuffer, { type: 'array' });
       let allHtml = '';
