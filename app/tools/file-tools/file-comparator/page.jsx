@@ -5,15 +5,22 @@ export default function FileComparatorPage() {
   const [file1, setFile1] = useState(null);
   const [file2, setFile2] = useState(null);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
   const ref1 = useRef();
   const ref2 = useRef();
   const compare = async () => {
     if (!file1 || !file2) return;
-    const [buf1, buf2] = await Promise.all([file1.arrayBuffer(), file2.arrayBuffer()]);
-    const bytes1 = new Uint8Array(buf1);
-    const bytes2 = new Uint8Array(buf2);
-    const identical = bytes1.length === bytes2.length && bytes1.every((b, i) => b === bytes2[i]);
-    setResult({ identical, size1: file1.size, size2: file2.size, name1: file1.name, name2: file2.name });
+    setError('');
+    try {
+      const [buf1, buf2] = await Promise.all([file1.arrayBuffer(), file2.arrayBuffer()]);
+      const bytes1 = new Uint8Array(buf1);
+      const bytes2 = new Uint8Array(buf2);
+      const identical = bytes1.length === bytes2.length && bytes1.every((b, i) => b === bytes2[i]);
+      setResult({ identical, size1: file1.size, size2: file2.size, name1: file1.name, name2: file2.name });
+    } catch (err) {
+      setError('Failed to compare files: ' + (err?.message || 'unknown error'));
+      setResult(null);
+    }
   };
   const formatSize = (b) => b < 1024 ? b + ' B' : b < 1024*1024 ? (b/1024).toFixed(2) + ' KB' : (b/(1024*1024)).toFixed(2) + ' MB';
   return (
@@ -33,6 +40,7 @@ export default function FileComparatorPage() {
             </div>
           </div>
           <button onClick={compare} disabled={!file1 || !file2} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Compare Files</button>
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {result && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center space-y-3">
               <div className={result.identical ? 'text-green-400 text-2xl font-bold' : 'text-red-400 text-2xl font-bold'}>{result.identical ? 'Files are identical' : 'Files are different'}</div>

@@ -7,7 +7,7 @@ export default function CaseConverterPage() {
   const [copyError, setCopyError] = useState(false);
   const toUpper = () => setText(text.toUpperCase());
   const toLower = () => setText(text.toLowerCase());
-  const toTitle = () => setText(text.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()));
+  const toTitle = () => setText(text.replace(/\p{L}\S*/gu, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()));
   const toSentence = () => setText(text.charAt(0).toUpperCase() + text.slice(1).toLowerCase());
   const toAlternate = () => setText(text.split('').map((c, i) => i % 2 === 0 ? c.toLowerCase() : c.toUpperCase()).join(''));
   return (

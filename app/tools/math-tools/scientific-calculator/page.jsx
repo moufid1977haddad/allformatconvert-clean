@@ -21,6 +21,7 @@ export default function ScientificCalculatorPage() {
         .replace(/(?<![0-9.])e(?![0-9])/g, 'Math.E')
         .replace(/\^/g, '**');
       const r = eval(e);
+      if (!isFinite(r)) return 'Cannot divide by zero';
       return parseFloat(r.toFixed(10)).toString();
     } catch { return 'Error'; }
   };

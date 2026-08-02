@@ -27,16 +27,27 @@ export default function FractionCalculatorPage() {
   const [n2, setN2] = useState('');
   const [d2, setD2] = useState('');
   const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
   const [op, setOp] = useState('+');
 
   const calculate = () => {
+    setError('');
     const a = parseInt(n1), b = parseInt(d1), c = parseInt(n2), d = parseInt(d2);
-    if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d) || b === 0 || d === 0) return;
+    if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d) || b === 0 || d === 0) {
+      setResult(null);
+      setError('Denominators cannot be zero.');
+      return;
+    }
     let num, den;
     if (op === '+') { num = a*d + c*b; den = b*d; }
     else if (op === '-') { num = a*d - c*b; den = b*d; }
     else if (op === '*') { num = a*c; den = b*d; }
     else { num = a*d; den = b*c; }
+    if (den === 0) {
+      setResult(null);
+      setError('Cannot divide by zero.');
+      return;
+    }
     const simplified = simplify(num, den);
     setResult({ ...simplified, decimal: (simplified.num / simplified.den).toFixed(6) });
   };
@@ -105,6 +116,11 @@ export default function FractionCalculatorPage() {
             <div style={{ marginTop:'20px', background: dark ? '#0a0a0a' : '#f9fafb', border:`1px solid ${border}`, borderRadius:'12px', padding:'24px', textAlign:'center' }}>
               <div style={{ fontSize:'36px', fontWeight:'800', color:'#6366f1' }}>{result.num}/{result.den}</div>
               <div style={{ color: textSub, marginTop:'8px' }}>= {result.decimal}</div>
+            </div>
+          )}
+          {error && (
+            <div style={{ marginTop:'20px', background: dark ? '#2c1215' : '#fef2f2', border:'1px solid #ef4444', borderRadius:'12px', padding:'16px', textAlign:'center', color:'#ef4444', fontWeight:'600' }}>
+              {error}
             </div>
           )}
         </div>

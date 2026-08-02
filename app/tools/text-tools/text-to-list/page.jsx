@@ -5,10 +5,11 @@ import SeoContent from '../../../components/SeoContent';
 export default function TextToListPage() {
   const [text, setText] = useState('');
   const [result, setResult] = useState('');
+  const [hasResult, setHasResult] = useState(false);
   const [copyError, setCopyError] = useState(false);
-  const toBullet = () => setResult(text.split('\n').filter(l => l.trim()).map(l => '• ' + l.trim()).join('\n'));
-  const toNumbered = () => setResult(text.split('\n').filter(l => l.trim()).map((l, i) => (i+1) + '. ' + l.trim()).join('\n'));
-  const toComma = () => setResult(text.split('\n').filter(l => l.trim()).join(', '));
+  const toBullet = () => { setResult(text.split('\n').filter(l => l.trim()).map(l => '• ' + l.trim()).join('\n')); setHasResult(true); };
+  const toNumbered = () => { setResult(text.split('\n').filter(l => l.trim()).map((l, i) => (i+1) + '. ' + l.trim()).join('\n')); setHasResult(true); };
+  const toComma = () => { setResult(text.split('\n').filter(l => l.trim()).join(', ')); setHasResult(true); };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
@@ -21,13 +22,15 @@ export default function TextToListPage() {
             <button onClick={toNumbered} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition">Numbered List</button>
             <button onClick={toComma} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition">Comma List</button>
           </div>
-          {result && (
+          {hasResult && (result ? (
             <div className="space-y-2">
               <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={result} readOnly />
               <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
               {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
             </div>
-          )}
+          ) : (
+            <p className="text-neutral-500 text-center text-sm bg-neutral-50 border border-neutral-200 rounded-xl py-4">Result is empty</p>
+          ))}
         </div>
       </div>
       <SeoContent

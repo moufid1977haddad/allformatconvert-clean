@@ -5,11 +5,12 @@ import SeoContent from '../../../components/SeoContent';
 export default function WhitespaceRemoverPage() {
   const [text, setText] = useState('');
   const [result, setResult] = useState('');
+  const [hasResult, setHasResult] = useState(false);
   const [copyError, setCopyError] = useState(false);
-  const removeAll = () => setResult(text.replace(/\s+/g, ' ').trim());
-  const removeExtra = () => setResult(text.replace(/[ \t]+/g, ' ').trim());
-  const removeLeading = () => setResult(text.split('\n').map(l => l.trimStart()).join('\n'));
-  const removeTrailing = () => setResult(text.split('\n').map(l => l.trimEnd()).join('\n'));
+  const removeAll = () => { setResult(text.replace(/\s+/g, ' ').trim()); setHasResult(true); };
+  const removeExtra = () => { setResult(text.replace(/[ \t]+/g, ' ').trim()); setHasResult(true); };
+  const removeLeading = () => { setResult(text.split('\n').map(l => l.trimStart()).join('\n')); setHasResult(true); };
+  const removeTrailing = () => { setResult(text.split('\n').map(l => l.trimEnd()).join('\n')); setHasResult(true); };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
@@ -23,13 +24,15 @@ export default function WhitespaceRemoverPage() {
             <button onClick={removeLeading} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition">Remove Leading</button>
             <button onClick={removeTrailing} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition">Remove Trailing</button>
           </div>
-          {result && (
+          {hasResult && (result ? (
             <div className="space-y-2">
               <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={result} readOnly />
               <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
               {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
             </div>
-          )}
+          ) : (
+            <p className="text-neutral-500 text-center text-sm bg-neutral-50 border border-neutral-200 rounded-xl py-4">Result is empty</p>
+          ))}
         </div>
       </div>
       <SeoContent

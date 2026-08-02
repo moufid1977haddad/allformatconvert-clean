@@ -10,6 +10,7 @@ export default function FindReplacePage() {
   const [replace, setReplace] = useState('');
   const [useRegex, setUseRegex] = useState(false);
   const [result, setResult] = useState('');
+  const [hasResult, setHasResult] = useState(false);
   const [count, setCount] = useState(0);
   const [error, setError] = useState('');
   const [copyError, setCopyError] = useState(false);
@@ -23,11 +24,13 @@ export default function FindReplacePage() {
     } catch (e) {
       setError(e.message);
       setResult('');
+      setHasResult(false);
       return;
     }
     const matches = (text.match(regex) || []).length;
     setCount(matches);
     setResult(text.replace(regex, replace));
+    setHasResult(true);
   };
 
   return (
@@ -53,12 +56,18 @@ export default function FindReplacePage() {
           </label>
           <button onClick={doReplace} disabled={!text || !find} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Replace All</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && (
+          {hasResult && (
             <div className="space-y-2">
               <p className="text-green-400 text-sm text-center">{count} replacement(s) made</p>
-              <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-40 resize-none" value={result} readOnly />
-              <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
-              {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
+              {result ? (
+                <>
+                  <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-40 resize-none" value={result} readOnly />
+                  <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
+                  {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
+                </>
+              ) : (
+                <p className="text-neutral-500 text-center text-sm bg-neutral-50 border border-neutral-200 rounded-xl py-4">Result is empty</p>
+              )}
             </div>
           )}
         </div>

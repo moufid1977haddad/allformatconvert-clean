@@ -5,9 +5,12 @@ export default function AspectRatioPage() {
   const [w, setW] = useState('1920');
   const [h, setH] = useState('1080');
   const gcd = (a,b) => b === 0 ? a : gcd(b, a%b);
-  const g = gcd(parseInt(w)||1, parseInt(h)||1);
-  const ratio = `${(parseInt(w)||1)/g}:${(parseInt(h)||1)/g}`;
-  const decimal = ((parseInt(w)||1)/(parseInt(h)||1)).toFixed(4);
+  const parseVal = (v) => { const n = parseInt(v, 10); return Number.isNaN(n) ? 1 : n; };
+  const wNum = parseVal(w);
+  const hNum = parseVal(h);
+  const g = gcd(wNum, hNum);
+  const ratio = `${wNum/g}:${hNum/g}`;
+  const decimal = (wNum/hNum).toFixed(4);
   const presets = [['16:9','1920x1080'],['4:3','1024x768'],['1:1','1080x1080'],['21:9','2560x1080'],['9:16','1080x1920']];
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

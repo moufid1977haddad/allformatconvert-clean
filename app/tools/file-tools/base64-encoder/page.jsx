@@ -5,16 +5,25 @@ export default function FileBase64EncoderPage() {
   const [result, setResult] = useState('');
   const [fileName, setFileName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const inputRef = useRef();
   const encode = async (e) => {
     const file = e.target.files[0];
     e.target.value = '';
     if (!file) return;
     setLoading(true);
+    setError('');
+    setResult('');
     setFileName(file.name);
-    const reader = new FileReader();
-    reader.onload = () => { setResult(reader.result); setLoading(false); };
-    reader.readAsDataURL(file);
+    try {
+      const reader = new FileReader();
+      reader.onload = () => { setResult(reader.result); setLoading(false); };
+      reader.onerror = () => { setError('Failed to read file: ' + (reader.error?.message || 'unknown error')); setLoading(false); };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      setError('Failed to read file: ' + (err?.message || 'unknown error'));
+      setLoading(false);
+    }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -27,6 +36,7 @@ export default function FileBase64EncoderPage() {
             <input ref={inputRef} type="file" className="hidden" onChange={encode} />
           </div>
           {loading && <p className="text-center text-neutral-500">Encoding...</p>}
+          {error && <p className="text-center text-red-400 text-sm">{error}</p>}
           {result && (
             <div className="space-y-2">
               <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-xs h-48 resize-none font-mono" value={result} readOnly />

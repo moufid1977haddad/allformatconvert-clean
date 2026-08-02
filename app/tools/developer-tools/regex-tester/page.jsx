@@ -9,7 +9,8 @@ export default function RegexTesterPage() {
   const test = () => {
     try {
       const regex = new RegExp(pattern, flags);
-      const found = [...text.matchAll(new RegExp(pattern, 'g'))];
+      const globalFlags = flags.includes('g') ? flags : flags + 'g';
+      const found = [...text.matchAll(new RegExp(pattern, globalFlags))];
       setMatches({ count: found.length, matches: found.map(m => m[0]), isMatch: regex.test(text) });
     } catch(e) { setMatches({ error: e.message }); }
   };

@@ -16,17 +16,22 @@ export default function FileSplitterPage() {
     if (!chunkSizeValid) { setError('Chunk size must be a positive number.'); return; }
     setError('');
     setLoading(true);
-    const sizes = { B: 1, KB: 1024, MB: 1024*1024 };
-    const bytesPerChunk = chunkSize * sizes[unit];
-    const arrayBuffer = await file.arrayBuffer();
-    const bytes = new Uint8Array(arrayBuffer);
-    const newChunks = [];
-    for (let i = 0; i < bytes.length; i += bytesPerChunk) {
-      const chunk = bytes.slice(i, i + bytesPerChunk);
-      const blob = new Blob([chunk]);
-      newChunks.push({ url: URL.createObjectURL(blob), size: chunk.length, index: newChunks.length + 1 });
+    try {
+      const sizes = { B: 1, KB: 1024, MB: 1024*1024 };
+      const bytesPerChunk = chunkSize * sizes[unit];
+      const arrayBuffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+      const newChunks = [];
+      for (let i = 0; i < bytes.length; i += bytesPerChunk) {
+        const chunk = bytes.slice(i, i + bytesPerChunk);
+        const blob = new Blob([chunk]);
+        newChunks.push({ url: URL.createObjectURL(blob), size: chunk.length, index: newChunks.length + 1 });
+      }
+      setChunks(newChunks);
+    } catch (err) {
+      setError('Failed to split file: ' + (err?.message || 'unknown error'));
+      setChunks([]);
     }
-    setChunks(newChunks);
     setLoading(false);
   };
   const formatSize = (b) => b < 1024 ? b + ' B' : b < 1024*1024 ? (b/1024).toFixed(2) + ' KB' : (b/(1024*1024)).toFixed(2) + ' MB';

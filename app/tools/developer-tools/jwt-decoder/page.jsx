@@ -5,12 +5,17 @@ export default function JwtDecoderPage() {
   const [token, setToken] = useState('');
   const [decoded, setDecoded] = useState(null);
   const [error, setError] = useState('');
+  const b64UrlDecodeUtf8 = (str) => {
+    const binary = atob(str.replace(/-/g,'+').replace(/_/g,'/'));
+    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+    return new TextDecoder('utf-8').decode(bytes);
+  };
   const decode = () => {
     try {
       const parts = token.split('.');
       if (parts.length !== 3) throw new Error('Invalid JWT format');
-      const header = JSON.parse(atob(parts[0].replace(/-/g,'+').replace(/_/g,'/')));
-      const payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
+      const header = JSON.parse(b64UrlDecodeUtf8(parts[0]));
+      const payload = JSON.parse(b64UrlDecodeUtf8(parts[1]));
       setDecoded({ header, payload });
       setError('');
     } catch(e) { setError('Invalid JWT token'); }
