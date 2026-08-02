@@ -119,6 +119,121 @@ function minifyCss(input) {
     .trim();
 }
 
+// Elements whose content must be copied through byte-for-byte: <script> and
+// <style> can contain whitespace that's semantically meaningful (a multi-line
+// template literal, a quoted CSS string with repeated spaces), and <pre>/
+// <textarea> render whitespace exactly as written.
+const HTML_RAW_TAGS = new Set(['script', 'style', 'pre', 'textarea']);
+
+// Finds a raw-text element's matching closing tag (case-insensitive), e.g.
+// the real </script> for a <script> opened earlier — not just the next
+// occurrence of '<' followed by those letters, which could appear inside the
+// element's own text content in a way that isn't actually a tag.
+function findRawTagEnd(input, contentStart, tagName) {
+  const lower = input.toLowerCase();
+  const needle = '</' + tagName;
+  let idx = lower.indexOf(needle, contentStart);
+  while (idx !== -1) {
+    const after = lower[idx + needle.length];
+    if (after === undefined || after === '>' || after === '/' || /\s/.test(after)) {
+      let tagEnd = input.indexOf('>', idx);
+      tagEnd = tagEnd === -1 ? input.length : tagEnd + 1;
+      return { contentEnd: idx, tagEnd };
+    }
+    idx = lower.indexOf(needle, idx + needle.length);
+  }
+  return null;
+}
+
+// Strips real HTML comments and collapses whitespace with a state-machine
+// scanner, rather than a text-blind regex. A naive
+// `/<!--[\s\S]*?-->/g` doesn't know it's inside a tag's attribute value, so
+// an attribute containing '<!--' or '-->' can make it start or end a "comment"
+// match in the wrong place and delete real, visible content between them.
+// Here, an entire tag (including quoted attribute values) is consumed
+// atomically by a quote-aware scan before control returns to the top-level
+// loop, so nothing inside a tag is ever mistaken for a comment delimiter.
+// <script>, <style>, <pre>, and <textarea> content is likewise copied
+// through untouched rather than whitespace-collapsed.
+function minifyHtml(input) {
+  let out = '';
+  let i = 0;
+  const n = input.length;
+  let pendingSpace = false;
+
+  while (i < n) {
+    const c = input[i];
+
+    if (/\s/.test(c)) {
+      pendingSpace = true;
+      i++;
+      continue;
+    }
+
+    if (c === '<' && input[i + 1] === '!' && input[i + 2] === '-' && input[i + 3] === '-') {
+      const end = input.indexOf('-->', i + 4);
+      if (end !== -1) {
+        i = end + 3;
+        continue;
+      }
+      // Unterminated comment: fall through to the generic '<' handling below,
+      // same as a plain regex would leave an unmatchable '<!--' untouched.
+    }
+
+    const nextChar = input[i + 1];
+    const isTagStart = c === '<' && nextChar !== undefined
+      && (/[a-zA-Z]/.test(nextChar) || nextChar === '/' || nextChar === '!' || nextChar === '?');
+
+    if (!isTagStart) {
+      if (pendingSpace) { if (!(c === '<' && out.endsWith('>'))) out += ' '; pendingSpace = false; }
+      out += c;
+      i++;
+      continue;
+    }
+
+    if (pendingSpace) { if (!out.endsWith('>')) out += ' '; pendingSpace = false; }
+
+    const isClose = nextChar === '/';
+    const nameStart = isClose ? i + 2 : i + 1;
+    let j = nameStart;
+    while (j < n && /[a-zA-Z0-9-]/.test(input[j])) j++;
+    const tagName = input.slice(nameStart, j).toLowerCase();
+
+    // Scan to this tag's own unquoted '>' so a quoted attribute value can
+    // contain '<', '>', '<!--', or '-->' without ever being mistaken for
+    // markup structure.
+    let k = i + 1;
+    let quote = null;
+    while (k < n) {
+      const ch = input[k];
+      if (quote) {
+        if (ch === quote) quote = null;
+        k++;
+        continue;
+      }
+      if (ch === '"' || ch === "'") { quote = ch; k++; continue; }
+      if (ch === '>') { k++; break; }
+      k++;
+    }
+
+    out += input.slice(i, k).replace(/\s+/g, ' ');
+    i = k;
+
+    if (!isClose && HTML_RAW_TAGS.has(tagName)) {
+      const found = findRawTagEnd(input, i, tagName);
+      if (found) {
+        out += input.slice(i, found.tagEnd);
+        i = found.tagEnd;
+      } else {
+        out += input.slice(i);
+        i = n;
+      }
+    }
+  }
+
+  return out.trim();
+}
+
 export default function CodeMinifierPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -130,7 +245,7 @@ export default function CodeMinifierPage() {
     } else if (lang === 'css') {
       result = minifyCss(result);
     } else if (lang === 'html') {
-      result = result.replace(/<!--[\s\S]*?-->/g,'').replace(/\s+/g,' ').replace(/> </g,'><').trim();
+      result = minifyHtml(result);
     }
     setOutput(result);
   };
@@ -154,7 +269,7 @@ export default function CodeMinifierPage() {
       </div>
       <SeoContent
         title="Code Minifier"
-        description="Code Minifier strips comments and collapses whitespace for JS, TS, CSS, and HTML entirely in your browser — nothing is uploaded to a server. For JS/TS and CSS, it's string-aware: it never touches the contents of quoted strings, template literals, or /regex/ literals, so a URL like https://example.com inside a string or a template literal containing // won't get corrupted. This is a lightweight text-based minifier, not a full parser — it doesn't rename variables or eliminate dead code like tools such as Terser."
+        description="Code Minifier strips comments and collapses whitespace for JS, TS, CSS, and HTML entirely in your browser — nothing is uploaded to a server. For JS/TS and CSS, it's string-aware: it never touches the contents of quoted strings, template literals, or /regex/ literals, so a URL like https://example.com inside a string or a template literal containing // won't get corrupted. For HTML, it's a tag-aware scanner rather than a plain-text regex: it never mistakes a '<!--' or '-->' inside a quoted attribute value for a real comment delimiter, and it copies the contents of <script>, <style>, <pre>, and <textarea> through completely untouched instead of collapsing their whitespace. This is a lightweight minifier, not a full parser — it doesn't rename variables or eliminate dead code like tools such as Terser."
         howTo={[
           "Choose JS, TS, CSS, or HTML from the language buttons.",
           "Paste your code into the input box.",
@@ -163,14 +278,14 @@ export default function CodeMinifierPage() {
         ]}
         faqs={[
           { q: "Is Code Minifier free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Will minification break my code?", a: "For JS, TS, and CSS, comment-stripping and whitespace-collapsing skip over string, template literal, and regex contents, so things like URLs inside strings are left intact. The HTML minifier is simpler and just collapses whitespace and inter-tag gaps, which can occasionally affect visible spacing inside whitespace-sensitive tags like <pre> or <textarea>." },
+          { q: "Will minification break my code?", a: "For JS, TS, and CSS, comment-stripping and whitespace-collapsing skip over string, template literal, and regex contents, so things like URLs inside strings are left intact. For HTML, comment-stripping only recognizes real '<!--' ... '-->' delimiters in actual markup position — an attribute value that happens to contain that text won't be misread as a comment and won't cause real content to be deleted — and <script>, <style>, <pre>, and <textarea> content is preserved exactly as written rather than whitespace-collapsed." },
           { q: "What languages does it support?", a: "JavaScript, TypeScript, CSS, and HTML. There's no JSON-specific mode (use JSON Minifier for that) or support for other languages." },
           { q: "Does it store or upload my code?", a: "No, everything runs locally in your browser; your code is never sent to a server." }
         ]}
         tips={[
           "For JS/TS, whitespace inside strings, template literals, and regex literals is preserved exactly as written — only whitespace and comments in actual code get collapsed or removed.",
           "For CSS, quoted string values (e.g. content: \"a: b\") are left untouched even though spacing and punctuation elsewhere gets tightened.",
-          "The HTML minifier doesn't parse embedded <script> or <style> blocks specially, so review the output if your HTML has inline JS or CSS with meaningful whitespace.",
+          "For HTML, <script>, <style>, <pre>, and <textarea> content is left byte-for-byte untouched — safe for a multi-line template literal, a CSS string with meaningful repeated spaces, or preformatted text.",
           "Keep a copy of your original code before minifying, since there's no undo once you navigate away."
         ]}
       />
