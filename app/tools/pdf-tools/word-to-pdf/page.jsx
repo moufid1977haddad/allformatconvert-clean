@@ -160,7 +160,7 @@ export default function WordToPdfPage() {
     setDownloading(true);
     setStatus('Generating PDF...');
     if (pdfUrl) { URL.revokeObjectURL(pdfUrl); setPdfUrl(null); }
-    let container = null;
+    let offscreenWrapper = null;
     try {
       const mammoth = (await import('mammoth/mammoth.browser')).default;
       const html2pdfModule = await import('html2pdf.js');
@@ -169,13 +169,27 @@ export default function WordToPdfPage() {
       const { value: html } = await mammoth.convertToHtml({ arrayBuffer });
       const pageInfo = await extractPageInfo(arrayBuffer);
 
-      container = document.createElement('div');
-      container.style.cssText = 'position:fixed;left:-99999px;top:0;background:#fff;box-sizing:border-box;font-family:Arial,sans-serif;line-height:1.6;color:#000;'
+      // html2pdf.js's own toContainer() step deep-clones the element passed to
+      // .from() into ITS OWN wrapper (which sizes itself via height:auto). If
+      // that source element carries its own position:fixed/absolute + a large
+      // left offset (as this container needs, to stay off-screen while it's
+      // briefly attached to the live document), the clone inherits that same
+      // out-of-flow positioning once nested inside html2pdf's wrapper too —
+      // so it no longer contributes to the wrapper's auto height, the wrapper
+      // collapses to 0px, and html2canvas rasterizes a blank page. Keeping the
+      // off-screen positioning on a separate outer wrapper — and passing the
+      // normally-flowed (position:static) inner container to .from() — avoids
+      // that collapse while still hiding the staging area from the user.
+      offscreenWrapper = document.createElement('div');
+      offscreenWrapper.style.cssText = 'position:fixed;left:-99999px;top:0;';
+      const container = document.createElement('div');
+      container.style.cssText = 'background:#fff;box-sizing:border-box;font-family:Arial,sans-serif;line-height:1.6;color:#000;'
         + `width:${pageInfo.widthIn}in;`
         + `padding:${pageInfo.marginTopIn}in ${pageInfo.marginRightIn}in ${pageInfo.marginBottomIn}in ${pageInfo.marginLeftIn}in;`
         + pageInfo.borderDecl;
       container.innerHTML = '<style>h1,h2,h3{color:#000;}table{border-collapse:collapse;width:100%;}td,th{border:1px solid #ccc;padding:6px;}</style>' + html;
-      document.body.appendChild(container);
+      offscreenWrapper.appendChild(container);
+      document.body.appendChild(offscreenWrapper);
 
       const filename = (file.name.replace(/\.docx$/i, '') || 'document') + '.pdf';
       const opt = {
@@ -193,7 +207,7 @@ export default function WordToPdfPage() {
     } catch (err) {
       setStatus('Error: ' + err.message);
     } finally {
-      if (container && container.parentNode) container.parentNode.removeChild(container);
+      if (offscreenWrapper && offscreenWrapper.parentNode) offscreenWrapper.parentNode.removeChild(offscreenWrapper);
       setDownloading(false);
     }
   };
