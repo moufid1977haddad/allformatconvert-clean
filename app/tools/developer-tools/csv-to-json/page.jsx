@@ -1,15 +1,49 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+
+// RFC 4180-style CSV parser: splitting on plain commas/newlines breaks the
+// moment a quoted field contains one of those characters (e.g. "Smith, John"
+// or a value with an embedded newline) — the field gets sliced apart into
+// extra columns instead of staying intact. This tracks quote state so commas
+// and newlines inside a quoted field are treated as literal data, and a
+// doubled "" inside a quoted field is unescaped to a single ".
+function parseCsvRows(input) {
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+  let i = 0;
+  const n = input.length;
+  while (i < n) {
+    const c = input[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (input[i + 1] === '"') { field += '"'; i += 2; continue; }
+        inQuotes = false; i++; continue;
+      }
+      field += c; i++; continue;
+    }
+    if (c === '"') { inQuotes = true; i++; continue; }
+    if (c === ',') { row.push(field); field = ''; i++; continue; }
+    if (c === '\r') { i++; continue; }
+    if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; i++; continue; }
+    field += c; i++;
+  }
+  if (field !== '' || row.length > 0) { row.push(field); rows.push(row); }
+  return rows;
+}
+
 export default function CsvToJsonPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
   const convert = () => {
     try {
-      const lines = input.trim().split('\n');
-      const headers = lines[0].split(',').map(h => h.trim());
-      const result = lines.slice(1).map(line => { const vals = line.split(','); return Object.fromEntries(headers.map((h,i) => [h, vals[i]?.trim() || ''])); });
+      const rows = parseCsvRows(input.trim());
+      if (rows.length === 0) throw new Error('Empty CSV');
+      const headers = rows[0].map(h => h.trim());
+      const result = rows.slice(1).map(vals => Object.fromEntries(headers.map((h, i) => [h, (vals[i] ?? '').trim()])));
       setOutput(JSON.stringify(result, null, 2));
       setError('');
     } catch(e) { setError('Invalid CSV'); }
@@ -33,7 +67,7 @@ export default function CsvToJsonPage() {
       </div>
       <SeoContent
         title="CSV to JSON"
-        description="CSV to JSON parses pasted CSV text and converts it to an array of JSON objects entirely in your browser — nothing is uploaded to a server. The first line is treated as the header row, and each subsequent line is split on plain commas; it doesn't handle quoted fields that contain commas or other delimiters like semicolons or tabs."
+        description="CSV to JSON parses pasted CSV text and converts it to an array of JSON objects entirely in your browser — nothing is uploaded to a server. The first line is treated as the header row. Parsing is quote-aware: a field wrapped in double quotes can safely contain a comma or a newline (like 'Smith, John') without being split into extra columns, and a doubled double-quote inside a quoted field is unescaped to a single quote. It doesn't support delimiters other than commas, like semicolons or tabs."
         howTo={[
           "Paste your CSV text into the input box, with a header row as the first line.",
           "Click 'Convert' to generate the JSON array.",
@@ -43,12 +77,12 @@ export default function CsvToJsonPage() {
         faqs={[
           { q: "Does it support file upload, or only pasted text?", a: "Only pasted text — there's no file picker or drag-and-drop upload." },
           { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser." },
-          { q: "Does it support delimiters other than commas, like semicolons or tabs?", a: "No, splitting is done on commas only." },
+          { q: "Does it support delimiters other than commas, like semicolons or tabs?", a: "No, splitting is done on commas only — though a comma inside a properly double-quoted field is treated as data, not a delimiter." },
           { q: "Can I download the JSON as a file?", a: "No, there's only a 'Copy' button — you'd need to paste the copied text into a file yourself." }
         ]}
         tips={[
           "Include a header row as the first line — those values become the keys in each JSON object.",
-          "Avoid commas inside individual values, since quoted fields with embedded commas aren't parsed correctly and will shift into the wrong keys.",
+          "Wrap a value in double quotes if it contains a comma (e.g. \"Smith, John\") — quoted fields are parsed correctly and won't shift into the wrong keys.",
           "Rows with fewer values than headers get empty strings for the missing fields.",
           "Validate the resulting JSON with a linter before using it in an application, especially for CSVs with unusual formatting."
         ]}

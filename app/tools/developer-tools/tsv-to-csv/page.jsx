@@ -1,10 +1,22 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+
+// RFC 4180-style CSV field writer: a value that itself contains a comma,
+// double quote, or newline is indistinguishable from a delimiter unless it's
+// wrapped in double quotes (with any internal quote doubled), so a TSV value
+// like "Smith, John" must be quoted on the way out or a spreadsheet will read
+// it as two columns.
+function csvField(v) {
+  const s = String(v ?? '');
+  if (/[",\r\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
 export default function TsvToCsvPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const convert = () => setOutput(input.split('\n').map(line => line.split('\t').join(',')).join('\n'));
+  const convert = () => setOutput(input.split('\n').map(line => line.split('\t').map(csvField).join(',')).join('\n'));
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-4xl mx-auto">
@@ -23,7 +35,7 @@ export default function TsvToCsvPage() {
       </div>
       <SeoContent
         title="TSV to CSV"
-        description="TSV to CSV replaces every tab character with a comma, line by line, entirely in your browser — nothing is uploaded to a server. It's a straight text substitution: there's no file upload, only pasted text, and if any value itself contains a comma, the resulting CSV field won't be quoted, so that comma will look like an extra column when opened in a spreadsheet."
+        description="TSV to CSV converts tab-separated values to comma-separated values entirely in your browser — nothing is uploaded to a server. Output fields are quoted per the standard CSV convention whenever needed: a value containing a comma, a double quote, or a newline is wrapped in double quotes (with any internal quote doubled), so that value is read back as a single column rather than splitting apart in a spreadsheet."
         howTo={[
           "Paste your TSV text into the input box (there's no file upload — paste the contents directly).",
           "Click 'Convert' to replace tabs with commas.",
@@ -34,11 +46,10 @@ export default function TsvToCsvPage() {
           { q: "What's the difference between TSV and CSV?", a: "TSV separates values with tabs; CSV uses commas. This tool converts the delimiter from tabs to commas." },
           { q: "Does it support file upload, or only pasted text?", a: "Only pasted text — there's no file picker or drag-and-drop upload." },
           { q: "Is my data uploaded to a server?", a: "No, the conversion happens entirely in your browser." },
-          { q: "Does it handle values that already contain a comma?", a: "Not safely — the output isn't quoted, so a value containing a comma will look like an extra column when the CSV is opened in a spreadsheet." }
+          { q: "Does it handle values that already contain a comma?", a: "Yes — any value containing a comma, quote, or newline is automatically wrapped in double quotes in the output, so it's read back as a single column rather than looking like an extra one." }
         ]}
         tips={[
-          "Works cleanly for TSV data that doesn't contain commas within individual values.",
-          "If a value already contains a comma, consider wrapping that field in quotes yourself after conversion, since the tool doesn't do this automatically.",
+          "Values containing a comma, quote, or newline are quoted automatically in the output — no manual cleanup needed for those.",
           "There's no file size limit enforced by the tool, but very large pastes are limited by your browser's performance.",
           "Copy the result right away, since there's no download button or saved history."
         ]}
