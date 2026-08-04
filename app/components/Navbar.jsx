@@ -1,7 +1,8 @@
 ﻿'use client';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
+import { supabase } from '@/lib/supabase';
 
 const categories = [
   { href: '/tools/pdf-tools', label: 'PDF' },
@@ -557,6 +558,7 @@ const tickerTools = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [dark, setDark] = useState(false);
   const [search, setSearch] = useState('');
   const [results, setResults] = useState([]);
@@ -566,6 +568,9 @@ export default function Navbar() {
   const isScrollingRef = useRef(false);
   const [currentLang, setCurrentLang] = useState(languages[0]);
   const langRef = useRef(null);
+  const [user, setUser] = useState(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
 
   useEffect(() => {
     if (dark) document.documentElement.classList.add('dark');
@@ -575,10 +580,27 @@ export default function Navbar() {
   useEffect(() => {
     const handleClick = (e) => {
       if (langRef.current && !langRef.current.contains(e.target)) setLangOpen(false);
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setUserMenuOpen(false);
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    setUserMenuOpen(false);
+    await supabase.auth.signOut();
+    router.push('/');
+  };
 
   const handleSearch = (e) => {
     const q = e.target.value;
@@ -767,10 +789,37 @@ export default function Navbar() {
               )}
             </button>
 
-            {/* Login */}
-            <Link href="/signin" className="flex items-center px-2 py-1 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-700 dark:text-neutral-200 text-xs font-bold whitespace-nowrap">
-              Sign In
-            </Link>
+            {/* Login / Account */}
+            {user ? (
+              <div className="relative notranslate" ref={userMenuRef}>
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-700 dark:text-neutral-200 text-xs font-bold whitespace-nowrap"
+                >
+                  <span className="w-5 h-5 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[10px] shrink-0">
+                    {(user.user_metadata?.full_name || user.email || '?').charAt(0).toUpperCase()}
+                  </span>
+                  <span className="max-w-[90px] truncate">{user.user_metadata?.full_name || user.email}</span>
+                </button>
+                {userMenuOpen && (
+                  <div className="absolute top-full right-0 mt-1 w-48 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-xl shadow-lg z-50">
+                    <div className="px-3 py-2 text-xs text-neutral-500 dark:text-neutral-400 truncate border-b border-neutral-100 dark:border-neutral-700">
+                      {user.email}
+                    </div>
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full text-left px-3 py-2 text-xs text-neutral-700 dark:text-neutral-200 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900 transition rounded-b-xl"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link href="/signin" className="flex items-center px-2 py-1 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-700 dark:text-neutral-200 text-xs font-bold whitespace-nowrap">
+                Sign In
+              </Link>
+            )}
 
           </div>
         </div>
