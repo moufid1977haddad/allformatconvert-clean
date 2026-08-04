@@ -34,7 +34,7 @@ export async function POST(request) {
   try {
     await resend.emails.send({
       from: `OnlineConverTools Contact <contact@${process.env.RESEND_EMAIL_DOMAIN}>`,
-      to: ['moufid_haddad@icloud.com'],
+      to: ['contact@onlineconvertools.com'],
       replyTo: email,
       subject: `[Contact] ${subject} — ${name}`,
       text: `From: ${name} <${email}>\nSubject: ${subject}\n\n${message}`,
