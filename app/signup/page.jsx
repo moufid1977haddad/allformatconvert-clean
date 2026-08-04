@@ -26,17 +26,25 @@ export default function SignUpPage() {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-      options: { data: { full_name: form.name } }
-    });
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: { data: { full_name: form.name } }
+      });
 
-    if (error) {
-      setError(error.message);
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+      } else if (data?.user?.identities?.length === 0) {
+        setError('An account with this email already exists. Please sign in instead.');
+        setLoading(false);
+      } else {
+        setSuccess(true);
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
       setLoading(false);
-    } else {
-      setSuccess(true);
     }
   };
 

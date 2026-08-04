@@ -16,13 +16,18 @@ export default function SignInPage() {
     setLoading(true);
     setError('');
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      setError(error.message);
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+      } else {
+        router.push('/');
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
       setLoading(false);
-    } else {
-      router.push('/');
     }
   };
 
