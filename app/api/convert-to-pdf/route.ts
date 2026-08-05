@@ -11,7 +11,7 @@ const GOTENBERG_TIMEOUT_MS = 30_000;
 // ceiling.
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024;
 
-const ALLOWED_EXTENSIONS = new Set(["docx", "doc", "xlsx", "xls", "pptx", "ppt"]);
+const ALLOWED_EXTENSIONS = new Set(["docx", "doc", "xlsx", "xls", "csv", "pptx", "ppt"]);
 
 function getExtension(filename: string): string {
   const idx = filename.lastIndexOf(".");
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
   const extension = getExtension(file.name);
   if (!ALLOWED_EXTENSIONS.has(extension)) {
     return NextResponse.json(
-      { error: "Unsupported file type. Allowed: .docx, .doc, .xlsx, .xls, .pptx, .ppt" },
+      { error: "Unsupported file type. Allowed: .docx, .doc, .xlsx, .xls, .csv, .pptx, .ppt" },
       { status: 400 }
     );
   }
