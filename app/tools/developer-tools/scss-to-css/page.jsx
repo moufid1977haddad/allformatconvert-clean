@@ -1,11 +1,59 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+
+// Splits input into { code } and { protected } segments, so the
+// comment-stripping and '&' rewrites below can be applied only to code
+// segments — never to the contents of a quoted string or an unquoted
+// url(...) value like url(http://example.com/img.png), where the '//'
+// is part of the URL, not a comment.
+function splitScssSegments(input) {
+  const segments = [];
+  let i = 0;
+  const n = input.length;
+  let buf = '';
+  while (i < n) {
+    const c = input[i];
+
+    if (c === '"' || c === "'") {
+      if (buf) { segments.push({ code: buf }); buf = ''; }
+      const quote = c;
+      let str = c;
+      i++;
+      while (i < n) {
+        if (input[i] === '\\') { str += input[i] + (input[i + 1] || ''); i += 2; continue; }
+        if (input[i] === quote) { str += input[i]; i++; break; }
+        str += input[i]; i++;
+      }
+      segments.push({ protected: str });
+      continue;
+    }
+
+    if (/^url\(/i.test(input.slice(i, i + 4)) && input[i + 4] !== '"' && input[i + 4] !== "'") {
+      if (buf) { segments.push({ code: buf }); buf = ''; }
+      const close = input.indexOf(')', i + 4);
+      const end = close === -1 ? n : close + 1;
+      segments.push({ protected: input.slice(i, end) });
+      i = end;
+      continue;
+    }
+
+    buf += c;
+    i++;
+  }
+  if (buf) segments.push({ code: buf });
+  return segments;
+}
+
 export default function ScssToCssPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const convert = () => {
-    let css = input.replace(/\/\/[^\n]*/g,'').replace(/&:([\w-]+)/g,':$1').replace(/&\.([\w-]+)/g,'.$1');
+    const css = splitScssSegments(input)
+      .map(seg => seg.protected !== undefined
+        ? seg.protected
+        : seg.code.replace(/\/\/[^\n]*/g,'').replace(/&:([\w-]+)/g,':$1').replace(/&\.([\w-]+)/g,'.$1'))
+      .join('');
     setOutput(css.trim());
   };
   return (
@@ -42,7 +90,7 @@ export default function ScssToCssPage() {
         tips={[
           "This tool works best on SCSS that's already close to flat CSS, using only & for pseudo-classes or chained class selectors.",
           "For real SCSS features — nesting, variables, mixins, imports, math — use an actual Sass compiler (like the sass npm package or Dart Sass), not this tool.",
-          "Since comment-stripping isn't string-aware, a // sequence inside a url() value (like a URL) could be stripped incorrectly — check the output for such cases.",
+          "Quoted strings and url(...) values (including an unquoted URL like url(http://example.com/img.png)) are scanned as protected content, so a // sequence inside either one is left intact rather than stripped as a comment.",
           "Always review the output for validity before shipping it, since this isn't a full CSS/Sass parser."
         ]}
       />
