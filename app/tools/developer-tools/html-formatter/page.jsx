@@ -1,12 +1,42 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+
+// Splits adjacent tags ('><') onto separate lines like a plain
+// `replace(/></g, '>\n<')` would, but tracks whether the scan is inside a
+// tag and inside a quoted attribute value, so a '>' or '<' appearing inside
+// a quoted attribute (e.g. placeholder="a><b") is never mistaken for a real
+// tag boundary and split apart.
+function splitTags(input) {
+  let out = '';
+  let insideTag = false;
+  let quote = null;
+  for (let i = 0; i < input.length; i++) {
+    const c = input[i];
+    out += c;
+    if (!insideTag) {
+      if (c === '<') insideTag = true;
+      continue;
+    }
+    if (quote) {
+      if (c === quote) quote = null;
+      continue;
+    }
+    if (c === '"' || c === "'") { quote = c; continue; }
+    if (c === '>') {
+      insideTag = false;
+      if (input[i + 1] === '<') out += '\n';
+    }
+  }
+  return out;
+}
+
 export default function HtmlFormatterPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const format = () => {
     let indent = 0;
-    const lines = input.replace(/></g,'>\n<').split('\n');
+    const lines = splitTags(input).split('\n');
     const formatted = lines.map(line => {
       if (line.match(/^<\//)) indent--;
       const result = '  '.repeat(Math.max(0,indent)) + line.trim();
@@ -49,7 +79,7 @@ export default function HtmlFormatterPage() {
         tips={[
           "Works well for typical, well-formed HTML with standard tags; unusual or deeply nested markup may not indent perfectly since it's pattern-based, not a full parser.",
           "Self-closing tags like br, hr, img, input, link, and meta are recognized and won't throw off indentation — other void elements (like source or wbr) aren't specifically handled.",
-          "Text content isn't specially protected, so a stray > < sequence inside text (rare, but possible) could affect line breaks.",
+          "A quoted attribute value containing '><' (e.g. placeholder=\"a><b\") is scanned correctly and won't be split onto separate lines.",
           "Copy the result right away, since there's no file download or save feature."
         ]}
       />
