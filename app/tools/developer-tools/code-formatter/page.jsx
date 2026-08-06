@@ -1,6 +1,69 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+
+// Splits input into { code } and { string } segments by scanning quotes, so
+// the whitespace/punctuation regexes below can be applied only to code
+// segments — never to the contents of a quoted CSS value like
+// content: "a;b" — instead of running on the whole text blindly. Same
+// helper as css-formatter (this page is standalone, so it's copied rather
+// than imported).
+function splitCssSegments(input) {
+  const segments = [];
+  let i = 0;
+  const n = input.length;
+  let buf = '';
+  while (i < n) {
+    const c = input[i];
+    if (c === '"' || c === "'") {
+      if (buf) { segments.push({ code: buf }); buf = ''; }
+      const quote = c;
+      let str = c;
+      i++;
+      while (i < n) {
+        if (input[i] === '\\') { str += input[i] + (input[i + 1] || ''); i += 2; continue; }
+        if (input[i] === quote) { str += input[i]; i++; break; }
+        str += input[i]; i++;
+      }
+      segments.push({ string: str });
+      continue;
+    }
+    buf += c;
+    i++;
+  }
+  if (buf) segments.push({ code: buf });
+  return segments;
+}
+
+// Splits adjacent tags ('><') onto separate lines like a plain
+// `replace(/></g, '>\n<')` would, but tracks whether the scan is inside a
+// tag and inside a quoted attribute value, so a '>' or '<' appearing inside
+// a quoted attribute (e.g. placeholder="a><b") is never mistaken for a real
+// tag boundary. Same helper as html-formatter (copied for the same reason).
+function splitTags(input) {
+  let out = '';
+  let insideTag = false;
+  let quote = null;
+  for (let i = 0; i < input.length; i++) {
+    const c = input[i];
+    out += c;
+    if (!insideTag) {
+      if (c === '<') insideTag = true;
+      continue;
+    }
+    if (quote) {
+      if (c === quote) quote = null;
+      continue;
+    }
+    if (c === '"' || c === "'") { quote = c; continue; }
+    if (c === '>') {
+      insideTag = false;
+      if (input[i + 1] === '<') out += '\n';
+    }
+  }
+  return out;
+}
+
 export default function CodeFormatterPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -11,10 +74,15 @@ export default function CodeFormatterPage() {
       if (lang === 'json') {
         result = JSON.stringify(JSON.parse(input), null, 2);
       } else if (lang === 'css') {
-        result = input.replace(/\s+/g,' ').replace(/;/g,';\n  ').replace(/{/g,' {\n  ').replace(/}/g,'\n}\n').trim();
+        result = splitCssSegments(input)
+          .map(seg => seg.string !== undefined
+            ? seg.string
+            : seg.code.replace(/\s+/g,' ').replace(/;/g,';\n  ').replace(/{/g,' {\n  ').replace(/}/g,'\n}\n'))
+          .join('')
+          .trim();
       } else if (lang === 'html') {
         let i = 0;
-        result = input.replace(/></g,'>\n<').split('\n').map(l => {
+        result = splitTags(input).split('\n').map(l => {
           if (l.match(/^<\//)) i = Math.max(0,i-1);
           const r = '  '.repeat(i) + l.trim();
           if (l.match(/^<[^/][^>]*>$/) && !l.match(/\//)) i++;
