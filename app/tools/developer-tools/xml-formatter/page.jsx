@@ -1,6 +1,67 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+
+// Splits adjacent tags ('><') onto separate lines like a plain
+// `replace(/></g, '>\n<')` would, but scans <!--...--> comments and
+// <![CDATA[...]]> sections as opaque blocks — copied through untouched,
+// with no line break inserted inside them — and tracks quoted attribute
+// values within a tag. So a '><' sequence that's actually literal content
+// inside CDATA, a comment, or an attribute value is never mistaken for a
+// real tag boundary and split apart.
+function splitXmlTags(input) {
+  let out = '';
+  let i = 0;
+  const n = input.length;
+
+  const closeAndMaybeBreak = (end) => {
+    out += input.slice(i, end);
+    i = end;
+    if (i < n && input[i] === '<') out += '\n';
+  };
+
+  while (i < n) {
+    if (input[i] !== '<') {
+      out += input[i];
+      i++;
+      continue;
+    }
+
+    if (input.startsWith('<![CDATA[', i)) {
+      const close = input.indexOf(']]>', i + 9);
+      closeAndMaybeBreak(close === -1 ? n : close + 3);
+      continue;
+    }
+
+    if (input.startsWith('<!--', i)) {
+      const close = input.indexOf('-->', i + 4);
+      closeAndMaybeBreak(close === -1 ? n : close + 3);
+      continue;
+    }
+
+    // A regular tag (opening, closing, declaration, or processing
+    // instruction): scan to its own unquoted '>' so a quoted attribute
+    // value can contain '<', '>', or '><' without being mistaken for a tag
+    // boundary.
+    let j = i + 1;
+    let quote = null;
+    while (j < n) {
+      const ch = input[j];
+      if (quote) {
+        if (ch === quote) quote = null;
+        j++;
+        continue;
+      }
+      if (ch === '"' || ch === "'") { quote = ch; j++; continue; }
+      if (ch === '>') { j++; break; }
+      j++;
+    }
+    closeAndMaybeBreak(j);
+  }
+
+  return out;
+}
+
 export default function XmlFormatterPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -8,7 +69,7 @@ export default function XmlFormatterPage() {
   const format = () => {
     try {
       let indent = 0;
-      const formatted = input.replace(/></g,'>\n<').split('\n').map(line => {
+      const formatted = splitXmlTags(input).split('\n').map(line => {
         if (line.match(/^<\//)) indent = Math.max(0, indent-1);
         const result = '  '.repeat(indent) + line.trim();
         if (line.match(/^<[^/!?][^>]*[^/]>$/)) indent++;
@@ -37,7 +98,7 @@ export default function XmlFormatterPage() {
       </div>
       <SeoContent
         title="XML Formatter"
-        description="XML Formatter re-indents XML using line-based text processing, not a real XML parser, entirely in your browser — nothing is uploaded to a server. It correctly handles the XML declaration, comments, and self-closing tags without breaking indentation, but since it's text-based rather than a true parser, it doesn't validate whether the XML is well-formed, and any '><' pairs inside a CDATA section or comment will be split onto separate lines too, which can alter the content of that section."
+        description="XML Formatter re-indents XML using line-based text processing, not a real XML parser, entirely in your browser — nothing is uploaded to a server. It correctly handles the XML declaration and self-closing tags without breaking indentation, and it's scanner-based rather than a plain-text regex: <![CDATA[...]]> sections, <!--...--> comments, and quoted attribute values are recognized as opaque and copied through untouched, so a '><' sequence inside any of them is never mistaken for a real tag boundary. It still doesn't validate whether the XML is well-formed, since it's a text-based indenter, not a true parser."
         howTo={[
           "Paste your XML into the input box.",
           "Click 'Format' to re-indent it based on nesting depth.",
@@ -52,7 +113,7 @@ export default function XmlFormatterPage() {
         ]}
         tips={[
           "For strict validation of whether your XML is well-formed, use a dedicated XML validator, not this formatter.",
-          "Avoid formatting XML with CDATA sections or comments containing '><' sequences, since those can get split across lines.",
+          "CDATA sections, XML comments, and quoted attribute values are scanned as protected content, so a '><' sequence inside any of them won't get split across lines.",
           "Indentation uses a fixed 2-space step per nesting level and isn't configurable.",
           "Copy the result right after formatting, since there's no download button or saved history."
         ]}
