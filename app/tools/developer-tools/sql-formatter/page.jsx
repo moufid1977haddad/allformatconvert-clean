@@ -72,7 +72,7 @@ export default function SqlFormatterPage() {
       </div>
       <SeoContent
         title="SQL Formatter"
-        description="SQL Formatter breaks a fixed list of SQL keywords (SELECT, FROM, WHERE, JOIN, and about 20 others) onto new lines and adds a line break after every comma, entirely in your browser — nothing is uploaded to a server. It's a simple keyword-matching pass, not a real SQL parser, but it is string-aware: string literals ('...') and quoted identifiers (\"...\"), including ones with a doubled-quote escape like 'it''s', are scanned separately from the surrounding SQL, so a keyword or comma inside one is copied through untouched instead of getting an unwanted line break."
+        description="SQL Formatter breaks a fixed list of SQL keywords (SELECT, FROM, WHERE, JOIN, and about 20 others) onto new lines and adds a line break after every comma, entirely in your browser — nothing is uploaded to a server. It's a simple keyword-matching pass, not a real SQL parser, but it is string-aware: string literals ('...') and double-quoted identifiers, including ones with a doubled-quote escape like 'it''s', are scanned separately from the surrounding SQL, so a keyword or comma inside one is copied through untouched instead of getting an unwanted line break."
         howTo={[
           "Paste your SQL query into the input box.",
           "Click 'Format' to break keywords and comma-separated items onto new lines.",

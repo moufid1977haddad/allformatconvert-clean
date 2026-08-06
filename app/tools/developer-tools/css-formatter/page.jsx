@@ -71,7 +71,7 @@ export default function CssFormatterPage() {
       </div>
       <SeoContent
         title="CSS Formatter"
-        description="CSS Formatter expands or minifies CSS entirely in your browser using simple pattern-based rules — breaking lines at braces and semicolons for formatting, or stripping whitespace for minifying — rather than a full CSS parser. It is string-aware, though: quoted values are scanned separately from the surrounding code, so a content declaration containing a semicolon, brace, or repeated spaces (e.g. content: \"a;b\") is copied through untouched instead of having its whitespace or punctuation altered."
+        description="CSS Formatter expands or minifies CSS entirely in your browser using simple pattern-based rules — breaking lines at braces and semicolons for formatting, or stripping whitespace for minifying — rather than a full CSS parser. It is string-aware, though: quoted values are scanned separately from the surrounding code, so a content declaration containing a semicolon, brace, or repeated spaces (e.g. content: 'a;b') is copied through untouched instead of having its whitespace or punctuation altered."
         howTo={[
           "Paste your CSS into the input box.",
           "Click 'Format' to expand it with line breaks and indentation, or 'Minify' to compress it.",
