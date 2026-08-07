@@ -6,6 +6,7 @@ export default function AviToGifPage() {
   const [frames, setFrames] = useState([]);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [videoError, setVideoError] = useState(false);
   const videoRef = useRef();
   const inputRef = useRef();
 
@@ -16,6 +17,7 @@ export default function AviToGifPage() {
     setFile(f);
     setFrames([]);
     setResult(null);
+    setVideoError(false);
   };
 
   useEffect(() => {
@@ -28,10 +30,14 @@ export default function AviToGifPage() {
 
   const convert = async () => {
     if (!videoRef.current || !file) return;
+    const video = videoRef.current;
+    if (video.error || video.readyState === 0) {
+      setVideoError(true);
+      return;
+    }
     setLoading(true);
     try {
       const { GIFEncoder, quantize, applyPalette } = await import('gifenc');
-      const video = videoRef.current;
       const canvas = document.createElement('canvas');
       canvas.width = Math.min(video.videoWidth, 480);
       canvas.height = Math.min(video.videoHeight, 270);
@@ -65,12 +71,20 @@ export default function AviToGifPage() {
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800">AVI to GIF</h1>
         <p className="text-neutral-500 text-center mb-8">Convert AVI video to GIF frames</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-amber-800 text-sm">
+            ⚠️ Most web browsers, including Chrome, can't play AVI files at all — AVI is a legacy container with inconsistent codec support. This tool only works if <em>your specific browser</em> can decode your specific AVI file's codec, which many AVI files won't satisfy. If conversion fails, use a dedicated video converter to convert your file to MP4 first, then use <a href="/tools/gif-tools/mp4-to-gif" className="underline font-medium">MP4 to GIF</a> instead.
+          </div>
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-300 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop an AVI file here'}</p>
             <input ref={inputRef} type="file" accept="video/avi,video/x-msvideo" className="hidden" onChange={handleFile} />
           </div>
-          {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-100" />}
-          <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 text-white rounded-xl py-3 font-semibold transition">{loading ? 'Converting...' : 'Convert to GIF'}</button>
+          {file && <video ref={videoRef} controls onError={() => setVideoError(true)} className="w-full rounded-xl bg-neutral-100" />}
+          {videoError && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-sm">
+              This AVI file couldn't be loaded — your browser doesn't support its video codec. Convert it to MP4 with a dedicated video converter first, then use <a href="/tools/gif-tools/mp4-to-gif" className="underline font-medium">MP4 to GIF</a> instead.
+            </div>
+          )}
+          <button onClick={convert} disabled={!file || loading || videoError} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 text-white rounded-xl py-3 font-semibold transition">{loading ? 'Converting...' : 'Convert to GIF'}</button>
           {frames.length > 0 && (
             <div className="space-y-3">
               <p className="text-green-600 text-center font-semibold">{frames.length} frames extracted</p>
