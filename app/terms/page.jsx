@@ -3,7 +3,7 @@
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-2 text-neutral-800">Terms of Service</h1>
-        <p className="text-neutral-500 text-center mb-10">Last updated: May 31, 2025</p>
+        <p className="text-neutral-500 text-center mb-10">Last updated: August 6, 2026</p>
         <div className="space-y-6">
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
