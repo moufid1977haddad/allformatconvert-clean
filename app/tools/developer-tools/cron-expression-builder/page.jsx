@@ -28,7 +28,7 @@ export default function CronExpressionBuilderPage() {
       </div>
       <SeoContent
         title="Cron Expression Builder"
-        description="Cron Expression Builder lets you build a 5-field cron expression (minute, hour, day, month, weekday) by typing directly into five text boxes, or by clicking one of eight presets, entirely in your browser. There's no syntax validation, no next-run-time preview, and no dropdown menus or calendar/time pickers — whatever you type in each field is joined as-is into the final expression."
+        description="Cron Expression Builder assembles a 5-field cron string (minute, hour, day, month, weekday) live as you fill in five text boxes, with eight presets that go beyond the basics to include a weekday-only schedule and a 15-minute interval. It runs entirely client-side with no syntax checking, next-run preview, or calendar/time pickers — the value in each field is joined directly into the final expression, so double-check it against your scheduler's syntax."
         howTo={[
           "Type values into the Minute, Hour, Day, Month, and Weekday fields, or click a preset below to fill them in automatically.",
           "Watch the generated cron expression update live as you type.",

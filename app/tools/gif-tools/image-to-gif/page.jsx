@@ -85,9 +85,10 @@ export default function ImageToGifPage() {
       </div>
       <SeoContent
         title="Image to GIF"
-        description="Image to GIF assembles your uploaded images into a real, downloadable animated GIF file with an adjustable frame delay, using the gifenc library entirely in your browser — nothing is uploaded to a server. Each frame is quantized to its own 256-color palette; images with different dimensions are scaled to match the first image's size, which can stretch photos with a different aspect ratio."
+        description="Image to GIF turns a batch of photos already sitting on your device into one animated GIF file, processed entirely client-side with the gifenc library so nothing leaves your browser. Playback uses a single adjustable delay you control with a slider, and colors are quantized per-frame to a 256-color palette — mixing differently sized images stretches the odd ones out to match your first upload."
         howTo={[
           "Click the upload area and add two or more images.",
+          "Remove any image you don't want with the \"x\" on its thumbnail — the rest keep their order.",
           "Set your frame delay using the slider.",
           "Click \"Create GIF\", then preview and download the resulting animated GIF file."
         ]}
@@ -99,10 +100,10 @@ export default function ImageToGifPage() {
           { q: "Is my data private?", a: "Yes. Everything happens locally in your browser — nothing is uploaded to a server." }
         ]}
         tips={[
-          "Use images with the same dimensions to avoid any of them being stretched to fit the first image's size.",
-          "For photos or images with smooth gradients, expect some color banding since the encoder doesn't dither — flat-color graphics and icons encode more cleanly.",
-          "A shorter delay (50–150ms) creates faster, more fluid-looking motion; longer delays (300ms+) work well for slideshow-style GIFs.",
-          "Keep the frame count and image resolution reasonable — a large number of high-resolution images takes longer to quantize and encode."
+          "Match your source photos to the same resolution beforehand if possible — the tool scales everything to the first image's size rather than letterboxing.",
+          "High-resolution photos and large batches take longer to quantize and encode; downscale first if the conversion feels slow.",
+          "Expect some color banding on photos with smooth gradients or skin tones, since the 256-color palette is applied per frame without dithering.",
+          "The finished GIF and its frame count are shown before you download, so you can re-run with a different delay if the timing feels off."
         ]}
       />
     </div>

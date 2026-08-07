@@ -87,7 +87,7 @@ export default function ImageToPdfPage() {
       </div>
       <SeoContent
         title="Image to PDF"
-        description="Image to PDF combines JPG and PNG images into a single PDF file entirely in your browser using the pdf-lib library — your images are never uploaded to a server. Each image becomes its own page, sized to match that image's exact pixel dimensions."
+        description="Image to PDF turns any mix of JPG and PNG files into one downloadable PDF, processed locally with the pdf-lib library so nothing ever reaches a server. Build your file list across as many uploads as you like, drop any image you change your mind about with its ✕ button, then convert — each page comes out at that source image's exact pixel size."
         howTo={[
           "Click the upload area and select one or more JPG or PNG images from your device.",
           "Remove any image you don't want by clicking the ✕ next to it — files appear in the order you added them.",

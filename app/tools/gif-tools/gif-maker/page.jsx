@@ -85,7 +85,7 @@ export default function GifMakerPage() {
       </div>
       <SeoContent
         title="GIF Maker"
-        description="GIF Maker assembles your uploaded images into a real, downloadable animated GIF file with an adjustable frame delay, using the gifenc library entirely in your browser — nothing is uploaded to a server. Each frame is quantized to its own 256-color palette; images with different dimensions are scaled to match the first image's size, which can stretch photos with a different aspect ratio."
+        description="GIF Maker turns a sequence of photos or graphics into a real, downloadable animated GIF, entirely in your browser with the gifenc library — nothing is uploaded anywhere. One delay value applies to every frame, and each frame gets its own 256-color palette; if your source images aren't all the same size, later frames are stretched to match the first image's dimensions."
         howTo={[
           "Click the upload area and add two or more images to use as frames.",
           "Remove any image using the \"x\" button on its thumbnail.",
@@ -100,10 +100,10 @@ export default function GifMakerPage() {
           { q: "Is my data private?", a: "Yes. Everything happens locally in your browser — your images are never uploaded to a server." }
         ]}
         tips={[
-          "Use images with the same dimensions to avoid any of them being stretched to fit the first image's size.",
-          "For photos or images with smooth gradients, expect some color banding since the encoder doesn't dither — flat-color graphics and icons encode more cleanly.",
-          "A shorter delay (50–150ms) creates faster, more fluid-looking motion; longer delays (300ms+) work well for slideshow-style GIFs.",
-          "Keep the frame count and image resolution reasonable — a large number of high-resolution images takes longer to quantize and encode."
+          "Frames are added in the order you upload them, and there's no drag-and-drop reordering — arrange your file selection first if sequence matters.",
+          "Keep source images the same size; mismatched dimensions get stretched to fit the first frame rather than cropped or padded.",
+          "Flat-color graphics, icons, and logos encode cleanly — photos and smooth gradients can show visible banding since the encoder doesn't dither.",
+          "Short delays (50–150ms) read as fluid motion; longer delays (300ms+) suit slideshow-style GIFs where each frame should linger."
         ]}
       />
     </div>

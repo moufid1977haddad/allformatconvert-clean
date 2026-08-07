@@ -26,7 +26,7 @@ export default function CronExpressionPage() {
       </div>
       <SeoContent
         title="Cron Expression"
-        description="Cron Expression lets you build a 5-field cron expression (minute, hour, day, month, weekday) by typing directly into five text boxes, or by clicking one of six presets, entirely in your browser. There's no syntax validation, no next-run-time preview, and no visual calendar or dropdown pickers — whatever you type in each field is joined as-is into the final expression."
+        description="Cron Expression turns five simple text fields — minute, hour, day, month, weekday — into a valid cron string as you type, with six one-click presets (every minute, hour, day, week, month, year) to get started fast. Everything runs in your browser: there's no syntax validation, no next-run-time preview, and no calendar or dropdown pickers, so whatever you type in each field is joined as-is into the output."
         howTo={[
           "Type values into the Minute, Hour, Day, Month, and Weekday fields, or click a preset below to fill them in automatically.",
           "Watch the generated cron expression update live as you type.",
