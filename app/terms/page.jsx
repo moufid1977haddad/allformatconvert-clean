@@ -73,7 +73,7 @@
             <h2 className="text-xl font-bold text-neutral-800 mb-3">12. Contact Us</h2>
             <p className="text-neutral-600 text-sm leading-relaxed">If you have any questions about these Terms of Service, please contact us at:<br /><br />
             <strong>Email:</strong> <a href="mailto:contact@onlineconvertools.com" className="text-indigo-600 hover:underline">contact@onlineconvertools.com</a><br />
-            <strong>Website:</strong> <a href="/contact" className="text-indigo-600 hover:underline">onlineconvertools.com/contact</a></p>
+            <strong>Website:</strong> <a href="/contact" className="text-indigo-600 hover:underline">www.onlineconvertools.com/contact</a></p>
           </div>
 
         </div>
