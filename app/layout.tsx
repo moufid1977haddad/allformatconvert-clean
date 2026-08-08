@@ -14,11 +14,11 @@ export const metadata: Metadata = {
   keywords: ["pdf converter", "image converter", "video converter", "free online tools", "file converter", "compress pdf", "compress image", "online converter", "free pdf tools", "resize image online", "convert video online", "audio converter", "gif maker", "qr code generator", "json formatter", "background remover", "ai tools free"],
   authors: [{ name: "OnlineConverTools" }],
   creator: "OnlineConverTools",
-  metadataBase: new URL("https://onlineconvertools.com"),
+  metadataBase: new URL("https://www.onlineconvertools.com"),
   openGraph: {
     title: "OnlineConverTools - Free Online Tools",
     description: "232+ free online tools for converting, compressing and editing files. No sign-up required.",
-    url: "https://onlineconvertools.com",
+    url: "https://www.onlineconvertools.com",
     siteName: "OnlineConverTools",
     locale: "en_US",
     type: "website",

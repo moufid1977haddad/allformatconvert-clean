@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: [],
     },
-    sitemap: "https://onlineconvertools.com/sitemap.xml",
+    sitemap: "https://www.onlineconvertools.com/sitemap.xml",
   };
 }

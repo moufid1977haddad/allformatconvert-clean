@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://onlineconvertools.com";
+  const baseUrl = "https://www.onlineconvertools.com";
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, priority: 1.0 },
