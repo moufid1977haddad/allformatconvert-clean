@@ -1,13 +1,15 @@
 ﻿import Link from 'next/link';
+import { getToolCounts } from '@/lib/toolCounts';
 
 export default function Footer() {
+  const { total } = getToolCounts();
   return (
     <footer className="bg-white text-neutral-600 border-t border-neutral-200 mt-16">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <h3 className="font-black text-xl mb-3 bg-gradient-to-r from-indigo-600 to-violet-500 bg-clip-text text-transparent notranslate">OnlineConverTools</h3>
-            <p className="text-sm text-neutral-400 leading-relaxed font-light">200+ free online tools for converting, compressing and editing files. No sign-up required.</p>
+            <p className="text-sm text-neutral-400 leading-relaxed font-light">{total}+ free online tools for converting, compressing and editing files. No sign-up required.</p>
           </div>
           <div>
             <h4 className="font-bold text-sm uppercase tracking-widest text-neutral-400 mb-3">Tools</h4>
@@ -40,7 +42,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-neutral-200 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-neutral-400 font-light tracking-wide">© 2025 OnlineConverTools. All rights reserved.</p>
+          <p className="text-sm text-neutral-400 font-light tracking-wide">© 2026 OnlineConverTools. All rights reserved.</p>
           <div className="flex gap-6 text-sm">
             <Link href="/privacy" className="hover:text-indigo-600 transition font-medium">Privacy</Link>
             <Link href="/terms" className="hover:text-indigo-600 transition font-medium">Terms</Link>

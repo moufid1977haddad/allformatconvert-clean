@@ -29,12 +29,16 @@ const categories = [
   { icon: '🤖', color: 'text-cyan-400',   title: 'AI Tools',         description: 'AI-powered image and text tools',                  href: '/tools/ai-tools',            slug: 'ai-tools',            tools: ['Background Remover', 'Image Upscaler', 'Grammar Fixer'],                     count: 16 },
 ];
 
-const stats = [
-  { value: 232, label: 'Free Tools',  suffix: '+', icon: '🛠️' },
-  { value: 12,  label: 'Categories',  suffix: '',  icon: '📂' },
-  { value: 13,  label: 'Languages',   suffix: '',  icon: '🌍' },
-  { value: 190, label: 'Countries',   suffix: '+', icon: '🌐' },
-];
+const DEFAULT_TOOL_COUNT = 225;
+
+function buildStats(totalTools) {
+  return [
+    { value: totalTools, label: 'Free Tools', suffix: '+', icon: '🛠️' },
+    { value: 12,  label: 'Categories',  suffix: '',  icon: '📂' },
+    { value: 13,  label: 'Languages',   suffix: '',  icon: '🌍' },
+    { value: 190, label: 'Countries',   suffix: '+', icon: '🌐' },
+  ];
+}
 
 const badges = [
   { icon: '⚡', text: 'No signup required' },
@@ -89,10 +93,12 @@ function StatCard({ value, label, suffix, icon, animate, dark }) {
 export default function Home() {
   const dark = useDarkMode();
   const [statsVisible, setStatsVisible] = useState(false);
-  const [toolCounts, setToolCounts] = useState({});
+  const [toolCounts, setToolCounts] = useState({ counts: {}, total: DEFAULT_TOOL_COUNT });
   useEffect(() => {
     fetch('/api/tool-counts').then(r => r.json()).then(data => setToolCounts(data)).catch(() => {});
   }, []);
+  const totalTools = toolCounts.total || DEFAULT_TOOL_COUNT;
+  const stats = buildStats(totalTools);
   const statsRef = useRef(null);
 
   useEffect(() => {
@@ -153,13 +159,13 @@ export default function Home() {
           {/* LEFT */}
           <div className='hero-left' style={{ flex:1, animation:'fadeUp 0.7s ease both' }}>
             <div style={{ display:'inline-flex', alignItems:'center', gap:'8px', background: dark ? '#111111' : '#e2e8f0', border: dark ? '1px solid #334155' : '1px solid #cbd5e1', borderRadius:'999px', padding:'6px 16px', marginBottom:'24px', fontSize:'13px', color: dark ? '#94a3b8' : '#475569' }}>
-              ✨ 232+ free tools · No signup · No limits
+              ✨ {totalTools}+ free tools · No signup · No limits
             </div>
             <h1 style={{ fontSize:'clamp(36px,5vw,58px)', fontWeight:'800', color: dark ? '#f1f5f9' : '#0f172a', lineHeight:'1.1', marginBottom:'20px', letterSpacing:'-0.02em' }}>
               Convert anything.<br /><span style={{ color:'#6366f1' }}>Instantly. Free.</span>
             </h1>
             <p style={{ fontSize:'18px', color: dark ? '#94a3b8' : '#475569', lineHeight:'1.7', marginBottom:'32px', maxWidth:'480px' }}>
-              The fastest way to convert, compress, and transform your files — 232 tools, zero installation, completely free.
+              The fastest way to convert, compress, and transform your files — {totalTools} tools, zero installation, completely free.
             </p>
             <div style={{ display:'flex', flexWrap:'wrap', gap:'10px', marginBottom:'40px' }}>
               {badges.map(b => (
@@ -198,7 +204,7 @@ export default function Home() {
         <div style={{ maxWidth:'720px', margin:'0 auto' }}>
           <div style={{ fontSize:'48px', marginBottom:'12px', lineHeight:1, color: dark ? '#475569' : '#9ca3af' }}>"</div>
           <p style={{ fontSize:'clamp(18px,2.5vw,24px)', fontWeight:'600', color: dark ? '#e2e8f0' : '#1e1b4b', lineHeight:'1.6', marginBottom:'20px', fontStyle:'italic' }}>
-            The fastest way to convert, compress, and transform your files — 232 tools, zero installation, completely free.
+            The fastest way to convert, compress, and transform your files — {totalTools} tools, zero installation, completely free.
           </p>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'12px' }}>
             <div style={{ width:'40px', height:'2px', background: dark ? '#475569' : '#9ca3af' }} />
@@ -218,7 +224,7 @@ export default function Home() {
               <Link key={cat.href} href={cat.href} className="bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)]">
                 <div className="flex justify-between items-center w-full mb-3">
                   <div className={`text-3xl ${cat.color}`}>{cat.icon}</div>
-                  <span className="text-xs text-neutral-400 dark:text-neutral-500 bg-neutral-100 dark:bg-neutral-700 rounded-full px-2 py-1">{toolCounts[cat.slug] || cat.count} tools</span>
+                  <span className="text-xs text-neutral-400 dark:text-neutral-500 bg-neutral-100 dark:bg-neutral-700 rounded-full px-2 py-1">{toolCounts.counts[cat.slug] || cat.count} tools</span>
                 </div>
                 <h2 className="font-bold text-lg mb-1 text-neutral-800 dark:text-white group-hover:text-indigo-600 transition">{cat.title}</h2>
                 <p className="text-neutral-500 dark:text-neutral-400 text-sm mb-4">{cat.description}</p>
@@ -226,7 +232,7 @@ export default function Home() {
                   {cat.tools.map(tool => (
                     <div key={tool} className="text-neutral-500 dark:text-neutral-400 text-xs">• {tool}</div>
                   ))}
-                  <div className="text-indigo-500 text-xs font-semibold mt-2">+{Math.max(0, (toolCounts[cat.slug] || cat.count) - cat.tools.length)} more tools</div>
+                  <div className="text-indigo-500 text-xs font-semibold mt-2">+{Math.max(0, (toolCounts.counts[cat.slug] || cat.count) - cat.tools.length)} more tools</div>
                 </div>
               </Link>
             ))}
@@ -256,7 +262,7 @@ export default function Home() {
       {/* ═══ FOOTER STRIP ═══ */}
       <section style={{ background: dark ? '#111111' : '#fff', padding:'32px 24px', textAlign:'center', borderTop: dark ? '1px solid #1e293b' : '1px solid #e2e8f0' }}>
         <p style={{ fontSize:'14px', color:'#6366f1' }}>
-          🌍 Available in <strong style={{ color:'#4338ca' }}>13 languages</strong> · ⚡ <strong style={{ color:'#4338ca' }}>232+</strong> free tools · 🔒 <strong style={{ color:'#4338ca' }}>No data stored</strong> · 💸 <strong style={{ color:'#4338ca' }}>Always free</strong>
+          🌍 Available in <strong style={{ color:'#4338ca' }}>13 languages</strong> · ⚡ <strong style={{ color:'#4338ca' }}>{totalTools}+</strong> free tools · 🔒 <strong style={{ color:'#4338ca' }}>No data stored</strong> · 💸 <strong style={{ color:'#4338ca' }}>Always free</strong>
         </p>
       </section>
 

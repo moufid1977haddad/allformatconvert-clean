@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getToolCounts } from '@/lib/toolCounts';
 
 export const metadata = {
   title: 'About - OnlineConverTools',
@@ -6,6 +7,7 @@ export const metadata = {
 };
 
 export default function AboutPage() {
+  const { total } = getToolCounts();
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
@@ -16,7 +18,7 @@ export default function AboutPage() {
         <div className="bg-white border border-neutral-200 rounded-xl p-8 mb-5">
           <h2 className="text-xl font-bold text-neutral-800 mb-3">What is OnlineConverTools?</h2>
           <p className="text-neutral-600 text-sm leading-relaxed">
-            OnlineConverTools is a free, all-in-one platform offering 200+ online tools for converting,
+            OnlineConverTools is a free, all-in-one platform offering {total}+ online tools for converting,
             compressing, and editing files — including PDFs, images, videos, audio, and more.
             Everything runs locally in your browser, so your files never leave your device.
           </p>
