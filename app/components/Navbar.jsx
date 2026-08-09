@@ -653,17 +653,17 @@ export default function Navbar() {
       <header className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700 sticky top-0 z-50">
 
         {/* â”€â”€ Main navbar â”€â”€ */}
-        <div className="w-full px-4 py-2 flex items-center gap-2" style={{ minHeight: '52px' }}>
+        <div className="w-full px-4 py-2 flex items-center gap-1 lg:gap-2" style={{ minHeight: '52px' }}>
 
           {/* Logo */}
           <div className="shrink-0">
-            <Link href="/" className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-950 transition notranslate">
+            <Link href="/" className="flex items-center gap-1.5 lg:gap-2 px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-950 transition notranslate">
               <div style={{width:"28px",height:"28px",background:"#6366f1",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",animation:"pulse-glow 2s ease-in-out infinite",flexShrink:0}}>
                 <span style={{color:"#fff",fontSize:"11px",fontWeight:"700"}}>OCT</span>
               </div>
               <div style={{display:"flex",flexDirection:"column",lineHeight:"1.1"}}>
-                <span style={{color:"#6366f1",fontSize:"15px",fontWeight:"800"}}>OnlineConver<span style={{color:"#4f46e5"}}>Tools</span></span>
-                <span style={{color:"#a5b4fc",fontSize:"9px",letterSpacing:"1px"}}>FREE ONLINE TOOLS</span>
+                <span className="text-[13px] lg:text-[15px]" style={{color:"#6366f1",fontWeight:"800"}}>OnlineConver<span style={{color:"#4f46e5"}}>Tools</span></span>
+                <span className="hidden lg:block" style={{color:"#a5b4fc",fontSize:"9px",letterSpacing:"1px"}}>FREE ONLINE TOOLS</span>
               </div>
             </Link>
           </div>
@@ -721,7 +721,7 @@ export default function Navbar() {
           </nav>
 
           {/* Right side */}
-          <div className="shrink-0 flex items-center gap-1.5" style={{ width: '320px', justifyContent: 'flex-end' }}>
+          <div className="shrink-0 flex items-center gap-1.5 justify-end">
 
             {/* Search */}
             <div className="relative">
@@ -730,7 +730,7 @@ export default function Navbar() {
                 value={search}
                 onChange={handleSearch}
                 placeholder="Search tools..."
-                className="w-36 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-indigo-400 text-neutral-700 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-400"
+                className="w-16 lg:w-36 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-indigo-400 text-neutral-700 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-400"
               />
               {results.length > 0 && (
                 <div className="absolute top-full right-0 mt-1 w-52 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-xl shadow-lg z-[9999]">
@@ -749,7 +749,7 @@ export default function Navbar() {
             </div>
 
             {/* Language Selector */}
-            <div className="relative notranslate" ref={langRef}>
+            <div className="relative notranslate hidden lg:block" ref={langRef}>
               <button
                 onClick={() => setLangOpen(!langOpen)}
                 className="flex items-center gap-0.5 px-1.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-700 dark:text-neutral-200 text-xs font-bold"
@@ -778,7 +778,7 @@ export default function Navbar() {
             {/* Dark mode */}
             <button
               onClick={() => setDark(!dark)}
-              className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-600 dark:text-neutral-300 shrink-0"
+              className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-600 dark:text-neutral-300 shrink-0 hidden lg:block"
             >
               {dark ? (
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -818,7 +818,7 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <Link href="/signin" className="flex items-center px-2 py-1 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-700 dark:text-neutral-200 text-xs font-bold whitespace-nowrap">
+              <Link href="/signin" className="flex items-center px-1.5 lg:px-2 py-1 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-700 dark:text-neutral-200 text-xs font-bold whitespace-nowrap">
                 Sign In
               </Link>
             )}
