@@ -22,45 +22,59 @@ const categories = [
 
 const categoryTools = {
   '/tools/pdf-tools': [
-    { name: 'Merge PDF', href: '/tools/pdf-tools/pdf-merge' },
-    { name: 'Split PDF', href: '/tools/pdf-tools/pdf-split' },
-    { name: 'Compress PDF', href: '/tools/pdf-tools/pdf-compress' },
-    { name: 'Protect PDF', href: '/tools/pdf-tools/pdf-protect' },
-    { name: 'Unlock PDF', href: '/tools/pdf-tools/pdf-unlock' },
-    { name: 'Rotate PDF', href: '/tools/pdf-tools/pdf-rotate' },
-    { name: 'Watermark PDF', href: '/tools/pdf-tools/pdf-watermark' },
-    { name: 'Image to PDF', href: '/tools/pdf-tools/image-to-pdf' },
-    { name: 'PDF to Image', href: '/tools/pdf-tools/pdf-to-image' },
-    { name: 'PDF to JPG', href: '/tools/pdf-tools/pdf-to-jpg' },
-    { name: 'JPG to PDF', href: '/tools/pdf-tools/jpg-to-pdf' },
-    { name: 'Word to PDF', href: '/tools/pdf-tools/word-to-pdf' },
-    { name: 'PDF to Word', href: '/tools/pdf-tools/pdf-to-word' },
-    { name: 'Excel to PDF', href: '/tools/pdf-tools/excel-to-pdf' },
-    { name: 'PDF to Excel', href: '/tools/pdf-tools/pdf-to-excel' },
-    { name: 'PDF to PPT', href: '/tools/pdf-tools/pdf-to-ppt' },
-    { name: 'PPT to PDF', href: '/tools/pdf-tools/ppt-to-pdf' },
-    { name: 'HTML to PDF', href: '/tools/pdf-tools/html-to-pdf' },
-    { name: 'Text to PDF', href: '/tools/pdf-tools/text-to-pdf' },
-    { name: 'Markdown to PDF', href: '/tools/pdf-tools/markdown-to-pdf' },
-    { name: 'EPUB to PDF', href: '/tools/pdf-tools/epub-to-pdf' },
-    { name: 'MOBI to PDF', href: '/tools/pdf-tools/mobi-to-pdf' },
-    { name: 'PDF to HTML', href: '/tools/pdf-tools/pdf-to-html' },
-    { name: 'Delete Pages', href: '/tools/pdf-tools/pdf-delete-pages' },
-    { name: 'Reorder Pages', href: '/tools/pdf-tools/pdf-reorder-pages' },
-    { name: 'Organize PDF', href: '/tools/pdf-tools/pdf-organize' },
-    { name: 'Extract Text', href: '/tools/pdf-tools/pdf-extract-text' },
-    { name: 'Number Pages', href: '/tools/pdf-tools/pdf-number-pages' },
-    { name: 'PDF Editor', href: '/tools/pdf-tools/pdf-editor' },
-    { name: 'Sign PDF', href: '/tools/pdf-tools/pdf-sign' },
-    { name: 'PDF OCR', href: '/tools/pdf-tools/pdf-ocr' },
-    { name: 'PDF Forms', href: '/tools/pdf-tools/pdf-forms' },
-    { name: 'Redact PDF', href: '/tools/pdf-tools/pdf-redact' },
-    { name: 'Crop PDF', href: '/tools/pdf-tools/pdf-crop' },
-    { name: 'Compare PDF', href: '/tools/pdf-tools/pdf-compare' },
-    { name: 'PDF to PDF/A', href: '/tools/pdf-tools/pdf-to-pdfa' },
-    { name: 'Repair PDF', href: '/tools/pdf-tools/pdf-repair' },
-    { name: 'AI PDF Summary', href: '/tools/pdf-tools/pdf-ai-summary' },
-    { name: 'Translate PDF', href: '/tools/pdf-tools/pdf-translate' },
+    { group: 'Organize', items: [
+      { name: 'Merge PDF', href: '/tools/pdf-tools/pdf-merge' },
+      { name: 'Split PDF', href: '/tools/pdf-tools/pdf-split' },
+      { name: 'Delete Pages', href: '/tools/pdf-tools/pdf-delete-pages' },
+      { name: 'Reorder Pages', href: '/tools/pdf-tools/pdf-reorder-pages' },
+      { name: 'Organize PDF', href: '/tools/pdf-tools/pdf-organize' },
+    ]},
+    { group: 'Optimize', items: [
+      { name: 'Compress PDF', href: '/tools/pdf-tools/pdf-compress' },
+      { name: 'Repair PDF', href: '/tools/pdf-tools/pdf-repair' },
+      { name: 'PDF OCR', href: '/tools/pdf-tools/pdf-ocr' },
+      { name: 'Extract Text', href: '/tools/pdf-tools/pdf-extract-text' },
+    ]},
+    { group: 'Convert to PDF', items: [
+      { name: 'Image to PDF', href: '/tools/pdf-tools/image-to-pdf' },
+      { name: 'JPG to PDF', href: '/tools/pdf-tools/jpg-to-pdf' },
+      { name: 'Word to PDF', href: '/tools/pdf-tools/word-to-pdf' },
+      { name: 'Excel to PDF', href: '/tools/pdf-tools/excel-to-pdf' },
+      { name: 'PPT to PDF', href: '/tools/pdf-tools/ppt-to-pdf' },
+      { name: 'HTML to PDF', href: '/tools/pdf-tools/html-to-pdf' },
+      { name: 'Text to PDF', href: '/tools/pdf-tools/text-to-pdf' },
+      { name: 'Markdown to PDF', href: '/tools/pdf-tools/markdown-to-pdf' },
+      { name: 'EPUB to PDF', href: '/tools/pdf-tools/epub-to-pdf' },
+      { name: 'MOBI to PDF', href: '/tools/pdf-tools/mobi-to-pdf' },
+    ]},
+    { group: 'Convert from PDF', items: [
+      { name: 'PDF to Image', href: '/tools/pdf-tools/pdf-to-image' },
+      { name: 'PDF to JPG', href: '/tools/pdf-tools/pdf-to-jpg' },
+      { name: 'PDF to Word', href: '/tools/pdf-tools/pdf-to-word' },
+      { name: 'PDF to Excel', href: '/tools/pdf-tools/pdf-to-excel' },
+      { name: 'PDF to PPT', href: '/tools/pdf-tools/pdf-to-ppt' },
+      { name: 'PDF to HTML', href: '/tools/pdf-tools/pdf-to-html' },
+      { name: 'PDF to PDF/A', href: '/tools/pdf-tools/pdf-to-pdfa' },
+    ]},
+    { group: 'Edit', items: [
+      { name: 'Rotate PDF', href: '/tools/pdf-tools/pdf-rotate' },
+      { name: 'Watermark PDF', href: '/tools/pdf-tools/pdf-watermark' },
+      { name: 'Number Pages', href: '/tools/pdf-tools/pdf-number-pages' },
+      { name: 'PDF Editor', href: '/tools/pdf-tools/pdf-editor' },
+      { name: 'PDF Forms', href: '/tools/pdf-tools/pdf-forms' },
+      { name: 'Crop PDF', href: '/tools/pdf-tools/pdf-crop' },
+    ]},
+    { group: 'Security', items: [
+      { name: 'Protect PDF', href: '/tools/pdf-tools/pdf-protect' },
+      { name: 'Unlock PDF', href: '/tools/pdf-tools/pdf-unlock' },
+      { name: 'Sign PDF', href: '/tools/pdf-tools/pdf-sign' },
+      { name: 'Redact PDF', href: '/tools/pdf-tools/pdf-redact' },
+      { name: 'Compare PDF', href: '/tools/pdf-tools/pdf-compare' },
+    ]},
+    { group: 'AI & Content', items: [
+      { name: 'AI PDF Summary', href: '/tools/pdf-tools/pdf-ai-summary' },
+      { name: 'Translate PDF', href: '/tools/pdf-tools/pdf-translate' },
+    ]},
   ],
   '/tools/image-tools': [
     { name: 'Image Compressor', href: '/tools/image-tools/image-compressor' },
@@ -684,6 +698,7 @@ export default function Navbar() {
           <nav className="hidden lg:flex items-center justify-center flex-1 gap-0.5">
             {categories.map((cat) => {
               const dropTools = categoryTools[cat.href] || [];
+              const isGrouped = dropTools.length > 0 && Boolean(dropTools[0].items);
               const isActive = pathname.startsWith(cat.href);
               const baseClass = isActive
                 ? 'text-indigo-600 border-indigo-300 bg-indigo-50'
@@ -708,7 +723,35 @@ export default function Navbar() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
-                  {openCat === cat.href && dropTools.length > 0 && (
+                  {openCat === cat.href && dropTools.length > 0 && isGrouped && (
+                    <div
+                      className="absolute top-full left-0 mt-1 grid grid-cols-4 gap-x-6 gap-y-4 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999] p-4"
+                      style={{ width: '680px', maxWidth: '90vw', maxHeight: '85vh', overflowY: 'auto' }}
+                      onMouseEnter={() => { clearTimeout(catTimerRef.current); setOpenCat(cat.href); }}
+                      onMouseLeave={() => { catTimerRef.current = setTimeout(() => setOpenCat(null), 300); }}
+                    >
+                      {dropTools.map((group) => (
+                        <div key={group.group} className="min-w-0">
+                          <div className="text-[10px] font-bold uppercase tracking-wide text-neutral-400 dark:text-neutral-500 mb-1.5 px-2">
+                            {group.group}
+                          </div>
+                          <div className="flex flex-col">
+                            {group.items.map((tool) => (
+                              <Link
+                                key={tool.href}
+                                href={tool.href}
+                                onClick={() => setOpenCat(null)}
+                                className="block px-2 py-1.5 rounded-lg text-xs text-neutral-700 dark:text-neutral-200 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900 transition"
+                              >
+                                {tool.name}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {openCat === cat.href && dropTools.length > 0 && !isGrouped && (
                     <div
                       className="absolute top-full left-0 mt-1 w-52 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999]"
                       style={{ maxHeight: '240px', overflowY: 'auto' }}
