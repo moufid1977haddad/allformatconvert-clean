@@ -634,7 +634,7 @@ export default function Navbar() {
   return (
     <>
       <style>{`
-        @keyframes pulse-glow { 0%,100% { opacity:1; box-shadow:0 0 0 0 rgba(99,102,241,0.4); } 50% { opacity:0.85; box-shadow:0 0 0 6px rgba(99,102,241,0); } }
+        @keyframes pulse-glow { 0%,100% { opacity:1; box-shadow:0 0 0 0 rgba(153,53,86,0.4); } 50% { opacity:0.85; box-shadow:0 0 0 6px rgba(153,53,86,0); } }
         @keyframes ticker-scroll {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
@@ -658,9 +658,21 @@ export default function Navbar() {
           {/* Logo */}
           <div className="shrink-0">
             <Link href="/" className="flex items-center gap-1.5 lg:gap-2 px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-950 transition notranslate">
-              <div style={{width:"28px",height:"28px",background:"#6366f1",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",animation:"pulse-glow 2s ease-in-out infinite",flexShrink:0}}>
-                <span style={{color:"#fff",fontSize:"11px",fontWeight:"700"}}>OCT</span>
-              </div>
+              <svg
+                width="28"
+                height="28"
+                viewBox="0 0 64 64"
+                style={{ animation: "pulse-glow 2s ease-in-out infinite", flexShrink: 0, borderRadius: "8px" }}
+                aria-hidden="true"
+              >
+                <rect x="4" y="4" width="56" height="56" rx="14" fill="#993556" />
+                <rect x="16" y="16" width="18" height="18" rx="4" fill="#F4C0D1" />
+                <circle cx="42" cy="20" r="2.5" fill="#F4C0D1" />
+                <circle cx="48" cy="26" r="2" fill="#ED93B1" />
+                <circle cx="44" cy="34" r="1.5" fill="#D4537E" />
+                <circle cx="20" cy="42" r="2.5" fill="#F4C0D1" />
+                <circle cx="28" cy="46" r="2" fill="#ED93B1" />
+              </svg>
               <div style={{display:"flex",flexDirection:"column",lineHeight:"1.1"}}>
                 <span className="text-[13px] lg:text-[15px]" style={{color:"#6366f1",fontWeight:"800"}}>OnlineConver<span style={{color:"#4f46e5"}}>Tools</span></span>
                 <span className="hidden lg:block" style={{color:"#a5b4fc",fontSize:"9px",letterSpacing:"1px"}}>FREE ONLINE TOOLS</span>
