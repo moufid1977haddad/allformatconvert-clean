@@ -1,6 +1,7 @@
 ﻿'use client';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { ToolIcon } from '../../../lib/toolIcons';
 
 export default function Page() {
   return (
@@ -13,9 +14,7 @@ export default function Page() {
         <p className="text-neutral-500 mb-10">Fix corrupted or damaged PDF files</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-10 space-y-4">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
+            <ToolIcon slug="pdf-repair" className="w-8 h-8 text-red-500" />
           </div>
           <div className="text-indigo-500 text-xl font-bold">Coming Soon</div>
           <p className="text-neutral-500 text-sm">We are working hard to bring you this tool. Stay tuned!</p>

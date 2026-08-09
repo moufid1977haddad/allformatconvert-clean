@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
+import { ToolIcon } from '@/app/lib/toolIcons';
 
 const categories = [
   { href: '/tools/pdf-tools', label: 'PDF' },
@@ -538,22 +539,22 @@ const allTools = [
 ];
 
 const tickerTools = [
-  { label: '📄 Merge PDF',         href: '/tools/pdf-tools/pdf-merge' },
-  { label: '🖼️ Resize Image',      href: '/tools/image-tools/image-resizer' },
-  { label: '🎬 Convert Video',      href: '/tools/video-tools/video-converter' },
-  { label: '🤖 Remove Background',  href: '/tools/ai-tools/background-remover' },
-  { label: '🎵 Trim Audio',         href: '/tools/audio-tools/audio-trimmer' },
-  { label: '📋 Format JSON',        href: '/tools/developer-tools/json-formatter' },
-  { label: '🔒 Encrypt PDF',        href: '/tools/pdf-tools/pdf-protect' },
-  { label: '🎞️ Make GIF',           href: '/tools/gif-tools/gif-maker' },
-  { label: '📝 Count Words',        href: '/tools/text-tools/word-counter' },
-  { label: '📏 Convert Units',      href: '/tools/converter-tools/unit-converter' },
-  { label: '💻 Encode Base64',      href: '/tools/developer-tools/base64-encoder' },
-  { label: '📱 Generate QR Code',   href: '/tools/qr-barcodes-tools/qr-generator' },
-  { label: '📦 Compress Files',     href: '/tools/file-tools/zip-creator' },
-  { label: '🎨 Convert Colors',     href: '/tools/converter-tools/color-converter' },
-  { label: '🎵 Extract Audio',      href: '/tools/video-tools/video-to-audio' },
-  { label: '✨ Fix Grammar',        href: '/tools/ai-tools/grammar-fixer' },
+  { label: 'Merge PDF',         href: '/tools/pdf-tools/pdf-merge' },
+  { label: 'Resize Image',      href: '/tools/image-tools/image-resizer' },
+  { label: 'Convert Video',     href: '/tools/video-tools/video-converter' },
+  { label: 'Remove Background', href: '/tools/ai-tools/background-remover' },
+  { label: 'Trim Audio',        href: '/tools/audio-tools/audio-trimmer' },
+  { label: 'Format JSON',       href: '/tools/developer-tools/json-formatter' },
+  { label: 'Encrypt PDF',       href: '/tools/pdf-tools/pdf-protect' },
+  { label: 'Make GIF',          href: '/tools/gif-tools/gif-maker' },
+  { label: 'Count Words',       href: '/tools/text-tools/word-counter' },
+  { label: 'Convert Units',     href: '/tools/converter-tools/unit-converter' },
+  { label: 'Encode Base64',     href: '/tools/developer-tools/base64-encoder' },
+  { label: 'Generate QR Code',  href: '/tools/qr-barcodes-tools/qr-generator' },
+  { label: 'Compress Files',    href: '/tools/file-tools/zip-creator' },
+  { label: 'Convert Colors',    href: '/tools/converter-tools/color-converter' },
+  { label: 'Extract Audio',     href: '/tools/video-tools/video-to-audio' },
+  { label: 'Fix Grammar',       href: '/tools/ai-tools/grammar-fixer' },
 ];
 
 export default function Navbar() {
@@ -841,8 +842,11 @@ export default function Navbar() {
                 fontWeight: '500',
                 borderRight: dark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #c7d2fe',
                 textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
               }}>
-                {tool.label}
+                <ToolIcon slug={tool.href.split('/').pop()} className="w-3.5 h-3.5" /> {tool.label}
               </Link>
             ))}
           </div>

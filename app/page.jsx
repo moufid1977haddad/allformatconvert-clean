@@ -1,6 +1,12 @@
 ﻿'use client';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import {
+  Sparkles, Rocket, Bot, Globe, Zap, Lock, DollarSign, ShieldCheck, Smartphone, Cloud,
+  Wrench, LayoutGrid, Languages, FileText, Image, Video, Music, Code2, Folder, Calculator,
+  Clapperboard, Type, QrCode, RefreshCw,
+} from 'lucide-react';
+import { CategoryIcon, ToolIcon } from './lib/toolIcons';
 
 function useDarkMode() {
   const [dark, setDark] = useState(false);
@@ -15,51 +21,51 @@ function useDarkMode() {
 }
 
 const categories = [
-  { icon: '📄', color: 'text-red-400',    title: 'PDF Tools',        description: 'Merge, split, compress, and convert PDFs',        href: '/tools/pdf-tools',           slug: 'pdf-tools',           tools: ['Merge PDF', 'Split PDF', 'Compress PDF'],                                    count: 39 },
-  { icon: '🖼️', color: 'text-pink-400',   title: 'Image Tools',      description: 'Convert, compress, and edit images',               href: '/tools/image-tools',         slug: 'image-tools',         tools: ['Image Compressor', 'Image Converter', 'Image Resizer'],                      count: 37 },
-  { icon: '🎞️', color: 'text-purple-500', title: 'GIF Tools',        description: 'Convert videos and images to GIF format',          href: '/tools/gif-tools',           slug: 'gif-tools',           tools: ['Video to GIF', 'MP4 to GIF', 'GIF Maker'],                                   count: 11 },
-  { icon: '📝', color: 'text-green-400',  title: 'Text Tools',       description: 'Word count, case conversion, text formatting',     href: '/tools/text-tools',          slug: 'text-tools',          tools: ['Word Counter', 'Case Converter', 'Text Reverser'],                            count: 17 },
-  { icon: '🎵', color: 'text-yellow-500', title: 'Audio Tools',      description: 'Convert, compress, and edit audio files',          href: '/tools/audio-tools',         slug: 'audio-tools',         tools: ['Audio Converter', 'Audio Trimmer', 'Voice Recorder'],                        count: 11 },
-  { icon: '🎬', color: 'text-blue-400',   title: 'Video Tools',      description: 'Convert, compress, and edit videos',               href: '/tools/video-tools',         slug: 'video-tools',         tools: ['Video Converter', 'Video Compressor', 'Video Trimmer'],                      count: 15 },
-  { icon: '📁', color: 'text-orange-400', title: 'File Tools',       description: 'ZIP compression, file conversion, Base64',         href: '/tools/file-tools',          slug: 'file-tools',          tools: ['ZIP Extractor', 'ZIP Creator', 'TAR Extractor'],                              count: 9  },
-  { icon: '📱', color: 'text-teal-400',   title: 'QR & Barcodes',   description: 'Generate and scan QR codes and barcodes',          href: '/tools/qr-barcodes-tools',   slug: 'qr-barcodes-tools',   tools: ['QR Generator', 'Barcode Generator', 'QR Scanner'],                           count: 3  },
-  { icon: '🔄', color: 'text-yellow-400', title: 'Converter Tools',  description: 'Convert units, colors, and currencies',            href: '/tools/converter-tools',     slug: 'converter-tools',     tools: ['Currency Converter', 'Unit Converter', 'Color Converter'],                    count: 4  },
-  { icon: '💻', color: 'text-purple-400', title: 'Developer Tools',  description: 'JSON, Base64, URL encoding, and more',             href: '/tools/developer-tools',     slug: 'developer-tools',     tools: ['JSON Formatter', 'XML to JSON', 'Hash Generator'],                           count: 57 },
-  { icon: '🔢', color: 'text-indigo-400', title: 'Math Tools',       description: 'Number conversion, percentage calculator',         href: '/tools/math-tools',          slug: 'math-tools',          tools: ['Number Base Converter', 'Percentage Calculator', 'Roman Numeral Converter'],  count: 6  },
-  { icon: '🤖', color: 'text-cyan-400',   title: 'AI Tools',         description: 'AI-powered image and text tools',                  href: '/tools/ai-tools',            slug: 'ai-tools',            tools: ['Background Remover', 'Image Upscaler', 'Grammar Fixer'],                     count: 16 },
+  { color: 'text-red-500',    title: 'PDF Tools',        description: 'Merge, split, compress, and convert PDFs',        href: '/tools/pdf-tools',           slug: 'pdf-tools',           tools: ['Merge PDF', 'Split PDF', 'Compress PDF'],                                    count: 39 },
+  { color: 'text-pink-500',   title: 'Image Tools',      description: 'Convert, compress, and edit images',               href: '/tools/image-tools',         slug: 'image-tools',         tools: ['Image Compressor', 'Image Converter', 'Image Resizer'],                      count: 37 },
+  { color: 'text-purple-500', title: 'GIF Tools',        description: 'Convert videos and images to GIF format',          href: '/tools/gif-tools',           slug: 'gif-tools',           tools: ['Video to GIF', 'MP4 to GIF', 'GIF Maker'],                                   count: 11 },
+  { color: 'text-green-500',  title: 'Text Tools',       description: 'Word count, case conversion, text formatting',     href: '/tools/text-tools',          slug: 'text-tools',          tools: ['Word Counter', 'Case Converter', 'Text Reverser'],                            count: 17 },
+  { color: 'text-yellow-500', title: 'Audio Tools',      description: 'Convert, compress, and edit audio files',          href: '/tools/audio-tools',         slug: 'audio-tools',         tools: ['Audio Converter', 'Audio Trimmer', 'Voice Recorder'],                        count: 11 },
+  { color: 'text-blue-500',   title: 'Video Tools',      description: 'Convert, compress, and edit videos',               href: '/tools/video-tools',         slug: 'video-tools',         tools: ['Video Converter', 'Video Compressor', 'Video Trimmer'],                      count: 15 },
+  { color: 'text-orange-500', title: 'File Tools',       description: 'ZIP compression, file conversion, Base64',         href: '/tools/file-tools',          slug: 'file-tools',          tools: ['ZIP Extractor', 'ZIP Creator', 'TAR Extractor'],                              count: 9  },
+  { color: 'text-teal-500',   title: 'QR & Barcodes',   description: 'Generate and scan QR codes and barcodes',          href: '/tools/qr-barcodes-tools',   slug: 'qr-barcodes-tools',   tools: ['QR Generator', 'Barcode Generator', 'QR Scanner'],                           count: 3  },
+  { color: 'text-amber-500',  title: 'Converter Tools',  description: 'Convert units, colors, and currencies',            href: '/tools/converter-tools',     slug: 'converter-tools',     tools: ['Currency Converter', 'Unit Converter', 'Color Converter'],                    count: 4  },
+  { color: 'text-violet-500', title: 'Developer Tools',  description: 'JSON, Base64, URL encoding, and more',             href: '/tools/developer-tools',     slug: 'developer-tools',     tools: ['JSON Formatter', 'XML to JSON', 'Hash Generator'],                           count: 57 },
+  { color: 'text-indigo-500', title: 'Math Tools',       description: 'Number conversion, percentage calculator',         href: '/tools/math-tools',          slug: 'math-tools',          tools: ['Number Base Converter', 'Percentage Calculator', 'Roman Numeral Converter'],  count: 6  },
+  { color: 'text-cyan-500',   title: 'AI Tools',         description: 'AI-powered image and text tools',                  href: '/tools/ai-tools',            slug: 'ai-tools',            tools: ['Background Remover', 'Image Upscaler', 'Grammar Fixer'],                     count: 16 },
 ];
 
 const DEFAULT_TOOL_COUNT = 225;
 
 function buildStats(totalTools) {
   return [
-    { value: totalTools, label: 'Free Tools', suffix: '+', icon: '🛠️' },
-    { value: 12,  label: 'Categories',  suffix: '',  icon: '📂' },
-    { value: 13,  label: 'Languages',   suffix: '',  icon: '🌍' },
-    { value: 190, label: 'Countries',   suffix: '+', icon: '🌐' },
+    { value: totalTools, label: 'Free Tools', suffix: '+', icon: Wrench },
+    { value: 12,  label: 'Categories',  suffix: '',  icon: LayoutGrid },
+    { value: 13,  label: 'Languages',   suffix: '',  icon: Languages },
+    { value: 190, label: 'Countries',   suffix: '+', icon: Globe },
   ];
 }
 
 const badges = [
-  { icon: '⚡', text: 'No signup required' },
-  { icon: '🔒', text: '100% secure & private' },
-  { icon: '📱', text: 'Works on all devices' },
-  { icon: '☁️', text: 'No installation needed' },
+  { icon: Zap, text: 'No signup required' },
+  { icon: ShieldCheck, text: '100% secure & private' },
+  { icon: Smartphone, text: 'Works on all devices' },
+  { icon: Cloud, text: 'No installation needed' },
 ];
 
 const floatingIcons = [
-  { icon: '📄', label: 'PDF',     href: '/tools/pdf-tools',         color: '#fef2f2', border: '#fca5a5', anim: 'floatA', dur: '3.2s', delay: '0s'    },
-  { icon: '🖼️', label: 'Image',   href: '/tools/image-tools',       color: '#fdf4ff', border: '#e879f9', anim: 'floatB', dur: '3.8s', delay: '0.3s'  },
-  { icon: '🎬', label: 'Video',   href: '/tools/media-tools',       color: '#eff6ff', border: '#93c5fd', anim: 'floatC', dur: '3.5s', delay: '0.1s'  },
-  { icon: '🤖', label: 'AI',      href: '/tools/ai-tools',          color: '#ecfeff', border: '#67e8f9', anim: 'floatA', dur: '4.0s', delay: '0.5s'  },
-  { icon: '🎵', label: 'Audio',   href: '/tools/audio-tools',       color: '#fefce8', border: '#fde047', anim: 'floatB', dur: '3.3s', delay: '0.2s'  },
-  { icon: '💻', label: 'Dev',     href: '/tools/developer-tools',   color: '#f5f3ff', border: '#c4b5fd', anim: 'floatC', dur: '3.7s', delay: '0.4s'  },
-  { icon: '📁', label: 'Files',   href: '/tools/file-tools',        color: '#fff7ed', border: '#fdba74', anim: 'floatA', dur: '4.2s', delay: '0.6s'  },
-  { icon: '🔢', label: 'Math',    href: '/tools/math-tools',        color: '#eef2ff', border: '#a5b4fc', anim: 'floatB', dur: '3.6s', delay: '0.35s' },
-  { icon: '🎞️', label: 'GIF',     href: '/tools/gif-tools',         color: '#faf5ff', border: '#d8b4fe', anim: 'floatC', dur: '3.9s', delay: '0.15s' },
-  { icon: '📝', label: 'Text',    href: '/tools/text-tools',        color: '#f0fdf4', border: '#86efac', anim: 'floatA', dur: '3.4s', delay: '0.55s' },
-  { icon: '📱', label: 'QR',      href: '/tools/qr-barcodes-tools', color: '#f0fdfa', border: '#5eead4', anim: 'floatB', dur: '4.1s', delay: '0.25s' },
-  { icon: '🔄', label: 'Convert', href: '/tools/converter-tools',   color: '#fffbeb', border: '#fcd34d', anim: 'floatC', dur: '3.6s', delay: '0.45s' },
+  { icon: FileText,     label: 'PDF',     href: '/tools/pdf-tools',         color: '#fef2f2', border: '#fca5a5', anim: 'floatA', dur: '3.2s', delay: '0s'    },
+  { icon: Image,        label: 'Image',   href: '/tools/image-tools',       color: '#fdf4ff', border: '#e879f9', anim: 'floatB', dur: '3.8s', delay: '0.3s'  },
+  { icon: Video,        label: 'Video',   href: '/tools/video-tools',       color: '#eff6ff', border: '#93c5fd', anim: 'floatC', dur: '3.5s', delay: '0.1s'  },
+  { icon: Bot,          label: 'AI',      href: '/tools/ai-tools',          color: '#ecfeff', border: '#67e8f9', anim: 'floatA', dur: '4.0s', delay: '0.5s'  },
+  { icon: Music,        label: 'Audio',   href: '/tools/audio-tools',       color: '#fefce8', border: '#fde047', anim: 'floatB', dur: '3.3s', delay: '0.2s'  },
+  { icon: Code2,        label: 'Dev',     href: '/tools/developer-tools',   color: '#f5f3ff', border: '#c4b5fd', anim: 'floatC', dur: '3.7s', delay: '0.4s'  },
+  { icon: Folder,       label: 'Files',   href: '/tools/file-tools',        color: '#fff7ed', border: '#fdba74', anim: 'floatA', dur: '4.2s', delay: '0.6s'  },
+  { icon: Calculator,   label: 'Math',    href: '/tools/math-tools',        color: '#eef2ff', border: '#a5b4fc', anim: 'floatB', dur: '3.6s', delay: '0.35s' },
+  { icon: Clapperboard, label: 'GIF',     href: '/tools/gif-tools',         color: '#faf5ff', border: '#d8b4fe', anim: 'floatC', dur: '3.9s', delay: '0.15s' },
+  { icon: Type,         label: 'Text',    href: '/tools/text-tools',        color: '#f0fdf4', border: '#86efac', anim: 'floatA', dur: '3.4s', delay: '0.55s' },
+  { icon: QrCode,       label: 'QR',      href: '/tools/qr-barcodes-tools', color: '#f0fdfa', border: '#5eead4', anim: 'floatB', dur: '4.1s', delay: '0.25s' },
+  { icon: RefreshCw,    label: 'Convert', href: '/tools/converter-tools',   color: '#fffbeb', border: '#fcd34d', anim: 'floatC', dur: '3.6s', delay: '0.45s' },
 ];
 
 function useCountUp(target, duration = 1800, start = false) {
@@ -79,11 +85,11 @@ function useCountUp(target, duration = 1800, start = false) {
   return count;
 }
 
-function StatCard({ value, label, suffix, icon, animate, dark }) {
+function StatCard({ value, label, suffix, icon: Icon, animate, dark }) {
   const count = useCountUp(value, 1600, animate);
   return (
     <div style={{ background: dark ? '#1c1c1e' : '#ffffff', border: dark ? '1px solid #2c2c2e' : '1px solid #e2e8f0', borderRadius:'16px', padding:'20px 24px', textAlign:'center' }}>
-      <div style={{ fontSize:'28px', marginBottom:'4px' }}>{icon}</div>
+      <Icon size={28} strokeWidth={2} style={{ marginBottom:'6px', color:'#6366f1' }} />
       <div style={{ fontSize:'32px', fontWeight:'800', color: dark ? '#f1f5f9' : '#0f172a', lineHeight:1 }}>{animate ? count : value}{suffix}</div>
       <div style={{ fontSize:'12px', color: dark ? '#94a3b8' : '#64748b', marginTop:'4px', letterSpacing:'0.05em', textTransform:'uppercase' }}>{label}</div>
     </div>
@@ -122,7 +128,7 @@ export default function Home() {
         .hero-left         { flex:1; animation:fadeUp 0.7s ease both; }
         .hero-icons-grid   { flex:0 0 360px; display:grid; grid-template-columns:repeat(3, 110px); gap:12px; justify-content:center; animation:fadeUp 0.9s ease 0.2s both; }
         .hero-icon-card    { width:110px; height:88px; border-radius:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; box-shadow:0 6px 20px rgba(0,0,0,0.10); text-decoration:none; }
-        .hero-icon-card span.ico { font-size:28px; }
+        .hero-icon-card .ico { width:28px; height:28px; }
         .hero-icon-card span.lbl { font-size:11px; font-weight:600; }
 
         /* ── MOBILE PORTRAIT ≤ 640px ── */
@@ -135,7 +141,7 @@ export default function Home() {
             gap:10px;
           }
           .hero-icon-card  { width:100%; height:72px; border-radius:14px; }
-          .hero-icon-card span.ico { font-size:22px; }
+          .hero-icon-card .ico { width:22px; height:22px; }
           .hero-icon-card span.lbl { font-size:10px; }
         }
 
@@ -143,7 +149,7 @@ export default function Home() {
         @media (min-width:641px) and (max-width:1024px) {
           .hero-icons-grid { flex:0 0 300px; grid-template-columns:repeat(3, 90px); gap:10px; }
           .hero-icon-card  { width:90px; height:76px; border-radius:16px; }
-          .hero-icon-card span.ico { font-size:24px; }
+          .hero-icon-card .ico { width:24px; height:24px; }
           .hero-icon-card span.lbl { font-size:10px; }
         }
       `}</style>
@@ -159,7 +165,7 @@ export default function Home() {
           {/* LEFT */}
           <div className='hero-left' style={{ flex:1, animation:'fadeUp 0.7s ease both' }}>
             <div style={{ display:'inline-flex', alignItems:'center', gap:'8px', background: dark ? '#111111' : '#e2e8f0', border: dark ? '1px solid #334155' : '1px solid #cbd5e1', borderRadius:'999px', padding:'6px 16px', marginBottom:'24px', fontSize:'13px', color: dark ? '#94a3b8' : '#475569' }}>
-              ✨ {totalTools}+ free tools · No signup · No limits
+              <Sparkles size={14} style={{ flexShrink:0 }} /> {totalTools}+ free tools · No signup · No limits
             </div>
             <h1 style={{ fontSize:'clamp(36px,5vw,58px)', fontWeight:'800', color: dark ? '#f1f5f9' : '#0f172a', lineHeight:'1.1', marginBottom:'20px', letterSpacing:'-0.02em' }}>
               Convert anything.<br /><span style={{ color:'#6366f1' }}>Instantly. Free.</span>
@@ -170,13 +176,13 @@ export default function Home() {
             <div style={{ display:'flex', flexWrap:'wrap', gap:'10px', marginBottom:'40px' }}>
               {badges.map(b => (
                 <span key={b.text} className="badge-pill" style={{ display:'flex', alignItems:'center', gap:'6px', background: dark ? '#111111' : '#f1f5f9', border:'1px solid #e2e8f0', borderRadius:'999px', padding:'7px 14px', fontSize:'13px', color: dark ? '#94a3b8' : '#475569', transition:'background 0.2s' }}>
-                  {b.icon} {b.text}
+                  <b.icon size={14} style={{ flexShrink:0 }} /> {b.text}
                 </span>
               ))}
             </div>
             <div style={{ display:'flex', gap:'12px', flexWrap:'wrap' }}>
-              <Link href="/tools/pdf-tools" style={{ display:'flex', alignItems:'center', gap:'6px', background: dark ? '#111111' : '#f1f5f9', border:'1px solid #e2e8f0', borderRadius:'999px', padding:'7px 14px', fontSize:'13px', color: dark ? '#94a3b8' : '#475569', textDecoration:'none', fontWeight:'500' }}>🚀 Explore PDF Tools</Link>
-              <Link href="/tools/ai-tools"  style={{ display:'flex', alignItems:'center', gap:'6px', background: dark ? '#111111' : '#f1f5f9', border:'1px solid #e2e8f0', borderRadius:'999px', padding:'7px 14px', fontSize:'13px', color: dark ? '#94a3b8' : '#475569', textDecoration:'none', fontWeight:'500' }}>🤖 Try AI Tools</Link>
+              <Link href="/tools/pdf-tools" style={{ display:'flex', alignItems:'center', gap:'6px', background: dark ? '#111111' : '#f1f5f9', border:'1px solid #e2e8f0', borderRadius:'999px', padding:'7px 14px', fontSize:'13px', color: dark ? '#94a3b8' : '#475569', textDecoration:'none', fontWeight:'500' }}><Rocket size={14} /> Explore PDF Tools</Link>
+              <Link href="/tools/ai-tools"  style={{ display:'flex', alignItems:'center', gap:'6px', background: dark ? '#111111' : '#f1f5f9', border:'1px solid #e2e8f0', borderRadius:'999px', padding:'7px 14px', fontSize:'13px', color: dark ? '#94a3b8' : '#475569', textDecoration:'none', fontWeight:'500' }}><Bot size={14} /> Try AI Tools</Link>
             </div>
           </div>
 
@@ -184,7 +190,7 @@ export default function Home() {
           <div className="hero-icons-grid">
             {floatingIcons.map(item => (
               <Link key={item.label} href={item.href} className="hero-icon-card" style={{ background: dark ? '#1c1c1e' : item.color, border: dark ? '1.5px solid #2c2c2e' : `1.5px solid ${item.border}`, animation:`${item.anim} ${item.dur} ease-in-out ${item.delay} infinite` }}>
-                <span className="ico">{item.icon}</span>
+                <item.icon className="ico" style={{ color: dark ? '#94a3b8' : '#374151' }} />
                 <span className="lbl" style={{ color: dark ? '#94a3b8' : '#374151' }}>{item.label}</span>
               </Link>
             ))}
@@ -223,7 +229,7 @@ export default function Home() {
             {categories.map((cat) => (
               <Link key={cat.href} href={cat.href} className="bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)]">
                 <div className="flex justify-between items-center w-full mb-3">
-                  <div className={`text-3xl ${cat.color}`}>{cat.icon}</div>
+                  <CategoryIcon slug={cat.slug} className={`w-8 h-8 ${cat.color}`} />
                   <span className="text-xs text-neutral-400 dark:text-neutral-500 bg-neutral-100 dark:bg-neutral-700 rounded-full px-2 py-1">{toolCounts.counts[cat.slug] || cat.count} tools</span>
                 </div>
                 <h2 className="font-bold text-lg mb-1 text-neutral-800 dark:text-white group-hover:text-indigo-600 transition">{cat.title}</h2>
@@ -243,26 +249,37 @@ export default function Home() {
       {/* ═══ AI SECTION ═══ */}
       <section style={{ background: dark ? '#111111' : '#f8fafc', padding:'72px 24px' }}>
         <div style={{ maxWidth:'900px', margin:'0 auto', textAlign:'center' }}>
-          <div style={{ fontSize:'48px', marginBottom:'16px' }}>🤖</div>
+          <Bot size={48} style={{ marginBottom:'16px', color:'#6366f1' }} />
           <h2 style={{ fontSize:'clamp(28px,4vw,42px)', fontWeight:'800', color: dark ? '#f1f5f9' : '#0f172a', marginBottom:'16px', letterSpacing:'-0.02em' }}>Powered by AI</h2>
           <p style={{ fontSize:'18px', color: dark ? '#94a3b8' : '#64748b', marginBottom:'40px', maxWidth:'580px', margin:'0 auto 40px', lineHeight:'1.7' }}>
             16 AI-powered tools including background removal, image upscaling, grammar fixing, translation, transcription, and more.
           </p>
           <div style={{ display:'flex', flexWrap:'wrap', gap:'12px', justifyContent:'center', marginBottom:'40px' }}>
-            {['✨ Grammar Fixer','🌍 AI Translator','📝 Text Summarizer','🎨 Background Remover','🔍 Image Upscaler','🎙️ Audio Transcriber','💬 AI Chatbot','📧 Email Generator'].map(t => (
-              <span key={t} style={{ background: dark ? '#1c1c1e' : '#e2e8f0', border: dark ? '1px solid #2c2c2e' : '1px solid #cbd5e1', borderRadius:'999px', padding:'8px 18px', fontSize:'13px', color: dark ? '#cbd5e1' : '#334155', fontWeight:'500' }}>{t}</span>
+            {[
+              { slug: 'grammar-fixer', label: 'Grammar Fixer' },
+              { slug: 'ai-translator', label: 'AI Translator' },
+              { slug: 'text-summarizer', label: 'Text Summarizer' },
+              { slug: 'background-remover', label: 'Background Remover' },
+              { slug: 'image-upscaler', label: 'Image Upscaler' },
+              { slug: 'audio-transcriber', label: 'Audio Transcriber' },
+              { slug: 'ai-chatbot', label: 'AI Chatbot' },
+              { slug: 'email-generator', label: 'Email Generator' },
+            ].map(t => (
+              <span key={t.slug} style={{ display:'inline-flex', alignItems:'center', gap:'6px', background: dark ? '#1c1c1e' : '#e2e8f0', border: dark ? '1px solid #2c2c2e' : '1px solid #cbd5e1', borderRadius:'999px', padding:'8px 18px', fontSize:'13px', color: dark ? '#cbd5e1' : '#334155', fontWeight:'500' }}>
+                <ToolIcon slug={t.slug} className="w-3.5 h-3.5" /> {t.label}
+              </span>
             ))}
           </div>
-          <Link href="/tools/ai-tools" style={{ display:'inline-block', background:'#6366f1', color:'#fff', padding:'16px 36px', borderRadius:'14px', fontWeight:'700', fontSize:'16px', textDecoration:'none', boxShadow:'0 8px 30px rgba(99,102,241,0.25)' }}>
-            🚀 Explore AI Tools
+          <Link href="/tools/ai-tools" style={{ display:'inline-flex', alignItems:'center', gap:'8px', background:'#6366f1', color:'#fff', padding:'16px 36px', borderRadius:'14px', fontWeight:'700', fontSize:'16px', textDecoration:'none', boxShadow:'0 8px 30px rgba(99,102,241,0.25)' }}>
+            <Rocket size={18} /> Explore AI Tools
           </Link>
         </div>
       </section>
 
       {/* ═══ FOOTER STRIP ═══ */}
       <section style={{ background: dark ? '#111111' : '#fff', padding:'32px 24px', textAlign:'center', borderTop: dark ? '1px solid #1e293b' : '1px solid #e2e8f0' }}>
-        <p style={{ fontSize:'14px', color:'#6366f1' }}>
-          🌍 Available in <strong style={{ color:'#4338ca' }}>13 languages</strong> · ⚡ <strong style={{ color:'#4338ca' }}>{totalTools}+</strong> free tools · 🔒 <strong style={{ color:'#4338ca' }}>No data stored</strong> · 💸 <strong style={{ color:'#4338ca' }}>Always free</strong>
+        <p style={{ fontSize:'14px', color:'#6366f1', display:'flex', flexWrap:'wrap', alignItems:'center', justifyContent:'center', gap:'6px' }}>
+          <Globe size={14} /> Available in <strong style={{ color:'#4338ca' }}>13 languages</strong> · <Zap size={14} /> <strong style={{ color:'#4338ca' }}>{totalTools}+</strong> free tools · <Lock size={14} /> <strong style={{ color:'#4338ca' }}>No data stored</strong> · <DollarSign size={14} /> <strong style={{ color:'#4338ca' }}>Always free</strong>
         </p>
       </section>
 

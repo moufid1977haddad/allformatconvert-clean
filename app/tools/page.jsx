@@ -1,65 +1,66 @@
 'use client';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { CategoryIcon } from '../lib/toolIcons';
 
 const categories = [
   {
-    icon: '📄', color: 'text-red-400', title: 'PDF Tools',
+    color: 'text-red-500', title: 'PDF Tools',
     description: 'Merge, split, compress, and convert PDFs',
     href: '/tools/pdf-tools', tools: ['Merge PDF', 'Split PDF', 'Compress PDF'], count: 39,
   },
   {
-    icon: '🖼️', color: 'text-pink-400', title: 'Image Tools',
+    color: 'text-pink-500', title: 'Image Tools',
     description: 'Convert, compress, and edit images',
     href: '/tools/image-tools', tools: ['Image Compressor', 'Image Converter', 'Image Resizer'], count: 37,
   },
   {
-    icon: '🎞️', color: 'text-purple-500', title: 'GIF Tools',
+    color: 'text-purple-500', title: 'GIF Tools',
     description: 'Convert videos and images to GIF format',
     href: '/tools/gif-tools', tools: ['Video to GIF', 'MP4 to GIF', 'GIF Maker'], count: 11,
   },
   {
-    icon: '📝', color: 'text-green-400', title: 'Text Tools',
+    color: 'text-green-500', title: 'Text Tools',
     description: 'Word count, case conversion, text formatting',
     href: '/tools/text-tools', tools: ['Word Counter', 'Case Converter', 'Text Reverser'], count: 17,
   },
   {
-    icon: '🎬', color: 'text-blue-400', title: 'Video Tools',
+    color: 'text-blue-500', title: 'Video Tools',
     description: 'Convert, compress, and edit videos',
     href: '/tools/video-tools', tools: ['Video Converter', 'Video Compressor', 'Video Trimmer'], count: 15,
   },
   {
-    icon: '🎵', color: 'text-pink-500', title: 'Audio Tools',
+    color: 'text-yellow-500', title: 'Audio Tools',
     description: 'Convert, compress, and edit audio files',
     href: '/tools/audio-tools', tools: ['Audio Converter', 'Audio Trimmer', 'Voice Recorder'], count: 11,
   },
   {
-    icon: '📁', color: 'text-orange-400', title: 'File Tools',
+    color: 'text-orange-500', title: 'File Tools',
     description: 'ZIP compression, file conversion, Base64',
     href: '/tools/file-tools', tools: ['ZIP Extractor', 'ZIP Creator', 'TAR Extractor'], count: 9,
   },
   {
-    icon: '📱', color: 'text-teal-400', title: 'QR & Barcodes Tools',
+    color: 'text-teal-500', title: 'QR & Barcodes Tools',
     description: 'Generate and scan QR codes and barcodes',
     href: '/tools/qr-barcodes-tools', tools: ['QR Generator', 'Barcode Generator', 'QR Scanner'], count: 3,
   },
   {
-    icon: '🔄', color: 'text-yellow-400', title: 'Converter Tools',
+    color: 'text-amber-500', title: 'Converter Tools',
     description: 'Convert units, colors, and currencies',
     href: '/tools/converter-tools', tools: ['Currency Converter', 'Unit Converter', 'Color Converter'], count: 4,
   },
   {
-    icon: '💻', color: 'text-purple-400', title: 'Developer Tools',
+    color: 'text-violet-500', title: 'Developer Tools',
     description: 'JSON, Base64, URL encoding, and more',
     href: '/tools/developer-tools', tools: ['JSON Formatter', 'XML to JSON', 'Hash Generator'], count: 57,
   },
   {
-    icon: '🔢', color: 'text-indigo-400', title: 'Math Tools',
+    color: 'text-indigo-500', title: 'Math Tools',
     description: 'Number conversion, percentage calculator',
     href: '/tools/math-tools', tools: ['Scientific Calculator', 'Percentage Calculator', 'Fraction Calculator'], count: 6,
   },
   {
-    icon: '🤖', color: 'text-cyan-400', title: 'AI Tools',
+    color: 'text-cyan-500', title: 'AI Tools',
     description: 'AI-powered image and text tools',
     href: '/tools/ai-tools', tools: ['Background Remover', 'Image Upscaler', 'Grammar Fixer'], count: 16,
   },
@@ -82,7 +83,7 @@ export default function ToolsPage() {
             return (
               <Link key={cat.href} href={cat.href} className="bg-white border border-neutral-200 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)]">
                 <div className="flex justify-between items-center w-full mb-3">
-                  <div className={`text-3xl ${cat.color}`}>{cat.icon}</div>
+                  <CategoryIcon slug={cat.href.replace('/tools/', '')} className={`w-8 h-8 ${cat.color}`} />
                   <span className="text-xs text-neutral-400 bg-neutral-100 rounded-full px-2 py-1">{count} tools</span>
                 </div>
                 <h2 className="font-bold text-lg mb-1 text-neutral-800 group-hover:text-indigo-600 transition">{cat.title}</h2>

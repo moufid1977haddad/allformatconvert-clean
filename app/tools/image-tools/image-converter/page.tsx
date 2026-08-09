@@ -1,5 +1,6 @@
 'use client';
 import { useState, useCallback, useRef } from 'react';
+import { Lock, Zap, Package } from 'lucide-react';
 import SeoContent from '../../../components/SeoContent';
 
 interface ConvertedFile {
@@ -247,12 +248,12 @@ export default function ImageConverterPage() {
         {/* Info */}
         <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
           {[
-            { icon: '🔒', title: '100% Private', desc: 'Files never leave your device' },
-            { icon: '⚡', title: 'Instant', desc: 'Conversion happens in your browser' },
-            { icon: '📦', title: 'Batch', desc: 'Convert multiple files at once' },
-          ].map(({ icon, title, desc }) => (
+            { icon: Lock, title: '100% Private', desc: 'Files never leave your device' },
+            { icon: Zap, title: 'Instant', desc: 'Conversion happens in your browser' },
+            { icon: Package, title: 'Batch', desc: 'Convert multiple files at once' },
+          ].map(({ icon: Icon, title, desc }) => (
             <div key={title} className="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-4">
-              <div className="text-2xl mb-1">{icon}</div>
+              <Icon className="w-6 h-6 mb-1 mx-auto text-indigo-500" />
               <p className="font-semibold text-sm text-neutral-800 dark:text-neutral-200">{title}</p>
               <p className="text-xs text-neutral-400 mt-0.5">{desc}</p>
             </div>
