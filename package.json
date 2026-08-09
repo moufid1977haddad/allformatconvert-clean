@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run check-links && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check-links": "node scripts/check-tool-links.js"
   },
   "dependencies": {
     "@cantoo/pdf-lib": "^2.7.4",
