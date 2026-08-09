@@ -14,7 +14,7 @@ import {
   Fingerprint, KeyRound, ArrowRightLeft, ArrowLeftRight, Database, Regex, Eye, Webhook, Pipette,
   Clock, RectangleHorizontal, Link, CodeXml, FileType2, Boxes, Cog, Server, AtSign, Settings,
   Timer, ShieldCheck, Percent, Divide, BarChart3, Expand, SpellCheck, MessageCircle, ShieldAlert,
-  Smile, Tag, Tags, Mail, Folder, Bot, LayoutGrid, Cloud, Zap, AlignLeft,
+  Smile, Tag, Tags, Mail, Folder, Bot, LayoutGrid, Cloud, Zap, AlignLeft, Pilcrow,
 } from 'lucide-react';
 
 // Single source of truth for every tool + category icon on the site.
@@ -57,9 +57,9 @@ export const toolIcons = {
   // Text Tools
   'word-counter': Hash, 'case-converter': CaseSensitive, 'text-reverser': FlipHorizontal,
   'duplicate-remover': Trash2, 'text-sorter': ArrowDownAZ, 'find-replace': Replace,
-  'text-comparator': GitCompare, 'whitespace-remover': Eraser, 'lorem-ipsum': FileText,
+  'text-comparator': GitCompare, 'whitespace-remover': Eraser, 'lorem-ipsum': Pilcrow,
   'url-encoder': Link2, 'text-to-list': ListChecks, 'text-truncator': Scissors,
-  'text-repeater': Repeat, 'character-counter': Calculator, 'text-encryptor': Lock,
+  'text-repeater': Repeat, 'character-counter': Ruler, 'text-encryptor': Lock,
   'ascii-art': Terminal, 'sticky-notes': StickyNote,
 
   // Audio Tools
@@ -93,7 +93,7 @@ export const toolIcons = {
   'toml-to-json': FileCode2, 'json-to-toml': Settings2, 'json-formatter': Braces,
   'json-minifier': Minimize2, 'uuid-generator': Fingerprint, 'hash-generator': Hash,
   'password-generator': KeyRound, 'csv-to-json': ArrowRightLeft, 'json-to-csv': ArrowLeftRight,
-  'css-formatter': Palette, 'html-formatter': Code2, 'js-minifier': Minimize2,
+  'css-formatter': Layers, 'html-formatter': Code2, 'js-minifier': Minimize2,
   'javascript-formatter': Braces, 'scss-to-css': Layers, 'typescript-to-js': FileCode,
   'xml-formatter': Code, 'sql-formatter': Database, 'regex-tester': Regex,
   'markdown-previewer': Eye, 'markdown-to-html': FileCode2, 'jwt-decoder': ShieldCheck,
@@ -108,7 +108,7 @@ export const toolIcons = {
   'cron-expression-builder': Timer,
 
   // Math Tools
-  'percentage-calculator': Percent, 'roman-numeral-converter': Hash,
+  'percentage-calculator': Percent, 'roman-numeral-converter': ArrowRightLeft,
   'scientific-calculator': Calculator, 'fraction-calculator': Divide,
   'statistics-calculator': BarChart3,
 
