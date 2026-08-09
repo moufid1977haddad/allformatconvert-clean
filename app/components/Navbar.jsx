@@ -644,7 +644,8 @@ export default function Navbar() {
           width: max-content;
           animation: ticker-scroll 28s linear infinite;
         }
-        .ticker-track:hover {
+        .ticker-track:hover,
+        .ticker-track:focus-within {
           animation-play-state: paused;
         }
       `}</style>
@@ -825,8 +826,8 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* â”€â”€ Ticker strip â€” juste sous la navbar â”€â”€ */}
-        <div style={{
+        {/* â”€â”€ Ticker strip â€” mobile/tablet only, the lg mega-menu covers desktop â”€â”€ */}
+        <div className="lg:hidden" style={{
           background: dark ? '#111111' : '#eef2ff',
           padding: '7px 0',
           overflow: 'hidden',
