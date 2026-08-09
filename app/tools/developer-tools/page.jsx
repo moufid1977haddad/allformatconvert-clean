@@ -15,7 +15,7 @@ const tools = [
   { title: 'JSON Formatter', description: 'Format and validate JSON', href: '/tools/developer-tools/json-formatter' },
   { title: 'JSON Minifier', description: 'Minify JSON data', href: '/tools/developer-tools/json-minifier' },
   { title: 'UUID Generator', description: 'Generate unique UUIDs', href: '/tools/developer-tools/uuid-generator' },
-  { title: 'Lorem Ipsum', description: 'Generate placeholder text', href: '/tools/developer-tools/url-encoder' },
+  { title: 'Lorem Ipsum', description: 'Generate placeholder text', href: '/tools/text-tools/lorem-ipsum' },
   { title: 'Base64 Encoder', description: 'Encode and decode Base64', href: '/tools/developer-tools/base64-encoder' },
   { title: 'URL Encoder', description: 'Encode and decode URLs', href: '/tools/developer-tools/url-encoder' },
   { title: 'Hash Generator', description: 'Generate SHA hashes', href: '/tools/developer-tools/hash-generator' },
