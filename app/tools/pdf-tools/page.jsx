@@ -1,47 +1,47 @@
 ﻿'use client';
 import Link from 'next/link';
-import { ToolIcon, CategoryIcon } from '../../lib/toolIcons';
+import { ToolIcon, CategoryIcon, groupTextColors } from '../../lib/toolIcons';
 
 const tools = [
-  { title: 'Merge PDF', description: 'Combine multiple PDFs into one', href: '/tools/pdf-tools/pdf-merge' },
-  { title: 'Split PDF', description: 'Extract specific pages from PDF', href: '/tools/pdf-tools/pdf-split' },
-  { title: 'Compress PDF', description: 'Reduce PDF file size', href: '/tools/pdf-tools/pdf-compress' },
-  { title: 'Protect PDF', description: 'Encrypt PDF with password', href: '/tools/pdf-tools/pdf-protect' },
-  { title: 'Unlock PDF', description: 'Remove password from PDF', href: '/tools/pdf-tools/pdf-unlock' },
-  { title: 'Rotate PDF', description: 'Rotate pages 90, 180, 270', href: '/tools/pdf-tools/pdf-rotate' },
-  { title: 'Watermark PDF', description: 'Add text watermark to PDF', href: '/tools/pdf-tools/pdf-watermark' },
-  { title: 'Image to PDF', description: 'Convert images to PDF', href: '/tools/pdf-tools/image-to-pdf' },
-  { title: 'PDF to Image', description: 'Convert PDF pages to images', href: '/tools/pdf-tools/pdf-to-image' },
-  { title: 'PDF to JPG', description: 'Convert PDF pages to JPG', href: '/tools/pdf-tools/pdf-to-jpg' },
-  { title: 'JPG to PDF', description: 'Convert JPG images to PDF', href: '/tools/pdf-tools/jpg-to-pdf' },
-  { title: 'Word to PDF', description: 'Convert DOCX to PDF', href: '/tools/pdf-tools/word-to-pdf' },
-  { title: 'PDF to Word', description: 'Convert PDF to DOCX', href: '/tools/pdf-tools/pdf-to-word' },
-  { title: 'Excel to PDF', description: 'Convert XLSX to PDF', href: '/tools/pdf-tools/excel-to-pdf' },
-  { title: 'PDF to Excel', description: 'Convert PDF tables to Excel', href: '/tools/pdf-tools/pdf-to-excel' },
-  { title: 'PDF to PPT', description: 'Convert PDF to PowerPoint', href: '/tools/pdf-tools/pdf-to-ppt' },
-  { title: 'PPT to PDF', description: 'Convert PowerPoint to PDF', href: '/tools/pdf-tools/ppt-to-pdf' },
-  { title: 'HTML to PDF', description: 'Convert HTML to PDF', href: '/tools/pdf-tools/html-to-pdf' },
-  { title: 'Text to PDF', description: 'Convert plain text to PDF', href: '/tools/pdf-tools/text-to-pdf' },
-  { title: 'Markdown to PDF', description: 'Convert Markdown to PDF', href: '/tools/pdf-tools/markdown-to-pdf' },
-  { title: 'EPUB to PDF', description: 'Convert EPUB ebooks to PDF', href: '/tools/pdf-tools/epub-to-pdf' },
-  { title: 'MOBI to PDF', description: 'Convert MOBI ebooks to PDF', href: '/tools/pdf-tools/mobi-to-pdf' },
-  { title: 'PDF to HTML', description: 'Convert PDF to HTML file', href: '/tools/pdf-tools/pdf-to-html' },
-  { title: 'Delete Pages', description: 'Remove specific pages from PDF', href: '/tools/pdf-tools/pdf-delete-pages' },
-  { title: 'Reorder Pages', description: 'Change the order of PDF pages', href: '/tools/pdf-tools/pdf-reorder-pages' },
-  { title: 'Organize PDF', description: 'Reorder and remove PDF pages', href: '/tools/pdf-tools/pdf-organize' },
-  { title: 'Extract Text', description: 'Extract all text from PDF', href: '/tools/pdf-tools/pdf-extract-text' },
-  { title: 'Number Pages', description: 'Add page numbers to PDF', href: '/tools/pdf-tools/pdf-number-pages' },
-  { title: 'PDF Editor', description: 'Edit text and images in PDF', href: '/tools/pdf-tools/pdf-editor' },
-  { title: 'Sign PDF', description: 'Add electronic signature to PDF', href: '/tools/pdf-tools/pdf-sign' },
-  { title: 'PDF OCR', description: 'Make scanned PDFs searchable', href: '/tools/pdf-tools/pdf-ocr' },
-  { title: 'PDF Forms', description: 'Fill and create PDF forms', href: '/tools/pdf-tools/pdf-forms' },
-  { title: 'Redact PDF', description: 'Censor sensitive text in PDF', href: '/tools/pdf-tools/pdf-redact' },
-  { title: 'Crop PDF', description: 'Crop and resize PDF pages', href: '/tools/pdf-tools/pdf-crop' },
-  { title: 'Compare PDF', description: 'Compare two PDF documents', href: '/tools/pdf-tools/pdf-compare' },
-  { title: 'PDF to PDF/A', description: 'Convert PDF for archiving', href: '/tools/pdf-tools/pdf-to-pdfa' },
-  { title: 'Repair PDF', description: 'Fix corrupted PDF files', href: '/tools/pdf-tools/pdf-repair' },
-  { title: 'AI PDF Summary', description: 'Summarize PDF with AI', href: '/tools/pdf-tools/pdf-ai-summary' },
-  { title: 'Translate PDF', description: 'Translate PDF to any language', href: '/tools/pdf-tools/pdf-translate' },
+  { title: 'Merge PDF', description: 'Combine multiple PDFs into one', href: '/tools/pdf-tools/pdf-merge', group: 'Organize' },
+  { title: 'Split PDF', description: 'Extract specific pages from PDF', href: '/tools/pdf-tools/pdf-split', group: 'Organize' },
+  { title: 'Compress PDF', description: 'Reduce PDF file size', href: '/tools/pdf-tools/pdf-compress', group: 'Optimize' },
+  { title: 'Protect PDF', description: 'Encrypt PDF with password', href: '/tools/pdf-tools/pdf-protect', group: 'Security' },
+  { title: 'Unlock PDF', description: 'Remove password from PDF', href: '/tools/pdf-tools/pdf-unlock', group: 'Security' },
+  { title: 'Rotate PDF', description: 'Rotate pages 90, 180, 270', href: '/tools/pdf-tools/pdf-rotate', group: 'Edit' },
+  { title: 'Watermark PDF', description: 'Add text watermark to PDF', href: '/tools/pdf-tools/pdf-watermark', group: 'Edit' },
+  { title: 'Image to PDF', description: 'Convert images to PDF', href: '/tools/pdf-tools/image-to-pdf', group: 'Convert to PDF' },
+  { title: 'PDF to Image', description: 'Convert PDF pages to images', href: '/tools/pdf-tools/pdf-to-image', group: 'Convert from PDF' },
+  { title: 'PDF to JPG', description: 'Convert PDF pages to JPG', href: '/tools/pdf-tools/pdf-to-jpg', group: 'Convert from PDF' },
+  { title: 'JPG to PDF', description: 'Convert JPG images to PDF', href: '/tools/pdf-tools/jpg-to-pdf', group: 'Convert to PDF' },
+  { title: 'Word to PDF', description: 'Convert DOCX to PDF', href: '/tools/pdf-tools/word-to-pdf', group: 'Convert to PDF' },
+  { title: 'PDF to Word', description: 'Convert PDF to DOCX', href: '/tools/pdf-tools/pdf-to-word', group: 'Convert from PDF' },
+  { title: 'Excel to PDF', description: 'Convert XLSX to PDF', href: '/tools/pdf-tools/excel-to-pdf', group: 'Convert to PDF' },
+  { title: 'PDF to Excel', description: 'Convert PDF tables to Excel', href: '/tools/pdf-tools/pdf-to-excel', group: 'Convert from PDF' },
+  { title: 'PDF to PPT', description: 'Convert PDF to PowerPoint', href: '/tools/pdf-tools/pdf-to-ppt', group: 'Convert from PDF' },
+  { title: 'PPT to PDF', description: 'Convert PowerPoint to PDF', href: '/tools/pdf-tools/ppt-to-pdf', group: 'Convert to PDF' },
+  { title: 'HTML to PDF', description: 'Convert HTML to PDF', href: '/tools/pdf-tools/html-to-pdf', group: 'Convert to PDF' },
+  { title: 'Text to PDF', description: 'Convert plain text to PDF', href: '/tools/pdf-tools/text-to-pdf', group: 'Convert to PDF' },
+  { title: 'Markdown to PDF', description: 'Convert Markdown to PDF', href: '/tools/pdf-tools/markdown-to-pdf', group: 'Convert to PDF' },
+  { title: 'EPUB to PDF', description: 'Convert EPUB ebooks to PDF', href: '/tools/pdf-tools/epub-to-pdf', group: 'Convert to PDF' },
+  { title: 'MOBI to PDF', description: 'Convert MOBI ebooks to PDF', href: '/tools/pdf-tools/mobi-to-pdf', group: 'Convert to PDF' },
+  { title: 'PDF to HTML', description: 'Convert PDF to HTML file', href: '/tools/pdf-tools/pdf-to-html', group: 'Convert from PDF' },
+  { title: 'Delete Pages', description: 'Remove specific pages from PDF', href: '/tools/pdf-tools/pdf-delete-pages', group: 'Organize' },
+  { title: 'Reorder Pages', description: 'Change the order of PDF pages', href: '/tools/pdf-tools/pdf-reorder-pages', group: 'Organize' },
+  { title: 'Organize PDF', description: 'Reorder and remove PDF pages', href: '/tools/pdf-tools/pdf-organize', group: 'Organize' },
+  { title: 'Extract Text', description: 'Extract all text from PDF', href: '/tools/pdf-tools/pdf-extract-text', group: 'Optimize' },
+  { title: 'Number Pages', description: 'Add page numbers to PDF', href: '/tools/pdf-tools/pdf-number-pages', group: 'Edit' },
+  { title: 'PDF Editor', description: 'Edit text and images in PDF', href: '/tools/pdf-tools/pdf-editor', group: 'Edit' },
+  { title: 'Sign PDF', description: 'Add electronic signature to PDF', href: '/tools/pdf-tools/pdf-sign', group: 'Security' },
+  { title: 'PDF OCR', description: 'Make scanned PDFs searchable', href: '/tools/pdf-tools/pdf-ocr', group: 'Optimize' },
+  { title: 'PDF Forms', description: 'Fill and create PDF forms', href: '/tools/pdf-tools/pdf-forms', group: 'Edit' },
+  { title: 'Redact PDF', description: 'Censor sensitive text in PDF', href: '/tools/pdf-tools/pdf-redact', group: 'Security' },
+  { title: 'Crop PDF', description: 'Crop and resize PDF pages', href: '/tools/pdf-tools/pdf-crop', group: 'Edit' },
+  { title: 'Compare PDF', description: 'Compare two PDF documents', href: '/tools/pdf-tools/pdf-compare', group: 'Security' },
+  { title: 'PDF to PDF/A', description: 'Convert PDF for archiving', href: '/tools/pdf-tools/pdf-to-pdfa', group: 'Convert from PDF' },
+  { title: 'Repair PDF', description: 'Fix corrupted PDF files', href: '/tools/pdf-tools/pdf-repair', group: 'Optimize' },
+  { title: 'AI PDF Summary', description: 'Summarize PDF with AI', href: '/tools/pdf-tools/pdf-ai-summary', group: 'AI & Content' },
+  { title: 'Translate PDF', description: 'Translate PDF to any language', href: '/tools/pdf-tools/pdf-translate', group: 'AI & Content' },
 ];
 
 export default function PdfToolsPage() {
@@ -53,7 +53,7 @@ export default function PdfToolsPage() {
         <div className="flex flex-wrap gap-4 justify-center">
           {tools.map((tool) => (
             <Link key={tool.href} href={tool.href} className="bg-white border border-neutral-200 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)]">
-              <ToolIcon slug={tool.href.split('/').pop()} className="w-8 h-8 mb-3 text-indigo-500" />
+              <ToolIcon slug={tool.href.split('/').pop()} className={`w-8 h-8 mb-3 ${groupTextColors[tool.group]}`} />
               <h2 className="font-bold text-lg mb-1 text-neutral-800 group-hover:text-indigo-600 transition">{tool.title}</h2>
               <p className="text-neutral-500 text-sm">{tool.description}</p>
             </Link>

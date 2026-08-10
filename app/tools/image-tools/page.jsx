@@ -1,45 +1,45 @@
 ﻿'use client';
 import Link from 'next/link';
-import { ToolIcon, CategoryIcon } from '../../lib/toolIcons';
+import { ToolIcon, CategoryIcon, groupTextColors } from '../../lib/toolIcons';
 
 const tools = [
-  { title: 'Image Compressor', description: 'Compress images without losing quality', href: '/tools/image-tools/image-compressor' },
-  { title: 'Image Converter', description: 'Convert between image formats', href: '/tools/image-tools/image-converter' },
-  { title: 'Image Resizer', description: 'Resize images to specific dimensions', href: '/tools/image-tools/image-resizer' },
-  { title: 'Image Cropper', description: 'Crop images with aspect ratio presets', href: '/tools/image-tools/image-cropper' },
-  { title: 'Image Rotate', description: 'Rotate images by any angle', href: '/tools/image-tools/image-rotate' },
-  { title: 'Image Flip', description: 'Flip images horizontally or vertically', href: '/tools/image-tools/image-flip' },
-  { title: 'Round Corners', description: 'Add rounded corners to images', href: '/tools/image-tools/round-corners' },
-  { title: 'Add Text to Image', description: 'Overlay text on images', href: '/tools/image-tools/add-text-to-image' },
-  { title: 'Image Editor', description: 'Edit and enhance your images', href: '/tools/image-tools/image-editor' },
-  { title: 'Add Border to Image', description: 'Add decorative borders to images', href: '/tools/image-tools/add-border-to-image' },
-  { title: 'Brightness and Contrast', description: 'Adjust image brightness and contrast', href: '/tools/image-tools/brightness-contrast' },
-  { title: 'Image Comparison', description: 'Compare images with slider', href: '/tools/image-tools/image-comparison' },
-  { title: 'Duplicate Image Finder', description: 'Find similar images', href: '/tools/image-tools/duplicate-image-finder' },
-  { title: 'Grayscale Converter', description: 'Convert images to grayscale', href: '/tools/image-tools/grayscale-converter' },
-  { title: 'Image Blur', description: 'Add blur effect to images', href: '/tools/image-tools/image-blur' },
-  { title: 'Image Inverter', description: 'Invert image colors', href: '/tools/image-tools/image-inverter' },
-  { title: 'Sepia Filter', description: 'Apply sepia tone effect', href: '/tools/image-tools/sepia-filter' },
-  { title: 'Image Metadata Viewer', description: 'View and remove EXIF data', href: '/tools/image-tools/image-metadata' },
-  { title: 'Image Pixelator', description: 'Pixelate/mosaic effect', href: '/tools/image-tools/image-pixelator' },
-  { title: 'Add Noise', description: 'Add film grain effect', href: '/tools/image-tools/add-noise' },
-  { title: 'Add Vignette', description: 'Add vignette effect', href: '/tools/image-tools/add-vignette' },
-  { title: 'HEIC to JPG', description: 'Convert iPhone HEIC photos to JPG', href: '/tools/image-tools/heic-to-jpg' },
-  { title: 'HEIC to PNG', description: 'Convert iPhone HEIC photos to PNG', href: '/tools/image-tools/heic-to-png' },
-  { title: 'WebP to PNG', description: 'Convert WebP images to PNG', href: '/tools/image-tools/webp-to-png' },
-  { title: 'WebP to JPG', description: 'Convert WebP images to JPG', href: '/tools/image-tools/webp-to-jpg' },
-  { title: 'PNG to JPG', description: 'Convert PNG to JPG with quality control', href: '/tools/image-tools/png-to-jpg' },
-  { title: 'JPG to PNG', description: 'Convert JPG to lossless PNG', href: '/tools/image-tools/jpg-to-png' },
-  { title: 'SVG to PNG', description: 'Rasterize SVG vectors to PNG', href: '/tools/image-tools/svg-to-png' },
-  { title: 'PNG to ICO', description: 'Create favicon from PNG', href: '/tools/image-tools/png-to-ico' },
-  { title: 'JPG to WebP', description: 'Convert JPG to modern WebP', href: '/tools/image-tools/jpg-to-webp' },
-  { title: 'PNG to WebP', description: 'Convert PNG to modern WebP', href: '/tools/image-tools/png-to-webp' },
-  { title: 'GIF to PNG', description: 'Extract first frame from GIF', href: '/tools/image-tools/gif-to-png' },
-  { title: 'BMP to PNG', description: 'Convert BMP to compressed PNG', href: '/tools/image-tools/bmp-to-png' },
-  { title: 'TIFF to PNG', description: 'Convert TIFF images to PNG', href: '/tools/image-tools/tiff-to-png' },
-  { title: 'TIFF to JPG', description: 'Convert TIFF images to JPG', href: '/tools/image-tools/tiff-to-jpg' },
-  { title: 'ICO to PNG', description: 'Convert ICO files to PNG', href: '/tools/image-tools/ico-to-png' },
-  { title: 'Image to Base64', description: 'Convert image to Base64 data URI', href: '/tools/image-tools/image-to-base64' },
+  { title: 'Image Compressor', description: 'Compress images without losing quality', href: '/tools/image-tools/image-compressor', group: 'Transform' },
+  { title: 'Image Converter', description: 'Convert between image formats', href: '/tools/image-tools/image-converter', group: 'Transform' },
+  { title: 'Image Resizer', description: 'Resize images to specific dimensions', href: '/tools/image-tools/image-resizer', group: 'Transform' },
+  { title: 'Image Cropper', description: 'Crop images with aspect ratio presets', href: '/tools/image-tools/image-cropper', group: 'Transform' },
+  { title: 'Image Rotate', description: 'Rotate images by any angle', href: '/tools/image-tools/image-rotate', group: 'Transform' },
+  { title: 'Image Flip', description: 'Flip images horizontally or vertically', href: '/tools/image-tools/image-flip', group: 'Transform' },
+  { title: 'Round Corners', description: 'Add rounded corners to images', href: '/tools/image-tools/round-corners', group: 'Annotate' },
+  { title: 'Add Text to Image', description: 'Overlay text on images', href: '/tools/image-tools/add-text-to-image', group: 'Annotate' },
+  { title: 'Image Editor', description: 'Edit and enhance your images', href: '/tools/image-tools/image-editor', group: 'Annotate' },
+  { title: 'Add Border to Image', description: 'Add decorative borders to images', href: '/tools/image-tools/add-border-to-image', group: 'Annotate' },
+  { title: 'Brightness and Contrast', description: 'Adjust image brightness and contrast', href: '/tools/image-tools/brightness-contrast', group: 'Filters & Effects' },
+  { title: 'Image Comparison', description: 'Compare images with slider', href: '/tools/image-tools/image-comparison', group: 'Analyze & Utilities' },
+  { title: 'Duplicate Image Finder', description: 'Find similar images', href: '/tools/image-tools/duplicate-image-finder', group: 'Analyze & Utilities' },
+  { title: 'Grayscale Converter', description: 'Convert images to grayscale', href: '/tools/image-tools/grayscale-converter', group: 'Filters & Effects' },
+  { title: 'Image Blur', description: 'Add blur effect to images', href: '/tools/image-tools/image-blur', group: 'Filters & Effects' },
+  { title: 'Image Inverter', description: 'Invert image colors', href: '/tools/image-tools/image-inverter', group: 'Filters & Effects' },
+  { title: 'Sepia Filter', description: 'Apply sepia tone effect', href: '/tools/image-tools/sepia-filter', group: 'Filters & Effects' },
+  { title: 'Image Metadata Viewer', description: 'View and remove EXIF data', href: '/tools/image-tools/image-metadata', group: 'Analyze & Utilities' },
+  { title: 'Image Pixelator', description: 'Pixelate/mosaic effect', href: '/tools/image-tools/image-pixelator', group: 'Filters & Effects' },
+  { title: 'Add Noise', description: 'Add film grain effect', href: '/tools/image-tools/add-noise', group: 'Annotate' },
+  { title: 'Add Vignette', description: 'Add vignette effect', href: '/tools/image-tools/add-vignette', group: 'Annotate' },
+  { title: 'HEIC to JPG', description: 'Convert iPhone HEIC photos to JPG', href: '/tools/image-tools/heic-to-jpg', group: 'Convert Format' },
+  { title: 'HEIC to PNG', description: 'Convert iPhone HEIC photos to PNG', href: '/tools/image-tools/heic-to-png', group: 'Convert Format' },
+  { title: 'WebP to PNG', description: 'Convert WebP images to PNG', href: '/tools/image-tools/webp-to-png', group: 'Convert Format' },
+  { title: 'WebP to JPG', description: 'Convert WebP images to JPG', href: '/tools/image-tools/webp-to-jpg', group: 'Convert Format' },
+  { title: 'PNG to JPG', description: 'Convert PNG to JPG with quality control', href: '/tools/image-tools/png-to-jpg', group: 'Convert Format' },
+  { title: 'JPG to PNG', description: 'Convert JPG to lossless PNG', href: '/tools/image-tools/jpg-to-png', group: 'Convert Format' },
+  { title: 'SVG to PNG', description: 'Rasterize SVG vectors to PNG', href: '/tools/image-tools/svg-to-png', group: 'Convert Format' },
+  { title: 'PNG to ICO', description: 'Create favicon from PNG', href: '/tools/image-tools/png-to-ico', group: 'Convert Format' },
+  { title: 'JPG to WebP', description: 'Convert JPG to modern WebP', href: '/tools/image-tools/jpg-to-webp', group: 'Convert Format' },
+  { title: 'PNG to WebP', description: 'Convert PNG to modern WebP', href: '/tools/image-tools/png-to-webp', group: 'Convert Format' },
+  { title: 'GIF to PNG', description: 'Extract first frame from GIF', href: '/tools/image-tools/gif-to-png', group: 'Convert Format' },
+  { title: 'BMP to PNG', description: 'Convert BMP to compressed PNG', href: '/tools/image-tools/bmp-to-png', group: 'Convert Format' },
+  { title: 'TIFF to PNG', description: 'Convert TIFF images to PNG', href: '/tools/image-tools/tiff-to-png', group: 'Convert Format' },
+  { title: 'TIFF to JPG', description: 'Convert TIFF images to JPG', href: '/tools/image-tools/tiff-to-jpg', group: 'Convert Format' },
+  { title: 'ICO to PNG', description: 'Convert ICO files to PNG', href: '/tools/image-tools/ico-to-png', group: 'Convert Format' },
+  { title: 'Image to Base64', description: 'Convert image to Base64 data URI', href: '/tools/image-tools/image-to-base64', group: 'Analyze & Utilities' },
 ];
 
 export default function ImageToolsPage() {
@@ -51,7 +51,7 @@ export default function ImageToolsPage() {
         <div className="flex flex-wrap gap-4 justify-center">
           {tools.map((tool) => (
             <Link key={tool.href} href={tool.href} className="bg-white border border-neutral-200 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)]">
-              <ToolIcon slug={tool.href.split('/').pop()} className="w-8 h-8 mb-3 text-indigo-500" />
+              <ToolIcon slug={tool.href.split('/').pop()} className={`w-8 h-8 mb-3 ${groupTextColors[tool.group]}`} />
               <h2 className="font-bold text-lg mb-1 text-neutral-800 group-hover:text-indigo-600 transition">{tool.title}</h2>
               <p className="text-neutral-500 text-sm">{tool.description}</p>
             </Link>

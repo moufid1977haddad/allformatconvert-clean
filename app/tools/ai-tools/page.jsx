@@ -1,24 +1,24 @@
 ﻿'use client';
 import Link from 'next/link';
-import { ToolIcon, CategoryIcon } from '../../lib/toolIcons';
+import { ToolIcon, CategoryIcon, groupTextColors } from '../../lib/toolIcons';
 
 const tools = [
-  { title: 'Background Remover', description: 'Remove image backgrounds with AI', href: '/tools/ai-tools/background-remover' },
-  { title: 'Image Upscaler', description: 'Upscale images with AI', href: '/tools/ai-tools/image-upscaler' },
-  { title: 'Grammar Fixer', description: 'Fix grammar and spelling with AI', href: '/tools/ai-tools/grammar-fixer' },
-  { title: 'Text Summarizer', description: 'Summarize long texts with AI', href: '/tools/ai-tools/text-summarizer' },
-  { title: 'AI Translator', description: 'Translate text with AI', href: '/tools/ai-tools/ai-translator' },
-  { title: 'Image Generator', description: 'Generate images with AI', href: '/tools/ai-tools/image-generator' },
-  { title: 'AI Chatbot', description: 'Chat with an AI assistant', href: '/tools/ai-tools/ai-chatbot' },
-  { title: 'AI Writer', description: 'Generate text content with AI', href: '/tools/ai-tools/ai-writer' },
-  { title: 'AI Detector', description: 'Detect AI-generated content', href: '/tools/ai-tools/ai-detector' },
-  { title: 'Audio Transcriber', description: 'Transcribe audio to text with AI', href: '/tools/ai-tools/audio-transcriber' },
-  { title: 'Sentiment Analyzer', description: 'Analyze text sentiment with AI', href: '/tools/ai-tools/sentiment-analyzer' },
-  { title: 'Image Captioner', description: 'Generate captions for images', href: '/tools/ai-tools/image-captioner' },
-  { title: 'Data Extractor', description: 'Extract data from documents with AI', href: '/tools/ai-tools/data-extractor' },
-  { title: 'AI Paraphraser', description: 'Paraphrase text with AI', href: '/tools/ai-tools/ai-paraphraser' },
-  { title: 'Email Generator', description: 'Generate professional emails with AI', href: '/tools/ai-tools/email-generator' },
-  { title: 'Keyword Extractor', description: 'Extract keywords from text with AI', href: '/tools/ai-tools/keyword-extractor' },
+  { title: 'Background Remover', description: 'Remove image backgrounds with AI', href: '/tools/ai-tools/background-remover', group: 'Image AI' },
+  { title: 'Image Upscaler', description: 'Upscale images with AI', href: '/tools/ai-tools/image-upscaler', group: 'Image AI' },
+  { title: 'Grammar Fixer', description: 'Fix grammar and spelling with AI', href: '/tools/ai-tools/grammar-fixer', group: 'Writing & Language' },
+  { title: 'Text Summarizer', description: 'Summarize long texts with AI', href: '/tools/ai-tools/text-summarizer', group: 'Writing & Language' },
+  { title: 'AI Translator', description: 'Translate text with AI', href: '/tools/ai-tools/ai-translator', group: 'Chat, Translate & Generate' },
+  { title: 'Image Generator', description: 'Generate images with AI', href: '/tools/ai-tools/image-generator', group: 'Image AI' },
+  { title: 'AI Chatbot', description: 'Chat with an AI assistant', href: '/tools/ai-tools/ai-chatbot', group: 'Chat, Translate & Generate' },
+  { title: 'AI Writer', description: 'Generate text content with AI', href: '/tools/ai-tools/ai-writer', group: 'Writing & Language' },
+  { title: 'AI Detector', description: 'Detect AI-generated content', href: '/tools/ai-tools/ai-detector', group: 'Writing & Language' },
+  { title: 'Audio Transcriber', description: 'Transcribe audio to text with AI', href: '/tools/ai-tools/audio-transcriber', group: 'Audio & Data Analysis' },
+  { title: 'Sentiment Analyzer', description: 'Analyze text sentiment with AI', href: '/tools/ai-tools/sentiment-analyzer', group: 'Audio & Data Analysis' },
+  { title: 'Image Captioner', description: 'Generate captions for images', href: '/tools/ai-tools/image-captioner', group: 'Image AI' },
+  { title: 'Data Extractor', description: 'Extract data from documents with AI', href: '/tools/ai-tools/data-extractor', group: 'Audio & Data Analysis' },
+  { title: 'AI Paraphraser', description: 'Paraphrase text with AI', href: '/tools/ai-tools/ai-paraphraser', group: 'Writing & Language' },
+  { title: 'Email Generator', description: 'Generate professional emails with AI', href: '/tools/ai-tools/email-generator', group: 'Chat, Translate & Generate' },
+  { title: 'Keyword Extractor', description: 'Extract keywords from text with AI', href: '/tools/ai-tools/keyword-extractor', group: 'Audio & Data Analysis' },
 ];
 
 export default function AiToolsPage() {
@@ -30,7 +30,7 @@ export default function AiToolsPage() {
         <div className="flex flex-wrap gap-4 justify-center">
           {tools.map((tool) => (
             <Link key={tool.href} href={tool.href} className="bg-white border border-neutral-200 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)]">
-              <ToolIcon slug={tool.href.split('/').pop()} className="w-8 h-8 mb-3 text-indigo-500" />
+              <ToolIcon slug={tool.href.split('/').pop()} className={`w-8 h-8 mb-3 ${groupTextColors[tool.group]}`} />
               <h2 className="font-bold text-lg mb-1 text-neutral-800 group-hover:text-indigo-600 transition">{tool.title}</h2>
               <p className="text-neutral-500 text-sm">{tool.description}</p>
             </Link>

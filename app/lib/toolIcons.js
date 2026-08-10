@@ -147,6 +147,59 @@ export function getCategoryIcon(slug) {
   return categoryIcons[slug] || DefaultToolIcon;
 }
 
+// Text-color equivalents of the mega-menu group badge colors in Navbar.jsx
+// (groupColors), used to tint each tool's icon on its category grid page to
+// match the group it belongs to in the nav dropdown.
+export const groupTextColors = {
+  // PDF Tools
+  'Organize': 'text-red-500',
+  'Optimize': 'text-green-500',
+  'Convert to PDF': 'text-blue-500',
+  'Convert from PDF': 'text-emerald-500',
+  'Edit': 'text-pink-500',
+  'Security': 'text-blue-800',
+  'AI & Content': 'text-purple-500',
+  // Image Tools
+  'Transform': 'text-red-500',
+  'Annotate': 'text-pink-500',
+  'Filters & Effects': 'text-purple-500',
+  'Convert Format': 'text-blue-500',
+  'Analyze & Utilities': 'text-green-500',
+  // Video Tools
+  'Edit & Transform': 'text-red-500',
+  'Convert': 'text-blue-500',
+  'Capture & Record': 'text-green-500',
+  'Info & Extras': 'text-purple-500',
+  // Text Tools
+  'Count & Analyze': 'text-blue-500',
+  'Transform & Format': 'text-pink-500',
+  'Find & Secure': 'text-emerald-500',
+  'Generate & Create': 'text-purple-500',
+  // Developer Tools
+  'JSON Tools': 'text-red-500',
+  'Data Format Convert': 'text-blue-500',
+  'Web & Text Encoding': 'text-emerald-500',
+  'Code Formatting': 'text-pink-500',
+  'Generators & Security': 'text-purple-500',
+  'Utilities': 'text-orange-500',
+  // AI Tools
+  'Writing & Language': 'text-pink-500',
+  'Chat, Translate & Generate': 'text-blue-500',
+  'Image AI': 'text-purple-500',
+  'Audio & Data Analysis': 'text-emerald-500',
+};
+
+// Text-color equivalents of the flat-category badge colors in Navbar.jsx
+// (flatCategoryColors), keyed by category href.
+export const flatCategoryTextColors = {
+  '/tools/gif-tools': 'text-teal-500',
+  '/tools/audio-tools': 'text-violet-500',
+  '/tools/file-tools': 'text-amber-500',
+  '/tools/qr-barcodes-tools': 'text-cyan-500',
+  '/tools/converter-tools': 'text-indigo-500',
+  '/tools/math-tools': 'text-rose-500',
+};
+
 // Convenience components: derive the icon straight from a tool/category href
 // so listing pages don't need to duplicate the mapping in local arrays.
 export function ToolIcon({ slug, className }) {

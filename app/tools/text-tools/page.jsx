@@ -1,25 +1,25 @@
 ﻿'use client';
 import Link from 'next/link';
-import { ToolIcon, CategoryIcon } from '../../lib/toolIcons';
+import { ToolIcon, CategoryIcon, groupTextColors } from '../../lib/toolIcons';
 
 const tools = [
-  { title: 'Word Counter', description: 'Count words, characters and sentences', href: '/tools/text-tools/word-counter' },
-  { title: 'Case Converter', description: 'Convert text to upper, lower, title case', href: '/tools/text-tools/case-converter' },
-  { title: 'Text Reverser', description: 'Reverse any text or sentence', href: '/tools/text-tools/text-reverser' },
-  { title: 'Duplicate Remover', description: 'Remove duplicate lines from text', href: '/tools/text-tools/duplicate-remover' },
-  { title: 'Text Sorter', description: 'Sort lines alphabetically', href: '/tools/text-tools/text-sorter' },
-  { title: 'Find and Replace', description: 'Find and replace text instantly', href: '/tools/text-tools/find-replace' },
-  { title: 'Text Comparator', description: 'Compare two texts side by side', href: '/tools/text-tools/text-comparator' },
-  { title: 'Whitespace Remover', description: 'Remove extra spaces from text', href: '/tools/text-tools/whitespace-remover' },
-  { title: 'Lorem Ipsum Generator', description: 'Generate placeholder text', href: '/tools/text-tools/lorem-ipsum' },
-  { title: 'URL Encoder', description: 'Encode and decode URLs', href: '/tools/text-tools/url-encoder' },
-  { title: 'Text to List', description: 'Convert text to bullet list', href: '/tools/text-tools/text-to-list' },
-  { title: 'Text Truncator', description: 'Truncate text to specific length', href: '/tools/text-tools/text-truncator' },
-  { title: 'Text Repeater', description: 'Repeat text multiple times', href: '/tools/text-tools/text-repeater' },
-  { title: 'Character Counter', description: 'Count characters in real time', href: '/tools/text-tools/character-counter' },
-  { title: 'Text Encryptor', description: 'Encrypt and decrypt text', href: '/tools/text-tools/text-encryptor' },
-  { title: 'ASCII Art Generator', description: 'Convert text to ASCII art', href: '/tools/text-tools/ascii-art' },
-  { title: 'Sticky Notes', description: 'Create and save sticky notes', href: '/tools/text-tools/sticky-notes' },
+  { title: 'Word Counter', description: 'Count words, characters and sentences', href: '/tools/text-tools/word-counter', group: 'Count & Analyze' },
+  { title: 'Case Converter', description: 'Convert text to upper, lower, title case', href: '/tools/text-tools/case-converter', group: 'Transform & Format' },
+  { title: 'Text Reverser', description: 'Reverse any text or sentence', href: '/tools/text-tools/text-reverser', group: 'Transform & Format' },
+  { title: 'Duplicate Remover', description: 'Remove duplicate lines from text', href: '/tools/text-tools/duplicate-remover', group: 'Transform & Format' },
+  { title: 'Text Sorter', description: 'Sort lines alphabetically', href: '/tools/text-tools/text-sorter', group: 'Transform & Format' },
+  { title: 'Find and Replace', description: 'Find and replace text instantly', href: '/tools/text-tools/find-replace', group: 'Find & Secure' },
+  { title: 'Text Comparator', description: 'Compare two texts side by side', href: '/tools/text-tools/text-comparator', group: 'Count & Analyze' },
+  { title: 'Whitespace Remover', description: 'Remove extra spaces from text', href: '/tools/text-tools/whitespace-remover', group: 'Transform & Format' },
+  { title: 'Lorem Ipsum Generator', description: 'Generate placeholder text', href: '/tools/text-tools/lorem-ipsum', group: 'Generate & Create' },
+  { title: 'URL Encoder', description: 'Encode and decode URLs', href: '/tools/text-tools/url-encoder', group: 'Find & Secure' },
+  { title: 'Text to List', description: 'Convert text to bullet list', href: '/tools/text-tools/text-to-list', group: 'Transform & Format' },
+  { title: 'Text Truncator', description: 'Truncate text to specific length', href: '/tools/text-tools/text-truncator', group: 'Transform & Format' },
+  { title: 'Text Repeater', description: 'Repeat text multiple times', href: '/tools/text-tools/text-repeater', group: 'Transform & Format' },
+  { title: 'Character Counter', description: 'Count characters in real time', href: '/tools/text-tools/character-counter', group: 'Count & Analyze' },
+  { title: 'Text Encryptor', description: 'Encrypt and decrypt text', href: '/tools/text-tools/text-encryptor', group: 'Find & Secure' },
+  { title: 'ASCII Art Generator', description: 'Convert text to ASCII art', href: '/tools/text-tools/ascii-art', group: 'Generate & Create' },
+  { title: 'Sticky Notes', description: 'Create and save sticky notes', href: '/tools/text-tools/sticky-notes', group: 'Generate & Create' },
 ];
 
 export default function TextToolsPage() {
@@ -31,7 +31,7 @@ export default function TextToolsPage() {
         <div className="flex flex-wrap gap-4 justify-center">
           {tools.map((tool) => (
             <Link key={tool.href} href={tool.href} className="bg-white border border-neutral-200 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)]">
-              <ToolIcon slug={tool.href.split('/').pop()} className="w-8 h-8 mb-3 text-indigo-500" />
+              <ToolIcon slug={tool.href.split('/').pop()} className={`w-8 h-8 mb-3 ${groupTextColors[tool.group]}`} />
               <h2 className="font-bold text-lg mb-1 text-neutral-800 group-hover:text-indigo-600 transition">{tool.title}</h2>
               <p className="text-neutral-500 text-sm">{tool.description}</p>
             </Link>

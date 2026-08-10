@@ -1,23 +1,23 @@
 ﻿'use client';
 import Link from 'next/link';
-import { ToolIcon, CategoryIcon } from '../../lib/toolIcons';
+import { ToolIcon, CategoryIcon, groupTextColors } from '../../lib/toolIcons';
 
 const tools = [
-  { title: 'Video to Audio', description: 'Extract audio from video files', href: '/tools/video-tools/video-to-audio' },
-  { title: 'Video Compressor', description: 'Compress video files easily', href: '/tools/video-tools/video-compressor' },
-  { title: 'Video Converter', description: 'Convert video to different formats', href: '/tools/video-tools/video-converter' },
-  { title: 'Video Trimmer', description: 'Trim and cut video files', href: '/tools/video-tools/video-trimmer' },
-  { title: 'Video to GIF', description: 'Convert video clips to GIF', href: '/tools/video-tools/video-to-gif' },
-  { title: 'Video Screenshot', description: 'Capture screenshots from video', href: '/tools/video-tools/video-screenshot' },
-  { title: 'Media Player', description: 'Play audio and video files', href: '/tools/video-tools/media-player' },
-  { title: 'Video Metadata', description: 'View and edit video metadata', href: '/tools/video-tools/video-metadata' },
-  { title: 'Video Watermark', description: 'Add watermark to video', href: '/tools/video-tools/video-watermark' },
-  { title: 'Subtitle Generator', description: 'Generate subtitles for video', href: '/tools/video-tools/subtitle-generator' },
-  { title: 'Screen Recorder', description: 'Record your screen', href: '/tools/video-tools/screen-recorder' },
-  { title: 'Video Merger', description: 'Merge multiple videos', href: '/tools/video-tools/video-merger' },
-  { title: 'Video Rotator', description: 'Rotate video files', href: '/tools/video-tools/video-rotator' },
-  { title: 'Video Resizer', description: 'Resize video dimensions', href: '/tools/video-tools/video-resizer' },
-  { title: 'Video Filter', description: 'Apply filters to video', href: '/tools/video-tools/video-filter' },
+  { title: 'Video to Audio', description: 'Extract audio from video files', href: '/tools/video-tools/video-to-audio', group: 'Convert' },
+  { title: 'Video Compressor', description: 'Compress video files easily', href: '/tools/video-tools/video-compressor', group: 'Edit & Transform' },
+  { title: 'Video Converter', description: 'Convert video to different formats', href: '/tools/video-tools/video-converter', group: 'Convert' },
+  { title: 'Video Trimmer', description: 'Trim and cut video files', href: '/tools/video-tools/video-trimmer', group: 'Edit & Transform' },
+  { title: 'Video to GIF', description: 'Convert video clips to GIF', href: '/tools/video-tools/video-to-gif', group: 'Convert' },
+  { title: 'Video Screenshot', description: 'Capture screenshots from video', href: '/tools/video-tools/video-screenshot', group: 'Capture & Record' },
+  { title: 'Media Player', description: 'Play audio and video files', href: '/tools/video-tools/media-player', group: 'Capture & Record' },
+  { title: 'Video Metadata', description: 'View and edit video metadata', href: '/tools/video-tools/video-metadata', group: 'Info & Extras' },
+  { title: 'Video Watermark', description: 'Add watermark to video', href: '/tools/video-tools/video-watermark', group: 'Edit & Transform' },
+  { title: 'Subtitle Generator', description: 'Generate subtitles for video', href: '/tools/video-tools/subtitle-generator', group: 'Info & Extras' },
+  { title: 'Screen Recorder', description: 'Record your screen', href: '/tools/video-tools/screen-recorder', group: 'Capture & Record' },
+  { title: 'Video Merger', description: 'Merge multiple videos', href: '/tools/video-tools/video-merger', group: 'Edit & Transform' },
+  { title: 'Video Rotator', description: 'Rotate video files', href: '/tools/video-tools/video-rotator', group: 'Edit & Transform' },
+  { title: 'Video Resizer', description: 'Resize video dimensions', href: '/tools/video-tools/video-resizer', group: 'Edit & Transform' },
+  { title: 'Video Filter', description: 'Apply filters to video', href: '/tools/video-tools/video-filter', group: 'Edit & Transform' },
 ];
 
 export default function MediaToolsPage() {
@@ -29,7 +29,7 @@ export default function MediaToolsPage() {
         <div className="flex flex-wrap gap-4 justify-center">
           {tools.map((tool) => (
             <Link key={tool.href} href={tool.href} className="bg-white border border-neutral-200 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)]">
-              <ToolIcon slug={tool.href.split('/').pop()} className="w-8 h-8 mb-3 text-indigo-500" />
+              <ToolIcon slug={tool.href.split('/').pop()} className={`w-8 h-8 mb-3 ${groupTextColors[tool.group]}`} />
               <h2 className="font-bold text-lg mb-1 text-neutral-800 group-hover:text-indigo-600 transition">{tool.title}</h2>
               <p className="text-neutral-500 text-sm">{tool.description}</p>
             </Link>
