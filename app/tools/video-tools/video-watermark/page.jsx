@@ -57,7 +57,7 @@ export default function VideoWatermarkPage() {
           </div>
           {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" />}
           <div><label className="block text-sm text-neutral-500 mb-1">Watermark Text</label><input type="text" value={text} onChange={e => setText(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
-          <div><label className="block text-sm text-neutral-500 mb-2">Position</label><div className="grid grid-cols-3 gap-2">{['top-left','top-right','center','bottom-left','bottom-right'].map(p => <button key={p} onClick={() => setPosition(p)} className={"py-2 rounded-lg text-sm font-semibold transition " + (position===p?'bg-indigo-600':'bg-neutral-800 hover:bg-neutral-100')}>{p}</button>)}</div></div>
+          <div><label className="block text-sm text-neutral-500 mb-2">Position</label><div className="grid grid-cols-3 gap-2">{['top-left','top-right','center','bottom-left','bottom-right'].map(p => <button key={p} onClick={() => setPosition(p)} className={"py-2 rounded-lg text-sm font-semibold transition " + (position===p?'bg-indigo-600 text-white':'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800')}>{p}</button>)}</div></div>
           <button onClick={capture} disabled={!file || !text} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Capture Frame with Watermark</button>
           {screenshots.length > 0 && (
             <div className="grid grid-cols-2 gap-3">

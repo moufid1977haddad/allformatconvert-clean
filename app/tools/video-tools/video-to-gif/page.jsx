@@ -72,7 +72,7 @@ export default function VideoToGifPage() {
                 {frames.map((f, i) => <img key={i} src={f} className="w-full rounded" />)}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {frames.map((f, i) => <a key={i} href={f} download={"frame-" + i + ".png"} className="block text-center bg-neutral-800 hover:bg-neutral-100 rounded-lg py-1 text-sm transition">Frame {i+1}</a>)}
+                {frames.map((f, i) => <a key={i} href={f} download={"frame-" + i + ".png"} className="block text-center bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800 rounded-lg py-1 text-sm transition">Frame {i+1}</a>)}
               </div>
             </div>
           )}

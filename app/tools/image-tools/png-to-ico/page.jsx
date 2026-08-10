@@ -55,7 +55,7 @@ export default function PngToIcoPage() {
             <label className="block text-sm text-neutral-500 mb-2">Size</label>
             <div className="grid grid-cols-4 gap-2">
               {[16, 32, 48, 64].map(s => (
-                <button key={s} onClick={() => setSize(s)} className={`py-2 rounded-lg font-semibold transition ${size === s ? 'bg-indigo-600' : 'bg-neutral-800 hover:bg-neutral-100'}`}>{s}x{s}</button>
+                <button key={s} onClick={() => setSize(s)} className={`py-2 rounded-lg font-semibold transition ${size === s ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>{s}x{s}</button>
               ))}
             </div>
           </div>

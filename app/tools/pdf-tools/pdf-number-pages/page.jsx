@@ -68,7 +68,7 @@ export default function PdfNumberPagesPage() {
             <label className="block text-sm text-neutral-500 mb-2">Position</label>
             <div className="grid grid-cols-3 gap-2">
               {['top-left','top-center','top-right','bottom-left','bottom-center','bottom-right'].map(pos => (
-                <button key={pos} onClick={() => setPosition(pos)} className={`py-2 rounded-lg text-sm font-semibold transition ${position === pos ? 'bg-indigo-600' : 'bg-neutral-800 hover:bg-neutral-100'}`}>{pos}</button>
+                <button key={pos} onClick={() => setPosition(pos)} className={`py-2 rounded-lg text-sm font-semibold transition ${position === pos ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>{pos}</button>
               ))}
             </div>
           </div>

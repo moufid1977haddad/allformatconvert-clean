@@ -29,8 +29,8 @@ export default function FileEncryptorPage() {
         <p className="text-neutral-500 text-center mb-8">Encrypt and decrypt files with a password</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="flex gap-2">
-            <button onClick={() => setMode('encrypt')} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'encrypt' ? 'bg-indigo-600' : 'bg-neutral-800'}`}>Encrypt</button>
-            <button onClick={() => setMode('decrypt')} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'decrypt' ? 'bg-indigo-600' : 'bg-neutral-800'}`}>Decrypt</button>
+            <button onClick={() => setMode('encrypt')} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'encrypt' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100'}`}>Encrypt</button>
+            <button onClick={() => setMode('decrypt')} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'decrypt' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100'}`}>Decrypt</button>
           </div>
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a file here'}</p>

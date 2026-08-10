@@ -35,7 +35,7 @@ export default function DiffViewerPage() {
           {diff && (
             <div className="space-y-1 font-mono text-sm max-h-96 overflow-y-auto">
               {diff.map((d, i) => (
-                <div key={i} className={"px-3 py-1 rounded flex gap-3 " + (d.type==='removed'?'bg-red-900/30 text-red-400':d.type==='added'?'bg-green-900/30 text-green-400':'bg-neutral-800 text-neutral-500')}>
+                <div key={i} className={"px-3 py-1 rounded flex gap-3 " + (d.type==='removed'?'bg-red-900/30 text-red-400':d.type==='added'?'bg-green-900/30 text-green-400':'bg-neutral-800 text-neutral-400')}>
                   <span className="text-neutral-600 w-6">{d.num}</span>
                   <span>{d.type==='removed'?'- ':d.type==='added'?'+ ':'  '}{d.line}</span>
                 </div>

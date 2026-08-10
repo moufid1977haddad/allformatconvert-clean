@@ -41,7 +41,7 @@ export default function TextComparatorPage() {
             <div className="space-y-2">
               <p className="text-sm text-neutral-500 text-center">{result.filter(r => !r.same).length} difference(s) found</p>
               {result.map((r, i) => (
-                <div key={i} className={`grid grid-cols-2 gap-2 p-2 rounded-lg ${r.same ? 'bg-neutral-800' : 'bg-red-900/30'}`}>
+                <div key={i} className={`grid grid-cols-2 gap-2 p-2 rounded-lg ${r.same ? 'bg-neutral-800 text-neutral-100' : 'bg-red-900/30'}`}>
                   <div className="text-sm font-mono">{r.l1 || <span className="text-neutral-600">empty</span>}</div>
                   <div className="text-sm font-mono">{r.l2 || <span className="text-neutral-600">empty</span>}</div>
                 </div>

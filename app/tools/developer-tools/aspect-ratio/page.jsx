@@ -26,7 +26,7 @@ export default function AspectRatioPage() {
             <div className="text-4xl font-bold text-indigo-400">{ratio}</div>
             <div className="text-neutral-500">Decimal: {decimal}</div>
           </div>
-          <div><label className="block text-sm text-neutral-500 mb-2">Common Presets</label><div className="grid grid-cols-3 gap-2">{presets.map(([r,d]) => <button key={r} onClick={() => { const [pw,ph] = d.split('x'); setW(pw); setH(ph); }} className="bg-neutral-800 hover:bg-neutral-100 rounded-lg p-2 text-sm transition"><div className="font-semibold">{r}</div><div className="text-neutral-500 text-xs">{d}</div></button>)}</div></div>
+          <div><label className="block text-sm text-neutral-500 mb-2">Common Presets</label><div className="grid grid-cols-3 gap-2">{presets.map(([r,d]) => <button key={r} onClick={() => { const [pw,ph] = d.split('x'); setW(pw); setH(ph); }} className="bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800 rounded-lg p-2 text-sm transition"><div className="font-semibold">{r}</div><div className="text-neutral-500 text-xs">{d}</div></button>)}</div></div>
         </div>
       </div>
       <SeoContent

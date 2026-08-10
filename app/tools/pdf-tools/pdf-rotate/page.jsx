@@ -53,7 +53,7 @@ export default function PdfRotatePage() {
             <label className="block text-sm text-neutral-500 mb-2">Rotation angle</label>
             <div className="flex gap-3">
               {[90, 180, 270].map(deg => (
-                <button key={deg} onClick={() => setRotation(deg)} className={`flex-1 py-2 rounded-lg font-semibold transition ${rotation === deg ? 'bg-indigo-600' : 'bg-neutral-800 hover:bg-neutral-100'}`}>{deg}deg</button>
+                <button key={deg} onClick={() => setRotation(deg)} className={`flex-1 py-2 rounded-lg font-semibold transition ${rotation === deg ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>{deg}deg</button>
               ))}
             </div>
           </div>
