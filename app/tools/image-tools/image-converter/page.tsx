@@ -1,6 +1,6 @@
 'use client';
 import { useState, useCallback, useRef } from 'react';
-import { Lock, Zap, Package } from 'lucide-react';
+import { Lock, Zap, Package, Folder, Image as ImageIcon } from 'lucide-react';
 import SeoContent from '../../../components/SeoContent';
 
 interface ConvertedFile {
@@ -138,7 +138,7 @@ export default function ImageConverterPage() {
               e.target.value = '';
             }}
           />
-          <div className="text-4xl mb-3">📁</div>
+          <Folder className="w-10 h-10 mb-3 mx-auto text-neutral-400 dark:text-neutral-500" />
           <p className="text-neutral-700 dark:text-neutral-300 font-semibold text-lg">Drop your images here</p>
           <p className="text-neutral-400 dark:text-neutral-500 text-sm mt-1">or click to browse — PNG, JPG, WebP, AVIF, GIF, BMP, TIFF</p>
         </div>
@@ -153,7 +153,7 @@ export default function ImageConverterPage() {
               {files.map((file, idx) => (
                 <div key={idx} className="flex items-center justify-between bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <span className="text-xl">🖼️</span>
+                    <ImageIcon className="w-5 h-5 text-neutral-400 dark:text-neutral-500" />
                     <div>
                       <p className="text-sm font-medium text-neutral-800 dark:text-neutral-200 truncate max-w-xs">{file.name}</p>
                       <p className="text-xs text-neutral-400">{formatSize(file.size)}</p>
@@ -200,7 +200,7 @@ export default function ImageConverterPage() {
               disabled={processing}
               className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition text-base"
             >
-              {processing ? '⏳ Converting...' : `✨ Convert ${files.length} file${files.length > 1 ? 's' : ''} to ${format.toUpperCase()}`}
+              {processing ? 'Converting...' : `Convert ${files.length} file${files.length > 1 ? 's' : ''} to ${format.toUpperCase()}`}
             </button>
           </div>
         )}

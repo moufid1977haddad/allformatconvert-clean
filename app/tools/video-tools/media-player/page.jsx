@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import { Music } from 'lucide-react';
 import SeoContent from '../../../components/SeoContent';
 export default function MediaPlayerPage() {
   const [file, setFile] = useState(null);
@@ -32,7 +33,7 @@ export default function MediaPlayerPage() {
                 <video controls src={url} className="w-full rounded-xl bg-neutral-800" />
               ) : (
                 <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-8 text-center space-y-4">
-                  <div className="text-6xl">🎵</div>
+                  <Music className="w-16 h-16 mx-auto text-neutral-400" />
                   <p className="text-neutral-300 font-semibold">{file.name}</p>
                   <audio controls src={url} className="w-full" />
                 </div>

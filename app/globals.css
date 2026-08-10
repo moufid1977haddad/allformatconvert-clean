@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Ties Tailwind's dark: variant to the site's manual toggle (.dark class on
+   <html>, set by Navbar.jsx) instead of the default prefers-color-scheme
+   media query -- without this, dark: utilities silently follow OS preference
+   and ignore the toggle entirely. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
+import { Mic, Folder } from 'lucide-react';
 import SeoContent from '../../../components/SeoContent';
 
 export default function AudioToTextPage() {
@@ -84,13 +85,13 @@ export default function AudioToTextPage() {
             onClick={() => setMode('mic')}
             className={`flex-1 py-3 font-semibold text-sm transition ${mode === 'mic' ? 'bg-indigo-600 text-white' : 'bg-white text-neutral-600 hover:bg-neutral-50'}`}
           >
-            🎤 Use Microphone
+            <Mic className="w-4 h-4 inline -mt-0.5 mr-1.5" /> Use Microphone
           </button>
           <button
             onClick={() => setMode('file')}
             className={`flex-1 py-3 font-semibold text-sm transition ${mode === 'file' ? 'bg-indigo-600 text-white' : 'bg-white text-neutral-600 hover:bg-neutral-50'}`}
           >
-            📁 Upload Audio File
+            <Folder className="w-4 h-4 inline -mt-0.5 mr-1.5" /> Upload Audio File
           </button>
         </div>
 
@@ -100,7 +101,9 @@ export default function AudioToTextPage() {
           {mode === 'mic' && (
             <>
               <div className="text-center space-y-4">
-                <div className="text-6xl">{isRecording ? '🔴' : '🎙️'}</div>
+                <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto transition ${isRecording ? 'bg-red-100 animate-pulse' : 'bg-indigo-100'}`}>
+                  <Mic className={`w-10 h-10 ${isRecording ? 'text-red-500' : 'text-indigo-500'}`} />
+                </div>
                 {!isRecording ? (
                   <button onClick={startRecording} className="bg-red-600 hover:bg-red-500 text-white rounded-xl px-8 py-3 font-semibold transition">
                     Start Transcription

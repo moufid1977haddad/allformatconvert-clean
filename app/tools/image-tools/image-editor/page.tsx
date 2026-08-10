@@ -220,22 +220,22 @@ export default function ImageEditorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 p-6">
+    <div className="min-h-screen bg-neutral-100 p-6">
       <h1 className="text-2xl font-bold mb-4">Editeur d&apos;images complet</h1>
-      <p className="text-neutral-400 mb-6">Retouchez vos images avec de nombreux effets</p>
+      <p className="text-neutral-500 mb-6">Retouchez vos images avec de nombreux effets</p>
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-4">
-          <div className="bg-neutral-900 rounded-xl p-4">
+          <div className="bg-white border border-neutral-200 rounded-xl p-4">
             <label className="block text-sm font-medium mb-2">Charger une image</label>
-            <input type="file" accept="image/*" onChange={handleImageUpload} className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-white" />
+            <input type="file" accept="image/*" onChange={handleImageUpload} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-neutral-800" />
           </div>
           <div className="flex gap-2 flex-wrap">
-            <button onClick={() => setActiveTab('adjust')} className={(activeTab === 'adjust' ? 'bg-indigo-600' : 'bg-neutral-800') + ' px-4 py-2 rounded-lg transition'}>Ajuster</button>
-            <button onClick={() => setActiveTab('transform')} className={(activeTab === 'transform' ? 'bg-indigo-600' : 'bg-neutral-800') + ' px-4 py-2 rounded-lg transition'}>Transformer</button>
-            <button onClick={() => setActiveTab('effects')} className={(activeTab === 'effects' ? 'bg-indigo-600' : 'bg-neutral-800') + ' px-4 py-2 rounded-lg transition'}>Effets</button>
-            <button onClick={() => setActiveTab('decorate')} className={(activeTab === 'decorate' ? 'bg-indigo-600' : 'bg-neutral-800') + ' px-4 py-2 rounded-lg transition'}>Decorater</button>
+            <button onClick={() => setActiveTab('adjust')} className={(activeTab === 'adjust' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100') + ' px-4 py-2 rounded-lg transition'}>Ajuster</button>
+            <button onClick={() => setActiveTab('transform')} className={(activeTab === 'transform' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100') + ' px-4 py-2 rounded-lg transition'}>Transformer</button>
+            <button onClick={() => setActiveTab('effects')} className={(activeTab === 'effects' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100') + ' px-4 py-2 rounded-lg transition'}>Effets</button>
+            <button onClick={() => setActiveTab('decorate')} className={(activeTab === 'decorate' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100') + ' px-4 py-2 rounded-lg transition'}>Decorater</button>
           </div>
-          <div className="bg-neutral-900 rounded-xl p-4 space-y-3">
+          <div className="bg-white border border-neutral-200 rounded-xl p-4 space-y-3">
             {activeTab === 'adjust' && (
               <>
                 <div><label>Luminosite ({brightness})</label><input type="range" min="-100" max="100" value={brightness} onChange={(e) => setBrightness(parseInt(e.target.value))} className="w-full" /></div>
@@ -264,20 +264,20 @@ export default function ImageEditorPage() {
                 <div><label>Coins arrondis ({cornerRadius}px)</label><input type="range" min="0" max="100" value={cornerRadius} onChange={(e) => setCornerRadius(parseInt(e.target.value))} className="w-full" /></div>
                 <div><label>Bordure ({borderWidth}px)</label><input type="range" min="0" max="20" value={borderWidth} onChange={(e) => setBorderWidth(parseInt(e.target.value))} className="w-full" /></div>
                 <div><label>Couleur bordure</label><input type="color" value={borderColor} onChange={(e) => setBorderColor(e.target.value)} className="w-full h-10" /></div>
-                <div><label>Texte</label><input type="text" value={textOverlay} onChange={(e) => setTextOverlay(e.target.value)} placeholder="Votre texte" className="w-full bg-neutral-800 rounded p-2" /></div>
+                <div><label>Texte</label><input type="text" value={textOverlay} onChange={(e) => setTextOverlay(e.target.value)} placeholder="Votre texte" className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 text-neutral-800" /></div>
                 <div><label>Couleur texte</label><input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="w-full h-10" /></div>
                 <div><label>Taille texte ({textSize}px)</label><input type="range" min="12" max="72" value={textSize} onChange={(e) => setTextSize(parseInt(e.target.value))} className="w-full" /></div>
               </>
             )}
             <div className="flex gap-2 pt-2">
               <button onClick={applyEffects} className="flex-1 bg-indigo-600 py-2 rounded-lg hover:bg-indigo-500">Appliquer</button>
-              <button onClick={resetAll} className="flex-1 bg-neutral-800 py-2 rounded-lg hover:bg-neutral-700">Reinitialiser</button>
+              <button onClick={resetAll} className="flex-1 bg-neutral-800 text-neutral-100 py-2 rounded-lg hover:bg-neutral-700">Reinitialiser</button>
               {image && <button onClick={downloadImage} className="flex-1 bg-green-600 py-2 rounded-lg hover:bg-green-500">Telecharger</button>}
             </div>
           </div>
         </div>
         <div className="lg:col-span-2">
-          <div className="bg-neutral-900 rounded-xl p-4">
+          <div className="bg-white border border-neutral-200 rounded-xl p-4">
             <h3 className="font-semibold mb-3">Apercu</h3>
             {image ? (
               <canvas ref={canvasRef} className="max-w-full h-auto rounded-lg mx-auto"></canvas>
