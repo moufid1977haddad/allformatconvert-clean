@@ -68,6 +68,21 @@ const xlGridColsByGroupCount = {
   7: 'xl:grid-cols-7',
 };
 
+// One badge color per flat (ungrouped) category -- distinct from every color
+// used in groupColors above so adjacent nav dropdowns don't blur together.
+const flatCategoryColors = {
+  '/tools/gif-tools': 'bg-teal-500',
+  '/tools/audio-tools': 'bg-violet-500',
+  '/tools/file-tools': 'bg-amber-500',
+  '/tools/qr-barcodes-tools': 'bg-cyan-500',
+  '/tools/converter-tools': 'bg-indigo-500',
+  '/tools/math-tools': 'bg-rose-500',
+};
+
+// Flat categories with enough tools (11) that a 2-column layout reads faster
+// than a single tall column.
+const flatTwoColumnCategories = new Set(['/tools/gif-tools', '/tools/audio-tools']);
+
 const categoryTools = {
   '/tools/pdf-tools': [
     { group: 'Organize', items: [
@@ -850,8 +865,8 @@ export default function Navbar() {
                   )}
                   {openCat === cat.href && dropTools.length > 0 && !isGrouped && (
                     <div
-                      className="absolute top-full left-0 mt-1 w-52 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999]"
-                      style={{ maxHeight: '240px', overflowY: 'auto' }}
+                      className={`absolute top-full left-0 mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999] p-2 ${flatTwoColumnCategories.has(cat.href) ? 'grid grid-cols-2 gap-x-2 gap-y-0.5 w-[420px]' : 'flex flex-col gap-0.5 w-64'}`}
+                      style={{ maxHeight: '85vh', overflowY: 'auto' }}
                       onMouseEnter={() => { clearTimeout(catTimerRef.current); setOpenCat(cat.href); }}
                       onMouseLeave={() => { catTimerRef.current = setTimeout(() => setOpenCat(null), 300); }}
                     >
@@ -860,8 +875,11 @@ export default function Navbar() {
                           key={tool.href}
                           href={tool.href}
                           onClick={() => setOpenCat(null)}
-                          className="block px-3 py-2 text-xs text-neutral-700 dark:text-neutral-200 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900 transition first:rounded-t-xl last:rounded-b-xl"
+                          className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs text-neutral-700 dark:text-neutral-200 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900 transition"
                         >
+                          <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${flatCategoryColors[cat.href] || 'bg-neutral-400'}`}>
+                            <ToolIcon slug={tool.href.split('/').pop()} className="w-4 h-4 text-white" />
+                          </span>
                           {tool.name}
                         </Link>
                       ))}
