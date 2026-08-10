@@ -742,7 +742,7 @@ export default function Navbar() {
                     >
                       {dropTools.map((group) => (
                         <div key={group.group} className="min-w-0">
-                          <div className="text-[10px] font-bold uppercase tracking-wide text-neutral-400 dark:text-neutral-500 mb-1.5 px-2">
+                          <div className="text-sm font-bold uppercase tracking-wide text-neutral-800 dark:text-neutral-100 mb-1.5 px-2">
                             {group.group}
                           </div>
                           <div className="flex flex-col">
