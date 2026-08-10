@@ -20,6 +20,16 @@ const categories = [
   { href: '/tools/ai-tools', label: 'AI' },
 ];
 
+const groupColors = {
+  'Organize': 'bg-red-500',
+  'Optimize': 'bg-green-500',
+  'Convert to PDF': 'bg-blue-500',
+  'Convert from PDF': 'bg-emerald-500',
+  'Edit': 'bg-pink-500',
+  'Security': 'bg-blue-800',
+  'AI & Content': 'bg-purple-500',
+};
+
 const categoryTools = {
   '/tools/pdf-tools': [
     { group: 'Organize', items: [
@@ -725,8 +735,8 @@ export default function Navbar() {
                   </button>
                   {openCat === cat.href && dropTools.length > 0 && isGrouped && (
                     <div
-                      className="absolute top-full left-0 mt-1 grid grid-cols-4 gap-x-6 gap-y-4 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999] p-4"
-                      style={{ width: '680px', maxWidth: '90vw', maxHeight: '85vh', overflowY: 'auto' }}
+                      className="fixed left-1/2 -translate-x-1/2 grid grid-cols-4 xl:grid-cols-7 gap-x-4 gap-y-4 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999] p-4 w-[820px] xl:w-[1400px] max-w-[calc(100vw-32px)]"
+                      style={{ top: '60px', maxHeight: '85vh', overflowY: 'auto' }}
                       onMouseEnter={() => { clearTimeout(catTimerRef.current); setOpenCat(cat.href); }}
                       onMouseLeave={() => { catTimerRef.current = setTimeout(() => setOpenCat(null), 300); }}
                     >
@@ -741,8 +751,11 @@ export default function Navbar() {
                                 key={tool.href}
                                 href={tool.href}
                                 onClick={() => setOpenCat(null)}
-                                className="block px-2 py-1.5 rounded-lg text-xs text-neutral-700 dark:text-neutral-200 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900 transition"
+                                className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs text-neutral-700 dark:text-neutral-200 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900 transition"
                               >
+                                <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${groupColors[group.group] || 'bg-neutral-400'}`}>
+                                  <ToolIcon slug={tool.href.split('/').pop()} className="w-4 h-4 text-white" />
+                                </span>
                                 {tool.name}
                               </Link>
                             ))}
