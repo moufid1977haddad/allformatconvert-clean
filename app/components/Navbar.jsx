@@ -642,6 +642,8 @@ export default function Navbar() {
   const [openCat, setOpenCat] = useState(null);
   const catTimerRef = useRef(null);
   const isScrollingRef = useRef(false);
+  const headerRef = useRef(null);
+  const [headerHeight, setHeaderHeight] = useState(60);
   const [currentLang, setCurrentLang] = useState(languages[0]);
   const langRef = useRef(null);
   const [user, setUser] = useState(null);
@@ -649,8 +651,23 @@ export default function Navbar() {
   const userMenuRef = useRef(null);
 
   useEffect(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved) setDark(saved === 'dark');
+  }, []);
+
+  useEffect(() => {
+    const measure = () => {
+      if (headerRef.current) setHeaderHeight(headerRef.current.offsetHeight);
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
+
+  useEffect(() => {
     if (dark) document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
   }, [dark]);
 
   useEffect(() => {
@@ -725,7 +742,7 @@ export default function Navbar() {
         }
       `}</style>
 
-      <header className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700 sticky top-0 z-50">
+      <header ref={headerRef} className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700 sticky top-0 z-50">
 
         {/* â”€â”€ Main navbar â”€â”€ */}
         <div className="w-full px-4 py-2 flex items-center gap-1 lg:gap-2" style={{ minHeight: '52px' }}>
@@ -779,7 +796,7 @@ export default function Navbar() {
                   {openCat === cat.href && dropTools.length > 0 && isGrouped && (
                     <div
                       className={`fixed left-1/2 -translate-x-1/2 grid grid-cols-4 ${xlGridColsByGroupCount[dropTools.length] || 'xl:grid-cols-4'} gap-x-4 gap-y-4 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999] p-4 w-[820px] xl:w-[1400px] max-w-[calc(100vw-32px)]`}
-                      style={{ top: '60px', maxHeight: '85vh', overflowY: 'auto' }}
+                      style={{ top: headerHeight, maxHeight: '85vh', overflowY: 'auto' }}
                       onMouseEnter={() => { clearTimeout(catTimerRef.current); setOpenCat(cat.href); }}
                       onMouseLeave={() => { catTimerRef.current = setTimeout(() => setOpenCat(null), 300); }}
                     >
