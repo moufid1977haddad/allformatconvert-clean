@@ -352,6 +352,7 @@ const categoryTools = {
       { name: 'Color Picker', href: '/tools/developer-tools/color-picker' },
       { name: 'Aspect Ratio', href: '/tools/developer-tools/aspect-ratio' },
       { name: 'Timestamp Converter', href: '/tools/developer-tools/timestamp-converter' },
+      { name: 'Cron Expression', href: '/tools/developer-tools/cron-expression' },
       { name: 'Cron Builder', href: '/tools/developer-tools/cron-expression-builder' },
       { name: 'Number Base Converter', href: '/tools/developer-tools/number-base-converter' },
       { name: 'ENV to JSON', href: '/tools/developer-tools/env-to-json' },
