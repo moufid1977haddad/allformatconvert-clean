@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
-import { ToolIcon } from '@/app/lib/toolIcons';
+import { ToolIcon, toolBgColors } from '@/app/lib/toolIcons';
 
 const categories = [
   { href: '/tools/pdf-tools', label: 'PDF' },
@@ -20,45 +20,6 @@ const categories = [
   { href: '/tools/ai-tools', label: 'AI' },
 ];
 
-const groupColors = {
-  // PDF Tools
-  'Organize': 'bg-red-500',
-  'Optimize': 'bg-green-500',
-  'Convert to PDF': 'bg-blue-500',
-  'Convert from PDF': 'bg-emerald-500',
-  'Edit': 'bg-pink-500',
-  'Security': 'bg-blue-800',
-  'AI & Content': 'bg-purple-500',
-  // Image Tools
-  'Transform': 'bg-red-500',
-  'Annotate': 'bg-pink-500',
-  'Filters & Effects': 'bg-purple-500',
-  'Convert Format': 'bg-blue-500',
-  'Analyze & Utilities': 'bg-green-500',
-  // Video Tools
-  'Edit & Transform': 'bg-red-500',
-  'Convert': 'bg-blue-500',
-  'Capture & Record': 'bg-green-500',
-  'Info & Extras': 'bg-purple-500',
-  // Text Tools
-  'Count & Analyze': 'bg-blue-500',
-  'Transform & Format': 'bg-pink-500',
-  'Find & Secure': 'bg-emerald-500',
-  'Generate & Create': 'bg-purple-500',
-  // Developer Tools
-  'JSON Tools': 'bg-red-500',
-  'Data Format Convert': 'bg-blue-500',
-  'Web & Text Encoding': 'bg-emerald-500',
-  'Code Formatting': 'bg-pink-500',
-  'Generators & Security': 'bg-purple-500',
-  'Utilities': 'bg-orange-500',
-  // AI Tools
-  'Writing & Language': 'bg-pink-500',
-  'Chat, Translate & Generate': 'bg-blue-500',
-  'Image AI': 'bg-purple-500',
-  'Audio & Data Analysis': 'bg-emerald-500',
-};
-
 // Maps a category's group count to a literal xl:grid-cols-N class so Tailwind's
 // static scanner can find it (dynamic template strings would be invisible to it).
 const xlGridColsByGroupCount = {
@@ -66,17 +27,6 @@ const xlGridColsByGroupCount = {
   5: 'xl:grid-cols-5',
   6: 'xl:grid-cols-6',
   7: 'xl:grid-cols-7',
-};
-
-// One badge color per flat (ungrouped) category -- distinct from every color
-// used in groupColors above so adjacent nav dropdowns don't blur together.
-const flatCategoryColors = {
-  '/tools/gif-tools': 'bg-teal-500',
-  '/tools/audio-tools': 'bg-violet-500',
-  '/tools/file-tools': 'bg-amber-500',
-  '/tools/qr-barcodes-tools': 'bg-cyan-500',
-  '/tools/converter-tools': 'bg-indigo-500',
-  '/tools/math-tools': 'bg-rose-500',
 };
 
 // Flat categories with enough tools (11) that a 2-column layout reads faster
@@ -822,12 +772,12 @@ export default function Navbar() {
                 >
                   <Link
                     href={cat.href}
-                    className={`text-xs font-bold px-1.5 py-1 rounded-l-lg border-y border-l transition whitespace-nowrap ${baseClass}`}
+                    className={`text-xs font-bold px-1.5 py-1 rounded-s-lg border-y border-s transition whitespace-nowrap ${baseClass}`}
                   >
                     {cat.label}
                   </Link>
                   <button
-                    className={`flex items-center justify-center px-1 py-1 rounded-r-lg border-y border-r transition border-l-0 ${baseClass}`}
+                    className={`flex items-center justify-center px-1 py-1 rounded-e-lg border-y border-e transition border-s-0 ${baseClass}`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className={`w-2.5 h-2.5 opacity-50 transition-transform ${openCat === cat.href ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -853,7 +803,7 @@ export default function Navbar() {
                                 onClick={() => setOpenCat(null)}
                                 className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs text-neutral-700 dark:text-neutral-200 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900 transition"
                               >
-                                <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${groupColors[group.group] || 'bg-neutral-400'}`}>
+                                <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${toolBgColors[tool.href] || 'bg-neutral-400'}`}>
                                   <ToolIcon slug={tool.href.split('/').pop()} className="w-4 h-4 text-white" />
                                 </span>
                                 {tool.name}
@@ -866,7 +816,7 @@ export default function Navbar() {
                   )}
                   {openCat === cat.href && dropTools.length > 0 && !isGrouped && (
                     <div
-                      className={`absolute top-full left-0 mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999] p-2 ${flatTwoColumnCategories.has(cat.href) ? 'grid grid-cols-2 gap-x-2 gap-y-0.5 w-[420px]' : 'flex flex-col gap-0.5 w-64'}`}
+                      className={`absolute top-full start-0 mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999] p-2 ${flatTwoColumnCategories.has(cat.href) ? 'grid grid-cols-2 gap-x-2 gap-y-0.5 w-[420px]' : 'flex flex-col gap-0.5 w-64'}`}
                       style={{ maxHeight: '85vh', overflowY: 'auto' }}
                       onMouseEnter={() => { clearTimeout(catTimerRef.current); setOpenCat(cat.href); }}
                       onMouseLeave={() => { catTimerRef.current = setTimeout(() => setOpenCat(null), 300); }}
@@ -878,7 +828,7 @@ export default function Navbar() {
                           onClick={() => setOpenCat(null)}
                           className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs text-neutral-700 dark:text-neutral-200 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900 transition"
                         >
-                          <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${flatCategoryColors[cat.href] || 'bg-neutral-400'}`}>
+                          <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${toolBgColors[tool.href] || 'bg-neutral-400'}`}>
                             <ToolIcon slug={tool.href.split('/').pop()} className="w-4 h-4 text-white" />
                           </span>
                           {tool.name}
@@ -904,7 +854,7 @@ export default function Navbar() {
                 className="w-16 lg:w-36 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-indigo-400 text-neutral-700 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-400"
               />
               {results.length > 0 && (
-                <div className="absolute top-full right-0 mt-1 w-52 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-xl shadow-lg z-[9999]">
+                <div className="absolute top-full end-0 mt-1 w-52 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-xl shadow-lg z-[9999]">
                   {results.map((r) => (
                     <Link
                       key={r.href}
@@ -931,12 +881,12 @@ export default function Navbar() {
                 </svg>
               </button>
               {langOpen && (
-                <div className="absolute top-full right-0 mt-1 w-40 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto">
+                <div className="absolute top-full end-0 mt-1 w-40 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto">
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
                       onClick={() => changeLanguage(lang)}
-                      className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs hover:bg-indigo-50 hover:text-indigo-600 transition text-left ${currentLang.code === lang.code ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-neutral-700 dark:text-neutral-200'}`}
+                      className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs hover:bg-indigo-50 hover:text-indigo-600 transition text-start ${currentLang.code === lang.code ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-neutral-700 dark:text-neutral-200'}`}
                     >
                       <span className="font-bold w-5">{lang.short}</span>
                       <span>{lang.label}</span>
@@ -975,13 +925,13 @@ export default function Navbar() {
                   <span className="max-w-[90px] truncate">{user.user_metadata?.full_name || user.email}</span>
                 </button>
                 {userMenuOpen && (
-                  <div className="absolute top-full right-0 mt-1 w-48 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-xl shadow-lg z-50">
+                  <div className="absolute top-full end-0 mt-1 w-48 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-xl shadow-lg z-50">
                     <div className="px-3 py-2 text-xs text-neutral-500 dark:text-neutral-400 truncate border-b border-neutral-100 dark:border-neutral-700">
                       {user.email}
                     </div>
                     <button
                       onClick={handleSignOut}
-                      className="w-full text-left px-3 py-2 text-xs text-neutral-700 dark:text-neutral-200 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900 transition rounded-b-xl"
+                      className="w-full text-start px-3 py-2 text-xs text-neutral-700 dark:text-neutral-200 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900 transition rounded-b-xl"
                     >
                       Sign Out
                     </button>
