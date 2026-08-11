@@ -1,8 +1,6 @@
 ﻿'use client';
 import Link from 'next/link';
-import { ToolIcon, CategoryIcon, flatCategoryTextColors } from '../../lib/toolIcons';
-
-const toolColor = flatCategoryTextColors['/tools/math-tools'];
+import { ToolIcon, CategoryIcon, toolTextColors } from '../../lib/toolIcons';
 
 const tools = [
   { title: 'Number Base Converter', description: 'Convert between binary, decimal, hex', href: '/tools/math-tools/number-base-converter' },
@@ -22,7 +20,7 @@ export default function MathToolsPage() {
         <div className="flex flex-wrap gap-4 justify-center">
           {tools.map((tool) => (
             <Link key={tool.href} href={tool.href} className="bg-white border border-neutral-200 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)]">
-              <ToolIcon slug={tool.href.split('/').pop()} className={`w-8 h-8 mb-3 ${toolColor}`} />
+              <ToolIcon slug={tool.href.split('/').pop()} className={`w-8 h-8 mb-3 ${toolTextColors[tool.href]}`} />
               <h2 className="font-bold text-lg mb-1 text-neutral-800 group-hover:text-indigo-600 transition">{tool.title}</h2>
               <p className="text-neutral-500 text-sm">{tool.description}</p>
             </Link>
