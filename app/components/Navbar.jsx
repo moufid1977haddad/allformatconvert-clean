@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { ToolIcon, toolBgColors } from '@/app/lib/toolIcons';
+import { Search } from 'lucide-react';
 
 const categories = [
   { href: '/tools/pdf-tools', label: 'PDF' },
@@ -731,7 +732,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <div className="shrink-0">
-            <Link href="/" className="flex items-center gap-1.5 lg:gap-2 px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-950 transition notranslate">
+            <Link href="/" className="flex items-center gap-1.5 lg:gap-2 px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition notranslate">
               <svg
                 width="28"
                 height="28"
@@ -739,7 +740,7 @@ export default function Navbar() {
                 style={{ animation: "pulse-glow 2s ease-in-out infinite", flexShrink: 0, borderRadius: "8px" }}
                 aria-hidden="true"
               >
-                <rect x="4" y="4" width="56" height="56" rx="14" fill="#993556" />
+                <rect x="4" y="4" width="56" height="56" rx="14" fill={dark ? '#378add' : '#185fa5'} />
                 <rect x="16" y="16" width="18" height="18" rx="4" fill="#F4C0D1" />
                 <circle cx="42" cy="20" r="2.5" fill="#F4C0D1" />
                 <circle cx="48" cy="26" r="2" fill="#ED93B1" />
@@ -747,10 +748,9 @@ export default function Navbar() {
                 <circle cx="20" cy="42" r="2.5" fill="#F4C0D1" />
                 <circle cx="28" cy="46" r="2" fill="#ED93B1" />
               </svg>
-              <div style={{display:"flex",flexDirection:"column",lineHeight:"1.1"}}>
-                <span className="text-[13px] lg:text-[15px]" style={{color:"#6366f1",fontWeight:"800"}}>OnlineConver<span style={{color:"#4f46e5"}}>Tools</span></span>
-                <span className="hidden lg:block" style={{color:"#a5b4fc",fontSize:"9px",letterSpacing:"1px"}}>FREE ONLINE TOOLS</span>
-              </div>
+              <span className="font-bold text-[13px] lg:text-[19px] text-black dark:text-white whitespace-nowrap">
+                <span className="text-[16px] lg:text-[24px] text-[#185fa5] dark:text-[#85b7eb]">O</span>nline<span className="text-[16px] lg:text-[24px] text-[#185fa5] dark:text-[#85b7eb]">C</span>onver<span className="text-[16px] lg:text-[24px] text-[#185fa5] dark:text-[#85b7eb]">T</span>ools
+              </span>
             </Link>
           </div>
 
@@ -760,9 +760,6 @@ export default function Navbar() {
               const dropTools = categoryTools[cat.href] || [];
               const isGrouped = dropTools.length > 0 && Boolean(dropTools[0].items);
               const isActive = pathname.startsWith(cat.href);
-              const baseClass = isActive
-                ? 'text-indigo-600 border-indigo-300 bg-indigo-50'
-                : 'text-[#6C5CE7] border-[#6C5CE7] hover:bg-[#6C5CE7] hover:text-white';
               return (
                 <div
                   key={cat.href}
@@ -772,17 +769,13 @@ export default function Navbar() {
                 >
                   <Link
                     href={cat.href}
-                    className={`text-xs font-bold px-1.5 py-1 rounded-s-lg border-y border-s transition whitespace-nowrap ${baseClass}`}
+                    className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold uppercase tracking-wide whitespace-nowrap transition text-black dark:text-white ${isActive ? 'underline underline-offset-4 decoration-2' : 'hover:opacity-60'}`}
                   >
                     {cat.label}
-                  </Link>
-                  <button
-                    className={`flex items-center justify-center px-1 py-1 rounded-e-lg border-y border-e transition border-s-0 ${baseClass}`}
-                  >
                     <svg xmlns="http://www.w3.org/2000/svg" className={`w-2.5 h-2.5 opacity-50 transition-transform ${openCat === cat.href ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
-                  </button>
+                  </Link>
                   {openCat === cat.href && dropTools.length > 0 && isGrouped && (
                     <div
                       className={`fixed left-1/2 -translate-x-1/2 grid grid-cols-4 ${xlGridColsByGroupCount[dropTools.length] || 'xl:grid-cols-4'} gap-x-4 gap-y-4 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999] p-4 w-[820px] xl:w-[1400px] max-w-[calc(100vw-32px)]`}
@@ -846,12 +839,13 @@ export default function Navbar() {
 
             {/* Search */}
             <div className="relative">
+              <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500 dark:text-neutral-400 pointer-events-none" aria-hidden="true" />
               <input
                 type="text"
                 value={search}
                 onChange={handleSearch}
                 placeholder="Search tools..."
-                className="w-16 lg:w-36 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-indigo-400 text-neutral-700 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-400"
+                className="w-16 lg:w-36 bg-[#f5f5f7] dark:bg-[#2a2a2a] rounded-full ps-8 pe-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 text-neutral-700 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500"
               />
               {results.length > 0 && (
                 <div className="absolute top-full end-0 mt-1 w-52 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-xl shadow-lg z-[9999]">
