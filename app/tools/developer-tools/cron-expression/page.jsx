@@ -13,7 +13,7 @@ export default function CronExpressionPage() {
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-2">Cron Expression Builder</h1>
+        <h1 className="text-3xl font-bold text-center mb-2">Cron Expression</h1>
         <p className="text-neutral-500 text-center mb-8">Build and validate cron expressions</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-5 gap-2">

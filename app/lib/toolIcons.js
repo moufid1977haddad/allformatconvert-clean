@@ -105,7 +105,7 @@ export const toolIcons = {
   'json-to-rust': Cog, 'json-to-python': Terminal, 'json-to-php': Server,
   'json-to-csharp': AtSign, 'csv-to-sql': Database, 'sql-to-csv': Table, 'env-to-json': Settings,
   'code-minifier': Minimize2, 'diff-viewer': GitCompare, 'code-formatter': Sparkles,
-  'cron-expression-builder': Timer,
+  'cron-expression': Timer, 'cron-expression-builder': Timer,
 
   // Math Tools
   'percentage-calculator': Percent, 'roman-numeral-converter': ArrowRightLeft,
