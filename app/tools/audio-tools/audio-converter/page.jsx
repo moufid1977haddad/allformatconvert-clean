@@ -60,7 +60,7 @@ export default function AudioConverterPage() {
               {formats.map(f => <option key={f} value={f}>{f.toUpperCase()}</option>)}
             </select>
           </div>
-          <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">
+          <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Converting...' : 'Convert Audio'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}

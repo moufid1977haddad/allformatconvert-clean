@@ -68,7 +68,7 @@ export default function PdfDeletePagesPage() {
               <p className="text-xs text-neutral-500 mt-1">Total pages: {pageCount}</p>
             </div>
           )}
-          <button onClick={deletePages} disabled={!file || !pagesToDelete || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">
+          <button onClick={deletePages} disabled={!file || !pagesToDelete || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Processing...' : 'Delete Pages'}
           </button>
           {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}

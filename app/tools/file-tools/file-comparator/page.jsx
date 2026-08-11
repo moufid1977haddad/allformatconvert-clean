@@ -39,7 +39,7 @@ export default function FileComparatorPage() {
               <input ref={ref2} type="file" className="hidden" onChange={e => { const f = e.target.files[0]; e.target.value = ''; setFile2(f); }} />
             </div>
           </div>
-          <button onClick={compare} disabled={!file1 || !file2} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Compare Files</button>
+          <button onClick={compare} disabled={!file1 || !file2} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Compare Files</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {result && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center space-y-3">

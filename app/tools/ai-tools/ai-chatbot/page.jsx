@@ -51,7 +51,7 @@ export default function AIChatbotPage() {
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <div className="flex gap-2">
             <input type="text" value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && process()} placeholder="Ask me anything..." className="flex-1 bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-400" />
-            <button onClick={process} disabled={!input.trim() || loading} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 text-white rounded-xl px-5 py-2 font-semibold transition text-sm">
+            <button onClick={process} disabled={!input.trim() || loading} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl px-5 py-2 font-semibold transition text-sm">
               Send
             </button>
           </div>

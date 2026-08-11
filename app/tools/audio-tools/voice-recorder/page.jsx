@@ -133,7 +133,7 @@ export default function VoiceRecorderPage() {
               <audio controls src={audioUrl} className="w-full" />
               <div className="grid grid-cols-2 gap-3">
                 <button onClick={download} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download WebM</button>
-                <button onClick={exportWav} disabled={converting} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 text-white rounded-xl py-2 font-semibold transition">
+                <button onClick={exportWav} disabled={converting} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-2 font-semibold transition">
                   {converting ? 'Converting...' : 'Export as WAV'}
                 </button>
               </div>

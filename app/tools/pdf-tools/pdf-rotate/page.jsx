@@ -57,7 +57,7 @@ export default function PdfRotatePage() {
               ))}
             </div>
           </div>
-          <button onClick={rotate} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">
+          <button onClick={rotate} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Rotating...' : 'Rotate PDF'}
           </button>
           {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}

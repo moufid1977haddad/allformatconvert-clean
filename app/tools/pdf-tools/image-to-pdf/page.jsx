@@ -73,7 +73,7 @@ export default function ImageToPdfPage() {
               ))}
             </div>
           )}
-          <button onClick={convert} disabled={files.length === 0 || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">
+          <button onClick={convert} disabled={files.length === 0 || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Converting...' : 'Convert to PDF'}
           </button>
           {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}

@@ -70,7 +70,7 @@ export default function WebmToGifPage() {
             <input ref={inputRef} type="file" accept="video/webm" className="hidden" onChange={handleFile} />
           </div>
           {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-100" />}
-          <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 text-white rounded-xl py-3 font-semibold transition">{loading ? 'Converting...' : 'Convert to GIF'}</button>
+          <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">{loading ? 'Converting...' : 'Convert to GIF'}</button>
           {frames.length > 0 && (
             <div className="space-y-3">
               <p className="text-green-600 text-center font-semibold">{frames.length} frames extracted</p>

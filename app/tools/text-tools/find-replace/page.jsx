@@ -54,7 +54,7 @@ export default function FindReplacePage() {
             <input type="checkbox" checked={useRegex} onChange={e => setUseRegex(e.target.checked)} />
             Use regular expression
           </label>
-          <button onClick={doReplace} disabled={!text || !find} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Replace All</button>
+          <button onClick={doReplace} disabled={!text || !find} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Replace All</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {hasResult && (
             <div className="space-y-2">

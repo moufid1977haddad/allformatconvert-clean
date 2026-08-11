@@ -59,7 +59,7 @@ export default function PngToIcoPage() {
               ))}
             </div>
           </div>
-          <button onClick={convert} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Convert to ICO</button>
+          <button onClick={convert} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert to ICO</button>
           {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
           {result && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center space-y-3">

@@ -55,7 +55,7 @@ export default function BarcodeGeneratorPage() {
               <option value="CODE39">CODE39</option>
             </select>
           </div>
-          <button onClick={generate} disabled={!text} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Generate Barcode</button>
+          <button onClick={generate} disabled={!text} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Generate Barcode</button>
           {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
           <div className="flex justify-center bg-white rounded-xl p-4">
             <canvas ref={canvasRef} />

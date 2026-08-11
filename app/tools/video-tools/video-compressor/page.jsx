@@ -85,7 +85,7 @@ export default function VideoCompressorPage() {
           <div><label className="block text-sm text-neutral-500 mb-1">Quality: {Math.round(quality*100)}%</label><input type="range" min="0.1" max="1" step="0.1" value={quality} onChange={e => setQuality(parseFloat(e.target.value))} className="w-full" /></div>
           {status && <p className="text-yellow-400 text-center">{status}</p>}
           {error && <p className="text-red-400 text-center">{error}</p>}
-          <button onClick={compress} disabled={!file || !!status} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Compress Video</button>
+          <button onClick={compress} disabled={!file || !!status} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Compress Video</button>
           {result && (
             <div className="space-y-3">
               <div className="grid grid-cols-3 gap-3 text-center">

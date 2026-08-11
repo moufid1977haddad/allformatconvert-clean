@@ -86,7 +86,7 @@ export default function PdfMergePage() {
               ))}
             </div>
           )}
-          <button onClick={merge} disabled={files.length < 2 || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 text-white rounded-xl py-3 font-semibold transition">
+          <button onClick={merge} disabled={files.length < 2 || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">
             {loading ? 'Merging...' : 'Merge PDFs'}
           </button>
           {status && <p className="text-center text-yellow-500 text-sm">{status}</p>}

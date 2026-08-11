@@ -45,7 +45,7 @@ export default function EmailGeneratorPage() {
             </select>
           </div>
           <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Describe the email you need..." value={input} onChange={e => setInput(e.target.value)} />
-          <button onClick={process} disabled={!input.trim() || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">
+          <button onClick={process} disabled={!input.trim() || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Generating...' : 'Generate Email'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}

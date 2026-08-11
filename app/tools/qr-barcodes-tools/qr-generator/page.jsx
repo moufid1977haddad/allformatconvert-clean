@@ -37,7 +37,7 @@ export default function QrGeneratorPage() {
             <label className="block text-sm text-neutral-500 mb-1">Size: {size}px</label>
             <input type="range" min="100" max="400" value={size} onChange={e => setSize(parseInt(e.target.value))} className="w-full" />
           </div>
-          <button onClick={generate} disabled={!text} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Generate QR Code</button>
+          <button onClick={generate} disabled={!text} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Generate QR Code</button>
           {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
           <div className="flex justify-center">
             <canvas ref={canvasRef} className="rounded-xl" />

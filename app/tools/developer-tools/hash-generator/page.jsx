@@ -18,7 +18,7 @@ export default function HashGeneratorPage() {
         <p className="text-neutral-500 text-center mb-8">Generate SHA-1, SHA-256, SHA-512 hashes</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none" placeholder="Enter text to hash..." value={input} onChange={e => setInput(e.target.value)} />
-          <button onClick={generate} disabled={!input} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Generate Hashes</button>
+          <button onClick={generate} disabled={!input} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Generate Hashes</button>
           {hashes && ['sha1','sha256','sha512'].map(k => (
             <div key={k} className="bg-neutral-50 rounded-xl border border-neutral-200 p-4">
               <div className="text-neutral-500 text-xs mb-1 uppercase">{k}</div>

@@ -159,7 +159,7 @@ export default function AudioToTextPage() {
               <button
                 onClick={transcribeFile}
                 disabled={!file || loading}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 text-white rounded-xl py-3 font-semibold transition"
+                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition"
               >
                 {loading ? 'Transcribing...' : 'Transcribe Audio'}
               </button>

@@ -162,7 +162,7 @@ export default function AudioWaveformPage() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <button onClick={resetZoom} disabled={!file} className="w-full bg-neutral-200 hover:bg-neutral-300 disabled:opacity-50 rounded-xl py-2 font-semibold transition">Reset Zoom</button>
-            <button onClick={downloadPng} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 text-white rounded-xl py-2 font-semibold transition">Download PNG</button>
+            <button onClick={downloadPng} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-2 font-semibold transition">Download PNG</button>
           </div>
           {audioUrl && <audio controls src={audioUrl} className="w-full" />}
         </div>

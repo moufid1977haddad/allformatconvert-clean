@@ -49,7 +49,7 @@ export default function FileSplitterPage() {
             <div><label className="block text-sm text-neutral-500 mb-1">Chunk Size</label><input type="number" min="1" value={chunkSize} onChange={e => setChunkSize(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
             <div><label className="block text-sm text-neutral-500 mb-1">Unit</label><select value={unit} onChange={e => setUnit(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3"><option>B</option><option>KB</option><option>MB</option></select></div>
           </div>
-          <button onClick={split} disabled={!file || loading || !chunkSizeValid} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">{loading ? 'Splitting...' : 'Split File'}</button>
+          <button onClick={split} disabled={!file || loading || !chunkSizeValid} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">{loading ? 'Splitting...' : 'Split File'}</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {chunks.length > 0 && (
             <div className="space-y-2">

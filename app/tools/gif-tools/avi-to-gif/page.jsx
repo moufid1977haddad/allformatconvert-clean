@@ -84,7 +84,7 @@ export default function AviToGifPage() {
               This AVI file couldn't be loaded — your browser doesn't support its video codec. Convert it to MP4 with a dedicated video converter first, then use <a href="/tools/gif-tools/mp4-to-gif" className="underline font-medium">MP4 to GIF</a> instead.
             </div>
           )}
-          <button onClick={convert} disabled={!file || loading || videoError} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 text-white rounded-xl py-3 font-semibold transition">{loading ? 'Converting...' : 'Convert to GIF'}</button>
+          <button onClick={convert} disabled={!file || loading || videoError} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">{loading ? 'Converting...' : 'Convert to GIF'}</button>
           {frames.length > 0 && (
             <div className="space-y-3">
               <p className="text-green-600 text-center font-semibold">{frames.length} frames extracted</p>

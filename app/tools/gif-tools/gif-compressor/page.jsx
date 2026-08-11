@@ -42,7 +42,7 @@ export default function GifCompressorPage() {
             <input ref={inputRef} type="file" accept=".gif" className="hidden" onChange={handleFile} />
           </div>
           <div><label className="block text-sm text-neutral-500 mb-1">Quality: {quality}%</label><input type="range" min="10" max="100" value={quality} onChange={e => setQuality(parseInt(e.target.value))} className="w-full" /></div>
-          <button onClick={compress} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">{loading ? 'Compressing...' : 'Compress'}</button>
+          <button onClick={compress} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">{loading ? 'Compressing...' : 'Compress'}</button>
           {result && (
             <div className="space-y-3">
               <img src={result.url} className="max-h-48 mx-auto rounded border border-neutral-200" />

@@ -100,7 +100,7 @@ export default function VideoRotatorPage() {
           {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" />}
           <div className="flex gap-2 justify-center">{[90,180,270].map(a => <button key={a} onClick={() => setAngle(a)} className={"px-4 py-2 rounded-lg font-semibold transition " + (angle===a?'bg-indigo-600 text-white':'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800')}>{a}°</button>)}</div>
           {status && <p className="text-yellow-400 text-center">{status}</p>}
-          <button onClick={rotate} disabled={!file || !!status} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Rotate Video</button>
+          <button onClick={rotate} disabled={!file || !!status} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Rotate Video</button>
           {result && <div className="space-y-2"><video controls src={result} className="w-full rounded-xl" /><a href={result} download="rotated.webm" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>

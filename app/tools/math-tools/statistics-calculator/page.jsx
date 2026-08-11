@@ -33,7 +33,7 @@ export default function StatisticsCalculatorPage() {
             <label className="block text-sm text-neutral-500 mb-1">Enter numbers separated by commas</label>
             <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-24 resize-none" placeholder="e.g. 1, 2, 3, 4, 5" value={input} onChange={e => setInput(e.target.value)} />
           </div>
-          <button onClick={calculate} disabled={!input} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">Calculate</button>
+          <button onClick={calculate} disabled={!input} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Calculate</button>
           {result && (
             <div className="grid grid-cols-2 gap-3">
               {[

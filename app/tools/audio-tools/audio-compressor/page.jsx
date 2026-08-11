@@ -52,7 +52,7 @@ export default function AudioCompressorPage() {
               ))}
             </div>
           </div>
-          <button onClick={compress} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">
+          <button onClick={compress} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Compressing...' : 'Compress Audio'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}

@@ -71,7 +71,7 @@ export default function PdfWatermarkPage() {
             <label className="block text-sm text-neutral-500 mb-1">Opacity: {Math.round(opacity * 100)}%</label>
             <input type="range" min="0.1" max="1" step="0.1" value={opacity} onChange={e => setOpacity(parseFloat(e.target.value))} className="w-full" />
           </div>
-          <button onClick={addWatermark} disabled={!file || !text || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 rounded-xl py-3 font-semibold transition">
+          <button onClick={addWatermark} disabled={!file || !text || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Processing...' : 'Add Watermark'}
           </button>
           {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
