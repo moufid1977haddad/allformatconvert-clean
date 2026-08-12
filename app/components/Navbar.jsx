@@ -34,6 +34,11 @@ const xlGridColsByGroupCount = {
 // than a single tall column.
 const flatTwoColumnCategories = new Set(['/tools/gif-tools', '/tools/audio-tools']);
 
+// Flat categories whose trigger sits close enough to the right edge of the
+// nav that a start-anchored dropdown overflows the viewport at narrower
+// desktop widths (~1024px) -- anchor these from the end instead.
+const flatEndAnchoredCategories = new Set(['/tools/converter-tools', '/tools/math-tools']);
+
 const categoryTools = {
   '/tools/pdf-tools': [
     { group: 'Organize', items: [
@@ -772,7 +777,7 @@ export default function Navbar() {
           </div>
 
           {/* Categories */}
-          <nav className="hidden lg:flex items-center justify-center flex-1 gap-0.5">
+          <nav className="hidden lg:flex items-center justify-center flex-1 min-w-0 overflow-x-auto gap-0.5">
             {categories.map((cat) => {
               const dropTools = categoryTools[cat.href] || [];
               const isGrouped = dropTools.length > 0 && Boolean(dropTools[0].items);
@@ -786,7 +791,7 @@ export default function Navbar() {
                 >
                   <Link
                     href={cat.href}
-                    className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold uppercase tracking-wide whitespace-nowrap transition text-black dark:text-white ${isActive ? 'underline underline-offset-4 decoration-2' : 'hover:opacity-60'}`}
+                    className={`flex items-center gap-1 px-1.5 min-[1410px]:px-2.5 py-1 text-xs font-bold uppercase tracking-wide whitespace-nowrap transition text-black dark:text-white ${isActive ? 'underline underline-offset-4 decoration-2' : 'hover:opacity-60'}`}
                   >
                     {cat.label}
                     <svg xmlns="http://www.w3.org/2000/svg" className={`w-2.5 h-2.5 opacity-50 transition-transform ${openCat === cat.href ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -826,7 +831,7 @@ export default function Navbar() {
                   )}
                   {openCat === cat.href && dropTools.length > 0 && !isGrouped && (
                     <div
-                      className={`absolute top-full start-0 mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999] p-2 ${flatTwoColumnCategories.has(cat.href) ? 'grid grid-cols-2 gap-x-2 gap-y-0.5 w-[420px]' : 'flex flex-col gap-0.5 w-64'}`}
+                      className={`absolute top-full ${flatEndAnchoredCategories.has(cat.href) ? 'end-0' : 'start-0'} mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999] p-2 ${flatTwoColumnCategories.has(cat.href) ? 'grid grid-cols-2 gap-x-2 gap-y-0.5 w-[420px]' : 'flex flex-col gap-0.5 w-64'}`}
                       style={{ maxHeight: '85vh', overflowY: 'auto' }}
                       onMouseEnter={() => { clearTimeout(catTimerRef.current); setOpenCat(cat.href); }}
                       onMouseLeave={() => { catTimerRef.current = setTimeout(() => setOpenCat(null), 300); }}
@@ -862,7 +867,7 @@ export default function Navbar() {
                 value={search}
                 onChange={handleSearch}
                 placeholder="Search tools..."
-                className="w-16 lg:w-36 bg-[#f5f5f7] dark:bg-[#2a2a2a] rounded-full ps-8 pe-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 text-neutral-700 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500"
+                className="w-16 min-[1024px]:w-20 min-[1410px]:w-36 bg-[#f5f5f7] dark:bg-[#2a2a2a] rounded-full ps-8 pe-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 text-neutral-700 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500"
               />
               {results.length > 0 && (
                 <div className="absolute top-full end-0 mt-1 w-52 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-xl shadow-lg z-[9999]">
