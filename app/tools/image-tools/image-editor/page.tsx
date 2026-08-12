@@ -7,6 +7,7 @@ export default function ImageEditorPage() {
   const [originalImage, setOriginalImage] = useState<HTMLImageElement | null>(null);
   const [activeTab, setActiveTab] = useState('adjust');
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [brightness, setBrightness] = useState(0);
   const [contrast, setContrast] = useState(0);
   const [saturation, setSaturation] = useState(0);
@@ -219,72 +220,85 @@ export default function ImageEditorPage() {
     }
   };
 
+  const tabs = [
+    { key: 'adjust', label: 'Adjust' },
+    { key: 'transform', label: 'Transform' },
+    { key: 'effects', label: 'Effects' },
+    { key: 'decorate', label: 'Decorate' },
+  ];
+
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
-      <h1 className="text-2xl font-bold mb-4">Editeur d&apos;images complet</h1>
-      <p className="text-neutral-500 mb-6">Retouchez vos images avec de nombreux effets</p>
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-4">
-          <div className="bg-white border border-neutral-200 rounded-xl p-4">
-            <label className="block text-sm font-medium mb-2">Charger une image</label>
-            <input type="file" accept="image/*" onChange={handleImageUpload} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-neutral-800" />
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            <button onClick={() => setActiveTab('adjust')} className={(activeTab === 'adjust' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100') + ' px-4 py-2 rounded-lg transition'}>Ajuster</button>
-            <button onClick={() => setActiveTab('transform')} className={(activeTab === 'transform' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100') + ' px-4 py-2 rounded-lg transition'}>Transformer</button>
-            <button onClick={() => setActiveTab('effects')} className={(activeTab === 'effects' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100') + ' px-4 py-2 rounded-lg transition'}>Effets</button>
-            <button onClick={() => setActiveTab('decorate')} className={(activeTab === 'decorate' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100') + ' px-4 py-2 rounded-lg transition'}>Decorater</button>
-          </div>
-          <div className="bg-white border border-neutral-200 rounded-xl p-4 space-y-3">
-            {activeTab === 'adjust' && (
-              <>
-                <div><label>Luminosite ({brightness})</label><input type="range" min="-100" max="100" value={brightness} onChange={(e) => setBrightness(parseInt(e.target.value))} className="w-full" /></div>
-                <div><label>Contraste ({contrast})</label><input type="range" min="-100" max="100" value={contrast} onChange={(e) => setContrast(parseInt(e.target.value))} className="w-full" /></div>
-                <div><label>Saturation ({saturation})</label><input type="range" min="-100" max="100" value={saturation} onChange={(e) => setSaturation(parseInt(e.target.value))} className="w-full" /></div>
-                <div><label>Niveaux de gris</label><input type="checkbox" checked={grayscale} onChange={(e) => setGrayscale(e.target.checked)} /></div>
-                <div><label>Inverser couleurs</label><input type="checkbox" checked={invert} onChange={(e) => setInvert(e.target.checked)} /></div>
-              </>
-            )}
-            {activeTab === 'transform' && (
-              <>
-                <div><label>Rotation ({rotation}deg)</label><input type="range" min="0" max="360" step="90" value={rotation} onChange={(e) => setRotation(parseInt(e.target.value))} className="w-full" /></div>
-                <div><label>Miroir horizontal</label><input type="checkbox" checked={flipH} onChange={(e) => setFlipH(e.target.checked)} /></div>
-                <div><label>Miroir vertical</label><input type="checkbox" checked={flipV} onChange={(e) => setFlipV(e.target.checked)} /></div>
-                <div><label>Pixelisation ({pixelSize}px)</label><input type="range" min="0" max="20" value={pixelSize} onChange={(e) => setPixelSize(parseInt(e.target.value))} className="w-full" /></div>
-              </>
-            )}
-            {activeTab === 'effects' && (
-              <>
-                <div><label>Bruit / Grain ({noiseIntensity})</label><input type="range" min="0" max="50" value={noiseIntensity} onChange={(e) => setNoiseIntensity(parseInt(e.target.value))} className="w-full" /></div>
-                <div><label>Vignette ({vignetteStrength}%)</label><input type="range" min="0" max="100" value={vignetteStrength} onChange={(e) => setVignetteStrength(parseInt(e.target.value))} className="w-full" /></div>
-              </>
-            )}
-            {activeTab === 'decorate' && (
-              <>
-                <div><label>Coins arrondis ({cornerRadius}px)</label><input type="range" min="0" max="100" value={cornerRadius} onChange={(e) => setCornerRadius(parseInt(e.target.value))} className="w-full" /></div>
-                <div><label>Bordure ({borderWidth}px)</label><input type="range" min="0" max="20" value={borderWidth} onChange={(e) => setBorderWidth(parseInt(e.target.value))} className="w-full" /></div>
-                <div><label>Couleur bordure</label><input type="color" value={borderColor} onChange={(e) => setBorderColor(e.target.value)} className="w-full h-10" /></div>
-                <div><label>Texte</label><input type="text" value={textOverlay} onChange={(e) => setTextOverlay(e.target.value)} placeholder="Votre texte" className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 text-neutral-800" /></div>
-                <div><label>Couleur texte</label><input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="w-full h-10" /></div>
-                <div><label>Taille texte ({textSize}px)</label><input type="range" min="12" max="72" value={textSize} onChange={(e) => setTextSize(parseInt(e.target.value))} className="w-full" /></div>
-              </>
-            )}
-            <div className="flex gap-2 pt-2">
-              <button onClick={applyEffects} className="flex-1 bg-indigo-600 py-2 rounded-lg hover:bg-indigo-500">Appliquer</button>
-              <button onClick={resetAll} className="flex-1 bg-neutral-800 text-neutral-100 py-2 rounded-lg hover:bg-neutral-700">Reinitialiser</button>
-              {image && <button onClick={downloadImage} className="flex-1 bg-green-600 py-2 rounded-lg hover:bg-green-500">Telecharger</button>}
-            </div>
-          </div>
-        </div>
-        <div className="lg:col-span-2">
-          <div className="bg-white border border-neutral-200 rounded-xl p-4">
-            <h3 className="font-semibold mb-3">Apercu</h3>
+      <div className="max-w-3xl mx-auto">
+        <h1 className="text-3xl font-bold text-center mb-2">Image Editor</h1>
+        <p className="text-neutral-500 text-center mb-8">Adjust, transform, and decorate your images</p>
+        <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
+          <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current?.click()}>
             {image ? (
               <canvas ref={canvasRef} className="max-w-full h-auto rounded-lg mx-auto"></canvas>
             ) : (
-              <div className="text-center text-neutral-500 py-20">Chargez une image pour commencer</div>
+              <p className="text-neutral-500">Click or drop an image here</p>
             )}
+            <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
           </div>
+
+          {image && (
+            <>
+              <div className="flex gap-2 flex-wrap">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={(activeTab === tab.key ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800') + ' px-4 py-2 rounded-lg text-sm font-semibold transition'}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="space-y-3">
+                {activeTab === 'adjust' && (
+                  <>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Brightness ({brightness})</label><input type="range" min="-100" max="100" value={brightness} onChange={(e) => setBrightness(parseInt(e.target.value))} className="w-full" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Contrast ({contrast})</label><input type="range" min="-100" max="100" value={contrast} onChange={(e) => setContrast(parseInt(e.target.value))} className="w-full" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Saturation ({saturation})</label><input type="range" min="-100" max="100" value={saturation} onChange={(e) => setSaturation(parseInt(e.target.value))} className="w-full" /></div>
+                    <label className="flex items-center gap-2 text-sm text-neutral-700"><input type="checkbox" checked={grayscale} onChange={(e) => setGrayscale(e.target.checked)} />Grayscale</label>
+                    <label className="flex items-center gap-2 text-sm text-neutral-700"><input type="checkbox" checked={invert} onChange={(e) => setInvert(e.target.checked)} />Invert Colors</label>
+                  </>
+                )}
+                {activeTab === 'transform' && (
+                  <>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Rotation ({rotation}&deg;)</label><input type="range" min="0" max="360" step="90" value={rotation} onChange={(e) => setRotation(parseInt(e.target.value))} className="w-full" /></div>
+                    <label className="flex items-center gap-2 text-sm text-neutral-700"><input type="checkbox" checked={flipH} onChange={(e) => setFlipH(e.target.checked)} />Flip Horizontal</label>
+                    <label className="flex items-center gap-2 text-sm text-neutral-700"><input type="checkbox" checked={flipV} onChange={(e) => setFlipV(e.target.checked)} />Flip Vertical</label>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Pixelate ({pixelSize}px)</label><input type="range" min="0" max="20" value={pixelSize} onChange={(e) => setPixelSize(parseInt(e.target.value))} className="w-full" /></div>
+                  </>
+                )}
+                {activeTab === 'effects' && (
+                  <>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Noise / Grain ({noiseIntensity})</label><input type="range" min="0" max="50" value={noiseIntensity} onChange={(e) => setNoiseIntensity(parseInt(e.target.value))} className="w-full" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Vignette ({vignetteStrength}%)</label><input type="range" min="0" max="100" value={vignetteStrength} onChange={(e) => setVignetteStrength(parseInt(e.target.value))} className="w-full" /></div>
+                  </>
+                )}
+                {activeTab === 'decorate' && (
+                  <>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Corner Radius ({cornerRadius}px)</label><input type="range" min="0" max="100" value={cornerRadius} onChange={(e) => setCornerRadius(parseInt(e.target.value))} className="w-full" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Border Width ({borderWidth}px)</label><input type="range" min="0" max="20" value={borderWidth} onChange={(e) => setBorderWidth(parseInt(e.target.value))} className="w-full" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Border Color</label><input type="color" value={borderColor} onChange={(e) => setBorderColor(e.target.value)} className="w-full h-10" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Text</label><input type="text" value={textOverlay} onChange={(e) => setTextOverlay(e.target.value)} placeholder="Your text" className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 text-neutral-800" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Text Color</label><input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="w-full h-10" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Text Size ({textSize}px)</label><input type="range" min="12" max="72" value={textSize} onChange={(e) => setTextSize(parseInt(e.target.value))} className="w-full" /></div>
+                  </>
+                )}
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button onClick={applyEffects} className="flex-1 bg-indigo-600 hover:bg-indigo-500 rounded-xl py-3 font-semibold transition">Apply</button>
+                <button onClick={resetAll} className="flex-1 bg-neutral-800 text-neutral-100 hover:bg-neutral-700 rounded-xl py-3 font-semibold transition">Reset</button>
+                <button onClick={downloadImage} className="flex-1 bg-green-600 hover:bg-green-500 rounded-xl py-3 font-semibold transition">Download</button>
+              </div>
+            </>
+          )}
         </div>
       </div>
       <SeoContent
@@ -304,7 +318,7 @@ export default function ImageEditorPage() {
         ]}
         tips={[
           "Changes only appear after you click \"Apply\" — adjusting a slider or checkbox doesn't update the preview until you do.",
-          "Use \"Reinitialiser\" (Reset) to clear every adjustment and start over without re-uploading the image.",
+          "Use \"Reset\" to clear every adjustment and start over without re-uploading the image.",
           "Combine desaturation with a vignette for a quick vintage or moody look.",
           "Rounded corners and a border are a fast way to turn a photo into a ready-to-use avatar or card image."
         ]}
