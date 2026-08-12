@@ -34,6 +34,11 @@ const xlGridColsByGroupCount = {
 // than a single tall column.
 const flatTwoColumnCategories = new Set(['/tools/gif-tools', '/tools/audio-tools']);
 
+// Flat categories whose trigger sits close enough to the right edge of the
+// nav that a start-anchored dropdown overflows the viewport at narrower
+// desktop widths (~1024px) -- anchor these from the end instead.
+const flatEndAnchoredCategories = new Set(['/tools/converter-tools', '/tools/math-tools']);
+
 const categoryTools = {
   '/tools/pdf-tools': [
     { group: 'Organize', items: [
@@ -826,7 +831,7 @@ export default function Navbar() {
                   )}
                   {openCat === cat.href && dropTools.length > 0 && !isGrouped && (
                     <div
-                      className={`absolute top-full start-0 mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999] p-2 ${flatTwoColumnCategories.has(cat.href) ? 'grid grid-cols-2 gap-x-2 gap-y-0.5 w-[420px]' : 'flex flex-col gap-0.5 w-64'}`}
+                      className={`absolute top-full ${flatEndAnchoredCategories.has(cat.href) ? 'end-0' : 'start-0'} mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999] p-2 ${flatTwoColumnCategories.has(cat.href) ? 'grid grid-cols-2 gap-x-2 gap-y-0.5 w-[420px]' : 'flex flex-col gap-0.5 w-64'}`}
                       style={{ maxHeight: '85vh', overflowY: 'auto' }}
                       onMouseEnter={() => { clearTimeout(catTimerRef.current); setOpenCat(cat.href); }}
                       onMouseLeave={() => { catTimerRef.current = setTimeout(() => setOpenCat(null), 300); }}
