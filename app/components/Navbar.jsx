@@ -643,6 +643,7 @@ export default function Navbar() {
   const [dark, setDark] = useState(false);
   const [search, setSearch] = useState('');
   const [results, setResults] = useState([]);
+  const [searchFocused, setSearchFocused] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [openCat, setOpenCat] = useState(null);
   const catTimerRef = useRef(null);
@@ -750,7 +751,7 @@ export default function Navbar() {
       <header ref={headerRef} className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700 sticky top-0 z-50">
 
         {/* â”€â”€ Main navbar â”€â”€ */}
-        <div className="w-full px-4 py-2 flex items-center gap-1 lg:gap-2" style={{ minHeight: '52px' }}>
+        <div className="w-full px-4 min-[1024px]:px-3 min-[1410px]:px-4 py-2 flex items-center gap-1 min-[1410px]:gap-2" style={{ minHeight: '52px' }}>
 
           {/* Logo */}
           <div className="shrink-0">
@@ -777,7 +778,7 @@ export default function Navbar() {
           </div>
 
           {/* Categories */}
-          <nav className="hidden lg:flex items-center justify-center flex-1 gap-0.5">
+          <nav className="hidden lg:flex items-center justify-center flex-1 gap-0 min-[1410px]:gap-0.5">
             {categories.map((cat) => {
               const dropTools = categoryTools[cat.href] || [];
               const isGrouped = dropTools.length > 0 && Boolean(dropTools[0].items);
@@ -791,7 +792,7 @@ export default function Navbar() {
                 >
                   <Link
                     href={cat.href}
-                    className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold uppercase tracking-wide whitespace-nowrap transition text-black dark:text-white ${isActive ? 'underline underline-offset-4 decoration-2' : 'hover:opacity-60'}`}
+                    className={`flex items-center gap-0.5 min-[1410px]:gap-1 px-0.5 min-[1410px]:px-2.5 py-1 text-[11px] min-[1410px]:text-xs font-bold uppercase tracking-wide whitespace-nowrap transition text-black dark:text-white ${isActive ? 'underline underline-offset-4 decoration-2' : 'hover:opacity-60'}`}
                   >
                     {cat.label}
                     <svg xmlns="http://www.w3.org/2000/svg" className={`w-2.5 h-2.5 opacity-50 transition-transform ${openCat === cat.href ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -857,17 +858,23 @@ export default function Navbar() {
           </nav>
 
           {/* Right side */}
-          <div className="shrink-0 flex items-center gap-1.5 justify-end">
+          <div className="shrink-0 flex items-center gap-1.5 min-[1024px]:gap-1 min-[1410px]:gap-1.5 justify-end">
 
             {/* Search */}
-            <div className="relative">
+            <div className="relative h-7 w-16 min-[1024px]:w-10 min-[1410px]:w-36">
               <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500 dark:text-neutral-400 pointer-events-none" aria-hidden="true" />
               <input
                 type="text"
                 value={search}
                 onChange={handleSearch}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setSearchFocused(false)}
                 placeholder="Search tools..."
-                className="w-16 lg:w-36 bg-[#f5f5f7] dark:bg-[#2a2a2a] rounded-full ps-8 pe-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 text-neutral-700 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500"
+                className={`bg-[#f5f5f7] dark:bg-[#2a2a2a] rounded-full ps-8 pe-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 text-neutral-700 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 transition-all w-full h-full ${
+                  (searchFocused || search.length > 0)
+                    ? 'min-[1024px]:max-[1409px]:absolute min-[1024px]:max-[1409px]:top-0 min-[1024px]:max-[1409px]:end-0 min-[1024px]:max-[1409px]:z-20 min-[1024px]:max-[1409px]:w-40'
+                    : ''
+                }`}
               />
               {results.length > 0 && (
                 <div className="absolute top-full end-0 mt-1 w-52 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 rounded-xl shadow-lg z-[9999]">
@@ -955,7 +962,7 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <Link href="/signin" className="flex items-center px-1.5 lg:px-2 py-1 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-700 dark:text-neutral-200 text-xs font-bold whitespace-nowrap">
+              <Link href="/signin" className="flex items-center px-1.5 min-[1410px]:px-2 py-1 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-700 dark:text-neutral-200 text-xs font-bold whitespace-nowrap">
                 Sign In
               </Link>
             )}
