@@ -1,5 +1,5 @@
 ﻿'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 
 const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
@@ -8,20 +8,7 @@ const simplify = (num, den) => {
   return { num: num / g, den: den / g };
 };
 
-function useDarkMode() {
-  const [dark, setDark] = useState(false);
-  useEffect(() => {
-    const check = () => setDark(document.documentElement.classList.contains('dark'));
-    check();
-    const obs = new MutationObserver(check);
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => obs.disconnect();
-  }, []);
-  return dark;
-}
-
 export default function FractionCalculatorPage() {
-  const dark = useDarkMode();
   const [n1, setN1] = useState('');
   const [d1, setD1] = useState('');
   const [n2, setN2] = useState('');
@@ -52,74 +39,67 @@ export default function FractionCalculatorPage() {
     setResult({ ...simplified, decimal: (simplified.num / simplified.den).toFixed(6) });
   };
 
-  const bg = dark ? '#111111' : '#f5f5f5';
-  const cardBg = dark ? '#1c1c1e' : '#ffffff';
-  const border = dark ? '#2c2c2e' : '#e5e7eb';
-  const textMain = dark ? '#ffffff' : '#1f2937';
-  const textSub = dark ? '#9ca3af' : '#6b7280';
-  const inputBg = dark ? '#2c2c2e' : '#f9fafb';
-  const btnBg = dark ? '#2c2c2e' : '#e5e7eb';
-  const btnText = dark ? '#ffffff' : '#1f2937';
-
   return (
-    <div style={{ minHeight:'100vh', background: bg, padding:'24px' }}>
-      <div style={{ maxWidth:'520px', margin:'0 auto' }}>
-        <h1 style={{ fontSize:'28px', fontWeight:'800', textAlign:'center', marginBottom:'8px', color: textMain }}>Fraction Calculator</h1>
-        <p style={{ textAlign:'center', marginBottom:'32px', color: textSub }}>Add, subtract, multiply and divide fractions</p>
+    <div className="min-h-screen bg-neutral-100 p-6">
+      <div className="max-w-lg mx-auto">
+        <h1 className="text-3xl font-bold text-center mb-2">Fraction Calculator</h1>
+        <p className="text-neutral-500 text-center mb-8">Add, subtract, multiply and divide fractions</p>
 
-        <div style={{ background: cardBg, border:`1px solid ${border}`, borderRadius:'16px', padding:'28px' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:'16px', justifyContent:'center' }}>
+        <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6">
+          <div className="flex items-center gap-4 justify-center">
 
             {/* Fraction 1 */}
-            <div style={{ textAlign:'center' }}>
+            <div className="text-center">
               <input type="number" value={n1} onChange={e => setN1(e.target.value)}
-                style={{ width:'80px', background: inputBg, border:`1px solid ${border}`, borderRadius:'8px', padding:'8px', textAlign:'center', color: textMain, outline:'none' }} placeholder="1" />
-              <div style={{ borderTop:`2px solid ${textSub}`, margin:'6px 0' }} />
+                className="w-20 bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center text-neutral-800 focus:outline-none" placeholder="1" />
+              <div className="border-t-2 border-neutral-400 my-1.5" />
               <input type="number" value={d1} onChange={e => setD1(e.target.value)}
-                style={{ width:'80px', background: inputBg, border:`1px solid ${border}`, borderRadius:'8px', padding:'8px', textAlign:'center', color: textMain, outline:'none' }} placeholder="2" />
+                className="w-20 bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center text-neutral-800 focus:outline-none" placeholder="2" />
             </div>
 
             {/* Operators */}
-            <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
+            <div className="flex flex-col gap-2">
               {['+','-','*','/'].map(o => (
-                <button key={o} onClick={() => setOp(o)} style={{
-                  width:'44px', height:'44px', borderRadius:'10px', fontWeight:'700', fontSize:'16px',
-                  border:'none', cursor:'pointer', transition:'all 0.15s',
-                  background: op === o ? '#6366f1' : btnBg,
-                  color: op === o ? '#ffffff' : btnText,
-                }}>{o}</button>
+                <button
+                  key={o}
+                  onClick={() => setOp(o)}
+                  className={`w-11 h-11 rounded-lg font-bold text-base transition ${
+                    op === o ? 'bg-indigo-500 text-white' : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-white'
+                  }`}
+                >
+                  {o}
+                </button>
               ))}
             </div>
 
             {/* Fraction 2 */}
-            <div style={{ textAlign:'center' }}>
+            <div className="text-center">
               <input type="number" value={n2} onChange={e => setN2(e.target.value)}
-                style={{ width:'80px', background: inputBg, border:`1px solid ${border}`, borderRadius:'8px', padding:'8px', textAlign:'center', color: textMain, outline:'none' }} placeholder="1" />
-              <div style={{ borderTop:`2px solid ${textSub}`, margin:'6px 0' }} />
+                className="w-20 bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center text-neutral-800 focus:outline-none" placeholder="1" />
+              <div className="border-t-2 border-neutral-400 my-1.5" />
               <input type="number" value={d2} onChange={e => setD2(e.target.value)}
-                style={{ width:'80px', background: inputBg, border:`1px solid ${border}`, borderRadius:'8px', padding:'8px', textAlign:'center', color: textMain, outline:'none' }} placeholder="3" />
+                className="w-20 bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center text-neutral-800 focus:outline-none" placeholder="3" />
             </div>
           </div>
 
           {/* Calculate button */}
-          <button onClick={calculate} disabled={!n1 || !d1 || !n2 || !d2} style={{
-            width:'100%', marginTop:'24px',
-            background: (!n1 || !d1 || !n2 || !d2) ? (dark ? '#2c2c2e' : '#c7d2fe') : '#6366f1',
-            color: (!n1 || !d1 || !n2 || !d2) ? (dark ? '#6b7280' : '#818cf8') : '#ffffff',
-            border:'none', borderRadius:'12px', padding:'14px',
-            fontWeight:'700', fontSize:'15px', cursor: (!n1 || !d1 || !n2 || !d2) ? 'not-allowed' : 'pointer',
-            transition:'all 0.15s',
-          }}>Calculate</button>
+          <button
+            onClick={calculate}
+            disabled={!n1 || !d1 || !n2 || !d2}
+            className="w-full mt-6 bg-indigo-500 hover:bg-indigo-400 disabled:bg-indigo-200 dark:disabled:bg-neutral-800 disabled:text-indigo-400 dark:disabled:text-neutral-500 disabled:cursor-not-allowed text-white rounded-xl py-3.5 font-bold transition"
+          >
+            Calculate
+          </button>
 
           {/* Result */}
           {result && (
-            <div style={{ marginTop:'20px', background: dark ? '#0a0a0a' : '#f9fafb', border:`1px solid ${border}`, borderRadius:'12px', padding:'24px', textAlign:'center' }}>
-              <div style={{ fontSize:'36px', fontWeight:'800', color:'#6366f1' }}>{result.num}/{result.den}</div>
-              <div style={{ color: textSub, marginTop:'8px' }}>= {result.decimal}</div>
+            <div className="mt-5 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 rounded-xl p-6 text-center">
+              <div className="text-4xl font-extrabold text-indigo-500">{result.num}/{result.den}</div>
+              <div className="text-neutral-500 mt-2">= {result.decimal}</div>
             </div>
           )}
           {error && (
-            <div style={{ marginTop:'20px', background: dark ? '#2c1215' : '#fef2f2', border:'1px solid #ef4444', borderRadius:'12px', padding:'16px', textAlign:'center', color:'#ef4444', fontWeight:'600' }}>
+            <div className="mt-5 bg-red-50 dark:bg-red-950 border border-red-500 rounded-xl p-4 text-center text-red-500 font-semibold">
               {error}
             </div>
           )}
