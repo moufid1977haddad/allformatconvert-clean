@@ -1,5 +1,5 @@
 ﻿'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 
 // RFC 4180-style CSV parser: splitting on plain commas/newlines breaks the
@@ -37,6 +37,18 @@ function parseCsvRows(input) {
 export default function CsvToExcelPage() {
   const [input, setInput] = useState('');
   const [status, setStatus] = useState('');
+  const [fileName, setFileName] = useState('');
+  const inputRef = useRef();
+  const handleFile = (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    setFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = () => { setInput(reader.result); setStatus(''); };
+    reader.onerror = () => setStatus('Error: failed to read file');
+    reader.readAsText(file);
+  };
   const convert = async () => {
     if (!input) return;
     setStatus('Converting...');
@@ -56,22 +68,26 @@ export default function CsvToExcelPage() {
         <h1 className="text-3xl font-bold text-center mb-2">CSV to Excel</h1>
         <p className="text-neutral-500 text-center mb-8">Convert CSV to Excel format</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" placeholder="Paste CSV here..." value={input} onChange={e => setInput(e.target.value)} />
+          <div className="border-2 border-dashed border-neutral-200 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
+            <p className="text-neutral-500 text-sm">{fileName || 'Click or drop a .csv file here'}</p>
+            <input ref={inputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={handleFile} />
+          </div>
+          <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" placeholder="...or paste CSV here" value={input} onChange={e => { setInput(e.target.value); setFileName(''); }} />
           <button onClick={convert} disabled={!input} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert and Download</button>
           {status && <p className="text-center text-green-400">{status}</p>}
         </div>
       </div>
       <SeoContent
         title="CSV to Excel"
-        description="CSV to Excel builds an .xlsx workbook from pasted CSV text using the xlsx library entirely in your browser, then triggers a download — your data is never uploaded to a server. CSV parsing is quote-aware: a field wrapped in double quotes can safely contain a comma or a newline (like 'Smith, John') without being split into extra columns, and a doubled double-quote inside a quoted field is unescaped to a single quote."
+        description="CSV to Excel builds an .xlsx workbook from a CSV file (or pasted CSV text) using the xlsx library entirely in your browser, then triggers a download — your data is never uploaded to a server. CSV parsing is quote-aware: a field wrapped in double quotes can safely contain a comma or a newline (like 'Smith, John') without being split into extra columns, and a doubled double-quote inside a quoted field is unescaped to a single quote."
         howTo={[
-          "Paste your CSV text into the input box (there's no file upload — paste the contents directly).",
+          "Click the upload area and select a .csv file, or paste CSV text directly into the box below it.",
           "Click 'Convert and Download' to build the workbook and save it.",
           "The file downloads automatically as converted.xlsx.",
           "Open it in Excel or any compatible spreadsheet app."
         ]}
         faqs={[
-          { q: "Does it support file upload, or only pasted text?", a: "Only pasted text — there's no file picker or drag-and-drop upload." },
+          { q: "Does it support file upload, or only pasted text?", a: "Both — upload a .csv file, or paste CSV text directly into the box." },
           { q: "What output format does it produce?", a: "Always .xlsx. There's no .xls (legacy Excel) option." },
           { q: "Is my data uploaded to a server?", a: "No, the workbook is built entirely in your browser using the xlsx library." },
           { q: "Does it handle CSV values that contain commas, like quoted fields?", a: "Yes — a value wrapped in double quotes (e.g. \"Smith, John\") is parsed as a single field and its comma is preserved intact, rather than being split into extra columns." }
