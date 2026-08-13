@@ -33,10 +33,14 @@ const EXT_TO_FIXTURE = {
   '.zip': 'sample.zip', '.epub': 'sample.epub', '.tar': 'sample.tar',
   '.png': 'sample.png', '.jpg': 'sample.jpg', '.jpeg': 'sample.jpg', '.webp': 'sample.webp', '.svg': 'sample.svg',
   '.webm': 'sample.webm',
+  '.heic': 'sample.heic', '.heif': 'sample.heic', '.tif': 'sample.tiff', '.tiff': 'sample.tiff',
+  '.mobi': 'sample.mobi', '.azw': 'sample.mobi', '.azw3': 'sample.mobi', '.pptx': 'sample.pptx',
 };
 const MIME_TO_FIXTURE = {
   'image/*': 'sample.png', 'image/png': 'sample.png', 'image/jpeg': 'sample.jpg', 'image/gif': 'sample.gif', 'image/apng': 'sample.gif',
   'audio/*': 'sample.wav', 'video/*': 'sample.webm', 'video/webm': 'sample.webm',
+  'video/avi': 'sample-real.avi', 'video/x-msvideo': 'sample-real.avi',
+  'video/mov': 'sample.mov', 'video/quicktime': 'sample.mov', 'video/mp4': 'sample.mp4',
   'text/csv': 'sample.csv',
 };
 

@@ -225,6 +225,209 @@ function buildTar() {
   w('sample.tar', Buffer.concat([header, contentBlock, end]));
 }
 
+// Minimal uncompressed TIFF: 4x4 RGB, one strip, little-endian.
+function buildTiff() {
+  const width = 4, height = 4, samplesPerPixel = 3, bitsPerSample = 8;
+  const pixelDataSize = width * height * samplesPerPixel;
+  const ifdEntryCount = 8;
+  const headerSize = 8;
+  const ifdOffset = headerSize;
+  const ifdSize = 2 + ifdEntryCount * 12 + 4;
+  const pixelDataOffset = ifdOffset + ifdSize;
+  const buf = Buffer.alloc(pixelDataOffset + pixelDataSize);
+  buf.write('II', 0); buf.writeUInt16LE(42, 2); buf.writeUInt32LE(ifdOffset, 4);
+  let off = ifdOffset;
+  buf.writeUInt16LE(ifdEntryCount, off); off += 2;
+  const entry = (tag, type, count, value) => {
+    buf.writeUInt16LE(tag, off); buf.writeUInt16LE(type, off + 2); buf.writeUInt32LE(count, off + 4);
+    if (type === 3 && count === 1) buf.writeUInt16LE(value, off + 8); else buf.writeUInt32LE(value, off + 8);
+    off += 12;
+  };
+  entry(256, 3, 1, width);              // ImageWidth
+  entry(257, 3, 1, height);             // ImageLength
+  entry(258, 3, 1, bitsPerSample);      // BitsPerSample (single value applies to all samples here)
+  entry(259, 3, 1, 1);                  // Compression = none
+  entry(262, 3, 1, 2);                  // PhotometricInterpretation = RGB
+  entry(273, 4, 1, pixelDataOffset);    // StripOffsets
+  entry(277, 3, 1, samplesPerPixel);    // SamplesPerPixel
+  entry(279, 4, 1, pixelDataSize);      // StripByteCounts
+  buf.writeUInt32LE(0, off);            // next IFD offset (none)
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const p = pixelDataOffset + (y * width + x) * 3;
+      buf[p] = 0x30 + x * 20; buf[p + 1] = 0x60; buf[p + 2] = 0xb0 - y * 10;
+    }
+  }
+  w('sample.tiff', buf);
+}
+
+// Minimal PPTX: a single-slide OOXML package built on the same store-only
+// zip writer as the EPUB fixture. PowerPoint/LibreOffice-family parsers
+// need every one of these parts present, even for one blank slide.
+function buildPptx() {
+  const contentTypes = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/>
+<Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/>
+<Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/>
+<Override PartName="/ppt/slides/slide1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>
+<Override PartName="/ppt/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>
+<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
+<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
+</Types>`;
+  const rootRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="ppt/presentation.xml"/>
+<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
+<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
+</Relationships>`;
+  const presentationXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:presentation xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+<p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rIdMaster1"/></p:sldMasterIdLst>
+<p:sldIdLst><p:sldId id="256" r:id="rIdSlide1"/></p:sldIdLst>
+<p:sldSz cx="9144000" cy="6858000"/>
+<p:notesSz cx="6858000" cy="9144000"/>
+</p:presentation>`;
+  const presentationRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rIdMaster1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="slideMasters/slideMaster1.xml"/>
+<Relationship Id="rIdSlide1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide1.xml"/>
+<Relationship Id="rIdTheme1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"/>
+</Relationships>`;
+  const slideXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+<p:cSld><p:spTree>
+<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>
+<p:grpSpPr/>
+<p:sp><p:nvSpPr><p:cNvPr id="2" name="Title"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="title"/></p:nvPr></p:nvSpPr>
+<p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:t>Audit Fixture</a:t></a:r></a:p></p:txBody></p:sp>
+</p:spTree></p:cSld>
+<p:clrMapOvr><a:overrideClrMapping bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/></p:clrMapOvr>
+</p:sld>`;
+  const slideRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>
+</Relationships>`;
+  const slideLayoutXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:sldLayout xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" type="title">
+<p:cSld><p:spTree>
+<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>
+<p:grpSpPr/>
+</p:spTree></p:cSld>
+<p:clrMapOvr><a:overrideClrMapping bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/></p:clrMapOvr>
+</p:sldLayout>`;
+  const slideLayoutRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="../slideMasters/slideMaster1.xml"/>
+</Relationships>`;
+  const slideMasterXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:sldMaster xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+<p:cSld><p:spTree>
+<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>
+<p:grpSpPr/>
+</p:spTree></p:cSld>
+<p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/>
+<p:sldLayoutIdLst><p:sldLayoutId id="2147483649" r:id="rId1"/></p:sldLayoutIdLst>
+</p:sldMaster>`;
+  const slideMasterRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>
+<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="../theme/theme1.xml"/>
+</Relationships>`;
+  const themeXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="Audit Theme">
+<a:themeElements>
+<a:clrScheme name="Audit"><a:dk1><a:sysClr val="windowText" lastClr="000000"/></a:dk1><a:lt1><a:sysClr val="window" lastClr="FFFFFF"/></a:lt1>
+<a:dk2><a:srgbClr val="1F497D"/></a:dk2><a:lt2><a:srgbClr val="EEECE1"/></a:lt2>
+<a:accent1><a:srgbClr val="4F81BD"/></a:accent1><a:accent2><a:srgbClr val="C0504D"/></a:accent2>
+<a:accent3><a:srgbClr val="9BBB59"/></a:accent3><a:accent4><a:srgbClr val="8064A2"/></a:accent4>
+<a:accent5><a:srgbClr val="4BACC6"/></a:accent5><a:accent6><a:srgbClr val="F79646"/></a:accent6>
+<a:hlink><a:srgbClr val="0000FF"/></a:hlink><a:folHlink><a:srgbClr val="800080"/></a:folHlink></a:clrScheme>
+<a:fontScheme name="Audit"><a:majorFont><a:latin typeface="Calibri"/></a:majorFont><a:minorFont><a:latin typeface="Calibri"/></a:minorFont></a:fontScheme>
+<a:fmtScheme name="Audit"><a:fillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:fillStyleLst>
+<a:lnStyleLst><a:ln><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:ln><a:ln><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:ln><a:ln><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:ln></a:lnStyleLst>
+<a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle></a:effectStyleLst>
+<a:bgFillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:bgFillStyleLst></a:fmtScheme>
+</a:themeElements>
+</a:theme>`;
+  const coreXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dc:title>Audit Fixture</dc:title></cp:coreProperties>`;
+  const appXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"><Application>audit-fixture</Application></Properties>`;
+  w('sample.pptx', buildStoreZip([
+    { name: '[Content_Types].xml', data: Buffer.from(contentTypes) },
+    { name: '_rels/.rels', data: Buffer.from(rootRels) },
+    { name: 'ppt/presentation.xml', data: Buffer.from(presentationXml) },
+    { name: 'ppt/_rels/presentation.xml.rels', data: Buffer.from(presentationRels) },
+    { name: 'ppt/slides/slide1.xml', data: Buffer.from(slideXml) },
+    { name: 'ppt/slides/_rels/slide1.xml.rels', data: Buffer.from(slideRels) },
+    { name: 'ppt/slideLayouts/slideLayout1.xml', data: Buffer.from(slideLayoutXml) },
+    { name: 'ppt/slideLayouts/_rels/slideLayout1.xml.rels', data: Buffer.from(slideLayoutRels) },
+    { name: 'ppt/slideMasters/slideMaster1.xml', data: Buffer.from(slideMasterXml) },
+    { name: 'ppt/slideMasters/_rels/slideMaster1.xml.rels', data: Buffer.from(slideMasterRels) },
+    { name: 'ppt/theme/theme1.xml', data: Buffer.from(themeXml) },
+    { name: 'docProps/core.xml', data: Buffer.from(coreXml) },
+    { name: 'docProps/app.xml', data: Buffer.from(appXml) },
+  ]));
+}
+
+// Minimal uncompressed (RGB24 DIB) AVI: RIFF/AVI container, 2 frames, no
+// video codec needed since uncompressed frames are a valid "Video for
+// Windows" stream any AVI-capable decoder (ffmpeg included) can read.
+function buildAvi() {
+  const width = 16, height = 16, fps = 10, frameCount = 2;
+  const rowSize = Math.ceil((width * 3) / 4) * 4;
+  const frameSize = rowSize * height;
+  const makeFrame = (r, g, b) => {
+    const buf = Buffer.alloc(frameSize);
+    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+      const off = y * rowSize + x * 3;
+      buf[off] = b; buf[off + 1] = g; buf[off + 2] = r;
+    }
+    return buf;
+  };
+  const frames = [makeFrame(0x20, 0x60, 0xd0), makeFrame(0xd0, 0x60, 0x20)];
+
+  const fourcc = (s) => Buffer.from(s, 'ascii');
+  const u32 = (n) => { const b = Buffer.alloc(4); b.writeUInt32LE(n >>> 0, 0); return b; };
+  const u16 = (n) => { const b = Buffer.alloc(2); b.writeUInt16LE(n, 0); return b; };
+
+  const avih = Buffer.concat([
+    u32(Math.round(1000000 / fps)), u32(frameSize * fps), u32(0), u32(0x10),
+    u32(frameCount), u32(0), u32(1), u32(0),
+    u32(width), u32(height), u32(0), u32(0), u32(0), u32(0),
+  ]);
+  const strh = Buffer.concat([
+    fourcc('vids'), fourcc('DIB '), u32(0), u32(0), u32(0), u32(0),
+    u32(1), u32(fps), u32(0), u32(frameCount), u32(frameSize * fps), u32(-1 >>> 0),
+    u32(0), u32(0), u16(0), u16(0), u16(width), u16(height),
+  ]);
+  const strf = Buffer.concat([
+    u32(40), u32(width), u32(height), u16(1), u16(24), u32(0), u32(frameSize),
+    u32(0), u32(0), u32(0), u32(0),
+  ]);
+
+  const chunk = (id, data) => {
+    const padded = data.length % 2 === 0 ? data : Buffer.concat([data, Buffer.from([0])]);
+    return Buffer.concat([fourcc(id), u32(data.length), padded]);
+  };
+  const list = (type, ...chunks) => {
+    const body = Buffer.concat([fourcc(type), ...chunks]);
+    return Buffer.concat([fourcc('LIST'), u32(body.length), body]);
+  };
+
+  const strl = list('strl', chunk('strh', strh), chunk('strf', strf));
+  const hdrl = list('hdrl', chunk('avih', avih), strl);
+  const moviChunks = frames.map((f) => chunk('00db', f));
+  const movi = list('movi', ...moviChunks);
+
+  const riffBody = Buffer.concat([fourcc('AVI '), hdrl, movi]);
+  w('sample.avi', Buffer.concat([fourcc('RIFF'), u32(riffBody.length), riffBody]));
+}
+
 (async () => {
   await buildPdf();
   await buildDocx();
@@ -237,5 +440,8 @@ function buildTar() {
   buildZip();
   buildEpub();
   buildTar();
+  buildTiff();
+  buildPptx();
+  buildAvi();
   console.log('Node-buildable fixtures done ->', OUT);
 })();
