@@ -6,6 +6,7 @@ export default function MovToGifPage() {
   const [frames, setFrames] = useState([]);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [videoError, setVideoError] = useState(false);
   const videoRef = useRef();
   const inputRef = useRef();
 
@@ -16,7 +17,26 @@ export default function MovToGifPage() {
     setFile(f);
     setFrames([]);
     setResult(null);
+    setVideoError(false);
   };
+
+  // Waits for the real `seeked` event, but some browsers never fire it when
+  // currentTime is set to a value the video is already effectively at (e.g.
+  // seeking to 0 right after load) -- that silently hung this loop forever
+  // (confirmed with a genuinely decodable MP4, not just a codec mismatch).
+  // A per-seek fallback timeout guarantees the loop always moves on.
+  const seekTo = (video, time) => new Promise((resolve) => {
+    let settled = false;
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      video.removeEventListener('seeked', done);
+      resolve();
+    };
+    video.addEventListener('seeked', done);
+    video.currentTime = time;
+    setTimeout(done, 1500);
+  });
 
   useEffect(() => {
     // videoRef.current is only guaranteed to exist after this render commits
@@ -28,10 +48,14 @@ export default function MovToGifPage() {
 
   const convert = async () => {
     if (!videoRef.current || !file) return;
+    const video = videoRef.current;
+    if (video.error || video.readyState === 0) {
+      setVideoError(true);
+      return;
+    }
     setLoading(true);
     try {
       const { GIFEncoder, quantize, applyPalette } = await import('gifenc');
-      const video = videoRef.current;
       const canvas = document.createElement('canvas');
       canvas.width = Math.min(video.videoWidth, 480);
       canvas.height = Math.min(video.videoHeight, 270);
@@ -42,8 +66,7 @@ export default function MovToGifPage() {
       const delay = Math.round((dur * 1000) / totalFrames);
       const gif = GIFEncoder();
       for (let i = 0; i < totalFrames; i++) {
-        video.currentTime = (i / totalFrames) * dur;
-        await new Promise(r => { video.onseeked = r; });
+        await seekTo(video, (i / totalFrames) * dur);
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         capturedFrames.push(canvas.toDataURL('image/png'));
         const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -69,8 +92,13 @@ export default function MovToGifPage() {
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a MOV file here'}</p>
             <input ref={inputRef} type="file" accept="video/quicktime,video/mov" className="hidden" onChange={handleFile} />
           </div>
-          {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-100" />}
-          <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">{loading ? 'Converting...' : 'Convert to GIF'}</button>
+          {file && <video ref={videoRef} controls onError={() => setVideoError(true)} className="w-full rounded-xl bg-neutral-100" />}
+          {videoError && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-sm">
+              This MOV file couldn't be loaded — your browser doesn't support its video codec (common with ProRes and some other non-H.264 codecs). Convert it to MP4 with a dedicated video converter first, then use <a href="/tools/gif-tools/mp4-to-gif" className="underline font-medium">MP4 to GIF</a> instead.
+            </div>
+          )}
+          <button onClick={convert} disabled={!file || loading || videoError} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">{loading ? 'Converting...' : 'Convert to GIF'}</button>
           {frames.length > 0 && (
             <div className="space-y-3">
               <p className="text-green-600 text-center font-semibold">{frames.length} frames extracted</p>
