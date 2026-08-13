@@ -44,3 +44,10 @@ next-env.d.ts
 
 # secrets / local notes
 infos/
+
+# functional audit run output (regenerate with scripts/audit/categorize.js
+# and scripts/audit/runners/run-audit.js -- only the tooling is versioned)
+scripts/audit/results/
+scripts/audit/tool-config.json
+/playwright-report/
+/test-results/

@@ -1,0 +1,2 @@
+Audit fixture plain text.
+Second line for good measure.
