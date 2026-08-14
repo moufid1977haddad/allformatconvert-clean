@@ -24,11 +24,20 @@ export const metadata: Metadata = {
     siteName: "OnlineConverTools",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "OnlineConverTools - 225 free online tools to convert, compress & edit files",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "OnlineConverTools - Free Online Tools",
     description: `${totalTools}+ free online tools for converting, compressing and editing files.`,
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,
