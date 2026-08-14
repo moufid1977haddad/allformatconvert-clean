@@ -773,8 +773,7 @@ export default function Navbar() {
           <div className="shrink-0">
             <Link href="/" className="flex items-center gap-1.5 lg:gap-2 px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition notranslate">
               <svg
-                width="28"
-                height="28"
+                className="w-7 h-7 lg:w-9 lg:h-9"
                 viewBox="0 0 64 64"
                 style={{ animation: "pulse-glow 2s ease-in-out infinite", flexShrink: 0, borderRadius: "8px" }}
                 aria-hidden="true"
@@ -787,8 +786,8 @@ export default function Navbar() {
                 <circle cx="20" cy="42" r="2.5" fill="#F4C0D1" />
                 <circle cx="28" cy="46" r="2" fill="#ED93B1" />
               </svg>
-              <span className="font-bold text-[13px] lg:text-[19px] text-black dark:text-white whitespace-nowrap">
-                <span className="text-[16px] lg:text-[24px] text-[#185fa5] dark:text-[#85b7eb]">O</span>nline<span className="text-[16px] lg:text-[24px] text-[#185fa5] dark:text-[#85b7eb]">C</span>onver<span className="text-[16px] lg:text-[24px] text-[#185fa5] dark:text-[#85b7eb]">T</span>ools
+              <span className="font-bold text-[13px] lg:text-[24px] text-black dark:text-white whitespace-nowrap">
+                <span className="text-[16px] lg:text-[30px] text-[#185fa5] dark:text-[#85b7eb]">O</span>nline<span className="text-[16px] lg:text-[30px] text-[#185fa5] dark:text-[#85b7eb]">C</span>onver<span className="text-[16px] lg:text-[30px] text-[#185fa5] dark:text-[#85b7eb]">T</span>ools
               </span>
             </Link>
           </div>

@@ -167,8 +167,14 @@ export default function Home() {
             <div style={{ display:'inline-flex', alignItems:'center', gap:'8px', background: dark ? '#111111' : '#e2e8f0', border: dark ? '1px solid #334155' : '1px solid #cbd5e1', borderRadius:'999px', padding:'6px 16px', marginBottom:'24px', fontSize:'13px', color: dark ? '#94a3b8' : '#475569' }}>
               <Sparkles size={14} style={{ flexShrink:0 }} /> {totalTools}+ free tools · No signup · No limits
             </div>
-            <h1 style={{ fontSize:'clamp(36px,5vw,58px)', fontWeight:'800', color: dark ? '#f1f5f9' : '#0f172a', lineHeight:'1.1', marginBottom:'20px', letterSpacing:'-0.02em' }}>
-              Convert anything.<br /><span style={{ color:'#6366f1' }}>Instantly. Free.</span>
+            <h1 style={{ fontSize:'clamp(46px,6.4vw,76px)', fontWeight:'800', color: dark ? '#f1f5f9' : '#0f172a', lineHeight:'1.1', marginBottom:'20px', letterSpacing:'-0.02em' }}>
+              Convert anything.<br /><span style={{
+                backgroundImage: dark ? 'linear-gradient(135deg, #378add, #F4C0D1)' : 'linear-gradient(135deg, #185fa5, #D4537E)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                color: 'transparent',
+                WebkitTextFillColor: 'transparent',
+              }}>Instantly. Free.</span>
             </h1>
             <p style={{ fontSize:'18px', color: dark ? '#94a3b8' : '#475569', lineHeight:'1.7', marginBottom:'32px', maxWidth:'480px' }}>
               The fastest way to convert, compress, and transform your files — {totalTools} tools, zero installation, completely free.
