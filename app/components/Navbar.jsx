@@ -23,11 +23,25 @@ const categories = [
 
 // Maps a category's group count to a literal xl:grid-cols-N class so Tailwind's
 // static scanner can find it (dynamic template strings would be invisible to it).
+// 7 (PDF Tools only, the sole 7-group category) uses a later custom breakpoint
+// instead of xl(1280px): at 1280-1431px the panel's w-[1400px] is clamped by
+// max-w-[calc(100vw-32px)] down to as little as 1248px, which squeezes 7 equal
+// columns to ~160px and wraps "Convert from PDF" onto 2 lines, misaligning that
+// column's items against its neighbors. 1440px is the first round breakpoint
+// past 1432px, where 100vw-32px >= 1400px so the panel reaches its full,
+// unclamped width and every column gets a comfortable ~181px.
 const xlGridColsByGroupCount = {
   4: 'xl:grid-cols-4',
   5: 'xl:grid-cols-5',
   6: 'xl:grid-cols-6',
-  7: 'xl:grid-cols-7',
+  7: 'min-[1440px]:grid-cols-7',
+};
+
+// Matching width breakpoint for the 7-group case, see above -- keeps the panel
+// at the same 820px/4-column layout already verified clean at 1024-1439px,
+// instead of widening to 1400px at xl(1280px) while columns are still 4.
+const widthByGroupCount = {
+  7: 'min-[1440px]:w-[1400px]',
 };
 
 // Flat categories with enough tools (11) that a 2-column layout reads faster
@@ -803,7 +817,7 @@ export default function Navbar() {
                   </Link>
                   {openCat === cat.href && dropTools.length > 0 && isGrouped && (
                     <div
-                      className={`fixed left-1/2 -translate-x-1/2 grid grid-cols-4 ${xlGridColsByGroupCount[dropTools.length] || 'xl:grid-cols-4'} gap-x-4 gap-y-4 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999] p-4 w-[820px] xl:w-[1400px] max-w-[calc(100vw-32px)]`}
+                      className={`fixed left-1/2 -translate-x-1/2 grid grid-cols-4 ${xlGridColsByGroupCount[dropTools.length] || 'xl:grid-cols-4'} gap-x-4 gap-y-4 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999] p-4 w-[820px] ${widthByGroupCount[dropTools.length] || 'xl:w-[1400px]'} max-w-[calc(100vw-32px)]`}
                       style={{ top: headerHeight, maxHeight: '85vh', overflowY: 'auto' }}
                       onMouseEnter={() => { clearTimeout(catTimerRef.current); setOpenCat(cat.href); }}
                       onMouseLeave={() => { catTimerRef.current = setTimeout(() => setOpenCat(null), 300); }}
