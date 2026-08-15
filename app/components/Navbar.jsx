@@ -5,23 +5,26 @@ import { useState, useEffect, useRef } from 'react';
 import { Titan_One } from 'next/font/google';
 import { supabase } from '@/lib/supabase';
 import { ToolIcon, toolBgColors } from '@/app/lib/toolIcons';
-import { Search } from 'lucide-react';
+import {
+  Search, FileText, Image as ImageIcon, Film, Headphones, Video, Type, Folder,
+  QrCode, Repeat, Code, Calculator, Bot,
+} from 'lucide-react';
 
 const titanOne = Titan_One({ weight: '400', subsets: ['latin'] });
 
 const categories = [
-  { href: '/tools/pdf-tools', label: 'PDF' },
-  { href: '/tools/image-tools', label: 'Image' },
-  { href: '/tools/gif-tools', label: 'GIF' },
-  { href: '/tools/audio-tools', label: 'Audio' },
-  { href: '/tools/video-tools', label: 'Video' },
-  { href: '/tools/text-tools', label: 'Text' },
-  { href: '/tools/file-tools', label: 'File' },
-  { href: '/tools/qr-barcodes-tools', label: 'QR' },
-  { href: '/tools/converter-tools', label: 'Convert' },
-  { href: '/tools/developer-tools', label: 'Dev' },
-  { href: '/tools/math-tools', label: 'Math' },
-  { href: '/tools/ai-tools', label: 'AI' },
+  { href: '/tools/pdf-tools', label: 'PDF', icon: FileText },
+  { href: '/tools/image-tools', label: 'Image', icon: ImageIcon },
+  { href: '/tools/gif-tools', label: 'GIF', icon: Film },
+  { href: '/tools/audio-tools', label: 'Audio', icon: Headphones },
+  { href: '/tools/video-tools', label: 'Video', icon: Video },
+  { href: '/tools/text-tools', label: 'Text', icon: Type },
+  { href: '/tools/file-tools', label: 'File', icon: Folder },
+  { href: '/tools/qr-barcodes-tools', label: 'QR', icon: QrCode },
+  { href: '/tools/converter-tools', label: 'Convert', icon: Repeat },
+  { href: '/tools/developer-tools', label: 'Dev', icon: Code },
+  { href: '/tools/math-tools', label: 'Math', icon: Calculator },
+  { href: '/tools/ai-tools', label: 'AI', icon: Bot },
 ];
 
 // Maps a category's group count to a literal xl:grid-cols-N class so Tailwind's
@@ -810,10 +813,12 @@ export default function Navbar() {
                 >
                   <Link
                     href={cat.href}
-                    className={`flex items-center gap-0.5 min-[1410px]:gap-1 px-0.5 min-[1410px]:px-2.5 py-1 text-[11px] min-[1410px]:text-xs font-bold uppercase tracking-wide whitespace-nowrap transition text-black dark:text-white ${isActive ? 'underline underline-offset-4 decoration-2' : 'hover:opacity-60'}`}
+                    title={cat.label}
+                    className={`flex items-center gap-0.5 min-[1410px]:gap-1 px-0.5 min-[1410px]:px-2.5 py-1 text-[11px] min-[1410px]:text-xs font-bold uppercase tracking-wide transition border-b-2 text-black dark:text-white ${isActive ? 'border-current' : 'border-transparent hover:opacity-60'}`}
                   >
-                    {cat.label}
-                    <svg xmlns="http://www.w3.org/2000/svg" className={`w-2.5 h-2.5 opacity-50 transition-transform ${openCat === cat.href ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <cat.icon className="w-[15px] h-[15px] shrink-0" aria-hidden="true" />
+                    <span className="sr-only min-[2100px]:not-sr-only min-[2100px]:truncate min-[2100px]:max-w-[64px]">{cat.label}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className={`w-2.5 h-2.5 shrink-0 opacity-50 transition-transform ${openCat === cat.href ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </Link>
