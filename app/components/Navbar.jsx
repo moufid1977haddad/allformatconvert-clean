@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { Titan_One } from 'next/font/google';
 import { supabase } from '@/lib/supabase';
-import { ToolIcon, toolBgColors } from '@/app/lib/toolIcons';
+import { ToolIcon, toolBgColors, categoryColors } from '@/app/lib/toolIcons';
 import {
   Search, FileText, Image as ImageIcon, Film, Headphones, Video, Type, Folder,
   QrCode, Repeat, Code, Calculator, Bot,
@@ -804,6 +804,8 @@ export default function Navbar() {
               const dropTools = categoryTools[cat.href] || [];
               const isGrouped = dropTools.length > 0 && Boolean(dropTools[0].items);
               const isActive = pathname.startsWith(cat.href);
+              const catSlug = cat.href.split('/').pop();
+              const catColor = categoryColors[catSlug];
               return (
                 <div
                   key={cat.href}
@@ -814,9 +816,11 @@ export default function Navbar() {
                   <Link
                     href={cat.href}
                     title={cat.label}
-                    className={`flex items-center gap-0.5 min-[1410px]:gap-1 px-0.5 min-[1410px]:px-2.5 py-1 text-[11px] min-[1410px]:text-xs font-bold uppercase tracking-wide transition border-b-2 text-black dark:text-white ${isActive ? 'border-current' : 'border-transparent hover:opacity-60'}`}
+                    className={`flex items-center gap-0.5 min-[1410px]:gap-1 px-0.5 min-[1410px]:px-2 py-1 text-[11px] min-[1410px]:text-xs font-bold uppercase tracking-wide transition border-b-2 text-black dark:text-white ${isActive ? 'border-current' : 'border-transparent hover:opacity-60'}`}
                   >
-                    <cat.icon className="w-[15px] h-[15px] shrink-0" aria-hidden="true" />
+                    <span className="flex items-center justify-center shrink-0 rounded-md bg-neutral-100 dark:bg-neutral-800 w-[22px] h-[22px]">
+                      <cat.icon className={`w-[15px] h-[15px] ${catColor}`} aria-hidden="true" />
+                    </span>
                     <span className="sr-only min-[2100px]:not-sr-only min-[2100px]:truncate min-[2100px]:max-w-[64px]">{cat.label}</span>
                     <svg xmlns="http://www.w3.org/2000/svg" className={`w-2.5 h-2.5 shrink-0 opacity-50 transition-transform ${openCat === cat.href ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -888,7 +892,7 @@ export default function Navbar() {
               {/* Inline field: mobile (<1024) and wide desktop (>=1536), where there's room for it in the row.
                   Threshold pushed past the old 1410px cut so the widened Titan One wordmark has room to breathe. */}
               <div className="relative min-[1024px]:max-[1535px]:hidden">
-                <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500 dark:text-neutral-400 pointer-events-none" aria-hidden="true" />
+                <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#185fa5] dark:text-[#85b7eb] pointer-events-none" aria-hidden="true" />
                 <input
                   type="text"
                   value={search}
@@ -917,7 +921,7 @@ export default function Navbar() {
                 type="button"
                 onClick={() => setSearchPanelOpen(true)}
                 aria-label="Search tools"
-                className="hidden min-[1024px]:max-[1535px]:flex items-center justify-center w-8 h-7 rounded-full bg-[#f5f5f7] dark:bg-[#2a2a2a] text-neutral-500 dark:text-neutral-400"
+                className="hidden min-[1024px]:max-[1535px]:flex items-center justify-center w-8 h-7 rounded-lg bg-[#eaf3fb] dark:bg-[#16283a] text-[#185fa5] dark:text-[#85b7eb] hover:opacity-80 transition"
               >
                 <Search className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
@@ -930,7 +934,7 @@ export default function Navbar() {
                   style={{ top: headerHeight + 4 }}
                 >
                   <div className="relative">
-                    <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500 dark:text-neutral-400 pointer-events-none" aria-hidden="true" />
+                    <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#185fa5] dark:text-[#85b7eb] pointer-events-none" aria-hidden="true" />
                     <input
                       autoFocus
                       type="text"
@@ -962,7 +966,7 @@ export default function Navbar() {
             <div className="relative notranslate hidden lg:block" ref={langRef}>
               <button
                 onClick={() => setLangOpen(!langOpen)}
-                className="flex items-center gap-0.5 px-1.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-700 dark:text-neutral-200 text-xs font-bold"
+                className="flex items-center gap-0.5 px-1.5 py-1 rounded-lg bg-[#eaf3fb] dark:bg-[#16283a] hover:opacity-80 transition text-[#185fa5] dark:text-[#85b7eb] text-xs font-bold"
               >
                 <span>{currentLang.short}</span>
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -988,7 +992,7 @@ export default function Navbar() {
             {/* Dark mode */}
             <button
               onClick={() => setDark(!dark)}
-              className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-600 dark:text-neutral-300 shrink-0 hidden lg:block"
+              className="p-1 rounded-lg bg-[#eaf3fb] dark:bg-[#16283a] hover:opacity-80 transition text-[#185fa5] dark:text-[#85b7eb] shrink-0 hidden lg:block"
             >
               {dark ? (
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1028,7 +1032,7 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <Link href="/signin" className="flex items-center px-1.5 min-[1410px]:px-2 py-1 rounded-lg border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition text-neutral-700 dark:text-neutral-200 text-xs font-bold whitespace-nowrap">
+              <Link href="/signin" className="flex items-center px-1.5 min-[1410px]:px-2.5 py-1 rounded-lg bg-[#185fa5] dark:bg-[#378add] hover:opacity-90 transition text-white text-xs font-bold whitespace-nowrap">
                 Sign In
               </Link>
             )}

@@ -6,7 +6,7 @@ import {
   Wrench, LayoutGrid, Languages, FileText, Image, Video, Music, Code2, Folder, Calculator,
   Clapperboard, Type, QrCode, RefreshCw,
 } from 'lucide-react';
-import { CategoryIcon, ToolIcon } from './lib/toolIcons';
+import { CategoryIcon, ToolIcon, categoryColors } from './lib/toolIcons';
 
 function useDarkMode() {
   const [dark, setDark] = useState(false);
@@ -21,18 +21,18 @@ function useDarkMode() {
 }
 
 const categories = [
-  { color: 'text-red-500',    title: 'PDF Tools',        description: 'Merge, split, compress, and convert PDFs',        href: '/tools/pdf-tools',           slug: 'pdf-tools',           tools: ['Merge PDF', 'Split PDF', 'Compress PDF'],                                    count: 39 },
-  { color: 'text-pink-500',   title: 'Image Tools',      description: 'Convert, compress, and edit images',               href: '/tools/image-tools',         slug: 'image-tools',         tools: ['Image Compressor', 'Image Converter', 'Image Resizer'],                      count: 37 },
-  { color: 'text-purple-500', title: 'GIF Tools',        description: 'Convert videos and images to GIF format',          href: '/tools/gif-tools',           slug: 'gif-tools',           tools: ['Video to GIF', 'MP4 to GIF', 'GIF Maker'],                                   count: 11 },
-  { color: 'text-green-500',  title: 'Text Tools',       description: 'Word count, case conversion, text formatting',     href: '/tools/text-tools',          slug: 'text-tools',          tools: ['Word Counter', 'Case Converter', 'Text Reverser'],                            count: 17 },
-  { color: 'text-yellow-500', title: 'Audio Tools',      description: 'Convert, compress, and edit audio files',          href: '/tools/audio-tools',         slug: 'audio-tools',         tools: ['Audio Converter', 'Audio Trimmer', 'Voice Recorder'],                        count: 11 },
-  { color: 'text-blue-500',   title: 'Video Tools',      description: 'Convert, compress, and edit videos',               href: '/tools/video-tools',         slug: 'video-tools',         tools: ['Video Converter', 'Video Compressor', 'Video Trimmer'],                      count: 15 },
-  { color: 'text-orange-500', title: 'File Tools',       description: 'ZIP compression, file conversion, Base64',         href: '/tools/file-tools',          slug: 'file-tools',          tools: ['ZIP Extractor', 'ZIP Creator', 'TAR Extractor'],                              count: 9  },
-  { color: 'text-teal-500',   title: 'QR & Barcodes',   description: 'Generate and scan QR codes and barcodes',          href: '/tools/qr-barcodes-tools',   slug: 'qr-barcodes-tools',   tools: ['QR Generator', 'Barcode Generator', 'QR Scanner'],                           count: 3  },
-  { color: 'text-amber-500',  title: 'Converter Tools',  description: 'Convert units, colors, and currencies',            href: '/tools/converter-tools',     slug: 'converter-tools',     tools: ['Currency Converter', 'Unit Converter', 'Color Converter'],                    count: 4  },
-  { color: 'text-violet-500', title: 'Developer Tools',  description: 'JSON, Base64, URL encoding, and more',             href: '/tools/developer-tools',     slug: 'developer-tools',     tools: ['JSON Formatter', 'XML to JSON', 'Hash Generator'],                           count: 57 },
-  { color: 'text-indigo-500', title: 'Math Tools',       description: 'Number conversion, percentage calculator',         href: '/tools/math-tools',          slug: 'math-tools',          tools: ['Number Base Converter', 'Percentage Calculator', 'Roman Numeral Converter'],  count: 6  },
-  { color: 'text-cyan-500',   title: 'AI Tools',         description: 'AI-powered image and text tools',                  href: '/tools/ai-tools',            slug: 'ai-tools',            tools: ['Background Remover', 'Image Upscaler', 'Grammar Fixer'],                     count: 16 },
+  { title: 'PDF Tools',        description: 'Merge, split, compress, and convert PDFs',        href: '/tools/pdf-tools',           slug: 'pdf-tools',           tools: ['Merge PDF', 'Split PDF', 'Compress PDF'],                                    count: 39 },
+  { title: 'Image Tools',      description: 'Convert, compress, and edit images',               href: '/tools/image-tools',         slug: 'image-tools',         tools: ['Image Compressor', 'Image Converter', 'Image Resizer'],                      count: 37 },
+  { title: 'GIF Tools',        description: 'Convert videos and images to GIF format',          href: '/tools/gif-tools',           slug: 'gif-tools',           tools: ['Video to GIF', 'MP4 to GIF', 'GIF Maker'],                                   count: 11 },
+  { title: 'Text Tools',       description: 'Word count, case conversion, text formatting',     href: '/tools/text-tools',          slug: 'text-tools',          tools: ['Word Counter', 'Case Converter', 'Text Reverser'],                            count: 17 },
+  { title: 'Audio Tools',      description: 'Convert, compress, and edit audio files',          href: '/tools/audio-tools',         slug: 'audio-tools',         tools: ['Audio Converter', 'Audio Trimmer', 'Voice Recorder'],                        count: 11 },
+  { title: 'Video Tools',      description: 'Convert, compress, and edit videos',               href: '/tools/video-tools',         slug: 'video-tools',         tools: ['Video Converter', 'Video Compressor', 'Video Trimmer'],                      count: 15 },
+  { title: 'File Tools',       description: 'ZIP compression, file conversion, Base64',         href: '/tools/file-tools',          slug: 'file-tools',          tools: ['ZIP Extractor', 'ZIP Creator', 'TAR Extractor'],                              count: 9  },
+  { title: 'QR & Barcodes',   description: 'Generate and scan QR codes and barcodes',          href: '/tools/qr-barcodes-tools',   slug: 'qr-barcodes-tools',   tools: ['QR Generator', 'Barcode Generator', 'QR Scanner'],                           count: 3  },
+  { title: 'Converter Tools',  description: 'Convert units, colors, and currencies',            href: '/tools/converter-tools',     slug: 'converter-tools',     tools: ['Currency Converter', 'Unit Converter', 'Color Converter'],                    count: 4  },
+  { title: 'Developer Tools',  description: 'JSON, Base64, URL encoding, and more',             href: '/tools/developer-tools',     slug: 'developer-tools',     tools: ['JSON Formatter', 'XML to JSON', 'Hash Generator'],                           count: 57 },
+  { title: 'Math Tools',       description: 'Number conversion, percentage calculator',         href: '/tools/math-tools',          slug: 'math-tools',          tools: ['Number Base Converter', 'Percentage Calculator', 'Roman Numeral Converter'],  count: 6  },
+  { title: 'AI Tools',         description: 'AI-powered image and text tools',                  href: '/tools/ai-tools',            slug: 'ai-tools',            tools: ['Background Remover', 'Image Upscaler', 'Grammar Fixer'],                     count: 16 },
 ];
 
 const DEFAULT_TOOL_COUNT = 225;
@@ -235,10 +235,10 @@ export default function Home() {
             {categories.map((cat) => (
               <Link key={cat.href} href={cat.href} className="bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)]">
                 <div className="flex justify-between items-center w-full mb-3">
-                  <CategoryIcon slug={cat.slug} className={`w-8 h-8 ${cat.color}`} />
+                  <CategoryIcon slug={cat.slug} className={`w-8 h-8 ${categoryColors[cat.slug]}`} />
                   <span className="text-xs text-neutral-400 dark:text-neutral-500 bg-neutral-100 dark:bg-neutral-700 rounded-full px-2 py-1">{toolCounts.counts[cat.slug] || cat.count} tools</span>
                 </div>
-                <h2 className="font-bold text-lg mb-1 text-neutral-800 dark:text-white group-hover:text-indigo-600 transition">{cat.title}</h2>
+                <h2 className="font-extrabold text-2xl mb-1 text-neutral-800 dark:text-white group-hover:text-indigo-600 transition">{cat.title}</h2>
                 <p className="text-neutral-500 dark:text-neutral-400 text-sm mb-4">{cat.description}</p>
                 <div className="space-y-1 w-full text-center">
                   {cat.tools.map(tool => (

@@ -136,6 +136,23 @@ export const categoryIcons = {
   'ai-tools': Bot,
 };
 
+// One accent color per category, shared by the homepage category cards and
+// the navbar category icons so the two stay visually in sync.
+export const categoryColors = {
+  'pdf-tools': 'text-red-500',
+  'image-tools': 'text-pink-500',
+  'gif-tools': 'text-purple-500',
+  'text-tools': 'text-green-500',
+  'audio-tools': 'text-yellow-500',
+  'video-tools': 'text-blue-500',
+  'file-tools': 'text-orange-500',
+  'qr-barcodes-tools': 'text-teal-500',
+  'converter-tools': 'text-amber-500',
+  'developer-tools': 'text-violet-500',
+  'math-tools': 'text-indigo-500',
+  'ai-tools': 'text-cyan-500',
+};
+
 // Fallback for any slug not (yet) mapped above.
 export const DefaultToolIcon = FileText;
 

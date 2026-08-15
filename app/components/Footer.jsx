@@ -1,5 +1,8 @@
 ﻿import Link from 'next/link';
+import { Titan_One } from 'next/font/google';
 import { getToolCounts } from '@/lib/toolCounts';
+
+const titanOne = Titan_One({ weight: '400', subsets: ['latin'] });
 
 export default function Footer() {
   const { total } = getToolCounts();
@@ -8,10 +11,10 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-bold text-xl mb-3 text-black dark:text-white notranslate">
-              <span className="text-[26px] text-[#185fa5] dark:text-[#85b7eb]">O</span>nline<span className="text-[26px] text-[#185fa5] dark:text-[#85b7eb]">C</span>onver<span className="text-[26px] text-[#185fa5] dark:text-[#85b7eb]">T</span>ools
+            <h3 className={`${titanOne.className} text-xl mb-3 text-black dark:text-white notranslate`}>
+              <span className="text-[#185fa5] dark:text-[#85b7eb]">O</span>nline<span className="text-[#185fa5] dark:text-[#85b7eb]">C</span>onver<span className="text-[#185fa5] dark:text-[#85b7eb]">T</span>ools
             </h3>
-            <p className="text-sm text-neutral-400 leading-relaxed font-light">{total}+ free online tools for converting, compressing and editing files. No sign-up required.</p>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed font-normal">{total}+ free online tools for converting, compressing and editing files. No sign-up required.</p>
           </div>
           <div>
             <h4 className="font-bold text-sm uppercase tracking-widest text-black dark:text-white mb-3">Tools</h4>
