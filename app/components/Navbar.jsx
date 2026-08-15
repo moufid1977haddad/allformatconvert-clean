@@ -2,9 +2,12 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
+import { Titan_One } from 'next/font/google';
 import { supabase } from '@/lib/supabase';
 import { ToolIcon, toolBgColors } from '@/app/lib/toolIcons';
 import { Search } from 'lucide-react';
+
+const titanOne = Titan_One({ weight: '400', subsets: ['latin'] });
 
 const categories = [
   { href: '/tools/pdf-tools', label: 'PDF' },
@@ -773,7 +776,7 @@ export default function Navbar() {
           <div className="shrink-0">
             <Link href="/" className="flex items-center gap-1.5 lg:gap-2 px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition notranslate">
               <svg
-                className="w-7 h-7 lg:w-9 lg:h-9"
+                className="w-7 h-7 lg:w-9 lg:h-9 xl:w-[46px] xl:h-[46px]"
                 viewBox="0 0 64 64"
                 style={{ animation: "pulse-glow 2s ease-in-out infinite", flexShrink: 0, borderRadius: "8px" }}
                 aria-hidden="true"
@@ -786,8 +789,8 @@ export default function Navbar() {
                 <circle cx="20" cy="42" r="2.5" fill="#F4C0D1" />
                 <circle cx="28" cy="46" r="2" fill="#ED93B1" />
               </svg>
-              <span className="font-bold text-[13px] lg:text-[24px] text-black dark:text-white whitespace-nowrap">
-                <span className="text-[16px] lg:text-[30px] text-[#185fa5] dark:text-[#85b7eb]">O</span>nline<span className="text-[16px] lg:text-[30px] text-[#185fa5] dark:text-[#85b7eb]">C</span>onver<span className="text-[16px] lg:text-[30px] text-[#185fa5] dark:text-[#85b7eb]">T</span>ools
+              <span className={`${titanOne.className} text-[11px] lg:text-[21px] xl:text-[30px] text-black dark:text-white whitespace-nowrap`}>
+                <span className="text-[#185fa5] dark:text-[#85b7eb]">O</span>nline<span className="text-[#185fa5] dark:text-[#85b7eb]">C</span>onver<span className="text-[#185fa5] dark:text-[#85b7eb]">T</span>ools
               </span>
             </Link>
           </div>
@@ -877,8 +880,9 @@ export default function Navbar() {
 
             {/* Search */}
             <div className="relative" ref={searchWrapRef}>
-              {/* Inline field: mobile (<1024) and wide desktop (>=1410), where there's room for it in the row */}
-              <div className="relative min-[1024px]:max-[1409px]:hidden">
+              {/* Inline field: mobile (<1024) and wide desktop (>=1536), where there's room for it in the row.
+                  Threshold pushed past the old 1410px cut so the widened Titan One wordmark has room to breathe. */}
+              <div className="relative min-[1024px]:max-[1535px]:hidden">
                 <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500 dark:text-neutral-400 pointer-events-none" aria-hidden="true" />
                 <input
                   type="text"
@@ -903,12 +907,12 @@ export default function Navbar() {
                 )}
               </div>
 
-              {/* Compact trigger: 1024-1409px only, where the row has no room for even a narrow inline field */}
+              {/* Compact trigger: 1024-1535px only, where the row has no room for even a narrow inline field */}
               <button
                 type="button"
                 onClick={() => setSearchPanelOpen(true)}
                 aria-label="Search tools"
-                className="hidden min-[1024px]:max-[1409px]:flex items-center justify-center w-8 h-7 rounded-full bg-[#f5f5f7] dark:bg-[#2a2a2a] text-neutral-500 dark:text-neutral-400"
+                className="hidden min-[1024px]:max-[1535px]:flex items-center justify-center w-8 h-7 rounded-full bg-[#f5f5f7] dark:bg-[#2a2a2a] text-neutral-500 dark:text-neutral-400"
               >
                 <Search className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
@@ -917,7 +921,7 @@ export default function Navbar() {
                   never overlapping sibling nav pills the way an in-row absolute-expand would. */}
               {searchPanelOpen && (
                 <div
-                  className="fixed end-2 min-[1410px]:hidden bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999] p-2 w-72 max-w-[calc(100vw-16px)]"
+                  className="fixed end-2 min-[1536px]:hidden bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999] p-2 w-72 max-w-[calc(100vw-16px)]"
                   style={{ top: headerHeight + 4 }}
                 >
                   <div className="relative">
