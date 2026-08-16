@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { ToolIcon, toolBgColors, categoryColors } from '@/app/lib/toolIcons';
 import {
   Search, FileText, Image as ImageIcon, Film, Headphones, Video, Type, Folder,
-  QrCode, Repeat, Code, Calculator, Bot,
+  QrCode, Repeat, Code, Calculator, Bot, Menu, X,
 } from 'lucide-react';
 
 const titanOne = Titan_One({ weight: '400', subsets: ['latin'] });
@@ -638,25 +638,6 @@ const allTools = [
   { name: 'Barcode Generator',    href: '/tools/qr-barcodes-tools/barcode-generator' },
 ];
 
-const tickerTools = [
-  { label: 'Merge PDF',         href: '/tools/pdf-tools/pdf-merge' },
-  { label: 'Resize Image',      href: '/tools/image-tools/image-resizer' },
-  { label: 'Convert Video',     href: '/tools/video-tools/video-converter' },
-  { label: 'Remove Background', href: '/tools/ai-tools/background-remover' },
-  { label: 'Trim Audio',        href: '/tools/audio-tools/audio-trimmer' },
-  { label: 'Format JSON',       href: '/tools/developer-tools/json-formatter' },
-  { label: 'Encrypt PDF',       href: '/tools/pdf-tools/pdf-protect' },
-  { label: 'Make GIF',          href: '/tools/gif-tools/gif-maker' },
-  { label: 'Count Words',       href: '/tools/text-tools/word-counter' },
-  { label: 'Convert Units',     href: '/tools/converter-tools/unit-converter' },
-  { label: 'Encode Base64',     href: '/tools/developer-tools/base64-encoder' },
-  { label: 'Generate QR Code',  href: '/tools/qr-barcodes-tools/qr-generator' },
-  { label: 'Compress Files',    href: '/tools/file-tools/zip-creator' },
-  { label: 'Convert Colors',    href: '/tools/converter-tools/color-converter' },
-  { label: 'Extract Audio',     href: '/tools/video-tools/video-to-audio' },
-  { label: 'Fix Grammar',       href: '/tools/ai-tools/grammar-fixer' },
-];
-
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -676,6 +657,16 @@ export default function Navbar() {
   const [user, setUser] = useState(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileOpenCat, setMobileOpenCat] = useState(null);
+  const [mobileLangOpen, setMobileLangOpen] = useState(false);
+  const mobileMenuRef = useRef(null);
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+    setMobileOpenCat(null);
+    setMobileLangOpen(false);
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem('theme');
@@ -702,9 +693,18 @@ export default function Navbar() {
       if (langRef.current && !langRef.current.contains(e.target)) setLangOpen(false);
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setUserMenuOpen(false);
       if (searchWrapRef.current && !searchWrapRef.current.contains(e.target)) setSearchPanelOpen(false);
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target)) closeMobileMenu();
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === 'Escape') closeMobileMenu();
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
   }, []);
 
   useEffect(() => {
@@ -749,25 +749,10 @@ export default function Navbar() {
     tryTranslate(10);
   };
 
-  const doubled = [...tickerTools, ...tickerTools];
-
   return (
     <>
       <style>{`
         @keyframes pulse-glow { 0%,100% { opacity:1; box-shadow:0 0 0 0 rgba(153,53,86,0.4); } 50% { opacity:0.85; box-shadow:0 0 0 6px rgba(153,53,86,0); } }
-        @keyframes ticker-scroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .ticker-track {
-          display: flex;
-          width: max-content;
-          animation: ticker-scroll 28s linear infinite;
-        }
-        .ticker-track:hover,
-        .ticker-track:focus-within {
-          animation-play-state: paused;
-        }
       `}</style>
 
       <header ref={headerRef} className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700 sticky top-0 z-50">
@@ -887,11 +872,161 @@ export default function Navbar() {
           {/* Right side */}
           <div className="shrink-0 flex items-center gap-1.5 min-[1024px]:gap-1 min-[1410px]:gap-1.5 justify-end">
 
+            {/* Mobile menu (categories + language + dark mode) -- below 1024px only, where all three are otherwise unreachable */}
+            <div className="relative lg:hidden" ref={mobileMenuRef}>
+              <button
+                type="button"
+                onClick={() => (mobileMenuOpen ? closeMobileMenu() : setMobileMenuOpen(true))}
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-menu-panel"
+                className="flex items-center justify-center w-8 h-7 rounded-lg bg-[#eaf3fb] dark:bg-[#16283a] text-[#185fa5] dark:text-[#85b7eb] hover:opacity-80 transition"
+              >
+                {mobileMenuOpen ? <X className="w-4 h-4" aria-hidden="true" /> : <Menu className="w-4 h-4" aria-hidden="true" />}
+              </button>
+
+              {mobileMenuOpen && (
+                <div
+                  id="mobile-menu-panel"
+                  className="fixed inset-x-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg z-[9999] p-2 overflow-y-auto"
+                  style={{ top: headerHeight + 4, maxHeight: `calc(100vh - ${headerHeight + 12}px)` }}
+                >
+                  <div className="flex flex-col gap-0.5">
+                    {categories.map((cat) => {
+                      const dropTools = categoryTools[cat.href] || [];
+                      const isGrouped = dropTools.length > 0 && Boolean(dropTools[0].items);
+                      const catSlug = cat.href.split('/').pop();
+                      const catColor = categoryColors[catSlug];
+                      const expanded = mobileOpenCat === cat.href;
+                      return (
+                        <div key={cat.href} className="border-b border-neutral-100 dark:border-neutral-700 last:border-b-0">
+                          <div className="flex items-center">
+                            <Link
+                              href={cat.href}
+                              onClick={closeMobileMenu}
+                              className="flex items-center gap-2 flex-1 min-w-0 px-2 py-2 text-sm font-bold uppercase tracking-wide text-black dark:text-white"
+                            >
+                              <span className="flex items-center justify-center shrink-0 rounded-md bg-neutral-100 dark:bg-neutral-800 w-8 h-8">
+                                <cat.icon className={`w-[18px] h-[18px] ${catColor}`} aria-hidden="true" />
+                              </span>
+                              <span className="truncate">{cat.label}</span>
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => setMobileOpenCat(expanded ? null : cat.href)}
+                              aria-expanded={expanded}
+                              aria-label={`${expanded ? 'Collapse' : 'Expand'} ${cat.label}`}
+                              className="shrink-0 p-2.5"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className={`w-3.5 h-3.5 opacity-50 transition-transform ${expanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </button>
+                          </div>
+                          {expanded && (
+                            <div className="pb-2 ps-4">
+                              {isGrouped ? dropTools.map((group) => (
+                                <div key={group.group} className="mb-2">
+                                  <div className="text-[10px] font-bold uppercase tracking-wide text-neutral-500 dark:text-neutral-400 px-2 mb-0.5">
+                                    {group.group}
+                                  </div>
+                                  {group.items.map((tool) => (
+                                    <Link
+                                      key={tool.href}
+                                      href={tool.href}
+                                      onClick={closeMobileMenu}
+                                      className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs text-neutral-700 dark:text-neutral-200 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900 transition"
+                                    >
+                                      <span className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${toolBgColors[tool.href] || 'bg-neutral-400'}`}>
+                                        <ToolIcon slug={tool.href.split('/').pop()} className="w-3 h-3 text-white" />
+                                      </span>
+                                      {tool.name}
+                                    </Link>
+                                  ))}
+                                </div>
+                              )) : dropTools.map((tool) => (
+                                <Link
+                                  key={tool.href}
+                                  href={tool.href}
+                                  onClick={closeMobileMenu}
+                                  className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs text-neutral-700 dark:text-neutral-200 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900 transition"
+                                >
+                                  <span className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${toolBgColors[tool.href] || 'bg-neutral-400'}`}>
+                                    <ToolIcon slug={tool.href.split('/').pop()} className="w-3 h-3 text-white" />
+                                  </span>
+                                  {tool.name}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Language */}
+                  <div className="mt-1 pt-1 border-t border-neutral-200 dark:border-neutral-700">
+                    <button
+                      type="button"
+                      onClick={() => setMobileLangOpen(!mobileLangOpen)}
+                      aria-expanded={mobileLangOpen}
+                      className="flex items-center gap-2 w-full px-2 py-2 text-sm font-bold text-black dark:text-white"
+                    >
+                      <span className="flex items-center justify-center shrink-0 rounded-md bg-[#eaf3fb] dark:bg-[#16283a] text-[#185fa5] dark:text-[#85b7eb] w-8 h-8 text-xs font-bold">
+                        {currentLang.short}
+                      </span>
+                      <span className="flex-1 text-start">{currentLang.label}</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className={`w-3.5 h-3.5 shrink-0 opacity-50 transition-transform ${mobileLangOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {mobileLangOpen && (
+                      <div className="ps-4 pb-1 grid grid-cols-2 gap-x-2 gap-y-0.5 max-h-48 overflow-y-auto">
+                        {languages.map((lang) => (
+                          <button
+                            key={lang.code}
+                            onClick={() => { changeLanguage(lang); setMobileLangOpen(false); }}
+                            className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs text-start hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900 transition ${currentLang.code === lang.code ? 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900 font-bold' : 'text-neutral-700 dark:text-neutral-200'}`}
+                          >
+                            <span className="font-bold w-6 shrink-0">{lang.short}</span>
+                            <span className="truncate">{lang.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Dark mode */}
+                  <div className="pt-1 border-t border-neutral-200 dark:border-neutral-700">
+                    <button
+                      type="button"
+                      onClick={() => setDark(!dark)}
+                      className="flex items-center gap-2 w-full px-2 py-2 text-sm font-bold text-black dark:text-white"
+                    >
+                      <span className="flex items-center justify-center shrink-0 rounded-md bg-[#eaf3fb] dark:bg-[#16283a] text-[#185fa5] dark:text-[#85b7eb] w-8 h-8">
+                        {dark ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                          </svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                          </svg>
+                        )}
+                      </span>
+                      <span>{dark ? 'Light mode' : 'Dark mode'}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Search */}
             <div className="relative" ref={searchWrapRef}>
-              {/* Inline field: mobile (<1024) and wide desktop (>=1536), where there's room for it in the row.
-                  Threshold pushed past the old 1410px cut so the widened Titan One wordmark has room to breathe. */}
-              <div className="relative min-[1024px]:max-[1535px]:hidden">
+              {/* Inline field: only wide desktop (>=1536), where there's room for it in the row.
+                  Below that (including mobile, freed up now for the hamburger) the compact icon
+                  trigger below opens the same floating panel used by the mega-menu/search pattern. */}
+              <div className="relative hidden min-[1536px]:block">
                 <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#185fa5] dark:text-[#85b7eb] pointer-events-none" aria-hidden="true" />
                 <input
                   type="text"
@@ -916,12 +1051,12 @@ export default function Navbar() {
                 )}
               </div>
 
-              {/* Compact trigger: 1024-1535px only, where the row has no room for even a narrow inline field */}
+              {/* Compact trigger: below 1536px (mobile included), where the row has no room for even a narrow inline field */}
               <button
                 type="button"
                 onClick={() => setSearchPanelOpen(true)}
                 aria-label="Search tools"
-                className="hidden min-[1024px]:max-[1535px]:flex items-center justify-center w-8 h-7 rounded-lg bg-[#eaf3fb] dark:bg-[#16283a] text-[#185fa5] dark:text-[#85b7eb] hover:opacity-80 transition"
+                className="flex min-[1536px]:hidden items-center justify-center w-8 h-7 rounded-lg bg-[#eaf3fb] dark:bg-[#16283a] text-[#185fa5] dark:text-[#85b7eb] hover:opacity-80 transition"
               >
                 <Search className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
@@ -1037,33 +1172,6 @@ export default function Navbar() {
               </Link>
             )}
 
-          </div>
-        </div>
-
-        {/* â”€â”€ Ticker strip â€” mobile/tablet only, the lg mega-menu covers desktop â”€â”€ */}
-        <div className="lg:hidden" style={{
-          background: dark ? '#111111' : '#eef2ff',
-          padding: '7px 0',
-          overflow: 'hidden',
-          borderTop: dark ? '1px solid #222222' : '1px solid #e0e7ff',
-        }}>
-          <div className="ticker-track">
-            {doubled.map((tool, i) => (
-              <Link key={i} href={tool.href} style={{
-                whiteSpace: 'nowrap',
-                padding: '0 24px',
-                fontSize: '12px',
-                color: dark ? 'rgba(255,255,255,0.7)' : '#4338ca',
-                fontWeight: '500',
-                borderRight: dark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #c7d2fe',
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-              }}>
-                <ToolIcon slug={tool.href.split('/').pop()} className="w-3.5 h-3.5" /> {tool.label}
-              </Link>
-            ))}
           </div>
         </div>
 
