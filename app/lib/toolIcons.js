@@ -639,8 +639,8 @@ export function ToolIcon({ slug, className }) {
   return createElement(getToolIcon(slug), { className, 'aria-hidden': true });
 }
 
-export function CategoryIcon({ slug, className }) {
-  return createElement(getCategoryIcon(slug), { className, 'aria-hidden': true });
+export function CategoryIcon({ slug, className, style }) {
+  return createElement(getCategoryIcon(slug), { className, style, 'aria-hidden': true });
 }
 
 // Decorative, non-tool icons reused on the homepage (badges/stats).

@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Sparkles, Rocket, Bot, Globe, Zap, Lock, DollarSign, ShieldCheck, Smartphone, Cloud,
   Wrench, LayoutGrid, Languages, FileText, Image, Video, Music, Code2, Folder, Calculator,
-  Clapperboard, Type, QrCode, RefreshCw, Laptop,
+  Clapperboard, Type, QrCode, RefreshCw, Laptop, ArrowUpRight,
 } from 'lucide-react';
-import { CategoryIcon, ToolIcon, categoryColors, toolTextColors } from './lib/toolIcons';
+import { CategoryIcon, ToolIcon, categoryColors } from './lib/toolIcons';
 
 function useDarkMode() {
   const [dark, setDark] = useState(false);
@@ -93,14 +93,27 @@ function hueOf(slug) {
   return match ? match[1] : 'indigo';
 }
 
-// Same links as the Footer's "Popular Tools" column, reused here instead of
-// inventing a separate shortlist.
+// Card background/border, muted a notch in dark mode: dark950/dark800 are
+// Tailwind's most *saturated* dark shades (not desaturated — higher numbers
+// mean darker AND more vivid), so blending them toward the site's neutral
+// card color (#1c1c1e) is what actually tones them down toward the light
+// mode's soft-pastel feel while keeping each hue clearly distinct.
+function cardBg(pal, dark) {
+  return dark ? `color-mix(in srgb, ${pal.dark950} 45%, #1c1c1e)` : pal.light100;
+}
+function cardBorder(pal, dark) {
+  return dark ? `1.5px solid color-mix(in srgb, ${pal.dark800} 60%, #1c1c1e)` : `1.5px solid ${pal.light300}`;
+}
+
+// Same links as the Footer's "Popular Tools" column plus one addition
+// (Video to GIF), reused here instead of inventing a separate shortlist.
 const popularTools = [
-  { slug: 'pdf-merge',           label: 'Merge PDF',           href: '/tools/pdf-tools/pdf-merge' },
-  { slug: 'image-compressor',    label: 'Image Compressor',    href: '/tools/image-tools/image-compressor' },
-  { slug: 'background-remover',  label: 'Background Remover',  href: '/tools/ai-tools/background-remover' },
-  { slug: 'grammar-fixer',       label: 'Grammar Fixer',       href: '/tools/ai-tools/grammar-fixer' },
-  { slug: 'qr-generator',        label: 'QR Generator',        href: '/tools/qr-barcodes-tools/qr-generator' },
+  { label: 'Merge PDF',           href: '/tools/pdf-tools/pdf-merge' },
+  { label: 'Image Compressor',    href: '/tools/image-tools/image-compressor' },
+  { label: 'Background Remover',  href: '/tools/ai-tools/background-remover' },
+  { label: 'Grammar Fixer',       href: '/tools/ai-tools/grammar-fixer' },
+  { label: 'QR Generator',        href: '/tools/qr-barcodes-tools/qr-generator' },
+  { label: 'Video to GIF',        href: '/tools/gif-tools/video-to-gif' },
 ];
 
 function useCountUp(target, duration = 1800, start = false) {
@@ -166,6 +179,22 @@ export default function Home() {
         .hero-icon-card .ico { width:28px; height:28px; }
         .hero-icon-card span.lbl { font-size:11px; font-weight:600; }
 
+        /* ── POPULAR TOOLS: 6-up grid of real clickable cards, distinct from
+           the hero's decorative badges ── */
+        .popular-tools-grid { display:grid; grid-template-columns:repeat(6, 1fr); gap:16px; max-width:1000px; margin:0 auto; }
+        .popular-tool-card  {
+          position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center;
+          gap:10px; padding:28px 10px; border-radius:18px; text-decoration:none;
+          box-shadow:0 2px 6px rgba(0,0,0,0.05);
+          transition:transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .popular-tool-card:hover { transform:translateY(-5px); box-shadow:0 14px 28px rgba(0,0,0,0.14); }
+        .popular-tool-card .ico  { width:30px; height:30px; transition:transform 0.2s ease; }
+        .popular-tool-card:hover .ico { transform:scale(1.12); }
+        .popular-tool-card .name { font-size:13.5px; font-weight:700; text-align:center; line-height:1.3; }
+        .popular-tool-card .arrow { position:absolute; top:10px; right:10px; width:15px; height:15px; opacity:0; transition:opacity 0.2s ease; }
+        .popular-tool-card:hover .arrow { opacity:0.7; }
+
         /* ── MOBILE PORTRAIT ≤ 640px ── */
         @media (max-width: 640px) {
           .hero-wrapper    { flex-direction:column; gap:28px; }
@@ -178,6 +207,8 @@ export default function Home() {
           .hero-icon-card  { width:100%; height:72px; border-radius:14px; }
           .hero-icon-card .ico { width:22px; height:22px; }
           .hero-icon-card span.lbl { font-size:10px; }
+          .popular-tools-grid { grid-template-columns:repeat(2, 1fr); gap:10px; }
+          .popular-tool-card  { padding:22px 8px; border-radius:14px; }
         }
 
         /* ── TABLETTE 641–1024px ── */
@@ -186,6 +217,7 @@ export default function Home() {
           .hero-icon-card  { width:90px; height:76px; border-radius:16px; }
           .hero-icon-card .ico { width:24px; height:24px; }
           .hero-icon-card span.lbl { font-size:10px; }
+          .popular-tools-grid { grid-template-columns:repeat(3, 1fr); }
         }
       `}</style>
 
@@ -232,7 +264,7 @@ export default function Home() {
             {floatingIcons.map(item => {
               const pal = huePalette[hueOf(item.href.split('/').pop())];
               return (
-                <Link key={item.label} href={item.href} className="hero-icon-card" style={{ background: dark ? pal.dark950 : pal.light100, border: dark ? `1.5px solid ${pal.dark800}` : `1.5px solid ${pal.light300}`, animation:`${item.anim} ${item.dur} ease-in-out ${item.delay} infinite` }}>
+                <Link key={item.label} href={item.href} className="hero-icon-card" style={{ background: cardBg(pal, dark), border: cardBorder(pal, dark), animation:`${item.anim} ${item.dur} ease-in-out ${item.delay} infinite` }}>
                   <item.icon className="ico" style={{ color: dark ? pal.dark400 : pal.light500 }} />
                   <span className="lbl" style={{ color: dark ? '#94a3b8' : '#374151' }}>{item.label}</span>
                 </Link>
@@ -251,16 +283,26 @@ export default function Home() {
 
       {/* ═══ POPULAR TOOLS ═══ */}
       <section style={{ background: dark ? '#111111' : '#fff', padding:'56px 24px', textAlign:'center', borderBottom: dark ? '1px solid #222222' : '1px solid #e2e8f0' }}>
-        <div style={{ maxWidth:'900px', margin:'0 auto' }}>
+        <div style={{ maxWidth:'1040px', margin:'0 auto' }}>
           <h2 style={{ fontSize:'clamp(22px,3vw,32px)', fontWeight:'800', color: dark ? '#f1f5f9' : '#0f172a', marginBottom:'8px', letterSpacing:'-0.02em' }}>Popular Tools</h2>
           <p style={{ fontSize:'15px', color: dark ? '#94a3b8' : '#1e293b', marginBottom:'28px' }}>Jump straight to what people use most</p>
-          <div style={{ display:'flex', flexWrap:'wrap', gap:'12px', justifyContent:'center' }}>
-            {popularTools.map(t => (
-              <Link key={t.href} href={t.href} style={{ display:'inline-flex', alignItems:'center', gap:'8px', background: dark ? '#1c1c1e' : '#f1f5f9', border: dark ? '1px solid #2c2c2e' : '1px solid #e2e8f0', borderRadius:'999px', padding:'10px 20px', fontSize:'14px', color: dark ? '#e2e8f0' : '#1e293b', fontWeight:'600', textDecoration:'none' }}>
-                <ToolIcon slug={t.slug} className={`w-4 h-4 ${toolTextColors[t.href] || ''}`} />
-                {t.label}
-              </Link>
-            ))}
+          <div className="popular-tools-grid">
+            {popularTools.map(t => {
+              const catSlug = t.href.split('/')[2];
+              const pal = huePalette[hueOf(catSlug)];
+              return (
+                <Link
+                  key={t.href}
+                  href={t.href}
+                  className="popular-tool-card"
+                  style={{ background: cardBg(pal, dark), border: cardBorder(pal, dark) }}
+                >
+                  <ArrowUpRight className="arrow" style={{ color: dark ? pal.dark400 : pal.light500 }} />
+                  <CategoryIcon slug={catSlug} className="ico" style={{ color: dark ? pal.dark400 : pal.light500 }} />
+                  <span className="name" style={{ color: dark ? '#e2e8f0' : '#1e293b' }}>{t.label}</span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
