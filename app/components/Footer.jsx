@@ -14,10 +14,10 @@ export default function Footer() {
             <h3 className={`${titanOne.className} text-xl mb-3 text-black dark:text-white notranslate`}>
               <span className="text-[#185fa5] dark:text-[#85b7eb]">O</span>nline<span className="text-[#185fa5] dark:text-[#85b7eb]">C</span>onver<span className="text-[#185fa5] dark:text-[#85b7eb]">T</span>ools
             </h3>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed font-normal">{total}+ free online tools for converting, compressing and editing files. No sign-up required.</p>
+            <p className="text-sm text-neutral-800 dark:text-neutral-400 leading-relaxed font-normal">{total}+ free online tools for converting, compressing and editing files. No sign-up required.</p>
           </div>
           <div>
-            <h4 className="font-bold text-sm uppercase tracking-widest text-black dark:text-white mb-3">Tools</h4>
+            <h4 className="font-bold text-base uppercase tracking-widest text-black dark:text-white mb-3">Tools</h4>
             <ul className="space-y-2 text-sm">
               <li><Link href="/tools/pdf-tools" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">PDF Tools</Link></li>
               <li><Link href="/tools/image-tools" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">Image Tools</Link></li>
@@ -27,7 +27,7 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="font-bold text-sm uppercase tracking-widest text-black dark:text-white mb-3">Company</h4>
+            <h4 className="font-bold text-base uppercase tracking-widest text-black dark:text-white mb-3">Company</h4>
             <ul className="space-y-2 text-sm">
               <li><Link href="/about" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">About Us</Link></li>
               <li><Link href="/contact" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">Contact</Link></li>
@@ -36,7 +36,7 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="font-bold text-sm uppercase tracking-widest text-black dark:text-white mb-3">Popular Tools</h4>
+            <h4 className="font-bold text-base uppercase tracking-widest text-black dark:text-white mb-3">Popular Tools</h4>
             <ul className="space-y-2 text-sm">
               <li><Link href="/tools/pdf-tools/pdf-merge" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">Merge PDF</Link></li>
               <li><Link href="/tools/image-tools/image-compressor" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">Image Compressor</Link></li>
@@ -47,7 +47,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-neutral-200 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-neutral-400 font-light tracking-wide">© 2026 OnlineConverTools. All rights reserved.</p>
+          <p className="text-sm text-neutral-700 dark:text-neutral-400 font-light tracking-wide">© 2026 OnlineConverTools. All rights reserved.</p>
           <div className="flex gap-6 text-sm">
             <Link href="/privacy" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">Privacy</Link>
             <Link href="/terms" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">Terms</Link>

@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Sparkles, Rocket, Bot, Globe, Zap, Lock, DollarSign, ShieldCheck, Smartphone, Cloud,
   Wrench, LayoutGrid, Languages, FileText, Image, Video, Music, Code2, Folder, Calculator,
-  Clapperboard, Type, QrCode, RefreshCw,
+  Clapperboard, Type, QrCode, RefreshCw, Laptop,
 } from 'lucide-react';
-import { CategoryIcon, ToolIcon, categoryColors } from './lib/toolIcons';
+import { CategoryIcon, ToolIcon, categoryColors, toolTextColors } from './lib/toolIcons';
 
 function useDarkMode() {
   const [dark, setDark] = useState(false);
@@ -54,18 +54,53 @@ const badges = [
 ];
 
 const floatingIcons = [
-  { icon: FileText,     label: 'PDF',     href: '/tools/pdf-tools',         color: '#fef2f2', border: '#fca5a5', anim: 'floatA', dur: '3.2s', delay: '0s'    },
-  { icon: Image,        label: 'Image',   href: '/tools/image-tools',       color: '#fdf4ff', border: '#e879f9', anim: 'floatB', dur: '3.8s', delay: '0.3s'  },
-  { icon: Video,        label: 'Video',   href: '/tools/video-tools',       color: '#eff6ff', border: '#93c5fd', anim: 'floatC', dur: '3.5s', delay: '0.1s'  },
-  { icon: Bot,          label: 'AI',      href: '/tools/ai-tools',          color: '#ecfeff', border: '#67e8f9', anim: 'floatA', dur: '4.0s', delay: '0.5s'  },
-  { icon: Music,        label: 'Audio',   href: '/tools/audio-tools',       color: '#fefce8', border: '#fde047', anim: 'floatB', dur: '3.3s', delay: '0.2s'  },
-  { icon: Code2,        label: 'Dev',     href: '/tools/developer-tools',   color: '#f5f3ff', border: '#c4b5fd', anim: 'floatC', dur: '3.7s', delay: '0.4s'  },
-  { icon: Folder,       label: 'Files',   href: '/tools/file-tools',        color: '#fff7ed', border: '#fdba74', anim: 'floatA', dur: '4.2s', delay: '0.6s'  },
-  { icon: Calculator,   label: 'Math',    href: '/tools/math-tools',        color: '#eef2ff', border: '#a5b4fc', anim: 'floatB', dur: '3.6s', delay: '0.35s' },
-  { icon: Clapperboard, label: 'GIF',     href: '/tools/gif-tools',         color: '#faf5ff', border: '#d8b4fe', anim: 'floatC', dur: '3.9s', delay: '0.15s' },
-  { icon: Type,         label: 'Text',    href: '/tools/text-tools',        color: '#f0fdf4', border: '#86efac', anim: 'floatA', dur: '3.4s', delay: '0.55s' },
-  { icon: QrCode,       label: 'QR',      href: '/tools/qr-barcodes-tools', color: '#f0fdfa', border: '#5eead4', anim: 'floatB', dur: '4.1s', delay: '0.25s' },
-  { icon: RefreshCw,    label: 'Convert', href: '/tools/converter-tools',   color: '#fffbeb', border: '#fcd34d', anim: 'floatC', dur: '3.6s', delay: '0.45s' },
+  { icon: FileText,     label: 'PDF',     href: '/tools/pdf-tools',         anim: 'floatA', dur: '3.2s', delay: '0s'    },
+  { icon: Image,        label: 'Image',   href: '/tools/image-tools',       anim: 'floatB', dur: '3.8s', delay: '0.3s'  },
+  { icon: Video,        label: 'Video',   href: '/tools/video-tools',       anim: 'floatC', dur: '3.5s', delay: '0.1s'  },
+  { icon: Bot,          label: 'AI',      href: '/tools/ai-tools',          anim: 'floatA', dur: '4.0s', delay: '0.5s'  },
+  { icon: Music,        label: 'Audio',   href: '/tools/audio-tools',       anim: 'floatB', dur: '3.3s', delay: '0.2s'  },
+  { icon: Code2,        label: 'Dev',     href: '/tools/developer-tools',   anim: 'floatC', dur: '3.7s', delay: '0.4s'  },
+  { icon: Folder,       label: 'Files',   href: '/tools/file-tools',        anim: 'floatA', dur: '4.2s', delay: '0.6s'  },
+  { icon: Calculator,   label: 'Math',    href: '/tools/math-tools',        anim: 'floatB', dur: '3.6s', delay: '0.35s' },
+  { icon: Clapperboard, label: 'GIF',     href: '/tools/gif-tools',         anim: 'floatC', dur: '3.9s', delay: '0.15s' },
+  { icon: Type,         label: 'Text',    href: '/tools/text-tools',        anim: 'floatA', dur: '3.4s', delay: '0.55s' },
+  { icon: QrCode,       label: 'QR',      href: '/tools/qr-barcodes-tools', anim: 'floatB', dur: '4.1s', delay: '0.25s' },
+  { icon: RefreshCw,    label: 'Convert', href: '/tools/converter-tools',   anim: 'floatC', dur: '3.6s', delay: '0.45s' },
+];
+
+// Backgrounds/borders/icon shades for the hero floating cards, one hue per
+// Tailwind color family. The hue-per-category assignment itself always comes
+// from the shared `categoryColors` map (app/lib/toolIcons.js) via `hueOf()` —
+// this table only supplies the hex shades inline styles need, it never
+// re-decides which color belongs to which category.
+const huePalette = {
+  red:    { light100:'#fee2e2', light300:'#fca5a5', light500:'#ef4444', dark950:'#450a0a', dark800:'#991b1b', dark400:'#f87171' },
+  pink:   { light100:'#fce7f3', light300:'#f9a8d4', light500:'#ec4899', dark950:'#500724', dark800:'#9d174d', dark400:'#f472b6' },
+  purple: { light100:'#f3e8ff', light300:'#d8b4fe', light500:'#a855f7', dark950:'#3b0764', dark800:'#6b21a8', dark400:'#c084fc' },
+  green:  { light100:'#dcfce7', light300:'#86efac', light500:'#22c55e', dark950:'#052e16', dark800:'#166534', dark400:'#4ade80' },
+  yellow: { light100:'#fef9c3', light300:'#fde047', light500:'#eab308', dark950:'#422006', dark800:'#854d0e', dark400:'#facc15' },
+  blue:   { light100:'#dbeafe', light300:'#93c5fd', light500:'#3b82f6', dark950:'#172554', dark800:'#1e40af', dark400:'#60a5fa' },
+  orange: { light100:'#ffedd5', light300:'#fdba74', light500:'#f97316', dark950:'#431407', dark800:'#9a3412', dark400:'#fb923c' },
+  teal:   { light100:'#ccfbf1', light300:'#5eead4', light500:'#14b8a6', dark950:'#042f2e', dark800:'#115e59', dark400:'#2dd4bf' },
+  amber:  { light100:'#fef3c7', light300:'#fcd34d', light500:'#f59e0b', dark950:'#451a03', dark800:'#92400e', dark400:'#fbbf24' },
+  violet: { light100:'#ede9fe', light300:'#c4b5fd', light500:'#8b5cf6', dark950:'#2e1065', dark800:'#5b21b6', dark400:'#a78bfa' },
+  indigo: { light100:'#e0e7ff', light300:'#a5b4fc', light500:'#6366f1', dark950:'#1e1b4b', dark800:'#3730a3', dark400:'#818cf8' },
+  cyan:   { light100:'#cffafe', light300:'#67e8f9', light500:'#06b6d4', dark950:'#083344', dark800:'#155e75', dark400:'#22d3ee' },
+};
+
+function hueOf(slug) {
+  const match = (categoryColors[slug] || '').match(/text-(\w+)-\d+/);
+  return match ? match[1] : 'indigo';
+}
+
+// Same links as the Footer's "Popular Tools" column, reused here instead of
+// inventing a separate shortlist.
+const popularTools = [
+  { slug: 'pdf-merge',           label: 'Merge PDF',           href: '/tools/pdf-tools/pdf-merge' },
+  { slug: 'image-compressor',    label: 'Image Compressor',    href: '/tools/image-tools/image-compressor' },
+  { slug: 'background-remover',  label: 'Background Remover',  href: '/tools/ai-tools/background-remover' },
+  { slug: 'grammar-fixer',       label: 'Grammar Fixer',       href: '/tools/ai-tools/grammar-fixer' },
+  { slug: 'qr-generator',        label: 'QR Generator',        href: '/tools/qr-barcodes-tools/qr-generator' },
 ];
 
 function useCountUp(target, duration = 1800, start = false) {
@@ -164,7 +199,7 @@ export default function Home() {
 
           {/* LEFT */}
           <div className='hero-left' style={{ flex:1, animation:'fadeUp 0.7s ease both' }}>
-            <div style={{ display:'inline-flex', alignItems:'center', gap:'8px', background: dark ? '#111111' : '#e2e8f0', border: dark ? '1px solid #334155' : '1px solid #cbd5e1', borderRadius:'999px', padding:'6px 16px', marginBottom:'24px', fontSize:'13px', color: dark ? '#94a3b8' : '#475569' }}>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:'8px', background: dark ? '#111111' : '#e2e8f0', border: dark ? '1px solid #334155' : '1px solid #cbd5e1', borderRadius:'999px', padding:'6px 16px', marginBottom:'24px', fontSize:'13px', color: dark ? '#94a3b8' : '#1e293b' }}>
               <Sparkles size={14} style={{ flexShrink:0 }} /> {totalTools}+ free tools · No signup · No limits
             </div>
             <h1 style={{ fontSize:'clamp(46px,6.4vw,76px)', fontWeight:'800', color: dark ? '#f1f5f9' : '#0f172a', lineHeight:'1.1', marginBottom:'20px', letterSpacing:'-0.02em' }}>
@@ -176,12 +211,12 @@ export default function Home() {
                 WebkitTextFillColor: 'transparent',
               }}>Instantly. Free.</span>
             </h1>
-            <p style={{ fontSize:'18px', color: dark ? '#94a3b8' : '#475569', lineHeight:'1.7', marginBottom:'32px', maxWidth:'480px' }}>
+            <p style={{ fontSize:'18px', color: dark ? '#94a3b8' : '#1e293b', lineHeight:'1.7', marginBottom:'32px', maxWidth:'480px' }}>
               The fastest way to convert, compress, and transform your files — {totalTools} tools, zero installation, completely free.
             </p>
             <div style={{ display:'flex', flexWrap:'wrap', gap:'10px', marginBottom:'40px' }}>
               {badges.map(b => (
-                <span key={b.text} className="badge-pill" style={{ display:'flex', alignItems:'center', gap:'6px', background: dark ? '#111111' : '#f1f5f9', border:'1px solid #e2e8f0', borderRadius:'999px', padding:'7px 14px', fontSize:'13px', color: dark ? '#94a3b8' : '#475569', transition:'background 0.2s' }}>
+                <span key={b.text} className="badge-pill" style={{ display:'flex', alignItems:'center', gap:'6px', background: dark ? '#111111' : '#f1f5f9', border:'1px solid #e2e8f0', borderRadius:'999px', padding:'7px 14px', fontSize:'13px', color: dark ? '#94a3b8' : '#1e293b', transition:'background 0.2s' }}>
                   <b.icon size={14} style={{ flexShrink:0 }} /> {b.text}
                 </span>
               ))}
@@ -194,12 +229,15 @@ export default function Home() {
 
           {/* RIGHT — 12 floating icons */}
           <div className="hero-icons-grid">
-            {floatingIcons.map(item => (
-              <Link key={item.label} href={item.href} className="hero-icon-card" style={{ background: dark ? '#1c1c1e' : item.color, border: dark ? '1.5px solid #2c2c2e' : `1.5px solid ${item.border}`, animation:`${item.anim} ${item.dur} ease-in-out ${item.delay} infinite` }}>
-                <item.icon className="ico" style={{ color: dark ? '#94a3b8' : '#374151' }} />
-                <span className="lbl" style={{ color: dark ? '#94a3b8' : '#374151' }}>{item.label}</span>
-              </Link>
-            ))}
+            {floatingIcons.map(item => {
+              const pal = huePalette[hueOf(item.href.split('/').pop())];
+              return (
+                <Link key={item.label} href={item.href} className="hero-icon-card" style={{ background: dark ? pal.dark950 : pal.light100, border: dark ? `1.5px solid ${pal.dark800}` : `1.5px solid ${pal.light300}`, animation:`${item.anim} ${item.dur} ease-in-out ${item.delay} infinite` }}>
+                  <item.icon className="ico" style={{ color: dark ? pal.dark400 : pal.light500 }} />
+                  <span className="lbl" style={{ color: dark ? '#94a3b8' : '#374151' }}>{item.label}</span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -211,17 +249,18 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ QUOTE ═══ */}
+      {/* ═══ POPULAR TOOLS ═══ */}
       <section style={{ background: dark ? '#111111' : '#fff', padding:'56px 24px', textAlign:'center', borderBottom: dark ? '1px solid #222222' : '1px solid #e2e8f0' }}>
-        <div style={{ maxWidth:'720px', margin:'0 auto' }}>
-          <div style={{ fontSize:'48px', marginBottom:'12px', lineHeight:1, color: dark ? '#475569' : '#9ca3af' }}>"</div>
-          <p style={{ fontSize:'clamp(18px,2.5vw,24px)', fontWeight:'600', color: dark ? '#e2e8f0' : '#1e1b4b', lineHeight:'1.6', marginBottom:'20px', fontStyle:'italic' }}>
-            The fastest way to convert, compress, and transform your files — {totalTools} tools, zero installation, completely free.
-          </p>
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'12px' }}>
-            <div style={{ width:'40px', height:'2px', background: dark ? '#475569' : '#9ca3af' }} />
-            <span style={{ fontSize:'13px', color: dark ? '#64748b' : '#9ca3af', fontWeight:'500', letterSpacing:'0.05em', textTransform:'uppercase' }}>OnlineConverTools · Trusted in 190+ countries</span>
-            <div style={{ width:'40px', height:'2px', background: dark ? '#475569' : '#9ca3af' }} />
+        <div style={{ maxWidth:'900px', margin:'0 auto' }}>
+          <h2 style={{ fontSize:'clamp(22px,3vw,32px)', fontWeight:'800', color: dark ? '#f1f5f9' : '#0f172a', marginBottom:'8px', letterSpacing:'-0.02em' }}>Popular Tools</h2>
+          <p style={{ fontSize:'15px', color: dark ? '#94a3b8' : '#1e293b', marginBottom:'28px' }}>Jump straight to what people use most</p>
+          <div style={{ display:'flex', flexWrap:'wrap', gap:'12px', justifyContent:'center' }}>
+            {popularTools.map(t => (
+              <Link key={t.href} href={t.href} style={{ display:'inline-flex', alignItems:'center', gap:'8px', background: dark ? '#1c1c1e' : '#f1f5f9', border: dark ? '1px solid #2c2c2e' : '1px solid #e2e8f0', borderRadius:'999px', padding:'10px 20px', fontSize:'14px', color: dark ? '#e2e8f0' : '#1e293b', fontWeight:'600', textDecoration:'none' }}>
+                <ToolIcon slug={t.slug} className={`w-4 h-4 ${toolTextColors[t.href] || ''}`} />
+                {t.label}
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -255,9 +294,9 @@ export default function Home() {
       {/* ═══ AI SECTION ═══ */}
       <section style={{ background: dark ? '#111111' : '#f8fafc', padding:'72px 24px' }}>
         <div style={{ maxWidth:'900px', margin:'0 auto', textAlign:'center' }}>
-          <Bot size={48} style={{ marginBottom:'16px', color:'#6366f1' }} />
+          <Bot size={48} style={{ display:'block', margin:'0 auto 16px', color:'#6366f1' }} />
           <h2 style={{ fontSize:'clamp(28px,4vw,42px)', fontWeight:'800', color: dark ? '#f1f5f9' : '#0f172a', marginBottom:'16px', letterSpacing:'-0.02em' }}>Powered by AI</h2>
-          <p style={{ fontSize:'18px', color: dark ? '#94a3b8' : '#64748b', marginBottom:'40px', maxWidth:'580px', margin:'0 auto 40px', lineHeight:'1.7' }}>
+          <p style={{ fontSize:'18px', color: dark ? '#94a3b8' : '#1e293b', marginBottom:'40px', maxWidth:'580px', margin:'0 auto 40px', lineHeight:'1.7' }}>
             16 AI-powered tools including background removal, image upscaling, grammar fixing, translation, transcription, and more.
           </p>
           <div style={{ display:'flex', flexWrap:'wrap', gap:'12px', justifyContent:'center', marginBottom:'40px' }}>
@@ -285,7 +324,7 @@ export default function Home() {
       {/* ═══ FOOTER STRIP ═══ */}
       <section style={{ background: dark ? '#111111' : '#fff', padding:'32px 24px', textAlign:'center', borderTop: dark ? '1px solid #1e293b' : '1px solid #e2e8f0' }}>
         <p style={{ fontSize:'14px', color:'#6366f1', display:'flex', flexWrap:'wrap', alignItems:'center', justifyContent:'center', gap:'6px' }}>
-          <Globe size={14} /> Available in <strong style={{ color:'#4338ca' }}>13 languages</strong> · <Zap size={14} /> <strong style={{ color:'#4338ca' }}>{totalTools}+</strong> free tools · <Lock size={14} /> <strong style={{ color:'#4338ca' }}>No data stored</strong> · <DollarSign size={14} /> <strong style={{ color:'#4338ca' }}>Always free</strong>
+          <Sparkles size={14} /> <strong style={{ color:'#4338ca' }}>No watermarks</strong> · <Laptop size={14} /> <strong style={{ color:'#4338ca' }}>Works in your browser</strong> · <Lock size={14} /> <strong style={{ color:'#4338ca' }}>No data stored</strong> · <DollarSign size={14} /> <strong style={{ color:'#4338ca' }}>Always free</strong>
         </p>
       </section>
 
