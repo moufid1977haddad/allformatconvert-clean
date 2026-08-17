@@ -339,10 +339,14 @@ export default function Home() {
         .search-result-row { display:block; padding:8px 10px; border-radius:8px; font-size:13px; text-decoration:none; }
         .search-result-row:hover { background: rgba(24,95,165,0.1); }
 
-        /* ── AD SLOT — invisible until an ad unit is mounted into it; height
-           reserved per breakpoint to match common responsive banner sizes. ── */
-        .ad-slot { width:100%; min-height:50px; background:transparent; }
-        @media (min-width:641px) { .ad-slot { min-height:90px; } }
+        /* ── AD SLOT — stays in the DOM at the same position but takes up no
+           space while empty (:empty means no ad script has injected anything
+           into it yet). Height only reserves once an ad unit actually mounts
+           a child element inside, so the placeholder itself never pushes
+           Popular Tools and All Tools apart. ── */
+        .ad-slot { width:100%; background:transparent; }
+        .ad-slot:not(:empty) { min-height:50px; }
+        @media (min-width:641px) { .ad-slot:not(:empty) { min-height:90px; } }
 
         /* ── POPULAR TOOLS: 6-up grid of real clickable cards, distinct from
            the hero's decorative badges ── */
@@ -462,9 +466,12 @@ export default function Home() {
       </section>
 
       {/* ═══ AD SLOT — reserved for a responsive AdSense banner, left empty
-           until launch. Sized (not styled) so turning the ad on later doesn't
-           shift the layout (CLS). ═══ */}
-      <div style={{ maxWidth:'970px', margin:'0 auto', padding:'16px 24px' }}>
+           until launch. The slot itself only reserves height once it's no
+           longer empty (see .ad-slot:not(:empty) above), so this wrapper's
+           own padding is what sets the gap between Popular Tools and All
+           Tools today -- kept small on purpose to match other section-to-
+           section gaps while the ad is inactive. ═══ */}
+      <div style={{ maxWidth:'970px', margin:'0 auto', padding:'8px 24px' }}>
         <div id="ad-slot-homepage" className="ad-slot" aria-hidden="true" />
       </div>
 
