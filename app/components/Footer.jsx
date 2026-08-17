@@ -14,7 +14,11 @@ export default function Footer() {
             <h3 className={`${poppinsMedium.className} text-xl mb-3 text-black dark:text-white notranslate`}>
               <span className="text-[#185fa5] dark:text-[#85b7eb]">O</span>nline<span className="text-[#185fa5] dark:text-[#85b7eb]">C</span>onver<span className="text-[#185fa5] dark:text-[#85b7eb]">T</span>ools
             </h3>
-            <p className="text-sm text-neutral-800 dark:text-neutral-400 leading-relaxed font-normal">{total}+ free online tools for converting, compressing and editing files. No sign-up required.</p>
+            <p className="text-sm text-neutral-800 dark:text-neutral-400 leading-relaxed font-normal">
+              {total} free online tools for converting<br />
+              compressing &amp; editing files<br />
+              No sign-up required
+            </p>
           </div>
           <div>
             <h4 className="font-bold text-base uppercase tracking-widest text-black dark:text-white mb-3">Tools</h4>

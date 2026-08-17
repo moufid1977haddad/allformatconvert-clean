@@ -164,10 +164,12 @@ function FileDropZone({ dark, toolCounts }) {
 
   const count = suggestions ? (toolCounts.counts?.[suggestions.category] || suggestions.fallbackCount) : 0;
 
-  const border = dragOver ? '#185fa5' : (dark ? '#334155' : '#cbd5e1');
+  const border = dragOver
+    ? (dark ? '#5aa6f2' : '#185fa5')
+    : (dark ? '#3b6ea8' : '#6fa8dc');
   const panelBg = dark
-    ? 'linear-gradient(160deg, #14181f 0%, #1c1c1e 100%)'
-    : 'linear-gradient(160deg, #ffffff 0%, #eef2f9 100%)';
+    ? 'linear-gradient(180deg, #141c28 0%, #1a2333 100%)'
+    : 'linear-gradient(180deg, #ffffff 0%, #dbeafe 100%)';
 
   return (
     <div
@@ -182,14 +184,15 @@ function FileDropZone({ dark, toolCounts }) {
         processFile(file);
       }}
       style={{
-        border: `2px dashed ${border}`,
+        border: `3px dashed ${border}`,
         background: panelBg,
-        borderRadius: '22px',
-        padding: '32px 24px',
+        borderRadius: '28px',
+        padding: '40px 28px',
         textAlign: 'center',
         position: 'relative',
         transition: 'border-color 0.2s ease',
-        minHeight: '320px',
+        minHeight: '400px',
+        boxShadow: dark ? '0 16px 40px rgba(0,0,0,0.45)' : '0 16px 40px rgba(24,95,165,0.14)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
@@ -205,7 +208,9 @@ function FileDropZone({ dark, toolCounts }) {
 
       {phase === 'idle' && (
         <div>
-          <UploadCloud size={40} style={{ margin: '0 auto 16px', color: dark ? '#85b7eb' : '#185fa5' }} />
+          <div className="dropzone-upload-badge" style={{ background: dark ? 'rgba(56,138,221,0.18)' : '#dbeafe' }}>
+            <UploadCloud size={32} style={{ color: dark ? '#85b7eb' : '#185fa5' }} />
+          </div>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
@@ -214,12 +219,29 @@ function FileDropZone({ dark, toolCounts }) {
           >
             Choose a file
           </button>
-          <p style={{ fontSize: '14px', color: dark ? '#94a3b8' : '#475569', marginTop: '16px', marginBottom: '8px' }}>
+          <p style={{ fontSize: '14px', color: dark ? '#94a3b8' : '#475569', marginTop: '18px', marginBottom: '8px' }}>
             or drop it here — we&apos;ll suggest the right tool for it
           </p>
-          <p style={{ fontSize: '11px', color: dark ? '#64748b' : '#94a3b8' }}>
+          <p style={{ fontSize: '11px', color: dark ? '#64748b' : '#94a3b8', marginBottom: '18px' }}>
             We only read the file type. Your file stays on your device.
           </p>
+          <div className="format-pills">
+            {['PDF', 'JPG', 'PNG', 'DOCX', 'MP4', 'MP3', 'GIF', 'ZIP'].map((f) => (
+              <span
+                key={f}
+                className="format-pill"
+                style={{ background: dark ? '#1c1c1e' : '#ffffff', border: dark ? '1px solid #334155' : '1px solid #e2e8f0', color: dark ? '#94a3b8' : '#64748b' }}
+              >
+                {f}
+              </span>
+            ))}
+            <span
+              className="format-pill"
+              style={{ background: dark ? '#1c1c1e' : '#ffffff', border: dark ? '1px solid #334155' : '1px solid #e2e8f0', color: dark ? '#64748b' : '#94a3b8' }}
+            >
+              + 40 more
+            </span>
+          </div>
         </div>
       )}
 
@@ -326,10 +348,13 @@ export default function Home() {
         .hero-dropzone-wrap { flex:0 0 380px; animation:fadeUp 0.9s ease 0.2s both; }
 
         /* ── DROP ZONE ── */
-        .dropzone-choose-btn { color:#fff; border:none; border-radius:999px; padding:11px 26px; font-size:14px; font-weight:700; cursor:pointer; transition:opacity 0.2s ease; }
-        .dropzone-choose-btn:hover { opacity:0.9; }
+        .dropzone-upload-badge { width:72px; height:72px; border-radius:20px; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; }
+        .dropzone-choose-btn { color:#fff; border:none; border-radius:999px; padding:15px 34px; font-size:16px; font-weight:800; cursor:pointer; transition:opacity 0.2s ease, transform 0.15s ease; }
+        .dropzone-choose-btn:hover { opacity:0.9; transform:translateY(-1px); }
         .dropzone-close { position:absolute; top:0; right:0; background:transparent; border:none; cursor:pointer; padding:4px; display:flex; }
         .dropzone-close:hover { opacity:0.7; }
+        .format-pills { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; }
+        .format-pill { font-size:11px; padding:4px 10px; border-radius:999px; font-weight:500; white-space:nowrap; }
         .suggestion-grid { display:flex; flex-direction:column; gap:8px; margin:4px 0 16px; }
         .suggestion-card { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:14px; text-decoration:none; transition:transform 0.15s ease; }
         .suggestion-card:hover { transform:translateX(4px); }
