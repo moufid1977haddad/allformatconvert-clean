@@ -1,8 +1,8 @@
 ﻿import Link from 'next/link';
-import { Titan_One } from 'next/font/google';
+import { Poppins } from 'next/font/google';
 import { getToolCounts } from '@/lib/toolCounts';
 
-const titanOne = Titan_One({ weight: '400', subsets: ['latin'] });
+const poppinsMedium = Poppins({ weight: '500', subsets: ['latin'] });
 
 export default function Footer() {
   const { total } = getToolCounts();
@@ -11,7 +11,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr] xl:grid-cols-[3fr_1fr_1fr_1fr] gap-8 md:gap-6">
           <div>
-            <h3 className={`${titanOne.className} text-xl mb-3 text-black dark:text-white notranslate`}>
+            <h3 className={`${poppinsMedium.className} text-xl mb-3 text-black dark:text-white notranslate`}>
               <span className="text-[#185fa5] dark:text-[#85b7eb]">O</span>nline<span className="text-[#185fa5] dark:text-[#85b7eb]">C</span>onver<span className="text-[#185fa5] dark:text-[#85b7eb]">T</span>ools
             </h3>
             <p className="text-sm text-neutral-800 dark:text-neutral-400 leading-relaxed font-normal">{total}+ free online tools for converting, compressing and editing files. No sign-up required.</p>
