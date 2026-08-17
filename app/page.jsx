@@ -2,11 +2,11 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import {
-  Sparkles, Rocket, Bot, Globe, Zap, Lock, DollarSign, ShieldCheck, Smartphone, Cloud,
-  Wrench, LayoutGrid, Languages, FileText, Image, Video, Music, Code2, Folder, Calculator,
-  Clapperboard, Type, QrCode, RefreshCw, Laptop, ArrowUpRight,
+  Sparkles, Rocket, Bot, Globe, Zap, Lock, DollarSign, ShieldCheck, Smartphone,
+  Wrench, LayoutGrid, Languages, Laptop, ArrowUpRight, UploadCloud, X, Search,
 } from 'lucide-react';
-import { CategoryIcon, ToolIcon, categoryColors } from './lib/toolIcons';
+import { CategoryIcon, ToolIcon, categoryColors, toolBgColors } from './lib/toolIcons';
+import { ALL_TOOLS, getSuggestions } from './lib/toolsRegistry';
 
 function useDarkMode() {
   const [dark, setDark] = useState(false);
@@ -48,24 +48,7 @@ function buildStats(totalTools) {
 
 const badges = [
   { icon: Zap, text: 'No signup required' },
-  { icon: ShieldCheck, text: '100% secure & private' },
   { icon: Smartphone, text: 'Works on all devices' },
-  { icon: Cloud, text: 'No installation needed' },
-];
-
-const floatingIcons = [
-  { icon: FileText,     label: 'PDF',     href: '/tools/pdf-tools',         anim: 'floatA', dur: '3.2s', delay: '0s'    },
-  { icon: Image,        label: 'Image',   href: '/tools/image-tools',       anim: 'floatB', dur: '3.8s', delay: '0.3s'  },
-  { icon: Video,        label: 'Video',   href: '/tools/video-tools',       anim: 'floatC', dur: '3.5s', delay: '0.1s'  },
-  { icon: Bot,          label: 'AI',      href: '/tools/ai-tools',          anim: 'floatA', dur: '4.0s', delay: '0.5s'  },
-  { icon: Music,        label: 'Audio',   href: '/tools/audio-tools',       anim: 'floatB', dur: '3.3s', delay: '0.2s'  },
-  { icon: Code2,        label: 'Dev',     href: '/tools/developer-tools',   anim: 'floatC', dur: '3.7s', delay: '0.4s'  },
-  { icon: Folder,       label: 'Files',   href: '/tools/file-tools',        anim: 'floatA', dur: '4.2s', delay: '0.6s'  },
-  { icon: Calculator,   label: 'Math',    href: '/tools/math-tools',        anim: 'floatB', dur: '3.6s', delay: '0.35s' },
-  { icon: Clapperboard, label: 'GIF',     href: '/tools/gif-tools',         anim: 'floatC', dur: '3.9s', delay: '0.15s' },
-  { icon: Type,         label: 'Text',    href: '/tools/text-tools',        anim: 'floatA', dur: '3.4s', delay: '0.55s' },
-  { icon: QrCode,       label: 'QR',      href: '/tools/qr-barcodes-tools', anim: 'floatB', dur: '4.1s', delay: '0.25s' },
-  { icon: RefreshCw,    label: 'Convert', href: '/tools/converter-tools',   anim: 'floatC', dur: '3.6s', delay: '0.45s' },
 ];
 
 // Backgrounds/borders/icon shades for the hero floating cards, one hue per
@@ -144,6 +127,175 @@ function StatCard({ value, label, suffix, icon: Icon, animate, dark }) {
   );
 }
 
+// Hero drop zone: detects a dropped/chosen file's extension client-side (reads
+// only `file.name`, never the file's bytes, and never sends anything over the
+// network) and surfaces up to 5 real tool suggestions from app/lib/toolsRegistry.
+function FileDropZone({ dark, toolCounts }) {
+  const [phase, setPhase] = useState('idle'); // idle | result | unrecognized
+  const [suggestions, setSuggestions] = useState(null);
+  const [rawExt, setRawExt] = useState('');
+  const [dragOver, setDragOver] = useState(false);
+  const [query, setQuery] = useState('');
+  const inputRef = useRef(null);
+
+  const processFile = (file) => {
+    if (!file) return;
+    const result = getSuggestions(file.name);
+    if (result) {
+      setSuggestions(result);
+      setPhase('result');
+    } else {
+      const m = /\.([a-zA-Z0-9]+)$/.exec(file.name || '');
+      setRawExt(m ? m[1].toLowerCase() : '');
+      setPhase('unrecognized');
+    }
+  };
+
+  const reset = () => {
+    setPhase('idle');
+    setSuggestions(null);
+    setQuery('');
+    if (inputRef.current) inputRef.current.value = '';
+  };
+
+  const searchResults = query.trim().length > 1
+    ? ALL_TOOLS.filter(t => t.name.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 8)
+    : [];
+
+  const count = suggestions ? (toolCounts.counts?.[suggestions.category] || suggestions.fallbackCount) : 0;
+
+  const border = dragOver ? '#185fa5' : (dark ? '#334155' : '#cbd5e1');
+  const panelBg = dark
+    ? 'linear-gradient(160deg, #14181f 0%, #1c1c1e 100%)'
+    : 'linear-gradient(160deg, #ffffff 0%, #eef2f9 100%)';
+
+  return (
+    <div
+      className="dropzone"
+      onDragOver={(e) => { e.preventDefault(); if (phase === 'idle') setDragOver(true); }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDragOver(false);
+        if (phase !== 'idle') return;
+        const file = e.dataTransfer.files && e.dataTransfer.files[0];
+        processFile(file);
+      }}
+      style={{
+        border: `2px dashed ${border}`,
+        background: panelBg,
+        borderRadius: '22px',
+        padding: '32px 24px',
+        textAlign: 'center',
+        position: 'relative',
+        transition: 'border-color 0.2s ease',
+        minHeight: '320px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+      }}
+    >
+      <input
+        ref={inputRef}
+        type="file"
+        className="hidden"
+        onChange={(e) => processFile(e.target.files && e.target.files[0])}
+        style={{ display: 'none' }}
+      />
+
+      {phase === 'idle' && (
+        <div>
+          <UploadCloud size={40} style={{ margin: '0 auto 16px', color: dark ? '#85b7eb' : '#185fa5' }} />
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="dropzone-choose-btn"
+            style={{ background: dark ? '#378add' : '#185fa5' }}
+          >
+            Choose a file
+          </button>
+          <p style={{ fontSize: '14px', color: dark ? '#94a3b8' : '#475569', marginTop: '16px', marginBottom: '8px' }}>
+            or drop it here — we&apos;ll suggest the right tool for it
+          </p>
+          <p style={{ fontSize: '11px', color: dark ? '#64748b' : '#94a3b8' }}>
+            We only read the file type. Your file stays on your device.
+          </p>
+        </div>
+      )}
+
+      {phase === 'result' && suggestions && (
+        <div style={{ textAlign: 'left' }}>
+          <button type="button" onClick={reset} aria-label="Close" className="dropzone-close" style={{ color: dark ? '#94a3b8' : '#64748b' }}>
+            <X size={18} />
+          </button>
+          <h3 style={{ fontSize: '16px', fontWeight: '800', color: dark ? '#f1f5f9' : '#0f172a', marginBottom: '14px', paddingRight: '28px' }}>
+            {suggestions.ext.toUpperCase()} file detected — what would you like to do?
+          </h3>
+          <div className="suggestion-grid">
+            {suggestions.tools.map((t) => (
+              <Link
+                key={t.href}
+                href={t.href}
+                className="suggestion-card"
+                style={{ background: dark ? '#1c1c1e' : '#ffffff', border: dark ? '1px solid #2c2c2e' : '1px solid #e2e8f0' }}
+              >
+                <span className={`icon-badge ${toolBgColors[t.href] || 'bg-neutral-400'}`}>
+                  <ToolIcon slug={t.href.split('/').pop()} className="w-4 h-4 text-white" />
+                </span>
+                <span style={{ minWidth: 0 }}>
+                  <span className="s-name" style={{ display: 'block', color: dark ? '#f1f5f9' : '#0f172a' }}>{t.name}</span>
+                  <span className="s-note" style={{ display: 'block', color: dark ? '#94a3b8' : '#64748b' }}>{t.note}</span>
+                </span>
+              </Link>
+            ))}
+          </div>
+          <Link href={suggestions.categoryHref} style={{ fontSize: '13px', fontWeight: '700', color: dark ? '#85b7eb' : '#185fa5', textDecoration: 'none' }}>
+            See all {count} {suggestions.categoryLabel} tools →
+          </Link>
+        </div>
+      )}
+
+      {phase === 'unrecognized' && (
+        <div style={{ textAlign: 'left' }}>
+          <button type="button" onClick={reset} aria-label="Close" className="dropzone-close" style={{ color: dark ? '#94a3b8' : '#64748b' }}>
+            <X size={18} />
+          </button>
+          <h3 style={{ fontSize: '15px', fontWeight: '800', color: dark ? '#f1f5f9' : '#0f172a', marginBottom: '10px', paddingRight: '28px' }}>
+            {rawExt ? `We don't recognize ".${rawExt}" files yet.` : "We couldn't detect this file's type."}
+          </h3>
+          <p style={{ fontSize: '13px', color: dark ? '#94a3b8' : '#64748b', marginBottom: '12px' }}>
+            Search our {ALL_TOOLS.length}+ tools instead:
+          </p>
+          <div style={{ position: 'relative', marginBottom: '10px' }}>
+            <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: dark ? '#64748b' : '#94a3b8' }} />
+            <input
+              autoFocus
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search tools..."
+              style={{
+                width: '100%', boxSizing: 'border-box', padding: '9px 12px 9px 34px', borderRadius: '10px',
+                border: dark ? '1px solid #334155' : '1px solid #cbd5e1', background: dark ? '#111111' : '#ffffff',
+                color: dark ? '#f1f5f9' : '#0f172a', fontSize: '13px', outline: 'none',
+              }}
+            />
+          </div>
+          {searchResults.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxHeight: '160px', overflowY: 'auto' }}>
+              {searchResults.map((r) => (
+                <Link key={r.href} href={r.href} className="search-result-row" style={{ color: dark ? '#e2e8f0' : '#1e293b' }}>
+                  {r.name}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Home() {
   const dark = useDarkMode();
   const [statsVisible, setStatsVisible] = useState(false);
@@ -166,18 +318,31 @@ export default function Home() {
 
       <style>{`
         @keyframes fadeUp  { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes floatA  { 0%,100% { transform:translateY(0px) rotate(-2deg); } 50% { transform:translateY(-12px) rotate(2deg);  } }
-        @keyframes floatB  { 0%,100% { transform:translateY(0px) rotate(3deg);  } 50% { transform:translateY(-16px) rotate(-1deg); } }
-        @keyframes floatC  { 0%,100% { transform:translateY(0px) rotate(-1deg); } 50% { transform:translateY(-10px) rotate(3deg);  } }
         .badge-pill:hover  { background: #e2e8f0 !important; }
 
         /* ── DESKTOP : hero côte à côte ── */
         .hero-wrapper      { max-width:1100px; margin:0 auto; display:flex; gap:48px; align-items:center; position:relative; z-index:1; }
         .hero-left         { flex:1; animation:fadeUp 0.7s ease both; }
-        .hero-icons-grid   { flex:0 0 360px; display:grid; grid-template-columns:repeat(3, 110px); gap:12px; justify-content:center; animation:fadeUp 0.9s ease 0.2s both; }
-        .hero-icon-card    { width:110px; height:88px; border-radius:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; box-shadow:0 6px 20px rgba(0,0,0,0.10); text-decoration:none; }
-        .hero-icon-card .ico { width:28px; height:28px; }
-        .hero-icon-card span.lbl { font-size:11px; font-weight:600; }
+        .hero-dropzone-wrap { flex:0 0 380px; animation:fadeUp 0.9s ease 0.2s both; }
+
+        /* ── DROP ZONE ── */
+        .dropzone-choose-btn { color:#fff; border:none; border-radius:999px; padding:11px 26px; font-size:14px; font-weight:700; cursor:pointer; transition:opacity 0.2s ease; }
+        .dropzone-choose-btn:hover { opacity:0.9; }
+        .dropzone-close { position:absolute; top:0; right:0; background:transparent; border:none; cursor:pointer; padding:4px; display:flex; }
+        .dropzone-close:hover { opacity:0.7; }
+        .suggestion-grid { display:flex; flex-direction:column; gap:8px; margin:4px 0 16px; }
+        .suggestion-card { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:14px; text-decoration:none; transition:transform 0.15s ease; }
+        .suggestion-card:hover { transform:translateX(4px); }
+        .icon-badge { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .s-name { font-size:13.5px; font-weight:700; }
+        .s-note { font-size:11.5px; }
+        .search-result-row { display:block; padding:8px 10px; border-radius:8px; font-size:13px; text-decoration:none; }
+        .search-result-row:hover { background: rgba(24,95,165,0.1); }
+
+        /* ── AD SLOT — invisible until an ad unit is mounted into it; height
+           reserved per breakpoint to match common responsive banner sizes. ── */
+        .ad-slot { width:100%; min-height:50px; background:transparent; }
+        @media (min-width:641px) { .ad-slot { min-height:90px; } }
 
         /* ── POPULAR TOOLS: 6-up grid of real clickable cards, distinct from
            the hero's decorative badges ── */
@@ -199,24 +364,14 @@ export default function Home() {
         @media (max-width: 640px) {
           .hero-wrapper    { flex-direction:column; gap:28px; }
           .hero-left       { width:100%; }
-          .hero-icons-grid {
-            flex:none; width:100%;
-            grid-template-columns: repeat(4, 1fr);
-            gap:10px;
-          }
-          .hero-icon-card  { width:100%; height:72px; border-radius:14px; }
-          .hero-icon-card .ico { width:22px; height:22px; }
-          .hero-icon-card span.lbl { font-size:10px; }
+          .hero-dropzone-wrap { flex:none; width:100%; }
           .popular-tools-grid { grid-template-columns:repeat(2, 1fr); gap:10px; }
           .popular-tool-card  { padding:22px 8px; border-radius:14px; }
         }
 
         /* ── TABLETTE 641–1024px ── */
         @media (min-width:641px) and (max-width:1024px) {
-          .hero-icons-grid { flex:0 0 300px; grid-template-columns:repeat(3, 90px); gap:10px; }
-          .hero-icon-card  { width:90px; height:76px; border-radius:16px; }
-          .hero-icon-card .ico { width:24px; height:24px; }
-          .hero-icon-card span.lbl { font-size:10px; }
+          .hero-dropzone-wrap { flex:0 0 320px; }
           .popular-tools-grid { grid-template-columns:repeat(3, 1fr); }
         }
       `}</style>
@@ -243,33 +398,32 @@ export default function Home() {
                 WebkitTextFillColor: 'transparent',
               }}>Instantly. Free.</span>
             </h1>
-            <p style={{ fontSize:'18px', color: dark ? '#94a3b8' : '#1e293b', lineHeight:'1.7', marginBottom:'32px', maxWidth:'480px' }}>
+            <p style={{ fontSize:'18px', color: dark ? '#94a3b8' : '#1e293b', lineHeight:'1.7', marginBottom:'20px', maxWidth:'480px' }}>
               The fastest way to convert, compress, and transform your files — {totalTools} tools, zero installation, completely free.
             </p>
-            <div style={{ display:'flex', flexWrap:'wrap', gap:'10px', marginBottom:'40px' }}>
+            <div style={{
+              display:'flex', alignItems:'flex-start', gap:'8px', maxWidth:'480px', marginBottom:'24px',
+              background: dark ? 'rgba(34,197,94,0.08)' : '#f0fdf4',
+              border: dark ? '1px solid rgba(34,197,94,0.25)' : '1px solid #bbf7d0',
+              borderRadius:'12px', padding:'10px 14px',
+            }}>
+              <ShieldCheck size={16} style={{ flexShrink:0, marginTop:'2px', color: dark ? '#4ade80' : '#16a34a' }} />
+              <span style={{ fontSize:'13px', color: dark ? '#86efac' : '#166534', lineHeight:'1.5' }}>
+                Most tools run right in your browser — nothing uploaded
+              </span>
+            </div>
+            <div style={{ display:'flex', flexWrap:'wrap', gap:'10px', marginBottom:'8px' }}>
               {badges.map(b => (
                 <span key={b.text} className="badge-pill" style={{ display:'flex', alignItems:'center', gap:'6px', background: dark ? '#111111' : '#f1f5f9', border:'1px solid #e2e8f0', borderRadius:'999px', padding:'7px 14px', fontSize:'13px', color: dark ? '#94a3b8' : '#1e293b', transition:'background 0.2s' }}>
                   <b.icon size={14} style={{ flexShrink:0 }} /> {b.text}
                 </span>
               ))}
             </div>
-            <div style={{ display:'flex', gap:'12px', flexWrap:'wrap' }}>
-              <Link href="/tools/pdf-tools" style={{ display:'flex', alignItems:'center', gap:'6px', background: dark ? '#111111' : '#f1f5f9', border:'1px solid #e2e8f0', borderRadius:'999px', padding:'7px 14px', fontSize:'13px', color: dark ? '#94a3b8' : '#475569', textDecoration:'none', fontWeight:'500' }}><Rocket size={14} /> Explore PDF Tools</Link>
-              <Link href="/tools/ai-tools"  style={{ display:'flex', alignItems:'center', gap:'6px', background: dark ? '#111111' : '#f1f5f9', border:'1px solid #e2e8f0', borderRadius:'999px', padding:'7px 14px', fontSize:'13px', color: dark ? '#94a3b8' : '#475569', textDecoration:'none', fontWeight:'500' }}><Bot size={14} /> Try AI Tools</Link>
-            </div>
           </div>
 
-          {/* RIGHT — 12 floating icons */}
-          <div className="hero-icons-grid">
-            {floatingIcons.map(item => {
-              const pal = huePalette[hueOf(item.href.split('/').pop())];
-              return (
-                <Link key={item.label} href={item.href} className="hero-icon-card" style={{ background: cardBg(pal, dark), border: cardBorder(pal, dark), animation:`${item.anim} ${item.dur} ease-in-out ${item.delay} infinite` }}>
-                  <item.icon className="ico" style={{ color: dark ? pal.dark400 : pal.light500 }} />
-                  <span className="lbl" style={{ color: dark ? '#94a3b8' : '#374151' }}>{item.label}</span>
-                </Link>
-              );
-            })}
+          {/* RIGHT — file drop zone */}
+          <div className="hero-dropzone-wrap">
+            <FileDropZone dark={dark} toolCounts={toolCounts} />
           </div>
         </div>
       </section>
@@ -307,6 +461,13 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ═══ AD SLOT — reserved for a responsive AdSense banner, left empty
+           until launch. Sized (not styled) so turning the ad on later doesn't
+           shift the layout (CLS). ═══ */}
+      <div style={{ maxWidth:'970px', margin:'0 auto', padding:'16px 24px' }}>
+        <div id="ad-slot-homepage" className="ad-slot" aria-hidden="true" />
+      </div>
+
       {/* ═══ CATEGORIES — FORMAT 100% ORIGINAL ═══ */}
       <div className="p-6 dark:bg-black">
         <div className="max-w-5xl mx-auto">
@@ -316,7 +477,9 @@ export default function Home() {
             {categories.map((cat) => (
               <Link key={cat.href} href={cat.href} className="bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)]">
                 <div className="flex justify-between items-center w-full mb-3">
-                  <CategoryIcon slug={cat.slug} className={`w-8 h-8 ${categoryColors[cat.slug]}`} />
+                  <span className="flex items-center justify-center shrink-0 rounded-xl bg-neutral-100 dark:bg-neutral-800 w-12 h-12">
+                    <CategoryIcon slug={cat.slug} className={`w-6 h-6 ${categoryColors[cat.slug]}`} />
+                  </span>
                   <span className="text-xs text-neutral-400 dark:text-neutral-500 bg-neutral-100 dark:bg-neutral-700 rounded-full px-2 py-1">{toolCounts.counts[cat.slug] || cat.count} tools</span>
                 </div>
                 <h2 className="font-extrabold text-2xl mb-1 text-neutral-800 dark:text-white group-hover:text-indigo-600 transition">{cat.title}</h2>
@@ -334,7 +497,7 @@ export default function Home() {
       </div>
 
       {/* ═══ AI SECTION ═══ */}
-      <section style={{ background: dark ? '#111111' : '#f8fafc', padding:'72px 24px' }}>
+      <section style={{ background: dark ? '#111111' : '#f8fafc', padding:'32px 24px 72px' }}>
         <div style={{ maxWidth:'900px', margin:'0 auto', textAlign:'center' }}>
           <Bot size={48} style={{ display:'block', margin:'0 auto 16px', color:'#6366f1' }} />
           <h2 style={{ fontSize:'clamp(28px,4vw,42px)', fontWeight:'800', color: dark ? '#f1f5f9' : '#0f172a', marginBottom:'16px', letterSpacing:'-0.02em' }}>Powered by AI</h2>
