@@ -7,7 +7,7 @@ const titanOne = Titan_One({ weight: '400', subsets: ['latin'] });
 export default function Footer() {
   const { total } = getToolCounts();
   return (
-    <footer className="bg-white text-neutral-600 border-t border-neutral-200 mt-12">
+    <footer className="bg-white text-neutral-600 border-t border-neutral-200">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr] xl:grid-cols-[3fr_1fr_1fr_1fr] gap-8 md:gap-6">
           <div>
