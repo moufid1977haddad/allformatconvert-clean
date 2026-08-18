@@ -1,0 +1,20 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: { absolute: "All Tools — Browse 225+ Free File Converters Online Free" },
+  description: "Browse all 225+ free online tools on OnlineConverTools, organized by category: PDF, image, video, audio, GIF, developer, AI, and more.",
+  alternates: { canonical: "https://www.onlineconvertools.com/tools" },
+  openGraph: {
+    title: "All Tools — Browse 225+ Free File Converters Online Free",
+    description: "Browse all 225+ free online tools on OnlineConverTools, organized by category: PDF, image, video, audio, GIF, developer, AI, and more.",
+    url: "https://www.onlineconvertools.com/tools",
+  },
+};
+
+// This layout only passes its children through -- it exists solely to host
+// the static `metadata` export above, since the page.jsx/tsx it wraps is a
+// 'use client' component and can't export metadata itself. It has no effect
+// on rendering or behavior.
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return children;
+}
