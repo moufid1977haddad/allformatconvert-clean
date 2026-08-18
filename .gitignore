@@ -51,3 +51,9 @@ scripts/audit/results/
 scripts/audit/tool-config.json
 /playwright-report/
 /test-results/
+
+# local agent skill tooling (installed via `npx skills add ...`) -- not part
+# of the site, not needed by Vercel's build
+/.agents/
+/.claude/
+/skills-lock.json
