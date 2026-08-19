@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "JSON to Python Class — Generate a Python @dataclass Online" },
-  description: "JSON to Python Class generates a Python @dataclass with one type-annotated field per top-level JSON key — not a populated dictionary or list containing your…",
+  description: "JSON to Python Class generates a Python @dataclass with one type-annotated field per top-level JSON key, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/json-to-python" },
   openGraph: {
     title: "JSON to Python Class — Generate a Python @dataclass Online",
-    description: "JSON to Python Class generates a Python @dataclass with one type-annotated field per top-level JSON key — not a populated dictionary or list containing your…",
+    description: "JSON to Python Class generates a Python @dataclass with one type-annotated field per top-level JSON key, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/json-to-python",
   },
 };

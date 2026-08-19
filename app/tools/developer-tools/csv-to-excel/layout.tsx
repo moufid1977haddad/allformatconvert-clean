@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "CSV to Excel — Build an .xlsx Workbook Online Free" },
-  description: "CSV to Excel builds an .xlsx workbook from a CSV file (or pasted CSV text) using the xlsx library entirely in your browser, then triggers a download — your…",
+  description: "CSV to Excel builds an .xlsx workbook from a CSV file or pasted CSV text, entirely in your browser — your data is never uploaded to a server.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/csv-to-excel" },
   openGraph: {
     title: "CSV to Excel — Build an .xlsx Workbook Online Free",
-    description: "CSV to Excel builds an .xlsx workbook from a CSV file (or pasted CSV text) using the xlsx library entirely in your browser, then triggers a download — your…",
+    description: "CSV to Excel builds an .xlsx workbook from a CSV file or pasted CSV text, entirely in your browser — your data is never uploaded to a server.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/csv-to-excel",
   },
 };

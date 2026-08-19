@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Image Resizer — Resize Images Online Free" },
-  description: "Image Resizer lets you set an exact pixel width and height and redraws your image at that size, entirely in your browser using the canvas element — your…",
+  description: "Image Resizer sets an exact pixel width and height and redraws your image at that size, entirely in your browser — no upload needed.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-resizer" },
   openGraph: {
     title: "Image Resizer — Resize Images Online Free",
-    description: "Image Resizer lets you set an exact pixel width and height and redraws your image at that size, entirely in your browser using the canvas element — your…",
+    description: "Image Resizer sets an exact pixel width and height and redraws your image at that size, entirely in your browser — no upload needed.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-resizer",
   },
 };

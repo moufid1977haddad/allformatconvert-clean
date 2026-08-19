@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF Unlock — Decrypt a Password-protected PDF Online Free" },
-  description: "PDF Unlock decrypts a password-protected PDF using the password you provide, via the @cantoo/pdf-lib library's standard PDF security handler entirely in your…",
+  description: "PDF Unlock decrypts a password-protected PDF using the password you provide, entirely in your browser — no upload needed.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-unlock" },
   openGraph: {
     title: "PDF Unlock — Decrypt a Password-protected PDF Online Free",
-    description: "PDF Unlock decrypts a password-protected PDF using the password you provide, via the @cantoo/pdf-lib library's standard PDF security handler entirely in your…",
+    description: "PDF Unlock decrypts a password-protected PDF using the password you provide, entirely in your browser — no upload needed.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-unlock",
   },
 };

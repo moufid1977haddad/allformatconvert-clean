@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF OCR — Despite Its Name, This Tool Does Not Online Free" },
-  description: "Despite its name, this tool does not perform optical character recognition on scanned images — it extracts a PDF's existing text layer entirely in your…",
+  description: "This tool doesn't perform OCR on scanned images — it extracts a PDF's existing text layer, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-ocr" },
   openGraph: {
     title: "PDF OCR — Despite Its Name, This Tool Does Not Online Free",
-    description: "Despite its name, this tool does not perform optical character recognition on scanned images — it extracts a PDF's existing text layer entirely in your…",
+    description: "This tool doesn't perform OCR on scanned images — it extracts a PDF's existing text layer, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-ocr",
   },
 };

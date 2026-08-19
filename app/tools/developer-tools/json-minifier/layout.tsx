@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "JSON Minifier — Parse Your JSON Online Free" },
-  description: "JSON Minifier parses your JSON with the browser's built-in JSON.parse and re-serializes it with JSON.stringify (no spacing argument), entirely in your…",
+  description: "JSON Minifier strips whitespace from your JSON using the browser's built-in parser, entirely in your browser — nothing is uploaded.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/json-minifier" },
   openGraph: {
     title: "JSON Minifier — Parse Your JSON Online Free",
-    description: "JSON Minifier parses your JSON with the browser's built-in JSON.parse and re-serializes it with JSON.stringify (no spacing argument), entirely in your…",
+    description: "JSON Minifier strips whitespace from your JSON using the browser's built-in parser, entirely in your browser — nothing is uploaded.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/json-minifier",
   },
 };

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF Watermark — Stamp a Diagonal, Semi-transparent Text" },
-  description: "PDF Watermark stamps a diagonal, semi-transparent text watermark across the center of every page, using the pdf-lib library entirely in your browser — your…",
+  description: "PDF Watermark stamps a diagonal, semi-transparent text watermark across every page, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-watermark" },
   openGraph: {
     title: "PDF Watermark — Stamp a Diagonal, Semi-transparent Text",
-    description: "PDF Watermark stamps a diagonal, semi-transparent text watermark across the center of every page, using the pdf-lib library entirely in your browser — your…",
+    description: "PDF Watermark stamps a diagonal, semi-transparent text watermark across every page, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-watermark",
   },
 };

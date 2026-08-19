@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "UUID Generator — Create Version 4 (random) UUIDs Online Free" },
-  description: "UUID Generator creates version 4 (random) UUIDs using the Web Crypto API's crypto.getRandomValues() for cryptographically strong randomness, entirely in your…",
+  description: "UUID Generator creates version 4 (random) UUIDs using the Web Crypto API for cryptographically strong randomness, in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/uuid-generator" },
   openGraph: {
     title: "UUID Generator — Create Version 4 (random) UUIDs Online Free",
-    description: "UUID Generator creates version 4 (random) UUIDs using the Web Crypto API's crypto.getRandomValues() for cryptographically strong randomness, entirely in your…",
+    description: "UUID Generator creates version 4 (random) UUIDs using the Web Crypto API for cryptographically strong randomness, in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/uuid-generator",
   },
 };

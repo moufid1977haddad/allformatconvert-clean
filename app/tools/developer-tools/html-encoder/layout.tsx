@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "HTML Encoder — Convert the Five Characters That Matter" },
-  description: "HTML Encoder converts the five characters that matter for safe HTML output — &, <, >, quote, and apostrophe — into their HTML entities, entirely in your…",
+  description: "HTML Encoder converts unsafe characters — &, <, >, quote, and apostrophe — into their HTML entities, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/html-encoder" },
   openGraph: {
     title: "HTML Encoder — Convert the Five Characters That Matter",
-    description: "HTML Encoder converts the five characters that matter for safe HTML output — &, <, >, quote, and apostrophe — into their HTML entities, entirely in your…",
+    description: "HTML Encoder converts unsafe characters — &, <, >, quote, and apostrophe — into their HTML entities, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/html-encoder",
   },
 };
