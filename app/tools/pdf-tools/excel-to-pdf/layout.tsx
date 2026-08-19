@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Excel to PDF — Convert Your .xlsx, .xls, or .csv File Online" },
-  description: "Excel to PDF converts your .xlsx, .xls, or .csv file into a real, professional-quality PDF using LibreOffice, the same conversion engine used by many…",
+  description: "Excel to PDF converts your .xlsx, .xls, or .csv file into a real, professional-quality PDF using LibreOffice, a trusted conversion engine.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/excel-to-pdf" },
   openGraph: {
     title: "Excel to PDF — Convert Your .xlsx, .xls, or .csv File Online",
-    description: "Excel to PDF converts your .xlsx, .xls, or .csv file into a real, professional-quality PDF using LibreOffice, the same conversion engine used by many…",
+    description: "Excel to PDF converts your .xlsx, .xls, or .csv file into a real, professional-quality PDF using LibreOffice, a trusted conversion engine.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/excel-to-pdf",
   },
 };

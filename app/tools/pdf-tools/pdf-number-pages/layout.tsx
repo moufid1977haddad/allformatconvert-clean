@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF Number Pages — Stamp a “current / Total” Label (e.g" },
-  description: "PDF Number Pages stamps a “current / total” label (e.g. “1 / 12”) onto every page of your PDF entirely in your browser using the pdf-lib library — your file…",
+  description: "PDF Number Pages stamps a current/total label onto every page of your PDF, entirely in your browser — your file is never uploaded.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-number-pages" },
   openGraph: {
     title: "PDF Number Pages — Stamp a “current / Total” Label (e.g",
-    description: "PDF Number Pages stamps a “current / total” label (e.g. “1 / 12”) onto every page of your PDF entirely in your browser using the pdf-lib library — your file…",
+    description: "PDF Number Pages stamps a current/total label onto every page of your PDF, entirely in your browser — your file is never uploaded.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-number-pages",
   },
 };

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "ZIP Creator — Bundle Multiple Files Online Free" },
-  description: "ZIP Creator is a free online tool that bundles multiple files into a single ZIP archive, entirely in your browser using JSZip — no upload, no software,…",
+  description: "ZIP Creator bundles multiple files into a single ZIP archive, entirely in your browser — no upload, no software installation.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/file-tools/zip-creator" },
   openGraph: {
     title: "ZIP Creator — Bundle Multiple Files Online Free",
-    description: "ZIP Creator is a free online tool that bundles multiple files into a single ZIP archive, entirely in your browser using JSZip — no upload, no software,…",
+    description: "ZIP Creator bundles multiple files into a single ZIP archive, entirely in your browser — no upload, no software installation.",
     url: "https://www.onlineconvertools.com/tools/file-tools/zip-creator",
   },
 };

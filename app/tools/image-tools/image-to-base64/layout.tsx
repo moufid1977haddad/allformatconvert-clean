@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Image to Base64 — Read an Image File Online Free" },
-  description: "Image to Base64 reads an image file and encodes it as a Base64 data URI, entirely in your browser using the FileReader API — your file is never uploaded…",
+  description: "Image to Base64 reads an image file and encodes it as a Base64 data URI, entirely in your browser using the FileReader API.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-to-base64" },
   openGraph: {
     title: "Image to Base64 — Read an Image File Online Free",
-    description: "Image to Base64 reads an image file and encodes it as a Base64 data URI, entirely in your browser using the FileReader API — your file is never uploaded…",
+    description: "Image to Base64 reads an image file and encodes it as a Base64 data URI, entirely in your browser using the FileReader API.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-to-base64",
   },
 };

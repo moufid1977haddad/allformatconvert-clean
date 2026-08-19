@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "JSON to PHP Class — Generate a Class Definition Online Free" },
-  description: "JSON to PHP Class generates a class definition with one typed property per top-level JSON key — not a PHP array or object populated with your actual data…",
+  description: "JSON to PHP Class generates a class definition with one typed property per top-level JSON key, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/json-to-php" },
   openGraph: {
     title: "JSON to PHP Class — Generate a Class Definition Online Free",
-    description: "JSON to PHP Class generates a class definition with one typed property per top-level JSON key — not a PHP array or object populated with your actual data…",
+    description: "JSON to PHP Class generates a class definition with one typed property per top-level JSON key, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/json-to-php",
   },
 };

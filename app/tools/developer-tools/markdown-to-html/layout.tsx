@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Markdown to HTML — Convert a Small Subset of Markdown Online" },
-  description: "Markdown to HTML converts a small subset of Markdown — headings (#, ##, ###), bold (**text**), italic (*text*), and simple list items (- item) —…",
+  description: "Markdown to HTML converts a small subset of Markdown into a complete HTML document, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/markdown-to-html" },
   openGraph: {
     title: "Markdown to HTML — Convert a Small Subset of Markdown Online",
-    description: "Markdown to HTML converts a small subset of Markdown — headings (#, ##, ###), bold (**text**), italic (*text*), and simple list items (- item) —…",
+    description: "Markdown to HTML converts a small subset of Markdown into a complete HTML document, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/markdown-to-html",
   },
 };

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Image Cropper — Crop Images Online Free" },
-  description: "Image Cropper lets you cut out a rectangular region of an image by entering exact X, Y, width, and height values in pixels — there's no drag-to-select handle…",
+  description: "Image Cropper lets you cut out a rectangular region of an image by entering exact X, Y, width, and height values in pixels.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-cropper" },
   openGraph: {
     title: "Image Cropper — Crop Images Online Free",
-    description: "Image Cropper lets you cut out a rectangular region of an image by entering exact X, Y, width, and height values in pixels — there's no drag-to-select handle…",
+    description: "Image Cropper lets you cut out a rectangular region of an image by entering exact X, Y, width, and height values in pixels.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-cropper",
   },
 };

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Word Counter — Instantly Analyzes Text Online Free" },
-  description: "Word Counter instantly analyzes text for word count, character count (with and without spaces), sentence count, paragraph count, and estimated reading time…",
+  description: "Word Counter instantly analyzes text for word count, character count, sentence count, paragraph count, and estimated reading time.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/word-counter" },
   openGraph: {
     title: "Word Counter — Instantly Analyzes Text Online Free",
-    description: "Word Counter instantly analyzes text for word count, character count (with and without spaces), sentence count, paragraph count, and estimated reading time…",
+    description: "Word Counter instantly analyzes text for word count, character count, sentence count, paragraph count, and estimated reading time.",
     url: "https://www.onlineconvertools.com/tools/text-tools/word-counter",
   },
 };

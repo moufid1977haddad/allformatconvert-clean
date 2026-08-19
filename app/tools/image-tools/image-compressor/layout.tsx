@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Image Compressor — Compress Images Online Free" },
-  description: "Image Compressor reduces an image's file size by re-encoding it as a JPEG at an adjustable quality level, entirely in your browser using the canvas element…",
+  description: "Image Compressor reduces an image's file size by re-encoding it as a JPEG at an adjustable quality level, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-compressor" },
   openGraph: {
     title: "Image Compressor — Compress Images Online Free",
-    description: "Image Compressor reduces an image's file size by re-encoding it as a JPEG at an adjustable quality level, entirely in your browser using the canvas element…",
+    description: "Image Compressor reduces an image's file size by re-encoding it as a JPEG at an adjustable quality level, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-compressor",
   },
 };

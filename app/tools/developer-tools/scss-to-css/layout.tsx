@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "SCSS to CSS — Be a Very Lightweight Text Transform, Not" },
-  description: "SCSS to CSS is a very lightweight text transform, not a real Sass compiler: it strips // comments and rewrites simple &:hover / &.class parent-selector…",
+  description: "SCSS to CSS is a lightweight text transform, not a real Sass compiler: it strips comments and rewrites simple parent-selector patterns.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/scss-to-css" },
   openGraph: {
     title: "SCSS to CSS — Be a Very Lightweight Text Transform, Not",
-    description: "SCSS to CSS is a very lightweight text transform, not a real Sass compiler: it strips // comments and rewrites simple &:hover / &.class parent-selector…",
+    description: "SCSS to CSS is a lightweight text transform, not a real Sass compiler: it strips comments and rewrites simple parent-selector patterns.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/scss-to-css",
   },
 };

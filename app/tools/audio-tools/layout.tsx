@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Audio Tools — Convert, Compress, and Edit Audio Files Online" },
-  description: "Audio Tools is a comprehensive free online platform offering a suite of audio processing utilities designed to enhance, convert, and edit sound files…",
+  description: "Audio Tools is a free online platform offering utilities to enhance, convert, and edit sound files without any software installation.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/audio-tools" },
   openGraph: {
     title: "Audio Tools — Convert, Compress, and Edit Audio Files Online",
-    description: "Audio Tools is a comprehensive free online platform offering a suite of audio processing utilities designed to enhance, convert, and edit sound files…",
+    description: "Audio Tools is a free online platform offering utilities to enhance, convert, and edit sound files without any software installation.",
     url: "https://www.onlineconvertools.com/tools/audio-tools",
   },
 };

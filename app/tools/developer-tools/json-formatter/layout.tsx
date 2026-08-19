@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "JSON Formatter — Parse Your JSON Online Free" },
-  description: "JSON Formatter parses your JSON with the browser's built-in JSON.parse and re-serializes it with JSON.stringify, entirely in your browser — nothing…",
+  description: "JSON Formatter parses your JSON with the browser's built-in JSON.parse and re-serializes it with JSON.stringify, in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/json-formatter" },
   openGraph: {
     title: "JSON Formatter — Parse Your JSON Online Free",
-    description: "JSON Formatter parses your JSON with the browser's built-in JSON.parse and re-serializes it with JSON.stringify, entirely in your browser — nothing…",
+    description: "JSON Formatter parses your JSON with the browser's built-in JSON.parse and re-serializes it with JSON.stringify, in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/json-formatter",
   },
 };

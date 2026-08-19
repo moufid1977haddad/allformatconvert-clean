@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Add Border to Image — Let You Add a Solid-color Border" },
-  description: "Add Border to Image lets you add a solid-color border of any width around a photo, entirely in your browser using the HTML canvas — your image is never…",
+  description: "Add Border to Image lets you add a solid-color border of any width around a photo, entirely in your browser using the HTML canvas.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/add-border-to-image" },
   openGraph: {
     title: "Add Border to Image — Let You Add a Solid-color Border",
-    description: "Add Border to Image lets you add a solid-color border of any width around a photo, entirely in your browser using the HTML canvas — your image is never…",
+    description: "Add Border to Image lets you add a solid-color border of any width around a photo, entirely in your browser using the HTML canvas.",
     url: "https://www.onlineconvertools.com/tools/image-tools/add-border-to-image",
   },
 };

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Image Pixelator — Pixelate Images Online Free" },
-  description: "Image Pixelator applies a mosaic effect across your entire image by averaging blocks of pixels at a size you choose, entirely in your browser…",
+  description: "Image Pixelator applies a mosaic effect across your image by averaging blocks of pixels at a size you choose, in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-pixelator" },
   openGraph: {
     title: "Image Pixelator — Pixelate Images Online Free",
-    description: "Image Pixelator applies a mosaic effect across your entire image by averaging blocks of pixels at a size you choose, entirely in your browser…",
+    description: "Image Pixelator applies a mosaic effect across your image by averaging blocks of pixels at a size you choose, in your browser.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-pixelator",
   },
 };

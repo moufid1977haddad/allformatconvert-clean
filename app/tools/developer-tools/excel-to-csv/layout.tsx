@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Excel to CSV — Read an Uploaded .xlsx or .xls File Online" },
-  description: "Excel to CSV reads an uploaded .xlsx or .xls file using the xlsx library and converts its first sheet to comma-separated CSV text, entirely in your browser…",
+  description: "Excel to CSV reads an uploaded .xlsx or .xls file and converts its first sheet to comma-separated CSV text, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/excel-to-csv" },
   openGraph: {
     title: "Excel to CSV — Read an Uploaded .xlsx or .xls File Online",
-    description: "Excel to CSV reads an uploaded .xlsx or .xls file using the xlsx library and converts its first sheet to comma-separated CSV text, entirely in your browser…",
+    description: "Excel to CSV reads an uploaded .xlsx or .xls file and converts its first sheet to comma-separated CSV text, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/excel-to-csv",
   },
 };

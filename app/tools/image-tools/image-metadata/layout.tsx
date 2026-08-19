@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Image Metadata Viewer — Read Basic File Information Online" },
-  description: "Image Metadata Viewer reads basic file information from an image you upload — file name, file size, MIME type, pixel dimensions, and last-modified date…",
+  description: "Image Metadata Viewer reads basic file information from an image you upload — name, size, type, dimensions, and date — in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-metadata" },
   openGraph: {
     title: "Image Metadata Viewer — Read Basic File Information Online",
-    description: "Image Metadata Viewer reads basic file information from an image you upload — file name, file size, MIME type, pixel dimensions, and last-modified date…",
+    description: "Image Metadata Viewer reads basic file information from an image you upload — name, size, type, dimensions, and date — in your browser.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-metadata",
   },
 };

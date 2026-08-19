@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Cron Expression Builder — Build Cron Expressions Online Free" },
-  description: "Cron Expression Builder assembles a 5-field cron string (minute, hour, day, month, weekday) live as you fill in five text boxes, with eight presets that go…",
+  description: "Cron Expression Builder assembles a 5-field cron string live as you fill in five text boxes, with eight one-click presets to get started.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/cron-expression-builder" },
   openGraph: {
     title: "Cron Expression Builder — Build Cron Expressions Online Free",
-    description: "Cron Expression Builder assembles a 5-field cron string (minute, hour, day, month, weekday) live as you fill in five text boxes, with eight presets that go…",
+    description: "Cron Expression Builder assembles a 5-field cron string live as you fill in five text boxes, with eight one-click presets to get started.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/cron-expression-builder",
   },
 };

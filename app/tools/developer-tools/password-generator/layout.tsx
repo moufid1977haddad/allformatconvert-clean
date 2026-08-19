@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Password Generator — Build a Random Password Online Free" },
-  description: "Password Generator builds a random password from the character sets you select, using the browser's crypto.getRandomValues() — a cryptographically secure…",
+  description: "Password Generator builds a random password from the character sets you select, using a cryptographically secure random number source.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/password-generator" },
   openGraph: {
     title: "Password Generator — Build a Random Password Online Free",
-    description: "Password Generator builds a random password from the character sets you select, using the browser's crypto.getRandomValues() — a cryptographically secure…",
+    description: "Password Generator builds a random password from the character sets you select, using a cryptographically secure random number source.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/password-generator",
   },
 };

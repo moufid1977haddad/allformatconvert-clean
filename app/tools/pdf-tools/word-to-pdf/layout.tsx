@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Word to PDF — Convert Your .docx File Online Free" },
-  description: "Word to PDF converts your .docx file into a real, professional-quality PDF using LibreOffice, the same conversion engine used by many enterprise document…",
+  description: "Word to PDF converts your .docx file into a real, professional-quality PDF using LibreOffice, a trusted enterprise conversion engine.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/word-to-pdf" },
   openGraph: {
     title: "Word to PDF — Convert Your .docx File Online Free",
-    description: "Word to PDF converts your .docx file into a real, professional-quality PDF using LibreOffice, the same conversion engine used by many enterprise document…",
+    description: "Word to PDF converts your .docx file into a real, professional-quality PDF using LibreOffice, a trusted enterprise conversion engine.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/word-to-pdf",
   },
 };

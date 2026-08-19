@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Background Remover — Remove Backgrounds Online Free" },
-  description: "Background Remover is a free online tool that instantly removes the background from an image using the remove.bg AI image-processing service, giving you…",
+  description: "Background Remover instantly removes an image's background using the remove.bg AI service, giving you a transparent PNG in one click.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/background-remover" },
   openGraph: {
     title: "Background Remover — Remove Backgrounds Online Free",
-    description: "Background Remover is a free online tool that instantly removes the background from an image using the remove.bg AI image-processing service, giving you…",
+    description: "Background Remover instantly removes an image's background using the remove.bg AI service, giving you a transparent PNG in one click.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/background-remover",
   },
 };

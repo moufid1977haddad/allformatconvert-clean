@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "SVG to PNG — Rasterize a Vector SVG File Online Free" },
-  description: "SVG to PNG rasterizes a vector SVG file into a PNG image at the exact pixel width and height you specify, entirely in your browser using the canvas element…",
+  description: "SVG to PNG rasterizes a vector SVG file into a PNG image at the exact pixel width and height you specify, in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/svg-to-png" },
   openGraph: {
     title: "SVG to PNG — Rasterize a Vector SVG File Online Free",
-    description: "SVG to PNG rasterizes a vector SVG file into a PNG image at the exact pixel width and height you specify, entirely in your browser using the canvas element…",
+    description: "SVG to PNG rasterizes a vector SVG file into a PNG image at the exact pixel width and height you specify, in your browser.",
     url: "https://www.onlineconvertools.com/tools/image-tools/svg-to-png",
   },
 };

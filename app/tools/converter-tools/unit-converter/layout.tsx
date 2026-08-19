@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Unit Converter — Convert Between Units Across Six Categories" },
-  description: "Unit Converter converts between units across six categories — Length, Weight, Temperature, Speed, Area, and Volume — entirely in your browser, with results…",
+  description: "Unit Converter converts between units across six categories — Length, Weight, Temperature, Speed, Area, and Volume — in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/converter-tools/unit-converter" },
   openGraph: {
     title: "Unit Converter — Convert Between Units Across Six Categories",
-    description: "Unit Converter converts between units across six categories — Length, Weight, Temperature, Speed, Area, and Volume — entirely in your browser, with results…",
+    description: "Unit Converter converts between units across six categories — Length, Weight, Temperature, Speed, Area, and Volume — in your browser.",
     url: "https://www.onlineconvertools.com/tools/converter-tools/unit-converter",
   },
 };

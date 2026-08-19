@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Text Tools — Word Count, Case Conversion, Text Formatting" },
-  description: "Text Tools is a free online suite of powerful utilities designed to help you manipulate, analyze, and transform text instantly without any downloads…",
+  description: "Text Tools is a free online suite of utilities to manipulate, analyze, and transform text instantly without any downloads.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools" },
   openGraph: {
     title: "Text Tools — Word Count, Case Conversion, Text Formatting",
-    description: "Text Tools is a free online suite of powerful utilities designed to help you manipulate, analyze, and transform text instantly without any downloads…",
+    description: "Text Tools is a free online suite of utilities to manipulate, analyze, and transform text instantly without any downloads.",
     url: "https://www.onlineconvertools.com/tools/text-tools",
   },
 };

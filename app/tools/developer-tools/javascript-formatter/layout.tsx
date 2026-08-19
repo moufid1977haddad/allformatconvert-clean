@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "JavaScript Formatter — Add Line Breaks Online Free" },
-  description: "JavaScript Formatter adds line breaks and indentation around braces, brackets, semicolons, and commas entirely in your browser, and its Minify button does…",
+  description: "JavaScript Formatter adds line breaks and indentation around braces, brackets, and commas entirely in your browser, and can minify too.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/javascript-formatter" },
   openGraph: {
     title: "JavaScript Formatter — Add Line Breaks Online Free",
-    description: "JavaScript Formatter adds line breaks and indentation around braces, brackets, semicolons, and commas entirely in your browser, and its Minify button does…",
+    description: "JavaScript Formatter adds line breaks and indentation around braces, brackets, and commas entirely in your browser, and can minify too.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/javascript-formatter",
   },
 };

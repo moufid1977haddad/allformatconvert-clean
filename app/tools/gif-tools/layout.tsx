@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "GIF Tools — Convert Videos and Images to GIF Format Online" },
-  description: "Gif Tools is a free online platform that allows users to create, edit, compress, and convert GIF files without any software installation or subscription…",
+  description: "Gif Tools is a free online platform to create, edit, compress, and convert GIF files without any software installation.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools" },
   openGraph: {
     title: "GIF Tools — Convert Videos and Images to GIF Format Online",
-    description: "Gif Tools is a free online platform that allows users to create, edit, compress, and convert GIF files without any software installation or subscription…",
+    description: "Gif Tools is a free online platform to create, edit, compress, and convert GIF files without any software installation.",
     url: "https://www.onlineconvertools.com/tools/gif-tools",
   },
 };

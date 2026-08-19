@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Hex to Text — Convert Between Plain Text Online Free" },
-  description: "Hex to Text converts between plain text and hexadecimal character codes entirely in your browser using JavaScript's built-in character-code functions…",
+  description: "Hex to Text converts between plain text and hexadecimal character codes entirely in your browser — nothing is uploaded to a server.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/hex-to-text" },
   openGraph: {
     title: "Hex to Text — Convert Between Plain Text Online Free",
-    description: "Hex to Text converts between plain text and hexadecimal character codes entirely in your browser using JavaScript's built-in character-code functions…",
+    description: "Hex to Text converts between plain text and hexadecimal character codes entirely in your browser — nothing is uploaded to a server.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/hex-to-text",
   },
 };

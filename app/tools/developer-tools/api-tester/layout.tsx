@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "API Tester — Send HTTP Requests Directly Online Free" },
-  description: "API Tester sends HTTP requests directly from your browser to the endpoint you specify, using the browser's own fetch() API, and shows the response status…",
+  description: "API Tester sends HTTP requests directly from your browser to the endpoint you specify, and shows the response status and body.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/api-tester" },
   openGraph: {
     title: "API Tester — Send HTTP Requests Directly Online Free",
-    description: "API Tester sends HTTP requests directly from your browser to the endpoint you specify, using the browser's own fetch() API, and shows the response status…",
+    description: "API Tester sends HTTP requests directly from your browser to the endpoint you specify, and shows the response status and body.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/api-tester",
   },
 };

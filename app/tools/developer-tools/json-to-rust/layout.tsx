@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "JSON to Rust Struct — Generate a Single Root Struct" },
-  description: "JSON to Rust Struct generates a single Root struct annotated with #[derive(Debug, Serialize, Deserialize)] and one field per top-level JSON key, entirely…",
+  description: "JSON to Rust Struct generates a single Root struct with one field per top-level JSON key, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/json-to-rust" },
   openGraph: {
     title: "JSON to Rust Struct — Generate a Single Root Struct",
-    description: "JSON to Rust Struct generates a single Root struct annotated with #[derive(Debug, Serialize, Deserialize)] and one field per top-level JSON key, entirely…",
+    description: "JSON to Rust Struct generates a single Root struct with one field per top-level JSON key, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/json-to-rust",
   },
 };

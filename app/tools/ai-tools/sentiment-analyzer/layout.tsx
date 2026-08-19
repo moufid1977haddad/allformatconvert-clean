@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Sentiment Analyzer — Analyze Sentiments Online Free" },
-  description: "Sentiment Analyzer is a free online tool that uses OpenAI's GPT-4o mini model to judge whether a piece of text is Positive, Negative, or Neutral, along…",
+  description: "Sentiment Analyzer uses an AI language model to judge whether text is Positive, Negative, or Neutral, with a confidence estimate.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/sentiment-analyzer" },
   openGraph: {
     title: "Sentiment Analyzer — Analyze Sentiments Online Free",
-    description: "Sentiment Analyzer is a free online tool that uses OpenAI's GPT-4o mini model to judge whether a piece of text is Positive, Negative, or Neutral, along…",
+    description: "Sentiment Analyzer uses an AI language model to judge whether text is Positive, Negative, or Neutral, with a confidence estimate.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/sentiment-analyzer",
   },
 };

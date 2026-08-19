@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Color Picker — Let You Pick a Color Online Free" },
-  description: "Color Picker lets you pick a color with your browser's native color picker or type a hex code directly, and shows the matching HEX and RGB values, entirely…",
+  description: "Color Picker lets you pick a color and shows the matching HEX and RGB values, entirely client-side in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/color-picker" },
   openGraph: {
     title: "Color Picker — Let You Pick a Color Online Free",
-    description: "Color Picker lets you pick a color with your browser's native color picker or type a hex code directly, and shows the matching HEX and RGB values, entirely…",
+    description: "Color Picker lets you pick a color and shows the matching HEX and RGB values, entirely client-side in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/color-picker",
   },
 };

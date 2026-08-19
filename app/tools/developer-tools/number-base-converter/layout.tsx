@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Number Base Converter — Convert Number Bases Online Free" },
-  description: "Number Base Converter shows a number in binary, octal, decimal, and hexadecimal simultaneously, live as you type, entirely in your browser — nothing…",
+  description: "Number Base Converter shows a number in binary, octal, decimal, and hexadecimal simultaneously, live as you type, in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/number-base-converter" },
   openGraph: {
     title: "Number Base Converter — Convert Number Bases Online Free",
-    description: "Number Base Converter shows a number in binary, octal, decimal, and hexadecimal simultaneously, live as you type, entirely in your browser — nothing…",
+    description: "Number Base Converter shows a number in binary, octal, decimal, and hexadecimal simultaneously, live as you type, in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/number-base-converter",
   },
 };

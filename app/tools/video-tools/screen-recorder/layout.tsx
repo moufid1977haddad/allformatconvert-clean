@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Screen Recorder — Record Screens Online Free" },
-  description: "Screen Recorder captures your screen, window, or browser tab using the browser's built-in screen-sharing and MediaRecorder APIs — entirely client-side,…",
+  description: "Screen Recorder captures your screen, window, or browser tab using the browser's built-in screen-sharing and MediaRecorder APIs.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/screen-recorder" },
   openGraph: {
     title: "Screen Recorder — Record Screens Online Free",
-    description: "Screen Recorder captures your screen, window, or browser tab using the browser's built-in screen-sharing and MediaRecorder APIs — entirely client-side,…",
+    description: "Screen Recorder captures your screen, window, or browser tab using the browser's built-in screen-sharing and MediaRecorder APIs.",
     url: "https://www.onlineconvertools.com/tools/video-tools/screen-recorder",
   },
 };

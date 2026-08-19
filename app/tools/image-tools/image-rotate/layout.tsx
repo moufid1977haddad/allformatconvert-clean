@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Image Rotate — Turn Your Image Online Free" },
-  description: "Image Rotate turns your image by a preset (90°, 180°, 270°) or custom angle, entirely in your browser using the canvas element — your image is never uploaded…",
+  description: "Image Rotate turns your image by a preset or custom angle, entirely in your browser — your image is never uploaded to a server.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-rotate" },
   openGraph: {
     title: "Image Rotate — Turn Your Image Online Free",
-    description: "Image Rotate turns your image by a preset (90°, 180°, 270°) or custom angle, entirely in your browser using the canvas element — your image is never uploaded…",
+    description: "Image Rotate turns your image by a preset or custom angle, entirely in your browser — your image is never uploaded to a server.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-rotate",
   },
 };

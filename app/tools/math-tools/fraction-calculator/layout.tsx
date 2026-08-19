@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Fraction Calculator — Adds, Subtracts, Multiplies Online" },
-  description: "Fraction Calculator adds, subtracts, multiplies, and divides two fractions entirely in your browser, automatically reducing every result to its simplest form…",
+  description: "Fraction Calculator adds, subtracts, multiplies, and divides two fractions entirely in your browser, reducing every result automatically.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/math-tools/fraction-calculator" },
   openGraph: {
     title: "Fraction Calculator — Adds, Subtracts, Multiplies Online",
-    description: "Fraction Calculator adds, subtracts, multiplies, and divides two fractions entirely in your browser, automatically reducing every result to its simplest form…",
+    description: "Fraction Calculator adds, subtracts, multiplies, and divides two fractions entirely in your browser, reducing every result automatically.",
     url: "https://www.onlineconvertools.com/tools/math-tools/fraction-calculator",
   },
 };

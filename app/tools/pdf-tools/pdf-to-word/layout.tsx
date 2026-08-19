@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF to Word — Extract Each Page's Plain Text Online Free" },
-  description: "PDF to Word extracts each page's plain text using the PDF.js library and writes it into a new .docx file as plain paragraphs, using the docx library entirely…",
+  description: "PDF to Word extracts each page's plain text and writes it into a new .docx file as plain paragraphs, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-word" },
   openGraph: {
     title: "PDF to Word — Extract Each Page's Plain Text Online Free",
-    description: "PDF to Word extracts each page's plain text using the PDF.js library and writes it into a new .docx file as plain paragraphs, using the docx library entirely…",
+    description: "PDF to Word extracts each page's plain text and writes it into a new .docx file as plain paragraphs, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-word",
   },
 };

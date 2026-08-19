@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Converter Tools — Convert Units, Colors, and Currencies" },
-  description: "Converter Tools is a free online utility that instantly converts between multiple file formats, units of measurement, and data types without requiring any…",
+  description: "Converter Tools instantly converts between multiple file formats, units of measurement, and data types without any installation.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/converter-tools" },
   openGraph: {
     title: "Converter Tools — Convert Units, Colors, and Currencies",
-    description: "Converter Tools is a free online utility that instantly converts between multiple file formats, units of measurement, and data types without requiring any…",
+    description: "Converter Tools instantly converts between multiple file formats, units of measurement, and data types without any installation.",
     url: "https://www.onlineconvertools.com/tools/converter-tools",
   },
 };

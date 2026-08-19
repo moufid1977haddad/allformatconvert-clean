@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Audio to Text — Offer Two Ways Online Free" },
-  description: "Audio to Text offers two ways to get a transcript: live microphone dictation using your browser's built-in Speech Recognition (works best in Chrome, entirely…",
+  description: "Audio to Text offers live microphone dictation or file upload, which sends your audio to a server-side AI transcription API.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/audio-tools/audio-to-text" },
   openGraph: {
     title: "Audio to Text — Offer Two Ways Online Free",
-    description: "Audio to Text offers two ways to get a transcript: live microphone dictation using your browser's built-in Speech Recognition (works best in Chrome, entirely…",
+    description: "Audio to Text offers live microphone dictation or file upload, which sends your audio to a server-side AI transcription API.",
     url: "https://www.onlineconvertools.com/tools/audio-tools/audio-to-text",
   },
 };

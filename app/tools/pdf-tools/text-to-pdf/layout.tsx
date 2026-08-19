@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Text to PDF — Convert Plain Text Online Free" },
-  description: "Text to PDF converts plain text — pasted directly or from an uploaded .txt file — into a PDF using the pdf-lib library entirely in your browser,…",
+  description: "Text to PDF converts plain text into a PDF using the pdf-lib library entirely in your browser, with automatic word-wrapping.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/text-to-pdf" },
   openGraph: {
     title: "Text to PDF — Convert Plain Text Online Free",
-    description: "Text to PDF converts plain text — pasted directly or from an uploaded .txt file — into a PDF using the pdf-lib library entirely in your browser,…",
+    description: "Text to PDF converts plain text into a PDF using the pdf-lib library entirely in your browser, with automatic word-wrapping.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/text-to-pdf",
   },
 };

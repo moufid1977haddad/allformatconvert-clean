@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Statistics Calculator — Compute Count, Sum, Mean, Median," },
-  description: "Statistics Calculator computes count, sum, mean, median, mode, standard deviation, variance, range, minimum, and maximum from a comma-separated list…",
+  description: "Statistics Calculator computes count, sum, mean, median, mode, standard deviation, variance, range, minimum, and maximum, in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/math-tools/statistics-calculator" },
   openGraph: {
     title: "Statistics Calculator — Compute Count, Sum, Mean, Median,",
-    description: "Statistics Calculator computes count, sum, mean, median, mode, standard deviation, variance, range, minimum, and maximum from a comma-separated list…",
+    description: "Statistics Calculator computes count, sum, mean, median, mode, standard deviation, variance, range, minimum, and maximum, in your browser.",
     url: "https://www.onlineconvertools.com/tools/math-tools/statistics-calculator",
   },
 };

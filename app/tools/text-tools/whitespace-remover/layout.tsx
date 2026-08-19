@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Whitespace Remover — Offer Four Ways Online Free" },
-  description: "Whitespace Remover offers four ways to clean up spacing in your text — collapse all whitespace, collapse only spaces and tabs, trim leading spaces per line…",
+  description: "Whitespace Remover offers four ways to clean up spacing in your text, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/whitespace-remover" },
   openGraph: {
     title: "Whitespace Remover — Offer Four Ways Online Free",
-    description: "Whitespace Remover offers four ways to clean up spacing in your text — collapse all whitespace, collapse only spaces and tabs, trim leading spaces per line…",
+    description: "Whitespace Remover offers four ways to clean up spacing in your text, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/text-tools/whitespace-remover",
   },
 };

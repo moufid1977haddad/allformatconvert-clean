@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "MOV to GIF — Extract Up to 10 Evenly Spaced Frames Online" },
-  description: "MOV to GIF extracts up to 10 evenly spaced frames from the first 5 seconds of your QuickTime MOV video and encodes them into a real, downloadable animated…",
+  description: "MOV to GIF extracts up to 10 evenly spaced frames from your QuickTime MOV video and encodes them into a real, downloadable GIF.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools/mov-to-gif" },
   openGraph: {
     title: "MOV to GIF — Extract Up to 10 Evenly Spaced Frames Online",
-    description: "MOV to GIF extracts up to 10 evenly spaced frames from the first 5 seconds of your QuickTime MOV video and encodes them into a real, downloadable animated…",
+    description: "MOV to GIF extracts up to 10 evenly spaced frames from your QuickTime MOV video and encodes them into a real, downloadable GIF.",
     url: "https://www.onlineconvertools.com/tools/gif-tools/mov-to-gif",
   },
 };

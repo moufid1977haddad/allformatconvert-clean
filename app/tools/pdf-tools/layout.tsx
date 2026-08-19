@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF Tools — Merge, Split, Compress, and Convert PDFs Online" },
-  description: "PDF Tools is a free online platform that allows users to edit, convert, merge, and manipulate PDF files without requiring software installation or paid…",
+  description: "PDF Tools is a free online platform to edit, convert, merge, and manipulate PDF files without any software installation.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools" },
   openGraph: {
     title: "PDF Tools — Merge, Split, Compress, and Convert PDFs Online",
-    description: "PDF Tools is a free online platform that allows users to edit, convert, merge, and manipulate PDF files without requiring software installation or paid…",
+    description: "PDF Tools is a free online platform to edit, convert, merge, and manipulate PDF files without any software installation.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools",
   },
 };

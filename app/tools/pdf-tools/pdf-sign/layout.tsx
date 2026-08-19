@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF Sign — Let You Draw a Signature Online Free" },
-  description: "PDF Sign lets you draw a signature with your mouse or finger on a canvas and stamps it into the bottom-right corner of your PDF's last page,…",
+  description: "PDF Sign lets you draw a signature with your mouse or finger and stamps it into the bottom-right corner of your PDF's last page.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-sign" },
   openGraph: {
     title: "PDF Sign — Let You Draw a Signature Online Free",
-    description: "PDF Sign lets you draw a signature with your mouse or finger on a canvas and stamps it into the bottom-right corner of your PDF's last page,…",
+    description: "PDF Sign lets you draw a signature with your mouse or finger and stamps it into the bottom-right corner of your PDF's last page.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-sign",
   },
 };

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "JPG to PDF — Be a One-shot Batch Converter: Select Your" },
-  description: "JPG to PDF is a one-shot batch converter: select your JPG or PNG photos, and pdf-lib stitches them into a single PDF right in your browser, with no server…",
+  description: "JPG to PDF is a one-shot batch converter: select your JPG or PNG photos, and pdf-lib stitches them into a single PDF in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/jpg-to-pdf" },
   openGraph: {
     title: "JPG to PDF — Be a One-shot Batch Converter: Select Your",
-    description: "JPG to PDF is a one-shot batch converter: select your JPG or PNG photos, and pdf-lib stitches them into a single PDF right in your browser, with no server…",
+    description: "JPG to PDF is a one-shot batch converter: select your JPG or PNG photos, and pdf-lib stitches them into a single PDF in your browser.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/jpg-to-pdf",
   },
 };

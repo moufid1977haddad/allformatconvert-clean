@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "File Converter — Convert Plain-text-based Files Online Free" },
-  description: "File Converter is a free online tool that converts plain-text-based files between TXT, JSON, CSV, and HTML formats — entirely in your browser, with nothing…",
+  description: "File Converter converts plain-text-based files between TXT, JSON, CSV, and HTML formats, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/file-tools/file-converter" },
   openGraph: {
     title: "File Converter — Convert Plain-text-based Files Online Free",
-    description: "File Converter is a free online tool that converts plain-text-based files between TXT, JSON, CSV, and HTML formats — entirely in your browser, with nothing…",
+    description: "File Converter converts plain-text-based files between TXT, JSON, CSV, and HTML formats, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/file-tools/file-converter",
   },
 };

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF Redact — Search Your Pdf's Text for a Keyword Online" },
-  description: "PDF Redact searches your PDF's text for a keyword using PDF.js, then permanently destroys the matched text rather than just covering it: any page containing…",
+  description: "PDF Redact searches your PDF's text for a keyword, then permanently destroys the matched text rather than just covering it up.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-redact" },
   openGraph: {
     title: "PDF Redact — Search Your Pdf's Text for a Keyword Online",
-    description: "PDF Redact searches your PDF's text for a keyword using PDF.js, then permanently destroys the matched text rather than just covering it: any page containing…",
+    description: "PDF Redact searches your PDF's text for a keyword, then permanently destroys the matched text rather than just covering it up.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-redact",
   },
 };

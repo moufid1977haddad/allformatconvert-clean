@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Percentage Calculator — Offer Three Independent Instant" },
-  description: "Percentage Calculator offers three independent instant calculations — what X% of Y is, what percent X is of Y, and the percentage change from X to Y — all…",
+  description: "Percentage Calculator offers three instant calculations — X% of Y, what percent X is of Y, and percentage change — live as you type.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/math-tools/percentage-calculator" },
   openGraph: {
     title: "Percentage Calculator — Offer Three Independent Instant",
-    description: "Percentage Calculator offers three independent instant calculations — what X% of Y is, what percent X is of Y, and the percentage change from X to Y — all…",
+    description: "Percentage Calculator offers three instant calculations — X% of Y, what percent X is of Y, and percentage change — live as you type.",
     url: "https://www.onlineconvertools.com/tools/math-tools/percentage-calculator",
   },
 };

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF to HTML — Extract Each Page's Plain Text Online Free" },
-  description: "PDF to HTML extracts each page's plain text using the PDF.js library and wraps it in a simple generic HTML page — a bordered box with a page-number heading…",
+  description: "PDF to HTML extracts each page's plain text and wraps it in a simple generic HTML page, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-html" },
   openGraph: {
     title: "PDF to HTML — Extract Each Page's Plain Text Online Free",
-    description: "PDF to HTML extracts each page's plain text using the PDF.js library and wraps it in a simple generic HTML page — a bordered box with a page-number heading…",
+    description: "PDF to HTML extracts each page's plain text and wraps it in a simple generic HTML page, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-html",
   },
 };

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Media Player — Play a Single Audio or Video File Online Free" },
-  description: "Media Player plays a single audio or video file directly in your browser using native HTML5 playback — the file loads locally as a blob URL and is never…",
+  description: "Media Player plays a single audio or video file directly in your browser using native HTML5 playback — nothing is uploaded.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/media-player" },
   openGraph: {
     title: "Media Player — Play a Single Audio or Video File Online Free",
-    description: "Media Player plays a single audio or video file directly in your browser using native HTML5 playback — the file loads locally as a blob URL and is never…",
+    description: "Media Player plays a single audio or video file directly in your browser using native HTML5 playback — nothing is uploaded.",
     url: "https://www.onlineconvertools.com/tools/video-tools/media-player",
   },
 };

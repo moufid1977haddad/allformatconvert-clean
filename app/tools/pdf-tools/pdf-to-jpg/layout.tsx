@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF to JPG — Render Every Page Online Free" },
-  description: "PDF to JPG renders every page onto a canvas at 2x scale and exports each as a separate JPG at a fixed quality setting, using the PDF.js library entirely…",
+  description: "PDF to JPG renders every page onto a canvas at 2x scale and exports each as a separate JPG at a fixed quality, in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-jpg" },
   openGraph: {
     title: "PDF to JPG — Render Every Page Online Free",
-    description: "PDF to JPG renders every page onto a canvas at 2x scale and exports each as a separate JPG at a fixed quality setting, using the PDF.js library entirely…",
+    description: "PDF to JPG renders every page onto a canvas at 2x scale and exports each as a separate JPG at a fixed quality, in your browser.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-jpg",
   },
 };

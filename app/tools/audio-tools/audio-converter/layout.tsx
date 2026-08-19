@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Audio Converter — Convert a Single Audio File Online Free" },
-  description: "Audio Converter converts a single audio file between MP3, WAV, AAC, FLAC, OGG, M4A, and Opus using ffmpeg.wasm, running entirely in your browser — your file…",
+  description: "Audio Converter converts a single audio file between MP3, WAV, AAC, FLAC, OGG, M4A, and Opus, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/audio-tools/audio-converter" },
   openGraph: {
     title: "Audio Converter — Convert a Single Audio File Online Free",
-    description: "Audio Converter converts a single audio file between MP3, WAV, AAC, FLAC, OGG, M4A, and Opus using ffmpeg.wasm, running entirely in your browser — your file…",
+    description: "Audio Converter converts a single audio file between MP3, WAV, AAC, FLAC, OGG, M4A, and Opus, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/audio-tools/audio-converter",
   },
 };

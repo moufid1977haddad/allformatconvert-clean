@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF Crop — Trim Each Page's Crop Box Online Free" },
-  description: "PDF Crop trims each page's crop box by the top, bottom, left, and right margins you enter, using the pdf-lib library entirely in your browser — your file…",
+  description: "PDF Crop trims each page's crop box by the top, bottom, left, and right margins you enter, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-crop" },
   openGraph: {
     title: "PDF Crop — Trim Each Page's Crop Box Online Free",
-    description: "PDF Crop trims each page's crop box by the top, bottom, left, and right margins you enter, using the pdf-lib library entirely in your browser — your file…",
+    description: "PDF Crop trims each page's crop box by the top, bottom, left, and right margins you enter, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-crop",
   },
 };

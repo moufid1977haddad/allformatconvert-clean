@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "GIF Maker — Turn a Sequence Online Free" },
-  description: "GIF Maker turns a sequence of photos or graphics into a real, downloadable animated GIF, entirely in your browser with the gifenc library — nothing…",
+  description: "GIF Maker turns a sequence of photos or graphics into a real, downloadable animated GIF, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools/gif-maker" },
   openGraph: {
     title: "GIF Maker — Turn a Sequence Online Free",
-    description: "GIF Maker turns a sequence of photos or graphics into a real, downloadable animated GIF, entirely in your browser with the gifenc library — nothing…",
+    description: "GIF Maker turns a sequence of photos or graphics into a real, downloadable animated GIF, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/gif-tools/gif-maker",
   },
 };

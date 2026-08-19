@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Image to GIF — Turn a Batch Online Free" },
-  description: "Image to GIF turns a batch of photos already sitting on your device into one animated GIF file, processed entirely client-side with the gifenc library so…",
+  description: "Image to GIF turns a batch of photos on your device into one animated GIF file, processed entirely client-side in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools/image-to-gif" },
   openGraph: {
     title: "Image to GIF — Turn a Batch Online Free",
-    description: "Image to GIF turns a batch of photos already sitting on your device into one animated GIF file, processed entirely client-side with the gifenc library so…",
+    description: "Image to GIF turns a batch of photos on your device into one animated GIF file, processed entirely client-side in your browser.",
     url: "https://www.onlineconvertools.com/tools/gif-tools/image-to-gif",
   },
 };

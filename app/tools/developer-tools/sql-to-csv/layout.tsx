@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "SQL to CSV — Extract Data From INSERT INTO .. Online Free" },
-  description: "SQL to CSV extracts data from INSERT INTO ... VALUES (...) statements in pasted SQL text and turns them into CSV rows, entirely in your browser — nothing…",
+  description: "SQL to CSV extracts data from INSERT INTO VALUES statements in pasted SQL text and turns them into CSV rows, in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/sql-to-csv" },
   openGraph: {
     title: "SQL to CSV — Extract Data From INSERT INTO .. Online Free",
-    description: "SQL to CSV extracts data from INSERT INTO ... VALUES (...) statements in pasted SQL text and turns them into CSV rows, entirely in your browser — nothing…",
+    description: "SQL to CSV extracts data from INSERT INTO VALUES statements in pasted SQL text and turns them into CSV rows, in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/sql-to-csv",
   },
 };

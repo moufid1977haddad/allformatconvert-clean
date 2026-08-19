@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Barcode Generator — Generate Barcodes Online Free" },
-  description: "Barcode Generator is a free online tool that creates scannable barcodes directly in your browser — no software installation, no signup, and no data ever…",
+  description: "Barcode Generator creates scannable barcodes directly in your browser — no software installation, no signup, no data ever leaves your device.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/qr-barcodes-tools/barcode-generator" },
   openGraph: {
     title: "Barcode Generator — Generate Barcodes Online Free",
-    description: "Barcode Generator is a free online tool that creates scannable barcodes directly in your browser — no software installation, no signup, and no data ever…",
+    description: "Barcode Generator creates scannable barcodes directly in your browser — no software installation, no signup, no data ever leaves your device.",
     url: "https://www.onlineconvertools.com/tools/qr-barcodes-tools/barcode-generator",
   },
 };

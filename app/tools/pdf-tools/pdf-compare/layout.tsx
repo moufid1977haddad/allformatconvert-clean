@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Compare PDF — Extract the Text Content Online Free" },
-  description: "Compare PDF extracts the text content of two PDF files entirely in your browser using the PDF.js library, then displays both extractions side by side…",
+  description: "Compare PDF extracts the text content of two PDF files entirely in your browser, then displays both extractions side by side as text.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-compare" },
   openGraph: {
     title: "Compare PDF — Extract the Text Content Online Free",
-    description: "Compare PDF extracts the text content of two PDF files entirely in your browser using the PDF.js library, then displays both extractions side by side…",
+    description: "Compare PDF extracts the text content of two PDF files entirely in your browser, then displays both extractions side by side as text.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-compare",
   },
 };

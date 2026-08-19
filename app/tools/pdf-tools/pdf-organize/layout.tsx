@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF Organize — Let You Reorder Online Free" },
-  description: "PDF Organize lets you reorder and remove pages within a single PDF using Up, Down, and Remove buttons next to a list of pages, entirely in your browser…",
+  description: "PDF Organize lets you reorder and remove pages within a single PDF using Up, Down, and Remove buttons, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-organize" },
   openGraph: {
     title: "PDF Organize — Let You Reorder Online Free",
-    description: "PDF Organize lets you reorder and remove pages within a single PDF using Up, Down, and Remove buttons next to a list of pages, entirely in your browser…",
+    description: "PDF Organize lets you reorder and remove pages within a single PDF using Up, Down, and Remove buttons, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-organize",
   },
 };

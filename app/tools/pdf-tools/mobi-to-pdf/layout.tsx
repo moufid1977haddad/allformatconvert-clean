@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "MOBI to PDF — Properly Decodes Your Kindle Ebook's Internal" },
-  description: "MOBI to PDF properly decodes your Kindle ebook's internal PalmDOC or Huffman/CDIC text compression and the newer KF8 structure used by .azw3 files, right…",
+  description: "MOBI to PDF decodes your Kindle ebook's internal text compression and structure right in your browser, then converts it to a real PDF.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/mobi-to-pdf" },
   openGraph: {
     title: "MOBI to PDF — Properly Decodes Your Kindle Ebook's Internal",
-    description: "MOBI to PDF properly decodes your Kindle ebook's internal PalmDOC or Huffman/CDIC text compression and the newer KF8 structure used by .azw3 files, right…",
+    description: "MOBI to PDF decodes your Kindle ebook's internal text compression and structure right in your browser, then converts it to a real PDF.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/mobi-to-pdf",
   },
 };

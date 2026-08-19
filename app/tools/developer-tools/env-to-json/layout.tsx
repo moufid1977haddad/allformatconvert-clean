@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: ".env to JSON — Parse Key=value Lines Online Free" },
-  description: ".env to JSON parses KEY=VALUE lines into a JSON object, and can also convert a flat JSON object back into .env lines, entirely in your browser — nothing…",
+  description: ".env to JSON parses KEY=VALUE lines into a JSON object, and can convert a flat JSON object back into .env lines, in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/env-to-json" },
   openGraph: {
     title: ".env to JSON — Parse Key=value Lines Online Free",
-    description: ".env to JSON parses KEY=VALUE lines into a JSON object, and can also convert a flat JSON object back into .env lines, entirely in your browser — nothing…",
+    description: ".env to JSON parses KEY=VALUE lines into a JSON object, and can convert a flat JSON object back into .env lines, in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/env-to-json",
   },
 };

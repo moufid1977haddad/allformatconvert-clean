@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF Compress — Rewrite Your Pdf's Internal Structure" },
-  description: "PDF Compress rewrites your PDF's internal structure entirely in your browser using the pdf-lib library, condensing its objects into compact object streams…",
+  description: "PDF Compress rewrites your PDF's internal structure entirely in your browser, condensing its objects into compact object streams.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-compress" },
   openGraph: {
     title: "PDF Compress — Rewrite Your Pdf's Internal Structure",
-    description: "PDF Compress rewrites your PDF's internal structure entirely in your browser using the pdf-lib library, condensing its objects into compact object streams…",
+    description: "PDF Compress rewrites your PDF's internal structure entirely in your browser, condensing its objects into compact object streams.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-compress",
   },
 };

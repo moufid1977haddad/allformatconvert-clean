@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF Translate — Extract Text From the First 5 Pages Online" },
-  description: "PDF Translate extracts text from the first 5 pages of your PDF in your browser using PDF.js, then sends up to the first 3,000 characters of that text to our…",
+  description: "PDF Translate extracts text from the first 5 pages of your PDF in your browser, then sends it to OpenAI's API for translation.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-translate" },
   openGraph: {
     title: "PDF Translate — Extract Text From the First 5 Pages Online",
-    description: "PDF Translate extracts text from the first 5 pages of your PDF in your browser using PDF.js, then sends up to the first 3,000 characters of that text to our…",
+    description: "PDF Translate extracts text from the first 5 pages of your PDF in your browser, then sends it to OpenAI's API for translation.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-translate",
   },
 };

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Subtitle Generator — Be a Manual SRT Subtitle Builder Online" },
-  description: "Subtitle Generator is a manual SRT subtitle builder — add rows with your own start time, end time, and text for each line, and it assembles a standard .srt…",
+  description: "Subtitle Generator is a manual SRT subtitle builder — add rows with your own start time, end time, and text for each line.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/subtitle-generator" },
   openGraph: {
     title: "Subtitle Generator — Be a Manual SRT Subtitle Builder Online",
-    description: "Subtitle Generator is a manual SRT subtitle builder — add rows with your own start time, end time, and text for each line, and it assembles a standard .srt…",
+    description: "Subtitle Generator is a manual SRT subtitle builder — add rows with your own start time, end time, and text for each line.",
     url: "https://www.onlineconvertools.com/tools/video-tools/subtitle-generator",
   },
 };

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "GIF to APNG — Decode Every Frame Online Free" },
-  description: "GIF to APNG decodes every frame of your GIF (using the gifuct-js library) and re-encodes them into a real, downloadable animated PNG (using upng-js)…",
+  description: "GIF to APNG decodes every frame of your GIF and re-encodes it into a real, downloadable animated PNG, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools/gif-to-apng" },
   openGraph: {
     title: "GIF to APNG — Decode Every Frame Online Free",
-    description: "GIF to APNG decodes every frame of your GIF (using the gifuct-js library) and re-encodes them into a real, downloadable animated PNG (using upng-js)…",
+    description: "GIF to APNG decodes every frame of your GIF and re-encodes it into a real, downloadable animated PNG, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/gif-tools/gif-to-apng",
   },
 };

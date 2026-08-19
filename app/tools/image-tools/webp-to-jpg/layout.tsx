@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "WebP to JPG — Convert a Webp Image Online Free" },
-  description: "WebP to JPG converts a WebP image to JPG format entirely in your browser using the HTML canvas — your file is never uploaded to a server, and nothing…",
+  description: "WebP to JPG converts a WebP image to JPG format entirely in your browser — your file is never uploaded to a server.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/webp-to-jpg" },
   openGraph: {
     title: "WebP to JPG — Convert a Webp Image Online Free",
-    description: "WebP to JPG converts a WebP image to JPG format entirely in your browser using the HTML canvas — your file is never uploaded to a server, and nothing…",
+    description: "WebP to JPG converts a WebP image to JPG format entirely in your browser — your file is never uploaded to a server.",
     url: "https://www.onlineconvertools.com/tools/image-tools/webp-to-jpg",
   },
 };

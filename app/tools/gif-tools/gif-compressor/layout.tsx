@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "GIF Compressor — Compress GIF Online Free" },
-  description: "GIF Compressor shrinks your animated GIF's file size while keeping the animation intact, using gifsicle compiled to WebAssembly (gifsicle-wasm-browser)…",
+  description: "GIF Compressor shrinks your animated GIF's file size while keeping the animation intact, entirely in your browser — nothing is uploaded.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools/gif-compressor" },
   openGraph: {
     title: "GIF Compressor — Compress GIF Online Free",
-    description: "GIF Compressor shrinks your animated GIF's file size while keeping the animation intact, using gifsicle compiled to WebAssembly (gifsicle-wasm-browser)…",
+    description: "GIF Compressor shrinks your animated GIF's file size while keeping the animation intact, entirely in your browser — nothing is uploaded.",
     url: "https://www.onlineconvertools.com/tools/gif-tools/gif-compressor",
   },
 };

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "CSS Formatter — Format CSS Online Free" },
-  description: "CSS Formatter expands or minifies CSS entirely in your browser using simple pattern-based rules — breaking lines at braces and semicolons for formatting,…",
+  description: "CSS Formatter expands or minifies CSS entirely in your browser using simple pattern-based rules, rather than a full CSS parser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/css-formatter" },
   openGraph: {
     title: "CSS Formatter — Format CSS Online Free",
-    description: "CSS Formatter expands or minifies CSS entirely in your browser using simple pattern-based rules — breaking lines at braces and semicolons for formatting,…",
+    description: "CSS Formatter expands or minifies CSS entirely in your browser using simple pattern-based rules, rather than a full CSS parser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/css-formatter",
   },
 };

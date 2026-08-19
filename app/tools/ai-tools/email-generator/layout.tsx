@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Email Generator — Generate Emails Online Free" },
-  description: "Email Generator is a free online tool that uses OpenAI's GPT-4o mini model to draft a complete email — subject line, greeting, body, and closing —…",
+  description: "Email Generator uses an AI language model to draft a complete email — subject, greeting, body, and closing — from a short description.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/email-generator" },
   openGraph: {
     title: "Email Generator — Generate Emails Online Free",
-    description: "Email Generator is a free online tool that uses OpenAI's GPT-4o mini model to draft a complete email — subject line, greeting, body, and closing —…",
+    description: "Email Generator uses an AI language model to draft a complete email — subject, greeting, body, and closing — from a short description.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/email-generator",
   },
 };

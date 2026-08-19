@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "AVI to GIF — Extract Up to 10 Evenly Spaced Frames Online" },
-  description: "AVI to GIF extracts up to 10 evenly spaced frames from the first 5 seconds of your AVI video and encodes them into a real, downloadable animated GIF…",
+  description: "AVI to GIF extracts up to 10 evenly spaced frames from your AVI video and encodes them into a real, downloadable animated GIF.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools/avi-to-gif" },
   openGraph: {
     title: "AVI to GIF — Extract Up to 10 Evenly Spaced Frames Online",
-    description: "AVI to GIF extracts up to 10 evenly spaced frames from the first 5 seconds of your AVI video and encodes them into a real, downloadable animated GIF…",
+    description: "AVI to GIF extracts up to 10 evenly spaced frames from your AVI video and encodes them into a real, downloadable animated GIF.",
     url: "https://www.onlineconvertools.com/tools/gif-tools/avi-to-gif",
   },
 };

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Keyword Extractor — Extract Keywords Online Free" },
-  description: "Keyword Extractor is a free online tool that uses OpenAI's GPT-4o mini model to identify the most important keywords and key phrases in a piece of text…",
+  description: "Keyword Extractor uses an AI language model to identify the most important keywords and key phrases in a piece of text you provide.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/keyword-extractor" },
   openGraph: {
     title: "Keyword Extractor — Extract Keywords Online Free",
-    description: "Keyword Extractor is a free online tool that uses OpenAI's GPT-4o mini model to identify the most important keywords and key phrases in a piece of text…",
+    description: "Keyword Extractor uses an AI language model to identify the most important keywords and key phrases in a piece of text you provide.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/keyword-extractor",
   },
 };

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Scientific Calculator — Evaluate Expressions With" },
-  description: "Scientific Calculator evaluates expressions with trigonometric functions, logarithms, square roots, exponents, and parentheses, entirely in your browser…",
+  description: "Scientific Calculator evaluates expressions with trigonometric functions, logarithms, square roots, exponents, and parentheses, in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/math-tools/scientific-calculator" },
   openGraph: {
     title: "Scientific Calculator — Evaluate Expressions With",
-    description: "Scientific Calculator evaluates expressions with trigonometric functions, logarithms, square roots, exponents, and parentheses, entirely in your browser…",
+    description: "Scientific Calculator evaluates expressions with trigonometric functions, logarithms, square roots, exponents, and parentheses, in your browser.",
     url: "https://www.onlineconvertools.com/tools/math-tools/scientific-calculator",
   },
 };
