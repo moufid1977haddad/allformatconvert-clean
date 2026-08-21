@@ -8,6 +8,7 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [resendState, setResendState] = useState('idle');
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -34,7 +35,11 @@ export default function SignUpPage() {
       });
 
       if (error) {
-        setError(error.message);
+        if (error.name === 'AuthRetryableFetchError' || /failed to fetch/i.test(error.message || '')) {
+          setError("We couldn't reach the server. Please check your connection and try again in a moment.");
+        } else {
+          setError(error.message);
+        }
         setLoading(false);
       } else if (data?.user?.identities?.length === 0) {
         setError('An account with this email already exists. Please sign in instead.');
@@ -43,8 +48,23 @@ export default function SignUpPage() {
         setSuccess(true);
       }
     } catch (err) {
-      setError('Something went wrong. Please try again.');
+      if (/failed to fetch/i.test(err?.message || '')) {
+        setError("We couldn't reach the server. Please check your connection and try again in a moment.");
+      } else {
+        setError('Something went wrong. Please try again later.');
+      }
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!form.email) return;
+    setResendState('sending');
+    try {
+      const { error } = await supabase.auth.resend({ type: 'signup', email: form.email });
+      setResendState(error ? 'error' : 'sent');
+    } catch {
+      setResendState('error');
     }
   };
 
@@ -60,7 +80,27 @@ export default function SignUpPage() {
             </div>
             <h2 className="text-xl font-bold text-neutral-800 mb-2">Account created! 🎉</h2>
             <p className="text-neutral-500 text-sm mb-2">Welcome to OnlineConverTools.</p>
-            <p className="text-neutral-400 text-xs mb-6">Please check your email and confirm your account before signing in.</p>
+            <p className="text-neutral-600 text-sm mb-1">
+              We sent a confirmation link to <span className="font-medium">{form.email}</span>.
+            </p>
+            <p className="text-neutral-400 text-xs mb-4">Please check your inbox — and your spam folder — and confirm your address before signing in.</p>
+            <div className="mb-6">
+              {resendState === 'sent' ? (
+                <span className="text-green-600 text-sm font-medium">Confirmation email resent — check your inbox.</span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resendState === 'sending'}
+                  className="text-indigo-600 text-sm font-medium hover:underline disabled:text-neutral-400"
+                >
+                  {resendState === 'sending' ? 'Resending…' : "Didn't get the email? Resend it"}
+                </button>
+              )}
+              {resendState === 'error' && (
+                <p className="text-red-500 text-xs mt-1">Could not resend the email. Please try again later.</p>
+              )}
+            </div>
             <Link href="/signin" className="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition text-center">
               Go to Sign In
             </Link>

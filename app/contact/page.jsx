@@ -32,14 +32,22 @@ export default function ContactPage() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error || 'Something went wrong. Please try again.');
+        if (res.status >= 500) {
+          setError("Our server had a problem sending your message. Please try again in a few minutes.");
+        } else {
+          setError(data.error || 'Something went wrong. Please check your information and try again.');
+        }
         setLoading(false);
         return;
       }
 
       setSubmitted(true);
     } catch (err) {
-      setError('Something went wrong. Please try again.');
+      if (/failed to fetch/i.test(err?.message || '')) {
+        setError("We couldn't reach the server. Please check your connection and try again in a moment.");
+      } else {
+        setError('Something went wrong. Please try again later.');
+      }
       setLoading(false);
     }
   }

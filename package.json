@@ -7,7 +7,8 @@
     "build": "npm run check-links && next build",
     "start": "next start",
     "lint": "eslint",
-    "check-links": "node scripts/check-tool-links.js"
+    "check-links": "node scripts/check-tool-links.js",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@cantoo/pdf-lib": "^2.7.4",
