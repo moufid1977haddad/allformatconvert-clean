@@ -50,7 +50,11 @@ export default function SignInPage() {
     if (!email) return;
     setResendState('sending');
     try {
-      const { error } = await supabase.auth.resend({ type: 'signup', email });
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/signin` },
+      });
       setResendState(error ? 'error' : 'sent');
     } catch {
       setResendState('error');

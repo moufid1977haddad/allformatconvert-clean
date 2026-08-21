@@ -31,7 +31,10 @@ export default function SignUpPage() {
       const { data, error } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
-        options: { data: { full_name: form.name } }
+        options: {
+          data: { full_name: form.name },
+          emailRedirectTo: `${window.location.origin}/signin`,
+        }
       });
 
       if (error) {
@@ -61,7 +64,11 @@ export default function SignUpPage() {
     if (!form.email) return;
     setResendState('sending');
     try {
-      const { error } = await supabase.auth.resend({ type: 'signup', email: form.email });
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: form.email,
+        options: { emailRedirectTo: `${window.location.origin}/signin` },
+      });
       setResendState(error ? 'error' : 'sent');
     } catch {
       setResendState('error');
