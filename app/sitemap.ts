@@ -41,6 +41,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       );
       if (!pageExists) continue;
 
+      const layoutPath = ["layout.tsx", "layout.ts", "layout.jsx", "layout.js"]
+        .map((f) => path.join(categoryDir, slug.name, f))
+        .find((p) => fs.existsSync(p));
+      if (layoutPath) {
+        const layoutSource = fs.readFileSync(layoutPath, "utf-8");
+        const isNoindex = /robots\s*:\s*\{[^}]*index\s*:\s*false/s.test(layoutSource);
+        if (isNoindex) continue;
+      }
+
       toolPages.push({
         url: `${baseUrl}/tools/${category.name}/${slug.name}`,
         priority: 0.6,
