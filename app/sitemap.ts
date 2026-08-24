@@ -46,7 +46,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         .find((p) => fs.existsSync(p));
       if (layoutPath) {
         const layoutSource = fs.readFileSync(layoutPath, "utf-8");
-        const isNoindex = /robots\s*:\s*\{[^}]*index\s*:\s*false/s.test(layoutSource);
+        const isNoindex = /robots\s*:\s*\{[^}]*index\s*:\s*false/.test(layoutSource);
         if (isNoindex) continue;
       }
 
