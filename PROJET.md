@@ -23,8 +23,10 @@
 ## Pages créées
 - `/about` — Page about
 - `/contact` — Page contact
-- `/login` — Page login
+- `/signin` — Page sign in
 - `/signup` — Page signup
+- `/forgot-password` — Demande de réinitialisation de mot de passe
+- `/reset-password` — Saisie du nouveau mot de passe (lien email)
 - `/privacy` — Privacy Policy (sans AdSense pour l'instant)
 - `/terms` — Terms of Service
 - `sitemap.ts` — Sitemap SEO

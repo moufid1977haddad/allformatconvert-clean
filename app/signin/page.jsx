@@ -27,6 +27,8 @@ export default function SignInPage() {
         if (error.code === 'email_not_confirmed' || /email not confirmed/i.test(error.message || '')) {
           setNeedsConfirmation(true);
           setError('Your email address is not confirmed yet. Please check your inbox (and spam folder) for the confirmation link.');
+        } else if (error.code === 'invalid_credentials' || /invalid login credentials/i.test(error.message || '')) {
+          setError('Incorrect email or password. If you forgot your password, you can reset it below — or sign up if you don’t have an account yet.');
         } else if (error.name === 'AuthRetryableFetchError' || /failed to fetch/i.test(error.message || '')) {
           setError("We couldn't reach the server. Please check your connection and try again in a moment.");
         } else {

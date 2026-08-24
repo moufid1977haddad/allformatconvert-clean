@@ -7,6 +7,7 @@ export default function SignUpPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [existingUnconfirmed, setExistingUnconfirmed] = useState(false);
   const [error, setError] = useState('');
   const [resendState, setResendState] = useState('idle');
 
@@ -47,6 +48,11 @@ export default function SignUpPage() {
       } else if (data?.user?.identities?.length === 0) {
         setError('An account with this email already exists. Please sign in instead.');
         setLoading(false);
+      } else if (data?.user && Date.now() - new Date(data.user.created_at).getTime() > 10000) {
+        // Supabase returns a "success" response for a duplicate signup on an
+        // unconfirmed account too, but silently keeps the original password.
+        setExistingUnconfirmed(true);
+        setLoading(false);
       } else {
         setSuccess(true);
       }
@@ -75,6 +81,48 @@ export default function SignUpPage() {
     }
   };
 
+  if (existingUnconfirmed) {
+    return (
+      <div className="min-h-screen bg-neutral-100 flex items-center justify-center p-6">
+        <div className="w-full max-w-md text-center">
+          <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-10">
+            <h2 className="text-xl font-bold text-neutral-800 mb-2">This email is already pending confirmation</h2>
+            <p className="text-neutral-600 text-sm mb-1">
+              An account for <span className="font-medium">{form.email}</span> was already created but not confirmed yet.
+            </p>
+            <p className="text-neutral-500 text-sm mb-4">
+              For security, the password you just entered was <span className="font-medium">not</span> saved — the account still uses the password from when it was first created.
+            </p>
+            <div className="mb-6 space-y-2">
+              {resendState === 'sent' ? (
+                <p className="text-green-600 text-sm font-medium">Confirmation email resent — check your inbox.</p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resendState === 'sending'}
+                  className="text-indigo-600 text-sm font-medium hover:underline disabled:text-neutral-400 block w-full"
+                >
+                  {resendState === 'sending' ? 'Resending…' : 'Resend the confirmation email'}
+                </button>
+              )}
+              {resendState === 'error' && (
+                <p className="text-red-500 text-xs">Could not resend the email. Please try again later.</p>
+              )}
+              <p className="text-neutral-400 text-xs pt-1">
+                Don't remember the original password?{' '}
+                <Link href="/forgot-password" className="text-indigo-600 hover:underline">Reset it</Link> — this also confirms your email.
+              </p>
+            </div>
+            <Link href="/signin" className="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition text-center">
+              Go to Sign In
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (success) {
     return (
       <div className="min-h-screen bg-neutral-100 flex items-center justify-center p-6">
@@ -90,7 +138,8 @@ export default function SignUpPage() {
             <p className="text-neutral-600 text-sm mb-1">
               We sent a confirmation link to <span className="font-medium">{form.email}</span>.
             </p>
-            <p className="text-neutral-400 text-xs mb-4">Please check your inbox — and your spam folder — and confirm your address before signing in.</p>
+            <p className="text-neutral-400 text-xs mb-1">Please check your inbox — and your spam folder — and confirm your address before signing in.</p>
+            <p className="text-neutral-400 text-xs mb-4">Using iCloud or Yahoo Mail? If it lands in Junk, please mark it "Not Junk" — it helps make sure our emails reach you (and others) reliably in the future.</p>
             <div className="mb-6">
               {resendState === 'sent' ? (
                 <span className="text-green-600 text-sm font-medium">Confirmation email resent — check your inbox.</span>
