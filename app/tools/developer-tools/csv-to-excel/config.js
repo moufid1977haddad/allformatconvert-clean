@@ -1,21 +1,34 @@
-// Measured with Node (same parse/build code, comparable V8 engine) against
-// synthetic product-catalog CSVs: 500,000 rows completes in ~14s and stays
-// well clear of the memory blowup that hits at higher row counts (1M rows
-// took ~37s with sharply worsening GC pressure; 2M rows crashed with an
-// out-of-memory error). This is a client-side row limit, not Excel's own
-// 1,048,576-rows-per-sheet ceiling -- files this size never approach that.
-// Confirmed against real Chrome in production (not just Node): 500,000 rows
-// (93MB CSV) completed in 30.3s and produced a 257MB .xlsx download without
-// issue -- the browser adds roughly 1.5x Node's time (worker transfer +
-// engine overhead) but no crash risk at this cap.
-export const MAX_ROWS = 500000;
+// Re-measured 2026-08-25: the previous 500,000-row cap was rejected. Node
+// peak RSS at that size was 4.25GB against a live-measured Chrome tab heap
+// ceiling of ~4.19GB (via performance.memory.jsHeapSizeLimit) -- that's the
+// edge of the cliff, not a safety margin, and a laptop with 8GB total RAM
+// and other tabs open would crash where this dev machine didn't.
+//
+// The memory ceiling is the decisive constraint (it's what kills the tab),
+// with a secondary real-browser time budget of 15s. Node peak RSS measured
+// against synthetic product-catalog CSVs (same shape used for the original
+// benchmark, reproduced to within ~10% of its 500k-row numbers):
+//   200,000 rows: ~1.5GB peak RSS, ~8.1s Node / ~12.5s real-browser (x1.55)
+//   250,000 rows: ~2.0GB peak RSS, ~11.8s Node / ~18.3s real-browser
+//   300,000 rows: ~2.3GB peak RSS, ~16.2s Node / ~25.1s real-browser
+// 250,000 already blows the 15s real-browser time budget even though its
+// memory is still (barely) under half the heap ceiling; 300,000 fails both.
+// 200,000 rows is the largest tier that clears both bars with real margin:
+// ~1.5GB is ~36% of the 4.19GB ceiling (well under the 50% target), and
+// ~12.5s leaves ~2.5s of headroom under the 15s budget. This is a client-side
+// row limit, not Excel's own 1,048,576-rows-per-sheet ceiling -- files this
+// size never approach that.
+export const MAX_ROWS = 200000;
 
-// Lower cap for phones/tablets. Node measurements at this size: 620MB peak
-// RSS and a 25MB output file, vs. 4.25GB RSS and a 257MB output file at the
-// desktop cap above. Mobile browser tabs are commonly killed well under
-// 2GB (iOS Safari) or even less on low-RAM Android devices, and a 257MB
-// download is impractical on a phone regardless of memory; 50,000 rows
-// keeps both the memory footprint and the download size in territory that's
-// safe across real-world mobile hardware, with several times the margin of
-// the desktop cap relative to its own crash risk.
-export const MOBILE_MAX_ROWS = 50000;
+// Lower cap for phones/tablets. Re-measured 2026-08-25 for the same reason
+// as the desktop cap above: the previous 50,000-row tier peaked at 620MB
+// Node RSS, too close to what a 1-2GB-RAM entry-level Android phone can
+// actually give a single tab (commonly well under 500MB once the OS and
+// browser chrome take their share) -- iOS Safari's ~2GB kill threshold isn't
+// the binding constraint here, low-RAM Android is.
+//   20,000 rows: ~357MB peak RSS, ~0.7s Node / ~1.1s real-browser
+//   30,000 rows: ~437MB peak RSS, ~1.2s Node / ~1.9s real-browser
+// 30,000 rows (437MB) leaves little real margin against a conservative
+// ~500MB entry-level budget. 20,000 rows (357MB) leaves clear margin --
+// about 29% of a 500MB budget still free -- so it's the tier kept.
+export const MOBILE_MAX_ROWS = 20000;

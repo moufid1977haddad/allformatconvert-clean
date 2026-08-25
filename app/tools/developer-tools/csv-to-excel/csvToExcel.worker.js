@@ -3,7 +3,7 @@ import { MAX_ROWS } from './config';
 
 class RowLimitExceededError extends Error {
   constructor(limit) {
-    super(`This CSV has more than ${limit.toLocaleString()} rows.`);
+    super(`This CSV has more than ${limit.toLocaleString()} rows, counting the header row.`);
     this.name = 'RowLimitExceededError';
     this.limit = limit;
   }

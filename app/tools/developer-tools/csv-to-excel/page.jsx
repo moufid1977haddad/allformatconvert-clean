@@ -15,18 +15,18 @@ const MAX_ROWS_LABEL = MAX_ROWS.toLocaleString();
 const MOBILE_MAX_ROWS_LABEL = MOBILE_MAX_ROWS.toLocaleString();
 
 // Time estimate breakpoints: [CSV size in MB, seconds], measured in Node
-// (parse + sheet build + xlsx write) and scaled by 1.55x to match real
-// Chrome production behavior -- confirmed against a 93.3MB/500,000-row file
-// that measured 30.3s in-browser vs. 19.87s in Node (a 1.525x ratio). Shown
-// to the user immediately on file selection, before they click Convert.
+// (parse + sheet build + xlsx write) against the new 200,000-row cap and
+// scaled by 1.55x to match real Chrome production behavior -- that ratio
+// was confirmed separately against a 93.3MB/500,000-row file that measured
+// 30.3s in-browser vs. 19.87s in Node (a 1.525x ratio). Shown to the user
+// immediately on file selection, before they click Convert.
 const TIME_ESTIMATE_BREAKPOINTS = [
   [0, 0],
-  [9.1, 2.4],
-  [18.2, 6.4],
-  [37.0, 10.1],
-  [55.7, 17.0],
-  [74.5, 21.2],
-  [93.3, 30.8],
+  [3.2, 1.1],
+  [8.1, 3.3],
+  [16.3, 5.7],
+  [24.6, 8.7],
+  [32.9, 12.5],
 ];
 
 function estimateSeconds(fileSizeBytes) {
@@ -136,7 +136,7 @@ export default function CsvToExcelPage() {
       } else if (msg.type === 'row_limit') {
         setConverting(false);
         workerRef.current = null;
-        setError(`This CSV has more than ${msg.limit.toLocaleString()} rows — in-browser conversion becomes unreliable beyond that point. Please split your file into smaller pieces and convert them separately.`);
+        setError(`This CSV has more than ${msg.limit.toLocaleString()} rows, counting the header row as row 1 — in-browser conversion becomes unreliable beyond that point. If your data itself has exactly ${msg.limit.toLocaleString()} rows plus a header, that's one row over the limit. Please split your file into smaller pieces and convert them separately.`);
       } else if (msg.type === 'error') {
         setConverting(false);
         workerRef.current = null;
@@ -156,7 +156,7 @@ export default function CsvToExcelPage() {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">CSV to Excel</h1>
         <p className="text-neutral-500 dark:text-neutral-400 text-center mb-2">Convert CSV to Excel format</p>
-        <p className="text-neutral-400 dark:text-neutral-500 text-xs text-center mb-8">Supports CSVs up to {effectiveMaxRowsLabel} rows{isMobile ? ' on this device' : ''} (files up to {MAX_FILE_SIZE_LABEL}). Conversion runs in the background — this tab stays responsive.</p>
+        <p className="text-neutral-400 dark:text-neutral-500 text-xs text-center mb-8">Supports CSVs up to {effectiveMaxRowsLabel} rows (including the header row){isMobile ? ' on this device' : ''} (files up to {MAX_FILE_SIZE_LABEL}). Conversion runs in the background — this tab stays responsive.</p>
         <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-600 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500 dark:text-neutral-400 text-sm">{fileName || 'Click or drop a .csv file here'}</p>
@@ -206,7 +206,7 @@ export default function CsvToExcelPage() {
           { q: "What output format does it produce?", a: "Always .xlsx. There's no .xls (legacy Excel) option." },
           { q: "Is my data uploaded to a server?", a: "No, the workbook is built entirely in your browser using the xlsx library, in a background Web Worker so the page never freezes." },
           { q: "Does it handle CSV values that contain commas, like quoted fields?", a: "Yes — a value wrapped in double quotes (e.g. \"Smith, John\") is parsed as a single field and its comma is preserved intact, rather than being split into extra columns." },
-          { q: "Why is there a row limit, if Excel itself allows over a million rows per sheet?", a: `Excel's own format allows up to 1,048,576 rows per sheet, but converting a file anywhere near that size in a browser tab risks running out of memory and crashing the tab rather than just being slow. ${MAX_ROWS_LABEL} rows is the limit we've measured to convert reliably on desktop; beyond that, split your CSV into smaller files first.` },
+          { q: "Why is there a row limit, if Excel itself allows over a million rows per sheet?", a: `Excel's own format allows up to 1,048,576 rows per sheet, but converting a file anywhere near that size in a browser tab risks running out of memory and crashing the tab rather than just being slow. ${MAX_ROWS_LABEL} rows is the limit we've measured to convert reliably on desktop; beyond that, split your CSV into smaller files first. The count includes the header row, the same way Excel itself counts it as row 1.` },
           { q: "Why is the row limit lower on my phone?", a: `On phones and tablets the cap is ${MOBILE_MAX_ROWS_LABEL} rows instead of ${MAX_ROWS_LABEL}. Mobile browser tabs get killed at a much lower memory ceiling than desktop tabs, and large CSVs also produce large .xlsx downloads that are impractical to save on a phone — the lower cap keeps mobile conversions reliable.` }
         ]}
         tips={[
