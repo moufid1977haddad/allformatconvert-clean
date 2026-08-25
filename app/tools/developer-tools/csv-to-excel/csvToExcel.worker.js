@@ -9,16 +9,17 @@ class RowLimitExceededError extends Error {
   }
 }
 
-async function run({ file, text }) {
+async function run({ file, text, maxRows }) {
+  const limit = maxRows || MAX_ROWS;
   const rows = [];
   const parser = new IncrementalCsvParser((row) => {
     rows.push(row);
     // Bail out as soon as the limit is crossed, mid-read, rather than
     // finishing the parse and risking the memory blowup that a huge row
     // count causes in the sheet-build/xlsx-write phase (measured: 2,000,000
-    // rows crashes with an out-of-memory error; the MAX_ROWS cap keeps this
+    // rows crashes with an out-of-memory error; the row cap keeps this
     // tool well inside the range that reliably completes).
-    if (rows.length > MAX_ROWS) throw new RowLimitExceededError(MAX_ROWS);
+    if (rows.length > limit) throw new RowLimitExceededError(limit);
   });
 
   if (file) {
