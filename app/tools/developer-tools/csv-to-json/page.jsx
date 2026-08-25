@@ -1,38 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
-
-// RFC 4180-style CSV parser: splitting on plain commas/newlines breaks the
-// moment a quoted field contains one of those characters (e.g. "Smith, John"
-// or a value with an embedded newline) — the field gets sliced apart into
-// extra columns instead of staying intact. This tracks quote state so commas
-// and newlines inside a quoted field are treated as literal data, and a
-// doubled "" inside a quoted field is unescaped to a single ".
-function parseCsvRows(input) {
-  const rows = [];
-  let row = [];
-  let field = '';
-  let inQuotes = false;
-  let i = 0;
-  const n = input.length;
-  while (i < n) {
-    const c = input[i];
-    if (inQuotes) {
-      if (c === '"') {
-        if (input[i + 1] === '"') { field += '"'; i += 2; continue; }
-        inQuotes = false; i++; continue;
-      }
-      field += c; i++; continue;
-    }
-    if (c === '"') { inQuotes = true; i++; continue; }
-    if (c === ',') { row.push(field); field = ''; i++; continue; }
-    if (c === '\r') { i++; continue; }
-    if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; i++; continue; }
-    field += c; i++;
-  }
-  if (field !== '' || row.length > 0) { row.push(field); rows.push(row); }
-  return rows;
-}
+import { parseCsvRows } from '../../../lib/csvParser';
 
 export default function CsvToJsonPage() {
   const [input, setInput] = useState('');
