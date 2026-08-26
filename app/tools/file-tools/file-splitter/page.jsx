@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL, MAX_CHUNKS } from './config';
 export default function FileSplitterPage() {
   const [file, setFile] = useState(null);
   const [chunkSize, setChunkSize] = useState(1);
@@ -9,9 +10,20 @@ export default function FileSplitterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const inputRef = useRef();
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setChunks([]); setError(''); };
+  const handleFile = (e) => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    setChunks([]);
+    setError('');
+    if (f && f.size > MAX_FILE_SIZE_BYTES) {
+      setError(`This file is ${(f.size / (1024 * 1024 * 1024)).toFixed(1)} GB, which is over the ${MAX_FILE_SIZE_LABEL} limit.`);
+      setFile(null);
+      return;
+    }
+    setFile(f);
+  };
   const chunkSizeValid = Number.isFinite(chunkSize) && chunkSize > 0;
-  const split = async () => {
+  const split = () => {
     if (!file) return;
     if (!chunkSizeValid) { setError('Chunk size must be a positive number.'); return; }
     setError('');
@@ -19,13 +31,24 @@ export default function FileSplitterPage() {
     try {
       const sizes = { B: 1, KB: 1024, MB: 1024*1024 };
       const bytesPerChunk = chunkSize * sizes[unit];
-      const arrayBuffer = await file.arrayBuffer();
-      const bytes = new Uint8Array(arrayBuffer);
+      const expectedChunks = Math.ceil(file.size / bytesPerChunk);
+      if (expectedChunks > MAX_CHUNKS) {
+        setError(`That chunk size would produce ${expectedChunks.toLocaleString()} parts, over the ${MAX_CHUNKS.toLocaleString()}-part limit. Choose a larger chunk size.`);
+        setChunks([]);
+        setLoading(false);
+        return;
+      }
+      // Blob.slice() is a lazy, zero-copy view -- it reads no bytes now,
+      // only when a chunk is actually downloaded later. The file itself
+      // is never read into memory here, so this is safe regardless of
+      // file size (unlike the previous file.arrayBuffer() + manual byte
+      // slicing, which fully materialized the file and then duplicated
+      // it again across every chunk's own Blob).
       const newChunks = [];
-      for (let i = 0; i < bytes.length; i += bytesPerChunk) {
-        const chunk = bytes.slice(i, i + bytesPerChunk);
-        const blob = new Blob([chunk]);
-        newChunks.push({ url: URL.createObjectURL(blob), size: chunk.length, index: newChunks.length + 1 });
+      for (let i = 0; i < file.size; i += bytesPerChunk) {
+        const end = Math.min(i + bytesPerChunk, file.size);
+        const chunk = file.slice(i, end);
+        newChunks.push({ url: URL.createObjectURL(chunk), size: chunk.size, index: newChunks.length + 1 });
       }
       setChunks(newChunks);
     } catch (err) {
@@ -39,7 +62,8 @@ export default function FileSplitterPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">File Splitter</h1>
-        <p className="text-neutral-500 text-center mb-8">Split large files into smaller parts</p>
+        <p className="text-neutral-500 text-center mb-2">Split large files into smaller parts</p>
+        <p className="text-neutral-400 text-xs text-center mb-8">Supports files up to {MAX_FILE_SIZE_LABEL} and up to {MAX_CHUNKS.toLocaleString()} parts. Splitting is instant — chunks are lazy byte-range views, not copied into memory.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a file here'}</p>
@@ -76,13 +100,13 @@ export default function FileSplitterPage() {
         faqs={[
           { q: "What file types can I split?", a: "Any file type — splitting works purely on raw bytes, so there are no format restrictions." },
           { q: "Does File Splitter include a way to merge the parts back together?", a: "Not on this page — this tool only splits files. You'll need a separate file-joining utility, or a command like \"copy /b\" on Windows or \"cat\" on Mac/Linux, to reassemble the parts in order." },
-          { q: "Is there a file size limit?", a: "No hard limit is enforced, but very large files depend on your browser's available memory since everything is processed locally." },
+          { q: "Is there a file size limit?", a: `Files up to ${MAX_FILE_SIZE_LABEL} are supported, and a split can't produce more than ${MAX_CHUNKS.toLocaleString()} parts (pick a larger chunk size if you hit that). Splitting itself doesn't load your file into memory -- each part is a lazy byte-range view of the original, only read when you actually download it -- so file size isn't the limiting factor the way it is for tools that have to process a file's full contents.` },
           { q: "Is my data private?", a: "Yes. Splitting happens entirely in your browser — your file is never uploaded to a server." }
         ]}
         tips={[
           "Parts are numbered sequentially and automatically — keep them together in the same folder and in order for easy reassembly.",
           "Pick a chunk size just under your target limit (e.g. 24MB for a 25MB email attachment) to leave room for any encoding overhead.",
-          "Very large files may take a moment to process since splitting happens in your browser's memory.",
+          "Splitting is instant regardless of file size, since parts are lazy views rather than copies — only downloading a part actually reads its bytes.",
           "Keep the original file until you've confirmed you can successfully rejoin and use the split parts."
         ]}
       />
