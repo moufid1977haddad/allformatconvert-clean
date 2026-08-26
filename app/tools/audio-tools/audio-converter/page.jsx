@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import ProgressBar from '../../../components/ProgressBar';
 
 const formats = ['mp3', 'wav', 'aac', 'flac', 'ogg', 'm4a', 'opus'];
 
@@ -9,9 +10,11 @@ export default function AudioConverterPage() {
   const [file, setFile] = useState(null);
   const [format, setFormat] = useState('mp3');
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const fileRef = useRef();
+  const ffmpegRef = useRef(null);
 
   const handleFile = (e) => {
     const f = e.target.files[0];
@@ -21,14 +24,28 @@ export default function AudioConverterPage() {
     setError('');
   };
 
+  const cancel = () => {
+    if (ffmpegRef.current) {
+      ffmpegRef.current.terminate();
+      ffmpegRef.current = null;
+    }
+    setLoading(false);
+    setProgress(0);
+  };
+
   const convert = async () => {
     if (!file) return;
     setLoading(true);
+    setProgress(0);
     setError('');
     try {
       const { FFmpeg } = await import('@ffmpeg/ffmpeg');
       const { fetchFile } = await import('@ffmpeg/util');
       const ffmpeg = new FFmpeg();
+      ffmpegRef.current = ffmpeg;
+      ffmpeg.on('progress', ({ progress }) => {
+        setProgress(Math.round(Math.min(1, Math.max(0, progress)) * 100));
+      });
       await ffmpeg.load();
       const inputName = 'input.' + file.name.split('.').pop();
       const outputName = 'output.' + format;
@@ -37,9 +54,11 @@ export default function AudioConverterPage() {
       const data = await ffmpeg.readFile(outputName);
       const url = URL.createObjectURL(new Blob([data.buffer], { type: 'audio/' + format }));
       setResult({ url, name: file.name.replace(/\.[^.]+$/, '') + '.' + format });
+      setProgress(100);
     } catch(e) {
-      setError('Conversion failed: ' + e.message);
+      if (ffmpegRef.current) setError('Conversion failed: ' + e.message);
     }
+    ffmpegRef.current = null;
     setLoading(false);
   };
 
@@ -60,9 +79,16 @@ export default function AudioConverterPage() {
               {formats.map(f => <option key={f} value={f}>{f.toUpperCase()}</option>)}
             </select>
           </div>
-          <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
-            {loading ? 'Converting...' : 'Convert Audio'}
-          </button>
+          {loading ? (
+            <div className="space-y-3">
+              <ProgressBar pct={progress} label="Converting…" />
+              <button onClick={cancel} className="w-full bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl py-3 font-semibold transition">Cancel</button>
+            </div>
+          ) : (
+            <button onClick={convert} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+              Convert Audio
+            </button>
+          )}
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {result && (
             <div className="space-y-2">
