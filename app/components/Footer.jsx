@@ -50,13 +50,8 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-        <div className="border-t border-neutral-200 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="border-t border-neutral-200 mt-10 pt-6 flex justify-center items-center">
           <p className="text-sm text-neutral-700 dark:text-neutral-400 font-light tracking-wide">© 2026 OnlineConverTools. All rights reserved.</p>
-          <div className="flex gap-6 text-sm">
-            <Link href="/privacy" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">Privacy</Link>
-            <Link href="/terms" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">Terms</Link>
-            <Link href="/contact" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">Contact</Link>
-          </div>
         </div>
       </div>
     </footer>
