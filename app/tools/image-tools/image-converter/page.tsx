@@ -1,7 +1,10 @@
 'use client';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Lock, Zap, Package, Folder, Image as ImageIcon } from 'lucide-react';
 import SeoContent from '../../../components/SeoContent';
+import ProgressBar from '../../../components/ProgressBar';
+import { MAX_MEGAPIXELS, MOBILE_MAX_MEGAPIXELS, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL, MOBILE_MAX_FILE_SIZE_BYTES, MOBILE_MAX_FILE_SIZE_LABEL } from './config';
+import { isMobileDevice } from '../../../lib/isMobileDevice';
 
 interface ConvertedFile {
   originalName: string;
@@ -16,69 +19,83 @@ export default function ImageConverterPage() {
   const [quality, setQuality] = useState(80);
   const [converted, setConverted] = useState<ConvertedFile[]>([]);
   const [processing, setProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const workerRef = useRef<Worker | null>(null);
+
+  useEffect(() => {
+    setIsMobile(isMobileDevice());
+  }, []);
+
+  const maxMegapixels = isMobile ? MOBILE_MAX_MEGAPIXELS : MAX_MEGAPIXELS;
+  const maxFileBytes = isMobile ? MOBILE_MAX_FILE_SIZE_BYTES : MAX_FILE_SIZE_BYTES;
+  const maxFileLabel = isMobile ? MOBILE_MAX_FILE_SIZE_LABEL : MAX_FILE_SIZE_LABEL;
 
   const addFiles = (incoming: File[]) => {
     const imageFiles = incoming.filter(f => f.type.startsWith('image/'));
-    setFiles(prev => [...prev, ...imageFiles]);
+    const tooLarge = imageFiles.filter(f => f.size > maxFileBytes);
+    const ok = imageFiles.filter(f => f.size <= maxFileBytes);
+    setFiles(prev => [...prev, ...ok]);
     setConverted([]);
+    if (tooLarge.length > 0) {
+      setError(`${tooLarge.length} file${tooLarge.length > 1 ? 's' : ''} skipped for being over the ${maxFileLabel} limit${isMobile ? ' on this device' : ''}:\n` + tooLarge.map(f => f.name).join('\n'));
+    }
   };
 
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setDragging(false);
     addFiles(Array.from(e.dataTransfer.files));
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [maxFileBytes, isMobile]);
 
-  const convertImage = async (file: File): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.src = URL.createObjectURL(file);
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) ctx.drawImage(img, 0, 0);
-        let mime = 'image/webp';
-        if (format === 'jpg') mime = 'image/jpeg';
-        if (format === 'png') mime = 'image/png';
-        if (format === 'avif') mime = 'image/avif';
-        canvas.toBlob((blob) => resolve(blob!), mime, quality / 100);
-        URL.revokeObjectURL(img.src);
-      };
-      img.onerror = () => {
-        URL.revokeObjectURL(img.src);
-        reject(new Error(`Failed to load "${file.name}". It may be corrupted or in an unsupported format.`));
-      };
-    });
+  const cancel = () => {
+    if (workerRef.current) {
+      workerRef.current.terminate();
+      workerRef.current = null;
+    }
+    setProcessing(false);
+    setProgress(0);
   };
 
-  const handleConvert = async () => {
+  const handleConvert = () => {
     setProcessing(true);
+    setProgress(0);
     setError('');
     const results: ConvertedFile[] = [];
     const failures: string[] = [];
-    for (const file of files) {
-      try {
-        const convertedBlob = await convertImage(file);
-        results.push({
-          originalName: file.name,
-          originalSize: file.size,
-          convertedBlob,
-          convertedSize: convertedBlob.size,
-        });
-      } catch (err) {
-        failures.push(`${file.name}: ${err instanceof Error ? err.message : 'conversion failed'}`);
+
+    const worker = new Worker(new URL('./imageConverter.worker.js', import.meta.url), { type: 'module' });
+    workerRef.current = worker;
+
+    worker.onmessage = (e) => {
+      const msg = e.data;
+      if (msg.type === 'progress') {
+        setProgress(msg.pct);
+      } else if (msg.type === 'file-done') {
+        results.push({ originalName: msg.name, originalSize: msg.originalSize, convertedBlob: msg.blob, convertedSize: msg.convertedSize });
+        setConverted([...results]);
+      } else if (msg.type === 'file-error') {
+        failures.push(`${msg.name}: ${msg.message}`);
+        setError(`${failures.length} file${failures.length > 1 ? 's' : ''} failed to convert:\n` + failures.join('\n'));
+      } else if (msg.type === 'done') {
+        setProcessing(false);
+        workerRef.current = null;
+      } else if (msg.type === 'error') {
+        setProcessing(false);
+        workerRef.current = null;
+        setError('Conversion failed: ' + msg.message);
       }
-    }
-    setConverted(results);
-    if (failures.length > 0) {
-      setError(`${failures.length} file${failures.length > 1 ? 's' : ''} failed to convert:\n` + failures.join('\n'));
-    }
-    setProcessing(false);
+    };
+    worker.onerror = (err) => {
+      setProcessing(false);
+      workerRef.current = null;
+      setError('Conversion failed: ' + (err?.message || 'unknown worker error'));
+    };
+    worker.postMessage({ files, format, quality, maxMegapixels });
   };
 
   const downloadOne = (item: ConvertedFile) => {
@@ -110,7 +127,8 @@ export default function ImageConverterPage() {
       <div className="max-w-3xl mx-auto">
 
         <h1 className="text-3xl font-bold text-center mb-2">Image Converter</h1>
-        <p className="text-neutral-500 text-center mb-8">Convert images to PNG, JPG, WebP or AVIF — 100% local, nothing uploaded to any server.</p>
+        <p className="text-neutral-500 text-center mb-2">Convert images to PNG, JPG, WebP or AVIF — 100% local, nothing uploaded to any server.</p>
+        <p className="text-neutral-400 text-xs text-center mb-8">Each image up to {maxMegapixels} megapixels{isMobile ? ' on this device' : ''} (files up to {maxFileLabel}). Conversion runs in the background — this tab stays responsive.</p>
 
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
 
@@ -158,7 +176,7 @@ export default function ImageConverterPage() {
                         <p className="text-xs text-neutral-400">{formatSize(file.size)}</p>
                       </div>
                     </div>
-                    <button onClick={() => removeFile(idx)} className="text-neutral-400 hover:text-red-500 transition text-lg">✕</button>
+                    <button onClick={() => removeFile(idx)} disabled={processing} className="text-neutral-400 hover:text-red-500 transition text-lg">✕</button>
                   </div>
                 ))}
               </div>
@@ -172,6 +190,7 @@ export default function ImageConverterPage() {
                     <select
                       value={format}
                       onChange={(e) => setFormat(e.target.value)}
+                      disabled={processing}
                       className="bg-white border border-neutral-200 rounded-lg px-3 py-2 text-sm text-neutral-800 focus:outline-none focus:border-indigo-400"
                     >
                       <option value="webp">WebP</option>
@@ -188,19 +207,26 @@ export default function ImageConverterPage() {
                       max="100"
                       value={quality}
                       onChange={(e) => setQuality(parseInt(e.target.value))}
+                      disabled={processing}
                       className="w-full accent-indigo-500"
                     />
                   </div>
                 </div>
               </div>
 
-              <button
-                onClick={handleConvert}
-                disabled={processing}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition"
-              >
-                {processing ? 'Converting...' : `Convert ${files.length} file${files.length > 1 ? 's' : ''} to ${format.toUpperCase()}`}
-              </button>
+              {processing ? (
+                <div className="space-y-3">
+                  <ProgressBar pct={progress} label="Converting…" />
+                  <button onClick={cancel} className="w-full bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl py-3 font-semibold transition">Cancel</button>
+                </div>
+              ) : (
+                <button
+                  onClick={handleConvert}
+                  className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition"
+                >
+                  {`Convert ${files.length} file${files.length > 1 ? 's' : ''} to ${format.toUpperCase()}`}
+                </button>
+              )}
             </div>
           )}
 
@@ -209,7 +235,7 @@ export default function ImageConverterPage() {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-bold text-neutral-800">Results</h3>
-                {converted.length > 1 && (
+                {converted.length > 1 && !processing && (
                   <button
                     onClick={downloadAll}
                     className="bg-green-600 hover:bg-green-500 text-white text-sm font-semibold px-4 py-2 rounded-xl transition"
@@ -264,7 +290,7 @@ export default function ImageConverterPage() {
       </div>
       <SeoContent
         title="Image Converter"
-        description="Image Converter is a free online tool that converts images between PNG, JPG, WebP, and AVIF entirely in your browser — nothing is ever uploaded to a server. Drop in one or many images, pick your target format and quality, and download the results instantly, with a live before/after size comparison for every file."
+        description="Image Converter is a free online tool that converts images between PNG, JPG, WebP, and AVIF entirely in your browser — nothing is ever uploaded to a server. Drop in one or many images, pick your target format and quality, and download the results instantly, with a live before/after size comparison for every file. Conversion runs in a background Web Worker so the page stays responsive even on large batches."
         howTo={[
           "Drop or click to upload one or more images (PNG, JPG, WebP, AVIF, GIF, BMP, or TIFF are all accepted).",
           "Choose your output format: WebP, PNG, JPG, or AVIF.",
@@ -272,10 +298,11 @@ export default function ImageConverterPage() {
           "Click Convert, then download each result individually or use \"Download all\" for the whole batch."
         ]}
         faqs={[
-          { q: "Is Image Converter free to use?", a: "Yes, it's completely free with no signup and no limit on how many images you can convert." },
-          { q: "Are my images uploaded anywhere?", a: "No. Every conversion happens locally in your browser using the Canvas API — your files never leave your device." },
+          { q: "Is Image Converter free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Are my images uploaded anywhere?", a: "No. Every conversion happens locally in your browser, in a background Web Worker — your files never leave your device." },
           { q: "Which formats are supported?", a: "You can upload PNG, JPG, WebP, AVIF, GIF, BMP, or TIFF images, and convert them to WebP, PNG, JPG, or AVIF." },
-          { q: "Can I convert several images at once?", a: "Yes, you can add multiple files and convert them all in one batch, then download them individually or together." }
+          { q: "Can I convert several images at once?", a: "Yes, you can add multiple files and convert them all in one batch, then download them individually or together." },
+          { q: "Is there an image-size limit?", a: `Yes: each image can be up to ${MAX_MEGAPIXELS} megapixels on desktop (${MOBILE_MAX_MEGAPIXELS} on phones and tablets), measured against how long large images take to encode in the browser — WebP in particular gets dramatically slower past a certain size. There's no limit on how many images you can batch-convert, since they're processed one at a time.` }
         ]}
         tips={[
           "WebP usually gives the best balance of quality and file size for web use — a solid default choice.",
