@@ -1,11 +1,12 @@
 ﻿import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Noto_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Script from "next/script";
 import { getToolCounts } from "@/lib/toolCounts";
 const inter = Inter({ subsets: ["latin"] });
+const notoSansArabic = Noto_Sans_Arabic({ subsets: ["arabic"], variable: "--font-arabic" });
 const { total: totalTools } = getToolCounts();
 export const metadata: Metadata = {
   title: {
@@ -55,7 +56,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-US" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className={`${inter.className} ${notoSansArabic.variable}`} suppressHydrationWarning>
         <div id="google_translate_element" style={{ display: "none" }} />
         <Navbar />
         {children}

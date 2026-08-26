@@ -104,3 +104,18 @@ body {
 .goog-te-menu-value:hover { text-decoration: none !important; }
 body { top: 0 !important; }
 .skiptranslate { display: none !important; }
+
+/* RTL (Arabic): Google Translate carries no font of its own, so Arabic renders in
+   Inter/Arial -- fonts with no Arabic glyphs -- falling back to a system font whose
+   diacritics need more vertical room than the Latin-tuned line-heights below give
+   them, so marks from one line get clipped by the line above. */
+html[dir="rtl"] body {
+  font-family: var(--font-arabic), Arial, Helvetica, sans-serif;
+}
+
+html[dir="rtl"] h1,
+html[dir="rtl"] h2,
+html[dir="rtl"] h3,
+html[dir="rtl"] p {
+  line-height: 1.9 !important;
+}

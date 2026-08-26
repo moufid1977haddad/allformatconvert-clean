@@ -674,6 +674,18 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    const syncDirFromTranslation = () => {
+      const cls = document.documentElement.className;
+      if (cls.includes('translated-rtl')) document.documentElement.dir = 'rtl';
+      else if (cls.includes('translated-ltr')) document.documentElement.dir = 'ltr';
+    };
+    syncDirFromTranslation();
+    const observer = new MutationObserver(syncDirFromTranslation);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
     const measure = () => {
       if (headerRef.current) setHeaderHeight(headerRef.current.offsetHeight);
     };
