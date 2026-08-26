@@ -1054,7 +1054,7 @@ export default function Navbar() {
                         key={r.href}
                         href={r.href}
                         onClick={() => { setSearch(''); setResults([]); }}
-                        className="block px-3 py-2 text-xs text-neutral-700 dark:text-neutral-200 hover:bg-indigo-50 hover:text-indigo-600 transition"
+                        className="block px-3 py-2 text-xs text-neutral-700 dark:text-neutral-200 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900 transition"
                       >
                         {r.name}
                       </Link>
@@ -1098,7 +1098,7 @@ export default function Navbar() {
                           key={r.href}
                           href={r.href}
                           onClick={() => { setSearch(''); setResults([]); setSearchPanelOpen(false); }}
-                          className="block px-3 py-2 text-xs text-neutral-700 dark:text-neutral-200 hover:bg-indigo-50 hover:text-indigo-600 transition rounded-lg"
+                          className="block px-3 py-2 text-xs text-neutral-700 dark:text-neutral-200 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900 transition rounded-lg"
                         >
                           {r.name}
                         </Link>
