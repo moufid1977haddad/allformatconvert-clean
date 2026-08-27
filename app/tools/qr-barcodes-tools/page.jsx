@@ -1,6 +1,6 @@
 ﻿'use client';
 import Link from 'next/link';
-import { ToolIcon, CategoryIcon, toolTextColors } from '../../lib/toolIcons';
+import { ToolIcon, CategoryIcon, toolTextColors, categoryColors } from '../../lib/toolIcons';
 
 const tools = [
   { title: 'QR Generator', description: 'Generate QR codes instantly', href: '/tools/qr-barcodes-tools/qr-generator' },
@@ -12,7 +12,7 @@ export default function QrBarcodesToolsPage() {
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-2 flex items-center justify-center gap-2"><CategoryIcon slug="qr-barcodes-tools" className="w-8 h-8 text-teal-500" /> QR & Barcodes Tools</h1>
+        <h1 className="text-4xl font-bold text-center mb-2 flex items-center justify-center gap-2"><CategoryIcon slug="qr-barcodes-tools" className={`w-8 h-8 ${categoryColors['qr-barcodes-tools']}`} /> QR & Barcodes Tools</h1>
         <p className="text-neutral-500 text-center mb-10">All your QR and barcode tools in one place - {tools.length} tools</p>
         <div className="flex flex-wrap gap-4 justify-center">
           {tools.map((tool) => (

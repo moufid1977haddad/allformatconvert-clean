@@ -1,6 +1,6 @@
 ﻿'use client';
 import Link from 'next/link';
-import { ToolIcon, CategoryIcon, toolTextColors } from '../../lib/toolIcons';
+import { ToolIcon, CategoryIcon, toolTextColors, categoryColors } from '../../lib/toolIcons';
 
 const tools = [
   { title: 'Image Compressor', description: 'Compress images without losing quality', href: '/tools/image-tools/image-compressor', group: 'Transform' },
@@ -46,7 +46,7 @@ export default function ImageToolsPage() {
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-2 flex items-center justify-center gap-2"><CategoryIcon slug="image-tools" className="w-8 h-8 text-pink-500" /> Image Tools</h1>
+        <h1 className="text-4xl font-bold text-center mb-2 flex items-center justify-center gap-2"><CategoryIcon slug="image-tools" className={`w-8 h-8 ${categoryColors['image-tools']}`} /> Image Tools</h1>
         <p className="text-neutral-500 text-center mb-10">All your image tools in one place - {tools.length} tools</p>
         <div className="flex flex-wrap gap-4 justify-center">
           {tools.map((tool) => (

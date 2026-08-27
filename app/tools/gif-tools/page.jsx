@@ -1,6 +1,6 @@
 ﻿'use client';
 import Link from 'next/link';
-import { ToolIcon, CategoryIcon, toolTextColors } from '../../lib/toolIcons';
+import { ToolIcon, CategoryIcon, toolTextColors, categoryColors } from '../../lib/toolIcons';
 
 const tools = [
   { title: 'Video to GIF', description: 'Convert video files to GIF frames', href: '/tools/gif-tools/video-to-gif' },
@@ -20,7 +20,7 @@ export default function GifToolsPage() {
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-2 text-neutral-800 flex items-center justify-center gap-2"><CategoryIcon slug="gif-tools" className="w-8 h-8 text-purple-500" /> GIF Tools</h1>
+        <h1 className="text-4xl font-bold text-center mb-2 text-neutral-800 flex items-center justify-center gap-2"><CategoryIcon slug="gif-tools" className={`w-8 h-8 ${categoryColors['gif-tools']}`} /> GIF Tools</h1>
         <p className="text-neutral-500 text-center mb-10">All your GIF tools in one place - {tools.length} tools</p>
         <div className="flex flex-wrap gap-4 justify-center">
           {tools.map((tool) => (

@@ -1,6 +1,6 @@
 ﻿'use client';
 import Link from 'next/link';
-import { ToolIcon, CategoryIcon, toolTextColors } from '../../lib/toolIcons';
+import { ToolIcon, CategoryIcon, toolTextColors, categoryColors } from '../../lib/toolIcons';
 
 const tools = [
   { title: 'XML to JSON', description: 'Convert XML to JSON format', href: '/tools/developer-tools/xml-to-json', group: 'Data Format Convert' },
@@ -67,7 +67,7 @@ export default function DeveloperToolsPage() {
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-2 flex items-center justify-center gap-2"><CategoryIcon slug="developer-tools" className="w-8 h-8 text-purple-500" /> Developer Tools</h1>
+        <h1 className="text-4xl font-bold text-center mb-2 flex items-center justify-center gap-2"><CategoryIcon slug="developer-tools" className={`w-8 h-8 ${categoryColors['developer-tools']}`} /> Developer Tools</h1>
         <p className="text-neutral-500 text-center mb-10">All your developer tools in one place - {tools.length} tools</p>
         <div className="flex flex-wrap gap-4 justify-center">
           {tools.map((tool) => (
