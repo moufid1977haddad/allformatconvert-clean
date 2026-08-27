@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [notified, setNotified] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '', agree: false });
@@ -41,6 +42,8 @@ export default function ContactPage() {
         return;
       }
 
+      const data = await res.json().catch(() => ({}));
+      setNotified(data.notified !== false);
       setSubmitted(true);
     } catch (err) {
       if (/failed to fetch/i.test(err?.message || '')) {
@@ -75,6 +78,11 @@ export default function ContactPage() {
                   <div className="text-5xl mb-4">📩</div>
                   <h2 className="text-2xl font-bold text-neutral-800 dark:text-white mb-2">Message sent!</h2>
                   <p className="text-neutral-500 dark:text-neutral-400">Thank you for reaching out. We will get back to you soon.</p>
+                  {!notified && (
+                    <p className="text-amber-600 dark:text-amber-400 text-sm mt-3">
+                      Your message was saved, but our email notification didn't go through — replies may take a little longer than usual.
+                    </p>
+                  )}
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">

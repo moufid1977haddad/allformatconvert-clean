@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { sendAlert } from "@/lib/alert";
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,6 +19,13 @@ export async function POST(req: NextRequest) {
     });
 
     if (!response.ok) {
+      if (response.status === 402 || response.status === 429) {
+        await sendAlert("remove.bg", String(response.status));
+        return NextResponse.json(
+          { error: "This tool is temporarily at capacity. Please try again later." },
+          { status: 503 }
+        );
+      }
       const err = await response.json();
       return NextResponse.json({ error: err.errors?.[0]?.title || "remove.bg error" }, { status: 500 });
     }

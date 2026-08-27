@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { sendAlert } from "@/lib/alert";
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,7 +28,16 @@ export async function POST(req: NextRequest) {
     });
 
     const data = await response.json();
-    if (!response.ok) return NextResponse.json({ error: data.error?.message || "API error" }, { status: 500 });
+    if (!response.ok) {
+      if (response.status === 429) {
+        await sendAlert("openai", data.error?.code || "429");
+        return NextResponse.json(
+          { error: "This tool is temporarily at capacity. Please try again later." },
+          { status: 503 }
+        );
+      }
+      return NextResponse.json({ error: data.error?.message || "API error" }, { status: 500 });
+    }
     const text = data.choices?.[0]?.message?.content || "";
     return NextResponse.json({ text });
   } catch (e: any) {

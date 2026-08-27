@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+import { sendAlert } from '@/lib/alert';
 
 export async function POST(request) {
   const supabaseAdmin = createClient(
@@ -31,6 +32,7 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Failed to save your message' }, { status: 500 });
   }
 
+  let notified = true;
   try {
     await resend.emails.send({
       from: `OnlineConverTools Contact <contact@${process.env.RESEND_EMAIL_DOMAIN}>`,
@@ -41,7 +43,9 @@ export async function POST(request) {
     });
   } catch (emailError) {
     console.error('Contact message stored but notification email failed', emailError);
+    notified = false;
+    await sendAlert('resend', 'send_failed');
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, notified });
 }
