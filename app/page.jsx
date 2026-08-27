@@ -508,13 +508,13 @@ export default function Home() {
           <div className="flex flex-wrap gap-5 justify-center">
             {categories.map((cat) => (
               <Link key={cat.href} href={cat.href} className="bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)]">
-                <div className="flex justify-between items-center w-full mb-3">
-                  <span className="flex items-center justify-center shrink-0 rounded-xl bg-neutral-100 dark:bg-neutral-800 w-12 h-12">
-                    <CategoryIcon slug={cat.slug} className={`w-6 h-6 ${categoryColors[cat.slug]}`} />
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <span className="flex items-center justify-center shrink-0 rounded-xl bg-neutral-100 dark:bg-neutral-800 w-9 h-9">
+                    <CategoryIcon slug={cat.slug} className={`w-5 h-5 ${categoryColors[cat.slug]}`} />
                   </span>
-                  <span className="text-xs text-neutral-400 dark:text-neutral-500 bg-neutral-100 dark:bg-neutral-700 rounded-full px-2 py-1">{toolCounts.counts[cat.slug] || cat.count} tools</span>
+                  <h2 className="font-extrabold text-2xl text-neutral-800 dark:text-white group-hover:text-indigo-600 transition">{cat.title}</h2>
                 </div>
-                <h2 className="font-extrabold text-2xl mb-1 text-neutral-800 dark:text-white group-hover:text-indigo-600 transition">{cat.title}</h2>
+                <span className="text-xs text-neutral-400 dark:text-neutral-500 bg-neutral-100 dark:bg-neutral-700 rounded-full px-2 py-1 mb-3">{toolCounts.counts[cat.slug] || cat.count} tools</span>
                 <p className="text-neutral-500 dark:text-neutral-400 text-sm mb-4">{cat.description}</p>
                 <div className="space-y-1 w-full text-center">
                   {cat.tools.map(tool => (
