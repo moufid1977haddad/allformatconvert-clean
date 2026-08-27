@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import SiteName from '@/app/components/SiteName';
 
 export default function ResetPasswordPage() {
   const [status, setStatus] = useState('checking'); // checking | ready | invalid | success
@@ -125,7 +126,7 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen bg-neutral-100 flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-indigo-600">OnlineConverTools</Link>
+          <Link href="/"><SiteName className="font-semibold text-2xl text-black dark:text-white" /></Link>
           <h1 className="text-2xl font-bold text-neutral-800 mt-4">Set a new password</h1>
           <p className="text-neutral-500 text-sm mt-1">Choose a new password for your account</p>
         </div>

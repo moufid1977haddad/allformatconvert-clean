@@ -2,15 +2,13 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { Poppins } from 'next/font/google';
 import { supabase } from '@/lib/supabase';
 import { ToolIcon, toolBgColors, categoryColors } from '@/app/lib/toolIcons';
+import SiteName from './SiteName';
 import {
   Search, FileText, Image as ImageIcon, Film, Headphones, Video, Type, Folder,
   QrCode, Repeat, Code, Calculator, Bot, Menu, X,
 } from 'lucide-react';
-
-const poppinsMedium = Poppins({ weight: '500', subsets: ['latin'] });
 
 const categories = [
   { href: '/tools/pdf-tools', label: 'PDF', icon: FileText },
@@ -789,9 +787,7 @@ export default function Navbar() {
                 <circle cx="20" cy="42" r="2.5" fill="#F4C0D1" />
                 <circle cx="28" cy="46" r="2" fill="#ED93B1" />
               </svg>
-              <span className={`${poppinsMedium.className} text-[12px] lg:text-[21px] xl:text-[30px] text-black dark:text-white whitespace-nowrap`}>
-                <span className="text-[#185fa5] dark:text-[#85b7eb]">O</span>nline<span className="text-[#185fa5] dark:text-[#85b7eb]">C</span>onver<span className="text-[#185fa5] dark:text-[#85b7eb]">T</span>ools
-              </span>
+              <SiteName className="font-medium text-[12px] lg:text-[21px] xl:text-[30px] text-black dark:text-white whitespace-nowrap" />
             </Link>
           </div>
 
