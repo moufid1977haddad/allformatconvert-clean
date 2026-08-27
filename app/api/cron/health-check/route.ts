@@ -90,6 +90,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Lets the alert channel itself be verified on demand, without waiting
+  // for (or faking) a real dependency failure.
+  if (new URL(request.url).searchParams.get("test") === "true") {
+    await sendAlert("test", "manual_trigger");
+    return NextResponse.json({ sent: true });
+  }
+
   const checks: Record<string, CheckResult> = {
     gotenberg: await checkGotenberg(),
     openai: await checkOpenAI(),
