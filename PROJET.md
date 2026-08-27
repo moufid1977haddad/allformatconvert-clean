@@ -57,7 +57,6 @@
 - `/api/ai` — OpenAI GPT-4o-mini (texte)
 - `/api/ai-vision` — OpenAI Vision (images)
 - `/api/ai-transcribe` — OpenAI Whisper (audio)
-- `/api/ai-image` — Image generation
 - `/api/remove-bg` — remove.bg
 
 ## Fonctionnalités navbar
