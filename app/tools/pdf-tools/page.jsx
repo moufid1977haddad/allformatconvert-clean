@@ -31,7 +31,7 @@ const tools = [
   { title: 'Organize PDF', description: 'Reorder and remove PDF pages', href: '/tools/pdf-tools/pdf-organize', group: 'Organize' },
   { title: 'Extract Text', description: 'Extract all text from PDF', href: '/tools/pdf-tools/pdf-extract-text', group: 'Optimize' },
   { title: 'Number Pages', description: 'Add page numbers to PDF', href: '/tools/pdf-tools/pdf-number-pages', group: 'Edit' },
-  { title: 'PDF Editor', description: 'Edit text and images in PDF', href: '/tools/pdf-tools/pdf-editor', group: 'Edit' },
+  { title: 'PDF Editor', description: 'Organize pages, add text, images & annotations', href: '/tools/pdf-tools/pdf-editor', group: 'Edit' },
   { title: 'Sign PDF', description: 'Add electronic signature to PDF', href: '/tools/pdf-tools/pdf-sign', group: 'Security' },
   { title: 'PDF OCR', description: 'Make scanned PDFs searchable', href: '/tools/pdf-tools/pdf-ocr', group: 'Optimize' },
   { title: 'PDF Forms', description: 'Fill and create PDF forms', href: '/tools/pdf-tools/pdf-forms', group: 'Edit' },

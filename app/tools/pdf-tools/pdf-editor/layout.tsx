@@ -1,15 +1,12 @@
 import type { Metadata } from 'next';
 
-// TODO: remove `robots: { index: false }` and swap back to a search-intent
-// title once this tool ships (see page.jsx's "Coming Soon" state).
 export const metadata: Metadata = {
-  title: { absolute: "PDF Editor — Coming Soon" },
-  description: "A full PDF Editor for adding text, images, and annotations directly onto a document is not yet available — this feature is under development.",
+  title: { absolute: "PDF Editor — Add Text, Images & Annotations Online Free" },
+  description: "PDF Editor lets you reorder, rotate, delete, and extract pages, and add text, images, and annotations to any PDF for free, right in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-editor" },
-  robots: { index: false, follow: true },
   openGraph: {
-    title: "PDF Editor — Coming Soon",
-    description: "A full PDF Editor for adding text, images, and annotations directly onto a document is not yet available — this feature is under development.",
+    title: "PDF Editor — Add Text, Images & Annotations Online Free",
+    description: "PDF Editor lets you reorder, rotate, delete, and extract pages, and add text, images, and annotations to any PDF for free, right in your browser.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-editor",
   },
 };
