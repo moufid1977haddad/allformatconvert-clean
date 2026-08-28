@@ -39,7 +39,22 @@ async function convertWithGhostscript(workDir, conformance, signal) {
     '-dBATCH',
     '-dNOPAUSE',
     '-dNOOUTERSAVE',
-    '-sColorConversionStrategy=UseDeviceIndependentColor',
+    // Ghostscript's default -dSAFER sandbox blocks the raw PostScript file
+    // read that PDFA_def.ps does to load the ICC profile ("ICCProfile (r)
+    // file"). Without this, that read silently fails, PDFA_def.ps skips
+    // embedding the OutputIntent entirely, and the output has no
+    // PDF/A OutputIntent at all -- on every conformance level, not just
+    // 2b/3b. This grants read access to exactly that one file, keeping
+    // SAFER's protection against the untrusted input PDF intact.
+    `--permit-file-read=${ICC_NAME}`,
+    // Explicit device colour space, not "let Ghostscript decide" via
+    // UseDeviceIndependentColor: pdfwrite refuses to honor
+    // UseDeviceIndependentColor for -dPDFA=2/3 ("cannot guarantee creating
+    // a conformant PDF/A-2 file with device-independent colour") and
+    // silently reverts to plain (non-PDF/A) pdfwrite output instead of
+    // erroring, which is why 2b/3b were producing non-conformant files.
+    // RGB is honored identically across 1b/2b/3b.
+    '-sColorConversionStrategy=RGB',
     '-sProcessColorModel=DeviceRGB',
     '-sDEVICE=pdfwrite',
     '-dPDFACompatibilityPolicy=1',
