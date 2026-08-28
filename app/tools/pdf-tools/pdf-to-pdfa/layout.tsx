@@ -1,15 +1,12 @@
 import type { Metadata } from 'next';
 
-// TODO: remove `robots: { index: false }` and swap back to a search-intent
-// title once this tool ships (see page.jsx's "Coming Soon" state).
 export const metadata: Metadata = {
-  title: { absolute: "PDF to PDF/A — Coming Soon" },
-  description: "A tool to convert a standard PDF into the archival PDF/A format is not yet available — this feature is under development.",
+  title: { absolute: "PDF to PDF/A — Convert & Validate for Archiving Online" },
+  description: "PDF to PDF/A converts your PDF for long-term archiving with Ghostscript, then validates it with veraPDF — you only get a file back if it's verified compliant.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-pdfa" },
-  robots: { index: false, follow: true },
   openGraph: {
-    title: "PDF to PDF/A — Coming Soon",
-    description: "A tool to convert a standard PDF into the archival PDF/A format is not yet available — this feature is under development.",
+    title: "PDF to PDF/A — Convert & Validate for Archiving Online",
+    description: "PDF to PDF/A converts your PDF for long-term archiving with Ghostscript, then validates it with veraPDF — you only get a file back if it's verified compliant.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-pdfa",
   },
 };

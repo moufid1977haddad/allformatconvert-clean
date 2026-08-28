@@ -66,6 +66,27 @@ async function checkResend(): Promise<CheckResult> {
   }
 }
 
+// Checks the pdf-tools service's own /health, which in turn reports whether
+// Ghostscript, qpdf, and veraPDF are all actually runnable inside its
+// container -- not just that the process is up.
+async function checkPdfTools(): Promise<CheckResult> {
+  const url = process.env.PDFTOOLS_SERVICE_URL;
+  if (!url) return { ok: false, detail: "not_configured" };
+  try {
+    const res = await fetch(`${url.replace(/\/+$/, "")}/health`, { signal: AbortSignal.timeout(8000) });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.ok) {
+      const failing = data?.binaries
+        ? Object.entries(data.binaries).filter(([, v]: any) => !v.ok).map(([k]) => k).join(",")
+        : "unknown";
+      return { ok: false, detail: `unhealthy_${failing || res.status}` };
+    }
+    return { ok: true, detail: String(res.status) };
+  } catch {
+    return { ok: false, detail: "unreachable" };
+  }
+}
+
 // GoTrue's dedicated health route -- the piece signup/signin/reset actually
 // depend on, checked for free with no auth flow or row read.
 async function checkSupabaseAuth(): Promise<CheckResult> {
@@ -103,6 +124,7 @@ export async function GET(request: NextRequest) {
     "remove.bg": await checkRemoveBg(),
     resend: await checkResend(),
     "supabase-auth": await checkSupabaseAuth(),
+    "pdf-tools": await checkPdfTools(),
   };
 
   for (const [service, result] of Object.entries(checks)) {

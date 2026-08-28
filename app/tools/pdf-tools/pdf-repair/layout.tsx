@@ -1,15 +1,12 @@
 import type { Metadata } from 'next';
 
-// TODO: remove `robots: { index: false }` and swap back to a search-intent
-// title once this tool ships (see page.jsx's "Coming Soon" state).
 export const metadata: Metadata = {
-  title: { absolute: "PDF Repair — Coming Soon" },
-  description: "A tool to fix corrupted or damaged PDF files is not yet available — this feature is under development.",
+  title: { absolute: "PDF Repair — Fix Damaged PDF Files Online" },
+  description: "PDF Repair fixes PDFs with damaged structure, like a broken cross-reference table, using qpdf and Ghostscript on our server.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-repair" },
-  robots: { index: false, follow: true },
   openGraph: {
-    title: "PDF Repair — Coming Soon",
-    description: "A tool to fix corrupted or damaged PDF files is not yet available — this feature is under development.",
+    title: "PDF Repair — Fix Damaged PDF Files Online",
+    description: "PDF Repair fixes PDFs with damaged structure, like a broken cross-reference table, using qpdf and Ghostscript on our server.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-repair",
   },
 };
