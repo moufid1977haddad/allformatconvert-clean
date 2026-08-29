@@ -10,7 +10,7 @@
 
 **Spec:** `docs/specs/2026-08-28-quota-spend-limits-design.md` — this plan implements every section; read it alongside this plan.
 
-**Progress (2026-08-29):** Tasks 0-12 complete and review-clean (schema, all `lib/quota/` primitives, the `guardPaidRoute` orchestrator, and all 4 shared paid routes — `/api/ai`, `/api/ai-vision`, `/api/ai-transcribe`, `/api/remove-bg` — now wired) — see `.superpowers/sdd/2026-08-28-quota-spend-limits-plan/progress.md` for the full ledger, including two real bugs the Tasks 0-8 review loop caught and fixed (a Postgres cap check that silently skipped a brand-new bucket; an ESM-module-namespace monkeypatch that silently no-oped) plus a financial-correctness fix (alert-check failures could orphan a reservation), and one real bug the Task 9 review caught (12 of 13 `/api/ai` pages left their submit control stuck on a failed length check — a plan-text inconsistency, since the plan's own Step 2 only showed the loading-state reset for one of the 13 pages — fixed uniformly across all 13, and the lesson was carried forward and correctly applied without recurrence in Tasks 10-12). Stopped here per the mandatory gate before Task 13 (Couche B UI / `/api/quota/me`) and the stub pages.
+**Progress (2026-08-29):** Tasks 0-12 complete and review-clean (schema, all `lib/quota/` primitives, the `guardPaidRoute` orchestrator, and all 4 shared paid routes — `/api/ai`, `/api/ai-vision`, `/api/ai-transcribe`, `/api/remove-bg` — now wired) — see `.superpowers/sdd/2026-08-28-quota-spend-limits-plan/progress.md` for the full ledger, including two real bugs the Tasks 0-8 review loop caught and fixed (a Postgres cap check that silently skipped a brand-new bucket; an ESM-module-namespace monkeypatch that silently no-oped) plus a financial-correctness fix (alert-check failures could orphan a reservation), and one real bug the Task 9 review caught (12 of 13 `/api/ai` pages left their submit control stuck on a failed length check — a plan-text inconsistency, since the plan's own Step 2 only showed the loading-state reset for one of the 13 pages — fixed uniformly across all 13, and the lesson was carried forward and correctly applied without recurrence in Tasks 10-12). Stopped here per the mandatory gate before Task 13 (Couche B UI / `/api/quota/me`) and the stub pages. A subsequent priority fix (done before Task 13, see the SDD ledger) migrated global-spend accounting from integer cents to integer micro-dollars across `lib/quota/config.js`/`globalSpend.js`/`logEvent.js` and the 3 OpenAI routes, correcting a `Math.ceil`-at-the-cent rounding distortion found in live verification — Tasks 1-12's code blocks below are left as a historical record of what was built at the time and are not updated to reflect this.
 
 ## Global Constraints
 
@@ -2199,7 +2199,7 @@ git commit -m "feat(quota): add login invitation and quota balance to the 3 futu
 - Modify: `app/api/cron/health-check/route.ts`
 
 **Interfaces:**
-- Consumes: `supabaseAdmin` (Task 2), `GLOBAL_SPEND_CAP_CENTS`/`ADOBE_TX_CAP` (Task 3), `currentUtcMonthKey`/`currentUtcDayKey` (Task 2).
+- Consumes: `supabaseAdmin` (Task 2), `GLOBAL_SPEND_CAP_MICROS`/`ADOBE_TX_CAP` (Task 3, renamed from `GLOBAL_SPEND_CAP_CENTS` by the cents->micros migration — see the top Progress note and the SDD ledger), `currentUtcMonthKey`/`currentUtcDayKey` (Task 2).
 
 - [ ] **Step 1: Add the digest and housekeeping to `app/api/cron/health-check/route.ts`**
 
@@ -2209,7 +2209,7 @@ First, add these three imports at the top of the file, alongside the existing `i
 
 ```ts
 import { supabaseAdmin } from "@/lib/quota/supabaseAdmin";
-import { GLOBAL_SPEND_CAP_CENTS, ADOBE_TX_CAP } from "@/lib/quota/config";
+import { GLOBAL_SPEND_CAP_MICROS, ADOBE_TX_CAP } from "@/lib/quota/config";
 import { currentUtcMonthKey, currentUtcDayKey } from "@/lib/quota/period";
 ```
 
@@ -2222,7 +2222,7 @@ async function buildDailyDigest() {
 
   const { data: spendRow } = await supabaseAdmin
     .from("usage_counters").select("value")
-    .eq("bucket_key", "global_spend_cents").eq("period_key", monthKey).maybeSingle();
+    .eq("bucket_key", "global_spend_microusd").eq("period_key", monthKey).maybeSingle();
   const { data: adobeRow } = await supabaseAdmin
     .from("usage_counters").select("value")
     .eq("bucket_key", "adobe_tx").eq("period_key", monthKey).maybeSingle();
@@ -2245,8 +2245,8 @@ async function buildDailyDigest() {
     denialCounts[row.outcome] = (denialCounts[row.outcome] || 0) + 1;
   }
 
-  const spendUsd = ((spendRow?.value || 0) / 100).toFixed(2);
-  const capUsd = (GLOBAL_SPEND_CAP_CENTS / 100).toFixed(2);
+  const spendUsd = ((spendRow?.value || 0) / 1_000_000).toFixed(2);
+  const capUsd = (GLOBAL_SPEND_CAP_MICROS / 1_000_000).toFixed(2);
   const adobeUsed = adobeRow?.value || 0;
   const topToolsStr = topTools.length ? topTools.map(([t, c]) => `${t}(${c})`).join(", ") : "none";
   const ipHourDenials = (denialCounts.denied_ip_hour || 0) + (denialCounts.denied_ip_day || 0);
@@ -2293,14 +2293,14 @@ node -e "
 require('./scripts/quota-tests/_env');
 const { supabaseAdmin } = require('./lib/quota/supabaseAdmin');
 const { currentUtcMonthKey } = require('./lib/quota/period');
-supabaseAdmin.from('usage_counters').upsert({ bucket_key: 'global_spend_cents', period_key: currentUtcMonthKey(), value: 999999 }).then(() => console.log('seeded'));
+supabaseAdmin.from('usage_counters').upsert({ bucket_key: 'global_spend_microusd', period_key: currentUtcMonthKey(), value: 9999990000 }).then(() => console.log('seeded'));
 "
 curl -s -H "Authorization: Bearer $CRON_SECRET" "http://localhost:3000/api/cron/health-check"
 node -e "
 require('./scripts/quota-tests/_env');
 const { supabaseAdmin } = require('./lib/quota/supabaseAdmin');
 const { currentUtcMonthKey } = require('./lib/quota/period');
-supabaseAdmin.from('usage_counters').delete().eq('bucket_key','global_spend_cents').eq('period_key', currentUtcMonthKey()).then(() => console.log('cleaned up'));
+supabaseAdmin.from('usage_counters').delete().eq('bucket_key','global_spend_microusd').eq('period_key', currentUtcMonthKey()).then(() => console.log('cleaned up'));
 "
 ```
 

@@ -11,7 +11,7 @@ create table if not exists usage_events (
     'accepted', 'denied_ip_hour', 'denied_ip_day', 'denied_global_spend',
     'denied_adobe_cap', 'denied_user_quota', 'provider_failed'
   )),
-  estimated_cost_cents integer not null default 0,
+  estimated_cost_micros integer not null default 0,
   account_id uuid
 );
 alter table usage_events enable row level security;

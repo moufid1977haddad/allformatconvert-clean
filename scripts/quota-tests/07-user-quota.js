@@ -1,3 +1,9 @@
+// Guard: require both env vars before proceeding
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('Set SUPABASE_SERVICE_ROLE_KEY and NEXT_PUBLIC_SUPABASE_URL in your shell before running this script.');
+  process.exit(1);
+}
+
 const assert = require('node:assert');
 const { reserveUserQuota, releaseUserQuota, getUserQuotaRemaining } = require('../../lib/quota/userQuota');
 const { supabaseAdmin } = require('../../lib/quota/supabaseAdmin');

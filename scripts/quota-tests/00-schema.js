@@ -60,7 +60,7 @@ async function main() {
     console.log('(Skipped anon/RLS grant verification: NEXT_PUBLIC_SUPABASE_ANON_KEY not set in environment)');
   }
 
-  const eventInsert = await admin.from('usage_events').insert({ route: 'test', tool: 'test', outcome: 'accepted', estimated_cost_cents: 1 });
+  const eventInsert = await admin.from('usage_events').insert({ route: 'test', tool: 'test', outcome: 'accepted', estimated_cost_micros: 1 });
   if (eventInsert.error) throw new Error('usage_events insert failed: ' + eventInsert.error.message);
   await admin.from('usage_events').delete().eq('route', 'test');
 

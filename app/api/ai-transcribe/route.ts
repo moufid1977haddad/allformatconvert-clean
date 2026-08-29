@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendAlert } from "@/lib/alert";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { MAX_AUDIO_UPLOAD_BYTES } from "@/lib/quota/limits";
-import { actualAiTranscribeCostCents } from "@/lib/quota/config";
+import { actualAiTranscribeCostMicros } from "@/lib/quota/config";
 
 export async function POST(req: NextRequest) {
   try {
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       }
       return NextResponse.json({ error: data.error?.message || "API error" }, { status: 500 });
     }
-    await guard.commit(actualAiTranscribeCostCents(data.duration));
+    await guard.commit(actualAiTranscribeCostMicros(data.duration));
     return NextResponse.json({ text: data.text });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });

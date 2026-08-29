@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendAlert } from "@/lib/alert";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkPromptLength } from "@/lib/quota/limits";
-import { actualAiCostCents } from "@/lib/quota/config";
+import { actualAiCostMicros } from "@/lib/quota/config";
 
 export async function POST(req: NextRequest) {
   try {
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       }
       return NextResponse.json({ error: data.error?.message || "API error" }, { status: 500 });
     }
-    await guard.commit(actualAiCostCents(data.usage));
+    await guard.commit(actualAiCostMicros(data.usage));
     const text = data.choices?.[0]?.message?.content || "";
     return NextResponse.json({ text });
   } catch (e: any) {

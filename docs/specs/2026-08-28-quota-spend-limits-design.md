@@ -116,7 +116,7 @@ create table if not exists usage_events (
     'accepted', 'denied_ip_hour', 'denied_ip_day', 'denied_global_spend',
     'denied_adobe_cap', 'denied_user_quota', 'provider_failed'
   )),
-  estimated_cost_cents integer not null default 0,
+  estimated_cost_micros integer not null default 0,
   account_id uuid
 );
 alter table usage_events enable row level security;
@@ -132,7 +132,7 @@ design) and set only for the 3 future Couche-B tools.
 
 | Layer | bucket_key | period_key |
 |---|---|---|
-| Global spend | `global_spend_cents` | `2026-08` (UTC month) |
+| Global spend | `global_spend_microusd` | `2026-08` (UTC month) |
 | Adobe transactions | `adobe_tx` | `2026-08` (UTC month) |
 | Per-user quota | `user_quota:pdf_conversions:<uid>` / `user_quota:images:<uid>` | `2026-08` (UTC month) |
 | IP hourly | `ip_rate:hour:<sha256(ip)>` | `2026-08-28T14` (UTC hour) |
@@ -265,6 +265,20 @@ is only as honest as these numbers):
 | `ai-vision` (gpt-4o-mini + image) | same token prices + image-token estimate for a high-detail image |
 | `ai-transcribe` (whisper-1) | $0.006 / minute |
 | `remove-bg` | $0.20 / image (flat, conservative) |
+
+**Storage unit: integer micro-dollars, not integer cents.** The original design stored
+`usage_counters.value` and `usage_events.estimated_cost_cents` (now renamed
+`estimated_cost_micros`) as integer cents, with `Math.ceil` rounding up to the nearest
+cent to preserve the never-undercount guarantee. Live verification found a real
+`/api/ai` call (`prompt_tokens: 291, completion_tokens: 76`, true cost $0.00008925) that
+`Math.ceil`'d to 1 full cent — a 112× (>10,000%) overcount — which at scale would close
+the $20 global cap after roughly 2,000 such calls instead of after $20 of real spend.
+The unit was migrated to integer micro-dollars (1 USD = 1,000,000 micros): the same
+real call now rounds to 90 micros (`Math.ceil(89.25)`), a 0.84% overcount. `Math.ceil`
+is kept — it still never undercounts — but the coarseness of the rounding grid shrank by
+10,000×. See `supabase/migrate-cents-to-micros.sql` and the SDD ledger
+(`.superpowers/sdd/2026-08-28-quota-spend-limits-plan/progress.md`) for the full
+migration record.
 
 ### 4.4 Adobe counter
 
