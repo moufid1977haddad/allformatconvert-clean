@@ -181,13 +181,15 @@ cap built on flat estimates stops capping anything. The fix has three parts:
 
 ### 4.2 Input bounds (new)
 
-Config constants in `lib/quota/config.js` (not new env vars — see §7 rationale):
+Config constants in `lib/quota/limits.js` (not new env vars — see §7 rationale; kept in
+its own module, separate from `lib/quota/config.js`, specifically so it has no
+server-only env reads and is safe to import from client components — see §4.2.1):
 
 | Bound | Applies to | Purpose | Default |
 |---|---|---|---|
 | `MAX_PROMPT_CHARS` | `/api/ai`, `/api/ai-vision` | Bounds worst-case input-token cost | 8,000 chars (~2,000 tokens) |
 | `MAX_VISION_IMAGE_BYTES` | `/api/ai-vision` | Bounds worst-case image-token cost | 5 MB |
-| `MAX_AUDIO_UPLOAD_BYTES` | `/api/ai-transcribe` | Bounds worst-case transcription duration | 25 MB (OpenAI's own hard limit — this bound is enforcing a ceiling that already exists, giving a real worst-case duration "for free") |
+| `MAX_AUDIO_UPLOAD_BYTES` | `/api/ai-transcribe` | Bounds worst-case transcription duration | 10 MB (below OpenAI's own 25 MB hard limit; still covers ~10–20 min of real-world speech audio, the realistic range for an online transcription tool — see rationale below) |
 | `MAX_REMOVEBG_IMAGE_BYTES` | `/api/remove-bg` | Bounds upload size (cost itself is flat) | 12 MB |
 
 Requests exceeding a bound are rejected before any provider call (400, honest message
@@ -196,6 +198,31 @@ worst-case duration is derived from `MAX_AUDIO_UPLOAD_BYTES` via a conservative
 low-bitrate floor (documented as a code comment next to the constant, since it's a
 physics-derived worst case, not a tunable price): a smaller worst-case bound produces a
 smaller worst-case duration and therefore a smaller reservation.
+
+**Why 10 MB, not OpenAI's own 25 MB ceiling**: at 25 MB, a worst-case reservation costs
+roughly $0.27/call, which alone allows only ~74 transcriptions/month sitewide before the
+$20 global cap closes for everyone — one input bound would have silently strangled the
+whole site's transcription capacity. 10 MB brings the worst-case reservation down
+proportionally, covers the realistic 10–20 minute range for this kind of tool, and
+roughly triples the number of visitors the monthly cap can serve. This value is
+expected to move once there's real usage data — it lives in `lib/quota/limits.js`
+alongside the other three bounds, a one-line change, not a schema or logic change.
+
+All four bounds are defined in a plain-constants module (`lib/quota/limits.js`, no env
+reads, no server secrets) specifically so it can be imported from both the server routes
+and the client-side tool pages — see §4.2.1.
+
+### 4.2.1 Client-side pre-checks (new)
+
+Every one of the 4 shared routes' upload UIs (`audio-transcriber`, `audio-to-text`,
+`image-captioner`, `background-remover`, and the text-input tools for
+`MAX_PROMPT_CHARS`) checks the file size / character count against the same
+`lib/quota/limits.js` constants **in the browser, before any network request** — a
+visitor is never allowed to spend time uploading 40 MB only to be rejected server-side.
+The client-side check names the exact limit (e.g. "Audio files are limited to 10 MB —
+this file is 23 MB"). The server-side check in §4.2 stays in place regardless — the
+client check is a UX courtesy, never the actual boundary, since nothing from the client
+is trusted for enforcement.
 
 ### 4.3 Cost table (route-keyed, tool-labeled)
 
@@ -253,14 +280,44 @@ denials logged to `usage_events` with the specific outcome (`denied_ip_hour` /
 `denied_ip_day`) so the digest can report which one is actually triggering.
 
 On denial: 429 ("too many requests" is the accurate status for a per-IP rate limit),
-with an honest message stating the limit and when it resets — never phrased as a
-security measure, since Couche A is what actually protects the budget.
+with a `Retry-After` header (seconds until the bucket's window rolls over) and an
+honest message stating the limit and when it resets — never phrased as a security
+measure, since Couche A is what actually protects the budget.
 
-Status-code convention used consistently across every layer: **429** for the IP
-hour/day buckets (Couche C — a rate, not a capacity, problem); **503** for global
-spend, the Adobe counter, and per-user quota exhaustion (Couche A/B — the service is
-genuinely out of budget/allowance, matching the existing `503` "temporarily at
-capacity" convention already used for OpenAI's own 429s in the current 4 routes).
+Status-code convention, revised (see also §6 and §9 below):
+
+- **429** — Couche C, IP hour/day buckets. A rate problem, retriable soon, `Retry-After`
+  header set.
+- **503** — Couche A, global spend cap and Adobe counter. The service is genuinely out
+  of budget for *everyone* until the month rolls over — matches the existing `503`
+  "temporarily at capacity" convention already used for OpenAI's own 429s in the
+  current 4 routes. `Retry-After` header set to seconds until the next UTC calendar
+  month.
+- **403** — Couche B, per-user quota exhausted (corrected from an earlier draft of this
+  spec, which had this at 503 — wrong: a client's exhausted personal quota is not a
+  server capacity problem, and a 503 invites automatic retries from clients/network
+  layers that would multiply refused calls, plus risks the daily health-check
+  mistaking a deliberate quota refusal for a dependency outage). Response body states
+  the account's current balance and the reset date. No `Retry-After` — the reset is a
+  calendar date, not a short retry window.
+
+`/api/cron/health-check` must not treat any of these three statuses as a dependency
+failure — a cap being reached is information for the daily digest (§8), never a
+failure alert. The existing per-dependency checks (`checkOpenAI`, `checkRemoveBg`, etc.)
+call the *provider* directly and are entirely unaffected by this distinction, but this
+is stated explicitly here since it would be an easy mistake to wire the new guarded
+routes' responses into the same failure-alert path.
+
+### 5.1 Message tone (new, applies to Couches A and C)
+
+When the global spend cap or the Adobe counter is exhausted, the message must never
+read as if the visitor did something wrong — it's a site-wide limit, not a consequence
+of their action. E.g. "This tool has reached its usage limit for the month — that's a
+site-wide limit, not something on your end. It resets on <date>." Same principle for
+the IP rate-limit message (Couche C): factual, names the limit and the retry window,
+no implication of wrongdoing. Couche B's per-user quota message (§6) is inherently about
+the visitor's own usage count, so it states the balance plainly without needing the same
+disclaimer.
 
 ## 6. Couche B — account + per-user quota (barrier only, no tools yet)
 
@@ -268,7 +325,9 @@ Server-side primitives mirror Couche A: `reserveUserQuota(userId, bucket)` /
 `releaseUserQuota(userId, bucket)` / `getUserQuotaRemaining(userId, bucket)`, scoped to
 `user_quota:pdf_conversions:<uid>` (shared by the future pdf-to-excel + pdf-to-ppt) and
 `user_quota:images:<uid>` (image-generator), both capped via
-`USER_QUOTA_PDF_CONVERSIONS` / `USER_QUOTA_IMAGES` (default 5/month each).
+`USER_QUOTA_PDF_CONVERSIONS` / `USER_QUOTA_IMAGES` (default 5/month each). A denied
+reservation returns **403** with a body naming the current balance (`0/5`) and the UTC
+reset date — see §5 above for the full status-code rationale.
 
 The 3 target pages are today static "Coming Soon" stubs with no logic. This chantier
 adds, without building the actual conversion:
@@ -290,12 +349,16 @@ where the atomicity claim actually lives.
 
 ## 7. Configuration and environment variables
 
-Per your decision: a code module (`lib/quota/config.js`), not a Supabase settings table —
-consistent with `services/pdf-tools/src/config.js` already in this repo. The *caps* read
-from env vars (so they're adjustable without a code change); the cost table and input
-bounds are constants in the same module (not one env var per knob — flagged here in case
-you'd rather they be tunable without a redeploy too, easy to change before implementation
-starts).
+Per your decision: code modules, not a Supabase settings table — consistent with
+`services/pdf-tools/src/config.js` already in this repo. Two modules, split by where
+they need to run:
+
+- `lib/quota/config.js` (server-only): the six env-var-backed caps below, plus the
+  route cost table (§4.3) and alert thresholds (§4.5) — none of this is ever imported
+  by client components.
+- `lib/quota/limits.js` (server + client safe, no env reads): the four input bounds
+  (§4.2), imported by both the guarded routes (server-side enforcement) and the tool
+  pages (client-side pre-check, §4.2.1).
 
 New env vars (names only):
 
@@ -361,6 +424,15 @@ site.
    already-crossed threshold sends nothing.
 6. **No regression**: exercise at least 3 of the 15 OpenAI-backed tool pages end to end,
    under the rate limit, confirm normal responses.
+7. **(new) Voluntary caps never read as outages**: with the global-spend counter forced
+   over cap, call `/api/cron/health-check` and confirm the resulting digest reports the
+   cap as informational (§8) and does not trigger a failure alert — the 503/403/429
+   responses from the guarded routes are a deliberate design signal, not a dependency
+   failure.
+8. **(new) Client-side bound enforcement**: attempt to select an oversized file on
+   `audio-transcriber` and confirm the browser rejects it with the exact limit stated,
+   before any network request fires (checked via network panel / request log showing
+   zero calls).
 
 ## 11. Out of scope (confirmed)
 
