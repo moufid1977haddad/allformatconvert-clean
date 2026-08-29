@@ -989,7 +989,13 @@ const { USER_QUOTA_PDF_CONVERSIONS, USER_QUOTA_IMAGES } = require('./config');
 const CAPS = { pdf_conversions: USER_QUOTA_PDF_CONVERSIONS, images: USER_QUOTA_IMAGES };
 
 function bucketFor(userId, bucket) {
-  if (!CAPS[bucket]) throw new Error(`Unknown user quota bucket "${bucket}"`);
+  // A type check, not a truthiness check: every cap in config.js derives via
+  // `Number(process.env.X || default)`, so an operator setting e.g.
+  // USER_QUOTA_PDF_CONVERSIONS=0 as a kill-switch produces CAPS.x = 0, which
+  // `!CAPS[bucket]` would wrongly treat as "unknown bucket" (caught in
+  // Task 7 review, 2026-08-29 -- see ledger; globalSpend.js already used
+  // this correct pattern).
+  if (typeof CAPS[bucket] !== 'number') throw new Error(`Unknown user quota bucket "${bucket}"`);
   return `user_quota:${bucket}:${userId}`;
 }
 
