@@ -49,16 +49,26 @@ create or replace function increment_usage_counter(
   p_bucket_key text, p_period_key text, p_amount bigint, p_cap bigint
 ) returns table(new_value bigint, allowed boolean)
 language sql as $$
+  -- `where p_amount <= p_cap` on the SELECT gates the plain-INSERT path (a
+  -- brand-new bucket_key/period_key -- the routine case of every first
+  -- request in a new hour/day/month bucket); the `where` on DO UPDATE gates
+  -- the conflict path. Both are required -- an earlier draft only had the
+  -- second and let a fresh bucket's opening request bypass the cap
+  -- entirely (caught in implementation review, 2026-08-28). Safe: since
+  -- decrement/adjust both clamp at 0, stored value is always >= 0, so
+  -- `p_amount <= p_cap` failing implies `existing.value + p_amount <= p_cap`
+  -- also fails -- this can only narrow, never change, the conflict path.
   with upsert as (
     insert into usage_counters (bucket_key, period_key, value)
-    values (p_bucket_key, p_period_key, p_amount)
+    select p_bucket_key, p_period_key, p_amount
+    where p_amount <= p_cap
     on conflict (bucket_key, period_key) do update
       set value = usage_counters.value + p_amount, updated_at = now()
       where usage_counters.value + p_amount <= p_cap
     returning value
   )
   select
-    coalesce((select value from upsert), (select value from usage_counters where bucket_key = p_bucket_key and period_key = p_period_key)),
+    coalesce((select value from upsert), (select value from usage_counters where bucket_key = p_bucket_key and period_key = p_period_key), 0),
     exists(select 1 from upsert);
 $$;
 
