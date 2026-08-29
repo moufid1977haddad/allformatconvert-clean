@@ -27,7 +27,7 @@ export default function Page() {
       const base64 = btoa(String.fromCharCode(...prefixBytes));
       const summaryPrompt = 'Please summarize this PDF document: ' + base64.slice(0, 5000);
       const lengthCheck = checkPromptLength(summaryPrompt);
-      if (!lengthCheck.ok) { setError(lengthCheck.message); return; }
+      if (!lengthCheck.ok) { setError(lengthCheck.message); setLoading(false); return; }
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

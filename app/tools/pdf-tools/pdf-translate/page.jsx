@@ -32,7 +32,7 @@ export default function Page() {
         text += content.items.map(item => item.str).join(' ') + '\n';
       }
       const lengthCheck = checkPromptLength(text.slice(0, 3000));
-      if (!lengthCheck.ok) { setError(lengthCheck.message); return; }
+      if (!lengthCheck.ok) { setError(lengthCheck.message); setLoading(false); return; }
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

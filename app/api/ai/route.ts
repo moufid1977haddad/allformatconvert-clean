@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     const data = await response.json();
     if (!response.ok) {
-      await guard.release!();
+      await guard.release();
       if (response.status === 429) {
         await sendAlert("openai", data.error?.code || "429");
         return NextResponse.json(
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       }
       return NextResponse.json({ error: data.error?.message || "API error" }, { status: 500 });
     }
-    await guard.commit!(actualAiCostCents(data.usage));
+    await guard.commit(actualAiCostCents(data.usage));
     const text = data.choices?.[0]?.message?.content || "";
     return NextResponse.json({ text });
   } catch (e: any) {

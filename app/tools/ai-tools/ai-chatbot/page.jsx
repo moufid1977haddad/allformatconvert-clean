@@ -18,7 +18,7 @@ export default function AIChatbotPage() {
     setError('');
     try {
       const lengthCheck = checkPromptLength(userMsg);
-      if (!lengthCheck.ok) { setError(lengthCheck.message); return; }
+      if (!lengthCheck.ok) { setError(lengthCheck.message); setLoading(false); return; }
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
