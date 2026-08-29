@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendAlert } from "@/lib/alert";
+import { guardPaidRoute } from "@/lib/quota/guard";
+import { MAX_VISION_IMAGE_BYTES } from "@/lib/quota/limits";
+import { actualAiCostCents } from "@/lib/quota/config";
 
 export async function POST(req: NextRequest) {
   try {
-    const { image, prompt } = await req.json();
+    const { image, prompt, tool } = await req.json();
     if (!image) return NextResponse.json({ error: "No image provided" }, { status: 400 });
+
+    const imageBytes = Buffer.byteLength(image, "base64");
+    if (imageBytes > MAX_VISION_IMAGE_BYTES) {
+      const maxMb = (MAX_VISION_IMAGE_BYTES / (1024 * 1024)).toFixed(0);
+      return NextResponse.json({ error: `Images are limited to ${maxMb} MB.` }, { status: 400 });
+    }
+
+    const guard = await guardPaidRoute(req, { route: "ai-vision", tool });
+    if (!guard.ok) return guard.response;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -29,6 +41,7 @@ export async function POST(req: NextRequest) {
 
     const data = await response.json();
     if (!response.ok) {
+      await guard.release();
       if (response.status === 429) {
         await sendAlert("openai", data.error?.code || "429");
         return NextResponse.json(
@@ -38,6 +51,7 @@ export async function POST(req: NextRequest) {
       }
       return NextResponse.json({ error: data.error?.message || "API error" }, { status: 500 });
     }
+    await guard.commit(actualAiCostCents(data.usage));
     const text = data.choices?.[0]?.message?.content || "";
     return NextResponse.json({ text });
   } catch (e: any) {

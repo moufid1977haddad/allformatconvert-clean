@@ -1,12 +1,14 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkFileSize, MAX_VISION_IMAGE_BYTES } from '@/lib/quota/limits';
 
 export default function ImageCaptionerPage() {
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [preview, setPreview] = useState('');
+  const [imageFile, setImageFile] = useState(null);
   const fileRef = useRef();
 
   const handleFile = (e) => {
@@ -14,6 +16,7 @@ export default function ImageCaptionerPage() {
     if (!file) return;
     e.target.value = '';
     setError('');
+    setImageFile(file);
     const reader = new FileReader();
     reader.onload = (ev) => setPreview(ev.target.result);
     reader.onerror = () => setError('Failed to read the image file. It may be corrupt or in an unsupported format.');
@@ -27,10 +30,12 @@ export default function ImageCaptionerPage() {
     setError('');
     try {
       const base64 = preview.split(',')[1];
+      const sizeCheck = checkFileSize(imageFile, MAX_VISION_IMAGE_BYTES, 'Images');
+      if (!sizeCheck.ok) { setError(sizeCheck.message); setLoading(false); return; }
       const response = await fetch('/api/ai-vision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: base64, prompt: 'Generate a creative, descriptive caption for this image.' }),
+        body: JSON.stringify({ image: base64, prompt: 'Generate a creative, descriptive caption for this image.', tool: 'image-captioner' }),
       });
       const data = await response.json();
       if (data.text) setOutput(data.text);
