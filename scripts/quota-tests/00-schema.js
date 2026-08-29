@@ -24,6 +24,7 @@ async function main() {
   });
   if (capped.error) throw new Error(capped.error.message);
   if (capped.data[0].allowed !== false) throw new Error('expected cap to block a 100-unit increment on a cap of 10');
+  if (capped.data[0].new_value !== 3) throw new Error('expected new_value to remain 3 after cap-blocked increment, got ' + capped.data[0].new_value);
 
   const dec = await admin.rpc('decrement_usage_counter', { p_bucket_key: testBucket, p_period_key: testPeriod, p_amount: 3 });
   if (dec.error) throw new Error(dec.error.message);
@@ -32,7 +33,32 @@ async function main() {
   if (adj.error) throw new Error(adj.error.message);
   if (adj.data !== 0) throw new Error('expected adjust to clamp at 0, got ' + adj.data);
 
+  // Test cap enforcement on a brand-new bucket (very first call ever to this
+  // bucket_key/period_key pair). This exercises the plain-INSERT path, not
+  // the ON CONFLICT branch. Must not create a row if amount > cap.
+  const newBucketName = 'test:brand-new-bucket';
+  const cappedNewBucket = await admin.rpc('increment_usage_counter', {
+    p_bucket_key: newBucketName, p_period_key: testPeriod, p_amount: 50, p_cap: 10,
+  });
+  if (cappedNewBucket.error) throw new Error('increment_usage_counter on new bucket failed: ' + cappedNewBucket.error.message);
+  if (cappedNewBucket.data[0].allowed !== false) throw new Error('expected cap to block 50-unit increment on 10-unit cap for brand-new bucket');
+  if (cappedNewBucket.data[0].new_value !== 0) throw new Error('expected new_value to be 0 for rejected brand-new bucket increment, got ' + cappedNewBucket.data[0].new_value);
+
   await admin.from('usage_counters').delete().eq('bucket_key', testBucket);
+  await admin.from('usage_counters').delete().eq('bucket_key', newBucketName);
+
+  // Test that grants and RLS are properly enforced. Create an anon client
+  // and verify it cannot call the RPC functions (should get a permission error).
+  // This is optional: if NEXT_PUBLIC_SUPABASE_ANON_KEY is not set, skip but don't fail.
+  if (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const anonClient = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+    const anonTest = await anonClient.rpc('increment_usage_counter', {
+      p_bucket_key: 'test:anon-check', p_period_key: testPeriod, p_amount: 1, p_cap: 10,
+    });
+    if (!anonTest.error) throw new Error('expected anon client to be denied RPC access, but call succeeded');
+  } else {
+    console.log('(Skipped anon/RLS grant verification: NEXT_PUBLIC_SUPABASE_ANON_KEY not set in environment)');
+  }
 
   const eventInsert = await admin.from('usage_events').insert({ route: 'test', tool: 'test', outcome: 'accepted', estimated_cost_cents: 1 });
   if (eventInsert.error) throw new Error('usage_events insert failed: ' + eventInsert.error.message);
