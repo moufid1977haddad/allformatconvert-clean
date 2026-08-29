@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkPromptLength } from '@/lib/quota/limits';
 
 export default function DataExtractorPage() {
   const [input, setInput] = useState('');
@@ -14,12 +15,15 @@ export default function DataExtractorPage() {
     setOutput('');
     setError('');
     try {
+      const lengthCheck = checkPromptLength(input);
+      if (!lengthCheck.ok) { setError(lengthCheck.message); return; }
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system: 'You are a data extraction expert. Extract structured data from the provided text. Format the extracted data in a clear, organized way (JSON or table format when appropriate).',
           prompt: input,
+          tool: 'data-extractor',
         }),
       });
       const data = await response.json();

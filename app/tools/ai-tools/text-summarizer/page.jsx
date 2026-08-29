@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkPromptLength } from '@/lib/quota/limits';
 
 export default function TextSummarizerPage() {
   const [input, setInput] = useState('');
@@ -14,12 +15,15 @@ export default function TextSummarizerPage() {
     setOutput('');
     setError('');
     try {
+      const lengthCheck = checkPromptLength(input);
+      if (!lengthCheck.ok) { setError(lengthCheck.message); setLoading(false); return; }
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system: 'You are a text summarizer. Create a concise summary of the provided text. Keep the key points and main ideas. Return only the summary.',
           prompt: input,
+          tool: 'text-summarizer',
         }),
       });
       const data = await response.json();

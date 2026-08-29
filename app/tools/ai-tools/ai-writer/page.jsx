@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkPromptLength } from '@/lib/quota/limits';
 
 export default function AIWriterPage() {
   const [input, setInput] = useState('');
@@ -14,12 +15,15 @@ export default function AIWriterPage() {
     setOutput('');
     setError('');
     try {
+      const lengthCheck = checkPromptLength(input);
+      if (!lengthCheck.ok) { setError(lengthCheck.message); return; }
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system: 'You are a professional content writer. Generate high-quality, engaging content based on the user input. Be creative and detailed.',
           prompt: input,
+          tool: 'ai-writer',
         }),
       });
       const data = await response.json();

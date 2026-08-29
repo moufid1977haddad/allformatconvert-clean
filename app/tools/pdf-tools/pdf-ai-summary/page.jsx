@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { checkPromptLength } from '@/lib/quota/limits';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -24,12 +25,16 @@ export default function Page() {
       // for any realistically-sized PDF (crashes above ~100KB).
       const prefixBytes = new Uint8Array(arrayBuffer).slice(0, 4000);
       const base64 = btoa(String.fromCharCode(...prefixBytes));
+      const summaryPrompt = 'Please summarize this PDF document: ' + base64.slice(0, 5000);
+      const lengthCheck = checkPromptLength(summaryPrompt);
+      if (!lengthCheck.ok) { setError(lengthCheck.message); return; }
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system: 'You are a document summarizer. Provide a clear and concise summary of the PDF document content.',
-          prompt: 'Please summarize this PDF document: ' + base64.slice(0, 5000),
+          prompt: summaryPrompt,
+          tool: 'pdf-ai-summary',
         }),
       });
       const data = await response.json();

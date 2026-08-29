@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendAlert } from "@/lib/alert";
+import { guardPaidRoute } from "@/lib/quota/guard";
+import { checkPromptLength } from "@/lib/quota/limits";
+import { actualAiCostCents } from "@/lib/quota/config";
 
 export async function POST(req: NextRequest) {
   try {
-    const { system, prompt } = await req.json();
+    const { system, prompt, tool } = await req.json();
     if (!prompt) return NextResponse.json({ error: "No prompt provided" }, { status: 400 });
+
+    const promptCheck = checkPromptLength(prompt);
+    if (!promptCheck.ok) return NextResponse.json({ error: promptCheck.message }, { status: 400 });
+
+    const guard = await guardPaidRoute(req, { route: "ai", tool });
+    if (!guard.ok) return guard.response;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -24,6 +33,7 @@ export async function POST(req: NextRequest) {
 
     const data = await response.json();
     if (!response.ok) {
+      await guard.release!();
       if (response.status === 429) {
         await sendAlert("openai", data.error?.code || "429");
         return NextResponse.json(
@@ -33,6 +43,7 @@ export async function POST(req: NextRequest) {
       }
       return NextResponse.json({ error: data.error?.message || "API error" }, { status: 500 });
     }
+    await guard.commit!(actualAiCostCents(data.usage));
     const text = data.choices?.[0]?.message?.content || "";
     return NextResponse.json({ text });
   } catch (e: any) {

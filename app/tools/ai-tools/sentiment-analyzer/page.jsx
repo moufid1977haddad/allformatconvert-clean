@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkPromptLength } from '@/lib/quota/limits';
 
 export default function SentimentAnalyzerPage() {
   const [input, setInput] = useState('');
@@ -14,12 +15,15 @@ export default function SentimentAnalyzerPage() {
     setOutput('');
     setError('');
     try {
+      const lengthCheck = checkPromptLength(input);
+      if (!lengthCheck.ok) { setError(lengthCheck.message); return; }
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system: 'You are a sentiment analysis expert. Analyze the sentiment of the provided text. Determine if it is Positive, Negative, or Neutral, provide a confidence percentage, and explain the key sentiment indicators.',
           prompt: input,
+          tool: 'sentiment-analyzer',
         }),
       });
       const data = await response.json();

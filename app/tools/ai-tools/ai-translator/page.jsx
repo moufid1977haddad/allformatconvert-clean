@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkPromptLength } from '@/lib/quota/limits';
 
 const languages = ['English', 'French', 'Spanish', 'German', 'Italian', 'Portuguese', 'Arabic', 'Chinese', 'Japanese', 'Russian'];
 
@@ -17,12 +18,15 @@ export default function AITranslatorPage() {
     setOutput('');
     setError('');
     try {
+      const lengthCheck = checkPromptLength(input);
+      if (!lengthCheck.ok) { setError(lengthCheck.message); return; }
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system: `You are a professional translator. Translate the provided text to ${targetLang}. Return only the translation without explanations.`,
           prompt: input,
+          tool: 'ai-translator',
         }),
       });
       const data = await response.json();

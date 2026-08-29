@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkPromptLength } from '@/lib/quota/limits';
 
 export default function KeywordExtractorPage() {
   const [input, setInput] = useState('');
@@ -14,12 +15,15 @@ export default function KeywordExtractorPage() {
     setOutput('');
     setError('');
     try {
+      const lengthCheck = checkPromptLength(input);
+      if (!lengthCheck.ok) { setError(lengthCheck.message); return; }
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system: 'You are a keyword extraction expert. Extract the most important keywords and key phrases from the provided text. Return them as a numbered list with brief explanations of why each is important.',
           prompt: input,
+          tool: 'keyword-extractor',
         }),
       });
       const data = await response.json();

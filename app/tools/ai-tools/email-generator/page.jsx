@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkPromptLength } from '@/lib/quota/limits';
 
 const tones = ['Professional', 'Friendly', 'Formal', 'Casual', 'Persuasive'];
 
@@ -17,12 +18,15 @@ export default function EmailGeneratorPage() {
     setOutput('');
     setError('');
     try {
+      const lengthCheck = checkPromptLength(input);
+      if (!lengthCheck.ok) { setError(lengthCheck.message); return; }
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system: `You are a professional email writer. Generate a well-structured ${tone.toLowerCase()} email based on the user description. Include subject line, greeting, body, and closing.`,
           prompt: input,
+          tool: 'email-generator',
         }),
       });
       const data = await response.json();

@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkPromptLength } from '@/lib/quota/limits';
 
 export default function AIDetectorPage() {
   const [input, setInput] = useState('');
@@ -14,12 +15,15 @@ export default function AIDetectorPage() {
     setOutput('');
     setError('');
     try {
+      const lengthCheck = checkPromptLength(input);
+      if (!lengthCheck.ok) { setError(lengthCheck.message); return; }
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system: 'You are an AI text detector. Analyze the provided text and determine if it was likely written by an AI or a human. Provide a percentage likelihood and explain your reasoning.',
           prompt: input,
+          tool: 'ai-detector',
         }),
       });
       const data = await response.json();

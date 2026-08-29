@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { checkPromptLength } from '@/lib/quota/limits';
 
 const languages = ['English', 'French', 'Spanish', 'German', 'Arabic', 'Chinese', 'Japanese', 'Portuguese', 'Italian', 'Russian'];
 
@@ -30,12 +31,15 @@ export default function Page() {
         const content = await page.getTextContent();
         text += content.items.map(item => item.str).join(' ') + '\n';
       }
+      const lengthCheck = checkPromptLength(text.slice(0, 3000));
+      if (!lengthCheck.ok) { setError(lengthCheck.message); return; }
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system: `You are a professional translator. Translate the following text to ${targetLang}. Return only the translation.`,
           prompt: text.slice(0, 3000),
+          tool: 'pdf-translate',
         }),
       });
       const data = await response.json();

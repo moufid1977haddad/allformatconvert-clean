@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkPromptLength } from '@/lib/quota/limits';
 
 export default function AIChatbotPage() {
   const [messages, setMessages] = useState([]);
@@ -16,12 +17,15 @@ export default function AIChatbotPage() {
     setLoading(true);
     setError('');
     try {
+      const lengthCheck = checkPromptLength(userMsg);
+      if (!lengthCheck.ok) { setError(lengthCheck.message); return; }
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system: 'You are a helpful, friendly AI assistant. Answer questions and help with tasks in a conversational way.',
           prompt: userMsg,
+          tool: 'ai-chatbot',
         }),
       });
       const data = await response.json();

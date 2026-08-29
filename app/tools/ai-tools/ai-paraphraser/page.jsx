@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkPromptLength } from '@/lib/quota/limits';
 
 export default function AIParaphraserPage() {
   const [input, setInput] = useState('');
@@ -14,12 +15,15 @@ export default function AIParaphraserPage() {
     setOutput('');
     setError('');
     try {
+      const lengthCheck = checkPromptLength(input);
+      if (!lengthCheck.ok) { setError(lengthCheck.message); return; }
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system: 'You are a paraphrasing expert. Rewrite the provided text using different words and sentence structures while preserving the original meaning. Return only the paraphrased text.',
           prompt: input,
+          tool: 'ai-paraphraser',
         }),
       });
       const data = await response.json();
