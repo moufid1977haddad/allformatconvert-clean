@@ -742,12 +742,27 @@ const { GLOBAL_SPEND_CAP_CENTS, WORST_CASE_COST_CENTS } = require('./config');
 
 const BUCKET = 'global_spend_cents';
 
+// Alerting is best-effort and must never be allowed to corrupt a reservation
+// that already succeeded: a transient DB error inside checkAndAlertThresholds
+// (it does its own incrementCounter call, on the alert-flag bucket) would
+// otherwise propagate up through reserveGlobalSpend/reconcileGlobalSpend
+// AFTER the real spend counter was already mutated, orphaning that
+// reservation -- no commit/release closure would ever reach the caller
+// (caught in Task 8 review, 2026-08-29 -- see ledger).
+async function safeCheckAndAlertThresholds(args) {
+  try {
+    await checkAndAlertThresholds(args);
+  } catch (err) {
+    console.error('Alert-threshold check failed (non-fatal, reservation stands):', err.message);
+  }
+}
+
 async function reserveGlobalSpend(route) {
   const periodKey = currentUtcMonthKey();
   const reservedCents = WORST_CASE_COST_CENTS[route];
   if (typeof reservedCents !== 'number') throw new Error(`No worst-case cost configured for route "${route}"`);
   const { newValue, allowed } = await incrementCounter(BUCKET, periodKey, reservedCents, GLOBAL_SPEND_CAP_CENTS);
-  await checkAndAlertThresholds({ counterName: 'global_spend', periodKey, value: newValue, cap: GLOBAL_SPEND_CAP_CENTS });
+  await safeCheckAndAlertThresholds({ counterName: 'global_spend', periodKey, value: newValue, cap: GLOBAL_SPEND_CAP_CENTS });
   return { allowed, reservedCents, periodKey };
 }
 
@@ -758,7 +773,7 @@ async function releaseGlobalSpend(periodKey, reservedCents) {
 async function reconcileGlobalSpend(periodKey, reservedCents, actualCents) {
   const delta = actualCents - reservedCents;
   const newValue = await adjustCounter(BUCKET, periodKey, delta);
-  await checkAndAlertThresholds({ counterName: 'global_spend', periodKey, value: newValue, cap: GLOBAL_SPEND_CAP_CENTS });
+  await safeCheckAndAlertThresholds({ counterName: 'global_spend', periodKey, value: newValue, cap: GLOBAL_SPEND_CAP_CENTS });
 }
 
 module.exports = { reserveGlobalSpend, releaseGlobalSpend, reconcileGlobalSpend };
@@ -776,10 +791,19 @@ const { ADOBE_TX_CAP } = require('./config');
 
 const BUCKET = 'adobe_tx';
 
+// Same non-fatal-alert-check rationale as lib/quota/globalSpend.js.
+async function safeCheckAndAlertThresholds(args) {
+  try {
+    await checkAndAlertThresholds(args);
+  } catch (err) {
+    console.error('Alert-threshold check failed (non-fatal, reservation stands):', err.message);
+  }
+}
+
 async function reserveAdobeTransaction() {
   const periodKey = currentUtcMonthKey();
   const { newValue, allowed } = await incrementCounter(BUCKET, periodKey, 1, ADOBE_TX_CAP);
-  await checkAndAlertThresholds({ counterName: 'adobe_tx', periodKey, value: newValue, cap: ADOBE_TX_CAP });
+  await safeCheckAndAlertThresholds({ counterName: 'adobe_tx', periodKey, value: newValue, cap: ADOBE_TX_CAP });
   return { allowed, periodKey };
 }
 
@@ -1145,9 +1169,18 @@ async function guardPaidRoute(req, { route, tool }) {
     return { ok: false, response };
   }
 
+  // Guards against a caller invoking commit()/release() more than once, in
+  // any combination -- either would otherwise double-adjust the spend
+  // counter and double-log the event (caught in Task 8 review, 2026-08-29 --
+  // see ledger). Does not defend against neither ever being called; the
+  // route integrations that consume this must call exactly one, always
+  // (try/finally), since that gap can't be closed from inside the guard.
+  let settled = false;
   return {
     ok: true,
     async commit(actualCostCents) {
+      if (settled) return;
+      settled = true;
       if (typeof actualCostCents === 'number') {
         await reconcileGlobalSpend(reservation.periodKey, reservation.reservedCents, actualCostCents);
         await logUsageEvent({ route, tool, outcome: 'accepted', estimatedCostCents: actualCostCents });
@@ -1156,6 +1189,8 @@ async function guardPaidRoute(req, { route, tool }) {
       }
     },
     async release() {
+      if (settled) return;
+      settled = true;
       await releaseGlobalSpend(reservation.periodKey, reservation.reservedCents);
       await logUsageEvent({ route, tool, outcome: 'provider_failed' });
     },
