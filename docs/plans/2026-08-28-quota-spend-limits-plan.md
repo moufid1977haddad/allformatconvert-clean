@@ -10,6 +10,8 @@
 
 **Spec:** `docs/specs/2026-08-28-quota-spend-limits-design.md` — this plan implements every section; read it alongside this plan.
 
+**Progress (2026-08-29):** Tasks 0-8 complete and review-clean (schema, all `lib/quota/` primitives, the `guardPaidRoute` orchestrator) — see `.superpowers/sdd/2026-08-28-quota-spend-limits-plan/progress.md` for the full ledger, including two real bugs the review loop caught and fixed (a Postgres cap check that silently skipped a brand-new bucket; an ESM-module-namespace monkeypatch that silently no-oped) plus a financial-correctness fix (alert-check failures could orphan a reservation). Stopped here per the mandatory gate before Task 9 touches the first of the 4 existing production routes.
+
 ## Global Constraints
 
 - All new Supabase tables get `alter table ... enable row level security` with **no policies** (service-role only), and all new RPC functions get `revoke execute ... from public, anon, authenticated` (spec §2).
@@ -30,13 +32,13 @@
 
 **Files:** none (environment setup only)
 
-- [ ] **Step 1: Tag the pre-change state**
+- [x] **Step 1: Tag the pre-change state**
 
 ```bash
 git tag pre-quota-infra-2026-08-28
 ```
 
-- [ ] **Step 2: Confirm `SUPABASE_SERVICE_ROLE_KEY` is available locally**
+- [x] **Step 2: Confirm `SUPABASE_SERVICE_ROLE_KEY` is available locally**
 
 `.env.local` currently only has `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` — the service-role key needed for every quota primitive isn't there yet. If the Vercel CLI isn't installed (`vercel --version` fails), install it (`npm i -g vercel`), then run:
 
@@ -50,7 +52,7 @@ Confirm `SUPABASE_SERVICE_ROLE_KEY` and `NTFY_TOPIC` now appear in `.env.local` 
 grep -oE "^[A-Z_]+=" .env.local | sort -u
 ```
 
-- [ ] **Step 3: No commit for this task** (environment-only, nothing to version).
+- [x] **Step 3: No commit for this task** (environment-only, nothing to version).
 
 ---
 
@@ -64,7 +66,7 @@ grep -oE "^[A-Z_]+=" .env.local | sort -u
 **Interfaces:**
 - Produces: table `usage_counters(bucket_key text, period_key text, value bigint, updated_at timestamptz)`, PK `(bucket_key, period_key)`; table `usage_events(id, created_at, route, tool, outcome, estimated_cost_cents, account_id)`; RPC functions `increment_usage_counter(p_bucket_key, p_period_key, p_amount, p_cap) returns table(new_value bigint, allowed boolean)`, `decrement_usage_counter(p_bucket_key, p_period_key, p_amount) returns void`, `adjust_usage_counter(p_bucket_key, p_period_key, p_delta) returns bigint`.
 
-- [ ] **Step 1: Write `supabase/usage_counters.sql`**
+- [x] **Step 1: Write `supabase/usage_counters.sql`**
 
 ```sql
 -- The single atomic-capped-counter primitive behind all three layers: global
@@ -137,7 +139,7 @@ revoke execute on function increment_usage_counter, decrement_usage_counter, adj
   from public, anon, authenticated;
 ```
 
-- [ ] **Step 2: Write `supabase/usage_events.sql`**
+- [x] **Step 2: Write `supabase/usage_events.sql`**
 
 ```sql
 -- Append-only observability log. Never used for enforcement (usage_counters
@@ -161,11 +163,11 @@ create index if not exists usage_events_created_at_idx on usage_events (created_
 create index if not exists usage_events_tool_idx on usage_events (tool, created_at);
 ```
 
-- [ ] **Step 3: Apply both files to Supabase**
+- [x] **Step 3: Apply both files to Supabase**
 
 Open the Supabase project's SQL Editor (same place `supabase/contact_messages.sql` was applied) and run both files' contents, in order (`usage_counters.sql` first — `usage_events.sql` has no dependency on it, but keep the order for readability).
 
-- [ ] **Step 4: Write and run the schema verification script**
+- [x] **Step 4: Write and run the schema verification script**
 
 ```js
 // scripts/quota-tests/00-schema.js
@@ -221,7 +223,7 @@ require('fs').readFileSync('.env.local', 'utf8').split('\n').forEach((line) => {
 Run: `node scripts/quota-tests/00-schema.js`
 Expected: `PASS: schema, RPC functions, and grants all behave as designed.`
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add supabase/usage_counters.sql supabase/usage_events.sql scripts/quota-tests/00-schema.js
@@ -244,7 +246,7 @@ git commit -m "feat(quota): add usage_counters/usage_events schema and atomic RP
 **Interfaces:**
 - Produces: `supabaseAdmin` (Supabase client, service role); `currentUtcMonthKey(now?)`, `currentUtcDayKey(now?)`, `currentUtcHourKey(now?)`, `secondsUntilNextUtcMonth(now?)`, `secondsUntilNextUtcHour(now?)`, `secondsUntilNextUtcDay(now?)`, `nextUtcMonthIso(now?)`; `hashIp(ip)`, `getClientIp(req)`; `incrementCounter(bucketKey, periodKey, amount, cap)` → `{newValue, allowed}`, `decrementCounter(bucketKey, periodKey, amount)` → `void`, `adjustCounter(bucketKey, periodKey, delta)` → `newValue`.
 
-- [ ] **Step 1: Write the shared test env loader**
+- [x] **Step 1: Write the shared test env loader**
 
 ```js
 // scripts/quota-tests/_env.js
@@ -256,7 +258,7 @@ require('fs').readFileSync('.env.local', 'utf8').split('\n').forEach((line) => {
 
 (Retroactively, Task 1's Step 4 script should `require('./_env')` instead of inlining the loader — update `scripts/quota-tests/00-schema.js` to replace its inline loader with `require('./_env');` at this point.)
 
-- [ ] **Step 2: Write `lib/quota/supabaseAdmin.js`**
+- [x] **Step 2: Write `lib/quota/supabaseAdmin.js`**
 
 ```js
 const { createClient } = require('@supabase/supabase-js');
@@ -270,7 +272,7 @@ const supabaseAdmin = createClient(
 module.exports = { supabaseAdmin };
 ```
 
-- [ ] **Step 3: Write `lib/quota/period.js`**
+- [x] **Step 3: Write `lib/quota/period.js`**
 
 ```js
 function pad(n) { return String(n).padStart(2, '0'); }
@@ -315,7 +317,7 @@ module.exports = {
 };
 ```
 
-- [ ] **Step 4: Write `lib/quota/ipHash.js`**
+- [x] **Step 4: Write `lib/quota/ipHash.js`**
 
 ```js
 const { createHash } = require('node:crypto');
@@ -337,7 +339,7 @@ function getClientIp(req) {
 module.exports = { hashIp, getClientIp };
 ```
 
-- [ ] **Step 5: Write `lib/quota/counters.js`**
+- [x] **Step 5: Write `lib/quota/counters.js`**
 
 ```js
 const { supabaseAdmin } = require('./supabaseAdmin');
@@ -369,7 +371,7 @@ async function adjustCounter(bucketKey, periodKey, delta) {
 module.exports = { incrementCounter, decrementCounter, adjustCounter };
 ```
 
-- [ ] **Step 6: Write and run the period-keys test**
+- [x] **Step 6: Write and run the period-keys test**
 
 ```js
 // scripts/quota-tests/01-period.js
@@ -392,7 +394,7 @@ console.log('PASS: period key and reset-countdown helpers.');
 Run: `node scripts/quota-tests/01-period.js`
 Expected: FAIL first (files don't exist yet if run before Step 3) — since Steps 3-5 already ran above, this should now PASS directly. Run it and confirm `PASS: period key and reset-countdown helpers.`
 
-- [ ] **Step 7: Write and run the counters integration test**
+- [x] **Step 7: Write and run the counters integration test**
 
 ```js
 // scripts/quota-tests/02-counters.js
@@ -434,7 +436,7 @@ main().catch((err) => { console.error('FAIL:', err.message); process.exit(1); })
 Run: `node scripts/quota-tests/02-counters.js`
 Expected: `PASS: counters.js wraps the RPC functions correctly.`
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add scripts/quota-tests lib/quota/supabaseAdmin.js lib/quota/period.js lib/quota/ipHash.js lib/quota/counters.js
@@ -454,7 +456,7 @@ git commit -m "feat(quota): add core primitives (period keys, IP hashing, counte
 - Consumes: nothing from prior tasks.
 - Produces: `MAX_PROMPT_CHARS`, `MAX_VISION_IMAGE_BYTES`, `MAX_AUDIO_UPLOAD_BYTES`, `MAX_REMOVEBG_IMAGE_BYTES`, `checkPromptLength(text)` → `{ok, message?}`, `checkFileSize(file, maxBytes, label)` → `{ok, message?}` (all from `limits.js`); `GLOBAL_SPEND_CAP_CENTS`, `ADOBE_TX_CAP`, `USER_QUOTA_PDF_CONVERSIONS`, `USER_QUOTA_IMAGES`, `IP_RATE_LIMIT_PER_HOUR`, `IP_RATE_LIMIT_PER_DAY`, `WORST_CASE_COST_CENTS` (object keyed `ai`/`ai-vision`/`ai-transcribe`/`remove-bg`), `actualAiCostCents(usage)`, `actualAiTranscribeCostCents(durationSeconds)` (all from `config.js`).
 
-- [ ] **Step 1: Write `lib/quota/limits.js`**
+- [x] **Step 1: Write `lib/quota/limits.js`**
 
 ```js
 // Client-safe: no process.env reads, no server-only imports. Imported by
@@ -488,7 +490,7 @@ module.exports = {
 };
 ```
 
-- [ ] **Step 2: Write `lib/quota/config.js`**
+- [x] **Step 2: Write `lib/quota/config.js`**
 
 ```js
 // Server-only: reads process.env. Never imported by a 'use client' page --
@@ -576,7 +578,7 @@ module.exports = {
 };
 ```
 
-- [ ] **Step 3: Write and run the config test**
+- [x] **Step 3: Write and run the config test**
 
 ```js
 // scripts/quota-tests/03-config.js
@@ -606,7 +608,7 @@ console.log('PASS: config.js cost formulas and limits.js client checks.', WORST_
 Run: `node scripts/quota-tests/03-config.js`
 Expected: `PASS: ...` line, printing the worst-case cost table.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add lib/quota/limits.js lib/quota/config.js scripts/quota-tests/03-config.js
@@ -625,7 +627,7 @@ git commit -m "feat(quota): add config.js (caps, cost table) and limits.js (inpu
 - Consumes: `incrementCounter` (Task 2), `sendAlert` (existing `lib/alert.js`).
 - Produces: `checkAndAlertThresholds({ counterName, periodKey, value, cap })` → `void`.
 
-- [ ] **Step 1: Write `lib/quota/alerts.js`**
+- [x] **Step 1: Write `lib/quota/alerts.js`**
 
 ```js
 const { incrementCounter } = require('./counters');
@@ -661,7 +663,7 @@ async function checkAndAlertThresholds({ counterName, periodKey, value, cap }, s
 module.exports = { checkAndAlertThresholds };
 ```
 
-- [ ] **Step 2: Write and run the alerts test**
+- [x] **Step 2: Write and run the alerts test**
 
 This test passes a stub `sendAlertFn` directly into `checkAndAlertThresholds` (see the comment above — monkeypatching `lib/alert.js`'s export does not work, since `require()` of an ESM module returns a non-writable namespace object).
 
@@ -712,7 +714,7 @@ Expected: `PASS: alert thresholds fire exactly once each, in order 50/80/100.`
 
 This directly proves spec verification #5 (§10.5) — keep this script; it's referenced again in Task 12.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add lib/quota/alerts.js scripts/quota-tests/04-alerts.js
@@ -732,7 +734,7 @@ git commit -m "feat(quota): add exactly-once-per-threshold alert primitive"
 - Consumes: `incrementCounter`/`decrementCounter`/`adjustCounter` (Task 2), `checkAndAlertThresholds` (Task 4), `currentUtcMonthKey` (Task 2), `GLOBAL_SPEND_CAP_CENTS`/`ADOBE_TX_CAP`/`WORST_CASE_COST_CENTS` (Task 3).
 - Produces: `reserveGlobalSpend(route)` → `{allowed, reservedCents, periodKey}`; `releaseGlobalSpend(periodKey, reservedCents)`; `reconcileGlobalSpend(periodKey, reservedCents, actualCents)`; `reserveAdobeTransaction()` → `{allowed, periodKey}`; `releaseAdobeTransaction(periodKey)`.
 
-- [ ] **Step 1: Write `lib/quota/globalSpend.js`**
+- [x] **Step 1: Write `lib/quota/globalSpend.js`**
 
 ```js
 const { incrementCounter, decrementCounter, adjustCounter } = require('./counters');
@@ -779,7 +781,7 @@ async function reconcileGlobalSpend(periodKey, reservedCents, actualCents) {
 module.exports = { reserveGlobalSpend, releaseGlobalSpend, reconcileGlobalSpend };
 ```
 
-- [ ] **Step 2: Write `lib/quota/adobeCounter.js`**
+- [x] **Step 2: Write `lib/quota/adobeCounter.js`**
 
 Not called from any route yet — exported ready for the next chantier's Adobe-backed tools (spec §4.4).
 
@@ -814,7 +816,7 @@ async function releaseAdobeTransaction(periodKey) {
 module.exports = { reserveAdobeTransaction, releaseAdobeTransaction };
 ```
 
-- [ ] **Step 3: Write and run the global-spend test**
+- [x] **Step 3: Write and run the global-spend test**
 
 ```js
 // scripts/quota-tests/05-global-spend.js
@@ -863,7 +865,7 @@ main().catch((err) => { console.error('FAIL:', err.message); process.exit(1); })
 Run: `node scripts/quota-tests/05-global-spend.js`
 Expected: `PASS: global spend reserve/reconcile/release and Adobe counter.`
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add lib/quota/globalSpend.js lib/quota/adobeCounter.js scripts/quota-tests/05-global-spend.js
@@ -882,7 +884,7 @@ git commit -m "feat(quota): add global spend cap and pre-provisioned Adobe trans
 - Consumes: `incrementCounter`/`decrementCounter` (Task 2), `hashIp`/`getClientIp` (Task 2), `currentUtcHourKey`/`currentUtcDayKey`/`secondsUntilNextUtcHour`/`secondsUntilNextUtcDay` (Task 2), `IP_RATE_LIMIT_PER_HOUR`/`IP_RATE_LIMIT_PER_DAY` (Task 3).
 - Produces: `checkIpRateLimit(req)` → `{allowed: true}` or `{allowed: false, layer: 'ip_hour'|'ip_day', retryAfterSeconds}`.
 
-- [ ] **Step 1: Write `lib/quota/ipRateLimit.js`**
+- [x] **Step 1: Write `lib/quota/ipRateLimit.js`**
 
 ```js
 const { incrementCounter, decrementCounter } = require('./counters');
@@ -918,7 +920,7 @@ async function checkIpRateLimit(req) {
 module.exports = { checkIpRateLimit };
 ```
 
-- [ ] **Step 2: Write and run the IP rate-limit test — this is verification #2 (spec §10.2), the 10-concurrent-against-5 proof**
+- [x] **Step 2: Write and run the IP rate-limit test — this is verification #2 (spec §10.2), the 10-concurrent-against-5 proof**
 
 ```js
 // scripts/quota-tests/06-ip-rate-limit.js
@@ -984,7 +986,7 @@ main().catch((err) => { console.error('FAIL:', err.message); process.exit(1); })
 Run: `node scripts/quota-tests/06-ip-rate-limit.js`
 Expected: `PASS: IP rate limit -- sequential cap, concurrent atomicity (exactly 5/10), unknown-IP fallback.`
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add lib/quota/ipRateLimit.js scripts/quota-tests/06-ip-rate-limit.js
@@ -1003,7 +1005,7 @@ git commit -m "feat(quota): add shared per-IP hour/day rate limit (Couche C)"
 - Consumes: `incrementCounter`/`decrementCounter` (Task 2), `currentUtcMonthKey`/`nextUtcMonthIso` (Task 2), `USER_QUOTA_PDF_CONVERSIONS`/`USER_QUOTA_IMAGES` (Task 3).
 - Produces: `reserveUserQuota(userId, bucket)` → `{allowed, remaining, cap, resetsAt, periodKey}`; `releaseUserQuota(userId, bucket)`; `getUserQuotaRemaining(userId, bucket)` → `{remaining, cap, resetsAt}`. `bucket` is `'pdf_conversions'` or `'images'`.
 
-- [ ] **Step 1: Write `lib/quota/userQuota.js`**
+- [x] **Step 1: Write `lib/quota/userQuota.js`**
 
 ```js
 const { incrementCounter, decrementCounter } = require('./counters');
@@ -1045,7 +1047,7 @@ async function getUserQuotaRemaining(userId, bucket) {
 module.exports = { reserveUserQuota, releaseUserQuota, getUserQuotaRemaining };
 ```
 
-- [ ] **Step 2: Write and run the user-quota test — this also directly proves spec verification #2 (§10.2) at the account layer**
+- [x] **Step 2: Write and run the user-quota test — this also directly proves spec verification #2 (§10.2) at the account layer**
 
 ```js
 // scripts/quota-tests/07-user-quota.js
@@ -1089,7 +1091,7 @@ main().catch((err) => { console.error('FAIL:', err.message); process.exit(1); })
 Run: `node scripts/quota-tests/07-user-quota.js`
 Expected: `PASS: user quota reserve/release, balance read, and 10-concurrent-vs-5 atomicity.`
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add lib/quota/userQuota.js scripts/quota-tests/07-user-quota.js
@@ -1109,7 +1111,7 @@ git commit -m "feat(quota): add per-user monthly quota primitive (Couche B, no t
 - Consumes: `checkIpRateLimit` (Task 6), `reserveGlobalSpend`/`releaseGlobalSpend`/`reconcileGlobalSpend` (Task 5), `secondsUntilNextUtcMonth`/`nextUtcMonthIso` (Task 2).
 - Produces: `logUsageEvent({route, tool, outcome, estimatedCostCents?, accountId?})`; `guardPaidRoute(req, {route, tool}) → {ok:false, response: NextResponse} | {ok:true, commit: async (actualCostCents?) => void, release: async () => void}`.
 
-- [ ] **Step 1: Write `lib/quota/logEvent.js`**
+- [x] **Step 1: Write `lib/quota/logEvent.js`**
 
 ```js
 const { supabaseAdmin } = require('./supabaseAdmin');
@@ -1129,7 +1131,7 @@ async function logUsageEvent({ route, tool, outcome, estimatedCostCents = 0, acc
 module.exports = { logUsageEvent };
 ```
 
-- [ ] **Step 2: Write `lib/quota/guard.js`**
+- [x] **Step 2: Write `lib/quota/guard.js`**
 
 ```js
 const { NextResponse } = require('next/server');
@@ -1200,7 +1202,7 @@ async function guardPaidRoute(req, { route, tool }) {
 module.exports = { guardPaidRoute };
 ```
 
-- [ ] **Step 3: Write and run the guard test**
+- [x] **Step 3: Write and run the guard test**
 
 ```js
 // scripts/quota-tests/08-guard.js
@@ -1253,7 +1255,7 @@ main().catch((err) => { console.error('FAIL:', err.message); process.exit(1); })
 Run: `node scripts/quota-tests/08-guard.js`
 Expected: `PASS: guardPaidRoute -- commit reconciles, release restores, both logged.`
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add lib/quota/logEvent.js lib/quota/guard.js scripts/quota-tests/08-guard.js
