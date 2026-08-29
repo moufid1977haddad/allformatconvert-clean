@@ -35,17 +35,23 @@ function fakeReq(ip) {
   return { headers: { get: (name) => (name === 'x-forwarded-for' ? ip : null) } };
 }
 
-// ip_rate:*, alert_sent:*, and usage_events rows here are scoped to a fake
-// test IP/tool that never collides with real traffic -- safe to DELETE. The
-// global_spend_microusd bucket is the ONE real, shared production bucket for
-// the current UTC month and must never be deleted -- see
-// readCounterValue/restoreCounter below.
+// ip_rate:* and usage_events rows here are scoped to a fake test IP/tool
+// that never collides with real traffic -- safe to DELETE. Deliberately NOT
+// deleted here: alert_sent:global_spend:% -- that's the real production
+// idempotency flag checkAndAlertThresholds sets when the real spend counter
+// genuinely crosses 50/80/100% of its cap that month (spec §4.5, "exactly
+// once per threshold per period"). This test's own reservation (a single
+// worst-case 'ai' call) is tiny relative to the $20 cap -- nowhere near
+// crossing a real threshold on its own -- so there is never a flag this
+// test legitimately owns to clean up; deleting one would risk erasing a
+// REAL crossing and causing a duplicate real alert next time that threshold
+// is crossed. The global_spend_microusd bucket is the ONE real, shared
+// production bucket for the current UTC month and must never be deleted
+// either -- see readCounterValue/restoreCounter below.
 async function cleanupIpAndEvents(ip) {
   const hash = hashIp(ip);
-  const period = currentUtcMonthKey();
   await supabaseAdmin.from('usage_counters').delete().eq('bucket_key', `ip_rate:hour:${hash}`);
   await supabaseAdmin.from('usage_counters').delete().eq('bucket_key', `ip_rate:day:${hash}`);
-  await supabaseAdmin.from('usage_counters').delete().like('bucket_key', 'alert_sent:global_spend:%').eq('period_key', period);
   await supabaseAdmin.from('usage_events').delete().eq('tool', TOOL);
 }
 

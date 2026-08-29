@@ -58,10 +58,20 @@ async function main() {
 
     console.log('PASS: global spend reserve/reconcile/release and Adobe counter.');
   } finally {
+    // alert_sent:global_spend:%/alert_sent:adobe_tx:% are NOT touched here --
+    // they are the real production idempotency flags checkAndAlertThresholds
+    // sets when the real spend/Adobe counter genuinely crosses 50/80/100% of
+    // its cap that month (spec §4.5, "exactly once per threshold per
+    // period"). This test's own reservations are tiny relative to either cap
+    // (a single 'ai' worst-case reservation and a single Adobe transaction),
+    // nowhere near crossing a real threshold on their own, so there is never
+    // a flag this test legitimately owns to clean up -- deleting one here
+    // would risk erasing a REAL crossing and causing a duplicate real alert
+    // the next time that threshold is crossed. Same principle as the
+    // counter-restore fix above: never touch real production state a test
+    // doesn't own.
     await restoreCounter('global_spend_microusd', period, beforeSpend);
     await restoreCounter('adobe_tx', period, beforeAdobe);
-    await supabaseAdmin.from('usage_counters').delete().like('bucket_key', 'alert_sent:global_spend:%').eq('period_key', period);
-    await supabaseAdmin.from('usage_counters').delete().like('bucket_key', 'alert_sent:adobe_tx:%').eq('period_key', period);
   }
 }
 
