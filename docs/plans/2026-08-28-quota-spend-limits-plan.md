@@ -1273,7 +1273,7 @@ git commit -m "feat(quota): add usage-event logging and the guardPaidRoute orche
 **Interfaces:**
 - Consumes: `guardPaidRoute` (Task 8), `checkPromptLength`/`MAX_PROMPT_CHARS` (Task 3), `actualAiCostCents` (Task 3).
 
-- [ ] **Step 1: Modify `app/api/ai/route.ts`**
+- [x] **Step 1: Modify `app/api/ai/route.ts`**
 
 Current file (`app/api/ai/route.ts`, full contents):
 
@@ -1378,7 +1378,7 @@ export async function POST(req: NextRequest) {
 }
 ```
 
-- [ ] **Step 2: Add `tool` + client-side length guard to each of the 13 pages**
+- [x] **Step 2: Add `tool` + client-side length guard to each of the 13 pages**
 
 For each file below, add the import and a guard clause immediately before the existing `fetch('/api/ai', ...)` call, and add a `tool: '<slug>'` field to the JSON body. The pattern is identical across all 13 — only the prompt variable name, tool slug, and exact surrounding code differ. Apply each one exactly as shown (old block → new block).
 
@@ -1494,15 +1494,15 @@ Add near the top: `import { checkPromptLength } from '@/lib/quota/limits';`
 
 For each of the 9 "same pattern" entries above (sentiment-analyzer, keyword-extractor, grammar-fixer, email-generator, data-extractor, ai-writer, ai-translator, ai-paraphraser, ai-detector, ai-chatbot), apply this shape: add `import { checkPromptLength } from '@/lib/quota/limits';` near the top of the file, insert `const lengthCheck = checkPromptLength(<promptVar>); if (!lengthCheck.ok) { setError(lengthCheck.message); return; }` as the line immediately before `const response = await fetch('/api/ai', {`, and add `tool: '<slug>',` as a new line immediately after the existing `prompt: <promptVar>,` line inside the `JSON.stringify({...})` body — using each file's own prompt variable (`input` for all except `ai-chatbot`, which uses `userMsg`) and its own tool slug as listed above.
 
-- [ ] **Step 3: Manual verification (no automated test framework for React components in this repo)**
+- [ ] **Step 3: Manual verification (no automated test framework for React components in this repo)** — PENDING USER ACTION (cannot be run by any agent — these routes call `guardPaidRoute`, which touches Supabase via the service-role key; see Global Constraints and the SDD ledger's Task 9 entry).
 
 ```bash
 npm run dev
 ```
 
-Open `http://localhost:3000/tools/ai-tools/text-summarizer`, paste text over 8,000 characters, submit, and confirm the page shows the character-limit error **without any network request firing** (check the browser Network panel). Paste text under the limit and confirm a normal summary comes back. Repeat for `ai-chatbot` (checking `userMsg`, not `input`).
+Open `http://localhost:3000/tools/ai-tools/text-summarizer`, paste text over 8,000 characters, submit, and confirm the page shows the character-limit error **without any network request firing** (check the browser Network panel), and that the submit control re-enables (fixed in the Task 9 fix round — it previously stuck in "Processing..." on this path for 12 of the 13 pages). Paste text under the limit and confirm a normal summary comes back. Repeat for `ai-chatbot` (checking `userMsg`, not `input`) and at least one more of the 13 pages.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add app/api/ai/route.ts app/tools/ai-tools/text-summarizer/page.jsx app/tools/pdf-tools/pdf-translate/page.jsx app/tools/ai-tools/sentiment-analyzer/page.jsx app/tools/ai-tools/keyword-extractor/page.jsx app/tools/ai-tools/grammar-fixer/page.jsx app/tools/ai-tools/email-generator/page.jsx app/tools/ai-tools/data-extractor/page.jsx app/tools/pdf-tools/pdf-ai-summary/page.jsx app/tools/ai-tools/ai-writer/page.jsx app/tools/ai-tools/ai-translator/page.jsx app/tools/ai-tools/ai-paraphraser/page.jsx app/tools/ai-tools/ai-detector/page.jsx app/tools/ai-tools/ai-chatbot/page.jsx
