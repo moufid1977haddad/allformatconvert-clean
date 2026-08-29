@@ -185,9 +185,20 @@ cap built on flat estimates stops capping anything. The fix has three parts:
    "auto"` already fixed in the existing route) so reservation already equals actual —
    no reconciliation needed there.
 3. **When a provider genuinely offers no way to learn the real cost**, the reservation
-   stays at the worst case permanently for that call — never fall back to an average.
-   (Does not currently apply to any of the 4 routes; stated for when Adobe is wired up
-   next chantier, since Adobe's per-transaction pricing is flat regardless of input.)
+   stays at the worst case permanently for that call — never fall back to an average,
+   and never fall back to zero. This is not only a future-Adobe concern: a missing or
+   malformed `usage`/`duration` field from OpenAI on any of the 3 token/duration-metered
+   routes (`ai`, `ai-vision`, `ai-transcribe`) is the exact same case, and was found to
+   be silently mishandled during Tasks 9-12's live verification (the cost functions
+   returned `0` for a missing field, indistinguishable from a real zero cost, which fully
+   cancelled the worst-case reservation on every call and silently disarmed the cap
+   regardless of real volume). `lib/quota/config.js`'s cost functions now return `null`
+   — not `0` — when the provider didn't supply enough data to compute a real cost, and
+   `lib/quota/guard.js`'s `commit()` treats `null` as "keep the reservation, alert the
+   incident" (`sendAlert('quota-cost-unknown', ...)`), strictly distinct from the
+   `undefined`/no-argument case (remove.bg's flat, deterministic cost, no reconciliation
+   needed and no incident). Also applies, as originally stated, to Adobe once wired up
+   next chantier.
 
 ### 4.2 Input bounds (new)
 
