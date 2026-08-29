@@ -1,18 +1,21 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkFileSize, MAX_REMOVEBG_IMAGE_BYTES } from '@/lib/quota/limits';
 
 export default function BackgroundRemoverPage() {
   const [preview, setPreview] = useState('');
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [imageFile, setImageFile] = useState(null);
   const fileRef = useRef();
 
   const handleFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     e.target.value = '';
+    setImageFile(file);
     const reader = new FileReader();
     reader.onload = (ev) => { setPreview(ev.target.result); setResult(''); setError(''); };
     reader.onerror = () => { setPreview(''); setResult(''); setError('Failed to read the image file. It may be corrupt or in an unsupported format.'); };
@@ -26,10 +29,12 @@ export default function BackgroundRemoverPage() {
     setError('');
     try {
       const base64 = preview.split(',')[1];
+      const sizeCheck = checkFileSize(imageFile, MAX_REMOVEBG_IMAGE_BYTES, 'Images');
+      if (!sizeCheck.ok) { setError(sizeCheck.message); setLoading(false); return; }
       const response = await fetch('/api/remove-bg', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: base64 }),
+        body: JSON.stringify({ image: base64, tool: 'background-remover' }),
       });
       const data = await response.json();
       if (data.image) setResult('data:image/png;base64,' + data.image);
