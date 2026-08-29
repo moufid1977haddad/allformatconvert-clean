@@ -10,7 +10,7 @@
 
 **Spec:** `docs/specs/2026-08-28-quota-spend-limits-design.md` — this plan implements every section; read it alongside this plan.
 
-**Progress (2026-08-29):** Tasks 0-8 complete and review-clean (schema, all `lib/quota/` primitives, the `guardPaidRoute` orchestrator) — see `.superpowers/sdd/2026-08-28-quota-spend-limits-plan/progress.md` for the full ledger, including two real bugs the review loop caught and fixed (a Postgres cap check that silently skipped a brand-new bucket; an ESM-module-namespace monkeypatch that silently no-oped) plus a financial-correctness fix (alert-check failures could orphan a reservation). Stopped here per the mandatory gate before Task 9 touches the first of the 4 existing production routes.
+**Progress (2026-08-29):** Tasks 0-12 complete and review-clean (schema, all `lib/quota/` primitives, the `guardPaidRoute` orchestrator, and all 4 shared paid routes — `/api/ai`, `/api/ai-vision`, `/api/ai-transcribe`, `/api/remove-bg` — now wired) — see `.superpowers/sdd/2026-08-28-quota-spend-limits-plan/progress.md` for the full ledger, including two real bugs the Tasks 0-8 review loop caught and fixed (a Postgres cap check that silently skipped a brand-new bucket; an ESM-module-namespace monkeypatch that silently no-oped) plus a financial-correctness fix (alert-check failures could orphan a reservation), and one real bug the Task 9 review caught (12 of 13 `/api/ai` pages left their submit control stuck on a failed length check — a plan-text inconsistency, since the plan's own Step 2 only showed the loading-state reset for one of the 13 pages — fixed uniformly across all 13, and the lesson was carried forward and correctly applied without recurrence in Tasks 10-12). Stopped here per the mandatory gate before Task 13 (Couche B UI / `/api/quota/me`) and the stub pages.
 
 ## Global Constraints
 
@@ -1818,7 +1818,7 @@ git commit -m "feat(quota): wire guardPaidRoute into /api/ai-transcribe with rea
 - Modify: `app/api/remove-bg/route.ts`
 - Modify: `app/tools/ai-tools/background-remover/page.jsx:29-33`
 
-- [ ] **Step 1: Modify `app/api/remove-bg/route.ts`**
+- [x] **Step 1: Modify `app/api/remove-bg/route.ts`**
 
 Current file, full contents:
 
@@ -1924,7 +1924,7 @@ export async function POST(req: NextRequest) {
 }
 ```
 
-- [ ] **Step 2: Modify `app/tools/ai-tools/background-remover/page.jsx`**
+- [x] **Step 2: Modify `app/tools/ai-tools/background-remover/page.jsx`**
 
 Read the full file to find the `File`/`Blob` variable used before it was base64-encoded (the shown snippet only has the fetch call at lines 29-33). Old:
 ```jsx
@@ -1946,11 +1946,11 @@ New:
 ```
 (`<fileVar>` is whatever variable held the originally-selected image `File` before base64 conversion — confirm the exact name by reading the file.) Add near the top: `import { checkFileSize, MAX_REMOVEBG_IMAGE_BYTES } from '@/lib/quota/limits';`
 
-- [ ] **Step 3: Manual verification**
+- [ ] **Step 3: Manual verification** — PENDING USER ACTION (touches `guardPaidRoute`/Supabase; cannot be run by any agent)
 
 `npm run dev`, open `/tools/ai-tools/background-remover`, select an image over 12 MB, confirm client-side rejection with no network call; select one under the limit and confirm the background is removed normally.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add app/api/remove-bg/route.ts app/tools/ai-tools/background-remover/page.jsx
