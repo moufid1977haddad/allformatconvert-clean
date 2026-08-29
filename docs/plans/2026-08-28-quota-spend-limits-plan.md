@@ -1679,7 +1679,7 @@ git commit -m "feat(quota): wire guardPaidRoute into /api/ai-vision and image-ca
 - Modify: `app/tools/ai-tools/audio-transcriber/page.jsx:23-26`
 - Modify: `app/tools/audio-tools/audio-to-text/page.jsx:68`
 
-- [ ] **Step 1: Modify `app/api/ai-transcribe/route.ts`**
+- [x] **Step 1: Modify `app/api/ai-transcribe/route.ts`**
 
 Current file, full contents:
 
@@ -1784,7 +1784,7 @@ export async function POST(req: NextRequest) {
 }
 ```
 
-- [ ] **Step 2: Modify `app/tools/ai-tools/audio-transcriber/page.jsx`**
+- [x] **Step 2: Modify `app/tools/ai-tools/audio-transcriber/page.jsx`**
 
 Read the full file to find where the `FormData` is built (the current snippet only shows the fetch call at lines 23-26; the `formData.append('file', ...)` call is earlier in the same handler). Add, right after the existing `formData.append('file', <fileVar>)` line: `formData.append('tool', 'audio-transcriber');`. Immediately before the `const response = await fetch('/api/ai-transcribe', {` line (line 23), insert:
 
@@ -1795,15 +1795,15 @@ Read the full file to find where the `FormData` is built (the current snippet on
 
 replacing `<fileVar>` with whatever variable name the file already goes by in this handler (it's whatever was passed to `formData.append('file', ...)`). Add near the top: `import { checkFileSize, MAX_AUDIO_UPLOAD_BYTES } from '@/lib/quota/limits';`
 
-- [ ] **Step 3: Modify `app/tools/audio-tools/audio-to-text/page.jsx`**
+- [x] **Step 3: Modify `app/tools/audio-tools/audio-to-text/page.jsx`**
 
 Read the full file around line 68 to find the `FormData` construction (same as Step 2 — the fetch call at line 68 is a one-liner, so the `formData.append('file', ...)` and the enclosing handler start are above it). Apply the identical pattern: add `formData.append('tool', 'audio-to-text');` after the file append, add the `checkFileSize` guard immediately before the `fetch('/api/ai-transcribe', ...)` call, and add the same `import { checkFileSize, MAX_AUDIO_UPLOAD_BYTES } from '@/lib/quota/limits';` near the top.
 
-- [ ] **Step 4: Manual verification**
+- [ ] **Step 4: Manual verification** — PENDING USER ACTION (touches `guardPaidRoute`/Supabase; cannot be run by any agent)
 
 `npm run dev`, open `/tools/ai-tools/audio-transcriber`, select an audio file over 10 MB, confirm the client-side rejection with no network call; select one under the limit and confirm a transcript comes back. Repeat for `/tools/audio-tools/audio-to-text`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add app/api/ai-transcribe/route.ts app/tools/ai-tools/audio-transcriber/page.jsx app/tools/audio-tools/audio-to-text/page.jsx
