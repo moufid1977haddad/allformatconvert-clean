@@ -630,21 +630,22 @@ git commit -m "feat(quota): add config.js (caps, cost table) and limits.js (inpu
 ```js
 const { incrementCounter } = require('./counters');
 const { ALERT_THRESHOLDS } = require('./config');
-
-// lib/alert.js uses ESM export syntax (only ever run through Next's
-// bundler elsewhere in this repo) -- this file is CommonJS per this plan's
-// Global Constraints, so it requires the compiled interop shape. Next
-// resolves this transparently for both the route handlers and this module
-// when it's imported from a route; the standalone test script below
-// requires the same file directly and needs the identical shape, which
-// Node's CJS/ESM interop provides automatically for a plain `export`.
 const { sendAlert } = require('../alert');
 
 // Threshold-crossing is itself a capped-at-1 counter increment: if it
 // succeeds (flag was 0, now 1), this is the first time this threshold was
 // crossed this period -- send the alert. If it fails (already 1), skip
 // silently. Exactly-once per threshold per period, no separate bookkeeping.
-async function checkAndAlertThresholds({ counterName, periodKey, value, cap }) {
+//
+// sendAlertFn is injectable (defaults to the real sendAlert) so tests can
+// pass a stub instead of the real function. This isn't just a testing nicety:
+// `lib/alert.js` uses ESM `export` syntax, so `require('../alert')` returns a
+// module namespace object whose properties are non-writable by spec --
+// `alertModule.sendAlert = stub` silently no-ops (verified 2026-08-28, see
+// ledger) rather than throwing, so a monkeypatch-based test would always
+// exercise the REAL sendAlert and either fail or send genuine ntfy alerts.
+// Passing the stub as an argument sidesteps that entirely.
+async function checkAndAlertThresholds({ counterName, periodKey, value, cap }, sendAlertFn = sendAlert) {
   if (cap <= 0) return;
   const pct = (value / cap) * 100;
   for (const threshold of ALERT_THRESHOLDS) {
@@ -652,7 +653,7 @@ async function checkAndAlertThresholds({ counterName, periodKey, value, cap }) {
     const flagBucket = `alert_sent:${counterName}:${threshold}`;
     const { allowed } = await incrementCounter(flagBucket, periodKey, 1, 1);
     if (allowed) {
-      await sendAlert(counterName, `${threshold}pct_of_cap_${value}_of_${cap}`);
+      await sendAlertFn(counterName, `${threshold}pct_of_cap_${value}_of_${cap}`);
     }
   }
 }
@@ -662,44 +663,45 @@ module.exports = { checkAndAlertThresholds };
 
 - [ ] **Step 2: Write and run the alerts test**
 
-This test stubs `lib/alert.js`'s `sendAlert` by requiring the real module and monkeypatching the export in the module cache (no mocking library in this repo) — acceptable for a throwaway verification script.
+This test passes a stub `sendAlertFn` directly into `checkAndAlertThresholds` (see the comment above — monkeypatching `lib/alert.js`'s export does not work, since `require()` of an ESM module returns a non-writable namespace object).
 
 ```js
 // scripts/quota-tests/04-alerts.js
-require('./_env');
 const assert = require('node:assert');
-const alertModule = require('../../lib/alert');
-const sent = [];
-alertModule.sendAlert = async (service, status) => { sent.push({ service, status }); };
-
 const { checkAndAlertThresholds } = require('../../lib/quota/alerts');
 const { supabaseAdmin } = require('../../lib/quota/supabaseAdmin');
+
+const sent = [];
+const stubSendAlert = async (service, status) => { sent.push({ service, status }); };
 
 async function main() {
   const counterName = 'test-alert-' + Date.now();
   const period = '2000-01';
 
-  await checkAndAlertThresholds({ counterName, periodKey: period, value: 40, cap: 100 }); // 40% -- no threshold crossed
-  assert.strictEqual(sent.length, 0, 'no alert should fire below 50%');
+  try {
+    await checkAndAlertThresholds({ counterName, periodKey: period, value: 40, cap: 100 }, stubSendAlert); // 40% -- no threshold crossed
+    assert.strictEqual(sent.length, 0, 'no alert should fire below 50%');
 
-  await checkAndAlertThresholds({ counterName, periodKey: period, value: 55, cap: 100 }); // crosses 50%
-  assert.strictEqual(sent.length, 1);
-  assert.strictEqual(sent[0].service, counterName);
+    await checkAndAlertThresholds({ counterName, periodKey: period, value: 55, cap: 100 }, stubSendAlert); // crosses 50%
+    assert.strictEqual(sent.length, 1);
+    assert.strictEqual(sent[0].service, counterName);
 
-  await checkAndAlertThresholds({ counterName, periodKey: period, value: 60, cap: 100 }); // still only past 50%, already sent
-  assert.strictEqual(sent.length, 1, 'the 50% alert must not fire twice');
+    await checkAndAlertThresholds({ counterName, periodKey: period, value: 60, cap: 100 }, stubSendAlert); // still only past 50%, already sent
+    assert.strictEqual(sent.length, 1, 'the 50% alert must not fire twice');
 
-  await checkAndAlertThresholds({ counterName, periodKey: period, value: 85, cap: 100 }); // crosses 80%
-  assert.strictEqual(sent.length, 2);
+    await checkAndAlertThresholds({ counterName, periodKey: period, value: 85, cap: 100 }, stubSendAlert); // crosses 80%
+    assert.strictEqual(sent.length, 2);
 
-  await checkAndAlertThresholds({ counterName, periodKey: period, value: 100, cap: 100 }); // crosses 100%
-  assert.strictEqual(sent.length, 3);
+    await checkAndAlertThresholds({ counterName, periodKey: period, value: 100, cap: 100 }, stubSendAlert); // crosses 100%
+    assert.strictEqual(sent.length, 3);
 
-  await checkAndAlertThresholds({ counterName, periodKey: period, value: 100, cap: 100 }); // repeat call at same value
-  assert.strictEqual(sent.length, 3, 'no threshold should re-fire on a repeat call');
+    await checkAndAlertThresholds({ counterName, periodKey: period, value: 100, cap: 100 }, stubSendAlert); // repeat call at same value
+    assert.strictEqual(sent.length, 3, 'no threshold should re-fire on a repeat call');
 
-  await supabaseAdmin.from('usage_counters').delete().like('bucket_key', `alert_sent:${counterName}:%`);
-  console.log('PASS: alert thresholds fire exactly once each, in order 50/80/100.');
+    console.log('PASS: alert thresholds fire exactly once each, in order 50/80/100.');
+  } finally {
+    await supabaseAdmin.from('usage_counters').delete().like('bucket_key', `alert_sent:${counterName}:%`);
+  }
 }
 
 main().catch((err) => { console.error('FAIL:', err.message); process.exit(1); });
