@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkFileSize, MAX_AUDIO_UPLOAD_BYTES } from '@/lib/quota/limits';
 
 export default function AudioTranscriberPage() {
   const [output, setOutput] = useState('');
@@ -20,6 +21,9 @@ export default function AudioTranscriberPage() {
     try {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('tool', 'audio-transcriber');
+      const sizeCheck = checkFileSize(file, MAX_AUDIO_UPLOAD_BYTES, 'Audio files');
+      if (!sizeCheck.ok) { setLoading(false); setError(sizeCheck.message); return; }
       const response = await fetch('/api/ai-transcribe', {
         method: 'POST',
         body: formData,

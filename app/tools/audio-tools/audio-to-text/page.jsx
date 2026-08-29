@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import { Mic, Folder } from 'lucide-react';
 import SeoContent from '../../../components/SeoContent';
+import { checkFileSize, MAX_AUDIO_UPLOAD_BYTES } from '@/lib/quota/limits';
 
 export default function AudioToTextPage() {
   // Mode : 'mic' ou 'file'
@@ -65,6 +66,9 @@ export default function AudioToTextPage() {
     try {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('tool', 'audio-to-text');
+      const sizeCheck = checkFileSize(file, MAX_AUDIO_UPLOAD_BYTES, 'Audio files');
+      if (!sizeCheck.ok) { setLoading(false); setError(sizeCheck.message); return; }
       const response = await fetch('/api/ai-transcribe', { method: 'POST', body: formData });
       const data = await response.json();
       if (data.text) setFileTranscript(data.text);
