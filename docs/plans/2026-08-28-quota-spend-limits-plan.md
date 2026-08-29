@@ -1517,7 +1517,7 @@ git commit -m "feat(quota): wire guardPaidRoute into /api/ai and its 13 tool pag
 - Modify: `app/api/ai-vision/route.ts`
 - Modify: `app/tools/ai-tools/image-captioner/page.jsx:30-34`
 
-- [ ] **Step 1: Modify `app/api/ai-vision/route.ts`**
+- [x] **Step 1: Modify `app/api/ai-vision/route.ts`**
 
 Current file, full contents:
 
@@ -1635,7 +1635,7 @@ export async function POST(req: NextRequest) {
 }
 ```
 
-- [ ] **Step 2: Modify `app/tools/ai-tools/image-captioner/page.jsx`**
+- [x] **Step 2: Modify `app/tools/ai-tools/image-captioner/page.jsx`**
 
 Old (lines 30-34):
 ```jsx
@@ -1659,11 +1659,11 @@ Add near the top: `import { checkFileSize, MAX_VISION_IMAGE_BYTES } from '@/lib/
 
 Read the full file first to confirm the exact name of the File object variable in scope at this point (it will be whatever variable holds the originally-selected `File`, before it was converted to `base64` — likely named `file` or `imageFile`; use whichever the file actually uses, since `checkFileSize` needs the raw `File` for its `.size` property, not the base64 string).
 
-- [ ] **Step 3: Manual verification**
+- [ ] **Step 3: Manual verification** — PENDING USER ACTION (touches `guardPaidRoute`/Supabase; cannot be run by any agent)
 
 `npm run dev`, open `/tools/ai-tools/image-captioner`, select an image over 5 MB, confirm the client-side error with no network request; select one under the limit and confirm a caption comes back.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add app/api/ai-vision/route.ts app/tools/ai-tools/image-captioner/page.jsx
