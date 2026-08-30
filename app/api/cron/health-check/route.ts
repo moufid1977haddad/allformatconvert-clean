@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendAlert } from "@/lib/alert";
+import { supabaseAdmin } from "@/lib/quota/supabaseAdmin";
+import { GLOBAL_SPEND_CAP_MICROS, ADOBE_TX_CAP } from "@/lib/quota/config";
+import { currentUtcMonthKey, currentUtcDayKey } from "@/lib/quota/period";
 
 export const maxDuration = 30;
 
@@ -104,6 +107,51 @@ async function checkSupabaseAuth(): Promise<CheckResult> {
   }
 }
 
+async function buildDailyDigest() {
+  const monthKey = currentUtcMonthKey();
+  const dayStart = `${currentUtcDayKey()}T00:00:00.000Z`;
+
+  const { data: spendRow } = await supabaseAdmin
+    .from("usage_counters").select("value")
+    .eq("bucket_key", "global_spend_microusd").eq("period_key", monthKey).maybeSingle();
+  const { data: adobeRow } = await supabaseAdmin
+    .from("usage_counters").select("value")
+    .eq("bucket_key", "adobe_tx").eq("period_key", monthKey).maybeSingle();
+
+  const { data: monthEvents } = await supabaseAdmin
+    .from("usage_events").select("tool")
+    .eq("outcome", "accepted").gte("created_at", `${monthKey}-01T00:00:00.000Z`);
+  const toolCounts: Record<string, number> = {};
+  for (const row of monthEvents || []) {
+    if (!row.tool) continue;
+    toolCounts[row.tool] = (toolCounts[row.tool] || 0) + 1;
+  }
+  const topTools = Object.entries(toolCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+
+  const { data: todaysDenials } = await supabaseAdmin
+    .from("usage_events").select("outcome").gte("created_at", dayStart)
+    .in("outcome", ["denied_ip_hour", "denied_ip_day", "denied_global_spend", "denied_adobe_cap", "denied_user_quota"]);
+  const denialCounts: Record<string, number> = {};
+  for (const row of todaysDenials || []) {
+    denialCounts[row.outcome] = (denialCounts[row.outcome] || 0) + 1;
+  }
+
+  const spendUsd = ((spendRow?.value || 0) / 1_000_000).toFixed(2);
+  const capUsd = (GLOBAL_SPEND_CAP_MICROS / 1_000_000).toFixed(2);
+  const adobeUsed = adobeRow?.value || 0;
+  const topToolsStr = topTools.length ? topTools.map(([t, c]) => `${t}(${c})`).join(", ") : "none";
+  const ipHourDenials = (denialCounts.denied_ip_hour || 0) + (denialCounts.denied_ip_day || 0);
+  const capDenials = (denialCounts.denied_global_spend || 0) + (denialCounts.denied_adobe_cap || 0);
+  const quotaDenials = denialCounts.denied_user_quota || 0;
+
+  // A capped-out global spend or Adobe counter is informational here, never
+  // a dependency failure -- see spec §5, "Voluntary caps never read as
+  // outages." This digest is a separate, unconditional daily message, not
+  // routed through the per-dependency sendAlert(service, status) failure
+  // path above.
+  return `spend $${spendUsd}/$${capUsd}, adobe ${adobeUsed}/${ADOBE_TX_CAP}, top tools: ${topToolsStr}, refusals today: ip=${ipHourDenials} cap=${capDenials} quota=${quotaDenials}`;
+}
+
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
@@ -130,6 +178,16 @@ export async function GET(request: NextRequest) {
   for (const [service, result] of Object.entries(checks)) {
     if (!result.ok) await sendAlert(service, result.detail);
   }
+
+  const digest = await buildDailyDigest();
+  await sendAlert("daily-digest", digest);
+
+  // Housekeeping: fixed-window counter rows and event-log rows both grow
+  // unbounded without pruning (spec §8).
+  const twoDaysAgo = new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString();
+  await supabaseAdmin.from("usage_counters").delete().like("bucket_key", "ip_rate:%").lt("updated_at", twoDaysAgo);
+  const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString();
+  await supabaseAdmin.from("usage_events").delete().lt("created_at", ninetyDaysAgo);
 
   return NextResponse.json({ checks });
 }
