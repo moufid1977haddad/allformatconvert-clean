@@ -24,7 +24,7 @@ async function cleanupIpAndEvents(ip) {
   const hash = hashIp(ip);
   await supabaseAdmin.from('usage_counters').delete().eq('bucket_key', `ip_rate:hour:${hash}`);
   await supabaseAdmin.from('usage_counters').delete().eq('bucket_key', `ip_rate:day:${hash}`);
-  await supabaseAdmin.from('usage_events').delete().eq('route', 'test-guard-route');
+  await supabaseAdmin.from('usage_events').delete().eq('tool', 'test-guard-route');
 }
 
 async function readCounterValue(bucketKey, periodKey) {
@@ -60,7 +60,7 @@ async function main() {
     const afterRelease = await readCounterValue('global_spend_microusd', period);
     assert.strictEqual(afterRelease - before, 1, 'a released reservation must not leave residual spend -- verification #4');
 
-    const { data: events } = await supabaseAdmin.from('usage_events').select('outcome').eq('route', 'test-guard-route').order('id');
+    const { data: events } = await supabaseAdmin.from('usage_events').select('outcome').eq('tool', 'test-guard-route').order('id');
     assert.deepStrictEqual(events.map((e) => e.outcome), ['accepted', 'provider_failed']);
 
     console.log('PASS: guardPaidRoute -- commit reconciles, release restores, both logged.');
