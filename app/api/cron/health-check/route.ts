@@ -111,16 +111,19 @@ async function buildDailyDigest() {
   const monthKey = currentUtcMonthKey();
   const dayStart = `${currentUtcDayKey()}T00:00:00.000Z`;
 
-  const { data: spendRow } = await supabaseAdmin
+  const { data: spendRow, error: spendErr } = await supabaseAdmin
     .from("usage_counters").select("value")
     .eq("bucket_key", "global_spend_microusd").eq("period_key", monthKey).maybeSingle();
-  const { data: adobeRow } = await supabaseAdmin
+  if (spendErr) console.error("health-check digest: global_spend_microusd read failed (non-fatal):", spendErr.message);
+  const { data: adobeRow, error: adobeErr } = await supabaseAdmin
     .from("usage_counters").select("value")
     .eq("bucket_key", "adobe_tx").eq("period_key", monthKey).maybeSingle();
+  if (adobeErr) console.error("health-check digest: adobe_tx read failed (non-fatal):", adobeErr.message);
 
-  const { data: monthEvents } = await supabaseAdmin
+  const { data: monthEvents, error: monthEventsErr } = await supabaseAdmin
     .from("usage_events").select("tool")
     .eq("outcome", "accepted").gte("created_at", `${monthKey}-01T00:00:00.000Z`);
+  if (monthEventsErr) console.error("health-check digest: monthly usage_events read failed (non-fatal):", monthEventsErr.message);
   const toolCounts: Record<string, number> = {};
   for (const row of monthEvents || []) {
     if (!row.tool) continue;
@@ -128,9 +131,10 @@ async function buildDailyDigest() {
   }
   const topTools = Object.entries(toolCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
 
-  const { data: todaysDenials } = await supabaseAdmin
+  const { data: todaysDenials, error: denialsErr } = await supabaseAdmin
     .from("usage_events").select("outcome").gte("created_at", dayStart)
     .in("outcome", ["denied_ip_hour", "denied_ip_day", "denied_global_spend", "denied_adobe_cap", "denied_user_quota"]);
+  if (denialsErr) console.error("health-check digest: today's denials read failed (non-fatal):", denialsErr.message);
   const denialCounts: Record<string, number> = {};
   for (const row of todaysDenials || []) {
     denialCounts[row.outcome] = (denialCounts[row.outcome] || 0) + 1;
@@ -185,9 +189,13 @@ export async function GET(request: NextRequest) {
   // Housekeeping: fixed-window counter rows and event-log rows both grow
   // unbounded without pruning (spec §8).
   const twoDaysAgo = new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString();
-  await supabaseAdmin.from("usage_counters").delete().like("bucket_key", "ip_rate:%").lt("updated_at", twoDaysAgo);
+  const { error: ipRateDeleteErr } = await supabaseAdmin
+    .from("usage_counters").delete().like("bucket_key", "ip_rate:%").lt("updated_at", twoDaysAgo);
+  if (ipRateDeleteErr) console.error("health-check housekeeping: ip_rate counter prune failed (non-fatal):", ipRateDeleteErr.message);
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString();
-  await supabaseAdmin.from("usage_events").delete().lt("created_at", ninetyDaysAgo);
+  const { error: eventsDeleteErr } = await supabaseAdmin
+    .from("usage_events").delete().lt("created_at", ninetyDaysAgo);
+  if (eventsDeleteErr) console.error("health-check housekeeping: usage_events prune failed (non-fatal):", eventsDeleteErr.message);
 
   return NextResponse.json({ checks });
 }
