@@ -2,6 +2,41 @@
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { ToolIcon } from '../../../lib/toolIcons';
+import { useSupabaseUser } from '@/lib/hooks/useSupabaseUser';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+
+function QuotaStatus({ bucket }) {
+  const { user, loading } = useSupabaseUser();
+  const [balance, setBalance] = useState(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) return;
+      const res = await fetch(`/api/quota/me?bucket=${bucket}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.ok) setBalance(await res.json());
+    });
+  }, [user, bucket]);
+
+  if (loading) return null;
+
+  if (!user) {
+    return (
+      <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 text-sm text-indigo-800">
+        <a href="/signin" className="font-bold underline">Log in</a> to use this tool once it launches — it's included free with an account, with a monthly limit.
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm text-neutral-600">
+      {balance ? `${balance.remaining} / ${balance.cap} remaining this month` : 'Checking your balance…'}
+    </div>
+  );
+}
 
 export default function Page() {
   return (
@@ -17,7 +52,8 @@ export default function Page() {
             <ToolIcon slug="pdf-to-ppt" className="w-8 h-8 text-red-500" />
           </div>
           <div className="text-indigo-500 text-xl font-bold">Coming Soon</div>
-          <p className="text-neutral-500 text-sm">We are working hard to bring you this tool. Stay tuned!</p>
+          <p className="text-neutral-500 text-sm mb-4">We are working hard to bring you this tool. Stay tuned!</p>
+          <QuotaStatus bucket="pdf_conversions" />
         </div>
       </div>
       <SeoContent
