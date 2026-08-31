@@ -3,6 +3,7 @@ import { sendAlert } from "@/lib/alert";
 import { supabaseAdmin } from "@/lib/quota/supabaseAdmin";
 import { GLOBAL_SPEND_CAP_MICROS, ADOBE_TX_CAP } from "@/lib/quota/config";
 import { currentUtcMonthKey, currentUtcDayKey } from "@/lib/quota/period";
+import { checkStateTransition } from "@/lib/quota/alertState";
 
 export const maxDuration = 30;
 
@@ -179,8 +180,14 @@ export async function GET(request: NextRequest) {
     "pdf-tools": await checkPdfTools(),
   };
 
+  // One alert per incident, not one per cron run: a service that's still
+  // down on the next run stays silent, and a matching alert fires once it
+  // comes back. State persists in usage_counters via checkStateTransition.
   for (const [service, result] of Object.entries(checks)) {
-    if (!result.ok) await sendAlert(service, result.detail);
+    const transition = await checkStateTransition(`health:${service}`, !result.ok);
+    if (transition.alert) {
+      await sendAlert(service, transition.recovered ? "recovered" : result.detail);
+    }
   }
 
   const digest = await buildDailyDigest();

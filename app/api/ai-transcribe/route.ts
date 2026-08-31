@@ -3,6 +3,7 @@ import { sendAlert } from "@/lib/alert";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { MAX_AUDIO_UPLOAD_BYTES } from "@/lib/quota/limits";
 import { actualAiTranscribeCostMicros } from "@/lib/quota/config";
+import { alertServerError } from "@/lib/quota/errorAlerts";
 
 export async function POST(req: NextRequest) {
   try {
@@ -51,6 +52,8 @@ export async function POST(req: NextRequest) {
     await guard.commit(actualAiTranscribeCostMicros(data.duration));
     return NextResponse.json({ text: data.text });
   } catch (e: any) {
+    console.error("Unhandled error in /api/ai-transcribe:", e?.message || e);
+    await alertServerError("ai-transcribe", e?.message || String(e));
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }

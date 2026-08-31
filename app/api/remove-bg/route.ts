@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendAlert } from "@/lib/alert";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { MAX_REMOVEBG_IMAGE_BYTES } from "@/lib/quota/limits";
+import { alertServerError } from "@/lib/quota/errorAlerts";
 
 export async function POST(req: NextRequest) {
   try {
@@ -50,6 +51,8 @@ export async function POST(req: NextRequest) {
     const base64 = Buffer.from(buffer).toString("base64");
     return NextResponse.json({ image: base64 });
   } catch (e: any) {
+    console.error("Unhandled error in /api/remove-bg:", e?.message || e);
+    await alertServerError("remove-bg", e?.message || String(e));
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }

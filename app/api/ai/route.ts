@@ -3,6 +3,7 @@ import { sendAlert } from "@/lib/alert";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkPromptLength } from "@/lib/quota/limits";
 import { actualAiCostMicros } from "@/lib/quota/config";
+import { alertServerError } from "@/lib/quota/errorAlerts";
 
 export async function POST(req: NextRequest) {
   try {
@@ -47,6 +48,8 @@ export async function POST(req: NextRequest) {
     const text = data.choices?.[0]?.message?.content || "";
     return NextResponse.json({ text });
   } catch (e: any) {
+    console.error("Unhandled error in /api/ai:", e?.message || e);
+    await alertServerError("ai", e?.message || String(e));
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
