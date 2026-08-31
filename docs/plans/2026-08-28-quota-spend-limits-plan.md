@@ -12,6 +12,8 @@
 
 **Progress (2026-08-29):** Tasks 0-12 complete and review-clean (schema, all `lib/quota/` primitives, the `guardPaidRoute` orchestrator, and all 4 shared paid routes — `/api/ai`, `/api/ai-vision`, `/api/ai-transcribe`, `/api/remove-bg` — now wired) — see `.superpowers/sdd/2026-08-28-quota-spend-limits-plan/progress.md` for the full ledger, including two real bugs the Tasks 0-8 review loop caught and fixed (a Postgres cap check that silently skipped a brand-new bucket; an ESM-module-namespace monkeypatch that silently no-oped) plus a financial-correctness fix (alert-check failures could orphan a reservation), and one real bug the Task 9 review caught (12 of 13 `/api/ai` pages left their submit control stuck on a failed length check — a plan-text inconsistency, since the plan's own Step 2 only showed the loading-state reset for one of the 13 pages — fixed uniformly across all 13, and the lesson was carried forward and correctly applied without recurrence in Tasks 10-12). Stopped here per the mandatory gate before Task 13 (Couche B UI / `/api/quota/me`) and the stub pages. A subsequent priority fix (done before Task 13, see the SDD ledger) migrated global-spend accounting from integer cents to integer micro-dollars across `lib/quota/config.js`/`globalSpend.js`/`logEvent.js` and the 3 OpenAI routes, correcting a `Math.ceil`-at-the-cent rounding distortion found in live verification — Tasks 1-12's code blocks below are left as a historical record of what was built at the time and are not updated to reflect this.
 
+**Progress (2026-08-30): CLOSED — all 18 tasks (0-17) complete.** Tasks 13-16 (Couche B `/api/quota/me` + `useSupabaseUser` hook, the 3 stub pages' login/balance UI, the health-check daily digest + housekeeping, the privacy policy disclosure) all shipped review-clean (one fix round on Task 15: unchecked Supabase errors in the new digest/housekeeping calls, a plan-mandated finding, fixed and re-reviewed clean). Task 17's full verification suite passed (8/8 checks, see its Step 7 result below), the 7 env vars (6 from this chantier + the pre-existing `CRON_SECRET` gap) were set on Vercel by the user, `worktree-quota-spend-infra` was fast-forward-merged into `master` (`48ef7564..f3acb3b5`) and deployed to production, and the user independently re-verified all of #3/#6/#8 live on `www.onlineconvertools.com`. See Task 17's Step 7 for the full closing report.
+
 ## Global Constraints
 
 - All new Supabase tables get `alter table ... enable row level security` with **no policies** (service-role only), and all new RPC functions get `revoke execute ... from public, anon, authenticated` (spec §2).
@@ -1969,7 +1971,7 @@ git commit -m "feat(quota): wire guardPaidRoute into /api/remove-bg"
 - Consumes: `getUserQuotaRemaining` (Task 7), existing `lib/supabase.js` client.
 - Produces: `useSupabaseUser()` React hook → `{ user, loading }`; `GET /api/quota/me?bucket=pdf_conversions|images` → `{ remaining, cap, resetsAt }` (200) or `{ error }` (401 if no/invalid bearer token, 400 if bad `bucket`).
 
-- [ ] **Step 1: Write `lib/hooks/useSupabaseUser.js`**
+- [x] **Step 1: Write `lib/hooks/useSupabaseUser.js`**
 
 Extracted from the exact pattern already in `app/components/Navbar.jsx:720-727` (`getSession()` + `onAuthStateChange`) — no new auth mechanism.
 
@@ -1997,7 +1999,7 @@ export function useSupabaseUser() {
 }
 ```
 
-- [ ] **Step 2: Write `app/api/quota/me/route.ts`**
+- [x] **Step 2: Write `app/api/quota/me/route.ts`**
 
 ```ts
 import { NextRequest, NextResponse } from "next/server";
@@ -2038,7 +2040,7 @@ export async function GET(req: NextRequest) {
 
 `lib/quota/userQuota.js` is CommonJS (`module.exports = {...}`) per this plan's Global Constraints, and this route imports it with a normal ESM named `import` — the same interop this codebase already relies on for `import { createClient } from "@supabase/supabase-js"` (also a CJS package), so no new pattern is introduced.
 
-- [ ] **Step 3: Manual verification**
+- [x] **Step 3: Manual verification**
 
 ```bash
 npm run dev
@@ -2058,7 +2060,7 @@ Expected: `{"error":"Invalid or missing bucket parameter."}` with 400.
 
 Full sign-in-and-fetch verification happens in Task 14 once the UI can obtain a real session token.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add lib/hooks/useSupabaseUser.js app/api/quota/me/route.ts
@@ -2077,9 +2079,9 @@ git commit -m "feat(quota): add useSupabaseUser hook and /api/quota/me balance e
 **Interfaces:**
 - Consumes: `useSupabaseUser` (Task 13), `GET /api/quota/me` (Task 13).
 
-- [ ] **Step 1: Read `pdf-to-excel/page.jsx` and `pdf-to-ppt/page.jsx` in full** to confirm they follow the same static "Coming Soon" shape as `image-generator/page.jsx` (already read in full during spec research — reproduced below) before editing, since their exact JSX structure determines where the banner/balance block is inserted.
+- [x] **Step 1: Read `pdf-to-excel/page.jsx` and `pdf-to-ppt/page.jsx` in full** to confirm they follow the same static "Coming Soon" shape as `image-generator/page.jsx` (already read in full during spec research — reproduced below) before editing, since their exact JSX structure determines where the banner/balance block is inserted.
 
-- [ ] **Step 2: Replace `app/tools/ai-tools/image-generator/page.jsx`**
+- [x] **Step 2: Replace `app/tools/ai-tools/image-generator/page.jsx`**
 
 Current file (full contents):
 
@@ -2176,15 +2178,15 @@ export default function ImageGeneratorPage() {
 }
 ```
 
-- [ ] **Step 3: Apply the equivalent change to `app/tools/pdf-tools/pdf-to-excel/page.jsx` and `app/tools/pdf-tools/pdf-to-ppt/page.jsx`**
+- [x] **Step 3: Apply the equivalent change to `app/tools/pdf-tools/pdf-to-excel/page.jsx` and `app/tools/pdf-tools/pdf-to-ppt/page.jsx`**
 
 Using the same `QuotaStatus` component shape as Step 2 (duplicated in each file, matching this repo's existing convention of not sharing tiny presentational components across unrelated route folders — consistent with how `SeoContent` is the only cross-page shared component already in use here, imported via relative path from `../../../components/`), but with `bucket="pdf_conversions"` instead of `bucket="images"` (both `pdf-to-excel` and `pdf-to-ppt` share the same `pdf_conversions` bucket per spec §6). Preserve each file's existing headline, icon slug, and "Coming Soon" copy exactly as they are today — only add the `'use client'` directive, the imports, the `QuotaStatus` function, and its `<QuotaStatus bucket="pdf_conversions" />` placement inside the existing "Coming Soon" card, mirroring Step 2's structure.
 
-- [ ] **Step 4: Manual verification**
+- [x] **Step 4: Manual verification**
 
 `npm run dev`. Logged out, visit `/tools/ai-tools/image-generator`, `/tools/pdf-tools/pdf-to-excel`, `/tools/pdf-tools/pdf-to-ppt` — confirm each shows the "Log in to use this tool" banner, never a hard block. Sign in via `/signin` with a real test account, revisit each page, confirm each shows `5 / 5 remaining this month` (or the configured default). Then visit at least 3 unrelated tool pages (e.g. `/tools/ai-tools/ai-chatbot`, `/tools/image-tools/image-blur`, `/tools/pdf-tools/pdf-merge`) both logged in and logged out, and confirm none of them show any login prompt or quota UI at all — this is verification #3 (spec §10.3).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add app/tools/ai-tools/image-generator/page.jsx app/tools/pdf-tools/pdf-to-excel/page.jsx app/tools/pdf-tools/pdf-to-ppt/page.jsx
@@ -2201,7 +2203,7 @@ git commit -m "feat(quota): add login invitation and quota balance to the 3 futu
 **Interfaces:**
 - Consumes: `supabaseAdmin` (Task 2), `GLOBAL_SPEND_CAP_MICROS`/`ADOBE_TX_CAP` (Task 3, renamed from `GLOBAL_SPEND_CAP_CENTS` by the cents->micros migration — see the top Progress note and the SDD ledger), `currentUtcMonthKey`/`currentUtcDayKey` (Task 2).
 
-- [ ] **Step 1: Add the digest and housekeeping to `app/api/cron/health-check/route.ts`**
+- [x] **Step 1: Add the digest and housekeeping to `app/api/cron/health-check/route.ts`**
 
 Read the current file in full first (already read during spec research — it ends with the `GET` handler building `checks` and looping `sendAlert` on failures, then returning `NextResponse.json({ checks })`).
 
@@ -2276,7 +2278,7 @@ Finally, inside the `GET` handler, immediately after the existing failure-alert 
   await supabaseAdmin.from("usage_events").delete().lt("created_at", ninetyDaysAgo);
 ```
 
-- [ ] **Step 2: Manual verification**
+- [x] **Step 2: Manual verification**
 
 Requires `CRON_SECRET` from `.env.local` (pulled in Task 0). With the dev server running:
 
@@ -2304,7 +2306,7 @@ supabaseAdmin.from('usage_counters').delete().eq('bucket_key','global_spend_micr
 "
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add app/api/cron/health-check/route.ts
@@ -2318,7 +2320,7 @@ git commit -m "feat(quota): add daily spend/Adobe/top-tools/refusals digest and 
 **Files:**
 - Modify: `app/privacy/page.jsx`
 
-- [ ] **Step 1: Add the usage-metrics bullet to Section 2 ("Information We Collect")**
+- [x] **Step 1: Add the usage-metrics bullet to Section 2 ("Information We Collect")**
 
 Old (within the `<ul>` in Section 2):
 ```jsx
@@ -2330,7 +2332,7 @@ New (add a new `<li>` immediately after it):
               <li><strong>Usage Metrics:</strong> To operate fairly within our provider budgets and prevent abuse, we record which tool was used, when, an estimated processing cost, and — for the small number of tools that require an account — your account identifier. We never record file contents or the text you submit. For abuse-rate-limiting on tools that don't require an account, we record a one-way cryptographic hash of your IP address, never the address itself.</li>
 ```
 
-- [ ] **Step 2: Replace the vague retention line in Section 6 ("Data Retention")**
+- [x] **Step 2: Replace the vague retention line in Section 6 ("Data Retention")**
 
 Old:
 ```jsx
@@ -2341,7 +2343,7 @@ New:
             <p className="text-neutral-600 text-sm leading-relaxed">We retain your personal data only for as long as necessary to provide the service. Usage metrics (described in Section 2) are kept for 90 days. Hashed-IP rate-limit records are kept for 2 days.</p>
 ```
 
-- [ ] **Step 3: Bump the "Last updated" date**
+- [x] **Step 3: Bump the "Last updated" date**
 
 Old:
 ```jsx
@@ -2352,11 +2354,11 @@ New (use the actual date this task is executed, in the same format):
         <p className="text-neutral-500 text-center mb-10">Last updated: August 28, 2026</p>
 ```
 
-- [ ] **Step 4: Manual verification**
+- [x] **Step 4: Manual verification**
 
 `npm run dev`, open `/privacy`, confirm the new bullet reads correctly in Section 2, the retention text in Section 6 states 90 days / 2 days, and the date at the top matches today.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add app/privacy/page.jsx
@@ -2369,7 +2371,7 @@ git commit -m "docs: disclose usage-metrics collection and retention in the priv
 
 **Files:** none new — this task runs everything already built and ships it.
 
-- [ ] **Step 1: Run every quota-tests script in order**
+- [x] **Step 1: Run every quota-tests script in order**
 
 ```bash
 node scripts/quota-tests/00-schema.js
@@ -2384,9 +2386,9 @@ node scripts/quota-tests/08-guard.js
 ```
 Expected: every script prints its own `PASS: ...` line. This covers spec verification #1 (global cap blocks — proven in `05-global-spend.js` and `08-guard.js`), #2 (atomicity — `06-ip-rate-limit.js` and `07-user-quota.js`), #4 (provider failure releases quota — `08-guard.js`), #5 (alerts exactly once per threshold — `04-alerts.js`).
 
-- [ ] **Step 2: Re-verify #3 and #7 and #8 manually** (already exercised in Tasks 14 and 15 — repeat quickly here as a final gate): 3 stub pages show the login invitation logged-out and never elsewhere; the health-check digest treats a forced-over-cap spend counter as informational, not a failure; an oversized file/prompt is rejected client-side with zero network calls.
+- [x] **Step 2: Re-verify #3 and #7 and #8 manually** (already exercised in Tasks 14 and 15 — repeat quickly here as a final gate): 3 stub pages show the login invitation logged-out and never elsewhere; the health-check digest treats a forced-over-cap spend counter as informational, not a failure; an oversized file/prompt is rejected client-side with zero network calls.
 
-- [ ] **Step 3: No-regression pass on 3 of the 15 OpenAI-backed tools (verification #6)**
+- [x] **Step 3: No-regression pass on 3 of the 15 OpenAI-backed tools (verification #6)**
 
 `npm run dev`, and with the site well under the configured rate limit (fresh IP bucket), exercise:
 - `/tools/ai-tools/ai-chatbot` — send a short message, confirm a normal reply.
@@ -2395,24 +2397,43 @@ Expected: every script prints its own `PASS: ...` line. This covers spec verific
 
 For each, confirm the response is a normal 200 with real content (not a 429/503/403) and that the browser Network panel shows the request completed normally.
 
-- [ ] **Step 4: Set the 6 new env vars in Vercel** (names only — do not commit values anywhere)
+- [x] **Step 4: Set the 6 new env vars in Vercel** (names only — do not commit values anywhere)
 
 `GLOBAL_SPEND_CAP_USD`, `ADOBE_TX_CAP`, `USER_QUOTA_PDF_CONVERSIONS`, `USER_QUOTA_IMAGES`, `IP_RATE_LIMIT_PER_HOUR`, `IP_RATE_LIMIT_PER_DAY` — via the Vercel dashboard or `vercel env add <NAME> production` for each. Confirm with `vercel env ls` (names only).
 
-- [ ] **Step 5: Push**
+- [x] **Step 5: Push**
 
 ```bash
 git push origin master
 ```
 
-- [ ] **Step 6: Wait for the Vercel deployment to finish**, then verify in production on `www.onlineconvertools.com`:
+- [x] **Step 6: Wait for the Vercel deployment to finish**, then verify in production on `www.onlineconvertools.com`:
   - Visit `/tools/pdf-tools/pdf-to-excel` logged out — confirm the login invitation, not a block.
   - Visit `/tools/ai-tools/ai-chatbot` logged out — confirm it works normally, no login prompt.
   - Visit `/privacy` — confirm the updated Section 2 bullet, Section 6 retention text, and today's date.
   - `curl -s -H "Authorization: Bearer $CRON_SECRET" "https://www.onlineconvertools.com/api/cron/health-check"` — confirm `checks` still returns normally and a `daily-digest` ntfy message arrives.
 
-- [ ] **Step 7: Final report**
+- [x] **Step 7: Final report**
 
 Summarize: which of the 8 verification checks passed (with evidence — the specific script or manual step), the final list of env vars set in Vercel, and confirm nothing in `/v1/repair`, `/v1/pdfa` (Railway `pdf-tools` service), or the Supabase Auth signup/signin/password flows was touched.
+
+**Result (2026-08-30):**
+
+- **#1 global cap blocks:** `05-global-spend.js`, `08-guard.js` — PASS (user, own terminal).
+- **#2 atomicity:** `06-ip-rate-limit.js`, `07-user-quota.js` — PASS.
+- **#3 stub-page login invitation, never elsewhere:** verified twice — controller via claude-in-chrome pre-deploy (logged out: banner on the 3 stubs, nothing on `ai-chatbot`/`image-blur`/`pdf-merge`), user in production post-deploy (all 3 stubs show the banner, nothing on unrelated tools).
+- **#4 provider failure releases quota:** `08-guard.js` — PASS (release path asserted).
+- **#5 alerts exactly once per threshold:** `04-alerts.js` — PASS.
+- **#6 no-regression on 3 OpenAI-backed tools:** verified twice — user locally (Task 17 Step 3), user again in production (`ai-chatbot`, `text-summarizer`, `grammar-fixer` all respond normally).
+- **#7 digest treats an over-cap spend counter as informational:** user seeded `global_spend_microusd=9999990000`, called `/api/cron/health-check` locally — `checks` unaffected (openai/remove.bg/etc. all normal), `daily-digest` ntfy notification arrived with the correct over-cap figures, a real `remove.bg not_configured` failure fired its own separate alert in parallel (failure channel proven live too). Counter restored to its real value (10087) after. Not re-run against production directly — see Step 6 note below.
+- **#8 oversized file/prompt rejected client-side, zero network calls:** verified twice — controller pre-deploy (`text-summarizer`, 8,500 chars, zero `/api/*` requests, button re-enabled), user in production (`text-summarizer`, 33,870 chars, exact error text, button re-enabled).
+
+All 8 confirmed. Deployed: fast-forward merge `worktree-quota-spend-infra` → `master` (`48ef7564..f3acb3b5`), pushed, Vercel production deployment `f3acb3b5` Ready (~1m26s build). Step 6's cron-with-`CRON_SECRET` sub-check was deliberately not run manually against production — `CRON_SECRET` lives only in the user's own terminal/Vercel (by design, never in an agent's environment), and the user chose to let the existing daily cron schedule exercise it naturally within 24h instead, which will also be its first successful run since 2026-08-26 (previously 401'd — `CRON_SECRET` was never set on Vercel until this task's Step 4).
+
+**Env vars set in Vercel (Production + Preview), confirmed via `vercel env ls` — names and scope only, no values ever seen by the controller:** `CRON_SECRET` (pre-existing gap, added by the user alongside this chantier's 6), `GLOBAL_SPEND_CAP_USD=20`, `IP_RATE_LIMIT_PER_HOUR=30`, `IP_RATE_LIMIT_PER_DAY=100` (user's own choice, raised from the code default of 10/30 — mobile carriers NAT thousands of subscribers behind one IP; real budget protection is the global spend cap, not the IP limit), `USER_QUOTA_PDF_CONVERSIONS=5`, `USER_QUOTA_IMAGES=5`, `ADOBE_TX_CAP=450`.
+
+**Confirmed untouched (checked via diff/grep against the full branch, `pre-quota-infra-2026-08-28..f3acb3b5`):** no reference to `/v1/repair` or `/v1/pdfa` (Railway `pdf-tools` service) anywhere in the diff; no file under a Supabase Auth signup/signin/password path changed; `SUPABASE_SERVICE_ROLE_KEY` never entered any agent's environment at any point across Tasks 1-17.
+
+**Chantier closed 2026-08-30. All 18 tasks (0-17) complete, reviewed, deployed, and verified in production.**
 
 ---
