@@ -144,3 +144,111 @@ placeholder difference this volet fixes.
 **Reminder (PowerShell, not bash):** `curl` in PowerShell is an alias for
 `Invoke-WebRequest`, which doesn't understand `-u`/`-F`/`-o` the same way
 — always call `curl.exe` explicitly, as above.
+
+## Volet B — Wingdings/Webdings research (no code, report only)
+
+Three questions, answered from primary sources, not assumed.
+
+### 1. Does LibreOffice have an internal symbol-font substitution table? Does it apply here? Can it be triggered?
+
+**Confirmed: no.** LibreOffice's own bug tracker settles this directly.
+[Bug 88418](https://libreoffice-bugs.freedesktop.narkive.com/BriNbnW4/bug-88418-new-formatting-wingdings-font-not-applied-in-docx-file-symbols)
+reports the exact symptom (a Wingdings arrow renders as garbled text). A
+LibreOffice developer's response: *"I don't have Wingdings installed
+here. Perhaps you could use a more universally-supported arrow
+character?"* — the reporter then confirmed the fix was copying the real
+`wingding.ttf` from a Windows machine onto the Linux system's font
+directory. The bug was closed **RESOLVED/INVALID**: not a LibreOffice
+defect, a missing-font situation, full stop, in the words of LO's own
+team.
+
+This matches this project's own phase-1 and phase-2 empirical testing
+exactly: the legacy **"Symbol"** font (a different, older font name) *did*
+render correctly across all three Office formats tested, via LibreOffice's
+own bundled **OpenSymbol** font — OpenSymbol was built to cover that
+specific legacy encoding and generic bullet/math glyphs. It was never
+built to also contain Wingdings' distinct, arbitrary proprietary glyph
+set. There is no hidden flag to "activate" broader coverage in OpenSymbol
+for Wingdings specifically — the coverage isn't there by design, not by
+misconfiguration.
+
+### 2. Is there a free, verifiable Wingdings/Webdings-to-Unicode mapping table?
+
+Yes, tables exist — but a table is not a fix by itself. Two kinds found:
+
+- **Reference tables** (not code, just documentation of the mapping):
+  [Alan Wood's Wingdings](https://www.alanwood.net/demos/wingdings.html)
+  and [Webdings](https://www.alanwood.net/demos/webdings.html) pages, and
+  a 2014 [Unicode.org mailing list thread](https://corp.unicode.org/pipermail/unicode/2014-July/000839.html)
+  titled "Official mappings between Wingdings/Webdings and Unicode" —
+  confirms Microsoft's own PUA assignment (U+F020–U+F0FF, legacy byte
+  value + 0xF000 offset) is documented, but "official" here means
+  *documented*, not that Unicode assigns standard equivalents for every
+  glyph — many Wingdings icons (a specific stylized folder, a specific
+  clip-art-style airplane) have no single canonical Unicode codepoint at
+  all, only an approximate one.
+- **A runnable mapping project**: [dingbat-to-unicode](https://github.com/mwilliamson/dingbat-to-unicode)
+  (GitHub/PyPI) explicitly maps Symbol/Webdings/Wingdings codepoints to
+  Unicode. **Its exact license and the completeness/accuracy of its
+  mapping data could not be independently verified in this session** —
+  its README/LICENSE files 404'd on the paths tried, and PyPI's page
+  didn't load through the fetch tool available here. Flagged as
+  unverified, not assumed usable.
+
+Even with a verified table, using one is **not a Dockerfile/fontconfig
+change** — fontconfig only substitutes font *family names*, not
+individual character codepoints conditional on which font requested them.
+Applying a codepoint remap means rewriting the actual PUA characters in
+the uploaded document's XML (`w:sym` elements and Wingdings-font text
+runs) to their Unicode equivalents *before* handing the file to Gotenberg,
+then rendering with an already-present open Unicode symbol font (Noto
+Sans Symbols / Noto Color Emoji — both already in the current image). That
+is real new preprocessing logic in this site's own code, not a Docker
+image change — a materially larger undertaking than volet A, gated on a
+mapping table this session could not confirm is complete or correctly
+licensed.
+
+### 3. Which Microsoft fonts are legally redistributable? Is Wingdings one of them?
+
+**No, and the margin isn't close.**
+
+- Microsoft's only ever freely-distributed TrueType pack was
+  ["Core fonts for the Web"](https://en.wikipedia.org/wiki/Core_fonts_for_the_Web)
+  (1996–2002, discontinued): Andalé Mono, Arial, Arial Black, Comic Sans
+  MS, Courier New, Georgia, Impact, Times New Roman, Trebuchet MS,
+  Verdana, **Webdings**. Its EULA ([full text](https://corefonts.sourceforge.net/eula.htm))
+  explicitly states: *"Copies of the SOFTWARE PRODUCT may not be
+  distributed for profit either on a standalone basis or included as part
+  of your own product."* This site is a commercial, ad-monetized product
+  — embedding even Webdings in this Docker image would violate that
+  clause directly, license text against license text, no interpretation
+  needed.
+- **Wingdings was never part of that pack, or any other Microsoft
+  freeware distribution, ever.** It has only ever shipped bundled with
+  Windows/Office under Microsoft's standard restrictive EULA.
+- Real-world confirmation this exact conflict is known and acted on:
+  Gotenberg's own repository has [issue #1101](https://github.com/gotenberg/gotenberg/issues/1101),
+  "MS Core Fonts violates MIT license," raising precisely this EULA
+  conflict for their image. The current upstream Gotenberg Dockerfile
+  (fetched directly for this diagnostic, see the phase-1/phase-2 specs)
+  installs **no** Microsoft font package at all — Carlito, Caladea,
+  Liberation, DejaVu, Noto only. That is consistent with the maintainers
+  having moved away from real MS fonts for exactly this reason.
+
+### Verdict
+
+- **A pixel/glyph-faithful correction using the real Wingdings/Webdings
+  font: IMPOSSIBLE.** Not a technical limitation — a licensing one, with
+  no legal path found, and Gotenberg's own history backs that reading.
+- **A partial correction via PUA-to-Unicode remapping: theoretically
+  possible, not verified, and substantially more work than volet A** —
+  new document-preprocessing code, gated on an unverified third-party
+  mapping table, and even if it works, it renders *different* icons (the
+  closest Unicode equivalent), not the original Wingdings/Webdings ones.
+  This carries exactly the risk flagged going in: swapping empty squares
+  for a different flavor of wrong, on foundations not yet confirmed
+  solid.
+- Given that, and the standing instruction to prefer an assumed limit
+  over a shaky fix: **volet C — telling the visitor the truth before
+  conversion — is the honest move regardless of whether volet B's partial
+  path is ever pursued.**
