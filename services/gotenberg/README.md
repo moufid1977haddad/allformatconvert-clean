@@ -16,10 +16,16 @@ anything is switched over.
 ## What's in this image vs. the production one
 
 `FROM gotenberg/gotenberg:8.36.0` (pinned exact version — see `Dockerfile`
-for why the base image was chosen and what it already includes) plus one
-fontconfig rule (`fonts.conf`) that fixes "Calibri Light" resolving to the
-wrong substitute font. See `FONTS.md` for the license/origin of every font
-in play, including the ones this repo didn't add.
+for why the base image was chosen and what it already includes) plus:
+- A fontconfig rule (`fonts.conf`) that fixes "Calibri Light" resolving to
+  the wrong substitute font.
+- The Debian package `fonts-liberation-sans-narrow` plus a second
+  fontconfig rule fixing "Arial Narrow" — found missing a correct
+  substitute while testing a real user document, not a synthetic one.
+
+See `FONTS.md` for the license/origin of every font in play, including
+the ones this repo didn't add, and why Wingdings/Webdings deliberately
+aren't among them.
 
 ## Deploying this service (for testing only — do not point production at it yet)
 

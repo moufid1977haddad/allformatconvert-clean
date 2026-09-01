@@ -13,6 +13,21 @@ FROM gotenberg/gotenberg:8.36.0
 
 USER root
 
+# Arial Narrow has no correct substitute in the base image -- confirmed by
+# converting a real user document (a resume, 100% of its body text set in
+# Arial Narrow) through the current production service and inspecting the
+# embedded output font: it silently resolves to Carlito (Calibri's
+# substitute), which is not a condensed design at all. Liberation Sans
+# Narrow is the actual open, metric-compatible replacement -- packaged by
+# Debian itself as fonts-liberation-sans-narrow (present in trixie, the
+# same Debian release this image is built on), licensed GPLv2 with Red
+# Hat's font exception (verified against the font's own License.txt, not
+# assumed -- see FONTS.md). Installed via apt like every other font
+# already in the base image, not embedded by hand.
+RUN apt-get update -qq \
+    && apt-get install -y -qq --no-install-recommends fonts-liberation-sans-narrow \
+    && rm -rf /var/lib/apt/lists/*
+
 # The base image already ships Carlito/Caladea (Calibri/Cambria's
 # metric-compatible substitutes) via fonts-crosextra-carlito/-caladea --
 # confirmed empirically in phase 1 by inspecting the embedded fonts in real

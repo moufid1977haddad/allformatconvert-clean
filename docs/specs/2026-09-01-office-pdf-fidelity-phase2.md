@@ -1,4 +1,4 @@
-# Office→PDF fidelity, phase 2 — volet A (Calibri Light) + real-document test
+# Office→PDF fidelity, phase 2 — volet A (Calibri Light + Arial Narrow) + real-document test
 
 Follows the phase 1 diagnostic (2026-08-31): confirmed Carlito/Caladea
 (Calibri/Cambria's metric substitutes) already work correctly in the
@@ -17,6 +17,31 @@ instead of Carlito.
 sees them. No new font file is added — see `FONTS.md` for why, and for the
 license/origin of every font already in the base image that this rule
 touches.
+
+## Volet A, extended — the Arial Narrow fix (2026-09-01, after the user's real CV was tested)
+
+The real-document test below (originally run to check for anything a
+synthetic file might have missed) found a second, more consequential gap:
+the CV's actual body font — Arial Narrow, 834 of 834 runs — has no
+correct substitute either, silently falling back to Carlito (not a
+condensed design). The user asked this be fixed in the same image build
+as Calibri Light rather than shipping and re-testing twice.
+
+Added: the Debian package `fonts-liberation-sans-narrow` (installed via
+`apt-get` in the Dockerfile, same pattern as every other font already in
+the base image) plus a second fontconfig rule, "Arial Narrow" → "Liberation
+Sans Narrow". License verified directly against the font's own
+`License.txt` before adding it (not assumed from the user's description):
+GPLv2 with Red Hat's font-embedding exception — same license family the
+original Liberation Sans/Serif/Mono already in the base image used before
+the wider project moved to OFL 1.1. Full reasoning, including why this
+font isn't in the current `liberation-fonts` 2.00.0+ release, in
+`FONTS.md`.
+
+Re-checked the same real CV's every XML part (not just the body text) for
+any other font gap: none found. Courier New/Arial/Calibri also appear
+(bullet-list definitions in `numbering.xml`) but all three already
+resolve correctly via fonts already in the base image.
 
 This directory does not build, run, or deploy anything by itself in this
 session — no Docker or Railway access here (confirmed: `docker` command
