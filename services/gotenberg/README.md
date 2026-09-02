@@ -32,15 +32,11 @@ aren't among them.
 1. Railway project `fortunate-manifestation` (same project as the existing
    Gotenberg and pdf-tools services) → New Service → Deploy from the
    GitHub repo → Root Directory: `services/gotenberg`.
-2. Environment variables — `GOTENBERG_API_BASIC_AUTH_USERNAME` and
-   `GOTENBERG_API_BASIC_AUTH_PASSWORD` (Gotenberg's own native Basic Auth,
-   already baked on via `--api-enable-basic-auth` in this image's `CMD` —
-   see the Dockerfile). These are Gotenberg's names, not this repo's app-side
-   `GOTENBERG_USERNAME`/`GOTENBERG_PASSWORD` (what `.env.local` and the
-   Next.js routes use to build the Basic Auth header they send) — set them
-   to the same values as the existing service's credentials so both
-   services accept the same login. No other env vars are required — this
-   image adds nothing else that reads new config.
+2. Environment variables — **all 9 of them, not just the 2 Basic Auth
+   ones.** See `RAILWAY.md` for the full list, each variable's role, and
+   whether its value should be copied from the existing Gotenberg service.
+   Skipping `PORT` specifically is what broke the first real deploy attempt
+   here — `RAILWAY.md` explains why.
 3. Healthcheck path: `/health` (same as the existing service; confirmed
    live — see the phase 1 spec).
 4. Replicas: 1 is enough for a test/comparison service — it isn't taking
