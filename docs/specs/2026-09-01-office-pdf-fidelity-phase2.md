@@ -286,9 +286,46 @@ and converted their real CV through both services.
 - **Fixed:** body-text line wrapping. Liberation Sans Narrow resolved the
   Arial Narrow gap, confirmed as the dominant cause — it affected the
   entire document, not a handful of characters.
-- **Not fixed, as predicted:** the decorative border, built from Wingdings/
-  Webdings characters — the licensing wall from volet B, accepted as a
-  standing limitation, not pursued further.
+- **Not fixed, as predicted — but for a different reason than first
+  assumed.** This spec originally attributed the unfixed decorative border
+  to the same cause as volet B's Wingdings/Webdings finding (a font/
+  licensing gap). **That was wrong, corrected 2026-09-02 after directly
+  inspecting the CV's `word/document.xml`.** The two are unrelated,
+  independent mechanisms in this file:
+  - The header contact icons (location/email/phone) genuinely are
+    `<w:sym w:font="Webdings">` — a real font dependency, correctly
+    covered by volet B's licensing-wall verdict.
+  - **The page border is not font-based at all.** The `sectPr` at the end
+    of the document contains:
+    ```xml
+    <w:pgBorders w:offsetFrom="page">
+      <w:top w:val="dashDotStroked" w:sz="24" w:space="24" w:color="auto"/>
+      <w:left w:val="dashDotStroked" w:sz="24" w:space="24" w:color="auto"/>
+      <w:bottom w:val="dashDotStroked" w:sz="24" w:space="24" w:color="auto"/>
+      <w:right w:val="dashDotStroked" w:sz="24" w:space="24" w:color="auto"/>
+    </w:pgBorders>
+    ```
+    No `w:art` attribute is present, so this isn't one of Word's bitmap
+    "art" page borders either — `dashDotStroked` is one of the ~30 named
+    line styles in the OOXML `ST_Border` enumeration, a pure vector-stroke
+    instruction with zero dependency on any font, licensed or not.
+  - **Confirmed empirically, not just from the XML:** the user tested the
+    same CV through LibreOffice on a Windows machine that has the real
+    Wingdings and Webdings fonts installed. Result: the three header icons
+    rendered correctly (font dependency resolved), but the border still
+    rendered as a plain double black line instead of the dash-dot-stroke
+    pattern — proof, independent of the XML reading, that the border's
+    defect has nothing to do with font availability.
+  - LibreOffice implements `pgBorders` and offers `dashDotStroked` as a
+    selectable line style, but its renderer for this and other complex
+    line-art border styles is known to be imprecise — see upstream
+    [LibreOffice Bug 117354, "Unable to produce double-line page
+    borders"](https://bugs.documentfoundation.org/show_bug.cgi?id=117354).
+    No font fix, real or licensed, could ever have corrected this border;
+    it is a rendering-engine gap, not a font-substitution gap. Still
+    accepted as a standing limitation of the LibreOffice route — see the
+    engine-alternatives research this correction is drawn from — not
+    pursued further in this image.
 
 One correction to this spec: the "no other env vars are required" claim
 in volet A's deploy notes was wrong. The real deployment needed **9**
