@@ -7,6 +7,7 @@ export default function WordToPdfPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
+  const [detectedFonts, setDetectedFonts] = useState([]);
   const inputRef = useRef();
 
   const handleFile = (e) => {
@@ -22,6 +23,7 @@ export default function WordToPdfPage() {
     setLoading(true);
     setError('');
     setDone(false);
+    setDetectedFonts([]);
 
     try {
       const formData = new FormData();
@@ -39,6 +41,9 @@ export default function WordToPdfPage() {
         }
         throw new Error(message);
       }
+
+      const detectedFontsHeader = res.headers.get('X-Detected-Symbol-Fonts');
+      setDetectedFonts(detectedFontsHeader ? detectedFontsHeader.split(',') : []);
 
       const blob = await res.blob();
       const filename = (file.name.replace(/\.[^.]+$/, '') || 'document') + '.pdf';
@@ -58,11 +63,18 @@ export default function WordToPdfPage() {
     }
   };
 
+  // Oxford-comma join: "Wingdings", "Wingdings and Webdings", or
+  // "Wingdings, Wingdings 2, and Wingdings 3" for the rare 3+ case.
+  const detectedFontsList = detectedFonts.length <= 2
+    ? detectedFonts.join(' and ')
+    : `${detectedFonts.slice(0, -1).join(', ')}, and ${detectedFonts[detectedFonts.length - 1]}`;
+
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Word to PDF</h1>
-        <p className="text-neutral-500 text-center mb-8">Convert .docx files to PDF with professional-grade fidelity</p>
+        <p className="text-neutral-500 text-center mb-2">Convert .docx files to PDF using LibreOffice</p>
+        <p className="text-neutral-400 text-xs text-center mb-8">Standard fonts and formatting come through accurately. Wingdings and Webdings icon fonts can&apos;t legally be reproduced and will appear blank if your file uses them.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a .docx file here'}</p>
@@ -81,13 +93,18 @@ export default function WordToPdfPage() {
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
               <div className="text-green-500 text-xl font-bold mb-1">PDF downloaded!</div>
               <p className="text-neutral-500 text-sm">Check your browser's downloads for the converted file.</p>
+              {detectedFonts.length > 0 && (
+                <p className="text-amber-600 text-sm mt-3">
+                  Heads up: this file uses {detectedFontsList} icon font{detectedFonts.length > 1 ? 's' : ''}, which can&apos;t legally be reproduced — those specific characters may appear as blank boxes in your PDF. Everything else converted normally.
+                </p>
+              )}
             </div>
           )}
         </div>
       </div>
       <SeoContent
         title="Word to PDF"
-        description="Word to PDF converts your .docx file into a real, professional-quality PDF using LibreOffice, the same conversion engine used by many enterprise document pipelines. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. In return, you get pixel-accurate layout, fonts, and formatting, with fully selectable text, matching your original document far more closely than a browser-rendered approximation ever could."
+        description="Word to PDF converts your .docx file into a real, professional-quality PDF using LibreOffice, the same conversion engine used by many enterprise document pipelines. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. Standard fonts, spacing, and page layout are preserved accurately with fully selectable text. The one disclosed exception: Wingdings and Webdings icon fonts can't legally be embedded in our conversion service (a font-licensing restriction, not a bug), so those specific characters come through as blank boxes if your document uses them — everything else converts normally."
         howTo={[
           "Click the upload area and select a .docx file from your device.",
           "Click 'Download PDF'. Your file is uploaded securely for conversion and the PDF downloads automatically once it's ready.",

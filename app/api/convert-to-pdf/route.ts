@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { detectProprietarySymbolFonts } from "@/lib/officeSymbolFonts";
 
 // Give the Gotenberg round-trip (up to GOTENBERG_TIMEOUT_MS below) enough
 // headroom inside the function's own execution budget.
@@ -58,6 +59,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Kicked off in parallel with the Gotenberg conversion below: scans the
+  // upload for Wingdings/Wingdings 2/Wingdings 3/Webdings references so the
+  // response can disclose the (confirmed, permanent) icon-font gap on
+  // success. Reading the bytes here doesn't consume `file` -- Blob/File
+  // bytes can be read more than once, so `gotenbergForm.append` below still
+  // gets the original upload. Detection failures must never break the
+  // actual conversion, hence the trailing .catch.
+  const detectedFontsPromise: Promise<string[]> = file
+    .arrayBuffer()
+    .then((buf) => detectProprietarySymbolFonts(Buffer.from(buf), extension))
+    .catch(() => []);
+
   const gotenbergForm = new FormData();
   gotenbergForm.append("files", file, file.name);
 
@@ -107,11 +120,16 @@ export async function POST(req: NextRequest) {
   }
 
   const outName = file.name.replace(/\.[^.]+$/, "") + ".pdf";
-  return new NextResponse(pdfBuffer, {
-    status: 200,
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${outName.replace(/"/g, "")}"`,
-    },
-  });
+  const detectedFonts = await detectedFontsPromise;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/pdf",
+    "Content-Disposition": `attachment; filename="${outName.replace(/"/g, "")}"`,
+  };
+  // Only set this header when it has something to say -- an empty-string
+  // header would be a false "we checked and found nothing worth this
+  // header existing" signal indistinguishable from "we didn't check".
+  if (detectedFonts.length > 0) {
+    headers["X-Detected-Symbol-Fonts"] = detectedFonts.join(",");
+  }
+  return new NextResponse(pdfBuffer, { status: 200, headers });
 }
