@@ -277,3 +277,60 @@ licensed.
   over a shaky fix: **volet C — telling the visitor the truth before
   conversion — is the honest move regardless of whether volet B's partial
   path is ever pursued.**
+
+## Real-document comparison result (2026-09-01)
+
+The user deployed the new service (`gotenberg-fonts-production.up.railway.app`)
+and converted their real CV through both services.
+
+- **Fixed:** body-text line wrapping. Liberation Sans Narrow resolved the
+  Arial Narrow gap, confirmed as the dominant cause — it affected the
+  entire document, not a handful of characters.
+- **Not fixed, as predicted:** the decorative border, built from Wingdings/
+  Webdings characters — the licensing wall from volet B, accepted as a
+  standing limitation, not pursued further.
+
+One correction to this spec: the "no other env vars are required" claim
+in volet A's deploy notes was wrong. The real deployment needed **9**
+environment variables, not 2 — the healthcheck failed on the missing
+`PORT` var specifically. Corrected in `services/gotenberg/RAILWAY.md`
+(new file, point 1 below) with the full, verified list.
+
+## Point 2 — cutover procedure (not executed here — the user changes the variable)
+
+**Variable to change:** `GOTENBERG_URL` on Vercel (the same variable
+`app/api/convert-to-pdf/route.ts` and `app/api/convert-html-to-pdf/route.ts`
+both already read — no code change needed for the cutover itself).
+`GOTENBERG_USERNAME`/`GOTENBERG_PASSWORD` do NOT need to change, since the
+new Railway service was configured with the same Basic Auth credentials
+as the existing one.
+
+**Recommended order — Preview before Production:**
+1. Set `GOTENBERG_URL` for the **Preview** environment only, to
+   `https://gotenberg-fonts-production.up.railway.app`, on Vercel
+   (Project → Settings → Environment Variables → `GOTENBERG_URL` → add/edit
+   the Preview-scoped value). Leave Production untouched at this step.
+2. Trigger a preview deployment (push any branch, or redeploy the current
+   one from the Vercel dashboard) and run the test list below against
+   that preview URL.
+3. Only once every test below looks right: change `GOTENBERG_URL` for
+   **Production** to the same new URL, and redeploy production (Vercel
+   dashboard → Deployments → latest → "Redeploy" — changing an env var
+   alone does not retroactively affect an already-built deployment).
+4. Re-run the same test list against the live production domain.
+
+**Tests — all 5 tools, both before promoting to Production and again after:**
+
+| Tool | Page | What to check |
+|---|---|---|
+| Word to PDF | `/tools/pdf-tools/word-to-pdf` | Upload the real CV — confirm line wrapping now matches the "new service" comparison PDF; confirm the Wingdings/Webdings header icons still show as blank boxes (expected, unrelated to this cutover) and the new honesty banner appears (once point 3 ships) |
+| Excel to PDF | `/tools/pdf-tools/excel-to-pdf` | Upload a real .xlsx with some formatting (borders, number formats) — confirm it still converts cleanly |
+| PowerPoint to PDF | `/tools/pdf-tools/ppt-to-pdf` | Upload a real .pptx — confirm slides render, confirm a "Calibri Light" title placeholder (if the file has one) now uses Carlito correctly |
+| EPUB to PDF | `/tools/pdf-tools/epub-to-pdf` | Upload a real .epub — this tool calls `/api/convert-html-to-pdf` (Chromium, not LibreOffice) which also points at `GOTENBERG_URL`; confirm the new image's Chromium variant handles it (the new image is the "full" variant — Chromium + LibreOffice — same as production, not a LibreOffice-only build, so this should need no special handling, but it's the one path not otherwise exercised by the CV/xlsx/pptx tests above) |
+| MOBI to PDF | `/tools/pdf-tools/mobi-to-pdf` | Same as EPUB — also routes through `/api/convert-html-to-pdf` |
+
+**Rollback (if anything regresses):** change `GOTENBERG_URL` back to the
+existing production value (`https://gotenberg-production-7de3.up.railway.app`)
+on whichever environment(s) were changed, then redeploy the same way as
+step 3 above. The old service was never touched or stopped, so this is
+immediate and complete — no data or state to reconcile either direction.
