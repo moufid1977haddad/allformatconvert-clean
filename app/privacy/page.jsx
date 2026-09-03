@@ -17,7 +17,13 @@
             <ul className="text-neutral-600 text-sm leading-relaxed space-y-2 list-disc pl-5">
               <li><strong>Usage Data:</strong> We automatically collect information about how you interact with our website, including your IP address, browser type, browser version, pages visited, time and date of visit, and other diagnostic data.</li>
               <li><strong>Cookies:</strong> We use cookies to remember your preferences such as dark mode settings. These cookies do not contain personal information.</li>
-              <li><strong>File Processing:</strong> All file conversions and processing are performed locally in your browser. We do NOT upload, store, or transmit your files to our servers.</li>
+              <li><strong>File Processing:</strong> Most tools process your files entirely in your browser — nothing is uploaded to any server. A few tools require server-side processing for fidelity or capability reasons in-browser processing cannot reach; for those, your file is transmitted over HTTPS, processed, and deleted immediately afterward — never stored, logged, or kept:
+                <ul className="list-disc pl-5 mt-2 space-y-1">
+                  <li>Word to PDF, Excel to PDF, PowerPoint to PDF, EPUB to PDF, MOBI to PDF, PDF Repair, PDF to PDF/A: processed on our own servers (self-hosted, not shared with a third party).</li>
+                  <li>Audio Transcriber / Audio to Text: your audio is sent to OpenAI for processing — see Section 3.</li>
+                  <li>Background Remover: your image is sent to Remove.bg for processing — see Section 3.</li>
+                </ul>
+              </li>
               <li><strong>Account Information:</strong> If you create an account, we collect your name and email address.</li>
               <li><strong>Usage Metrics:</strong> To operate fairly within our provider budgets and prevent abuse, we record which tool was used, when, an estimated processing cost, and — for the small number of tools that require an account — your account identifier. We never record file contents or the text you submit. For abuse-rate-limiting on tools that don't require an account, we record a one-way cryptographic hash of your IP address, never the address itself.</li>
             </ul>
