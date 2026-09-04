@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendAlert } from "@/lib/alert";
 import { supabaseAdmin } from "@/lib/quota/supabaseAdmin";
-import { GLOBAL_SPEND_CAP_MICROS, ADOBE_TX_CAP } from "@/lib/quota/config";
+import { GLOBAL_SPEND_CAP_MICROS } from "@/lib/quota/config";
 import { currentUtcMonthKey, currentUtcDayKey } from "@/lib/quota/period";
 import { checkStateTransition } from "@/lib/quota/alertState";
 
@@ -116,10 +116,6 @@ async function buildDailyDigest() {
     .from("usage_counters").select("value")
     .eq("bucket_key", "global_spend_microusd").eq("period_key", monthKey).maybeSingle();
   if (spendErr) console.error("health-check digest: global_spend_microusd read failed (non-fatal):", spendErr.message);
-  const { data: adobeRow, error: adobeErr } = await supabaseAdmin
-    .from("usage_counters").select("value")
-    .eq("bucket_key", "adobe_tx").eq("period_key", monthKey).maybeSingle();
-  if (adobeErr) console.error("health-check digest: adobe_tx read failed (non-fatal):", adobeErr.message);
 
   const { data: monthEvents, error: monthEventsErr } = await supabaseAdmin
     .from("usage_events").select("tool")
@@ -134,7 +130,7 @@ async function buildDailyDigest() {
 
   const { data: todaysDenials, error: denialsErr } = await supabaseAdmin
     .from("usage_events").select("outcome").gte("created_at", dayStart)
-    .in("outcome", ["denied_ip_hour", "denied_ip_day", "denied_global_spend", "denied_adobe_cap", "denied_user_quota"]);
+    .in("outcome", ["denied_ip_hour", "denied_ip_day", "denied_global_spend", "denied_user_quota"]);
   if (denialsErr) console.error("health-check digest: today's denials read failed (non-fatal):", denialsErr.message);
   const denialCounts: Record<string, number> = {};
   for (const row of todaysDenials || []) {
@@ -143,18 +139,16 @@ async function buildDailyDigest() {
 
   const spendUsd = ((spendRow?.value || 0) / 1_000_000).toFixed(2);
   const capUsd = (GLOBAL_SPEND_CAP_MICROS / 1_000_000).toFixed(2);
-  const adobeUsed = adobeRow?.value || 0;
   const topToolsStr = topTools.length ? topTools.map(([t, c]) => `${t}(${c})`).join(", ") : "none";
   const ipHourDenials = (denialCounts.denied_ip_hour || 0) + (denialCounts.denied_ip_day || 0);
-  const capDenials = (denialCounts.denied_global_spend || 0) + (denialCounts.denied_adobe_cap || 0);
+  const capDenials = denialCounts.denied_global_spend || 0;
   const quotaDenials = denialCounts.denied_user_quota || 0;
 
-  // A capped-out global spend or Adobe counter is informational here, never
-  // a dependency failure -- see spec §5, "Voluntary caps never read as
-  // outages." This digest is a separate, unconditional daily message, not
-  // routed through the per-dependency sendAlert(service, status) failure
-  // path above.
-  return `spend $${spendUsd}/$${capUsd}, adobe ${adobeUsed}/${ADOBE_TX_CAP}, top tools: ${topToolsStr}, refusals today: ip=${ipHourDenials} cap=${capDenials} quota=${quotaDenials}`;
+  // A capped-out global spend is informational here, never a dependency
+  // failure -- see spec §5, "Voluntary caps never read as outages." This
+  // digest is a separate, unconditional daily message, not routed through
+  // the per-dependency sendAlert(service, status) failure path above.
+  return `spend $${spendUsd}/$${capUsd}, top tools: ${topToolsStr}, refusals today: ip=${ipHourDenials} cap=${capDenials} quota=${quotaDenials}`;
 }
 
 export async function GET(request: NextRequest) {
