@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { detectProprietarySymbolFonts } from "@/lib/officeSymbolFonts";
+import { convertDocxToPdf, ConvertApiError } from "@/lib/providers/convertApi";
+import { guardPaidRoute } from "@/lib/quota/guard";
+import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES } from "@/lib/quota/limits";
+import { alertServerError } from "@/lib/quota/errorAlerts";
 
-// Give the Gotenberg round-trip (up to GOTENBERG_TIMEOUT_MS below) enough
-// headroom inside the function's own execution budget.
+// Give the Gotenberg/ConvertAPI round-trip (up to GOTENBERG_TIMEOUT_MS
+// below) enough headroom inside the function's own execution budget.
 export const maxDuration = 60;
 
 const GOTENBERG_TIMEOUT_MS = 30_000;
@@ -14,21 +18,83 @@ const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024;
 
 const ALLOWED_EXTENSIONS = new Set(["docx", "doc", "xlsx", "xls", "csv", "pptx", "ppt"]);
 
+// Every non-docx row stays "gotenberg" by design, not by omission -- this
+// table is the single place that answers "which engine handles this
+// file," and it should stay legible enough that the answer is obvious
+// without reading control flow. See
+// docs/specs/2026-09-03-convertapi-word-to-pdf-integration.md §1.
+const BACKEND_FOR_EXTENSION: Record<string, "convertapi" | "gotenberg"> = {
+  docx: "convertapi",
+  doc: "gotenberg",
+  xlsx: "gotenberg",
+  xls: "gotenberg",
+  csv: "gotenberg",
+  pptx: "gotenberg",
+  ppt: "gotenberg",
+};
+
+// Rollback switch (spec §9): only the literal value "true" routes .docx to
+// ConvertAPI. Unset, or any other value (including "false"), falls
+// through to the existing Gotenberg path -- the same fail-safe-to-old-
+// behavior default as every other extension. Flipping this back off is an
+// env var change plus a redeploy, never a code change.
+const CONVERTAPI_ENABLED = process.env.CONVERTAPI_ENABLED === "true";
+
+// Real ConvertAPI HTTP status codes and response codes mapped to plain-
+// language user messages, per spec §4 exactly. `alert` marks the rows
+// that trigger alertServerError (everything except the two success-
+// adjacent, self-explanatory cases: unsupported format and file-too-
+// large, the latter handled separately by the size check below).
+const CONVERTAPI_ERROR_RESPONSES: Record<string, { status: number; message: string; alert: boolean }> = {
+  quota_exceeded: {
+    status: 503,
+    message: "Conversion is temporarily unavailable. Please try again later.",
+    alert: true,
+  },
+  rate_limited: {
+    status: 503,
+    message: "Conversion is temporarily unavailable. Please try again later.",
+    alert: true,
+  },
+  invalid_token: {
+    status: 502,
+    message: "Conversion isn't working right now. We've been notified.",
+    alert: true,
+  },
+  unsupported_format: {
+    status: 415,
+    message: "This file format isn't supported. Please upload a .docx file.",
+    alert: false,
+  },
+  timeout: {
+    status: 504,
+    message: "This conversion is taking too long. Try a smaller or simpler file.",
+    alert: true,
+  },
+  corrupted_file: {
+    status: 502,
+    message: "This file couldn't be converted. It may be corrupted or in an unexpected format.",
+    alert: true,
+  },
+  upstream_error: {
+    status: 502,
+    message: "Conversion failed. Please try again.",
+    alert: true,
+  },
+};
+
 function getExtension(filename: string): string {
   const idx = filename.lastIndexOf(".");
   return idx === -1 ? "" : filename.slice(idx + 1).toLowerCase();
 }
 
+function backendFor(extension: string): "convertapi" | "gotenberg" {
+  const backend = BACKEND_FOR_EXTENSION[extension];
+  if (backend === "convertapi" && !CONVERTAPI_ENABLED) return "gotenberg";
+  return backend;
+}
+
 export async function POST(req: NextRequest) {
-  const gotenbergUrl = process.env.GOTENBERG_URL;
-  const gotenbergUsername = process.env.GOTENBERG_USERNAME;
-  const gotenbergPassword = process.env.GOTENBERG_PASSWORD;
-
-  if (!gotenbergUrl || !gotenbergUsername || !gotenbergPassword) {
-    // Deliberately do not include the values above in this message.
-    return NextResponse.json({ error: "Conversion service is not configured." }, { status: 500 });
-  }
-
   let file: File;
   try {
     const formData = await req.formData();
@@ -57,6 +123,102 @@ export async function POST(req: NextRequest) {
       { error: `File is too large. Maximum size is ${MAX_FILE_SIZE_BYTES / (1024 * 1024)} MB.` },
       { status: 413 }
     );
+  }
+
+  const backend = backendFor(extension);
+  if (backend === "convertapi") {
+    return handleConvertApi(req, file);
+  }
+  return handleGotenberg(file, extension);
+}
+
+// .docx only, and only while CONVERTAPI_ENABLED === "true" -- see
+// docs/specs/2026-09-03-convertapi-word-to-pdf-integration.md.
+async function handleConvertApi(req: NextRequest, file: File): Promise<NextResponse> {
+  // Validated BEFORE calling ConvertAPI, so a credit is never spent on a
+  // file that would fail anyway (§5). In practice the generic
+  // MAX_FILE_SIZE_BYTES check above already enforces this same 25 MB
+  // ceiling, but this check stands on its own per the spec, in case the
+  // two constants are ever tuned independently in the future.
+  const sizeCheck = checkFileSize(file, MAX_CONVERTAPI_FILE_BYTES, "Word documents");
+  if (!sizeCheck.ok) {
+    return NextResponse.json({ error: "This file is too large. Maximum size is 25 MB." }, { status: 413 });
+  }
+
+  const guard = await guardPaidRoute(req, { route: "word-to-pdf", tool: "word-to-pdf" });
+  if (!guard.ok) return guard.response;
+
+  let fileBuffer: Buffer;
+  try {
+    fileBuffer = Buffer.from(await file.arrayBuffer());
+  } catch {
+    await guard.release();
+    return NextResponse.json(
+      { error: "This file couldn't be converted. It may be corrupted or in an unexpected format." },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const { pdfBuffer, costMicros } = await convertDocxToPdf(fileBuffer, file.name);
+    // Real reconciliation: actualCostMicros = response.ConversionCost *
+    // CONVERTAPI_COST_MICROS, computed inside the adapter (only it knows
+    // ConvertAPI's response shape) and returned here as the already-scaled
+    // costMicros. Committed regardless of the magic-byte check below --
+    // ConvertAPI's 2xx response means it already billed for this
+    // conversion, whether or not the payload turns out to be a valid PDF.
+    await guard.commit(costMicros);
+
+    const bytes = new Uint8Array(pdfBuffer);
+    const isPdf = bytes.length >= 5 && String.fromCharCode(...bytes.slice(0, 5)) === "%PDF-";
+    if (!isPdf) {
+      // Mirrors the same defense-in-depth check handleGotenberg already
+      // does below -- a 2xx from the provider isn't proof the bytes are
+      // actually a PDF, and streaming an invalid file to the client with a
+      // .pdf extension and no error would be worse than refusing it here.
+      await alertServerError("word-to-pdf", "non_pdf_response");
+      return NextResponse.json({ error: "Conversion failed. Please try again." }, { status: 502 });
+    }
+
+    const outName = file.name.replace(/\.[^.]+$/, "") + ".pdf";
+    return new NextResponse(bytes, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${outName.replace(/"/g, "")}"`,
+      },
+    });
+  } catch (err) {
+    // No automatic fallback to Gotenberg on any ConvertAPI failure -- every
+    // failure returns an explicit error to the user, never a silent retry
+    // against a different provider.
+    await guard.release();
+
+    if (err instanceof ConvertApiError) {
+      const mapped = CONVERTAPI_ERROR_RESPONSES[err.code] || CONVERTAPI_ERROR_RESPONSES.upstream_error;
+      if (mapped.alert) {
+        // Server-side only, and deliberately limited to the error code and
+        // HTTP status -- never the token, never the raw upstream body.
+        await alertServerError("word-to-pdf", `${err.code} (HTTP ${err.httpStatus ?? "n/a"})`);
+      }
+      return NextResponse.json({ error: mapped.message }, { status: mapped.status });
+    }
+
+    await alertServerError("word-to-pdf", "unexpected_error");
+    return NextResponse.json({ error: "Conversion failed. Please try again." }, { status: 500 });
+  }
+}
+
+// Every extension except .docx (plus .docx itself when CONVERTAPI_ENABLED
+// is not "true") -- unchanged from before this spec's implementation.
+async function handleGotenberg(file: File, extension: string): Promise<NextResponse> {
+  const gotenbergUrl = process.env.GOTENBERG_URL;
+  const gotenbergUsername = process.env.GOTENBERG_USERNAME;
+  const gotenbergPassword = process.env.GOTENBERG_PASSWORD;
+
+  if (!gotenbergUrl || !gotenbergUsername || !gotenbergPassword) {
+    // Deliberately do not include the values above in this message.
+    return NextResponse.json({ error: "Conversion service is not configured." }, { status: 500 });
   }
 
   // Kicked off in parallel with the Gotenberg conversion below: scans the
