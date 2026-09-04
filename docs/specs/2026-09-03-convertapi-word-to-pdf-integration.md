@@ -298,14 +298,46 @@ New line in Section 3 (Third-Party Services):
 
 ## 9. Rollback procedure
 
-`CONVERTAPI_ENABLED` env var, checked before consulting `BACKEND_FOR_EXTENSION` — when
-false (or unset), `.docx` also routes to Gotenberg, same as every other extension.
-Flipping it back is an env var change plus a redeploy, not a code revert, matching the
-project's established rollback pattern (the earlier Gotenberg-image cutover worked the
-same way: change one variable, the old path was never touched or removed).
+**Correction (verified empirically after the first production test): this is NOT an
+immediate switch. A redeploy is mandatory, not optional, and it takes real, observable
+time — budget roughly 2 minutes, not "instant."** An earlier draft of this section
+undersold that, alongside the Gotenberg-URL cutover comparison below, which reads as
+faster than this actually is.
+
+**Why a redeploy is mandatory, not just recommended:** `CONVERTAPI_ENABLED` is read
+exactly once, at module load —
+
+```js
+const CONVERTAPI_ENABLED = process.env.CONVERTAPI_ENABLED === "true"; // route.ts line 41
+```
+
+— not per-request. A Vercel serverless function instance evaluates this line once, at
+cold start, and every request that warm instance serves afterward reuses that same
+boolean for as long as that instance lives. **Changing the value in the Vercel dashboard
+alone does nothing to already-running instances of the current deployment** — there is
+no live-reload of environment variables into warm functions. The only way already-served
+traffic starts seeing the new value is a brand new deployment: Vercel routes 100% of
+traffic to the new deployment's instances once it's `READY`, and the old deployment's
+instances stop receiving traffic at that point (they don't need to individually restart
+or expire) — so the switch is atomic *once the new deployment is ready*, but nothing
+happens before that.
+
+**Procedure:**
+1. Change `CONVERTAPI_ENABLED` on Vercel (Production environment).
+2. Trigger a new deployment — either an empty commit + push, or a manual redeploy of the
+   current commit from the Vercel dashboard. Either works; the point is a *new*
+   deployment, not just a saved env var.
+3. Wait for that deployment to reach `READY` before treating the rollback as live —
+   check via the deployment's status, not by assuming the push succeeded.
+
+**Observed timing, this evaluation, two redeploys, same project:** 88.8s and 85.2s from
+deployment-created to `READY` (push → build → ready). Call it **~1.5–2 minutes in
+practice** — this is an observation from two data points on this specific project, not a
+number Vercel guarantees, but it's a realistic expectation to plan around rather than
+assuming the flip is instant.
 
 Fallback, if the flag mechanism itself is implicated: `git revert` of the merge commit
-and redeploy.
+and redeploy — same redeploy-required timing applies.
 
 `CONVERTAPI_TOKEN` stays configured on Vercel even after a rollback; disabling the flag
 is sufficient and does not require removing the credential.
