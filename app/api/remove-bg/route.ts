@@ -18,38 +18,53 @@ export async function POST(req: NextRequest) {
     const guard = await guardPaidRoute(req, { route: "remove-bg", tool });
     if (!guard.ok) return guard.response;
 
-    const formData = new FormData();
-    formData.append("image_file_b64", image);
-    formData.append("size", "auto");
+    try {
+      const formData = new FormData();
+      formData.append("image_file_b64", image);
+      formData.append("size", "auto");
 
-    const response = await fetch("https://api.remove.bg/v1.0/removebg", {
-      method: "POST",
-      headers: {
-        "X-Api-Key": process.env.REMOVEBG_API_KEY || "",
-      },
-      body: formData,
-    });
+      const response = await fetch("https://api.remove.bg/v1.0/removebg", {
+        method: "POST",
+        headers: {
+          "X-Api-Key": process.env.REMOVEBG_API_KEY || "",
+        },
+        body: formData,
+      });
 
-    if (!response.ok) {
-      await guard.release();
-      if (response.status === 402 || response.status === 429) {
-        await sendAlert("remove.bg", String(response.status));
-        return NextResponse.json(
-          { error: "This tool is temporarily at capacity. Please try again later." },
-          { status: 503 }
-        );
+      if (!response.ok) {
+        await guard.release();
+        if (response.status === 402 || response.status === 429) {
+          await sendAlert("remove.bg", String(response.status));
+          return NextResponse.json(
+            { error: "This tool is temporarily at capacity. Please try again later." },
+            { status: 503 }
+          );
+        }
+        const err = await response.json();
+        return NextResponse.json({ error: err.errors?.[0]?.title || "remove.bg error" }, { status: 500 });
       }
-      const err = await response.json();
-      return NextResponse.json({ error: err.errors?.[0]?.title || "remove.bg error" }, { status: 500 });
-    }
 
-    // remove.bg's cost is a flat, deterministic credit per call (fixed
-    // `size: "auto"` above) -- the reservation already equals the actual
-    // cost, so commit() is called with no argument (no reconciliation).
-    await guard.commit();
-    const buffer = await response.arrayBuffer();
-    const base64 = Buffer.from(buffer).toString("base64");
-    return NextResponse.json({ image: base64 });
+      // remove.bg's cost is a flat, deterministic credit per call (fixed
+      // `size: "auto"` above) -- the reservation already equals the actual
+      // cost, so commit() is called with no argument (no reconciliation).
+      await guard.commit();
+      const buffer = await response.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString("base64");
+      return NextResponse.json({ image: base64 });
+    } catch (err: any) {
+      // Anything thrown here happens before a real cost is established (or
+      // after commit() has already settled the reservation, in which case
+      // guard.release() below is a safe no-op -- see guard.js's `settled`
+      // flag). The case this specifically fixes: fetch() itself throwing
+      // (network failure, DNS, timeout) before remove.bg ever responds --
+      // that used to skip past the release() above and leak the worst-case
+      // reservation for the rest of the month. Mirrors
+      // convert-to-pdf/route.ts's ConvertAPI path.
+      await guard.release();
+      console.error("Unhandled error in /api/remove-bg (post-guard):", err?.message || err);
+      await alertServerError("remove-bg", err?.message || String(err));
+      return NextResponse.json({ error: err?.message || "remove.bg error" }, { status: 500 });
+    }
   } catch (e: any) {
     console.error("Unhandled error in /api/remove-bg:", e?.message || e);
     await alertServerError("remove-bg", e?.message || String(e));
