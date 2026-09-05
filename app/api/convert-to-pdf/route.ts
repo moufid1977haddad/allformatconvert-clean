@@ -192,7 +192,19 @@ async function handleConvertApi(req: NextRequest, file: File): Promise<NextRespo
     // No automatic fallback to Gotenberg on any ConvertAPI failure -- every
     // failure returns an explicit error to the user, never a silent retry
     // against a different provider.
-    await guard.release();
+    //
+    // Release/commit boundary (see lib/providers/convertApi.js's
+    // ConvertApiError#billed): release() only when ConvertAPI never
+    // actually billed this request (a rejected/non-2xx response, or
+    // fetch() itself never reaching ConvertAPI). A billed:true error means
+    // a 2xx response was already received -- ConvertAPI already charged
+    // for it -- so this must never release; treat it as a real, unknown
+    // cost via commit(null), same as guard.js's null-cost path.
+    if (err instanceof ConvertApiError && err.billed) {
+      await guard.commit(null);
+    } else {
+      await guard.release();
+    }
 
     if (err instanceof ConvertApiError) {
       const mapped = CONVERTAPI_ERROR_RESPONSES[err.code] || CONVERTAPI_ERROR_RESPONSES.upstream_error;
