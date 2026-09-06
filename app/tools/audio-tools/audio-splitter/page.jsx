@@ -40,6 +40,10 @@ export default function AudioSplitterPage() {
       const { FFmpeg } = await import('@ffmpeg/ffmpeg');
       const { fetchFile } = await import('@ffmpeg/util');
       const ffmpeg = new FFmpeg();
+      // ffmpeg.wasm's own stderr/stdout -- this is where the real reason for
+      // a failure lives. Without this, a failed exec() surfaces only as a
+      // generic rejection with no way to diagnose what actually happened.
+      ffmpeg.on('log', ({ message }) => console.log('[ffmpeg]', message));
       await ffmpeg.load();
       await ffmpeg.writeFile('input.mp3', await fetchFile(file));
       await ffmpeg.exec(['-i', 'input.mp3', '-t', String(splitAt), 'part1.mp3']);
@@ -50,7 +54,15 @@ export default function AudioSplitterPage() {
         { url: URL.createObjectURL(new Blob([data1.buffer], { type: 'audio/mp3' })), name: 'part1_' + file.name },
         { url: URL.createObjectURL(new Blob([data2.buffer], { type: 'audio/mp3' })), name: 'part2_' + file.name },
       ]);
-    } catch(e) { setError('Split failed: ' + e.message); }
+    } catch(e) {
+      // Full error object + stack to the console -- ffmpeg.wasm frequently
+      // throws non-Error values (or Errors with no .message) on internal
+      // failures, so `e.message` alone can silently render as "undefined"
+      // with zero way to diagnose what actually happened.
+      console.error('Split failed:', e);
+      const reason = (e && e.message) || (typeof e === 'string' ? e : null) || 'an unknown error -- check the browser console for details';
+      setError('Split failed: ' + reason);
+    }
     setLoading(false);
   };
 

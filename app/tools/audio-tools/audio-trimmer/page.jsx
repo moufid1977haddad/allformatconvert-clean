@@ -47,6 +47,10 @@ export default function AudioTrimmerPage() {
       const { FFmpeg } = await import('@ffmpeg/ffmpeg');
       const { fetchFile } = await import('@ffmpeg/util');
       const ffmpeg = new FFmpeg();
+      // ffmpeg.wasm's own stderr/stdout -- this is where the real reason for
+      // a failure lives. Without this, a failed exec() surfaces only as a
+      // generic rejection with no way to diagnose what actually happened.
+      ffmpeg.on('log', ({ message }) => console.log('[ffmpeg]', message));
       await ffmpeg.load();
       const inputName = 'input.' + file.name.split('.').pop();
       const outputName = 'output.mp3';
@@ -56,7 +60,13 @@ export default function AudioTrimmerPage() {
       const url = URL.createObjectURL(new Blob([data.buffer], { type: 'audio/mp3' }));
       setResult({ url, name: 'trimmed_' + file.name.replace(/\.[^.]+$/, '') + '.mp3' });
     } catch(e) {
-      setError('Trim failed: ' + e.message);
+      // Full error object + stack to the console -- ffmpeg.wasm frequently
+      // throws non-Error values (or Errors with no .message) on internal
+      // failures, so `e.message` alone can silently render as "undefined"
+      // with zero way to diagnose what actually happened.
+      console.error('Trim failed:', e);
+      const reason = (e && e.message) || (typeof e === 'string' ? e : null) || 'an unknown error -- check the browser console for details';
+      setError('Trim failed: ' + reason);
     }
     setLoading(false);
   };

@@ -21,6 +21,10 @@ export default function AudioCompressorPage() {
       const { FFmpeg } = await import('@ffmpeg/ffmpeg');
       const { fetchFile } = await import('@ffmpeg/util');
       const ffmpeg = new FFmpeg();
+      // ffmpeg.wasm's own stderr/stdout -- this is where the real reason for
+      // a failure lives. Without this, a failed exec() surfaces only as a
+      // generic rejection with no way to diagnose what actually happened.
+      ffmpeg.on('log', ({ message }) => console.log('[ffmpeg]', message));
       await ffmpeg.load();
       await ffmpeg.writeFile('input.mp3', await fetchFile(file));
       await ffmpeg.exec(['-i', 'input.mp3', '-b:a', bitrate + 'k', 'output.mp3']);
@@ -29,7 +33,15 @@ export default function AudioCompressorPage() {
       const url = URL.createObjectURL(blob);
       const reduction = (((file.size - blob.size) / file.size) * 100).toFixed(1);
       setResult({ url, name: 'compressed_' + file.name, originalSize: (file.size/1024/1024).toFixed(2), newSize: (blob.size/1024/1024).toFixed(2), reduction });
-    } catch(e) { setError('Compression failed: ' + e.message); }
+    } catch(e) {
+      // Full error object + stack to the console -- ffmpeg.wasm frequently
+      // throws non-Error values (or Errors with no .message) on internal
+      // failures, so `e.message` alone can silently render as "undefined"
+      // with zero way to diagnose what actually happened.
+      console.error('Compression failed:', e);
+      const reason = (e && e.message) || (typeof e === 'string' ? e : null) || 'an unknown error -- check the browser console for details';
+      setError('Compression failed: ' + reason);
+    }
     setLoading(false);
   };
 

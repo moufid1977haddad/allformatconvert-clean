@@ -43,6 +43,11 @@ export default function AudioConverterPage() {
       const { fetchFile } = await import('@ffmpeg/util');
       const ffmpeg = new FFmpeg();
       ffmpegRef.current = ffmpeg;
+      // ffmpeg.wasm's own stderr/stdout -- this is where the real reason for
+      // a failure lives (e.g. an unsupported input format). Without this, a
+      // failed exec() surfaces only as a generic rejection with no way to
+      // diagnose what actually happened.
+      ffmpeg.on('log', ({ message }) => console.log('[ffmpeg]', message));
       ffmpeg.on('progress', ({ progress }) => {
         setProgress(Math.round(Math.min(1, Math.max(0, progress)) * 100));
       });
@@ -56,7 +61,15 @@ export default function AudioConverterPage() {
       setResult({ url, name: file.name.replace(/\.[^.]+$/, '') + '.' + format });
       setProgress(100);
     } catch(e) {
-      if (ffmpegRef.current) setError('Conversion failed: ' + e.message);
+      // Full error object + stack to the console -- ffmpeg.wasm frequently
+      // throws non-Error values (or Errors with no .message) on internal
+      // failures, so `e.message` alone can silently render as "undefined"
+      // with zero way to diagnose what actually happened.
+      console.error('Conversion failed:', e);
+      if (ffmpegRef.current) {
+        const reason = (e && e.message) || (typeof e === 'string' ? e : null) || 'an unknown error -- check the browser console for details';
+        setError('Conversion failed: ' + reason);
+      }
     }
     ffmpegRef.current = null;
     setLoading(false);
