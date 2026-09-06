@@ -68,7 +68,7 @@ export default function AudioTranscriberPage() {
         faqs={[
           { q: "Is Audio Transcriber really free to use?", a: "Yes, Audio Transcriber is free to use with no signup or subscription required." },
           { q: "What audio formats does Audio Transcriber support?", a: "It accepts common audio formats such as MP3, WAV, and M4A, and most other formats your browser can select as an audio file." },
-          { q: "How large can my audio file be?", a: "The underlying transcription API has a file size limit of around 25MB. For longer recordings, split the audio into smaller segments and transcribe each one separately." },
+          { q: "How large can my audio file be?", a: "Uploads are limited to 10MB. For longer recordings, split the audio into smaller segments and transcribe each one separately." },
           { q: "Is my audio data private?", a: "Your audio file is sent directly to the transcription API to generate the transcript. It is not stored on our servers." }
         ]}
         tips={[

@@ -52,13 +52,22 @@ export default function AudioTrimmerPage() {
       // generic rejection with no way to diagnose what actually happened.
       ffmpeg.on('log', ({ message }) => console.log('[ffmpeg]', message));
       await ffmpeg.load();
-      const inputName = 'input.' + file.name.split('.').pop();
-      const outputName = 'output.mp3';
+      // '-c copy' is a stream copy: no re-encoding happens, so the output's
+      // actual codec/container is whatever the source file already was.
+      // The output name (both the internal ffmpeg filename and the
+      // downloaded file's name) has to carry the source's real extension --
+      // hardcoding ".mp3" here would mislabel every non-MP3 source (e.g. a
+      // trimmed WAV would be named "trim.mp3" while still being raw PCM).
+      const sourceExt = file.name.includes('.') ? file.name.split('.').pop() : 'mp3';
+      const inputName = 'input.' + sourceExt;
+      const outputName = 'output.' + sourceExt;
       await ffmpeg.writeFile(inputName, await fetchFile(file));
       await ffmpeg.exec(['-i', inputName, '-ss', String(start), '-to', String(end), '-c', 'copy', outputName]);
       const data = await ffmpeg.readFile(outputName);
-      const url = URL.createObjectURL(new Blob([data.buffer], { type: 'audio/mp3' }));
-      setResult({ url, name: 'trimmed_' + file.name.replace(/\.[^.]+$/, '') + '.mp3' });
+      // The bytes are byte-identical in codec to the source (stream copy),
+      // so the source file's own MIME type is the accurate one to use here.
+      const url = URL.createObjectURL(new Blob([data.buffer], { type: file.type || 'application/octet-stream' }));
+      setResult({ url, name: 'trimmed_' + file.name.replace(/\.[^.]+$/, '') + '.' + sourceExt });
     } catch(e) {
       // Full error object + stack to the console -- ffmpeg.wasm frequently
       // throws non-Error values (or Errors with no .message) on internal
@@ -119,11 +128,11 @@ export default function AudioTrimmerPage() {
         faqs={[
           { q: "Is Audio Trimmer free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "What audio formats can I trim?", a: "Any format ffmpeg.wasm can decode for input." },
-          { q: "Will the output always play correctly as MP3?", a: "The tool uses fast stream-copy trimming (no re-encoding) and always names the result with an .mp3 extension — this works cleanly when your source is already MP3. Trimming other formats (WAV, FLAC, etc.) this way can occasionally produce a file whose extension doesn't match its actual encoding." },
+          { q: "Will the output be an MP3 file?", a: "Only if your source file already was one. The tool uses fast stream-copy trimming (no re-encoding), so the output keeps the exact same codec as your source — the downloaded file is named with that source's real extension, not forced to .mp3." },
           { q: "Is my file uploaded anywhere?", a: "No. Everything happens locally via ffmpeg.wasm — your file is never uploaded to a server." }
         ]}
         tips={[
-          "For the most reliable results, trim files that are already in MP3 format.",
+          "The trimmed file keeps your source's original format — trim a WAV and you'll get a WAV back, not an MP3.",
           "Because trimming uses stream copy (not re-encoding), start/end points may snap slightly rather than cutting at the exact sample — fine for most uses, but not frame-accurate.",
           "Preview both edges of your selection before trimming to make sure you're not cutting off audio you want to keep.",
           "The first trim after loading the page takes longer since the ffmpeg.wasm engine needs to download."

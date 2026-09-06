@@ -157,7 +157,7 @@ export default function ImageConverterPage() {
             />
             <Folder className="w-10 h-10 mb-3 mx-auto text-neutral-400" />
             <p className="text-neutral-700 font-semibold text-lg">Drop your images here</p>
-            <p className="text-neutral-400 text-sm mt-1">or click to browse — PNG, JPG, WebP, AVIF, GIF, BMP, TIFF</p>
+            <p className="text-neutral-400 text-sm mt-1">or click to browse — PNG, JPG, WebP, AVIF, GIF, BMP</p>
           </div>
 
           {error && <p className="text-red-500 text-center text-sm whitespace-pre-line">{error}</p>}
@@ -292,7 +292,7 @@ export default function ImageConverterPage() {
         title="Image Converter"
         description="Image Converter is a free online tool that converts images between PNG, JPG, WebP, and AVIF entirely in your browser — nothing is ever uploaded to a server. Drop in one or many images, pick your target format and quality, and download the results instantly, with a live before/after size comparison for every file. Conversion runs in a background Web Worker so the page stays responsive even on large batches."
         howTo={[
-          "Drop or click to upload one or more images (PNG, JPG, WebP, AVIF, GIF, BMP, or TIFF are all accepted).",
+          "Drop or click to upload one or more images (PNG, JPG, WebP, AVIF, GIF, or BMP are all accepted).",
           "Choose your output format: WebP, PNG, JPG, or AVIF.",
           "Adjust the quality slider to balance file size against image quality.",
           "Click Convert, then download each result individually or use \"Download all\" for the whole batch."
@@ -300,7 +300,7 @@ export default function ImageConverterPage() {
         faqs={[
           { q: "Is Image Converter free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Are my images uploaded anywhere?", a: "No. Every conversion happens locally in your browser, in a background Web Worker — your files never leave your device." },
-          { q: "Which formats are supported?", a: "You can upload PNG, JPG, WebP, AVIF, GIF, BMP, or TIFF images, and convert them to WebP, PNG, JPG, or AVIF." },
+          { q: "Which formats are supported?", a: "You can upload PNG, JPG, WebP, AVIF, GIF, or BMP images, and convert them to WebP, PNG, JPG, or AVIF. TIFF is not supported here — browsers can't decode TIFF locally — use the dedicated TIFF to JPG or TIFF to PNG tools instead." },
           { q: "Can I convert several images at once?", a: "Yes, you can add multiple files and convert them all in one batch, then download them individually or together." },
           { q: "Is there an image-size limit?", a: `Yes: each image can be up to ${MAX_MEGAPIXELS} megapixels on desktop (${MOBILE_MAX_MEGAPIXELS} on phones and tablets), measured against how long large images take to encode in the browser — WebP in particular gets dramatically slower past a certain size. There's no limit on how many images you can batch-convert, since they're processed one at a time.` }
         ]}
