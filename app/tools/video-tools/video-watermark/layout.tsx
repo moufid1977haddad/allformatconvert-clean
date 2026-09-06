@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "Video Watermark — Thi Tool Captures a Still Frame Online" },
-  description: "This tool captures a still frame from your video with a text watermark burned in, producing a downloadable PNG image — not a watermarked video file.",
+  title: { absolute: "Video Watermark — Add a Text or Image Watermark to Video" },
+  description: "Burns a text or image watermark into your video and exports a real watermarked .mp4 file, entirely in your browser via ffmpeg.wasm — no upload. Videos up to 2 minutes; original audio is preserved.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-watermark" },
   openGraph: {
-    title: "Video Watermark — Thi Tool Captures a Still Frame Online",
-    description: "This tool captures a still frame from your video with a text watermark burned in, producing a downloadable PNG image — not a watermarked video file.",
+    title: "Video Watermark — Add a Text or Image Watermark to Video",
+    description: "Burns a text or image watermark into your video and exports a real watermarked .mp4 file, entirely in your browser via ffmpeg.wasm — no upload. Videos up to 2 minutes; original audio is preserved.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-watermark",
   },
 };

@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF OCR — Despite Its Name, This Tool Does Not Online Free" },
-  description: "This tool doesn't perform OCR on scanned images — it extracts a PDF's existing text layer, entirely in your browser.",
+  title: { absolute: "PDF OCR — Extract Text from Scanned PDFs Online" },
+  description: "Runs real OCR (Tesseract.js) on scanned PDFs and photographed pages of text, entirely in your browser in English or French — your file is never uploaded. Works best on a straight, clean scan; skewed or low-quality images will need proofreading.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-ocr" },
   openGraph: {
-    title: "PDF OCR — Despite Its Name, This Tool Does Not Online Free",
-    description: "This tool doesn't perform OCR on scanned images — it extracts a PDF's existing text layer, entirely in your browser.",
+    title: "PDF OCR — Extract Text from Scanned PDFs Online",
+    description: "Runs real OCR (Tesseract.js) on scanned PDFs and photographed pages of text, entirely in your browser in English or French — your file is never uploaded. Works best on a straight, clean scan; skewed or low-quality images will need proofreading.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-ocr",
   },
 };
