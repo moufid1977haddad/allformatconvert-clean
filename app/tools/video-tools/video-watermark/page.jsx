@@ -38,14 +38,26 @@ const computeOverlayXY = (position, videoWidth, videoHeight, wmWidth, wmHeight, 
   }
 };
 
-// Codecs confirmed present in the loaded ffmpeg.wasm core WITH full
-// frame/slice-threading capability flags (checked this session via
-// `ffmpeg.exec(['-decoders'])` against the exact zero-arg-load core every
-// tool on this site uses). AV1 is deliberately excluded: it's present in
-// the decoder table but only as ffmpeg's primitive native decoder (no F/S
-// flags, not libaom/dav1d), and reproduced failing on real content this
-// session ("Missing Sequence Header"). Codecs not checked this session
-// (mjpeg, mpeg4, wmv, ...) are deliberately not guessed into this list.
+// Every codec below was proven to actually decode with the loaded
+// ffmpeg.wasm core (zero-arg load, the exact core every tool on this site
+// uses) -- NOT just "listed present", which is exactly the trap AV1 turned
+// out to be (av1 is also listed, with a decoder flag, and still fails on
+// real content). Each one was fed a real, independently-downloaded public
+// sample file through this exact overlay pipeline and produced non-empty
+// output:
+//   h264   -- Big Buck Bunny 360p/H.264, test-videos.co.uk
+//   hevc   -- Big Buck Bunny 360p/H.265, test-videos.co.uk
+//   vp8    -- Big Buck Bunny 360p/VP8 (webm), test-videos.co.uk
+//   vp9    -- Big Buck Bunny 360p/VP9 (webm), test-videos.co.uk
+//   theora -- chroma_siting_test.ogv, media.xiph.org (Theora's own project)
+//   prores -- apple-prores-422.mov, openpreserve/format-corpus (Open
+//             Preservation Foundation's public format-testing corpus)
+// AV1 is deliberately excluded: present in the decoder table (with a
+// decoder flag, just not the frame/slice-threading flags the six above
+// have) but reproduced failing on real content ("Missing Sequence
+// Header"). Codecs never tested at all (mjpeg, mpeg4, wmv, ...) are
+// deliberately not guessed into this list -- untested is treated the same
+// as AV1: rejected up front, not assumed safe.
 const SUPPORTED_VIDEO_CODECS = ['h264', 'hevc', 'vp8', 'vp9', 'theora', 'prores'];
 
 // Matches ffmpeg's input-probe stream-info line for a video stream, e.g.
