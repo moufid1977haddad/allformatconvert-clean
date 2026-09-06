@@ -112,6 +112,24 @@ export default function VideoWatermarkPage() {
       }
     };
 
+    // Distinguishes "this browser can't decode this file at all" (a real
+    // MediaError, e.g. most .avi files -- codes 3/4 mean the format/codec
+    // itself is unsupported) from the timeout case above, which is for
+    // files the browser DOES accept but never resolves a finite duration
+    // for. Reporting both as "couldn't determine length" wrongly implies
+    // the file itself might be broken when it's actually a browser
+    // container/codec support gap.
+    video.onerror = () => {
+      clearTimeout(giveUpTimer);
+      setDurationKnown(false);
+      const code = video.error && video.error.code;
+      if (code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || code === MediaError.MEDIA_ERR_DECODE) {
+        setDurationError("Your browser can't play this video format/codec, so it can't be watermarked here -- this isn't necessarily a broken file. Chrome reliably plays MP4 (H.264) and WebM (VP8/VP9); .avi, many .mov and .mkv files, and less common codecs often aren't decodable in-browser at all. Try converting it to MP4 first.");
+      } else {
+        setDurationError("This video failed to load, so its length can't be confirmed. Try a different file.");
+      }
+    };
+
     return () => clearTimeout(giveUpTimer);
   }, [file]);
 
@@ -147,6 +165,11 @@ export default function VideoWatermarkPage() {
       const { fetchFile } = await import('@ffmpeg/util');
       const ffmpeg = new FFmpeg();
       ffmpegRef.current = ffmpeg;
+      // ffmpeg.wasm's own stderr/stdout -- this is where the REAL reason for
+      // a failure lives (e.g. "Unknown encoder 'libx264'"). Without this,
+      // a failed exec() surfaces only as a generic rejection with no useful
+      // message, and the actual cause is silently discarded.
+      ffmpeg.on('log', ({ message }) => console.log('[ffmpeg]', message));
       ffmpeg.on('progress', ({ progress: p }) => {
         const clamped = Math.min(1, Math.max(0, p));
         setProgress(Math.round(clamped * 100));
@@ -192,18 +215,50 @@ export default function VideoWatermarkPage() {
         '-i', inputName,
         '-i', 'watermark.png',
         '-filter_complex', `[0:v][1:v]overlay=${POSITIONS[position]}[v]`,
-        '-map', '[v]', '-map', '0:a',
+        // '0:a?' (not '0:a') -- a source with no audio track is a real,
+        // common case (screen recordings, muted exports), and an
+        // unconditional '0:a' throws "Stream map '0:a' matches no streams"
+        // inside ffmpeg itself. '-c:a aac' is left unconditional too:
+        // verified directly (not assumed) that ffmpeg simply skips audio
+        // encoding when '0:a?' matches nothing, producing a valid
+        // video-only output rather than erroring.
+        '-map', '[v]', '-map', '0:a?',
         '-c:v', 'libx264', '-preset', 'veryfast',
         '-c:a', 'aac',
         outputName,
       ]);
 
-      const data = await ffmpeg.readFile(outputName);
+      // A resolved exec() promise is not proof of success -- ffmpeg.wasm can
+      // internally abort a command (see the failed-'-map 0:a' case this
+      // guards against) without ever rejecting that promise. The only real
+      // signal is the output file actually existing with real bytes in it,
+      // the same defense-in-depth principle as the %PDF-/PK magic-byte
+      // checks already used on the ConvertAPI-backed routes.
+      let data;
+      try {
+        data = await ffmpeg.readFile(outputName);
+      } catch {
+        throw new Error('ffmpeg did not produce an output file. Check the browser console for the ffmpeg log above -- it usually names the exact reason.');
+      }
+      if (!data || data.byteLength === 0) {
+        throw new Error('ffmpeg produced an empty output file. Check the browser console for the ffmpeg log above -- it usually names the exact reason.');
+      }
+
       const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
       setResult({ url, name: file.name.replace(/\.[^.]+$/, '') + '-watermarked.mp4' });
       setProgress(100);
     } catch (e) {
-      if (ffmpegRef.current) setError('Watermarking failed: ' + e.message);
+      // Full error object + stack to the console -- ffmpeg.wasm frequently
+      // throws non-Error values (or Errors with no .message) on internal
+      // failures, so `e.message` alone can silently render as "undefined"
+      // with zero way to diagnose what actually happened. The ffmpeg log
+      // listener above already streamed the real libav-level reason (if
+      // any) to the console before this ever fires.
+      console.error('Watermarking failed:', e);
+      if (ffmpegRef.current) {
+        const reason = (e && e.message) || (typeof e === 'string' ? e : null) || 'an unknown error -- check the browser console for details';
+        setError('Watermarking failed: ' + reason);
+      }
     } finally {
       // Terminate on every path, not just cancel() -- otherwise each
       // successful conversion leaks a Worker + wasm instance, and
@@ -225,7 +280,8 @@ export default function VideoWatermarkPage() {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Video Watermark</h1>
         <p className="text-neutral-500 text-center mb-2">Burn a text or image watermark into your video and export a real watermarked video file</p>
-        <p className="text-neutral-500 text-sm text-center mb-8">Works on videos up to <strong>2 minutes</strong> long. Watermarking runs entirely in your browser and takes roughly as long as the video itself (about 1 second of processing per second of video).</p>
+        <p className="text-neutral-500 text-sm text-center mb-2">Works on videos up to <strong>2 minutes</strong> long. Watermarking runs entirely in your browser and takes roughly as long as the video itself (about 1 second of processing per second of video).</p>
+        <p className="text-neutral-400 text-xs text-center mb-8">Best supported formats: <strong>MP4 (H.264)</strong> and <strong>WebM</strong>. Formats like .avi, many .mov/.mkv files, or uncommon codecs often can&apos;t be decoded in-browser at all -- convert to MP4 first if your file is rejected.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className={"border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center transition " + (loading ? 'opacity-50 pointer-events-none' : 'cursor-pointer hover:border-indigo-500')} onClick={() => !loading && inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
@@ -314,7 +370,8 @@ export default function VideoWatermarkPage() {
           { q: "Does this produce a full watermarked video now?", a: "Yes -- it exports a real .mp4 file with the watermark burned into every frame and the original audio preserved, not a single still image." },
           { q: "Can I use an image or logo as the watermark?", a: "Yes. Switch the Watermark Type toggle to Image and upload a PNG or JPG; it's composited at its natural size with the opacity you choose." },
           { q: "Why is there a 2-minute limit?", a: "Watermarking runs entirely in your browser via ffmpeg.wasm, which encodes at roughly real-time speed (about 1 second of processing per second of video). Longer clips would take too long or risk freezing the tab." },
-          { q: "Is audio preserved?", a: "Yes, the original audio track is kept and re-encoded to AAC alongside the watermarked video." },
+          { q: "Is audio preserved?", a: "Yes, if your video has an audio track it's kept and re-encoded to AAC alongside the watermarked video. Silent or audio-free videos (screen recordings, muted exports) work fine too -- the output is just video-only." },
+          { q: "Why was my video rejected before I even clicked Convert?", a: "Two different reasons produce two different messages. If your browser can't decode the file at all (common for .avi, some .mov/.mkv, or uncommon codecs), you'll see a message saying so -- that's a browser support gap, not proof your file is broken. If the browser can play the file but can't determine its length, you'll see a different message asking for a re-export. MP4 (H.264) and WebM are the safest formats to use here." },
           { q: "Is my file uploaded anywhere?", a: "No, everything happens locally in your browser via ffmpeg.wasm -- there's no server involved." }
         ]}
         tips={[
