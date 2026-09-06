@@ -5,12 +5,69 @@ import ProgressBar from '../../../components/ProgressBar';
 
 const MAX_DURATION = 120;
 
-const POSITIONS = {
-  'top-left': '20:20',
-  'top-right': 'W-w-20:20',
-  'bottom-left': '20:H-h-20',
-  'bottom-right': 'W-w-20:H-h-20',
-  'center': '(W-w)/2:(H-h)/2',
+// Watermark sizing is relative to the VIDEO, never the watermark's own
+// source resolution -- a portrait logo dropped onto a landscape video (or
+// vice versa) must come out the same proportional size either way. 15% of
+// video width matches the upper end of the commonly-cited 8-15% range for a
+// persistent brand watermark (Mux's own docs use 25% in their worked
+// example; 15% is a sane middle ground short of that). Margins are a
+// percentage of frame size too (3% of the shorter dimension), not a fixed
+// pixel count, so they scale correctly from a 240p clip to 4K instead of
+// looking cavernous or nonexistent at the extremes.
+const WATERMARK_WIDTH_RATIO = 0.15;
+const WATERMARK_MARGIN_RATIO = 0.03;
+
+// Pixel offsets for the 5 position presets, computed directly in JS now
+// that the exact watermark size is known ahead of time -- no more ffmpeg
+// runtime expressions like `W-w-20`, which knew nothing about the real
+// watermark dimensions and is exactly how the cut-off-at-the-edge bug
+// happened.
+const computeOverlayXY = (position, videoWidth, videoHeight, wmWidth, wmHeight, margin) => {
+  switch (position) {
+    case 'top-left':
+      return { x: margin, y: margin };
+    case 'top-right':
+      return { x: videoWidth - wmWidth - margin, y: margin };
+    case 'bottom-left':
+      return { x: margin, y: videoHeight - wmHeight - margin };
+    case 'bottom-right':
+      return { x: videoWidth - wmWidth - margin, y: videoHeight - wmHeight - margin };
+    case 'center':
+    default:
+      return { x: Math.round((videoWidth - wmWidth) / 2), y: Math.round((videoHeight - wmHeight) / 2) };
+  }
+};
+
+// Codecs confirmed present in the loaded ffmpeg.wasm core WITH full
+// frame/slice-threading capability flags (checked this session via
+// `ffmpeg.exec(['-decoders'])` against the exact zero-arg-load core every
+// tool on this site uses). AV1 is deliberately excluded: it's present in
+// the decoder table but only as ffmpeg's primitive native decoder (no F/S
+// flags, not libaom/dav1d), and reproduced failing on real content this
+// session ("Missing Sequence Header"). Codecs not checked this session
+// (mjpeg, mpeg4, wmv, ...) are deliberately not guessed into this list.
+const SUPPORTED_VIDEO_CODECS = ['h264', 'hevc', 'vp8', 'vp9', 'theora', 'prores'];
+
+// Matches ffmpeg's input-probe stream-info line for a video stream, e.g.
+// both "Stream #0:0(und): Video: h264 (avc1 / 0x31637661), yuv420p, ..."
+// and "Stream #0:0: Video: av1, yuv420p, ...". This line is logged during
+// input demuxing/probing, which happens before any frame is actually
+// decoded -- which is exactly why the real AV1 failure log this session
+// still correctly identified the stream as `av1` even though decoding it
+// then failed. That ordering is what lets this run as a fast pre-flight
+// check instead of waiting for a real decode attempt to blow up.
+const CODEC_PROBE_RE = /Stream #\d+:\d+(?:\[[^\]]*\])?\(?[^:]*\)?:\s*Video:\s*(\w+)/i;
+
+// Recognizable ffmpeg-log signatures for the specific real failure mode
+// confirmed this session (an undecodable stream, e.g. AV1's "Missing
+// Sequence Header"). The codec pre-flight check above should catch this
+// before it ever gets this far -- this is just a fallback net in case the
+// probe misses something the actual encode run still hits.
+const describeFfmpegFailure = (logText) => {
+  if (/Missing Sequence Header|Invalid data found when processing input|Cannot determine format/i.test(logText)) {
+    return "ffmpeg couldn't decode this video's stream correctly (a codec-level failure, not related to duration or file size).";
+  }
+  return 'This video could not be processed. Try a different file, or re-encode it to standard MP4 (H.264) first.';
 };
 
 const loadImageElement = (imgFile) => new Promise((resolve, reject) => {
@@ -25,6 +82,8 @@ export default function VideoWatermarkPage() {
   const [duration, setDuration] = useState(0);
   const [durationKnown, setDurationKnown] = useState(false);
   const [durationError, setDurationError] = useState('');
+  const [videoWidth, setVideoWidth] = useState(0);
+  const [videoHeight, setVideoHeight] = useState(0);
   const [watermarkType, setWatermarkType] = useState('text');
   const [text, setText] = useState('Watermark');
   const [watermarkImage, setWatermarkImage] = useState(null);
@@ -48,6 +107,8 @@ export default function VideoWatermarkPage() {
     setDuration(0);
     setDurationKnown(false);
     setDurationError('');
+    setVideoWidth(0);
+    setVideoHeight(0);
     setResult(null);
     setError('');
   };
@@ -71,6 +132,12 @@ export default function VideoWatermarkPage() {
     const finalize = (d) => {
       setDuration(d);
       setDurationKnown(true);
+      // Captured at the same point duration is finalized -- videoWidth/
+      // videoHeight are the video's real decoded pixel dimensions (not the
+      // <video> element's CSS/layout size), which is what the watermark
+      // must be scaled relative to.
+      setVideoWidth(video.videoWidth);
+      setVideoHeight(video.videoHeight);
       if (d > MAX_DURATION) {
         setDurationError(`This video is ${Math.round(d)}s -- over the 2-minute limit. Watermarking runs in your browser and takes roughly one second per second of video, so longer files would take too long or risk freezing the tab. Trim it first, or use a shorter clip.`);
       } else {
@@ -154,12 +221,24 @@ export default function VideoWatermarkPage() {
     if (!file || !durationKnown || duration > MAX_DURATION) return;
     if (watermarkType === 'text' && !text.trim()) return;
     if (watermarkType === 'image' && !watermarkImage) return;
+    // videoWidth/videoHeight are captured in the same finalize() call that
+    // sets durationKnown, so this should never actually trip for a normal
+    // video file -- it only guards a genuinely dimension-less input (e.g.
+    // an audio-only file that still passed video/* file-picker filtering).
+    if (!videoWidth || !videoHeight) {
+      setError("Couldn't read this video's dimensions, so the watermark can't be sized correctly. Try a different file.");
+      return;
+    }
 
     setLoading(true);
     setProgress(0);
     setEta(null);
     setError('');
     setResult(null);
+    // Accumulated across this run so any failure can be translated into a
+    // plain sentence instead of a raw ffmpeg log line -- reset on every
+    // convert() call since this is a local variable in this closure.
+    const logLines = [];
     try {
       const { FFmpeg } = await import('@ffmpeg/ffmpeg');
       const { fetchFile } = await import('@ffmpeg/util');
@@ -169,13 +248,54 @@ export default function VideoWatermarkPage() {
       // a failure lives (e.g. "Unknown encoder 'libx264'"). Without this,
       // a failed exec() surfaces only as a generic rejection with no useful
       // message, and the actual cause is silently discarded.
-      ffmpeg.on('log', ({ message }) => console.log('[ffmpeg]', message));
+      ffmpeg.on('log', ({ message }) => {
+        logLines.push(message);
+        console.log('[ffmpeg]', message);
+      });
       ffmpeg.on('progress', ({ progress: p }) => {
         const clamped = Math.min(1, Math.max(0, p));
         setProgress(Math.round(clamped * 100));
         setEta(Math.max(0, Math.round((1 - clamped) * duration)));
       });
       await ffmpeg.load();
+
+      const inputName = 'input.' + (file.name.split('.').pop() || 'mp4');
+      const outputName = 'output.mp4';
+      await ffmpeg.writeFile(inputName, await fetchFile(file));
+
+      // Pre-flight codec probe -- BEFORE any real encode work or progress
+      // reporting. ffmpeg determines a stream's codec while demuxing/
+      // probing the input, which happens before it ever attempts to decode
+      // a frame -- calling exec(['-i', inputName]) with no output at all
+      // makes ffmpeg log that stream-info line and then throw its own
+      // "at least one output file must be specified" error, which is
+      // expected and ignored here. This is what catches a codec like AV1
+      // (confirmed this session to fail partway through a real ~55s encode
+      // with "Missing Sequence Header") before the user waits through any
+      // of that budget.
+      let probedCodec = null;
+      const probeListener = ({ message }) => {
+        const match = message.match(CODEC_PROBE_RE);
+        if (match && !probedCodec) probedCodec = match[1].toLowerCase();
+      };
+      ffmpeg.on('log', probeListener);
+      try {
+        await ffmpeg.exec(['-i', inputName]);
+      } catch {
+        // Expected -- ffmpeg always "fails" here because no output file was
+        // given. Only the logged stream-info line (captured above) matters.
+      }
+      ffmpeg.off('log', probeListener);
+
+      if (!probedCodec) {
+        throw new Error("Couldn't detect this video's codec, so it can't be safely processed here. Try a different file, or re-encode it to standard MP4 (H.264) first.");
+      }
+      if (!SUPPORTED_VIDEO_CODECS.includes(probedCodec)) {
+        if (probedCodec === 'av1') {
+          throw new Error("This video is encoded in AV1, which this tool's video engine can't decode reliably (confirmed: it fails partway through, wasting your wait). Re-encode it to H.264 (MP4) first, then try again.");
+        }
+        throw new Error(`This video uses the "${probedCodec}" codec, which this tool's video engine can't reliably decode. Re-encode it to H.264 (MP4) first, then try again.`);
+      }
 
       // Both watermark types render to an offscreen canvas -> PNG first, so
       // ffmpeg only ever has to overlay a single image file -- this avoids
@@ -205,16 +325,27 @@ export default function VideoWatermarkPage() {
       }
       const pngBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
       const pngBytes = new Uint8Array(await pngBlob.arrayBuffer());
-
-      const inputName = 'input.' + (file.name.split('.').pop() || 'mp4');
-      const outputName = 'output.mp4';
-      await ffmpeg.writeFile(inputName, await fetchFile(file));
       await ffmpeg.writeFile('watermark.png', pngBytes);
+
+      // Watermark size/position computed in JS as real pixel numbers,
+      // relative to the VIDEO's own dimensions -- never the watermark
+      // canvas's own source size. This applies identically whether the
+      // canvas came from the text path or the image path, since both
+      // funnel into this same overlay pipeline.
+      const wmWidth = Math.round(videoWidth * WATERMARK_WIDTH_RATIO);
+      const wmHeight = Math.round(wmWidth * (canvas.height / canvas.width));
+      const margin = Math.round(Math.min(videoWidth, videoHeight) * WATERMARK_MARGIN_RATIO);
+      const { x, y } = computeOverlayXY(position, videoWidth, videoHeight, wmWidth, wmHeight, margin);
 
       await ffmpeg.exec([
         '-i', inputName,
         '-i', 'watermark.png',
-        '-filter_complex', `[0:v][1:v]overlay=${POSITIONS[position]}[v]`,
+        // Scale the watermark input to the exact pixel size computed above
+        // BEFORE overlaying, then overlay at a literal pixel offset --
+        // no more runtime expressions like `W-w-20`, which knew nothing
+        // about the watermark's real size and is exactly how it rendered
+        // at native resolution and got cut off at the frame edge.
+        '-filter_complex', `[1:v]scale=${wmWidth}:${wmHeight}[wm];[0:v][wm]overlay=${x}:${y}[v]`,
         // '0:a?' (not '0:a') -- a source with no audio track is a real,
         // common case (screen recordings, muted exports), and an
         // unconditional '0:a' throws "Stream map '0:a' matches no streams"
@@ -238,10 +369,10 @@ export default function VideoWatermarkPage() {
       try {
         data = await ffmpeg.readFile(outputName);
       } catch {
-        throw new Error('ffmpeg did not produce an output file. Check the browser console for the ffmpeg log above -- it usually names the exact reason.');
+        throw new Error(describeFfmpegFailure(logLines.join('\n')));
       }
       if (!data || data.byteLength === 0) {
-        throw new Error('ffmpeg produced an empty output file. Check the browser console for the ffmpeg log above -- it usually names the exact reason.');
+        throw new Error(describeFfmpegFailure(logLines.join('\n')));
       }
 
       const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
@@ -256,7 +387,13 @@ export default function VideoWatermarkPage() {
       // any) to the console before this ever fires.
       console.error('Watermarking failed:', e);
       if (ffmpegRef.current) {
-        const reason = (e && e.message) || (typeof e === 'string' ? e : null) || 'an unknown error -- check the browser console for details';
+        // Prefer a real thrown message (the codec pre-flight check and the
+        // output-validation checks above already throw plain, non-technical
+        // sentences); only fall back to scanning the accumulated ffmpeg log
+        // when nothing usable was thrown -- this never points the visitor
+        // at the console as their main instruction, that's for a developer
+        // reading the console.error above.
+        const reason = (e && e.message) || (typeof e === 'string' ? e : null) || describeFfmpegFailure(logLines.join('\n'));
         setError('Watermarking failed: ' + reason);
       }
     } finally {
