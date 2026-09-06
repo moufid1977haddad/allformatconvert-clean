@@ -279,7 +279,7 @@ YAML invalide sur les tableaux, xml-to-json perd les attributs).
 
 ---
 
-## FAMILLE VIDÉO (EN COURS — constats déjà établis par lecture directe du code)
+## FAMILLE VIDÉO (terminé)
 
 Scope : `app/tools/video-tools/*` (15 outils : media-player, screen-recorder,
 subtitle-generator, video-compressor, video-converter, video-filter, video-merger,
@@ -348,18 +348,79 @@ Autres outils vus :
   couvrir la quasi-totalité de cette liste côté navigateur, donc l'écart est bien un écart de
   CODE, pas un écart d'architecture ou de technologie disponible.
 
-### Reste à faire pour clore la famille vidéo (reprise après ce commit)
-1. Construire le tableau des écarts formel (mêmes colonnes que les autres familles) à partir
-   des constats ci-dessus — l'essentiel de la matière est déjà là.
-2. Vérifier video-metadata en détail (quelles infos il expose vs ffprobe).
-3. Vérifier media-player et video-screenshot pour tout gap d'entrée résiduel.
-4. Un 2e concurrent à froid pour confirmer FreeConvert (liste de sortie semblait incomplète
-   sur la page fetchée).
+### Vérifications complémentaires (video-metadata, video-screenshot)
+
+- `video-metadata` : lit via l'élément `<video>` natif uniquement (`onloadedmetadata`) —
+  expose nom/taille/type/durée/largeur/hauteur/date, et **le documente honnêtement** :
+  "it doesn't extract codec, bitrate, or frame rate information". Échoue entièrement
+  (`video.onerror`) sur tout conteneur que le navigateur ne sait pas décoder.
+- `video-screenshot` : capture via `<canvas>.drawImage()` depuis le `<video>` natif, **sortie
+  PNG uniquement**, pas de choix JPG/qualité. Même limite d'entrée que les autres (dépend du
+  décodage natif du navigateur).
+- `media-player` (`accept="audio/*,video/*"`) : lecteur simple, pas d'opération de
+  conversion — pas de ligne dédiée dans le tableau, il hérite juste de la même limite de
+  lecture native (pas un gap puisqu'il ne prétend pas convertir).
+
+### Tableau des écarts — VIDÉO
+
+| outil | ce que j'accepte | ce que les concurrents acceptent | ce qui manque | cause probable | difficulté |
+|---|---|---|---|---|---|
+| video-converter | `video/*`, mais décodage réel limité à ce que l'élément `<video>` du navigateur sait lire ; **sortie WebM uniquement, aucun sélecteur de format** (le FAQ de l'outil l'admet lui-même) | CloudConvert : any-to-any sur 28 formats (3G2, AVI, FLV, M2TS, MKV, MOV, MP4, MPEG, OGV, RM, TS, VOB, WEBM, WMV…) ; FreeConvert : 30+ formats en entrée, MP4/MOV/MKV/WebM/AVI en sortie | Sortie MP4/MOV/AVI/MKV (le format le plus demandé, MP4, n'est même pas proposé) ; entrée de tout conteneur non nativement lisible par le navigateur | **limite de mon code qui interroge le mauvais composant** — ffmpeg.wasm est déjà chargé et fonctionnel ailleurs dans ce même dossier (video-watermark) mais n'est pas utilisé ici ; `<video>`+MediaRecorder est utilisé à la place d'un vrai moteur de conversion | difficile — remplacer tout le pipeline par ffmpeg.wasm avec sélecteur de sortie |
+| video-compressor | Même moteur `<video>`+MediaRecorder, sortie WebM uniquement, bitrate calculé proportionnellement à la source (bonne logique) mais encodage single-pass sans look-ahead | CloudConvert/FreeConvert compressent en conservant ou choisissant le format (souvent MP4/H.264, largement compatible) | Sortie MP4 (bien plus compatible que WebM pour partage/lecture universelle) ; vrai contrôle de bitrate/CRF | limite de mon code — ffmpeg.wasm ferait un vrai encodage 2-pass ou CRF, déjà dans le bundle | moyen |
+| video-trimmer | `<video>`+MediaRecorder temps réel, sortie WebM uniquement | Concurrents trim sans perte (stream-copy) en gardant le format source | Trim sans réencodage (perte de qualité évitable) et sortie dans le format d'origine | limite de mon code — `audio-trimmer` du site utilise déjà `-c copy` avec ffmpeg pour ce cas exact ; le pattern n'a pas été porté à la vidéo | facile-moyen (porter le pattern `-c copy` déjà utilisé en audio) |
+| video-merger | `<video>`+MediaRecorder temps réel, sortie WebM uniquement, fusionne en rejouant les vidéos l'une après l'autre en temps réel | Concurrents fusionnent des formats mixtes sans réencodage temps réel | Fusion instantanée (frame-based) et formats de sortie multiples | limite de mon code | moyen |
+| video-resizer, video-rotator, video-filter | Même moteur `<video>`+MediaRecorder (`combinedStream`), sortie WebM uniquement | Concurrents traitent en quelques secondes indépendamment de la durée, formats multiples | Traitement rapide (non temps-réel) + choix de format de sortie | limite de mon code | moyen |
+| screen-recorder | Enregistre via `getDisplayMedia`+MediaRecorder, sortie WebM uniquement (cohérent avec l'usage d'enregistrement live — pas un vrai "gap" de conversion, mais aucun export MP4 après coup) | Des enregistreurs d'écran concurrents proposent un export/réencodage MP4 après capture | Export MP4 post-enregistrement | limite arbitraire jamais remise en question (ffmpeg.wasm pourrait réencoder le WebM capturé en MP4 après coup) | facile-moyen |
+| video-to-audio | `AudioContext.decodeAudioData` + rendu manuel, **sortie WAV mono uniquement** (downmix forcé, 1 seul canal) | CloudConvert/FreeConvert extraient l'audio en stéréo, dans n'importe quel format (MP3/AAC/OGG) | Stéréo, et tout format compressé | **limite de mon code qui interroge le mauvais composant** — ffmpeg.wasm (déjà dans le bundle, `audio-converter` le prouve) ferait ça correctement en une commande | facile — porter la logique déjà utilisée par audio-converter |
+| video-to-gif | Extraction de frames via `<canvas>` + décodage `<video>` natif — échoue sur AVI/MOV ProRes/etc. (même limite que la famille GIF) | ezgif/CloudConvert décodent tout conteneur côté serveur | Formats non nativement décodables par le navigateur (voir famille GIF pour le détail) | limite de mon code qui interroge le mauvais composant (doublon avec le gap déjà documenté dans la famille GIF — un seul correctif d'engine réglerait les deux familles) | moyen |
+| video-metadata | `<video>` natif : nom/taille/type/durée/résolution/date uniquement ; **pas de codec, bitrate, frame rate** ; échoue entièrement sur un conteneur non lisible nativement | Des outils comme MediaInfo Online exposent codec, bitrate, frame rate, pistes audio, pour quasi tout conteneur | Codec/bitrate/frame rate/pistes — et lisibilité des conteneurs non nativement décodables (ex. lire les métadonnées d'un AVI sans le décoder entièrement) | **limite de mon code qui interroge le mauvais composant** — ffmpeg.wasm expose ces infos (ex. `ffprobe`-like via `ffmpeg -i`) sans réencoder, déjà dans le bundle | moyen |
+| video-screenshot | Capture `<canvas>`, **sortie PNG uniquement**, pas de choix JPG/qualité ; entrée limitée au décodage natif | La plupart des concurrents proposent PNG et JPG | Export JPG (avec contrôle qualité) | limite arbitraire jamais remise en question — `canvas.toDataURL('image/jpeg', q)` est la même API déjà utilisée pour le PNG | facile |
+| subtitle-generator | Générateur SRT manuel (pas de transcription automatique), sortie `.srt` uniquement | Diffchecker/Kapwing etc. proposent VTT/ASS en export, et des outils dédiés transcrivent automatiquement | Export VTT/ASS (reformattage trivial des mêmes données) ; transcription automatique (fonctionnalité distincte, l'outil `audio-to-text`/`audio-transcriber` du site existe déjà mais n'est pas relié ici) | Export VTT/ASS : limite arbitraire (facile). Transcription auto : fonctionnalité manquante, pas un bug — le moteur Whisper existe déjà ailleurs dans le site | facile (VTT/ASS) / moyen (relier à Whisper existant) |
+
+**Non-écart** : `video-watermark` — déjà corrigé récemment (ffmpeg.wasm réel, allowlist de
+codecs prouvée sur fichiers réels, gère les vidéos sans piste audio, cap 120s documenté).
+C'est le seul outil de la famille qui utilise déjà la bonne architecture — **la référence
+interne à répliquer sur les 8 autres outils de transformation**, exactement comme le prouve
+la présence de ffmpeg.wasm dans `gif-to-mp4` pour la famille GIF.
+
+---
+
+## SYNTHÈSE — classement des 8 familles par ampleur de l'écart
+
+Classement qualitatif basé sur : (a) le nombre d'outils touchés par famille, (b) la
+proportion d'écarts classés "limite de mon code" (donc réellement corrigibles, pas une
+limite technologique), et (c) si un outil interne du même dossier prouve déjà que la
+techno est disponible (preuve la plus forte selon la règle de l'utilisateur).
+
+1. **VIDÉO — écart le plus large.** 8 des 9 outils de transformation vidéo (tous sauf
+   video-watermark) tournent sur un moteur structurellement faible (`<video>`+MediaRecorder
+   temps réel, sortie WebM forcée) alors qu'un vrai moteur ffmpeg.wasm est déjà présent et
+   prouvé fonctionnel dans le même dossier. C'est un écart architectural transversal, pas
+   des lacunes isolées.
+2. **DONNÉES — écart transversal de qualité+couverture.** 7 outils de conversion structurée
+   (JSON/XML/YAML/TOML/ENV) sans aucune librairie de parsing standard — bugs de sortie
+   invalide (YAML) et de perte de données (attributs XML), pas seulement des formats
+   manquants.
+3. **GIF** — 4 des 11 outils échouent sur AVI/MOV réels par la même faute de décodage natif
+   que la vidéo ; caps de durée/résolution arbitraires ; aucune sortie WebP animée proposée.
+4. **IMAGE** — écart concentré sur `image-converter` (sortie limitée à 4 formats alors que
+   Squoosh, 100% navigateur, en fait bien plus) plus quelques formats non branchés alors que
+   leurs décodeurs existent déjà ailleurs dans le repo (HEIC, TIFF).
+5. **PDF** — nombreux petits écarts mais presque tous "limite de mon code" faciles à corriger
+   (le backend Gotenberg accepte déjà .doc/.ppt/.ods, seul le frontend les bloque) ; famille
+   la plus mûre par ailleurs (39 outils, 2 seulement encore stub).
+6. **AUDIO** — écarts réels mais plus étroits (sorties MP3 forcées, quelques formats
+   d'encodage ffmpeg non exposés) ; l'essentiel du moteur (ffmpeg.wasm) est déjà correct.
+7. **DOCUMENTS** — écarts ponctuels (tar.gz, RAR/7z, .prc) plus un problème de portée sur
+   `file-converter` (nom générique, capacité réelle très inférieure) à trancher par vous.
+8. **TEXTE — écart le plus étroit.** 15 des 17 outils n'ont aucune dimension "format de
+   fichier" pertinente (texte collé → texte affiché) ; seuls 2 outils (text-comparator,
+   word-counter/character-counter) gagneraient à accepter l'upload de fichiers.
 
 ---
 
 ## Prochaine étape
 
-Une fois la famille vidéo complétée et son tableau formel ajouté ci-dessus, ce document sera
-présenté comme le tableau des écarts complet de la Phase 1, trié par ampleur, avant tout
-passage en Phase 2 (correction), conformément à la consigne de l'utilisateur.
+**Phase 1 terminée — arrêt ici, conformément à la consigne.** Ce document contient le
+tableau des écarts complet des 8 familles. Aucune modification de code n'a été faite. En
+attente de votre décision sur l'ordre des corrections avant tout passage en Phase 2.
