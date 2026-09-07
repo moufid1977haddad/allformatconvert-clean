@@ -5,27 +5,33 @@ export default function XmlToJsonPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
-  const convert = () => {
+  const [converting, setConverting] = useState(false);
+  const convert = async () => {
+    setConverting(true);
+    setError('');
     try {
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(input, 'text/xml');
-      if (xml.querySelector('parsererror')) throw new Error('Invalid XML');
-      const xmlToObj = (node) => {
-        if (node.nodeType === 3) return node.nodeValue.trim();
-        const obj = {};
-        for (const child of node.childNodes) {
-          const val = xmlToObj(child);
-          if (val === '') continue;
-          if (obj[child.nodeName]) {
-            if (!Array.isArray(obj[child.nodeName])) obj[child.nodeName] = [obj[child.nodeName]];
-            obj[child.nodeName].push(val);
-          } else obj[child.nodeName] = val;
-        }
-        return obj;
-      };
-      setOutput(JSON.stringify(xmlToObj(xml.documentElement), null, 2));
+      // fast-xml-parser is loaded on demand -- it's only needed once the
+      // visitor actually clicks Convert, so it doesn't add to the page's
+      // initial JS payload.
+      const { XMLParser, XMLValidator } = await import('fast-xml-parser');
+      const validation = XMLValidator.validate(input);
+      if (validation !== true) {
+        throw new Error(validation?.err?.msg || 'Invalid XML');
+      }
+      const parser = new XMLParser({
+        ignoreAttributes: false, // keep attributes -- previously silently dropped
+        attributeNamePrefix: '@_',
+        textNodeName: '#text', // matches the '#text' convention this tool already documented
+        ignoreDeclaration: true, // drop the <?xml ...?> prolog from the output, as before
+      });
+      const parsed = parser.parse(input);
+      setOutput(JSON.stringify(parsed, null, 2));
       setError('');
-    } catch(e) { setError('Invalid XML'); }
+    } catch (e) {
+      setError('Invalid XML' + (e?.message ? `: ${e.message}` : ''));
+      setOutput('');
+    }
+    setConverting(false);
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -39,30 +45,30 @@ export default function XmlToJsonPage() {
           </div>
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}
           <div className="grid grid-cols-2 gap-3">
-            <button onClick={convert} disabled={!input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert</button>
+            <button onClick={convert} disabled={!input || converting} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">{converting ? 'Converting…' : 'Convert'}</button>
             <button onClick={() => navigator.clipboard.writeText(output)} disabled={!output} className="bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Copy</button>
           </div>
         </div>
       </div>
       <SeoContent
         title="XML to JSON"
-        description="XML to JSON converts XML into JSON using the browser's built-in XML parser (DOMParser), entirely in your browser — nothing is uploaded to a server. Malformed XML is correctly detected and reported as invalid. Repeated sibling elements become a JSON array automatically, and text content is stored under a '#text' key — but XML attributes are not captured at all; only element names and text content make it into the JSON output."
+        description="XML to JSON converts XML into JSON using the fast-xml-parser library, entirely in your browser — nothing is uploaded to a server. Malformed XML is correctly detected and reported as invalid. Repeated sibling elements become a JSON array automatically, element text content is stored under a '#text' key when it shares a node with attributes or other children, and — unlike a plain DOM-based conversion — XML attributes are preserved, each appearing as a JSON key prefixed with '@_' (e.g. id=\"5\" becomes \"@_id\": \"5\")."
         howTo={[
           "Paste your XML into the input box.",
           "Click 'Convert' to parse it into JSON.",
-          "Review the output, keeping in mind that attributes are dropped.",
+          "Review the output — attributes appear as '@_'-prefixed keys alongside each element's other content.",
           "Click 'Copy' to copy the JSON result."
         ]}
         faqs={[
           { q: "Is XML to JSON free to use?", a: "Yes, completely free with no registration required." },
-          { q: "Will invalid XML be detected?", a: "Yes — malformed XML is parsed with the browser's real XML parser and reported as 'Invalid XML'." },
-          { q: "Are XML attributes included in the JSON output?", a: "No — only element names and text content are converted; attributes (like id=\"5\") are silently dropped." },
-          { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser using the native DOMParser." }
+          { q: "Will invalid XML be detected?", a: "Yes — malformed XML is validated and reported as 'Invalid XML', with the underlying parser error when available." },
+          { q: "Are XML attributes included in the JSON output?", a: "Yes — every attribute is preserved as a JSON key prefixed with '@_', for example id=\"5\" becomes \"@_id\": \"5\" on that same element's object." },
+          { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser using the fast-xml-parser library, loaded on demand when you click Convert." }
         ]}
         tips={[
-          "If your XML relies on attributes for important data, that data won't appear in the JSON output — restructure it as child elements first if you need it preserved.",
+          "Attributes show up as '@_'-prefixed keys (e.g. '@_id') on the same object as that element's children or text.",
           "Repeated sibling elements with the same tag name are automatically grouped into a JSON array.",
-          "Element text content appears under a '#text' key in the resulting object.",
+          "Element text content appears under a '#text' key when the element also has attributes or child elements.",
           "Copy the result right after conversion, since there's no download button or saved history."
         ]}
       />
