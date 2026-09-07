@@ -73,12 +73,12 @@ export default function WordToPdfPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Word to PDF</h1>
-        <p className="text-neutral-500 text-center mb-2">Convert .docx files to a real, professional-quality PDF</p>
+        <p className="text-neutral-500 text-center mb-2">Convert .docx or .doc files to a real, professional-quality PDF</p>
         <p className="text-neutral-400 text-xs text-center mb-8">Standard fonts and formatting come through accurately.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a .docx file here'}</p>
-            <input ref={inputRef} type="file" accept=".docx" className="hidden" onChange={handleFile} />
+            <p className="text-neutral-500">{file ? file.name : 'Click or drop a .docx or .doc file here'}</p>
+            <input ref={inputRef} type="file" accept=".docx,.doc" className="hidden" onChange={handleFile} />
           </div>
           <button onClick={convert} disabled={!file || loading} className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">
             {loading && (
@@ -104,15 +104,15 @@ export default function WordToPdfPage() {
       </div>
       <SeoContent
         title="Word to PDF"
-        description="Word to PDF converts your .docx file into a real, professional-quality PDF using our conversion service. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. Standard fonts, spacing, and page layout are preserved accurately with fully selectable text."
+        description="Word to PDF converts your .docx or .doc file into a real, professional-quality PDF using our conversion service. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. Standard fonts, spacing, and page layout are preserved accurately with fully selectable text."
         howTo={[
-          "Click the upload area and select a .docx file from your device.",
+          "Click the upload area and select a .docx or .doc file from your device.",
           "Click 'Download PDF'. Your file is uploaded securely for conversion and the PDF downloads automatically once it's ready.",
           "Save the resulting PDF file to your device."
         ]}
         faqs={[
           { q: "Is Word to PDF completely free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What file formats does Word to PDF support?", a: "Only .docx files. The older binary .doc format isn't supported — save your document as .docx first if needed." },
+          { q: "What file formats does Word to PDF support?", a: "Both .docx and the older binary .doc format are supported — both are converted using our conversion service." },
           { q: "Will my documents be uploaded to a server?", a: "Yes. Your file is uploaded securely over HTTPS to our conversion service to generate the PDF, and is deleted immediately after conversion — it isn't stored or kept." },
           { q: "Do I need to install any software to use Word to PDF?", a: "No, it works directly in your web browser." },
           { q: "Will the text in my PDF be selectable?", a: "Yes. Because conversion is done server-side rather than by rasterizing a screenshot, the resulting PDF has fully selectable, searchable text." },
@@ -121,7 +121,6 @@ export default function WordToPdfPage() {
         tips={[
           "Our server-side conversion preserves fonts, spacing, and page layout far more accurately than in-browser rendering.",
           "The resulting PDF has selectable, searchable text rather than a flattened image.",
-          "If your file is a legacy .doc, open it in Word and save a copy as .docx before uploading.",
           "Very large or complex files may take a little longer to convert — keep the tab open until the download starts."
         ]}
       />

@@ -73,12 +73,12 @@ export default function ExcelToPdfPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Excel to PDF</h1>
-        <p className="text-neutral-500 text-center mb-2">Convert .xlsx, .xls, and .csv files to PDF using LibreOffice</p>
+        <p className="text-neutral-500 text-center mb-2">Convert .xlsx, .xls, .csv, and .ods files to PDF using LibreOffice</p>
         <p className="text-neutral-400 text-xs text-center mb-8">Standard fonts and formatting come through accurately. Wingdings and Webdings icon fonts can&apos;t legally be reproduced and will appear blank if your file uses them.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop an Excel file here'}</p>
-            <input ref={inputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFile} />
+            <input ref={inputRef} type="file" accept=".xlsx,.xls,.csv,.ods" className="hidden" onChange={handleFile} />
           </div>
           <button onClick={convert} disabled={!file || loading} className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">
             {loading && (
@@ -104,15 +104,15 @@ export default function ExcelToPdfPage() {
       </div>
       <SeoContent
         title="Excel to PDF"
-        description="Excel to PDF converts your .xlsx, .xls, or .csv file into a real, professional-quality PDF using LibreOffice, the same conversion engine used by many enterprise document pipelines. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. Every sheet in your workbook is rendered with accurate column widths, number formats, and cell borders. The one disclosed exception: Wingdings and Webdings icon fonts can't legally be embedded in our conversion service (a font-licensing restriction, not a bug), so those specific characters come through as blank boxes if your file uses them — everything else converts normally."
+        description="Excel to PDF converts your .xlsx, .xls, .csv, or .ods file into a real, professional-quality PDF using LibreOffice, the same conversion engine used by many enterprise document pipelines. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. Every sheet in your workbook is rendered with accurate column widths, number formats, and cell borders. The one disclosed exception: Wingdings and Webdings icon fonts can't legally be embedded in our conversion service (a font-licensing restriction, not a bug), so those specific characters come through as blank boxes if your file uses them — everything else converts normally."
         howTo={[
-          "Click the upload area and select an .xlsx, .xls, or .csv file from your device.",
+          "Click the upload area and select an .xlsx, .xls, .csv, or .ods file from your device.",
           "Click 'Download PDF'. Your file is uploaded securely for conversion and the PDF downloads automatically once it's ready.",
           "Save the resulting PDF file to your device."
         ]}
         faqs={[
           { q: "Is Excel to PDF completely free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What file formats does the tool support?", a: "It accepts .xlsx, .xls, and .csv files." },
+          { q: "What file formats does the tool support?", a: "It accepts .xlsx, .xls, .csv, and .ods files." },
           { q: "Will my files be uploaded to a server?", a: "Yes. Your file is uploaded securely over HTTPS to our conversion service, which uses LibreOffice to generate the PDF, and is deleted immediately after conversion — it isn't stored or kept." },
           { q: "Can I convert multiple Excel files at once?", a: "No, only one file can be converted at a time." },
           { q: "Will formulas and formatting carry over?", a: "Formula results, number formats, column widths, and cell borders are preserved because conversion is done with LibreOffice rather than a browser-side approximation. Very complex conditional formatting or macros may not be fully supported." }

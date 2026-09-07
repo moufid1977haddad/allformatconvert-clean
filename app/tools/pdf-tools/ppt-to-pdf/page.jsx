@@ -73,12 +73,12 @@ export default function PptToPdfPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">PowerPoint to PDF</h1>
-        <p className="text-neutral-500 text-center mb-2">Convert .pptx files to PDF using LibreOffice</p>
+        <p className="text-neutral-500 text-center mb-2">Convert .pptx or .ppt files to PDF using LibreOffice</p>
         <p className="text-neutral-400 text-xs text-center mb-8">Standard fonts and formatting come through accurately. Wingdings and Webdings icon fonts can&apos;t legally be reproduced and will appear blank if your file uses them.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a .pptx file here'}</p>
-            <input ref={inputRef} type="file" accept=".pptx" className="hidden" onChange={handleFile} />
+            <p className="text-neutral-500">{file ? file.name : 'Click or drop a .pptx or .ppt file here'}</p>
+            <input ref={inputRef} type="file" accept=".pptx,.ppt" className="hidden" onChange={handleFile} />
           </div>
           <button onClick={convert} disabled={!file || loading} className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">
             {loading && (
@@ -104,15 +104,15 @@ export default function PptToPdfPage() {
       </div>
       <SeoContent
         title="PowerPoint to PDF"
-        description="PowerPoint to PDF converts your .pptx file into a real, professional-quality PDF using LibreOffice, the same conversion engine used by many enterprise document pipelines. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. Every slide is rendered with accurate layout, fonts, and images. The one disclosed exception: Wingdings and Webdings icon fonts can't legally be embedded in our conversion service (a font-licensing restriction, not a bug), so those specific characters come through as blank boxes if your presentation uses them — everything else converts normally."
+        description="PowerPoint to PDF converts your .pptx or .ppt file into a real, professional-quality PDF using LibreOffice, the same conversion engine used by many enterprise document pipelines. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. Every slide is rendered with accurate layout, fonts, and images. The one disclosed exception: Wingdings and Webdings icon fonts can't legally be embedded in our conversion service (a font-licensing restriction, not a bug), so those specific characters come through as blank boxes if your presentation uses them — everything else converts normally."
         howTo={[
-          "Click the upload area and select a .pptx file from your device.",
+          "Click the upload area and select a .pptx or .ppt file from your device.",
           "Click 'Download PDF'. Your file is uploaded securely for conversion and the PDF downloads automatically once it's ready.",
           "Save the resulting PDF file to your device."
         ]}
         faqs={[
           { q: "Is PowerPoint to PDF completely free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What file formats does PowerPoint to PDF support?", a: "Only .pptx files. The older binary .ppt format isn't supported — save your presentation as .pptx first if needed." },
+          { q: "What file formats does PowerPoint to PDF support?", a: "Both .pptx and the older binary .ppt format are supported — both go through the same LibreOffice-based conversion service." },
           { q: "Will my presentations be uploaded to a server?", a: "Yes. Your file is uploaded securely over HTTPS to our conversion service, which uses LibreOffice to generate the PDF, and is deleted immediately after conversion — it isn't stored or kept." },
           { q: "Do I need to install any software to use PowerPoint to PDF?", a: "No, it works directly in your web browser." },
           { q: "Will each slide become its own PDF page?", a: "Yes. Each slide in your presentation is rendered as one page in the resulting PDF, in its original order." },
@@ -121,7 +121,6 @@ export default function PptToPdfPage() {
         tips={[
           "LibreOffice-based conversion preserves fonts, images, and slide layout far more accurately than in-browser rendering.",
           "Each slide becomes one page in the PDF, in its original order.",
-          "If your file is a legacy .ppt, open it in PowerPoint and save a copy as .pptx before uploading.",
           "Very large presentations or ones with many embedded media files may take a little longer to convert — keep the tab open until the download starts."
         ]}
       />

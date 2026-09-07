@@ -16,7 +16,7 @@ const GOTENBERG_TIMEOUT_MS = 30_000;
 // ceiling.
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024;
 
-const ALLOWED_EXTENSIONS = new Set(["docx", "doc", "xlsx", "xls", "csv", "pptx", "ppt"]);
+const ALLOWED_EXTENSIONS = new Set(["docx", "doc", "xlsx", "xls", "csv", "ods", "pptx", "ppt"]);
 
 // Every non-docx row stays "gotenberg" by design, not by omission -- this
 // table is the single place that answers "which engine handles this
@@ -29,6 +29,7 @@ const BACKEND_FOR_EXTENSION: Record<string, "convertapi" | "gotenberg"> = {
   xlsx: "gotenberg",
   xls: "gotenberg",
   csv: "gotenberg",
+  ods: "gotenberg",
   pptx: "gotenberg",
   ppt: "gotenberg",
 };
@@ -110,7 +111,7 @@ export async function POST(req: NextRequest) {
   const extension = getExtension(file.name);
   if (!ALLOWED_EXTENSIONS.has(extension)) {
     return NextResponse.json(
-      { error: "Unsupported file type. Allowed: .docx, .doc, .xlsx, .xls, .csv, .pptx, .ppt" },
+      { error: "Unsupported file type. Allowed: .docx, .doc, .xlsx, .xls, .csv, .ods, .pptx, .ppt" },
       { status: 400 }
     );
   }

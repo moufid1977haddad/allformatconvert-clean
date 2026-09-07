@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "HTML to PDF — Open Your HTML Code or File Online Free" },
-  description: "HTML to PDF opens your HTML code or file — including its CSS — in a new browser tab, entirely on your device, and never uploads it to a server.",
+  title: { absolute: "HTML to PDF — Convert Your HTML Code or File to PDF Online Free" },
+  description: "HTML to PDF converts your HTML code or file into a real, professional-quality PDF using a real browser rendering engine — accurate CSS, images, and layout.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/html-to-pdf" },
   openGraph: {
-    title: "HTML to PDF — Open Your HTML Code or File Online Free",
-    description: "HTML to PDF opens your HTML code or file — including its CSS — in a new browser tab, entirely on your device, and never uploads it to a server.",
+    title: "HTML to PDF — Convert Your HTML Code or File to PDF Online Free",
+    description: "HTML to PDF converts your HTML code or file into a real, professional-quality PDF using a real browser rendering engine — accurate CSS, images, and layout.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/html-to-pdf",
   },
 };

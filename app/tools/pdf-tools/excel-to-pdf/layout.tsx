@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "Excel to PDF — Convert Your .xlsx, .xls, or .csv File Online" },
-  description: "Excel to PDF converts your .xlsx, .xls, or .csv file into a real PDF using LibreOffice — accurate for standard fonts, except Wingdings/Webdings icons.",
+  title: { absolute: "Excel to PDF — Convert Your .xlsx, .xls, .csv, or .ods File Online" },
+  description: "Excel to PDF converts your .xlsx, .xls, .csv, or .ods file into a real PDF using LibreOffice — accurate for standard fonts, except Wingdings/Webdings icons.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/excel-to-pdf" },
   openGraph: {
-    title: "Excel to PDF — Convert Your .xlsx, .xls, or .csv File Online",
-    description: "Excel to PDF converts your .xlsx, .xls, or .csv file into a real PDF using LibreOffice — accurate for standard fonts, except Wingdings/Webdings icons.",
+    title: "Excel to PDF — Convert Your .xlsx, .xls, .csv, or .ods File Online",
+    description: "Excel to PDF converts your .xlsx, .xls, .csv, or .ods file into a real PDF using LibreOffice — accurate for standard fonts, except Wingdings/Webdings icons.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/excel-to-pdf",
   },
 };
