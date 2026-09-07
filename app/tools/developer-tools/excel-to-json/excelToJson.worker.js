@@ -45,10 +45,18 @@ async function run({ file, maxRows }) {
   const XLSX = xlsxModule.default || xlsxModule;
   const workbook = XLSX.read(bytes, { type: 'array' });
 
+  const sheetNames = workbook.SheetNames;
+  // Sent as soon as the workbook structure is known -- well before the JSON
+  // is built -- so the UI can tell the visitor how many sheets were found
+  // (and their real names) while the conversion is still in progress. Every
+  // sheet has always been included in the output below (keyed by its real
+  // name) -- this message only makes that fact visible instead of implicit.
+  self.postMessage({ type: 'sheets', sheetNames });
+
   self.postMessage({ type: 'progress', pct: 85, phase: 'building' });
   const result = {};
-  let totalRows = workbook.SheetNames.length; // one header row implied per sheet
-  workbook.SheetNames.forEach((name) => {
+  let totalRows = sheetNames.length; // one header row implied per sheet
+  sheetNames.forEach((name) => {
     const rows = XLSX.utils.sheet_to_json(workbook.Sheets[name]);
     result[name] = rows;
     totalRows += rows.length;
@@ -58,7 +66,7 @@ async function run({ file, maxRows }) {
   const json = JSON.stringify(result, null, 2);
   self.postMessage({ type: 'progress', pct: 97, phase: 'building' });
   const blob = new Blob([json], { type: 'application/json' });
-  self.postMessage({ type: 'done', blob, rowCount: totalRows });
+  self.postMessage({ type: 'done', blob, rowCount: totalRows, sheetNames });
 }
 
 self.onmessage = (e) => {

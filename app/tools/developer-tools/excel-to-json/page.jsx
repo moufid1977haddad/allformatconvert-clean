@@ -54,6 +54,7 @@ export default function ExcelToJsonPage() {
   const [converting, setConverting] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [timeEstimate, setTimeEstimate] = useState('');
+  const [sheetNames, setSheetNames] = useState(null);
   const inputRef = useRef();
   const workerRef = useRef(null);
 
@@ -78,6 +79,7 @@ export default function ExcelToJsonPage() {
       return;
     }
     setFileName(f.name);
+    setSheetNames(null);
     setTimeEstimate(formatEstimate(estimateSeconds(f.size)));
     convertFile(f);
   };
@@ -98,6 +100,7 @@ export default function ExcelToJsonPage() {
     setStatus('');
     setProgress(0);
     setPhase('reading');
+    setSheetNames(null);
     setConverting(true);
 
     const worker = new Worker(new URL('./excelToJson.worker.js', import.meta.url), { type: 'module' });
@@ -108,6 +111,8 @@ export default function ExcelToJsonPage() {
       if (msg.type === 'progress') {
         setProgress(msg.pct);
         setPhase(msg.phase);
+      } else if (msg.type === 'sheets') {
+        setSheetNames(msg.sheetNames);
       } else if (msg.type === 'done') {
         setProgress(100);
         setConverting(false);
@@ -120,7 +125,11 @@ export default function ExcelToJsonPage() {
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
-        setStatus(`Downloaded! ${msg.rowCount.toLocaleString()} rows.`);
+        setStatus(
+          msg.sheetNames && msg.sheetNames.length > 1
+            ? `Downloaded! ${msg.sheetNames.length} sheets, ${msg.rowCount.toLocaleString()} rows total.`
+            : `Downloaded! ${msg.rowCount.toLocaleString()} rows.`
+        );
       } else if (msg.type === 'row_limit') {
         setConverting(false);
         workerRef.current = null;
@@ -152,6 +161,11 @@ export default function ExcelToJsonPage() {
           </div>
           {timeEstimate && !converting && !error && fileName && (
             <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">Estimated conversion time: {timeEstimate}</p>
+          )}
+          {sheetNames && sheetNames.length > 1 && (
+            <div className="bg-indigo-50 dark:bg-indigo-950 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-sm rounded-lg px-4 py-3">
+              {sheetNames.length} sheets detected: {sheetNames.join(', ')} — each will be a key in the JSON output.
+            </div>
           )}
           {error && (
             <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 text-sm rounded-lg px-4 py-3">{error}</div>
