@@ -30,17 +30,82 @@ export default function AudioMergerPage() {
       // generic rejection with no way to diagnose what actually happened.
       ffmpeg.on('log', ({ message }) => console.log('[ffmpeg]', message));
       await ffmpeg.load();
-      const inputs = [];
+
+      // Maps an audio codec_name (as reported by ffprobe) to a container
+      // extension that it is SAFE to stream-copy into. Deliberately
+      // conservative -- an unknown codec falls through to the re-encode
+      // path rather than guessing at container compatibility.
+      const COPY_SAFE_EXT = {
+        mp3: 'mp3',
+        flac: 'flac',
+        vorbis: 'ogg',
+        opus: 'opus',
+        aac: 'aac',
+        pcm_s16le: 'wav',
+        pcm_s24le: 'wav',
+        pcm_s32le: 'wav',
+        pcm_u8: 'wav',
+        pcm_f32le: 'wav',
+        pcm_f64le: 'wav',
+      };
+      const MIME_FOR_EXT = {
+        mp3: 'audio/mpeg', flac: 'audio/flac', ogg: 'audio/ogg',
+        opus: 'audio/opus', aac: 'audio/aac', wav: 'audio/wav',
+      };
+
+      const probeCodec = async (name) => {
+        await ffmpeg.ffprobe([
+          '-v', 'error',
+          '-select_streams', 'a:0',
+          '-show_entries', 'stream=codec_name',
+          '-of', 'default=noprint_wrappers=1:nokey=1',
+          name,
+          '-o', 'probe.txt',
+        ]);
+        const probeData = await ffmpeg.readFile('probe.txt');
+        await ffmpeg.deleteFile('probe.txt');
+        return new TextDecoder().decode(probeData).trim().split('\n')[0] || null;
+      };
+
+      const inputNames = [];
       for (let i = 0; i < files.length; i++) {
-        const name = `input${i}.mp3`;
+        const rawExt = (files[i].name.split('.').pop() || 'dat').toLowerCase();
+        const ext = /^[a-z0-9]{1,10}$/.test(rawExt) ? rawExt : 'dat'; // keep out of the quoted concat list-file syntax
+        const name = `input${i}.${ext}`;
         await ffmpeg.writeFile(name, await fetchFile(files[i]));
-        inputs.push(`file '${name}'`);
+        inputNames.push(name);
       }
-      await ffmpeg.writeFile('list.txt', new TextEncoder().encode(inputs.join('\n')));
-      await ffmpeg.exec(['-f', 'concat', '-safe', '0', '-i', 'list.txt', '-c', 'copy', 'output.mp3']);
-      const data = await ffmpeg.readFile('output.mp3');
-      const url = URL.createObjectURL(new Blob([data.buffer], { type: 'audio/mp3' }));
-      setResult({ url, name: 'merged_audio.mp3' });
+
+      const codecs = [];
+      for (const name of inputNames) {
+        codecs.push(await probeCodec(name));
+      }
+      const allSameCodec = codecs.every((c) => c && c === codecs[0]);
+      const canStreamCopy = allSameCodec && Object.prototype.hasOwnProperty.call(COPY_SAFE_EXT, codecs[0]);
+
+      let outputName;
+      let mime;
+      if (canStreamCopy) {
+        const ext = COPY_SAFE_EXT[codecs[0]];
+        outputName = `output.${ext}`;
+        mime = MIME_FOR_EXT[ext] || 'audio/mpeg';
+        const listEntries = inputNames.map((n) => `file '${n}'`);
+        await ffmpeg.writeFile('list.txt', new TextEncoder().encode(listEntries.join('\n')));
+        await ffmpeg.exec(['-f', 'concat', '-safe', '0', '-i', 'list.txt', '-c', 'copy', outputName]);
+      } else {
+        outputName = 'output.mp3';
+        mime = 'audio/mpeg';
+        const args = [];
+        inputNames.forEach((n) => args.push('-i', n));
+        const filterInputs = inputNames.map((_, i) => `[${i}:a]`).join('');
+        args.push('-filter_complex', `${filterInputs}concat=n=${inputNames.length}:v=0:a=1[out]`, '-map', '[out]', outputName);
+        await ffmpeg.exec(args);
+      }
+
+      const data = await ffmpeg.readFile(outputName);
+      const url = URL.createObjectURL(new Blob([data.buffer], { type: mime }));
+      const outExt = outputName.split('.').pop();
+      setResult({ url, name: `merged_audio.${outExt}` });
     } catch(e) {
       // Full error object + stack to the console -- ffmpeg.wasm frequently
       // throws non-Error values (or Errors with no .message) on internal
@@ -83,23 +148,23 @@ export default function AudioMergerPage() {
       </div>
       <SeoContent
         title="Audio Merger"
-        description="Audio Merger joins two or more audio files into one, using ffmpeg's stream-copy concat feature entirely in your browser via ffmpeg.wasm — nothing is uploaded to a server. Files are combined in the order you select them; there's no drag-to-reorder, fade, or volume-leveling controls."
+        description="Audio Merger joins two or more audio files into one, entirely in your browser via ffmpeg.wasm — nothing is uploaded to a server. Each file's codec is detected automatically: if every file shares the same codec, they're combined with a lossless stream-copy; if codecs differ, the files are automatically re-encoded to MP3 so the result plays correctly instead of coming out broken or silent. Files are combined in the order you select them; there's no drag-to-reorder, fade, or volume-leveling controls."
         howTo={[
           "Click the upload area and select two or more audio files — they'll merge in the order you pick them.",
           "Review the list of selected files.",
           "Click \"Merge Audio Files\" to combine them locally.",
-          "Preview and download the merged MP3."
+          "Preview and download the merged audio file."
         ]}
         faqs={[
           { q: "Can I reorder files before merging?", a: "Not currently — files merge in the order they were selected during upload." },
-          { q: "Does merging work with mixed formats?", a: "It works best when all files share the same codec/format, since the process uses fast stream-copy rather than re-encoding; mixing very different formats can sometimes fail." },
+          { q: "Does merging work with mixed formats?", a: "Yes. The tool checks each file's codec first: same-codec files (e.g., all MP3, or all WAV) are joined with a lossless stream-copy, and mixed-codec files (e.g., an MP3 and a WAV) are automatically re-encoded to MP3 so the merge always produces valid, playable audio." },
           { q: "Is there a limit on file count or size?", a: "No hard limit is enforced by the tool — you're limited by your browser's available memory." },
           { q: "Is my data private?", a: "Yes. Everything happens locally via ffmpeg.wasm — files are never uploaded to a server." }
         ]}
         tips={[
-          "For the most reliable results, merge files that share the same format and bitrate (e.g., all MP3 at 128kbps).",
+          "Merging files that share the same format (e.g., all MP3, all WAV, all FLAC) keeps the merge lossless — the output is a stream-copy with no quality loss and no re-encoding.",
           "Double-check the file order in the list before merging, since there's no drag-to-reorder — remove and re-add files in the order you want if needed.",
-          "If merging fails, try converting all files to the same format first with the Audio Converter tool.",
+          "Mixing formats (e.g., MP3 with WAV) is fully supported — it's automatically re-encoded to MP3, so expect the output extension to change accordingly.",
           "The first merge after loading the page takes longer since the ffmpeg.wasm engine needs to download."
         ]}
       />
