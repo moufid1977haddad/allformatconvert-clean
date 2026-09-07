@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "TOML to JSON — Parse Simple TOML Online Free" },
-  description: "TOML to JSON parses simple TOML — section headers and key/value pairs — into a JSON object, entirely in your browser.",
+  title: { absolute: "TOML to JSON — Convert Full TOML (Nested, Arrays) Online Free" },
+  description: "TOML to JSON parses TOML using the smol-toml library and converts it to JSON, entirely in your browser — nested tables, arrays, and dates all parse correctly.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/toml-to-json" },
   openGraph: {
-    title: "TOML to JSON — Parse Simple TOML Online Free",
-    description: "TOML to JSON parses simple TOML — section headers and key/value pairs — into a JSON object, entirely in your browser.",
+    title: "TOML to JSON — Convert Full TOML (Nested, Arrays) Online Free",
+    description: "TOML to JSON parses TOML using the smol-toml library and converts it to JSON, entirely in your browser — nested tables, arrays, and dates all parse correctly.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/toml-to-json",
   },
 };

@@ -1,5 +1,6 @@
-﻿'use client';
+'use client';
 import { useState } from 'react';
+import { parse } from 'smol-toml';
 import SeoContent from '../../../components/SeoContent';
 export default function TomlToJsonPage() {
   const [input, setInput] = useState('');
@@ -7,25 +8,10 @@ export default function TomlToJsonPage() {
   const [error, setError] = useState('');
   const convert = () => {
     try {
-      const obj = {};
-      let currentSection = obj;
-      input.split('\n').forEach(line => {
-        line = line.trim();
-        if (!line || line.startsWith('#')) return;
-        if (line.startsWith('[')) {
-          const key = line.slice(1,-1);
-          obj[key] = {};
-          currentSection = obj[key];
-        } else if (line.includes('=')) {
-          const eqIdx = line.indexOf('=');
-          const k = line.slice(0, eqIdx).trim();
-          const v = line.slice(eqIdx+1).trim().replace(/^"|"$/g,'');
-          currentSection[k] = isNaN(v) ? v : Number(v);
-        }
-      });
+      const obj = parse(input);
       setOutput(JSON.stringify(obj, null, 2));
       setError('');
-    } catch(e) { setError('Invalid TOML'); }
+    } catch(e) { setError('Invalid TOML' + (e?.message ? `: ${e.message}` : '')); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -46,24 +32,24 @@ export default function TomlToJsonPage() {
       </div>
       <SeoContent
         title="TOML to JSON"
-        description="TOML to JSON parses simple TOML — [section] headers and key = value pairs, one level deep — into a JSON object, entirely in your browser — nothing is uploaded to a server. It doesn't support nested tables (like [section.subsection]), arrays, multi-line strings, or TOML's native date/time literals, so more advanced TOML files won't convert correctly."
+        description="TOML to JSON parses TOML using the smol-toml library and converts it to JSON, entirely in your browser — nothing is uploaded to a server. Nested tables (including [section.subsection] and arrays of tables), inline and multi-line arrays, and TOML's native date/time and number types all parse correctly, matching how a real TOML parser reads the file."
         howTo={[
-          "Paste simple, single-level TOML into the input box.",
-          "Click 'Convert' to parse [section] headers and key = value pairs into JSON.",
-          "Review the output, especially for nested tables, arrays, or dates.",
+          "Paste any valid TOML into the input box — flat, nested, or with arrays.",
+          "Click 'Convert' to parse it into JSON.",
+          "The output preserves nested tables, arrays, and native types (numbers, booleans, dates) correctly.",
           "Click 'Copy' to copy the JSON to your clipboard."
         ]}
         faqs={[
           { q: "Is TOML to JSON free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it support nested tables, like [section.subsection]?", a: "No — only one level of [section] headers is recognized; dotted or nested table headers aren't parsed into nested JSON objects." },
-          { q: "Does it support TOML arrays or date/time values?", a: "No — arrays (key = [1, 2, 3]) and TOML's native date/time literals aren't parsed specially; they'll come through as unparsed text rather than proper JSON arrays or dates." },
+          { q: "Does it support nested tables, like [section.subsection]?", a: "Yes — dotted and nested table headers convert into properly nested JSON objects at any depth." },
+          { q: "Does it support TOML arrays or date/time values?", a: "Yes — arrays (including arrays of tables) convert to JSON arrays, and TOML's native date/time literals convert to ISO 8601 date strings in the JSON output." },
           { q: "Can I download the JSON as a file?", a: "No, there's only a 'Copy' button — paste the copied text into a file yourself if you need one." }
         ]}
         tips={[
-          "Works best on simple, flat TOML with basic key = value pairs and single-level [section] headers.",
-          "For nested tables, arrays, or advanced TOML features, use a dedicated TOML parser library instead.",
-          "Numbers are auto-detected and converted to JSON numbers; quoted string values have their surrounding double quotes stripped.",
-          "Review the output carefully for any file using TOML features beyond simple flat key-value pairs."
+          "Works on any valid TOML file, not just simple flat key-value pairs — nested tables and arrays of tables both convert correctly.",
+          "TOML date/time values come through as ISO 8601 strings in the JSON, since JSON has no native date type.",
+          "If conversion fails, the error message names the line where the parser got stuck, which is usually the fastest way to find a TOML syntax mistake.",
+          "Review the output for very large integers — JSON numbers lose precision beyond 2^53, same limitation as any other JSON tool."
         ]}
       />
     </div>

@@ -44,6 +44,7 @@ export default function AudioTranscriberPage() {
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
             {fileName ? <p className="text-neutral-700 text-sm font-medium">{fileName}</p> : <p className="text-neutral-400 text-sm">Click to upload an audio file (mp3, wav, m4a...)</p>}
           </div>
+          <p className="text-neutral-400 text-xs text-center -mt-2">Max {(MAX_AUDIO_UPLOAD_BYTES / (1024 * 1024)).toFixed(0)} MB per file — a hard cap to keep transcription cost-effective and free for everyone.</p>
           <input ref={fileRef} type="file" accept="audio/*" className="hidden" onChange={handleFile} />
           {loading && <p className="text-center text-indigo-500 text-sm">Transcribing...</p>}
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}

@@ -57,18 +57,29 @@ export default function AudioToTextPage() {
   };
 
   // ── File functions ──
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setFileTranscript(''); setError(''); };
+  // Checked immediately on selection (not just before the network request)
+  // so an oversized file is flagged the moment it's picked, rather than
+  // only after the visitor has already clicked "Transcribe Audio" and
+  // waited for the button to respond.
+  const handleFile = (e) => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    setFile(f);
+    setFileTranscript('');
+    const sizeCheck = checkFileSize(f, MAX_AUDIO_UPLOAD_BYTES, 'Audio files');
+    setError(sizeCheck.ok ? '' : sizeCheck.message);
+  };
 
   const transcribeFile = async () => {
     if (!file) return;
+    const sizeCheck = checkFileSize(file, MAX_AUDIO_UPLOAD_BYTES, 'Audio files');
+    if (!sizeCheck.ok) { setError(sizeCheck.message); return; }
     setLoading(true);
     setError('');
     try {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('tool', 'audio-to-text');
-      const sizeCheck = checkFileSize(file, MAX_AUDIO_UPLOAD_BYTES, 'Audio files');
-      if (!sizeCheck.ok) { setLoading(false); setError(sizeCheck.message); return; }
       const response = await fetch('/api/ai-transcribe', { method: 'POST', body: formData });
       const data = await response.json();
       if (data.text) setFileTranscript(data.text);
@@ -158,11 +169,12 @@ export default function AudioToTextPage() {
                   : <p className="text-neutral-400 text-sm">Click to upload an audio file (MP3, WAV, M4A...)</p>
                 }
               </div>
+              <p className="text-neutral-400 text-xs text-center -mt-2">Max {(MAX_AUDIO_UPLOAD_BYTES / (1024 * 1024)).toFixed(0)} MB per file — a hard cap to keep transcription cost-effective and free for everyone.</p>
               <input ref={fileRef} type="file" accept="audio/*" className="hidden" onChange={handleFile} />
               {file && <audio controls src={URL.createObjectURL(file)} className="w-full" />}
               <button
                 onClick={transcribeFile}
-                disabled={!file || loading}
+                disabled={!file || loading || file.size > MAX_AUDIO_UPLOAD_BYTES}
                 className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition"
               >
                 {loading ? 'Transcribing...' : 'Transcribe Audio'}
@@ -210,6 +222,7 @@ export default function AudioToTextPage() {
           { q: "Is my audio uploaded to a server?", a: "It depends on the mode: microphone dictation runs entirely in your browser via the Web Speech API and isn't uploaded anywhere. Uploaded audio files are sent to a server-side transcription API to generate the text." },
           { q: "Which browsers support microphone dictation?", a: "It relies on the Web Speech API, which works best in Google Chrome; other browsers may not support it." },
           { q: "What audio formats can I upload?", a: "Common formats like MP3, WAV, and M4A." },
+          { q: "How large can an uploaded audio file be?", a: `File-upload transcription is capped at ${(MAX_AUDIO_UPLOAD_BYTES / (1024 * 1024)).toFixed(0)} MB per file — a deliberate cost control to keep this tool free, not a technical ceiling. Split a longer recording into smaller pieces and transcribe each separately if you hit the limit. Microphone dictation has no such limit since it doesn't call a paid API.` },
           { q: "Is Audio to Text free to use?", a: "Yes, both the microphone and file-upload modes are free to use." }
         ]}
         tips={[

@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "JSON to TOML — Convert a Flat or One-level-nested JSON" },
-  description: "JSON to TOML converts a flat or one-level-nested JSON object into TOML text, entirely in your browser — nothing is uploaded to a server.",
+  title: { absolute: "JSON to TOML — Convert Full JSON (Nested, Arrays) Online Free" },
+  description: "JSON to TOML converts a JSON object into valid TOML using the smol-toml library, entirely in your browser — nested tables and arrays at any depth convert correctly.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/json-to-toml" },
   openGraph: {
-    title: "JSON to TOML — Convert a Flat or One-level-nested JSON",
-    description: "JSON to TOML converts a flat or one-level-nested JSON object into TOML text, entirely in your browser — nothing is uploaded to a server.",
+    title: "JSON to TOML — Convert Full JSON (Nested, Arrays) Online Free",
+    description: "JSON to TOML converts a JSON object into valid TOML using the smol-toml library, entirely in your browser — nested tables and arrays at any depth convert correctly.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/json-to-toml",
   },
 };

@@ -1,11 +1,13 @@
-﻿'use client';
+'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { COMPRESSIBLE_AUDIO_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
 
 export default function AudioCompressorPage() {
   const [file, setFile] = useState(null);
   const [bitrate, setBitrate] = useState('128');
+  const [format, setFormat] = useState('mp3');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
@@ -26,13 +28,15 @@ export default function AudioCompressorPage() {
       // generic rejection with no way to diagnose what actually happened.
       ffmpeg.on('log', ({ message }) => console.log('[ffmpeg]', message));
       await ffmpeg.load();
-      await ffmpeg.writeFile('input.mp3', await fetchFile(file));
-      await ffmpeg.exec(['-i', 'input.mp3', '-b:a', bitrate + 'k', 'output.mp3']);
-      const data = await ffmpeg.readFile('output.mp3');
-      const blob = new Blob([data.buffer], { type: 'audio/mp3' });
+      const inputName = 'input.' + sanitizedInputExt(file);
+      const { outputName, extraArgs, mime, ext } = buildOutputSpec(format);
+      await ffmpeg.writeFile(inputName, await fetchFile(file));
+      await ffmpeg.exec(['-i', inputName, '-b:a', bitrate + 'k', ...extraArgs, outputName]);
+      const data = await ffmpeg.readFile(outputName);
+      const blob = new Blob([data.buffer], { type: mime });
       const url = URL.createObjectURL(blob);
       const reduction = (((file.size - blob.size) / file.size) * 100).toFixed(1);
-      setResult({ url, name: 'compressed_' + file.name, originalSize: (file.size/1024/1024).toFixed(2), newSize: (blob.size/1024/1024).toFixed(2), reduction });
+      setResult({ url, name: 'compressed_' + file.name.replace(/\.[^.]+$/, '') + '.' + ext, originalSize: (file.size/1024/1024).toFixed(2), newSize: (blob.size/1024/1024).toFixed(2), reduction });
     } catch(e) {
       // Full error object + stack to the console -- ffmpeg.wasm frequently
       // throws non-Error values (or Errors with no .message) on internal
@@ -64,6 +68,12 @@ export default function AudioCompressorPage() {
               ))}
             </div>
           </div>
+          <div>
+            <label className="block text-sm text-neutral-500 mb-1">Output Format</label>
+            <select value={format} onChange={e => setFormat(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
+              {COMPRESSIBLE_AUDIO_FORMATS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+            </select>
+          </div>
           <button onClick={compress} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Compressing...' : 'Compress Audio'}
           </button>
@@ -83,16 +93,17 @@ export default function AudioCompressorPage() {
       </div>
       <SeoContent
         title="Audio Compressor"
-        description="Audio Compressor reduces an audio file's size by re-encoding it at a lower bitrate (64–320 kbps) using ffmpeg.wasm, entirely in your browser. Note: this is bitrate-based file-size compression — it does not apply dynamic-range compression (threshold/ratio/attack/release) despite the tool's name."
+        description="Audio Compressor reduces an audio file's size by re-encoding it at a lower bitrate (64–320 kbps) using ffmpeg.wasm, entirely in your browser. Note: this is bitrate-based file-size compression — it does not apply dynamic-range compression (threshold/ratio/attack/release) despite the tool's name. Output format is your choice among the bitrate-controllable codecs (MP3, AAC, M4A, OGG, Opus, WMA, AC3) — lossless formats like WAV and FLAC aren't offered here since a bitrate target doesn't apply to them."
         howTo={[
           "Click the upload area and select an audio file.",
           "Choose a target bitrate from the presets (64k–320k).",
+          "Pick an output format — MP3 is the most universally compatible.",
           "Click \"Compress Audio\" to re-encode the file locally.",
-          "Compare the before/after size and download the result as MP3."
+          "Compare the before/after size and download the result."
         ]}
         faqs={[
           { q: "Does this apply dynamic-range compression?", a: "No — despite the name, this tool re-encodes your audio at a lower bitrate to shrink file size. It doesn't touch the audio's dynamic range (loud vs. quiet parts)." },
-          { q: "What output format do I get?", a: "Always MP3, regardless of the format you uploaded." },
+          { q: "What output format do I get?", a: "Your choice among MP3, AAC, M4A, OGG, Opus, WMA, and AC3 — all bitrate-controllable, lossy codecs where a lower bitrate actually shrinks the file. Lossless formats (WAV, FLAC) aren't offered since bitrate compression doesn't apply to them." },
           { q: "Is there a file size limit?", a: "No hard limit is enforced by the tool — very large files are limited only by your browser's available memory." },
           { q: "Is my file uploaded anywhere?", a: "No. Everything is processed client-side via ffmpeg.wasm — nothing is uploaded to a server." }
         ]}

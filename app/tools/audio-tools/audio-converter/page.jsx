@@ -1,10 +1,9 @@
-﻿'use client';
+'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
-
-const formats = ['mp3', 'wav', 'aac', 'flac', 'ogg', 'm4a', 'opus'];
+import { AUDIO_OUTPUT_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
 
 export default function AudioConverterPage() {
   const [file, setFile] = useState(null);
@@ -52,13 +51,13 @@ export default function AudioConverterPage() {
         setProgress(Math.round(Math.min(1, Math.max(0, progress)) * 100));
       });
       await ffmpeg.load();
-      const inputName = 'input.' + file.name.split('.').pop();
-      const outputName = 'output.' + format;
+      const inputName = 'input.' + sanitizedInputExt(file);
+      const { outputName, extraArgs, mime, ext } = buildOutputSpec(format);
       await ffmpeg.writeFile(inputName, await fetchFile(file));
-      await ffmpeg.exec(['-i', inputName, outputName]);
+      await ffmpeg.exec(['-i', inputName, ...extraArgs, outputName]);
       const data = await ffmpeg.readFile(outputName);
-      const url = URL.createObjectURL(new Blob([data.buffer], { type: 'audio/' + format }));
-      setResult({ url, name: file.name.replace(/\.[^.]+$/, '') + '.' + format });
+      const url = URL.createObjectURL(new Blob([data.buffer], { type: mime }));
+      setResult({ url, name: file.name.replace(/\.[^.]+$/, '') + '.' + ext });
       setProgress(100);
     } catch(e) {
       // Full error object + stack to the console -- ffmpeg.wasm frequently
@@ -89,7 +88,7 @@ export default function AudioConverterPage() {
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Target Format</label>
             <select value={format} onChange={e => setFormat(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
-              {formats.map(f => <option key={f} value={f}>{f.toUpperCase()}</option>)}
+              {AUDIO_OUTPUT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
             </select>
           </div>
           {loading ? (
@@ -113,7 +112,7 @@ export default function AudioConverterPage() {
       </div>
       <SeoContent
         title="Audio Converter"
-        description="Audio Converter converts a single audio file between MP3, WAV, AAC, FLAC, OGG, M4A, and Opus using ffmpeg.wasm, running entirely in your browser — your file is never uploaded to a server."
+        description="Audio Converter converts a single audio file between MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, and AC3 using ffmpeg.wasm, running entirely in your browser — your file is never uploaded to a server."
         howTo={[
           "Click the upload area and select an audio file.",
           "Choose your target format from the dropdown.",
@@ -122,13 +121,15 @@ export default function AudioConverterPage() {
         ]}
         faqs={[
           { q: "Is Audio Converter free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can convert." },
-          { q: "What formats are supported?", a: "MP3, WAV, AAC, FLAC, OGG, M4A, and Opus, both for input (anything ffmpeg can decode) and as output targets." },
+          { q: "What formats are supported?", a: "MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, and AC3 as output targets, and any format ffmpeg can decode as input (which covers the vast majority of real-world audio files, including AMR)." },
+          { q: "Can it convert to AMR?", a: "No — this tool can read AMR files as input, but the AMR encoder isn't available in the ffmpeg build used here, so AMR isn't offered as an output target." },
+          { q: "What is ALAC output actually saved as?", a: "A .m4a file using the ALAC (Apple Lossless) codec instead of AAC — the same format iTunes/Apple Music uses for lossless downloads." },
           { q: "Can I convert multiple files at once?", a: "No, this tool processes one file at a time — you'd need to repeat the process for each file." },
           { q: "Is my file uploaded anywhere?", a: "No. Conversion happens entirely client-side via ffmpeg.wasm (WebAssembly) — there's no server involved, so nothing is ever uploaded." }
         ]}
         tips={[
           "The first conversion after loading the page takes longer since your browser needs to download the ffmpeg.wasm engine (roughly 25–30MB).",
-          "FLAC and WAV preserve full quality but produce larger files than MP3, AAC, or Opus.",
+          "FLAC, WAV, AIFF, and ALAC preserve full quality but produce larger files than MP3, AAC, WMA, or Opus.",
           "Opus is a strong choice for small file size at good quality if your target player supports it.",
           "This tool converts audio files only — it doesn't extract audio from video files."
         ]}
