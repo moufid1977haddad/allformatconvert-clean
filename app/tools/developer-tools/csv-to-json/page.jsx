@@ -4,6 +4,15 @@ import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
 import { MAX_ROWS, MOBILE_MAX_ROWS, PASTE_MAX_ROWS } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
+import { detectDelimiter, CSV_DELIMITERS } from '../../../lib/csvParser';
+
+// Only the first 8KB is needed to see several rows -- detectDelimiter only
+// looks at the first 10 non-empty logical lines anyway, so sampling more of
+// a large paste or file would just cost time without changing the result.
+const DELIMITER_SAMPLE_BYTES = 8192;
+function delimiterLabel(value) {
+  return CSV_DELIMITERS.find((d) => d.value === value)?.label || value;
+}
 
 // Coarse defense-in-depth backstop for pathological inputs, same role as the
 // equivalent constant on csv-to-excel. MAX_ROWS, checked during parsing, is
@@ -62,6 +71,8 @@ export default function CsvToJsonPage() {
   const [converting, setConverting] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [timeEstimate, setTimeEstimate] = useState('');
+  const [delimiterChoice, setDelimiterChoice] = useState('auto');
+  const [detectedDelimiter, setDetectedDelimiter] = useState(',');
   const inputRef = useRef();
   const workerRef = useRef(null);
 
@@ -88,7 +99,11 @@ export default function CsvToJsonPage() {
     setFile(f);
     setFileName(f.name);
     setInput('');
+    setDelimiterChoice('auto');
     setTimeEstimate(formatEstimate(estimateSeconds(f.size)));
+    f.slice(0, DELIMITER_SAMPLE_BYTES).text().then((sample) => {
+      setDetectedDelimiter(detectDelimiter(sample));
+    });
   };
 
   const cancel = () => {
@@ -157,7 +172,8 @@ export default function CsvToJsonPage() {
       workerRef.current = null;
       setError('Conversion failed: ' + (err?.message || 'unknown worker error'));
     };
-    worker.postMessage(file ? { file, mode, maxRows } : { text: input, mode, maxRows });
+    const delimiter = delimiterChoice === 'auto' ? detectedDelimiter : delimiterChoice;
+    worker.postMessage(file ? { file, mode, maxRows, delimiter } : { text: input, mode, maxRows, delimiter });
   };
 
   return (
@@ -183,6 +199,8 @@ export default function CsvToJsonPage() {
                   setInput(val);
                   setFileName('');
                   setFile(null);
+                  setDelimiterChoice('auto');
+                  setDetectedDelimiter(detectDelimiter(val.slice(0, DELIMITER_SAMPLE_BYTES)));
                   setTimeEstimate('');
                 }}
                 disabled={converting}
@@ -195,6 +213,20 @@ export default function CsvToJsonPage() {
           </div>
           {timeEstimate && !converting && !error && (
             <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">Estimated conversion time: {timeEstimate}</p>
+          )}
+          {!converting && (
+            <div className="flex items-center justify-center gap-2 text-sm">
+              <label htmlFor="csv-delimiter" className="text-neutral-500 dark:text-neutral-400">Delimiter:</label>
+              <select
+                id="csv-delimiter"
+                value={delimiterChoice}
+                onChange={e => setDelimiterChoice(e.target.value)}
+                className="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-lg px-3 py-1.5 text-neutral-800 dark:text-neutral-200"
+              >
+                <option value="auto">Auto-detected: {delimiterLabel(detectedDelimiter)}</option>
+                {CSV_DELIMITERS.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+              </select>
+            </div>
           )}
           {error && (
             <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 text-sm rounded-lg px-4 py-3">{error}</div>
@@ -215,9 +247,10 @@ export default function CsvToJsonPage() {
       </div>
       <SeoContent
         title="CSV to JSON"
-        description="CSV to JSON converts a CSV file (or pasted CSV text) into an array of JSON objects entirely in your browser — nothing is uploaded to a server. The first line is treated as the header row. Parsing is quote-aware: a field wrapped in double quotes can safely contain a comma or a newline (like 'Smith, John') without being split into extra columns. Large files are read and parsed off the main thread in a Web Worker, so the page stays responsive, and the result downloads automatically as a .json file."
+        description="CSV to JSON converts a CSV file (or pasted CSV text) into an array of JSON objects entirely in your browser — nothing is uploaded to a server. The first line is treated as the header row. The field delimiter (comma, semicolon, tab, or pipe) is detected automatically, with a dropdown to override it. Parsing is quote-aware: a field wrapped in double quotes can safely contain a comma, the delimiter itself, or a newline (like 'Smith, John') without being split into extra columns. Large files are read and parsed off the main thread in a Web Worker, so the page stays responsive, and the result downloads automatically as a .json file."
         howTo={[
           "Click the upload area and select a .csv file, or paste CSV text directly into the box below it.",
+          "The delimiter is detected automatically — check the dropdown and correct it if needed.",
           "Click 'Convert' to generate the JSON.",
           "A file upload downloads automatically as converted.json; pasted text appears in the output box for you to copy.",
           "Validate the JSON in a linter or your target application before relying on it."
@@ -225,7 +258,7 @@ export default function CsvToJsonPage() {
         faqs={[
           { q: "Does it support file upload, or only pasted text?", a: "Both — upload a .csv file, or paste CSV text directly into the box." },
           { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser, in a background Web Worker so the page never freezes." },
-          { q: "Does it support delimiters other than commas, like semicolons or tabs?", a: "No, splitting is done on commas only — though a comma inside a properly double-quoted field is treated as data, not a delimiter." },
+          { q: "Does it support delimiters other than commas, like semicolons or tabs?", a: "Yes — the delimiter (comma, semicolon, tab, or pipe) is auto-detected from the file, which matters for European CSVs that commonly use semicolons. A dropdown lets you override the detected delimiter if it's ever wrong." },
           { q: "Why is there a row limit?", a: `Converting a very large CSV in a browser tab risks running out of memory and crashing the tab rather than just being slow. Uploaded files support up to ${MAX_ROWS_LABEL} rows on desktop (${MOBILE_MAX_ROWS_LABEL} on phones/tablets); pasted text is capped lower, at ${PASTE_MAX_ROWS_LABEL} rows, since pasted text has to live in the page itself rather than being streamed in like a file. The count includes the header row.` },
           { q: "Why is the pasted-text limit lower than the file-upload limit?", a: "A pasted CSV sits in the page's own memory and gets re-rendered into the input box on every change, on both desktop and mobile — an uploaded file is instead streamed straight into the background worker without that overhead, so it can safely handle far more rows." }
         ]}
@@ -233,6 +266,7 @@ export default function CsvToJsonPage() {
           "Include a header row as the first line — those values become the keys in each JSON object.",
           "Wrap a value in double quotes if it contains a comma (e.g. \"Smith, John\") — quoted fields are parsed correctly and won't shift into the wrong keys.",
           "Rows with fewer values than headers get empty strings for the missing fields.",
+          "The delimiter dropdown shows what was auto-detected — double check it on unusual files, and switch it manually if a column split looks wrong.",
           "For a large CSV, upload it as a file rather than pasting it — the file path supports far more rows and downloads the result directly instead of rendering it on the page."
         ]}
       />

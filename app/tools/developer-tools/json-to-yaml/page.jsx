@@ -1,5 +1,6 @@
-﻿'use client';
+'use client';
 import { useState } from 'react';
+import { dump } from 'js-yaml';
 import SeoContent from '../../../components/SeoContent';
 export default function JsonToYamlPage() {
   const [input, setInput] = useState('');
@@ -8,8 +9,7 @@ export default function JsonToYamlPage() {
   const convert = () => {
     try {
       const obj = JSON.parse(input);
-      const toYaml = (o, indent = 0) => Object.entries(o).map(([k,v]) => typeof v === 'object' && v !== null ? `${'  '.repeat(indent)}${k}:\n${toYaml(v, indent+1)}` : `${'  '.repeat(indent)}${k}: ${v}`).join('\n');
-      setOutput(toYaml(obj));
+      setOutput(dump(obj, { lineWidth: -1 }));
       setError('');
     } catch(e) { setError('Invalid JSON'); }
   };
@@ -32,24 +32,24 @@ export default function JsonToYamlPage() {
       </div>
       <SeoContent
         title="JSON to YAML"
-        description="JSON to YAML recursively converts JSON objects into indented YAML, entirely in your browser — nothing is uploaded to a server. Nested objects convert cleanly at any depth, but two gaps are worth knowing: JSON arrays are converted into numbered keys (0, 1, 2...) rather than proper YAML list items, and string values are inserted without quoting, so a value containing a colon-plus-space can produce invalid YAML."
+        description="JSON to YAML converts JSON into valid YAML using the js-yaml library, entirely in your browser — nothing is uploaded to a server. Arrays convert into proper YAML list items (- item), nested objects convert at any depth, and string values are quoted automatically whenever needed (a colon, a leading special character, and similar cases) so the output parses back correctly."
         howTo={[
           "Paste your JSON into the input box.",
-          "Click 'Convert' to generate indented YAML.",
-          "Review the output, especially for arrays or values containing a colon.",
+          "Click 'Convert' to generate YAML.",
+          "The output is copy-paste-ready YAML, including arrays and nested objects.",
           "Click 'Copy' to copy the result to your clipboard."
         ]}
         faqs={[
           { q: "Is JSON to YAML free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Does it handle nested JSON objects?", a: "Yes — nested objects convert into properly indented YAML at any depth." },
-          { q: "Does it convert JSON arrays correctly?", a: "No — array items are converted into numbered keys like 0: a and 1: b, which a YAML parser reads back as an object with keys \"0\" and \"1\", not as a list." },
-          { q: "Does it handle values containing special YAML characters, like a colon?", a: "Not reliably — values are inserted without quoting, so a string containing a colon followed by a space (e.g. \"Note: important\") can produce YAML that fails to parse." }
+          { q: "Does it convert JSON arrays correctly?", a: "Yes — array items are converted into proper YAML list syntax (- item), which parses back as an array, not an object." },
+          { q: "Does it handle values containing special YAML characters, like a colon?", a: "Yes — values are quoted automatically whenever needed (e.g. a string containing \"Note: important\"), since the conversion uses the js-yaml library instead of manual string formatting." }
         ]}
         tips={[
-          "Rewrite array values as YAML list syntax by hand afterward, since numbered keys parse back as an object, not a list.",
-          "If a value contains a colon followed by a space, wrap it in quotes manually in the output to keep it valid YAML.",
-          "Nested objects are this tool's strength — nesting converts correctly at any depth.",
-          "Validate the output with a YAML parser or linter before using it in a real configuration file, especially for free-form text values."
+          "Arrays and deeply nested objects both convert correctly — there's no need to restructure your JSON first.",
+          "Values that need quoting (colons, leading special characters, etc.) are quoted automatically.",
+          "The output uses YAML's block style throughout, so it stays readable even for large nested structures.",
+          "It's still worth a quick sanity check in your target application, since some YAML consumers interpret edge cases (like unquoted 'yes'/'no') differently."
         ]}
       />
     </div>

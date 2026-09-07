@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "Excel to CSV — Read an Uploaded .xlsx or .xls File Online" },
-  description: "Excel to CSV reads an uploaded .xlsx or .xls file and converts every sheet to comma-separated CSV text (zipped when there's more than one), entirely in your browser.",
+  title: { absolute: "Excel to CSV — Read an Uploaded .xlsx, .xls, or .ods File Online" },
+  description: "Excel to CSV reads an uploaded .xlsx, .xls, or .ods file and converts every sheet to comma-separated CSV text (zipped when there's more than one), entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/excel-to-csv" },
   openGraph: {
-    title: "Excel to CSV — Read an Uploaded .xlsx or .xls File Online",
-    description: "Excel to CSV reads an uploaded .xlsx or .xls file and converts every sheet to comma-separated CSV text (zipped when there's more than one), entirely in your browser.",
+    title: "Excel to CSV — Read an Uploaded .xlsx, .xls, or .ods File Online",
+    description: "Excel to CSV reads an uploaded .xlsx, .xls, or .ods file and converts every sheet to comma-separated CSV text (zipped when there's more than one), entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/excel-to-csv",
   },
 };

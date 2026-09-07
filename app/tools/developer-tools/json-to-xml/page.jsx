@@ -1,19 +1,25 @@
-﻿'use client';
+'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 export default function JsonToXmlPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
-  const convert = () => {
+  const convert = async () => {
     try {
       const obj = JSON.parse(input);
-      const toXml = (obj, root = 'root') => {
-        if (typeof obj !== 'object') return `<${root}>${obj}</${root}>`;
-        const inner = Object.entries(obj).map(([k,v]) => toXml(v, k)).join('');
-        return `<${root}>${inner}</${root}>`;
-      };
-      setOutput('<?xml version="1.0" encoding="UTF-8"?>\n' + toXml(obj));
+      // fast-xml-parser is loaded on demand -- it's only needed once the
+      // visitor actually clicks Convert, so it doesn't add to the page's
+      // initial JS payload.
+      const { XMLBuilder } = await import('fast-xml-parser');
+      const builder = new XMLBuilder({ format: true, indentBy: '  ', ignoreAttributes: false });
+      // A top-level JSON array has no single tag name of its own, so it's
+      // wrapped under a generic <item> element -- repeated once per array
+      // entry -- to keep the document to one root element, the way any
+      // other top-level array would need a wrapper to be valid XML.
+      const payload = Array.isArray(obj) ? { item: obj } : obj;
+      const xml = builder.build({ root: payload });
+      setOutput('<?xml version="1.0" encoding="UTF-8"?>\n' + xml);
       setError('');
     } catch(e) { setError('Invalid JSON'); }
   };
@@ -36,24 +42,24 @@ export default function JsonToXmlPage() {
       </div>
       <SeoContent
         title="JSON to XML"
-        description="JSON to XML recursively converts JSON into nested XML tags — each key becomes a tag name, with objects nesting naturally — entirely in your browser. Two real gaps to know about: text values are inserted directly without XML-escaping, so a value containing an ampersand or a less-than sign produces invalid XML, and array items become numbered tags like <0> and <1>, which aren't valid XML tag names."
+        description="JSON to XML recursively converts JSON into nested XML tags using the fast-xml-parser library, entirely in your browser. Each key becomes a tag name, objects nest naturally, text is escaped automatically (so an ampersand or a less-than sign in a value doesn't break the output), and array items become repeated sibling tags with the same name — the standard, valid way to represent a list in XML."
         howTo={[
           "Paste your JSON into the input box.",
           "Click 'Convert' to generate nested XML tags.",
-          "Review the output, especially for arrays or text containing & or <.",
+          "Arrays and special characters are handled automatically — no manual cleanup needed.",
           "Click 'Copy' to copy the result to your clipboard."
         ]}
         faqs={[
           { q: "Is JSON to XML free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it handle nested JSON objects?", a: "Yes — unlike some of our other JSON code-generator tools, this one recursively converts nested objects into properly nested XML tags at any depth." },
-          { q: "Does it escape special characters like & and <?", a: "No — text values are inserted as-is, so a value containing an ampersand or a less-than sign produces invalid, non-well-formed XML. Replace those characters with &amp; and &lt; yourself, or avoid them in your data." },
-          { q: "Does it convert JSON arrays correctly?", a: "No — array items become numbered tags like <0> and <1>, which are not valid XML tag names since tags can't start with a digit." }
+          { q: "Does it handle nested JSON objects?", a: "Yes — nested objects convert into properly nested XML tags at any depth." },
+          { q: "Does it escape special characters like & and <?", a: "Yes — text values are escaped automatically (& becomes &amp;, < becomes &lt;, and so on), so the output is well-formed XML." },
+          { q: "Does it convert JSON arrays correctly?", a: "Yes — array items become repeated sibling tags under the same name (e.g. three tags named tag for a 3-item array), which is valid XML and the conventional way array-like data is represented." }
         ]}
         tips={[
-          "Manually replace & with &amp; and < with &lt; in any text values before converting, since the tool doesn't escape them automatically.",
-          "Avoid JSON arrays in your input, or restructure them as objects with named keys, since array items don't convert to valid XML tags.",
-          "Nested objects convert cleanly at any depth — this tool's main strength over some of the similar converters here.",
-          "Validate the output with an XML parser before using it in a real system, especially if your data includes free-form text."
+          "A top-level JSON array is wrapped in a generic <item> element per entry, since XML documents need exactly one root element.",
+          "Nested objects convert cleanly at any depth.",
+          "Special characters in text values no longer need manual escaping — the converter handles it.",
+          "Validate the output with an XML parser before using it in a real system, especially for very unusual key names (XML tag names have their own rules, e.g. they can't start with a digit)."
         ]}
       />
     </div>

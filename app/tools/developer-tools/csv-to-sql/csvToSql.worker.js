@@ -14,13 +14,13 @@ class RowLimitExceededError extends Error {
   }
 }
 
-async function run({ file, text, maxRows, mode, tableName }) {
+async function run({ file, text, maxRows, mode, tableName, delimiter }) {
   const limit = maxRows || MAX_ROWS;
   const rows = [];
   const parser = new IncrementalCsvParser((row) => {
     rows.push(row);
     if (rows.length > limit) throw new RowLimitExceededError(limit);
-  });
+  }, delimiter || ',');
 
   if (file) {
     const total = file.size || 0;

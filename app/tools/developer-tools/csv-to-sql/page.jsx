@@ -4,6 +4,15 @@ import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
 import { MAX_ROWS, MOBILE_MAX_ROWS, PASTE_MAX_ROWS } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
+import { detectDelimiter, CSV_DELIMITERS } from '../../../lib/csvParser';
+
+// Only the first 8KB is needed to see several rows -- detectDelimiter only
+// looks at the first 10 non-empty logical lines anyway, so sampling more of
+// a large paste or file would just cost time without changing the result.
+const DELIMITER_SAMPLE_BYTES = 8192;
+function delimiterLabel(value) {
+  return CSV_DELIMITERS.find((d) => d.value === value)?.label || value;
+}
 
 const MAX_FILE_SIZE_BYTES = 150 * 1024 * 1024; // 150 MB
 const MAX_FILE_SIZE_LABEL = '150 MB';
@@ -59,6 +68,8 @@ export default function CsvToSqlPage() {
   const [converting, setConverting] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [timeEstimate, setTimeEstimate] = useState('');
+  const [delimiterChoice, setDelimiterChoice] = useState('auto');
+  const [detectedDelimiter, setDetectedDelimiter] = useState(',');
   const inputRef = useRef();
   const workerRef = useRef(null);
 
@@ -85,7 +96,11 @@ export default function CsvToSqlPage() {
     setFile(f);
     setFileName(f.name);
     setInput('');
+    setDelimiterChoice('auto');
     setTimeEstimate(formatEstimate(estimateSeconds(f.size)));
+    f.slice(0, DELIMITER_SAMPLE_BYTES).text().then((sample) => {
+      setDetectedDelimiter(detectDelimiter(sample));
+    });
   };
 
   const cancel = () => {
@@ -154,7 +169,8 @@ export default function CsvToSqlPage() {
       workerRef.current = null;
       setError('Conversion failed: ' + (err?.message || 'unknown worker error'));
     };
-    worker.postMessage(file ? { file, mode, maxRows, tableName } : { text: input, mode, maxRows, tableName });
+    const delimiter = delimiterChoice === 'auto' ? detectedDelimiter : delimiterChoice;
+    worker.postMessage(file ? { file, mode, maxRows, tableName, delimiter } : { text: input, mode, maxRows, tableName, delimiter });
   };
 
   return (
@@ -184,6 +200,8 @@ export default function CsvToSqlPage() {
                   setInput(val);
                   setFileName('');
                   setFile(null);
+                  setDelimiterChoice('auto');
+                  setDetectedDelimiter(detectDelimiter(val.slice(0, DELIMITER_SAMPLE_BYTES)));
                   setTimeEstimate('');
                 }}
                 disabled={converting}
@@ -196,6 +214,20 @@ export default function CsvToSqlPage() {
           </div>
           {timeEstimate && !converting && !error && (
             <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">Estimated conversion time: {timeEstimate}</p>
+          )}
+          {!converting && (
+            <div className="flex items-center justify-center gap-2 text-sm">
+              <label htmlFor="csv-delimiter" className="text-neutral-500 dark:text-neutral-400">Delimiter:</label>
+              <select
+                id="csv-delimiter"
+                value={delimiterChoice}
+                onChange={e => setDelimiterChoice(e.target.value)}
+                className="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-lg px-3 py-1.5 text-neutral-800 dark:text-neutral-200"
+              >
+                <option value="auto">Auto-detected: {delimiterLabel(detectedDelimiter)}</option>
+                {CSV_DELIMITERS.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+              </select>
+            </div>
           )}
           {error && (
             <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 text-sm rounded-lg px-4 py-3">{error}</div>
@@ -216,10 +248,11 @@ export default function CsvToSqlPage() {
       </div>
       <SeoContent
         title="CSV to SQL"
-        description="CSV to SQL generates a CREATE TABLE statement and one INSERT statement per row from a CSV file (or pasted CSV text), entirely in your browser — nothing is uploaded to a server. CSV parsing is quote-aware: a field wrapped in double quotes can safely contain a comma (like 'Smith, John') without being split into extra values. Values are also escaped for SQL string literals (a quote inside a value is doubled, the standard SQL escaping). Large files are read and parsed off the main thread in a Web Worker, so the page stays responsive. Column and table names typed into the Table Name field are not escaped, so avoid spaces or SQL reserved words there."
+        description="CSV to SQL generates a CREATE TABLE statement and one INSERT statement per row from a CSV file (or pasted CSV text), entirely in your browser — nothing is uploaded to a server. The field delimiter (comma, semicolon, tab, or pipe) is detected automatically, with a dropdown to override it. CSV parsing is quote-aware: a field wrapped in double quotes can safely contain a comma or the delimiter itself (like 'Smith, John') without being split into extra values. Values are also escaped for SQL string literals (a quote inside a value is doubled, the standard SQL escaping). Large files are read and parsed off the main thread in a Web Worker, so the page stays responsive. Column and table names typed into the Table Name field are not escaped, so avoid spaces or SQL reserved words there."
         howTo={[
           "Type your table name, or keep the default.",
           "Click the upload area and select a .csv file, or paste CSV text directly into the box below it.",
+          "The delimiter is detected automatically — check the dropdown and correct it if needed.",
           "Click 'Convert' to generate a CREATE TABLE statement plus one INSERT per row.",
           "A file upload downloads automatically as converted.sql; pasted text appears in the output box for you to copy."
         ]}
@@ -227,13 +260,15 @@ export default function CsvToSqlPage() {
           { q: "Is CSV to SQL free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Are values safely escaped in the generated SQL?", a: "Yes — quotes inside values are doubled following standard SQL string escaping, so values containing an apostrophe (like a name such as O'Brien) produce valid, safe SQL rather than broken or exploitable statements." },
           { q: "What data types does the CREATE TABLE statement use?", a: "Every column is created as VARCHAR(255), regardless of whether the CSV data looks numeric, a date, or text — edit the generated statement if you need different types." },
-          { q: "Does it support file upload, or only pasted text?", a: "Both — upload a .csv file, or paste CSV text directly into the box. No delimiter other than commas is supported (a comma inside a properly double-quoted field is treated as data, not a delimiter)." },
+          { q: "Does it support file upload, or only pasted text?", a: "Both — upload a .csv file, or paste CSV text directly into the box." },
+          { q: "Does it support semicolon- or tab-delimited files, not just commas?", a: "Yes — the delimiter (comma, semicolon, tab, or pipe) is auto-detected from the file, which matters for European CSVs that commonly use semicolons. A dropdown lets you override the detected delimiter if it's ever wrong." },
           { q: "Why is there a row limit, and why is it lower for pasted text?", a: `Converting a very large CSV in a browser tab risks running out of memory and crashing the tab. Uploaded files support up to ${MAX_ROWS_LABEL} rows on desktop (${MOBILE_MAX_ROWS_LABEL} on phones/tablets); pasted text is capped lower, at ${PASTE_MAX_ROWS_LABEL} rows on any device, since pasted text has to live in the page itself and be re-rendered into the input box, rather than being streamed in like a file. The count includes the header row.` }
         ]}
         tips={[
           "Values are escaped for SQL, but the table name and column headers are inserted as-is — avoid spaces, quotes, or reserved SQL keywords in the Table Name field or your CSV header row.",
           "Every column defaults to VARCHAR(255); adjust the CREATE TABLE statement afterward if you need numeric, date, or other column types.",
           "Wrap a value in double quotes if it contains a comma (e.g. \"Smith, John\") — quoted fields are parsed correctly and stay as a single value.",
+          "The delimiter dropdown shows what was auto-detected — double check it on unusual files, and switch it manually if a column split looks wrong.",
           "Always review generated SQL — and test it on a development database — before running it against production."
         ]}
       />

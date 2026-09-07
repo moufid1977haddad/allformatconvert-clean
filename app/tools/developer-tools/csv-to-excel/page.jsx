@@ -4,6 +4,15 @@ import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
 import { MAX_ROWS, MOBILE_MAX_ROWS } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
+import { detectDelimiter, CSV_DELIMITERS } from '../../../lib/csvParser';
+
+// Only the first 8KB is needed to see several rows -- detectDelimiter only
+// looks at the first 10 non-empty logical lines anyway, so sampling more of
+// a large paste or file would just cost time without changing the result.
+const DELIMITER_SAMPLE_BYTES = 8192;
+function delimiterLabel(value) {
+  return CSV_DELIMITERS.find((d) => d.value === value)?.label || value;
+}
 
 // Coarse defense-in-depth backstop for pathological inputs (e.g. a handful
 // of enormous rows) that could slip under the row-count cap below while
@@ -65,6 +74,9 @@ export default function CsvToExcelPage() {
   const [converting, setConverting] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [timeEstimate, setTimeEstimate] = useState('');
+  const [bookType, setBookType] = useState('xlsx');
+  const [delimiterChoice, setDelimiterChoice] = useState('auto');
+  const [detectedDelimiter, setDetectedDelimiter] = useState(',');
   const inputRef = useRef();
   const workerRef = useRef(null);
 
@@ -90,7 +102,11 @@ export default function CsvToExcelPage() {
     setFile(f);
     setFileName(f.name);
     setInput('');
+    setDelimiterChoice('auto');
     setTimeEstimate(formatEstimate(estimateSeconds(f.size)));
+    f.slice(0, DELIMITER_SAMPLE_BYTES).text().then((sample) => {
+      setDetectedDelimiter(detectDelimiter(sample));
+    });
   };
 
   const cancel = () => {
@@ -124,7 +140,7 @@ export default function CsvToExcelPage() {
         const url = URL.createObjectURL(msg.blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'converted.xlsx';
+        a.download = `converted.${msg.bookType}`;
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -148,7 +164,8 @@ export default function CsvToExcelPage() {
       workerRef.current = null;
       setError('Conversion failed: ' + (err?.message || 'unknown worker error'));
     };
-    worker.postMessage(file ? { file, maxRows: effectiveMaxRows } : { text: input, maxRows: effectiveMaxRows });
+    const delimiter = delimiterChoice === 'auto' ? detectedDelimiter : delimiterChoice;
+    worker.postMessage(file ? { file, maxRows: effectiveMaxRows, bookType, delimiter } : { text: input, maxRows: effectiveMaxRows, bookType, delimiter });
   };
 
   return (
@@ -171,12 +188,42 @@ export default function CsvToExcelPage() {
               setInput(val);
               setFileName('');
               setFile(null);
+              setDelimiterChoice('auto');
+              setDetectedDelimiter(detectDelimiter(val.slice(0, DELIMITER_SAMPLE_BYTES)));
               setTimeEstimate(val ? formatEstimate(estimateSeconds(new Blob([val]).size)) : '');
             }}
             disabled={converting}
           />
           {timeEstimate && !converting && !error && (
             <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">Estimated conversion time: {timeEstimate}</p>
+          )}
+          {!converting && (
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <label htmlFor="csv-delimiter" className="text-neutral-500 dark:text-neutral-400">Delimiter:</label>
+                <select
+                  id="csv-delimiter"
+                  value={delimiterChoice}
+                  onChange={e => setDelimiterChoice(e.target.value)}
+                  className="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-lg px-3 py-1.5 text-neutral-800 dark:text-neutral-200"
+                >
+                  <option value="auto">Auto-detected: {delimiterLabel(detectedDelimiter)}</option>
+                  {CSV_DELIMITERS.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <label htmlFor="book-type" className="text-neutral-500 dark:text-neutral-400">Output format:</label>
+                <select
+                  id="book-type"
+                  value={bookType}
+                  onChange={e => setBookType(e.target.value)}
+                  className="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-lg px-3 py-1.5 text-neutral-800 dark:text-neutral-200"
+                >
+                  <option value="xlsx">.xlsx (Excel 2007+)</option>
+                  <option value="xls">.xls (legacy Excel 97-2003)</option>
+                </select>
+              </div>
+            </div>
           )}
           {error && (
             <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 text-sm rounded-lg px-4 py-3">{error}</div>
@@ -187,25 +234,27 @@ export default function CsvToExcelPage() {
               <button onClick={cancel} className="w-full bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-800 dark:text-neutral-200 rounded-xl py-3 font-semibold transition">Cancel</button>
             </div>
           ) : (
-            <button onClick={convert} disabled={!file && !input} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 dark:disabled:bg-neutral-700 disabled:text-gray-600 dark:disabled:text-neutral-500 text-white rounded-xl py-3 font-semibold transition">Convert and Download</button>
+            <button onClick={convert} disabled={!file && !input} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 dark:disabled:bg-neutral-700 disabled:text-gray-600 dark:disabled:text-neutral-500 text-white rounded-xl py-3 font-semibold transition">Convert and Download .{bookType}</button>
           )}
           {status && !converting && <p className="text-center text-sm text-green-600 dark:text-green-400">{status}</p>}
         </div>
       </div>
       <SeoContent
         title="CSV to Excel"
-        description="CSV to Excel builds an .xlsx workbook from a CSV file (or pasted CSV text) using the xlsx library entirely in your browser, then triggers a download — your data is never uploaded to a server. The file is read and parsed off the main thread in a Web Worker, so the page stays responsive even on large files."
+        description="CSV to Excel builds an .xlsx or legacy .xls workbook from a CSV file (or pasted CSV text) using the xlsx library entirely in your browser, then triggers a download — your data is never uploaded to a server. The file is read and parsed off the main thread in a Web Worker, so the page stays responsive even on large files. The field delimiter (comma, semicolon, tab, or pipe) is detected automatically, with a dropdown to override it if the guess is wrong."
         howTo={[
           "Click the upload area and select a .csv file, or paste CSV text directly into the box below it.",
+          "The delimiter is detected automatically — check the dropdown and correct it if needed.",
+          "Choose .xlsx or legacy .xls as the output format.",
           "Click 'Convert and Download' to build the workbook and save it.",
-          "The file downloads automatically as converted.xlsx.",
           "Open it in Excel or any compatible spreadsheet app."
         ]}
         faqs={[
           { q: "Does it support file upload, or only pasted text?", a: "Both — upload a .csv file, or paste CSV text directly into the box." },
-          { q: "What output format does it produce?", a: "Always .xlsx. There's no .xls (legacy Excel) option." },
+          { q: "What output format does it produce?", a: "Your choice of .xlsx (Excel 2007+) or legacy .xls (Excel 97-2003), picked from a dropdown before converting." },
           { q: "Is my data uploaded to a server?", a: "No, the workbook is built entirely in your browser using the xlsx library, in a background Web Worker so the page never freezes." },
           { q: "Does it handle CSV values that contain commas, like quoted fields?", a: "Yes — a value wrapped in double quotes (e.g. \"Smith, John\") is parsed as a single field and its comma is preserved intact, rather than being split into extra columns." },
+          { q: "Does it support semicolon- or tab-delimited files, not just commas?", a: "Yes — the delimiter (comma, semicolon, tab, or pipe) is auto-detected from the file, which matters for European CSVs that commonly use semicolons. A dropdown lets you override the detected delimiter if it's ever wrong." },
           { q: "Why is there a row limit, if Excel itself allows over a million rows per sheet?", a: `Excel's own format allows up to 1,048,576 rows per sheet, but converting a file anywhere near that size in a browser tab risks running out of memory and crashing the tab rather than just being slow. ${MAX_ROWS_LABEL} rows is the limit we've measured to convert reliably on desktop; beyond that, split your CSV into smaller files first. The count includes the header row, the same way Excel itself counts it as row 1.` },
           { q: "Why is the row limit lower on my phone?", a: `On phones and tablets the cap is ${MOBILE_MAX_ROWS_LABEL} rows instead of ${MAX_ROWS_LABEL}. Mobile browser tabs get killed at a much lower memory ceiling than desktop tabs, and large CSVs also produce large .xlsx downloads that are impractical to save on a phone — the lower cap keeps mobile conversions reliable.` }
         ]}
@@ -213,7 +262,7 @@ export default function CsvToExcelPage() {
           "Wrap a value in double quotes if it contains a comma (e.g. \"Smith, John\") — quoted fields are parsed correctly and stay in a single cell.",
           "The first line becomes the first row of the sheet as-is — include a header row yourself if you want column labels.",
           "Check the downloaded file's column alignment for CSVs with unusual formatting before relying on it.",
-          "Only comma is recognized as a delimiter — a CSV using semicolons or tabs instead needs to be converted to commas first."
+          "The delimiter dropdown shows what was auto-detected — double check it on unusual files, and switch it manually if a column split looks wrong."
         ]}
       />
     </div>

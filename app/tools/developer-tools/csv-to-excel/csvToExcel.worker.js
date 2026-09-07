@@ -9,7 +9,12 @@ class RowLimitExceededError extends Error {
   }
 }
 
-async function run({ file, text, maxRows }) {
+const MIME_TYPES = {
+  xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  xls: 'application/vnd.ms-excel',
+};
+
+async function run({ file, text, maxRows, bookType, delimiter }) {
   const limit = maxRows || MAX_ROWS;
   const rows = [];
   const parser = new IncrementalCsvParser((row) => {
@@ -20,7 +25,7 @@ async function run({ file, text, maxRows }) {
     // rows crashes with an out-of-memory error; the row cap keeps this
     // tool well inside the range that reliably completes).
     if (rows.length > limit) throw new RowLimitExceededError(limit);
-  });
+  }, delimiter || ',');
 
   if (file) {
     const total = file.size || 0;
@@ -61,10 +66,11 @@ async function run({ file, text, maxRows }) {
   // that avoids it, but its result isn't a plain Transferable, so the Blob
   // is built here (in the worker) and cloned as a Blob instead -- browsers
   // clone Blobs efficiently without needing an explicit transfer list.
-  const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
-  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const type = bookType === 'xls' ? 'xls' : 'xlsx';
+  const buffer = XLSX.write(wb, { type: 'buffer', bookType: type });
+  const blob = new Blob([buffer], { type: MIME_TYPES[type] });
 
-  self.postMessage({ type: 'done', blob, rowCount: rows.length });
+  self.postMessage({ type: 'done', blob, rowCount: rows.length, bookType: type });
 }
 
 self.onmessage = (e) => {

@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "Excel to JSON — Read an Uploaded .xlsx, .xls, or .csv Online" },
-  description: "Excel to JSON reads an uploaded .xlsx, .xls, or .csv file and converts every sheet to an array of row objects, entirely in your browser.",
+  title: { absolute: "Excel to JSON — Read an Uploaded .xlsx, .xls, .ods, or .csv Online" },
+  description: "Excel to JSON reads an uploaded .xlsx, .xls, .ods, or .csv file and converts every sheet to an array of row objects, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/excel-to-json" },
   openGraph: {
-    title: "Excel to JSON — Read an Uploaded .xlsx, .xls, or .csv Online",
-    description: "Excel to JSON reads an uploaded .xlsx, .xls, or .csv file and converts every sheet to an array of row objects, entirely in your browser.",
+    title: "Excel to JSON — Read an Uploaded .xlsx, .xls, .ods, or .csv Online",
+    description: "Excel to JSON reads an uploaded .xlsx, .xls, .ods, or .csv file and converts every sheet to an array of row objects, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/excel-to-json",
   },
 };

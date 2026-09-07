@@ -156,8 +156,8 @@ export default function ExcelToJsonPage() {
         <p className="text-neutral-400 dark:text-neutral-500 text-xs text-center mb-8">Supports workbooks up to {maxRowsLabel} rows across all sheets{isMobile ? ' on this device' : ''} (files up to {maxFileLabel}). Conversion runs in the background — this tab stays responsive.</p>
         <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-600 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500 dark:text-neutral-400 text-sm">{fileName || 'Click or drop an Excel file here'}</p>
-            <input ref={inputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFile} />
+            <p className="text-neutral-500 dark:text-neutral-400 text-sm">{fileName || 'Click or drop an Excel, ODS, or CSV file here'}</p>
+            <input ref={inputRef} type="file" accept=".xlsx,.xls,.csv,.ods" className="hidden" onChange={handleFile} />
           </div>
           {timeEstimate && !converting && !error && fileName && (
             <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">Estimated conversion time: {timeEstimate}</p>
@@ -181,15 +181,15 @@ export default function ExcelToJsonPage() {
       </div>
       <SeoContent
         title="Excel to JSON"
-        description="Excel to JSON reads an uploaded .xlsx, .xls, or .csv file using the xlsx library and converts every sheet to an array of row objects, entirely in your browser — your file is never uploaded to a server. Reading and parsing run off the main thread in a Web Worker, so the page stays responsive even on large files, and the result downloads automatically as a .json file. The result is a single JSON object keyed by sheet name, with each sheet's first row used as the property names for that sheet's rows."
+        description="Excel to JSON reads an uploaded .xlsx, .xls, .ods, or .csv file using the xlsx library and converts every sheet to an array of row objects, entirely in your browser — your file is never uploaded to a server. Reading and parsing run off the main thread in a Web Worker, so the page stays responsive even on large files, and the result downloads automatically as a .json file. The result is a single JSON object keyed by sheet name, with each sheet's first row used as the property names for that sheet's rows."
         howTo={[
-          "Click the upload area and select an .xlsx, .xls, or .csv file.",
+          "Click the upload area and select an .xlsx, .xls, .ods, or .csv file.",
           "Conversion runs automatically in the background — no button click needed.",
           "The result downloads automatically as converted.json once it's ready.",
           "Open it in a code editor or your target application."
         ]}
         faqs={[
-          { q: "What file formats does it support?", a: ".xlsx, .xls, and .csv." },
+          { q: "What file formats does it support?", a: ".xlsx, .xls, .ods (OpenDocument Spreadsheet), and .csv." },
           { q: "Is my file uploaded to a server?", a: "No, conversion happens entirely in your browser using the xlsx library, in a background Web Worker so the page never freezes." },
           { q: "Can I convert multiple sheets at once?", a: "Yes — every sheet in the workbook is converted automatically, each becoming its own array under a key named after the sheet. There's no option to merge sheets or select specific ones." },
           { q: "Why is there a row and file-size limit?", a: `Excel files can't be parsed incrementally the way plain text can, so converting a very large workbook risks the tab running out of memory or taking too long. Uploaded files are capped at ${maxRowsLabel} rows across all sheets combined and ${maxFileLabel}${isMobile ? ' on this device' : ' on desktop'}, measured to convert reliably.` },

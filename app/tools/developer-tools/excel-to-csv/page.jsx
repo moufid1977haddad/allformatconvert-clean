@@ -158,8 +158,8 @@ export default function ExcelToCsvPage() {
         <p className="text-neutral-400 dark:text-neutral-500 text-xs text-center mb-8">Supports workbooks up to {maxRowsLabel} rows{isMobile ? ' on this device' : ''} (including the header row, files up to {maxFileLabel}). Conversion runs in the background — this tab stays responsive.</p>
         <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-600 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500 dark:text-neutral-400 text-sm">{fileName || 'Click or drop an Excel file here'}</p>
-            <input ref={inputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={handleFile} />
+            <p className="text-neutral-500 dark:text-neutral-400 text-sm">{fileName || 'Click or drop an Excel or ODS file here'}</p>
+            <input ref={inputRef} type="file" accept=".xlsx,.xls,.ods" className="hidden" onChange={handleFile} />
           </div>
           {timeEstimate && !converting && !error && fileName && (
             <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">Estimated conversion time: {timeEstimate}</p>
@@ -183,15 +183,16 @@ export default function ExcelToCsvPage() {
       </div>
       <SeoContent
         title="Excel to CSV"
-        description="Excel to CSV reads an uploaded .xlsx or .xls file using the xlsx library and converts it to comma-separated CSV text, entirely in your browser — your file is never uploaded to a server. Reading and parsing run off the main thread in a Web Worker, so the page stays responsive even on large files. A single-sheet workbook downloads as one .csv file, exactly as before; a workbook with multiple sheets downloads as a .zip containing one .csv per sheet, named after the real sheet name, so no sheet is ever silently dropped. The tool tells you up front how many sheets it found and their names."
+        description="Excel to CSV reads an uploaded .xlsx, .xls, or .ods file using the xlsx library and converts it to comma-separated CSV text, entirely in your browser — your file is never uploaded to a server. Reading and parsing run off the main thread in a Web Worker, so the page stays responsive even on large files. A single-sheet workbook downloads as one .csv file, exactly as before; a workbook with multiple sheets downloads as a .zip containing one .csv per sheet, named after the real sheet name, so no sheet is ever silently dropped. The tool tells you up front how many sheets it found and their names."
         howTo={[
-          "Click the upload area and select an .xlsx or .xls file.",
+          "Click the upload area and select an .xlsx, .xls, or .ods file.",
           "Conversion starts automatically in the background — no button click needed.",
           "If the workbook has more than one sheet, you'll see how many were detected and their names.",
           "The result downloads automatically — converted.csv for a single sheet, or converted.zip (one .csv per sheet) for multiple.",
           "Open the CSV(s) in a spreadsheet app or text editor."
         ]}
         faqs={[
+          { q: "What file formats does it support?", a: ".xlsx, .xls, and .ods (OpenDocument Spreadsheet)." },
           { q: "Is my file uploaded to a server?", a: "No, the conversion happens entirely in your browser using the xlsx library, in a background Web Worker so the page never freezes." },
           { q: "What happens with a workbook that has multiple sheets?", a: "Every sheet is converted — you get a .zip file containing one .csv per sheet, each named after the real sheet name. The tool shows you the sheet count and names before the download starts." },
           { q: "Why is there a row and file-size limit?", a: `Excel files can't be parsed incrementally the way plain text can, so converting a very large workbook risks the tab running out of memory or taking too long. Uploaded files are capped at ${maxRowsLabel} rows across all sheets combined and ${maxFileLabel}${isMobile ? ' on this device' : ' on desktop'}, measured to convert reliably.` },

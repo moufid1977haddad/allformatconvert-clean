@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "YAML to JSON — Parse Simple, Flat 'key: Value' Lines Online" },
-  description: "YAML to JSON parses simple, flat 'key: value' lines into a JSON object, entirely in your browser — nothing is uploaded to a server.",
+  title: { absolute: "YAML to JSON — Convert Full YAML (Nested, Lists) Online Free" },
+  description: "YAML to JSON parses YAML using the js-yaml library and converts it to JSON, entirely in your browser — nested structures, lists, and comments all parse correctly.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/yaml-to-json" },
   openGraph: {
-    title: "YAML to JSON — Parse Simple, Flat 'key: Value' Lines Online",
-    description: "YAML to JSON parses simple, flat 'key: value' lines into a JSON object, entirely in your browser — nothing is uploaded to a server.",
+    title: "YAML to JSON — Convert Full YAML (Nested, Lists) Online Free",
+    description: "YAML to JSON parses YAML using the js-yaml library and converts it to JSON, entirely in your browser — nested structures, lists, and comments all parse correctly.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/yaml-to-json",
   },
 };

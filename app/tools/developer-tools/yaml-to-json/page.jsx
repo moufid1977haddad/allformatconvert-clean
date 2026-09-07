@@ -1,5 +1,6 @@
-﻿'use client';
+'use client';
 import { useState } from 'react';
+import { load } from 'js-yaml';
 import SeoContent from '../../../components/SeoContent';
 export default function YamlToJsonPage() {
   const [input, setInput] = useState('');
@@ -7,15 +8,10 @@ export default function YamlToJsonPage() {
   const [error, setError] = useState('');
   const convert = () => {
     try {
-      const lines = input.split('\n');
-      const obj = {};
-      lines.forEach(line => {
-        const match = line.match(/^([\w-]+):\s*(.*)$/);
-        if (match) obj[match[1]] = isNaN(match[2]) ? match[2] : Number(match[2]);
-      });
+      const obj = load(input);
       setOutput(JSON.stringify(obj, null, 2));
       setError('');
-    } catch(e) { setError('Invalid YAML'); }
+    } catch(e) { setError('Invalid YAML: ' + e.message); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -36,24 +32,24 @@ export default function YamlToJsonPage() {
       </div>
       <SeoContent
         title="YAML to JSON"
-        description="YAML to JSON parses simple, flat 'key: value' lines into a JSON object, entirely in your browser — nothing is uploaded to a server. It doesn't support nested structures, lists (- item), multi-line strings, comments, or booleans/null — only flat top-level key-value pairs. A key with no value after the colon converts to 0 rather than null, since it isn't recognized as a distinct case."
+        description="YAML to JSON parses YAML using the js-yaml library and converts it to JSON, entirely in your browser — nothing is uploaded to a server. Nested structures, lists (- item), multi-line strings, comments, booleans, and null all parse correctly, matching how a real YAML parser reads the file."
         howTo={[
-          "Paste simple, flat YAML — one 'key: value' pair per line — into the input box.",
+          "Paste any valid YAML into the input box — flat, nested, or with lists.",
           "Click 'Convert' to parse it into JSON.",
-          "Review the output, especially for nested keys, lists, or missing values.",
+          "The output preserves nested objects, arrays, and types (booleans, numbers, null) correctly.",
           "Click 'Copy' to copy the JSON result."
         ]}
         faqs={[
           { q: "Is YAML to JSON free to use?", a: "Yes, completely free with no registration required." },
-          { q: "Does it support nested YAML structures?", a: "No — only flat, top-level 'key: value' pairs are recognized; indented nested keys aren't parsed into nested JSON objects." },
-          { q: "Does it support YAML lists (- item)?", a: "No — list syntax isn't recognized and won't convert into a JSON array." },
+          { q: "Does it support nested YAML structures?", a: "Yes — nested mappings convert into nested JSON objects at any depth." },
+          { q: "Does it support YAML lists (- item)?", a: "Yes — list syntax converts into a proper JSON array." },
           { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser." }
         ]}
         tips={[
-          "Works best on simple, flat configuration snippets with one key-value pair per line.",
-          "For nested YAML, lists, comments, or multi-line strings, use a dedicated YAML parser library instead.",
-          "Numbers are auto-detected and converted to JSON numbers; other values are kept as strings.",
-          "A key left with no value (like 'foo:') converts to 0, not null — adjust the output manually if you need a true null."
+          "Comments (starting with #) are supported and simply ignored, as in any YAML parser.",
+          "Booleans, numbers, and null are recognized and converted to their real JSON types, not left as strings.",
+          "Multi-line strings (using | or >) parse correctly into a single JSON string value.",
+          "If conversion fails, the error message includes the line where the parser got stuck, which is usually the fastest way to find a YAML syntax mistake."
         ]}
       />
     </div>
