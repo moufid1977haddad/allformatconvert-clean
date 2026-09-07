@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "XML to JSON — Convert XML Into JSON Online Free" },
-  description: "XML to JSON converts XML into JSON using the browser's built-in XML parser (DOMParser), entirely in your browser — nothing is uploaded to a server.",
+  description: "XML to JSON converts XML into JSON, preserving attributes, entirely in your browser — nothing is uploaded to a server.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/xml-to-json" },
   openGraph: {
     title: "XML to JSON — Convert XML Into JSON Online Free",
-    description: "XML to JSON converts XML into JSON using the browser's built-in XML parser (DOMParser), entirely in your browser — nothing is uploaded to a server.",
+    description: "XML to JSON converts XML into JSON, preserving attributes, entirely in your browser — nothing is uploaded to a server.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/xml-to-json",
   },
 };
