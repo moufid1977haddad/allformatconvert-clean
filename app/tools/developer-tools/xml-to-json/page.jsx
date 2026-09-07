@@ -52,7 +52,7 @@ export default function XmlToJsonPage() {
       </div>
       <SeoContent
         title="XML to JSON"
-        description="XML to JSON converts XML into JSON using the fast-xml-parser library, entirely in your browser — nothing is uploaded to a server. Malformed XML is correctly detected and reported as invalid. Repeated sibling elements become a JSON array automatically, element text content is stored under a '#text' key when it shares a node with attributes or other children, and — unlike a plain DOM-based conversion — XML attributes are preserved, each appearing as a JSON key prefixed with '@_' (e.g. id=\"5\" becomes \"@_id\": \"5\")."
+        description="XML to JSON converts XML into JSON using the fast-xml-parser library, entirely in your browser — nothing is uploaded to a server. Malformed XML is correctly detected and reported as invalid. Repeated sibling elements become a JSON array automatically, element text content is stored under a '#text' key when it shares a node with attributes or other children, and — unlike a plain DOM-based conversion — XML attributes are preserved, each appearing as a JSON key prefixed with '@_' (e.g. id='5' becomes '@_id': '5')."
         howTo={[
           "Paste your XML into the input box.",
           "Click 'Convert' to parse it into JSON.",
