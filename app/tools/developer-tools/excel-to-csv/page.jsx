@@ -54,6 +54,7 @@ export default function ExcelToCsvPage() {
   const [converting, setConverting] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [timeEstimate, setTimeEstimate] = useState('');
+  const [sheetNames, setSheetNames] = useState(null);
   const inputRef = useRef();
   const workerRef = useRef(null);
 
@@ -80,6 +81,7 @@ export default function ExcelToCsvPage() {
     }
     setFile(f);
     setFileName(f.name);
+    setSheetNames(null);
     setTimeEstimate(formatEstimate(estimateSeconds(f.size)));
     convertFile(f);
   };
@@ -100,6 +102,7 @@ export default function ExcelToCsvPage() {
     setStatus('');
     setProgress(0);
     setPhase('reading');
+    setSheetNames(null);
     setConverting(true);
 
     const worker = new Worker(new URL('./excelToCsv.worker.js', import.meta.url), { type: 'module' });
@@ -110,6 +113,8 @@ export default function ExcelToCsvPage() {
       if (msg.type === 'progress') {
         setProgress(msg.pct);
         setPhase(msg.phase);
+      } else if (msg.type === 'sheets') {
+        setSheetNames(msg.sheetNames);
       } else if (msg.type === 'done') {
         setProgress(100);
         setConverting(false);
@@ -117,16 +122,20 @@ export default function ExcelToCsvPage() {
         const url = URL.createObjectURL(msg.blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'converted.csv';
+        a.download = msg.isZip ? 'converted.zip' : 'converted.csv';
         document.body.appendChild(a);
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
-        setStatus(`Downloaded! ${msg.rowCount.toLocaleString()} rows.`);
+        setStatus(
+          msg.isZip
+            ? `Downloaded! ${msg.sheetNames.length} sheets zipped as separate CSVs, ${msg.rowCount.toLocaleString()} rows total.`
+            : `Downloaded! ${msg.rowCount.toLocaleString()} rows.`
+        );
       } else if (msg.type === 'row_limit') {
         setConverting(false);
         workerRef.current = null;
-        setError(`This workbook's first sheet has more than ${maxRowsLabel} rows, counting the header row as row 1 — in-browser conversion becomes unreliable beyond that point. Split it into smaller files and convert them separately.`);
+        setError(`This workbook has more than ${maxRowsLabel} rows across all sheets, counting each sheet's header row — in-browser conversion becomes unreliable beyond that point. Split it into smaller files and convert them separately.`);
       } else if (msg.type === 'error') {
         setConverting(false);
         workerRef.current = null;
@@ -155,6 +164,11 @@ export default function ExcelToCsvPage() {
           {timeEstimate && !converting && !error && fileName && (
             <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">Estimated conversion time: {timeEstimate}</p>
           )}
+          {sheetNames && sheetNames.length > 1 && (
+            <div className="bg-indigo-50 dark:bg-indigo-950 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-sm rounded-lg px-4 py-3">
+              {sheetNames.length} sheets detected: {sheetNames.join(', ')} — each will be converted to its own CSV, packed into one .zip.
+            </div>
+          )}
           {error && (
             <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 text-sm rounded-lg px-4 py-3">{error}</div>
           )}
@@ -169,22 +183,23 @@ export default function ExcelToCsvPage() {
       </div>
       <SeoContent
         title="Excel to CSV"
-        description="Excel to CSV reads an uploaded .xlsx or .xls file using the xlsx library and converts its first sheet to comma-separated CSV text, entirely in your browser — your file is never uploaded to a server. Reading and parsing run off the main thread in a Web Worker, so the page stays responsive even on large files, and the result downloads automatically as a .csv file. Only the first sheet is converted; there's no sheet picker for workbooks with multiple sheets, and no delimiter options beyond a standard comma."
+        description="Excel to CSV reads an uploaded .xlsx or .xls file using the xlsx library and converts it to comma-separated CSV text, entirely in your browser — your file is never uploaded to a server. Reading and parsing run off the main thread in a Web Worker, so the page stays responsive even on large files. A single-sheet workbook downloads as one .csv file, exactly as before; a workbook with multiple sheets downloads as a .zip containing one .csv per sheet, named after the real sheet name, so no sheet is ever silently dropped. The tool tells you up front how many sheets it found and their names."
         howTo={[
           "Click the upload area and select an .xlsx or .xls file.",
-          "The first sheet converts automatically in the background — no button click needed.",
-          "The result downloads automatically as converted.csv once it's ready.",
-          "Open it in a spreadsheet app or text editor."
+          "Conversion starts automatically in the background — no button click needed.",
+          "If the workbook has more than one sheet, you'll see how many were detected and their names.",
+          "The result downloads automatically — converted.csv for a single sheet, or converted.zip (one .csv per sheet) for multiple.",
+          "Open the CSV(s) in a spreadsheet app or text editor."
         ]}
         faqs={[
           { q: "Is my file uploaded to a server?", a: "No, the conversion happens entirely in your browser using the xlsx library, in a background Web Worker so the page never freezes." },
-          { q: "Can I choose which sheet to convert?", a: "No — only the workbook's first sheet is converted; there's no sheet selector." },
-          { q: "Why is there a row and file-size limit?", a: `Excel files can't be parsed incrementally the way plain text can, so converting a very large workbook risks the tab running out of memory or taking too long. Uploaded files are capped at ${maxRowsLabel} rows and ${maxFileLabel}${isMobile ? ' on this device' : ' on desktop'}, measured to convert reliably.` },
+          { q: "What happens with a workbook that has multiple sheets?", a: "Every sheet is converted — you get a .zip file containing one .csv per sheet, each named after the real sheet name. The tool shows you the sheet count and names before the download starts." },
+          { q: "Why is there a row and file-size limit?", a: `Excel files can't be parsed incrementally the way plain text can, so converting a very large workbook risks the tab running out of memory or taking too long. Uploaded files are capped at ${maxRowsLabel} rows across all sheets combined and ${maxFileLabel}${isMobile ? ' on this device' : ' on desktop'}, measured to convert reliably.` },
           { q: "Will formatting like colors or fonts carry over?", a: "No, CSV is plain text, so only cell values transfer — formatting, formulas' calculated results (not the formulas themselves as text), and structure like merged cells don't." },
-          { q: "Can I download the CSV as a file, or is it only shown on the page?", a: "It downloads automatically as converted.csv — there's no inline preview, since a large workbook's CSV output can be too big to safely render on the page." }
+          { q: "Can I download the CSV as a file, or is it only shown on the page?", a: "It downloads automatically — there's no inline preview, since a large workbook's CSV output can be too big to safely render on the page." }
         ]}
         tips={[
-          "If your workbook has multiple sheets and you need one other than the first, reorder or duplicate it to the front before uploading.",
+          "Multi-sheet workbooks now come back as a .zip with one .csv per sheet — check the sheet names shown on the page before downloading to confirm nothing you need is missing.",
           "Merged cells and complex formatting won't survive the conversion — only the underlying values do.",
           "Since it uses a proper spreadsheet-parsing library rather than naive text splitting, values containing commas or quotes are handled correctly.",
           "For a very large workbook, split it into smaller files first if it exceeds the row or size limit."
