@@ -32,19 +32,48 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Failed to save your message' }, { status: 500 });
   }
 
+  // The message is already durably saved at this point -- everything below
+  // is best-effort notification, and nothing here is allowed to turn the
+  // success response the visitor already earned back into a failure.
   let notified = true;
-  try {
-    await resend.emails.send({
-      from: `OnlineConverTools Contact <contact@${process.env.RESEND_EMAIL_DOMAIN}>`,
-      to: ['moufid_haddad@icloud.com'],
-      replyTo: email,
-      subject: `[Contact] ${subject} — ${name}`,
-      text: `From: ${name} <${email}>\nSubject: ${subject}\n\n${message}`,
-    });
-  } catch (emailError) {
-    console.error('Contact message stored but notification email failed', emailError);
+  const ownerEmail = process.env.CONTACT_NOTIFICATION_TO;
+  if (!ownerEmail) {
+    // No hardcoded fallback address: a silently-wrong destination is worse
+    // than a loud, visible misconfiguration.
+    console.error('Contact message stored but CONTACT_NOTIFICATION_TO is not set -- no owner notification sent');
     notified = false;
-    await sendAlert('resend', 'send_failed');
+    await sendAlert('resend', 'contact_notification_to_missing');
+  } else {
+    try {
+      await resend.emails.send({
+        from: `OnlineConverTools Contact <contact@${process.env.RESEND_EMAIL_DOMAIN}>`,
+        to: [ownerEmail],
+        replyTo: email,
+        subject: `[Contact] ${subject} — ${name}`,
+        text: `From: ${name} <${email}>\nSubject: ${subject}\n\n${message}`,
+      });
+    } catch (emailError) {
+      console.error('Contact message stored but notification email failed', emailError);
+      notified = false;
+      await sendAlert('resend', 'send_failed');
+    }
+
+    // Best-effort acknowledgment to the visitor -- deliberately isolated
+    // from `notified` (that flag is specifically about whether the OWNER
+    // was reached) and from the response itself. A failure here is logged
+    // only, not alerted: it doesn't block the owner from seeing and
+    // answering the message above, so it isn't an operational incident.
+    try {
+      await resend.emails.send({
+        from: `OnlineConverTools Contact <contact@${process.env.RESEND_EMAIL_DOMAIN}>`,
+        to: [email],
+        replyTo: ownerEmail,
+        subject: "We've received your message",
+        text: `Hi ${name},\n\nThanks for contacting OnlineConverTools -- we've received your message about "${subject}" and will get back to you soon.\n\nIf anything is urgent, just reply directly to this email.\n\n— OnlineConverTools`,
+      });
+    } catch (ackError) {
+      console.error('Contact acknowledgment email to visitor failed (non-fatal)', ackError);
+    }
   }
 
   return NextResponse.json({ success: true, notified });
