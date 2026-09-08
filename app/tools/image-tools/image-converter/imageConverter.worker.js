@@ -1,4 +1,5 @@
 import { MAX_MEGAPIXELS } from './config';
+import { decodeTiff } from '../../../lib/tiffDecode';
 
 class LimitExceededError extends Error {
   constructor(message) {
@@ -14,26 +15,6 @@ const MIME_BY_FORMAT = {
   avif: 'image/avif',
 };
 
-async function decodeTiff(blob) {
-  const UTIF = (await import('utif2')).default;
-  const buffer = await blob.arrayBuffer();
-  const ifds = UTIF.decode(buffer);
-  if (!ifds.length) throw new Error('No image data found in this TIFF file');
-  // UTIF.js only decodes chunky (interleaved) TIFFs correctly -- for a
-  // planar one (PlanarConfiguration=2, color planes stored separately) it
-  // still "succeeds" but silently produces corrupted, striped pixel data,
-  // so this must be caught before decodeImage rather than left to ship a
-  // garbled result.
-  if (ifds[0].t284 && ifds[0].t284[0] === 2) {
-    const err = new Error('This TIFF uses planar color storage (separate color-plane layout), which this decoder cannot read correctly. Re-save it with chunky/interleaved color storage first.');
-    err.knownLimitation = true;
-    throw err;
-  }
-  UTIF.decodeImage(buffer, ifds[0]);
-  const rgba = UTIF.toRGBA8(ifds[0]);
-  return { width: ifds[0].width, height: ifds[0].height, rgba };
-}
-
 async function convertOne(item, format, quality, maxMegapixels) {
   const { blob, name } = item;
   const isTiff = /\.(tif|tiff)$/i.test(name);
@@ -44,7 +25,8 @@ async function convertOne(item, format, quality, maxMegapixels) {
   if (isTiff) {
     let decoded;
     try {
-      decoded = await decodeTiff(blob);
+      const buffer = await blob.arrayBuffer();
+      decoded = await decodeTiff(buffer);
     } catch (err) {
       // Re-throw the specific, actionable message from decodeTiff's own
       // validation (e.g. planar color storage) as-is; only fall back to a

@@ -1,12 +1,34 @@
-﻿'use client';
-import { useState, useRef } from 'react';
+'use client';
+import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { TIFF_DECODE_TIMEOUT_MS } from '../../../lib/tiffDecode';
+
+const TIMEOUT_MESSAGE = "This file is taking far longer than a normal TIFF to decode, which usually means it uses a TIFF variant this tool can't read correctly (this happens with some non-standard LZW-compressed TIFFs). Try re-saving the file with a different compression setting (Deflate/ZIP or uncompressed) in an image editor such as GIMP or IrfanView, or convert it with desktop software and re-upload the result.";
+
 export default function TiffToPngPage() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const inputRef = useRef();
+  const workerRef = useRef(null);
+  const timeoutRef = useRef(null);
+  const resultUrlRef = useRef(null);
+
+  const stopWorker = () => {
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = null;
+    if (workerRef.current) {
+      workerRef.current.terminate();
+      workerRef.current = null;
+    }
+  };
+
+  useEffect(() => () => {
+    stopWorker();
+    if (resultUrlRef.current) URL.revokeObjectURL(resultUrlRef.current);
+  }, []);
+
   const handleFile = (e) => {
     const f = e.target.files[0];
     e.target.value = '';
@@ -15,36 +37,55 @@ export default function TiffToPngPage() {
     setResult(null);
     setError('');
   };
+
+  const cancel = () => {
+    stopWorker();
+    setLoading(false);
+  };
+
   const convert = async () => {
     if (!file) return;
     setError('');
     setLoading(true);
-    try {
-      const UTIF = (await import('utif2')).default;
-      const buffer = await file.arrayBuffer();
-      const ifds = UTIF.decode(buffer);
-      if (!ifds.length) throw new Error('No image data found in this TIFF file');
-      // UTIF.js only decodes chunky (interleaved) TIFFs correctly -- for a
-      // planar one (PlanarConfiguration=2, color planes stored separately)
-      // it still "succeeds" but silently produces corrupted, striped pixel
-      // data, so this must be caught before decodeImage rather than left to
-      // ship a garbled result.
-      if (ifds[0].t284 && ifds[0].t284[0] === 2) {
-        throw new Error('This TIFF uses planar color storage (separate color-plane layout), which this decoder cannot read correctly. Re-save it with chunky/interleaved color storage first.');
-      }
-      UTIF.decodeImage(buffer, ifds[0]);
-      const rgba = UTIF.toRGBA8(ifds[0]);
-      const canvas = document.createElement('canvas');
-      canvas.width = ifds[0].width;
-      canvas.height = ifds[0].height;
-      const ctx = canvas.getContext('2d');
-      ctx.putImageData(new ImageData(new Uint8ClampedArray(rgba), ifds[0].width, ifds[0].height), 0, 0);
-      setResult(canvas.toDataURL('image/png'));
-    } catch (err) {
-      setError('Could not decode this TIFF file: ' + err.message);
+    if (resultUrlRef.current) {
+      URL.revokeObjectURL(resultUrlRef.current);
+      resultUrlRef.current = null;
     }
-    setLoading(false);
+    setResult(null);
+
+    const worker = new Worker(new URL('./tiffToPng.worker.js', import.meta.url), { type: 'module' });
+    workerRef.current = worker;
+
+    timeoutRef.current = setTimeout(() => {
+      stopWorker();
+      setError(TIMEOUT_MESSAGE);
+      setLoading(false);
+    }, TIFF_DECODE_TIMEOUT_MS);
+
+    worker.onmessage = (e) => {
+      const msg = e.data;
+      if (msg.type === 'done') {
+        stopWorker();
+        const url = URL.createObjectURL(msg.blob);
+        resultUrlRef.current = url;
+        setResult(url);
+        setLoading(false);
+      } else if (msg.type === 'error') {
+        stopWorker();
+        setError(msg.knownLimitation ? msg.message : 'Could not decode this TIFF file: ' + msg.message);
+        setLoading(false);
+      }
+    };
+    worker.onerror = (err) => {
+      stopWorker();
+      setError('Could not decode this TIFF file: ' + (err?.message || 'unknown worker error'));
+      setLoading(false);
+    };
+
+    const buffer = await file.arrayBuffer();
+    worker.postMessage({ buffer }, [buffer]);
   };
+
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
@@ -55,14 +96,21 @@ export default function TiffToPngPage() {
             {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500">Click or drop a TIFF file here</p>}
             <input ref={inputRef} type="file" accept=".tiff,.tif" className="hidden" onChange={handleFile} />
           </div>
-          <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">{loading ? 'Converting...' : 'Convert to PNG'}</button>
-          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+          {loading ? (
+            <div className="space-y-2">
+              <button disabled className="w-full bg-neutral-200 text-gray-600 rounded-xl py-3 font-semibold">Converting…</button>
+              <button onClick={cancel} className="w-full bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl py-3 font-semibold transition">Cancel</button>
+            </div>
+          ) : (
+            <button onClick={convert} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert to PNG</button>
+          )}
+          {error && <p className="text-red-400 text-center text-sm whitespace-pre-line">{error}</p>}
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="converted.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download PNG</a></div>}
         </div>
       </div>
       <SeoContent
         title="TIFF to PNG"
-        description="TIFF to PNG converts a TIFF image to PNG format entirely in your browser using the open-source UTIF.js decoder — your file is never uploaded to a server. Multi-page TIFFs are supported for decoding, but only the first page is converted."
+        description="TIFF to PNG converts a TIFF image to PNG format entirely in your browser using the open-source UTIF.js decoder, running in a background Web Worker so the page never freezes — your file is never uploaded to a server. Multi-page TIFFs are supported for decoding, but only the first page is converted."
         howTo={[
           "Click the upload area and select a TIFF or TIF file from your device.",
           "Click 'Convert to PNG' to process the image.",
@@ -74,7 +122,7 @@ export default function TiffToPngPage() {
           { q: "What file size limits does TIFF to PNG have?", a: "There's no fixed size limit — processing happens locally in your browser, so it's limited only by your device's available memory." },
           { q: "Will the conversion affect image quality?", a: "No, the pixels are copied as-is with no lossy compression applied." },
           { q: "Do I need to download software to use this tool?", a: "No, it works entirely in your browser on any device with a modern browser." },
-          { q: "Are all TIFF variants supported?", a: "Most are (uncompressed, LZW, PackBits, and standard Deflate, in the common chunky/interleaved color layout). TIFFs saved with planar color storage (color channels stored as separate planes rather than interleaved) aren't supported and are rejected with a clear error rather than producing a corrupted result." }
+          { q: "Are all TIFF variants supported?", a: "Most are (uncompressed, most LZW and PackBits variants, and standard Deflate, in the common chunky/interleaved color layout). TIFFs saved with planar color storage (color channels stored as separate planes rather than interleaved) aren't supported and are rejected with a clear error. A small number of non-standard TIFFs decode unusually slowly; if that happens, conversion is stopped automatically after 20 seconds with an explanation and a suggestion, and you can also cancel manually at any time." }
         ]}
         tips={[
           "If your TIFF is multi-page, only the page the browser renders will be converted.",
