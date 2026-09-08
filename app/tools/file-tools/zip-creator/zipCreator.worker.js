@@ -7,7 +7,7 @@ class LimitExceededError extends Error {
   }
 }
 
-async function run({ files, maxTotalBytes }) {
+async function run({ files, maxTotalBytes, compressionLevel }) {
   const limit = maxTotalBytes || MAX_TOTAL_SIZE_BYTES;
   const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
   if (totalBytes > limit) {
@@ -25,7 +25,12 @@ async function run({ files, maxTotalBytes }) {
     zip.file(file.name, file);
   }
 
-  const blob = await zip.generateAsync({ type: 'blob' }, (metadata) => {
+  const level = Number.isInteger(compressionLevel) ? compressionLevel : 6;
+  const genOptions = level === 0
+    ? { type: 'blob', compression: 'STORE' }
+    : { type: 'blob', compression: 'DEFLATE', compressionOptions: { level } };
+
+  const blob = await zip.generateAsync(genOptions, (metadata) => {
     self.postMessage({ type: 'progress', pct: Math.round(metadata.percent), phase: 'zipping' });
   });
   self.postMessage({ type: 'done', blob, fileCount: files.length });

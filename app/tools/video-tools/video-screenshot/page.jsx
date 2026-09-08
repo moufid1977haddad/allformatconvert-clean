@@ -4,6 +4,8 @@ import SeoContent from '../../../components/SeoContent';
 export default function VideoScreenshotPage() {
   const [file, setFile] = useState(null);
   const [screenshots, setScreenshots] = useState([]);
+  const [format, setFormat] = useState('png');
+  const [quality, setQuality] = useState(90);
   const videoRef = useRef();
   const inputRef = useRef();
 
@@ -27,10 +29,18 @@ export default function VideoScreenshotPage() {
     const canvas = document.createElement('canvas');
     canvas.width = videoRef.current.videoWidth;
     canvas.height = videoRef.current.videoHeight;
-    canvas.getContext('2d').drawImage(videoRef.current, 0, 0);
-    const url = canvas.toDataURL('image/png');
+    const ctx = canvas.getContext('2d');
+    if (format === 'jpg') {
+      // JPG has no alpha channel -- paint a white background first so
+      // transparent letterboxing (rare, but possible from some codecs)
+      // doesn't come out black the way an unfilled canvas would.
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    ctx.drawImage(videoRef.current, 0, 0);
+    const url = format === 'jpg' ? canvas.toDataURL('image/jpeg', quality / 100) : canvas.toDataURL('image/png');
     const time = videoRef.current.currentTime.toFixed(2);
-    setScreenshots(prev => [...prev, { url, time }]);
+    setScreenshots(prev => [...prev, { url, time, format }]);
   };
 
   return (
@@ -46,6 +56,21 @@ export default function VideoScreenshotPage() {
           {file && (
             <div className="space-y-3">
               <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" />
+              <div className="flex flex-wrap gap-4 items-center">
+                <div>
+                  <label className="text-xs text-neutral-500 block mb-1">Format</label>
+                  <select value={format} onChange={e => setFormat(e.target.value)} className="bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm">
+                    <option value="png">PNG</option>
+                    <option value="jpg">JPG</option>
+                  </select>
+                </div>
+                {format === 'jpg' && (
+                  <div className="flex-1 min-w-[160px]">
+                    <label className="text-xs text-neutral-500 block mb-1">Quality: {quality}%</label>
+                    <input type="range" min="10" max="100" value={quality} onChange={e => setQuality(parseInt(e.target.value))} className="w-full" />
+                  </div>
+                )}
+              </div>
               <button onClick={capture} className="w-full bg-indigo-600 hover:bg-indigo-500 rounded-xl py-3 font-semibold transition">Capture Screenshot</button>
             </div>
           )}
@@ -58,7 +83,7 @@ export default function VideoScreenshotPage() {
                     <img src={s.url} className="w-full rounded" />
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-neutral-500">At {s.time}s</span>
-                      <a href={s.url} download={"screenshot-" + s.time + ".png"} className="text-xs text-indigo-400 hover:text-indigo-300">Download</a>
+                      <a href={s.url} download={"screenshot-" + s.time + "." + (s.format || 'png')} className="text-xs text-indigo-400 hover:text-indigo-300">Download</a>
                     </div>
                   </div>
                 ))}
@@ -69,16 +94,17 @@ export default function VideoScreenshotPage() {
       </div>
       <SeoContent
         title="Video Screenshot"
-        description="Video Screenshot captures the current frame of a video as a PNG image, entirely in your browser — pause or seek to the moment you want, then capture as many stills as you need."
+        description="Video Screenshot captures the current frame of a video as a PNG or JPG image, entirely in your browser — pause or seek to the moment you want, choose your format and (for JPG) quality, then capture as many stills as you need."
         howTo={[
           "Click the upload area and select a video file.",
           "Use the player controls to pause on the exact frame you want.",
+          "Choose PNG (lossless) or JPG (with an adjustable quality level).",
           "Click \"Capture Screenshot\" to save that frame — repeat for as many frames as you like.",
-          "Click \"Download\" under any captured image to save it as a PNG."
+          "Click \"Download\" under any captured image to save it."
         ]}
         faqs={[
-          { q: "What image format do screenshots download as?", a: "PNG only." },
-          { q: "Can I capture multiple frames?", a: "Yes, click \"Capture Screenshot\" as many times as you like at different points in the video." },
+          { q: "What image formats do screenshots download as?", a: "PNG (lossless) or JPG (with an adjustable quality slider) — pick whichever you need before capturing." },
+          { q: "Can I capture multiple frames?", a: "Yes, click \"Capture Screenshot\" as many times as you like at different points in the video, even mixing PNG and JPG captures." },
           { q: "Is Video Screenshot free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Is my file uploaded anywhere?", a: "No, capturing happens entirely in your browser using canvas — your video is never uploaded to a server." }
         ]}
@@ -86,7 +112,7 @@ export default function VideoScreenshotPage() {
           "Pause the video before capturing to avoid motion blur from a frame mid-transition.",
           "Use the timeline scrubber for precise frame selection rather than relying on play/pause timing.",
           "Capture several nearby frames if you need to pick the sharpest one afterward.",
-          "PNG is lossless, so captured screenshots retain full quality for further editing."
+          "Use PNG for lossless quality (best for further editing) or JPG for a smaller file size when sharing stills."
         ]}
       />
     </div>

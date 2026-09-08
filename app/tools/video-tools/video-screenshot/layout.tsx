@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Video Screenshot — Capture the Current Frame Online Free" },
-  description: "Video Screenshot captures the current frame of a video as a PNG image, entirely in your browser — pause or seek, then capture stills.",
+  description: "Video Screenshot captures the current frame of a video as a PNG or JPG image, entirely in your browser — pause or seek, then capture stills.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-screenshot" },
   openGraph: {
     title: "Video Screenshot — Capture the Current Frame Online Free",
-    description: "Video Screenshot captures the current frame of a video as a PNG image, entirely in your browser — pause or seek, then capture stills.",
+    description: "Video Screenshot captures the current frame of a video as a PNG or JPG image, entirely in your browser — pause or seek, then capture stills.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-screenshot",
   },
 };

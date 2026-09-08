@@ -6,6 +6,7 @@ export default function QrGeneratorPage() {
   const [text, setText] = useState('');
   const [size, setSize] = useState(200);
   const [qrUrl, setQrUrl] = useState('');
+  const [qrSvgUrl, setQrSvgUrl] = useState('');
   const [status, setStatus] = useState('');
   const canvasRef = useRef(null);
 
@@ -13,11 +14,14 @@ export default function QrGeneratorPage() {
     if (!text) return;
     setStatus('');
     setQrUrl('');
+    setQrSvgUrl('');
     try {
       const QRCode = (await import('qrcode')).default;
       const canvas = canvasRef.current;
       await QRCode.toCanvas(canvas, text, { width: size, margin: 2 });
       setQrUrl(canvas.toDataURL());
+      const svgMarkup = await QRCode.toString(text, { type: 'svg', width: size, margin: 2 });
+      setQrSvgUrl(URL.createObjectURL(new Blob([svgMarkup], { type: 'image/svg+xml' })));
     } catch (err) {
       setStatus(err.message || 'Failed to generate QR code');
     }
@@ -43,27 +47,30 @@ export default function QrGeneratorPage() {
             <canvas ref={canvasRef} className="rounded-xl" />
           </div>
           {qrUrl && (
-            <a href={qrUrl} download="qrcode.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download QR Code</a>
+            <div className="grid grid-cols-2 gap-2">
+              <a href={qrUrl} download="qrcode.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download PNG</a>
+              <a href={qrSvgUrl} download="qrcode.svg" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download SVG</a>
+            </div>
           )}
         </div>
       </div>
       <SeoContent
         title="QR Code Generator"
-        description="QR Code Generator is a free online tool that instantly turns any text or URL into a scannable QR code, right in your browser. There's nothing to install and nothing is uploaded to a server — adjust the size to fit your use case, from business cards to large-format posters, and download it in seconds."
+        description="QR Code Generator is a free online tool that instantly turns any text or URL into a scannable QR code, right in your browser. There's nothing to install and nothing is uploaded to a server — adjust the size to fit your use case, from business cards to large-format posters, and download it as PNG or scalable SVG in seconds."
         howTo={[
           "Type or paste the text, URL, or data you want to encode into the input field.",
           "Use the slider to set the QR code size (100–400px) to match how it will be printed or displayed.",
           "Click \"Generate QR Code\" to render it instantly.",
-          "Download the QR code as a PNG image and use it wherever you need."
+          "Download the QR code as a PNG image, or as an SVG for print and large-format use, and use it wherever you need."
         ]}
         faqs={[
           { q: "Is QR Code Generator free to use?", a: "Yes, it's completely free with no signup and no limit on how many QR codes you can generate." },
           { q: "What can I encode in a QR code?", a: "Any text string — URLs, plain messages, or formatted data like WiFi credentials or vCard text — just enter it exactly as you want it decoded." },
-          { q: "Can I customize the color or add a logo to my QR code?", a: "Currently you can adjust the size only; color and logo customization aren't supported yet." },
+          { q: "Can I download as SVG, and can I customize the color or add a logo?", a: "Yes, both PNG and SVG downloads are available — SVG scales to any size without quality loss, which is ideal for print. Color and logo customization aren't supported yet." },
           { q: "Is my data private?", a: "Yes. The QR code is generated entirely in your browser — nothing you type is sent to a server." }
         ]}
         tips={[
-          "Use a larger size (300px or more) for QR codes that will be printed small or viewed from a distance, like on posters.",
+          "Download the SVG version for anything printed, especially posters or large signage — it stays crisp at any size, unlike a scaled-up PNG.",
           "Keep the encoded text as short as possible — shorter data produces a simpler, more reliably scannable code.",
           "Test the QR code with your phone's camera before printing or publishing it widely.",
           "Regenerate and re-download the code any time you edit the text, since it doesn't update automatically."

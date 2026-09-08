@@ -13,6 +13,7 @@ export default function ZipCreatorPage() {
   const [status, setStatus] = useState('');
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [compressionLevel, setCompressionLevel] = useState(6);
   const inputRef = useRef();
   const workerRef = useRef(null);
 
@@ -82,7 +83,7 @@ export default function ZipCreatorPage() {
       workerRef.current = null;
       setError('Error: ' + (err?.message || 'unknown worker error'));
     };
-    worker.postMessage({ files, maxTotalBytes });
+    worker.postMessage({ files, maxTotalBytes, compressionLevel });
   };
 
   return (
@@ -107,6 +108,21 @@ export default function ZipCreatorPage() {
               <p className={`text-xs text-right ${overSizeLimit ? 'text-red-500' : 'text-neutral-400'}`}>{(totalSize / (1024 * 1024)).toFixed(1)} MB total</p>
             </div>
           )}
+          <div className="flex items-center justify-between gap-3">
+            <label htmlFor="compression-level" className="text-sm text-neutral-600">Compression level</label>
+            <select
+              id="compression-level"
+              value={compressionLevel}
+              onChange={(e) => setCompressionLevel(Number(e.target.value))}
+              disabled={loading}
+              className="border border-neutral-200 rounded-lg px-3 py-2 text-sm bg-white disabled:bg-neutral-100"
+            >
+              <option value={0}>None (store only, fastest)</option>
+              <option value={1}>Fast (lower compression)</option>
+              <option value={6}>Normal (balanced, default)</option>
+              <option value={9}>Best (smallest file, slowest)</option>
+            </select>
+          </div>
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3">{error}</div>
           )}
@@ -124,10 +140,11 @@ export default function ZipCreatorPage() {
       </div>
       <SeoContent
         title="ZIP Creator"
-        description="ZIP Creator is a free online tool that bundles multiple files into a single ZIP archive, entirely in your browser using JSZip — no upload, no software, and works with any file type. Zipping runs in a background Web Worker so the page stays responsive, with a live progress bar and a Cancel button."
+        description="ZIP Creator is a free online tool that bundles multiple files into a single ZIP archive, entirely in your browser using JSZip — no upload, no software, and works with any file type. Choose a compression level, and zipping runs in a background Web Worker so the page stays responsive, with a live progress bar and a Cancel button."
         howTo={[
           "Click the upload area and select one or more files to add to your archive.",
           "Remove any files you don't want by clicking \"Remove\" next to them.",
+          "Pick a compression level (None, Fast, Normal, or Best).",
           "Click \"Create ZIP\" to bundle everything into a single archive locally.",
           "Click \"Download ZIP\" to save the resulting archive.zip file."
         ]}
@@ -135,11 +152,12 @@ export default function ZipCreatorPage() {
           { q: "Is ZIP Creator free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "What file types can I zip?", a: "Any file type — there are no format restrictions since files are added to the archive as-is." },
           { q: "Do you store my uploaded files?", a: "No. The ZIP is built entirely in your browser, in a background Web Worker — files are never uploaded to a server." },
-          { q: "Can I rename the archive or set a compression level?", a: "Not currently — the tool creates a file named archive.zip using JSZip's default settings." },
+          { q: "Can I rename the archive or set a compression level?", a: "You can choose a compression level (None/Fast/Normal/Best) before zipping. The archive is always named archive.zip — rename the downloaded file afterward if you need something else." },
           { q: "Is there a size limit?", a: `Yes: the files you add can add up to ${MAX_TOTAL_SIZE_LABEL} total on desktop (${MOBILE_MAX_TOTAL_SIZE_LABEL} on phones and tablets) -- a measured limit to keep zipping reliable in the browser tab rather than risking a crash on a very large combined archive.` }
         ]}
         tips={[
           "Add all the files you need before clicking \"Create ZIP\" — use the Remove button to fix any mistakes first.",
+          "Use \"None\" for files that are already compressed (JPG, MP4, ZIP) to save time, and \"Best\" for text or uncompressed files to shrink the archive the most.",
           "Large batches of files may take longer to process since compression runs in your browser — watch the progress bar.",
           "Rename the downloaded archive.zip file afterward if you need a more descriptive name.",
           "Great for bundling multiple documents or images into a single file before emailing or uploading elsewhere."

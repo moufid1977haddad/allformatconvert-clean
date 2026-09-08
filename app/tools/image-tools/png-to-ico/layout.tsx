@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "PNG to ICO — Resize Your PNG Online Free" },
-  description: "PNG to ICO resizes your PNG to a chosen icon size and downloads it with a .ico file extension, entirely in your browser.",
+  title: { absolute: "PNG to ICO — Convert PNG to a Real Multi-Size ICO Free" },
+  description: "PNG to ICO builds a real, multi-resolution Windows ICO file from your PNG (16, 32, 48, 256px) entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/png-to-ico" },
   openGraph: {
-    title: "PNG to ICO — Resize Your PNG Online Free",
-    description: "PNG to ICO resizes your PNG to a chosen icon size and downloads it with a .ico file extension, entirely in your browser.",
+    title: "PNG to ICO — Convert PNG to a Real Multi-Size ICO Free",
+    description: "PNG to ICO builds a real, multi-resolution Windows ICO file from your PNG (16, 32, 48, 256px) entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/image-tools/png-to-ico",
   },
 };

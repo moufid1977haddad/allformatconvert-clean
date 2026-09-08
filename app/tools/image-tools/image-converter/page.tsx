@@ -34,8 +34,11 @@ export default function ImageConverterPage() {
   const maxFileBytes = isMobile ? MOBILE_MAX_FILE_SIZE_BYTES : MAX_FILE_SIZE_BYTES;
   const maxFileLabel = isMobile ? MOBILE_MAX_FILE_SIZE_LABEL : MAX_FILE_SIZE_LABEL;
 
+  const isRecognizedImage = (f: File) =>
+    f.type.startsWith('image/') || /\.(heic|heif|tif|tiff)$/i.test(f.name);
+
   const addFiles = (incoming: File[]) => {
-    const imageFiles = incoming.filter(f => f.type.startsWith('image/'));
+    const imageFiles = incoming.filter(isRecognizedImage);
     const tooLarge = imageFiles.filter(f => f.size > maxFileBytes);
     const ok = imageFiles.filter(f => f.size <= maxFileBytes);
     setFiles(prev => [...prev, ...ok]);
@@ -61,12 +64,42 @@ export default function ImageConverterPage() {
     setProgress(0);
   };
 
-  const handleConvert = () => {
+  const isHeic = (f: File) => /^image\/heic|^image\/heif/.test(f.type) || /\.(heic|heif)$/i.test(f.name);
+
+  const handleConvert = async () => {
     setProcessing(true);
     setProgress(0);
     setError('');
     const results: ConvertedFile[] = [];
     const failures: string[] = [];
+
+    // HEIC/HEIF needs heic2any, which relies on a <canvas> element and only
+    // runs on the main thread (DOM-dependent, unlike createImageBitmap) --
+    // decode it here to a PNG blob before handing off to the worker, which
+    // then re-encodes that PNG into the user's chosen output format like
+    // any other image.
+    const items: { name: string; originalSize: number; blob: Blob }[] = [];
+    for (const file of files) {
+      if (isHeic(file)) {
+        try {
+          const heic2any = (await import('heic2any')).default;
+          const decoded = await heic2any({ blob: file, toType: 'image/png' });
+          const pngBlob = Array.isArray(decoded) ? decoded[0] : decoded;
+          items.push({ name: file.name, originalSize: file.size, blob: pngBlob });
+        } catch (err: any) {
+          failures.push(`${file.name}: Failed to decode this HEIC/HEIF file (${err?.message || 'unknown error'})`);
+        }
+      } else {
+        items.push({ name: file.name, originalSize: file.size, blob: file });
+      }
+    }
+    if (failures.length > 0) {
+      setError(`${failures.length} file${failures.length > 1 ? 's' : ''} failed to convert:\n` + failures.join('\n'));
+    }
+    if (items.length === 0) {
+      setProcessing(false);
+      return;
+    }
 
     const worker = new Worker(new URL('./imageConverter.worker.js', import.meta.url), { type: 'module' });
     workerRef.current = worker;
@@ -95,7 +128,7 @@ export default function ImageConverterPage() {
       workerRef.current = null;
       setError('Conversion failed: ' + (err?.message || 'unknown worker error'));
     };
-    worker.postMessage({ files, format, quality, maxMegapixels });
+    worker.postMessage({ items, format, quality, maxMegapixels });
   };
 
   const downloadOne = (item: ConvertedFile) => {
@@ -148,7 +181,7 @@ export default function ImageConverterPage() {
               ref={inputRef}
               type="file"
               multiple
-              accept="image/*"
+              accept="image/*,.heic,.heif,.tif,.tiff"
               className="hidden"
               onChange={(e) => {
                 addFiles(Array.from(e.target.files || []));
@@ -157,7 +190,7 @@ export default function ImageConverterPage() {
             />
             <Folder className="w-10 h-10 mb-3 mx-auto text-neutral-400" />
             <p className="text-neutral-700 font-semibold text-lg">Drop your images here</p>
-            <p className="text-neutral-400 text-sm mt-1">or click to browse — PNG, JPG, WebP, AVIF, GIF, BMP</p>
+            <p className="text-neutral-400 text-sm mt-1">or click to browse — PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, HEIC/HEIF</p>
           </div>
 
           {error && <p className="text-red-500 text-center text-sm whitespace-pre-line">{error}</p>}
@@ -290,9 +323,9 @@ export default function ImageConverterPage() {
       </div>
       <SeoContent
         title="Image Converter"
-        description="Image Converter is a free online tool that converts images between PNG, JPG, WebP, and AVIF entirely in your browser — nothing is ever uploaded to a server. Drop in one or many images, pick your target format and quality, and download the results instantly, with a live before/after size comparison for every file. Conversion runs in a background Web Worker so the page stays responsive even on large batches."
+        description="Image Converter is a free online tool that converts images — including TIFF and iPhone HEIC/HEIF photos — to PNG, JPG, WebP, or AVIF entirely in your browser — nothing is ever uploaded to a server. Drop in one or many images, pick your target format and quality, and download the results instantly, with a live before/after size comparison for every file. Conversion runs in a background Web Worker so the page stays responsive even on large batches."
         howTo={[
-          "Drop or click to upload one or more images (PNG, JPG, WebP, AVIF, GIF, or BMP are all accepted).",
+          "Drop or click to upload one or more images (PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, and HEIC/HEIF are all accepted).",
           "Choose your output format: WebP, PNG, JPG, or AVIF.",
           "Adjust the quality slider to balance file size against image quality.",
           "Click Convert, then download each result individually or use \"Download all\" for the whole batch."
@@ -300,7 +333,7 @@ export default function ImageConverterPage() {
         faqs={[
           { q: "Is Image Converter free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Are my images uploaded anywhere?", a: "No. Every conversion happens locally in your browser, in a background Web Worker — your files never leave your device." },
-          { q: "Which formats are supported?", a: "You can upload PNG, JPG, WebP, AVIF, GIF, or BMP images, and convert them to WebP, PNG, JPG, or AVIF. TIFF is not supported here — browsers can't decode TIFF locally — use the dedicated TIFF to JPG or TIFF to PNG tools instead." },
+          { q: "Which formats are supported?", a: "You can upload PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, or HEIC/HEIF (iPhone photos) images, and convert them to WebP, PNG, JPG, or AVIF. TIFF is decoded with a dedicated in-browser decoder (planar-color-storage TIFFs aren't supported and are rejected with a clear error), and HEIC/HEIF is decoded on the main thread before being re-encoded to your chosen format." },
           { q: "Can I convert several images at once?", a: "Yes, you can add multiple files and convert them all in one batch, then download them individually or together." },
           { q: "Is there an image-size limit?", a: `Yes: each image can be up to ${MAX_MEGAPIXELS} megapixels on desktop (${MOBILE_MAX_MEGAPIXELS} on phones and tablets), measured against how long large images take to encode in the browser — WebP in particular gets dramatically slower past a certain size. There's no limit on how many images you can batch-convert, since they're processed one at a time.` }
         ]}

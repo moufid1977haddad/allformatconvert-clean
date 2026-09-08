@@ -25,6 +25,14 @@ export default function TiffToJpgPage() {
       const buffer = await file.arrayBuffer();
       const ifds = UTIF.decode(buffer);
       if (!ifds.length) throw new Error('No image data found in this TIFF file');
+      // UTIF.js only decodes chunky (interleaved) TIFFs correctly -- for a
+      // planar one (PlanarConfiguration=2, color planes stored separately)
+      // it still "succeeds" but silently produces corrupted, striped pixel
+      // data, so this must be caught before decodeImage rather than left to
+      // ship a garbled result.
+      if (ifds[0].t284 && ifds[0].t284[0] === 2) {
+        throw new Error('This TIFF uses planar color storage (separate color-plane layout), which this decoder cannot read correctly. Re-save it with chunky/interleaved color storage first.');
+      }
       UTIF.decodeImage(buffer, ifds[0]);
       const rgba = UTIF.toRGBA8(ifds[0]);
       const canvas = document.createElement('canvas');
@@ -67,7 +75,8 @@ export default function TiffToJpgPage() {
           { q: "Is TIFF to JPG completely free to use?", a: "Yes, it's 100% free with no registration required." },
           { q: "What is the maximum file size I can convert?", a: "There's no fixed size limit — processing happens locally, so it's limited only by your device's available memory." },
           { q: "Will my uploaded files be stored or shared?", a: "No. Conversion happens entirely in your browser — your file is never uploaded to a server." },
-          { q: "Can I convert multiple TIFF files at once?", a: "No, only one file can be converted at a time — there's no batch upload." }
+          { q: "Can I convert multiple TIFF files at once?", a: "No, only one file can be converted at a time — there's no batch upload." },
+          { q: "Are all TIFF variants supported?", a: "Most are (uncompressed, LZW, PackBits, and standard Deflate, in the common chunky/interleaved color layout). TIFFs saved with planar color storage (color channels stored as separate planes rather than interleaved) aren't supported and are rejected with a clear error rather than producing a corrupted result." }
         ]}
         tips={[
           "If your TIFF is multi-page, only the page the browser renders will be converted — extract other pages separately if needed.",

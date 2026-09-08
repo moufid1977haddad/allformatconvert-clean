@@ -339,7 +339,7 @@ export default function MobiToEpubPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a MOBI file here'}</p>
-            <input ref={inputRef} type="file" accept=".mobi,.azw,.azw3" className="hidden" onChange={handleFile} />
+            <input ref={inputRef} type="file" accept=".mobi,.azw,.azw3,.prc" className="hidden" onChange={handleFile} />
           </div>
           <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Converting...' : 'Convert to EPUB'}
@@ -348,30 +348,30 @@ export default function MobiToEpubPage() {
           {downloadUrl && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
               <div className="text-green-400 text-xl font-bold mb-3">Done!</div>
-              <a href={downloadUrl} download={file.name.replace(/\.(mobi|azw3?)$/i, '') + '.epub'} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition">Download EPUB</a>
+              <a href={downloadUrl} download={file.name.replace(/\.(mobi|azw3?|prc)$/i, '') + '.epub'} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition">Download EPUB</a>
             </div>
           )}
         </div>
       </div>
       <SeoContent
         title="MOBI to EPUB"
-        description="MOBI to EPUB converts your Kindle ebook into a real, standards-compliant EPUB file entirely in your browser — nothing is uploaded to a server. It properly decodes MOBI's internal PalmDOC or Huffman/CDIC text compression and the newer KF8 structure used by .azw3 files, using a dedicated parser rather than reading the raw bytes as plain text, so chapters, images, and the cover are extracted correctly and packaged into a real ZIP-based EPUB that opens in standard e-reader apps. DRM-protected ebooks aren't supported, since decrypting Kindle DRM is outside the scope of this tool."
+        description="MOBI to EPUB converts your Kindle ebook into a real, standards-compliant EPUB file entirely in your browser — nothing is uploaded to a server. It properly decodes MOBI's internal PalmDOC or Huffman/CDIC text compression and the newer KF8 structure used by .azw3 files, using a dedicated parser rather than reading the raw bytes as plain text, so chapters, images, and the cover are extracted correctly and packaged into a real ZIP-based EPUB that opens in standard e-reader apps. .prc files (the same MOBI6 format under a different extension) are supported too. DRM-protected ebooks aren't supported, since decrypting Kindle DRM is outside the scope of this tool."
         howTo={[
-          "Click the upload area and select a .mobi, .azw, or .azw3 file.",
+          "Click the upload area and select a .mobi, .azw, .azw3, or .prc file.",
           "Click \"Convert to EPUB\" to parse and repackage the file locally.",
           "Wait for the \"Done!\" message to appear.",
           "Download the resulting EPUB and open it in your e-reader app to confirm it looks right."
         ]}
         faqs={[
-          { q: "Will this reliably convert my MOBI ebook to a working EPUB?", a: "Yes, for unencrypted .mobi, .azw, and .azw3 files. The tool properly decompresses MOBI's PalmDOC or Huffman/CDIC-compressed text and parses the KF8 structure used by most .azw3 files, then packages the result into a standards-compliant, ZIP-based EPUB. DRM-protected ebooks purchased from stores like Amazon can't be converted, since removing that encryption isn't something this tool does." },
+          { q: "Will this reliably convert my MOBI ebook to a working EPUB?", a: "Yes, for unencrypted .mobi, .azw, .azw3, and .prc files. The tool properly decompresses MOBI's PalmDOC or Huffman/CDIC-compressed text and parses the KF8 structure used by most .azw3 files, then packages the result into a standards-compliant, ZIP-based EPUB. DRM-protected ebooks purchased from stores like Amazon can't be converted, since removing that encryption isn't something this tool does." },
           { q: "Is MOBI to EPUB free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What file types can I upload?", a: ".mobi, .azw, and .azw3 files. The parser automatically detects whether a file uses the older MOBI6 structure or the newer KF8 structure used by most .azw3 files." },
+          { q: "What file types can I upload?", a: ".mobi, .azw, .azw3, and .prc files. The parser automatically detects whether a file uses the older MOBI6 structure (used by .mobi, .azw, and .prc) or the newer KF8 structure used by most .azw3 files." },
           { q: "Is my file uploaded anywhere?", a: "No. All processing happens locally in your browser — your file is never uploaded to a server." },
           { q: "Will chapter titles and in-book links from the original ebook be preserved?", a: "Chapter content, images, and the cover are preserved in reading order, but chapters are currently labeled generically (Chapter 1, Chapter 2, ...) rather than the book's original per-chapter titles, and internal cross-reference links (like footnotes) aren't guaranteed to remain clickable." }
         ]}
         tips={[
           "For DRM-protected Kindle purchases, remove the DRM first with a tool you're authorized to use — this converter only handles unencrypted files.",
-          "Both .mobi/.azw (MOBI6) and .azw3 (KF8) files are supported, with the internal format detected automatically.",
+          "Both .mobi/.azw/.prc (MOBI6) and .azw3 (KF8) files are supported, with the internal format detected automatically.",
           "Chapters are labeled generically (Chapter 1, Chapter 2, ...) since per-chapter titles aren't exposed by the underlying parser.",
           "Always open the resulting EPUB in your e-reader app to confirm it looks right before deleting your original file."
         ]}

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Video to Audio — Extract the Audio Track Online Free" },
-  description: "Video to Audio extracts the audio track from a video file using the Web Audio API, entirely in your browser.",
+  description: "Video to Audio extracts the audio track from a video file using ffmpeg.wasm, in stereo, to MP3, WAV, AAC, FLAC, and more, entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-to-audio" },
   openGraph: {
     title: "Video to Audio — Extract the Audio Track Online Free",
-    description: "Video to Audio extracts the audio track from a video file using the Web Audio API, entirely in your browser.",
+    description: "Video to Audio extracts the audio track from a video file using ffmpeg.wasm, in stereo, to MP3, WAV, AAC, FLAC, and more, entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-to-audio",
   },
 };

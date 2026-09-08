@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "TAR Extractor — Extract TAR Online Free" },
-  description: "TAR Extractor is a free online tool that extracts files from plain, uncompressed TAR archives directly in your browser — no software or upload required.",
+  description: "TAR Extractor is a free online tool that extracts files from TAR, TAR.GZ, and TGZ archives directly in your browser — no software or upload required.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/file-tools/tar-extractor" },
   openGraph: {
     title: "TAR Extractor — Extract TAR Online Free",
-    description: "TAR Extractor is a free online tool that extracts files from plain, uncompressed TAR archives directly in your browser — no software or upload required.",
+    description: "TAR Extractor is a free online tool that extracts files from TAR, TAR.GZ, and TGZ archives directly in your browser — no software or upload required.",
     url: "https://www.onlineconvertools.com/tools/file-tools/tar-extractor",
   },
 };
