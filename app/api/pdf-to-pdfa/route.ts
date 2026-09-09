@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { alertServerError } from "@/lib/quota/errorAlerts";
+import { buildServerToolError, insertToolError } from "@/lib/reportError";
 
 // Give the pdf-tools-service round-trip (up to SERVICE_TIMEOUT_MS below)
 // enough headroom inside the function's own execution budget.
@@ -66,6 +68,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "Conversion timed out. Try a smaller file." }, { status: 504 });
     }
     console.error("pdf-tools-service request failed:", err?.message || "unknown error");
+    await alertServerError("pdf-to-pdfa", `unreachable: ${err?.message || "unknown error"}`);
+    await insertToolError(buildServerToolError({
+      tool: "pdf-to-pdfa",
+      file,
+      error: err,
+      userAgent: req.headers.get("user-agent"),
+    }));
     return NextResponse.json({ ok: false, error: "Could not reach the PDF/A service." }, { status: 502 });
   } finally {
     clearTimeout(timeoutId);
@@ -74,6 +83,13 @@ export async function POST(req: NextRequest) {
   const body = await serviceResponse.text();
   if (!serviceResponse.ok && serviceResponse.status !== 422) {
     console.error("pdf-tools-service /v1/pdfa error:", serviceResponse.status, body.slice(0, 500));
+    await alertServerError("pdf-to-pdfa", `service_error_${serviceResponse.status}`);
+    await insertToolError(buildServerToolError({
+      tool: "pdf-to-pdfa",
+      file,
+      error: new Error(`service_error_${serviceResponse.status}`),
+      userAgent: req.headers.get("user-agent"),
+    }));
   }
 
   return new NextResponse(body, {

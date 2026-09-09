@@ -4,6 +4,7 @@ import { convertDocxToPdf, ConvertApiError } from "@/lib/providers/convertApi";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES } from "@/lib/quota/limits";
 import { alertServerError } from "@/lib/quota/errorAlerts";
+import { buildServerToolError, insertToolError } from "@/lib/reportError";
 
 // Give the Gotenberg/ConvertAPI round-trip (up to GOTENBERG_TIMEOUT_MS
 // below) enough headroom inside the function's own execution budget.
@@ -130,7 +131,7 @@ export async function POST(req: NextRequest) {
   if (backend === "convertapi") {
     return handleConvertApi(req, file);
   }
-  return handleGotenberg(file, extension);
+  return handleGotenberg(req, file, extension);
 }
 
 // .docx only, and only while CONVERTAPI_ENABLED === "true" -- see
@@ -178,6 +179,12 @@ async function handleConvertApi(req: NextRequest, file: File): Promise<NextRespo
       // actually a PDF, and streaming an invalid file to the client with a
       // .pdf extension and no error would be worse than refusing it here.
       await alertServerError("word-to-pdf", "non_pdf_response");
+      await insertToolError(buildServerToolError({
+        tool: "word-to-pdf",
+        file,
+        error: new Error("non_pdf_response"),
+        userAgent: req.headers.get("user-agent"),
+      }));
       return NextResponse.json({ error: "Conversion failed. Please try again." }, { status: 502 });
     }
 
@@ -213,18 +220,30 @@ async function handleConvertApi(req: NextRequest, file: File): Promise<NextRespo
         // Server-side only, and deliberately limited to the error code and
         // HTTP status -- never the token, never the raw upstream body.
         await alertServerError("word-to-pdf", `${err.code} (HTTP ${err.httpStatus ?? "n/a"})`);
+        await insertToolError(buildServerToolError({
+          tool: "word-to-pdf",
+          file,
+          error: new Error(`${err.code} (HTTP ${err.httpStatus ?? "n/a"})`),
+          userAgent: req.headers.get("user-agent"),
+        }));
       }
       return NextResponse.json({ error: mapped.message }, { status: mapped.status });
     }
 
     await alertServerError("word-to-pdf", "unexpected_error");
+    await insertToolError(buildServerToolError({
+      tool: "word-to-pdf",
+      file,
+      error: err instanceof Error ? err : new Error("unexpected_error"),
+      userAgent: req.headers.get("user-agent"),
+    }));
     return NextResponse.json({ error: "Conversion failed. Please try again." }, { status: 500 });
   }
 }
 
 // Every extension except .docx (plus .docx itself when CONVERTAPI_ENABLED
 // is not "true") -- unchanged from before this spec's implementation.
-async function handleGotenberg(file: File, extension: string): Promise<NextResponse> {
+async function handleGotenberg(req: NextRequest, file: File, extension: string): Promise<NextResponse> {
   const gotenbergUrl = process.env.GOTENBERG_URL;
   const gotenbergUsername = process.env.GOTENBERG_USERNAME;
   const gotenbergPassword = process.env.GOTENBERG_PASSWORD;
@@ -268,6 +287,13 @@ async function handleGotenberg(file: File, extension: string): Promise<NextRespo
     }
     // Log only the failure kind, never credentials or the auth header.
     console.error("Gotenberg request failed:", err?.message || "unknown error");
+    await alertServerError("convert-to-pdf", `unreachable: ${err?.message || "unknown error"}`);
+    await insertToolError(buildServerToolError({
+      tool: "convert-to-pdf-" + extension,
+      file,
+      error: err,
+      userAgent: req.headers.get("user-agent"),
+    }));
     return NextResponse.json({ error: "Could not reach the conversion service." }, { status: 502 });
   } finally {
     clearTimeout(timeoutId);
@@ -276,10 +302,18 @@ async function handleGotenberg(file: File, extension: string): Promise<NextRespo
   if (!gotenbergResponse.ok) {
     if (gotenbergResponse.status === 401 || gotenbergResponse.status === 403) {
       console.error("Gotenberg rejected the request: authentication failed (status " + gotenbergResponse.status + ")");
+      await alertServerError("convert-to-pdf", "auth_failed_" + gotenbergResponse.status);
       return NextResponse.json({ error: "Conversion service authentication failed." }, { status: 502 });
     }
     const bodyText = await gotenbergResponse.text().catch(() => "");
     console.error("Gotenberg conversion error:", gotenbergResponse.status, bodyText.slice(0, 500));
+    await alertServerError("convert-to-pdf", `service_error_${gotenbergResponse.status}`);
+    await insertToolError(buildServerToolError({
+      tool: "convert-to-pdf-" + extension,
+      file,
+      error: new Error(`service_error_${gotenbergResponse.status}`),
+      userAgent: req.headers.get("user-agent"),
+    }));
     return NextResponse.json(
       { error: "Conversion failed. The document may be corrupted or in an unsupported format." },
       { status: 502 }
@@ -291,6 +325,13 @@ async function handleGotenberg(file: File, extension: string): Promise<NextRespo
   const isPdf = bytes.length >= 5 && String.fromCharCode(...bytes.slice(0, 5)) === "%PDF-";
   if (!isPdf) {
     console.error("Gotenberg returned a non-PDF response despite a 2xx status.");
+    await alertServerError("convert-to-pdf", "non_pdf_response");
+    await insertToolError(buildServerToolError({
+      tool: "convert-to-pdf-" + extension,
+      file,
+      error: new Error("non_pdf_response"),
+      userAgent: req.headers.get("user-agent"),
+    }));
     return NextResponse.json({ error: "Conversion service returned an unexpected response." }, { status: 502 });
   }
 
