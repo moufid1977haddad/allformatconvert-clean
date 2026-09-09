@@ -72,10 +72,21 @@ for i in $(seq 1 21); do curl -s -o /dev/null -w "%{http_code}\n" -X POST <URL>/
 ```
 **Résultat attendu** : les 20 premières requêtes répondent `204`, la 21e répond `429` avec un en-tête `Retry-After`.
 
-## Pas commencé
+## Terminé (suite)
 
-- **Tâche 16** — proposition (texte seul, aucun code) de page admin.
-- **Tâche 17 restant** — tests manuels complets (rate-limit 429, insertion réelle en base — tous deux bloqués localement par le problème de clé ci-dessus, à faire en preview/prod ou après rotation de la clé), rapport final `docs/audit/RAPPORT-remontee-erreurs.md`, build complet, push, déploiement, vérification unique READY.
+- **Tâche 16** — proposition de page admin (texte seul, aucun code) : voir `docs/audit/RAPPORT-remontee-erreurs.md`, section "Ce qui reste non traité".
+- **Tâche 17** — `npm run build` propre (exit 0, 0 erreur/avertissement) ; rapport final écrit et committé (`docs/audit/RAPPORT-remontee-erreurs.md`) ; branche `feat/error-reporting` poussée (10 commits au-dessus de `master`) ; déploiement preview Vercel déclenché automatiquement par le push (intégration GitHub) et vérifié **READY** :
+  - Déploiement : `dpl_9n3FS5zn2xpwijavPZPiN1wKbMif`, commit `73788b8d`
+  - URL : `https://onlineconvertools-git-feat-error-reporting-moufid.vercel.app`
+  - **Cette URL a de vraies clés Supabase (contrairement au local)** — c'est là qu'il faut faire le Test 5 (limitation d'abus) et vérifier qu'une ligne atterrit réellement dans `tool_errors` après un échec, une fois `supabase/tool_errors.sql` appliqué.
+
+## Pas commencé / bloqué (nécessite l'utilisateur)
+
+- Application de `supabase/tool_errors.sql` en base (Supabase SQL editor).
+- Les 4 procédures de test manuel du navigateur (section ci-dessus) — non exécutées par manque d'extension navigateur fonctionnelle cette session.
+- Test 5 (limitation d'abus) et vérification d'écriture réelle en base — à faire contre l'URL de preview ci-dessus.
+- Vérification de la réception d'une alerte email/ntfy réelle.
+- Fusion vers `master` / mise en production — **pas demandée, pas faite**. Le travail est prêt et vérifié sur la branche `feat/error-reporting` et son déploiement preview ; une mise en prod reste une décision explicite à prendre séparément.
 
 ## Décisions à connaître pour reprendre à froid
 
@@ -92,4 +103,4 @@ for i in $(seq 1 21); do curl -s -o /dev/null -w "%{http_code}\n" -X POST <URL>/
 
 ## Pour reprendre
 
-Tout le code (Tâches 1-15) est committé sur `feat/error-reporting` et poussé. Les 4 procédures de test manuel ci-dessus sont écrites mais pas exécutées (extension navigateur indisponible dans cette session) — c'est à l'utilisateur de les faire. Le reste (Tâche 16 texte, rapport final, build, commit, push, déploiement, vérification READY) est en cours de finalisation dans la foulée de cette sauvegarde.
+Toutes les tâches de code et de documentation (1-17) sont terminées, committées et poussées sur `feat/error-reporting`. Le déploiement preview est READY. Il ne reste que des actions côté utilisateur : appliquer le SQL, exécuter les 5 procédures de test manuel (section ci-dessus), et décider si/quand fusionner vers `master`.
