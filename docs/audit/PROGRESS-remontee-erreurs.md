@@ -20,8 +20,57 @@ Suivi de reprise. Plan complet : `docs/superpowers/plans/2026-09-08-error-report
 ## Modifié mais pas (encore) prouvé en conditions réelles
 
 - **Route `/api/report-error` en local** : bloquée par un problème d'environnement local préexistant, sans rapport avec ce code — la clé `SUPABASE_SERVICE_ROLE_KEY` dans `.env.local` est refusée par Supabase ("Legacy API keys are disabled"), ce qui fait échouer TOUT appel service-role local (pas seulement le mien : `/api/quota/me` et les routes payantes existantes seraient pareillement affectées). Confirmé que ce n'est pas un bug du nouveau code : `/api/tool-counts` (qui lit via la clé anon) répond bien 200 ; seul le chemin service-role échoue. Conséquence directe et positive : le correctif de la relecture (échec propre en 503 au lieu d'un plantage) a été validé en conditions réelles par cet échec lui-même.
-- **Tests navigateur du beacon (Tâche 17, Étape 1)** : en cours au moment de cette sauvegarde — fichiers de test créés (zip valide/corrompu, tiff corrompu), navigateur ouvert, pas encore d'upload effectué.
+- **Tests navigateur du beacon (Tâche 17, Étape 1)** : NON effectués — l'extension Chrome (claude-in-chrome) s'est déconnectée en cours de session, avant le premier upload. Les 4 procédures ci-dessous sont écrites pour que l'utilisateur les fasse lui-même.
 - **Les 5 routes serveur modifiées** (Tâches 7-8) : typecheck OK, jamais exercées pour de vrai (Gotenberg/ConvertAPI/pdf-tools non configurés en local).
+
+## Procédures de test manuel (4), à faire par l'utilisateur
+
+Prérequis : serveur de dev lancé (`npm run dev`, sur `http://localhost:3000`). Fichiers de test déjà préparés dans `C:\Users\moufi\AppData\Local\Temp\claude\C--Users-moufi-Desktop-onlineconvertools\82720794-9e0c-46b9-942d-026741befd95\scratchpad\` :
+- `valid-test.zip` (140 octets, une vraie archive ZIP valide contenant `hello.txt`)
+- `corrupt-test.zip` (59 octets de texte brut, pas une vraie archive)
+- `corrupt-test.tiff` (49 octets de texte brut, pas un vrai TIFF)
+- `corrupt-test.mp3` (68 octets de texte brut, pas un vrai MP3)
+
+Si ces fichiers n'existent plus (dossier temporaire nettoyé), n'importe quel petit fichier texte renommé avec la bonne extension fonctionne aussi bien pour les cas "corrompu" — le but est juste un fichier que l'outil ne peut pas décoder.
+
+Dans Chrome : F12 → onglet **Réseau** (Network) → filtrer sur `report-error` avant de commencer chaque test.
+
+### Test 1 — La remontée part bien lors d'un échec
+
+1. URL : `http://localhost:3000/tools/file-tools/zip-extractor`
+2. Fichier à uploader : `corrupt-test.zip`
+3. Cliquer la zone d'upload, sélectionner le fichier (l'extraction se lance automatiquement au choix du fichier).
+4. Dans l'onglet Réseau : chercher une requête vers `report-error` (type `fetch`/`xhr` ou `ping` selon si `sendBeacon` ou le repli `fetch` a été utilisé).
+5. **Résultat attendu** : une requête `POST /api/report-error` apparaît, avec un statut soit `204` (si la clé Supabase locale fonctionne), soit `503` (si le même problème de clé service-role que documenté plus haut persiste — dans les deux cas la requête est bien partie, ce qui est ce que ce test vérifie). Une alerte navigateur "Error: ..." apparaît aussi (comportement existant de l'outil, inchangé).
+
+### Test 2 — Rien ne part lors d'un succès
+
+1. URL : `http://localhost:3000/tools/file-tools/zip-extractor`
+2. Fichier à uploader : `valid-test.zip`
+3. Cliquer la zone d'upload, sélectionner le fichier.
+4. Dans l'onglet Réseau : regarder toutes les requêtes émises après l'upload (pas seulement filtrées sur `report-error` cette fois, pour être sûr de ne rien manquer).
+5. **Résultat attendu** : la liste "1 file(s) extracted" avec `hello.txt` téléchargeable apparaît, et **aucune** requête vers `report-error` n'apparaît dans l'onglet Réseau.
+
+### Test 3 — Aucun nom de fichier ni contenu ne fuit
+
+1. Reprendre la requête `POST /api/report-error` capturée au Test 1.
+2. Cliquer dessus dans l'onglet Réseau → sous-onglet **Payload** (ou "Request") → regarder le corps JSON envoyé.
+3. **Résultat attendu** : le corps contient exactement les champs `tool` (`"zip-extractor"`), `source` (`"browser"`), `ext` (`"zip"` ou `null`), `sizeBucket` (ex. `"0-1MB"`), `errorType`, `errorMessage`, `browser`. Le champ `errorMessage` ne doit contenir ni `corrupt-test.zip`, ni `corrupt-test`, ni aucun chemin Windows (`C:\...`) ou Unix (`/...`) réel — au pire un jeton `[file]` ou `[path]` à la place. Refaire ce test avec `corrupt-test.tiff` sur `http://localhost:3000/tools/image-tools/tiff-to-png` pour confirmer sur un deuxième outil (celui qui a motivé ce chantier).
+
+### Test 4 — Un échec de la remontée ne casse jamais l'outil
+
+1. Arrêter le serveur de dev (`Ctrl+C` dans le terminal où tourne `npm run dev`), ou renommer temporairement `app/api/report-error/route.js` en `route.js.disabled` puis relancer `npm run dev`.
+2. URL : `http://localhost:3000/tools/image-tools/tiff-to-png`
+3. Fichier à uploader : `corrupt-test.tiff`, puis cliquer "Convert to PNG".
+4. **Résultat attendu** : le message d'erreur habituel de l'outil ("Could not decode this TIFF file: ...") s'affiche normalement, sans page blanche, sans exception JavaScript visible, sans blocage de l'interface — même si la requête vers `report-error` échoue silencieusement (404 ou connexion refusée) en arrière-plan. Remettre `route.js.disabled` en `route.js` ensuite si renommé.
+
+### Test 5 (bonus, nécessite une base fonctionnelle) — Limitation d'abus
+
+Bloqué en local par le problème de clé `SUPABASE_SERVICE_ROLE_KEY` documenté plus haut. À faire une fois la clé rafraîchie, ou directement contre l'URL de prévisualisation Vercel une fois déployée (voir section déploiement) :
+```
+for i in $(seq 1 21); do curl -s -o /dev/null -w "%{http_code}\n" -X POST <URL>/api/report-error -H "Content-Type: application/json" -d '{"tool":"zip-extractor","source":"browser","errorMessage":"test"}'; done
+```
+**Résultat attendu** : les 20 premières requêtes répondent `204`, la 21e répond `429` avec un en-tête `Retry-After`.
 
 ## Pas commencé
 
@@ -43,4 +92,4 @@ Suivi de reprise. Plan complet : `docs/superpowers/plans/2026-09-08-error-report
 
 ## Pour reprendre
 
-Tout le code (Tâches 1-15) est committé sur `feat/error-reporting` et poussé après cette sauvegarde. Prochaine étape : finir les tests navigateur du beacon (Tâche 17 Étape 1, déjà commencés), puis Tâche 16 (texte seul), puis rédiger et committer `docs/audit/RAPPORT-remontee-erreurs.md`, puis build/commit/push/déploiement/vérification.
+Tout le code (Tâches 1-15) est committé sur `feat/error-reporting` et poussé. Les 4 procédures de test manuel ci-dessus sont écrites mais pas exécutées (extension navigateur indisponible dans cette session) — c'est à l'utilisateur de les faire. Le reste (Tâche 16 texte, rapport final, build, commit, push, déploiement, vérification READY) est en cours de finalisation dans la foulée de cette sauvegarde.
