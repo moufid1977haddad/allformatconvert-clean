@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { reportToolError } from '../../../lib/reportError';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -32,7 +33,10 @@ export default function Page() {
         imgs.push({ url: canvas.toDataURL('image/jpeg', 0.9), name: `page_${i}.jpg` });
       }
       setImages(imgs);
-    } catch(e) { setError('Conversion failed: ' + e.message); }
+    } catch(e) {
+      reportToolError({ tool: 'pdf-to-jpg', file, error: e });
+      setError('Conversion failed: ' + e.message);
+    }
     setLoading(false);
   };
 

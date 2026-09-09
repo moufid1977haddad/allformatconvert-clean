@@ -17,6 +17,8 @@ Suivi de reprise pour ce chantier. Mis à jour et commité après chaque lot. Pl
 | Instrumentation TIFF (3 outils, chemin Worker partagé) | `app/tools/image-tools/tiff-to-png/page.jsx`, `tiff-to-jpg/page.jsx`, `image-converter/page.tsx` | `npx tsc --noEmit` → 0 erreur |
 | Instrumentation HEIC (2 outils) | `app/tools/image-tools/heic-to-jpg/page.jsx`, `heic-to-png/page.jsx` | Relecture manuelle — structure identique confirmée avant édition |
 | Instrumentation ffmpeg.wasm (9 outils audio/vidéo) | `audio-converter`, `audio-compressor`, `audio-booster`, `audio-splitter`, `audio-trimmer`, `audio-merger`, `video-to-audio`, `video-watermark`, `gif-to-mp4` (tous `page.jsx`) | Chaque fichier relu individuellement avant édition (formes légèrement différentes : `setError` vs `setStatus`, garde `ffmpegRef.current`, `audio-merger` en plusieurs fichiers sans "le" fichier unique). `npx tsc --noEmit` → 0 erreur. `grep -c reportToolError` → 2 par fichier (import + appel) sur les 9 |
+| Instrumentation PDF côté client (4 outils) | `pdf-ocr`, `pdf-to-image`, `pdf-to-jpg`, `pdf-extract-text` (tous `page.jsx`) | `npx tsc --noEmit` → 0 erreur. Vigilance particulière : `pdf-ocr` et `pdf-extract-text` ne rapportent que l'erreur de décodage/parsing, jamais `output`/`text` (le contenu extrait) |
+| Instrumentation ZIP Extractor | `app/tools/file-tools/zip-extractor/page.jsx` | `npx tsc --noEmit` → 0 erreur |
 
 ### Relecture indépendante de la route + du sanitiseur (Tâche 6) — résultat
 
@@ -41,18 +43,17 @@ Correctif mineur additionnel : `app/lib/reportError.js`'s `reportToolError` a re
 
 - **Route `/api/report-error`** — écrite et relue, pas encore testée en vrai (curl / navigateur) : en attente de l'application de `supabase/tool_errors.sql` en base par l'utilisateur pour pouvoir vérifier qu'une ligne est réellement insérée. Prévu Tâche 17.
 - **Les 5 routes serveur modifiées** (`pdf-repair`, `pdf-to-pdfa`, `convert-html-to-pdf`, `convert-to-pdf`, `pdf-to-word`) — le typecheck passe, mais aucun appel réel n'a été déclenché (nécessiterait Gotenberg/ConvertAPI/le service pdf-tools configurés, absents en local).
-- **Les 14 outils TIFF/HEIC/ffmpeg instrumentés** — typecheck OK, mais aucun test navigateur réel encore effectué (prévu en Tâche 17 avec les autres outils, pour éviter de retester manuellement à chaque lot).
+- **Les 19 outils navigateur instrumentés** (TIFF, HEIC, ffmpeg, PDF client, ZIP) — typecheck OK partout, mais aucun test navigateur réel encore effectué. C'est la prochaine étape (Tâche 17) : tester en vrai (upload fichier cassé → vérifier le beacon part et ne contient rien de sensible ; upload fichier valide → vérifier que rien ne part).
 
 ## Reste à faire
 
-1. **Instrumentation navigateur restante** (Tâches 12-13) : 4 PDF client (pdf-ocr, pdf-to-image, pdf-to-jpg, pdf-extract-text), 1 ZIP — 5 outils.
-2. **Agrégation + alerte quotidienne** (Tâche 14) dans le cron `health-check` existant.
-3. **Page de confidentialité** (Tâche 15).
-4. **Proposition page admin, sans construction** (Tâche 16).
-5. **Rapport final, tests manuels, build, commit, push, déploiement, vérification unique** (Tâche 17).
+1. **Agrégation + alerte quotidienne** (Tâche 14) dans le cron `health-check` existant.
+2. **Page de confidentialité** (Tâche 15).
+3. **Proposition page admin, sans construction** (Tâche 16).
+4. **Rapport final, tests manuels, build, commit, push, déploiement, vérification unique** (Tâche 17).
 
 **Action utilisateur en attente** : exécuter `supabase/tool_errors.sql` dans l'éditeur SQL Supabase avant que les tests bout-en-bout ne puissent réellement écrire/lire des lignes.
 
 ## Pour reprendre
 
-Si la session s'arrête ici : les lots "modules partagés" (Tâches 1-5), "routes serveur" (Tâches 7-8), "route de collecte relue et corrigée" (Tâche 6), "TIFF+HEIC" (Tâches 9-10) et "ffmpeg.wasm" (Tâche 11) sont tous committés et propres (typecheck OK). Prochaine étape : Tâche 12 (instrumentation des 4 outils PDF côté client) du plan.
+Si la session s'arrête ici : toute l'instrumentation navigateur est terminée et committée (Tâches 1-13, typecheck OK partout). Il ne reste que la partie serveur/documentation : agrégation cron (Tâche 14), page de confidentialité (Tâche 15), proposition admin non construite (Tâche 16), puis tests manuels + rapport final + déploiement (Tâche 17). Aucun test navigateur réel n'a encore eu lieu — c'est délibéré, regroupé en Tâche 17 pour ne tester qu'une seule fois l'ensemble plutôt qu'à chaque lot.

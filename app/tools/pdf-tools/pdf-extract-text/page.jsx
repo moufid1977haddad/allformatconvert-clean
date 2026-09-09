@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { reportToolError } from '../../../lib/reportError';
 
 export default function PdfExtractTextPage() {
   const [file, setFile] = useState(null);
@@ -37,6 +38,10 @@ export default function PdfExtractTextPage() {
       setText(fullText);
       setStatus('');
     } catch (err) {
+      // Only the pdfjs decode/parse error is reported here -- never `text`
+      // (the extracted content), which is exactly the file content this
+      // feature must never transmit.
+      reportToolError({ tool: 'pdf-extract-text', file, error: err });
       setStatus('Error: ' + err.message);
     }
     setLoading(false);

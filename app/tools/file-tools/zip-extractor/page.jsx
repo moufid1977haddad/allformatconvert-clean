@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { reportToolError } from '../../../lib/reportError';
 export default function ZipExtractorPage() {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -21,7 +22,10 @@ export default function ZipExtractorPage() {
         }
       }
       setFiles(extracted);
-    } catch(e) { alert('Error: ' + e.message); }
+    } catch(e) {
+      reportToolError({ tool: 'zip-extractor', file, error: e });
+      alert('Error: ' + e.message);
+    }
     setLoading(false);
   };
   return (
