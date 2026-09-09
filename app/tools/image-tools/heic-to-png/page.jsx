@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { reportToolError } from '../../../lib/reportError';
 
 export default function HeicToPngPage() {
   const [file, setFile] = useState(null);
@@ -26,6 +27,7 @@ export default function HeicToPngPage() {
       setResult(url);
       setStatus('');
     } catch (err) {
+      reportToolError({ tool: 'heic-to-png', file, error: err });
       setStatus('Error: ' + err.message);
     }
     setLoading(false);

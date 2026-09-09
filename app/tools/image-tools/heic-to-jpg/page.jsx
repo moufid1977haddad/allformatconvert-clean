@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { reportToolError } from '../../../lib/reportError';
 
 export default function HeicToJpgPage() {
   const [file, setFile] = useState(null);
@@ -31,6 +32,7 @@ export default function HeicToJpgPage() {
       setResult(url);
       setStatus('');
     } catch (err) {
+      reportToolError({ tool: 'heic-to-jpg', file, error: err });
       setStatus('Error: ' + err.message);
     }
     setLoading(false);

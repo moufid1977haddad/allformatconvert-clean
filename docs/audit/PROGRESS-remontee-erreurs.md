@@ -9,29 +9,49 @@ Suivi de reprise pour ce chantier. Mis à jour et commité après chaque lot. Pl
 | Table Supabase `tool_errors` (migration écrite, PAS ENCORE appliquée en base par l'utilisateur) | `supabase/tool_errors.sql` | Relecture manuelle du SQL — schéma conforme au contrat de champs |
 | Constantes de config (rate limit + seuil d'alerte) | `lib/quota/config.js` | `node -e "require('./lib/quota/config.js').TOOL_ERROR_ALERT_THRESHOLD_PER_DAY"` → `10` |
 | Rate limiter dédié IP-hash pour la route de collecte | `lib/quota/toolErrorRateLimit.js` | Chargement module OK (env Supabase factices, pas de vraie clé) |
-| Module partagé client+serveur (sanitisation, bucketing, parsing navigateur, envoi sendBeacon/fetch) | `app/lib/reportError.js` | `node scripts/error-reporting-tests/01-sanitize.js` → tous les cas passent (filename réel jamais présent dans le message nettoyé, troncature à 300 car., chemins Windows/Unix balayés, entrées non-string ne lèvent jamais) |
-| Module serveur d'insertion (`insertToolError`, `buildServerToolError`) | `lib/reportError.js` | Chargement module OK |
+| Module partagé client+serveur (sanitisation, bucketing, parsing navigateur, envoi sendBeacon/fetch) | `app/lib/reportError.js` | `node scripts/error-reporting-tests/01-sanitize.js` → tous les cas passent, y compris les 5 régressions ajoutées après relecture (voir ci-dessous) |
+| Module serveur d'insertion (`insertToolError`, `buildServerToolError`) | `lib/reportError.js` | Chargement module OK ; `errorMessage` re-sanitisé côté serveur (voir relecture) |
+| **Route de collecte publique `/api/report-error`** | `app/api/report-error/route.js` | Relecture indépendante close, 8 remarques traitées ou documentées (voir ci-dessous). `npx tsc --noEmit` → 0 erreur. Test curl réel encore à faire (Tâche 17, nécessite la table Supabase appliquée). |
+| Alerte serveur sur les 4 chemins jamais couverts par `lib/alert.js` | `app/api/pdf-repair/route.ts`, `app/api/pdf-to-pdfa/route.ts`, `app/api/convert-html-to-pdf/route.ts`, `app/api/convert-to-pdf/route.ts` (chemin `handleGotenberg`) | Réutilise `alertServerError` existant — pas de nouveau mécanisme |
+| Journalisation `tool_errors` côté serveur sur ces 4 chemins + `pdf-to-word` | mêmes fichiers + `app/api/pdf-to-word/route.ts` | `npx tsc --noEmit` → 0 erreur sur tout le projet |
+| Instrumentation TIFF (3 outils, chemin Worker partagé) | `app/tools/image-tools/tiff-to-png/page.jsx`, `tiff-to-jpg/page.jsx`, `image-converter/page.tsx` | `npx tsc --noEmit` → 0 erreur |
+| Instrumentation HEIC (2 outils) | `app/tools/image-tools/heic-to-jpg/page.jsx`, `heic-to-png/page.jsx` | Relecture manuelle — structure identique confirmée avant édition |
 
-| Route de collecte publique `/api/report-error` (écrite, relecture indépendante en cours) | `app/api/report-error/route.js` | Relecture par sous-agent indépendant lancée (route + sanitiseur uniquement, comme demandé) — résultat pas encore revenu |
-| Alerte serveur sur les 4 chemins jamais couverts par `lib/alert.js` | `app/api/pdf-repair/route.ts`, `app/api/pdf-to-pdfa/route.ts`, `app/api/convert-html-to-pdf/route.ts`, `app/api/convert-to-pdf/route.ts` (chemin `handleGotenberg`) | Réutilise `alertServerError` existant (déjà utilisé ailleurs dans le repo) — pas de nouveau mécanisme |
-| Journalisation `tool_errors` côté serveur sur ces 4 chemins + `pdf-to-word` (qui avait déjà `alertServerError` mais pas encore `tool_errors`) | mêmes fichiers + `app/api/pdf-to-word/route.ts` | `npx tsc --noEmit` → 0 erreur sur tout le projet |
+### Relecture indépendante de la route + du sanitiseur (Tâche 6) — résultat
+
+8 remarques reçues, classées par sévérité. Traitées dans le code avant tout commit :
+
+1. **HIGH — corrigé.** Les regex de chemins Windows/Unix excluaient les espaces (`\s`), donc un chemin réel du type `C:\Users\John Doe\Desktop\my resume.docx` n'était nettoyé que jusqu'au premier espace ("John"), laissant fuiter "Doe\Desktop\my". Corrigé : ces regex ne s'arrêtent plus qu'à un guillemet/chevron/saut de ligne réel — sur-rédiger le reste du message est la direction sûre.
+2. **MEDIUM-HIGH — corrigé.** `errorMessage` soumis par le navigateur n'était que tronqué (300 car.) côté serveur, jamais re-nettoyé — un appel curl direct sur la route pouvait injecter du texte non nettoyé dans `tool_errors.error_message`. `insertToolError` appelle maintenant `sanitizeErrorMessage` elle-même, quel que soit l'appelant.
+3. **MEDIUM — corrigé.** Les noms de fichiers non-latins (`文档.pdf`, `отчёт.xlsx`) sans préfixe de chemin n'étaient pas repérés du tout : `\b` est défini via `\w` (ASCII) et ne "voit" pas de frontière avant un caractère non-latin précédé d'un espace. Remplacé par des bornes explicites (espace/guillemet/parenthèse/chevron/début-fin de chaîne) au lieu de `\b`.
+4. **LOW-MEDIUM — corrigé.** Un nom de fichier de plus de 80 caractères sans espace pouvait laisser fuiter son préfixe (le moteur regex ne peut matcher que jusqu'à 80 caractères avant le point d'extension). Plafond relevé à 200 (aucun système de fichiers réel n'autorise un composant de nom de plus de 255 caractères).
+5. **MEDIUM — corrigé.** `checkToolErrorRateLimit` pouvait lever une exception non interceptée si Supabase répondait en erreur, faisant planter la route au lieu de répondre proprement. Ajout d'un `try/catch` autour de l'appel, réponse `503` en cas d'échec.
+6. **LOW-MEDIUM — documenté, non corrigé.** La confiance dans le premier maillon de `X-Forwarded-For` est partagée avec `lib/quota/ipRateLimit.js` existant (déjà en production pour les routes payantes) — corriger unilatéralement ce fichier-ci créerait une incohérence avec l'infra existante sans confirmation du comportement réel de Vercel sur les en-têtes XFF. Signalé dans le rapport final comme limitation connue, partagée avec l'infra existante.
+7. **LOW — corrigé.** Le contrôle de taille du corps comparait `.length` (unités UTF-16) à `MAX_BODY_BYTES`, sous-évaluant la taille réelle sur le fil pour un message riche en caractères multi-octets. Remplacé par `Buffer.byteLength(rawBody, 'utf8')`.
+8. **LOW — documenté, non corrigé.** Le corps est entièrement bufferisé (`request.text()`) avant le contrôle de taille, sans vérification préalable de `Content-Length`. Risque réel jugé faible (bornes de charge utile de la plateforme Vercel en amont) — non corrigé pour rester minimal, signalé dans le rapport final.
+
+Confirmé sans problème par la relecture : (a) aucun chemin n'atteint `insertToolError` sans passer par le rate limiter ET la validation stricte des champs ; (b) la liste blanche de champs rejette bien tout champ imprévu, y compris `__proto__` (simple clé JSON rejetée comme non listée, pas de pollution de prototype réelle) ; (d) le bucket du rate limiter dédié est bien séparé du budget des routes payantes, les deux plafonds (heure/jour) s'appliquent avant toute écriture, pas de race condition (upsert atomique Postgres) ; (e) la route ne renvoie jamais de détail d'erreur au client, un échec d'insertion ne fait jamais planter la route.
+
+5 nouveaux cas de test de non-régression ajoutés dans `scripts/error-reporting-tests/01-sanitize.js` pour les points 1, 3, 4 ci-dessus, plus un test de non-blocage sur entrée pathologique — tous passent.
+
+Correctif mineur additionnel : `app/lib/reportError.js`'s `reportToolError` a reçu un JSDoc et un défaut `file = null` (les erreurs de lot/timeout d'`image-converter` n'ont pas toujours un fichier précis identifiable) — sans ce correctif, TypeScript inférait `file` comme obligatoire.
 
 ## Modifié mais pas encore testé en conditions réelles
 
-- **Route `/api/report-error`** — écrite, pas encore testée en vrai (curl / navigateur) : en attente du retour de la relecture indépendante avant de committer, et de l'application de `supabase/tool_errors.sql` en base par l'utilisateur pour pouvoir vérifier qu'une ligne est réellement insérée.
-- **Les 5 routes serveur modifiées** (`pdf-repair`, `pdf-to-pdfa`, `convert-html-to-pdf`, `convert-to-pdf`, `pdf-to-word`) — le typecheck passe, mais aucun appel réel n'a été déclenché (nécessiterait Gotenberg/ConvertAPI/le service pdf-tools configurés, absents en local). Aucun de ces chemins n'a encore été exercé pour de vrai.
+- **Route `/api/report-error`** — écrite et relue, pas encore testée en vrai (curl / navigateur) : en attente de l'application de `supabase/tool_errors.sql` en base par l'utilisateur pour pouvoir vérifier qu'une ligne est réellement insérée. Prévu Tâche 17.
+- **Les 5 routes serveur modifiées** (`pdf-repair`, `pdf-to-pdfa`, `convert-html-to-pdf`, `convert-to-pdf`, `pdf-to-word`) — le typecheck passe, mais aucun appel réel n'a été déclenché (nécessiterait Gotenberg/ConvertAPI/le service pdf-tools configurés, absents en local).
+- **Les 5 outils TIFF/HEIC instrumentés** — typecheck OK, mais aucun test navigateur réel encore effectué (prévu en Tâche 17 avec les autres outils, pour éviter de retester manuellement à chaque lot).
 
 ## Reste à faire
 
-1. Committer la route de collecte une fois la relecture indépendante close et ses remarques traitées (Tâche 6).
-2. **Instrumentation navigateur** (Tâches 9-13) : 3 outils TIFF, 2 HEIC, 9 ffmpeg.wasm (audio/vidéo), 4 PDF client, 1 ZIP — 19 outils au total.
-3. **Agrégation + alerte quotidienne** (Tâche 14) dans le cron `health-check` existant.
-4. **Page de confidentialité** (Tâche 15).
-5. **Proposition page admin, sans construction** (Tâche 16).
-6. **Rapport final, tests manuels, build, commit, push, déploiement, vérification unique** (Tâche 17).
+1. **Instrumentation navigateur restante** (Tâches 11-13) : 9 ffmpeg.wasm (audio/vidéo), 4 PDF client, 1 ZIP — 14 outils.
+2. **Agrégation + alerte quotidienne** (Tâche 14) dans le cron `health-check` existant.
+3. **Page de confidentialité** (Tâche 15).
+4. **Proposition page admin, sans construction** (Tâche 16).
+5. **Rapport final, tests manuels, build, commit, push, déploiement, vérification unique** (Tâche 17).
 
 **Action utilisateur en attente** : exécuter `supabase/tool_errors.sql` dans l'éditeur SQL Supabase avant que les tests bout-en-bout ne puissent réellement écrire/lire des lignes.
 
 ## Pour reprendre
 
-Si la session s'arrête ici : le lot des routes serveur (Tâches 7-8) est committé et propre (typecheck OK). La route de collecte (`app/api/report-error/route.js`) existe sur disque mais N'EST PAS ENCORE COMMITÉE — elle attend le retour de la relecture indépendante lancée en tâche de fond. Reprendre en vérifiant d'abord si cette relecture est revenue ; sinon relancer une relecture équivalente avant de committer la route, puis continuer à la Tâche 9 (instrumentation TIFF) du plan.
+Si la session s'arrête ici : les lots "modules partagés" (Tâches 1-5), "routes serveur" (Tâches 7-8), "route de collecte relue et corrigée" (Tâche 6) et "TIFF+HEIC" (Tâches 9-10) sont tous committés et propres (typecheck + tests OK). Prochaine étape : Tâche 11 (instrumentation des 9 outils ffmpeg.wasm) du plan.
