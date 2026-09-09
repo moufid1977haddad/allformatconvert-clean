@@ -1,9 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { TIFF_DECODE_TIMEOUT_MS } from '../../../lib/tiffDecode';
-
-const TIMEOUT_MESSAGE = "This file is taking far longer than a normal TIFF to decode, which usually means it uses a TIFF variant this tool can't read correctly (this happens with some non-standard LZW-compressed TIFFs). Try re-saving the file with a different compression setting (Deflate/ZIP or uncompressed) in an image editor such as GIMP or IrfanView, or convert it with desktop software and re-upload the result.";
+import { TIFF_DECODE_TIMEOUT_MS, TIFF_DECODE_TIMEOUT_MESSAGE } from '../../../lib/tiffDecode';
 
 export default function TiffToJpgPage() {
   const [file, setFile] = useState(null);
@@ -59,7 +57,7 @@ export default function TiffToJpgPage() {
 
     timeoutRef.current = setTimeout(() => {
       stopWorker();
-      setError(TIMEOUT_MESSAGE);
+      setError(TIFF_DECODE_TIMEOUT_MESSAGE);
       setLoading(false);
     }, TIFF_DECODE_TIMEOUT_MS);
 

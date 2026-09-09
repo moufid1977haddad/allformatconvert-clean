@@ -5,6 +5,7 @@ import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
 import { MAX_MEGAPIXELS, MOBILE_MAX_MEGAPIXELS, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL, MOBILE_MAX_FILE_SIZE_BYTES, MOBILE_MAX_FILE_SIZE_LABEL } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
+import { TIFF_DECODE_TIMEOUT_MS, TIFF_DECODE_TIMEOUT_MESSAGE } from '../../../lib/tiffDecode';
 
 interface ConvertedFile {
   originalName: string;
@@ -25,6 +26,7 @@ export default function ImageConverterPage() {
   const [isMobile, setIsMobile] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const workerRef = useRef<Worker | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setIsMobile(isMobileDevice());
@@ -55,14 +57,24 @@ export default function ImageConverterPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [maxFileBytes, isMobile]);
 
-  const cancel = () => {
+  const stopWorker = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     if (workerRef.current) {
       workerRef.current.terminate();
       workerRef.current = null;
     }
+  };
+
+  const cancel = () => {
+    stopWorker();
     setProcessing(false);
     setProgress(0);
   };
+
+  useEffect(() => () => stopWorker(), []);
 
   const isHeic = (f: File) => /^image\/heic|^image\/heif/.test(f.type) || /\.(heic|heif)$/i.test(f.name);
 
@@ -104,7 +116,25 @@ export default function ImageConverterPage() {
     const worker = new Worker(new URL('./imageConverter.worker.js', import.meta.url), { type: 'module' });
     workerRef.current = worker;
 
+    // A single hung file (e.g. a non-standard TIFF UTIF2 loops forever on --
+    // see app/lib/tiffDecode.js) would otherwise block the whole batch with
+    // no way out but the manual Cancel button below. This re-arms on every
+    // message the worker sends, so it only fires when the worker has gone
+    // silent for the full timeout -- a large batch of many valid files
+    // keeps resetting it as each one finishes, only a stuck one lets it run
+    // out.
+    const armWatchdog = () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        stopWorker();
+        setProcessing(false);
+        setProgress(0);
+        setError(TIFF_DECODE_TIMEOUT_MESSAGE);
+      }, TIFF_DECODE_TIMEOUT_MS);
+    };
+
     worker.onmessage = (e) => {
+      armWatchdog();
       const msg = e.data;
       if (msg.type === 'progress') {
         setProgress(msg.pct);
@@ -115,19 +145,20 @@ export default function ImageConverterPage() {
         failures.push(`${msg.name}: ${msg.message}`);
         setError(`${failures.length} file${failures.length > 1 ? 's' : ''} failed to convert:\n` + failures.join('\n'));
       } else if (msg.type === 'done') {
+        stopWorker();
         setProcessing(false);
-        workerRef.current = null;
       } else if (msg.type === 'error') {
+        stopWorker();
         setProcessing(false);
-        workerRef.current = null;
         setError('Conversion failed: ' + msg.message);
       }
     };
     worker.onerror = (err) => {
+      stopWorker();
       setProcessing(false);
-      workerRef.current = null;
       setError('Conversion failed: ' + (err?.message || 'unknown worker error'));
     };
+    armWatchdog();
     worker.postMessage({ items, format, quality, maxMegapixels });
   };
 
