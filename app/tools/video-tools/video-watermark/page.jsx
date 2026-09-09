@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
+import { reportToolError } from '../../../lib/reportError';
 
 const MAX_DURATION = 120;
 
@@ -406,6 +407,7 @@ export default function VideoWatermarkPage() {
         // at the console as their main instruction, that's for a developer
         // reading the console.error above.
         const reason = (e && e.message) || (typeof e === 'string' ? e : null) || describeFfmpegFailure(logLines.join('\n'));
+        reportToolError({ tool: 'video-watermark', file, error: e instanceof Error ? e : new Error(String(reason)) });
         setError('Watermarking failed: ' + reason);
       }
     } finally {

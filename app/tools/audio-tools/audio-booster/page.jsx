@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { AUDIO_OUTPUT_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
+import { reportToolError } from '../../../lib/reportError';
 
 export default function AudioBoosterPage() {
   const [file, setFile] = useState(null);
@@ -42,6 +43,7 @@ export default function AudioBoosterPage() {
       // with zero way to diagnose what actually happened.
       console.error('Boost failed:', e);
       const reason = (e && e.message) || (typeof e === 'string' ? e : null) || 'an unknown error -- check the browser console for details';
+      reportToolError({ tool: 'audio-booster', file, error: e instanceof Error ? e : new Error(String(reason)) });
       setError('Boost failed: ' + reason);
     }
     setLoading(false);

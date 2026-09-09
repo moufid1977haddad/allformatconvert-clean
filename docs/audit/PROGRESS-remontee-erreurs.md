@@ -16,6 +16,7 @@ Suivi de reprise pour ce chantier. Mis à jour et commité après chaque lot. Pl
 | Journalisation `tool_errors` côté serveur sur ces 4 chemins + `pdf-to-word` | mêmes fichiers + `app/api/pdf-to-word/route.ts` | `npx tsc --noEmit` → 0 erreur sur tout le projet |
 | Instrumentation TIFF (3 outils, chemin Worker partagé) | `app/tools/image-tools/tiff-to-png/page.jsx`, `tiff-to-jpg/page.jsx`, `image-converter/page.tsx` | `npx tsc --noEmit` → 0 erreur |
 | Instrumentation HEIC (2 outils) | `app/tools/image-tools/heic-to-jpg/page.jsx`, `heic-to-png/page.jsx` | Relecture manuelle — structure identique confirmée avant édition |
+| Instrumentation ffmpeg.wasm (9 outils audio/vidéo) | `audio-converter`, `audio-compressor`, `audio-booster`, `audio-splitter`, `audio-trimmer`, `audio-merger`, `video-to-audio`, `video-watermark`, `gif-to-mp4` (tous `page.jsx`) | Chaque fichier relu individuellement avant édition (formes légèrement différentes : `setError` vs `setStatus`, garde `ffmpegRef.current`, `audio-merger` en plusieurs fichiers sans "le" fichier unique). `npx tsc --noEmit` → 0 erreur. `grep -c reportToolError` → 2 par fichier (import + appel) sur les 9 |
 
 ### Relecture indépendante de la route + du sanitiseur (Tâche 6) — résultat
 
@@ -40,11 +41,11 @@ Correctif mineur additionnel : `app/lib/reportError.js`'s `reportToolError` a re
 
 - **Route `/api/report-error`** — écrite et relue, pas encore testée en vrai (curl / navigateur) : en attente de l'application de `supabase/tool_errors.sql` en base par l'utilisateur pour pouvoir vérifier qu'une ligne est réellement insérée. Prévu Tâche 17.
 - **Les 5 routes serveur modifiées** (`pdf-repair`, `pdf-to-pdfa`, `convert-html-to-pdf`, `convert-to-pdf`, `pdf-to-word`) — le typecheck passe, mais aucun appel réel n'a été déclenché (nécessiterait Gotenberg/ConvertAPI/le service pdf-tools configurés, absents en local).
-- **Les 5 outils TIFF/HEIC instrumentés** — typecheck OK, mais aucun test navigateur réel encore effectué (prévu en Tâche 17 avec les autres outils, pour éviter de retester manuellement à chaque lot).
+- **Les 14 outils TIFF/HEIC/ffmpeg instrumentés** — typecheck OK, mais aucun test navigateur réel encore effectué (prévu en Tâche 17 avec les autres outils, pour éviter de retester manuellement à chaque lot).
 
 ## Reste à faire
 
-1. **Instrumentation navigateur restante** (Tâches 11-13) : 9 ffmpeg.wasm (audio/vidéo), 4 PDF client, 1 ZIP — 14 outils.
+1. **Instrumentation navigateur restante** (Tâches 12-13) : 4 PDF client (pdf-ocr, pdf-to-image, pdf-to-jpg, pdf-extract-text), 1 ZIP — 5 outils.
 2. **Agrégation + alerte quotidienne** (Tâche 14) dans le cron `health-check` existant.
 3. **Page de confidentialité** (Tâche 15).
 4. **Proposition page admin, sans construction** (Tâche 16).
@@ -54,4 +55,4 @@ Correctif mineur additionnel : `app/lib/reportError.js`'s `reportToolError` a re
 
 ## Pour reprendre
 
-Si la session s'arrête ici : les lots "modules partagés" (Tâches 1-5), "routes serveur" (Tâches 7-8), "route de collecte relue et corrigée" (Tâche 6) et "TIFF+HEIC" (Tâches 9-10) sont tous committés et propres (typecheck + tests OK). Prochaine étape : Tâche 11 (instrumentation des 9 outils ffmpeg.wasm) du plan.
+Si la session s'arrête ici : les lots "modules partagés" (Tâches 1-5), "routes serveur" (Tâches 7-8), "route de collecte relue et corrigée" (Tâche 6), "TIFF+HEIC" (Tâches 9-10) et "ffmpeg.wasm" (Tâche 11) sont tous committés et propres (typecheck OK). Prochaine étape : Tâche 12 (instrumentation des 4 outils PDF côté client) du plan.

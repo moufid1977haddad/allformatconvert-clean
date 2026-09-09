@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { reportToolError } from '../../../lib/reportError';
 
 export default function AudioMergerPage() {
   const [files, setFiles] = useState([]);
@@ -113,6 +114,9 @@ export default function AudioMergerPage() {
       // with zero way to diagnose what actually happened.
       console.error('Merge failed:', e);
       const reason = (e && e.message) || (typeof e === 'string' ? e : null) || 'an unknown error -- check the browser console for details';
+      // No single "the file" for a multi-file merge -- ext/sizeBucket stay
+      // null rather than reporting just the first of several files.
+      reportToolError({ tool: 'audio-merger', error: e instanceof Error ? e : new Error(String(reason)) });
       setError('Merge failed: ' + reason);
     }
     setLoading(false);

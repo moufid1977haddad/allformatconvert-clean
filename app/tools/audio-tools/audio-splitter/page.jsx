@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { AUDIO_OUTPUT_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
+import { reportToolError } from '../../../lib/reportError';
 
 export default function AudioSplitterPage() {
   const [file, setFile] = useState(null);
@@ -68,6 +69,7 @@ export default function AudioSplitterPage() {
       // with zero way to diagnose what actually happened.
       console.error('Split failed:', e);
       const reason = (e && e.message) || (typeof e === 'string' ? e : null) || 'an unknown error -- check the browser console for details';
+      reportToolError({ tool: 'audio-splitter', file, error: e instanceof Error ? e : new Error(String(reason)) });
       setError('Split failed: ' + reason);
     }
     setLoading(false);

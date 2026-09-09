@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { reportToolError } from '../../../lib/reportError';
 export default function GifToMp4Page() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
@@ -42,6 +43,7 @@ export default function GifToMp4Page() {
       // with zero way to diagnose what actually happened.
       console.error('Conversion failed:', e);
       const reason = (e && e.message) || (typeof e === 'string' ? e : null) || 'an unknown error -- check the browser console for details';
+      reportToolError({ tool: 'gif-to-mp4', file, error: e instanceof Error ? e : new Error(String(reason)) });
       setError('Conversion failed: ' + reason);
     }
     setLoading(false);
