@@ -19,6 +19,8 @@ Suivi de reprise pour ce chantier. Mis à jour et commité après chaque lot. Pl
 | Instrumentation ffmpeg.wasm (9 outils audio/vidéo) | `audio-converter`, `audio-compressor`, `audio-booster`, `audio-splitter`, `audio-trimmer`, `audio-merger`, `video-to-audio`, `video-watermark`, `gif-to-mp4` (tous `page.jsx`) | Chaque fichier relu individuellement avant édition (formes légèrement différentes : `setError` vs `setStatus`, garde `ffmpegRef.current`, `audio-merger` en plusieurs fichiers sans "le" fichier unique). `npx tsc --noEmit` → 0 erreur. `grep -c reportToolError` → 2 par fichier (import + appel) sur les 9 |
 | Instrumentation PDF côté client (4 outils) | `pdf-ocr`, `pdf-to-image`, `pdf-to-jpg`, `pdf-extract-text` (tous `page.jsx`) | `npx tsc --noEmit` → 0 erreur. Vigilance particulière : `pdf-ocr` et `pdf-extract-text` ne rapportent que l'erreur de décodage/parsing, jamais `output`/`text` (le contenu extrait) |
 | Instrumentation ZIP Extractor | `app/tools/file-tools/zip-extractor/page.jsx` | `npx tsc --noEmit` → 0 erreur |
+| Agrégation quotidienne + alerte systémique (réutilise le cron `health-check` existant, `checkStateTransition`, `sendAlert` — aucun nouveau job) | `app/api/cron/health-check/route.ts` | `npx tsc --noEmit` → 0 erreur. Purge à 90 jours de `tool_errors` ajoutée au même bloc de housekeeping existant |
+| Page de confidentialité mise à jour (nouveau point "Failure Reports" en section 2, rétention en section 6, date mise à jour) | `app/privacy/page.jsx` | `npx tsc --noEmit` → 0 erreur ; relecture manuelle du texte contre le contrat de champs exact |
 
 ### Relecture indépendante de la route + du sanitiseur (Tâche 6) — résultat
 
@@ -47,13 +49,11 @@ Correctif mineur additionnel : `app/lib/reportError.js`'s `reportToolError` a re
 
 ## Reste à faire
 
-1. **Agrégation + alerte quotidienne** (Tâche 14) dans le cron `health-check` existant.
-2. **Page de confidentialité** (Tâche 15).
-3. **Proposition page admin, sans construction** (Tâche 16).
-4. **Rapport final, tests manuels, build, commit, push, déploiement, vérification unique** (Tâche 17).
+1. **Proposition page admin, sans construction** (Tâche 16) — pas de code, juste une estimation dans le rapport.
+2. **Rapport final, tests manuels, build, commit, push, déploiement, vérification unique** (Tâche 17).
 
 **Action utilisateur en attente** : exécuter `supabase/tool_errors.sql` dans l'éditeur SQL Supabase avant que les tests bout-en-bout ne puissent réellement écrire/lire des lignes.
 
 ## Pour reprendre
 
-Si la session s'arrête ici : toute l'instrumentation navigateur est terminée et committée (Tâches 1-13, typecheck OK partout). Il ne reste que la partie serveur/documentation : agrégation cron (Tâche 14), page de confidentialité (Tâche 15), proposition admin non construite (Tâche 16), puis tests manuels + rapport final + déploiement (Tâche 17). Aucun test navigateur réel n'a encore eu lieu — c'est délibéré, regroupé en Tâche 17 pour ne tester qu'une seule fois l'ensemble plutôt qu'à chaque lot.
+Si la session s'arrête ici : tout le code est terminé et committé (Tâches 1-15, typecheck OK partout) — modules partagés, route de collecte relue, 4 routes serveur + pdf-to-word alertées et journalisées, 19 outils navigateur instrumentés, agrégation quotidienne dans le cron existant, page de confidentialité à jour. Il ne reste que : la proposition (non construite) de page admin (Tâche 16), puis les tests manuels réels + le rapport final + build/commit/push/déploiement/vérification (Tâche 17) — rien de tout cela n'a encore été fait, aucun test navigateur réel n'a encore eu lieu (délibérément regroupé en une seule passe finale plutôt qu'à chaque lot).

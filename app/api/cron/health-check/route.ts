@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendAlert } from "@/lib/alert";
 import { supabaseAdmin } from "@/lib/quota/supabaseAdmin";
-import { GLOBAL_SPEND_CAP_MICROS } from "@/lib/quota/config";
+import { GLOBAL_SPEND_CAP_MICROS, TOOL_ERROR_ALERT_THRESHOLD_PER_DAY } from "@/lib/quota/config";
 import { currentUtcMonthKey, currentUtcDayKey } from "@/lib/quota/period";
 import { checkStateTransition } from "@/lib/quota/alertState";
 
@@ -151,6 +151,53 @@ async function buildDailyDigest() {
   return `spend $${spendUsd}/$${capUsd}, top tools: ${topToolsStr}, refusals today: ip=${ipHourDenials} cap=${capDenials} quota=${quotaDenials}`;
 }
 
+// Distinguishes an isolated one-off failure from a tool that's
+// systematically broken (see docs/audit/RAPPORT-remontee-erreurs.md):
+// counts tool_errors rows per tool over the trailing 24h and alerts once
+// per tool on crossing into "problem" state, using the same
+// checkStateTransition machinery the per-dependency health checks above
+// already use -- so a tool that's still over-threshold on tomorrow's run
+// stays silent, and a matching "recovered" alert fires once it drops back
+// under. Runs once per (daily) cron invocation, not a new scheduled job.
+async function checkToolErrorRates() {
+  const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  const { data, error } = await supabaseAdmin
+    .from("tool_errors").select("tool").gte("created_at", since);
+  if (error) {
+    console.error("health-check: tool_errors read failed (non-fatal):", error.message);
+    return;
+  }
+
+  const counts: Record<string, number> = {};
+  for (const row of data || []) {
+    if (!row.tool) continue;
+    counts[row.tool] = (counts[row.tool] || 0) + 1;
+  }
+
+  // Every tool that was over threshold on a PRIOR run and has since fallen
+  // silent (zero rows today) needs its own transition check too, so a
+  // recovery still fires -- not just tools present in today's counts.
+  const { data: activeProblems, error: activeErr } = await supabaseAdmin
+    .from("usage_counters").select("bucket_key")
+    .like("bucket_key", "alert_state:tool-error-rate:%").eq("value", 1);
+  if (activeErr) console.error("health-check: active tool-error-rate state read failed (non-fatal):", activeErr.message);
+  for (const row of activeProblems || []) {
+    const tool = row.bucket_key.replace("alert_state:tool-error-rate:", "");
+    if (!(tool in counts)) counts[tool] = 0;
+  }
+
+  for (const [tool, count] of Object.entries(counts)) {
+    const isProblem = count >= TOOL_ERROR_ALERT_THRESHOLD_PER_DAY;
+    const transition = await checkStateTransition(`tool-error-rate:${tool}`, isProblem);
+    if (transition.alert) {
+      await sendAlert(
+        "tool-error-rate",
+        transition.recovered ? `recovered: ${tool}` : `${tool}: ${count} failures in the last 24h (threshold ${TOOL_ERROR_ALERT_THRESHOLD_PER_DAY})`
+      );
+    }
+  }
+}
+
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
@@ -184,6 +231,8 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  await checkToolErrorRates();
+
   const digest = await buildDailyDigest();
   await sendAlert("daily-digest", digest);
 
@@ -197,6 +246,9 @@ export async function GET(request: NextRequest) {
   const { error: eventsDeleteErr } = await supabaseAdmin
     .from("usage_events").delete().lt("created_at", ninetyDaysAgo);
   if (eventsDeleteErr) console.error("health-check housekeeping: usage_events prune failed (non-fatal):", eventsDeleteErr.message);
+  const { error: toolErrorsDeleteErr } = await supabaseAdmin
+    .from("tool_errors").delete().lt("created_at", ninetyDaysAgo);
+  if (toolErrorsDeleteErr) console.error("health-check housekeeping: tool_errors prune failed (non-fatal):", toolErrorsDeleteErr.message);
 
   return NextResponse.json({ checks });
 }
