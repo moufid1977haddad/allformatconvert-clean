@@ -68,10 +68,25 @@ export function sanitizeErrorMessage(message, fileName) {
   }
 
   out = out
-    .replace(/[A-Za-z]:\\[^\s"'<>]+/g, '[path]') // Windows paths
-    .replace(/(?:\.{1,2}\/|\/)[^\s"'<>]*\/[^\s"'<>]*/g, '[path]') // unix-ish paths
-    .replace(/\b[^\s"'()<>]{1,80}\.[A-Za-z0-9]{2,5}\b/g, (match) =>
-      /^(e\.g|i\.e|etc)\.[a-z]{1,3}$/i.test(match) ? match : '[file]'
+    // Windows/unix-ish paths: deliberately do NOT stop at a plain space --
+    // real paths routinely contain them ("C:\Users\John Doe\...",
+    // "/Users/John Doe/..."), and a naive \s-excluding class only redacts
+    // up to the first space, leaking every real name/folder after it. Only
+    // stop at a quote/bracket/newline (a real delimiter) or end of string;
+    // over-redacting the rest of the message is the safe direction here.
+    .replace(/[A-Za-z]:\\[^\r\n"'<>]+/g, '[path]') // Windows paths
+    .replace(/(?:\.{1,2}\/|\/)[^\r\n"'<>]*\/[^\r\n"'<>]*/g, '[path]') // unix-ish paths
+    // Filename-shaped tokens: bounded by whitespace/quotes/brackets/string
+    // edges rather than \b, which is defined via ASCII \w and silently
+    // fails to bound a filename that starts with a non-Latin character
+    // (e.g. "文档.pdf", "отчёт.xlsx") with nothing but a space before it.
+    // {1,200}, not {1,80}: a regex engine can only match {1,80} starting up
+    // to 80 chars before the extension's dot, so anything longer than the
+    // cap leaves its prefix unmatched and leaking -- 200 covers every real
+    // filename (filesystems cap components at 255 chars/bytes) while still
+    // bounded by MAX_MESSAGE_LENGTH below.
+    .replace(/(^|[\s"'()<>])([^\s"'()<>]{1,200}\.[A-Za-z0-9]{2,5})(?=[\s"'()<>]|$)/g, (m, pre, token) =>
+      pre + (/^(e\.g|i\.e|etc)\.[a-z]{1,3}$/i.test(token) ? token : '[file]')
     )
     .replace(/\s+/g, ' ')
     .trim();
@@ -85,7 +100,10 @@ export function sanitizeErrorMessage(message, fileName) {
 // sendBeacon missing, fetch throwing, JSON.stringify throwing on a weird
 // error object -- is swallowed. Never call this with `await` expecting it
 // to matter; it deliberately returns undefined, not a promise.
-export function reportToolError({ tool, source = 'browser', file, error }) {
+/**
+ * @param {{ tool: string, source?: 'browser'|'server', file?: {name?: string, size?: number} | null, error?: Error | string | null | undefined }} args
+ */
+export function reportToolError({ tool, source = 'browser', file = null, error }) {
   try {
     const message = (error && typeof error.message === 'string') ? error.message
       : (typeof error === 'string' ? error : '');
