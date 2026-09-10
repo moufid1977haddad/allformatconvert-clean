@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { TIFF_DECODE_TIMEOUT_MS, TIFF_DECODE_TIMEOUT_MESSAGE } from '../../../lib/tiffDecode';
+import { reportToolError } from '../../../lib/reportError';
 
 export default function TiffToJpgPage() {
   const [file, setFile] = useState(null);
@@ -57,6 +58,7 @@ export default function TiffToJpgPage() {
 
     timeoutRef.current = setTimeout(() => {
       stopWorker();
+      reportToolError({ tool: 'tiff-to-jpg', file, error: new Error('decode_timeout') });
       setError(TIFF_DECODE_TIMEOUT_MESSAGE);
       setLoading(false);
     }, TIFF_DECODE_TIMEOUT_MS);
@@ -71,12 +73,14 @@ export default function TiffToJpgPage() {
         setLoading(false);
       } else if (msg.type === 'error') {
         stopWorker();
+        reportToolError({ tool: 'tiff-to-jpg', file, error: new Error(msg.message) });
         setError(msg.knownLimitation ? msg.message : 'Could not decode this TIFF file: ' + msg.message);
         setLoading(false);
       }
     };
     worker.onerror = (err) => {
       stopWorker();
+      reportToolError({ tool: 'tiff-to-jpg', file, error: new Error(err?.message || 'unknown worker error') });
       setError('Could not decode this TIFF file: ' + (err?.message || 'unknown worker error'));
       setLoading(false);
     };

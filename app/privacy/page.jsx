@@ -3,7 +3,7 @@
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-2 text-neutral-800">Privacy Policy</h1>
-        <p className="text-neutral-500 text-center mb-10">Last updated: August 30, 2026</p>
+        <p className="text-neutral-500 text-center mb-10">Last updated: September 8, 2026</p>
         <div className="space-y-6">
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
@@ -27,6 +27,7 @@
               </li>
               <li><strong>Account Information:</strong> If you create an account, we collect your name and email address.</li>
               <li><strong>Usage Metrics:</strong> To operate fairly within our provider budgets and prevent abuse, we record which tool was used, when, an estimated processing cost, and — for the small number of tools that require an account — your account identifier. We never record file contents or the text you submit. For abuse-rate-limiting on tools that don't require an account, we record a one-way cryptographic hash of your IP address, never the address itself.</li>
+              <li><strong>Failure Reports:</strong> When a tool fails to process your file, we automatically record a small, anonymous record so we can find and fix the problem: the tool's name, the file's extension, a coarse size range (e.g. "1-10MB" — never the exact size), the type and a cleaned error message, a coarse browser name and version (e.g. "Chrome 129" — never your full browser signature), and the time. We never record your file, any part of its content, its real filename, your IP address, or anything else that could identify you. Nothing is sent when a tool succeeds.</li>
             </ul>
           </div>
 
@@ -67,7 +68,7 @@
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">6. Data Retention</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">We retain your personal data only for as long as necessary to provide the service. Usage metrics (described in Section 2) are kept for 90 days. Hashed-IP rate-limit records are kept for 2 days.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">We retain your personal data only for as long as necessary to provide the service. Usage metrics (described in Section 2) are kept for 90 days. Failure reports (described in Section 2) are also kept for 90 days. Hashed-IP rate-limit records are kept for 2 days.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">

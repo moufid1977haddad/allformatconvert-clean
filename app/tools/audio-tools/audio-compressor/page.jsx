@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { COMPRESSIBLE_AUDIO_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
+import { reportToolError } from '../../../lib/reportError';
 
 export default function AudioCompressorPage() {
   const [file, setFile] = useState(null);
@@ -44,6 +45,7 @@ export default function AudioCompressorPage() {
       // with zero way to diagnose what actually happened.
       console.error('Compression failed:', e);
       const reason = (e && e.message) || (typeof e === 'string' ? e : null) || 'an unknown error -- check the browser console for details';
+      reportToolError({ tool: 'audio-compressor', file, error: e instanceof Error ? e : new Error(String(reason)) });
       setError('Compression failed: ' + reason);
     }
     setLoading(false);

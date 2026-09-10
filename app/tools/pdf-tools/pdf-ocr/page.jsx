@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
+import { reportToolError } from '../../../lib/reportError';
 
 const LANGUAGES = [
   { code: 'afr', label: "Afrikaans" },
@@ -195,6 +196,10 @@ export default function Page() {
 
       setOutput(fullText.trim() ? fullText.trim() : 'No text was recognized in this PDF.');
     } catch (e) {
+      // Only the decode/OCR-engine error itself is ever reported -- never
+      // `output` (the recognized text), which is exactly the file content
+      // this feature must never transmit.
+      reportToolError({ tool: 'pdf-ocr', file, error: e });
       setError('OCR failed: ' + e.message);
     } finally {
       if (worker) {

@@ -3,6 +3,7 @@ import { convertPdfToDocx, ConvertApiError } from "@/lib/providers/convertApi";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES } from "@/lib/quota/limits";
 import { alertServerError } from "@/lib/quota/errorAlerts";
+import { buildServerToolError, insertToolError } from "@/lib/reportError";
 
 // Give the ConvertAPI round-trip enough headroom inside the function's own
 // execution budget -- same reasoning as convert-to-pdf/route.ts's identical
@@ -143,6 +144,12 @@ export async function POST(req: NextRequest) {
       // client with a .docx extension and no error would be worse than
       // refusing it here.
       await alertServerError("pdf-to-word", "non_docx_response");
+      await insertToolError(buildServerToolError({
+        tool: "pdf-to-word",
+        file,
+        error: new Error("non_docx_response"),
+        userAgent: req.headers.get("user-agent"),
+      }));
       return NextResponse.json({ error: "Conversion failed. Please try again." }, { status: 502 });
     }
 
@@ -181,11 +188,23 @@ export async function POST(req: NextRequest) {
         // Server-side only, and deliberately limited to the error code and
         // HTTP status -- never the token, never the raw upstream body.
         await alertServerError("pdf-to-word", `${err.code} (HTTP ${err.httpStatus ?? "n/a"})`);
+        await insertToolError(buildServerToolError({
+          tool: "pdf-to-word",
+          file,
+          error: new Error(`${err.code} (HTTP ${err.httpStatus ?? "n/a"})`),
+          userAgent: req.headers.get("user-agent"),
+        }));
       }
       return NextResponse.json({ error: mapped.message }, { status: mapped.status });
     }
 
     await alertServerError("pdf-to-word", "unexpected_error");
+    await insertToolError(buildServerToolError({
+      tool: "pdf-to-word",
+      file,
+      error: err instanceof Error ? err : new Error("unexpected_error"),
+      userAgent: req.headers.get("user-agent"),
+    }));
     return NextResponse.json({ error: "Conversion failed. Please try again." }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { reportToolError } from '../../../lib/reportError';
 
 export default function PdfToImagePage() {
   const [file, setFile] = useState(null);
@@ -41,6 +42,7 @@ export default function PdfToImagePage() {
       setImages(urls);
       setStatus('');
     } catch (err) {
+      reportToolError({ tool: 'pdf-to-image', file, error: err });
       setStatus('Error: ' + err.message);
     }
     setLoading(false);

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { alertServerError } from "@/lib/quota/errorAlerts";
+import { buildServerToolError, insertToolError } from "@/lib/reportError";
 
 // Give the Gotenberg round-trip (up to GOTENBERG_TIMEOUT_MS below) enough
 // headroom inside the function's own execution budget.
@@ -67,6 +69,13 @@ export async function POST(req: NextRequest) {
     }
     // Log only the failure kind, never credentials or the auth header.
     console.error("Gotenberg request failed:", err?.message || "unknown error");
+    await alertServerError("convert-html-to-pdf", `unreachable: ${err?.message || "unknown error"}`);
+    await insertToolError(buildServerToolError({
+      tool: "convert-html-to-pdf",
+      file,
+      error: err,
+      userAgent: req.headers.get("user-agent"),
+    }));
     return NextResponse.json({ error: "Could not reach the conversion service." }, { status: 502 });
   } finally {
     clearTimeout(timeoutId);
@@ -75,10 +84,18 @@ export async function POST(req: NextRequest) {
   if (!gotenbergResponse.ok) {
     if (gotenbergResponse.status === 401 || gotenbergResponse.status === 403) {
       console.error("Gotenberg rejected the request: authentication failed (status " + gotenbergResponse.status + ")");
+      await alertServerError("convert-html-to-pdf", "auth_failed_" + gotenbergResponse.status);
       return NextResponse.json({ error: "Conversion service authentication failed." }, { status: 502 });
     }
     const bodyText = await gotenbergResponse.text().catch(() => "");
     console.error("Gotenberg conversion error:", gotenbergResponse.status, bodyText.slice(0, 500));
+    await alertServerError("convert-html-to-pdf", `service_error_${gotenbergResponse.status}`);
+    await insertToolError(buildServerToolError({
+      tool: "convert-html-to-pdf",
+      file,
+      error: new Error(`service_error_${gotenbergResponse.status}`),
+      userAgent: req.headers.get("user-agent"),
+    }));
     return NextResponse.json(
       { error: "Conversion failed. The document may be corrupted or in an unsupported format." },
       { status: 502 }
@@ -90,6 +107,13 @@ export async function POST(req: NextRequest) {
   const isPdf = bytes.length >= 5 && String.fromCharCode(...bytes.slice(0, 5)) === "%PDF-";
   if (!isPdf) {
     console.error("Gotenberg returned a non-PDF response despite a 2xx status.");
+    await alertServerError("convert-html-to-pdf", "non_pdf_response");
+    await insertToolError(buildServerToolError({
+      tool: "convert-html-to-pdf",
+      file,
+      error: new Error("non_pdf_response"),
+      userAgent: req.headers.get("user-agent"),
+    }));
     return NextResponse.json({ error: "Conversion service returned an unexpected response." }, { status: 502 });
   }
 

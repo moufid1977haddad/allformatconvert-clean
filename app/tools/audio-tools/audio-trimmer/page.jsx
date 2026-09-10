@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { reportToolError } from '../../../lib/reportError';
 
 export default function AudioTrimmerPage() {
   const [file, setFile] = useState(null);
@@ -75,6 +76,7 @@ export default function AudioTrimmerPage() {
       // with zero way to diagnose what actually happened.
       console.error('Trim failed:', e);
       const reason = (e && e.message) || (typeof e === 'string' ? e : null) || 'an unknown error -- check the browser console for details';
+      reportToolError({ tool: 'audio-trimmer', file, error: e instanceof Error ? e : new Error(String(reason)) });
       setError('Trim failed: ' + reason);
     }
     setLoading(false);

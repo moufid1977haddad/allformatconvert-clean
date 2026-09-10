@@ -6,6 +6,7 @@ import ProgressBar from '../../../components/ProgressBar';
 import { MAX_MEGAPIXELS, MOBILE_MAX_MEGAPIXELS, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL, MOBILE_MAX_FILE_SIZE_BYTES, MOBILE_MAX_FILE_SIZE_LABEL } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { TIFF_DECODE_TIMEOUT_MS, TIFF_DECODE_TIMEOUT_MESSAGE } from '../../../lib/tiffDecode';
+import { reportToolError } from '../../../lib/reportError';
 
 interface ConvertedFile {
   originalName: string;
@@ -99,6 +100,7 @@ export default function ImageConverterPage() {
           const pngBlob = Array.isArray(decoded) ? decoded[0] : decoded;
           items.push({ name: file.name, originalSize: file.size, blob: pngBlob });
         } catch (err: any) {
+          reportToolError({ tool: 'image-converter', file, error: err instanceof Error ? err : new Error(String(err)) });
           failures.push(`${file.name}: Failed to decode this HEIC/HEIF file (${err?.message || 'unknown error'})`);
         }
       } else {
@@ -129,6 +131,7 @@ export default function ImageConverterPage() {
         stopWorker();
         setProcessing(false);
         setProgress(0);
+        reportToolError({ tool: 'image-converter', error: new Error('decode_timeout') });
         setError(TIFF_DECODE_TIMEOUT_MESSAGE);
       }, TIFF_DECODE_TIMEOUT_MS);
     };
@@ -143,6 +146,11 @@ export default function ImageConverterPage() {
         setConverted([...results]);
       } else if (msg.type === 'file-error') {
         failures.push(`${msg.name}: ${msg.message}`);
+        reportToolError({
+          tool: 'image-converter',
+          file: { name: msg.name, size: items[msg.index]?.originalSize },
+          error: new Error(msg.message),
+        });
         setError(`${failures.length} file${failures.length > 1 ? 's' : ''} failed to convert:\n` + failures.join('\n'));
       } else if (msg.type === 'done') {
         stopWorker();
@@ -150,12 +158,14 @@ export default function ImageConverterPage() {
       } else if (msg.type === 'error') {
         stopWorker();
         setProcessing(false);
+        reportToolError({ tool: 'image-converter', error: new Error(msg.message) });
         setError('Conversion failed: ' + msg.message);
       }
     };
     worker.onerror = (err) => {
       stopWorker();
       setProcessing(false);
+      reportToolError({ tool: 'image-converter', error: new Error(err?.message || 'unknown worker error') });
       setError('Conversion failed: ' + (err?.message || 'unknown worker error'));
     };
     armWatchdog();

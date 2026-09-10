@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
 import { AUDIO_OUTPUT_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
+import { reportToolError } from '../../../lib/reportError';
 
 export default function VideoToAudioPage() {
   const [file, setFile] = useState(null);
@@ -63,6 +64,7 @@ export default function VideoToAudioPage() {
       console.error('Extraction failed:', e);
       if (ffmpegRef.current) {
         const reason = (e && e.message) || (typeof e === 'string' ? e : null) || 'an unknown error -- check the browser console for details';
+        reportToolError({ tool: 'video-to-audio', file, error: e instanceof Error ? e : new Error(String(reason)) });
         setStatus('Error: ' + reason);
       }
     }
