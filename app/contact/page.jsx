@@ -1,5 +1,17 @@
 ﻿'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { sniffFormat } from '../lib/detectFileFormat';
+
+const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024;
+const MAX_ATTACHMENTS_TOTAL_BYTES = 10 * 1024 * 1024;
+const MAX_ATTACHMENTS_COUNT = 3;
+const ACCEPTED_FORMATS = new Set(['png', 'jpg', 'gif', 'webp']);
+const ACCEPTED_LABEL = 'PNG, JPEG, GIF, or WebP';
+const ATTACHMENT_HINT = `Up to ${MAX_ATTACHMENTS_COUNT} images (${ACCEPTED_LABEL}), 5 MB each, 10 MB total. Click, drag & drop, or paste a screenshot.`;
+
+function formatBytes(bytes) {
+  return bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.ceil(bytes / 1024)} KB`;
+}
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -7,10 +19,81 @@ export default function ContactPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '', agree: false });
+  const [files, setFiles] = useState([]);
+  const [fileError, setFileError] = useState('');
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef();
+  const nextFileId = useRef(0);
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
     setForm({ ...form, [name]: type === 'checkbox' ? checked : value });
+  }
+
+  // Client-side check only, for instant feedback -- the server re-validates
+  // every one of these against the real bytes and is the actual security
+  // boundary (see app/api/contact/route.js).
+  async function addFiles(candidates) {
+    setFileError('');
+    const imageCandidates = candidates.filter((f) => f instanceof File);
+    if (imageCandidates.length === 0) return;
+
+    let currentCount = files.length;
+    let currentTotal = files.reduce((sum, f) => sum + f.file.size, 0);
+    const accepted = [];
+    let rejectionReason = '';
+
+    for (const file of imageCandidates) {
+      if (currentCount >= MAX_ATTACHMENTS_COUNT) {
+        rejectionReason = `You can attach up to ${MAX_ATTACHMENTS_COUNT} images.`;
+        break;
+      }
+      if (file.size === 0 || file.size > MAX_ATTACHMENT_BYTES) {
+        rejectionReason = `Each image must be ${formatBytes(MAX_ATTACHMENT_BYTES)} or smaller.`;
+        continue;
+      }
+      if (currentTotal + file.size > MAX_ATTACHMENTS_TOTAL_BYTES) {
+        rejectionReason = `Attachments can't add up to more than ${formatBytes(MAX_ATTACHMENTS_TOTAL_BYTES)} total.`;
+        continue;
+      }
+      const buffer = await file.arrayBuffer();
+      const detected = sniffFormat(buffer);
+      if (!detected || !ACCEPTED_FORMATS.has(detected.format)) {
+        rejectionReason = `Please attach ${ACCEPTED_LABEL} images only.`;
+        continue;
+      }
+      accepted.push({ id: nextFileId.current++, file });
+      currentCount += 1;
+      currentTotal += file.size;
+    }
+
+    if (accepted.length > 0) setFiles((prev) => [...prev, ...accepted]);
+    if (rejectionReason) setFileError(rejectionReason);
+  }
+
+  function removeFile(id) {
+    setFileError('');
+    setFiles((prev) => prev.filter((f) => f.id !== id));
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    setDragOver(false);
+    addFiles(Array.from(e.dataTransfer.files || []));
+  }
+
+  function handlePaste(e) {
+    const items = Array.from(e.clipboardData?.items || []);
+    const pastedFiles = items
+      .filter((item) => item.kind === 'file' && item.type.startsWith('image/'))
+      .map((item) => item.getAsFile())
+      .filter(Boolean);
+    if (pastedFiles.length > 0) {
+      // Let normal text pasting through untouched; only intercept when the
+      // clipboard actually carries an image (a textarea can't render one).
+      e.preventDefault();
+      addFiles(pastedFiles);
+    }
   }
 
   async function handleSubmit(e) {
@@ -20,15 +103,16 @@ export default function ContactPage() {
     setLoading(true);
 
     try {
+      const body = new FormData();
+      body.append('name', form.name);
+      body.append('email', form.email);
+      body.append('subject', form.subject);
+      body.append('message', form.message);
+      for (const { file } of files) body.append('attachments', file);
+
       const res = await fetch('/api/contact', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          subject: form.subject,
-          message: form.message,
-        }),
+        body,
       });
 
       if (!res.ok) {
@@ -160,10 +244,69 @@ export default function ContactPage() {
                       required
                       value={form.message}
                       onChange={handleChange}
+                      onPaste={handlePaste}
                       placeholder="Write a message"
                       rows={6}
                       className="w-full border border-neutral-200 dark:border-neutral-600 rounded-lg px-4 py-2.5 text-sm text-neutral-800 dark:text-white bg-white dark:bg-neutral-700 focus:outline-none focus:border-red-400 dark:focus:border-red-400 transition resize-none"
                     />
+                  </div>
+
+                  {/* Attachments */}
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                      Attachments (optional)
+                    </label>
+                    <p className="text-xs text-neutral-400 dark:text-neutral-500 mb-2">{ATTACHMENT_HINT}</p>
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                      onDragLeave={() => setDragOver(false)}
+                      onDrop={handleDrop}
+                      className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition text-sm ${
+                        dragOver
+                          ? 'border-red-400 bg-red-50 dark:bg-red-950/20'
+                          : 'border-neutral-200 dark:border-neutral-600 hover:border-red-300'
+                      }`}
+                    >
+                      <span className="text-neutral-500 dark:text-neutral-400">
+                        Click or drop images here
+                      </span>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg,image/gif,image/webp"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => { addFiles(Array.from(e.target.files || [])); e.target.value = ''; }}
+                      />
+                    </div>
+
+                    {files.length > 0 && (
+                      <ul className="mt-2 space-y-1">
+                        {files.map(({ id, file }) => (
+                          <li
+                            key={id}
+                            className="flex items-center justify-between text-xs bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600 rounded-lg px-3 py-2"
+                          >
+                            <span className="truncate text-neutral-600 dark:text-neutral-300">
+                              {file.name} <span className="text-neutral-400">({formatBytes(file.size)})</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => removeFile(id)}
+                              aria-label={`Remove ${file.name}`}
+                              className="text-neutral-400 hover:text-red-500 font-bold ml-3 flex-shrink-0"
+                            >
+                              ×
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {fileError && (
+                      <p className="text-red-500 text-xs mt-2" role="alert">{fileError}</p>
+                    )}
                   </div>
 
                   {/* Checkbox */}
