@@ -1,14 +1,21 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { TIFF_DECODE_TIMEOUT_MS, TIFF_DECODE_TIMEOUT_MESSAGE } from '../../../lib/tiffDecode';
-import { reportToolError } from '../../../lib/reportError';
+import { reportToolError, extOf } from '../../../lib/reportError';
+import { describeFormatMismatch } from '../../../lib/detectFileFormat';
+
+const GENERIC_DECODE_ERROR = "This TIFF file couldn't be read. It may be corrupted, or use a rare TIFF variant this tool doesn't support. Try re-saving it with different settings (e.g. Deflate/ZIP compression) in an image editor, or try a different file.";
+const GENERIC_WORKER_ERROR = 'Something went wrong while converting this file. Please try again, or try a different file.';
+const UNRECOGNIZED_FORMAT_ERROR = "This doesn't look like a valid TIFF file — its content doesn't match any format this tool recognizes. Double-check you selected the right file.";
 
 export default function TiffToPngPage() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [mismatch, setMismatch] = useState(null);
   const inputRef = useRef();
   const workerRef = useRef(null);
   const timeoutRef = useRef(null);
@@ -35,6 +42,7 @@ export default function TiffToPngPage() {
     setFile(f);
     setResult(null);
     setError('');
+    setMismatch(null);
   };
 
   const cancel = () => {
@@ -45,6 +53,7 @@ export default function TiffToPngPage() {
   const convert = async () => {
     if (!file) return;
     setError('');
+    setMismatch(null);
     setLoading(true);
     if (resultUrlRef.current) {
       URL.revokeObjectURL(resultUrlRef.current);
@@ -72,15 +81,34 @@ export default function TiffToPngPage() {
         setLoading(false);
       } else if (msg.type === 'error') {
         stopWorker();
-        reportToolError({ tool: 'tiff-to-png', file, error: new Error(msg.message) });
-        setError(msg.knownLimitation ? msg.message : 'Could not decode this TIFF file: ' + msg.message);
+        // The declared extension is already logged via `file` below; only
+        // add the sniffed real format when it actually differs, so
+        // tool_errors can distinguish a genuine decode bug (formats match)
+        // from a mislabeled upload (they don't) -- see
+        // docs/audit/RAPPORT-tiff-paint.md.
+        const declaredExt = extOf(file.name);
+        const detectedExt = msg.detectedFormat && msg.detectedFormat !== declaredExt ? msg.detectedFormat : null;
+        reportToolError({ tool: 'tiff-to-png', file, error: new Error(msg.message), detectedExt });
+
+        if (msg.notTiff) {
+          const desc = describeFormatMismatch({
+            detected: msg.detectedFormat ? { format: msg.detectedFormat, label: msg.detectedLabel } : null,
+            expectedFormat: 'tiff',
+            expectedLabel: 'TIFF',
+            outputFormat: 'png',
+          });
+          setMismatch(desc);
+          setError(desc ? '' : UNRECOGNIZED_FORMAT_ERROR);
+        } else {
+          setError(msg.knownLimitation ? msg.message : GENERIC_DECODE_ERROR);
+        }
         setLoading(false);
       }
     };
     worker.onerror = (err) => {
       stopWorker();
       reportToolError({ tool: 'tiff-to-png', file, error: new Error(err?.message || 'unknown worker error') });
-      setError('Could not decode this TIFF file: ' + (err?.message || 'unknown worker error'));
+      setError(GENERIC_WORKER_ERROR);
       setLoading(false);
     };
 
@@ -105,6 +133,12 @@ export default function TiffToPngPage() {
             </div>
           ) : (
             <button onClick={convert} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert to PNG</button>
+          )}
+          {mismatch && (
+            <div className="text-center text-sm text-red-400">
+              <p>{mismatch.text}</p>
+              {mismatch.link && <Link href={mismatch.link.path} className="text-indigo-600 hover:underline font-medium">{mismatch.link.label}</Link>}
+            </div>
           )}
           {error && <p className="text-red-400 text-center text-sm whitespace-pre-line">{error}</p>}
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="converted.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download PNG</a></div>}

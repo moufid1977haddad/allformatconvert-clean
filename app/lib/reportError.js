@@ -101,9 +101,9 @@ export function sanitizeErrorMessage(message, fileName) {
 // error object -- is swallowed. Never call this with `await` expecting it
 // to matter; it deliberately returns undefined, not a promise.
 /**
- * @param {{ tool: string, source?: 'browser'|'server', file?: {name?: string, size?: number} | null, error?: Error | string | null | undefined }} args
+ * @param {{ tool: string, source?: 'browser'|'server', file?: {name?: string, size?: number} | null, error?: Error | string | null | undefined, detectedExt?: string | null }} args
  */
-export function reportToolError({ tool, source = 'browser', file = null, error }) {
+export function reportToolError({ tool, source = 'browser', file = null, error, detectedExt = null }) {
   try {
     const message = (error && typeof error.message === 'string') ? error.message
       : (typeof error === 'string' ? error : '');
@@ -111,6 +111,11 @@ export function reportToolError({ tool, source = 'browser', file = null, error }
       tool: typeof tool === 'string' ? tool.slice(0, 60) : 'unknown',
       source,
       ext: file ? extOf(file.name) : null,
+      // Only set when a real-format sniff was run AND it differed from the
+      // declared extension above -- lets tool_errors distinguish a
+      // mislabeled upload from a genuine decode bug. See
+      // docs/audit/RAPPORT-tiff-paint.md.
+      detectedExt: typeof detectedExt === 'string' ? detectedExt.slice(0, 10) : null,
       sizeBucket: file && typeof file.size === 'number' ? sizeBucket(file.size) : null,
       errorType: (error && typeof error.name === 'string' && error.name) || 'Error',
       errorMessage: sanitizeErrorMessage(message, file && file.name),

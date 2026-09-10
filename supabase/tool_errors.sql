@@ -16,6 +16,13 @@ create table if not exists tool_errors (
   error_message text,
   browser text
 );
+-- Real format sniffed from the file's own header bytes (see
+-- app/lib/detectFileFormat.js), set only when it differs from `ext` (the
+-- declared/filename extension) -- lets a mislabeled upload (e.g. a PNG
+-- saved with a .tiff extension) be told apart from a genuine decode bug in
+-- this table, instead of both showing up identically as a TIFF failure.
+-- Added after the initial table creation, hence the separate statement.
+alter table tool_errors add column if not exists detected_ext text;
 alter table tool_errors enable row level security;
 -- No policies added: only the service role (lib/quota/supabaseAdmin.js) can
 -- read/write this table, same pattern as usage_counters and usage_events.

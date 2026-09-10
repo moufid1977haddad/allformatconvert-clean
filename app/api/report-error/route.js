@@ -6,7 +6,7 @@ import { insertToolError } from '@/lib/reportError';
 // 500 bytes. 4KB is generous headroom while still rejecting anything that
 // looks like an attempt to smuggle a large body through this endpoint.
 const MAX_BODY_BYTES = 4096;
-const ALLOWED_KEYS = new Set(['tool', 'source', 'ext', 'sizeBucket', 'errorType', 'errorMessage', 'browser']);
+const ALLOWED_KEYS = new Set(['tool', 'source', 'ext', 'detectedExt', 'sizeBucket', 'errorType', 'errorMessage', 'browser']);
 const TOOL_RE = /^[a-z0-9-]{1,60}$/;
 const EXT_RE = /^[a-z0-9]{1,10}$/;
 const SIZE_BUCKET_RE = /^(0-1MB|1-10MB|10-50MB|50-200MB|200MB\+)$/;
@@ -60,11 +60,12 @@ export async function POST(request) {
     }
   }
 
-  const { tool, source, ext, sizeBucket, errorType, errorMessage, browser } = body;
+  const { tool, source, ext, detectedExt, sizeBucket, errorType, errorMessage, browser } = body;
 
   if (typeof tool !== 'string' || !TOOL_RE.test(tool)) return new NextResponse(null, { status: 400 });
   if (source !== 'browser') return new NextResponse(null, { status: 400 }); // this route only ever receives browser reports; 'server' rows are inserted directly, never via HTTP
   if (ext !== null && ext !== undefined && (typeof ext !== 'string' || !EXT_RE.test(ext))) return new NextResponse(null, { status: 400 });
+  if (detectedExt !== null && detectedExt !== undefined && (typeof detectedExt !== 'string' || !EXT_RE.test(detectedExt))) return new NextResponse(null, { status: 400 });
   if (sizeBucket !== null && sizeBucket !== undefined && (typeof sizeBucket !== 'string' || !SIZE_BUCKET_RE.test(sizeBucket))) return new NextResponse(null, { status: 400 });
   if (errorType !== undefined && (typeof errorType !== 'string' || !ERROR_TYPE_RE.test(errorType))) return new NextResponse(null, { status: 400 });
   if (typeof errorMessage !== 'string' || errorMessage.length > 300) return new NextResponse(null, { status: 400 });
@@ -74,6 +75,7 @@ export async function POST(request) {
     tool,
     source: 'browser',
     ext: ext || null,
+    detectedExt: detectedExt || null,
     sizeBucket: sizeBucket || null,
     errorType: errorType || 'Error',
     errorMessage,

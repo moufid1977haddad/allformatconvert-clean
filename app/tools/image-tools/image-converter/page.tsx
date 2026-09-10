@@ -6,7 +6,10 @@ import ProgressBar from '../../../components/ProgressBar';
 import { MAX_MEGAPIXELS, MOBILE_MAX_MEGAPIXELS, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL, MOBILE_MAX_FILE_SIZE_BYTES, MOBILE_MAX_FILE_SIZE_LABEL } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { TIFF_DECODE_TIMEOUT_MS, TIFF_DECODE_TIMEOUT_MESSAGE } from '../../../lib/tiffDecode';
-import { reportToolError } from '../../../lib/reportError';
+import { reportToolError, extOf } from '../../../lib/reportError';
+
+const GENERIC_CONVERSION_ERROR = 'Conversion failed. Please try again, or try a different file.';
+const GENERIC_HEIC_ERROR = 'Failed to decode this HEIC/HEIF file. It may be corrupted or use a variant this tool doesn\'t support.';
 
 interface ConvertedFile {
   originalName: string;
@@ -101,7 +104,7 @@ export default function ImageConverterPage() {
           items.push({ name: file.name, originalSize: file.size, blob: pngBlob });
         } catch (err: any) {
           reportToolError({ tool: 'image-converter', file, error: err instanceof Error ? err : new Error(String(err)) });
-          failures.push(`${file.name}: Failed to decode this HEIC/HEIF file (${err?.message || 'unknown error'})`);
+          failures.push(`${file.name}: ${GENERIC_HEIC_ERROR}`);
         }
       } else {
         items.push({ name: file.name, originalSize: file.size, blob: file });
@@ -145,11 +148,21 @@ export default function ImageConverterPage() {
         results.push({ originalName: msg.name, originalSize: msg.originalSize, convertedBlob: msg.blob, convertedSize: msg.convertedSize });
         setConverted([...results]);
       } else if (msg.type === 'file-error') {
+        // msg.message is already one of our own authored, user-safe
+        // strings (built in imageConverter.worker.js) -- never a raw
+        // browser/library exception -- so it's fine to show as-is. The
+        // declared extension is logged via `file` below; only add the
+        // sniffed real format when it actually differs, so tool_errors can
+        // distinguish a genuine decode bug from a mislabeled upload -- see
+        // docs/audit/RAPPORT-tiff-paint.md.
         failures.push(`${msg.name}: ${msg.message}`);
+        const declaredExt = extOf(msg.name);
+        const detectedExt = msg.detectedFormat && msg.detectedFormat !== declaredExt ? msg.detectedFormat : null;
         reportToolError({
           tool: 'image-converter',
           file: { name: msg.name, size: items[msg.index]?.originalSize },
           error: new Error(msg.message),
+          detectedExt,
         });
         setError(`${failures.length} file${failures.length > 1 ? 's' : ''} failed to convert:\n` + failures.join('\n'));
       } else if (msg.type === 'done') {
@@ -159,14 +172,14 @@ export default function ImageConverterPage() {
         stopWorker();
         setProcessing(false);
         reportToolError({ tool: 'image-converter', error: new Error(msg.message) });
-        setError('Conversion failed: ' + msg.message);
+        setError(GENERIC_CONVERSION_ERROR);
       }
     };
     worker.onerror = (err) => {
       stopWorker();
       setProcessing(false);
       reportToolError({ tool: 'image-converter', error: new Error(err?.message || 'unknown worker error') });
-      setError('Conversion failed: ' + (err?.message || 'unknown worker error'));
+      setError(GENERIC_CONVERSION_ERROR);
     };
     armWatchdog();
     worker.postMessage({ items, format, quality, maxMegapixels });
