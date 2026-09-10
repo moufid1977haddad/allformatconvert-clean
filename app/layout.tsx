@@ -57,6 +57,32 @@ export default function RootLayout({
   return (
     <html lang="en-US" suppressHydrationWarning>
       <body className={`${inter.className} ${notoSansArabic.variable}`} suppressHydrationWarning>
+        {/* Google Translate rewrites text nodes outside React's tracking; when a tool's
+            result panel re-renders after a download, React can throw NotFoundError on
+            insertBefore/removeChild against a node GT already moved, crashing to the
+            default Next.js error screen. This patch makes those two DOM ops no-op/append
+            instead of throwing. */}
+        <Script id="google-translate-dom-patch" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: `
+          (function () {
+            if (typeof Node !== 'function' || !Node.prototype) return;
+            var originalRemoveChild = Node.prototype.removeChild;
+            Node.prototype.removeChild = function (child) {
+              if (child.parentNode !== this) {
+                if (typeof console !== 'undefined') console.warn('[gt-patch] removeChild called on a non-child node, ignoring', child, this);
+                return child;
+              }
+              return originalRemoveChild.apply(this, arguments);
+            };
+            var originalInsertBefore = Node.prototype.insertBefore;
+            Node.prototype.insertBefore = function (newNode, referenceNode) {
+              if (referenceNode && referenceNode.parentNode !== this) {
+                if (typeof console !== 'undefined') console.warn('[gt-patch] insertBefore reference node is not a child, appending instead', referenceNode, this);
+                return this.appendChild(newNode);
+              }
+              return originalInsertBefore.apply(this, arguments);
+            };
+          })();
+        `}} />
         <div id="google_translate_element" style={{ display: "none" }} />
         <Navbar />
         {children}
