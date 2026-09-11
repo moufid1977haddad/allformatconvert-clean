@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { sendAlert } from '@/lib/alert';
+import { alertServerError } from '@/lib/quota/errorAlerts';
+import { buildServerToolError, insertToolError } from '@/lib/reportError';
+import { supabaseAdmin } from '@/lib/quota/supabaseAdmin';
 import { checkContactRateLimit } from '@/lib/quota/contactRateLimit';
 import {
   MAX_CONTACT_ATTACHMENT_BYTES, MAX_CONTACT_ATTACHMENTS_TOTAL_BYTES, MAX_CONTACT_ATTACHMENTS_COUNT,
@@ -142,10 +144,6 @@ export async function POST(request) {
     attachments.push({ filename: result.filename, content: result.buffer });
   }
 
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  );
   const resend = new Resend(process.env.RESEND_API_KEY);
 
   // The message (never the attachments -- see privacy policy §2) is durably
@@ -157,6 +155,18 @@ export async function POST(request) {
 
   if (dbError) {
     console.error('Failed to store contact message', dbError);
+    // A DB-insert failure used to be visible only in Vercel's own console
+    // logs -- invisible to both the alert channel and tool_errors, the same
+    // two places every other route's server-side failure surfaces. Both are
+    // wired here so a recurrence (a real Supabase hiccup, a schema drift)
+    // gets noticed instead of silently losing the visitor's message.
+    await alertServerError('contact', `db_insert_failed: ${dbError.message}`);
+    await insertToolError(buildServerToolError({
+      tool: 'contact',
+      file: null,
+      error: new Error(dbError.message || 'db_insert_failed'),
+      userAgent: request.headers.get('user-agent'),
+    }));
     return NextResponse.json({ error: 'Failed to save your message' }, { status: 500 });
   }
 
