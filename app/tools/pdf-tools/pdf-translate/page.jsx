@@ -5,6 +5,8 @@ import SeoContent from '../../../components/SeoContent';
 import { checkPromptLength } from '@/lib/quota/limits';
 
 const languages = ['English', 'French', 'Spanish', 'German', 'Arabic', 'Chinese', 'Japanese', 'Portuguese', 'Italian', 'Russian'];
+const MAX_PDF_TRANSLATE_PAGES = 5;
+const MAX_PDF_TRANSLATE_CHARS = 3000;
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -26,19 +28,19 @@ export default function Page() {
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       let text = '';
-      for (let i = 1; i <= Math.min(pdf.numPages, 5); i++) {
+      for (let i = 1; i <= Math.min(pdf.numPages, MAX_PDF_TRANSLATE_PAGES); i++) {
         const page = await pdf.getPage(i);
         const content = await page.getTextContent();
         text += content.items.map(item => item.str).join(' ') + '\n';
       }
-      const lengthCheck = checkPromptLength(text.slice(0, 3000));
+      const lengthCheck = checkPromptLength(text.slice(0, MAX_PDF_TRANSLATE_CHARS));
       if (!lengthCheck.ok) { setError(lengthCheck.message); setLoading(false); return; }
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system: `You are a professional translator. Translate the following text to ${targetLang}. Return only the translation.`,
-          prompt: text.slice(0, 3000),
+          prompt: text.slice(0, MAX_PDF_TRANSLATE_CHARS),
           tool: 'pdf-translate',
         }),
       });
@@ -59,6 +61,7 @@ export default function Page() {
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
             {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-400 text-sm">Click to upload a PDF file</p>}
           </div>
+          <p className="text-neutral-400 text-xs text-center -mt-2">Max {MAX_PDF_TRANSLATE_PAGES} pages / {MAX_PDF_TRANSLATE_CHARS.toLocaleString()} characters translated — a hard cap to keep translation cost-effective and free for everyone.</p>
           <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Target Language</label>
