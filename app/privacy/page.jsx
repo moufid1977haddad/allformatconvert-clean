@@ -1,4 +1,15 @@
-﻿export default function PrivacyPage() {
+﻿export const metadata = {
+  title: { absolute: "OnlineConverTools Privacy Policy — Your Data & Files" },
+  description: "How OnlineConverTools collects, uses, and protects your data. Most tools process files entirely in your browser — nothing is uploaded to a server.",
+  alternates: { canonical: "https://www.onlineconvertools.com/privacy" },
+  openGraph: {
+    title: "OnlineConverTools Privacy Policy — Your Data & Files",
+    description: "How OnlineConverTools collects, uses, and protects your data. Most tools process files entirely in your browser — nothing is uploaded to a server.",
+    url: "https://www.onlineconvertools.com/privacy",
+  },
+};
+
+export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">

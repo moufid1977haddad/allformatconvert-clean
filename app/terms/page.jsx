@@ -1,4 +1,15 @@
-﻿export default function TermsPage() {
+﻿export const metadata = {
+  title: { absolute: "OnlineConverTools Terms of Service" },
+  description: "The Terms of Service for OnlineConverTools: acceptable use, free file conversion tools, and the rules that govern your use of the service.",
+  alternates: { canonical: "https://www.onlineconvertools.com/terms" },
+  openGraph: {
+    title: "OnlineConverTools Terms of Service",
+    description: "The Terms of Service for OnlineConverTools: acceptable use, free file conversion tools, and the rules that govern your use of the service.",
+    url: "https://www.onlineconvertools.com/terms",
+  },
+};
+
+export default function TermsPage() {
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
