@@ -105,7 +105,7 @@ Les titres décrivent l'intention réelle de recherche pour chaque page (ex. « 
 | Pages sans métadonnées avant ce chantier | 7 |
 | Pages sans métadonnées après ce chantier | 0 |
 | Build local (`next build`) | 247/247 pages, 0 erreur |
-| Déploiement `981a1b20` (app, doit builder) | déclenché normalement, `dpl_DJ5WnoSV8TRaKMWH252kUsuAyG52` |
-| Déploiement de ce rapport (docs-only, doit être ignoré) | voir constat direct ci-dessous |
+| Déploiement `981a1b20` (app, doit builder) | déclenché normalement, `dpl_DJ5WnoSV8TRaKMWH252kUsuAyG52`, état `READY`, aliasé sur `www.onlineconvertools.com` |
+| Déploiement du rapport docs-only (`a0877f76`) | **ignoré** : `dpl_9n56w5FZSPXjkUzFAzZbfHDBGkag`, état `CANCELED`, `errorLink: vercel.com/docs/platform/projects#ignored-build-step` -- confirmation explicite de Vercel que c'est bien `ignoreCommand` qui a sauté ce build, pas un échec |
 
-**Constat direct sur ce déploiement (docs-only)** : à compléter après le push de ce fichier — un seul contrôle de statut Vercel, sans boucle de surveillance, conformément à la consigne.
+**Constat direct** : les deux branches du comportement sont vérifiées en production sur ce chantier même, pas seulement en local -- un commit touchant `app/`/`vercel.json` a construit et publié normalement, un commit docs-only immédiatement après a été annulé par Vercel avec la raison explicite "Ignored Build Step", sans toucher à l'alias de production (resté sur le dernier déploiement réel). Un seul contrôle de statut Vercel par déploiement, sans boucle de surveillance, conformément à la consigne.
