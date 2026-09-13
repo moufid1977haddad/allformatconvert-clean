@@ -1,0 +1,119 @@
+{
+  "cold_start_seconds": 6.741144418716431,
+  "mem_after_load": {
+    "peak_pagefile": 894074880,
+    "peak_wset": 679247872,
+    "private": 788787200,
+    "rss": 576122880
+  },
+  "requests": [
+    {
+      "model": "isnet-general-use",
+      "image": "01_portrait_cheveux.jpg",
+      "label": "FROID",
+      "client_seconds": 2.7262,
+      "server_seconds": 2.2948,
+      "output": "01_portrait_cheveux__isnet-general-use__server.png"
+    },
+    {
+      "model": "isnet-general-use",
+      "image": "02_animal_poil.jpg",
+      "label": "CHAUD",
+      "client_seconds": 2.6569,
+      "server_seconds": 2.1319,
+      "output": "02_animal_poil__isnet-general-use__server.png"
+    },
+    {
+      "model": "isnet-general-use",
+      "image": "03_objet_bords_complexes.jpg",
+      "label": "CHAUD",
+      "client_seconds": 2.236,
+      "server_seconds": 2.1553,
+      "output": "03_objet_bords_complexes__isnet-general-use__server.png"
+    },
+    {
+      "model": "isnet-general-use",
+      "image": "04_objet_transparent.jpg",
+      "label": "CHAUD",
+      "client_seconds": 2.3635,
+      "server_seconds": 2.2146,
+      "output": "04_objet_transparent__isnet-general-use__server.png"
+    },
+    {
+      "model": "isnet-general-use",
+      "image": "05_faible_contraste.jpg",
+      "label": "CHAUD",
+      "client_seconds": 2.9682,
+      "server_seconds": 2.7182,
+      "output": "05_faible_contraste__isnet-general-use__server.png"
+    },
+    {
+      "model": "isnet-general-use",
+      "image": "06_produit_fond_blanc.jpg",
+      "label": "CHAUD",
+      "client_seconds": 2.9389,
+      "server_seconds": 2.716,
+      "output": "06_produit_fond_blanc__isnet-general-use__server.png"
+    },
+    {
+      "model": "birefnet-general-lite",
+      "image": "01_portrait_cheveux.jpg",
+      "label": "FROID",
+      "client_seconds": 15.6203,
+      "server_seconds": 15.1404,
+      "output": "01_portrait_cheveux__birefnet-general-lite__server.png"
+    },
+    {
+      "model": "birefnet-general-lite",
+      "image": "02_animal_poil.jpg",
+      "label": "CHAUD",
+      "client_seconds": 15.1265,
+      "server_seconds": 14.4847,
+      "output": "02_animal_poil__birefnet-general-lite__server.png"
+    },
+    {
+      "model": "birefnet-general-lite",
+      "image": "03_objet_bords_complexes.jpg",
+      "label": "CHAUD",
+      "client_seconds": 13.7692,
+      "server_seconds": 13.6669,
+      "output": "03_objet_bords_complexes__birefnet-general-lite__server.png"
+    },
+    {
+      "model": "birefnet-general-lite",
+      "image": "04_objet_transparent.jpg",
+      "label": "CHAUD",
+      "client_seconds": 13.528,
+      "server_seconds": 13.3737,
+      "output": "04_objet_transparent__birefnet-general-lite__server.png"
+    },
+    {
+      "model": "birefnet-general-lite",
+      "image": "05_faible_contraste.jpg",
+      "label": "CHAUD",
+      "client_seconds": 11.5875,
+      "server_seconds": 11.3695,
+      "output": "05_faible_contraste__birefnet-general-lite__server.png"
+    },
+    {
+      "model": "birefnet-general-lite",
+      "image": "06_produit_fond_blanc.jpg",
+      "label": "CHAUD",
+      "client_seconds": 11.2456,
+      "server_seconds": 11.0438,
+      "output": "06_produit_fond_blanc__birefnet-general-lite__server.png"
+    }
+  ],
+  "mem_final_peak_wset": {
+    "peak_pagefile": 20848238592,
+    "peak_wset": 14078365696,
+    "private": 20760678400,
+    "rss": 13991038976
+  },
+  "peak_rss_polled_bytes": 4272128,
+  "peak_rss_polled_mb": 4.3,
+  "peak_rss_polled_tag": "idle",
+  "num_mem_samples": 1032,
+  "peak_wset_official_mb": 14078.4,
+  "rss_after_model_load_mb": 576.1
+}
