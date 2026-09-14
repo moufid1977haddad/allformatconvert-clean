@@ -1,0 +1,16 @@
+{
+  "isnet_vs_market": {
+    "n": 11,
+    "global_mae": 7.28009090909091,
+    "band_mae": 25.375545454545456,
+    "iou": 0.9260545454545455,
+    "pct_area_sym_diff": 7.394636363636363
+  },
+  "market_vs_market": {
+    "n": 5,
+    "global_mae": 2.378,
+    "band_mae": 13.7922,
+    "iou": 0.97576,
+    "pct_area_sym_diff": 2.425
+  }
+}

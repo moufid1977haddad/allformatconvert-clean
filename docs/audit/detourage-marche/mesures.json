@@ -1,0 +1,194 @@
+{
+  "01_portrait_cheveux": {
+    "target_size": [
+      408,
+      611
+    ],
+    "pairs": {
+      "isnet_vs_removebg": {
+        "global_mae": 10.523,
+        "band_mae": 39.764,
+        "band_pixel_count": 40877,
+        "iou": 0.9643,
+        "pct_area_a_not_b": 3.137,
+        "pct_area_b_not_a": 0.438,
+        "pct_area_sym_diff": 3.575
+      },
+      "isnet_vs_pixian": {
+        "global_mae": 15.326,
+        "band_mae": 54.765,
+        "band_pixel_count": 37072,
+        "iou": 0.9416,
+        "pct_area_a_not_b": 5.35,
+        "pct_area_b_not_a": 0.485,
+        "pct_area_sym_diff": 5.836
+      },
+      "removebg_vs_pixian": {
+        "global_mae": 9.153,
+        "band_mae": 46.271,
+        "band_pixel_count": 41461,
+        "iou": 0.9524,
+        "pct_area_a_not_b": 3.486,
+        "pct_area_b_not_a": 1.275,
+        "pct_area_sym_diff": 4.761
+      }
+    }
+  },
+  "02_animal_poil": {
+    "target_size": [
+      468,
+      532
+    ],
+    "pairs": {
+      "isnet_vs_pixian": {
+        "global_mae": 29.593,
+        "band_mae": 59.683,
+        "band_pixel_count": 46531,
+        "iou": 0.9356,
+        "pct_area_a_not_b": 0.908,
+        "pct_area_b_not_a": 5.536,
+        "pct_area_sym_diff": 6.444
+      }
+    }
+  },
+  "03_objet_bords_complexes": {
+    "target_size": [
+      402,
+      620
+    ],
+    "pairs": {
+      "isnet_vs_removebg": {
+        "global_mae": 0.595,
+        "band_mae": 5.92,
+        "band_pixel_count": 24965,
+        "iou": 0.9534,
+        "pct_area_a_not_b": 4.643,
+        "pct_area_b_not_a": 0.018,
+        "pct_area_sym_diff": 4.662
+      },
+      "isnet_vs_pixian": {
+        "global_mae": 0.573,
+        "band_mae": 5.699,
+        "band_pixel_count": 24998,
+        "iou": 0.9619,
+        "pct_area_a_not_b": 2.972,
+        "pct_area_b_not_a": 0.835,
+        "pct_area_sym_diff": 3.807
+      },
+      "removebg_vs_pixian": {
+        "global_mae": 0.418,
+        "band_mae": 4.324,
+        "band_pixel_count": 24102,
+        "iou": 0.9653,
+        "pct_area_a_not_b": 0.48,
+        "pct_area_b_not_a": 2.992,
+        "pct_area_sym_diff": 3.472
+      }
+    }
+  },
+  "04_objet_transparent": {
+    "target_size": [
+      409,
+      611
+    ],
+    "pairs": {
+      "isnet_vs_removebg": {
+        "global_mae": 9.026,
+        "band_mae": 40.92,
+        "band_pixel_count": 27647,
+        "iou": 0.742,
+        "pct_area_a_not_b": 24.596,
+        "pct_area_b_not_a": 1.208,
+        "pct_area_sym_diff": 25.804
+      },
+      "isnet_vs_pixian": {
+        "global_mae": 8.921,
+        "band_mae": 40.101,
+        "band_pixel_count": 27555,
+        "iou": 0.7458,
+        "pct_area_a_not_b": 24.001,
+        "pct_area_b_not_a": 1.418,
+        "pct_area_sym_diff": 25.42
+      },
+      "removebg_vs_pixian": {
+        "global_mae": 0.313,
+        "band_mae": 4.097,
+        "band_pixel_count": 19110,
+        "iou": 0.9889,
+        "pct_area_a_not_b": 0.058,
+        "pct_area_b_not_a": 1.052,
+        "pct_area_sym_diff": 1.109
+      }
+    }
+  },
+  "05_faible_contraste": {
+    "target_size": [
+      613,
+      407
+    ],
+    "pairs": {
+      "isnet_vs_removebg": {
+        "global_mae": 2.309,
+        "band_mae": 11.549,
+        "band_pixel_count": 44475,
+        "iou": 0.9761,
+        "pct_area_a_not_b": 2.145,
+        "pct_area_b_not_a": 0.244,
+        "pct_area_sym_diff": 2.389
+      },
+      "isnet_vs_pixian": {
+        "global_mae": 2.192,
+        "band_mae": 11.027,
+        "band_pixel_count": 43460,
+        "iou": 0.9789,
+        "pct_area_a_not_b": 1.364,
+        "pct_area_b_not_a": 0.741,
+        "pct_area_sym_diff": 2.105
+      },
+      "removebg_vs_pixian": {
+        "global_mae": 1.605,
+        "band_mae": 9.13,
+        "band_pixel_count": 43702,
+        "iou": 0.982,
+        "pct_area_a_not_b": 0.261,
+        "pct_area_b_not_a": 1.544,
+        "pct_area_sym_diff": 1.805
+      }
+    }
+  },
+  "06_produit_fond_blanc": {
+    "target_size": [
+      500,
+      500
+    ],
+    "pairs": {
+      "isnet_vs_removebg": {
+        "global_mae": 0.488,
+        "band_mae": 4.545,
+        "band_pixel_count": 19433,
+        "iou": 0.9943,
+        "pct_area_a_not_b": 0.391,
+        "pct_area_b_not_a": 0.178,
+        "pct_area_sym_diff": 0.569
+      },
+      "isnet_vs_pixian": {
+        "global_mae": 0.535,
+        "band_mae": 5.158,
+        "band_pixel_count": 19434,
+        "iou": 0.9927,
+        "pct_area_a_not_b": 0.718,
+        "pct_area_b_not_a": 0.013,
+        "pct_area_sym_diff": 0.73
+      },
+      "removebg_vs_pixian": {
+        "global_mae": 0.401,
+        "band_mae": 5.139,
+        "band_pixel_count": 19485,
+        "iou": 0.9902,
+        "pct_area_a_not_b": 0.735,
+        "pct_area_b_not_a": 0.243,
+        "pct_area_sym_diff": 0.978
+      }
+    }
+  }
+}
