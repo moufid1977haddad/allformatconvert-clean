@@ -57,3 +57,10 @@ scripts/audit/tool-config.json
 /.agents/
 /.claude/
 /skills-lock.json
+
+# background-removal service: the ONNX model is downloaded and checksum-
+# verified at Docker build time (see services/background-removal/README.md),
+# never committed -- this only ignores a local copy used for testing.
+services/background-removal/models/
+services/background-removal/**/__pycache__/
+services/background-removal/**/*.pyc
