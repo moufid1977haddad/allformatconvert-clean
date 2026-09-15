@@ -1,15 +1,20 @@
 ﻿'use client';
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import ProgressBar from '../../../components/ProgressBar';
 import { checkFileSize, MAX_REMOVEBG_IMAGE_BYTES } from '@/lib/quota/limits';
 
 export default function BackgroundRemoverPage() {
   const [preview, setPreview] = useState('');
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const fileRef = useRef();
+  const progressTimerRef = useRef(null);
+
+  useEffect(() => () => { if (progressTimerRef.current) clearInterval(progressTimerRef.current); }, []);
 
   const handleFile = (e) => {
     const file = e.target.files[0];
@@ -22,24 +27,43 @@ export default function BackgroundRemoverPage() {
     reader.readAsDataURL(file);
   };
 
+  // There is no real progress feed for a single server round trip, so this
+  // climbs toward 90% and slows down the longer it runs -- reads naturally
+  // whether the request finishes in a couple of seconds (the common case)
+  // or takes longer because the service had gone to sleep from inactivity
+  // and needed a moment to wake up.
+  const startProgress = () => {
+    setProgress(4);
+    progressTimerRef.current = setInterval(() => {
+      setProgress((p) => (p >= 90 ? p : p + (90 - p) * 0.08));
+    }, 300);
+  };
+
+  const stopProgress = (finalValue) => {
+    if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+    progressTimerRef.current = null;
+    setProgress(finalValue);
+  };
+
   const process = async () => {
     if (!preview) return;
     setLoading(true);
     setResult('');
     setError('');
+    startProgress();
     try {
       const base64 = preview.split(',')[1];
       const sizeCheck = checkFileSize(imageFile, MAX_REMOVEBG_IMAGE_BYTES, 'Images');
-      if (!sizeCheck.ok) { setError(sizeCheck.message); setLoading(false); return; }
+      if (!sizeCheck.ok) { setError(sizeCheck.message); stopProgress(0); setLoading(false); return; }
       const response = await fetch('/api/remove-bg', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image: base64, tool: 'background-remover' }),
       });
       const data = await response.json();
-      if (data.image) setResult('data:image/png;base64,' + data.image);
-      else setError(data.error || 'Error removing background');
-    } catch(e) { setError('Error: ' + e.message); }
+      if (data.image) { setResult('data:image/png;base64,' + data.image); stopProgress(100); }
+      else { setError(data.error || 'Error removing background'); stopProgress(0); }
+    } catch(e) { setError('Error: ' + e.message); stopProgress(0); }
     setLoading(false);
   };
 
@@ -54,8 +78,14 @@ export default function BackgroundRemoverPage() {
           </div>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           <button onClick={process} disabled={!preview || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
-            {loading ? 'Removing background...' : 'Remove Background'}
+            {loading ? 'Removing background…' : 'Remove Background'}
           </button>
+          {loading && (
+            <div className="space-y-1.5">
+              <ProgressBar pct={Math.round(progress)} label="Removing background" />
+              <p className="text-xs text-neutral-400 text-center">This can take a bit longer than usual if the tool hasn't been used in a while.</p>
+            </div>
+          )}
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {result && (
             <div className="space-y-3">
@@ -70,7 +100,7 @@ export default function BackgroundRemoverPage() {
       </div>
       <SeoContent
         title="Background Remover"
-        description="Background Remover is a free online tool that instantly removes the background from an image using the remove.bg AI image-processing service, giving you a transparent PNG in one click. Perfect for product photos, portraits, and professional graphics, with no software installation required."
+        description="Background Remover is a free online tool that instantly removes the background from an image using an AI segmentation model that runs on our own infrastructure, giving you a transparent PNG in one click. Perfect for product photos, portraits, and professional graphics, with no software installation required."
         howTo={[
           "Click the upload area and select a photo from your device.",
           "Click 'Remove Background' and wait a few seconds while the background is automatically detected and removed.",
@@ -80,7 +110,7 @@ export default function BackgroundRemoverPage() {
         faqs={[
           { q: "Is Background Remover completely free to use?", a: "Yes, Background Remover is free to use with no account creation or watermarks on your downloaded image." },
           { q: "What image formats does Background Remover support?", a: "The tool accepts common image formats like JPG and PNG, and always outputs the result as a transparent PNG file." },
-          { q: "How long does it take to remove a background?", a: "Most images are processed in a few seconds, depending on file size and complexity." },
+          { q: "How long does it take to remove a background?", a: "Most images are processed in a few seconds. It can take noticeably longer for the first request in a while, since the background-removal service needs a moment to wake up after sitting idle." },
           { q: "Do I need to install any software or create an account?", a: "No, Background Remover works entirely online with no downloads, installations, or account requirements." }
         ]}
         tips={[
