@@ -50,11 +50,11 @@ export default function BackgroundRemoverPage() {
     setLoading(true);
     setResult('');
     setError('');
-    startProgress();
     try {
-      const base64 = preview.split(',')[1];
       const sizeCheck = checkFileSize(imageFile, MAX_REMOVEBG_IMAGE_BYTES, 'Images');
-      if (!sizeCheck.ok) { setError(sizeCheck.message); stopProgress(0); setLoading(false); return; }
+      if (!sizeCheck.ok) { setError(sizeCheck.message); setLoading(false); return; }
+      startProgress();
+      const base64 = preview.split(',')[1];
       const response = await fetch('/api/remove-bg', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

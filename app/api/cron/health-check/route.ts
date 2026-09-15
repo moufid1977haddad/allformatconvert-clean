@@ -34,23 +34,12 @@ async function checkOpenAI(): Promise<CheckResult> {
   }
 }
 
-// remove.bg's /account endpoint doesn't consume credits -- it's the free
-// way to confirm both reachability and remaining balance in one call.
-async function checkRemoveBg(): Promise<CheckResult> {
-  const key = process.env.REMOVEBG_API_KEY;
-  if (!key) return { ok: false, detail: "not_configured" };
+async function checkBackgroundRemoval(): Promise<CheckResult> {
+  const url = process.env.BG_REMOVAL_SERVICE_URL;
+  if (!url) return { ok: false, detail: "not_configured" };
   try {
-    const res = await fetch("https://api.remove.bg/v1.0/account", {
-      headers: { "X-Api-Key": key },
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!res.ok) return { ok: false, detail: String(res.status) };
-    const data = await res.json();
-    const remaining = data?.data?.attributes?.credits?.total;
-    if (typeof remaining === "number" && remaining < 5) {
-      return { ok: false, detail: `low_credits_${remaining}` };
-    }
-    return { ok: true, detail: String(res.status) };
+    const res = await fetch(`${url.replace(/\/+$/, "")}/health`, { signal: AbortSignal.timeout(8000) });
+    return { ok: res.ok, detail: String(res.status) };
   } catch {
     return { ok: false, detail: "unreachable" };
   }
@@ -215,7 +204,7 @@ export async function GET(request: NextRequest) {
   const checks: Record<string, CheckResult> = {
     gotenberg: await checkGotenberg(),
     openai: await checkOpenAI(),
-    "remove.bg": await checkRemoveBg(),
+    "background-removal": await checkBackgroundRemoval(),
     resend: await checkResend(),
     "supabase-auth": await checkSupabaseAuth(),
     "pdf-tools": await checkPdfTools(),

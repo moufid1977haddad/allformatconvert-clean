@@ -10,6 +10,7 @@ this (see docs/audit/RAPPORT-detourage-phase2.md).
 """
 from __future__ import annotations
 
+import hmac
 import time
 from functools import wraps
 
@@ -41,7 +42,7 @@ def require_api_key(handler):
         key = request.headers.get("X-API-Key")
         if not key:
             return jsonify(error="unauthorized", message="Missing X-API-Key header."), 401
-        if key != config.API_KEY:
+        if not hmac.compare_digest(key, config.API_KEY):
             return jsonify(error="unauthorized", message="Invalid API key."), 401
 
         usage = _get_usage(key)
