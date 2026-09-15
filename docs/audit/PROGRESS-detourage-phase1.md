@@ -1,47 +1,43 @@
 # Progress — détourage phase 1 (construction + déploiement Railway)
 
-**Arrêté sur consigne explicite de l'utilisateur (« Limite atteinte. N'entreprends plus rien. »). Aucune action Railway supplémentaire n'a été tentée après ce point.**
+**TERMINÉ le 14/09/2026.** Service déployé, vérifié en production, rapport complété. Voir [RAPPORT-detourage-phase1.md](RAPPORT-detourage-phase1.md) pour le détail complet.
 
 ## Fait et poussé (dépôt git)
 
 - `services/background-removal/` créé, commité, poussé — commit `ec74cf96` sur `master`.
 - Tag de restauration `pre-detourage-phase1-service` créé et poussé (pointe sur `3975ab10`, avant ce chantier).
-- `docs/audit/RAPPORT-detourage-phase1.md` écrit et poussé (construction + décision modèle + instructions Railway détaillées ; sa section « Vérification en production » est encore marquée EN ATTENTE — non complétée, voir ci-dessous).
+- `docs/audit/RAPPORT-detourage-phase1.md` écrit, puis complété avec toutes les mesures de production.
+- `fix(background-removal): numpy/scipy pins incompatibles avec Python 3.11.6` — commit `f4ea6419`. Corrige `numpy==2.5.3`→`2.4.6` et `scipy==1.18.1`→`1.17.1` (les deux versions d'origine exigeaient Python ≥3.12, incompatible avec le 3.11.6 épinglé dans le Dockerfile — jamais détecté avant faute de build Docker réel en local).
+- `fix(background-removal): SHA256 du modele tronque d'un caractere` — commit `46c8a563`. Le digest du modèle codé en dur dans `Dockerfile` et `README.md` faisait 63 caractères hex au lieu de 64 (`a` final manquant) — corrigé après recalcul local (`sha256sum`) sur le fichier réellement téléchargé.
 
-## Où en sont exactement les 10 étapes Railway (pilotage direct dans le navigateur de l'utilisateur, rien commité côté Railway par git)
+## Railway — toutes les étapes terminées
 
-1. ✅ **Fait** — Projet Railway `fortunate-manifestation` ouvert.
-2. ✅ **Fait** — Service Gotenberg (`gotenberg-fonts`) ouvert → Settings → Watch Paths : **était vide**, confirmé par capture d'écran ET par l'historique de déploiements (un commit `docs(detourage)` sans rapport avait déclenché un rebuild Gotenberg quelques minutes plus tôt). Rempli avec `/services/gotenberg/**`, bouton **Deploy** cliqué, changement appliqué avec succès (badge « Edited »/« 1 Change » disparu, service repassé « Online »). Aucun autre réglage Gotenberg touché.
-3. ✅ **Fait** — Nouveau service créé via **"+ New" → "GitHub Repository" → `moufid1977haddad/allformatconvert-clean`**. Nom du service : `allformatconvert-clean`, id `e5522a95-c93f-4279-979f-7e7f3346cf7b`.
-4. ✅ **Fait** — **Root Directory** réglé à `services/background-removal`, confirmé affiché dans le champ (changement en attente d'application, pas encore déployé).
-5. ✅ **Fait** — **Watch Paths** réglé à `/services/background-removal/**`. Un doublon sans slash initial (`services/background-removal/**`, artefact de saisie) a été créé puis supprimé — un seul motif propre reste dans le champ, vérifié par capture d'écran après suppression.
-6. 🟡 **Probablement fait, à re-vérifier en premier** — **Healthcheck Path** : `/health` tapé et confirmé présent dans le champ (lu directement via l'état du champ). Le clic final sur la coche de confirmation a été suivi d'un timeout de capture d'écran puis de l'instruction d'arrêt — **le résultat de ce dernier clic n'a pas été revérifié**. À contrôler en premier à la reprise.
-7. ❌ **Non fait** — Activer **"Enable Serverless"** (Settings → Deploy → section Serverless). Le bouton était visible et cliquable au dernier écran vu, non cliqué.
-8. ❌ **Non fait** — Lancer le déploiement (bouton **"Deploy"** en haut, actuellement « Apply 5 changes » ou « 6 » selon si l'étape 6 a bien été confirmée) et lire les **Deploy Logs**.
-9. ❌ **Non fait** — Générer le domaine public (Settings → Networking → Public Networking → **"Generate Domain"**).
-10. ❌ **Non fait** — Vérifier dans les logs de build que **"Using detected Dockerfile!"** apparaît (et non Nixpacks). Dépend du déploiement (étape 8).
+Projet `fortunate-manifestation`, service `allformatconvert-clean` (id `e5522a95-c93f-4279-979f-7e7f3346cf7b`) :
 
-**Incident mineur corrigé pendant la manipulation, sans conséquence :** un clic mal placé a brièvement activé un **Cron Schedule** (fréquence « Daily ») sur le nouveau service, ce qui bloquait le toggle Serverless (« Serverless is not available for services that have a cron schedule »). Corrigé immédiatement — le sélecteur a été ramené à **« No schedule »**, confirmé par capture d'écran montrant le bouton **"+ Add Schedule"** (état non configuré) de retour. Aucune trace de ce cron ne devrait subsister, mais à confirmer visuellement en réouvrant Settings → Deploy à la reprise.
+1. ✅ Gotenberg (`gotenberg-fonts`) → Watch Paths réglé à `/services/gotenberg/**` (était vide). Aucun autre réglage touché.
+2. ✅ Service `allformatconvert-clean` existant, Root Directory = `services/background-removal`.
+3. ✅ Watch Paths = `/services/background-removal/**` (unique, propre).
+4. ✅ Healthcheck Path = `/health` (n'était en fait PAS encore enregistré au début de cette session malgré ce que la session précédente pensait — corrigé et confirmé).
+5. ✅ Serverless activé (« Enable Serverless », libellé exact confirmé).
+6. ✅ Déployé — 3ᵉ tentative réussie après correction des deux bugs ci-dessus (les tentatives 1 et 2 ont échoué proprement, aucun OOM/Killed rencontré à aucun moment).
+7. ✅ Builder confirmé = **Dockerfile, Automatically Detected** (jamais Nixpacks).
+8. ✅ Domaine public généré : **`allformatconvert-clean-production-337b.up.railway.app`** (port 8080).
 
-## URL publique du service
+## Vérification en production — faite
 
-**Non générée.** Le service n'a jamais été déployé (« There is no active deployment for this service » confirmé à l'écran) — l'étape 9 (Generate Domain) ne peut de toute façon pas produire d'URL fonctionnelle avant un déploiement réussi.
+Voir RAPPORT §5 pour le détail complet. Résumé :
 
-## Ce qui reste à vérifier en production (points 5 et 6 du prompt initial — rien de tout cela n'a été fait)
+- 6/6 photos de test → `200`, PNG RGBA valides, découpage conforme aux références locales (une différence avec l'ancienne référence sur la photo 04 est **intentionnelle** : le filtre plus-grande-région, ajouté après cette référence, retire bien la mire de couleurs comme prévu).
+- `/health` chaud : 249 ms.
+- `/remove-background` chaud : 6,7–9,9 s/image — **3 à 4× plus lent qu'en local (~2,4 s/image)**, écart réel non anticipé, cause probable = CPU Railway moins puissant pour ce calcul intensif. Non diagnostiqué plus loin (hors périmètre mesure).
+- Mémoire observée (Metrics Railway) : palier ~1,6 Go, cohérent avec l'estimation locale de ~1,7 Go.
+- 4 cas d'erreur testés (corps vide, octets invalides, route inexistante, mauvaise méthode) : 4/4 JSON propre, jamais de trace technique.
+- **Non mesuré** : le réveil après une veille réelle (5-10 min d'inactivité) — nécessiterait une attente active (minuteur, boucle, `sleep` long), explicitement et strictement interdite par consigne utilisateur pour ce chantier. Seule donnée disponible : le tout premier appel après déploiement (démarrage conteneur + modèle inclus) = 9,29 s.
 
-- Les 6 mêmes photos de `docs/audit/detourage-serveur/` contre le service réel.
-- Temps de réponse à chaud et après veille.
-- Pic de mémoire réellement observé sur Railway.
-- `/health` après un réveil.
+## Observation hors périmètre (signalée, non traitée)
 
-Rien de ceci n'est possible tant que le service n'est pas déployé et son domaine généré (étapes 8-9 encore à faire).
+Le service `pdf-tools` du même projet Railway s'est aussi redéployé lors des pushes de cette session (ses propres Watch Paths, non modifiés ici, semblent couvrir tout le dépôt). Aucune action prise — hors du périmètre de ce chantier (phase 1 ne touche que Gotenberg Watch Paths et le nouveau service background-removal).
 
-## Premier geste de la prochaine session
+## Prochaine étape (phase 2, hors périmètre de ce chantier)
 
-Rouvrir le service **`allformatconvert-clean`** dans le projet Railway `fortunate-manifestation` → **Settings → Deploy**, et dans l'ordre :
-1. Vérifier/re-confirmer que **Healthcheck Path = `/health`** est bien enregistré (pas seulement affiché dans un champ en édition).
-2. Vérifier qu'aucun Cron Schedule ne traîne (doit afficher « + Add Schedule », pas un sélecteur de fréquence).
-3. Activer **"Enable Serverless"**.
-4. Cliquer **"Deploy"**, lire les **Deploy Logs** en direct — s'arrêter immédiatement et signaler si `Killed`, `OOM` ou `out of memory` apparaît, ou si Nixpacks est utilisé à la place de `"Using detected Dockerfile!"`.
-5. Une fois déployé : **Settings → Networking → Public Networking → "Generate Domain"**, noter l'URL.
-6. Enchaîner avec les vérifications de production (points 5-6 du prompt initial) et compléter `docs/audit/RAPPORT-detourage-phase1.md`.
+Brancher `/api/remove-bg` sur ce service, mettre à jour la page de l'outil, gérer les quotas. Rien de tout cela n'a été touché ici.
