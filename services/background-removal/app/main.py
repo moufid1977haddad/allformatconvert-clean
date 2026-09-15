@@ -19,6 +19,10 @@ justification of each):
   to JSON using only its own safe name/description, and any other
   exception is logged internally (exception type + message, never image
   bytes) and answered with a generic message -- never a raw stack trace.
+- /remove-background requires a valid X-API-Key header (auth.py) and a
+  restrictive CORS policy applies to browser-originated requests
+  (cors.py) -- see docs/audit/RAPPORT-detourage-phase2.md, "securiser le
+  service". /health stays public and key-free, matching pdf-tools.
 """
 from __future__ import annotations
 
@@ -33,6 +37,8 @@ from PIL import Image, UnidentifiedImageError
 from werkzeug.exceptions import HTTPException
 
 from . import infer
+from .auth import require_api_key
+from .cors import apply_cors
 
 MODEL_PATH = os.path.normpath(
     os.path.join(os.path.dirname(__file__), "..", "models", "isnet-general-use.onnx")
@@ -51,6 +57,7 @@ log.info(
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_BYTES
+apply_cors(app)
 
 _session = None
 _session_lock = threading.Lock()
@@ -80,6 +87,7 @@ def health():
 
 
 @app.route("/remove-background", methods=["POST"])
+@require_api_key
 def remove_background():
     request_start = time.perf_counter()
     data = request.get_data()
