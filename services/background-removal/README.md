@@ -43,8 +43,15 @@ Why download-at-build instead, and why the checksum is not optional:
   landing on the same digest:
 
   ```
-  sha256:60920e99c45464f2ba57bee2ad08c919a52bbf852739e96947fbb4358c0d964
+  sha256:60920e99c45464f2ba57bee2ad08c919a52bbf852739e96947fbb4358c0d964a
   ```
+
+  Correction du 14/09/2026 : les trois vérifications précédentes avaient
+  transcrit ce digest en le tronquant d'un caractère (`...c0d964` au lieu
+  de `...c0d964a`, 63 caractères hex au lieu de 64) -- non détecté avant le
+  premier déploiement réel sur Railway, qui a échoué la vérification de
+  somme de contrôle avec ce digest tronqué. Recalculé directement en local
+  (`sha256sum`) sur le fichier réellement téléchargé depuis l'URL ci-dessus.
 
   This exact digest is hardcoded in `Dockerfile` and checked by
   `scripts/download_model.py` (stdlib only, no extra dependency) after

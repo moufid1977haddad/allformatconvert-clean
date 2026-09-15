@@ -18,7 +18,7 @@ RUN mkdir -p models && \
     python scripts/download_model.py \
       "https://github.com/danielgatis/rembg/releases/download/v0.0.0/isnet-general-use.onnx" \
       "models/isnet-general-use.onnx" \
-      "60920e99c45464f2ba57bee2ad08c919a52bbf852739e96947fbb4358c0d964"
+      "60920e99c45464f2ba57bee2ad08c919a52bbf852739e96947fbb4358c0d964a"
 
 COPY app/ app/
 
