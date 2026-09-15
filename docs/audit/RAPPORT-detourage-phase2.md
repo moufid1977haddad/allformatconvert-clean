@@ -115,9 +115,19 @@ Le plan Hobby de ce projet autorise donc déjà 300 s par défaut, sans configur
 
 ## 6. Revue indépendante — étapes 2 et 4 uniquement
 
-Sous-agent réviseur indépendant lancé sur la plage `f41ef7d2..828ed712` (les commits de sécurisation et de branchement, à l'exclusion de l'instrumentation de l'étape 1) au niveau `high`, conformément à la consigne (revue uniquement sur la clé partagée et la route publique).
+Sous-agent réviseur indépendant lancé sur la plage `f41ef7d2..828ed712` (les commits de sécurisation et de branchement, à l'exclusion de l'instrumentation de l'étape 1) au niveau `high`, conformément à la consigne (revue uniquement sur la clé partagée et la route publique). 6 constats remontés, 5 corrigés (commit `ec441600`), 1 signalé sans correction :
 
-<!-- RESULTATS_REVUE -->
+| # | Constat | Suite |
+|---|---|---|
+| 1 | `lib/quota/config.js` réserve toujours 0,20 $ fictifs par appel dans le plafond de dépense global partagé (coût de remove.bg, alors que le coût réel du service Railway est un forfait mensuel, pas un coût marginal par appel) — au rythme actuel du plafond (~20 $/mois), une centaine d'appels suffirait à épuiser le budget partagé et bloquer tous les outils payants du site, pour un coût réel proche de zéro. | **Non corrigé.** Corriger ce chiffre reviendrait à modifier le système de quota, explicitement hors périmètre de ce chantier sans validation préalable. Signalé ici pour décision. |
+| 2 | Le cron de santé (`app/api/cron/health-check`) surveillait encore l'API remove.bg retirée au lieu du service Railway réel — la vraie dépendance de production n'était jamais surveillée. | **Corrigé** : `checkBackgroundRemoval()` ping désormais `BG_REMOVAL_SERVICE_URL`/health, même motif que `checkPdfTools`. |
+| 3 | Politique de confidentialité (`app/privacy`) affirmait encore que les images sont envoyées à Remove.bg — risque de conformité (déclaration inexacte). | **Corrigé** : reclassé avec les autres outils auto-hébergés. |
+| 4 | Conditions d'utilisation (`app/terms`) citaient encore Remove.bg comme sous-traitant tiers. | **Corrigé.** |
+| 5 | Métadonnées SEO de la page outil (`layout.tsx`) mentionnaient encore remove.bg, incohérent avec le texte de `page.jsx` déjà corrigé dans le même diff. | **Corrigé.** |
+| 6 | `services/background-removal/app/auth.py` comparait la clé API avec `!=` (canal temporel exploitable en théorie, sévérité faible vu l'unique appelant connu). | **Corrigé** : `hmac.compare_digest`. |
+| 7 | La barre de progression démarrait avant la vérification de taille de fichier côté client, provoquant un flash visuel inutile sur un fichier trop gros. | **Corrigé** : réordonné. |
+
+(Ménage additionnel fait dans le même commit, hors liste de la revue : `lib/alert.js` avait une entrée `SERVICE_NAMES['remove.bg']` devenue morte après la suppression de l'appel direct à remove.bg — remplacée par `'remove-bg'`, la clé réellement utilisée par `alertServerError` dans la nouvelle route.)
 
 ---
 
@@ -138,4 +148,5 @@ Une fois ces deux points confirmés, il restera à faire, dans l'ordre : redépl
 - Étape 6 (tests bout-en-bout sur préversion Vercel) : bloquée, voir §7.
 - Fusion de la branche vers `master` : non faite — la consigne est explicite (« Fusionne seulement une fois tout vert »), et rien n'est vert tant que l'étape 6 n'a pas pu s'exécuter.
 - Nettoyage de `REMOVEBG_API_KEY` sur Vercel : explicitement hors périmètre par consigne.
-- Suppression du chemin de code remove.bg ailleurs que dans `app/api/remove-bg/route.ts` : aucun autre fichier applicatif n'y fait référence (vérifié).
+- Suppression du chemin de code remove.bg ailleurs que dans `app/api/remove-bg/route.ts` : aucun autre fichier applicatif n'y fait référence — vérifié par une recherche exhaustive sur `app/`, `lib/`, `services/` après les corrections de la revue (§6). Les seules occurrences restantes de « remove-bg » dans `lib/quota/` sont des identifiants du système de quota (nom de route, constantes de coût), hors périmètre.
+- **Décision en attente** : le coût fictif de 0,20 $/appel dans `lib/quota/config.js` (constat §6, point 1) — je ne l'ai pas corrigé sans validation explicite, puisque cela touche le système de quota. À trancher : le laisser tel quel (le plafond agit alors comme un simple limiteur de volume, ~100 appels/mois avec le plafond actuel de 20 $) ou l'ajuster pour refléter le coût réel (quasi nul, un forfait mensuel Railway partagé entre tous les appels).
