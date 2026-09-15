@@ -26,6 +26,7 @@ import io
 import logging
 import os
 import threading
+import time
 
 from flask import Flask, jsonify, request, send_file
 from PIL import Image, UnidentifiedImageError
@@ -40,6 +41,13 @@ MAX_UPLOAD_BYTES = 25 * 1024 * 1024  # 25 MB
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("background-removal")
+log.info(
+    "startup: os.cpu_count()=%s ORT_INTRA_OP_THREADS=%s ORT_INTER_OP_THREADS=%s FILTER_AT_MODEL_RES=%s",
+    os.cpu_count(),
+    os.environ.get("ORT_INTRA_OP_THREADS", "(unset)"),
+    os.environ.get("ORT_INTER_OP_THREADS", "(unset)"),
+    os.environ.get("FILTER_AT_MODEL_RES", "(unset, defaults to on)"),
+)
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_BYTES
@@ -73,10 +81,12 @@ def health():
 
 @app.route("/remove-background", methods=["POST"])
 def remove_background():
+    request_start = time.perf_counter()
     data = request.get_data()
     if not data:
         return jsonify(error="empty_request", message="No image data was received."), 400
 
+    t0 = time.perf_counter()
     try:
         img = Image.open(io.BytesIO(data))
         img.load()  # force full decode now, inside this try block
@@ -85,18 +95,40 @@ def remove_background():
             jsonify(error="invalid_image", message="The uploaded data could not be decoded as an image."),
             400,
         )
+    decode_seconds = time.perf_counter() - t0
 
     try:
         session = get_session()
-        mask = infer.predict_mask(session, img)
+        mask, mask_timings = infer.predict_mask(session, img)
+
+        t1 = time.perf_counter()
         result = infer.cutout(img, mask)
+        cutout_seconds = time.perf_counter() - t1
     except Exception:
         log.exception("inference failed (image content not logged)")
         return jsonify(error="internal_error", message="Background removal failed."), 500
 
+    t2 = time.perf_counter()
     buf = io.BytesIO()
     result.save(buf, format="PNG")
     buf.seek(0)
+    encode_seconds = time.perf_counter() - t2
+
+    total_seconds = time.perf_counter() - request_start
+    log.info(
+        "timing_breakdown_seconds size=%dx%d decode=%.3f preprocess=%.3f inference=%.3f "
+        "connected_component_filter=%.3f mask_upsample=%.3f cutout=%.3f encode=%.3f total=%.3f",
+        img.width,
+        img.height,
+        decode_seconds,
+        mask_timings.get("preprocess", 0.0),
+        mask_timings.get("inference", 0.0),
+        mask_timings.get("connected_component_filter", 0.0),
+        mask_timings.get("mask_upsample", 0.0),
+        cutout_seconds,
+        encode_seconds,
+        total_seconds,
+    )
     return send_file(buf, mimetype="image/png")
 
 
