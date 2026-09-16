@@ -30,10 +30,9 @@ export default function PrivacyPage() {
               <li><strong>Cookies:</strong> We use cookies to remember your preferences such as dark mode settings. These cookies do not contain personal information.</li>
               <li><strong>File Processing:</strong> Most tools process your files entirely in your browser — nothing is uploaded to any server. A few tools require server-side processing for fidelity or capability reasons in-browser processing cannot reach; for those, your file is transmitted over HTTPS, processed, and deleted immediately afterward — never stored, logged, or kept:
                 <ul className="list-disc pl-5 mt-2 space-y-1">
-                  <li>Excel to PDF, PowerPoint to PDF, EPUB to PDF, MOBI to PDF, PDF Repair, PDF to PDF/A: processed on our own servers (self-hosted, not shared with a third party).</li>
+                  <li>Excel to PDF, PowerPoint to PDF, EPUB to PDF, MOBI to PDF, PDF Repair, PDF to PDF/A, Background Remover: processed on our own servers (self-hosted, not shared with a third party).</li>
                   <li>Word to PDF, PDF to Word: your file is sent to ConvertAPI for processing, then deleted — see Section 3.</li>
                   <li>Audio Transcriber / Audio to Text: your audio is sent to OpenAI for processing — see Section 3.</li>
-                  <li>Background Remover: your image is sent to Remove.bg for processing — see Section 3.</li>
                 </ul>
               </li>
               <li><strong>Contact Attachments:</strong> This is different from the tool files described above. If you choose to attach an image to a contact message (e.g. a screenshot of a bug), it is included as an attachment in the email notification we send ourselves — it is never uploaded to any storage or written to our database. Only images (PNG, JPEG, GIF, or WebP) are accepted, up to 3 files and 4&nbsp;MB total per message.</li>
@@ -48,7 +47,6 @@ export default function PrivacyPage() {
             <p className="text-neutral-600 text-sm leading-relaxed mb-3">We use the following third-party services that may collect your data:</p>
             <ul className="text-neutral-600 text-sm leading-relaxed space-y-2 list-disc pl-5">
               <li><strong>OpenAI:</strong> Used for AI-powered tools. Your text input is sent to OpenAI for processing. See <a href="https://openai.com/privacy" className="text-indigo-600 hover:underline" target="_blank" rel="noopener noreferrer">OpenAI Privacy Policy</a>.</li>
-              <li><strong>Remove.bg:</strong> Used for background removal. Your images are sent to remove.bg for processing. See <a href="https://www.remove.bg/privacy" className="text-indigo-600 hover:underline" target="_blank" rel="noopener noreferrer">Remove.bg Privacy Policy</a>.</li>
               <li><strong>ConvertAPI:</strong> Used for Word-to-PDF and PDF-to-Word conversion. Your file is sent to ConvertAPI for processing, with StoreFile=false so it is never written to their disk. See <a href="https://www.convertapi.com/privacy-policy" className="text-indigo-600 hover:underline" target="_blank" rel="noopener noreferrer">ConvertAPI Privacy Policy</a>.</li>
               <li><strong>Vercel:</strong> Our hosting provider may collect server logs including IP addresses.</li>
             </ul>

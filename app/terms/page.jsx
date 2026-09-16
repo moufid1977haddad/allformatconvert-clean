@@ -47,7 +47,7 @@ export default function TermsPage() {
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">5. Third-Party Services</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">Some features use third-party APIs including OpenAI and Remove.bg. By using AI-powered tools, you agree to the respective terms of service of these providers. OnlineConverTools is not responsible for the performance or availability of third-party services.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">Some features use third-party APIs including OpenAI. By using AI-powered tools, you agree to the respective terms of service of these providers. OnlineConverTools is not responsible for the performance or availability of third-party services.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
