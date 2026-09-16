@@ -161,9 +161,3 @@ def predict_mask(session: ort.InferenceSession, img: Image.Image) -> tuple[Image
         timings["connected_component_filter"] = t4 - t3
 
     return mask, timings
-
-
-def cutout(img: Image.Image, mask: Image.Image) -> Image.Image:
-    img_rgba = img.convert("RGBA")
-    empty = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    return Image.composite(img_rgba, empty, mask)

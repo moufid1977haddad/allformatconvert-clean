@@ -23,6 +23,15 @@ justification of each):
   restrictive CORS policy applies to browser-originated requests
   (cors.py) -- see docs/audit/RAPPORT-detourage-phase2.md, "securiser le
   service". /health stays public and key-free, matching pdf-tools.
+- /remove-background returns the grayscale alpha MASK (mode 'L' PNG), not
+  a composited RGBA cutout -- see docs/audit/RAPPORT-detourage-taille-fichiers.md.
+  The caller (app/api/remove-bg/route.ts) sends a browser-resized copy of
+  the image (capped near the model's own fixed 1024px input resolution,
+  see infer.MODEL_INPUT_SIZE) to stay under Vercel's serverless payload
+  ceiling, then recomposites the returned mask against the visitor's
+  original full-resolution file entirely client-side -- this service never
+  sees the original file and has no way to produce a full-resolution
+  cutout itself even if it wanted to.
 """
 from __future__ import annotations
 
@@ -108,24 +117,20 @@ def remove_background():
     try:
         session = get_session()
         mask, mask_timings = infer.predict_mask(session, img)
-
-        t1 = time.perf_counter()
-        result = infer.cutout(img, mask)
-        cutout_seconds = time.perf_counter() - t1
     except Exception:
         log.exception("inference failed (image content not logged)")
         return jsonify(error="internal_error", message="Background removal failed."), 500
 
     t2 = time.perf_counter()
     buf = io.BytesIO()
-    result.save(buf, format="PNG")
+    mask.save(buf, format="PNG")
     buf.seek(0)
     encode_seconds = time.perf_counter() - t2
 
     total_seconds = time.perf_counter() - request_start
     log.info(
         "timing_breakdown_seconds size=%dx%d decode=%.3f preprocess=%.3f inference=%.3f "
-        "connected_component_filter=%.3f mask_upsample=%.3f cutout=%.3f encode=%.3f total=%.3f",
+        "connected_component_filter=%.3f mask_upsample=%.3f encode=%.3f total=%.3f",
         img.width,
         img.height,
         decode_seconds,
@@ -133,7 +138,6 @@ def remove_background():
         mask_timings.get("inference", 0.0),
         mask_timings.get("connected_component_filter", 0.0),
         mask_timings.get("mask_upsample", 0.0),
-        cutout_seconds,
         encode_seconds,
         total_seconds,
     )

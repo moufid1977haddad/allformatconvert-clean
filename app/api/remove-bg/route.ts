@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { guardPaidRoute } from "@/lib/quota/guard";
-import { MAX_REMOVEBG_IMAGE_BYTES } from "@/lib/quota/limits";
+import { MAX_REMOVEBG_UPLOAD_BYTES } from "@/lib/quota/limits";
 import { alertServerError } from "@/lib/quota/errorAlerts";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
 
@@ -30,10 +30,15 @@ export async function POST(req: NextRequest) {
     const { image, tool } = await req.json();
     if (!image) return NextResponse.json({ error: "No image provided" }, { status: 400 });
 
+    // This is the browser-resized copy (see page.jsx), never the visitor's
+    // original file -- should always be small. A defensive ceiling against
+    // Vercel's own ~4.4-4.7MB measured serverless payload limit (see
+    // docs/audit/RAPPORT-pieces-jointes-contact.md), not the visitor-facing
+    // size limit (that's MAX_REMOVEBG_ORIGINAL_BYTES, enforced client-side
+    // in page.jsx before the resize ever happens).
     const imageBytes = Buffer.byteLength(image, "base64");
-    if (imageBytes > MAX_REMOVEBG_IMAGE_BYTES) {
-      const maxMb = (MAX_REMOVEBG_IMAGE_BYTES / (1024 * 1024)).toFixed(0);
-      return NextResponse.json({ error: `Images are limited to ${maxMb} MB.` }, { status: 400 });
+    if (imageBytes > MAX_REMOVEBG_UPLOAD_BYTES) {
+      return NextResponse.json({ error: "The resized image is unexpectedly large. Try a different photo." }, { status: 400 });
     }
 
     const guard = await guardPaidRoute(req, { route: "remove-bg", tool });
@@ -63,7 +68,7 @@ export async function POST(req: NextRequest) {
           error: new Error("timeout"),
           userAgent: req.headers.get("user-agent"),
         }));
-        return NextResponse.json({ error: "Background removal timed out. Try a smaller image." }, { status: 504 });
+        return NextResponse.json({ error: "Background removal timed out. Please try again." }, { status: 504 });
       }
       console.error("background-removal service request failed:", err?.message || "unknown error");
       await alertServerError("remove-bg", `unreachable: ${err?.message || "unknown error"}`);
@@ -114,7 +119,12 @@ export async function POST(req: NextRequest) {
     await guard.commit();
     const buffer = await serviceResponse.arrayBuffer();
     const base64 = Buffer.from(buffer).toString("base64");
-    return NextResponse.json({ image: base64 });
+    // This is the alpha MASK (grayscale PNG), not a composited image -- the
+    // service only ever sees a resized copy of the visitor's photo, so it
+    // cannot produce a full-resolution cutout itself. The caller (page.jsx)
+    // recomposites this mask against the visitor's original full-resolution
+    // file entirely client-side. See docs/audit/RAPPORT-detourage-taille-fichiers.md.
+    return NextResponse.json({ mask: base64 });
   } catch (e: any) {
     console.error("Unhandled error in /api/remove-bg:", e?.message || e);
     await alertServerError("remove-bg", e?.message || String(e));
