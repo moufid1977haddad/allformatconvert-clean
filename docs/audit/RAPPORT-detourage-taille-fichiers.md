@@ -95,14 +95,15 @@ Les deux cas échouent désormais **entièrement côté navigateur, sans aucun a
 
 ## 5. Vérification finale post-fusion
 
-Après fusion dans `master` (§6), revérifié :
+Après fusion dans `master` (commit `46e4e2d0`) et déploiement de production Vercel confirmé (`READY`, alias `www.onlineconvertools.com` / `onlineconvertools.com`) :
 - `npx tsc --noEmit` : aucune erreur.
-- Production (`www.onlineconvertools.com`) : page charge, comportement par défaut du service Railway inchangé (déjà vérifié en §3.1 avant la fusion du site).
+- Page de production chargée : le nouveau texte d'annonce du plafond (« Max 50 MB per file… ») visible avant sélection, comme prévu.
+- **Test réel complet en production** (une vraie photo, `01_portrait_cheveux.jpg`) : dépôt, clic, résultat affiché — pipeline réduction navigateur → `?output=mask` → recomposition pleine résolution confirmé fonctionnel de bout en bout sur le site réel, pas seulement sur la préversion.
 
 ## 6. Fusion
 
 Étape 4 entièrement verte. Fusionné dans `master` :
-- Commit additif Railway : `6eb91965` (déjà en production depuis §3.1).
-- Commit de fusion du site : voir historique `git log` sur `master` après ce rapport.
+- Commit additif Railway : `6eb91965` (déjà en production depuis §3.1, comportement par défaut revérifié inchangé).
+- Commit de fusion du site : `46e4e2d0` (`Merge branch 'detourage-taille-fichiers-3-3-a-12mo' into master`).
 
 La branche `detourage-taille-fichiers-3-3-a-12mo` reste en place sur `origin` pour référence.
