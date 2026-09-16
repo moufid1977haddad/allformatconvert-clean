@@ -286,4 +286,11 @@ Découvert en cours de route (liste des déploiements Vercel) : `master` avait d
 
 ## 13. Fusion
 
-[À compléter une fois l'étape 6 entièrement verte]
+Étape 6 entièrement verte (§11). Fusionné dans `master` par commit de fusion (`--no-ff`, cohérent avec la convention déjà utilisée dans ce dépôt pour les autres chantiers) :
+
+- Commit de fusion : `c27f9cfe` (`Merge branch 'detourage-phase2-latence-securite-branchement' into master`).
+- Poussé sur `origin/master`. Vercel a démarré un nouveau déploiement de production (`c27f9cfe`) automatiquement.
+- Railway (branche suivie : `master`) a redéployé automatiquement le même commit — succès confirmé (« Deployment successful », ACTIVE) sans intervention manuelle cette fois, la variable `BG_REMOVAL_API_KEY` étant désormais correctement appliquée depuis §10.
+- Revérifié après ce déploiement final : `/health` → 200, `POST /remove-background` sans clé → 401. Le correctif `hmac.compare_digest` (revue §6) est désormais actif sur le déploiement réellement servi (il ne l'était pas sur l'ancien déploiement `a794284c` isolé de §12).
+
+La branche de travail `detourage-phase2-latence-securite-branchement` reste en place sur `origin` (non supprimée) pour référence.
