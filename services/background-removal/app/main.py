@@ -23,6 +23,20 @@ justification of each):
   restrictive CORS policy applies to browser-originated requests
   (cors.py) -- see docs/audit/RAPPORT-detourage-phase2.md, "securiser le
   service". /health stays public and key-free, matching pdf-tools.
+- /remove-background defaults to returning a composited RGBA cutout, same
+  as always. Passing ?output=mask instead returns just the grayscale alpha
+  mask (mode 'L' PNG) -- smaller and faster, added additively (existing
+  callers and their exact response format are untouched) so this service
+  change could be merged and deployed to production on its own, verified
+  not to have changed the default response, before any caller used the
+  new mode -- see docs/audit/RAPPORT-detourage-taille-fichiers.md. The one
+  real caller (app/api/remove-bg/route.ts) uses ?output=mask: it sends a
+  browser-resized copy of the image (capped near the model's own fixed
+  1024px input resolution, see infer.MODEL_INPUT_SIZE) to stay under
+  Vercel's serverless payload ceiling, then recomposites the returned mask
+  against the visitor's original full-resolution file entirely
+  client-side -- this service never sees the original file and has no way
+  to produce a full-resolution cutout itself even if it wanted to.
 """
 from __future__ import annotations
 
@@ -105,13 +119,19 @@ def remove_background():
         )
     decode_seconds = time.perf_counter() - t0
 
+    # Additive, backward-compatible: default (no query string, every existing
+    # caller) keeps returning the composited RGBA cutout exactly as before.
+    # ?output=mask is the only way to get the new, smaller, mask-only
+    # response -- see docs/audit/RAPPORT-detourage-taille-fichiers.md.
+    mask_only = request.args.get("output") == "mask"
+
     try:
         session = get_session()
         mask, mask_timings = infer.predict_mask(session, img)
 
         t1 = time.perf_counter()
-        result = infer.cutout(img, mask)
-        cutout_seconds = time.perf_counter() - t1
+        result = mask if mask_only else infer.cutout(img, mask)
+        compose_seconds = time.perf_counter() - t1
     except Exception:
         log.exception("inference failed (image content not logged)")
         return jsonify(error="internal_error", message="Background removal failed."), 500
@@ -124,16 +144,17 @@ def remove_background():
 
     total_seconds = time.perf_counter() - request_start
     log.info(
-        "timing_breakdown_seconds size=%dx%d decode=%.3f preprocess=%.3f inference=%.3f "
-        "connected_component_filter=%.3f mask_upsample=%.3f cutout=%.3f encode=%.3f total=%.3f",
+        "timing_breakdown_seconds size=%dx%d output=%s decode=%.3f preprocess=%.3f inference=%.3f "
+        "connected_component_filter=%.3f mask_upsample=%.3f compose=%.3f encode=%.3f total=%.3f",
         img.width,
         img.height,
+        "mask" if mask_only else "cutout",
         decode_seconds,
         mask_timings.get("preprocess", 0.0),
         mask_timings.get("inference", 0.0),
         mask_timings.get("connected_component_filter", 0.0),
         mask_timings.get("mask_upsample", 0.0),
-        cutout_seconds,
+        compose_seconds,
         encode_seconds,
         total_seconds,
     )
