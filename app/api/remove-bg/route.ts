@@ -49,7 +49,10 @@ export async function POST(req: NextRequest) {
 
     let serviceResponse: Response;
     try {
-      serviceResponse = await fetch(`${serviceUrl.replace(/\/+$/, "")}/remove-background`, {
+      // ?output=mask: additive mode on the Railway service (default response
+      // there is still the full composited cutout, unchanged, for any other
+      // caller) -- see docs/audit/RAPPORT-detourage-taille-fichiers.md.
+      serviceResponse = await fetch(`${serviceUrl.replace(/\/+$/, "")}/remove-background?output=mask`, {
         method: "POST",
         headers: {
           "X-API-Key": apiKey,
