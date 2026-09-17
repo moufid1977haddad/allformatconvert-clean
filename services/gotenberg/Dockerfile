@@ -1,15 +1,22 @@
 # Derived from the official Gotenberg image (Chromium + LibreOffice, same
 # variant the production service on Railway runs -- confirmed via that
 # service's own /health response reporting both chromium and libreoffice as
-# up). Version pinned to an exact release, never a floating tag (:8, :latest
-# would silently move underneath us on a rebuild).
+# up). Pinned by tag AND digest -- a floating tag (:8, :latest) would
+# silently move underneath us on a rebuild, and even an exact tag like
+# :8.36.0 can be repointed upstream; the digest can't. Verified live
+# against Docker Hub's registry API on 2026-09-16 (manifest-list digest,
+# so the platform-appropriate image is still selected per architecture).
 #
 # This is a NEW, separate service -- it does not touch, rebuild, or replace
-# the Gotenberg instance currently serving Word/Excel/PowerPoint/EPUB/MOBI
-# to PDF in production. See FONTS.md for what's added and why, and
-# docs/specs/2026-09-01-office-pdf-fidelity-phase2.md for the
-# diagnosis this responds to.
-FROM gotenberg/gotenberg:8.36.0
+# the Gotenberg instance currently serving Word/Excel/PowerPoint/EPUB/MOBI/
+# HTML to PDF in production. See FONTS.md for what's added and why,
+# RAILWAY.md for deploy settings, and
+# docs/specs/2026-09-01-office-pdf-fidelity-phase2.md for the font-fidelity
+# diagnosis that originally motivated this image. The versioning itself
+# (this file pinning tag+digest) is a separate, independent goal: today the
+# production Gotenberg service runs the floating public image with no
+# pinned version at all -- see docs/audit/RAPPORT-gotenberg-versionne.md.
+FROM gotenberg/gotenberg:8.36.0@sha256:87c16b9f364279d321bc9772d31fa58aa6abe036423c270698bd636c3a8e9466
 
 USER root
 
