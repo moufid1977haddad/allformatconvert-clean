@@ -1,10 +1,13 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkPlatformUploadSize, MAX_PLATFORM_UPLOAD_BYTES, PLATFORM_LIMIT_HINT } from '@/lib/quota/limits';
 import ProgressBar from '../../../components/ProgressBar';
 
-const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
-const MAX_FILE_SIZE_LABEL = '50 MB';
+// Real ceiling (hosting-platform payload gate), not the 50 MB the route itself would
+// accept -- see lib/quota/limits.js.
+const MAX_FILE_SIZE_BYTES = MAX_PLATFORM_UPLOAD_BYTES;
+const MAX_FILE_SIZE_LABEL = `${MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB`;
 
 export default function PdfRepairPage() {
   const [file, setFile] = useState(null);
@@ -21,8 +24,9 @@ export default function PdfRepairPage() {
     e.target.value = '';
     if (!f) return;
     setError(''); setResult(null); setDownloadUrl(null);
-    if (f.size > MAX_FILE_SIZE_BYTES) {
-      setError(`This file is ${(f.size / (1024 * 1024)).toFixed(0)} MB, over the ${MAX_FILE_SIZE_LABEL} limit.`);
+    const sizeCheck = checkPlatformUploadSize(f);
+    if (!sizeCheck.ok) {
+      setError(sizeCheck.message);
       setFile(null);
       return;
     }
@@ -79,7 +83,7 @@ export default function PdfRepairPage() {
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">PDF Repair</h1>
         <p className="text-neutral-500 text-center mb-2">Recover PDFs with damaged structure — broken cross-reference tables and similar corruption</p>
         <p className="text-neutral-400 dark:text-neutral-500 text-xs text-center mb-8">
-          Files up to {MAX_FILE_SIZE_LABEL}. Your file is uploaded to our repair service for processing — see below for what that means.
+          Files up to {MAX_FILE_SIZE_LABEL} — {PLATFORM_LIMIT_HINT} Your file is uploaded to our repair service for processing — see below for what that means.
         </p>
 
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
@@ -138,7 +142,7 @@ export default function PdfRepairPage() {
         title="PDF Repair"
         description="PDF Repair fixes PDFs with damaged internal structure — most commonly a broken or missing cross-reference table, the index PDF readers use to jump to each page and object. It repairs one class of damage, not every possible way a PDF file can be broken: files with genuinely destroyed content (truncated mid-page, overwritten with garbage, or missing entire objects) may not be recoverable, and the tool says so honestly rather than returning a corrupted result. Unlike almost every other tool on this site, this one really does send your file to a server: it's uploaded securely over HTTPS to our repair service (which runs qpdf and Ghostscript), and deleted immediately after processing — never stored, logged, or kept around."
         howTo={[
-          "Click the upload area and select a damaged PDF file, up to 50 MB.",
+          `Click the upload area and select a damaged PDF file, up to ${MAX_FILE_SIZE_LABEL}.`,
           "Click 'Repair PDF'. Your file uploads with a real progress bar; a working Cancel button is available the whole time.",
           "If the repair succeeds, review what was found and fixed, then download the repaired file. If the file is too damaged, you'll get a clear explanation instead of a broken result."
         ]}
@@ -146,7 +150,7 @@ export default function PdfRepairPage() {
           { q: "Is PDF Repair free to use?", a: "Yes, completely free with no signup required." },
           { q: "Can this fix any damaged PDF?", a: "No. It repairs structural damage — broken cross-reference tables and similar corruption — using qpdf first, then Ghostscript as a fallback. Files with destroyed content (truncated, overwritten, or missing objects) may not be recoverable, and you'll be told clearly rather than getting a silently broken file back." },
           { q: "Is my file uploaded to a server?", a: "Yes. This is one of the few tools on this site that actually sends your file to a server for processing, because PDF repair genuinely needs Ghostscript and qpdf, which don't run in a browser. Your file is uploaded securely over HTTPS, processed, and deleted immediately afterward — it is never stored, logged, or kept." },
-          { q: "How large a PDF can I repair?", a: "Up to 50 MB per file." },
+          { q: "How large a PDF can I repair?", a: `Up to ${MAX_FILE_SIZE_LABEL} per file — the current upload limit of our hosting platform. Larger files are refused before repair starts.` },
           { q: "What's the difference between the two repair methods?", a: "qpdf tries first: it precisely reconstructs a damaged cross-reference table without touching your actual content. If that's not enough, Ghostscript rewrites the file from its content streams instead — this can recover more, but re-embeds fonts and images rather than copying them exactly." },
         ]}
         tips={[

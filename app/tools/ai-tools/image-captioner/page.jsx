@@ -1,7 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { checkFileSize, MAX_VISION_IMAGE_BYTES } from '@/lib/quota/limits';
+import { checkPlatformUploadSize, MAX_PLATFORM_IMAGE_BASE64_SOURCE_BYTES, PLATFORM_LIMIT_HINT } from '@/lib/quota/limits';
 
 export default function ImageCaptionerPage() {
   const [output, setOutput] = useState('');
@@ -15,8 +15,10 @@ export default function ImageCaptionerPage() {
     const file = e.target.files[0];
     if (!file) return;
     e.target.value = '';
-    setError('');
     setImageFile(file);
+    // The image travels as base64 (x1.33) inside JSON, so the source image ceiling is lower than a raw upload's.
+    const sizeCheck = checkPlatformUploadSize(file, MAX_PLATFORM_IMAGE_BASE64_SOURCE_BYTES);
+    setError(sizeCheck.ok ? '' : sizeCheck.message);
     const reader = new FileReader();
     reader.onload = (ev) => setPreview(ev.target.result);
     reader.onerror = () => setError('Failed to read the image file. It may be corrupt or in an unsupported format.');
@@ -30,7 +32,7 @@ export default function ImageCaptionerPage() {
     setError('');
     try {
       const base64 = preview.split(',')[1];
-      const sizeCheck = checkFileSize(imageFile, MAX_VISION_IMAGE_BYTES, 'Images');
+      const sizeCheck = checkPlatformUploadSize(imageFile, MAX_PLATFORM_IMAGE_BASE64_SOURCE_BYTES);
       if (!sizeCheck.ok) { setError(sizeCheck.message); setLoading(false); return; }
       const response = await fetch('/api/ai-vision', {
         method: 'POST',
@@ -53,8 +55,9 @@ export default function ImageCaptionerPage() {
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
             {preview ? <img src={preview} className="max-h-48 mx-auto rounded-lg" alt="preview" /> : <p className="text-neutral-400 text-sm">Click to upload an image</p>}
           </div>
+          <p className="text-neutral-400 text-xs text-center -mt-2">Max {MAX_PLATFORM_IMAGE_BASE64_SOURCE_BYTES / (1024 * 1024)} MB per image — images are sent encoded, which makes them about a third larger; {PLATFORM_LIMIT_HINT}</p>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
-          <button onClick={process} disabled={!preview || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          <button onClick={process} disabled={!preview || loading || (imageFile && imageFile.size > MAX_PLATFORM_IMAGE_BASE64_SOURCE_BYTES)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Generating...' : 'Generate Caption'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}

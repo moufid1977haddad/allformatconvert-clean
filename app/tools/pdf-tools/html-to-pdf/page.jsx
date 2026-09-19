@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkPlatformUploadSize, MAX_PLATFORM_UPLOAD_BYTES, PLATFORM_LIMIT_HINT } from '@/lib/quota/limits';
 
 export default function HtmlToPdfPage() {
   const [file, setFile] = useState(null);
@@ -15,23 +16,29 @@ export default function HtmlToPdfPage() {
     const f = e.target.files[0];
     e.target.value = '';
     setFile(f);
-    setError('');
     setDone(false);
+    // Checked on selection: the HTML is uploaded as-is, so its size is the upload size.
+    const sizeCheck = checkPlatformUploadSize(f);
+    setError(sizeCheck.ok ? '' : sizeCheck.message);
     const text = await f.text();
     setHtmlContent(text);
   };
 
   const convert = async () => {
     if (!htmlContent) return;
+    const uploadBlob = new Blob([htmlContent], { type: 'text/html' });
+    const sizeCheck = checkPlatformUploadSize(uploadBlob);
+    if (!sizeCheck.ok) { setError(sizeCheck.message); return; }
     setLoading(true);
     setDone(false);
     setError('');
     try {
       const formData = new FormData();
-      formData.append('file', new Blob([htmlContent], { type: 'text/html' }), 'document.html');
+      formData.append('file', uploadBlob, 'document.html');
 
       const res = await fetch('/api/convert-html-to-pdf', { method: 'POST', body: formData });
       if (!res.ok) {
+        if (res.status === 413) throw new Error(`This file is over the ${MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB limit — ${PLATFORM_LIMIT_HINT}`);
         let message = 'Conversion failed. Please try again.';
         try {
           const data = await res.json();
@@ -78,7 +85,8 @@ export default function HtmlToPdfPage() {
           ) : (
             <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm font-mono h-48 resize-none" placeholder="Paste your HTML code here..." value={htmlContent} onChange={(e) => setHtmlContent(e.target.value)} />
           )}
-          <button onClick={convert} disabled={!htmlContent || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          <p className="text-neutral-400 text-xs text-center -mt-2">Max {MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB of HTML — {PLATFORM_LIMIT_HINT}</p>
+          <button onClick={convert} disabled={!htmlContent || loading || new Blob([htmlContent]).size > MAX_PLATFORM_UPLOAD_BYTES} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Converting...' : 'Convert to PDF'}
           </button>
           {error && (

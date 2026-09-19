@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkPlatformUploadSize, MAX_PLATFORM_UPLOAD_BYTES, PLATFORM_LIMIT_HINT } from '@/lib/quota/limits';
 
 const escapeHtml = (str) => String(str)
   .replace(/&/g, '&amp;')
@@ -219,11 +220,18 @@ export default function MobiToPdfPage() {
       const html = buildFullDocument({ title: metadata.title || file.name, coverDataUri, chaptersHtml });
 
       setStatus('Rendering PDF...');
+      const htmlBlob = new Blob([html], { type: 'text/html' });
+      // What is uploaded is the prepared HTML (chapters + inlined images), which can be
+      // far larger than the book file itself -- so that is what the ceiling applies to.
+      if (htmlBlob.size > MAX_PLATFORM_UPLOAD_BYTES) {
+        throw new Error(`This book is ${(htmlBlob.size / (1024 * 1024)).toFixed(1)} MB once prepared for conversion (images included), but this tool accepts up to ${MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB — ${PLATFORM_LIMIT_HINT}`);
+      }
       const formData = new FormData();
-      formData.append('file', new Blob([html], { type: 'text/html' }), 'book.html');
+      formData.append('file', htmlBlob, 'book.html');
 
       const res = await fetch('/api/convert-html-to-pdf', { method: 'POST', body: formData });
       if (!res.ok) {
+        if (res.status === 413) throw new Error(`This file is over the ${MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB limit — ${PLATFORM_LIMIT_HINT}`);
         let message = 'Conversion failed. Please try again.';
         try {
           const data = await res.json();
@@ -265,6 +273,7 @@ export default function MobiToPdfPage() {
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a MOBI file here'}</p>
             <input ref={inputRef} type="file" accept=".mobi,.azw,.azw3" className="hidden" onChange={handleFile} />
           </div>
+          <p className="text-neutral-400 text-xs text-center -mt-2">Max {MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB of prepared content per book — image-heavy books count for more than their file size. This is {PLATFORM_LIMIT_HINT}</p>
           <button onClick={convert} disabled={!file || loading} className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading && (
               <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden="true" />
