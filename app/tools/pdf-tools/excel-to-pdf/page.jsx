@@ -104,7 +104,7 @@ export default function ExcelToPdfPage() {
       </div>
       <SeoContent
         title="Excel to PDF"
-        description="Excel to PDF converts your .xlsx, .xls, .csv, or .ods file into a real, professional-quality PDF using LibreOffice, the same conversion engine used by many enterprise document pipelines. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. Every sheet in your workbook is rendered with accurate column widths, number formats, and cell borders. The one disclosed exception: Wingdings and Webdings icon fonts can't legally be embedded in our conversion service (a font-licensing restriction, not a bug), so those specific characters come through as blank boxes if your file uses them — everything else converts normally."
+        description="Excel to PDF converts your .xlsx, .xls, .csv, or .ods file into a real, professional-quality PDF using LibreOffice, the same conversion engine used by many enterprise document pipelines. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. Every sheet in your workbook is rendered with accurate column widths, number formats, merged cells, cell borders, conditional formatting (including color scales), and charts, and formulas — including cross-sheet lookups — are recalculated so the values you see are current, not stale. Two disclosed exceptions: Wingdings and Webdings icon fonts can't legally be embedded in our conversion service (a font-licensing restriction, not a bug), so those specific characters come through as blank boxes if your file uses them; and bold text can render in a substituted serif typeface instead of the expected sans-serif one (a known LibreOffice font-substitution quirk for bold weights) — the text itself is always correct and legible, just not always in the exact intended font."
         howTo={[
           "Click the upload area and select an .xlsx, .xls, .csv, or .ods file from your device.",
           "Click 'Download PDF'. Your file is uploaded securely for conversion and the PDF downloads automatically once it's ready.",
@@ -115,12 +115,13 @@ export default function ExcelToPdfPage() {
           { q: "What file formats does the tool support?", a: "It accepts .xlsx, .xls, .csv, and .ods files." },
           { q: "Will my files be uploaded to a server?", a: "Yes. Your file is uploaded securely over HTTPS to our conversion service, which uses LibreOffice to generate the PDF, and is deleted immediately after conversion — it isn't stored or kept." },
           { q: "Can I convert multiple Excel files at once?", a: "No, only one file can be converted at a time." },
-          { q: "Will formulas and formatting carry over?", a: "Formula results, number formats, column widths, and cell borders are preserved because conversion is done with LibreOffice rather than a browser-side approximation. Very complex conditional formatting or macros may not be fully supported." }
+          { q: "Will formulas and formatting carry over?", a: "Formula results (including cross-sheet references), number formats, column widths, cell borders, and conditional formatting like color scales are preserved because conversion is done with LibreOffice rather than a browser-side approximation. Very complex conditional formatting or macros may not be fully supported." },
+          { q: "Why does some bold text look slightly different in my PDF?", a: "Bold text occasionally renders in a substituted serif typeface instead of the sans-serif font it was set in — a known LibreOffice font-substitution quirk that affects bold weights specifically. The text is still fully correct and legible; only the exact typeface can differ." }
         ]}
         tips={[
           "Every sheet in your workbook is converted in its original order, each starting on its own page(s).",
           "Wide spreadsheets with many columns convert most cleanly when column widths are set to fit their content before uploading.",
-          "LibreOffice-based conversion preserves number formats, formulas' displayed values, and cell borders far more accurately than in-browser rendering.",
+          "LibreOffice-based conversion preserves number formats, formulas' displayed values, cell borders, and conditional formatting far more accurately than in-browser rendering.",
           "Simplify complex conditional formatting or macros beforehand, since only standard formatting is guaranteed to carry over."
         ]}
       />

@@ -104,7 +104,7 @@ export default function PptToPdfPage() {
       </div>
       <SeoContent
         title="PowerPoint to PDF"
-        description="PowerPoint to PDF converts your .pptx or .ppt file into a real, professional-quality PDF using LibreOffice, the same conversion engine used by many enterprise document pipelines. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. Every slide is rendered with accurate layout, fonts, and images. The one disclosed exception: Wingdings and Webdings icon fonts can't legally be embedded in our conversion service (a font-licensing restriction, not a bug), so those specific characters come through as blank boxes if your presentation uses them — everything else converts normally."
+        description="PowerPoint to PDF converts your .pptx or .ppt file into a real, professional-quality PDF using LibreOffice, the same conversion engine used by many enterprise document pipelines. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. Every slide is rendered with accurate layout, images (including full-bleed images and overlapping shapes with the correct stacking order), gradient fills, tables, and charts. A font not installed on our conversion servers — for example Segoe UI — is automatically substituted with a similar typeface rather than left blank. The one exception that isn't a substitution: Wingdings and Webdings icon fonts can't legally be embedded in our conversion service (a font-licensing restriction, not a bug), so those specific characters come through as blank boxes if your presentation uses them — everything else converts normally."
         howTo={[
           "Click the upload area and select a .pptx or .ppt file from your device.",
           "Click 'Download PDF'. Your file is uploaded securely for conversion and the PDF downloads automatically once it's ready.",
@@ -116,11 +116,13 @@ export default function PptToPdfPage() {
           { q: "Will my presentations be uploaded to a server?", a: "Yes. Your file is uploaded securely over HTTPS to our conversion service, which uses LibreOffice to generate the PDF, and is deleted immediately after conversion — it isn't stored or kept." },
           { q: "Do I need to install any software to use PowerPoint to PDF?", a: "No, it works directly in your web browser." },
           { q: "Will each slide become its own PDF page?", a: "Yes. Each slide in your presentation is rendered as one page in the resulting PDF, in its original order." },
-          { q: "Why does this look different from the previous in-browser converter?", a: "This tool now converts presentations server-side with LibreOffice instead of approximating the layout in your browser. The trade-off for uploading your file is significantly better fidelity: accurate fonts, images, transitions rendered as static slides, and layout that closely matches the original presentation." }
+          { q: "Why does this look different from the previous in-browser converter?", a: "This tool now converts presentations server-side with LibreOffice instead of approximating the layout in your browser. The trade-off for uploading your file is significantly better fidelity: accurate fonts, images, transitions rendered as static slides, and layout that closely matches the original presentation." },
+          { q: "What happens if my presentation uses a font that isn't common?", a: "A font not installed on our conversion servers — for example Segoe UI, which is Windows-only — is automatically substituted with a similar typeface rather than left blank, except Wingdings and Webdings, which can't legally be reproduced and come through as blank boxes instead." }
         ]}
         tips={[
           "LibreOffice-based conversion preserves fonts, images, and slide layout far more accurately than in-browser rendering.",
           "Each slide becomes one page in the PDF, in its original order.",
+          "A font not installed on our conversion servers is substituted with a similar typeface automatically — embed fonts in your .pptx if exact typography matters.",
           "Very large presentations or ones with many embedded media files may take a little longer to convert — keep the tab open until the download starts."
         ]}
       />

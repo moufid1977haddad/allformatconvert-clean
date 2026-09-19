@@ -104,7 +104,7 @@ export default function WordToPdfPage() {
       </div>
       <SeoContent
         title="Word to PDF"
-        description="Word to PDF converts your .docx or .doc file into a real, professional-quality PDF using our conversion service. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. Standard fonts, spacing, and page layout are preserved accurately with fully selectable text."
+        description="Word to PDF converts your .docx or .doc file into a real, professional-quality PDF using our conversion service. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. Standard fonts, spacing, page layout, multi-column sections, headers and footers with working page numbers, tables with merged cells, and images with text wrapping all carry over accurately, and the text stays fully selectable. The one disclosed exception: a Word-generated table of contents is not recalculated during conversion — it shows whatever was last cached in the .docx, not a freshly rebuilt table."
         howTo={[
           "Click the upload area and select a .docx or .doc file from your device.",
           "Click 'Download PDF'. Your file is uploaded securely for conversion and the PDF downloads automatically once it's ready.",
@@ -116,11 +116,13 @@ export default function WordToPdfPage() {
           { q: "Will my documents be uploaded to a server?", a: "Yes. Your file is uploaded securely over HTTPS to our conversion service to generate the PDF, and is deleted immediately after conversion — it isn't stored or kept." },
           { q: "Do I need to install any software to use Word to PDF?", a: "No, it works directly in your web browser." },
           { q: "Will the text in my PDF be selectable?", a: "Yes. Because conversion is done server-side rather than by rasterizing a screenshot, the resulting PDF has fully selectable, searchable text." },
-          { q: "Why does this look different from the previous in-browser converter?", a: "This tool now converts documents server-side instead of approximating the layout in your browser. The trade-off for uploading your file is significantly better fidelity: accurate fonts, spacing, page layout, and selectable text that closely matches the original Word document." }
+          { q: "Why does this look different from the previous in-browser converter?", a: "This tool now converts documents server-side instead of approximating the layout in your browser. The trade-off for uploading your file is significantly better fidelity: accurate fonts, spacing, page layout, and selectable text that closely matches the original Word document." },
+          { q: "Will my table of contents update automatically?", a: "No. A table of contents (or any other calculated field) is converted using whatever was last cached in the .docx file, not recalculated during conversion. In Word, click into the table of contents and choose \"Update Field\" before converting if you want it to reflect your current headings and page numbers." }
         ]}
         tips={[
           "Our server-side conversion preserves fonts, spacing, and page layout far more accurately than in-browser rendering.",
           "The resulting PDF has selectable, searchable text rather than a flattened image.",
+          "Update any table of contents or calculated fields in Word before converting — they carry over as last saved, not recalculated.",
           "Very large or complex files may take a little longer to convert — keep the tab open until the download starts."
         ]}
       />
