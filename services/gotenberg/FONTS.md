@@ -64,3 +64,21 @@ have working substitutes already present in the base image (Liberation
 Mono, Liberation Sans, Carlito) — confirmed, not assumed, since those are
 exactly the substitutions Debian's croscore/Liberation packages exist
 for.
+
+## Selawik (added 2026-09-19, audit D2)
+
+| Font | Source | License | Redistributable? |
+|---|---|---|---|
+| Selawik Regular + Bold | Official Microsoft repository <https://github.com/microsoft/Selawik>, release asset `Selawik_Release.zip` tag `1.01`; the two TTFs are vendored unmodified in `fonts/selawik/` and their SHA-256 is verified at image build time | SIL Open Font License 1.1 (the repository's own `LICENSE.txt`, kept as `fonts/selawik/OFL-LICENSE.txt`; the GitHub API also reports `OFL-1.1`). The OFL permits use, redistribution and bundling with software, including commercially, as long as the font is not sold by itself and the files/Reserved Font Name "Selawik" are not modified — they are not. | Yes |
+
+Why: Segoe UI is Windows-only; without it the image substituted Noto Sans, which is wider, so a slide
+title set in Segoe UI wrapped and was hidden behind an overlapping shape (fixture 06). A fontconfig rule
+(`fonts.conf`) now maps the family name `Segoe UI` to `Selawik`.
+
+What is and is not established (measured on 2026-09-19, not taken from marketing):
+- Advance widths of Selawik and the real Segoe UI (Windows `segoeui.ttf` / `segoeuib.ttf`) are identical for
+  93/93 tested glyphs (Latin letters, digits, French accents, « » € — ’), regular and bold.
+- The upstream README only says "an open source replacement for Segoe UI" and lists "missing kerning to
+  match Segoe UI" and "needs improved hinting" as known issues. It does **not** claim metric compatibility;
+  the width match above is our own measurement, and kerning is not matched.
+- Light, Semilight and Semibold are not shipped and not mapped (not measured).

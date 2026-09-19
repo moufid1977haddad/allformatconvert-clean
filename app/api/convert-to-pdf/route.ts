@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { detectProprietarySymbolFonts } from "@/lib/officeSymbolFonts";
+import { nameNamelessFonts } from "@/lib/xlsxDefaultFont";
 import { convertDocxToPdf, ConvertApiError } from "@/lib/providers/convertApi";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES } from "@/lib/quota/limits";
@@ -265,8 +266,24 @@ async function handleGotenberg(req: NextRequest, file: File, extension: string):
     .then((buf) => detectProprietarySymbolFonts(Buffer.from(buf), extension))
     .catch(() => []);
 
+  // .xlsx only: font entries with no name mean "the workbook's default font"
+  // to Excel but fall to a serif face in LibreOffice (bold headers came out
+  // in Caladea) -- see lib/xlsxDefaultFont.js. Files whose fonts are all
+  // named are passed through untouched. If the archive can't be read the
+  // original upload is converted as before and the reason is logged, so a
+  // failure here can never block a conversion.
+  let fileToConvert: Blob = file;
+  if (extension === "xlsx") {
+    try {
+      const { buffer, patched } = await nameNamelessFonts(Buffer.from(await file.arrayBuffer()));
+      if (patched > 0) fileToConvert = new Blob([new Uint8Array(buffer)], { type: file.type });
+    } catch (err: any) {
+      console.error("xlsx font normalization skipped:", err?.message || "unknown error");
+    }
+  }
+
   const gotenbergForm = new FormData();
-  gotenbergForm.append("files", file, file.name);
+  gotenbergForm.append("files", fileToConvert, file.name);
 
   const authHeader = "Basic " + Buffer.from(`${gotenbergUsername}:${gotenbergPassword}`).toString("base64");
 

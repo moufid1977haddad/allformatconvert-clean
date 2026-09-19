@@ -13,8 +13,10 @@ export const maxDuration = 60;
 // Rollback switch, same shape as CONVERTAPI_ENABLED in
 // convert-to-pdf/route.ts (spec §9): only the literal value "true" routes
 // PDFs to ConvertAPI. Unset, or any other value (including "false"),
-// disables this route entirely -- the client falls back to its own
-// client-side extraction, see pdf-to-word/page.jsx. Flipping this back off
+// disables this route: it answers 503 with a plain-language message and the
+// page shows it. There is deliberately NO degraded fallback -- the old
+// client-side plain-text extraction returned a result that looked normal
+// but had lost tables, fonts and layout (audit D6). Flipping this back on
 // is an env var change plus a redeploy, never a code change.
 const PDF_TO_WORD_CONVERTAPI_ENABLED = process.env.PDF_TO_WORD_CONVERTAPI_ENABLED === "true";
 
@@ -70,12 +72,14 @@ function getExtension(filename: string): string {
 }
 
 export async function POST(req: NextRequest) {
-  // Checked first, before touching the guard or reading the file body --
-  // this 404 is a deliberate, distinct signal the client uses to fall back
-  // to the old client-side extraction (page.jsx), never to be confused
-  // with a real conversion failure. Nothing else in this route returns 404.
+  // Checked first, before touching the guard or reading the file body. A
+  // disabled tool fails loudly with a clear message; it never hands back a
+  // lower-quality result that looks like a normal conversion.
   if (!PDF_TO_WORD_CONVERTAPI_ENABLED) {
-    return NextResponse.json({ error: "not_enabled" }, { status: 404 });
+    return NextResponse.json(
+      { error: "PDF to Word is temporarily unavailable. Please try again later." },
+      { status: 503 }
+    );
   }
 
   let file: File;
@@ -165,9 +169,7 @@ export async function POST(req: NextRequest) {
     // No automatic fallback to a different provider on any ConvertAPI
     // failure -- every failure returns an explicit error to the user,
     // never a silent retry, same policy as handleConvertApi in
-    // convert-to-pdf/route.ts. (The client-side pdfjs-dist fallback in
-    // page.jsx exists only for the disabled-feature 404 above, never for a
-    // real provider failure reaching this branch.)
+    // convert-to-pdf/route.ts.
     //
     // Release/commit boundary (see lib/providers/convertApi.js's
     // ConvertApiError#billed): release() only when ConvertAPI never
