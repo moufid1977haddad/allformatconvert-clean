@@ -119,3 +119,51 @@ Les trois premières changent de valeur lors de la bascule (nouvelle URL/identif
 - `services/gotenberg/README.md` — reformulé (6 outils, Watch Paths, double objectif fidélité/versioning).
 - `docs/audit/RAPPORT-gotenberg-versionne.md` — ce rapport (nouveau).
 - Aucun fichier applicatif du site modifié. Aucun outil supprimé ni renommé.
+
+---
+
+## 6. Session de déploiement — exécutée le 18 septembre 2026
+
+### 6.1 Constat de départ, différent de l'hypothèse du §4
+
+Avant toute action de cette session, vérification a montré que **le service Railway existant s'appelle `gotenberg-fonts`**, pas un nom générique « gotenberg » — et qu'il avait déjà, depuis le chantier du 1er septembre, exactement la configuration que le §4.1 demandait de créer pour le nouveau service (`Root Directory: services/gotenberg`, `Watch Paths: services/gotenberg/**`). Conséquence : quand le commit 74e4660 (digest pin) a été poussé sur `master` à la fin de la session de code, `gotenberg-fonts` s'est **auto-redéployé lui-même** avant même le début de cette session — sans passage par une bascule bleu/vert réfléchie. Ce n'était pas une action de cette session, mais un effet de bord du Watch Paths déjà en place sur le service existant.
+
+Confirmation que `gotenberg-fonts` est bien le service de **production** (et non un service de test comme sa description originale le laissait penser) : `GOTENBERG_URL` dans Vercel pointait dessus (vérifié en lisant la valeur dans le tableau de bord, jamais affichée dans ce terminal). Un seul workspace, un seul projet (`fortunate-manifestation`), un seul environnement Railway (`production`) existent sur ce compte — aucun autre service Gotenberg n'a été trouvé ailleurs.
+
+### 6.2 Nouveau service créé : `gotenberg-v2`
+
+- Projet Railway `fortunate-manifestation`, créé depuis `moufid1977haddad/allformatconvert-clean`, branche `master`.
+- Root Directory : `services/gotenberg` · Builder : Dockerfile (confirmé dans les logs : `load build definition from services/gotenberg/Dockerfile`, même digest `sha256:87c16b9f...` que le service existant) · Watch Paths : `services/gotenberg/**` · Healthcheck Path : `/health`.
+- Domaine généré : **`gotenberg-v2-production.up.railway.app`** (port 3000).
+- Les 9 variables d'environnement ont été ajoutées par **référence croisée Railway** (`${{gotenberg-fonts.NOM_VAR}}`) plutôt que recopiées — leurs valeurs n'ont jamais été lues ni affichées.
+- Vérifié isolément avant toute bascule : `/health` répond `{"status":"up",...}` avec Chromium et LibreOffice déjà « up ».
+
+### 6.3 Bascule Preview puis Production
+
+`GOTENBERG_URL` a été scindée en deux valeurs distinctes par environnement (au lieu d'une valeur unique partagée) : Preview → `gotenberg-v2-production.up.railway.app`, Production conservée sur l'ancienne valeur le temps des tests. `GOTENBERG_USERNAME`/`GOTENBERG_PASSWORD` restent partagés (identifiants réutilisés, comme documenté au §4.2).
+
+Piège rencontré : un « Ignored Build Step » du projet Vercel annule automatiquement tout redéploiement d'un commit qui ne touche que `docs/**`/`*.md`/`README` — ce qui était le cas du dernier commit. Contournement : décocher « Use project's Ignore Build Step » sur le redéploiement manuel (sans cache de build), uniquement pour ce déploiement précis — aucun réglage de projet n'a été modifié.
+
+Après le redéploiement Preview (`onlineconvertools-git-master-moufid.vercel.app`), les six outils ont été testés avec des fichiers réels (`scripts/audit/fixtures/files/sample.{docx,xlsx,pptx,epub,mobi,html}`, déjà utilisés dans les audits précédents de ce projet) :
+
+| Outil | Avant (production, `gotenberg-fonts`) | Après (production, `gotenberg-v2`) |
+|---|---|---|
+| word-to-pdf | ✅ PDF généré | ✅ PDF généré |
+| excel-to-pdf | ✅ PDF généré | ✅ PDF généré |
+| ppt-to-pdf | ✅ PDF généré | ✅ PDF généré |
+| epub-to-pdf | ✅ PDF généré | ✅ PDF généré |
+| mobi-to-pdf | ✅ PDF généré | ✅ PDF généré |
+| html-to-pdf | ✅ PDF généré | ✅ PDF généré |
+
+Tous verts sur Preview → bascule de `GOTENBERG_URL` Production vers `gotenberg-v2`, redéploiement Production forcé de la même façon (même contournement de l'Ignored Build Step), puis les six outils ont été **retestés en conditions réelles sur `www.onlineconvertools.com`** après bascule — tous verts (tableau ci-dessus, colonne « Après »).
+
+### 6.4 Temps de conversion : mesure non concluante, signalé honnêtement
+
+Le prompt demandait une comparaison des temps de conversion sur le même fichier. Une tentative de mesure via horodatage autour des actions navigateur a été abandonnée : l'écart mesuré (~48 s) reflétait le temps d'aller-retour de l'automatisation elle-même (plusieurs appels séquentiels), pas le temps réel de conversion côté Gotenberg — le chiffre aurait été trompeur s'il avait été présenté comme tel. Fait vérifiable à la place : les deux services font tourner **la même image Docker, au même digest** (confirmé dans les logs de build de `gotenberg-v2`), donc aucune différence de performance n'est attendue, et aucune n'a été perceptible pendant les tests manuels (conversions quasi instantanées des deux côtés).
+
+### 6.5 État final
+
+- **URL du nouveau service** : `https://gotenberg-v2-production.up.railway.app`
+- `gotenberg-fonts` (ancien service) **conservé intact, non supprimé**, sert de filet de repli — sa suppression attend l'accord explicite du propriétaire, comme demandé.
+- Aucun outil supprimé ni renommé. Aucune valeur de variable affichée à aucun moment.
+- `GOTENBERG_PASSWORD` porte une alerte Vercel native « Needs Attention » (variable de type Config plutôt que Secret) — signalé pour information, aucune action prise (hors périmètre de cette session).
