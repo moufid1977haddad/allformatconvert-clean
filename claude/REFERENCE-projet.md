@@ -83,3 +83,39 @@ Vérifié empiriquement (métadonnée PDF `Producer`) le 2026-09-19 : les conver
 `.docx` réelles passent bien par ConvertAPI (`Producer: ConvertAPI`), les
 `.xlsx`/`.pptx` par Gotenberg (`Producer: LibreOffice 26.2.5.2 (X86_64)`).
 Voir `docs/audit/RAPPORT-fidelite-office.md` pour la mesure de fidélité complète.
+
+## Outils PDF hors Office — backends (vérifié le 2026-09-19)
+
+- **pdf-to-word** : `/api/pdf-to-word`, ConvertAPI (actif en production). Si
+  `PDF_TO_WORD_CONVERTAPI_ENABLED` est coupé, la page bascule **silencieusement**
+  sur une extraction de texte brut côté navigateur (`convertClientSide`) — voir
+  défaut D6 du rapport.
+- **html-to-pdf** : `/api/convert-html-to-pdf`, module Chromium de Gotenberg
+  (`Skia/PDF m151`, Letter). Les polices absentes sont remplacées
+  (Georgia → Liberation Serif, Arial → Liberation Sans).
+
+## Fidélité — état mesuré (2026-09-19, détail dans `docs/audit/RAPPORT-fidelite-office.md`)
+
+- Corpus : `docs/audit/fixtures-fidelite/` (6 fichiers) ; scripts de comparaison :
+  `docs/audit/fidelite-marche/mont.py` et `diff.py` ; preuves PNG dans le même dossier.
+- docx (ConvertAPI) : indiscernable de FreeConvert et Online2PDF.
+- xlsx (LibreOffice) : équivalent sauf **D1** (gras en Caladea à empattements).
+- pptx (LibreOffice) : équivalent sauf **D2** (Segoe UI → Noto Sans plus large,
+  titre replié et masqué sur la fixture 06).
+- Concurrents : FreeConvert (1 Go, sans compte, publicités, moteur déclaré
+  Microsoft Office) ; Online2PDF (150 Mo/fichier, 200 Mo total, sans compte) ;
+  CloudConvert (quota gratuit **10 crédits/jour**, atteint) ; iLovePDF (le
+  téléchargement fige l'onglet en automatisation). FreeConvert et Online2PDF
+  produisent des pptx quasi identiques : ne pas les compter comme deux avis
+  indépendants.
+- Nos limites : 25 Mo/fichier ; quotas par défaut du code 5 conversions PDF par
+  utilisateur, 10/h et 30/jour par IP (`lib/quota/config.js`, valeurs de
+  production non lues).
+
+## Règle de rédaction des promesses
+
+Toute phrase de fidélité d'un outil (page, `SeoContent`, `layout.tsx`
+title/description/OpenGraph) doit citer une mesure du rapport ; pas de
+« professional-quality », pas de comparaison non mesurée, et le SEO doit dire la
+même chose que la page (pdf-to-word affirmait « texte brut, dans votre
+navigateur » alors que la production fait autre chose — corrigé le 2026-09-19).

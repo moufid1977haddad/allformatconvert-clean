@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF to Word — Extract Each Page's Plain Text Online Free" },
-  description: "PDF to Word extracts each page's plain text and writes it into a new .docx file as plain paragraphs, entirely in your browser.",
+  title: { absolute: "PDF to Word — Convert Your PDF to an Editable .docx Online Free" },
+  description: "PDF to Word converts a PDF to an editable .docx. In our tests on Word-exported PDFs, headings, tables, columns and lists were kept; scanned PDFs are not supported.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-word" },
   openGraph: {
-    title: "PDF to Word — Extract Each Page's Plain Text Online Free",
-    description: "PDF to Word extracts each page's plain text and writes it into a new .docx file as plain paragraphs, entirely in your browser.",
+    title: "PDF to Word — Convert Your PDF to an Editable .docx Online Free",
+    description: "PDF to Word converts a PDF to an editable .docx. In our tests on Word-exported PDFs, headings, tables, columns and lists were kept; scanned PDFs are not supported.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-word",
   },
 };
