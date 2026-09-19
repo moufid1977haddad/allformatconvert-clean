@@ -1,0 +1,19 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>t</title>
+<style>
+body{font-family:Georgia,serif;margin:0;padding:24px;color:#222}
+h1{font-family:Arial,sans-serif;color:#1d4ed8;border-bottom:3px solid #1d4ed8}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+.card{background:linear-gradient(135deg,#f97316,#ec4899);color:#fff;padding:14px;border-radius:12px;box-shadow:0 3px 8px rgba(0,0,0,.3)}
+.flex{display:flex;justify-content:space-between;align-items:center;background:#eef;padding:10px}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #888;padding:6px}th{background:#333;color:#fff}
+.cols{column-count:2;column-gap:24px;text-align:justify}
+@media print{.noprint{display:none}}
+</style></head><body>
+<h1>Rapport — accents é è à ç « guillemets »</h1>
+<div class="grid"><div class="card">Carte 1</div><div class="card">Carte 2</div><div class="card">Carte 3</div></div>
+<div class="flex"><span>Gauche</span><strong>Centre</strong><em>Droite</em></div>
+<p class="noprint">NE DOIT PAS APPARAITRE EN IMPRESSION</p>
+<table><tr><th>A</th><th>B</th><th>C</th></tr><tr><td>1</td><td colspan="2">fusion</td></tr><tr><td>x</td><td>y</td><td>z</td></tr></table>
+<div class="cols"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.</p></div>
+<svg width="200" height="80"><rect width="200" height="80" fill="#0a0"/><circle cx="40" cy="40" r="25" fill="#fff"/></svg>
+</body></html>

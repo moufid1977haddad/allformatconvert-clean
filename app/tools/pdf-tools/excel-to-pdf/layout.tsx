@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Excel to PDF — Convert Your .xlsx, .xls, .csv, or .ods File Online" },
-  description: "Excel to PDF converts your .xlsx, .xls, .csv, or .ods file into a real PDF using LibreOffice — accurate for standard fonts, except Wingdings/Webdings icons.",
+  description: "Excel to PDF converts your .xlsx, .xls, .csv, or .ods file to PDF using LibreOffice. In our tests numbers, formulas and color scales carried over; bold text can appear in a serif font.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/excel-to-pdf" },
   openGraph: {
     title: "Excel to PDF — Convert Your .xlsx, .xls, .csv, or .ods File Online",
-    description: "Excel to PDF converts your .xlsx, .xls, .csv, or .ods file into a real PDF using LibreOffice — accurate for standard fonts, except Wingdings/Webdings icons.",
+    description: "Excel to PDF converts your .xlsx, .xls, .csv, or .ods file to PDF using LibreOffice. In our tests numbers, formulas and color scales carried over; bold text can appear in a serif font.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/excel-to-pdf",
   },
 };

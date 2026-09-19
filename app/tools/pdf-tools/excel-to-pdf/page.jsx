@@ -74,7 +74,7 @@ export default function ExcelToPdfPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Excel to PDF</h1>
         <p className="text-neutral-500 text-center mb-2">Convert .xlsx, .xls, .csv, and .ods files to PDF using LibreOffice</p>
-        <p className="text-neutral-400 text-xs text-center mb-8">Standard fonts and formatting come through accurately. Wingdings and Webdings icon fonts can&apos;t legally be reproduced and will appear blank if your file uses them.</p>
+        <p className="text-neutral-400 text-xs text-center mb-8">In our tests, number formats, formulas, merged cells and color scales carried over. Bold text can appear in a serif font, and Wingdings and Webdings icon fonts can&apos;t legally be reproduced and will appear blank.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop an Excel file here'}</p>
@@ -104,7 +104,7 @@ export default function ExcelToPdfPage() {
       </div>
       <SeoContent
         title="Excel to PDF"
-        description="Excel to PDF converts your .xlsx, .xls, .csv, or .ods file into a real, professional-quality PDF using LibreOffice, the same conversion engine used by many enterprise document pipelines. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. Every sheet in your workbook is rendered with accurate column widths, number formats, and cell borders. The one disclosed exception: Wingdings and Webdings icon fonts can't legally be embedded in our conversion service (a font-licensing restriction, not a bug), so those specific characters come through as blank boxes if your file uses them — everything else converts normally."
+        description="Excel to PDF converts your .xlsx, .xls, .csv, or .ods file into a PDF using LibreOffice. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. We tested .xlsx workbooks with currency, percentage and date formats, merged cells, cell borders, color-scale conditional formatting, a bar chart, a wrapped-text column and formulas (multiplication, IF and cross-sheet lookups): the formulas were recalculated to the right values, and a sheet set to fit on one page stayed on one page. A sheet wider than the page, with no print area or scaling, is split across several PDF pages by groups of columns (another converter shrank the same sheet onto fewer pages). The chart was drawn, but its styling differs from what other converters produce, so check it in your PDF. Two disclosed exceptions: Wingdings and Webdings icon fonts can't legally be embedded in our conversion service (a font-licensing restriction, not a bug), so those specific characters come through as blank boxes if your file uses them; and bold text can render in a substituted serif typeface instead of the expected sans-serif one (a known LibreOffice font-substitution quirk for bold weights) — in our tests the text and its position were correct, only the typeface differed."
         howTo={[
           "Click the upload area and select an .xlsx, .xls, .csv, or .ods file from your device.",
           "Click 'Download PDF'. Your file is uploaded securely for conversion and the PDF downloads automatically once it's ready.",
@@ -115,13 +115,15 @@ export default function ExcelToPdfPage() {
           { q: "What file formats does the tool support?", a: "It accepts .xlsx, .xls, .csv, and .ods files." },
           { q: "Will my files be uploaded to a server?", a: "Yes. Your file is uploaded securely over HTTPS to our conversion service, which uses LibreOffice to generate the PDF, and is deleted immediately after conversion — it isn't stored or kept." },
           { q: "Can I convert multiple Excel files at once?", a: "No, only one file can be converted at a time." },
-          { q: "Will formulas and formatting carry over?", a: "Formula results, number formats, column widths, and cell borders are preserved because conversion is done with LibreOffice rather than a browser-side approximation. Very complex conditional formatting or macros may not be fully supported." }
+          { q: "Will formulas and formatting carry over?", a: "In our tests on .xlsx files, formula results (including cross-sheet lookups), number formats, merged cells, cell borders and color-scale conditional formatting carried over. We did not test macros or very complex conditional formatting, and we measured .xlsx only, not .xls, .csv or .ods." },
+          { q: "Why is my wide spreadsheet split across several pages?", a: "A sheet wider than one page, with no print area or scaling set, is split into pages by groups of columns. Setting the sheet to fit on one page wide in Excel (Page Layout > Scale to Fit) before uploading keeps it together — a sheet set to fit on one page stayed on one page in our test." },
+          { q: "Why does some bold text look slightly different in my PDF?", a: "Bold text occasionally renders in a substituted serif typeface instead of the sans-serif font it was set in — a known LibreOffice font-substitution quirk that affects bold weights specifically. In our tests the text was correct and in the right place; only the typeface differed." }
         ]}
         tips={[
           "Every sheet in your workbook is converted in its original order, each starting on its own page(s).",
-          "Wide spreadsheets with many columns convert most cleanly when column widths are set to fit their content before uploading.",
-          "LibreOffice-based conversion preserves number formats, formulas' displayed values, and cell borders far more accurately than in-browser rendering.",
-          "Simplify complex conditional formatting or macros beforehand, since only standard formatting is guaranteed to carry over."
+          "Wide sheets are split by groups of columns unless you set them to fit on one page wide in Excel first (Page Layout > Scale to Fit).",
+          "Formulas are recalculated during conversion, so the PDF shows current values.",
+          "We tested standard formatting (number formats, color scales, merged cells); macros and very complex conditional formatting were not tested."
         ]}
       />
     </div>
