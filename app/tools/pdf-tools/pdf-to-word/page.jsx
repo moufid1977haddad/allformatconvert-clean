@@ -17,34 +17,6 @@ export default function PdfToWordPage() {
     setDone(false);
   };
 
-  // Client-side fallback: extracts each page's plain text with pdfjs-dist
-  // and writes it into a new .docx as plain paragraphs, entirely in the
-  // browser. This was this tool's ONLY implementation before the
-  // server-side ConvertAPI path shipped; it's kept here (not deleted),
-  // moved into its own function, purely so PDF_TO_WORD_CONVERTAPI_ENABLED
-  // can be flipped back off server-side without breaking this tool for
-  // visitors -- see the 404 handling in convert() below. It carries over
-  // text only; images, fonts, tables, and the original layout are not
-  // preserved, which is exactly why it's now the fallback rather than the
-  // primary path.
-  const convertClientSide = async (pdfFile) => {
-    const pdfjsLib = await import('pdfjs-dist');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
-    const arrayBuffer = await pdfFile.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    let fullText = '';
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items.map(item => item.str).join(' ');
-      fullText += pageText + '\n\n';
-    }
-    const { Document, Packer, Paragraph, TextRun } = await import('docx');
-    const paragraphs = fullText.split('\n').map(line => new Paragraph({ children: [new TextRun(line)] }));
-    const doc = new Document({ sections: [{ properties: {}, children: paragraphs }] });
-    return Packer.toBlob(doc);
-  };
-
   const convert = async () => {
     if (!file) return;
     setLoading(true);
@@ -57,34 +29,9 @@ export default function PdfToWordPage() {
 
       const res = await fetch('/api/pdf-to-word', { method: 'POST', body: formData });
 
-      let blob;
-      if (res.status === 404) {
-        // A deliberate, distinct disabled-feature signal from the route
-        // (PDF_TO_WORD_CONVERTAPI_ENABLED off) -- NOT a real conversion
-        // failure. Falls back silently to the client-side extraction
-        // above; the user never sees an error or any sign that anything
-        // unusual happened. Confirmed via the JSON body so an unrelated
-        // 404 (there shouldn't be one, but just in case) doesn't get
-        // mistaken for this signal.
-        let isDisabledSignal = false;
-        try {
-          const data = await res.json();
-          isDisabledSignal = data && data.error === 'not_enabled';
-        } catch {
-          // Not JSON -- isDisabledSignal stays false, so this falls
-          // through to a normal visible error below instead of a silent
-          // fallback.
-        }
-        if (isDisabledSignal) {
-          blob = await convertClientSide(file);
-        } else {
-          throw new Error('Conversion failed. Please try again.');
-        }
-      } else if (!res.ok) {
-        // Any other non-ok response is a real ConvertAPI failure (502,
-        // 503, 413, 415, etc.) -- surface it as a normal visible error,
-        // exactly like word-to-pdf/page.jsx does. Never silently fall back
-        // on a real failure, only on the disabled-feature 404 above.
+      if (!res.ok) {
+        // Every failure is shown to the user, including the route's 503 when the
+        // service is switched off. There is no degraded fallback (audit D6).
         let message = 'Conversion failed. Please try again.';
         try {
           const data = await res.json();
@@ -93,9 +40,8 @@ export default function PdfToWordPage() {
           // Response wasn't JSON; fall back to the generic message above.
         }
         throw new Error(message);
-      } else {
-        blob = await res.blob();
       }
+      const blob = await res.blob();
 
       const filename = (file.name.replace(/\.[^.]+$/, '') || 'document') + '.docx';
       const url = URL.createObjectURL(blob);

@@ -35,6 +35,26 @@ RUN apt-get update -qq \
     && apt-get install -y -qq --no-install-recommends fonts-liberation-sans-narrow \
     && rm -rf /var/lib/apt/lists/*
 
+# Segoe UI is Windows-only and unlicensed for redistribution, so the base
+# image substitutes Noto Sans, which is noticeably wider: a slide title set
+# in Segoe UI wrapped onto a second line and was hidden behind the shape
+# placed over it (docs/audit/RAPPORT-fidelite-corrections.md, D2). Selawik
+# is Microsoft's own open replacement (github.com/microsoft/Selawik, SIL OFL
+# 1.1 -- commercial redistribution and bundling permitted, files must stay
+# unmodified). Measured against the real Segoe UI: identical advance widths
+# for 93/93 tested glyphs, regular and bold; NOT kerned like Segoe UI (the
+# upstream README says so). No apt package exists, so the two TTFs are
+# vendored under fonts/selawik/ (provenance in SOURCE.md) and their SHA-256
+# is verified at build time -- a mismatch fails the build.
+COPY fonts/selawik/ /tmp/selawik/
+RUN cd /tmp/selawik \
+    && sha256sum -c SHA256SUMS \
+    && install -d /usr/local/share/fonts/selawik /usr/share/doc/selawik \
+    && install -m 0644 selawk.ttf selawkb.ttf /usr/local/share/fonts/selawik/ \
+    && install -m 0644 OFL-LICENSE.txt /usr/share/doc/selawik/copyright \
+    && fc-cache -f \
+    && rm -rf /tmp/selawik
+
 # The base image already ships Carlito/Caladea (Calibri/Cambria's
 # metric-compatible substitutes) via fonts-crosextra-carlito/-caladea --
 # confirmed empirically in phase 1 by inspecting the embedded fonts in real
