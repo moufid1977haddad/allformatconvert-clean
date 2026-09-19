@@ -30,7 +30,7 @@
 | **1** | Navbar (10) · plafond `pdf-translate` (4) · chiffrage des stubs (7) | ✅ **FAIT** |
 | **2** | **MESURER** la fidélité Office → PDF *(bloquant 2)* | ✅ **MESURÉ** — promesses corrigées en ligne · défauts ouverts D1→D10 |
 | **3** | Détourage *(bloquant 3)* | ✅ **CLOS** |
-| **4** | **TESTER** Safari sur les 20 outils les plus mis en avant *(bloquant 9)* | ⬜ **prochain** |
+| **4** | **TESTER** Safari sur les 20 outils les plus mis en avant *(bloquant 9)* | 🟡 **feuille prête** (`tests-safari-proprietaire.md`) — **en attente du propriétaire**, ~2 h |
 
 ---
 
@@ -46,6 +46,7 @@
 > - `REFERENCE-projet.md` — encyclopédie technique
 > - `decision-internationalisation.md` — dossier de décision sur le multilingue
 > - **`tests-manuels-proprietaire.md`** — feuille de test du **bloquant 11**. Ses verdicts se reportent ici ; ce qui échoue remonte dans les bloquants, jamais dans « CLOS ».
+> - **`tests-safari-proprietaire.md`** — feuille de test du **bloquant 9** (Safari iPhone + MacBook, 20 outils). Même règle : verdicts reportés ici, ce qui échoue remonte dans le bloquant 9.
 > - `docs/audit/RAPPORT-*.md` — traces de chantier, jamais des tâches
 > - `session-etat-*.md` — archives datées
 >
@@ -216,6 +217,10 @@ Vercel **Hobby** = **une tâche planifiée par jour**. **Sans trafic, ça ne ser
 
 **C'est le dernier bloquant technique avant le lancement.** Firefox et Chrome confirmés. Safari = l'essentiel du trafic iPhone et Mac. Casse typiquement : Web Workers, téléchargements, WASM, `OffscreenCanvas`. **Nécessite un iPhone ou un Mac.**
 
+**✅ Feuille opérationnelle prête (19 septembre 2026) : `tests-safari-proprietaire.md`**, comme le bloquant 11 a la sienne. 20 outils classés par risque lu dans le code, fichiers d'essai fournis (`docs/audit/fixtures-safari/`), séances iPhone puis MacBook, **~2 h**, la moitié la plus risquée en premier (séances A puis C, ~1 h). **Le propriétaire a un iPhone et un MacBook réels : aucun service de test, aucun compte à ouvrir.** **Le bloquant reste OUVERT tant que la feuille n'est pas remplie** ; **les verdicts remontent ici**, et chaque ÉCHOUÉ devient un défaut chiffré dans ce bloquant, jamais dans « CLOS » sans retest sur le vrai Safari.
+
+**Suspects lus dans le code — hypothèses à confirmer par le test, pas des constats :** ① `video-compressor`, `video-converter`, `video-trimmer` appellent `captureStream()` + `MediaRecorder` en `video/webm` **sans détection de support** ; ② `voice-recorder` étiquette `audio/webm` un enregistrement que Safari produit en MP4 ; ③ `image-converter` : WebP par défaut via `OffscreenCanvas.convertToBlob` (Safari peut renvoyer du PNG) ; ④ `image-upscaler` (jusqu'à ×8) et `background-remover` (recomposition pleine résolution) dépassent probablement la limite de canvas de Safari iOS ; ⑤ `video-to-gif` attend `seeked` **sans délai de garde** (contrairement à `mp4-to-gif`).
+
 ## 10 — ✅ CLOS — Bug de débordement de la navbar
 
 8 largeurs de 1024 à 1536 px, barre + 3 enfants directs : **0 px partout**.
@@ -230,7 +235,8 @@ Vercel **Hobby** = **une tâche planifiée par jour**. **Sans trafic, ça ne ser
 # 🟢 ADMINISTRATIF — sans condition
 
 - ✅ ~~Inscrire le service de détourage dans `REFERENCE-projet.md`~~ — fait le 19 septembre (service détourage, références croisées des deux Gotenberg, quotas lus).
-- **Décider du sort de `gotenberg-fonts`** (~2 $/mois). Deux services Railway font tourner la **même image au même digest** : `gotenberg-fonts` (historique) et `gotenberg-v2` (production depuis le 18 septembre). ⚠️ **Les variables de `gotenberg-v2` sont des références croisées vers `gotenberg-fonts` : le supprimer tuerait `gotenberg-v2`.** Résoudre les références en valeurs propres AVANT toute suppression. **Décision : le garder comme retour arrière tant que les correctifs de polices ne sont pas stabilisés en production.**
+- **Décider du sort de `gotenberg-fonts`** (~2 $/mois). Deux services Railway font tourner la **même image au même digest** : `gotenberg-fonts` (historique) et `gotenberg-v2` (production depuis le 18 septembre). ⚠️ **NON VÉRIFIÉ — ne pas lire comme un fait établi (19 septembre 2026).** Que les variables de `gotenberg-v2` soient des références croisées vers `gotenberg-fonts` **est une hypothèse, pas un constat** : deux sources écrites l'affirment (ce plan, et `RAPPORT-gotenberg-versionne.md` ligne 138 — qui dit avoir ajouté les 9 variables par `${{gotenberg-fonts.NOM_VAR}}` **sans jamais lire leurs valeurs**), une source l'infirme (`RAPPORT-fidelite-office.md` ligne 23 : « aucune référence croisée », lecture d'API où une référence peut apparaître comme une valeur). **Aucune n'a été vérifiée contre l'état réel de Railway** ; cette ligne avait été recopiée de document en document. **Tentative du 19 septembre : impossible** — la CLI Railway n'est **pas installée** sur ce poste (absente du PATH et des emplacements usuels ; seul le dossier de configuration `~/.railway` subsiste), donc pas de lecture possible sans clic dans le tableau de bord, interdit. **Règle en attendant : traiter la dépendance comme réelle** (le coût d'une erreur est asymétrique : supprimer à tort tue la production Office → PDF). **Pour trancher :** installer la CLI (`npm i -g @railway/cli`, aval du propriétaire), puis lire les variables de `gotenberg-v2` **par un petit script qui n'imprime que le NOM et un booléen « la valeur commence par `${{` »** — ⚠️ la CLI, elle, imprime les valeurs : ne jamais lancer `railway variables` sans ce filtre, sa sortie contient des secrets. Résoudre les références en valeurs propres AVANT toute suppression. **Décision : le garder comme retour arrière tant que les correctifs de polices ne sont pas stabilisés en production.**
+- **Repli silencieux dans `lib/quota/config.js` — CONFIRMÉ le 19 septembre, NON corrigé.** `IP_RATE_LIMIT_PER_HOUR || 10` et `IP_RATE_LIMIT_PER_DAY || 30` (lignes 8-9) : si la variable est absente, le code retombe sur **10/h et 30/jour** alors que la production est à **30/h et 100/jour**. Interdit permanent n° 3. Le sens de l'erreur est **plus strict que la production** (pas de fuite de coût), mais silencieux. **Même défaut sur 8 autres constantes du fichier** (`GLOBAL_SPEND_CAP_USD`, `USER_QUOTA_*`, `TOOL_ERROR_*`, `CONTACT_*`). Chiffrage dans `RAPPORT-safari-preparation.md` §2. `Number('abc')` donne en plus `NaN` sans repli, ce qui peut désactiver une limite en silence (à vérifier dans `incrementCounter`).
 - **Envisager la veille Serverless de `pdf-tools`** : le service est actif 24 h/24 alors que ses outils sont « Coming Soon » (même mécanisme que le détourage).
 - **Supprimer à la main** `Downloads\fidelite-01..06.pdf` (verrouillés par Chrome).
 - **Supprimer la variable `REMOVEBG_API_KEY`** de Vercel : plus aucun code ne l'utilise.
@@ -296,7 +302,7 @@ Vercel **Hobby** = **une tâche planifiée par jour**. **Sans trafic, ça ne ser
 - **Le plafond de charge utile des fonctions Vercel est de 4,4-4,7 Mo.** **Mesuré exactement le 19 septembre sur les routes Office : refus entre 4 412 819 et 4 517 676 octets.** Ces routes envoient du **multipart brut**. En revanche, tout outil qui encode en **base64** touche le mur dès **3,3 Mo de fichier réel** (inflation ×1,33) — c'est ce qui est arrivé deux fois. **Tout nouvel outil qui fait transiter un fichier par Vercel doit être conçu en le sachant.**
 - **`RESEND_API_KEY` et `GOTENBERG_PASSWORD` sont signalées par l'API Vercel comme lisibles.** À basculer en variables sensibles si le plan le permet ; ne jamais les afficher entre-temps.
 - **Un déploiement Railway qui plante ne fait pas tomber le service** — l'ancienne version reste servie, sans alerte.
-- **Deux services Railway servent la même image Gotenberg**, liés par des références croisées de variables.
+- **Deux services Railway servent la même image Gotenberg**, **possiblement** liés par des références croisées de variables (**non vérifié**, voir ADMINISTRATIF).
 - **Dépendance à des fournisseurs tiers qui peuvent disparaître.** Les mêmes questions valent pour **ConvertAPI, Adobe PDF Services et OpenAI**.
 - **La navbar est à budget de largeur ZÉRO.**
 - **Aucun repli sur les API d'IA** — une clé expirée fait tomber **15 outils**
