@@ -298,7 +298,7 @@ décision sur B.
 
 ## 9. Vérification finale des pages corrigées
 
-(Complétée après le déploiement du dernier commit.)
+Déploiement final : commit `68aae267` sur master, Vercel en ligne après une attente bornée (18 sondages de 10 s). Lecture du HTML servi (`curl`) le 2026-09-19 sur les cinq pages : plus aucune occurrence de « professional-quality » ; « In our tests… » présent 5 à 7 fois dans chaque page et dans la balise `<meta name="description">` de chacune ; excel-to-pdf ne contient plus la divulgation « substituted serif » (le seul « serif » restant est la pile de polices CSS du site) ; ppt-to-pdf contient « Three disclosed limits » et la mention « do not wrap ». Vérification par lecture du HTML servi, pas par test de conversion dans un navigateur.
 
 ## 10. Ce qui n'a pas été fait / limites
 
