@@ -151,7 +151,8 @@ Les promesses fausses **ne sont plus en ligne**. *« professional-quality »* a 
 **Mesuré le 19 septembre, fichier à l'appui :** un fichier de **4 412 819 octets passe**, un de **4 517 676 octets est refusé** par Vercel (`FUNCTION_PAYLOAD_TOO_LARGE`). Vaut pour `.xlsx`, `.pptx`, `.docx` et `pdf-to-word`. **Ces routes envoient du multipart brut — pas d'inflation base64**, contrairement au détourage.
 
 - **Le « 25 Mo » n'existe que dans un message d'erreur serveur inatteignable.** Aucune page ne l'affiche.
-- **D10 — ce que voit le visiteur :** un fichier de 5 à 25 Mo affiche *« Conversion failed. Please try again. »* Il réessaie, ça échoue encore, il part. **C'est un mensonge par omission et un bloquant de lancement.**
+- ✅ **D10 CORRIGÉ et vérifié en production le 19 septembre** (`RAPPORT-plafonds-declares.md`) : plafond de **4 Mio** annoncé avant la sélection, contrôlé dans le navigateur, message honnête, sur les 4 routes + html/epub/mobi-to-pdf, pdf-repair, pdf-to-pdfa (qui annonçaient 50 Mo), audio-to-text et audio-transcriber (10 Mo), image-captioner (3 Mio, base64). Le plafond lui-même n'est pas relevé (D8 reste ouvert).
+- **D10 — ce que voyait le visiteur (avant correction) :** un fichier de 5 à 25 Mo affiche *« Conversion failed. Please try again. »* Il réessaie, ça échoue encore, il part. **C'est un mensonge par omission et un bloquant de lancement.**
 - **Écart marché :** **~34×** moins qu'Online2PDF (150 Mo), **~230×** moins que FreeConvert (1 Go). *(Tailles affichées par leurs pages, non éprouvées.)*
 
 **Chiffrage (estimations non vérifiées) :** contrôle côté navigateur + message honnête = **quelques heures**. Envoi via **Vercel Blob** = 1 à 2 jours, risque non mesuré sur la taille du PDF renvoyé. Sortir ces routes de Vercel = 2 à 4 jours.
@@ -228,7 +229,7 @@ Vercel **Hobby** = **une tâche planifiée par jour**. **Sans trafic, ça ne ser
 
 # 🟢 ADMINISTRATIF — sans condition
 
-- **Inscrire le service de détourage dans `REFERENCE-projet.md`**, à côté de Gotenberg et pdf-tools.
+- ✅ ~~Inscrire le service de détourage dans `REFERENCE-projet.md`~~ — fait le 19 septembre (service détourage, références croisées des deux Gotenberg, quotas lus).
 - **Décider du sort de `gotenberg-fonts`** (~2 $/mois). Deux services Railway font tourner la **même image au même digest** : `gotenberg-fonts` (historique) et `gotenberg-v2` (production depuis le 18 septembre). ⚠️ **Les variables de `gotenberg-v2` sont des références croisées vers `gotenberg-fonts` : le supprimer tuerait `gotenberg-v2`.** Résoudre les références en valeurs propres AVANT toute suppression. **Décision : le garder comme retour arrière tant que les correctifs de polices ne sont pas stabilisés en production.**
 - **Envisager la veille Serverless de `pdf-tools`** : le service est actif 24 h/24 alors que ses outils sont « Coming Soon » (même mécanisme que le détourage).
 - **Supprimer à la main** `Downloads\fidelite-01..06.pdf` (verrouillés par Chrome).
@@ -491,7 +492,7 @@ Get-Content .env.local | ForEach-Object {
 
 # CRITÈRE DE LANCEMENT
 
-**Un bloquant technique restant : 9 (Safari).** Plus **D10** (le message d'erreur trompeur au-delà de 4,4 Mo), Railway Gotenberg à 3 réplicas, et la galerie Product Hunt.
+**Un bloquant technique restant : 9 (Safari).** Railway Gotenberg à 3 réplicas, et la galerie Product Hunt.
 
 Le bloquant 2 est **mesuré et ses promesses corrigées en ligne** ; ses défauts résiduels (D7, D9) et le relèvement du plafond (D8) passent après le lancement.
 
