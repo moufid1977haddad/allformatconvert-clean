@@ -40,11 +40,19 @@ tous `status: RUNNING` au 2026-09-19 :
   s'était déjà auto-redéployé sur le digest épinglé via les Watch Paths existants
   avant même la création de gotenberg-v2.
 - **Veille Serverless** : **désactivée** — tourne 24h/24 pour un usage quasi nul.
-- **Variables** : aucune référence croisée Railway (`${{...}}`) vers gotenberg-v2
-  ou l'inverse — toutes les variables des deux services (dont
-  `GOTENBERG_API_BASIC_AUTH_USERNAME`/`PASSWORD`) sont des valeurs littérales
-  indépendantes. Supprimer gotenberg-fonts ne casserait donc pas gotenberg-v2
-  au niveau Railway.
+- **Variables — RÉFÉRENCES CROISÉES (corrigé le 2026-09-19 ; NE PAS SUPPRIMER CE SERVICE)** :
+  une version antérieure de cette ligne affirmait qu'il n'y avait aucune référence croisée
+  et que supprimer gotenberg-fonts ne casserait pas gotenberg-v2. **C'est contredit par
+  le document de pilotage** (`claude/plan-de-travail.md`, section ADMINISTRATIF), relevé
+  par le propriétaire dans Railway : les variables de **gotenberg-v2 sont des références
+  croisées vers gotenberg-fonts** (`${{gotenberg-fonts.…}}`) — le supprimer **tuerait
+  gotenberg-v2**, donc la production Office → PDF et HTML → PDF. La lecture d'origine
+  s'appuyait sur une lecture d'API où une référence apparaissait comme une valeur ;
+  **non revérifiée dans cette passe** (pas de CLI Railway, et lire les variables
+  exposerait des secrets). Règle : traiter la dépendance comme réelle jusqu'à preuve
+  du contraire. Avant toute suppression : résoudre ces références en valeurs propres
+  dans gotenberg-v2, redéployer, retester les cinq outils. Décision actuelle : le garder
+  comme retour arrière tant que les correctifs de polices ne sont pas stabilisés.
 - **Coût estimé** : ~40-45% de la mémoire résidente du compte (583 Mo gotenberg-v2
   vs 529 Mo gotenberg-fonts, tous deux quasi inactifs), soit de l'ordre de
   **2 $/mois** entièrement évitables pour un usage résiduel proche de zéro.
@@ -68,6 +76,27 @@ tous `status: RUNNING` au 2026-09-19 :
 - **Domaine** : `allformatconvert-clean-production.up.railway.app`.
 - **Veille Serverless** : **activée** (`sleepApplication: true`) — cohérent avec le
   modèle de coût « $0/mois au repos » documenté pour le détourage.
+- **Code** : `services/background-removal/` (Docker, modèle IS-Net general-use ONNX,
+  Apache-2.0, téléchargé au build et vérifié par SHA-256 ; voir son README). Filtre
+  « plus grande région connexe » appliqué sur le masque natif 1024×1024.
+- **Contrat** : `GET /health` ; `POST /remove-background` (octets bruts, pas de
+  multipart, aucun nom de fichier journalisé). Clé d'API comparée par
+  `hmac.compare_digest`, CORS restreint, sur le motif de `services/pdf-tools` :
+  401 sans clé, prouvé en production.
+- **Côté site** : `app/api/remove-bg/route.ts` lit `BG_REMOVAL_SERVICE_URL` et
+  `BG_REMOVAL_API_KEY` (noms seulement). Le navigateur réduit l'image à 1024 px avant
+  l'envoi (charge utile ≤ `MAX_REMOVEBG_UPLOAD_BYTES` = 3 Mo, base64 + JSON), le service
+  renvoie le **masque seul**, le navigateur recompose en pleine résolution. Plafond de
+  l'original : **50 Mo** (`MAX_REMOVEBG_ORIGINAL_BYTES`), annoncé avant la sélection.
+- **Performances mesurées** : 1,1-3,7 s par image, réveil après veille ~4-5 s.
+  Coût : ~0 $/mois à trafic nul, ~5-6 $/mois à 500 images (Leonardo.Ai : 52,35 $).
+  Détail : `docs/audit/RAPPORT-detourage-phase2.md`, `RAPPORT-detourage-taille-fichiers.md`.
+- **Remplace** remove.bg (fermeture annoncée le 1er décembre 2026). Plus aucun code
+  n'utilise `REMOVEBG_API_KEY` (variable Vercel à supprimer, voir plan de travail).
+- **Coût de quota** : `REMOVEBG_PER_IMAGE_DOLLARS` = **0,0031 $** (constante en dur dans
+  `lib/quota/config.js`, relue dans le code le 2026-09-19 ; c'était 0,20 $ — à ce prix,
+  cent détourages épuisaient le plafond global de 20 $ partagé avec 15 outils IA,
+  ConvertAPI et Adobe).
 
 ## Pipeline de conversion Office → PDF (production, vérifié le 2026-09-19)
 
@@ -114,6 +143,26 @@ Voir `docs/audit/RAPPORT-fidelite-office.md` pour la mesure de fidélité compl�
   d'erreur serveur inatteignable. Valeurs de production lues : `USER_QUOTA_PDF_CONVERSIONS`=5
   (mensuel, routes `.docx` et pdf-to-word seulement), `IP_RATE_LIMIT_PER_HOUR`=30,
   `IP_RATE_LIMIT_PER_DAY`=100, `GLOBAL_SPEND_CAP_USD`=20 ; xlsx/pptx/etc. sans quota ni limite par IP.
+- **Quotas — valeurs lues en production le 2026-09-19 vs valeurs par défaut du code**
+  (`lib/quota/config.js` retombe sur son défaut si la variable est absente : c'est le seul
+  « repli » toléré, et il diffère de la production — vérifier que les variables existent) :
+
+  | Variable | Production (lue) | Défaut du code | Portée |
+  |---|---|---|---|
+  | `USER_QUOTA_PDF_CONVERSIONS` | **5 / mois** | 5 | `.docx` (ConvertAPI) et pdf-to-word uniquement |
+  | `IP_RATE_LIMIT_PER_HOUR` | **30** | 10 | routes payantes (16 outils + détourage) |
+  | `IP_RATE_LIMIT_PER_DAY` | **100** | 30 | idem |
+  | `GLOBAL_SPEND_CAP_USD` | **20** | 20 | plafond de dépense partagé (IA, ConvertAPI, Adobe, détourage) |
+
+  Les « 10/h et 30/jour » d'un rapport antérieur étaient les **défauts du code**, pas la
+  production. `.xlsx`, `.pptx`, `.doc`, `.xls`, `.ppt`, `.csv`, `.ods` (Gotenberg) : **ni
+  quota utilisateur ni limite par IP.**
+- **Plafond de taille déclaré (D10, corrigé le 2026-09-19)** : 4 Mio (`MAX_PLATFORM_UPLOAD_BYTES`
+  dans `lib/quota/limits.js`), annoncé sur la page avant la sélection et contrôlé dans le
+  navigateur. Mesures et liste des outils touchés : `docs/audit/RAPPORT-plafonds-declares.md`.
+  Les « 25 Mo » (convert-to-pdf, pdf-to-word), « 50 Mo » (pdf-repair, pdf-to-pdfa) et
+  « 10 Mo » (ai-transcribe) codés dans les routes sont **inatteignables** derrière la
+  barrière de la plateforme.
 - Corrections 2026-09-19 : D1 (polices `xlsx` sans nom → `lib/xlsxDefaultFont.js`), D2 (Selawik
   ajoutée à l'image Gotenberg ; le titre de la fixture 06 reste replié car LibreOffice replie les
   zones `wrap="none"` : D9), D6 (pdf-to-word répond 503 quand l'indicateur est coupé, plus de repli).

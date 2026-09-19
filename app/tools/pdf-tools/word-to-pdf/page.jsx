@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkPlatformUploadSize, MAX_PLATFORM_UPLOAD_BYTES, PLATFORM_LIMIT_HINT } from '@/lib/quota/limits';
 
 export default function WordToPdfPage() {
   const [file, setFile] = useState(null);
@@ -14,12 +15,17 @@ export default function WordToPdfPage() {
     const f = e.target.files[0];
     e.target.value = '';
     setFile(f);
-    setError('');
+    // Checked the moment the file is picked -- a file over the platform
+    // ceiling would otherwise only fail after upload with a generic error.
+    const sizeCheck = checkPlatformUploadSize(f);
+    setError(sizeCheck.ok ? '' : sizeCheck.message);
     setDone(false);
   };
 
   const convert = async () => {
     if (!file) return;
+    const sizeCheck = checkPlatformUploadSize(file);
+    if (!sizeCheck.ok) { setError(sizeCheck.message); return; }
     setLoading(true);
     setError('');
     setDone(false);
@@ -32,6 +38,7 @@ export default function WordToPdfPage() {
       const res = await fetch('/api/convert-to-pdf', { method: 'POST', body: formData });
 
       if (!res.ok) {
+        if (res.status === 413) throw new Error(`This file is over the ${MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB limit — ${PLATFORM_LIMIT_HINT}`);
         let message = 'Conversion failed. Please try again.';
         try {
           const data = await res.json();
@@ -80,7 +87,8 @@ export default function WordToPdfPage() {
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a .docx or .doc file here'}</p>
             <input ref={inputRef} type="file" accept=".docx,.doc" className="hidden" onChange={handleFile} />
           </div>
-          <button onClick={convert} disabled={!file || loading} className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">
+          <p className="text-neutral-400 text-xs text-center -mt-2">Max {MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB per file — {PLATFORM_LIMIT_HINT}</p>
+          <button onClick={convert} disabled={!file || loading || file.size > MAX_PLATFORM_UPLOAD_BYTES} className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">
             {loading && (
               <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden="true" />
             )}

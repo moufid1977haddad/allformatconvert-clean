@@ -1,10 +1,13 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkPlatformUploadSize, MAX_PLATFORM_UPLOAD_BYTES, PLATFORM_LIMIT_HINT } from '@/lib/quota/limits';
 import ProgressBar from '../../../components/ProgressBar';
 
-const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
-const MAX_FILE_SIZE_LABEL = '50 MB';
+// Real ceiling (hosting-platform payload gate), not the 50 MB the route itself would
+// accept -- see lib/quota/limits.js.
+const MAX_FILE_SIZE_BYTES = MAX_PLATFORM_UPLOAD_BYTES;
+const MAX_FILE_SIZE_LABEL = `${MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB`;
 const CONFORMANCE_LEVELS = ['1b', '2b', '3b'];
 
 export default function PdfToPdfaPage() {
@@ -23,8 +26,9 @@ export default function PdfToPdfaPage() {
     e.target.value = '';
     if (!f) return;
     setError(''); setResult(null); setDownloadUrl(null);
-    if (f.size > MAX_FILE_SIZE_BYTES) {
-      setError(`This file is ${(f.size / (1024 * 1024)).toFixed(0)} MB, over the ${MAX_FILE_SIZE_LABEL} limit.`);
+    const sizeCheck = checkPlatformUploadSize(f);
+    if (!sizeCheck.ok) {
+      setError(sizeCheck.message);
       setFile(null);
       return;
     }
@@ -85,7 +89,7 @@ export default function PdfToPdfaPage() {
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">PDF to PDF/A</h1>
         <p className="text-neutral-500 text-center mb-2">Convert to PDF/A for long-term archiving, verified compliant by veraPDF</p>
         <p className="text-neutral-400 dark:text-neutral-500 text-xs text-center mb-8">
-          Files up to {MAX_FILE_SIZE_LABEL}. Your file is uploaded to our conversion service for processing — see below for what that means.
+          Files up to {MAX_FILE_SIZE_LABEL} — {PLATFORM_LIMIT_HINT} Your file is uploaded to our conversion service for processing — see below for what that means.
         </p>
 
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
@@ -147,7 +151,7 @@ export default function PdfToPdfaPage() {
         title="PDF to PDF/A"
         description="PDF to PDF/A converts your document into the ISO-standardized PDF/A archival format using Ghostscript, then validates the result with veraPDF — the industry-reference validator built for the PDF Association's own conformance testing. This is the core guarantee: you only get a file back if it's verified compliant. If Ghostscript's conversion doesn't pass validation, you get an explicit error naming which PDF/A rule failed and how many times, not a file that merely claims to be PDF/A. Unlike almost every other tool on this site, this one really does send your file to a server: it's uploaded securely over HTTPS to our conversion service, and deleted immediately after processing — never stored, logged, or kept around."
         howTo={[
-          "Click the upload area and select a PDF file, up to 50 MB.",
+          `Click the upload area and select a PDF file, up to ${MAX_FILE_SIZE_LABEL}.`,
           "Choose a PDF/A conformance level (1b, 2b, or 3b — 2b is the most commonly required for archiving).",
           "Click 'Convert'. Your file uploads with a real progress bar; a working Cancel button is available the whole time.",
           "If the result passes veraPDF validation, download it. If not, you'll see exactly which rule failed instead of a silently non-compliant file."
