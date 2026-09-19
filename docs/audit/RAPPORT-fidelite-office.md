@@ -5,6 +5,14 @@ phase 4 complète, défauts chiffrés). Tout ce qui est écrit ici a été mesur
 ce qui ne l'a pas été est dit explicitement. Les preuves visuelles sont dans
 `docs/audit/fidelite-marche/`.
 
+> **Corrections postérieures (2026-09-19, voir `RAPPORT-fidelite-corrections.md`)** — trois affirmations
+> de ce rapport se sont révélées fausses à la mesure : (1) **D1** : la cause n'était pas une règle
+> fontconfig « Calibri » manquante, mais des polices `.xlsx` sans nom ; (2) **D2** : la police plus large
+> n'est pas la cause du titre replié de la fixture 06 (LibreOffice replie les zones `wrap="none"`,
+> même avec la vraie Segoe UI) ; (3) **§ 3.3** : les valeurs de production sont 30/h et 100/jour par IP
+> (pas 10/h et 30/jour), le quota de 5 est **mensuel** et ne concerne que `.docx` et pdf-to-word, et le
+> plafond réel de taille est ≈ 4,4 Mo, pas 25 Mo. Le reste du rapport est inchangé.
+
 ## 0. Réconciliation Railway — TERMINÉ
 
 Détail complet dans `claude/REFERENCE-projet.md`. Résumé :

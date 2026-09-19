@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PowerPoint to PDF — Convert Your .pptx or .ppt File Online Free" },
-  description: "PowerPoint to PDF converts your .pptx or .ppt file to PDF using LibreOffice. In our tests layout, images, gradients and tables carried over; a substituted font can shift text.",
+  description: "PowerPoint to PDF converts your .pptx or .ppt file to PDF using LibreOffice. In our tests layout, images, gradients and tables carried over; a text box narrower than its text can wrap.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/ppt-to-pdf" },
   openGraph: {
     title: "PowerPoint to PDF — Convert Your .pptx or .ppt File Online Free",
-    description: "PowerPoint to PDF converts your .pptx or .ppt file to PDF using LibreOffice. In our tests layout, images, gradients and tables carried over; a substituted font can shift text.",
+    description: "PowerPoint to PDF converts your .pptx or .ppt file to PDF using LibreOffice. In our tests layout, images, gradients and tables carried over; a text box narrower than its text can wrap.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/ppt-to-pdf",
   },
 };

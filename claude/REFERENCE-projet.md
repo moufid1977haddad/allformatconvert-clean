@@ -108,9 +108,16 @@ Voir `docs/audit/RAPPORT-fidelite-office.md` pour la mesure de fidélité compl�
   téléchargement fige l'onglet en automatisation). FreeConvert et Online2PDF
   produisent des pptx quasi identiques : ne pas les compter comme deux avis
   indépendants.
-- Nos limites : 25 Mo/fichier ; quotas par défaut du code 5 conversions PDF par
-  utilisateur, 10/h et 30/jour par IP (`lib/quota/config.js`, valeurs de
-  production non lues).
+- Nos limites (corrigé le 2026-09-19 — la version précédente de cette ligne était fausse) : plafond
+  **réel** ≈ 4,4 Mo de fichier (413 `FUNCTION_PAYLOAD_TOO_LARGE` de Vercel, mesuré entre
+  4 412 819 o accepté et 4 517 676 o refusé) ; le « 25 Mo » n'existe que dans un message
+  d'erreur serveur inatteignable. Valeurs de production lues : `USER_QUOTA_PDF_CONVERSIONS`=5
+  (mensuel, routes `.docx` et pdf-to-word seulement), `IP_RATE_LIMIT_PER_HOUR`=30,
+  `IP_RATE_LIMIT_PER_DAY`=100, `GLOBAL_SPEND_CAP_USD`=20 ; xlsx/pptx/etc. sans quota ni limite par IP.
+- Corrections 2026-09-19 : D1 (polices `xlsx` sans nom → `lib/xlsxDefaultFont.js`), D2 (Selawik
+  ajoutée à l'image Gotenberg ; le titre de la fixture 06 reste replié car LibreOffice replie les
+  zones `wrap="none"` : D9), D6 (pdf-to-word répond 503 quand l'indicateur est coupé, plus de repli).
+  Détail : `docs/audit/RAPPORT-fidelite-corrections.md`.
 
 ## Règle de rédaction des promesses
 
