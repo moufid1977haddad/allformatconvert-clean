@@ -17,7 +17,7 @@ Rapport : `docs/audit/RAPPORT-fidelite-office.md`.
 | 3. Comparaison marché | Fait, **partielle** : FreeConvert + Online2PDF ; CloudConvert bloqué (quota 10/jour), iLovePDF non téléchargeable en automatisation |
 | 4. Promesses des 5 outils (word/excel/ppt-to-pdf, pdf-to-word, html-to-pdf) | Fait : chaque phrase (page, SeoContent, title/description SEO) tracée à une mesure |
 | 5. Défauts chiffrés | Fait (D1–D8 dans le rapport) |
-| Déploiement | Voir la fin du rapport (section 7) |
+| Déploiement | Fait : master c802a01e, 5 pages vérifiées en production (2026-09-19) |
 
 ## À faire — nécessite une décision de l'utilisateur
 

@@ -211,7 +211,7 @@ D2 est le seul cas où du texte est réellement perdu à l'écran.
 
 ## 7. Vérification en production et déploiement
 
-Voir la section « Déploiement » ci-dessous (complétée après vérification).
+Merge `c802a01e` sur master, déploiement Vercel `dpl_9WWW7iSFsGGsKYWE97p5AjwrdVwm` (resté QUEUED quelques minutes, puis en ligne). Vérification en production le 2026-09-19 (`curl` des 5 pages) : plus aucune occurrence de « professional-quality », le texte « In our tests… » présent dans le corps de chaque page (5 à 7 occurrences) **et** dans la balise `<meta name="description">` des cinq outils ; ppt-to-pdf contient la divulgation D2. Vérification par lecture du HTML servi, pas par test fonctionnel de conversion (les textes seuls ont changé, aucun code de conversion).
 
 ## 8. Interdits respectés / incidents
 
