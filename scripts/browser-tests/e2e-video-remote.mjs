@@ -51,6 +51,7 @@ async function run(label, toolPath, file, pick, ext, magic) {
   let size = 0; let name = ''; let real = false;
   if (link) {
     const dP = page.waitForEvent('download'); await link.click(); const d = await dP;
+    if (process.env.OUT) await d.saveAs(path.join(process.env.OUT, engineName + '-' + d.suggestedFilename()));
     const buf = fs.readFileSync(await d.path()); size = buf.length; name = d.suggestedFilename();
     real = size > 1000 && name.endsWith('.' + ext) && magic(buf);
   } else if (err) console.log('  page error:', await err.innerText());
