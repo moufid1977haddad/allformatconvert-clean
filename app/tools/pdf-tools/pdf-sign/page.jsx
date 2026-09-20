@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -11,6 +12,9 @@ export default function Page() {
   const [drawing, setDrawing] = useState(false);
   const canvasRef = useRef();
   const fileRef = useRef();
+  // True only once something was actually drawn: an untouched pad must never be
+  // stamped into the PDF and reported as a signature.
+  const inkRef = useRef(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -29,6 +33,7 @@ export default function Page() {
     const rect = canvas.getBoundingClientRect();
     ctx.beginPath();
     ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    inkRef.current = true;
   };
 
   const draw = (e) => {
@@ -47,15 +52,17 @@ export default function Page() {
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#f9f9f9';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    inkRef.current = false;
   };
 
   const addSignature = async () => {
     if (!file) return;
-    setLoading(true);
     setError('');
+    if (!inkRef.current) { setError('Draw your signature in the box first — an empty signature was not added.'); return; }
+    setLoading(true);
     try {
       const { PDFDocument, rgb } = await import('pdf-lib');
-      const signatureDataUrl = canvasRef.current.toDataURL('image/png');
+      const signatureDataUrl = checkedDataURL(canvasRef.current, 'image/png');
       const signatureBytes = await fetch(signatureDataUrl).then(r => r.arrayBuffer());
       const arrayBuffer = await file.arrayBuffer();
       const pdfDoc = await PDFDocument.load(arrayBuffer);
@@ -65,6 +72,7 @@ export default function Page() {
       const { width, height } = firstPage.getSize();
       firstPage.drawImage(signatureImage, { x: width - 220, y: 50, width: 200, height: 80 });
       const pdfBytes = await pdfDoc.save();
+      if (!pdfBytes || pdfBytes.length < 100 || String.fromCharCode(...pdfBytes.slice(0, 5)) !== '%PDF-') throw new Error('the signed PDF came out invalid');
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setResult(URL.createObjectURL(blob));
     } catch(e) { setError('Failed to add signature: ' + e.message); }
@@ -85,7 +93,7 @@ export default function Page() {
           <div>
             <label className="block text-sm text-neutral-500 mb-2">Draw your signature below:</label>
             <canvas ref={canvasRef} width={500} height={150} className="w-full border border-neutral-200 rounded-xl cursor-crosshair bg-neutral-50"
-              onMouseDown={startDraw} onMouseMove={draw} onMouseUp={stopDraw} onMouseLeave={stopDraw} />
+              style={{ touchAction: 'none' }} onPointerDown={startDraw} onPointerMove={draw} onPointerUp={stopDraw} onPointerLeave={stopDraw} onPointerCancel={stopDraw} />
             <button onClick={clearSignature} className="mt-2 text-sm text-neutral-500 hover:text-red-500 transition">Clear signature</button>
           </div>
           <button onClick={addSignature} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">

@@ -1,11 +1,12 @@
 ﻿'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
+import { VIDEO_ACCEPT, assertVideoReadable, checkedDataURL } from '../../../lib/mediaSupport';
 export default function VideoToGifPage() {
   const [file, setFile] = useState(null);
   const [frames, setFrames] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [fps, setFps] = useState(5);
   const [duration, setDuration] = useState(3);
   const videoRef = useRef();
@@ -30,23 +31,30 @@ export default function VideoToGifPage() {
   const capture = async () => {
     if (!videoRef.current || !file) return;
     setLoading(true);
-    const video = videoRef.current;
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    const capturedFrames = [];
-    const totalFrames = fps * duration;
-    const interval = duration / totalFrames;
-    video.currentTime = 0;
-    for (let i = 0; i < totalFrames; i++) {
-      await new Promise(r => setTimeout(r, 100));
-      video.currentTime = i * interval;
-      await new Promise(r => { video.onseeked = r; });
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      capturedFrames.push(canvas.toDataURL('image/png'));
+    setError('');
+    try {
+      const video = videoRef.current;
+      assertVideoReadable(video);
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      const capturedFrames = [];
+      const totalFrames = fps * duration;
+      const interval = duration / totalFrames;
+      video.currentTime = 0;
+      for (let i = 0; i < totalFrames; i++) {
+        await new Promise(r => setTimeout(r, 100));
+        video.currentTime = i * interval;
+        await new Promise(r => { video.onseeked = r; setTimeout(r, 1500); });
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        capturedFrames.push(checkedDataURL(canvas, 'image/png'));
+      }
+      setFrames(capturedFrames);
+    } catch (e) {
+      setFrames([]);
+      setError(e.message);
     }
-    setFrames(capturedFrames);
     setLoading(false);
   };
 
@@ -65,6 +73,7 @@ export default function VideoToGifPage() {
             <div><label className="block text-sm text-neutral-500 mb-1">FPS: {fps}</label><input type="range" min="1" max="15" value={fps} onChange={e => setFps(parseInt(e.target.value))} className="w-full" /></div>
             <div><label className="block text-sm text-neutral-500 mb-1">Duration: {duration}s</label><input type="range" min="1" max="10" value={duration} onChange={e => setDuration(parseInt(e.target.value))} className="w-full" /></div>
           </div>
+          {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
           <button onClick={capture} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">{loading ? 'Capturing...' : 'Capture Frames'}</button>
           {frames.length > 0 && (
             <div className="space-y-3">

@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useEffect, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 
 export default function QrGeneratorPage() {
   const [text, setText] = useState('');
@@ -19,7 +20,7 @@ export default function QrGeneratorPage() {
       const QRCode = (await import('qrcode')).default;
       const canvas = canvasRef.current;
       await QRCode.toCanvas(canvas, text, { width: size, margin: 2 });
-      setQrUrl(canvas.toDataURL());
+      setQrUrl(checkedDataURL(canvas, 'image/png'));
       const svgMarkup = await QRCode.toString(text, { type: 'svg', width: size, margin: 2 });
       setQrSvgUrl(URL.createObjectURL(new Blob([svgMarkup], { type: 'image/svg+xml' })));
     } catch (err) {

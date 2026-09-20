@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 
 export default function BarcodeGeneratorPage() {
   const [text, setText] = useState('');
@@ -29,7 +30,7 @@ export default function BarcodeGeneratorPage() {
     try {
       const JsBarcode = (await import('jsbarcode')).default;
       JsBarcode(canvas, text, options);
-      setBarcodeUrl(canvas.toDataURL());
+      setBarcodeUrl(checkedDataURL(canvas, 'image/png'));
       JsBarcode(svg, text, options);
       svg.removeAttribute('class');
       setBarcodeSvgUrl(URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml' })));

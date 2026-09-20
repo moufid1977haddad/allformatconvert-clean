@@ -222,3 +222,41 @@ export const VIDEO_ACCEPT =
   'video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts';
 export const AUDIO_ACCEPT =
   'audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.opus,.wma,.aiff,.aif,.amr,.mka,.weba,.caf';
+
+// ---------------------------------------------------------------------------
+// Video frame / GIF output guards
+// ---------------------------------------------------------------------------
+
+// A <video> whose frames were never decoded reports 0x0. Drawing it yields a
+// transparent canvas and the encoder still "succeeds" with an empty GIF.
+export function assertVideoReadable(video) {
+  if (!video || !video.videoWidth || !video.videoHeight) {
+    throw new OutputError(
+      "This video's frames could not be read (its codec is probably not supported by this browser), so nothing was converted. Try re-exporting it as standard H.264 MP4."
+    );
+  }
+}
+
+// `data` is RGBA from getImageData. A frame with alpha 0 everywhere was never
+// painted (undecoded / not yet seeked).
+export function assertFrameNotBlank(data) {
+  for (let i = 3; i < data.length; i += 4 * 61) {
+    if (data[i] !== 0) return;
+  }
+  // stride sampling can miss a sparse image; confirm with a full scan before failing
+  for (let i = 3; i < data.length; i += 4) {
+    if (data[i] !== 0) return;
+  }
+  throw new OutputError(
+    'A frame came out empty — the browser could not decode this part of the video, so no GIF was produced. Try another file or re-export it as H.264 MP4.'
+  );
+}
+
+// GIF bytes -> Blob, refusing anything that is not a real GIF.
+export function gifBlobFromBytes(bytes) {
+  const head = String.fromCharCode(...bytes.slice(0, 6));
+  if (!bytes || bytes.length < 20 || (head !== 'GIF89a' && head !== 'GIF87a')) {
+    throw new OutputError('The GIF encoder produced no valid file, so nothing was saved. Please try again.');
+  }
+  return new Blob([bytes], { type: 'image/gif' });
+}

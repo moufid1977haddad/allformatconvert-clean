@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
-import { AUDIO_ACCEPT } from '../../../lib/mediaSupport';
+import { AUDIO_ACCEPT, checkedDataURL } from '../../../lib/mediaSupport';
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 200;
@@ -127,8 +127,10 @@ export default function AudioWaveformPage() {
 
   const downloadPng = () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const url = canvas.toDataURL('image/png');
+    // Never hand over the empty placeholder canvas as if it were a waveform.
+    if (!canvas || !audioBufferRef.current) { setError('Load an audio file first — there is no waveform to save yet.'); return; }
+    let url;
+    try { url = checkedDataURL(canvas, 'image/png'); } catch (e) { setError(e.message); return; }
     const a = document.createElement('a');
     a.href = url;
     a.download = (file?.name.replace(/\.[^.]+$/, '') || 'waveform') + '-waveform.png';

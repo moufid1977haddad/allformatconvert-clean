@@ -1,12 +1,13 @@
 ﻿'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
+import { VIDEO_ACCEPT, assertVideoReadable, assertFrameNotBlank, gifBlobFromBytes } from '../../../lib/mediaSupport';
 export default function Mp4ToGifPage() {
   const [file, setFile] = useState(null);
   const [frames, setFrames] = useState([]);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [gifError, setGifError] = useState('');
   const [videoError, setVideoError] = useState(false);
   const videoRef = useRef();
   const inputRef = useRef();
@@ -55,8 +56,10 @@ export default function Mp4ToGifPage() {
       return;
     }
     setLoading(true);
+    setGifError('');
     try {
       const { GIFEncoder, quantize, applyPalette } = await import('gifenc');
+      assertVideoReadable(video);
       const canvas = document.createElement('canvas');
       canvas.width = Math.min(video.videoWidth, 480);
       canvas.height = Math.min(video.videoHeight, 270);
@@ -71,15 +74,16 @@ export default function Mp4ToGifPage() {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         capturedFrames.push(canvas.toDataURL('image/png'));
         const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        assertFrameNotBlank(data);
         const palette = quantize(data, 256);
         const index = applyPalette(data, palette);
         gif.writeFrame(index, canvas.width, canvas.height, { palette, delay });
       }
       gif.finish();
-      const blob = new Blob([gif.bytes()], { type: 'image/gif' });
+      const blob = gifBlobFromBytes(gif.bytes());
       setFrames(capturedFrames);
       setResult(URL.createObjectURL(blob));
-    } catch(e) { alert('Error: ' + e.message); }
+    } catch(e) { setResult(null); setFrames([]); setGifError(e.message); }
     setLoading(false);
   };
 
@@ -99,6 +103,7 @@ export default function Mp4ToGifPage() {
               This MP4 file couldn't be loaded — your browser doesn't support its video codec. Try re-exporting it as standard H.264/AAC MP4 with a dedicated video converter.
             </div>
           )}
+          {gifError && <p role="alert" className="text-red-500 text-center text-sm">{gifError}</p>}
           <button onClick={convert} disabled={!file || loading || videoError} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">{loading ? 'Converting...' : 'Convert to GIF'}</button>
           {frames.length > 0 && (
             <div className="space-y-3">

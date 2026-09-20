@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 import ProgressBar from '../../../components/ProgressBar';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import {
@@ -107,7 +108,7 @@ export default function PdfEditorPage() {
           baseRotation,
           widthPt: unrotated.width,
           heightPt: unrotated.height,
-          thumbUrl: canvas.toDataURL('image/png'),
+          thumbUrl: checkedDataURL(canvas, 'image/png'),
         });
       }
       setPageMeta(meta);
@@ -305,8 +306,12 @@ export default function PdfEditorPage() {
       if (msg.type === 'progress') { setProgress(msg.pct); setPhase(msg.phase); }
       else if (msg.type === 'done') {
         setProgress(100); setLoading(false); workerRef.current = null;
-        setDownloadUrl(URL.createObjectURL(msg.blob));
-        setStatus(`Done — ${msg.pageCount.toLocaleString()} page${msg.pageCount === 1 ? '' : 's'}.`);
+        // Never announce "Done" on an empty or non-PDF output.
+        msg.blob.slice(0, 5).text().then((head) => {
+          if (msg.blob.size < 100 || head !== '%PDF-') { setError('The edited PDF came out empty or invalid, so nothing was saved. Please try again.'); return; }
+          setDownloadUrl(URL.createObjectURL(msg.blob));
+          setStatus(`Done — ${msg.pageCount.toLocaleString()} page${msg.pageCount === 1 ? '' : 's'}.`);
+        });
       } else if (msg.type === 'limit') { setLoading(false); workerRef.current = null; setError(msg.message); }
       else if (msg.type === 'error') { setLoading(false); workerRef.current = null; setError('Error: ' + msg.message); }
     };
