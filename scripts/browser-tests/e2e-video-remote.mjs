@@ -64,6 +64,15 @@ async function run(label, toolPath, file, pick, ext, magic) {
 
 const head = (s) => (b) => b.subarray(0, 64).toString('latin1').includes(s);
 console.log(`===== ${engineName} on ${origin} =====`);
+const FMT = process.env.FMT; // e.g. FMT=webm -> only the converter, MP4 -> FMT, on both videos
+if (FMT) {
+  const anyMagic = (b) => b.length > 1000;
+  await run(`convert 30 s -> ${FMT}`, '/tools/video-tools/video-converter', 's30.mp4', FMT, FMT, anyMagic);
+  await run(`convert 3 min -> ${FMT}`, '/tools/video-tools/video-converter', 'surf.mp4', FMT, FMT, anyMagic);
+  await browser.close();
+  console.log(bad.length ? `\n${bad.length} FAILED: ${bad.join('; ')}` : '\nall passed');
+  process.exit(bad.length ? 1 : 0);
+}
 await run('compress 30 s', '/tools/video-tools/video-compressor', 's30.mp4', null, 'mp4', head('ftyp'));
 await run('convert 30 s -> MP4', '/tools/video-tools/video-converter', 's30.mp4', 'mp4', 'mp4', head('ftyp'));
 await run('compress 3 min', '/tools/video-tools/video-compressor', 'surf.mp4', null, 'mp4', head('ftyp'));
