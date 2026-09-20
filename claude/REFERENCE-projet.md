@@ -172,6 +172,15 @@ Voir `docs/audit/RAPPORT-fidelite-office.md` pour la mesure de fidélité compl�
 
 Depuis le commit `c8fd3b56`, `IP_RATE_LIMIT_PER_HOUR` et `IP_RATE_LIMIT_PER_DAY` n'ont plus de repli : absentes ou invalides, **le build et le démarrage échouent** (`lib/quota/requiredEnv.js`). Le garde-fou est voulu et ne doit pas être affaibli. Pour que `next build` compile en local, `.env.local` (ignoré par git) contient désormais ces deux lignes, aux **valeurs de production — ce sont des nombres, pas des secrets** : `IP_RATE_LIMIT_PER_HOUR=30` et `IP_RATE_LIMIT_PER_DAY=100`. Ne jamais afficher le reste de ce fichier. Si un futur build local échoue avec « missing or is not a positive integer », vérifier d'abord ces deux noms.
 
+## Service `media-processing` (ffmpeg) — code prêt et testé, NON DÉPLOYÉ (2026-09-20)
+
+Moteur de `video-compressor` et `video-converter`, et chemin d'envoi direct navigateur → service (un fichier ne passe jamais par une fonction Vercel). Code : `services/media-processing/` (README = variables et licences), billet signé : `lib/media/ticket.js` + `app/api/media/ticket/route.js`, client : `app/lib/mediaJob.js`, interface : `app/components/MediaServiceTool.jsx`. Rapport et runbook de déploiement : `docs/audit/RAPPORT-video-architecture.md`.
+
+**Interrupteur de déploiement** : tant que `NEXT_PUBLIC_MEDIA_SERVICE_URL` n'est pas définie sur Vercel, les deux outils gardent leur ancienne version dans le navigateur (`LegacyPage.jsx`). Une fois définie (et le site reconstruit **sans cache**, la variable est figée au build), les outils passent sur le service.
+
+Variables **Vercel** (aucune n'a de valeur par défaut ; la route répond 503 en NOMMANT la variable manquante) : `MEDIA_TICKET_SECRET` (sensible, identique côté Railway), `MEDIA_TICKET_MAX_BYTES`, `MEDIA_JOBS_PER_HOUR_PER_IP`, `MEDIA_JOBS_PER_DAY_PER_IP`, `NEXT_PUBLIC_MEDIA_SERVICE_URL` (publique).
+Variables **Railway** (toutes obligatoires, le service refuse de démarrer sans) : `MEDIA_TICKET_SECRET`, `ALLOWED_ORIGINS`, `MEDIA_MAX_CONCURRENT_JOBS`, `MEDIA_MAX_QUEUED_JOBS`, `MEDIA_MAX_FILE_BYTES`, `MEDIA_MAX_DURATION_SECONDS`, `MEDIA_JOB_TTL_SECONDS`, `MEDIA_FFMPEG_TIMEOUT_SECONDS`, `MEDIA_WORK_DIR`, `MEDIA_FFMPEG_PATH`, `MEDIA_CHUNK_BYTES`.
+
 ## Règle de rédaction des promesses
 
 Toute phrase de fidélité d'un outil (page, `SeoContent`, `layout.tsx`

@@ -1,102 +1,89 @@
-﻿'use client';
-import { useState, useRef, useEffect } from 'react';
-import SeoContent from '../../../components/SeoContent';
-import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
-import { videoReRecordSupport, captureMediaElementStream, finishRecording } from '../../../lib/mediaSupport';
+'use client';
+import LegacyVideoConverter from './LegacyPage';
+import MediaServiceTool from '../../../components/MediaServiceTool';
+import { mediaServiceConfigured } from '../../../lib/mediaJob';
+
+// Deployment switch, not a silent fallback: see video-compressor/page.jsx.
+
+const VIDEO_TARGETS = [
+  ['mp4', 'MP4 (H.264) — plays everywhere'], ['mov', 'MOV (QuickTime)'], ['mkv', 'MKV'], ['webm', 'WebM (VP9)'],
+  ['avi', 'AVI'], ['wmv', 'WMV'], ['flv', 'FLV'], ['mpg', 'MPEG'], ['ts', 'TS (MPEG-TS)'], ['3gp', '3GP'], ['m4v', 'M4V'], ['ogv', 'OGV (Theora)'],
+];
+const OTHER_TARGETS = [['gif', 'Animated GIF']];
+const AUDIO_TARGETS = [
+  ['mp3', 'MP3'], ['m4a', 'M4A (AAC)'], ['wav', 'WAV'], ['ogg', 'OGG (Vorbis)'], ['opus', 'Opus'], ['flac', 'FLAC'],
+];
+const QUALITIES = [['high', 'High quality'], ['medium', 'Balanced'], ['low', 'Small file']];
+const HEIGHTS = [['', 'Keep original resolution'], ['1080', 'Limit to 1080p'], ['720', 'Limit to 720p'], ['480', 'Limit to 480p'], ['360', 'Limit to 360p']];
+
+const seo = {
+  title: 'Video Converter',
+  description: 'Video Converter turns almost any video into MP4, MOV, MKV, WebM, AVI, WMV, FLV, MPEG, TS, 3GP, M4V, OGV or an animated GIF, and extracts the audio as MP3, M4A, WAV, OGG, Opus or FLAC. It runs on our server, so it works in any browser including Safari and iPhone, handles files up to 1 GB, and shows real progress. Your file is deleted from our server as soon as you have downloaded the result.',
+  howTo: [
+    'Select or drop a video file (up to 1 GB).',
+    'Choose the output format, the quality, and an optional maximum resolution.',
+    'Click "Convert" and follow the real progress: upload, waiting line if the service is busy, then conversion.',
+    'Preview the result and download it — the file name always carries the real extension.',
+  ],
+  faqs: [
+    { q: 'Which formats can I convert to?', a: 'Video: MP4, MOV, MKV, WebM, AVI, WMV, FLV, MPEG, TS, 3GP, M4V, OGV. Animated GIF. Audio only: MP3, M4A, WAV, OGG, Opus, FLAC.' },
+    { q: 'Which formats can I convert from?', a: 'Any video or audio file that ffmpeg can read: MP4, MOV (including iPhone videos), MKV, WebM, AVI, WMV, FLV, MPEG, TS, 3GP, OGV and many more.' },
+    { q: 'How large a file can I convert?', a: 'Up to 1 GB. The file is uploaded in pieces, straight to the video service, and resumes after a dropped connection.' },
+    { q: 'Is my video kept?', a: 'No. The original is deleted the moment conversion ends, and the result is deleted right after your download (or after 15 minutes if you never download it). Nothing about your file is logged.' },
+    { q: 'Why can some conversions take longer?', a: 'WebM (VP9) and OGV (Theora) are far slower to encode than MP4. The progress bar shows the real percentage, and a very long file may be stopped by our time limit.' },
+  ],
+  tips: [
+    'MP4 (H.264) is the safest choice for sharing: it plays on every device.',
+    'Use "Small file" or a lower resolution when the result must fit an email or chat limit.',
+    'To keep just the sound of a video, pick MP3 or M4A.',
+    'Keep the tab open while it works; you can cancel at any time.',
+  ],
+};
+
 export default function VideoConverterPage() {
-  const [file, setFile] = useState(null);
-  const [status, setStatus] = useState('');
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
-  const [support, setSupport] = useState({ ok: true, mime: null, ext: 'webm', reason: '' });
-  const inputRef = useRef();
-  const videoRef = useRef();
-
-  // Checked on mount so the visitor learns BEFORE selecting a file, not after
-  // a failed run (Safari has no <video>.captureStream() and cannot record WebM).
-  useEffect(() => { setSupport(videoReRecordSupport({ fromMediaElement: true })); }, []);
-
-  const handleFile = (e) => {
-    const f = e.target.files[0];
-    if (!f) return;
-    setFile(f);
-    setResult(null);
-    setError('');
-  };
-
-  useEffect(() => {
-    // videoRef.current is only guaranteed to exist after this render commits
-    // (the <video> element only mounts once `file` is set), so the src must
-    // be assigned here rather than inline in handleFile — otherwise the very
-    // first file selection silently fails to load since the ref is still null.
-    if (file && videoRef.current) videoRef.current.src = URL.createObjectURL(file);
-  }, [file]);
-
-  const convert = async () => {
-    if (!file || !support.ok) return;
-    setError('');
-    setStatus('Converting to WebM...');
-    try {
-      const stream = captureMediaElementStream(videoRef.current);
-      if (!stream) throw new Error('This browser cannot capture the video.');
-      const recorder = new MediaRecorder(stream, { mimeType: support.mime });
-      const chunks = [];
-      recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
-      recorder.onstop = () => {
-        try {
-          const { blob, ext } = finishRecording(chunks, recorder, support.mime);
-          setResult({ url: URL.createObjectURL(blob), ext });
-        } catch (e) { setError(e.message); }
-        setStatus('');
-      };
-      recorder.onerror = () => { setError('Recording failed in this browser.'); setStatus(''); };
-      videoRef.current.currentTime = 0;
-      await videoRef.current.play();
-      recorder.start();
-      setTimeout(() => { if (recorder.state !== 'inactive') recorder.stop(); videoRef.current.pause(); }, videoRef.current.duration * 1000);
-    } catch(e) { setError('Error: ' + e.message); setStatus(''); }
-  };
-
+  if (!mediaServiceConfigured()) return <LegacyVideoConverter />;
   return (
-    <div className="min-h-screen bg-neutral-100 p-6">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-2">Video Converter</h1>
-        <p className="text-neutral-500 text-center mb-8">Convert video files to WebM format</p>
-        <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
-            <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />
+    <MediaServiceTool
+      op="convert"
+      title="Video Converter"
+      subtitle="Convert video to MP4, MOV, MKV, WebM, AVI, GIF, MP3 and more — any browser, up to 1 GB"
+      buttonLabel="Convert"
+      initialParams={{ target: 'mp4', quality: 'medium', maxHeight: '' }}
+      buildParams={(p) => ({ target: p.target, quality: p.quality, ...(p.maxHeight && !AUDIO_TARGETS.some(([v]) => v === p.target) ? { maxHeight: Number(p.maxHeight) } : {}) })}
+      outName={(name, ext) => {
+        const base = name.replace(/\.[^.]+$/, '');
+        const same = name.toLowerCase().endsWith('.' + ext);
+        return base + (same ? '-converted' : '') + '.' + ext;
+      }}
+      controls={({ params, setParams, disabled }) => {
+        const audio = AUDIO_TARGETS.some(([v]) => v === params.target);
+        const sel = 'w-full bg-white border border-neutral-200 rounded-lg px-3 py-2 text-sm';
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm text-neutral-500 mb-1">Convert to</label>
+              <select disabled={disabled} value={params.target} onChange={(e) => setParams({ ...params, target: e.target.value })} className={sel}>
+                <optgroup label="Video">{VIDEO_TARGETS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</optgroup>
+                <optgroup label="Image">{OTHER_TARGETS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</optgroup>
+                <optgroup label="Audio only">{AUDIO_TARGETS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</optgroup>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-neutral-500 mb-1">Quality</label>
+              <select disabled={disabled || params.target === 'gif' || params.target === 'wav' || params.target === 'flac'} value={params.quality} onChange={(e) => setParams({ ...params, quality: e.target.value })} className={sel}>
+                {QUALITIES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-neutral-500 mb-1">Resolution</label>
+              <select disabled={disabled || audio || params.target === 'gif'} value={params.maxHeight} onChange={(e) => setParams({ ...params, maxHeight: e.target.value })} className={sel}>
+                {HEIGHTS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              </select>
+            </div>
           </div>
-          {!support.ok && <p role="alert" className="text-red-500 text-center text-sm">{support.reason}</p>}
-          {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" />}
-          {status && <p className="text-yellow-400 text-center">{status}</p>}
-          {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
-          <button onClick={convert} disabled={!file || !!status || !support.ok} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert to WebM</button>
-          {result && <div className="space-y-2"><video controls src={result.url} className="w-full rounded-xl" /><a href={result.url} download={`converted.${result.ext}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download {result.ext.toUpperCase()}</a></div>}
-        </div>
-      </div>
-      <SeoContent
-        title="Video Converter"
-        description="Video Converter re-encodes your video to WebM using the browser's native MediaRecorder API, entirely client-side. Note: WebM is the only output format — there's no selector for MP4, AVI, MOV, or other targets — and since it works by playing and re-recording the video in real time, conversion takes as long as the video's actual duration."
-        howTo={[
-          "Click the upload area and select a video file.",
-          "Click \"Convert to WebM\" — the video plays through once while it's re-recorded.",
-          "Wait for the process to finish (roughly the length of the video).",
-          "Preview and download the resulting WebM file."
-        ]}
-        faqs={[
-          { q: "What formats can I convert to?", a: "WebM only — despite the tool's name, there's no format selector for MP4, AVI, MOV, or other targets." },
-          { q: "Is there quality loss?", a: "Yes, some — this re-encodes your video through the browser's WebM encoder, so it isn't a lossless conversion." },
-          { q: "How long does conversion take?", a: "Roughly as long as the source video's duration, since it plays and re-records the video in real time." },
-          { q: "Is my file uploaded anywhere?", a: "No, conversion runs entirely in your browser using the MediaRecorder API." }
-        ]}
-        tips={[
-          "Keep the browser tab open and active while converting, since the video needs to play through for the recording to work.",
-          "If you need a format other than WebM, use this to get a WebM file first, then convert that with a dedicated format-specific converter.",
-          "Test the converted WebM file in your target player before deleting the original, since some older devices have limited WebM support.",
-          "For long source videos, expect the conversion itself to take about as long as the video runs."
-        ]}
-      />
-    </div>
+        );
+      }}
+      seo={seo}
+    />
   );
 }
