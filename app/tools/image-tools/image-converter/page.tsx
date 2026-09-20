@@ -42,7 +42,8 @@ export default function ImageConverterPage() {
       webp: canEncodeImageType('image/webp'),
       png: true,
       jpg: canEncodeImageType('image/jpeg'),
-      avif: canEncodeImageType('image/avif'),
+      // Browsers cannot encode AVIF from a canvas (measured), but the worker encodes it with WebAssembly.
+      avif: typeof WebAssembly === 'object',
     };
     setEncodable(support);
     setFormat(prev => (support[prev as keyof typeof support] ? prev : 'png'));
@@ -227,7 +228,7 @@ export default function ImageConverterPage() {
       <div className="max-w-3xl mx-auto">
 
         <h1 className="text-3xl font-bold text-center mb-2">Image Converter</h1>
-        <p className="text-neutral-500 text-center mb-2">Convert images to PNG, JPG or WebP — 100% local, nothing uploaded to any server.</p>
+        <p className="text-neutral-500 text-center mb-2">Convert images to PNG, JPG, WebP or AVIF — 100% local, nothing uploaded to any server.</p>
         <p className="text-neutral-400 text-xs text-center mb-8">Each image up to {maxMegapixels} megapixels{isMobile ? ' on this device' : ''} (files up to {maxFileLabel}). Conversion runs in the background — this tab stays responsive.</p>
 
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
@@ -298,11 +299,14 @@ export default function ImageConverterPage() {
                       <option value="jpg" disabled={!encodable.jpg}>JPG{encodable.jpg ? '' : ' (not supported by this browser)'}</option>
                       <option value="avif" disabled={!encodable.avif}>AVIF{encodable.avif ? '' : ' (not supported by this browser)'}</option>
                     </select>
-                    {(!encodable.webp || !encodable.avif) && (
+                    {!encodable.webp && (
                       <p className="text-xs text-amber-600 mt-1 max-w-xs">
-                        {!encodable.avif && 'AVIF output is disabled: this browser cannot encode AVIF from a canvas (measured in current Chrome and Firefox: none can) — it would hand you a PNG with the wrong extension. '}
-                        {!encodable.webp && 'WebP output is disabled: this browser (Safari, including every browser on iPhone) cannot create WebP; Chrome, Edge or Firefox on a computer can. '}
-                        Use PNG or JPG{encodable.webp ? ' or WebP' : ''} instead.
+                        WebP output is disabled: this browser (Safari, including every browser on iPhone) cannot create WebP; Chrome, Edge or Firefox on a computer can. Use PNG, JPG or AVIF instead.
+                      </p>
+                    )}
+                    {format === 'avif' && (
+                      <p className="text-xs text-neutral-500 mt-1 max-w-xs">
+                        AVIF is encoded with a WebAssembly encoder, so it is slower than the other formats (a few seconds per photo) and the first use downloads about 1 MB.
                       </p>
                     )}
                   </div>
@@ -397,24 +401,24 @@ export default function ImageConverterPage() {
       </div>
       <SeoContent
         title="Image Converter"
-        description="Image Converter is a free online tool that converts images — including TIFF and iPhone HEIC/HEIF photos — to PNG, JPG or WebP entirely in your browser (WebP output needs a browser that can encode it: Chrome, Edge and Firefox can, Safari cannot; AVIF is accepted as input but not offered as output, because the browsers we measured, Chrome and Firefox, cannot encode it) — nothing is ever uploaded to a server. Drop in one or many images, pick your target format and quality, and download the results instantly, with a live before/after size comparison for every file. Conversion runs in a background Web Worker so the page stays responsive even on large batches."
+        description="Image Converter is a free online tool that converts images — including TIFF and iPhone HEIC/HEIF photos — to PNG, JPG, WebP or AVIF entirely in your browser (AVIF is encoded with a WebAssembly encoder because no browser can encode it natively; WebP output needs a browser that can encode it: Chrome, Edge and Firefox can, Safari cannot) — nothing is ever uploaded to a server. Drop in one or many images, pick your target format and quality, and download the results instantly, with a live before/after size comparison for every file. Conversion runs in a background Web Worker so the page stays responsive even on large batches."
         howTo={[
           "Drop or click to upload one or more images (PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, and HEIC/HEIF are all accepted).",
-          "Choose your output format: WebP, PNG or JPG.",
+          "Choose your output format: WebP, PNG, JPG or AVIF.",
           "Adjust the quality slider to balance file size against image quality.",
           "Click Convert, then download each result individually or use \"Download all\" for the whole batch."
         ]}
         faqs={[
           { q: "Is Image Converter free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Are my images uploaded anywhere?", a: "No. Every conversion happens locally in your browser, in a background Web Worker — your files never leave your device." },
-          { q: "Which formats are supported?", a: "You can upload PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, or HEIC/HEIF (iPhone photos) images, and convert them to WebP, PNG or JPG (AVIF is read but cannot be produced by the browsers we measured). TIFF is decoded with a dedicated in-browser decoder (planar-color-storage TIFFs aren't supported and are rejected with a clear error), and HEIC/HEIF is decoded on the main thread before being re-encoded to your chosen format." },
+          { q: "Which formats are supported?", a: "You can upload PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, or HEIC/HEIF (iPhone photos) images, and convert them to WebP, PNG, JPG or AVIF. AVIF is encoded with a WebAssembly encoder (browsers cannot encode it natively), so it takes a few seconds per photo. TIFF is decoded with a dedicated in-browser decoder (planar-color-storage TIFFs aren't supported and are rejected with a clear error), and HEIC/HEIF is decoded on the main thread before being re-encoded to your chosen format." },
           { q: "Can I convert several images at once?", a: "Yes, you can add multiple files and convert them all in one batch, then download them individually or together." },
           { q: "Is there an image-size limit?", a: `Yes: each image can be up to ${MAX_MEGAPIXELS} megapixels on desktop (${MOBILE_MAX_MEGAPIXELS} on phones and tablets), measured against how long large images take to encode in the browser — WebP in particular gets dramatically slower past a certain size. There's no limit on how many images you can batch-convert, since they're processed one at a time.` }
         ]}
         tips={[
           "WebP usually gives the best balance of quality and file size for web use — a solid default choice.",
-          "The quality slider only affects lossy formats (JPG and WebP); PNG output is always lossless, so it won't change PNG file size.",
-          "AVIF output is deliberately not offered: measured in current Chrome and Firefox, canvas AVIF encoding returns a PNG instead. WebP gives similarly small files.",
+          "The quality slider only affects lossy formats (JPG, WebP and AVIF); PNG output is always lossless, so it won't change PNG file size.",
+          "AVIF gives the smallest files of the four but takes a few seconds per photo, because it is encoded by a WebAssembly encoder; WebP is much faster.",
           "Check the size comparison shown next to each result (green for smaller, orange for larger) before choosing which files to keep."
         ]}
       />
