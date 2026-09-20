@@ -213,13 +213,25 @@ Les retirer coûte **20 lignes sur 5 fichiers, dont 2 partagées avec de vrais o
 
 Vercel **Hobby** = **une tâche planifiée par jour**. **Sans trafic, ça ne sert à rien.**
 
-## 9 — 🔴 Safari jamais testé *(bloquant de lancement — TESTER seulement)*
+## 9 — 🔴 Safari **à moitié testé** : macOS mesuré, iPhone à faire par le propriétaire *(bloquant de lancement)*
 
 **C'est le dernier bloquant technique avant le lancement.** Firefox et Chrome confirmés. Safari = l'essentiel du trafic iPhone et Mac. Casse typiquement : Web Workers, téléchargements, WASM, `OffscreenCanvas`. **Nécessite un iPhone ou un Mac.**
 
 **✅ Feuille opérationnelle prête (19 septembre 2026) : `tests-safari-proprietaire.md`**, comme le bloquant 11 a la sienne. 20 outils classés par risque lu dans le code, fichiers d'essai fournis (`docs/audit/fixtures-safari/`), séances iPhone puis MacBook, **~2 h**, la moitié la plus risquée en premier (séances A puis C, ~1 h). **Le propriétaire a un iPhone et un MacBook réels : aucun service de test, aucun compte à ouvrir.** **Le bloquant reste OUVERT tant que la feuille n'est pas remplie** ; **les verdicts remontent ici**, et chaque ÉCHOUÉ devient un défaut chiffré dans ce bloquant, jamais dans « CLOS » sans retest sur le vrai Safari.
 
 **📌 DÉCISION du 19 septembre — exception assumée à l'interdit n° 8 :** les deux outils payants de la feuille Safari (**Background Remover** et **Grammar Fixer**) sont testés **en PRODUCTION, une fois chacun, coût mesuré ~0,003 $**. La règle n° 8 vise la dépense non maîtrisée ; ici la dépense est bornée et connue, et c'est **la production** qu'il faut prouver sur Safari, pas une préversion protégée par une connexion. Ne vaut que pour ces deux tests, une fois chacun.
+
+**📌 MESURÉ le 19 septembre — vrai Safari 17.6 / macOS 14.8.9 (safaridriver) : 5 outils sur 20 échouent, causes WebKit, donc valables sur iPhone.** Chaque défaut entre dans le bloquant avec sa gravité (détail, balayage fichier:ligne et chiffrage : `docs/audit/RAPPORT-safari-defauts.md`) :
+
+| # | Défaut | Gravité | État |
+|---|---|---|---|
+| S2 | `voice-recorder` : MP4 étiqueté `audio/webm`, sans erreur | **HAUTE — mensonge** | 🟡 corrigé en code (branche `safari-defauts`), **retest Safari réel requis** |
+| S3 | `image-converter` (+ `jpg-to-webp`, `png-to-webp`) : PNG livré sous nom `.webp`, 86 % plus lourd, sans avertissement | **HAUTE — mensonge** | 🟡 corrigé en code, retest requis |
+| S4 | `image-upscaler` ×8 : canvas 32000×24000, fichier vide, interface « réussie » (URL réelle `/tools/ai-tools/image-upscaler`) | **HAUTE — mensonge** | 🟡 corrigé en code, retest requis |
+| S1 | `video-compressor` / `video-converter` / `video-trimmer` : `captureStream()` absent de `<video>`, MediaRecorder sans WebM | Moyenne — panne franche | 🟡 message AVANT usage ; **fonctionnement Safari = choix ffmpeg.wasm, chiffré (18-26 h), NON décidé** |
+| S5 | `mp4-to-gif` refuse les `.mov` (donc toute vidéo iPhone) | Moyenne — refus franc | 🟡 `accept` élargi, retest requis |
+
+Le balayage a trouvé **9 `MediaRecorder` sans `isTypeSupported`** (pas 5) : `video-merger/filter/rotator/resizer` et `screen-recorder` s'ajoutent, non testés sous Safari. La classe « succès annoncé sans vérifier la sortie » est traitée site-wide via `app/lib/mediaSupport.js` (tests : `scripts/media-support-tests/`). **Le bloquant 9 reste OUVERT** : ces correctifs ne sont prouvés que contre des faux, pas sur un Safari réel.
 
 **Suspects lus dans le code — hypothèses à confirmer par le test, pas des constats :** ① `video-compressor`, `video-converter`, `video-trimmer` appellent `captureStream()` + `MediaRecorder` en `video/webm` **sans détection de support** ; ② `voice-recorder` étiquette `audio/webm` un enregistrement que Safari produit en MP4 ; ③ `image-converter` : WebP par défaut via `OffscreenCanvas.convertToBlob` (Safari peut renvoyer du PNG) ; ④ `image-upscaler` (jusqu'à ×8) et `background-remover` (recomposition pleine résolution) dépassent probablement la limite de canvas de Safari iOS ; ⑤ `video-to-gif` attend `seeked` **sans délai de garde** (contrairement à `mp4-to-gif`).
 
@@ -402,6 +414,7 @@ Vercel **Hobby** = **une tâche planifiée par jour**. **Sans trafic, ça ne ser
 > ⑧ **Une doctrine que l'exécutant ne peut pas lire n'existe pas.** Ce document a vécu des semaines hors du dépôt, invisible de Claude Code.
 > ⑨ **Une cause « probable » n'est pas une cause.** D1 et D2 avaient tous deux une hypothèse plausible : les deux étaient fausses. Vérifier la cause avant de corriger.
 > ⑩ **Le plafond qu'on annonce doit être celui qu'on tient.** 25 Mo annoncés, 4,4 Mo réels, et un message d'erreur qui ne dit rien.
+> ⑪ **Un échec silencieux qui affiche « réussi » est plus grave qu'une panne visible**, parce que l'utilisateur repart avec un fichier faux et ne revient jamais. Un outil n’annonce jamais un succès sans avoir vérifié que la sortie existe et n'est pas vide, nomme le fichier d'après le type réel du blob produit, et dit AVANT l'usage qu'un format est impossible.
 
 ---
 
@@ -502,7 +515,7 @@ Get-Content .env.local | ForEach-Object {
 
 # CRITÈRE DE LANCEMENT
 
-**Un bloquant technique restant : 9 (Safari).** Railway Gotenberg à 3 réplicas, et la galerie Product Hunt.
+**Un bloquant technique restant : 9 (Safari — macOS mesuré, iPhone et retest des correctifs à faire par le propriétaire).** Railway Gotenberg à 3 réplicas, et la galerie Product Hunt.
 
 Le bloquant 2 est **mesuré et ses promesses corrigées en ligne** ; ses défauts résiduels (D7, D9) et le relèvement du plafond (D8) passent après le lancement.
 

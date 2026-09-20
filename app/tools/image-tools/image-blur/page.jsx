@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function ImageBlurPage() {
   const [image, setImage] = useState(null);
   const [blur, setBlur] = useState(5);
@@ -16,7 +17,7 @@ export default function ImageBlurPage() {
       const ctx = canvas.getContext('2d');
       ctx.filter = `blur(${blur}px)`;
       ctx.drawImage(img, 0, 0);
-      setResult(canvas.toDataURL('image/png'));
+      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
       setError('');
     };
     img.onerror = () => {

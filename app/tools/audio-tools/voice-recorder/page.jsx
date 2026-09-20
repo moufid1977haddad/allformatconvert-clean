@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { finishRecording } from '../../../lib/mediaSupport';
 
 export default function VoiceRecorderPage() {
   const [recording, setRecording] = useState(false);
@@ -12,17 +13,25 @@ export default function VoiceRecorderPage() {
   const mediaRecorder = useRef(null);
   const chunks = useRef([]);
   const blobRef = useRef(null);
+  // Extension of what the browser REALLY recorded (Chrome/Firefox: webm, Safari: mp4),
+  // never assumed -- a Safari recording renamed .webm would not open.
+  const [recExt, setRecExt] = useState('webm');
 
   const start = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorder.current = new MediaRecorder(stream);
       chunks.current = [];
-      mediaRecorder.current.ondataavailable = e => chunks.current.push(e.data);
+      mediaRecorder.current.ondataavailable = e => { if (e.data && e.data.size) chunks.current.push(e.data); };
       mediaRecorder.current.onstop = () => {
-        const blob = new Blob(chunks.current, { type: 'audio/webm' });
-        blobRef.current = blob;
-        setAudioUrl(URL.createObjectURL(blob));
+        try {
+          const { blob, ext } = finishRecording(chunks.current, mediaRecorder.current, 'audio/webm');
+          blobRef.current = blob;
+          setRecExt(ext);
+          setAudioUrl(URL.createObjectURL(blob));
+        } catch (err) {
+          setError(err.message);
+        }
       };
       mediaRecorder.current.start();
       setRecording(true);
@@ -43,7 +52,7 @@ export default function VoiceRecorderPage() {
   const download = () => {
     const a = document.createElement('a');
     a.href = audioUrl;
-    a.download = 'recording.webm';
+    a.download = `recording.${recExt}`;
     a.click();
   };
 
@@ -132,7 +141,7 @@ export default function VoiceRecorderPage() {
             <div className="space-y-3">
               <audio controls src={audioUrl} className="w-full" />
               <div className="grid grid-cols-2 gap-3">
-                <button onClick={download} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download WebM</button>
+                <button onClick={download} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download {recExt.toUpperCase()}</button>
                 <button onClick={exportWav} disabled={converting} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-2 font-semibold transition">
                   {converting ? 'Converting...' : 'Export as WAV'}
                 </button>
@@ -146,22 +155,22 @@ export default function VoiceRecorderPage() {
       </div>
       <SeoContent
         title="Voice Recorder"
-        description="Voice Recorder captures audio from your microphone directly in your browser using the MediaRecorder API — nothing is uploaded to a server. Recordings are saved as WebM by default, and can also be converted and downloaded as a standard WAV file using the Web Audio API entirely on your device."
+        description="Voice Recorder captures audio from your microphone directly in your browser using the MediaRecorder API — nothing is uploaded to a server. Recordings are saved in the format your browser records natively — WebM in Chrome, Edge and Firefox, MP4 in Safari — and can also be converted and downloaded as a standard WAV file using the Web Audio API entirely on your device."
         howTo={[
           "Click \"Start Recording\" and allow microphone access if prompted.",
           "Speak into your microphone — the indicator pulses red while recording.",
           "Click \"Stop Recording\" when you're finished.",
-          "Download the recording as WebM directly, or click \"Export as WAV\" to convert it and download a WAV file instead."
+          "Download the recording directly (WebM, or MP4 in Safari), or click \"Export as WAV\" to convert it and download a WAV file instead."
         ]}
         faqs={[
-          { q: "What audio format do recordings download as?", a: "Recordings are captured as WebM by default. Click \"Export as WAV\" to decode and re-encode the recording as a standard WAV file, then download it separately." },
+          { q: "What audio format do recordings download as?", a: "Recordings are captured in your browser's native format: WebM in Chrome, Edge and Firefox, MP4 in Safari, and the file extension always matches. Click \"Export as WAV\" to decode and re-encode the recording as a standard WAV file, then download it separately." },
           { q: "Is Voice Recorder free to use?", a: "Yes, it's completely free with no signup and no limit on how many recordings you can make." },
           { q: "Do I need to install anything?", a: "No, it works directly in your browser as long as you grant microphone access." },
           { q: "Is my recording private?", a: "Yes. Recording and WAV conversion both happen entirely on your device via the browser's MediaRecorder and Web Audio APIs — audio is never uploaded to a server unless you choose to share the downloaded file yourself." }
         ]}
         tips={[
           "Record in a quiet space and keep the microphone 6–12 inches from your mouth for clearer audio.",
-          "Use \"Export as WAV\" if you need an uncompressed, universally compatible format instead of WebM.",
+          "Use \"Export as WAV\" if you need an uncompressed, universally compatible format instead of the browser's native format.",
           "Download your recording promptly after stopping — refreshing the page will lose it since nothing is saved automatically.",
           "If you accidentally deny microphone permission, you'll need to reset the site's microphone permission in your browser settings to try again."
         ]}

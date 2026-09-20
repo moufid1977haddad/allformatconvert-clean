@@ -7,6 +7,7 @@ import { MAX_MEGAPIXELS, MOBILE_MAX_MEGAPIXELS, MAX_FILE_SIZE_BYTES, MAX_FILE_SI
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { TIFF_DECODE_TIMEOUT_MS, TIFF_DECODE_TIMEOUT_MESSAGE } from '../../../lib/tiffDecode';
 import { reportToolError, extOf } from '../../../lib/reportError';
+import { canEncodeImageType, extFromMime } from '../../../lib/mediaSupport';
 
 const GENERIC_CONVERSION_ERROR = 'Conversion failed. Please try again, or try a different file.';
 const GENERIC_HEIC_ERROR = 'Failed to decode this HEIC/HEIF file. It may be corrupted or use a variant this tool doesn\'t support.';
@@ -28,12 +29,23 @@ export default function ImageConverterPage() {
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState('');
   const [isMobile, setIsMobile] = useState(false);
+  // Which output formats THIS browser can really encode. Probed, not assumed:
+  // Safari cannot encode WebP or AVIF from a canvas and would return a PNG.
+  const [encodable, setEncodable] = useState<Record<string, boolean>>({ webp: true, png: true, jpg: true, avif: true });
   const inputRef = useRef<HTMLInputElement>(null);
   const workerRef = useRef<Worker | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setIsMobile(isMobileDevice());
+    const support = {
+      webp: canEncodeImageType('image/webp'),
+      png: true,
+      jpg: canEncodeImageType('image/jpeg'),
+      avif: canEncodeImageType('image/avif'),
+    };
+    setEncodable(support);
+    setFormat(prev => (support[prev as keyof typeof support] ? prev : 'png'));
   }, []);
 
   const maxMegapixels = isMobile ? MOBILE_MAX_MEGAPIXELS : MAX_MEGAPIXELS;
@@ -189,7 +201,8 @@ export default function ImageConverterPage() {
     const url = URL.createObjectURL(item.convertedBlob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = item.originalName.replace(/\.[^.]+$/, '.' + format);
+    // Extension from the real type of the produced blob, never from the requested format.
+    a.download = item.originalName.replace(/\.[^.]+$/, '.' + extFromMime(item.convertedBlob.type, format));
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -280,11 +293,16 @@ export default function ImageConverterPage() {
                       disabled={processing}
                       className="bg-white border border-neutral-200 rounded-lg px-3 py-2 text-sm text-neutral-800 focus:outline-none focus:border-indigo-400"
                     >
-                      <option value="webp">WebP</option>
+                      <option value="webp" disabled={!encodable.webp}>WebP{encodable.webp ? '' : ' (not supported by this browser)'}</option>
                       <option value="png">PNG</option>
-                      <option value="jpg">JPG</option>
-                      <option value="avif">AVIF</option>
+                      <option value="jpg" disabled={!encodable.jpg}>JPG{encodable.jpg ? '' : ' (not supported by this browser)'}</option>
+                      <option value="avif" disabled={!encodable.avif}>AVIF{encodable.avif ? '' : ' (not supported by this browser)'}</option>
                     </select>
+                    {(!encodable.webp || !encodable.avif) && (
+                      <p className="text-xs text-amber-600 mt-1 max-w-xs">
+                        This browser cannot create {[!encodable.webp && 'WebP', !encodable.avif && 'AVIF'].filter(Boolean).join(' or ')} files, so {!encodable.webp && !encodable.avif ? 'those options are' : 'that option is'} disabled rather than handing you a PNG with the wrong extension. Use Chrome, Edge or Firefox on a computer for {[!encodable.webp && 'WebP', !encodable.avif && 'AVIF'].filter(Boolean).join(' / ')}.
+                      </p>
+                    )}
                   </div>
                   <div className="flex-1 min-w-[160px]">
                     <label className="text-xs text-neutral-500 block mb-1">Quality: <span className="font-semibold text-indigo-500">{quality}%</span></label>

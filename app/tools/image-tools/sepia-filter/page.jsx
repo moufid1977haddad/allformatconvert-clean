@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function SepiaFilterPage() {
   const [image, setImage] = useState(null);
   const [intensity, setIntensity] = useState(100);
@@ -26,7 +27,7 @@ export default function SepiaFilterPage() {
         data.data[i+2] = Math.min(255, r*0.272*f + g*0.534*f + b*(1-0.869*f));
       }
       ctx.putImageData(data, 0, 0);
-      setResult(canvas.toDataURL('image/png'));
+      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
     };
     img.src = image;
   };

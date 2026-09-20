@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 
 export default function AddNoisePage() {
   const [image, setImage] = useState(null);
@@ -34,7 +35,7 @@ export default function AddNoisePage() {
         data.data[i+2] = Math.min(255, Math.max(0, data.data[i+2] + noise));
       }
       ctx.putImageData(data, 0, 0);
-      setResult(canvas.toDataURL('image/png'));
+      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
       setError('');
     };
     img.onerror = () => {

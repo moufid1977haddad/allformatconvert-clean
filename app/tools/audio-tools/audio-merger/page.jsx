@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { AUDIO_ACCEPT } from '../../../lib/mediaSupport';
 import { reportToolError } from '../../../lib/reportError';
 
 export default function AudioMergerPage() {
@@ -132,7 +133,7 @@ export default function AudioMergerPage() {
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
             {files.length > 0 ? <p className="text-neutral-700 font-medium">{files.length} files selected</p> : <p className="text-neutral-400 text-sm">Click to upload multiple audio files</p>}
           </div>
-          <input ref={fileRef} type="file" accept="audio/*" multiple className="hidden" onChange={handleFiles} />
+          <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} multiple className="hidden" onChange={handleFiles} />
           {files.length > 0 && (
             <div className="space-y-1">
               {files.map((f, i) => <div key={i} className="text-sm text-neutral-600 bg-neutral-50 rounded-lg px-3 py-2 border border-neutral-200">{i+1}. {f.name}</div>)}

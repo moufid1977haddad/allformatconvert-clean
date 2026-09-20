@@ -1,18 +1,27 @@
 ﻿'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
+import { videoReRecordSupport, captureMediaElementStream, finishRecording } from '../../../lib/mediaSupport';
 export default function VideoConverterPage() {
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState('');
   const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
+  const [support, setSupport] = useState({ ok: true, mime: null, ext: 'webm', reason: '' });
   const inputRef = useRef();
   const videoRef = useRef();
+
+  // Checked on mount so the visitor learns BEFORE selecting a file, not after
+  // a failed run (Safari has no <video>.captureStream() and cannot record WebM).
+  useEffect(() => { setSupport(videoReRecordSupport({ fromMediaElement: true })); }, []);
 
   const handleFile = (e) => {
     const f = e.target.files[0];
     if (!f) return;
     setFile(f);
     setResult(null);
+    setError('');
   };
 
   useEffect(() => {
@@ -24,23 +33,28 @@ export default function VideoConverterPage() {
   }, [file]);
 
   const convert = async () => {
-    if (!file) return;
+    if (!file || !support.ok) return;
+    setError('');
     setStatus('Converting to WebM...');
     try {
-      const stream = videoRef.current.captureStream();
-      const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+      const stream = captureMediaElementStream(videoRef.current);
+      if (!stream) throw new Error('This browser cannot capture the video.');
+      const recorder = new MediaRecorder(stream, { mimeType: support.mime });
       const chunks = [];
-      recorder.ondataavailable = e => chunks.push(e.data);
+      recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
       recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'video/webm' });
-        setResult(URL.createObjectURL(blob));
+        try {
+          const { blob, ext } = finishRecording(chunks, recorder, support.mime);
+          setResult({ url: URL.createObjectURL(blob), ext });
+        } catch (e) { setError(e.message); }
         setStatus('');
       };
+      recorder.onerror = () => { setError('Recording failed in this browser.'); setStatus(''); };
       videoRef.current.currentTime = 0;
       await videoRef.current.play();
       recorder.start();
-      setTimeout(() => { recorder.stop(); videoRef.current.pause(); }, videoRef.current.duration * 1000);
-    } catch(e) { setStatus('Error: ' + e.message); }
+      setTimeout(() => { if (recorder.state !== 'inactive') recorder.stop(); videoRef.current.pause(); }, videoRef.current.duration * 1000);
+    } catch(e) { setError('Error: ' + e.message); setStatus(''); }
   };
 
   return (
@@ -51,12 +65,14 @@ export default function VideoConverterPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
-            <input ref={inputRef} type="file" accept="video/*" className="hidden" onChange={handleFile} />
+            <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />
           </div>
+          {!support.ok && <p role="alert" className="text-red-500 text-center text-sm">{support.reason}</p>}
           {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" />}
           {status && <p className="text-yellow-400 text-center">{status}</p>}
-          <button onClick={convert} disabled={!file || !!status} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert to WebM</button>
-          {result && <div className="space-y-2"><video controls src={result} className="w-full rounded-xl" /><a href={result} download="converted.webm" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download WebM</a></div>}
+          {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
+          <button onClick={convert} disabled={!file || !!status || !support.ok} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert to WebM</button>
+          {result && <div className="space-y-2"><video controls src={result.url} className="w-full rounded-xl" /><a href={result.url} download={`converted.${result.ext}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download {result.ext.toUpperCase()}</a></div>}
         </div>
       </div>
       <SeoContent

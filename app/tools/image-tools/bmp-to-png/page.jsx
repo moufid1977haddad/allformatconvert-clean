@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function BMPtoPNGPage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
@@ -13,7 +14,7 @@ export default function BMPtoPNGPage() {
       const canvas = document.createElement('canvas');
       canvas.width = img.width; canvas.height = img.height;
       canvas.getContext('2d').drawImage(img, 0, 0);
-      setResult(canvas.toDataURL('image/png'));
+      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
       setError('');
     };
     img.onerror = () => {

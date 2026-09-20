@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
+import { checkedDataURL, assertCanvasSize } from '../../../lib/mediaSupport';
 import { checkFileSize, MAX_REMOVEBG_ORIGINAL_BYTES } from '@/lib/quota/limits';
 
 // Matches the model's own fixed internal input resolution (see
@@ -36,7 +37,7 @@ function resizeForUpload(img) {
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(img, 0, 0, width, height);
-  return canvas.toDataURL('image/jpeg', 0.92);
+  return checkedDataURL(canvas, 'image/jpeg', 0.92);
 }
 
 // Scales the (small) returned mask up to the ORIGINAL image's full
@@ -48,6 +49,7 @@ function resizeForUpload(img) {
 function recompositeAtFullResolution(originalImg, maskImg) {
   const width = originalImg.naturalWidth;
   const height = originalImg.naturalHeight;
+  assertCanvasSize(width, height);
 
   const originalCanvas = document.createElement('canvas');
   originalCanvas.width = width;
@@ -71,7 +73,7 @@ function recompositeAtFullResolution(originalImg, maskImg) {
     pixels[i + 3] = maskPixels[i];
   }
   originalCtx.putImageData(originalData, 0, 0);
-  return originalCanvas.toDataURL('image/png');
+  return checkedDataURL(originalCanvas, 'image/png');
 }
 
 export default function BackgroundRemoverPage() {

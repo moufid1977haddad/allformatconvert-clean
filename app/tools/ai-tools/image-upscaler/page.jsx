@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { canvasSizeProblem, checkedDataURL } from '../../../lib/mediaSupport';
 
 export default function ImageUpscalerPage() {
   const [image, setImage] = useState(null);
@@ -27,15 +28,31 @@ export default function ImageUpscalerPage() {
     setError('');
     const img = new Image();
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width * scale;
-      canvas.height = img.height * scale;
-      const ctx = canvas.getContext('2d');
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      setResult(canvas.toDataURL('image/png'));
-      setInfo({ original: img.width + 'x' + img.height, upscaled: canvas.width + 'x' + canvas.height });
+      // Never announce success on an oversized canvas: a 32000x24000 canvas made
+      // real Safari return an empty "data:," while this UI said "Upscaled".
+      const outW = img.width * scale;
+      const outH = img.height * scale;
+      const problem = canvasSizeProblem(outW, outH);
+      if (problem) {
+        setLoading(false);
+        setError(problem + ' Try a smaller factor than ' + scale + 'x.');
+        return;
+      }
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = outW;
+        canvas.height = outH;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        setResult(checkedDataURL(canvas, 'image/png'));
+        setInfo({ original: img.width + 'x' + img.height, upscaled: canvas.width + 'x' + canvas.height });
+      } catch (e) {
+        setResult(null);
+        setInfo(null);
+        setError(e.message + ' Try a smaller factor than ' + scale + 'x.');
+      }
       setLoading(false);
     };
     img.onerror = () => {

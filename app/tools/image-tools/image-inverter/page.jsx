@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function ImageInverterPage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
@@ -23,7 +24,7 @@ export default function ImageInverterPage() {
         data.data[i+2] = 255 - data.data[i+2];
       }
       ctx.putImageData(data, 0, 0);
-      setResult(canvas.toDataURL('image/png'));
+      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
     };
     img.src = image;
   };

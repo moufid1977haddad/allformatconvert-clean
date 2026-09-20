@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL, canvasSizeProblem } from '../../../lib/mediaSupport';
 export default function ImageResizerPage() {
   const [image, setImage] = useState(null);
   const [width, setWidth] = useState(800);
@@ -13,13 +14,15 @@ export default function ImageResizerPage() {
   const resize = () => {
     setError('');
     if (!dimsValid) { setError('Please enter valid width and height (positive numbers).'); return; }
+    const sizeProblem = canvasSizeProblem(width, height);
+    if (sizeProblem) { setError(sizeProblem); return; }
     const img = new Image();
     img.onerror = () => setError('Could not load image file');
     img.onload = () => {
       const canvas = document.createElement('canvas');
       canvas.width = width; canvas.height = height;
       canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-      setResult(canvas.toDataURL('image/png'));
+      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
     };
     img.src = image;
   };

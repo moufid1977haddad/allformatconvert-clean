@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function ImageFlipPage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
@@ -16,7 +17,7 @@ export default function ImageFlipPage() {
       if (horizontal) { ctx.translate(img.width, 0); ctx.scale(-1, 1); }
       else { ctx.translate(0, img.height); ctx.scale(1, -1); }
       ctx.drawImage(img, 0, 0);
-      setResult(canvas.toDataURL('image/png'));
+      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
       setError('');
     };
     img.onerror = () => {

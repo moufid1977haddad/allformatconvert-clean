@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL, assertCanvasSize } from '../../../lib/mediaSupport';
 import { reportToolError } from '../../../lib/reportError';
 
 export default function Page() {
@@ -27,10 +28,11 @@ export default function Page() {
         const page = await pdf.getPage(i);
         const viewport = page.getViewport({ scale: 2 });
         const canvas = document.createElement('canvas');
+        assertCanvasSize(viewport.width, viewport.height);
         canvas.width = viewport.width;
         canvas.height = viewport.height;
         await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-        imgs.push({ url: canvas.toDataURL('image/jpeg', 0.9), name: `page_${i}.jpg` });
+        imgs.push({ url: checkedDataURL(canvas, 'image/jpeg', 0.9), name: `page_${i}.jpg` });
       }
       setImages(imgs);
     } catch(e) {

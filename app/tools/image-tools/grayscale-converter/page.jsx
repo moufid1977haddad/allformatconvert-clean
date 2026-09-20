@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function GrayscaleConverterPage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
@@ -20,7 +21,7 @@ export default function GrayscaleConverterPage() {
         data.data[i] = data.data[i+1] = data.data[i+2] = avg;
       }
       ctx.putImageData(data, 0, 0);
-      setResult(canvas.toDataURL('image/png'));
+      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
       setError('');
     };
     img.onerror = () => {

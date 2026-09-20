@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 
 export default function ImagePixelatorPage() {
   const [image, setImage] = useState(null);
@@ -35,7 +36,7 @@ export default function ImagePixelatorPage() {
           ctx.fillRect(x, y, pixelSize, pixelSize);
         }
       }
-      setResult(canvas.toDataURL('image/png'));
+      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
     };
     img.src = image;
   };

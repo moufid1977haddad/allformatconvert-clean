@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL, assertCanvasSize } from '../../../lib/mediaSupport';
 import { reportToolError } from '../../../lib/reportError';
 
 export default function PdfToImagePage() {
@@ -33,11 +34,12 @@ export default function PdfToImagePage() {
         const page = await pdf.getPage(i);
         const viewport = page.getViewport({ scale: 2 });
         const canvas = document.createElement('canvas');
+        assertCanvasSize(viewport.width, viewport.height);
         canvas.width = viewport.width;
         canvas.height = viewport.height;
         const ctx = canvas.getContext('2d');
         await page.render({ canvasContext: ctx, viewport }).promise;
-        urls.push({ url: canvas.toDataURL('image/png'), page: i });
+        urls.push({ url: checkedDataURL(canvas, 'image/png'), page: i });
       }
       setImages(urls);
       setStatus('');

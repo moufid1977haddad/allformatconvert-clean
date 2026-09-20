@@ -1,11 +1,14 @@
 ﻿'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function VideoScreenshotPage() {
   const [file, setFile] = useState(null);
   const [screenshots, setScreenshots] = useState([]);
   const [format, setFormat] = useState('png');
   const [quality, setQuality] = useState(90);
+  const [error, setError] = useState('');
   const videoRef = useRef();
   const inputRef = useRef();
 
@@ -26,6 +29,7 @@ export default function VideoScreenshotPage() {
 
   const capture = () => {
     if (!videoRef.current) return;
+    setError('');
     const canvas = document.createElement('canvas');
     canvas.width = videoRef.current.videoWidth;
     canvas.height = videoRef.current.videoHeight;
@@ -38,7 +42,12 @@ export default function VideoScreenshotPage() {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
     ctx.drawImage(videoRef.current, 0, 0);
-    const url = format === 'jpg' ? canvas.toDataURL('image/jpeg', quality / 100) : canvas.toDataURL('image/png');
+    // A frame that is not decoded yet leaves a 0x0 canvas: never report a capture then.
+    let url;
+    try {
+      if (!canvas.width || !canvas.height) throw new Error('The video has no readable frame yet — wait for it to load, then try again.');
+      url = format === 'jpg' ? checkedDataURL(canvas, 'image/jpeg', quality / 100) : checkedDataURL(canvas, 'image/png');
+    } catch (e) { setError(e.message); return; }
     const time = videoRef.current.currentTime.toFixed(2);
     setScreenshots(prev => [...prev, { url, time, format }]);
   };
@@ -51,7 +60,7 @@ export default function VideoScreenshotPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
-            <input ref={inputRef} type="file" accept="video/*" className="hidden" onChange={handleFile} />
+            <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />
           </div>
           {file && (
             <div className="space-y-3">
@@ -72,6 +81,7 @@ export default function VideoScreenshotPage() {
                 )}
               </div>
               <button onClick={capture} className="w-full bg-indigo-600 hover:bg-indigo-500 rounded-xl py-3 font-semibold transition">Capture Screenshot</button>
+              {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
             </div>
           )}
           {screenshots.length > 0 && (
