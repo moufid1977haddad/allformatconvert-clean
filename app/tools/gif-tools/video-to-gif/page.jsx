@@ -1,12 +1,13 @@
 ﻿'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
+import { VIDEO_ACCEPT, assertVideoReadable, assertFrameNotBlank, gifBlobFromBytes } from '../../../lib/mediaSupport';
 export default function VideoToGifPage() {
   const [file, setFile] = useState(null);
   const [frames, setFrames] = useState([]);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [gifError, setGifError] = useState('');
   const [fps, setFps] = useState(5);
   const [duration, setDuration] = useState(3);
   const videoRef = useRef();
@@ -32,9 +33,11 @@ export default function VideoToGifPage() {
   const capture = async () => {
     if (!videoRef.current || !file) return;
     setLoading(true);
+    setGifError('');
     try {
       const { GIFEncoder, quantize, applyPalette } = await import('gifenc');
       const video = videoRef.current;
+      assertVideoReadable(video);
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
@@ -46,19 +49,20 @@ export default function VideoToGifPage() {
       const gif = GIFEncoder();
       for (let i = 0; i < totalFrames; i++) {
         video.currentTime = i * interval;
-        await new Promise(r => { video.onseeked = r; });
+        await new Promise(r => { video.onseeked = r; setTimeout(r, 1500); });
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         capturedFrames.push(canvas.toDataURL('image/png'));
         const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        assertFrameNotBlank(data);
         const palette = quantize(data, 256);
         const index = applyPalette(data, palette);
         gif.writeFrame(index, canvas.width, canvas.height, { palette, delay });
       }
       gif.finish();
-      const blob = new Blob([gif.bytes()], { type: 'image/gif' });
+      const blob = gifBlobFromBytes(gif.bytes());
       setFrames(capturedFrames);
       setResult(URL.createObjectURL(blob));
-    } catch(e) { alert('Error: ' + e.message); }
+    } catch(e) { setResult(null); setFrames([]); setGifError(e.message); }
     setLoading(false);
   };
 
@@ -77,6 +81,7 @@ export default function VideoToGifPage() {
             <div><label className="block text-sm text-neutral-500 mb-1">FPS: {fps}</label><input type="range" min="1" max="15" value={fps} onChange={e => setFps(parseInt(e.target.value))} className="w-full" /></div>
             <div><label className="block text-sm text-neutral-500 mb-1">Duration: {duration}s</label><input type="range" min="1" max="10" value={duration} onChange={e => setDuration(parseInt(e.target.value))} className="w-full" /></div>
           </div>
+          {gifError && <p role="alert" className="text-red-500 text-center text-sm">{gifError}</p>}
           <button onClick={capture} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">{loading ? 'Capturing frames...' : 'Convert to GIF Frames'}</button>
           {frames.length > 0 && (
             <div className="space-y-3">

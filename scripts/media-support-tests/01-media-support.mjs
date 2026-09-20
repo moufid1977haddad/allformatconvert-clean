@@ -150,6 +150,25 @@ await test('Chrome: canEncodeImageType(webp) is true', () => {
   });
 });
 
+
+console.log('video frame / GIF guards');
+await test('assertVideoReadable refuses a 0x0 video (undecoded codec)', () => {
+  assert.throws(() => m.assertVideoReadable({ videoWidth: 0, videoHeight: 0 }), m.OutputError);
+  assert.doesNotThrow(() => m.assertVideoReadable({ videoWidth: 640, videoHeight: 360 }));
+});
+await test('assertFrameNotBlank refuses a fully transparent frame, accepts a single painted pixel', () => {
+  const blank = new Uint8ClampedArray(4 * 1000);
+  assert.throws(() => m.assertFrameNotBlank(blank), m.OutputError);
+  const one = new Uint8ClampedArray(4 * 1000); one[4 * 777 + 3] = 255;
+  assert.doesNotThrow(() => m.assertFrameNotBlank(one));
+});
+await test('gifBlobFromBytes accepts GIF89a, refuses empty / non-GIF bytes', () => {
+  const ok = new Uint8Array(40); ok.set([0x47, 0x49, 0x46, 0x38, 0x39, 0x61]);
+  assert.equal(m.gifBlobFromBytes(ok).type, 'image/gif');
+  assert.throws(() => m.gifBlobFromBytes(new Uint8Array(0)), m.OutputError);
+  assert.throws(() => m.gifBlobFromBytes(new Uint8Array(40)), m.OutputError);
+});
+
 console.log('accept lists (coverage rule)');
 await test('VIDEO_ACCEPT lets iPhone .mov through, plus the wildcard', () => {
   assert.ok(m.VIDEO_ACCEPT.split(',').includes('.mov'));

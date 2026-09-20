@@ -168,6 +168,10 @@ Voir `docs/audit/RAPPORT-fidelite-office.md` pour la mesure de fidélité compl�
   zones `wrap="none"` : D9), D6 (pdf-to-word répond 503 quand l'indicateur est coupé, plus de repli).
   Détail : `docs/audit/RAPPORT-fidelite-corrections.md`.
 
+## Build local — variables requises (ajouté le 2026-09-19)
+
+Depuis le commit `c8fd3b56`, `IP_RATE_LIMIT_PER_HOUR` et `IP_RATE_LIMIT_PER_DAY` n'ont plus de repli : absentes ou invalides, **le build et le démarrage échouent** (`lib/quota/requiredEnv.js`). Le garde-fou est voulu et ne doit pas être affaibli. Pour que `next build` compile en local, `.env.local` (ignoré par git) contient désormais ces deux lignes, aux **valeurs de production — ce sont des nombres, pas des secrets** : `IP_RATE_LIMIT_PER_HOUR=30` et `IP_RATE_LIMIT_PER_DAY=100`. Ne jamais afficher le reste de ce fichier. Si un futur build local échoue avec « missing or is not a positive integer », vérifier d'abord ces deux noms.
+
 ## Règle de rédaction des promesses
 
 Toute phrase de fidélité d'un outil (page, `SeoContent`, `layout.tsx`

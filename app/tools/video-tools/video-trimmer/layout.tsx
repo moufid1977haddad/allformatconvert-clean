@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Video Trimmer — Cut a Section Online Free" },
-  description: "Video Trimmer cuts a section from your video by playing it and re-recording just that range using the browser's native MediaRecorder API.",
+  description: "Video Trimmer cuts a section from your video in your browser without re-encoding it, so the cut takes seconds and keeps your original quality and format (MP4, MOV, WebM, MKV).",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-trimmer" },
   openGraph: {
     title: "Video Trimmer — Cut a Section Online Free",
-    description: "Video Trimmer cuts a section from your video by playing it and re-recording just that range using the browser's native MediaRecorder API.",
+    description: "Video Trimmer cuts a section from your video in your browser without re-encoding it, so the cut takes seconds and keeps your original quality and format (MP4, MOV, WebM, MKV).",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-trimmer",
   },
 };
