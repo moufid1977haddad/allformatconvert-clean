@@ -63,7 +63,7 @@ Implémentation : copie de flux (`-c copy`), aucun ré-encodage, même moteur qu
 
 ## 5. Build local (point 5)
 
-`IP_RATE_LIMIT_PER_HOUR=30` et `IP_RATE_LIMIT_PER_DAY=100` ajoutées à `.env.local` (valeurs de production, nombres — aucun autre contenu du fichier affiché) et documentées dans `claude/REFERENCE-projet.md`. **`next build` passe désormais en local** (compilation, TypeScript, collecte des pages, 247 pages). Le garde-fou `requiredEnv` n'a pas été touché. Ce build a aussi révélé une vraie erreur de syntaxe de mon propre lot (guillemets échappés dans 5 pages GIF), corrigée avant commit — le build local sans variables l'avait masquée la veille.
+`IP_RATE_LIMIT_PER_HOUR=30` et `IP_RATE_LIMIT_PER_DAY=100` ajoutées à `.env.local` (valeurs de production, nombres — aucun autre contenu du fichier affiché) et documentées dans `claude/REFERENCE-projet.md`. **`next build` passe désormais en local** (compilation, TypeScript, collecte des pages, 247 pages). Le garde-fou `requiredEnv` n'a pas été touché. Ce build complet a aussi attrapé une erreur de syntaxe introduite par ma propre transformation automatique de cette session (guillemets échappés dans 5 pages GIF), corrigée avant le commit : sans lui, elle aurait cassé le déploiement.
 
 ## 6. Décision sur les trois outils vidéo (point 6)
 
