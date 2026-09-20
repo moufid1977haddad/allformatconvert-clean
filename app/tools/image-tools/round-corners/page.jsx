@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 
 export default function RoundCornersPage() {
   const [image, setImage] = useState(null);
@@ -41,7 +42,7 @@ export default function RoundCornersPage() {
       ctx.closePath();
       ctx.clip();
       ctx.drawImage(img, 0, 0);
-      setResult(canvas.toDataURL('image/png'));
+      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
     };
     img.src = image;
   };

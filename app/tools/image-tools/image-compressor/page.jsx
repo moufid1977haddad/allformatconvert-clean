@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function ImageCompressorPage() {
   const [image, setImage] = useState(null);
   const [quality, setQuality] = useState(80);
@@ -14,9 +15,10 @@ export default function ImageCompressorPage() {
       const canvas = document.createElement('canvas');
       canvas.width = img.width; canvas.height = img.height;
       canvas.getContext('2d').drawImage(img, 0, 0);
-      const url = canvas.toDataURL('image/jpeg', quality / 100);
-      setResult(url);
-      setError('');
+      try {
+        setResult(checkedDataURL(canvas, 'image/jpeg', quality / 100));
+        setError('');
+      } catch (e) { setResult(null); setError(e.message); }
     };
     img.onerror = () => {
       setError('Could not load this image. The file may be corrupted or in an unsupported format.');

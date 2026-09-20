@@ -1,10 +1,16 @@
 ﻿'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
+import { videoReRecordSupport, finishRecording } from '../../../lib/mediaSupport';
 export default function VideoMergerPage() {
   const [files, setFiles] = useState([]);
   const [result, setResult] = useState(null);
   const [status, setStatus] = useState('');
+  const [error, setError] = useState('');
+  const [supportReason, setSupportReason] = useState('');
+  // Checked on mount so the visitor learns BEFORE running anything.
+  useEffect(() => { setSupportReason(videoReRecordSupport().reason); }, []);
   const inputRef = useRef();
 
   const handleFiles = (e) => {
@@ -16,6 +22,7 @@ export default function VideoMergerPage() {
 
   const merge = async () => {
     if (files.length < 2) return;
+    setError('');
     setStatus('Merging videos...');
     try {
       const canvas = document.createElement('canvas');
@@ -29,10 +36,19 @@ export default function VideoMergerPage() {
       canvas.height = videos[0].videoHeight;
       const ctx = canvas.getContext('2d');
       const stream = canvas.captureStream(30);
-      const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+      const support = videoReRecordSupport();
+      if (!support.ok) throw new Error(support.reason);
+      const recorder = new MediaRecorder(stream, { mimeType: support.mime });
       const chunks = [];
-      recorder.ondataavailable = e => chunks.push(e.data);
-      recorder.onstop = () => { setResult(URL.createObjectURL(new Blob(chunks, { type: 'video/webm' }))); setStatus(''); };
+      recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+      recorder.onstop = () => {
+        try {
+          const { blob, ext } = finishRecording(chunks, recorder, support.mime);
+          setResult({ url: URL.createObjectURL(blob), ext });
+        } catch (e) { setError(e.message); }
+        setStatus('');
+      };
+      recorder.onerror = () => { setError('Recording failed in this browser.'); setStatus(''); };
       recorder.start();
       for (const video of videos) {
         await video.play();
@@ -47,7 +63,7 @@ export default function VideoMergerPage() {
         video.pause();
       }
       recorder.stop();
-    } catch(e) { setStatus('Error: ' + e.message); }
+    } catch(e) { setError('Error: ' + e.message); setStatus(''); }
   };
 
   return (
@@ -58,7 +74,7 @@ export default function VideoMergerPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">Click to add video files</p>
-            <input ref={inputRef} type="file" accept="video/*" multiple className="hidden" onChange={handleFiles} />
+            <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} multiple className="hidden" onChange={handleFiles} />
           </div>
           {files.length > 0 && (
             <div className="space-y-2">
@@ -70,9 +86,11 @@ export default function VideoMergerPage() {
               ))}
             </div>
           )}
+          {supportReason && <p role="alert" className="text-red-500 text-center text-sm">{supportReason}</p>}
           {status && <p className="text-yellow-400 text-center">{status}</p>}
-          <button onClick={merge} disabled={files.length < 2 || !!status} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Merge Videos</button>
-          {result && <div className="space-y-2"><video controls src={result} className="w-full rounded-xl" /><a href={result} download="merged.webm" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
+          <button onClick={merge} disabled={files.length < 2 || !!status || !!supportReason} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Merge Videos</button>
+          {result && <div className="space-y-2"><video controls src={result.url} className="w-full rounded-xl" /><a href={result.url} download={`merged.${result.ext}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
       <SeoContent

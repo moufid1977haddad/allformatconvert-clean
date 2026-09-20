@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { AUDIO_ACCEPT } from '../../../lib/mediaSupport';
 import { reportToolError } from '../../../lib/reportError';
 
 export default function AudioTrimmerPage() {
@@ -92,7 +93,7 @@ export default function AudioTrimmerPage() {
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
             {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-400 text-sm">Click to upload an audio file</p>}
           </div>
-          <input ref={fileRef} type="file" accept="audio/*" className="hidden" onChange={handleFile} />
+          <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
           {audioUrl && <audio ref={audioRef} src={audioUrl} onLoadedMetadata={onLoaded} controls className="w-full" />}
           {duration > 0 && (
             <div className="grid grid-cols-2 gap-4">

@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function ImageCropperPage() {
   const [image, setImage] = useState(null);
   const [imgDims, setImgDims] = useState({ width: 0, height: 0 });
@@ -50,7 +51,7 @@ export default function ImageCropperPage() {
     canvas.height = Math.round(h * scaleY);
     const ctx = canvas.getContext('2d');
     ctx.drawImage(img, x * scaleX, y * scaleY, w * scaleX, h * scaleY, 0, 0, canvas.width, canvas.height);
-    setResult(canvas.toDataURL('image/png'));
+    try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

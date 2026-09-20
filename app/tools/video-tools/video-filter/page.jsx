@@ -1,11 +1,17 @@
 ﻿'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
+import { videoReRecordSupport, finishRecording } from '../../../lib/mediaSupport';
 export default function VideoFilterPage() {
   const [file, setFile] = useState(null);
   const [filter, setFilter] = useState('none');
   const [result, setResult] = useState(null);
   const [status, setStatus] = useState('');
+  const [error, setError] = useState('');
+  const [supportReason, setSupportReason] = useState('');
+  // Checked on mount so the visitor learns BEFORE running anything.
+  useEffect(() => { setSupportReason(videoReRecordSupport().reason); }, []);
   const videoRef = useRef();
   const inputRef = useRef();
   const audioGraphRef = useRef(null);
@@ -65,6 +71,7 @@ export default function VideoFilterPage() {
 
   const applyFilter = async () => {
     if (!file || !videoRef.current) return;
+    setError('');
     setStatus('Applying filter...');
     try {
       const canvas = document.createElement('canvas');
@@ -79,10 +86,19 @@ export default function VideoFilterPage() {
         ...videoStream.getVideoTracks(),
         ...(audioTrack ? [audioTrack] : []),
       ]);
-      const recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
+      const support = videoReRecordSupport();
+      if (!support.ok) throw new Error(support.reason);
+      const recorder = new MediaRecorder(combinedStream, { mimeType: support.mime });
       const chunks = [];
-      recorder.ondataavailable = e => chunks.push(e.data);
-      recorder.onstop = () => { setResult(URL.createObjectURL(new Blob(chunks, { type: 'video/webm' }))); setStatus(''); };
+      recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+      recorder.onstop = () => {
+        try {
+          const { blob, ext } = finishRecording(chunks, recorder, support.mime);
+          setResult({ url: URL.createObjectURL(blob), ext });
+        } catch (e) { setError(e.message); }
+        setStatus('');
+      };
+      recorder.onerror = () => { setError('Recording failed in this browser.'); setStatus(''); };
       const drawFrame = () => {
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
         if (!videoRef.current.paused && !videoRef.current.ended) requestAnimationFrame(drawFrame);
@@ -91,8 +107,8 @@ export default function VideoFilterPage() {
       await videoRef.current.play();
       recorder.start();
       drawFrame();
-      setTimeout(() => { recorder.stop(); videoRef.current.pause(); }, videoRef.current.duration * 1000);
-    } catch(e) { setStatus('Error: ' + e.message); }
+      setTimeout(() => { if (recorder.state !== 'inactive') recorder.stop(); videoRef.current.pause(); }, videoRef.current.duration * 1000);
+    } catch(e) { setError('Error: ' + e.message); setStatus(''); }
   };
 
   return (
@@ -103,15 +119,17 @@ export default function VideoFilterPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
-            <input ref={inputRef} type="file" accept="video/*" className="hidden" onChange={handleFile} />
+            <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />
           </div>
           {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" style={{filter: filters.find(f => f.value === filter)?.css || ''}} />}
           <div className="grid grid-cols-4 gap-2">
             {filters.map(f => <button key={f.value} onClick={() => setFilter(f.value)} className={"py-2 rounded-lg text-sm font-semibold transition " + (filter===f.value?'bg-indigo-600 text-white':'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800')}>{f.name}</button>)}
           </div>
+          {supportReason && <p role="alert" className="text-red-500 text-center text-sm">{supportReason}</p>}
           {status && <p className="text-yellow-400 text-center">{status}</p>}
-          <button onClick={applyFilter} disabled={!file || filter === 'none' || !!status} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Apply Filter</button>
-          {result && <div className="space-y-2"><video controls src={result} className="w-full rounded-xl" /><a href={result} download="filtered.webm" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
+          <button onClick={applyFilter} disabled={!file || filter === 'none' || !!status || !!supportReason} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Apply Filter</button>
+          {result && <div className="space-y-2"><video controls src={result.url} className="w-full rounded-xl" /><a href={result.url} download={`filtered.${result.ext}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
       <SeoContent

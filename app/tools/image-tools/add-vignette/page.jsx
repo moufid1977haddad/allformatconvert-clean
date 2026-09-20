@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function AddVignettePage() {
   const [image, setImage] = useState(null);
   const [intensity, setIntensity] = useState(50);
@@ -27,7 +28,7 @@ export default function AddVignettePage() {
       gradient.addColorStop(1, `rgba(0,0,0,${intensity/100})`);
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      setResult(canvas.toDataURL('image/png'));
+      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
       setError('');
     };
     img.onerror = () => {

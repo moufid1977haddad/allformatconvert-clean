@@ -1,6 +1,7 @@
 import { MAX_MEGAPIXELS } from './config';
 import { decodeTiff } from '../../../lib/tiffDecode';
 import { sniffFormat, NATIVE_BITMAP_FORMATS } from '../../../lib/detectFileFormat';
+import { checkedBlob } from '../../../lib/mediaSupport';
 
 class LimitExceededError extends Error {
   constructor(message) {
@@ -81,7 +82,10 @@ async function convertOne(item, format, quality, maxMegapixels) {
     bitmap.close();
   }
 
-  return canvas.convertToBlob({ type: MIME_BY_FORMAT[format], quality: quality / 100 });
+  // Verified, never trusted: a browser that cannot encode the requested format
+  // (Safari + WebP/AVIF) silently returns a PNG -- which used to be shipped as
+  // a ".webp" file 86% heavier, with no warning. checkedBlob throws instead.
+  return checkedBlob(canvas, MIME_BY_FORMAT[format], quality / 100);
 }
 
 async function run({ items, format, quality, maxMegapixels }) {

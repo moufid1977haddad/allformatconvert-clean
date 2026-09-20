@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 
 export default function AddBorderToImagePage() {
   const [image, setImage] = useState(null);
@@ -29,7 +30,7 @@ export default function AddBorderToImagePage() {
       ctx.fillStyle = borderColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, borderWidth, borderWidth);
-      setResult(canvas.toDataURL('image/png'));
+      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
       setError('');
     };
     img.onerror = () => {

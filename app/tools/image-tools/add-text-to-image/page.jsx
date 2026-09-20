@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 
 export default function AddTextToImagePage() {
   const [image, setImage] = useState(null);
@@ -34,7 +35,7 @@ export default function AddTextToImagePage() {
       ctx.fillStyle = color;
       ctx.textAlign = 'center';
       ctx.fillText(text, img.width * posX / 100, img.height * posY / 100);
-      setResult(canvas.toDataURL('image/png'));
+      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
       setError('');
     };
     img.onerror = () => {

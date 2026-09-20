@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function ImageRotatePage() {
   const [image, setImage] = useState(null);
   const [angle, setAngle] = useState(90);
@@ -22,7 +23,7 @@ export default function ImageRotatePage() {
       ctx.translate(canvas.width/2, canvas.height/2);
       ctx.rotate(rad);
       ctx.drawImage(img, -img.width/2, -img.height/2);
-      setResult(canvas.toDataURL('image/png'));
+      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
     };
     img.src = image;
   };

@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import { Music } from 'lucide-react';
 import SeoContent from '../../../components/SeoContent';
+import { AUDIO_ACCEPT, VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 export default function MediaPlayerPage() {
   const [file, setFile] = useState(null);
   const [isVideo, setIsVideo] = useState(false);
@@ -25,7 +26,7 @@ export default function MediaPlayerPage() {
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a media file here'}</p>
             <p className="text-neutral-400 text-sm mt-1">Supports MP4, MP3, WAV, OGG, WebM</p>
-            <input ref={inputRef} type="file" accept="audio/*,video/*" className="hidden" onChange={handleFile} />
+            <input ref={inputRef} type="file" accept={`${AUDIO_ACCEPT},${VIDEO_ACCEPT}`} className="hidden" onChange={handleFile} />
           </div>
           {url && (
             <div className="space-y-3">

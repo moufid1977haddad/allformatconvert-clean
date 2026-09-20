@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { finishRecording } from '../../../lib/mediaSupport';
 export default function ScreenRecorderPage() {
   const [recording, setRecording] = useState(false);
   const [videoUrl, setVideoUrl] = useState(null);
@@ -10,6 +11,8 @@ export default function ScreenRecorderPage() {
   const chunks = useRef([]);
   const timer = useRef(null);
   const preview = useRef(null);
+  // Extension of what the browser REALLY recorded (Chrome/Firefox: webm, Safari: mp4).
+  const [ext, setExt] = useState('webm');
 
   const start = async () => {
     setError('');
@@ -19,10 +22,15 @@ export default function ScreenRecorderPage() {
       if (preview.current) preview.current.srcObject = stream;
       mediaRecorder.current = new MediaRecorder(stream);
       chunks.current = [];
-      mediaRecorder.current.ondataavailable = e => chunks.current.push(e.data);
+      mediaRecorder.current.ondataavailable = e => { if (e.data && e.data.size) chunks.current.push(e.data); };
       mediaRecorder.current.onstop = () => {
-        const blob = new Blob(chunks.current, { type: 'video/webm' });
-        setVideoUrl(URL.createObjectURL(blob));
+        try {
+          const { blob, ext: realExt } = finishRecording(chunks.current, mediaRecorder.current, 'video/webm');
+          setExt(realExt);
+          setVideoUrl(URL.createObjectURL(blob));
+        } catch (err) {
+          setError(err.message);
+        }
         if (preview.current) preview.current.srcObject = null;
         stream.getTracks().forEach(t => t.stop());
       };
@@ -72,22 +80,22 @@ export default function ScreenRecorderPage() {
           {videoUrl && (
             <div className="space-y-3">
               <video controls src={videoUrl} className="w-full rounded-xl" />
-              <a href={videoUrl} download="recording.webm" className="block w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-center">Download Recording</a>
+              <a href={videoUrl} download={`recording.${ext}`} className="block w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-center">Download Recording</a>
             </div>
           )}
         </div>
       </div>
       <SeoContent
         title="Screen Recorder"
-        description="Screen Recorder captures your screen, window, or browser tab using the browser's built-in screen-sharing and MediaRecorder APIs — entirely client-side, with no software installation. Recordings are saved as a WebM video file."
+        description="Screen Recorder captures your screen, window, or browser tab using the browser's built-in screen-sharing and MediaRecorder APIs — entirely client-side, with no software installation. Recordings are saved in your browser's native video format — WebM in Chrome, Edge and Firefox, MP4 in Safari."
         howTo={[
           "Click \"Start Recording\" and choose which screen, window, or tab to share when your browser prompts you.",
           "Perform the actions you want to record while the live preview plays.",
           "Click \"Stop Recording\" when you're finished.",
-          "Preview the result, then click \"Download Recording\" to save it as a WebM file."
+          "Preview the result, then click \"Download Recording\" to save it (WebM, or MP4 in Safari)."
         ]}
         faqs={[
-          { q: "What video format do recordings download as?", a: "Always WebM (.webm) — there's no option to export as MP4 or other formats directly." },
+          { q: "What video format do recordings download as?", a: "The format your browser records natively — WebM (.webm) in Chrome, Edge and Firefox, MP4 (.mp4) in Safari. The file extension always matches the real content. There's no option to pick another format directly." },
           { q: "Is Screen Recorder free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Does it record audio?", a: "It can capture audio from the screen or tab you're sharing if your browser and the shared source support it — it does not separately capture your microphone." },
           { q: "Is my recording uploaded anywhere?", a: "No, recording happens entirely through your browser's native screen-capture and MediaRecorder APIs — nothing is uploaded to a server." }
@@ -95,7 +103,7 @@ export default function ScreenRecorderPage() {
         tips={[
           "Choose \"Chrome Tab\" instead of your whole screen when recording to also capture that tab's audio, if your browser supports it.",
           "Close unnecessary tabs and apps before recording for smoother performance.",
-          "If you need MP4 instead of WebM, convert the downloaded file afterward with a dedicated video converter.",
+          "If you need a different format than your browser's native one, convert the downloaded file afterward with a dedicated video converter.",
           "Recording also stops if you stop sharing from the browser's own sharing indicator, not just the \"Stop Recording\" button."
         ]}
       />

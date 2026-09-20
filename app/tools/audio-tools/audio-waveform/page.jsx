@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { AUDIO_ACCEPT } from '../../../lib/mediaSupport';
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 200;
@@ -144,7 +145,7 @@ export default function AudioWaveformPage() {
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
             {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-400 text-sm">Click to upload an audio file</p>}
           </div>
-          <input ref={fileRef} type="file" accept="audio/*" className="hidden" onChange={handleFile} />
+          <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <canvas
             ref={canvasRef}

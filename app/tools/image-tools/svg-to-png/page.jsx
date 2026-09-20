@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { checkedDataURL, canvasSizeProblem } from '../../../lib/mediaSupport';
 
 export default function SvgToPngPage() {
   const [file, setFile] = useState(null);
@@ -23,6 +24,8 @@ export default function SvgToPngPage() {
   const convert = async () => {
     if (!file) return;
     if (!dimsValid) { setStatus('Error: please enter valid width and height (positive numbers).'); return; }
+    const sizeProblem = canvasSizeProblem(width, height);
+    if (sizeProblem) { setStatus('Error: ' + sizeProblem); return; }
     setStatus('Converting...');
     try {
       const text = await file.text();
@@ -35,8 +38,10 @@ export default function SvgToPngPage() {
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-        setResult(canvas.toDataURL('image/png'));
-        setStatus('');
+        try {
+          setResult(checkedDataURL(canvas, 'image/png'));
+          setStatus('');
+        } catch (e) { setResult(null); setStatus('Error: ' + e.message); }
         URL.revokeObjectURL(url);
       };
       img.onerror = () => {

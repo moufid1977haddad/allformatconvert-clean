@@ -1,11 +1,16 @@
 ﻿'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { canEncodeImageType, checkedDataURL, assertCanvasSize } from '../../../lib/mediaSupport';
 export default function JPGtoWebPPage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [webpOk, setWebpOk] = useState(true);
   const inputRef = useRef();
+  // Safari cannot encode WebP from a canvas: it silently hands back a PNG. Detected
+  // up front so the visitor is told BEFORE converting, not when opening the file.
+  useEffect(() => { setWebpOk(canEncodeImageType('image/webp')); }, []);
   const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setResult(null); setError(''); } };
   const convert = () => {
     setError('');
@@ -13,9 +18,12 @@ export default function JPGtoWebPPage() {
     img.onerror = () => setError('Could not load image file');
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      canvas.width = img.width; canvas.height = img.height;
-      canvas.getContext('2d').drawImage(img, 0, 0);
-      setResult(canvas.toDataURL('image/webp'));
+      try {
+        assertCanvasSize(img.width, img.height);
+        canvas.width = img.width; canvas.height = img.height;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        setResult(checkedDataURL(canvas, 'image/webp'));
+      } catch (e) { setError(e.message); }
     };
     img.src = image;
   };
@@ -29,7 +37,8 @@ export default function JPGtoWebPPage() {
             {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept=".jpg,.jpeg" className="hidden" onChange={handleFile} />
           </div>
-          <button onClick={convert} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert</button>
+          <button onClick={convert} disabled={!image || !webpOk} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert</button>
+          {!webpOk && <p role="alert" className="text-red-500 text-center text-sm">This browser (Safari, including every browser on iPhone) cannot create WebP files. Open this tool in Chrome, Edge or Firefox to convert to WebP — nothing was converted and no file was produced.</p>}
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="converted.webp" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
