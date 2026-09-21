@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { convertPdfToDocx, ConvertApiError } from "@/lib/providers/convertApi";
 import { guardPaidRoute } from "@/lib/quota/guard";
-import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES } from "@/lib/quota/limits";
+import { checkFileSize, MAX_PDF_TO_WORD_STAGED_BYTES } from "@/lib/quota/limits";
 import { isStagedRequest, respondStaged, fileResponse } from "@/lib/media/stagedRoute";
 import { alertServerError } from "@/lib/quota/errorAlerts";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
@@ -113,9 +113,9 @@ async function convertPdf(req: NextRequest, file: File, staged = false): Promise
   // Validated BEFORE calling ConvertAPI, so a credit is never spent on a
   // file that would fail anyway -- same reasoning and same 25 MB ceiling as
   // handleConvertApi's checkFileSize call in convert-to-pdf/route.ts.
-  const sizeCheck = checkFileSize(file, MAX_CONVERTAPI_FILE_BYTES, "PDF files");
+  const sizeCheck = checkFileSize(file, MAX_PDF_TO_WORD_STAGED_BYTES, "PDF files");
   if (!sizeCheck.ok) {
-    return NextResponse.json({ error: `This file is too large. Maximum size is ${MAX_CONVERTAPI_FILE_BYTES / (1024 * 1024)} MB.` }, { status: 413 });
+    return NextResponse.json({ error: `This file is too large. Maximum size is ${MAX_PDF_TO_WORD_STAGED_BYTES / (1024 * 1024)} MB.` }, { status: 413 });
   }
 
   const guard = await guardPaidRoute(req, { route: "pdf-to-word", tool: "pdf-to-word" });
