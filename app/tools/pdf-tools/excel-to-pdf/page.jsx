@@ -1,11 +1,12 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { checkPlatformUploadSize, MAX_PLATFORM_UPLOAD_BYTES, PLATFORM_LIMIT_HINT } from '@/lib/quota/limits';
+import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 
 export default function ExcelToPdfPage() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [stage, setStage] = useState(null);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
   const [detectedFonts, setDetectedFonts] = useState([]);
@@ -17,14 +18,14 @@ export default function ExcelToPdfPage() {
     setFile(f);
     // Checked the moment the file is picked -- a file over the platform
     // ceiling would otherwise only fail after upload with a generic error.
-    const sizeCheck = checkPlatformUploadSize(f);
+    const sizeCheck = checkOfficeSize(f);
     setError(sizeCheck.ok ? '' : sizeCheck.message);
     setDone(false);
   };
 
   const convert = async () => {
     if (!file) return;
-    const sizeCheck = checkPlatformUploadSize(file);
+    const sizeCheck = checkOfficeSize(file);
     if (!sizeCheck.ok) { setError(sizeCheck.message); return; }
     setLoading(true);
     setError('');
@@ -32,27 +33,10 @@ export default function ExcelToPdfPage() {
     setDetectedFonts([]);
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const res = await fetch('/api/convert-to-pdf', { method: 'POST', body: formData });
-
-      if (!res.ok) {
-        if (res.status === 413) throw new Error(`This file is over the ${MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB limit — ${PLATFORM_LIMIT_HINT}`);
-        let message = 'Conversion failed. Please try again.';
-        try {
-          const data = await res.json();
-          if (data?.error) message = data.error;
-        } catch {
-          // Response wasn't JSON; fall back to the generic message above.
-        }
-        throw new Error(message);
-      }
-
-      const detectedFontsHeader = res.headers.get('X-Detected-Symbol-Fonts');
-      setDetectedFonts(detectedFontsHeader ? detectedFontsHeader.split(',') : []);
-
-      const blob = await res.blob();
+      setStage(null);
+      const result = await convertOffice({ file: file, endpoint: '/api/convert-to-pdf', onStage: setStage });
+      setDetectedFonts(result.detectedFonts);
+      const blob = result.blob;
       const filename = (file.name.replace(/\.[^.]+$/, '') || 'spreadsheet') + '.pdf';
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -87,12 +71,12 @@ export default function ExcelToPdfPage() {
             <p className="text-neutral-500">{file ? file.name : 'Click or drop an Excel file here'}</p>
             <input ref={inputRef} type="file" accept=".xlsx,.xls,.csv,.ods" className="hidden" onChange={handleFile} />
           </div>
-          <p className="text-neutral-400 text-xs text-center -mt-2">Max {MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB per file — {PLATFORM_LIMIT_HINT}</p>
-          <button onClick={convert} disabled={!file || loading || file.size > MAX_PLATFORM_UPLOAD_BYTES} className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">
+          <p className="text-neutral-400 text-xs text-center -mt-2">Max {officeMaxLabel()} per file</p>
+          <button onClick={convert} disabled={!file || loading || file.size > officeMaxBytes()} className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">
             {loading && (
               <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden="true" />
             )}
-            {loading ? 'Converting...' : 'Download PDF'}
+            {loading ? officeStageLabel(stage) : 'Download PDF'}
           </button>
           {error && (
             <p className="text-center text-red-500 text-sm" role="alert">{error}</p>

@@ -1,27 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { alertServerError } from "@/lib/quota/errorAlerts";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
+import { MAX_OFFICE_STAGED_BYTES } from "@/lib/quota/limits";
+import { isStagedRequest, respondStaged } from "@/lib/media/stagedRoute";
 
 // Give the Gotenberg round-trip (up to GOTENBERG_TIMEOUT_MS below) enough
 // headroom inside the function's own execution budget.
-export const maxDuration = 60;
+export const maxDuration = 300;
 
-const GOTENBERG_TIMEOUT_MS = 30_000;
+function gotenbergTimeoutMs(bytes: number): number {
+  return Math.min(240_000, 30_000 + Math.ceil(bytes / (1024 * 1024)) * 3_000);
+}
 
-// A single self-contained HTML document (chapters + base64-inlined images)
-// for a book-length MOBI file is expected to be a few MB at most; this is a
-// deliberate app-level ceiling, not a platform limit.
-const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024;
+// Direct multipart requests never exceed Vercel's ~4.5 MB body ceiling; larger documents (a book-length
+// EPUB/MOBI turned into one self-contained HTML) arrive through the staged path, whose ceiling is this one.
+const MAX_FILE_SIZE_BYTES = MAX_OFFICE_STAGED_BYTES;
 
 export async function POST(req: NextRequest) {
-  const gotenbergUrl = process.env.GOTENBERG_URL;
-  const gotenbergUsername = process.env.GOTENBERG_USERNAME;
-  const gotenbergPassword = process.env.GOTENBERG_PASSWORD;
-
-  if (!gotenbergUrl || !gotenbergUsername || !gotenbergPassword) {
-    // Deliberately do not include the values above in this message.
-    return NextResponse.json({ error: "Conversion service is not configured." }, { status: 500 });
-  }
+  if (isStagedRequest(req)) return respondStaged(req, "pdf", (file) => convertHtml(req, file));
 
   let file: File;
   try {
@@ -33,6 +29,18 @@ export async function POST(req: NextRequest) {
     file = uploaded;
   } catch {
     return NextResponse.json({ error: "Invalid multipart/form-data request." }, { status: 400 });
+  }
+  return convertHtml(req, file);
+}
+
+async function convertHtml(req: NextRequest, file: File): Promise<NextResponse> {
+  const gotenbergUrl = process.env.GOTENBERG_URL;
+  const gotenbergUsername = process.env.GOTENBERG_USERNAME;
+  const gotenbergPassword = process.env.GOTENBERG_PASSWORD;
+
+  if (!gotenbergUrl || !gotenbergUsername || !gotenbergPassword) {
+    // Deliberately do not include the values above in this message.
+    return NextResponse.json({ error: "Conversion service is not configured." }, { status: 500 });
   }
 
   if (file.size === 0) {
@@ -53,7 +61,7 @@ export async function POST(req: NextRequest) {
   const authHeader = "Basic " + Buffer.from(`${gotenbergUsername}:${gotenbergPassword}`).toString("base64");
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), GOTENBERG_TIMEOUT_MS);
+  const timeoutId = setTimeout(() => controller.abort(), gotenbergTimeoutMs(file.size));
 
   let gotenbergResponse: Response;
   try {

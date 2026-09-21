@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { convertPdfToDocx, ConvertApiError } from "@/lib/providers/convertApi";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES } from "@/lib/quota/limits";
+import { isStagedRequest, respondStaged } from "@/lib/media/stagedRoute";
 import { alertServerError } from "@/lib/quota/errorAlerts";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
 
 // Give the ConvertAPI round-trip enough headroom inside the function's own
 // execution budget -- same reasoning as convert-to-pdf/route.ts's identical
 // constant.
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // Rollback switch, same shape as CONVERTAPI_ENABLED in
 // convert-to-pdf/route.ts (spec §9): only the literal value "true" routes
@@ -82,6 +83,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Staged path (files above the Vercel body ceiling) -- see lib/media/stagedRoute.ts.
+  if (isStagedRequest(req)) return respondStaged(req, "docx", (file) => convertPdf(req, file));
+
   let file: File;
   try {
     const formData = await req.formData();
@@ -93,7 +97,10 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: "Invalid multipart/form-data request." }, { status: 400 });
   }
+  return convertPdf(req, file);
+}
 
+async function convertPdf(req: NextRequest, file: File): Promise<NextResponse> {
   const extension = getExtension(file.name);
   if (extension !== "pdf") {
     return NextResponse.json({ error: "Unsupported file type. Please upload a .pdf file." }, { status: 400 });

@@ -3,24 +3,26 @@ import { detectProprietarySymbolFonts } from "@/lib/officeSymbolFonts";
 import { nameNamelessFonts } from "@/lib/xlsxDefaultFont";
 import { convertDocxToPdf, ConvertApiError } from "@/lib/providers/convertApi";
 import { guardPaidRoute } from "@/lib/quota/guard";
-import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES } from "@/lib/quota/limits";
+import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES, MAX_OFFICE_STAGED_BYTES } from "@/lib/quota/limits";
+import { isStagedRequest, respondStaged } from "@/lib/media/stagedRoute";
 import { alertServerError } from "@/lib/quota/errorAlerts";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
 
 // Give the Gotenberg/ConvertAPI round-trip (up to GOTENBERG_TIMEOUT_MS
 // below) enough headroom inside the function's own execution budget.
-export const maxDuration = 60;
+export const maxDuration = 300;
 
-const GOTENBERG_TIMEOUT_MS = 30_000;
+// Grows with the file: LibreOffice needs longer for a big workbook or deck. Stays under maxDuration.
+function gotenbergTimeoutMs(bytes: number): number {
+  return Math.min(240_000, 30_000 + Math.ceil(bytes / (1024 * 1024)) * 3_000);
+}
 
-// Vercel refuses request bodies above ~4.5 MB BEFORE this code runs (measured in
-// production on 2026-09-20: 4,493,821 bytes accepted, 4,493,924 refused with
-// FUNCTION_PAYLOAD_TOO_LARGE; nothing above that gets through, up to 100 MB tried),
-// so through the site this 25 MB check is never reached. It stays as the server-side
-// guard for a direct-upload path (D8, docs/audit/RAPPORT-video-deploiement.md);
-// the ceiling that actually applies today is MAX_PLATFORM_UPLOAD_BYTES in
-// lib/quota/limits.js, checked in the browser before the file is sent.
-const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024;
+// Two ways in. Direct multipart: Vercel refuses request bodies above ~4.5 MB BEFORE this code runs
+// (measured in production on 2026-09-20: 4,493,821 bytes accepted, 4,493,924 refused with
+// FUNCTION_PAYLOAD_TOO_LARGE), so only small files arrive this way. Staged: the browser sends the file
+// straight to the media service in signed chunks and posts only a small JSON here (lib/media/stagedRoute.ts),
+// so this check is the real server-side ceiling for those files (docs/audit/RAPPORT-office-envoi-morceaux.md).
+const MAX_FILE_SIZE_BYTES = MAX_OFFICE_STAGED_BYTES;
 
 const ALLOWED_EXTENSIONS = new Set(["docx", "doc", "xlsx", "xls", "csv", "ods", "pptx", "ppt"]);
 
@@ -102,6 +104,10 @@ function backendFor(extension: string): "convertapi" | "gotenberg" {
 }
 
 export async function POST(req: NextRequest) {
+  // Staged path (files above the Vercel body ceiling): the browser already sent the file straight to the
+  // media service and only posts a small JSON here; see lib/media/stagedRoute.ts.
+  if (isStagedRequest(req)) return respondStaged(req, "pdf", (file) => convertFile(req, file));
+
   let file: File;
   try {
     const formData = await req.formData();
@@ -113,7 +119,10 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: "Invalid multipart/form-data request." }, { status: 400 });
   }
+  return convertFile(req, file);
+}
 
+async function convertFile(req: NextRequest, file: File): Promise<NextResponse> {
   const extension = getExtension(file.name);
   if (!ALLOWED_EXTENSIONS.has(extension)) {
     return NextResponse.json(
@@ -292,7 +301,7 @@ async function handleGotenberg(req: NextRequest, file: File, extension: string):
   const authHeader = "Basic " + Buffer.from(`${gotenbergUsername}:${gotenbergPassword}`).toString("base64");
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), GOTENBERG_TIMEOUT_MS);
+  const timeoutId = setTimeout(() => controller.abort(), gotenbergTimeoutMs(file.size));
 
   let gotenbergResponse: Response;
   try {

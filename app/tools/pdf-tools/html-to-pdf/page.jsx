@@ -1,12 +1,13 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { checkPlatformUploadSize, MAX_PLATFORM_UPLOAD_BYTES, PLATFORM_LIMIT_HINT } from '@/lib/quota/limits';
+import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 
 export default function HtmlToPdfPage() {
   const [file, setFile] = useState(null);
   const [htmlContent, setHtmlContent] = useState('');
   const [loading, setLoading] = useState(false);
+  const [stage, setStage] = useState(null);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
   const [mode, setMode] = useState('file');
@@ -18,7 +19,7 @@ export default function HtmlToPdfPage() {
     setFile(f);
     setDone(false);
     // Checked on selection: the HTML is uploaded as-is, so its size is the upload size.
-    const sizeCheck = checkPlatformUploadSize(f);
+    const sizeCheck = checkOfficeSize(f);
     setError(sizeCheck.ok ? '' : sizeCheck.message);
     const text = await f.text();
     setHtmlContent(text);
@@ -27,29 +28,15 @@ export default function HtmlToPdfPage() {
   const convert = async () => {
     if (!htmlContent) return;
     const uploadBlob = new Blob([htmlContent], { type: 'text/html' });
-    const sizeCheck = checkPlatformUploadSize(uploadBlob);
+    const sizeCheck = checkOfficeSize(uploadBlob);
     if (!sizeCheck.ok) { setError(sizeCheck.message); return; }
     setLoading(true);
     setDone(false);
     setError('');
     try {
-      const formData = new FormData();
-      formData.append('file', uploadBlob, 'document.html');
-
-      const res = await fetch('/api/convert-html-to-pdf', { method: 'POST', body: formData });
-      if (!res.ok) {
-        if (res.status === 413) throw new Error(`This file is over the ${MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB limit — ${PLATFORM_LIMIT_HINT}`);
-        let message = 'Conversion failed. Please try again.';
-        try {
-          const data = await res.json();
-          if (data?.error) message = data.error;
-        } catch {
-          // Response wasn't JSON; fall back to the generic message above.
-        }
-        throw new Error(message);
-      }
-
-      const pdfBlob = await res.blob();
+      setStage(null);
+      const result = await convertOffice({ file: new File([uploadBlob], 'document.html', { type: 'text/html' }), endpoint: '/api/convert-html-to-pdf', onStage: setStage });
+      const pdfBlob = result.blob;
       const filename = (file?.name ? file.name.replace(/\.[^.]+$/, '') : 'document') + '.pdf';
       const url = URL.createObjectURL(pdfBlob);
       const a = document.createElement('a');
@@ -85,9 +72,9 @@ export default function HtmlToPdfPage() {
           ) : (
             <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm font-mono h-48 resize-none" placeholder="Paste your HTML code here..." value={htmlContent} onChange={(e) => setHtmlContent(e.target.value)} />
           )}
-          <p className="text-neutral-400 text-xs text-center -mt-2">Max {MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB of HTML — {PLATFORM_LIMIT_HINT}</p>
-          <button onClick={convert} disabled={!htmlContent || loading || new Blob([htmlContent]).size > MAX_PLATFORM_UPLOAD_BYTES} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
-            {loading ? 'Converting...' : 'Convert to PDF'}
+          <p className="text-neutral-400 text-xs text-center -mt-2">Max {officeMaxLabel()} of HTML</p>
+          <button onClick={convert} disabled={!htmlContent || loading || new Blob([htmlContent]).size > officeMaxBytes()} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+            {loading ? officeStageLabel(stage) : 'Convert to PDF'}
           </button>
           {error && (
             <p className="text-center text-red-500 text-sm" role="alert">{error}</p>

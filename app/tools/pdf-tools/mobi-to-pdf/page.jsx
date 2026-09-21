@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { checkPlatformUploadSize, MAX_PLATFORM_UPLOAD_BYTES, PLATFORM_LIMIT_HINT } from '@/lib/quota/limits';
+import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 
 const escapeHtml = (str) => String(str)
   .replace(/&/g, '&amp;')
@@ -166,6 +166,7 @@ export default function MobiToPdfPage() {
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
+  const [stage, setStage] = useState(null);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
   const inputRef = useRef();
@@ -223,26 +224,12 @@ export default function MobiToPdfPage() {
       const htmlBlob = new Blob([html], { type: 'text/html' });
       // What is uploaded is the prepared HTML (chapters + inlined images), which can be
       // far larger than the book file itself -- so that is what the ceiling applies to.
-      if (htmlBlob.size > MAX_PLATFORM_UPLOAD_BYTES) {
-        throw new Error(`This book is ${(htmlBlob.size / (1024 * 1024)).toFixed(1)} MB once prepared for conversion (images included), but this tool accepts up to ${MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB — ${PLATFORM_LIMIT_HINT}`);
+      if (htmlBlob.size > officeMaxBytes()) {
+        throw new Error(`This book is ${(htmlBlob.size / (1024 * 1024)).toFixed(1)} MB once prepared for conversion (images included), but this tool accepts up to ${officeMaxLabel()}.`);
       }
-      const formData = new FormData();
-      formData.append('file', htmlBlob, 'book.html');
-
-      const res = await fetch('/api/convert-html-to-pdf', { method: 'POST', body: formData });
-      if (!res.ok) {
-        if (res.status === 413) throw new Error(`This file is over the ${MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB limit — ${PLATFORM_LIMIT_HINT}`);
-        let message = 'Conversion failed. Please try again.';
-        try {
-          const data = await res.json();
-          if (data?.error) message = data.error;
-        } catch {
-          // Response wasn't JSON; fall back to the generic message above.
-        }
-        throw new Error(message);
-      }
-
-      const pdfBlob = await res.blob();
+      setStage(null);
+      const result = await convertOffice({ file: new File([htmlBlob], 'book.html', { type: 'text/html' }), endpoint: '/api/convert-html-to-pdf', onStage: setStage });
+      const pdfBlob = result.blob;
       const filename = (file.name.replace(/\.(mobi|azw3?)$/i, '') || 'document') + '.pdf';
       const url = URL.createObjectURL(pdfBlob);
       const a = document.createElement('a');
@@ -273,12 +260,12 @@ export default function MobiToPdfPage() {
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a MOBI file here'}</p>
             <input ref={inputRef} type="file" accept=".mobi,.azw,.azw3" className="hidden" onChange={handleFile} />
           </div>
-          <p className="text-neutral-400 text-xs text-center -mt-2">Max {MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB of prepared content per book — image-heavy books count for more than their file size. This is {PLATFORM_LIMIT_HINT}</p>
+          <p className="text-neutral-400 text-xs text-center -mt-2">Max {officeMaxLabel()} of prepared content per book — image-heavy books count for more than their file size.</p>
           <button onClick={convert} disabled={!file || loading} className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading && (
               <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden="true" />
             )}
-            {loading ? (status || 'Converting...') : 'Convert to PDF'}
+            {loading ? (stage ? officeStageLabel(stage) : (status || 'Converting...')) : 'Convert to PDF'}
           </button>
           {error && (
             <p className="text-center text-red-500 text-sm" role="alert">{error}</p>
