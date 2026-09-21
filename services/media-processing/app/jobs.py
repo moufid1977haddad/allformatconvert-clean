@@ -27,6 +27,9 @@ from . import config, ffmpeg_ops
 
 log = logging.getLogger("media-processing")
 
+# A compressed file must be at least this much smaller than the source to count as smaller.
+NOT_SMALLER_RATIO = 0.98
+
 
 class Job:
     def __init__(self, jid, op, params, size, ext_hint):
@@ -42,6 +45,8 @@ class Job:
         self.out_ext = None
         self.out_mime = None
         self.out_size = None
+        self.attempt = 1          # compress: a stronger level is tried once when the result is not smaller
+        self.not_smaller = False  # compress: even the strongest attempt was not smaller than the source
         self.created = time.time()
         self.touched = time.time()
         self.cancel = threading.Event()
@@ -251,24 +256,49 @@ def _process(job: Job):
     job.status = "processing"
     job.progress = 0.0
     try:
-        args, ext, mime = ffmpeg_ops.build_command(job.op, job.params, job._info, inp, out)
-        code, cancelled, timed_out = ffmpeg_ops.run(
-            args, job._info.duration, lambda p: setattr(job, "progress", p), job.cancel.is_set, config.FFMPEG_TIMEOUT_SECONDS
-        )
-        if cancelled:
-            shutil.rmtree(job.dir, ignore_errors=True)
-            return
-        if timed_out:
-            _fail(job, "timeout", "The conversion took too long and was stopped. Try a shorter file.")
-        elif code != 0 or not os.path.exists(out) or os.path.getsize(out) == 0:
-            # Never report success on a missing or empty output.
-            _fail(job, "conversion_failed", "This file could not be converted. It may use a codec that cannot be read.")
-        else:
-            job.out_ext, job.out_mime, job.out_size = ext, mime, os.path.getsize(out)
+        # A compression is only worth delivering if it is SMALLER than the source. When
+        # a result is not, the next stronger level is tried once; if that one is not
+        # smaller either, the service says so instead of handing back a bigger file.
+        attempts = [job.params]
+        if job.op == "compress":
+            level = job.params.get("level", "balanced")
+            i = ffmpeg_ops.COMPRESS_LEVELS.index(level)
+            attempts = [job.params] + [dict(job.params, level=nxt) for nxt in ffmpeg_ops.COMPRESS_LEVELS[i + 1:i + 2]]
+        for n, params in enumerate(attempts, start=1):
+            job.attempt = n
+            job.progress = 0.0
+            args, ext, mime = ffmpeg_ops.build_command(job.op, params, job._info, inp, out, job.size)
+            code, cancelled, timed_out = ffmpeg_ops.run(
+                args, job._info.duration, lambda p: setattr(job, "progress", p), job.cancel.is_set, config.FFMPEG_TIMEOUT_SECONDS
+            )
+            if cancelled:
+                shutil.rmtree(job.dir, ignore_errors=True)
+                return
+            if timed_out:
+                _fail(job, "timeout", "The conversion took too long and was stopped. Try a shorter file.")
+                break
+            if code != 0 or not os.path.exists(out) or os.path.getsize(out) == 0:
+                # Never report success on a missing or empty output.
+                _fail(job, "conversion_failed", "This file could not be converted. It may use a codec that cannot be read.")
+                break
+            size = os.path.getsize(out)
+            if job.op == "compress" and size >= job.size * NOT_SMALLER_RATIO:
+                if n < len(attempts):
+                    os.remove(out)
+                    continue  # try the next, stronger level
+                job.not_smaller = True
+            job.out_ext, job.out_mime, job.out_size = ext, mime, size
             job.progress = 100.0
             job.status = "done"
             job.touched = time.time()
+            if job.not_smaller:
+                job.out_ext = None  # nothing to download: the bigger file is discarded, only the sizes are reported
+                try:
+                    os.remove(out)
+                except FileNotFoundError:
+                    pass
             _drop_input(job)  # the source is destroyed as soon as processing is over
+            break
     except Exception:
         log.exception("processing crashed (file content never logged)")
         _fail(job, "internal_error", "An unexpected error occurred while converting.")

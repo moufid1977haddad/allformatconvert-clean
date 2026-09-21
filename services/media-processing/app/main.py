@@ -60,7 +60,9 @@ def _job_or_404(jid):
 
 @app.route("/health")
 def health():
-    return jsonify(status="ok"), 200
+    # `targets` = number of output formats this build offers: lets a deployment be checked for
+    # running THIS code (an old version keeps answering /health after a failed deploy).
+    return jsonify(status="ok", targets=len(ffmpeg_ops.TARGETS)), 200
 
 
 @app.route("/v1/jobs", methods=["POST"])
@@ -103,6 +105,9 @@ def job_status(jid):
         errorCode=job.error_code,
         outputExt=job.out_ext,
         outputBytes=job.out_size,
+        inputBytes=job.size,
+        attempt=job.attempt,
+        notSmaller=job.not_smaller,
     )
 
 
@@ -150,6 +155,8 @@ def result(jid):
         return missing
     if job.status != "done":
         return _err("not_ready", "The result is not ready.", 409)
+    if job.not_smaller:
+        return _err("not_smaller", "Compressing this video would not make it smaller, so no file was produced.", 410)
     path = os.path.join(job.dir, "output.bin")
     size = os.path.getsize(path)
 
