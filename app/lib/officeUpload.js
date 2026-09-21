@@ -13,12 +13,12 @@ import {
 const MIB = 1024 * 1024;
 
 /** The ceiling that really applies to this deployment, in bytes. */
-export const officeMaxBytes = () => (mediaServiceConfigured() ? MAX_OFFICE_STAGED_BYTES : MAX_PLATFORM_UPLOAD_BYTES);
-export const officeMaxLabel = () => `${Math.round(officeMaxBytes() / MIB)} MB`;
+export const officeMaxBytes = (cap = MAX_OFFICE_STAGED_BYTES) => (mediaServiceConfigured() ? cap : MAX_PLATFORM_UPLOAD_BYTES);
+export const officeMaxLabel = (cap) => `${Math.round(officeMaxBytes(cap) / MIB)} MB`;
 
 /** Pre-upload check: the honest reason and the real limit, before any byte is sent. */
-export function checkOfficeSize(file) {
-  const max = officeMaxBytes();
+export function checkOfficeSize(file, cap) {
+  const max = officeMaxBytes(cap);
   if (!file || file.size <= max) return { ok: true };
   const fileMb = (file.size / MIB).toFixed(1);
   const tail = mediaServiceConfigured() ? 'Larger files are not supported.' : PLATFORM_LIMIT_HINT;

@@ -115,7 +115,7 @@ async function convertPdf(req: NextRequest, file: File, staged = false): Promise
   // handleConvertApi's checkFileSize call in convert-to-pdf/route.ts.
   const sizeCheck = checkFileSize(file, MAX_CONVERTAPI_FILE_BYTES, "PDF files");
   if (!sizeCheck.ok) {
-    return NextResponse.json({ error: "This file is too large. Maximum size is 25 MB." }, { status: 413 });
+    return NextResponse.json({ error: `This file is too large. Maximum size is ${MAX_CONVERTAPI_FILE_BYTES / (1024 * 1024)} MB.` }, { status: 413 });
   }
 
   const guard = await guardPaidRoute(req, { route: "pdf-to-word", tool: "pdf-to-word" });

@@ -239,7 +239,8 @@ export async function runStagedConversion({ file, endpoint, fields, onStage, sig
   const { res, json: j, jid, ticket, cleanup } = await stagedCall({ file, endpoint, fields, onStage, signal });
   try {
     if (!res.ok || !j.ok) {
-      const msg = j.error || (res.status === 504 ? 'This conversion is taking too long. Try a smaller or simpler file.' : 'Conversion failed. Please try again.');
+      // j.error is a string from our routes, but a platform-level failure (memory, timeout) can answer an object or nothing.
+      const msg = (typeof j.error === 'string' && j.error) || (res.status === 504 ? 'This conversion is taking too long. Try a smaller or simpler file.' : 'Conversion failed. Please try again.');
       throw new MediaJobError(msg, 'convert_' + res.status);
     }
     const dl = await downloadResult({ jid, ticket, expected: j.outputBytes || 0, onStage, signal });

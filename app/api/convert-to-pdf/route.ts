@@ -3,7 +3,7 @@ import { detectProprietarySymbolFonts } from "@/lib/officeSymbolFonts";
 import { nameNamelessFonts } from "@/lib/xlsxDefaultFont";
 import { convertDocxToPdf, ConvertApiError } from "@/lib/providers/convertApi";
 import { guardPaidRoute } from "@/lib/quota/guard";
-import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES, MAX_OFFICE_STAGED_BYTES } from "@/lib/quota/limits";
+import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES, MAX_OFFICE_STAGED_BYTES, MAX_SPREADSHEET_STAGED_BYTES } from "@/lib/quota/limits";
 import { isStagedRequest, respondStaged, fileResponse } from "@/lib/media/stagedRoute";
 import { alertServerError } from "@/lib/quota/errorAlerts";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
@@ -134,9 +134,11 @@ async function convertFile(req: NextRequest, file: File, staged = false): Promis
   if (file.size === 0) {
     return NextResponse.json({ error: "The uploaded file is empty." }, { status: 400 });
   }
-  if (file.size > MAX_FILE_SIZE_BYTES) {
+  const isSheet = ["xlsx", "xls", "csv", "ods"].includes(extension);
+  const maxBytes = isSheet ? MAX_SPREADSHEET_STAGED_BYTES : MAX_FILE_SIZE_BYTES;
+  if (file.size > maxBytes) {
     return NextResponse.json(
-      { error: `File is too large. Maximum size is ${MAX_FILE_SIZE_BYTES / (1024 * 1024)} MB.` },
+      { error: `File is too large. Maximum size is ${maxBytes / (1024 * 1024)} MB.` },
       { status: 413 }
     );
   }
@@ -153,12 +155,12 @@ async function convertFile(req: NextRequest, file: File, staged = false): Promis
 async function handleConvertApi(req: NextRequest, file: File, staged: boolean): Promise<NextResponse> {
   // Validated BEFORE calling ConvertAPI, so a credit is never spent on a
   // file that would fail anyway (§5). In practice the generic
-  // MAX_FILE_SIZE_BYTES check above already enforces this same 25 MB
+  // MAX_FILE_SIZE_BYTES check above already enforces a ceiling at or above
   // ceiling, but this check stands on its own per the spec, in case the
   // two constants are ever tuned independently in the future.
   const sizeCheck = checkFileSize(file, MAX_CONVERTAPI_FILE_BYTES, "Word documents");
   if (!sizeCheck.ok) {
-    return NextResponse.json({ error: "This file is too large. Maximum size is 25 MB." }, { status: 413 });
+    return NextResponse.json({ error: `This file is too large. Maximum size is ${MAX_CONVERTAPI_FILE_BYTES / (1024 * 1024)} MB.` }, { status: 413 });
   }
 
   const guard = await guardPaidRoute(req, { route: "word-to-pdf", tool: "word-to-pdf" });

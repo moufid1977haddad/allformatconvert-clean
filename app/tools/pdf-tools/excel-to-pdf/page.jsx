@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { MAX_SPREADSHEET_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 
 export default function ExcelToPdfPage() {
@@ -18,14 +19,14 @@ export default function ExcelToPdfPage() {
     setFile(f);
     // Checked the moment the file is picked -- a file over the platform
     // ceiling would otherwise only fail after upload with a generic error.
-    const sizeCheck = checkOfficeSize(f);
+    const sizeCheck = checkOfficeSize(f, MAX_SPREADSHEET_STAGED_BYTES);
     setError(sizeCheck.ok ? '' : sizeCheck.message);
     setDone(false);
   };
 
   const convert = async () => {
     if (!file) return;
-    const sizeCheck = checkOfficeSize(file);
+    const sizeCheck = checkOfficeSize(file, MAX_SPREADSHEET_STAGED_BYTES);
     if (!sizeCheck.ok) { setError(sizeCheck.message); return; }
     setLoading(true);
     setError('');
@@ -71,8 +72,8 @@ export default function ExcelToPdfPage() {
             <p className="text-neutral-500">{file ? file.name : 'Click or drop an Excel file here'}</p>
             <input ref={inputRef} type="file" accept=".xlsx,.xls,.csv,.ods" className="hidden" onChange={handleFile} />
           </div>
-          <p className="text-neutral-400 text-xs text-center -mt-2">Max {officeMaxLabel()} per file</p>
-          <button onClick={convert} disabled={!file || loading || file.size > officeMaxBytes()} className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">
+          <p className="text-neutral-400 text-xs text-center -mt-2">Max {officeMaxLabel(MAX_SPREADSHEET_STAGED_BYTES)} per file</p>
+          <button onClick={convert} disabled={!file || loading || file.size > officeMaxBytes(MAX_SPREADSHEET_STAGED_BYTES)} className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">
             {loading && (
               <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden="true" />
             )}
