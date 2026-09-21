@@ -32,7 +32,7 @@ export async function respondStaged(
 
   let res: NextResponse;
   try {
-    res = await produce(new File([src.buffer], h.filename || "document"));
+    res = await produce(new File([src.blob], h.filename || "document"));
   } catch (err) {
     await discard(h);
     throw err;
@@ -55,4 +55,34 @@ export async function respondStaged(
     { ok: true, jid: h.jid, outputBytes: dep.outputBytes, ext: outExt, detectedFonts: fonts ? fonts.split(",") : [] },
     { headers: { "Cache-Control": "no-store" } },
   );
+}
+
+/**
+ * Staged INPUT, inline JSON answer (e.g. a transcript): the route reads the staged file server-to-server,
+ * runs its own unchanged handler and returns that handler's response as is; the staged file is destroyed
+ * as soon as the handler is done, whatever the outcome.
+ */
+export async function respondStagedInline(
+  req: NextRequest,
+  produce: (file: File, body: any) => Promise<NextResponse>,
+  errorShape: (message: string) => Record<string, unknown> = (message) => ({ error: message }),
+): Promise<NextResponse> {
+  let body: any = null;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json(errorShape("Invalid request."), { status: 400 });
+  }
+  const h: any = openStaged(body);
+  if (!h.ok) return NextResponse.json(errorShape(h.error), { status: h.status });
+  const src: any = await readSource(h);
+  if (!src.ok) {
+    await discard(h);
+    return NextResponse.json(errorShape(src.error), { status: src.status });
+  }
+  try {
+    return await produce(new File([src.blob], h.filename || "audio"), body);
+  } finally {
+    await discard(h);
+  }
 }

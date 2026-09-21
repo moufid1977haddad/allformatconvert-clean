@@ -65,7 +65,7 @@ await t('readSource: sends the SERVER ticket and returns the exact bytes', async
   mock(() => new Response(data, { status: 200, headers: { 'content-length': String(data.length) } }));
   const r = await readSource(h);
   assert.equal(r.ok, true);
-  assert.deepEqual(r.buffer, data);
+  assert.deepEqual(Buffer.from(await r.blob.arrayBuffer()), data);
   assert.equal(calls.at(-1).init.headers.Authorization, 'Bearer ' + h.serverTicket);
   assert.equal(calls.at(-1).url, `https://svc.test/v1/jobs/${h.jid}/source`);
 });

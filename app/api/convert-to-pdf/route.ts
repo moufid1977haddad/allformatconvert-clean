@@ -177,6 +177,8 @@ async function handleConvertApi(req: NextRequest, file: File): Promise<NextRespo
 
   try {
     const { pdfBuffer, costMicros } = await convertDocxToPdf(fileBuffer, file.name);
+    // Size bucket and cost only (never a name or content): shows whether a large file costs more than one credit.
+    console.log(`[convertapi] docx->pdf cost_micros=${costMicros} input_mb=${Math.round(file.size / 1048576)}`);
     // Real reconciliation: actualCostMicros = response.ConversionCost *
     // CONVERTAPI_COST_MICROS, computed inside the adapter (only it knows
     // ConvertAPI's response shape) and returned here as the already-scaled

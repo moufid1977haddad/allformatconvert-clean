@@ -200,14 +200,12 @@ export async function runMediaJob({ file, op, params, onStage, signal }) {
 }
 
 /**
- * Staged document conversion (Office / HTML / PDF): the file goes to the service in chunks (no Vercel body
- * ceiling), then the tool's own API route is asked, with a tiny JSON, to read it server-to-server, convert
- * it and deposit the result, which is then downloaded from the service.
- * @param {{file: File, endpoint: string, fields?: object, onStage: (s: object) => void, signal?: AbortSignal}} opts
- * @returns {Promise<{blob: Blob, ext: string, bytes: number, detectedFonts: string[]}>}
+ * Staged call: the file goes to the service in chunks (no Vercel body ceiling), then the tool's own API
+ * route is asked, with a tiny JSON, to read it server-to-server and do its work. Resolves with the route's
+ * JSON answer and the ids needed to download a result (if the route deposited one).
  */
-export async function runStagedConversion({ file, endpoint, fields, onStage, signal }) {
-  if (!mediaServiceConfigured()) throw new MediaJobError('Large-file conversion is not available right now.', 'not_configured');
+async function stagedCall({ file, endpoint, fields, onStage, signal }) {
+  if (!mediaServiceConfigured()) throw new MediaJobError('Large-file processing is not available right now.', 'not_configured');
   const { jid, ticket, cleanup } = await openAndUpload({ file, op: 'stage', params: {}, onStage, signal });
   try {
     const s = await api(`/v1/jobs/${jid}/start`, { method: 'POST', ticket, signal });
@@ -215,7 +213,6 @@ export async function runStagedConversion({ file, endpoint, fields, onStage, sig
       if (s.status === 409 && s.json.error === 'incomplete') throw new MediaJobError('The upload was incomplete. Please try again.', 'incomplete');
       throw new MediaJobError(s.json.message || 'The service could not accept this file.', s.json.error || 'start');
     }
-
     onStage({ stage: 'converting' });
     let res;
     try {
@@ -224,12 +221,27 @@ export async function runStagedConversion({ file, endpoint, fields, onStage, sig
       if (e && e.name === 'AbortError') throw new MediaJobError('Cancelled.', 'cancelled');
       throw new MediaJobError('Could not reach the site. Check your connection and try again.', 'network');
     }
-    const j = await res.json().catch(() => ({}));
+    const json = await res.json().catch(() => ({}));
+    return { res, json, jid, ticket, cleanup };
+  } catch (e) {
+    if (e instanceof MediaJobError && e.code !== 'expired') cleanup();
+    throw e;
+  }
+}
+
+/**
+ * Staged document conversion (Office / HTML / PDF): stagedCall, then the converted file is downloaded from
+ * the service (which deletes it after one complete download).
+ * @param {{file: File, endpoint: string, fields?: object, onStage: (s: object) => void, signal?: AbortSignal}} opts
+ * @returns {Promise<{blob: Blob, ext: string, bytes: number, detectedFonts: string[]}>}
+ */
+export async function runStagedConversion({ file, endpoint, fields, onStage, signal }) {
+  const { res, json: j, jid, ticket, cleanup } = await stagedCall({ file, endpoint, fields, onStage, signal });
+  try {
     if (!res.ok || !j.ok) {
       const msg = j.error || (res.status === 504 ? 'This conversion is taking too long. Try a smaller or simpler file.' : 'Conversion failed. Please try again.');
       throw new MediaJobError(msg, 'convert_' + res.status);
     }
-
     const dl = await downloadResult({ jid, ticket, expected: j.outputBytes || 0, onStage, signal });
     return { blob: dl.blob, ext: j.ext, bytes: dl.bytes, detectedFonts: j.detectedFonts || [] };
   } catch (e) {
@@ -237,4 +249,13 @@ export async function runStagedConversion({ file, endpoint, fields, onStage, sig
     if (e instanceof MediaJobError && e.code !== 'expired') cleanup();
     throw e;
   }
+}
+
+/**
+ * Staged call whose answer is the route's JSON itself (no file to download), e.g. a transcript.
+ * @returns {Promise<{status: number, json: object}>}
+ */
+export async function runStagedJson({ file, endpoint, fields, onStage, signal }) {
+  const { res, json } = await stagedCall({ file, endpoint, fields, onStage, signal });
+  return { status: res.status, json };
 }
