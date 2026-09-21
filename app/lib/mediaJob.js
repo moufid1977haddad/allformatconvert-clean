@@ -141,10 +141,17 @@ export async function runMediaJob({ file, op, params, onStage, signal }) {
       if (st.status === 401 || st.status === 404) throw new MediaJobError('The conversion session expired. Please try again.', 'expired');
       const j = st.json;
       if (j.status === 'queued') onStage({ stage: 'queued', position: j.queuePosition });
-      else if (j.status === 'processing') onStage({ stage: 'processing', pct: j.progress });
+      else if (j.status === 'processing') onStage({ stage: 'processing', pct: j.progress, attempt: j.attempt || 1 });
       else if (j.status === 'error') throw new MediaJobError(j.error || 'The conversion failed.', j.errorCode);
       else if (j.status === 'done') { done = j; break; }
       await sleep(700, signal);
+    }
+
+    // ---- honest "already optimal": the service produced no file because every attempt
+    // was at least as large as the source. Nothing to download; free the job right away.
+    if (done.notSmaller) {
+      fetch(`${MEDIA_SERVICE_URL}/v1/jobs/${jid}`, { method: 'DELETE', headers: { Authorization: 'Bearer ' + ticket } }).catch(() => {});
+      return { notSmaller: true, inputBytes: done.inputBytes || file.size, outputBytes: done.outputBytes || 0 };
     }
 
     // ---- download (the service deletes the file after this) ----------------

@@ -36,7 +36,7 @@ const seo = {
     { q: 'What do I get?', a: 'An H.264 + AAC MP4, the format that plays on every phone, computer and browser.' },
     { q: 'Is my video kept?', a: 'No. The original is deleted the moment compression ends, and the result is deleted right after your download (or after 15 minutes if you never download it). Nothing about your file is logged.' },
     { q: 'Why is this not done in the browser?', a: 'Compressing on a server is several times faster than real time and works on iPhone and Safari, where in-browser video recording is not available.' },
-    { q: 'Can the result be larger than the original?', a: 'Rarely, on videos that are already heavily compressed. The page shows the real before and after sizes, so you can see it; try the Strong level or a lower resolution.' },
+    { q: 'Can the result be larger than the original?', a: 'No. The compressor is given a size ceiling taken from your own file. If a result still is not smaller, it automatically tries one stronger setting, and if that is not smaller either it tells you your video is already well compressed instead of handing you a bigger file. To go smaller in that case, lower the resolution.' },
   ],
   tips: [
     'Balanced is right for most videos; use Strong for messaging apps and email limits.',
