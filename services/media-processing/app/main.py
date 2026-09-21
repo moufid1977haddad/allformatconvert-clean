@@ -108,6 +108,7 @@ def job_status(jid):
         inputBytes=job.size,
         attempt=job.attempt,
         notSmaller=job.not_smaller,
+        larger=job.larger,
     )
 
 

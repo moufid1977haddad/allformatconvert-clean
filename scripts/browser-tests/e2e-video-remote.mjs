@@ -64,11 +64,16 @@ async function run(label, toolPath, file, pick, ext, magic) {
 
 const head = (s) => (b) => b.subarray(0, 64).toString('latin1').includes(s);
 console.log(`===== ${engineName} on ${origin} =====`);
-const FMT = process.env.FMT; // e.g. FMT=webm -> only the converter, MP4 -> FMT, on both videos
+const FMT = process.env.FMT; // e.g. FMT=webm,h265,av1 -> only the converter, MP4 -> each format, on the chosen videos
+const CLIPS = (process.env.CLIPS || 's30.mp4,surf.mp4').split(',');
+const REAL_EXT = { h265: 'mp4', av1: 'mp4', xvid: 'avi' };
 if (FMT) {
   const anyMagic = (b) => b.length > 1000;
-  await run(`convert 30 s -> ${FMT}`, '/tools/video-tools/video-converter', 's30.mp4', FMT, FMT, anyMagic);
-  await run(`convert 3 min -> ${FMT}`, '/tools/video-tools/video-converter', 'surf.mp4', FMT, FMT, anyMagic);
+  for (const fmt of FMT.split(',')) {
+    for (const clip of CLIPS) {
+      await run(`convert ${clip} -> ${fmt}`, '/tools/video-tools/video-converter', clip, fmt, REAL_EXT[fmt] || fmt, anyMagic);
+    }
+  }
   await browser.close();
   console.log(bad.length ? `\n${bad.length} FAILED: ${bad.join('; ')}` : '\nall passed');
   process.exit(bad.length ? 1 : 0);
