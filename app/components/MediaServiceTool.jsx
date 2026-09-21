@@ -27,6 +27,7 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
   const [params, setParams] = useState(initialParams);
   const [stage, setStage] = useState(null); // {stage, pct, position}
   const [result, setResult] = useState(null);
+  const [notSmaller, setNotSmaller] = useState(null); // compress: {inputBytes, outputBytes} when nothing smaller exists
   const [error, setError] = useState('');
   const [previewUrl, setPreviewUrl] = useState(null);
   const inputRef = useRef();
@@ -49,6 +50,7 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
     // lets the same file be chosen twice.
     if (!f) return;
     setResult(null);
+    setNotSmaller(null);
     setError('');
     if (f.size > MAX_UPLOAD_MB * 1024 * 1024) {
       setFile(null);
@@ -62,14 +64,20 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
     if (!file || busy) return;
     setError('');
     setResult(null);
+    setNotSmaller(null);
     const ac = new AbortController();
     abortRef.current = ac;
     setStage({ stage: 'ticket' });
     try {
       const out = await runMediaJob({ file, op, params: buildParams(params), onStage: setStage, signal: ac.signal });
+      if (out.notSmaller) {
+        // Not an error and not a success: the honest answer for a video that is already well compressed.
+        setNotSmaller({ inputBytes: out.inputBytes, outputBytes: out.outputBytes });
+        return;
+      }
       // A success is only announced for a real, non-empty file with a known extension.
       if (!out.bytes || !out.ext) throw new MediaJobError('The service returned an empty file.', 'empty');
-      setResult({ url: URL.createObjectURL(out.blob), ext: out.ext, bytes: out.bytes, name: outName(file.name, out.ext), isVideo: out.blob.type.startsWith('video/'), isAudio: out.blob.type.startsWith('audio/') });
+      setResult({ url: URL.createObjectURL(out.blob), ext: out.ext, bytes: out.bytes, name: outName(file.name, out.ext, params), isVideo: out.blob.type.startsWith('video/'), isAudio: out.blob.type.startsWith('audio/') });
     } catch (e) {
       if (e.code !== 'cancelled') {
         reportToolError({ tool: op === 'compress' ? 'video-compressor' : 'video-converter', file, error: e instanceof Error ? e : new Error(String(e)) });
@@ -87,6 +95,7 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
   let pct = null;
   if (stage) {
     if (stage.stage === 'queued') label = stage.position > 0 ? `Waiting for a free slot — you are number ${stage.position} in line` : 'Waiting for a free slot…';
+    else if (stage.stage === 'processing' && stage.attempt > 1) label = 'Trying a stronger setting to make it smaller';
     else label = STAGE_LABEL[stage.stage] || 'Working…';
     if (typeof stage.pct === 'number') pct = Math.round(stage.pct);
   }
@@ -116,6 +125,12 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
             <button onClick={cancel} className="w-full bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl py-3 font-semibold transition">Cancel</button>
           ) : (
             <button onClick={run} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">{buttonLabel}</button>
+          )}
+          {notSmaller && (
+            <div role="status" className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-neutral-800 space-y-1">
+              <p className="font-semibold">This video is already well compressed.</p>
+              <p>Your file is {fmt(notSmaller.inputBytes)}. Compressing it again, even with a stronger setting, would only make it larger ({fmt(notSmaller.outputBytes)}), so we did not give you a bigger file. Your original is the best version. To go smaller, lower the resolution instead.</p>
+            </div>
           )}
           {result && (
             <div className="space-y-3">
