@@ -138,6 +138,15 @@ def info(path):
     return dur, e
 
 
+def decoded_seconds(path):
+    """Real duration by decoding: raw streams (ADTS .aac, .ac3, .amr) carry no duration header,
+    so `ffmpeg -i` only ESTIMATES it (measured: 9.7 s for a 6.0 s AAC)."""
+    import re
+    p = subprocess.run([FFMPEG, "-hide_banner", "-i", path, "-f", "null", "-"], capture_output=True)
+    m = re.findall(r"time=(\d+):(\d+):(\d+\.\d+)", p.stderr.decode("utf8", "replace"))
+    return int(m[-1][0]) * 3600 + int(m[-1][1]) * 60 + float(m[-1][2]) if m else None
+
+
 def download(srv, jid, tk, suffix):
     st, data, h = req(srv, "GET", f"/v1/jobs/{jid}/result", tk, raw_response=True)
     out = os.path.join(tempfile.gettempdir(), f"media-test-out-{jid}.{suffix}")
@@ -251,19 +260,56 @@ try:
     print(f"      compress took {took:.1f}s for a 30.4 s video ({os.path.getsize(SRC)/1048576:.1f} MB -> {os.path.getsize(out)/1048576:.1f} MB)")
 
     print("convert: every target on a real clip")
-    TARGETS = ["mp4", "m4v", "mov", "mkv", "flv", "ts", "3gp", "webm", "avi", "wmv", "ogv", "mpg", "gif", "mp3", "m4a", "wav", "ogg", "opus", "flac"]
+    VIDEO_T = ["mp4", "m4v", "mov", "mkv", "flv", "ts", "3gp", "3g2", "f4v", "m2ts", "mts", "h265", "av1", "webm", "avi", "xvid", "wmv", "asf", "ogv", "mpg", "mpeg", "vob"]
+    TARGETS = VIDEO_T + ["gif", "mp3", "m4a", "aac", "wav", "aiff", "ogg", "opus", "flac", "wma", "ac3", "amr"]
+    EXT = {"h265": "mp4", "av1": "mp4", "xvid": "avi"}          # target -> real file extension
+    CODEC = {"h265": "hevc", "av1": "av1", "webm": "vp9", "mp4": "h264", "mkv": "h264", "xvid": "mpeg4", "wmv": "wmv2", "vob": "mpeg2video"}
+    src_size = os.path.getsize(short)
     for tgt in TARGETS:
         jid, tk, st, j = upload(srv, short, "convert", {"target": tgt})
         st, j, _ = req(srv, "POST", f"/v1/jobs/{jid}/start", tk)
         j, secs = wait_done(srv, jid, tk)
-        ok = j["status"] == "done" and j["outputExt"] == tgt and (j["outputBytes"] or 0) > 0
+        want_ext = EXT.get(tgt, tgt)
+        ok = j["status"] == "done" and j["outputExt"] == want_ext and (j["outputBytes"] or 0) > 0
         detail = ""
         if ok:
-            st, out, h = download(srv, jid, tk, tgt)
+            st, out, h = download(srv, jid, tk, want_ext)
             dur, e = info(out)
+            if tgt in ("aac", "ac3", "amr"):
+                dur = decoded_seconds(out)
             ok = st == 200 and dur is not None and 4.5 < dur < 7.5 if tgt != "gif" else st == 200 and open(out, "rb").read(6) in (b"GIF89a", b"GIF87a")
-            detail = f"{os.path.getsize(out)/1024:.0f} KB {secs:.1f}s"
+            if ok and tgt in CODEC:
+                ok = CODEC[tgt] in e
+                if not ok:
+                    detail = "wrong codec: " + e[-160:]
+            size = os.path.getsize(out)
+            detail = detail or f"{size/1024:.0f} KB {secs:.1f}s"
+            if ok and tgt in VIDEO_T:  # the size policy: a converted video is never heavier than its source
+                # MPEG-2 (mpg/mpeg/vob) needs about twice H.264's bitrate for the same picture and its
+                # encoder cannot go below its quantiser limit on hard 1080p content: it is allowed
+                # +5 % here (measured +0.3 % to +2.2 %); every other format must not be heavier at all.
+                limit = src_size * (1.05 if tgt in ("mpg", "mpeg", "vob") else 1.0)
+                check(f"{tgt:5s} -> not heavier than the source ({size/1024:.0f} KB vs {src_size/1024:.0f} KB{', MPEG-2 tolerance +5%' if limit > src_size else ''})", size <= limit)
         check(f"{tgt:5s} -> valid, playable, right extension  ({detail or j.get('error')})", ok)
+
+    print("compress: already-optimal source is reported honestly, never returned bigger")
+    tiny = os.path.join(tempfile.gettempdir(), "media-test-tiny.mp4")
+    subprocess.run([FFMPEG, "-hide_banner", "-loglevel", "error", "-y", "-t", "6", "-i", short, "-vf", "scale=320:-2", "-c:v", "libx264", "-preset", "veryfast", "-crf", "51",
+                    "-c:a", "aac", "-b:a", "16k", tiny], check=True)
+    for level, attempts in (("strong", 1), ("balanced", 2)):
+        jid, tk, st, j = upload(srv, tiny, "compress", {"level": level})
+        st, j, _ = req(srv, "POST", f"/v1/jobs/{jid}/start", tk)
+        j, secs = wait_done(srv, jid, tk)
+        check(f"compress '{level}' on an already tiny file -> done + notSmaller, {attempts} attempt(s)", j["status"] == "done" and j["notSmaller"] is True and j["attempt"] == attempts and j["outputExt"] is None, str(j))
+        st, _, _ = req(srv, "GET", f"/v1/jobs/{jid}/result", tk, raw_response=True)
+        check(f"compress '{level}' on an already tiny file -> no file is served (410)", st == 410)
+        check("...and no output file is left on disk", not os.path.exists(os.path.join(srv.work, jid, "output.bin")))
+        req(srv, "DELETE", f"/v1/jobs/{jid}", tk)
+    jid, tk, st, j = upload(srv, short, "compress", {"level": "balanced"})
+    st, j, _ = req(srv, "POST", f"/v1/jobs/{jid}/start", tk)
+    j, secs = wait_done(srv, jid, tk)
+    check("compress on a normal 5.7 Mbit/s video -> smaller, first attempt", j["status"] == "done" and j["notSmaller"] is False and j["attempt"] == 1 and j["outputBytes"] < src_size, str(j))
+    req(srv, "DELETE", f"/v1/jobs/{jid}", tk)
 
     print("cancel")
     jid, tk, st, j = upload(srv, SRC, "convert", {"target": "webm", "quality": "high"})
