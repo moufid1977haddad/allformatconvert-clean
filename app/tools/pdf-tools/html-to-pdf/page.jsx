@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 
 export default function HtmlToPdfPage() {
@@ -19,7 +20,7 @@ export default function HtmlToPdfPage() {
     setFile(f);
     setDone(false);
     // Checked on selection: the HTML is uploaded as-is, so its size is the upload size.
-    const sizeCheck = checkOfficeSize(f);
+    const sizeCheck = checkOfficeSize(f, MAX_HTML_STAGED_BYTES);
     setError(sizeCheck.ok ? '' : sizeCheck.message);
     const text = await f.text();
     setHtmlContent(text);
@@ -28,7 +29,7 @@ export default function HtmlToPdfPage() {
   const convert = async () => {
     if (!htmlContent) return;
     const uploadBlob = new Blob([htmlContent], { type: 'text/html' });
-    const sizeCheck = checkOfficeSize(uploadBlob);
+    const sizeCheck = checkOfficeSize(uploadBlob, MAX_HTML_STAGED_BYTES);
     if (!sizeCheck.ok) { setError(sizeCheck.message); return; }
     setLoading(true);
     setDone(false);
@@ -72,8 +73,8 @@ export default function HtmlToPdfPage() {
           ) : (
             <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm font-mono h-48 resize-none" placeholder="Paste your HTML code here..." value={htmlContent} onChange={(e) => setHtmlContent(e.target.value)} />
           )}
-          <p className="text-neutral-400 text-xs text-center -mt-2">Max {officeMaxLabel()} of HTML</p>
-          <button onClick={convert} disabled={!htmlContent || loading || new Blob([htmlContent]).size > officeMaxBytes()} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          <p className="text-neutral-400 text-xs text-center -mt-2">Max {officeMaxLabel(MAX_HTML_STAGED_BYTES)} of HTML</p>
+          <button onClick={convert} disabled={!htmlContent || loading || new Blob([htmlContent]).size > officeMaxBytes(MAX_HTML_STAGED_BYTES)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? officeStageLabel(stage) : 'Convert to PDF'}
           </button>
           {error && (

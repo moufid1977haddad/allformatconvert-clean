@@ -41,6 +41,7 @@ const btn = page.locator('button:has-text("Download PDF"), button:has-text("Down
 const t0 = Date.now(); tStart = t0;
 const dl = page.waitForEvent('download', { timeout: Number(process.env.LIMIT_S || 900) * 1000 }).catch(() => null);
 const errSel = page.waitForSelector('p[role=alert]', { timeout: Number(process.env.LIMIT_S || 900) * 1000 }).catch(() => null);
+for (let i = 0; i < 60 && (await btn.isDisabled()); i++) await page.waitForTimeout(500); // large files are read before the button enables
 if (await btn.isDisabled()) {
   console.log(`  REFUSED before sending (button disabled). Page text: "${limitText}"; message: "${(await page.$$eval('p[role=alert]', (e) => e.map((x) => x.textContent).join(' | ')))}"`);
   console.log(`  chunks sent: ${chunkPuts.length}, route calls: ${routeCalls.length}`);

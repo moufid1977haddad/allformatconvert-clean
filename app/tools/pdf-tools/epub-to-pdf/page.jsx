@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 
 const escapeHtml = (str) => String(str)
@@ -221,8 +222,8 @@ export default function EpubToPdfPage() {
       const htmlBlob = new Blob([html], { type: 'text/html' });
       // What is uploaded is the prepared HTML (chapters + inlined images), which can be
       // far larger than the book file itself -- so that is what the ceiling applies to.
-      if (htmlBlob.size > officeMaxBytes()) {
-        throw new Error(`This book is ${(htmlBlob.size / (1024 * 1024)).toFixed(1)} MB once prepared for conversion (images included), but this tool accepts up to ${officeMaxLabel()}.`);
+      if (htmlBlob.size > officeMaxBytes(MAX_HTML_STAGED_BYTES)) {
+        throw new Error(`This book is ${(htmlBlob.size / (1024 * 1024)).toFixed(1)} MB once prepared for conversion (images included), but this tool accepts up to ${officeMaxLabel(MAX_HTML_STAGED_BYTES)}.`);
       }
       setStage(null);
       const result = await convertOffice({ file: new File([htmlBlob], 'book.html', { type: 'text/html' }), endpoint: '/api/convert-html-to-pdf', onStage: setStage });
@@ -257,7 +258,7 @@ export default function EpubToPdfPage() {
             <p className="text-neutral-500">{file ? file.name : 'Click or drop an EPUB file here'}</p>
             <input ref={inputRef} type="file" accept=".epub" className="hidden" onChange={handleFile} />
           </div>
-          <p className="text-neutral-400 text-xs text-center -mt-2">Max {officeMaxLabel()} of prepared content per book — image-heavy books count for more than their file size.</p>
+          <p className="text-neutral-400 text-xs text-center -mt-2">Max {officeMaxLabel(MAX_HTML_STAGED_BYTES)} of prepared content per book — image-heavy books count for more than their file size.</p>
           <button onClick={convert} disabled={!file || loading} className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading && (
               <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden="true" />

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { alertServerError } from "@/lib/quota/errorAlerts";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
-import { MAX_OFFICE_STAGED_BYTES } from "@/lib/quota/limits";
+import { MAX_HTML_STAGED_BYTES } from "@/lib/quota/limits";
 import { isStagedRequest, respondStaged, fileResponse } from "@/lib/media/stagedRoute";
 
 // Give the Gotenberg round-trip (up to GOTENBERG_TIMEOUT_MS below) enough
@@ -14,7 +14,7 @@ function gotenbergTimeoutMs(bytes: number): number {
 
 // Direct multipart requests never exceed Vercel's ~4.5 MB body ceiling; larger documents (a book-length
 // EPUB/MOBI turned into one self-contained HTML) arrive through the staged path, whose ceiling is this one.
-const MAX_FILE_SIZE_BYTES = MAX_OFFICE_STAGED_BYTES;
+const MAX_FILE_SIZE_BYTES = MAX_HTML_STAGED_BYTES;
 
 export async function POST(req: NextRequest) {
   if (isStagedRequest(req)) return respondStaged(req, "pdf", (file) => convertHtml(req, file, true));
