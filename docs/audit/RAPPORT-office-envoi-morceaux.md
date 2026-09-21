@@ -107,7 +107,7 @@ Pptx de 10 Mio (2 morceaux), vraie page : **Chromium 6,0 s ✓ · Firefox 7,0 s 
 
 ## 9. Ce qui n'est pas fait, ou reste à faire
 
-- **Préversion → production, ordre suivi :** service fusionné en premier et vérifié (`stage:true`, 401 sans billet) ; appelants prouvés sur préversion ; puis fusion. Voir §10 pour la vérification en production, **et pour le retrait de l'origine de préversion.**
+- **Mise en production faite et vérifiée (21/09) :** fusion `aed1e753`, déploiement `dpl_CZ1vLyGp` READY. Sur **www.onlineconvertools.com**, vraie page, vrai service : pptx de 10 Mio par morceaux 9,8 s ✓ ; **pptx de 99,2 Mio 53,7 s ✓ (PDF de 100 Mo)** ; docx de 49,4 Mio 34,6 s ✓ ; **xlsx de 24,7 Mio refusé avant tout envoi** avec le message honnête ✓ ; pptx de 148,6 Mio refusé avant envoi (au-dessus des 100 Mo annoncés) ✓. Origine de préversion **retirée** de `ALLOWED_ORIGINS` et **prouvée** (requête préliminaire CORS : plus d'en-tête pour l'URL de préversion, présent pour www). Retour arrière : retirer `NEXT_PUBLIC_MEDIA_SERVICE_URL` (les pages retombent sur l'ancien plafond de 4 Mio) ; le chemin direct n'a pas été modifié.
 - **`image-captioner`** : non branché (redimensionnement navigateur à faire).
 - **Excel au-delà de 15 Mo** : dépend d'`API_TIMEOUT` de Gotenberg (décision du propriétaire).
 - **Word/PowerPoint au-delà de ~150 Mo** : mémoire de la fonction ; à trancher si la concurrence à 1 Go devient un argument.
