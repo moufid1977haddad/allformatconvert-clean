@@ -31,6 +31,10 @@ async function run(label, toolPath, file, pick, ext, magic) {
   await page.setInputFiles('input[type=file]', path.join(dir, file));
   await page.waitForSelector('select:has(option[value=balanced]), select:has(option[value=mp4])');
   if (pick) await page.selectOption('select:has(option[value=mp4])', pick);
+  let lastStatus = null;
+  page.on('response', async (r) => {
+    if (r.request().method() === 'GET' && /\/v1\/jobs\/[0-9a-f]+$/.test(r.url())) { try { lastStatus = await r.json(); } catch {} }
+  });
   const t0 = Date.now();
   await page.click('button:has-text("Compress Video"), button:has-text("Convert"):not(:has-text("Video Converter"))');
   const seen = []; const firstSeen = {};
@@ -57,7 +61,8 @@ async function run(label, toolPath, file, pick, ext, magic) {
   } else if (err) console.log('  page error:', await err.innerText());
   if (!real) bad.push(label);
   const progress = seen.length;
-  console.log(`  ${real ? 'PASS' : 'FAIL'} ${label}: ${total.toFixed(1)} s total, ${name} ${(size / 1048576).toFixed(1)} MB, ${progress} distinct progress values, first seen at (s) ${JSON.stringify(firstSeen)}`);
+  const st = lastStatus ? ` [service: attempt=${lastStatus.attempt} larger=${lastStatus.larger} notSmaller=${lastStatus.notSmaller}]` : ' [service status not seen]';
+  console.log(`  ${real ? 'PASS' : 'FAIL'} ${label}: ${total.toFixed(1)} s total, ${name} ${(size / 1048576).toFixed(1)} MB, ${progress} distinct progress values, first seen at (s) ${JSON.stringify(firstSeen)}${st}`);
   rows.push({ label, total, size, progress, firstSeen });
   await page.close();
 }
