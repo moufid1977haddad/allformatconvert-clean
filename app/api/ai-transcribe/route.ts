@@ -4,13 +4,30 @@ import { guardPaidRoute } from "@/lib/quota/guard";
 import { MAX_AUDIO_UPLOAD_BYTES } from "@/lib/quota/limits";
 import { actualAiTranscribeCostMicros } from "@/lib/quota/config";
 import { alertServerError } from "@/lib/quota/errorAlerts";
+import { isStagedRequest, respondStagedInline } from "@/lib/media/stagedRoute";
 
+// Staged path (audio above the Vercel body ceiling): the browser already sent the file straight to the
+// media service; this route reads it server-to-server and runs the SAME handler (guard, size ceiling,
+// Whisper call, cost reconciliation) below. See lib/media/stagedRoute.ts.
 export async function POST(req: NextRequest) {
+  if (isStagedRequest(req)) {
+    return respondStagedInline(req, (file, body) => transcribe(req, file, typeof body?.tool === "string" ? body.tool : null));
+  }
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File;
     const tool = formData.get("tool") as string | null;
     if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    return transcribe(req, file, tool);
+  } catch (e: any) {
+    console.error("Unhandled error in /api/ai-transcribe:", e?.message || e);
+    await alertServerError("ai-transcribe", e?.message || String(e));
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
+}
+
+async function transcribe(req: NextRequest, file: File, tool: string | null): Promise<NextResponse> {
+  try {
 
     if (file.size > MAX_AUDIO_UPLOAD_BYTES) {
       const maxMb = (MAX_AUDIO_UPLOAD_BYTES / (1024 * 1024)).toFixed(0);

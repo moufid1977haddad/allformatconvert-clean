@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react';
 import { Mic, Folder } from 'lucide-react';
 import SeoContent from '../../../components/SeoContent';
-import { checkPlatformUploadSize, MAX_PLATFORM_UPLOAD_BYTES, PLATFORM_LIMIT_HINT } from '@/lib/quota/limits';
+import { transcribeAudio, checkAudioSize, audioMaxBytes, audioMaxLabel } from '../../../lib/officeUpload';
 
 export default function AudioToTextPage() {
   // Mode : 'mic' ou 'file'
@@ -66,22 +66,18 @@ export default function AudioToTextPage() {
     e.target.value = '';
     setFile(f);
     setFileTranscript('');
-    const sizeCheck = checkPlatformUploadSize(f);
+    const sizeCheck = checkAudioSize(f);
     setError(sizeCheck.ok ? '' : sizeCheck.message);
   };
 
   const transcribeFile = async () => {
     if (!file) return;
-    const sizeCheck = checkPlatformUploadSize(file);
+    const sizeCheck = checkAudioSize(file);
     if (!sizeCheck.ok) { setError(sizeCheck.message); return; }
     setLoading(true);
     setError('');
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('tool', 'audio-to-text');
-      const response = await fetch('/api/ai-transcribe', { method: 'POST', body: formData });
-      const data = await response.json();
+      const data = await transcribeAudio({ file, tool: 'audio-to-text' });
       if (data.text) setFileTranscript(data.text);
       else setError(data.error || 'Transcription failed');
     } catch (e) { setError('Error: ' + e.message); }
@@ -169,12 +165,12 @@ export default function AudioToTextPage() {
                   : <p className="text-neutral-400 text-sm">Click to upload an audio file (MP3, WAV, M4A...)</p>
                 }
               </div>
-              <p className="text-neutral-400 text-xs text-center -mt-2">Max {MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB per file — {PLATFORM_LIMIT_HINT}</p>
+              <p className="text-neutral-400 text-xs text-center -mt-2">Max {audioMaxLabel()} per file</p>
               <input ref={fileRef} type="file" accept="audio/*" className="hidden" onChange={handleFile} />
               {file && <audio controls src={URL.createObjectURL(file)} className="w-full" />}
               <button
                 onClick={transcribeFile}
-                disabled={!file || loading || file.size > MAX_PLATFORM_UPLOAD_BYTES}
+                disabled={!file || loading || file.size > audioMaxBytes()}
                 className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition"
               >
                 {loading ? 'Transcribing...' : 'Transcribe Audio'}
@@ -222,7 +218,7 @@ export default function AudioToTextPage() {
           { q: "Is my audio uploaded to a server?", a: "It depends on the mode: microphone dictation runs entirely in your browser via the Web Speech API and isn't uploaded anywhere. Uploaded audio files are sent to a server-side transcription API to generate the text." },
           { q: "Which browsers support microphone dictation?", a: "It relies on the Web Speech API, which works best in Google Chrome; other browsers may not support it." },
           { q: "What audio formats can I upload?", a: "Common formats like MP3, WAV, and M4A." },
-          { q: "How large can an uploaded audio file be?", a: `File-upload transcription accepts up to ${MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB per file — that is ${PLATFORM_LIMIT_HINT} Split a longer recording into smaller pieces and transcribe each separately if you hit the limit. Microphone dictation has no such limit since it doesn't call a paid API.` },
+          { q: "How large can an uploaded audio file be?", a: `File-upload transcription accepts up to ${audioMaxLabel()} per file — the maximum the transcription engine (OpenAI Whisper) itself accepts. Split a longer recording into smaller pieces and transcribe each separately if you hit the limit. Microphone dictation has no such limit since it doesn't call a paid API.` },
           { q: "Is Audio to Text free to use?", a: "Yes, both the microphone and file-upload modes are free to use." }
         ]}
         tips={[

@@ -4,7 +4,7 @@ import { nameNamelessFonts } from "@/lib/xlsxDefaultFont";
 import { convertDocxToPdf, ConvertApiError } from "@/lib/providers/convertApi";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES, MAX_OFFICE_STAGED_BYTES } from "@/lib/quota/limits";
-import { isStagedRequest, respondStaged } from "@/lib/media/stagedRoute";
+import { isStagedRequest, respondStaged, fileResponse } from "@/lib/media/stagedRoute";
 import { alertServerError } from "@/lib/quota/errorAlerts";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
 
@@ -106,7 +106,7 @@ function backendFor(extension: string): "convertapi" | "gotenberg" {
 export async function POST(req: NextRequest) {
   // Staged path (files above the Vercel body ceiling): the browser already sent the file straight to the
   // media service and only posts a small JSON here; see lib/media/stagedRoute.ts.
-  if (isStagedRequest(req)) return respondStaged(req, "pdf", (file) => convertFile(req, file));
+  if (isStagedRequest(req)) return respondStaged(req, "pdf", (file) => convertFile(req, file, true));
 
   let file: File;
   try {
@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
   return convertFile(req, file);
 }
 
-async function convertFile(req: NextRequest, file: File): Promise<NextResponse> {
+async function convertFile(req: NextRequest, file: File, staged = false): Promise<NextResponse> {
   const extension = getExtension(file.name);
   if (!ALLOWED_EXTENSIONS.has(extension)) {
     return NextResponse.json(
@@ -143,14 +143,14 @@ async function convertFile(req: NextRequest, file: File): Promise<NextResponse> 
 
   const backend = backendFor(extension);
   if (backend === "convertapi") {
-    return handleConvertApi(req, file);
+    return handleConvertApi(req, file, staged);
   }
-  return handleGotenberg(req, file, extension);
+  return handleGotenberg(req, file, extension, staged);
 }
 
 // .docx only, and only while CONVERTAPI_ENABLED === "true" -- see
 // docs/specs/2026-09-03-convertapi-word-to-pdf-integration.md.
-async function handleConvertApi(req: NextRequest, file: File): Promise<NextResponse> {
+async function handleConvertApi(req: NextRequest, file: File, staged: boolean): Promise<NextResponse> {
   // Validated BEFORE calling ConvertAPI, so a credit is never spent on a
   // file that would fail anyway (§5). In practice the generic
   // MAX_FILE_SIZE_BYTES check above already enforces this same 25 MB
@@ -205,13 +205,10 @@ async function handleConvertApi(req: NextRequest, file: File): Promise<NextRespo
     }
 
     const outName = file.name.replace(/\.[^.]+$/, "") + ".pdf";
-    return new NextResponse(bytes, {
-      status: 200,
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${outName.replace(/"/g, "")}"`,
-      },
-    });
+    return fileResponse(bytes, {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="${outName.replace(/"/g, "")}"`,
+    }, staged);
   } catch (err) {
     // No automatic fallback to Gotenberg on any ConvertAPI failure -- every
     // failure returns an explicit error to the user, never a silent retry
@@ -259,7 +256,7 @@ async function handleConvertApi(req: NextRequest, file: File): Promise<NextRespo
 
 // Every extension except .docx (plus .docx itself when CONVERTAPI_ENABLED
 // is not "true") -- unchanged from before this spec's implementation.
-async function handleGotenberg(req: NextRequest, file: File, extension: string): Promise<NextResponse> {
+async function handleGotenberg(req: NextRequest, file: File, extension: string, staged: boolean): Promise<NextResponse> {
   const gotenbergUrl = process.env.GOTENBERG_URL;
   const gotenbergUsername = process.env.GOTENBERG_USERNAME;
   const gotenbergPassword = process.env.GOTENBERG_PASSWORD;
@@ -379,5 +376,5 @@ async function handleGotenberg(req: NextRequest, file: File, extension: string):
   if (detectedFonts.length > 0) {
     headers["X-Detected-Symbol-Fonts"] = detectedFonts.join(",");
   }
-  return new NextResponse(pdfBuffer, { status: 200, headers });
+  return fileResponse(pdfBuffer, headers, staged);
 }

@@ -1,7 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { checkPlatformUploadSize, MAX_PLATFORM_UPLOAD_BYTES, PLATFORM_LIMIT_HINT } from '@/lib/quota/limits';
+import { transcribeAudio, checkAudioSize, audioMaxLabel } from '../../../lib/officeUpload';
 
 export default function AudioTranscriberPage() {
   const [output, setOutput] = useState('');
@@ -19,16 +19,9 @@ export default function AudioTranscriberPage() {
     setOutput('');
     setError('');
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('tool', 'audio-transcriber');
-      const sizeCheck = checkPlatformUploadSize(file);
+      const sizeCheck = checkAudioSize(file);
       if (!sizeCheck.ok) { setLoading(false); setError(sizeCheck.message); return; }
-      const response = await fetch('/api/ai-transcribe', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await response.json();
+      const data = await transcribeAudio({ file, tool: 'audio-transcriber' });
       if (data.text) setOutput(data.text);
       else setError(data.error || 'No response received');
     } catch(e) { setError('Error: ' + e.message); }
@@ -44,7 +37,7 @@ export default function AudioTranscriberPage() {
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
             {fileName ? <p className="text-neutral-700 text-sm font-medium">{fileName}</p> : <p className="text-neutral-400 text-sm">Click to upload an audio file (mp3, wav, m4a...)</p>}
           </div>
-          <p className="text-neutral-400 text-xs text-center -mt-2">Max {MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB per file — {PLATFORM_LIMIT_HINT}</p>
+          <p className="text-neutral-400 text-xs text-center -mt-2">Max {audioMaxLabel()} per file</p>
           <input ref={fileRef} type="file" accept="audio/*" className="hidden" onChange={handleFile} />
           {loading && <p className="text-center text-indigo-500 text-sm">Transcribing...</p>}
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
@@ -69,7 +62,7 @@ export default function AudioTranscriberPage() {
         faqs={[
           { q: "Is Audio Transcriber really free to use?", a: "Yes, Audio Transcriber is free to use with no signup or subscription required." },
           { q: "What audio formats does Audio Transcriber support?", a: "It accepts common audio formats such as MP3, WAV, and M4A, and most other formats your browser can select as an audio file." },
-          { q: "How large can my audio file be?", a: `Uploads are limited to ${MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB — ${PLATFORM_LIMIT_HINT} For longer recordings, split the audio into smaller segments and transcribe each one separately.` },
+          { q: "How large can my audio file be?", a: `Uploads are limited to ${audioMaxLabel()} — the maximum the transcription engine (OpenAI Whisper) itself accepts. For longer recordings, split the audio into smaller segments and transcribe each one separately.` },
           { q: "Is my audio data private?", a: "Your audio file is sent directly to the transcription API to generate the transcript. It is not stored on our servers." }
         ]}
         tips={[

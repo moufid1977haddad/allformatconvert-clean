@@ -9,6 +9,18 @@ export function isStagedRequest(req: NextRequest): boolean {
   return (req.headers.get("content-type") || "").toLowerCase().startsWith("application/json");
 }
 
+/**
+ * The converted file as the route's answer. Direct requests get the file itself; staged requests get an
+ * empty 200 that only CARRIES the bytes (`rawBody`) to respondStaged, so a result of hundreds of MB is not
+ * copied again into a Response body (the function's memory is the ceiling of the staged path).
+ */
+export function fileResponse(bytes: Uint8Array | ArrayBuffer, headers: Record<string, string>, staged: boolean): NextResponse {
+  if (!staged) return new NextResponse(bytes as BodyInit, { status: 200, headers });
+  const r = new NextResponse(null, { status: 200, headers });
+  (r as any).rawBody = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  return r;
+}
+
 export async function respondStaged(
   req: NextRequest,
   outExt: "pdf" | "docx",
@@ -44,7 +56,7 @@ export async function respondStaged(
     return res;
   }
 
-  const bytes = new Uint8Array(await res.arrayBuffer());
+  const bytes: Uint8Array = (res as any).rawBody ?? new Uint8Array(await res.arrayBuffer());
   const dep: any = await depositOutput(h, bytes, outExt);
   if (!dep.ok) {
     await discard(h);
@@ -85,4 +97,56 @@ export async function respondStagedInline(
   } finally {
     await discard(h);
   }
+}
+
+/**
+ * Staged INPUT for the tools whose service answers JSON with the result as base64 in `file` (PDF repair,
+ * PDF/A). The base64 (+33 %) would hit the ~4.5 MB Vercel RESPONSE ceiling, so the route decodes it,
+ * deposits the PDF on the media service and answers the same JSON WITHOUT `file`, plus `staged` and
+ * `outputBytes`; the browser downloads the PDF from the service.
+ */
+export async function respondStagedPdfJson(
+  req: NextRequest,
+  produce: (file: File, body: any) => Promise<NextResponse>,
+): Promise<NextResponse> {
+  const errorShape = (message: string) => ({ ok: false, error: message });
+  let body: any = null;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json(errorShape("Invalid request."), { status: 400 });
+  }
+  const h: any = openStaged(body);
+  if (!h.ok) return NextResponse.json(errorShape(h.error), { status: h.status });
+  const src: any = await readSource(h);
+  if (!src.ok) {
+    await discard(h);
+    return NextResponse.json(errorShape(src.error), { status: src.status });
+  }
+  let res: NextResponse;
+  try {
+    res = await produce(new File([src.blob], h.filename || "document.pdf"), body);
+  } catch (err) {
+    await discard(h);
+    throw err;
+  }
+  let data: any = null;
+  try {
+    data = JSON.parse(await res.text());
+  } catch {
+    data = null;
+  }
+  if (!data || !data.ok || typeof data.file !== "string") {
+    // A refusal or a report without a file (e.g. "could not be repaired"): returned as the legacy path would.
+    await discard(h);
+    return NextResponse.json(data ?? errorShape("The service returned an unexpected response."), { status: res.status });
+  }
+  const bytes = new Uint8Array(Buffer.from(data.file, "base64"));
+  delete data.file;
+  const dep: any = await depositOutput(h, bytes, "pdf");
+  if (!dep.ok) {
+    await discard(h);
+    return NextResponse.json(errorShape(dep.error), { status: dep.status });
+  }
+  return NextResponse.json({ ...data, staged: true, jid: h.jid, outputBytes: dep.outputBytes }, { headers: { "Cache-Control": "no-store" } });
 }

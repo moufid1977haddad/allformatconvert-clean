@@ -1,13 +1,12 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { checkPlatformUploadSize, MAX_PLATFORM_UPLOAD_BYTES, PLATFORM_LIMIT_HINT } from '@/lib/quota/limits';
+import { runStagedToolResult } from '../../../lib/mediaJob';
+import { checkPdfToolsSize, pdfToolsMaxLabel, shouldStage } from '../../../lib/officeUpload';
 import ProgressBar from '../../../components/ProgressBar';
 
 // Real ceiling (hosting-platform payload gate), not the 50 MB the route itself would
 // accept -- see lib/quota/limits.js.
-const MAX_FILE_SIZE_BYTES = MAX_PLATFORM_UPLOAD_BYTES;
-const MAX_FILE_SIZE_LABEL = `${MAX_PLATFORM_UPLOAD_BYTES / (1024 * 1024)} MB`;
 const CONFORMANCE_LEVELS = ['1b', '2b', '3b'];
 
 export default function PdfToPdfaPage() {
@@ -20,13 +19,14 @@ export default function PdfToPdfaPage() {
   const [downloadUrl, setDownloadUrl] = useState(null);
   const inputRef = useRef();
   const xhrRef = useRef(null);
+  const abortRef = useRef(null);
 
   const handleFile = (e) => {
     const f = e.target.files[0];
     e.target.value = '';
     if (!f) return;
     setError(''); setResult(null); setDownloadUrl(null);
-    const sizeCheck = checkPlatformUploadSize(f);
+    const sizeCheck = checkPdfToolsSize(f);
     if (!sizeCheck.ok) {
       setError(sizeCheck.message);
       setFile(null);
@@ -37,12 +37,30 @@ export default function PdfToPdfaPage() {
 
   const cancel = () => {
     if (xhrRef.current) xhrRef.current.abort();
+    if (abortRef.current) abortRef.current.abort();
     setLoading(false); setProgress(0);
   };
 
   const convert = () => {
     if (!file) return;
     setLoading(true); setError(''); setResult(null); setDownloadUrl(null); setProgress(0);
+
+
+    if (shouldStage(file)) {
+      // Large-file path: chunked upload straight to the media service, the route reads it server-to-server
+      // and the result is downloaded from the service (see app/lib/mediaJob.js).
+      const ac = new AbortController();
+      abortRef.current = ac;
+      runStagedToolResult({ file, endpoint: '/api/pdf-to-pdfa', fields: { conformance }, signal: ac.signal, onStage: (s) => { if (s.stage === 'upload') setProgress(Math.round(s.pct || 0)); } })
+        .then(({ json: data, blob }) => {
+          if (!data.ok) { setError(data.error || 'This file could not be processed.'); setResult(data.verapdf ? data : null); return; }
+          setResult(data);
+          if (blob) setDownloadUrl(URL.createObjectURL(blob));
+        })
+        .catch((e) => { if (e.code !== 'cancelled') setError(e.message || 'Something went wrong. Please try again.'); })
+        .finally(() => { abortRef.current = null; setLoading(false); });
+      return;
+    }
 
     const formData = new FormData();
     formData.append('file', file);
@@ -89,7 +107,7 @@ export default function PdfToPdfaPage() {
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">PDF to PDF/A</h1>
         <p className="text-neutral-500 text-center mb-2">Convert to PDF/A for long-term archiving, verified compliant by veraPDF</p>
         <p className="text-neutral-400 dark:text-neutral-500 text-xs text-center mb-8">
-          Files up to {MAX_FILE_SIZE_LABEL} — {PLATFORM_LIMIT_HINT} Your file is uploaded to our conversion service for processing — see below for what that means.
+          Files up to {pdfToolsMaxLabel()} Your file is uploaded to our conversion service for processing — see below for what that means.
         </p>
 
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
@@ -151,7 +169,7 @@ export default function PdfToPdfaPage() {
         title="PDF to PDF/A"
         description="PDF to PDF/A converts your document into the ISO-standardized PDF/A archival format using Ghostscript, then validates the result with veraPDF — the industry-reference validator built for the PDF Association's own conformance testing. This is the core guarantee: you only get a file back if it's verified compliant. If Ghostscript's conversion doesn't pass validation, you get an explicit error naming which PDF/A rule failed and how many times, not a file that merely claims to be PDF/A. Unlike almost every other tool on this site, this one really does send your file to a server: it's uploaded securely over HTTPS to our conversion service, and deleted immediately after processing — never stored, logged, or kept around."
         howTo={[
-          `Click the upload area and select a PDF file, up to ${MAX_FILE_SIZE_LABEL}.`,
+          `Click the upload area and select a PDF file, up to ${pdfToolsMaxLabel()}.`,
           "Choose a PDF/A conformance level (1b, 2b, or 3b — 2b is the most commonly required for archiving).",
           "Click 'Convert'. Your file uploads with a real progress bar; a working Cancel button is available the whole time.",
           "If the result passes veraPDF validation, download it. If not, you'll see exactly which rule failed instead of a silently non-compliant file."

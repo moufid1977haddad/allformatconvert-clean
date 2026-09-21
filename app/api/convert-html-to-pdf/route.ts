@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { alertServerError } from "@/lib/quota/errorAlerts";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
 import { MAX_OFFICE_STAGED_BYTES } from "@/lib/quota/limits";
-import { isStagedRequest, respondStaged } from "@/lib/media/stagedRoute";
+import { isStagedRequest, respondStaged, fileResponse } from "@/lib/media/stagedRoute";
 
 // Give the Gotenberg round-trip (up to GOTENBERG_TIMEOUT_MS below) enough
 // headroom inside the function's own execution budget.
@@ -17,7 +17,7 @@ function gotenbergTimeoutMs(bytes: number): number {
 const MAX_FILE_SIZE_BYTES = MAX_OFFICE_STAGED_BYTES;
 
 export async function POST(req: NextRequest) {
-  if (isStagedRequest(req)) return respondStaged(req, "pdf", (file) => convertHtml(req, file));
+  if (isStagedRequest(req)) return respondStaged(req, "pdf", (file) => convertHtml(req, file, true));
 
   let file: File;
   try {
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
   return convertHtml(req, file);
 }
 
-async function convertHtml(req: NextRequest, file: File): Promise<NextResponse> {
+async function convertHtml(req: NextRequest, file: File, staged = false): Promise<NextResponse> {
   const gotenbergUrl = process.env.GOTENBERG_URL;
   const gotenbergUsername = process.env.GOTENBERG_USERNAME;
   const gotenbergPassword = process.env.GOTENBERG_PASSWORD;
@@ -125,11 +125,8 @@ async function convertHtml(req: NextRequest, file: File): Promise<NextResponse> 
     return NextResponse.json({ error: "Conversion service returned an unexpected response." }, { status: 502 });
   }
 
-  return new NextResponse(pdfBuffer, {
-    status: 200,
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="document.pdf"`,
-    },
-  });
+  return fileResponse(pdfBuffer, {
+    "Content-Type": "application/pdf",
+    "Content-Disposition": `attachment; filename="document.pdf"`,
+  }, staged);
 }

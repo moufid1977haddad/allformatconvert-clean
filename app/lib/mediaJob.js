@@ -259,3 +259,22 @@ export async function runStagedJson({ file, endpoint, fields, onStage, signal })
   const { res, json } = await stagedCall({ file, endpoint, fields, onStage, signal });
   return { status: res.status, json };
 }
+
+/**
+ * Staged call for tools whose route answers a JSON report and, when it produced a file, deposits it on the
+ * service (`outputBytes`): downloads that file. Resolves with {json, blob|null}.
+ */
+export async function runStagedToolResult({ file, endpoint, fields, onStage, signal }) {
+  const { json, jid, ticket, cleanup } = await stagedCall({ file, endpoint, fields, onStage, signal });
+  try {
+    if (json.ok && json.outputBytes) {
+      const dl = await downloadResult({ jid, ticket, expected: json.outputBytes, onStage, signal });
+      return { json, blob: dl.blob };
+    }
+    cleanup();
+    return { json, blob: null };
+  } catch (e) {
+    if (e instanceof MediaJobError && e.code !== 'expired') cleanup();
+    throw e;
+  }
+}

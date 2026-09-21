@@ -5,9 +5,9 @@
 //
 // When the media service is not configured (NEXT_PUBLIC_MEDIA_SERVICE_URL absent) the tools keep exactly
 // their previous ceiling and message: officeMaxBytes() falls back to the platform limit.
-import { runStagedConversion, mediaServiceConfigured, MediaJobError } from './mediaJob';
+import { runStagedConversion, runStagedJson, mediaServiceConfigured, MediaJobError } from './mediaJob';
 import {
-  MAX_PLATFORM_UPLOAD_BYTES, MAX_OFFICE_STAGED_BYTES, OFFICE_STAGED_THRESHOLD_BYTES, PLATFORM_LIMIT_HINT,
+  MAX_PLATFORM_UPLOAD_BYTES, MAX_OFFICE_STAGED_BYTES, MAX_AUDIO_STAGED_BYTES, MAX_PDFTOOLS_STAGED_BYTES, OFFICE_STAGED_THRESHOLD_BYTES, PLATFORM_LIMIT_HINT,
 } from '@/lib/quota/limits';
 
 const MIB = 1024 * 1024;
@@ -70,4 +70,43 @@ export async function convertOffice({ file, endpoint, fields, onStage, signal })
   }
   const header = res.headers.get('X-Detected-Symbol-Fonts');
   return { blob: await res.blob(), detectedFonts: header ? header.split(',') : [] };
+}
+
+// ---- audio transcription (route answers with JSON, nothing to download) ---------------------------------
+/** Ceiling for a transcription upload: OpenAI's own limit once staging is available, else the platform one. */
+export const audioMaxBytes = () => (mediaServiceConfigured() ? MAX_AUDIO_STAGED_BYTES : MAX_PLATFORM_UPLOAD_BYTES);
+export const audioMaxLabel = () => `${Math.round(audioMaxBytes() / MIB)} MB`;
+
+export function checkAudioSize(file) {
+  const max = audioMaxBytes();
+  if (!file || file.size <= max) return { ok: true };
+  const fileMb = (file.size / MIB).toFixed(1);
+  const tail = mediaServiceConfigured() ? 'Split a longer recording into smaller pieces.' : PLATFORM_LIMIT_HINT;
+  return { ok: false, message: `This file is ${fileMb} MB but this tool accepts audio up to ${Math.round(max / MIB)} MB — ${tail}` };
+}
+
+/** @returns {Promise<{text?: string, error?: string}>} the route's JSON, whichever path carried the file */
+export async function transcribeAudio({ file, tool, onStage, signal }) {
+  const stage = onStage || (() => {});
+  if (mediaServiceConfigured() && file.size > OFFICE_STAGED_THRESHOLD_BYTES) {
+    const r = await runStagedJson({ file, endpoint: '/api/ai-transcribe', fields: { tool }, onStage: stage, signal });
+    return r.json;
+  }
+  const formData = new FormData();
+  formData.append('file', file, file.name);
+  formData.append('tool', tool);
+  const res = await fetch('/api/ai-transcribe', { method: 'POST', body: formData, signal });
+  return res.json();
+}
+
+// ---- PDF Repair / PDF to PDF/A --------------------------------------------------------------------------
+export const pdfToolsMaxBytes = () => (mediaServiceConfigured() ? MAX_PDFTOOLS_STAGED_BYTES : MAX_PLATFORM_UPLOAD_BYTES);
+export const pdfToolsMaxLabel = () => `${Math.round(pdfToolsMaxBytes() / MIB)} MB`;
+export const shouldStage = (file) => mediaServiceConfigured() && !!file && file.size > OFFICE_STAGED_THRESHOLD_BYTES;
+
+export function checkPdfToolsSize(file) {
+  const max = pdfToolsMaxBytes();
+  if (!file || file.size <= max) return { ok: true };
+  const tail = mediaServiceConfigured() ? 'Larger files are not supported.' : PLATFORM_LIMIT_HINT;
+  return { ok: false, message: `This file is ${(file.size / MIB).toFixed(1)} MB but this tool accepts files up to ${Math.round(max / MIB)} MB — ${tail}` };
 }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { convertPdfToDocx, ConvertApiError } from "@/lib/providers/convertApi";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES } from "@/lib/quota/limits";
-import { isStagedRequest, respondStaged } from "@/lib/media/stagedRoute";
+import { isStagedRequest, respondStaged, fileResponse } from "@/lib/media/stagedRoute";
 import { alertServerError } from "@/lib/quota/errorAlerts";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
 
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Staged path (files above the Vercel body ceiling) -- see lib/media/stagedRoute.ts.
-  if (isStagedRequest(req)) return respondStaged(req, "docx", (file) => convertPdf(req, file));
+  if (isStagedRequest(req)) return respondStaged(req, "docx", (file) => convertPdf(req, file, true));
 
   let file: File;
   try {
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
   return convertPdf(req, file);
 }
 
-async function convertPdf(req: NextRequest, file: File): Promise<NextResponse> {
+async function convertPdf(req: NextRequest, file: File, staged = false): Promise<NextResponse> {
   const extension = getExtension(file.name);
   if (extension !== "pdf") {
     return NextResponse.json({ error: "Unsupported file type. Please upload a .pdf file." }, { status: 400 });
@@ -166,13 +166,10 @@ async function convertPdf(req: NextRequest, file: File): Promise<NextResponse> {
     }
 
     const outName = file.name.replace(/\.[^.]+$/, "") + ".docx";
-    return new NextResponse(bytes, {
-      status: 200,
-      headers: {
-        "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "Content-Disposition": `attachment; filename="${outName.replace(/"/g, "")}"`,
-      },
-    });
+    return fileResponse(bytes, {
+      "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "Content-Disposition": `attachment; filename="${outName.replace(/"/g, "")}"`,
+    }, staged);
   } catch (err) {
     // No automatic fallback to a different provider on any ConvertAPI
     // failure -- every failure returns an explicit error to the user,
