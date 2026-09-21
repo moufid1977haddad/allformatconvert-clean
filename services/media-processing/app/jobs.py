@@ -47,6 +47,7 @@ class Job:
         self.out_size = None
         self.attempt = 1          # compress: a stronger level is tried once when the result is not smaller
         self.not_smaller = False  # compress: even the strongest attempt was not smaller than the source
+        self.larger = False       # convert: even the strongest step is larger than the source (delivered, flagged)
         self.created = time.time()
         self.touched = time.time()
         self.cancel = threading.Event()
@@ -256,18 +257,23 @@ def _process(job: Job):
     job.status = "processing"
     job.progress = 0.0
     try:
-        # A compression is only worth delivering if it is SMALLER than the source. When
-        # a result is not, the next stronger level is tried once; if that one is not
-        # smaller either, the service says so instead of handing back a bigger file.
-        attempts = [job.params]
+        # SIZE LADDER. A compression is only worth delivering if it is SMALLER than the source; a
+        # conversion should not be LARGER than it. Otherwise the encode is repeated once or twice
+        # with a stronger setting (compress: the next level; convert: CRF +6, then +12). If the last
+        # attempt is still not acceptable the service says so instead of hiding it: a compression
+        # returns no file (notSmaller); a conversion is delivered and flagged (larger).
         if job.op == "compress":
             level = job.params.get("level", "balanced")
             i = ffmpeg_ops.COMPRESS_LEVELS.index(level)
-            attempts = [job.params] + [dict(job.params, level=nxt) for nxt in ffmpeg_ops.COMPRESS_LEVELS[i + 1:i + 2]]
-        for n, params in enumerate(attempts, start=1):
+            attempts = [(dict(job.params, level=lv), 0) for lv in ffmpeg_ops.COMPRESS_LEVELS[i:i + 2]]
+        elif job.params.get("target") in ffmpeg_ops.LADDER_TARGETS:
+            attempts = [(job.params, off) for off in ffmpeg_ops.CRF_LADDER]
+        else:
+            attempts = [(job.params, 0)]
+        for n, (params, offset) in enumerate(attempts, start=1):
             job.attempt = n
             job.progress = 0.0
-            args, ext, mime = ffmpeg_ops.build_command(job.op, params, job._info, inp, out, job.size)
+            args, ext, mime = ffmpeg_ops.build_command(job.op, params, job._info, inp, out, job.size, offset)
             code, cancelled, timed_out = ffmpeg_ops.run(
                 args, job._info.duration, lambda p: setattr(job, "progress", p), job.cancel.is_set, config.FFMPEG_TIMEOUT_SECONDS
             )
@@ -282,11 +288,15 @@ def _process(job: Job):
                 _fail(job, "conversion_failed", "This file could not be converted. It may use a codec that cannot be read.")
                 break
             size = os.path.getsize(out)
-            if job.op == "compress" and size >= job.size * NOT_SMALLER_RATIO:
-                if n < len(attempts):
-                    os.remove(out)
-                    continue  # try the next, stronger level
-                job.not_smaller = True
+            too_big = size >= job.size * NOT_SMALLER_RATIO if job.op == "compress" else size > job.size
+            if too_big and n < len(attempts):
+                os.remove(out)
+                continue  # try the next, stronger step
+            if too_big:
+                if job.op == "compress":
+                    job.not_smaller = True
+                elif job.params.get("target") in ffmpeg_ops.LADDER_TARGETS:
+                    job.larger = True
             job.out_ext, job.out_mime, job.out_size = ext, mime, size
             job.progress = 100.0
             job.status = "done"

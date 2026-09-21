@@ -95,7 +95,7 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
   let pct = null;
   if (stage) {
     if (stage.stage === 'queued') label = stage.position > 0 ? `Waiting for a free slot — you are number ${stage.position} in line` : 'Waiting for a free slot…';
-    else if (stage.stage === 'processing' && stage.attempt > 1) label = 'Trying a stronger setting to make it smaller';
+    else if (stage.stage === 'processing' && stage.attempt > 1) label = op === 'compress' ? 'Trying a stronger setting to make it smaller' : 'Adjusting the quality so the file is not larger than the original';
     else label = STAGE_LABEL[stage.stage] || 'Working…';
     if (typeof stage.pct === 'number') pct = Math.round(stage.pct);
   }

@@ -24,17 +24,21 @@ COMPRESS_CRF = {"light": 26, "balanced": 28, "strong": 32}
 COMPRESS_LEVELS = ("light", "balanced", "strong")
 
 # --- size policy (measured 2026-09-20, docs/audit/RAPPORT-video-qualite.md) -----------
-# A converted/compressed video must never come out heavier than its source. Every
-# lossy video encoder therefore gets a bitrate CEILING derived from the source's own
-# total bitrate: quality level -> share of that bitrate the video stream may use.
-# CRF still decides the quality on easy content (the file is then far below the
-# ceiling); the ceiling only binds on hard content (foliage, noise, shaky footage).
+# A converted/compressed video must not come out heavier than its source. A bitrate
+# ceiling (VBV / maxrate) was tried first and REJECTED by measurement: it starves the
+# complex opening seconds of a video (5 % of frames under VMAF 60, minimum VMAF 15 on a
+# 3-minute clip, versus none without it). The policy is a re-encode LADDER instead:
+# encode at the requested quality; if the result is larger than the source, encode again
+# at a higher CRF (+6, then +12); if it is STILL larger, deliver it and say so.
+CRF_LADDER = (0, 6, 12)
+# Targets whose encoder has a CRF: only these take part in the ladder.
+LADDER_TARGETS = {"mp4", "m4v", "mov", "mkv", "flv", "ts", "3gp", "3g2", "f4v", "m2ts", "mts", "h265", "av1", "webm"}
+# The bitrate-driven legacy encoders (mpeg4, xvid, mpeg2, theora, wmv2) have no CRF: they get a
+# bitrate derived from the source instead (they do not show the starvation problem).
 CAP_FRACTION = {"high": 1.0, "medium": 0.7, "low": 0.4}
-COMPRESS_CAP_FRACTION = {"light": 0.85, "balanced": 0.7, "strong": 0.45}
 MIN_VIDEO_KBPS = 150
-# Old encoders (mpeg4, xvid, mpeg2) overshoot their target bitrate and their containers add
-# multiplexing overhead (measured on 6 s of 5.7 Mbit/s: +2 % to +8 % over the ceiling), so
-# they aim 15 % under it.
+# Old encoders overshoot their target bitrate and their containers add multiplexing overhead
+# (measured on 6 s of 5.7 Mbit/s: +2 % to +8 % over the target), so they aim 15 % under it.
 LEGACY_HEADROOM = 0.85
 
 # --- effort policy ---------------------------------------------------------------------
@@ -43,15 +47,16 @@ LEGACY_HEADROOM = 0.85
 # better at equal size, measured), beyond it in real-time mode (about 6x faster). These
 # are tunable constants, not a hidden fallback: both modes produce a valid file, the
 # choice only trades time for size.
-GOOD_MAX_WORK = 30.0
+GOOD_MAX_WORK = 60.0
 AV1_PRESET_SHORT, AV1_PRESET_LONG, AV1_SHORT_MAX_WORK = 8, 9, 60.0
 
 
 class Ctx:
     """What a target builder may know about the source."""
 
-    def __init__(self, info, input_bytes):
+    def __init__(self, info, input_bytes, crf_offset=0):
         self.info = info
+        self.crf_offset = crf_offset  # ladder step: added to the CRF of every CRF-based encoder
         self.work = info.duration * (max(info.width, 1) * max(info.height, 1)) / (1920 * 1080) if info.has_video else 0.0
         total = info.total_kbps
         if not total and info.duration > 0 and input_bytes:
@@ -72,8 +77,7 @@ def _rate(cap):
 # target -> (extension, mime, kind, ffmpeg output args builder(quality, ctx))
 def _h264(fmt=None, audio="aac"):
     def build(q, ctx):
-        a = ["-c:v", "libx264", "-preset", "veryfast", "-crf", str(CRF[q]), "-pix_fmt", "yuv420p"]
-        a += _rate(ctx.cap(CAP_FRACTION[q], AUDIO_KBPS[q]))
+        a = ["-c:v", "libx264", "-preset", "veryfast", "-crf", str(CRF[q] + ctx.crf_offset), "-pix_fmt", "yuv420p"]
         a += ["-c:a", audio, "-b:a", f"{AUDIO_KBPS[q]}k"]
         if fmt in ("mp4", "mov", "3gp", "3g2"):
             a += ["-movflags", "+faststart"]
@@ -86,11 +90,10 @@ def _h264(fmt=None, audio="aac"):
 
 
 def _vp9(q, ctx):
-    crf = {"high": 28, "medium": 33, "low": 38}[q]
-    cap = ctx.cap(CAP_FRACTION[q], AUDIO_KBPS[q])
-    # -crf together with -b:v = constrained quality: the bitrate is a ceiling, not a target.
-    a = ["-c:v", "libvpx-vp9", "-crf", str(crf), "-b:v", f"{cap}k" if cap else "0", "-row-mt", "1", "-tile-columns", "2", "-pix_fmt", "yuv420p"]
-    if ctx.work <= GOOD_MAX_WORK:
+    crf = {"high": 28, "medium": 33, "low": 38}[q] + ctx.crf_offset
+    a = ["-c:v", "libvpx-vp9", "-crf", str(crf), "-b:v", "0", "-row-mt", "1", "-tile-columns", "2", "-pix_fmt", "yuv420p"]
+    # Slow mode only for the first attempt: the size-ladder retries (crf_offset > 0) run in the fast mode.
+    if ctx.work <= GOOD_MAX_WORK and ctx.crf_offset == 0:
         a += ["-deadline", "good", "-cpu-used", "5", "-auto-alt-ref", "0", "-lag-in-frames", "0"]
     else:
         a += ["-deadline", "realtime", "-cpu-used", "6"]
@@ -98,22 +101,17 @@ def _vp9(q, ctx):
 
 
 def _hevc(q, ctx):
-    crf = {"high": 24, "medium": 28, "low": 33}[q]
-    cap = ctx.cap(CAP_FRACTION[q], AUDIO_KBPS[q])
-    params = "log-level=error" + (f":vbv-maxrate={cap}:vbv-bufsize={2 * cap}" if cap else "")
+    crf = {"high": 24, "medium": 28, "low": 33}[q] + ctx.crf_offset
     # hvc1 tag: required for QuickTime / Safari / iPhone to play HEVC in MP4.
-    return ["-c:v", "libx265", "-preset", "veryfast", "-crf", str(crf), "-pix_fmt", "yuv420p", "-tag:v", "hvc1", "-x265-params", params,
+    return ["-c:v", "libx265", "-preset", "veryfast", "-crf", str(crf), "-pix_fmt", "yuv420p", "-tag:v", "hvc1", "-x265-params", "log-level=error",
             "-c:a", "aac", "-b:a", f"{AUDIO_KBPS[q]}k", "-movflags", "+faststart", "-f", "mp4"]
 
 
 def _av1(q, ctx):
-    crf = {"high": 30, "medium": 36, "low": 42}[q]
-    cap = ctx.cap(CAP_FRACTION[q], AUDIO_KBPS[q])
+    crf = {"high": 30, "medium": 36, "low": 42}[q] + ctx.crf_offset
     preset = AV1_PRESET_SHORT if ctx.work <= AV1_SHORT_MAX_WORK else AV1_PRESET_LONG
-    a = ["-c:v", "libsvtav1", "-preset", str(preset), "-crf", str(crf), "-pix_fmt", "yuv420p"]
-    if cap:
-        a += ["-svtav1-params", f"mbr={cap}"]
-    return a + ["-c:a", "aac", "-b:a", f"{AUDIO_KBPS[q]}k", "-movflags", "+faststart", "-f", "mp4"]
+    return ["-c:v", "libsvtav1", "-preset", str(preset), "-crf", str(crf), "-pix_fmt", "yuv420p",
+            "-c:a", "aac", "-b:a", f"{AUDIO_KBPS[q]}k", "-movflags", "+faststart", "-f", "mp4"]
 
 
 _MP3 = ("libmp3lame", lambda q: ["-q:a", str({"high": 2, "medium": 4, "low": 6}[q])])
@@ -236,7 +234,7 @@ def probe(path: str):
     return ProbeResult(duration, bool(v), has_audio, int(v.group(2)) if v else 0, int(v.group(3)) if v else 0, int(br.group(1)) if br else 0)
 
 
-def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_path: str, input_bytes: int = 0):
+def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_path: str, input_bytes: int = 0, crf_offset: int = 0):
     """Returns (ffmpeg argv, extension, mime). Raises ValueError with a user-safe message."""
     quality = params.get("quality", "medium")
     if quality not in CRF:
@@ -247,7 +245,7 @@ def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_pa
 
     base = [config.FFMPEG_PATH, "-hide_banner", "-loglevel", "error", "-nostdin", "-y",
             "-protocol_whitelist", "file", "-i", in_path, "-map_metadata", "-1"]
-    ctx = Ctx(info, input_bytes)
+    ctx = Ctx(info, input_bytes, crf_offset)
 
     if op == "compress":
         if not info.has_video:
@@ -258,9 +256,8 @@ def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_pa
         vf = []
         if max_h:
             vf = ["-vf", f"scale=-2:'min({max_h},ih)'"]
-        rate = _rate(ctx.cap(COMPRESS_CAP_FRACTION[level], 96))
         args = base + ["-map", "0:v:0", "-map", "0:a:0?"] + vf + [
-            "-c:v", "libx264", "-preset", "veryfast", "-crf", str(COMPRESS_CRF[level]), "-pix_fmt", "yuv420p", *rate,
+            "-c:v", "libx264", "-preset", "veryfast", "-crf", str(COMPRESS_CRF[level]), "-pix_fmt", "yuv420p",
             "-c:a", "aac", "-b:a", "96k", "-movflags", "+faststart", "-f", "mp4", out_path]
         return args, "mp4", "video/mp4"
 
