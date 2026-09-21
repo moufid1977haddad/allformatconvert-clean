@@ -3,24 +3,26 @@ import { detectProprietarySymbolFonts } from "@/lib/officeSymbolFonts";
 import { nameNamelessFonts } from "@/lib/xlsxDefaultFont";
 import { convertDocxToPdf, ConvertApiError } from "@/lib/providers/convertApi";
 import { guardPaidRoute } from "@/lib/quota/guard";
-import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES } from "@/lib/quota/limits";
+import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES, MAX_OFFICE_STAGED_BYTES, MAX_SPREADSHEET_STAGED_BYTES } from "@/lib/quota/limits";
+import { isStagedRequest, respondStaged, fileResponse } from "@/lib/media/stagedRoute";
 import { alertServerError } from "@/lib/quota/errorAlerts";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
 
 // Give the Gotenberg/ConvertAPI round-trip (up to GOTENBERG_TIMEOUT_MS
 // below) enough headroom inside the function's own execution budget.
-export const maxDuration = 60;
+export const maxDuration = 300;
 
-const GOTENBERG_TIMEOUT_MS = 30_000;
+// Grows with the file: LibreOffice needs longer for a big workbook or deck. Stays under maxDuration.
+function gotenbergTimeoutMs(bytes: number): number {
+  return Math.min(240_000, 30_000 + Math.ceil(bytes / (1024 * 1024)) * 3_000);
+}
 
-// Vercel refuses request bodies above ~4.5 MB BEFORE this code runs (measured in
-// production on 2026-09-20: 4,493,821 bytes accepted, 4,493,924 refused with
-// FUNCTION_PAYLOAD_TOO_LARGE; nothing above that gets through, up to 100 MB tried),
-// so through the site this 25 MB check is never reached. It stays as the server-side
-// guard for a direct-upload path (D8, docs/audit/RAPPORT-video-deploiement.md);
-// the ceiling that actually applies today is MAX_PLATFORM_UPLOAD_BYTES in
-// lib/quota/limits.js, checked in the browser before the file is sent.
-const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024;
+// Two ways in. Direct multipart: Vercel refuses request bodies above ~4.5 MB BEFORE this code runs
+// (measured in production on 2026-09-20: 4,493,821 bytes accepted, 4,493,924 refused with
+// FUNCTION_PAYLOAD_TOO_LARGE), so only small files arrive this way. Staged: the browser sends the file
+// straight to the media service in signed chunks and posts only a small JSON here (lib/media/stagedRoute.ts),
+// so this check is the real server-side ceiling for those files (docs/audit/RAPPORT-office-envoi-morceaux.md).
+const MAX_FILE_SIZE_BYTES = MAX_OFFICE_STAGED_BYTES;
 
 const ALLOWED_EXTENSIONS = new Set(["docx", "doc", "xlsx", "xls", "csv", "ods", "pptx", "ppt"]);
 
@@ -102,6 +104,10 @@ function backendFor(extension: string): "convertapi" | "gotenberg" {
 }
 
 export async function POST(req: NextRequest) {
+  // Staged path (files above the Vercel body ceiling): the browser already sent the file straight to the
+  // media service and only posts a small JSON here; see lib/media/stagedRoute.ts.
+  if (isStagedRequest(req)) return respondStaged(req, "pdf", (file) => convertFile(req, file, true));
+
   let file: File;
   try {
     const formData = await req.formData();
@@ -113,7 +119,10 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: "Invalid multipart/form-data request." }, { status: 400 });
   }
+  return convertFile(req, file);
+}
 
+async function convertFile(req: NextRequest, file: File, staged = false): Promise<NextResponse> {
   const extension = getExtension(file.name);
   if (!ALLOWED_EXTENSIONS.has(extension)) {
     return NextResponse.json(
@@ -125,31 +134,33 @@ export async function POST(req: NextRequest) {
   if (file.size === 0) {
     return NextResponse.json({ error: "The uploaded file is empty." }, { status: 400 });
   }
-  if (file.size > MAX_FILE_SIZE_BYTES) {
+  const isSheet = ["xlsx", "xls", "csv", "ods"].includes(extension);
+  const maxBytes = isSheet ? MAX_SPREADSHEET_STAGED_BYTES : MAX_FILE_SIZE_BYTES;
+  if (file.size > maxBytes) {
     return NextResponse.json(
-      { error: `File is too large. Maximum size is ${MAX_FILE_SIZE_BYTES / (1024 * 1024)} MB.` },
+      { error: `File is too large. Maximum size is ${maxBytes / (1024 * 1024)} MB.` },
       { status: 413 }
     );
   }
 
   const backend = backendFor(extension);
   if (backend === "convertapi") {
-    return handleConvertApi(req, file);
+    return handleConvertApi(req, file, staged);
   }
-  return handleGotenberg(req, file, extension);
+  return handleGotenberg(req, file, extension, staged);
 }
 
 // .docx only, and only while CONVERTAPI_ENABLED === "true" -- see
 // docs/specs/2026-09-03-convertapi-word-to-pdf-integration.md.
-async function handleConvertApi(req: NextRequest, file: File): Promise<NextResponse> {
+async function handleConvertApi(req: NextRequest, file: File, staged: boolean): Promise<NextResponse> {
   // Validated BEFORE calling ConvertAPI, so a credit is never spent on a
   // file that would fail anyway (§5). In practice the generic
-  // MAX_FILE_SIZE_BYTES check above already enforces this same 25 MB
+  // MAX_FILE_SIZE_BYTES check above already enforces a ceiling at or above
   // ceiling, but this check stands on its own per the spec, in case the
   // two constants are ever tuned independently in the future.
   const sizeCheck = checkFileSize(file, MAX_CONVERTAPI_FILE_BYTES, "Word documents");
   if (!sizeCheck.ok) {
-    return NextResponse.json({ error: "This file is too large. Maximum size is 25 MB." }, { status: 413 });
+    return NextResponse.json({ error: `This file is too large. Maximum size is ${MAX_CONVERTAPI_FILE_BYTES / (1024 * 1024)} MB.` }, { status: 413 });
   }
 
   const guard = await guardPaidRoute(req, { route: "word-to-pdf", tool: "word-to-pdf" });
@@ -168,6 +179,8 @@ async function handleConvertApi(req: NextRequest, file: File): Promise<NextRespo
 
   try {
     const { pdfBuffer, costMicros } = await convertDocxToPdf(fileBuffer, file.name);
+    // Size bucket and cost only (never a name or content): shows whether a large file costs more than one credit.
+    console.log(`[convertapi] docx->pdf cost_micros=${costMicros} input_mb=${Math.round(file.size / 1048576)}`);
     // Real reconciliation: actualCostMicros = response.ConversionCost *
     // CONVERTAPI_COST_MICROS, computed inside the adapter (only it knows
     // ConvertAPI's response shape) and returned here as the already-scaled
@@ -194,13 +207,10 @@ async function handleConvertApi(req: NextRequest, file: File): Promise<NextRespo
     }
 
     const outName = file.name.replace(/\.[^.]+$/, "") + ".pdf";
-    return new NextResponse(bytes, {
-      status: 200,
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${outName.replace(/"/g, "")}"`,
-      },
-    });
+    return fileResponse(bytes, {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="${outName.replace(/"/g, "")}"`,
+    }, staged);
   } catch (err) {
     // No automatic fallback to Gotenberg on any ConvertAPI failure -- every
     // failure returns an explicit error to the user, never a silent retry
@@ -248,7 +258,7 @@ async function handleConvertApi(req: NextRequest, file: File): Promise<NextRespo
 
 // Every extension except .docx (plus .docx itself when CONVERTAPI_ENABLED
 // is not "true") -- unchanged from before this spec's implementation.
-async function handleGotenberg(req: NextRequest, file: File, extension: string): Promise<NextResponse> {
+async function handleGotenberg(req: NextRequest, file: File, extension: string, staged: boolean): Promise<NextResponse> {
   const gotenbergUrl = process.env.GOTENBERG_URL;
   const gotenbergUsername = process.env.GOTENBERG_USERNAME;
   const gotenbergPassword = process.env.GOTENBERG_PASSWORD;
@@ -292,7 +302,7 @@ async function handleGotenberg(req: NextRequest, file: File, extension: string):
   const authHeader = "Basic " + Buffer.from(`${gotenbergUsername}:${gotenbergPassword}`).toString("base64");
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), GOTENBERG_TIMEOUT_MS);
+  const timeoutId = setTimeout(() => controller.abort(), gotenbergTimeoutMs(file.size));
 
   let gotenbergResponse: Response;
   try {
@@ -368,5 +378,5 @@ async function handleGotenberg(req: NextRequest, file: File, extension: string):
   if (detectedFonts.length > 0) {
     headers["X-Detected-Symbol-Fonts"] = detectedFonts.join(",");
   }
-  return new NextResponse(pdfBuffer, { status: 200, headers });
+  return fileResponse(pdfBuffer, headers, staged);
 }

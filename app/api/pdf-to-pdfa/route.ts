@@ -1,17 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { alertServerError } from "@/lib/quota/errorAlerts";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
+import { MAX_PDFTOOLS_STAGED_BYTES } from "@/lib/quota/limits";
+import { isStagedRequest, respondStagedPdfJson } from "@/lib/media/stagedRoute";
 
 // Give the pdf-tools-service round-trip (up to SERVICE_TIMEOUT_MS below)
 // enough headroom inside the function's own execution budget.
-export const maxDuration = 90;
+export const maxDuration = 300;
 
-const SERVICE_TIMEOUT_MS = 65_000;
+// Grows with the file (a large scan takes the service longer); stays under maxDuration.
+function serviceTimeoutMs(bytes: number): number {
+  return Math.min(240_000, 65_000 + Math.ceil(bytes / (1024 * 1024)) * 3_000);
+}
 
 // Deliberately stricter than the service's own MAX_FILE_SIZE_BYTES so this
 // route fails fast with a clear message rather than uploading a doomed
 // request to the service first.
-const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
+const MAX_FILE_SIZE_BYTES = MAX_PDFTOOLS_STAGED_BYTES;
 
 export async function POST(req: NextRequest) {
   const serviceUrl = process.env.PDFTOOLS_SERVICE_URL;
@@ -19,6 +24,14 @@ export async function POST(req: NextRequest) {
 
   if (!serviceUrl || !apiKey) {
     return NextResponse.json({ ok: false, error: "PDF/A service is not configured." }, { status: 500 });
+  }
+
+  // Staged path (files above the Vercel body ceiling): see lib/media/stagedRoute.ts.
+  if (isStagedRequest(req)) {
+    return respondStagedPdfJson(req, (file, body) => {
+      const requested = body?.conformance;
+      return convertPdfa(req, file, typeof requested === "string" && /^[0-9][ab]$/i.test(requested) ? requested.toLowerCase() : "2b", serviceUrl, apiKey);
+    });
   }
 
   let file: File;
@@ -37,7 +50,10 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid multipart/form-data request." }, { status: 400 });
   }
+  return convertPdfa(req, file, conformance, serviceUrl, apiKey);
+}
 
+async function convertPdfa(req: NextRequest, file: File, conformance: string, serviceUrl: string, apiKey: string): Promise<NextResponse> {
   if (file.size === 0) {
     return NextResponse.json({ ok: false, error: "The uploaded file is empty." }, { status: 400 });
   }
@@ -53,7 +69,7 @@ export async function POST(req: NextRequest) {
   serviceForm.append("conformance", conformance);
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), SERVICE_TIMEOUT_MS);
+  const timeoutId = setTimeout(() => controller.abort(), serviceTimeoutMs(file.size));
 
   let serviceResponse: Response;
   try {

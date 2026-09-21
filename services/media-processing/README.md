@@ -37,6 +37,10 @@ compare, expiry, one job id per ticket).
 | `GET /v1/jobs/<id>` | `uploading\|queued\|processing\|done\|error`, real `progress`, `queuePosition` |
 | `GET /v1/jobs/<id>/result` | streams the output; **deleted after one complete download** |
 | `DELETE /v1/jobs/<id>` | cancels (kills ffmpeg) and deletes everything |
+| `GET /v1/jobs/<id>/source` | **stage jobs, SERVER-role ticket only**: the staged upload, read by the site's Vercel route |
+| `PUT /v1/jobs/<id>/output` | **stage jobs, SERVER-role ticket only**: the converted file (`X-Output-Ext` pdf\|docx, `X-Output-Sha256`, `Content-Length`); length, hash and magic bytes are verified, the source is destroyed |
+
+**`op: "stage"` (Office / HTML / PDF / audio documents, 21 Sept 2026).** The service only stores the upload and the result; the site's route converts. The browser ticket cannot read the source or deposit an output; a server ticket (minted by the route for the same job after verifying the browser's) cannot create a job. `/health` answers `"stage": true` on a build that has it. See `docs/audit/RAPPORT-office-envoi-morceaux.md`. Tests: `.venv/Scripts/python tests/run_stage_tests.py` (32, no ffmpeg needed).
 
 `convert` targets: mp4, m4v, mov, mkv, flv, ts, 3gp, webm, avi, wmv, ogv, mpg,
 gif, and audio-only mp3, m4a, wav, ogg, opus, flac. `compress`: H.264 MP4 with

@@ -8,6 +8,10 @@
 // chunked resumable upload straight to the processing node), minus any
 // third-party dependency. Every step reports progress, chunks are retried and
 // the upload resumes after a network cut.
+//
+// Two users of the same upload: video jobs (runMediaJob: the service converts) and
+// documents (runStagedConversion: the service only stores the file and the result,
+// the tool's Vercel route converts it -- see lib/media/staged.js).
 
 export const MEDIA_SERVICE_URL = (process.env.NEXT_PUBLIC_MEDIA_SERVICE_URL || '').replace(/\/+$/, '');
 export const mediaServiceConfigured = () => MEDIA_SERVICE_URL !== '';
@@ -36,7 +40,7 @@ async function api(path, { method = 'GET', ticket, body, signal } = {}) {
     });
   } catch (e) {
     if (e && e.name === 'AbortError') throw new MediaJobError('Cancelled.', 'cancelled');
-    throw new MediaJobError('Could not reach the video service. Check your connection and try again.', 'network');
+    throw new MediaJobError('Could not reach the conversion service. Check your connection and try again.', 'network');
   }
   let json = {};
   try { json = await res.json(); } catch { /* empty body */ }
@@ -68,12 +72,10 @@ async function putChunk(url, ticket, blob, onBytes, signal) {
 }
 
 /**
- * @param {{file: File, op: 'convert'|'compress', params: object, onStage: (s: {stage: string, pct?: number, position?: number}) => void, signal?: AbortSignal}} opts
- * @returns {Promise<{blob: Blob, ext: string, bytes: number}>}
+ * Ticket -> create job -> chunked, resumable, SHA-256-checked upload straight to the service.
+ * Returns the ids and a best-effort cleanup that destroys the job on the service.
  */
-export async function runMediaJob({ file, op, params, onStage, signal }) {
-  if (!mediaServiceConfigured()) throw new MediaJobError('The video service is not available.', 'not_configured');
-
+async function openAndUpload({ file, op, params, onStage, signal }) {
   onStage({ stage: 'ticket' });
   let tres;
   try {
@@ -87,19 +89,16 @@ export async function runMediaJob({ file, op, params, onStage, signal }) {
   const { jid, ticket } = tj;
 
   const created = await api('/v1/jobs', { method: 'POST', ticket, body: { op, size: file.size, params }, signal });
-  if (created.status !== 201) throw new MediaJobError(created.json.message || 'The video service refused this file.', created.json.error);
+  if (created.status !== 201) throw new MediaJobError(created.json.message || 'The service refused this file.', created.json.error);
   const { chunkBytes, totalChunks } = created.json;
 
   const cleanup = () => { try { fetch(`${MEDIA_SERVICE_URL}/v1/jobs/${jid}`, { method: 'DELETE', headers: { Authorization: 'Bearer ' + ticket }, keepalive: true }).catch(() => {}); } catch { /* best effort */ } };
   if (signal) signal.addEventListener('abort', cleanup, { once: true });
 
   try {
-    // ---- upload, chunk by chunk, resumable --------------------------------
     let sentBytes = 0;
     const total = file.size;
-    const have = new Set();
     for (let n = 0; n < totalChunks; n++) {
-      if (have.has(n)) continue;
       const blob = file.slice(n * chunkBytes, Math.min(total, (n + 1) * chunkBytes));
       let attempt = 0;
       for (;;) {
@@ -121,7 +120,45 @@ export async function runMediaJob({ file, op, params, onStage, signal }) {
       sentBytes += blob.size;
       onStage({ stage: 'upload', pct: Math.min(100, (sentBytes / total) * 100) });
     }
+  } catch (e) {
+    if (e instanceof MediaJobError && e.code !== 'expired') cleanup();
+    throw e;
+  }
+  return { jid, ticket, cleanup };
+}
 
+/** Single download of a finished job (the service deletes the file after it). Never accepts a short file. */
+async function downloadResult({ jid, ticket, expected, onStage, signal }) {
+  onStage({ stage: 'download', pct: 0 });
+  let res;
+  try { res = await fetch(`${MEDIA_SERVICE_URL}/v1/jobs/${jid}/result`, { headers: { Authorization: 'Bearer ' + ticket }, signal }); }
+  catch (e) { throw new MediaJobError(e && e.name === 'AbortError' ? 'Cancelled.' : 'The download was interrupted. Please try again.', e && e.name === 'AbortError' ? 'cancelled' : 'network'); }
+  if (!res.ok) throw new MediaJobError('The result could not be downloaded.', 'download');
+  const reader = res.body.getReader();
+  const parts = [];
+  let got = 0;
+  for (;;) {
+    const { value, done: end } = await reader.read();
+    if (end) break;
+    parts.push(value);
+    got += value.length;
+    if (expected) onStage({ stage: 'download', pct: Math.min(100, (got / expected) * 100) });
+  }
+  // Never announce success on an empty or truncated file.
+  if (got === 0 || (expected && got !== expected)) throw new MediaJobError('The downloaded file is incomplete. Please try again.', 'download');
+  const mime = res.headers.get('Content-Type') || 'application/octet-stream';
+  return { blob: new Blob(parts, { type: mime }), bytes: got };
+}
+
+/**
+ * @param {{file: File, op: 'convert'|'compress', params: object, onStage: (s: {stage: string, pct?: number, position?: number}) => void, signal?: AbortSignal}} opts
+ * @returns {Promise<{blob: Blob, ext: string, bytes: number}>}
+ */
+export async function runMediaJob({ file, op, params, onStage, signal }) {
+  if (!mediaServiceConfigured()) throw new MediaJobError('The video service is not available.', 'not_configured');
+  const { jid, ticket, cleanup } = await openAndUpload({ file, op, params, onStage, signal });
+
+  try {
     // ---- start (retry while the service is full) --------------------------
     onStage({ stage: 'queued', position: 0 });
     let started = false;
@@ -154,27 +191,89 @@ export async function runMediaJob({ file, op, params, onStage, signal }) {
       return { notSmaller: true, inputBytes: done.inputBytes || file.size, outputBytes: done.outputBytes || 0 };
     }
 
-    // ---- download (the service deletes the file after this) ----------------
-    onStage({ stage: 'download', pct: 0 });
-    let res;
-    try { res = await fetch(`${MEDIA_SERVICE_URL}/v1/jobs/${jid}/result`, { headers: { Authorization: 'Bearer ' + ticket }, signal }); }
-    catch (e) { throw new MediaJobError(e && e.name === 'AbortError' ? 'Cancelled.' : 'The download was interrupted. Please try again.', e && e.name === 'AbortError' ? 'cancelled' : 'network'); }
-    if (!res.ok) throw new MediaJobError('The result could not be downloaded.', 'download');
-    const expected = done.outputBytes || 0;
-    const reader = res.body.getReader();
-    const parts = [];
-    let got = 0;
-    for (;;) {
-      const { value, done: end } = await reader.read();
-      if (end) break;
-      parts.push(value);
-      got += value.length;
-      if (expected) onStage({ stage: 'download', pct: Math.min(100, (got / expected) * 100) });
+    const dl = await downloadResult({ jid, ticket, expected: done.outputBytes || 0, onStage, signal });
+    return { blob: dl.blob, ext: done.outputExt, bytes: dl.bytes };
+  } catch (e) {
+    if (e instanceof MediaJobError && e.code !== 'expired') cleanup();
+    throw e;
+  }
+}
+
+/**
+ * Staged call: the file goes to the service in chunks (no Vercel body ceiling), then the tool's own API
+ * route is asked, with a tiny JSON, to read it server-to-server and do its work. Resolves with the route's
+ * JSON answer and the ids needed to download a result (if the route deposited one).
+ */
+async function stagedCall({ file, endpoint, fields, onStage, signal }) {
+  if (!mediaServiceConfigured()) throw new MediaJobError('Large-file processing is not available right now.', 'not_configured');
+  const { jid, ticket, cleanup } = await openAndUpload({ file, op: 'stage', params: {}, onStage, signal });
+  try {
+    const s = await api(`/v1/jobs/${jid}/start`, { method: 'POST', ticket, signal });
+    if (s.status !== 202) {
+      if (s.status === 409 && s.json.error === 'incomplete') throw new MediaJobError('The upload was incomplete. Please try again.', 'incomplete');
+      throw new MediaJobError(s.json.message || 'The service could not accept this file.', s.json.error || 'start');
     }
-    // Never announce success on an empty or truncated file.
-    if (got === 0 || (expected && got !== expected)) throw new MediaJobError('The downloaded file is incomplete. Please try again.', 'download');
-    const mime = res.headers.get('Content-Type') || 'application/octet-stream';
-    return { blob: new Blob(parts, { type: mime }), ext: done.outputExt, bytes: got };
+    onStage({ stage: 'converting' });
+    let res;
+    try {
+      res = await fetch(endpoint, { method: 'POST', signal, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...(fields || {}), jid, ticket, filename: file.name }) });
+    } catch (e) {
+      if (e && e.name === 'AbortError') throw new MediaJobError('Cancelled.', 'cancelled');
+      throw new MediaJobError('Could not reach the site. Check your connection and try again.', 'network');
+    }
+    const json = await res.json().catch(() => ({}));
+    return { res, json, jid, ticket, cleanup };
+  } catch (e) {
+    if (e instanceof MediaJobError && e.code !== 'expired') cleanup();
+    throw e;
+  }
+}
+
+/**
+ * Staged document conversion (Office / HTML / PDF): stagedCall, then the converted file is downloaded from
+ * the service (which deletes it after one complete download).
+ * @param {{file: File, endpoint: string, fields?: object, onStage: (s: object) => void, signal?: AbortSignal}} opts
+ * @returns {Promise<{blob: Blob, ext: string, bytes: number, detectedFonts: string[]}>}
+ */
+export async function runStagedConversion({ file, endpoint, fields, onStage, signal }) {
+  const { res, json: j, jid, ticket, cleanup } = await stagedCall({ file, endpoint, fields, onStage, signal });
+  try {
+    if (!res.ok || !j.ok) {
+      // j.error is a string from our routes, but a platform-level failure (memory, timeout) can answer an object or nothing.
+      const msg = (typeof j.error === 'string' && j.error) || (res.status === 504 ? 'This conversion is taking too long. Try a smaller or simpler file.' : 'Conversion failed. Please try again.');
+      throw new MediaJobError(msg, 'convert_' + res.status);
+    }
+    const dl = await downloadResult({ jid, ticket, expected: j.outputBytes || 0, onStage, signal });
+    return { blob: dl.blob, ext: j.ext, bytes: dl.bytes, detectedFonts: j.detectedFonts || [] };
+  } catch (e) {
+    // The route already destroys the staged file on a failed conversion; this covers cancel/network cases.
+    if (e instanceof MediaJobError && e.code !== 'expired') cleanup();
+    throw e;
+  }
+}
+
+/**
+ * Staged call whose answer is the route's JSON itself (no file to download), e.g. a transcript.
+ * @returns {Promise<{status: number, json: object}>}
+ */
+export async function runStagedJson({ file, endpoint, fields, onStage, signal }) {
+  const { res, json } = await stagedCall({ file, endpoint, fields, onStage, signal });
+  return { status: res.status, json };
+}
+
+/**
+ * Staged call for tools whose route answers a JSON report and, when it produced a file, deposits it on the
+ * service (`outputBytes`): downloads that file. Resolves with {json, blob|null}.
+ */
+export async function runStagedToolResult({ file, endpoint, fields, onStage, signal }) {
+  const { json, jid, ticket, cleanup } = await stagedCall({ file, endpoint, fields, onStage, signal });
+  try {
+    if (json.ok && json.outputBytes) {
+      const dl = await downloadResult({ jid, ticket, expected: json.outputBytes, onStage, signal });
+      return { json, blob: dl.blob };
+    }
+    cleanup();
+    return { json, blob: null };
   } catch (e) {
     if (e instanceof MediaJobError && e.code !== 'expired') cleanup();
     throw e;

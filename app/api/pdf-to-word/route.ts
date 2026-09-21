@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { convertPdfToDocx, ConvertApiError } from "@/lib/providers/convertApi";
 import { guardPaidRoute } from "@/lib/quota/guard";
-import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES } from "@/lib/quota/limits";
+import { checkFileSize, MAX_PDF_TO_WORD_STAGED_BYTES } from "@/lib/quota/limits";
+import { isStagedRequest, respondStaged, fileResponse } from "@/lib/media/stagedRoute";
 import { alertServerError } from "@/lib/quota/errorAlerts";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
 
 // Give the ConvertAPI round-trip enough headroom inside the function's own
 // execution budget -- same reasoning as convert-to-pdf/route.ts's identical
 // constant.
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // Rollback switch, same shape as CONVERTAPI_ENABLED in
 // convert-to-pdf/route.ts (spec §9): only the literal value "true" routes
@@ -82,6 +83,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Staged path (files above the Vercel body ceiling) -- see lib/media/stagedRoute.ts.
+  if (isStagedRequest(req)) return respondStaged(req, "docx", (file) => convertPdf(req, file, true));
+
   let file: File;
   try {
     const formData = await req.formData();
@@ -93,7 +97,10 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: "Invalid multipart/form-data request." }, { status: 400 });
   }
+  return convertPdf(req, file);
+}
 
+async function convertPdf(req: NextRequest, file: File, staged = false): Promise<NextResponse> {
   const extension = getExtension(file.name);
   if (extension !== "pdf") {
     return NextResponse.json({ error: "Unsupported file type. Please upload a .pdf file." }, { status: 400 });
@@ -106,9 +113,9 @@ export async function POST(req: NextRequest) {
   // Validated BEFORE calling ConvertAPI, so a credit is never spent on a
   // file that would fail anyway -- same reasoning and same 25 MB ceiling as
   // handleConvertApi's checkFileSize call in convert-to-pdf/route.ts.
-  const sizeCheck = checkFileSize(file, MAX_CONVERTAPI_FILE_BYTES, "PDF files");
+  const sizeCheck = checkFileSize(file, MAX_PDF_TO_WORD_STAGED_BYTES, "PDF files");
   if (!sizeCheck.ok) {
-    return NextResponse.json({ error: "This file is too large. Maximum size is 25 MB." }, { status: 413 });
+    return NextResponse.json({ error: `This file is too large. Maximum size is ${MAX_PDF_TO_WORD_STAGED_BYTES / (1024 * 1024)} MB.` }, { status: 413 });
   }
 
   const guard = await guardPaidRoute(req, { route: "pdf-to-word", tool: "pdf-to-word" });
@@ -127,6 +134,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const { docxBuffer, costMicros } = await convertPdfToDocx(fileBuffer, file.name);
+    console.log(`[convertapi] pdf->docx cost_micros=${costMicros} input_mb=${Math.round(file.size / 1048576)}`);
     // Real reconciliation: actualCostMicros = response.ConversionCost *
     // CONVERTAPI_COST_MICROS, computed inside the adapter (only it knows
     // ConvertAPI's response shape) and returned here as the already-scaled
@@ -158,13 +166,10 @@ export async function POST(req: NextRequest) {
     }
 
     const outName = file.name.replace(/\.[^.]+$/, "") + ".docx";
-    return new NextResponse(bytes, {
-      status: 200,
-      headers: {
-        "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "Content-Disposition": `attachment; filename="${outName.replace(/"/g, "")}"`,
-      },
-    });
+    return fileResponse(bytes, {
+      "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "Content-Disposition": `attachment; filename="${outName.replace(/"/g, "")}"`,
+    }, staged);
   } catch (err) {
     // No automatic fallback to a different provider on any ConvertAPI
     // failure -- every failure returns an explicit error to the user,
