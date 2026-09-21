@@ -27,8 +27,6 @@ from . import config, ffmpeg_ops
 
 log = logging.getLogger("media-processing")
 
-# A compressed file must be at least this much smaller than the source to count as smaller.
-NOT_SMALLER_RATIO = 0.98
 
 
 class Job:
@@ -258,24 +256,41 @@ def _process(job: Job):
     job.progress = 0.0
     try:
         # SIZE LADDER. A compression is only worth delivering if it is SMALLER than the source; a
-        # conversion should not be LARGER than it. Otherwise the encode is repeated once or twice
-        # with a stronger setting (compress: the next level; convert: CRF +6, then +12). If the last
-        # attempt is still not acceptable the service says so instead of hiding it: a compression
-        # returns no file (notSmaller); a conversion is delivered and flagged (larger).
+        # conversion should not be LARGER than it. Otherwise the encode is repeated with a stronger
+        # setting (compress: the next level; convert: a CRF offset computed from the measured or
+        # projected overshoot, at most MAX_ATTEMPTS encodes; an attempt whose projection is far too
+        # large is abandoned early). If the last attempt is still not acceptable the service says so
+        # instead of hiding it: a compression returns no file (notSmaller); a conversion is delivered
+        # and flagged (larger).
+        target = job.params.get("target")
         if job.op == "compress":
             level = job.params.get("level", "balanced")
             i = ffmpeg_ops.COMPRESS_LEVELS.index(level)
-            attempts = [(dict(job.params, level=lv), 0) for lv in ffmpeg_ops.COMPRESS_LEVELS[i:i + 2]]
-        elif job.params.get("target") in ffmpeg_ops.LADDER_TARGETS:
-            attempts = [(job.params, off) for off in ffmpeg_ops.CRF_LADDER]
+            plan = [dict(job.params, level=lv) for lv in ffmpeg_ops.COMPRESS_LEVELS[i:i + 2]]
+        elif target in ffmpeg_ops.LADDER_TARGETS:
+            plan = [job.params] * ffmpeg_ops.MAX_ATTEMPTS
         else:
-            attempts = [(job.params, 0)]
-        for n, (params, offset) in enumerate(attempts, start=1):
+            plan = [job.params]
+        offset = 0
+        for n, params in enumerate(plan, start=1):
             job.attempt = n
             job.progress = 0.0
+            last = n == len(plan)
+            projected = [0.0]
+
+            def abort_check(pct, _out=out, _projected=projected):
+                # only convert-ladder attempts that still have a retry left may be abandoned
+                if last or job.op != "convert" or pct < ffmpeg_ops.ABORT_AFTER_PCT:
+                    return False
+                try:
+                    _projected[0] = os.path.getsize(_out) / (pct / 100.0)
+                except OSError:
+                    return False
+                return _projected[0] > job.size * ffmpeg_ops.ABORT_SHARE
+
             args, ext, mime = ffmpeg_ops.build_command(job.op, params, job._info, inp, out, job.size, offset)
-            code, cancelled, timed_out = ffmpeg_ops.run(
-                args, job._info.duration, lambda p: setattr(job, "progress", p), job.cancel.is_set, config.FFMPEG_TIMEOUT_SECONDS
+            code, cancelled, timed_out, aborted = ffmpeg_ops.run(
+                args, job._info.duration, lambda p: setattr(job, "progress", p), job.cancel.is_set, config.FFMPEG_TIMEOUT_SECONDS, abort_check
             )
             if cancelled:
                 shutil.rmtree(job.dir, ignore_errors=True)
@@ -283,19 +298,26 @@ def _process(job: Job):
             if timed_out:
                 _fail(job, "timeout", "The conversion took too long and was stopped. Try a shorter file.")
                 break
+            if aborted:
+                offset = ffmpeg_ops.next_crf_offset(target, offset, projected[0], job.size)
+                if os.path.exists(out):
+                    os.remove(out)
+                continue
             if code != 0 or not os.path.exists(out) or os.path.getsize(out) == 0:
                 # Never report success on a missing or empty output.
                 _fail(job, "conversion_failed", "This file could not be converted. It may use a codec that cannot be read.")
                 break
             size = os.path.getsize(out)
-            too_big = size >= job.size * NOT_SMALLER_RATIO if job.op == "compress" else size > job.size
-            if too_big and n < len(attempts):
+            too_big = size >= job.size * ffmpeg_ops.NOT_SMALLER_RATIO if job.op == "compress" else size > job.size
+            if too_big and not last:
+                if job.op == "convert":
+                    offset = ffmpeg_ops.next_crf_offset(target, offset, size, job.size)
                 os.remove(out)
                 continue  # try the next, stronger step
             if too_big:
                 if job.op == "compress":
                     job.not_smaller = True
-                elif job.params.get("target") in ffmpeg_ops.LADDER_TARGETS:
+                elif target in ffmpeg_ops.LADDER_TARGETS:
                     job.larger = True
             job.out_ext, job.out_mime, job.out_size = ext, mime, size
             job.progress = 100.0

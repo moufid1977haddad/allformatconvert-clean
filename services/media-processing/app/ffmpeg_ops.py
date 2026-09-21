@@ -30,7 +30,27 @@ COMPRESS_LEVELS = ("light", "balanced", "strong")
 # 3-minute clip, versus none without it). The policy is a re-encode LADDER instead:
 # encode at the requested quality; if the result is larger than the source, encode again
 # at a higher CRF (+6, then +12); if it is STILL larger, deliver it and say so.
-CRF_LADDER = (0, 6, 12)
+MAX_ATTEMPTS = 3
+# A compressed file must be at least this much smaller than the source to count as smaller.
+NOT_SMALLER_RATIO = 0.98
+# Fraction of size saved by one CRF point (measured 2026-09-20 on hard 1080p footage, indicative):
+# H.264 / H.265 about 11 %, AV1 about 6 %, VP9 about 4.5 %. Used to jump straight to the CRF
+# that should land just under the source instead of stepping blindly.
+SIZE_PER_CRF = {"webm": 0.045, "av1": 0.06}
+DEFAULT_SIZE_PER_CRF = 0.11
+TARGET_SHARE = 0.95   # aim at 95 % of the source size when a retry is needed
+ABORT_SHARE = 1.25    # abandon an attempt early when its projected size is above 125 % of the source
+ABORT_AFTER_PCT = 12.0
+
+
+def next_crf_offset(target: str, offset: int, size: float, source_size: int) -> int:
+    """CRF offset for the next attempt, from the size (measured or projected) of this one."""
+    import math
+    k = SIZE_PER_CRF.get(target, DEFAULT_SIZE_PER_CRF)
+    ratio = max(size / (TARGET_SHARE * source_size), 1.0)
+    return offset + min(18, max(2, math.ceil(math.log(ratio) / -math.log(1 - k)) + 1))
+
+
 # Targets whose encoder has a CRF: only these take part in the ladder.
 LADDER_TARGETS = {"mp4", "m4v", "mov", "mkv", "flv", "ts", "3gp", "3g2", "f4v", "m2ts", "mts", "h265", "av1", "webm"}
 # The bitrate-driven legacy encoders (mpeg4, xvid, mpeg2, theora, wmv2) have no CRF: they get a
@@ -282,25 +302,31 @@ def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_pa
     raise ValueError("Unknown operation.")
 
 
-def run(args, duration: float, on_progress, should_cancel, timeout: int):
+def run(args, duration: float, on_progress, should_cancel, timeout: int, abort_check=None):
     """Runs ffmpeg with `-progress pipe:1`, reporting a real 0-100 progress.
 
-    Returns (returncode, cancelled, timed_out). stderr is never logged with
-    content: only the return code leaves this function.
+    Returns (returncode, cancelled, timed_out, aborted). `abort_check(progress_pct)` may stop the run
+    early (the size ladder uses it when a projection says the result will be far too large).
+    stderr is never logged with content: only the return code leaves this function.
     """
     import time
 
     cmd = args[:1] + ["-progress", "pipe:1", "-nostats"] + args[1:]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, bufsize=1)
     start = time.monotonic()
-    cancelled = timed_out = False
+    cancelled = timed_out = aborted = False
     try:
         for line in proc.stdout:
             if line.startswith("out_time_us=") or line.startswith("out_time_ms="):
                 try:
                     us = int(line.split("=", 1)[1])
                     if duration > 0 and us >= 0:
-                        on_progress(min(99.0, us / 1_000_000 / duration * 100.0))
+                        pct = min(99.0, us / 1_000_000 / duration * 100.0)
+                        on_progress(pct)
+                        if abort_check and abort_check(pct):
+                            aborted = True
+                            proc.kill()
+                            break
                 except ValueError:
                     pass
             if should_cancel():
@@ -313,4 +339,4 @@ def run(args, duration: float, on_progress, should_cancel, timeout: int):
                 break
     finally:
         proc.wait()
-    return proc.returncode, cancelled, timed_out
+    return proc.returncode, cancelled, timed_out, aborted
