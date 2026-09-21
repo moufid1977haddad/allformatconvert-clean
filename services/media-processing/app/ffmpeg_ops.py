@@ -18,8 +18,8 @@ from . import config
 # quality -> H.264 CRF (lower = better/bigger). "high" is visually near-lossless.
 CRF = {"high": 20, "medium": 24, "low": 30}
 AUDIO_KBPS = {"high": 160, "medium": 128, "low": 96}
-# Retuned 2026-09-20 with the x264 "fast" preset (~27 % smaller than "veryfast" at equal VMAF, measured):
-# balanced lands where the old veryfast crf 28 was in size, with higher VMAF (87.9 vs 83.7 on the 30 s reference).
+# Retuned 2026-09-20 for the x264 "faster" preset (~23 % smaller than "veryfast" at equal VMAF, measured):
+# balanced (crf 30) lands about where the old veryfast crf 28 was in size, with clearly higher VMAF.
 COMPRESS_CRF = {"light": 27, "balanced": 30, "strong": 34}
 # Ladder used when a compressed result is not smaller than its source: the next,
 # stronger level is tried once before the service says so honestly.
@@ -35,11 +35,11 @@ COMPRESS_LEVELS = ("light", "balanced", "strong")
 MAX_ATTEMPTS = 3
 # A compressed file must be at least this much smaller than the source to count as smaller.
 NOT_SMALLER_RATIO = 0.98
-# Fraction of size saved by one CRF point (measured 2026-09-20 on hard 1080p footage, indicative):
-# H.264 / H.265 about 11 %, AV1 about 6 %, VP9 about 4.5 %. Used to jump straight to the CRF
-# that should land just under the source instead of stepping blindly.
-SIZE_PER_CRF = {"webm": 0.045, "av1": 0.06}
-DEFAULT_SIZE_PER_CRF = 0.11
+# Fraction of size saved by one CRF point, measured 2026-09-20 on the hard 1080p reference (30 s of
+# handheld foliage): VP9 good mode 7 %, AV1 (SVT preset 8) 6.4 %, H.265 (x265 veryfast) 13 %, H.264
+# (x264 fast) 12 %. Used to jump straight to the CRF that should land just under the source.
+SIZE_PER_CRF = {"webm": 0.07, "av1": 0.064, "h265": 0.12}
+DEFAULT_SIZE_PER_CRF = 0.12
 TARGET_SHARE = 0.95   # aim at 95 % of the source size when a retry is needed
 ABORT_SHARE = 1.25    # abandon an attempt early when its projected size is above 125 % of the source
 ABORT_AFTER_PCT = 12.0
@@ -93,9 +93,10 @@ class Ctx:
 
 
 def x264_preset(ctx):
-    """Slower preset = smaller file at equal quality (measured: fast is ~27 % smaller than veryfast at
-    the same VMAF, for ~3x the CPU time). Long videos fall back to faster presets to bound the time."""
-    return "fast" if ctx.work <= 90 else "faster" if ctx.work <= 300 else "veryfast"
+    """Slower preset = smaller file at equal quality (measured on the 30 s reference: faster is ~23 % and
+    fast ~27 % smaller than veryfast at the same VMAF, for ~2x and ~3x the CPU time). "faster" is the
+    chosen trade; very long videos keep veryfast to bound the time."""
+    return "faster" if ctx.work <= 300 else "veryfast"
 
 
 def _rate(cap):
