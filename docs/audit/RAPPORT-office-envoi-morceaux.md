@@ -7,7 +7,7 @@ Branche `office-envoi-morceaux` (balise de restauration `restore-pre-office-envo
 
 - **Le plafond de ≈ 4,5 Mo est levé.** Mesuré avec de vrais fichiers, dans un vrai navigateur, contre la préversion et le vrai service : **Word et PowerPoint passent jusqu'à 148 Mo** (33× l'ancien plafond ; Online2PDF annonce 150 Mo), **et échouent à 198 Mo** (mémoire de la fonction Vercel). **Nous annonçons 100 Mo**, avec une marge d'un tiers sous le plus gros fichier réussi.
 - **Ce n'est pas partout 100 Mo, et le rapport le dit** : Excel 15 Mo (limité par le *temps* de conversion de Gotenberg, pas par la taille), PDF vers Word 60 Mo, HTML/EPUB/MOBI 30 Mo, PDF Repair et PDF/A 30 Mo, audio 25 Mo (limite de Whisper). Chaque valeur est le plus gros essai réussi, jamais une supposition.
-- **Plus lent sur les petits fichiers, comme demandé de le dire : oui**, d'environ 2 à 6 s. **Seuil proposé et appliqué : 1 Mio** (au-dessous, l'ancien chemin est conservé). Détail §4.
+- **Plus lent sur les petits fichiers, comme demandé de le dire : oui**, d'environ 1 à 6 s, donc l'ancien chemin est conservé jusqu'à 4 Mio. **Seuil appliqué : 4 Mio** (jusqu'à la limite de corps de requête de la plateforme, l'ancien chemin est conservé). Détail §4.
 - **Quota, limite par IP et plafond de dépense s'appliquent sur le nouveau chemin**, et un contrôle de plus existe : une limite par IP au moment du billet, qui n'existait pas pour `.xlsx`/`.pptx`. Elle s'est **déclenchée en direct pendant mes essais** (§5).
 - **Le service n'accepte jamais un envoi non signé** (9 requêtes non signées ou falsifiées refusées en production, §6). Un fichier est détruit dès la fin du traitement.
 - **Aucune bascule en production n'a précédé la preuve sur préversion.** Gotenberg de production n'a pas été modifié.
@@ -16,7 +16,7 @@ Branche `office-envoi-morceaux` (balise de restauration `restore-pre-office-envo
 
 | Route | Outils | Traitement |
 |---|---|---|
-| `convert-to-pdf` | word-to-pdf, excel-to-pdf, ppt-to-pdf | **branchée** (seuil 1 Mio) |
+| `convert-to-pdf` | word-to-pdf, excel-to-pdf, ppt-to-pdf | **branchée** (seuil 4 Mio) |
 | `convert-html-to-pdf` | html-to-pdf, epub-to-pdf, mobi-to-pdf | **branchée** |
 | `pdf-to-word` | pdf-to-word | **branchée** |
 | `pdf-repair`, `pdf-to-pdfa` | pdf-repair, pdf-to-pdfa | **branchées** (le résultat en base64 dépassait aussi le plafond de *réponse* de 4,5 Mo : la route décode et dépose le PDF sur le service) |
@@ -56,7 +56,7 @@ Temps = total perçu, du clic au fichier téléchargé, téléversement compris.
 - **Word/PowerPoint > ~150 Mo : `Vercel Runtime Error: instance was killed because it ran out of available memory`** (journal d'exécution, 3 fois). J'ai retiré les copies mémoire du pipeline (fichier lu comme `Blob` partagé, dépôt sans copie, réponse portée par `rawBody` au lieu d'être recopiée dans un corps de `Response`) : l'échec à 198 Mo a subsisté après ces correctifs (74,6 s). Le plafond n'est donc plus une question de code mais de **taille de fonction** (Hobby). Aller plus haut demande de la diffuser en flux de bout en bout ou un plan Vercel supérieur (plus de mémoire) : à trancher si la concurrence à 1 Go devient un argument.
 - **Excel > ~20 Mo : `API_TIMEOUT` de Gotenberg = 60 s** (valeur lue sur `gotenberg-v2` et `gotenberg-fonts`, cette seule variable, tout le reste filtré). Le classeur de 17,6 Mio (12 colonnes × ~500 000 lignes) a mis ~50 s ; celui de 24,7 Mio est coupé. **Je n'ai pas modifié ce réglage de production** (redéploiement de Gotenberg de production = décision du propriétaire). *Recommandation : passer `API_TIMEOUT` à 180-240 s, ce qui relèverait le plafond Excel ; à retester avec les mêmes fichiers.*
 - **Plafond ConvertAPI de 25 Mo (spec §5) : auto-imposé, pas celui de ConvertAPI.** Il refusait un `.docx` de 50 Mo après l'envoi. ConvertAPI a converti 98,7 et 148 Mio. La constante passe à 100 Mio.
-- **Le plafond de *réponse* de Vercel (~4,5 Mo) frappait l'ancien chemin aussi** : un PDF de 5 Mo issu d'un petit fichier ne pouvait pas être renvoyé. Le nouveau chemin renvoie 100+ Mo (PDF de 149,8 Mo livré).
+- **Correction d'une hypothèse que j'avais écrite puis réfutée par la mesure :** je pensais que l'ancien chemin échouait aussi quand le PDF *produit* dépasse ~4,5 Mo (plafond de réponse de Vercel). **Faux** : un classeur de 3,8 Mio a produit un PDF de **10,1 Mo** renvoyé sans erreur par l'ancien chemin (production, 22,9 s). Seul le corps de *requête* est plafonné. Le nouveau chemin renvoie quand même 100+ Mo (PDF de 149,8 Mo livré).
 
 **Plafonds annoncés** (constantes dans `lib/quota/limits.js`, affichés avant la sélection, contrôlés dans le navigateur ET côté route) : Word/PowerPoint **100 Mo** · Excel **15 Mo** · PDF→Word **60 Mo** · HTML/EPUB/MOBI **30 Mo** · PDF Repair et PDF/A **30 Mo** · Audio **25 Mo**. **Un fichier de 24,7 Mo dans Excel est refusé avant tout envoi, avec le message honnête** (prouvé), de même qu'un PDF de 100,3 Mo dans PDF→Word.
 
@@ -74,8 +74,8 @@ Fichiers réalistes générés avec de vraies images (Word 3,8 Mio, Excel 3,3 Mi
 
 **Décomposition d'un essai PowerPoint 4,1 Mio (5,6 s)** : billet 1,1 s (site + deux compteurs), création du job 0,5 s, envoi 1,4 s, démarrage 0,2 s, conversion 2,0 s (dont lecture et dépôt serveur à serveur), téléchargement ~0,4 s. **L'ancien chemin n'a ni billet, ni création, ni démarrage, ni dépôt, ni téléchargement séparé : le surcoût est ≈ 2 s de tours réseau fixes**, plus la variabilité de ConvertAPI/Gotenberg.
 
-**Décision : seuil de 1 Mio** (`OFFICE_STAGED_THRESHOLD_BYTES`, `lib/quota/limits.js`). Au-dessous, requête multipart directe comme avant (prouvé : un `.docx` de 40 Ko passe en 2,2 s sans aucun morceau) ; au-dessus, envoi par morceaux. **Réserve honnête :** entre 1 et 4 Mio, l'ancien chemin serait ~2 à 4 s plus rapide, mais il échoue si le PDF *produit* dépasse ~4,5 Mo (plafond de réponse de Vercel), ce que la sortie d'un tableur peut produire. Le seuil de 1 Mio est un compromis ; il se règle par une constante.
-**Piste non faite pour gagner ces 2 s :** commencer l'envoi dès le choix du fichier (le billet et le téléversement se déroulent pendant que le visiteur lit la page). À arbitrer : cela consomme un billet même si le visiteur ne clique jamais.
+**Décision : seuil de 4 Mio** (`OFFICE_STAGED_THRESHOLD_BYTES`, `lib/quota/limits.js`, égal à l'ancien plafond de plateforme). Jusqu'à 4 Mio, requête multipart directe comme avant (prouvé sur la préversion : un `.docx` de 40 Ko passe en 2,2 s sans aucun morceau) ; au-dessus, envoi par morceaux, seul chemin possible. Le nouveau chemin n'est donc plus lent pour personne : les visiteurs qui étaient déjà servis gardent leur vitesse, et ceux qui ne l'étaient pas (fichier > 4 Mio) sont servis. Le seuil se règle par une constante.
+**Piste non faite pour gagner ces 2 s au-dessus du seuil :** commencer l'envoi dès le choix du fichier (le billet et le téléversement se déroulent pendant que le visiteur lit la page). À arbitrer : cela consomme un billet même si le visiteur ne clique jamais.
 
 ## 5. Quota, limite par IP, plafond de dépense
 
