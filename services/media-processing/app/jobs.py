@@ -27,6 +27,15 @@ from . import config, ffmpeg_ops
 
 log = logging.getLogger("media-processing")
 
+# "stage" = Office / document jobs: the service only RECEIVES the file (same chunked, SHA-256-checked
+# upload as video), keeps it for the Vercel route to read server-to-server, then holds the converted
+# output that the same route deposits. No ffmpeg, no worker slot. Lifecycle:
+#   uploading -> (start) -> staged -> (output deposited) -> done   |   error / deleted
+STAGE_OP = "stage"
+STAGE_OUTPUTS = {
+    "pdf": ("application/pdf", b"%PDF-"),
+    "docx": ("application/vnd.openxmlformats-officedocument.wordprocessingml.document", b"PK"),
+}
 
 
 class Job:
@@ -153,7 +162,7 @@ def start(job: Job):
     """Assembles chunks, validates the media, queues the job. Returns (ok, (code, message)|None)."""
     with job.lock:
         if job.status != "uploading":
-            return (job.status in ("queued", "processing", "done")), None
+            return (job.status in ("queued", "processing", "done", "staged")), None
         if not getattr(job, "assembled", False):
             have = received(job)
             if len(have) != job.total_chunks:
@@ -165,6 +174,11 @@ def start(job: Job):
                     with open(p, "rb") as part:
                         shutil.copyfileobj(part, out, 1 << 20)
                     os.remove(p)
+            if job.op == STAGE_OP:
+                job.assembled = True
+                job.status = "staged"
+                job.touched = time.time()
+                return True, None
             info = ffmpeg_ops.probe(inp)
             if info is None:
                 _fail(job, "not_media", "This file could not be read as a video or audio file.")
@@ -187,6 +201,49 @@ def start(job: Job):
         job.status = "queued"
         job.touched = time.time()
         _queue.put(job.jid)
+        return True, None
+
+
+def store_output(job: Job, stream, ext: str, expected_len: int, expected_sha256: str):
+    """Deposit of a stage job's converted file (server ticket only). Returns (ok, (code, message)|None).
+
+    Length and SHA-256 are the sender's own and must match; the first bytes must be the real magic of the
+    declared type, so no empty, truncated or mislabelled output can ever be reported as done. The source is
+    destroyed the moment the output is safely stored."""
+    with job.lock:
+        if job.op != STAGE_OP or job.status != "staged":
+            return False, ("bad_state", "This job is not waiting for a result.")
+        if ext not in STAGE_OUTPUTS:
+            return False, ("bad_request", "Unsupported output type.")
+        if not 0 < expected_len <= config.MAX_FILE_BYTES:
+            return False, ("too_large", "The result is empty or too large.")
+        mime, magic = STAGE_OUTPUTS[ext]
+        tmp = os.path.join(job.dir, "output.tmp")
+        final = os.path.join(job.dir, "output.bin")
+        digest = hashlib.sha256()
+        written = 0
+        head = b""
+        with open(tmp, "wb") as f:
+            while True:
+                block = stream.read(1 << 20)
+                if not block:
+                    break
+                written += len(block)
+                if written > expected_len:
+                    break
+                if len(head) < len(magic):
+                    head += block[: len(magic) - len(head)]
+                digest.update(block)
+                f.write(block)
+        if written != expected_len or digest.hexdigest() != (expected_sha256 or "").lower() or not head.startswith(magic):
+            os.remove(tmp)
+            return False, ("bad_output", "The result arrived incomplete or altered.")
+        os.replace(tmp, final)
+        job.out_ext, job.out_mime, job.out_size = ext, mime, written
+        job.progress = 100.0
+        job.status = "done"
+        job.touched = time.time()
+        _drop_input(job)
         return True, None
 
 
