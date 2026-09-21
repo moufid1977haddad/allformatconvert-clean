@@ -326,7 +326,9 @@ srv = Server(8612, MEDIA_MAX_CONCURRENT_JOBS=1, MEDIA_MAX_QUEUED_JOBS=1)
 try:
     jobs = []
     for i in range(3):
-        jid, tk, st, j = upload(srv, SRC, "convert", {"target": "webm", "quality": "high"})
+        # MP4 high: long enough (several seconds) to hold the single worker, short enough to finish in the wait
+        # below now that WebM runs the slow VP9 mode plus the size ladder (minutes on this source).
+        jid, tk, st, j = upload(srv, SRC, "convert", {"target": "mp4", "quality": "high"})
         jobs.append((jid, tk))
     st1, j1, _ = req(srv, "POST", f"/v1/jobs/{jobs[0][0]}/start", jobs[0][1])
     time.sleep(1)
