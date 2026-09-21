@@ -9,7 +9,8 @@ import { isStagedRequest, respondStaged, fileResponse } from "@/lib/media/staged
 export const maxDuration = 300;
 
 function gotenbergTimeoutMs(bytes: number): number {
-  return Math.min(240_000, 30_000 + Math.ceil(bytes / (1024 * 1024)) * 3_000);
+  // Gotenberg's own API_TIMEOUT is 240 s (production, set 2026-09-21): ours must outlast it so ITS error arrives first.
+  return Math.min(250_000, 30_000 + Math.ceil(bytes / (1024 * 1024)) * 3_000);
 }
 
 // Direct multipart requests never exceed Vercel's ~4.5 MB body ceiling; larger documents (a book-length

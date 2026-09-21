@@ -1,7 +1,10 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { checkPlatformUploadSize, MAX_PLATFORM_IMAGE_BASE64_SOURCE_BYTES, PLATFORM_LIMIT_HINT } from '@/lib/quota/limits';
+import { MAX_IMAGE_CAPTIONER_ORIGINAL_BYTES } from '@/lib/quota/limits';
+import { imageToVisionJpeg } from '../../../lib/imageForVision';
+
+const MAX_MB = MAX_IMAGE_CAPTIONER_ORIGINAL_BYTES / (1024 * 1024);
 
 export default function ImageCaptionerPage() {
   const [output, setOutput] = useState('');
@@ -15,25 +18,27 @@ export default function ImageCaptionerPage() {
     const file = e.target.files[0];
     if (!file) return;
     e.target.value = '';
+    setOutput('');
     setImageFile(file);
-    // The image travels as base64 (x1.33) inside JSON, so the source image ceiling is lower than a raw upload's.
-    const sizeCheck = checkPlatformUploadSize(file, MAX_PLATFORM_IMAGE_BASE64_SOURCE_BYTES);
-    setError(sizeCheck.ok ? '' : sizeCheck.message);
-    const reader = new FileReader();
-    reader.onload = (ev) => setPreview(ev.target.result);
-    reader.onerror = () => setError('Failed to read the image file. It may be corrupt or in an unsupported format.');
-    reader.readAsDataURL(file);
+    if (file.size > MAX_IMAGE_CAPTIONER_ORIGINAL_BYTES) {
+      // Checked the moment the file is picked: nothing is decoded or sent.
+      setPreview('');
+      setError(`This image is ${(file.size / (1024 * 1024)).toFixed(1)} MB but this tool accepts images up to ${MAX_MB} MB.`);
+      return;
+    }
+    setError('');
+    // An object URL, not a data URL: a large photo must not be duplicated as a huge string in memory.
+    setPreview((old) => { if (old) URL.revokeObjectURL(old); return URL.createObjectURL(file); });
   };
 
   const process = async () => {
-    if (!preview) return;
+    if (!preview || !imageFile) return;
     setLoading(true);
     setOutput('');
     setError('');
     try {
-      const base64 = preview.split(',')[1];
-      const sizeCheck = checkPlatformUploadSize(imageFile, MAX_PLATFORM_IMAGE_BASE64_SOURCE_BYTES);
-      if (!sizeCheck.ok) { setError(sizeCheck.message); setLoading(false); return; }
+      // The original never leaves the device: the model only sees a reduced image anyway (see imageForVision.js).
+      const { base64 } = await imageToVisionJpeg(imageFile);
       const response = await fetch('/api/ai-vision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -42,7 +47,7 @@ export default function ImageCaptionerPage() {
       const data = await response.json();
       if (data.text) setOutput(data.text);
       else setError(data.error || 'No response received');
-    } catch(e) { setError('Error: ' + e.message); }
+    } catch(e) { setError(e.message || 'Something went wrong. Please try again.'); }
     setLoading(false);
   };
 
@@ -55,9 +60,9 @@ export default function ImageCaptionerPage() {
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
             {preview ? <img src={preview} className="max-h-48 mx-auto rounded-lg" alt="preview" /> : <p className="text-neutral-400 text-sm">Click to upload an image</p>}
           </div>
-          <p className="text-neutral-400 text-xs text-center -mt-2">Max {MAX_PLATFORM_IMAGE_BASE64_SOURCE_BYTES / (1024 * 1024)} MB per image — images are sent encoded, which makes them about a third larger; {PLATFORM_LIMIT_HINT}</p>
+          <p className="text-neutral-400 text-xs text-center -mt-2">Max {MAX_MB} MB per image — it is reduced on your device before sending, so large photos work</p>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
-          <button onClick={process} disabled={!preview || loading || (imageFile && imageFile.size > MAX_PLATFORM_IMAGE_BASE64_SOURCE_BYTES)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          <button onClick={process} disabled={!preview || loading || (imageFile && imageFile.size > MAX_IMAGE_CAPTIONER_ORIGINAL_BYTES)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Generating...' : 'Generate Caption'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
