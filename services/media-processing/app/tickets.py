@@ -5,7 +5,12 @@ checks) and authorises exactly ONE job id for a short time:
 
     v1.<base64url(json payload)>.<base64url(HMAC-SHA256(secret, payload part))>
 
-payload = {"jid": str, "op": str, "max": int (bytes), "exp": int (unix seconds)}
+payload = {"jid": str, "op": str, "max": int (bytes), "exp": int (unix seconds),
+           "role": "browser" | "server"  (optional, absent = "browser")}
+
+A "server" ticket is minted by the Vercel route for the same job after it has
+verified the browser's ticket; only it may read a staged source file or deposit
+the converted output (see main.py). The browser can never do either.
 
 The browser only ever holds this opaque ticket, never a long-lived key.
 Comparison is constant time (hmac.compare_digest), like every other secret
@@ -56,4 +61,7 @@ def verify(ticket: str | None):
         return None, "malformed"
     if exp < time.time():
         return None, "expired"
-    return {"jid": jid, "op": op, "max": mx, "exp": exp}, None
+    role = payload.get("role", "browser")
+    if role not in ("browser", "server"):
+        return None, "malformed"
+    return {"jid": jid, "op": op, "max": mx, "exp": exp, "role": role}, None

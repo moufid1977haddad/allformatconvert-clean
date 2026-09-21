@@ -14,6 +14,8 @@ Endpoints (all but /health need `Authorization: Bearer <ticket>`):
   PUT    /v1/jobs/<id>/chunks/<n>       raw bytes of chunk n + X-Chunk-Sha256 header (idempotent, resumable)
   POST   /v1/jobs/<id>/start            assemble + queue
   GET    /v1/jobs/<id>/result           stream the output (deleted after a full download)
+  GET    /v1/jobs/<id>/source           stage jobs, SERVER ticket only: the staged upload, read by the Vercel route
+  PUT    /v1/jobs/<id>/output           stage jobs, SERVER ticket only: deposit of the converted file (+ SHA-256)
   DELETE /v1/jobs/<id>                  cancel / delete now
 """
 from __future__ import annotations
@@ -31,10 +33,17 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 log = logging.getLogger("media-processing")
 
 app = Flask(__name__)
-# A request body is at most one chunk; refuse anything bigger up front.
+# A request body is at most one chunk; refuse anything bigger up front. The one exception is the
+# server-to-server output deposit of a stage job (see _raise_limit_for_output below).
 app.config["MAX_CONTENT_LENGTH"] = config.CHUNK_BYTES + 1024
 apply_cors(app)
 jobs.ensure_started()
+
+
+@app.before_request
+def _raise_limit_for_output():
+    if request.method == "PUT" and request.path.endswith("/output"):
+        request.max_content_length = config.MAX_FILE_BYTES
 
 
 def _err(code, message, status, **extra):
@@ -62,7 +71,7 @@ def _job_or_404(jid):
 def health():
     # `targets` = number of output formats this build offers: lets a deployment be checked for
     # running THIS code (an old version keeps answering /health after a failed deploy).
-    return jsonify(status="ok", targets=len(ffmpeg_ops.TARGETS)), 200
+    return jsonify(status="ok", targets=len(ffmpeg_ops.TARGETS), stage=True), 200
 
 
 @app.route("/v1/jobs", methods=["POST"])
@@ -72,11 +81,13 @@ def create_job():
         return bad
     body = request.get_json(silent=True) or {}
     op = body.get("op")
-    if op != payload["op"] or op not in ffmpeg_ops.OPS:
+    if op != payload["op"] or (op not in ffmpeg_ops.OPS and op != jobs.STAGE_OP):
         return _err("bad_request", "Unsupported operation.", 400)
     size = body.get("size")
     if not isinstance(size, int) or isinstance(size, bool):
         return _err("bad_request", "The file size is required.", 400)
+    if payload["role"] != "browser":
+        return _err("unauthorized", "Only the visitor's own ticket can create a job.", 401, reason="wrong_role")
     if size > payload["max"]:
         return _err("too_large", "This file is larger than the size this ticket allows.", 413)
     params = body.get("params") if isinstance(body.get("params"), dict) else {}
@@ -144,6 +155,58 @@ def start_job(jid):
         return jsonify(status=job.status), 202
     code, msg = problem
     return _err(code, msg, {"busy": 503, "incomplete": 409, "not_media": 422, "too_long": 422, "bad_request": 400}.get(code, 400))
+
+
+def _server_only(jid):
+    payload, bad = _authorized(jid)
+    if bad:
+        return None, bad
+    if payload["role"] != "server":
+        return None, _err("unauthorized", "This step is reserved for the site's server.", 401, reason="wrong_role")
+    return payload, None
+
+
+@app.route("/v1/jobs/<jid>/source", methods=["GET"])
+def source(jid):
+    _, bad = _server_only(jid)
+    if bad:
+        return bad
+    job, missing = _job_or_404(jid)
+    if missing:
+        return missing
+    if job.op != jobs.STAGE_OP or job.status != "staged":
+        return _err("bad_state", "No staged file to read.", 409)
+    path = os.path.join(job.dir, "input.bin")
+
+    def stream():
+        with open(path, "rb") as f:
+            while True:
+                block = f.read(1 << 20)
+                if not block:
+                    break
+                yield block
+
+    return Response(stream(), mimetype="application/octet-stream", headers={"Content-Length": str(os.path.getsize(path)), "Cache-Control": "no-store"})
+
+
+@app.route("/v1/jobs/<jid>/output", methods=["PUT"])
+def put_output(jid):
+    _, bad = _server_only(jid)
+    if bad:
+        return bad
+    job, missing = _job_or_404(jid)
+    if missing:
+        return missing
+    ext = request.headers.get("X-Output-Ext", "")
+    sha = request.headers.get("X-Output-Sha256", "")
+    length = request.content_length
+    if length is None:
+        return _err("bad_request", "Content-Length is required.", 411)
+    ok, problem = jobs.store_output(job, request.stream, ext, length, sha)
+    if ok:
+        return jsonify(ok=True, outputBytes=job.out_size), 200
+    code, msg = problem
+    return _err(code, msg, {"bad_state": 409, "too_large": 413}.get(code, 400))
 
 
 @app.route("/v1/jobs/<jid>/result", methods=["GET"])
