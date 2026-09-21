@@ -1,5 +1,7 @@
 # RAPPORT — Déploiement du service vidéo, preuve en production, comparaison au marché, plafond Vercel
 
+> **Correction du 21 septembre 2026 :** ce rapport comparait des Mo décimaux à des Mio (notre WebM de 30 s pesait 47,0 Mo, pas 44,8 ; la source 21,7 Mo, pas 20,7) et comparait des sorties de qualité inégale. Le tableau qui fait foi (temps · taille · qualité mesurée) est dans `RAPPORT-video-qualite.md`.
+
 Date : 20 septembre 2026. Suite de `RAPPORT-video-architecture.md` (§7, runbook).
 Commits : `d52e8039`, `ad455cc6`, fusion `f0d5faeb` (master) + ce rapport. Balise de restauration : `restore-pre-video-deploiement`.
 
