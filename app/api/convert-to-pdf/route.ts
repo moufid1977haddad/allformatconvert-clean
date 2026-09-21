@@ -13,9 +13,13 @@ export const maxDuration = 60;
 
 const GOTENBERG_TIMEOUT_MS = 30_000;
 
-// Vercel Functions accept request bodies up to 100 MB, so this app-level
-// limit is a deliberately stricter policy, not a workaround for a platform
-// ceiling.
+// Vercel refuses request bodies above ~4.5 MB BEFORE this code runs (measured in
+// production on 2026-09-20: 4,493,821 bytes accepted, 4,493,924 refused with
+// FUNCTION_PAYLOAD_TOO_LARGE; nothing above that gets through, up to 100 MB tried),
+// so through the site this 25 MB check is never reached. It stays as the server-side
+// guard for a direct-upload path (D8, docs/audit/RAPPORT-video-deploiement.md);
+// the ceiling that actually applies today is MAX_PLATFORM_UPLOAD_BYTES in
+// lib/quota/limits.js, checked in the browser before the file is sent.
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024;
 
 const ALLOWED_EXTENSIONS = new Set(["docx", "doc", "xlsx", "xls", "csv", "ods", "pptx", "ppt"]);
