@@ -6,9 +6,9 @@ Date : 22 septembre 2026. Suite de `RAPPORT-plafonds-mesures.md`.
 
 - **Incident grave reconnu : violation n° 3 de l'interdit « aucune boucle de surveillance »**, signalée par le propriétaire (« 11 monitors still running »). Cause identifiée et corrigée. Détail §1.
 - **Retour sur le bogue des permissions renvoyé** (§2) — la première tentative n'était pas arrivée à l'écran.
-- **`gotenberg-v2` est maintenant indépendant de `gotenberg-fonts`** : 8 variables référencées copiées en valeurs propres (jamais lues ni affichées), redéployé, vérifié en production avec de vrais fichiers sur les outils qui en dépendent. **`gotenberg-fonts` n'est PAS supprimé — en attente de l'accord explicite du propriétaire.**
-- **`gotenberg-fonts` confirmé : il ne dort pas.** Veille Serverless désactivée (`sleep: false`) : il tourne 24 h/24 sans jamais recevoir de requête depuis 3 jours. Le coût mesuré dans `RAPPORT-plafonds-mesures.md` (≈ 0,7-5,7 $/mois) est donc un coût réel et continu, pas une estimation au pire cas.
-- **DPA ConvertAPI : procédure réelle trouvée**, le vrai document légal lu directement (pas un résumé halluciné). Étapes exactes au §4.
+- **`gotenberg-v2` est indépendant de `gotenberg-fonts`, prouvé à 6 outils sur 6** (pas 5 sur 6) : 8 variables référencées copiées en valeurs propres (jamais lues ni affichées), redéployé, vérifié en production avec de vrais fichiers sur `excel-to-pdf`, `ppt-to-pdf`, `html-to-pdf`, `epub-to-pdf`, `mobi-to-pdf`, et `word-to-pdf` (`.doc` binaire réel, fabriqué avec LibreOffice installé localement).
+- **`gotenberg-fonts` : NON supprimé, décision du propriétaire — veille Serverless activée à la place.** Il tournait 24 h/24 sans une seule requête depuis 3 jours ; **la veille est maintenant active, vérifiée par lecture directe du réglage (`false` avant, `true` après)**, et `gotenberg-v2` continue de servir la production normalement (revérifié juste après). Suppression tranchée après le lancement.
+- **DPA ConvertAPI : ce n'est plus un bloquant de lancement.** Le document légal lu directement dit que ses conditions s'appliquent déjà sans signature. Procédure et courriel prêt à envoyer au §5.
 
 ## 1. Incident : boucles de surveillance (interdit permanent n° 6)
 
@@ -48,17 +48,19 @@ Le changement de variables a déclenché un redéploiement automatique de `goten
 | `epub-to-pdf` | 1,8 Ko (fixture minimale) | ✅ PASS — 0,5 s, PDF produit |
 | `mobi-to-pdf` | 122 Ko | ✅ PASS — 0,8 s, PDF 194 Ko |
 
-**`word-to-pdf` sur son chemin Gotenberg (repli `.doc`, actif seulement si `CONVERTAPI_ENABLED` est coupé pour `.docx`, ou pour un vrai `.doc`) : non testé séparément.** Aucun fichier `.doc` réel trouvé rapidement (deux sources externes ont renvoyé des pages HTML au lieu d'un vrai `.doc` ; abandonné après quelques essais, règle des vingt minutes). **Risque résiduel jugé faible** : ce chemin appelle exactement la même fonction (`handleGotenberg`, `app/api/convert-to-pdf/route.ts`) que `excel-to-pdf` et `ppt-to-pdf`, déjà prouvés ci-dessus, sur le même service, avec les mêmes nouvelles variables. **À revérifier avec un vrai `.doc` si tu veux fermer complètement ce point.**
+**✅ `word-to-pdf` sur son chemin Gotenberg (repli `.doc`) — prouvé.** Les deux sources externes essayées en premier renvoyaient des pages HTML au lieu d'un vrai `.doc` ; **LibreOffice était installé localement** (`C:\Program Files\LibreOffice\program\soffice.exe`), utilisé pour fabriquer un vrai `.doc` binaire (format Word 97, `soffice --headless --convert-to doc:"MS Word 97"`) à partir d'un texte simple. Passé en production sur `word-to-pdf` : **PASS, 1,3 s, PDF produit, octets magiques corrects.**
 
-**Conclusion de cette étape : `gotenberg-v2` fonctionne de façon autonome, prouvé sur www.onlineconvertools.com avec de vrais fichiers sur 5 des 6 outils Office ; le 6ᵉ (`word-to-pdf` / `.doc`) partage le code déjà prouvé mais n'a pas été testé avec son propre fichier.**
+**Conclusion de cette étape : `gotenberg-v2` fonctionne de façon autonome, prouvé sur www.onlineconvertools.com avec de vrais fichiers sur les 6 outils Office qui en dépendent — 6 sur 6, pas 5 sur 6.**
 
-### c. Suppression de gotenberg-fonts — EN ATTENTE
+### c. Suppression de gotenberg-fonts — DÉCISION DU PROPRIÉTAIRE : PAS DE SUPPRESSION MAINTENANT, VEILLE ACTIVÉE À LA PLACE
 
-**Rien n'a été supprimé.** L'indépendance de `gotenberg-v2` est prouvée (§a, §b). **La décision de supprimer `gotenberg-fonts` reste entièrement au propriétaire**, comme demandé. Dès l'accord explicite reçu, la suppression peut se faire par l'API Railway (nom du service seulement, aucune valeur) et sera vérifiée par un nouvel appel `/health` sur `gotenberg-v2` juste après, pour confirmer qu'aucune dépendance cachée n'a été manquée.
+**Ni supprimé, ni prévu de l'être maintenant.** Le propriétaire a tranché : garder le service, mais lui appliquer la veille Serverless (le même mécanisme que le détourage) pour récupérer le coût immédiatement, avec un retour arrière en un clic si besoin. La suppression sera retranchée après le lancement, une fois prouvé sur plusieurs semaines qu'il n'a servi à rien. **Fait et vérifié — voir §d.**
 
-### d. gotenberg-fonts dort-il vraiment ?
+### d. gotenberg-fonts dort-il vraiment ? — ✅ ACTIVÉ ET VÉRIFIÉ
 
-**Non — il tourne en continu.** Réglage lu côté Railway : `sleepApplication: false` sur `gotenberg-fonts` (aucune veille Serverless configurée), dernier déploiement réussi le 19 septembre 2026, `16h47`, et **aucune ligne `request handled` dans ses journaux depuis** (confirmé dans `RAPPORT-plafonds-mesures.md` §5, revérifié ici). **Le coût mesuré (≈ 0,7 à 5,7 $/mois selon la fenêtre de mesure) est donc un coût réel et continu pour zéro trafic, pas une estimation au pire cas avec veille.** C'est précisément ce coût que la suppression récupérerait intégralement.
+**Avant l'action : non, il tournait en continu.** `sleepApplication: false`, dernier déploiement le 19 septembre 16h47, **aucune ligne `request handled` dans ses journaux depuis** (confirmé dans `RAPPORT-plafonds-mesures.md` §5). Le coût mesuré (≈ 0,7 à 5,7 $/mois selon la fenêtre) était donc réel et continu pour zéro trafic.
+
+**Veille Serverless activée** (mutation API Railway sur le réglage du service, nom seulement — aucune valeur de variable lue ni affichée) : `sleepApplication` lu **`false` avant**, mutation appliquée, relu **`true` après** — confirmé par une lecture, pas supposé. **`gotenberg-v2` non touché** (toujours `sleep: false`, comme il se doit pour un service de production) et **vérifié servir la production normalement juste après le changement** : `word-to-pdf` avec un `.doc` réel, PASS en 1,3 s (voir §b). La veille récupère le coût dès la prochaine période d'inactivité de `gotenberg-fonts`, sans jamais avoir reçu de trafic pour la justifier.
 
 ## 4. DPA ConvertAPI — procédure réelle et étapes exactes
 
@@ -82,11 +84,32 @@ Le changement de variables a déclenché un redéploiement automatique de `goten
 
 **Ce que je n'ai pas pu vérifier directement** : l'existence exacte de la section « Contracts » du tableau de bord (elle nécessite une connexion, donc c'est à toi de la trouver à l'écran) ; le palier tarifaire réel du compte de production. Le contact `privacy@convertapi.com` et le contenu du document légal, eux, sont vérifiés directement, pas rapportés de seconde main.
 
-## 5. Ce qui reste
+## 5. DPA ConvertAPI — mise à jour du statut
 
-- **Suppression de `gotenberg-fonts`** : en attente de ton accord explicite (point 3c).
-- **Signature du DPA** : à faire par toi, avant Product Hunt (point 4).
-- **Confirmation que le compteur de surveillance est bien à zéro** côté interface (point 1) — je ne peux pas le vérifier moi-même.
+**Ce n'est plus un bloquant de lancement.** Le document légal lu au §4 dit explicitement que ses conditions **s'appliquent déjà, automatiquement, sans signature** — la protection RGPD est donc déjà en place aujourd'hui, avant toute action. Un DPA individuel signé reste utile (traçabilité contractuelle formelle) mais n'a plus d'urgence liée au lancement. Statut corrigé dans le plan en conséquence.
+
+**Courriel prêt à envoyer** (à adapter avec le nom exact de l'entité cliente avant envoi) :
+
+> **À :** privacy@convertapi.com
+> **Objet :** Demande de DPA individuel signé — compte ConvertAPI [NOM DU COMPTE / EMAIL DU COMPTE]
+>
+> Bonjour,
+>
+> Nous utilisons ConvertAPI en production sur onlineconvertools.com pour la conversion de documents (Word, Excel, PowerPoint, PDF). Nous souhaitons formaliser un Accord de Traitement des Données (Data Processing Agreement) individuel et signé, en complément du document « Privacy Policy and Data Processing Terms » du 7 février 2025 qui s'applique déjà à notre compte.
+>
+> Merci de nous indiquer la procédure pour obtenir et signer ce document, ou de nous transmettre directement le DPA à signer.
+>
+> Nom de l'entité cliente (partie au contrat principal ConvertAPI) : [À COMPLÉTER — doit être identique au nom du compte]
+> Adresse e-mail du compte ConvertAPI : [À COMPLÉTER]
+>
+> Cordialement,
+> [NOM / SOCIÉTÉ]
+
+## 6. Ce qui reste
+
+- **Confirmation que le compteur de surveillance est bien à zéro** côté interface — le propriétaire la vérifie lui-même à l'écran, aucune vérification de ma part sur ce point.
+- **DPA** : courriel ci-dessus prêt, à envoyer et signer quand le propriétaire le souhaite — sans urgence de lancement.
+- **Suppression de `gotenberg-fonts`** : reportée après le lancement, décision explicite du propriétaire (point 3c).
 
 ## 6. Livrables
 
