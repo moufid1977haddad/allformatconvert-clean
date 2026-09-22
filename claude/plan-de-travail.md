@@ -363,6 +363,7 @@ Et les deux outils de données : **`xml-to-json`** (`b77f988b`, guillemets écha
 | Quand | Quoi |
 |---|---|
 | ✅ **Déclenché le 22/09 — le rapport Indexation a dépassé le 03/09, relevé au 17/09/2026** | **45 pages indexées sur 248, 203 non indexées.** Répartition des 203 : **192 « Détectée, actuellement non indexée »** — autorité de domaine, ne se corrige pas par du code, cohérent avec la position moyenne 74,7 déjà documentée ; **7 imputables au site, toutes relevées et diagnostiquées le 22/09 via Claude in Chrome** (voir ADMINISTRATIF) — aucune n'est cassée aujourd'hui : les 3 « 404 » étaient de vraies pannes avant le 31/08 (corrigées depuis par `lib/legacyRedirects.ts`), les 3 « Page avec redirection » sont des variantes non canoniques de l'accueil (comportement voulu), la 1 « Erreur liée aux redirections » (`/tools/media-tools`) fonctionne aujourd'hui en un seul saut propre (aléa de crawl probable, non reproduit). Aucune URL saine retirée du sitemap ni passée en `noindex`. |
+| **Le 24 septembre** | Relire le pourcentage de stockage Vercel — attendu ~2,7 % si l'hypothèse du recalcul quotidien est juste, 77,9 % sinon, auquel cas la cause est ailleurs. |
 | **Le 27 de chaque mois** | Renouvellement Anthropic Pro — CA$ 32,19 |
 | **6 juin 2027** | Renouvellement du domaine chez Cloudflare Registrar — US$ 10,98/an. **Si le domaine tombe, tout tombe.** |
 
