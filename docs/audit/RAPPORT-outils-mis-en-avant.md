@@ -158,4 +158,6 @@ Il est faux sur presque tout ce qu'il affirme : « plan Pro » (Hobby), dossier 
 
 ## 7. Vérification en production
 
-Voir la section « Vérification » ajoutée après déploiement ci-dessous.
+Déploiement de production `dpl_BXrZoKXqL8EPcToJrJoRm7i1oNJL` (commit `92d3a66c`, `master` avancé en avance rapide depuis la branche), en ligne ~50 s après le push. `scripts/audit/featured/verify-fixes.mjs` contre `https://www.onlineconvertools.com` : **16/16 PASS** — compresseur (refus d'un fichier plus lourd, tailles affichées, fond blanc), convertisseur (fond blanc), TAR PAX et `tar.exe` (vrais fichiers, vrais noms), JSON (64 bits, 1.10), XML (zéros initiaux), bases (1012 binaire invalide, 2⁶⁴−1 exact), unités (0.0000006213711922 mile, 39370.07874 pouces), pourcentage (0.00005), romains (IM refusé, MCMXCIV = 1994), devises (date de publication des taux), compteur 222, accueil sans « 225 »/« 190 »/« No limits », sitemap toujours 240 URL sans stub. Même script 16/16 sur la préversion avant la fusion.
+
+Coûts engagés par l'audit : 2 appels payants sur préversion (Grammar Fixer ≈ 0,0002 $) + 2 détourages (service auto-hébergé) ; ~8 conversions vidéo sur le service ffmpeg (≈ 0,01 $).

@@ -460,7 +460,7 @@ Et les deux outils de données : **`xml-to-json`** (`b77f988b`, guillemets écha
 
 | Chantier | Preuve |
 |---|---|
-| **Outils mis en avant : 10 résultats faux silencieux (22/09)** | 36 outils ouverts avec de vrais fichiers en production ; 10 corrigés (`30235fe7`, `8b5d5645`, `609ba261`, `46306611`, `bf533569`), tests unitaires sur les entrées fautives, `verify-fixes.mjs` 16/16 sur préversion puis en production. Écarts de qualité/couverture : chiffrés, en attente (bloquant 5). |
+| **Outils mis en avant : 10 résultats faux silencieux (22/09)** | 36 outils ouverts avec de vrais fichiers en production ; 10 corrigés (`30235fe7`, `8b5d5645`, `609ba261`, `46306611`, `bf533569`), tests unitaires sur les entrées fautives, `verify-fixes.mjs` 16/16 sur préversion puis 16/16 en production (`dpl_BXrZoKXq`, 22/09). Écarts de qualité/couverture : chiffrés, en attente (bloquant 5). |
 | **Promesses de fidélité Office → PDF** | *« professional-quality »* retiré des **5 outils**, remplacé par des formulations adossées à des mesures écrites ; `<meta description>` corrigées ; substitution de police divulguée sur `ppt-to-pdf`. **Vérifié sur le HTML servi en production.** Corpus reproductible versionné. |
 | **Gras Excel (D1)** | Cause réelle identifiée (polices `.xlsx` sans nom), `lib/xlsxDefaultFont.js` + test, **Carlito-Bold en production**, au niveau des deux concurrents. |
 | **Repli silencieux `pdf-to-word` (D6)** | **503 avec message clair** au lieu d'un texte brut rendu sans le dire. |
