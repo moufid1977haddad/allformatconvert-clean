@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import fs from "node:fs";
 import path from "node:path";
+import { isComingSoonTool } from "@/lib/toolCounts";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://www.onlineconvertools.com";
@@ -41,14 +42,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       );
       if (!pageExists) continue;
 
-      const layoutPath = ["layout.tsx", "layout.ts", "layout.jsx", "layout.js"]
-        .map((f) => path.join(categoryDir, slug.name, f))
-        .find((p) => fs.existsSync(p));
-      if (layoutPath) {
-        const layoutSource = fs.readFileSync(layoutPath, "utf-8");
-        const isNoindex = /robots\s*:\s*\{[^}]*index\s*:\s*false/.test(layoutSource);
-        if (isNoindex) continue;
-      }
+      if (isComingSoonTool(path.join(categoryDir, slug.name))) continue;
 
       toolPages.push({
         url: `${baseUrl}/tools/${category.name}/${slug.name}`,

@@ -273,7 +273,7 @@ export function nameFor(href) {
 // `categories` list — used only if the live /api/tool-counts fetch hasn't
 // resolved yet).
 export const CATEGORY_META = {
-  'pdf-tools':   { label: 'PDF',   href: '/tools/pdf-tools',   count: 39 },
+  'pdf-tools':   { label: 'PDF',   href: '/tools/pdf-tools',   count: 37 },
   'image-tools': { label: 'Image', href: '/tools/image-tools', count: 37 },
   'gif-tools':   { label: 'GIF',   href: '/tools/gif-tools',   count: 11 },
   'audio-tools': { label: 'Audio', href: '/tools/audio-tools', count: 11 },

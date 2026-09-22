@@ -63,6 +63,45 @@ for (const cat of categories) {
   }
 }
 
+// Displayed tool counts. The homepage and /tools page are client components, so
+// their server-rendered HTML shows hardcoded fallbacks until /api/tool-counts
+// answers: those fallbacks must equal the real number of WORKING tools (a
+// "Coming Soon" page, marked noindex, is not one -- same rule as lib/toolCounts.js
+// and the sitemap). They had drifted: "225+" shown for 222 working tools.
+const NOINDEX_RE = /robots\s*:\s*\{[^}]*index\s*:\s*false/;
+const realCounts = {};
+let realTotal = 0;
+for (const cat of categories) {
+  const catDir = path.join(TOOLS_DIR, cat);
+  realCounts[cat] = fs.readdirSync(catDir).filter((slug) => {
+    const dir = path.join(catDir, slug);
+    if (!fs.statSync(dir).isDirectory() || !pageExists(cat, slug)) return false;
+    const layout = ['layout.tsx', 'layout.ts', 'layout.jsx', 'layout.js'].map((f) => path.join(dir, f)).find((p) => fs.existsSync(p));
+    return !(layout && NOINDEX_RE.test(fs.readFileSync(layout, 'utf8')));
+  }).length;
+  realTotal += realCounts[cat];
+}
+const COUNT_SOURCES = [
+  { file: path.join(__dirname, '..', 'app', 'page.jsx'), re: /href: '\/tools\/([a-z-]+)',[^\n]*?count: (\d+)/g },
+  { file: path.join(__dirname, '..', 'app', 'tools', 'page.jsx'), re: /href: '\/tools\/([a-z-]+)',[^\n]*?count: (\d+)/g },
+  { file: path.join(__dirname, '..', 'app', 'lib', 'toolsRegistry.js'), re: /'([a-z-]+)':\s*\{[^}]*count: (\d+)/g },
+];
+for (const { file, re } of COUNT_SOURCES) {
+  const src = fs.readFileSync(file, 'utf8');
+  let m;
+  while ((m = re.exec(src))) {
+    const [, cat, shown] = m;
+    if (cat in realCounts && Number(shown) !== realCounts[cat]) {
+      issues.push(`${path.relative(process.cwd(), file)}: "${cat}" shows count ${shown}, but it has ${realCounts[cat]} working tools`);
+    }
+  }
+}
+const homeSrc = fs.readFileSync(COUNT_SOURCES[0].file, 'utf8');
+const defaultTotal = Number((/DEFAULT_TOOL_COUNT = (\d+)/.exec(homeSrc) || [])[1]);
+if (defaultTotal !== realTotal) {
+  issues.push(`app/page.jsx: DEFAULT_TOOL_COUNT is ${defaultTotal}, but there are ${realTotal} working tools`);
+}
+
 if (issues.length) {
   console.error(`\nx check-tool-links found ${issues.length} issue(s):\n`);
   issues.forEach(i => console.error('  - ' + i));

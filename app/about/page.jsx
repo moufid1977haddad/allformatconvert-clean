@@ -18,7 +18,7 @@ export default function AboutPage() {
         <div className="bg-white border border-neutral-200 rounded-xl p-8 mb-5">
           <h2 className="text-xl font-bold text-neutral-800 mb-3">What is OnlineConverTools?</h2>
           <p className="text-neutral-600 text-sm leading-relaxed">
-            OnlineConverTools is a free, all-in-one platform offering {total}+ online tools for converting,
+            OnlineConverTools is a free, all-in-one platform offering {total} online tools for converting,
             compressing, and editing files — including PDFs, images, videos, audio, and more.
             Everything runs locally in your browser, so your files never leave your device.
           </p>
@@ -28,7 +28,7 @@ export default function AboutPage() {
           <h2 className="text-xl font-bold text-neutral-800 mb-3">Our Mission</h2>
           <p className="text-neutral-600 text-sm leading-relaxed">
             We believe powerful tools should be free and accessible to everyone. No sign-up required,
-            no watermarks, no limits — just fast, reliable tools that work right in your browser.
+            no watermarks — just fast, reliable tools that work right in your browser.
           </p>
         </div>
 

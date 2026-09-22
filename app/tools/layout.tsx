@@ -1,13 +1,16 @@
 import type { Metadata } from 'next';
 import ToolTitleIcon from './ToolTitleIcon';
+import { getToolCounts } from "@/lib/toolCounts";
+
+const { total: totalTools } = getToolCounts();
 
 export const metadata: Metadata = {
-  title: { absolute: "All Tools — Browse 225+ Free File Converters Online Free" },
-  description: "Browse all 225+ free online tools on OnlineConverTools, organized by category: PDF, image, video, audio, GIF, developer, AI, and more.",
+  title: { absolute: `All Tools — Browse ${totalTools} Free File Converters Online Free` },
+  description: `Browse all ${totalTools} free online tools on OnlineConverTools, organized by category: PDF, image, video, audio, GIF, developer, AI, and more.`,
   alternates: { canonical: "https://www.onlineconvertools.com/tools" },
   openGraph: {
-    title: "All Tools — Browse 225+ Free File Converters Online Free",
-    description: "Browse all 225+ free online tools on OnlineConverTools, organized by category: PDF, image, video, audio, GIF, developer, AI, and more.",
+    title: `All Tools — Browse ${totalTools} Free File Converters Online Free`,
+    description: `Browse all ${totalTools} free online tools on OnlineConverTools, organized by category: PDF, image, video, audio, GIF, developer, AI, and more.`,
     url: "https://www.onlineconvertools.com/tools",
   },
 };

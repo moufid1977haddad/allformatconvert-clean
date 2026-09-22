@@ -17,8 +17,8 @@ const tools = [
   { title: 'Word to PDF', description: 'Convert DOCX to PDF', href: '/tools/pdf-tools/word-to-pdf', group: 'Convert to PDF' },
   { title: 'PDF to Word', description: 'Convert PDF to DOCX', href: '/tools/pdf-tools/pdf-to-word', group: 'Convert from PDF' },
   { title: 'Excel to PDF', description: 'Convert XLSX to PDF', href: '/tools/pdf-tools/excel-to-pdf', group: 'Convert to PDF' },
-  { title: 'PDF to Excel', description: 'Convert PDF tables to Excel', href: '/tools/pdf-tools/pdf-to-excel', group: 'Convert from PDF' },
-  { title: 'PDF to PPT', description: 'Convert PDF to PowerPoint', href: '/tools/pdf-tools/pdf-to-ppt', group: 'Convert from PDF' },
+  { title: 'PDF to Excel', description: 'Convert PDF tables to Excel', href: '/tools/pdf-tools/pdf-to-excel', group: 'Convert from PDF', comingSoon: true },
+  { title: 'PDF to PPT', description: 'Convert PDF to PowerPoint', href: '/tools/pdf-tools/pdf-to-ppt', group: 'Convert from PDF', comingSoon: true },
   { title: 'PPT to PDF', description: 'Convert PowerPoint to PDF', href: '/tools/pdf-tools/ppt-to-pdf', group: 'Convert to PDF' },
   { title: 'HTML to PDF', description: 'Convert HTML to PDF', href: '/tools/pdf-tools/html-to-pdf', group: 'Convert to PDF' },
   { title: 'Text to PDF', description: 'Convert plain text to PDF', href: '/tools/pdf-tools/text-to-pdf', group: 'Convert to PDF' },
@@ -49,7 +49,7 @@ export default function PdfToolsPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-2 text-neutral-800 flex items-center justify-center gap-2"><CategoryIcon slug="pdf-tools" className={`w-8 h-8 ${categoryColors['pdf-tools']}`} /> PDF Tools</h1>
-        <p className="text-neutral-500 text-center mb-10">All your PDF tools in one place - {tools.length} tools</p>
+        <p className="text-neutral-500 text-center mb-10">All your PDF tools in one place - {tools.filter(t => !t.comingSoon).length} tools</p>
         <div className="flex flex-wrap gap-4 justify-center">
           {tools.map((tool) => (
             <Link key={tool.href} href={tool.href} className="bg-white border border-neutral-200 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)]">

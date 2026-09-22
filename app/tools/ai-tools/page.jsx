@@ -8,7 +8,7 @@ const tools = [
   { title: 'Grammar Fixer', description: 'Fix grammar and spelling with AI', href: '/tools/ai-tools/grammar-fixer', group: 'Writing & Language' },
   { title: 'Text Summarizer', description: 'Summarize long texts with AI', href: '/tools/ai-tools/text-summarizer', group: 'Writing & Language' },
   { title: 'AI Translator', description: 'Translate text with AI', href: '/tools/ai-tools/ai-translator', group: 'Chat, Translate & Generate' },
-  { title: 'Image Generator', description: 'Generate images with AI', href: '/tools/ai-tools/image-generator', group: 'Image AI' },
+  { title: 'Image Generator', description: 'Generate images with AI', href: '/tools/ai-tools/image-generator', group: 'Image AI', comingSoon: true },
   { title: 'AI Chatbot', description: 'Chat with an AI assistant', href: '/tools/ai-tools/ai-chatbot', group: 'Chat, Translate & Generate' },
   { title: 'AI Writer', description: 'Generate text content with AI', href: '/tools/ai-tools/ai-writer', group: 'Writing & Language' },
   { title: 'AI Detector', description: 'Detect AI-generated content', href: '/tools/ai-tools/ai-detector', group: 'Writing & Language' },
@@ -26,7 +26,7 @@ export default function AiToolsPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-2 flex items-center justify-center gap-2"><CategoryIcon slug="ai-tools" className={`w-8 h-8 ${categoryColors['ai-tools']}`} /> AI Tools</h1>
-        <p className="text-neutral-500 text-center mb-10">All your AI tools in one place - {tools.length} tools</p>
+        <p className="text-neutral-500 text-center mb-10">All your AI tools in one place - {tools.filter(t => !t.comingSoon).length} tools</p>
         <div className="flex flex-wrap gap-4 justify-center">
           {tools.map((tool) => (
             <Link key={tool.href} href={tool.href} className="bg-white border border-neutral-200 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)]">
