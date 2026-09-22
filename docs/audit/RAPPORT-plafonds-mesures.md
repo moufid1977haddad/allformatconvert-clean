@@ -311,6 +311,19 @@ chose que ce chantier peut corriger dans le dépôt.
   révélé) ; il est corrigé pour tous les types de conversion « stage » par construction (le
   correctif est dans le chemin commun), mais pas re-testé individuellement pour chacun ici.
 
+## 8 bis. Correction après coup : marge réelle, pas une valeur pile à la frontière
+
+En vérifiant chaque plafond sur la production après le premier déploiement, deux valeurs
+annoncées (PDF Repair/PDF/A à 45 Mio, PDF vers Word à 100 Mio) tombaient **exactement** sur la
+taille du fichier de preuve (45,38 et 100,25 Mio), sans marge. Ce n'est pas une erreur de fond —
+un plafond annoncé en dessous d'un fichier prouvé réussit forcément aussi, un fichier plus petit
+n'étant pas plus difficile pour le même moteur — mais un test de production avec le fichier de
+preuve lui-même s'est vu refuser par sa propre limite, ce qui aurait été trompeur à lire sans
+explication. **Corrigé par prudence avec une vraie marge : PDF Repair/PDF/A 45 → 44 Mio, PDF vers
+Word 100 → 99 Mio.** Revérifié en production avec des fichiers sous ces nouvelles valeurs (40 et
+90 Mio). Des blocs de commentaires orphelins de D8 (laissés sans `const` associé par des
+remplacements précédents) ont été nettoyés au passage dans `lib/quota/limits.js`.
+
 ## 9. Déploiement
 
 Fusionné dans `master`, build local propre (268 pages, aucune erreur TypeScript), vérifié sur
