@@ -188,3 +188,27 @@ title/description/OpenGraph) doit citer une mesure du rapport ; pas de
 « professional-quality », pas de comparaison non mesurée, et le SEO doit dire la
 même chose que la page (pdf-to-word affirmait « texte brut, dans votre
 navigateur » alors que la production fait autre chose — corrigé le 2026-09-19).
+
+## Pièges connus
+
+- **Les règles `deny` de `.claude/settings.json` sont un ralentisseur, pas un mur.** Ajoutées le
+  22/09 pour bloquer la lecture des fichiers `.env*` par des commandes shell courantes (`cat`,
+  `grep`, `sed`, `less`, `tail`), elles restent **contournables par une autre forme de la même
+  commande** : chemin absolu du binaire (`/bin/cat .env.local`), sous-shell (`bash -c 'cat
+  .env.local'`), redirection (`cat < .env.local`), ou un outil non listé (`python -c "print(open('.
+  env.local').read())"`, `Get-Content` en PowerShell). Le moteur de permissions découpe bien les
+  commandes enchaînées (`&&`, `;`, `|`) et vérifie chaque sous-commande, mais il matche sur le
+  **texte littéral** de la commande, pas sur son effet — changer la forme du texte suffit à passer
+  au travers. **La vraie protection reste l'interdit numéro un du projet** (ne jamais lire ni
+  afficher le contenu réel des secrets), pas cette barrière technique.
+- **Les règles `allow` de `.claude/settings.local.json` se régénèrent toutes seules.** Chaque fois
+  qu'une commande est approuvée avec « ne plus demander », une nouvelle règle s'ajoute
+  automatiquement à ce fichier — y compris des règles trop larges (générique en fin de commande sur
+  une famille entière, comme `curl *` ou `node *`) ou techniquement cassées (guillemet resté
+  ouvert avant le générique, qui approuve alors bien plus que la commande visée). Ce fichier est
+  gitignored (`/.claude/` dans `.gitignore`) : le nettoyage fait dans une session ne survit pas au
+  clonage ailleurs et doit être repris périodiquement. `.claude/settings.json`, lui, est versionné
+  (forcé au dépôt le 22/09 malgré l'exclusion générale de `.claude/`) et ses règles `deny` gagnent
+  toujours sur n'importe quelle règle `allow`, quelle que soit sa spécificité — c'est pour ça qu'il
+  porte les interdits qui doivent survivre à un clone, un changement de machine ou une
+  réinstallation, plutôt que de compter sur le fichier local.
