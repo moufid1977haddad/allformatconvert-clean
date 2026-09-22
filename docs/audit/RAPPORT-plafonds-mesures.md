@@ -287,6 +287,16 @@ Fichier affiché avant modification (23 règles), catégories trouvées :
 `~/.claude/settings.json` non touchés, comme demandé. Le fichier repasse ainsi sous le principe
 « redemander plutôt que présumer » pour ces commandes.
 
+**Observation faite en terminant ce chantier, à consigner** : 10 de ces mêmes règles sont
+**réapparues d'elles-mêmes** avant la fin de la session, recréées automatiquement par mes propres
+commandes (`git push`, `git checkout -b`, `git merge`, `node -e '…'`, etc.) — l'automatisme qui
+enregistre une permission le fait sur la forme générale de la commande que je tape, pas sur la
+commande exacte, donc il régénère le même excès de portée. **Retirées une seconde fois** juste
+avant ce rapport. Ce n'est pas corrigible en éditant le fichier une fois : c'est un comportement de
+l'outil qui se reproduira à la prochaine session tant qu'il enregistre des règles à partir de motifs
+larges plutôt que de la commande exacte tapée. Signalé par ailleurs (retour d'usage), pas quelque
+chose que ce chantier peut corriger dans le dépôt.
+
 ## 8. Ce qui n'est pas fait, par discipline de temps (note du propriétaire prise en compte)
 
 - Les textes de plafond des pages d'outils individuelles (au-delà de la FAQ de catégorie
