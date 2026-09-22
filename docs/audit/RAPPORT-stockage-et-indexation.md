@@ -2,145 +2,169 @@
 
 Date : 22 septembre 2026. Suite de `RAPPORT-gotenberg-independance.md`.
 
+**Version 2 de ce rapport** : la version précédente s'arrêtait à « je ne peux pas lire ça
+moi-même ». Ce n'était pas vrai — le connecteur Vercel et Claude in Chrome permettaient les deux
+lectures directement. Cette version contient les chiffres et les URL réels, lus en direct.
+
 ## 0. Verdict
 
-- **Stockage Vercel : 207 déploiements ramenés à 5 (-97,6 %).** Production actuelle jamais touchée,
-  vérifiée intacte avant et après. Je ne peux pas lire le pourcentage exact de stockage moi-même
-  (aucun outil ne l'expose) — **à confirmer par toi dans le tableau de bord ou le prochain courriel
-  Vercel.**
-- **Search Console — les 7 pages « de notre faute » : recherche approfondie, mais je ne peux pas te
-  donner les URL exactes sans accès à Search Console.** Tout ce que j'ai pu vérifier moi-même
-  (les 240 URL du sitemap, les 202 redirections codées, la configuration de domaine) **est sain,
-  aujourd'hui, en direct — zéro anomalie trouvée.** Détail et prochaine étape au §2.
-- **Indexation et coût Railway** : chiffres réels du 17/09 et de septembre inscrits dans le plan tels
-  que tu me les as donnés (je n'ai pas d'accès direct à ces deux tableaux de bord).
+- **Stockage Vercel : 77,9 % (7,79 Go / 10 Go), mesuré en direct — PIRE que les 75 % du courriel,
+  malgré le nettoyage de 207 déploiements à 5.** La suppression n'a pas fait ce qu'on en attendait ;
+  détail et explication la plus probable au §1.
+- **Search Console — les 7 pages « de notre faute » : les 7 URL relevées et diagnostiquées une par
+  une, en direct, via Claude in Chrome sur Search Console.** Aucune n'est cassée aujourd'hui. Détail
+  au §2.
+- **Indexation et coût Railway** : chiffres réels du 17/09 et de septembre, inchangés depuis la
+  version précédente de ce rapport.
 
-## 1. Stockage Vercel — nettoyage des anciens déploiements
+## 1. Stockage Vercel — mesuré en direct, résultat contre-intuitif
 
-### Constat
+### Le chiffre
 
-**207 déploiements accumulés depuis le 31 mai 2026** (près de 4 mois), dont 146 ciblant la
-production et 61 des préversions ; 178 encore à l'état `READY` (donc dont les artefacts de
-construction restent stockés), 29 dans un état `CANCELED`/`ERROR`/`BLOCKED` (dont les artefacts
-restent aussi, sauf suppression). C'est l'accumulation que le courriel de Vercel signale.
+Lu dans le tableau de bord Vercel (Usage → Deployment Storage), projet `onlineconvertools` — seul
+projet de l'équipe, donc 100 % du chiffre lui est attribuable :
 
-### Politique de conservation retenue, et pourquoi
+**7,79 Go / 10 Go = 77,9 %.**
 
-**Gardé : les 5 déploiements de production `READY` les plus récents**, soit :
+C'est **plus haut** que les 75 % annoncés par le courriel Vercel qui a déclenché ce chantier — alors
+que dans l'intervalle, 202 des 207 déploiements ont été supprimés (voir le rapport précédent pour le
+détail de cette suppression, qui reste valide et vérifiée : production jamais touchée).
 
-| Déploiement | Date | Rôle |
-|---|---|---|
-| `dpl_G2fFd6zFT2saJ5yJtf2vXAyRNWjh` | 22/09 01h42 | **Production actuelle** — jamais touché |
-| `dpl_6JJKN7JUsEjmvmgDRAEeLp7RkbhL` | 22/09 01h30 | Signalé par Vercel lui-même comme candidat au retour arrière en un clic |
-| `dpl_CZ1vLyGpxWTYcG5NUrJJvt7hYhhx` | 21/09 22h12 | Fusion D8 (envoi par morceaux Office) — jalon majeur testé |
-| `dpl_CbgYRDnktj2eCgnPjDMp6v6g2ySX` | 21/09 20h33 | Fusion du service (changement additif) |
-| `dpl_9UjuCFYb7AausgNBfKzv9k3ktXuF` | 21/09 04h54 | Fusion du chantier qualité vidéo |
+### Pourquoi la suppression n'a (visiblement) pas aidé sur ce chiffre précis
 
-**Pourquoi 5 et pas moins** : Vercel ne signale que 2 candidats officiels au retour arrière (la
-production actuelle et la précédente), ce qui suffit pour un retour arrière immédiat en un clic ;
-j'ai gardé 3 de plus, chacun un point de fusion propre et testé, pour une marge de plusieurs jours
-si un défaut mettait du temps à apparaître — cohérent avec ce projet (le bogue de marge de plafond
-trouvé plus tôt dans la même journée n'est apparu qu'à la vérification, pas tout de suite).
+Relevé technique à l'appui : au moment de cette mesure, le projet ne compte plus que **6
+déploiements** (les 5 gardés pour la marge de retour arrière, plus 1 nouveau créé par un commit
+poussé après le nettoyage — `dpl_Nd7PuWVhZB2TLWdR7gZGjwDt6vT8`, à l'état `CANCELED`, créé le 22/09 à
+03h08). Le graphique 30 jours du tableau de bord montre une **croissance continue** de 4,68 Go
+(23/08) à 7,79 Go (22/09), sans aucune marche visible à la baisse au moment du nettoyage.
 
-**Supprimé : 202 déploiements** — les 141 autres ciblant la production (tous plus anciens que les 5
-gardés, remplacés depuis) et les 61 préversions (leur code reste dans Git ; les reconstruire à
-l'identique, si jamais utile, ne demande qu'un nouveau déploiement depuis le bon commit).
+**L'explication la plus probable, sans certitude absolue (l'API Vercel n'expose pas la taille par
+déploiement, donc ceci reste une déduction, pas une mesure directe)** : cette métrique ne compte pas
+le nombre de déploiements mais le poids des artefacts de build **actuellement conservés**. Les 202
+déploiements supprimés étaient anciens ; il est probable que Vercel avait déjà recyclé leur stockage
+de son côté (pratique courante sur les plateformes cloud pour les déploiements remplacés depuis
+longtemps), rendant notre suppression explicite sans effet mesurable sur ce chiffre précis — même si
+elle reste justifiée pour d'autres raisons (clarté de la liste, hygiène générale).
 
-**Aucun déploiement en production actuelle n'a été touché.** Le seul actif servant
-www.onlineconvertools.com aujourd'hui n'a jamais été dans la liste de suppression — vérifié par
-une assertion dans le script lui-même (le script s'arrête si jamais la production actuelle
-apparaissait dans la liste à supprimer) et par une relecture après coup.
+**Le vrai poids semble être les 5-6 déploiements gardés pour la marge de retour arrière** : à raison
+d'environ 1,3 Go par déploiement en moyenne (7,79 Go / 6 — une moyenne, pas une mesure individuelle),
+garder plusieurs déploiements complets pour le retour arrière coûte cher en soi.
 
-### Exécution et preuve
+### Marge et rythme
 
-Suppression via l'API REST de Vercel (jeton local du CLI, lu et utilisé uniquement à l'intérieur du
-script, jamais affiché). **201 suppressions réussies du premier coup, 1 en butée sur la limite de
-débit de Vercel (« plus de 200 requêtes »)** — production revérifiée intacte pendant l'attente, puis
-la dernière suppression a réussi à la nouvelle tentative. **202 sur 202, confirmé par une relecture
-complète de la liste après coup : il ne reste que les 5 déploiements prévus.**
+- **Marge restante : 2,21 Go (22,1 %) avant le palier gratuit de 10 Go.**
+- **Rythme mesuré sur le graphique** : moyenne du mois ≈ 0,11 Go/jour (4,68→7,79 Go sur 29 jours),
+  mais **accélération nette la dernière semaine** : 6,0 Go le 14/09 → 7,79 Go le 22/09, soit
+  **≈ 0,26 Go/jour** — plus du double de la moyenne mensuelle, corrélé aux chantiers à gros volume de
+  la semaine (D8 envoi par morceaux, architecture vidéo, indépendance Gotenberg).
+- **À ce rythme récent, le palier des 10 Go serait atteint dans environ 8 à 9 jours si rien ne
+  change.** Ce n'est pas une marge de plusieurs mois.
 
-| | Avant | Après |
-|---|---|---|
-| Déploiements totaux | 207 | **5** |
-| Ciblant la production | 146 | 5 |
-| Préversions | 61 | 0 |
-| États autres que `READY` | 29 | 0 |
+### Ce qui aiderait réellement (pas encore fait, à décider)
 
-**Production vérifiée après coup** : `www.onlineconvertools.com` répond 200, alias toujours sur le
-bon déploiement, `readyState: READY`.
+Puisque le nombre total de déploiements n'est plus le levier (déjà réduit à l'essentiel), les deux
+leviers réels sont :
+1. **Réduire le nombre de déploiements gardés en marge de retour arrière** (5 → 2-3) — Vercel ne
+   signale que 2 candidats officiels au retour arrière ; les 3 de plus gardés par prudence coûtent
+   à eux seuls une part significative des 7,79 Go.
+2. **Réduire la fréquence des déploiements de production** pendant les périodes de chantier intense
+   (chaque commit sur `master` déclenche un nouveau déploiement complet) — pas toujours possible
+   pendant un chantier actif, mais à garder en tête après le lancement.
 
-### Ce que je ne peux pas te confirmer moi-même
+## 2. Search Console — les 7 pages « de notre faute », relevées et diagnostiquées
 
-**Le pourcentage réel de stockage utilisé.** Aucun outil à ma disposition n'expose ce chiffre
-(les points de terminaison d'utilisation testés répondent 404/400). La réduction de 207 à 5
-déploiements (-97,6 %) devrait faire chuter le stockage dans une proportion comparable si le poids
-est à peu près uniforme par déploiement, mais **c'est une déduction, pas une lecture directe** —
-**vérifie le pourcentage réel dans le tableau de bord Vercel (Usage) ou au prochain courriel.**
+### Méthode
 
-## 2. Search Console — les 7 pages « de notre faute »
+Navigation directe dans Search Console via Claude in Chrome : propriété `onlineconvertools.com` →
+Indexation → Pages → ouverture de chacune des 3 lignes concernées, lecture de leur tableau
+« Exemples ». Chaque URL trouvée a ensuite été vérifiée en direct par requête HTTP (`curl`), et
+recoupée avec `lib/legacyRedirects.ts` et son historique Git.
 
-### Ce que j'ai pu vérifier moi-même, en direct, aujourd'hui
+### Les 7 URL, une par une
 
-| Vérification | Résultat |
+**« Introuvable (404) » — 3 pages :**
+
+| URL | Dernier crawl Google |
 |---|---|
-| Les 240 URL du sitemap actuel | **240/240 en 200**, aucune exception |
-| Les 202 redirections codées (`lib/legacyRedirects.ts`) | **202/202 saines** : chacune répond par une redirection permanente vers une page qui répond elle-même 200, en un seul saut, aucune chaîne, aucune boucle |
-| Configuration de domaine (Vercel) | `onlineconvertools.com` → `www.onlineconvertools.com`, redirection 308 configurée au niveau plateforme, correcte |
-| Variantes `http://`, double barre oblique, barre oblique finale | Toutes se résolvent normalement ; le seul cas à deux sauts est `http://onlineconvertools.com` (HTTP→HTTPS puis apex→www) — **comportement standard de toute plateforme avec domaine racine, pas un défaut de configuration**, et deux sauts n'est pas ce que Google classe en « erreur de redirection » (qui vise plutôt les boucles ou les chaînes de 5 sauts et plus) |
-| Journaux de production Vercel, 404 sur 30 jours | **Aucun** — mais réserve ci-dessous |
-| Recherche `site:onlineconvertools.com` | N'a renvoyé que des sites concurrents sans rapport, cohérent avec la position 74 déjà documentée dans le plan — pas exploitable pour retrouver des URL précises |
+| `onlineconvertools.com/tools/yaml-to-json` | 25 juillet 2026 |
+| `onlineconvertools.com/tools/epub-to-pdf` | 13 juillet 2026 |
+| `onlineconvertools.com/tools/file-encryptor` | 12 juillet 2026 |
 
-**Réserve sur les journaux de production** : l'outil de journaux ne couvre que les invocations de
-fonctions serveur. Un 404 sur une page statique inexistante peut ne jamais atteindre une fonction et
-donc ne pas y apparaître — son absence ne prouve pas l'absence de 404 réels, seulement que je n'ai
-pas pu les voir par ce chemin.
+Les trois utilisent le domaine nu (sans `www`) et l'ancien chemin plat `/tools/<outil>` (avant la
+catégorisation). **C'était une vraie panne au moment du crawl** : la table `lib/legacyRedirects.ts`
+qui les redirige aujourd'hui vers leur page catégorisée a été créée le **31 août 2026**
+(`f0ab1ddc`) — après ces trois dates de crawl. Autrement dit, Google a raison sur ce qu'il a vu, et
+le correctif existe déjà depuis presque un mois. **Vérifié en direct aujourd'hui : les 3 répondent
+200, en 2 sauts** (apex→www au niveau de la plateforme, puis ancien chemin→chemin catégorisé au
+niveau de l'app). **Rien à corriger côté code.**
 
-### Ce que je n'ai pas pu déterminer
+**« Page avec redirection » — 3 pages :**
 
-**Je n'ai trouvé aucune anomalie dans tout ce que je peux tester moi-même.** Cela signifie soit que
-les 7 URL concernées sont des adresses **historiques**, jamais couvertes par la table de
-redirections actuelle (créées avant elle, ou jamais servies par ce site du tout — un lien externe
-mal orthographié, par exemple), soit qu'elles ont déjà été corrigées depuis le dernier passage de
-Google (le rapport que tu lis date du 17/09). **Je n'ai pas d'outil pour interroger Search Console
-directement** — je ne peux pas lister les URL précises derrière les trois catégories sans que tu me
-les donnes.
+| URL | Dernier crawl Google |
+|---|---|
+| `http://www.onlineconvertools.com/` | 19 septembre 2026 |
+| `http://onlineconvertools.com/` | 23 août 2026 |
+| `https://onlineconvertools.com/` | 23 août 2026 |
 
-**Prochaine étape concrète** : dans Search Console → Pages → sous chacune des trois lignes
-(Introuvable 404, Page avec redirection, Erreur liée aux redirections), un clic affiche la liste des
-URL exactes concernées. Si tu me les colles (même juste les chemins, sans le domaine), je les teste
-immédiatement et je corrige ce qui doit l'être — un vrai correctif sur une URL non vérifiée serait
-justement le genre d'erreur que ce projet a déjà payée cher (doctrine : mesurer avant de construire).
+Ce sont les trois variantes **non canoniques** de la page d'accueil (HTTP au lieu de HTTPS, domaine
+nu au lieu de `www`), qui redirigent toutes vers `https://www.onlineconvertools.com/`. **C'est le
+comportement voulu** : la redirection existe précisément pour qu'aucune de ces variantes ne soit
+indexée séparément de la version canonique. Google classe cette page correctement — ce n'est pas une
+anomalie. **Rien à corriger.**
 
-**Aucune URL saine n'a été retirée du sitemap ni passée en `noindex`** — rien de tel n'a été fait,
-puisque rien de cassé n'a été identifié avec certitude.
+**« Erreur liée à des redirections » — 1 page :**
+
+| URL | Dernier crawl Google | Première détection |
+|---|---|---|
+| `https://www.onlineconvertools.com/tools/media-tools` | 12 septembre 2026 | 15 septembre 2026 |
+
+Vérifiée en direct : `curl` confirme une redirection 308 simple vers `/tools/video-tools`, qui
+répond 200 directement (aucun saut supplémentaire), correspond à une entrée légitime de
+`lib/legacyRedirects.ts` (ligne 229 : l'ancienne catégorie `media-tools` n'avait pas de successeur
+unique, `video-tools` a hérité de la majorité de ses outils), et la destination n'est pas bloquée par
+`robots.txt`. **Aucune anomalie reproduite aujourd'hui.** L'explication la plus probable est un aléa
+transitoire au moment précis du passage de Googlebot (par exemple un démarrage à froid de fonction
+Vercel ayant retardé la réponse ce jour-là) plutôt qu'un défaut permanent — non prouvable
+rétroactivement, mais rien de reproductible n'a été trouvé pour justifier un correctif de code.
+
+### Ce qui a été fait, ce qui ne l'a pas été
+
+- **Aucune URL saine n'a été retirée du sitemap ni passée en `noindex`** — aucune des 7 n'en avait
+  besoin.
+- **Aucun clic sur « Valider la correction » n'a été fait dans Search Console.** La règle du plan
+  (« Ne pas cliquer VALIDER LA CORRECTION tant que rien n'a été corrigé ») l'interdit sans ton
+  accord explicite. Pour les 3 « 404 », la correction existe réellement depuis le 31/08 — cliquer
+  serait donc l'usage légitime du bouton, mais je ne l'ai pas fait de moi-même.
 
 ## 3. Indexation et coût Railway — chiffres reçus, inscrits tels quels
 
-Les deux chiffres suivants viennent de toi (tableaux de bord auxquels je n'ai pas d'accès direct) et
-sont simplement consignés dans le plan, comme demandé :
+Inchangé depuis la version précédente de ce rapport :
 
-- **Search Console, rapport du 17/09/2026 : 45 pages indexées sur 248, 203 non indexées.** Répartition
-  des 203 : 192 « Détectée, actuellement non indexée » (autorité de domaine, ne se corrige pas par du
-  code) ; 7 imputables au site (3 introuvables/404, 3 avec redirection, 1 erreur de redirection —
-  voir §2).
-- **Coût Railway de septembre : 2,65 $ réel (relevé du tableau de bord).** Ma propre mesure via
-  l'API d'usage (moins précise, un service non résolu dans le nom manque à l'appel) donne un ordre de
-  grandeur comparable (~1,8 $ extrapolé sur ce que l'API me rend), donc pas de contradiction, mais le
-  chiffre qui fait foi est le tien. **La veille de `gotenberg-fonts`, activée aujourd'hui
-  (`RAPPORT-gotenberg-independance.md`), doit faire baisser ce chiffre au prochain relevé** — il
-  tournait 24 h/24 sans aucune requête depuis 3 jours avant l'activation.
+- **Search Console, rapport du 17/09/2026 : 45 pages indexées sur 248, 203 non indexées.**
+  Répartition des 203 : 192 « Détectée, actuellement non indexée » (autorité de domaine) ; 7
+  imputables au site (voir §2, aucune cassée aujourd'hui).
+- **Coût Railway de septembre : 2,65 $ réel (relevé du tableau de bord).** La veille de
+  `gotenberg-fonts`, activée le 22/09 (`RAPPORT-gotenberg-independance.md`), doit faire baisser ce
+  chiffre au prochain relevé.
 
 ## 4. Ce qui reste
 
-- **Le pourcentage réel de stockage Vercel après nettoyage** — à vérifier par toi.
-- **Les 7 URL Search Console précises** — à me transmettre depuis le tableau de bord pour correction
-  ciblée et vérifiée.
+- **Décider si le nombre de déploiements gardés en marge de retour arrière (5) doit baisser** pour
+  reprendre de la marge sur le stockage Vercel — à ton arbitrage, avec le compromis explicité au §1.
+- **Décider si les 3 « 404 » de Search Console doivent être validées** (« Valider la correction »)
+  maintenant que la correction est confirmée réelle depuis le 31/08.
 - **Le prochain relevé Railway**, pour confirmer que la veille de `gotenberg-fonts` fait baisser le
   coût comme prévu.
+- **Revérifier le stockage Vercel d'ici quelques jours** compte tenu du rythme récent (~0,26 Go/jour) —
+  la marge de 2,21 Go pourrait s'épuiser en 8-9 jours si les chantiers à gros volume continuent au
+  même rythme.
 
 ## 5. Livrables
 
-Scripts (non versionnés, usage ponctuel — logique documentée ici) : liste et suppression de
-déploiements Vercel via l'API REST (jeton CLI local, jamais affiché), vérification des 240 URL du
-sitemap et des 202 redirections en direct. Plan mis à jour : stockage Vercel, indexation réelle du
-17/09, coût Railway réel de septembre, déclencheur satisfait retiré.
+- Lecture directe du tableau de bord Vercel (Usage → Deployment Storage) via Claude in Chrome.
+- Lecture directe de Search Console (Indexation → Pages → 3 catégories) via Claude in Chrome.
+- Vérification croisée de chaque URL trouvée par requête HTTP directe (`curl -sIL`) et par lecture de
+  `lib/legacyRedirects.ts` et de son historique Git (date de création de la table de redirections).
+- Re-listing des déploiements Vercel actuels via l'API REST (jeton CLI local, jamais affiché) pour
+  confirmer l'état après nettoyage (6 déploiements, dont 1 nouveau `CANCELED`).
+- Plan mis à jour : chiffre de stockage réel + rythme, les 7 URL diagnostiquées une par une.
