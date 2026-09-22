@@ -1,20 +1,18 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { parseInBase } from '../../../lib/exactNumbers';
 
 export default function NumberBaseConverterPage() {
   const [value, setValue] = useState('');
   const [fromBase, setFromBase] = useState('10');
   const [copyError, setCopyError] = useState(false);
 
+  // Exact (BigInt) and strict: parseInt() used to read "1012" in binary as 5, "12abc" as 12,
+  // and lose every integer above 2^53 (app/lib/exactNumbers.js).
   const convert = (base) => {
-    try {
-      const decimal = parseInt(value, parseInt(fromBase));
-      if (isNaN(decimal)) return 'Invalid';
-      return decimal.toString(parseInt(base));
-    } catch {
-      return 'Invalid';
-    }
+    const n = parseInBase(value, parseInt(fromBase));
+    return n === null ? 'Invalid' : n.toString(parseInt(base));
   };
 
   return (

@@ -1,10 +1,12 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { parseInBase } from '../../../lib/exactNumbers';
 export default function NumberBaseConverterDevPage() {
   const [value, setValue] = useState('');
   const [fromBase, setFromBase] = useState('10');
-  const convert = (base) => { try { const d = parseInt(value, parseInt(fromBase)); return isNaN(d) ? 'Invalid' : d.toString(parseInt(base)).toUpperCase(); } catch { return 'Invalid'; } };
+  // Exact and strict, same fix as the math-tools page (app/lib/exactNumbers.js).
+  const convert = (base) => { const n = parseInBase(value, parseInt(fromBase)); return n === null ? 'Invalid' : n.toString(parseInt(base)).toUpperCase(); };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">

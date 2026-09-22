@@ -1,14 +1,18 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { formatSignificant } from '../../../lib/exactNumbers';
 
+// Units per ONE base unit, from the exact definitions (1 in = 0.0254 m, 1 lb = 0.45359237 kg,
+// 1 US gal = 3.785411784 L, 1 knot = 1.852 km/h...). The previous rounded factors (ft 3.28084,
+// inch 39.3701...) showed 1 km = "39370.1000" inch for a true 39370.0787 (measured 2026-09-22).
 const CONVERSIONS = {
-  Length: { m: 1, km: 0.001, cm: 100, mm: 1000, ft: 3.28084, inch: 39.3701, mile: 0.000621371, yard: 1.09361 },
-  Weight: { kg: 1, g: 1000, mg: 1000000, lb: 2.20462, oz: 35.274, ton: 0.001 },
+  Length: { m: 1, km: 0.001, cm: 100, mm: 1000, ft: 1 / 0.3048, inch: 1 / 0.0254, mile: 1 / 1609.344, yard: 1 / 0.9144 },
+  Weight: { kg: 1, g: 1000, mg: 1000000, lb: 1 / 0.45359237, oz: 16 / 0.45359237, 'metric ton': 0.001 },
   Temperature: { C: 'special', F: 'special', K: 'special' },
-  Speed: { 'km/h': 1, 'mph': 0.621371, 'm/s': 0.277778, knot: 0.539957 },
-  Area: { 'm²': 1, 'km²': 0.000001, 'cm²': 10000, 'ft²': 10.7639, 'acre': 0.000247105 },
-  Volume: { L: 1, mL: 1000, 'm³': 0.001, gallon: 0.264172, 'fl oz': 33.814 },
+  Speed: { 'km/h': 1, 'mph': 1 / 1.609344, 'm/s': 1 / 3.6, knot: 1 / 1.852 },
+  Area: { 'm²': 1, 'km²': 0.000001, 'cm²': 10000, 'ft²': 1 / 0.09290304, 'acre': 1 / 4046.8564224 },
+  Volume: { L: 1, mL: 1000, 'm³': 0.001, 'US gallon': 1 / 3.785411784, 'US fl oz': 1000 / 29.5735295625 },
 };
 
 const convertTemp = (value, from, to) => {
@@ -30,9 +34,10 @@ export default function UnitConverterPage() {
   const units = Object.keys(CONVERSIONS[category]);
 
   const convert = () => {
-    if (category === 'Temperature') return convertTemp(value, from, to).toFixed(4);
+    // Significant digits, never toFixed(4): 1 mm used to read "0.0000" mile.
+    if (category === 'Temperature') return formatSignificant(convertTemp(value, from, to));
     const base = value / CONVERSIONS[category][from];
-    return (base * CONVERSIONS[category][to]).toFixed(4);
+    return formatSignificant(base * CONVERSIONS[category][to]);
   };
 
   const handleCategory = (cat) => {

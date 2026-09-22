@@ -1,6 +1,9 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { formatSignificant } from '../../../lib/exactNumbers';
+
+// Results use significant digits, not toFixed(2): 0.001 % of 5 used to read "0.00" (measured 2026-09-22).
 
 export default function PercentageCalculatorPage() {
   const [a1, setA1] = useState('');
@@ -23,7 +26,7 @@ export default function PercentageCalculatorPage() {
               <input type="number" value={b1} onChange={e => setB1(e.target.value)} className="bg-neutral-200 border border-neutral-600 rounded-lg p-2" placeholder="Y" />
             </div>
             <div className="text-center text-xl font-bold text-green-400">
-              {a1 && b1 ? `${(parseFloat(a1) * parseFloat(b1) / 100).toFixed(2)}` : '—'}
+              {a1 && b1 ? formatSignificant(parseFloat(a1) * parseFloat(b1) / 100) : '—'}
             </div>
           </div>
           <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 space-y-3">
@@ -33,7 +36,7 @@ export default function PercentageCalculatorPage() {
               <input type="number" value={b2} onChange={e => setB2(e.target.value)} className="bg-neutral-200 border border-neutral-600 rounded-lg p-2" placeholder="Y" />
             </div>
             <div className="text-center text-xl font-bold text-green-400">
-              {a2 && b2 ? (parseFloat(b2) === 0 ? <span className="text-red-500">Cannot divide by zero</span> : `${(parseFloat(a2) / parseFloat(b2) * 100).toFixed(2)}%`) : '—'}
+              {a2 && b2 ? (parseFloat(b2) === 0 ? <span className="text-red-500">Cannot divide by zero</span> : `${formatSignificant(parseFloat(a2) / parseFloat(b2) * 100)}%`) : '—'}
             </div>
           </div>
           <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 space-y-3">
@@ -43,7 +46,7 @@ export default function PercentageCalculatorPage() {
               <input type="number" value={b3} onChange={e => setB3(e.target.value)} className="bg-neutral-200 border border-neutral-600 rounded-lg p-2" placeholder="To Y" />
             </div>
             <div className="text-center text-xl font-bold text-green-400">
-              {a3 && b3 ? (parseFloat(a3) === 0 ? <span className="text-red-500">Cannot divide by zero</span> : `${((parseFloat(b3) - parseFloat(a3)) / parseFloat(a3) * 100).toFixed(2)}%`) : '—'}
+              {a3 && b3 ? (parseFloat(a3) === 0 ? <span className="text-red-500">Cannot divide by zero</span> : `${formatSignificant((parseFloat(b3) - parseFloat(a3)) / parseFloat(a3) * 100)}%`) : '—'}
             </div>
           </div>
         </div>

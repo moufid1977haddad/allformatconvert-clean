@@ -1,29 +1,10 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { toRoman, fromRoman } from '../../../lib/exactNumbers';
 
-const toRoman = (num) => {
-  const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
-  const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
-  let result = '';
-  for (let i = 0; i < vals.length; i++) {
-    while (num >= vals[i]) { result += syms[i]; num -= vals[i]; }
-  }
-  return result;
-};
-
-const fromRoman = (str) => {
-  const map = { I:1, V:5, X:10, L:50, C:100, D:500, M:1000 };
-  let result = 0;
-  for (let i = 0; i < str.length; i++) {
-    const curr = map[str[i]];
-    const next = map[str[i+1]];
-    if (next && curr < next) result -= curr;
-    else result += curr;
-  }
-  return result;
-};
-
+// Strict conversions (app/lib/exactNumbers.js): only canonical numerals are accepted, so
+// "IM", "VX" or "MMMM" are refused instead of being shown as 999, 5 or 4000.
 export default function RomanNumeralConverterPage() {
   const [number, setNumber] = useState('');
   const [roman, setRoman] = useState('');
@@ -38,10 +19,10 @@ export default function RomanNumeralConverterPage() {
 
   const handleRoman = (val) => {
     setRoman(val.toUpperCase());
-    const result = fromRoman(val.toUpperCase());
-    if (result > 0) setNumber(result.toString());
-    else setNumber('');
+    const result = fromRoman(val);
+    setNumber(result ? result.toString() : '');
   };
+  const romanInvalid = roman !== '' && number === '';
 
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -58,13 +39,14 @@ export default function RomanNumeralConverterPage() {
             <label className="block text-sm text-neutral-500 mb-1">Roman Numeral</label>
             <input type="text" value={roman} onChange={e => handleRoman(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3 text-xl font-bold font-mono" placeholder="Enter Roman numeral..." />
           </div>
-          {roman && (
+          {romanInvalid && <p role="alert" className="text-red-500 text-center text-sm">“{roman}” is not a valid Roman numeral (standard form, 1 to 3999 — for example 4 is IV, not IIII).</p>}
+          {roman && !romanInvalid && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
               <div className="text-4xl font-bold text-indigo-400 font-mono">{roman}</div>
               <div className="text-neutral-500 mt-2">{number} = {roman}</div>
             </div>
           )}
-          <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(roman).catch(() => setCopyError(true)); }} disabled={!roman} className="w-full bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-2 font-semibold transition">Copy Roman Numeral</button>
+          <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(roman).catch(() => setCopyError(true)); }} disabled={!roman || romanInvalid} className="w-full bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-2 font-semibold transition">Copy Roman Numeral</button>
           {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
         </div>
       </div>

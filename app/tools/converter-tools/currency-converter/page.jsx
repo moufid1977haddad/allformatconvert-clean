@@ -23,7 +23,9 @@ export default function CurrencyConverterPage() {
       if (!res.ok) throw new Error('Network error');
       const data = await res.json();
       setRates(data.rates);
-      setLastUpdate(new Date().toLocaleString());
+      // The date the RATES were published (the API's own timestamp), not the time this page
+      // fetched them: it used to show the current time for rates up to a day old (measured 2026-09-22).
+      setLastUpdate(data.time_last_updated ? new Date(data.time_last_updated * 1000).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : 'unknown');
     } catch (err) {
       setError('Could not load rates. Check your connection.');
     }
@@ -73,7 +75,7 @@ export default function CurrencyConverterPage() {
             <div className="bg-neutral-50 dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6 text-center">
               <div className="text-4xl font-bold text-indigo-400">{convert()} {to}</div>
               <div className="text-neutral-500 dark:text-neutral-400 mt-2">{amount} {from} = {convert()} {to}</div>
-              <div className="text-neutral-400 text-xs mt-3">Updated: {lastUpdate}</div>
+              <div className="text-neutral-400 text-xs mt-3">Rates published: {lastUpdate}</div>
             </div>
           )}
           <button onClick={loadRates} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl py-2 font-semibold transition">Refresh Rates</button>
