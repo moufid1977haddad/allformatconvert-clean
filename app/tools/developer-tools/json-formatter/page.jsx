@@ -1,12 +1,16 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { reformatJson } from '../../../lib/jsonText';
 export default function JsonFormatterPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
-  const format = () => { try { setOutput(JSON.stringify(JSON.parse(input), null, 2)); setError(''); } catch(e) { setError('Invalid JSON'); } };
-  const minify = () => { try { setOutput(JSON.stringify(JSON.parse(input))); setError(''); } catch(e) { setError('Invalid JSON'); } };
+  // Re-indents the original text (app/lib/jsonText.js) instead of JSON.stringify(JSON.parse(...)),
+  // which silently turned 12345678901234567890 into 12345678901234567000 and 1.10 into 1.1.
+  const run = (indent) => { try { setOutput(reformatJson(input, indent)); setError(''); } catch(e) { setOutput(''); setError('Invalid JSON' + (e?.message ? ': ' + e.message : '')); } };
+  const format = () => run(2);
+  const minify = () => run(0);
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-4xl mx-auto">
@@ -27,7 +31,7 @@ export default function JsonFormatterPage() {
       </div>
       <SeoContent
         title="JSON Formatter"
-        description="JSON Formatter parses your JSON with the browser's built-in JSON.parse and re-serializes it with JSON.stringify, entirely in your browser — nothing is uploaded to a server. Format adds 2-space indentation; Minify strips it back to a single line. Since it uses a real parser, invalid JSON is reliably caught and reported rather than guessed at."
+        description="JSON Formatter checks your JSON with the browser's built-in JSON.parse, then re-indents your original text without re-serializing it — so large numbers like 64-bit IDs, trailing zeros (1.10) and escapes stay exactly as you wrote them — entirely in your browser — nothing is uploaded to a server. Format adds 2-space indentation; Minify strips it back to a single line. Since it uses a real parser, invalid JSON is reliably caught and reported rather than guessed at."
         howTo={[
           "Paste your JSON into the input box.",
           "Click 'Format' for readable, indented JSON, or 'Minify' for a compact single-line version.",

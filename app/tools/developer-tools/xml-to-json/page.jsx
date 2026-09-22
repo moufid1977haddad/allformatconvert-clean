@@ -23,6 +23,10 @@ export default function XmlToJsonPage() {
         attributeNamePrefix: '@_',
         textNodeName: '#text', // matches the '#text' convention this tool already documented
         ignoreDeclaration: true, // drop the <?xml ...?> prolog from the output, as before
+        // Keep element text exactly as written. fast-xml-parser's default turns numeric-looking
+        // text into numbers, which silently dropped leading zeros (measured 2026-09-22: phone
+        // 0612345678 -> 612345678, zip 01234 -> 1234) and would turn version 1.10 into 1.1.
+        parseTagValue: false,
       });
       const parsed = parser.parse(input);
       setOutput(JSON.stringify(parsed, null, 2));
@@ -62,6 +66,7 @@ export default function XmlToJsonPage() {
         faqs={[
           { q: "Is XML to JSON free to use?", a: "Yes, completely free with no registration required." },
           { q: "Will invalid XML be detected?", a: "Yes — malformed XML is validated and reported as 'Invalid XML', with the underlying parser error when available." },
+          { q: "Are numbers converted?", a: "No — every value is kept as text, exactly as it is written in the XML, so a phone number like 0612345678 or a ZIP code like 01234 keeps its leading zero and a version like 1.10 stays 1.10." },
           { q: "Are XML attributes included in the JSON output?", a: "Yes — every attribute is preserved as a JSON key prefixed with '@_', for example id=\"5\" becomes \"@_id\": \"5\" on that same element's object." },
           { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser using the fast-xml-parser library, loaded on demand when you click Convert." }
         ]}
