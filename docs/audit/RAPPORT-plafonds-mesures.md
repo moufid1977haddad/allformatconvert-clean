@@ -142,9 +142,10 @@ prennent aussi 60-200 s, y étaient exposés. **Corrigé avant que l'unification
 contrôlés côté route, inchangés dans leur mécanique — seules les valeurs bougent) :
 Word/PowerPoint **100 Mo** (marge sous 148,6, pas 197,9 — la marge de sécurité est volontairement
 large car le point d'échec dépend du contenu, pas seulement du poids) · Excel **60 Mo** · PDF vers
-Word **100 Mo** · HTML/EPUB/MOBI **100 Mo** (marge sous 149,9, jamais vu échouer) · PDF Repair et
-PDF/A **45 Mo** · Image Captioner **80 Mo** (marge zéro sous le plus gros succès — piste à retester
-plus haut si le besoin s'en fait sentir, non fait ici par discipline de temps). Texte de la FAQ
+Word **99 Mo** (resserré depuis 100 Mo, voir §8 bis) · HTML/EPUB/MOBI **100 Mo** (marge sous 149,9,
+jamais vu échouer) · PDF Repair et PDF/A **44 Mo** (resserré depuis 45 Mo, voir §8 bis) · Image
+Captioner **80 Mo** (marge zéro sous le plus gros succès — piste à retester plus haut si le besoin
+s'en fait sentir, non fait ici par discipline de temps). Texte de la FAQ
 `pdf-tools` mis à jour en conséquence (rapide, comme demandé — pas de nouvelle passe de relecture
 sur les autres pages).
 

@@ -162,14 +162,15 @@ Les promesses fausses **ne sont plus en ligne**. *« professional-quality »* a 
 > |---|---|---|---|---|
 > | Word / PowerPoint | **100 Mo** | 148,6 Mio (72-88 s) | mémoire de la fonction Vercel | ⚙️ architecture |
 > | Excel | **60 Mo** | 69,8 Mio (247-251 s) | `API_TIMEOUT` Gotenberg (240 s) | 🔒 réelle (moteur) |
-> | PDF vers Word | **100 Mo** | 100,3 Mio (204,6 s) | mémoire de la fonction Vercel | ⚙️ architecture |
+> | PDF vers Word | **99 Mo** | 100,3 Mio (204,6 s) | mémoire de la fonction Vercel | ⚙️ architecture |
 > | HTML/EPUB/MOBI | **100 Mo** | 149,9 Mio (90,4 s), pas d'échec trouvé | — | non déterminée |
-> | PDF Repair / PDF/A | **45 Mo** | 45,4 Mio (22-30 s) | config du service `pdf-tools` (50 Mo) | ⚙️ architecture légère (variable d'env) |
+> | PDF Repair / PDF/A | **44 Mo** | 45,4 Mio (22-30 s) | config du service `pdf-tools` (50 Mo) | ⚙️ architecture légère (variable d'env) |
 > | Image Captioner | **80 Mo** | 58 Mo / 80 MP (3,4-6,0 s), pas d'échec trouvé | — | corrigé (redimensionnement navigateur) |
 > | Audio | **25 Mo** | 24,1 Mio (48,5 s) | limite de Whisper | 🔒 réelle (fournisseur) |
 >
 > **Concurrence des workers Gotenberg** : au moins 2 conversions lourdes (~250 s chacune) simultanées sans dégrader les autres outils — non éprouvé au-delà.
 > **Coût ConvertAPI mesuré, pas de risque à un seul visiteur** : flat 0,01 $/conversion (confirmé 10 à 148 Mio) ; la garde réserve exactement ce montant, donc elle est déjà exacte. Une IP est plafonnée à 1 $/jour (limite par IP partagée, 100/jour). 2000 conversions dans le mois, tous visiteurs confondus, épuisent le plafond global de 20 $ — vrai avant D8 comme après, pas un risque nouveau.
+> **Correction après coup (revérifiée en production) :** PDF Repair/PDF/A et PDF vers Word annonçaient d'abord 45 et 100 Mo, pile la taille du fichier de preuve (45,38 et 100,25 Mio) — pas une erreur de fond (un plafond sous un succès prouvé reste valide), mais resserré à **44 et 99 Mo** pour une vraie marge, revérifié avec des fichiers de 40 et 90 Mio.
 > **Décision Gotenberg (au propriétaire) :** `gotenberg-fonts` confirmé par les journaux de requêtes comme **ne servant aucune conversion** depuis 3 jours (`gotenberg-v2` sert tout) ; coût mesuré ≈ 0,7-5,7 $/mois selon la charge, pour zéro travail utile. Recommandation : copier ses 8 variables référencées vers `gotenberg-v2` (préalable sans risque), puis le supprimer. Rien fait, décision en attente.
 > **`.claude/settings.local.json` nettoyé** : 23 règles trop larges retirées (guillemet fermé avant la fin de la commande, interpréteurs/réseau/Git sans contrainte).
 
