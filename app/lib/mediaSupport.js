@@ -111,6 +111,19 @@ export async function checkedBlob(canvas, type = 'image/png', quality) {
   return blob;
 }
 
+// JPEG has no alpha channel: every browser encodes transparent pixels as BLACK
+// (measured 2026-09-22: a transparent product PNG came out of image-converter and
+// image-compressor with a black background, and the converter shows no preview).
+// Paint white UNDER what is already drawn -- what image editors and the reference
+// converters do -- right before encoding to JPEG. Works on OffscreenCanvas too.
+export function flattenOntoWhite(ctx, width, height) {
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-over';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, width, height);
+  ctx.restore();
+}
+
 // Synchronous probe: can THIS browser encode the type from a canvas? Must run
 // in the browser (useEffect), never during render on the server.
 const encodeProbeCache = {};

@@ -1,7 +1,7 @@
 import { MAX_MEGAPIXELS } from './config';
 import { decodeTiff } from '../../../lib/tiffDecode';
 import { sniffFormat, NATIVE_BITMAP_FORMATS } from '../../../lib/detectFileFormat';
-import { checkedBlob } from '../../../lib/mediaSupport';
+import { checkedBlob, flattenOntoWhite } from '../../../lib/mediaSupport';
 
 // AVIF: no browser encodes it from a canvas (measured: Chrome 153, Chromium 151,
 // Firefox 153 all return a PNG), so it is encoded here by libavif compiled to
@@ -124,6 +124,7 @@ async function convertOne(item, format, quality, maxMegapixels) {
   // (Safari + WebP/AVIF) silently returns a PNG -- which used to be shipped as
   // a ".webp" file 86% heavier, with no warning. checkedBlob throws instead.
   if (format === 'avif') return encodeAvif(canvas, width, height, quality);
+  if (format === 'jpg') flattenOntoWhite(ctx, width, height);
   return checkedBlob(canvas, MIME_BY_FORMAT[format], quality / 100);
 }
 
