@@ -64,3 +64,4 @@ scripts/audit/tool-config.json
 services/background-removal/models/
 services/background-removal/**/__pycache__/
 services/background-removal/**/*.pyc
+Claude outputs/
