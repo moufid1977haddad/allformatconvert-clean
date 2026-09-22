@@ -3,7 +3,7 @@
 // File read from the service, so quota, spend guard, provider selection, checks and error mapping are
 // identical on both paths; only the transport of the input and of the result differs.
 import { NextRequest, NextResponse } from "next/server";
-import { openStaged, readSource, depositOutput, discard } from "./staged";
+import { openStaged, readSource, depositOutput, discard, keepStagedAlive } from "./staged";
 
 export function isStagedRequest(req: NextRequest): boolean {
   return (req.headers.get("content-type") || "").toLowerCase().startsWith("application/json");
@@ -43,11 +43,14 @@ export async function respondStaged(
   }
 
   let res: NextResponse;
+  const stopPing = keepStagedAlive(h);
   try {
     res = await produce(new File([src.blob], h.filename || "document"));
   } catch (err) {
     await discard(h);
     throw err;
+  } finally {
+    stopPing();
   }
   // Any refusal or failure of the conversion (quota, size, provider error...) is returned exactly as the
   // legacy path would, and the staged source is destroyed straight away.
@@ -92,9 +95,11 @@ export async function respondStagedInline(
     await discard(h);
     return NextResponse.json(errorShape(src.error), { status: src.status });
   }
+  const stopPing = keepStagedAlive(h);
   try {
     return await produce(new File([src.blob], h.filename || "audio"), body);
   } finally {
+    stopPing();
     await discard(h);
   }
 }
@@ -124,11 +129,14 @@ export async function respondStagedPdfJson(
     return NextResponse.json(errorShape(src.error), { status: src.status });
   }
   let res: NextResponse;
+  const stopPing = keepStagedAlive(h);
   try {
     res = await produce(new File([src.blob], h.filename || "document.pdf"), body);
   } catch (err) {
     await discard(h);
     throw err;
+  } finally {
+    stopPing();
   }
   let data: any = null;
   try {

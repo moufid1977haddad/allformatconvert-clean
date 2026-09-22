@@ -36,5 +36,5 @@ const done = await Promise.race([
 const total = (Date.now() - t0) / 1000;
 const caption = done === 'caption' ? await page.inputValue('textarea[readonly]') : '';
 const err = done === 'error' ? await page.innerText('p.text-red-400') : '';
-console.log(`  ${done === 'caption' && caption.length > 5 ? 'PASS' : 'FAIL'} ${path.basename(file)} (${(info / 1048576).toFixed(1)} MB) [${engineName}]: ${total.toFixed(1)} s, request body ${sent.map((b) => (b / 1024).toFixed(0) + ' KB').join(',')}, caption "${caption.slice(0, 70)}", error "${err}", pageerrors ${errors.length}`);
+console.log(`  ${done === 'caption' && caption.length > 5 ? 'PASS' : 'FAIL'} ${path.basename(file)} (${(info / 1048576).toFixed(1)} MB) [${engineName}]: ${total.toFixed(1)} s, request body ${sent.map((b) => (b / 1024).toFixed(0) + ' KB').join(',')}, caption "${caption.slice(0, 70)}", error "${err}", pageerrors ${errors.length}${errors.length ? ": " + errors.join(" | ") : ""}`);
 await browser.close();

@@ -7,7 +7,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { mintTicket, verifyTicket } = require('../../lib/media/ticket.js');
-const { openStaged, readSource, depositOutput, discard, stagedConfig } = require('../../lib/media/staged.js');
+const { openStaged, readSource, depositOutput, discard, stagedConfig, keepStagedAlive } = require('../../lib/media/staged.js');
 
 const secret = randomBytes(32).toString('base64url');
 const env = { MEDIA_TICKET_SECRET: secret, NEXT_PUBLIC_MEDIA_SERVICE_URL: 'https://svc.test/' };
@@ -96,6 +96,27 @@ await t('depositOutput: PUT with length, extension and the SHA-256 of the exact 
   assert.equal((await depositOutput(h, new Uint8Array(3), 'exe')).ok, false);
   mock(() => new Response('{}', { status: 400 }));
   assert.equal((await depositOutput(h, new Uint8Array(pdf), 'pdf')).status, 502);
+});
+
+await t('keepStagedAlive: pings the job with the SERVER ticket until stopped, and never throws', async () => {
+  // Regression guard for the defect measured on 2026-09-22: during a 3.5-minute LibreOffice conversion the
+  // service received nothing, Railway's Serverless sleep restarted it, and the in-memory job was lost (404 on
+  // deposit) although the PDF was ready.
+  const seen = [];
+  mock((url, init) => { seen.push({ url, auth: init.headers.Authorization }); return new Response('{}', { status: 200 }); });
+  const stop = keepStagedAlive(h, 20);
+  await new Promise((r) => setTimeout(r, 70));
+  stop();
+  const n = seen.length;
+  assert.ok(n >= 2, `expected repeated pings, got ${n}`);
+  assert.equal(seen[0].url, `https://svc.test/v1/jobs/${h.jid}`);
+  assert.equal(seen[0].auth, 'Bearer ' + h.serverTicket);
+  mock(() => { throw new Error('down'); });
+  const stop2 = keepStagedAlive(h, 20);
+  await new Promise((r) => setTimeout(r, 50));
+  stop2();
+  await new Promise((r) => setTimeout(r, 60));
+  assert.equal(seen.length, n, 'stopped pinging after stop()');
 });
 
 await t('discard: DELETE, never throws', async () => {
