@@ -228,6 +228,18 @@ Motif d'`audio-to-text` reproduit à l'identique, **avant** l'upload (`c6ae956a`
 
 > **Bornage accepté le 12 septembre : auditer les 30 à 40 outils que le site met lui-même en avant** — **pas les 185.** Commencer par les outils **déjà indexés**, les seuls qu'un visiteur peut atteindre.
 
+### ✅ AUDITÉ le 22 septembre 2026 — `docs/audit/RAPPORT-outils-mis-en-avant.md` (verdict et preuve par outil)
+
+**Le vrai nombre (tranché, gardé par le build) : 225 dossiers d'outils, dont 3 « Coming Soon » → 222 outils qui fonctionnent.** Par catégorie : PDF 37 · Image 37 · GIF 11 · Audio 11 · Vidéo 15 · Fichiers 9 · QR 3 · Convertisseurs 4 · Développeur 57 · Maths 6 · IA 15 · Texte 17. 4 slugs existent dans deux catégories (`base64-encoder`, `number-base-converter`, `url-encoder`, `video-to-gif`). Sitemap : 240 URL (6 + 12 + 222). Build : 247 routes. **« 232 » n'existe nulle part** ; le site affichait « 225+ » → corrigé en 222 partout ; `check-tool-links.js` fait échouer le build si un compteur codé en dur diverge. « 190+ Countries » (non mesuré) et « No limits » (faux) retirés. `public/og-image.png` porte encore « 225 » (préparation de lancement, non touché).
+
+**Périmètre : 36 outils** = 6 « Popular Tools » + 36 noms des cartes de catégorie (6 en commun) ; le pied de page n'ajoute rien.
+
+**Résultat :** 13 FONCTIONNE sans réserve · 23 avec un écart de qualité, de couverture ou un défaut visible · **10 rendaient un résultat faux sans le dire — tous corrigés et vérifiés en production** : `image-compressor` (fichier plus lourd livré « compressé », fond noir), `image-converter` (fond noir sans aperçu), `tar-extractor` (en-têtes PAX livrés comme fichiers, dont un sous le vrai nom), `json-formatter` (12345678901234567890 → …7000), `xml-to-json` (0612345678 → 612345678), `number-base-converter` (« 1012 » binaire → 5 ; 2⁶⁴−1 faux), `unit-converter` (1 mm = « 0.0000 » mile), `percentage-calculator` (« 0.00 »), `roman-numeral-converter` (« IM » → 999), `currency-converter` (heure du navigateur affichée comme date des taux).
+
+**Écarts mesurés contre le marché, même fichier :** `pdf-compress` −17,6 % / −0,1 % contre iLovePDF −35 % / −15,4 % ; `image-compressor` ~28 % plus lourd qu'iLoveIMG à PSNR égal ; `image-upscaler` netteté 1,27 contre 3,46 (iLoveIMG IA), sous un bicubique, rangé dans « AI Tools » sans IA ; `mp4-to-gif` écrase les vidéos verticales ; `video-to-gif` 18 Mo pour 3 s ; `image-resizer` sans verrou de proportions ; Opus cassé dans `audio-converter`.
+
+**📌 EN ATTENTE DE DÉCISION DU PROPRIÉTAIRE — 17 propositions chiffrées** (tableau §4 du rapport), en tête : ① `pdf-compress` via Ghostscript du service `pdf-tools`, 3 niveaux calibrés contre iLovePDF (6-10 h) ; ② encodeurs WASM MozJPEG/OxiPNG/WebP pour `image-compressor` (6-8 h) ; ③ les deux outils GIF sur le service ffmpeg déjà en production (3-5 h) ; ④ `image-upscaler` : vrai modèle (8-12 h, licence à vérifier) **ou** sortie de la catégorie IA (30 min, accord requis) ; ⑤ `image-resizer` (1-2 h) ; ⑥ Opus (1-2 h). **Trouvé hors périmètre :** `/api/ai` accepte l'instruction système du navigateur (proxy GPT généraliste borné par les quotas) — la déplacer côté serveur (1-2 h).
+
 ## 6 — ✅ Architecture vidéo — **DÉPLOYÉE et PROUVÉE EN PRODUCTION le 20 septembre 2026** (`docs/audit/RAPPORT-video-architecture.md`, `docs/audit/RAPPORT-video-deploiement.md`)
 
 **Décision : service ffmpeg auto-hébergé sur Railway** (modèle de `background-removal`), branché sur `video-compressor` et `video-converter` ; `video-trimmer` **reste dans le navigateur** (ffmpeg.wasm, coupe sans ré-encodage).
@@ -279,6 +291,8 @@ Nos autres sorties, mêmes conditions (production) : **30 s** — MP4 37,0 s · 
 ## 7 — ⏸️ Les trois stubs — **recommandation : ne rien retirer**, en attente de validation
 
 Les retirer coûte **20 lignes sur 5 fichiers, dont 2 partagées avec de vrais outils**, et crée des **pages orphelines de façon certaine**. Or « Coming Soon » + `noindex` + absents du sitemap, **c'est honnête**.
+
+**📌 22/09 — chiffré et recommandé, DÉCISION AU PROPRIÉTAIRE** (`RAPPORT-outils-mis-en-avant.md` §5). Constat nouveau : les pages catégorie PDF et IA listent les 3 stubs **comme des outils normaux** (« Convert PDF tables to Excel ») — la carte promet ce que la page n'a pas. Le marché (iLovePDF, Smallpdf, Adobe) ne publie pas de page d'outil vide. **Recommandation :** ① **construire `pdf-to-excel` (4-6 h) puis `pdf-to-ppt` (3-4 h)** sur ConvertAPI (`pdf/to/xlsx` et `pdf/to/pptx` existent, OCR inclus), même tuyau que `pdf-to-word`, 0,01 $/conversion ; ② **retirer `image-generator` des listes ou le supprimer** : 0,011-0,167 $/image, 500 images moyennes ≈ 21 $ épuisent seules le plafond global de 20 $, et `gpt-image-1` est annoncé retiré le 23/10/2026 ; ③ en attendant, un badge « Coming soon » sur les 3 cartes (≈ 15 min). Rien n'a été fait.
 
 ## 8 — Fréquence de la surveillance *(après le lancement)*
 
@@ -348,7 +362,7 @@ Et les deux outils de données : **`xml-to-json`** (`b77f988b`, guillemets écha
 - **Vérifier l'adresse de facturation des cinq fournisseurs** (Anthropic, Google Workspace, Railway, Cloudflare, OpenAI).
 - ✅ **DPA ConvertAPI — N'EST PLUS UN BLOQUANT DE LANCEMENT (corrigé le 22/09).** Le document légal officiel de ConvertAPI, lu directement (`https://www.convertapi.com/compliance/dpa.pdf`, « Privacy Policy and Data Processing Terms », 7 février 2025 — pas un résumé de seconde main), dit noir sur blanc que ses conditions **s'appliquent déjà, automatiquement, sans signature** : la protection RGPD est donc déjà en place aujourd'hui. `help.convertapi.com` reste injoignable depuis ce poste, mais `convertapi.com` répond. Un DPA individuel signé reste utile (traçabilité contractuelle formelle) mais n'a plus d'urgence de lancement. **Contact officiel confirmé dans le document lui-même : privacy@convertapi.com** (DPO ConvertAPI, UAB, Vilnius, Lituanie). **Courriel prêt à envoyer rédigé dans `RAPPORT-gotenberg-independance.md` §5** (à adapter avec le nom exact de l'entité cliente et l'email du compte avant envoi). **Étapes quand tu voudras le faire (~15 min) :** ① se connecter au tableau de bord ConvertAPI, vérifier le palier tarifaire (Startup/49 $ et au-dessus inclut « Signed NDA & DPA », non vérifié pour ce compte) ; ② chercher une section « Contracts »/« Legal » dans le tableau de bord (signalée par une source indirecte, à confirmer à l'écran) ; ③ à défaut, envoyer le courriel préparé à **privacy@convertapi.com** ; ④ conserver la copie signée ; ⑤ noter la date ici.
 - **Centraliser les notifications fournisseurs** vers `contact@onlineconvertools.com`.
-- **`PROJET.md` est obsolète et trompeur.** Inventaire réel : **247 pages**.
+- **`PROJET.md` est obsolète et trompeur — recommandation du 22/09 : le SUPPRIMER** (plan Pro, dossier `projet-recupere`, remove.bg, « Media Tools 28 »… : faux presque partout). L'inventaire réel est au bloquant 5 ci-dessus (222 outils) et le chiffre affiché est gardé par le build ; un second inventaire manuel redériverait. En attente de l'accord du propriétaire.
 - **Supprimer** `.claude\worktrees\quota-spend-infra` — **le dossier existe encore ; la branche `worktree-quota-spend-infra` n'existe plus** (vérifié le 20/09).
 - ✅ ~~Supprimer ou ignorer `_scratch_test_signup.mjs`~~ — **absent de la racine du dépôt** (vérifié le 20/09).
 - **Ajouter sur l'écran post-inscription** : « et marquez-le comme non indésirable ».
@@ -446,6 +460,7 @@ Et les deux outils de données : **`xml-to-json`** (`b77f988b`, guillemets écha
 
 | Chantier | Preuve |
 |---|---|
+| **Outils mis en avant : 10 résultats faux silencieux (22/09)** | 36 outils ouverts avec de vrais fichiers en production ; 10 corrigés (`30235fe7`, `8b5d5645`, `609ba261`, `46306611`, `bf533569`), tests unitaires sur les entrées fautives, `verify-fixes.mjs` 16/16 sur préversion puis en production. Écarts de qualité/couverture : chiffrés, en attente (bloquant 5). |
 | **Promesses de fidélité Office → PDF** | *« professional-quality »* retiré des **5 outils**, remplacé par des formulations adossées à des mesures écrites ; `<meta description>` corrigées ; substitution de police divulguée sur `ppt-to-pdf`. **Vérifié sur le HTML servi en production.** Corpus reproductible versionné. |
 | **Gras Excel (D1)** | Cause réelle identifiée (polices `.xlsx` sans nom), `lib/xlsxDefaultFont.js` + test, **Carlito-Bold en production**, au niveau des deux concurrents. |
 | **Repli silencieux `pdf-to-word` (D6)** | **503 avec message clair** au lieu d'un texte brut rendu sans le dire. |
