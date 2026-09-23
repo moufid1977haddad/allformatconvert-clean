@@ -37,7 +37,7 @@ MEDIA_SERVICE_URL = os.environ.get("MEDIA_SERVICE_URL", "").rstrip("/")  # empty
 # Measured on Railway before this value was set -- see the report. Input pixels, before upscaling.
 MAX_INPUT_PIXELS = int(os.environ.get("UPSCALE_MAX_INPUT_PIXELS") or 1_000_000)
 MAX_SOURCE_BYTES = 30 * 1024 * 1024
-TILE = 192      # input pixels per tile side: bounds memory whatever the image size
+TILE = 256      # input pixels per tile side: bounds memory whatever the image size
 OVERLAP = 16    # context around each tile, cropped away after inference (no visible seams)
 SCALE = 4
 JID_RE = re.compile(r"^[0-9a-zA-Z]{16,64}$")
@@ -49,13 +49,40 @@ _lock = threading.Lock()
 _run_lock = threading.Lock()
 
 
+def container_cpus() -> int | None:
+    """vCPUs this container may really use, from its cgroup quota -- NOT os.cpu_count(), which on Railway
+    returns the host's 48 cores. Measured 2026-09-23: with onnxruntime left to size its pool from
+    os.cpu_count(), a 1-megapixel x4 upscale took 203 s on Railway (oversubscribed threads)."""
+    try:
+        with open("/sys/fs/cgroup/cpu.max") as f:  # cgroup v2: "<quota> <period>" or "max <period>"
+            quota, period = f.read().split()[:2]
+        if quota != "max":
+            return max(1, int(int(quota) / int(period)))
+    except (OSError, ValueError):
+        pass
+    try:
+        with open("/sys/fs/cgroup/cpu/cpu.cfs_quota_us") as fq, open("/sys/fs/cgroup/cpu/cpu.cfs_period_us") as fp:  # v1
+            quota, period = int(fq.read()), int(fp.read())
+        if quota > 0:
+            return max(1, quota // period)
+    except (OSError, ValueError):
+        pass
+    return None
+
+
 def session():
     global _session
     if _session is None:
         with _lock:
             if _session is None:
-                log.info("loading upscale model")
-                _session = infer.load_session(MODEL_PATH)
+                import onnxruntime as ort
+                opts = ort.SessionOptions()
+                threads = infer._env_int("UPSCALE_ORT_THREADS") or container_cpus()
+                if threads:
+                    opts.intra_op_num_threads = threads
+                    opts.inter_op_num_threads = 1
+                log.info("loading upscale model: intra_op_threads=%s (os.cpu_count()=%s, cgroup cpus=%s)", threads, os.cpu_count(), container_cpus())
+                _session = ort.InferenceSession(MODEL_PATH, sess_options=opts, providers=["CPUExecutionProvider"])
     return _session
 
 
