@@ -264,6 +264,48 @@ def probe(path: str):
     return ProbeResult(duration, bool(v), has_audio, int(v.group(2)) if v else 0, int(v.group(3)) if v else 0, int(br.group(1)) if br else 0)
 
 
+# GIF options (video-to-gif, mp4-to-gif pages; video-converter sends none and keeps the defaults below).
+# The reference site (ezgif) offers start/end, a dozen output widths and a frame-rate choice.
+GIF_WIDTHS = (160, 240, 320, 360, 400, 480, 540, 600, 640, 720, 800, 960, 1080)
+GIF_FPS = (5, 8, 10, 12, 15, 20, 25, 30)
+GIF_MAX_SECONDS = 60
+GIF_DEFAULT_FPS = 12
+GIF_DEFAULT_MAX_WIDTH = 640
+
+
+def gif_options(params: dict, info: ProbeResult):
+    """Validated (start, duration or None, width expr, fps). Raises ValueError with a user-safe message."""
+    start = params.get("gifStart", 0)
+    dur = params.get("gifDuration")
+    width = params.get("gifWidth")
+    fps = params.get("gifFps", GIF_DEFAULT_FPS)
+    if not isinstance(start, (int, float)) or isinstance(start, bool) or start < 0 or (info.duration and start >= info.duration):
+        raise ValueError("The start time is outside the video.")
+    if dur is not None and (not isinstance(dur, (int, float)) or isinstance(dur, bool) or not 0.2 <= dur <= GIF_MAX_SECONDS):
+        raise ValueError(f"A GIF can last up to {GIF_MAX_SECONDS} seconds.")
+    if fps not in GIF_FPS:
+        raise ValueError("Unsupported frame rate.")
+    if width is None:
+        wexpr = f"'min({GIF_DEFAULT_MAX_WIDTH},iw)'"
+    elif width in GIF_WIDTHS:
+        wexpr = f"'min({width},iw)'"  # never upscaled: a GIF wider than its source only gets heavier
+    else:
+        raise ValueError("Unsupported width.")
+    return float(start), (float(dur) if dur is not None else None), wexpr, fps
+
+
+def effective_duration(op: str, params: dict, info: ProbeResult) -> float:
+    """Length of what ffmpeg will actually encode -- the progress bar's 100 %."""
+    if op == "convert" and params.get("target") == "gif":
+        try:
+            start, dur, _, _ = gif_options(params, info)
+        except ValueError:
+            return info.duration
+        remaining = max(0.0, info.duration - start) if info.duration else 0.0
+        return min(dur, remaining) if dur is not None and remaining else (dur or remaining or info.duration)
+    return info.duration
+
+
 def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_path: str, input_bytes: int = 0, crf_offset: int = 0):
     """Returns (ffmpeg argv, extension, mime). Raises ValueError with a user-safe message."""
     quality = params.get("quality", "medium")
@@ -306,6 +348,14 @@ def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_pa
         if max_h and kind == "video":
             vf = ["-vf", f"scale=-2:'min({max_h},ih)'"]
         maps = ["-map", "0:v:0", "-map", "0:a:0?"] if kind == "video" else (["-map", "0:v:0"] if kind == "gif" else ["-map", "0:a:0"])
+        if kind == "gif":
+            start, dur, wexpr, fps = gif_options(params, info)
+            # -ss before -i: fast seek, still frame-accurate because the frames are re-encoded.
+            gif_base = base[:base.index("-i")] + (["-ss", f"{start:.3f}"] if start else []) + base[base.index("-i"):]
+            clip = ["-t", f"{dur:.3f}"] if dur is not None else []
+            gif = ["-an", "-vf", f"fps={fps},scale={wexpr}:-2:flags=lanczos,split[s0][s1];[s0]palettegen=stats_mode=diff[p];[s1][p]paletteuse=dither=bayer:bayer_scale=4",
+                   "-loop", "0", "-f", "gif"]
+            return gif_base + maps + clip + gif + [out_path], ext, mime
         args = base + maps + vf + builder(quality, ctx) + [out_path]
         return args, ext, mime
 
