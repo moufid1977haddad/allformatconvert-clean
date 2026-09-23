@@ -1,5 +1,5 @@
 const { runProcess } = require('./runProcess');
-const { GS_BIN, QPDF_BIN, VERAPDF_BIN } = require('./config');
+const { GS_BIN, QPDF_BIN, VERAPDF_BIN, PDFPY_BIN } = require('./config');
 
 async function checkBinary(bin, args) {
   try {
@@ -13,12 +13,15 @@ async function checkBinary(bin, args) {
 }
 
 async function checkAllBinaries() {
-  const [gs, qpdf, verapdf] = await Promise.all([
+  const [gs, qpdf, verapdf, pdfpy, tx] = await Promise.all([
     checkBinary(GS_BIN, ['--version']),
     checkBinary(QPDF_BIN, ['--version']),
     checkBinary(VERAPDF_BIN, ['--version']),
+    // /v1/compress: the Python stack and Adobe's tx (py/compress.py)
+    checkBinary(PDFPY_BIN, ['-c', 'import pikepdf, PIL, fontTools; print("pikepdf", pikepdf.__version__)']),
+    checkBinary('tx', ['-v']),
   ]);
-  return { ghostscript: gs, qpdf, verapdf };
+  return { ghostscript: gs, qpdf, verapdf, pdfpy, tx };
 }
 
 module.exports = { checkAllBinaries };

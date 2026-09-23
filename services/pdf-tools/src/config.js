@@ -26,4 +26,10 @@ module.exports = {
   QPDF_BIN: process.env.QPDF_BIN || 'qpdf',
   VERAPDF_BIN: process.env.VERAPDF_BIN || 'verapdf',
   DEFAULT_PDFA_FLAVOUR: process.env.DEFAULT_PDFA_FLAVOUR || '2b',
+  // /v1/compress (py/compress.py). PDFPY_BIN is set by the Dockerfile.
+  PDFPY_BIN: process.env.PDFPY_BIN || 'python3',
+  COMPRESS_TIMEOUT_MS: Number(process.env.COMPRESS_TIMEOUT_MS) || 270_000,
+  MAX_COMPRESS_BYTES: Number(process.env.MAX_COMPRESS_BYTES) || 200 * 1024 * 1024,
+  // Where staged files live. No default on purpose: without it /v1/compress-staged answers 503.
+  MEDIA_SERVICE_URL: process.env.MEDIA_SERVICE_URL || '',
 };

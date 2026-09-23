@@ -1,0 +1,9 @@
+# PDF compression (py/compress.py). Licences read from PyPI metadata on 2026-09-23,
+# all compatible with commercial use (docs/audit/RAPPORT-ecarts-marche.md §3a):
+#   pikepdf MPL-2.0 (used unmodified; bundles qpdf, Apache-2.0)
+#   afdko Apache-2.0 (Adobe's tx: Type 1 -> CFF with hints kept)
+#   fonttools MIT, pillow MIT-CMU
+pikepdf==10.13.0.post1
+afdko==5.0.1
+fonttools==4.65.0
+pillow==12.3.0
