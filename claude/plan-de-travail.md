@@ -258,7 +258,29 @@ Motif d'`audio-to-text` reproduit à l'identique, **avant** l'upload (`c6ae956a`
 
 **Écarts mesurés contre le marché, même fichier :** `pdf-compress` −17,6 % / −0,1 % contre iLovePDF −35 % / −15,4 % ; `image-compressor` ~28 % plus lourd qu'iLoveIMG à PSNR égal ; `image-upscaler` netteté 1,27 contre 3,46 (iLoveIMG IA), sous un bicubique, rangé dans « AI Tools » sans IA ; `mp4-to-gif` écrase les vidéos verticales ; `video-to-gif` 18 Mo pour 3 s ; `image-resizer` sans verrou de proportions ; Opus cassé dans `audio-converter`.
 
-**📌 EN ATTENTE DE DÉCISION DU PROPRIÉTAIRE — 17 propositions chiffrées** (tableau §4 du rapport), en tête : ① `pdf-compress` via Ghostscript du service `pdf-tools`, 3 niveaux calibrés contre iLovePDF (6-10 h) ; ② encodeurs WASM MozJPEG/OxiPNG/WebP pour `image-compressor` (6-8 h) ; ③ les deux outils GIF sur le service ffmpeg déjà en production (3-5 h) ; ④ `image-upscaler` : vrai modèle (8-12 h, licence à vérifier) **ou** sortie de la catégorie IA (30 min, accord requis) ; ⑤ `image-resizer` (1-2 h) ; ⑥ Opus (1-2 h). **Trouvé hors périmètre :** `/api/ai` accepte l'instruction système du navigateur (proxy GPT généraliste borné par les quotas) — la déplacer côté serveur (1-2 h).
+**📌 23/09 — les 17 améliorations chiffrées, inscrites ici avec leur coût** (`RAPPORT-ecarts-marche.md` pour 1-6, `RAPPORT-outils-mis-en-avant.md` §4 pour 7-17 ; estimations = estimations). Les six premières sont **faites et vérifiées en production le 23/09** ; les onze autres restent des **bloquants de qualité ouverts** — aucune ne se perd.
+
+| # | Outil | Écart mesuré | Proposition | Coût | État |
+|---|---|---|---|---|---|
+| 1 | pdf-compress | −17,6 % / −0,1 % contre iLovePDF −35 % / −15,4 % | Optimisation en place (pikepdf + `tx` d'Adobe) sur `pdf-tools`, 3 niveaux, jusqu'à 200 Mo | ~10 h fait · 0 $ fixe | ✅ **fait** — sans perte −35,4 % (rendu identique), recommandé −40,6 %, extrême −43,0 % / −78,8 % |
+| 2 | image-compressor | ~28 % plus lourd qu'iLoveIMG ; JPEG forcé | MozJPEG + palette PNG + WebP dans le navigateur, lot + ZIP | ~6 h fait · 0 $ | ✅ **fait** — égal ou mieux sur les 4 fichiers |
+| 3 | video-to-gif, mp4-to-gif (+ mov/avi/webm-to-gif) | 18 Mo pour 3 s ; vidéo verticale écrasée | Service ffmpeg : début, durée, largeur, i/s | ~3 h fait · ≈ 0 $ | ✅ **fait** — proportions gardées, 5 outils |
+| 4 | image-upscaler | netteté 1,27 contre 3,46 ; « IA » sans IA | Modèle MoSR 4xNomos2_hq auto-hébergé | ~8 h fait · ≈ 0,002 $/image de 1 Mpx | ✅ **fait** — LPIPS 0,107 contre 0,164 chez iLoveIMG |
+| 5 | image-resizer | déformation ; PNG forcé (×5,2) | Verrou de proportions, %, format conservé | ~1 h fait | ✅ **fait** |
+| 6 | audio-converter | Opus cassé | Opus via le service (libopus) ; encodeur natif ailleurs | ~2 h fait | ✅ **fait** |
+| 7 | pdf-split | ni « chaque page », ni « toutes les N pages », ni ZIP | Ces modes + ZIP | 3-4 h | ⬜ ouvert |
+| 8 | text-reverser / case-converter / word-counter | emoji cassés ; Sentence case faux ; phrases mal comptées | `Intl.Segmenter`, casse par phrase | 2-3 h (les trois) | ⬜ ouvert |
+| 9 | hash-generator | ni MD5 ni fichiers | MD5, SHA-384, CRC32, fichiers en Worker | 2-3 h | ⬜ ouvert |
+| 10 | currency-converter | 24 devises / 166 ; API v4 dépréciée | Toutes les devises, source durable (à vérifier en direct) | 1-2 h | ⬜ ouvert |
+| 11 | qr-generator | 400 px, ni couleurs, ni logo, ni types | 2000 px, couleurs, correction, Wi-Fi/vCard | 3-4 h | ⬜ ouvert |
+| 12 | image-converter | 4 sorties | BMP, GIF, ICO, TIFF, PDF | 3-4 h | ⬜ ouvert |
+| 13 | grammar-fixer | pas de surlignage | Diff mot à mot | 2-3 h | ⬜ ouvert |
+| 14 | barcode-generator | 5 symbologies | ITF-14, Codabar, MSI ; DataMatrix, PDF417 | 2-4 h | ⬜ ouvert |
+| 15 | zip-extractor | ZIP seul | RAR/7z/ZIP chiffré (libarchive WASM), « tout télécharger » | 4-6 h | ⬜ ouvert |
+| 16 | unit-converter / color-converter | catégories / espaces manquants | Temps, données, pression, énergie ; HSV, CMYK | 3-4 h + 1-2 h | ⬜ ouvert |
+| 17 | gif-maker, qr-scanner, audio-trimmer | options | Ajuster au lieu d'étirer ; caméra ; dixième de seconde + fondus | 2-3 h chacun | ⬜ ouvert |
+
+**Trouvé en route le 23/09, à traiter (chiffré dans `RAPPORT-ecarts-marche.md` §8) :** ① le service de détourage fait tourner onnxruntime sur les **48 cœurs de l'hôte** au lieu de ses 8 vCPU (même cause qui rendait l'agrandisseur 6× trop lent) — à mesurer avant de toucher (réglage déjà validé autrement le 14/09) ; ② SVG absent de `image-compressor` (iLoveIMG le compresse) ; ③ Opus des trois autres outils audio : encodeur natif de ffmpeg, **qualité face à libopus non prouvée** ; ④ licence du modèle de l'agrandisseur écrite « CC-BY-0.4 » par son auteur (coquille, voir rapport) — confirmation écrite recommandée.
 
 ## 6 — ✅ Architecture vidéo — **DÉPLOYÉE et PROUVÉE EN PRODUCTION le 20 septembre 2026** (`docs/audit/RAPPORT-video-architecture.md`, `docs/audit/RAPPORT-video-deploiement.md`)
 
@@ -308,7 +330,11 @@ Nos autres sorties, mêmes conditions (production) : **30 s** — MP4 37,0 s · 
 
 **Reste** : ① Safari réel (macOS, iPhone) sur les deux outils vidéo, `image-converter` (AVIF), `video-trimmer` ; ② comparaison chiffrée aux concurrents pour MP4, H.265, AV1 et le compresseur ; ③ essai réel d'un fichier proche de 1 Go ; ④ première facture Railway ; ⑤ ~~D8 (branchement Office)~~ ✅ fait sur préversion le 21/09, voir 2 bis ; ⑥ **essai d'un fichier de 1 Go : non faisable** (la fonction Vercel cède vers ~150-200 Mo pour Office).
 
-## 7 — ⏸️ Les trois stubs — **recommandation : ne rien retirer**, en attente de validation
+## 7 — ✅ Les trois stubs — **construits, vérifiés, publiés le 23/09** (`RAPPORT-ecarts-marche.md` §3d, §5)
+
+> **23/09 :** `pdf-to-excel` et `pdf-to-ppt` construits sur ConvertAPI (même tuyau que `pdf-to-word`, gestionnaire partagé `lib/pdfToOfficeRoute.ts`) — **structurellement identiques à iLovePDF** sur les fichiers du corpus de fidélité (mêmes tableaux, mêmes valeurs typées, mêmes diapositives). `image-generator` construit sur **gpt-image-2 « low »** (≈ 0,006 $/image) après recherche documentée (fournisseurs, paliers gratuits, auto-hébergement impossible sur Railway sans GPU, bornage des concurrents) : 5 images/jour/visiteur et **budget propre de 5 $/mois** qui ne peut pas entamer le plafond global de 20 $. Option moins chère prête pour plus tard : FLUX.2 [klein] 4B (Apache-2.0) chez Cloudflare Workers AI, 0,00115 $/image, ~96 gratuites/jour — **exige un jeton API que seul le propriétaire peut créer**. Compteur passé à **225** ; image OG régénérée ; badges « Coming soon » devenus sans objet (le mécanisme reste pour un futur stub).
+
+*(Historique ci-dessous, périmé par ce qui précède.)*
 
 Les retirer coûte **20 lignes sur 5 fichiers, dont 2 partagées avec de vrais outils**, et crée des **pages orphelines de façon certaine**. Or « Coming Soon » + `noindex` + absents du sitemap, **c'est honnête**.
 
@@ -600,6 +626,12 @@ Et les deux outils de données : **`xml-to-json`** (`b77f988b`, guillemets écha
 | 15 | Tesseract.js | Navigateur | 1 |
 | **16** | **ffmpeg natif — service Railway `media-processing`** | **Serveur** | **2** (`video-compressor`, `video-converter`) — depuis le 20/09. **Sert aussi de stockage d'envoi pour 11 outils de documents et d'audio depuis le 21/09 (type de job `stage`)** |
 | **17** | **`@jsquash/avif` (encodeur WebAssembly)** | **Navigateur** | **1** (`image-converter`, sortie AVIF) — depuis le 20/09 |
+| **18** | **pikepdf + `tx` d'Adobe (AFDKO) — service `pdf-tools`** | **Serveur** | **1** (`pdf-compress`, jusqu'à 200 Mo) — depuis le 23/09. Ghostscript **écarté par la mesure** : sa réécriture perd une figure vectorielle |
+| **19** | **MozJPEG / OxiPNG / libwebp (`@jsquash`) + quantifieur de Wu (`image-q`)** | **Navigateur** | **1** (`image-compressor`) — depuis le 23/09 |
+| **20** | **MoSR 4xNomos2_hq (ONNX) — service d'images Railway** | **Serveur** | **1** (`image-upscaler`, x2/x4, ≤ 1 Mpx) — depuis le 23/09 |
+| **21** | **gpt-image-2 (OpenAI)** | **Serveur** | **1** (`image-generator`) — depuis le 23/09, budget propre 5 $/mois |
+| 4 bis | ConvertAPI | Serveur | passe de 2 à **4** outils (`pdf-to-excel`, `pdf-to-ppt` le 23/09) |
+| 16 bis | ffmpeg natif `media-processing` | Serveur | + **5 outils GIF** (options début/durée/largeur/i/s) et l'Opus d'`audio-converter` (libopus) — 23/09 |
 
 **Le fait central de l'audit :** la cause dominante des écarts n'est ni la technologie ni le budget, c'est **le bon moteur déjà présent dans le dépôt et simplement pas branché** — ou, comme pour le détourage, pas envisagé au bon endroit.
 
