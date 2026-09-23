@@ -7,7 +7,7 @@ const categories = [
   {
     color: 'text-red-500', title: 'PDF Tools',
     description: 'Merge, split, compress, and convert PDFs',
-    href: '/tools/pdf-tools', tools: ['Merge PDF', 'Split PDF', 'Compress PDF'], count: 37,
+    href: '/tools/pdf-tools', tools: ['Merge PDF', 'Split PDF', 'Compress PDF'], count: 39,
   },
   {
     color: 'text-pink-500', title: 'Image Tools',
@@ -62,7 +62,7 @@ const categories = [
   {
     color: 'text-cyan-500', title: 'AI Tools',
     description: 'AI-powered image and text tools',
-    href: '/tools/ai-tools', tools: ['Background Remover', 'Image Upscaler', 'Grammar Fixer'], count: 15,
+    href: '/tools/ai-tools', tools: ['Background Remover', 'Image Upscaler', 'Grammar Fixer'], count: 16,
   },
 ];
 

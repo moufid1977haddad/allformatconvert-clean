@@ -1,15 +1,12 @@
 import type { Metadata } from 'next';
 
-// TODO: remove `robots: { index: false }` and swap back to a search-intent
-// title once this tool ships (see page.jsx's "Coming Soon" state).
 export const metadata: Metadata = {
-  title: { absolute: "PDF to Excel — Coming Soon" },
-  description: "A tool to extract tables from a PDF into an editable Excel spreadsheet is not yet available — this feature is under development.",
+  title: { absolute: "PDF to Excel — Convert PDF Tables to Editable Excel" },
+  description: "Convert the tables of a PDF into an editable Excel spreadsheet (.xlsx). Free, no signup, files up to 99 MB.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-excel" },
-  robots: { index: false, follow: true },
   openGraph: {
-    title: "PDF to Excel — Coming Soon",
-    description: "A tool to extract tables from a PDF into an editable Excel spreadsheet is not yet available — this feature is under development.",
+    title: "PDF to Excel — Convert PDF Tables to Editable Excel",
+    description: "Convert the tables of a PDF into an editable Excel spreadsheet (.xlsx). Free, no signup, files up to 99 MB.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-excel",
   },
 };

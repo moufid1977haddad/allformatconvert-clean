@@ -1,15 +1,12 @@
 import type { Metadata } from 'next';
 
-// TODO: remove `robots: { index: false }` and swap back to a search-intent
-// title once this tool ships (see page.jsx's "Coming Soon" state).
 export const metadata: Metadata = {
-  title: { absolute: "PDF to PowerPoint — Coming Soon" },
-  description: "A tool to convert a PDF into an editable PowerPoint presentation is not yet available — this feature is under development.",
+  title: { absolute: "PDF to PowerPoint — Convert PDF to Editable Slides" },
+  description: "Convert each page of a PDF into an editable PowerPoint slide (.pptx). Free, no signup, files up to 99 MB.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-ppt" },
-  robots: { index: false, follow: true },
   openGraph: {
-    title: "PDF to PowerPoint — Coming Soon",
-    description: "A tool to convert a PDF into an editable PowerPoint presentation is not yet available — this feature is under development.",
+    title: "PDF to PowerPoint — Convert PDF to Editable Slides",
+    description: "Convert each page of a PDF into an editable PowerPoint slide (.pptx). Free, no signup, files up to 99 MB.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-ppt",
   },
 };

@@ -1,15 +1,12 @@
 import type { Metadata } from 'next';
 
-// TODO: remove `robots: { index: false }` and swap back to a search-intent
-// title once this tool ships (see page.jsx's "Coming Soon" state).
 export const metadata: Metadata = {
-  title: { absolute: "AI Image Generator — Coming Soon" },
-  description: "AI Image Generator is not yet available — this feature is under development.",
+  title: { absolute: "AI Image Generator — Free Text to Image, No Signup" },
+  description: "Turn a text description into an image with OpenAI's gpt-image-2. Square, portrait or landscape, WebP or PNG. 5 free images a day, no signup, no watermark.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/image-generator" },
-  robots: { index: false, follow: true },
   openGraph: {
-    title: "AI Image Generator — Coming Soon",
-    description: "AI Image Generator is not yet available — this feature is under development.",
+    title: "AI Image Generator — Free Text to Image, No Signup",
+    description: "Turn a text description into an image with OpenAI's gpt-image-2. Square, portrait or landscape, WebP or PNG. 5 free images a day, no signup, no watermark.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/image-generator",
   },
 };

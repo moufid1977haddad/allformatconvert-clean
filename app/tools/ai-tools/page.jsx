@@ -8,7 +8,7 @@ const tools = [
   { title: 'Grammar Fixer', description: 'Fix grammar and spelling with AI', href: '/tools/ai-tools/grammar-fixer', group: 'Writing & Language' },
   { title: 'Text Summarizer', description: 'Summarize long texts with AI', href: '/tools/ai-tools/text-summarizer', group: 'Writing & Language' },
   { title: 'AI Translator', description: 'Translate text with AI', href: '/tools/ai-tools/ai-translator', group: 'Chat, Translate & Generate' },
-  { title: 'Image Generator', description: 'Generate images with AI', href: '/tools/ai-tools/image-generator', group: 'Image AI', comingSoon: true },
+  { title: 'Image Generator', description: 'Generate images with AI', href: '/tools/ai-tools/image-generator', group: 'Image AI' },
   { title: 'AI Chatbot', description: 'Chat with an AI assistant', href: '/tools/ai-tools/ai-chatbot', group: 'Chat, Translate & Generate' },
   { title: 'AI Writer', description: 'Generate text content with AI', href: '/tools/ai-tools/ai-writer', group: 'Writing & Language' },
   { title: 'AI Detector', description: 'Detect AI-generated content', href: '/tools/ai-tools/ai-detector', group: 'Writing & Language' },

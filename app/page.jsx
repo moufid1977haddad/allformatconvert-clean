@@ -21,7 +21,7 @@ function useDarkMode() {
 }
 
 const categories = [
-  { title: 'PDF Tools',        description: 'Merge, split, compress, and convert PDFs',        href: '/tools/pdf-tools',           slug: 'pdf-tools',           tools: ['Merge PDF', 'Split PDF', 'Compress PDF'],                                    count: 37 },
+  { title: 'PDF Tools',        description: 'Merge, split, compress, and convert PDFs',        href: '/tools/pdf-tools',           slug: 'pdf-tools',           tools: ['Merge PDF', 'Split PDF', 'Compress PDF'],                                    count: 39 },
   { title: 'Image Tools',      description: 'Convert, compress, and edit images',               href: '/tools/image-tools',         slug: 'image-tools',         tools: ['Image Compressor', 'Image Converter', 'Image Resizer'],                      count: 37 },
   { title: 'GIF Tools',        description: 'Convert videos and images to GIF format',          href: '/tools/gif-tools',           slug: 'gif-tools',           tools: ['Video to GIF', 'MP4 to GIF', 'GIF Maker'],                                   count: 11 },
   { title: 'Text Tools',       description: 'Word count, case conversion, text formatting',     href: '/tools/text-tools',          slug: 'text-tools',          tools: ['Word Counter', 'Case Converter', 'Text Reverser'],                            count: 17 },
@@ -32,10 +32,10 @@ const categories = [
   { title: 'Converter Tools',  description: 'Convert units, colors, and currencies',            href: '/tools/converter-tools',     slug: 'converter-tools',     tools: ['Currency Converter', 'Unit Converter', 'Color Converter'],                    count: 4  },
   { title: 'Developer Tools',  description: 'JSON, Base64, URL encoding, and more',             href: '/tools/developer-tools',     slug: 'developer-tools',     tools: ['JSON Formatter', 'XML to JSON', 'Hash Generator'],                           count: 57 },
   { title: 'Math Tools',       description: 'Number conversion, percentage calculator',         href: '/tools/math-tools',          slug: 'math-tools',          tools: ['Number Base Converter', 'Percentage Calculator', 'Roman Numeral Converter'],  count: 6  },
-  { title: 'AI Tools',         description: 'AI-powered image and text tools',                  href: '/tools/ai-tools',            slug: 'ai-tools',            tools: ['Background Remover', 'Image Upscaler', 'Grammar Fixer'],                     count: 15 },
+  { title: 'AI Tools',         description: 'AI-powered image and text tools',                  href: '/tools/ai-tools',            slug: 'ai-tools',            tools: ['Background Remover', 'Image Upscaler', 'Grammar Fixer'],                     count: 16 },
 ];
 
-const DEFAULT_TOOL_COUNT = 222;
+const DEFAULT_TOOL_COUNT = 225;
 
 function buildStats(totalTools) {
   return [

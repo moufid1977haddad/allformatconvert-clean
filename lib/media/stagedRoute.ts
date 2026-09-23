@@ -23,7 +23,7 @@ export function fileResponse(bytes: Uint8Array | ArrayBuffer, headers: Record<st
 
 export async function respondStaged(
   req: NextRequest,
-  outExt: "pdf" | "docx",
+  outExt: "pdf" | "docx" | "xlsx" | "pptx",
   produce: (file: File) => Promise<NextResponse>,
   errorShape: (message: string) => Record<string, unknown> = (message) => ({ error: message }),
 ): Promise<NextResponse> {

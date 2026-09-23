@@ -31,7 +31,7 @@ export default function PrivacyPage() {
               <li><strong>File Processing:</strong> Most tools process your files entirely in your browser — nothing is uploaded to any server. A few tools require server-side processing for fidelity or capability reasons in-browser processing cannot reach; for those, your file is transmitted over HTTPS, processed, and deleted immediately afterward — never stored, logged, or kept:
                 <ul className="list-disc pl-5 mt-2 space-y-1">
                   <li>Excel to PDF, PowerPoint to PDF, EPUB to PDF, MOBI to PDF, PDF Repair, PDF to PDF/A, PDF Compress (files up to 200&nbsp;MB), Background Remover, AI Image Upscaler, Video Compressor, Video Converter: processed on our own servers (self-hosted, not shared with a third party).</li>
-                  <li>Word to PDF, PDF to Word: your file is sent to ConvertAPI for processing, then deleted — see Section 3.</li>
+                  <li>Word to PDF, PDF to Word, PDF to Excel, PDF to PowerPoint: your file is sent to ConvertAPI for processing, then deleted — see Section 3.</li>
                   <li>Audio Transcriber / Audio to Text: your audio is sent to OpenAI for processing — see Section 3.</li>
                 </ul>
               </li>
@@ -46,8 +46,8 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-bold text-neutral-800 mb-3">3. Third-Party Services</h2>
             <p className="text-neutral-600 text-sm leading-relaxed mb-3">We use the following third-party services that may collect your data:</p>
             <ul className="text-neutral-600 text-sm leading-relaxed space-y-2 list-disc pl-5">
-              <li><strong>OpenAI:</strong> Used for AI-powered tools. Your text input is sent to OpenAI for processing. See <a href="https://openai.com/privacy" className="text-indigo-600 hover:underline" target="_blank" rel="noopener noreferrer">OpenAI Privacy Policy</a>.</li>
-              <li><strong>ConvertAPI:</strong> Used for Word-to-PDF and PDF-to-Word conversion. Your file is sent to ConvertAPI for processing, with StoreFile=false so it is never written to their disk. See <a href="https://www.convertapi.com/privacy-policy" className="text-indigo-600 hover:underline" target="_blank" rel="noopener noreferrer">ConvertAPI Privacy Policy</a>.</li>
+              <li><strong>OpenAI:</strong> Used for AI-powered tools, including the AI Image Generator. Your text input is sent to OpenAI for processing. See <a href="https://openai.com/privacy" className="text-indigo-600 hover:underline" target="_blank" rel="noopener noreferrer">OpenAI Privacy Policy</a>.</li>
+              <li><strong>ConvertAPI:</strong> Used for Word-to-PDF, PDF-to-Word, PDF-to-Excel and PDF-to-PowerPoint conversion. Your file is sent to ConvertAPI for processing, with StoreFile=false so it is never written to their disk. See <a href="https://www.convertapi.com/privacy-policy" className="text-indigo-600 hover:underline" target="_blank" rel="noopener noreferrer">ConvertAPI Privacy Policy</a>.</li>
               <li><strong>Vercel:</strong> Our hosting provider may collect server logs including IP addresses.</li>
             </ul>
           </div>
