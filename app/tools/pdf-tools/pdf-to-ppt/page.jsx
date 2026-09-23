@@ -74,7 +74,7 @@ export default function PdfToPptPage() {
       </div>
       <SeoContent
         title="PDF to PowerPoint"
-        description="PDF to PowerPoint converts every page of your PDF into a slide of an editable .pptx presentation, with text and images you can move and change. The conversion is done by ConvertAPI, the same provider as our PDF to Word tool; your file is sent over HTTPS and deleted after conversion."
+        description="PDF to PowerPoint converts every page of your PDF into a slide of an editable .pptx presentation, with text and images you can move and change. In our tests on two presentation PDFs (bullets, an image, a chart, a gradient shape), every page became a slide with the same editable text boxes and images as the leading online PDF converter's result. The conversion is done by ConvertAPI, the same provider as our PDF to Word tool; your file is sent over HTTPS and deleted after conversion."
         howTo={[
           "Click the upload area and select a PDF file from your device.",
           "Click 'Download .pptx'. Your file is uploaded securely for conversion and the PowerPoint file downloads once it's ready.",

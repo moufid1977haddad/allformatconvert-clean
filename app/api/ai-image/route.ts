@@ -87,6 +87,8 @@ export async function POST(req: NextRequest) {
   }
 
   const cost = actualImageCostMicros(data?.usage);
+  // Real tokens in the function log (never the prompt): the only way to read the true unit cost.
+  console.log(`[openai-image] model=${MODEL} quality=${QUALITY} size=${size} input_tokens=${data?.usage?.input_tokens} output_tokens=${data?.usage?.output_tokens} cost_micros=${cost}`);
   await guard.commit(cost);
   await own.settle(cost);
   const b64 = data?.data?.[0]?.b64_json;

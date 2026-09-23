@@ -74,7 +74,7 @@ export default function PdfToExcelPage() {
       </div>
       <SeoContent
         title="PDF to Excel"
-        description="PDF to Excel converts the tables of your PDF into an editable .xlsx spreadsheet, with rows and columns you can sort, filter and calculate with. The conversion is done by ConvertAPI, the same provider as our PDF to Word tool; your file is sent over HTTPS and deleted after conversion."
+        description="PDF to Excel converts the tables of your PDF into an editable .xlsx spreadsheet, with rows and columns you can sort, filter and calculate with. In our tests on two spreadsheet PDFs (a 40-row sales table with dates, prices and percentages, and a sheet with five tables), every table came out with the same cells as the leading online PDF converter's, with numbers and dates as real values you can calculate with. The conversion is done by ConvertAPI, the same provider as our PDF to Word tool; your file is sent over HTTPS and deleted after conversion."
         howTo={[
           "Click the upload area and select a PDF file from your device.",
           "Click 'Download .xlsx'. Your file is uploaded securely for conversion and the Excel file downloads once it's ready.",
