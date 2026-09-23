@@ -181,6 +181,17 @@ def run():
         st, _b, h = req(srv, "GET", f"/v1/jobs/{jid2}/result", tk2, raw_response=True)
         check("docx served with the docx MIME type", "wordprocessingml" in h["Content-Type"], h.get("Content-Type"))
 
+        # --- png output magic (Image Upscaler)
+        jid4, tk4, st, _ = stage_upload(srv, b"z" * 3000)
+        req(srv, "POST", f"/v1/jobs/{jid4}/start", tk4)
+        st, j, _ = deposit(srv, jid4, b"GIF89a" + os.urandom(3000), ext="png")
+        check("png deposit with non-PNG bytes refused", st == 400, (st, j))
+        png = b"\x89PNG\r\n\x1a\n" + os.urandom(5000)
+        st, j, _ = deposit(srv, jid4, png, ext="png")
+        check("png deposit accepted", st == 200, (st, j))
+        st, b4, h = req(srv, "GET", f"/v1/jobs/{jid4}/result", tk4, raw_response=True)
+        check("png served as image/png, exact bytes", st == 200 and b4 == png and h["Content-Type"] == "image/png", h.get("Content-Type"))
+
         # --- cancel destroys everything
         jid3, tk3, st, _ = stage_upload(srv, b"y" * 5000)
         req(srv, "POST", f"/v1/jobs/{jid3}/start", tk3)

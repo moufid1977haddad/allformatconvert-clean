@@ -50,7 +50,7 @@ from flask import Flask, jsonify, request, send_file
 from PIL import Image, UnidentifiedImageError
 from werkzeug.exceptions import HTTPException
 
-from . import infer
+from . import infer, upscale
 from .auth import require_api_key
 from .cors import apply_cors
 
@@ -159,6 +159,23 @@ def remove_background():
         total_seconds,
     )
     return send_file(buf, mimetype="image/png")
+
+
+@app.route("/upscale-staged", methods=["POST"])
+@require_api_key
+def upscale_staged():
+    """AI upscaling of an image staged on media-processing -- see upscale.py."""
+    body = request.get_json(silent=True) or {}
+    try:
+        scale = int(body.get("scale", 0))
+    except (TypeError, ValueError):
+        scale = 0
+    try:
+        status, payload = upscale.staged(body.get("jid", ""), body.get("ticket", ""), scale)
+    except Exception:
+        log.exception("upscale failed (image content not logged)")
+        return jsonify(ok=False, error="Upscaling failed."), 500
+    return jsonify(payload), status
 
 
 @app.errorhandler(HTTPException)

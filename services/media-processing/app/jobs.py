@@ -35,6 +35,8 @@ STAGE_OP = "stage"
 STAGE_OUTPUTS = {
     "pdf": ("application/pdf", b"%PDF-"),
     "docx": ("application/vnd.openxmlformats-officedocument.wordprocessingml.document", b"PK"),
+    # Image Upscaler: the AI service (services/background-removal, /upscale-staged) deposits its PNG here.
+    "png": ("image/png", b"\x89PNG\r\n\x1a\n"),
 }
 
 
