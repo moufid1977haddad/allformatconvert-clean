@@ -294,7 +294,7 @@ const UNIVERSAL = [
 function img(...extra) {
   return [
     ...extra,
-    { href: '/tools/image-tools/image-compressor', note: 'Reduce file size, keep the quality' },
+    { href: '/tools/image-tools/image-compressor', note: 'Reduce file size, keep the format' },
     { href: '/tools/image-tools/image-converter',  note: 'Convert to PNG, JPG, WebP, and more' },
     { href: '/tools/image-tools/image-resizer',    note: 'Resize to exact dimensions' },
   ].slice(0, 5);

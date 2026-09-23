@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { ToolIcon, CategoryIcon, toolTextColors, categoryColors } from '../../lib/toolIcons';
 
 const tools = [
-  { title: 'Image Compressor', description: 'Compress images without losing quality', href: '/tools/image-tools/image-compressor', group: 'Transform' },
+  { title: 'Image Compressor', description: 'Compress JPG, PNG and WebP, format kept', href: '/tools/image-tools/image-compressor', group: 'Transform' },
   { title: 'Image Converter', description: 'Convert between image formats', href: '/tools/image-tools/image-converter', group: 'Transform' },
   { title: 'Image Resizer', description: 'Resize images to specific dimensions', href: '/tools/image-tools/image-resizer', group: 'Transform' },
   { title: 'Image Cropper', description: 'Crop images with aspect ratio presets', href: '/tools/image-tools/image-cropper', group: 'Transform' },
