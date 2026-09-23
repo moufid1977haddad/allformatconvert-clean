@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Compress — Rewrite Your Pdf's Internal Structure" },
-  description: "PDF Compress rewrites your PDF's internal structure entirely in your browser, condensing its objects into compact object streams.",
+  title: { absolute: "Compress PDF — Three Levels, Lossless Included" },
+  description: "Compress PDF files with three levels: Extreme, Recommended or Lossless. Images recompressed from their real size on the page, fonts optimised, text never rewritten.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-compress" },
   openGraph: {
-    title: "PDF Compress — Rewrite Your Pdf's Internal Structure",
-    description: "PDF Compress rewrites your PDF's internal structure entirely in your browser, condensing its objects into compact object streams.",
+    title: "Compress PDF — Three Levels, Lossless Included",
+    description: "Compress PDF files with three levels: Extreme, Recommended or Lossless. Images recompressed from their real size on the page, fonts optimised, text never rewritten.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-compress",
   },
 };

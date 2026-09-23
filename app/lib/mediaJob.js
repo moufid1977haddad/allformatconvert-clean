@@ -75,11 +75,11 @@ async function putChunk(url, ticket, blob, onBytes, signal) {
  * Ticket -> create job -> chunked, resumable, SHA-256-checked upload straight to the service.
  * Returns the ids and a best-effort cleanup that destroys the job on the service.
  */
-async function openAndUpload({ file, op, params, onStage, signal }) {
+async function openAndUpload({ file, op, params, purpose, onStage, signal }) {
   onStage({ stage: 'ticket' });
   let tres;
   try {
-    tres = await fetch('/api/media/ticket', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ op, size: file.size }), signal });
+    tres = await fetch('/api/media/ticket', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(purpose ? { op, size: file.size, purpose } : { op, size: file.size }), signal });
   } catch (e) {
     if (e && e.name === 'AbortError') throw new MediaJobError('Cancelled.', 'cancelled');
     throw new MediaJobError('Could not reach the site. Check your connection and try again.', 'network');
@@ -204,9 +204,9 @@ export async function runMediaJob({ file, op, params, onStage, signal }) {
  * route is asked, with a tiny JSON, to read it server-to-server and do its work. Resolves with the route's
  * JSON answer and the ids needed to download a result (if the route deposited one).
  */
-async function stagedCall({ file, endpoint, fields, onStage, signal }) {
+async function stagedCall({ file, endpoint, fields, purpose, onStage, signal }) {
   if (!mediaServiceConfigured()) throw new MediaJobError('Large-file processing is not available right now.', 'not_configured');
-  const { jid, ticket, cleanup } = await openAndUpload({ file, op: 'stage', params: {}, onStage, signal });
+  const { jid, ticket, cleanup } = await openAndUpload({ file, op: 'stage', params: {}, purpose, onStage, signal });
   try {
     const s = await api(`/v1/jobs/${jid}/start`, { method: 'POST', ticket, signal });
     if (s.status !== 202) {
@@ -265,8 +265,8 @@ export async function runStagedJson({ file, endpoint, fields, onStage, signal })
  * Staged call for tools whose route answers a JSON report and, when it produced a file, deposits it on the
  * service (`outputBytes`): downloads that file. Resolves with {json, blob|null}.
  */
-export async function runStagedToolResult({ file, endpoint, fields, onStage, signal }) {
-  const { json, jid, ticket, cleanup } = await stagedCall({ file, endpoint, fields, onStage, signal });
+export async function runStagedToolResult({ file, endpoint, fields, purpose, onStage, signal }) {
+  const { json, jid, ticket, cleanup } = await stagedCall({ file, endpoint, fields, purpose, onStage, signal });
   try {
     if (json.ok && json.outputBytes) {
       const dl = await downloadResult({ jid, ticket, expected: json.outputBytes, onStage, signal });

@@ -3,7 +3,10 @@ import { mintTicket, readConfig, validateRequest } from '@/lib/media/ticket';
 import { incrementCounter, decrementCounter } from '@/lib/quota/counters';
 import { currentUtcHourKey, currentUtcDayKey, secondsUntilNextUtcHour, secondsUntilNextUtcDay } from '@/lib/quota/period';
 import { hashIp, getClientIp } from '@/lib/quota/ipHash';
-import { MAX_OFFICE_STAGED_BYTES } from '@/lib/quota/limits';
+import { MAX_OFFICE_STAGED_BYTES, MAX_PDF_COMPRESS_STAGED_BYTES } from '@/lib/quota/limits';
+
+// Documents whose tool has its own measured ceiling (allow-list; anything else gets the Office one).
+const STAGE_PURPOSE_CAPS = { 'pdf-compress': MAX_PDF_COMPRESS_STAGED_BYTES };
 
 // Issues a one-job upload ticket for the media-processing service. The file
 // itself never comes through here: only this small JSON does.
@@ -19,7 +22,9 @@ export async function POST(req) {
   try { body = await req.json(); } catch { body = null; }
   // Documents (op 'stage') have their own, measured ceiling and their own rate buckets.
   const isStage = body && body.op === 'stage';
-  const maxBytes = isStage ? Math.min(cfg.maxBytes, MAX_OFFICE_STAGED_BYTES) : cfg.maxBytes;
+  const purposeCap = isStage && typeof body.purpose === 'string' && Object.prototype.hasOwnProperty.call(STAGE_PURPOSE_CAPS, body.purpose)
+    ? STAGE_PURPOSE_CAPS[body.purpose] : MAX_OFFICE_STAGED_BYTES;
+  const maxBytes = isStage ? Math.min(cfg.maxBytes, purposeCap) : cfg.maxBytes;
   const bucket = isStage ? 'office_rate' : 'media_rate';
   const v = validateRequest(body, maxBytes);
   if (!v.ok) return NextResponse.json({ error: 'bad_request', message: v.error }, { status: v.status });
