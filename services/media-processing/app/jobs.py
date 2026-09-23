@@ -35,6 +35,9 @@ STAGE_OP = "stage"
 STAGE_OUTPUTS = {
     "pdf": ("application/pdf", b"%PDF-"),
     "docx": ("application/vnd.openxmlformats-officedocument.wordprocessingml.document", b"PK"),
+    # PDF to Excel / PowerPoint (ConvertAPI), deposited by the site's routes: ZIP containers like docx.
+    "xlsx": ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", b"PK"),
+    "pptx": ("application/vnd.openxmlformats-officedocument.presentationml.presentation", b"PK"),
     # Image Upscaler: the AI service (services/background-removal, /upscale-staged) deposits its PNG here.
     "png": ("image/png", b"\x89PNG\r\n\x1a\n"),
 }
