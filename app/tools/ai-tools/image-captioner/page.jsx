@@ -42,7 +42,7 @@ export default function ImageCaptionerPage() {
       const response = await fetch('/api/ai-vision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: base64, prompt: 'Generate a creative, descriptive caption for this image.', tool: 'image-captioner' }),
+        body: JSON.stringify({ image: base64, tool: 'image-captioner' }),
       });
       const data = await response.json();
       if (data.text) setOutput(data.text);

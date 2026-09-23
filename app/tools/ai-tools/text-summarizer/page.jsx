@@ -21,7 +21,6 @@ export default function TextSummarizerPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: 'You are a text summarizer. Create a concise summary of the provided text. Keep the key points and main ideas. Return only the summary.',
           prompt: input,
           tool: 'text-summarizer',
         }),

@@ -4,11 +4,18 @@ import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkPromptLength } from "@/lib/quota/limits";
 import { actualAiCostMicros } from "@/lib/quota/config";
 import { alertServerError } from "@/lib/quota/errorAlerts";
+import { resolveTextTool } from "@/lib/ai/toolPrompts";
 
 export async function POST(req: NextRequest) {
   try {
-    const { system, prompt, tool } = await req.json();
-    if (!prompt) return NextResponse.json({ error: "No prompt provided" }, { status: 400 });
+    const body = await req.json();
+    // The instruction is chosen here from the tool name, never taken from the
+    // browser (lib/ai/toolPrompts.js explains why).
+    const resolved = resolveTextTool(body);
+    if (!resolved.ok) return NextResponse.json({ error: resolved.error }, { status: 400 });
+    const { system } = resolved;
+    const { prompt, tool } = body;
+    if (!prompt || typeof prompt !== "string") return NextResponse.json({ error: "No prompt provided" }, { status: 400 });
 
     const promptCheck = checkPromptLength(prompt);
     if (!promptCheck.ok) return NextResponse.json({ error: promptCheck.message }, { status: 400 });
@@ -27,7 +34,7 @@ export async function POST(req: NextRequest) {
           model: "gpt-4o-mini",
           max_tokens: 1000,
           messages: [
-            { role: "system", content: system || "You are a helpful assistant." },
+            { role: "system", content: system },
             { role: "user", content: prompt },
           ],
         }),

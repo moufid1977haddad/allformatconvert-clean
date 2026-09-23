@@ -21,7 +21,6 @@ export default function AIWriterPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: 'You are a professional content writer. Generate high-quality, engaging content based on the user input. Be creative and detailed.',
           prompt: input,
           tool: 'ai-writer',
         }),

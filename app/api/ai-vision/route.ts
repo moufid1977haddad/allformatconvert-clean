@@ -4,11 +4,18 @@ import { guardPaidRoute } from "@/lib/quota/guard";
 import { MAX_VISION_IMAGE_BYTES } from "@/lib/quota/limits";
 import { actualAiCostMicros } from "@/lib/quota/config";
 import { alertServerError } from "@/lib/quota/errorAlerts";
+import { resolveVisionTool } from "@/lib/ai/toolPrompts";
 
 export async function POST(req: NextRequest) {
   try {
-    const { image, prompt, tool } = await req.json();
-    if (!image) return NextResponse.json({ error: "No image provided" }, { status: 400 });
+    const body = await req.json();
+    // The instruction is chosen here from the tool name, never taken from the
+    // browser (lib/ai/toolPrompts.js explains why).
+    const resolved = resolveVisionTool(body);
+    if (!resolved.ok) return NextResponse.json({ error: resolved.error }, { status: 400 });
+    const { prompt } = resolved;
+    const { image, tool } = body;
+    if (!image || typeof image !== "string") return NextResponse.json({ error: "No image provided" }, { status: 400 });
 
     const imageBytes = Buffer.byteLength(image, "base64");
     if (imageBytes > MAX_VISION_IMAGE_BYTES) {
@@ -33,7 +40,7 @@ export async function POST(req: NextRequest) {
             {
               role: "user",
               content: [
-                { type: "text", text: prompt || "Generate a creative caption for this image." },
+                { type: "text", text: prompt },
                 { type: "image_url", image_url: { url: `data:image/jpeg;base64,${image}` } },
               ],
             },

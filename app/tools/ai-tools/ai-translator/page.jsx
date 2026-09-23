@@ -24,9 +24,9 @@ export default function AITranslatorPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: `You are a professional translator. Translate the provided text to ${targetLang}. Return only the translation without explanations.`,
           prompt: input,
           tool: 'ai-translator',
+          options: { targetLang },
         }),
       });
       const data = await response.json();

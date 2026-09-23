@@ -21,7 +21,6 @@ export default function DataExtractorPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: 'You are a data extraction expert. Extract structured data from the provided text. Format the extracted data in a clear, organized way (JSON or table format when appropriate).',
           prompt: input,
           tool: 'data-extractor',
         }),

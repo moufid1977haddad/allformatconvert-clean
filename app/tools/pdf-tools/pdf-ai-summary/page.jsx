@@ -2,37 +2,52 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
-import { checkPromptLength } from '@/lib/quota/limits';
+import { checkPromptLength, MAX_PROMPT_CHARS } from '@/lib/quota/limits';
 
 export default function Page() {
   const [file, setFile] = useState(null);
   const [output, setOutput] = useState('');
+  const [coverage, setCoverage] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const fileRef = useRef();
 
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setOutput(''); };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setOutput(''); setCoverage(''); };
 
   const summarize = async () => {
     if (!file) return;
     setLoading(true);
     setError('');
+    setCoverage('');
     try {
-      const arrayBuffer = await file.arrayBuffer();
-      // Only the first 5000 base64 chars are ever used below, so only encode
-      // enough of the file's start to cover that — encoding the whole buffer
-      // via String.fromCharCode(...bytes) blows the call-stack argument limit
-      // for any realistically-sized PDF (crashes above ~100KB).
-      const prefixBytes = new Uint8Array(arrayBuffer).slice(0, 4000);
-      const base64 = btoa(String.fromCharCode(...prefixBytes));
-      const summaryPrompt = 'Please summarize this PDF document: ' + base64.slice(0, 5000);
+      // Extract the document's real text (the tool used to send the raw file
+      // bytes, base64-encoded, so the model summarized binary noise).
+      const pdfjsLib = await import('pdfjs-dist');
+      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
+      const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+      let text = '';
+      let pagesRead = 0;
+      for (let i = 1; i <= pdf.numPages && text.length < MAX_PROMPT_CHARS; i++) {
+        const content = await (await pdf.getPage(i)).getTextContent();
+        text += content.items.map(item => item.str).join(' ').replace(/\s+/g, ' ').trim() + '\n';
+        pagesRead = i;
+      }
+      if (!text.trim()) {
+        setError('No text was found in this PDF — it is probably a scanned image. Run it through PDF OCR first, then summarize the result.');
+        setLoading(false);
+        return;
+      }
+      const truncated = text.length > MAX_PROMPT_CHARS;
+      const summaryPrompt = text.slice(0, MAX_PROMPT_CHARS);
       const lengthCheck = checkPromptLength(summaryPrompt);
       if (!lengthCheck.ok) { setError(lengthCheck.message); setLoading(false); return; }
+      setCoverage(truncated || pagesRead < pdf.numPages
+        ? `This summary covers the first ${MAX_PROMPT_CHARS.toLocaleString()} characters of text (about ${pagesRead} of ${pdf.numPages} pages).`
+        : `This summary covers the whole document (${pdf.numPages} page${pdf.numPages === 1 ? '' : 's'}).`);
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: 'You are a document summarizer. Provide a clear and concise summary of the PDF document content.',
           prompt: summaryPrompt,
           tool: 'pdf-ai-summary',
         }),
@@ -62,6 +77,7 @@ export default function Page() {
           {output && (
             <div className="space-y-2">
               <label className="block text-sm text-neutral-500">Summary</label>
+              {coverage && <p className="text-xs text-neutral-500">{coverage}</p>}
               <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={output} readOnly />
               <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Copy Summary</button>
             </div>
@@ -70,23 +86,23 @@ export default function Page() {
       </div>
       <SeoContent
         title="AI PDF Summary"
-        description="AI PDF Summary sends your file to our server, which passes it to OpenAI's gpt-4o-mini model for a text summary. Rather than extracting the PDF's actual text first, it base64-encodes the raw file and forwards only the first 5,000 characters of that encoding — for anything but short, simple PDFs, the model is working from a small slice of raw binary data rather than the document's full content."
+        description="AI PDF Summary extracts the text of your PDF in your browser, then sends that text (up to 8,000 characters) to our server, which passes it to OpenAI's gpt-4o-mini model for a summary. The page tells you exactly how much of the document the summary covers."
         howTo={[
           "Click the upload area and select a PDF file from your device.",
-          "Click 'Summarize PDF' to send it to the AI model.",
-          "Wait a few seconds for the summary to appear below.",
+          "Click 'Summarize PDF': the text is extracted and sent to the AI model.",
+          "Wait a few seconds for the summary to appear below, with a note on how many pages it covers.",
           "Click 'Copy Summary' to copy the result to your clipboard."
         ]}
         faqs={[
           { q: "Is AI PDF Summary free to use?", a: "Yes, it's free with no signup required." },
-          { q: "Does it read my entire PDF?", a: "No — only roughly the first 5,000 characters of the file's base64-encoded bytes are sent to the AI, so anything beyond the very start of the file isn't seen by the model." },
-          { q: "Is my file uploaded to a server?", a: "Yes. Unlike most tools on this site, your file is sent to our server and forwarded to OpenAI's API to generate the summary." },
-          { q: "Why does the summary sometimes look unrelated to my document?", a: "The tool sends raw file bytes rather than properly extracted text, so the model can end up summarizing binary noise instead of your document's actual content, especially for longer or image-heavy PDFs." }
+          { q: "Does it read my entire PDF?", a: "It reads the document's text up to 8,000 characters — the whole file for short documents, the first few pages for longer ones. The page says which, after each summary." },
+          { q: "Is my file uploaded to a server?", a: "The PDF itself stays in your browser. Only the extracted text is sent to our server and forwarded to OpenAI's API to generate the summary." },
+          { q: "Does it work on scanned PDFs?", a: "No. A scanned PDF contains images, not text; the page says so instead of summarizing nothing. Run it through PDF OCR first." }
         ]}
         tips={[
-          "This tool works best on short, simple, text-based PDFs, since only the beginning of the raw file reaches the AI.",
-          "For longer documents, use PDF Extract Text first, then paste that extracted text into a general-purpose AI summarizer for a more reliable result.",
-          "Treat the summary as a rough starting point and verify it against the original document.",
+          "For a long document, split it with PDF Split and summarize each part.",
+          "Scanned documents need PDF OCR first.",
+          "Treat the summary as a starting point and verify it against the original document.",
           "Copy the summary right away — it isn't saved anywhere after you leave the page."
         ]}
       />

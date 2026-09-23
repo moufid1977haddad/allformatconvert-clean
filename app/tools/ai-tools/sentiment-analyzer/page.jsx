@@ -21,7 +21,6 @@ export default function SentimentAnalyzerPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: 'You are a sentiment analysis expert. Analyze the sentiment of the provided text. Determine if it is Positive, Negative, or Neutral, provide a confidence percentage, and explain the key sentiment indicators.',
           prompt: input,
           tool: 'sentiment-analyzer',
         }),

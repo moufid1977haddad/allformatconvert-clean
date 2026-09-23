@@ -23,7 +23,6 @@ export default function AIChatbotPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: 'You are a helpful, friendly AI assistant. Answer questions and help with tasks in a conversational way.',
           prompt: userMsg,
           tool: 'ai-chatbot',
         }),

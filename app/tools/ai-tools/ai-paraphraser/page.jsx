@@ -21,7 +21,6 @@ export default function AIParaphraserPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: 'You are a paraphrasing expert. Rewrite the provided text using different words and sentence structures while preserving the original meaning. Return only the paraphrased text.',
           prompt: input,
           tool: 'ai-paraphraser',
         }),

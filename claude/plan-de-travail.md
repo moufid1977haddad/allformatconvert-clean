@@ -3,6 +3,26 @@
 > **📍 EMPLACEMENT DE CE DOCUMENT — lire en premier.**
 > Jusqu'au 19 septembre 2026, ce document vivait **uniquement dans le Projet claude.ai**, invisible depuis le dépôt. Claude Code a donc travaillé des semaines sans la RÈGLE ZÉRO, sans les interdits permanents et sans la liste des pièges — et a redécouvert à ses frais des choses déjà écrites ici. **Il vit désormais dans le dépôt, à `claude/plan-de-travail.md`, et c'est la seule copie qui fait foi.** À lire au début de chaque chantier.
 
+> ## ═══ RÈGLE QUI PRIME SUR TOUT LE RESTE, posée fermement par le propriétaire le 23 septembre ═══
+>
+> **RECHERCHE AVANT TOUTE DÉCISION — sans exception, et quelle que soit la taille de la décision.**
+> Cela ne vaut pas seulement pour les outils : cela vaut pour le moindre détail technique, d'interface
+> ou esthétique — une bibliothèque, une architecture, un plafond, un libellé, une disposition, une
+> couleur. Avant de choisir, tu regardes comment les sites de référence font, et par quel moyen.
+>
+> **Établir le MOYEN, pas seulement constater le RÉSULTAT.** Mesurer qu'un concurrent fait mieux ne
+> sert à rien si on ne sait pas comment il s'y prend. Ne jamais optimiser à l'intérieur d'une solution
+> sans avoir vérifié que c'est la bonne famille de solution.
+>
+> **Point de départ obligatoire : tout ce que propose ce site existe déjà ailleurs sur le web.** Des
+> concurrents le font sans se ruiner, donc un moyen viable EXISTE. Conclure « trop cher » ou
+> « impossible » à partir du tarif d'un seul fournisseur est une faute de méthode.
+>
+> **Aucune suppression d'outil ne peut même être PROPOSÉE avant une recherche documentée montrant
+> qu'aucune solution de qualité n'existe — et la décision appartient au propriétaire, toujours.**
+>
+> Le résultat doit être ÉGAL OU SUPÉRIEUR aux sites de référence, jamais inférieur.
+
 > ## 🚦 RÈGLE ZÉRO — MESURER AVANT DE CONSTRUIRE
 >
 > **Avant d'ouvrir un chantier, répondre à trois questions. Aucune exception.**

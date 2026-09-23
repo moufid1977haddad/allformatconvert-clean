@@ -21,7 +21,6 @@ export default function GrammarFixerPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: 'You are a grammar expert. Fix all grammar, spelling, and punctuation errors in the text. Return only the corrected text without explanations.',
           prompt: input,
           tool: 'grammar-fixer',
         }),

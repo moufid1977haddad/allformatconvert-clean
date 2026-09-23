@@ -39,9 +39,9 @@ export default function Page() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: `You are a professional translator. Translate the following text to ${targetLang}. Return only the translation.`,
           prompt: text.slice(0, MAX_PDF_TRANSLATE_CHARS),
           tool: 'pdf-translate',
+          options: { targetLang },
         }),
       });
       const data = await response.json();

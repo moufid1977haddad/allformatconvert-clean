@@ -21,7 +21,6 @@ export default function KeywordExtractorPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system: 'You are a keyword extraction expert. Extract the most important keywords and key phrases from the provided text. Return them as a numbered list with brief explanations of why each is important.',
           prompt: input,
           tool: 'keyword-extractor',
         }),
