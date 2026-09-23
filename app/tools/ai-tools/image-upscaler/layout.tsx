@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Upscaler — Upscale Images Online Free" },
-  description: "Image Upscaler is a free online tool that enlarges your images entirely in your browser using the HTML canvas element with high-quality smoothing.",
+  title: { absolute: "AI Image Upscaler — Enlarge Images 2x or 4x with AI" },
+  description: "AI Image Upscaler: enlarge small images 2x or 4x with a super-resolution neural network that rebuilds real detail. Free, no watermark.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/image-upscaler" },
   openGraph: {
-    title: "Image Upscaler — Upscale Images Online Free",
-    description: "Image Upscaler is a free online tool that enlarges your images entirely in your browser using the HTML canvas element with high-quality smoothing.",
+    title: "AI Image Upscaler — Enlarge Images 2x or 4x with AI",
+    description: "AI Image Upscaler: enlarge small images 2x or 4x with a super-resolution neural network that rebuilds real detail. Free, no watermark.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/image-upscaler",
   },
 };

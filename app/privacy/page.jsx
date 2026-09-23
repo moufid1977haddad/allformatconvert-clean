@@ -30,7 +30,7 @@ export default function PrivacyPage() {
               <li><strong>Cookies:</strong> We use cookies to remember your preferences such as dark mode settings. These cookies do not contain personal information.</li>
               <li><strong>File Processing:</strong> Most tools process your files entirely in your browser — nothing is uploaded to any server. A few tools require server-side processing for fidelity or capability reasons in-browser processing cannot reach; for those, your file is transmitted over HTTPS, processed, and deleted immediately afterward — never stored, logged, or kept:
                 <ul className="list-disc pl-5 mt-2 space-y-1">
-                  <li>Excel to PDF, PowerPoint to PDF, EPUB to PDF, MOBI to PDF, PDF Repair, PDF to PDF/A, PDF Compress (files up to 200&nbsp;MB), Background Remover, Video Compressor, Video Converter: processed on our own servers (self-hosted, not shared with a third party).</li>
+                  <li>Excel to PDF, PowerPoint to PDF, EPUB to PDF, MOBI to PDF, PDF Repair, PDF to PDF/A, PDF Compress (files up to 200&nbsp;MB), Background Remover, AI Image Upscaler, Video Compressor, Video Converter: processed on our own servers (self-hosted, not shared with a third party).</li>
                   <li>Word to PDF, PDF to Word: your file is sent to ConvertAPI for processing, then deleted — see Section 3.</li>
                   <li>Audio Transcriber / Audio to Text: your audio is sent to OpenAI for processing — see Section 3.</li>
                 </ul>
