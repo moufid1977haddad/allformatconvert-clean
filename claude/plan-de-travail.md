@@ -382,7 +382,7 @@ Et les deux outils de données : **`xml-to-json`** (`b77f988b`, guillemets écha
 - **Vérifier l'adresse de facturation des cinq fournisseurs** (Anthropic, Google Workspace, Railway, Cloudflare, OpenAI).
 - ✅ **DPA ConvertAPI — N'EST PLUS UN BLOQUANT DE LANCEMENT (corrigé le 22/09).** Le document légal officiel de ConvertAPI, lu directement (`https://www.convertapi.com/compliance/dpa.pdf`, « Privacy Policy and Data Processing Terms », 7 février 2025 — pas un résumé de seconde main), dit noir sur blanc que ses conditions **s'appliquent déjà, automatiquement, sans signature** : la protection RGPD est donc déjà en place aujourd'hui. `help.convertapi.com` reste injoignable depuis ce poste, mais `convertapi.com` répond. Un DPA individuel signé reste utile (traçabilité contractuelle formelle) mais n'a plus d'urgence de lancement. **Contact officiel confirmé dans le document lui-même : privacy@convertapi.com** (DPO ConvertAPI, UAB, Vilnius, Lituanie). **Courriel prêt à envoyer rédigé dans `RAPPORT-gotenberg-independance.md` §5** (à adapter avec le nom exact de l'entité cliente et l'email du compte avant envoi). **Étapes quand tu voudras le faire (~15 min) :** ① se connecter au tableau de bord ConvertAPI, vérifier le palier tarifaire (Startup/49 $ et au-dessus inclut « Signed NDA & DPA », non vérifié pour ce compte) ; ② chercher une section « Contracts »/« Legal » dans le tableau de bord (signalée par une source indirecte, à confirmer à l'écran) ; ③ à défaut, envoyer le courriel préparé à **privacy@convertapi.com** ; ④ conserver la copie signée ; ⑤ noter la date ici.
 - **Centraliser les notifications fournisseurs** vers `contact@onlineconvertools.com`.
-- **`PROJET.md` est obsolète et trompeur — recommandation du 22/09 : le SUPPRIMER** (plan Pro, dossier `projet-recupere`, remove.bg, « Media Tools 28 »… : faux presque partout). L'inventaire réel est au bloquant 5 ci-dessus (222 outils) et le chiffre affiché est gardé par le build ; un second inventaire manuel redériverait. En attente de l'accord du propriétaire.
+- ✅ ~~`PROJET.md` obsolète et trompeur~~ — **supprimé le 23/09 sur décision du propriétaire.** L'inventaire réel est au bloquant 5 (le chiffre affiché est gardé par le build).
 - **Supprimer** `.claude\worktrees\quota-spend-infra` — **le dossier existe encore ; la branche `worktree-quota-spend-infra` n'existe plus** (vérifié le 20/09).
 - ✅ ~~Supprimer ou ignorer `_scratch_test_signup.mjs`~~ — **absent de la racine du dépôt** (vérifié le 20/09).
 - **Ajouter sur l'écran post-inscription** : « et marquez-le comme non indésirable ».
@@ -472,7 +472,6 @@ Et les deux outils de données : **`xml-to-json`** (`b77f988b`, guillemets écha
 - **Dans Railway, ajouter une variable ne suffit pas** — il faut cliquer **« Deploy Changes »**.
 - **L'`ignoreCommand` de `vercel.json` annule les redéploiements d'un commit qui ne touche que `docs/**` ou `*.md`.** Ce n'est pas une panne. Contourner au cas par cas, ne jamais modifier le réglage du projet.
 - **Ne pas ajouter de policy RLS « admin »** sur `usage_counters`, `usage_events`, `contact_messages`.
-- **Les chiffres de `PROJET.md` ne font pas foi.**
 
 ---
 

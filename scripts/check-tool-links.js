@@ -102,6 +102,13 @@ if (defaultTotal !== realTotal) {
   issues.push(`app/page.jsx: DEFAULT_TOOL_COUNT is ${defaultTotal}, but there are ${realTotal} working tools`);
 }
 
+// public/og-image.png has the tool count drawn into it; the generator records
+// the number it drew in scripts/og-image.count.
+const ogCount = Number(fs.readFileSync(path.join(__dirname, 'og-image.count'), 'utf8').trim());
+if (ogCount !== realTotal) {
+  issues.push(`public/og-image.png shows ${ogCount} tools, but there are ${realTotal} working tools -- run node scripts/generate-og-image.js`);
+}
+
 if (issues.length) {
   console.error(`\nx check-tool-links found ${issues.length} issue(s):\n`);
   issues.forEach(i => console.error('  - ' + i));
