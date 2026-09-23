@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "WEBM to GIF — Extract Up to 10 Evenly Spaced Frames Online" },
-  description: "WEBM to GIF extracts up to 10 evenly spaced frames from your WebM video and encodes them into a real, downloadable animated GIF.",
+  title: { absolute: "WebM to GIF — Convert a Video Clip to an Animated GIF" },
+  description: "Convert a clip of your WebM video into an animated GIF: choose start, length up to 60 s, width and frame rate. Proportions kept, any browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools/webm-to-gif" },
   openGraph: {
-    title: "WEBM to GIF — Extract Up to 10 Evenly Spaced Frames Online",
-    description: "WEBM to GIF extracts up to 10 evenly spaced frames from your WebM video and encodes them into a real, downloadable animated GIF.",
+    title: "WebM to GIF — Convert a Video Clip to an Animated GIF",
+    description: "Convert a clip of your WebM video into an animated GIF: choose start, length up to 60 s, width and frame rate. Proportions kept, any browser.",
     url: "https://www.onlineconvertools.com/tools/gif-tools/webm-to-gif",
   },
 };

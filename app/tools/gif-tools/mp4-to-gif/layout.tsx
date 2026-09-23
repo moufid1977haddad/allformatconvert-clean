@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "MP4 to GIF — Extract Up to 10 Evenly Spaced Frames Online" },
-  description: "MP4 to GIF extracts up to 10 evenly spaced frames from your MP4 video and encodes them into a real, downloadable animated GIF.",
+  title: { absolute: "MP4 to GIF — Convert a Video Clip to an Animated GIF" },
+  description: "Convert a clip of your MP4 into an animated GIF: choose start, length up to 60 s, width and frame rate. Vertical videos keep their shape.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools/mp4-to-gif" },
   openGraph: {
-    title: "MP4 to GIF — Extract Up to 10 Evenly Spaced Frames Online",
-    description: "MP4 to GIF extracts up to 10 evenly spaced frames from your MP4 video and encodes them into a real, downloadable animated GIF.",
+    title: "MP4 to GIF — Convert a Video Clip to an Animated GIF",
+    description: "Convert a clip of your MP4 into an animated GIF: choose start, length up to 60 s, width and frame rate. Vertical videos keep their shape.",
     url: "https://www.onlineconvertools.com/tools/gif-tools/mp4-to-gif",
   },
 };

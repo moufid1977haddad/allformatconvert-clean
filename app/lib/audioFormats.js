@@ -5,7 +5,8 @@
 // found in ffmpeg's documented codec list -- this project's ffmpeg.wasm
 // core (@ffmpeg/core 0.12.9, configured with --enable-gpl but WITHOUT
 // --enable-libopencore-amrnb/amrwb) actually encodes each of these:
-//   mp3/wav/aac/flac/ogg/m4a/opus - pre-existing, proven by production use
+//   mp3/wav/aac/flac/ogg/m4a - pre-existing, proven by production use
+//   opus -> ffmpeg's native encoder (libopus crashes in this core, see the entry below)
 //   wma  -> wmav2 (native encoder, asf muxer)
 //   aiff -> pcm_s16be (native, aiff muxer)
 //   alac -> alac (native encoder; ffmpeg has no ".alac" muxer, so it's
@@ -25,7 +26,10 @@ export const AUDIO_OUTPUT_FORMATS = [
   { value: 'flac', label: 'FLAC', ext: 'flac', mime: 'audio/flac' },
   { value: 'ogg', label: 'OGG (Vorbis)', ext: 'ogg', mime: 'audio/ogg' },
   { value: 'm4a', label: 'M4A (AAC)', ext: 'm4a', mime: 'audio/mp4' },
-  { value: 'opus', label: 'Opus', ext: 'opus', mime: 'audio/opus' },
+  // libopus crashes in this ffmpeg.wasm core ("RuntimeError: memory access out of bounds", reproduced
+  // 2026-09-23 with float AND 16-bit input): ffmpeg's own Opus encoder is used in the browser instead
+  // (valid Ogg Opus, OpusHead checked). Audio Converter sends Opus to the media service (real libopus).
+  { value: 'opus', label: 'Opus', ext: 'opus', mime: 'audio/opus', extraArgs: ['-c:a', 'opus', '-strict', '-2'] },
   { value: 'wma', label: 'WMA', ext: 'wma', mime: 'audio/x-ms-wma' },
   { value: 'aiff', label: 'AIFF', ext: 'aiff', mime: 'audio/aiff' },
   { value: 'alac', label: 'ALAC (Apple Lossless, .m4a)', ext: 'm4a', mime: 'audio/mp4', extraArgs: ['-c:a', 'alac'] },

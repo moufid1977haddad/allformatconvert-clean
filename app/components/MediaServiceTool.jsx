@@ -22,7 +22,7 @@ const STAGE_LABEL = {
   download: 'Downloading the result',
 };
 
-export default function MediaServiceTool({ op, title, subtitle, buttonLabel, controls, initialParams, buildParams, outName, seo }) {
+export default function MediaServiceTool({ op, title, subtitle, buttonLabel, controls, initialParams, buildParams, outName, seo, tool }) {
   const [file, setFile] = useState(null);
   const [params, setParams] = useState(initialParams);
   const [stage, setStage] = useState(null); // {stage, pct, position}
@@ -77,10 +77,10 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
       }
       // A success is only announced for a real, non-empty file with a known extension.
       if (!out.bytes || !out.ext) throw new MediaJobError('The service returned an empty file.', 'empty');
-      setResult({ url: URL.createObjectURL(out.blob), ext: out.ext, bytes: out.bytes, name: outName(file.name, out.ext, params), isVideo: out.blob.type.startsWith('video/'), isAudio: out.blob.type.startsWith('audio/') });
+      setResult({ url: URL.createObjectURL(out.blob), ext: out.ext, bytes: out.bytes, name: outName(file.name, out.ext, params), isVideo: out.blob.type.startsWith('video/'), isAudio: out.blob.type.startsWith('audio/'), isImage: out.blob.type.startsWith('image/') });
     } catch (e) {
       if (e.code !== 'cancelled') {
-        reportToolError({ tool: op === 'compress' ? 'video-compressor' : 'video-converter', file, error: e instanceof Error ? e : new Error(String(e)) });
+        reportToolError({ tool: tool || (op === 'compress' ? 'video-compressor' : 'video-converter'), file, error: e instanceof Error ? e : new Error(String(e)) });
         setError(e.message || 'The conversion failed.');
       }
     } finally {
@@ -141,6 +141,7 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
               </div>
               {result.isVideo && <video controls playsInline src={result.url} className="w-full rounded-xl max-h-72" />}
               {result.isAudio && <audio controls src={result.url} className="w-full" />}
+              {result.isImage && <img src={result.url} alt="Result" className="mx-auto max-h-96 rounded-xl" />}
               <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download {result.ext.toUpperCase()}</a>
             </div>
           )}

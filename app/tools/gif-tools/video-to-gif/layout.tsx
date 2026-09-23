@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "Video to GIF — Capture a Series Online Free" },
-  description: "Video to GIF captures a series of frames from any video file at your chosen frame rate and duration, then encodes them into a real GIF.",
+  title: { absolute: "Video to GIF — Clip Any Video into an Animated GIF" },
+  description: "Turn a clip of any video (MP4, MOV, WebM…) into an animated GIF: choose start, length up to 60 s, width and frame rate. Any browser, iPhone included.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools/video-to-gif" },
   openGraph: {
-    title: "Video to GIF — Capture a Series Online Free",
-    description: "Video to GIF captures a series of frames from any video file at your chosen frame rate and duration, then encodes them into a real GIF.",
+    title: "Video to GIF — Clip Any Video into an Animated GIF",
+    description: "Turn a clip of any video (MP4, MOV, WebM…) into an animated GIF: choose start, length up to 60 s, width and frame rate. Any browser, iPhone included.",
     url: "https://www.onlineconvertools.com/tools/gif-tools/video-to-gif",
   },
 };

@@ -6,6 +6,7 @@ import { AUDIO_ACCEPT } from '../../../lib/mediaSupport';
 import ProgressBar from '../../../components/ProgressBar';
 import { AUDIO_OUTPUT_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
 import { reportToolError } from '../../../lib/reportError';
+import { runMediaJob, mediaServiceConfigured } from '../../../lib/mediaJob';
 
 export default function AudioConverterPage() {
   const [file, setFile] = useState(null);
@@ -39,6 +40,24 @@ export default function AudioConverterPage() {
     setLoading(true);
     setProgress(0);
     setError('');
+    // Opus: encoded on our media service with the real libopus (what the reference converters use).
+    // libopus crashes inside the browser's ffmpeg.wasm, reproduced 2026-09-23 (see lib/audioFormats.js).
+    if (format === 'opus' && mediaServiceConfigured()) {
+      try {
+        const out = await runMediaJob({
+          file, op: 'convert', params: { target: 'opus', quality: 'medium' },
+          onStage: (s) => { if (typeof s.pct === 'number') setProgress(Math.round(s.pct)); },
+        });
+        if (!out.bytes || out.ext !== 'opus') throw new Error('The service returned no Opus file.');
+        setResult({ url: URL.createObjectURL(out.blob), name: file.name.replace(/\.[^.]+$/, '') + '.opus' });
+        setProgress(100);
+      } catch (e) {
+        reportToolError({ tool: 'audio-converter', file, error: e instanceof Error ? e : new Error(String(e)) });
+        setError('Conversion failed: ' + (e?.message || 'unknown error'));
+      }
+      setLoading(false);
+      return;
+    }
     try {
       const { FFmpeg } = await import('@ffmpeg/ffmpeg');
       const { fetchFile } = await import('@ffmpeg/util');
@@ -115,7 +134,7 @@ export default function AudioConverterPage() {
       </div>
       <SeoContent
         title="Audio Converter"
-        description="Audio Converter converts a single audio file between MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, and AC3 using ffmpeg.wasm, running entirely in your browser — your file is never uploaded to a server."
+        description="Audio Converter converts a single audio file between MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, and AC3 using ffmpeg.wasm, running in your browser — your file is not uploaded. The one exception is Opus: it is encoded on our own server with the reference libopus encoder (the in-browser one is not reliable), and the file is deleted as soon as you have downloaded the result."
         howTo={[
           "Click the upload area and select an audio file.",
           "Choose your target format from the dropdown.",
@@ -128,7 +147,7 @@ export default function AudioConverterPage() {
           { q: "Can it convert to AMR?", a: "No — this tool can read AMR files as input, but the AMR encoder isn't available in the ffmpeg build used here, so AMR isn't offered as an output target." },
           { q: "What is ALAC output actually saved as?", a: "A .m4a file using the ALAC (Apple Lossless) codec instead of AAC — the same format iTunes/Apple Music uses for lossless downloads." },
           { q: "Can I convert multiple files at once?", a: "No, this tool processes one file at a time — you'd need to repeat the process for each file." },
-          { q: "Is my file uploaded anywhere?", a: "No. Conversion happens entirely client-side via ffmpeg.wasm (WebAssembly) — there's no server involved, so nothing is ever uploaded." }
+          { q: "Is my file uploaded anywhere?", a: "For every format except Opus, no: conversion happens in your browser via ffmpeg.wasm. For Opus, the file is sent to our own server (not a third party), encoded with libopus, and deleted as soon as you have downloaded the result." }
         ]}
         tips={[
           "The first conversion after loading the page takes longer since your browser needs to download the ffmpeg.wasm engine (roughly 25–30MB).",
