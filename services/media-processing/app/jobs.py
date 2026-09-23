@@ -352,7 +352,7 @@ def _process(job: Job):
 
             args, ext, mime = ffmpeg_ops.build_command(job.op, params, job._info, inp, out, job.size, offset)
             code, cancelled, timed_out, aborted = ffmpeg_ops.run(
-                args, job._info.duration, lambda p: setattr(job, "progress", p), job.cancel.is_set, config.FFMPEG_TIMEOUT_SECONDS, abort_check
+                args, ffmpeg_ops.effective_duration(job.op, params, job._info), lambda p: setattr(job, "progress", p), job.cancel.is_set, config.FFMPEG_TIMEOUT_SECONDS, abort_check
             )
             if cancelled:
                 shutil.rmtree(job.dir, ignore_errors=True)
