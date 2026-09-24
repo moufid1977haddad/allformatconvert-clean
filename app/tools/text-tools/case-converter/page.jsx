@@ -1,15 +1,17 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { sentenceCase, titleCase, capitalizedCase, graphemes } from '../../../lib/textSegments';
 
 export default function CaseConverterPage() {
   const [text, setText] = useState('');
   const [copyError, setCopyError] = useState(false);
   const toUpper = () => setText(text.toUpperCase());
   const toLower = () => setText(text.toLowerCase());
-  const toTitle = () => setText(text.replace(/\p{L}\S*/gu, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()));
-  const toSentence = () => setText(text.charAt(0).toUpperCase() + text.slice(1).toLowerCase());
-  const toAlternate = () => setText(text.split('').map((c, i) => i % 2 === 0 ? c.toLowerCase() : c.toUpperCase()).join(''));
+  const toTitle = () => setText(titleCase(text));
+  const toCapitalized = () => setText(capitalizedCase(text));
+  const toSentence = () => setText(sentenceCase(text));
+  const toAlternate = () => setText(graphemes(text).map((c, i) => i % 2 === 0 ? c.toLowerCase() : c.toUpperCase()).join(''));
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
@@ -21,6 +23,7 @@ export default function CaseConverterPage() {
             <button onClick={toUpper} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition">UPPERCASE</button>
             <button onClick={toLower} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition">lowercase</button>
             <button onClick={toTitle} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition">Title Case</button>
+            <button onClick={toCapitalized} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition">Capitalized Case</button>
             <button onClick={toSentence} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition">Sentence case</button>
             <button onClick={toAlternate} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition">aLtErNaTe</button>
             <button onClick={() => setText('')} className="bg-neutral-200 hover:bg-neutral-200 rounded-xl py-2 font-semibold transition">Clear</button>
@@ -31,16 +34,16 @@ export default function CaseConverterPage() {
       </div>
       <SeoContent
         title="Case Converter"
-        description="Case Converter transforms text between UPPERCASE, lowercase, Title Case, Sentence case, and aLtErNaTe (toggle) case, entirely in your browser."
+        description="Case Converter transforms text between UPPERCASE, lowercase, Title Case, Capitalized Case, Sentence case, and aLtErNaTe (toggle) case, entirely in your browser. Sentence case capitalises every sentence (not just the first), restores the pronoun “I”, and keeps acronyms like NASA and brand names like iPhone; Title Case keeps short words such as “of” and “the” lower-case, as style guides do."
         howTo={[
           "Paste or type your text into the text box.",
-          "Click one of the five case buttons: UPPERCASE, lowercase, Title Case, Sentence case, or aLtErNaTe.",
+          "Click one of the six case buttons: UPPERCASE, lowercase, Title Case, Capitalized Case, Sentence case, or aLtErNaTe.",
           "The text box updates immediately with the converted result.",
           "Click \"Copy\" to copy the converted text to your clipboard."
         ]}
         faqs={[
           { q: "Is Case Converter free to use?", a: "Yes, it's completely free with no signup and no limit on conversions." },
-          { q: "What case formats does this tool support?", a: "UPPERCASE, lowercase, Title Case, Sentence case, and aLtErNaTe (alternating) case. camelCase, PascalCase, snake_case, and kebab-case aren't currently included." },
+          { q: "What case formats does this tool support?", a: "UPPERCASE, lowercase, Title Case (short words like \"of\" and \"the\" stay lower-case), Capitalized Case (every word capitalised), Sentence case, and aLtErNaTe (alternating) case. camelCase, PascalCase, snake_case, and kebab-case aren't currently included." },
           { q: "Can I convert multiple texts at once?", a: "No, one text block is converted at a time — repeat the process for additional texts." },
           { q: "Is my data private?", a: "Yes, everything happens locally in your browser — nothing is sent to a server." }
         ]}

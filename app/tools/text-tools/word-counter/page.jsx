@@ -1,13 +1,17 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { countWords, countSentences, graphemes } from '../../../lib/textSegments';
 
 export default function WordCounterPage() {
   const [text, setText] = useState('');
-  const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
-  const characters = text.length;
-  const charactersNoSpaces = text.replace(/\s/g, '').length;
-  const sentences = text.trim() === '' ? 0 : text.split(/[.!?]+/).filter(s => s.trim()).length;
+  // Words, characters and sentences as a reader counts them (see lib/textSegments.js): an emoji is one
+  // character, Japanese and Chinese are split into words, "Mr." and "3.50" do not end a sentence.
+  const words = countWords(text);
+  const chars = graphemes(text);
+  const characters = chars.length;
+  const charactersNoSpaces = chars.filter((c) => !/^\s+$/.test(c)).length;
+  const sentences = countSentences(text);
   const paragraphs = text.trim() === '' ? 0 : text.split(/\n+/).filter(p => p.trim()).length;
   const readingTime = Math.ceil(words / 200);
   return (
@@ -41,6 +45,7 @@ export default function WordCounterPage() {
           { q: "Is Word Counter free to use?", a: "Yes, it's completely free with no signup and unlimited use." },
           { q: "Is my data saved?", a: "No, everything is processed locally in your browser — your text is never sent to a server." },
           { q: "Can I use it for academic essays?", a: "Yes, it's well suited for checking word count requirements for assignments and applications." },
+          { q: "How are words and characters counted?", a: "The way a reader counts them, using your browser's Unicode text segmentation: an emoji — even one with a skin tone, or a family emoji made of several code points — is one character; Chinese, Japanese and Thai, written without spaces, are split into real words instead of counting a whole sentence as one word; and abbreviations like \"Mr.\" or numbers like \"3.50\" do not end a sentence." },
           { q: "Does it provide keyword density analysis?", a: "No — it covers word count, character count, sentence count, paragraph count, and reading time only." }
         ]}
         tips={[

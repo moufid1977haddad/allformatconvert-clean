@@ -1,14 +1,16 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { reverseCharacters, reverseWords as reverseWordOrder, reverseLines as reverseLineOrder } from '../../../lib/textSegments';
 
 export default function TextReverserPage() {
   const [text, setText] = useState('');
   const [result, setResult] = useState('');
   const [copyError, setCopyError] = useState(false);
-  const reverseText = () => setResult(text.split('').reverse().join(''));
-  const reverseWords = () => setResult(text.split(' ').reverse().join(' '));
-  const reverseLines = () => setResult(text.split('\n').reverse().join('\n'));
+  // Characters as the reader sees them: emoji, flags and accented letters are never split in two.
+  const reverseText = () => setResult(reverseCharacters(text));
+  const reverseWords = () => setResult(reverseWordOrder(text));
+  const reverseLines = () => setResult(reverseLineOrder(text));
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
@@ -43,7 +45,7 @@ export default function TextReverserPage() {
           { q: "Is Text Reverser free to use?", a: "Yes, it's completely free with no signup and no limits." },
           { q: "Does it work with numbers and punctuation?", a: "Yes, all characters are reversed exactly as they appear, whichever of the three modes you choose." },
           { q: "Is my data private?", a: "Yes, your text is processed locally and never sent to a server." },
-          { q: "Does it work with any language?", a: "It reverses character order for any language's text, though note that character-by-character reversal can occasionally split multi-character emoji or certain accented characters oddly." }
+          { q: "Does it work with any language?", a: "It reverses character order for any language's text, and it reverses characters as you see them: emoji with skin tones, family emoji, flags and accented letters stay whole instead of being split into broken pieces. \"Reverse Words\" works line by line, so your line breaks stay where they were." }
         ]}
         tips={[
           "Use \"Reverse Text\" to check whether a word or phrase is a palindrome.",
