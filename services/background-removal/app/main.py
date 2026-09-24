@@ -62,8 +62,9 @@ MAX_UPLOAD_BYTES = 25 * 1024 * 1024  # 25 MB
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("background-removal")
 log.info(
-    "startup: os.cpu_count()=%s ORT_INTRA_OP_THREADS=%s ORT_INTER_OP_THREADS=%s FILTER_AT_MODEL_RES=%s",
+    "startup: os.cpu_count()=%s cgroup_cpus=%s ORT_INTRA_OP_THREADS=%s ORT_INTER_OP_THREADS=%s FILTER_AT_MODEL_RES=%s",
     os.cpu_count(),
+    infer.container_cpus(),
     os.environ.get("ORT_INTRA_OP_THREADS", "(unset)"),
     os.environ.get("ORT_INTER_OP_THREADS", "(unset)"),
     os.environ.get("FILTER_AT_MODEL_RES", "(unset, defaults to on)"),

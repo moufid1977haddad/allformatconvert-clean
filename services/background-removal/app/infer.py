@@ -75,10 +75,36 @@ def _env_bool(name: str, default: bool) -> bool:
     return raw.strip() not in ("0", "false", "False", "")
 
 
+def container_cpus() -> int | None:
+    """vCPUs this container may really use, from its cgroup quota -- NOT os.cpu_count(), which on Railway
+    returns the host's 48 cores. Measured 2026-09-23: with onnxruntime left to size its pool from
+    os.cpu_count(), a 1-megapixel x4 upscale took 203 s on Railway (oversubscribed threads)."""
+    try:
+        with open("/sys/fs/cgroup/cpu.max") as f:  # cgroup v2: "<quota> <period>" or "max <period>"
+            quota, period = f.read().split()[:2]
+        if quota != "max":
+            return max(1, int(int(quota) / int(period)))
+    except (OSError, ValueError):
+        pass
+    try:
+        with open("/sys/fs/cgroup/cpu/cpu.cfs_quota_us") as fq, open("/sys/fs/cgroup/cpu/cpu.cfs_period_us") as fp:  # v1
+            quota, period = int(fq.read()), int(fp.read())
+        if quota > 0:
+            return max(1, quota // period)
+    except (OSError, ValueError):
+        pass
+    return None
+
+
 def load_session(onnx_path: str) -> ort.InferenceSession:
+    # Default: the container's real vCPU quota, one inter-op thread. Measured on Railway 2026-09-23,
+    # A/B/A on the same photo (docs/audit/RAPPORT-licence-et-ameliorations.md §3a): onnxruntime's own
+    # default (48 threads, the host's cores) 3.0-6.7 s inference alone, up to 19 s at 4 concurrent;
+    # 8 threads 0.25-0.41 s. The env vars still override (a value of 0 = onnxruntime's own default).
     opts = ort.SessionOptions()
-    intra = _env_int("ORT_INTRA_OP_THREADS")
-    inter = _env_int("ORT_INTER_OP_THREADS")
+    cpus = container_cpus()
+    intra = _env_int("ORT_INTRA_OP_THREADS") if "ORT_INTRA_OP_THREADS" in os.environ else cpus
+    inter = _env_int("ORT_INTER_OP_THREADS") if "ORT_INTER_OP_THREADS" in os.environ else (1 if cpus else None)
     if intra is not None:
         opts.intra_op_num_threads = intra
     if inter is not None:

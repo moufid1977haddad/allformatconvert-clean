@@ -1,9 +1,11 @@
 """AI image upscaling (x2 / x4) -- the model behind the site's Image Upscaler.
 
 Model: 4xNomos2_hq_mosr (MoSR architecture, MIT) by Philip Hofmann, weights under
-CC BY 4.0 (the author's release page writes "CC-BY-0.4", a typo he uses on 27 of his
-releases and writes "CC-BY-4.0" on 12 others for the same kind of model; OpenModelDB
-records CC-BY-4.0). CC BY requires attribution: the tool page credits the model.
+CC BY 4.0. The GitHub release text reads "CC-BY-0.4" (a licence that does not exist), but the
+author's own structured declaration settles it: his Hugging Face repo Phips/4xNomos2_hq_mosr was
+created with `license: cc-by-4.0` in its initial commit (2024-10-09), as are 110 of his 122 HF
+repos, including every "CC-BY-0.4" release checked; OpenModelDB records CC-BY-4.0
+(docs/audit/RAPPORT-licence-et-ameliorations.md §1). CC BY requires attribution: the tool page credits the model.
 Chosen by measurement against iLoveIMG on the audit photo (docs/audit/RAPPORT-ecarts-marche.md §3c):
 LPIPS 0.107 vs 0.164 (lower is better), same PSNR (32.92), visually closest to the original
 of 9 open models tested; Real-ESRGAN x4plus 0.173, SwinIR-M 0.172.
@@ -49,25 +51,7 @@ _lock = threading.Lock()
 _run_lock = threading.Lock()
 
 
-def container_cpus() -> int | None:
-    """vCPUs this container may really use, from its cgroup quota -- NOT os.cpu_count(), which on Railway
-    returns the host's 48 cores. Measured 2026-09-23: with onnxruntime left to size its pool from
-    os.cpu_count(), a 1-megapixel x4 upscale took 203 s on Railway (oversubscribed threads)."""
-    try:
-        with open("/sys/fs/cgroup/cpu.max") as f:  # cgroup v2: "<quota> <period>" or "max <period>"
-            quota, period = f.read().split()[:2]
-        if quota != "max":
-            return max(1, int(int(quota) / int(period)))
-    except (OSError, ValueError):
-        pass
-    try:
-        with open("/sys/fs/cgroup/cpu/cpu.cfs_quota_us") as fq, open("/sys/fs/cgroup/cpu/cpu.cfs_period_us") as fp:  # v1
-            quota, period = int(fq.read()), int(fp.read())
-        if quota > 0:
-            return max(1, quota // period)
-    except (OSError, ValueError):
-        pass
-    return None
+container_cpus = infer.container_cpus  # kept importable from here (see infer.py)
 
 
 def session():
