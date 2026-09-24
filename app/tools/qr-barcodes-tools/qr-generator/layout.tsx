@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "QR Code Generator — Instantly Turns Any Text or URL Online" },
-  description: "QR Code Generator is a free online tool that instantly turns any text or URL into a scannable QR code, right in your browser.",
+  description: "Free QR codes for links, Wi-Fi, contacts, SMS and more — colours, logo, up to 2000 px, PNG, SVG or PDF, each one scanned back before download. In your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/qr-barcodes-tools/qr-generator" },
   openGraph: {
     title: "QR Code Generator — Instantly Turns Any Text or URL Online",
-    description: "QR Code Generator is a free online tool that instantly turns any text or URL into a scannable QR code, right in your browser.",
+    description: "Free QR codes for links, Wi-Fi, contacts, SMS and more — colours, logo, up to 2000 px, PNG, SVG or PDF, each one scanned back before download. In your browser.",
     url: "https://www.onlineconvertools.com/tools/qr-barcodes-tools/qr-generator",
   },
 };
