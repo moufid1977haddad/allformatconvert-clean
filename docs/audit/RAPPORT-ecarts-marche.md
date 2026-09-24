@@ -193,3 +193,9 @@ Règle du 23 septembre inscrite mot pour mot en tête des règles permanentes. L
 3. **Politique de confidentialité** : elle omettait `video-compressor` et `video-converter` (sur serveur depuis le 20/09) — **corrigé** en même temps que l'ajout des nouveaux outils serveur.
 4. Carte catégorie Image : « Compress images **without losing quality** » — faux (compression avec perte) — **corrigé**.
 5. Deux erreurs de ma part : la sonde payante en production (§1) ; un `__pycache__` commité puis retiré (`395b42cb`).
+
+---
+
+## 9. Suite — chantier du 23-24/09 (licence, coût d'image, améliorations 7-17)
+
+Tout est dans **`RAPPORT-licence-et-ameliorations.md`**, avec sa section « Où j'en suis ». En bref : licence MoSR **CC BY 4.0 établie** (déclaration structurée de l'auteur sur Hugging Face) ; coût réel d'une image **0,0048-0,0068 $**, réservation portée au vrai pire cas (0,03 $) ; détourage **×12** (8 fils) en production ; SVG dans `image-compressor` en production ; Opus natif non inférieur selon ViSQOL (non corrigé) ; améliorations **8, 10, 7 en production**, **11 et 12 sur la branche** (pas encore en production).
