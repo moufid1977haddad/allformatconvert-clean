@@ -37,6 +37,8 @@ async function encodeAvif(canvas, width, height, quality) {
   return new Blob([bytes], { type: 'image/avif' });
 }
 
+import { EXTRA_FORMATS, encodeExtra } from './extraFormats';
+
 class LimitExceededError extends Error {
   constructor(message) {
     super(message);
@@ -123,9 +125,13 @@ async function convertOne(item, format, quality, maxMegapixels) {
   // Verified, never trusted: a browser that cannot encode the requested format
   // (Safari + WebP/AVIF) silently returns a PNG -- which used to be shipped as
   // a ".webp" file 86% heavier, with no warning. checkedBlob throws instead.
-  if (format === 'avif') return encodeAvif(canvas, width, height, quality);
+  // 'alive' keeps the page's silence watchdog from firing during a long (but progressing) encode.
+  let last = 0;
+  const alive = () => { const now = Date.now(); if (now - last > 1000) { last = now; self.postMessage({ type: 'alive' }); } };
+  if (EXTRA_FORMATS.includes(format)) return encodeExtra(format, canvas, width, height, quality, alive);
+  if (format === 'avif') return { blob: await encodeAvif(canvas, width, height, quality), note: '' };
   if (format === 'jpg') flattenOntoWhite(ctx, width, height);
-  return checkedBlob(canvas, MIME_BY_FORMAT[format], quality / 100);
+  return { blob: await checkedBlob(canvas, MIME_BY_FORMAT[format], quality / 100), note: '' };
 }
 
 async function run({ items, format, quality, maxMegapixels }) {
@@ -133,8 +139,8 @@ async function run({ items, format, quality, maxMegapixels }) {
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     try {
-      const blob = await convertOne(item, format, quality, limit);
-      self.postMessage({ type: 'file-done', index: i, name: item.name, originalSize: item.originalSize, blob, convertedSize: blob.size });
+      const { blob, note } = await convertOne(item, format, quality, limit);
+      self.postMessage({ type: 'file-done', index: i, name: item.name, originalSize: item.originalSize, blob, convertedSize: blob.size, note });
     } catch (err) {
       const isLimit = err instanceof LimitExceededError;
       self.postMessage({ type: 'file-error', index: i, name: item.name, message: err?.message || String(err), isLimit, detectedFormat: err?.detectedFormat || null });
