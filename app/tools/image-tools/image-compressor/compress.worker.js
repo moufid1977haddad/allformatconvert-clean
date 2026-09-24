@@ -178,10 +178,48 @@ async function encodePng(img, quality, progress) {
   return { blob: new Blob([out], { type: 'image/png' }), colours };
 }
 
+// SVG -- the means read from iLoveIMG's own output on Tux.svg (docs/audit/RAPPORT-licence-et-ameliorations.md §3b):
+// SVGO's default preset (ids renamed a, g, h…, numbers shortened, groups collapsed, one line, still vector).
+// SVGO 4.1 default preset on the same file: 35,969 bytes; iLoveIMG: 35,973. SVGO (MIT) runs here, in the
+// browser; the page then checks that the result DRAWS the same as the original before offering it
+// (iLoveIMG does not check), which is why a cautious variant is sent along.
+// Markup text with an <svg> element near the top. Not a strict prolog grammar: Illustrator exports put a long
+// DOCTYPE with an internal entity subset first (the Wikipedia logo: several KB of <!ENTITY …>).
+const looksLikeSvg = (text) => /^﻿?\s*</.test(text) && !text.includes('\u0000') && /<svg[\s>]/i.test(text);
+const CAUTIOUS_SVG = {
+  multipass: false,
+  floatPrecision: 5,
+  plugins: [{
+    name: 'preset-default',
+    params: { overrides: { mergePaths: false, convertShapeToPath: false, convertPathData: false, inlineStyles: false, minifyStyles: false, collapseGroups: false, convertTransform: false } },
+  }],
+};
+
+async function compressSvg(file, progress) {
+  const text = await file.text();
+  if (!looksLikeSvg(text)) throw new Error('This file does not look like an SVG image.');
+  const { optimize } = await import('svgo/browser');
+  progress(20);
+  const run = (cfg) => { try { return optimize(text, cfg).data; } catch { return null; } };
+  // One pass and several passes: neither always wins (Tux: 35,969 vs 35,983 bytes; a map: 47,598 vs 46,706).
+  const best = [run({ multipass: false }), run({ multipass: true })].filter(Boolean).sort((a, b) => a.length - b.length)[0];
+  progress(70);
+  const cautious = run(CAUTIOUS_SVG);
+  if (!best && !cautious) throw new Error('Could not read this SVG. The file may be damaged.');
+  const blob = (s) => new Blob([s], { type: 'image/svg+xml' });
+  return { candidates: [best && { blob: blob(best), cautious: false }, cautious && { blob: blob(cautious), cautious: true }].filter(Boolean) };
+}
+
 self.onmessage = async (e) => {
   const { id, file, quality } = e.data;
   const progress = (pct) => self.postMessage({ id, type: 'progress', pct });
   try {
+    if (file.type === 'image/svg+xml' || /\.svg$/i.test(file.name || '') || looksLikeSvg(await file.slice(0, 65536).text())) {
+      const r = await compressSvg(file, progress);
+      progress(100);
+      self.postMessage({ id, type: 'svg', candidates: r.candidates });
+      return;
+    }
     const head = new Uint8Array(await file.slice(0, 32).arrayBuffer());
     const format = sniffFormat(head)?.format;
     progress(5);

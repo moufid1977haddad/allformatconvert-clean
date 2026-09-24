@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Image Compressor — Compress Images Online Free" },
-  description: "Compress JPG, PNG and WebP in your browser, format and transparency kept: MozJPEG for photos, smart palettes for PNG. Batch and ZIP download.",
+  description: "Compress JPG, PNG, WebP and SVG in your browser, format and transparency kept: MozJPEG for photos, smart palettes for PNG, SVGO for SVG. Batch and ZIP download.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-compressor" },
   openGraph: {
     title: "Image Compressor — Compress Images Online Free",
-    description: "Compress JPG, PNG and WebP in your browser, format and transparency kept: MozJPEG for photos, smart palettes for PNG. Batch and ZIP download.",
+    description: "Compress JPG, PNG, WebP and SVG in your browser, format and transparency kept: MozJPEG for photos, smart palettes for PNG, SVGO for SVG. Batch and ZIP download.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-compressor",
   },
 };

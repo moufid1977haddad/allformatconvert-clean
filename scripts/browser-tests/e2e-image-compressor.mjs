@@ -52,7 +52,7 @@ for (let i = 0; i < files.length; i++) {
   const sameDims = !A || A.info.width === B.info.width && A.info.height === B.info.height;
   const psnr = sameDims && A ? psnrOnWhite(A.data, B.data) : NaN;
   const smaller = fs.statSync(dest).size < fs.statSync(src).size;
-  const formatKept = ['jpeg', 'png', 'webp'].includes(srcMeta.format) ? meta.format === srcMeta.format : meta.format === 'jpeg';
+  const formatKept = ['jpeg', 'png', 'webp', 'svg'].includes(srcMeta.format) ? meta.format === srcMeta.format : meta.format === 'jpeg';
   const alphaKept = !srcMeta.hasAlpha || meta.format === 'jpeg' || meta.hasAlpha || meta.channels === 4 || meta.paletteBitDepth;
   const ok = smaller && formatKept && sameDims && alphaKept;
   if (!ok) fails++;
