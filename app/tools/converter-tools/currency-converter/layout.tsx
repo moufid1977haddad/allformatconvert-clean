@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Currency Converter — Convert Between 24 Major World" },
-  description: "Currency Converter converts between 24 major world currencies using exchange rates fetched directly in your browser from a free API.",
+  description: "Currency Converter converts between 166 world currencies, with their full names, using daily exchange rates fetched directly in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/converter-tools/currency-converter" },
   openGraph: {
     title: "Currency Converter — Convert Between 24 Major World",
-    description: "Currency Converter converts between 24 major world currencies using exchange rates fetched directly in your browser from a free API.",
+    description: "Currency Converter converts between 166 world currencies, with their full names, using daily exchange rates fetched directly in your browser.",
     url: "https://www.onlineconvertools.com/tools/converter-tools/currency-converter",
   },
 };
