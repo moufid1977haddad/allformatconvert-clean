@@ -27,32 +27,25 @@ async function handleLoad({ file, maxPages }) {
   self.postMessage({ type: 'loaded', pageCount });
 }
 
-async function handleSplit({ ranges }) {
+// files: [{ label, pages: [0-based indices] }], already validated by splitPlan.js in the page.
+async function handleSplit({ files, originalName }) {
   if (!loadedDoc) throw new Error('No PDF loaded.');
   const { PDFDocument } = await import('pdf-lib');
+  const { partName } = await import('./splitPlan');
   const pdfDoc = loadedDoc;
   const totalPages = pdfDoc.getPageCount();
-  const parts = ranges.split(',').map((r) => r.trim()).filter(Boolean);
   const results = [];
-  for (let i = 0; i < parts.length; i++) {
-    const part = parts[i];
+  for (let i = 0; i < files.length; i++) {
+    const { label, pages } = files[i];
+    if (!pages.length || pages.some((p) => p < 0 || p >= totalPages)) throw new Error(`Pages ${label} are not in this PDF.`);
     const newPdf = await PDFDocument.create();
-    let indices = [];
-    if (part.includes('-')) {
-      const [start, end] = part.split('-').map((n) => parseInt(n.trim(), 10) - 1);
-      for (let p = start; p <= end && p < totalPages; p++) if (p >= 0) indices.push(p);
-    } else {
-      const p = parseInt(part, 10) - 1;
-      if (p >= 0 && p < totalPages) indices.push(p);
-    }
-    if (indices.length > 0) {
-      const copied = await newPdf.copyPages(pdfDoc, indices);
-      copied.forEach((p) => newPdf.addPage(p));
-    }
+    const copied = await newPdf.copyPages(pdfDoc, pages);
+    copied.forEach((p) => newPdf.addPage(p));
     const bytes = await newPdf.save();
-    const blob = new Blob([bytes], { type: 'application/pdf' });
-    results.push({ blob, name: 'part-' + part.replace('-', '_') + '.pdf' });
-    self.postMessage({ type: 'progress', pct: Math.round(((i + 1) / parts.length) * 100), phase: 'splitting' });
+    // Never hand over a part that does not hold the pages it is named after.
+    if (newPdf.getPageCount() !== pages.length) throw new Error(`Part ${label} came out with ${newPdf.getPageCount()} pages instead of ${pages.length}.`);
+    results.push({ blob: new Blob([bytes], { type: 'application/pdf' }), name: partName(originalName, label), pages: pages.length });
+    self.postMessage({ type: 'progress', pct: Math.round(((i + 1) / files.length) * 100), phase: 'splitting' });
   }
   self.postMessage({ type: 'done', results });
 }

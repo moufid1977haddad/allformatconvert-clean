@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF Split — Create a Separate PDF File Online Free" },
-  description: "PDF Split creates a separate PDF file for each comma-separated range or page number you type (e.g.",
+  description: "Split a PDF by custom ranges, every N pages, every page or chosen pages, and download the parts one by one or as a ZIP — in your browser, nothing uploaded.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-split" },
   openGraph: {
     title: "PDF Split — Create a Separate PDF File Online Free",
-    description: "PDF Split creates a separate PDF file for each comma-separated range or page number you type (e.g.",
+    description: "Split a PDF by custom ranges, every N pages, every page or chosen pages, and download the parts one by one or as a ZIP — in your browser, nothing uploaded.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-split",
   },
 };
