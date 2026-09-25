@@ -47,6 +47,8 @@ fs.writeFileSync(path.join(dir, 'known-data.bin'), sz.FS.readFile('/t/d/data.bin
 // from a tree with Chinese and emoji names
 const WR = 'C:\\Program Files\\WinRAR';
 if (fs.existsSync(path.join(WR, 'Rar.exe'))) {
+  // WinRAR adds to existing volumes instead of replacing them: remove the previous run's
+  for (const n of fs.readdirSync(dir).filter((n) => /^(r5(\.part\d+)?\.rar|split\.z\d+|split\.zip)$/.test(n))) fs.rmSync(path.join(dir, n));
   const wsrc = path.join(dir, 'wr-src'); fs.rmSync(wsrc, { recursive: true, force: true });
   fs.mkdirSync(path.join(wsrc, 'Dossier 中文'), { recursive: true });
   fs.writeFileSync(path.join(wsrc, 'Dossier 中文', 'big 👍.bin'), randomBytes(2500000));
@@ -54,6 +56,11 @@ if (fs.existsSync(path.join(WR, 'Rar.exe'))) {
   execFileSync(path.join(WR, 'Rar.exe'), ['a', '-ma5', '-hpmot de passe', '-v1m', '-m3', '-r', '-ep1', '-idq', path.join(dir, 'r5.rar'), wsrc + '\\*']);
   execFileSync(path.join(WR, 'WinRAR.exe'), ['a', '-afzip', '-v1m', '-ibck', '-r', '-ep1', path.join(dir, 'split.zip'), wsrc + '\\*']);
 } else console.log('WinRAR not found: RAR5 volumes and .z01 split ZIP skipped');
+// Big enough (3 x 200 MiB, 3 batches) for Cancel to be clicked while "all as ZIP" runs, in any browser
+const slow = path.join(dir, 'slow'); fs.rmSync(slow, { recursive: true, force: true }); fs.mkdirSync(slow);
+for (const n of ['1.bin', '2.bin', '3.bin']) fs.writeFileSync(path.join(slow, n), randomBytes(200 * 1024 ** 2));
+fs.writeFileSync(path.join(slow, 'small.txt'), 'still here after Cancel\n');
+execFileSync(TAR, ['-cf', path.join(dir, 'slow.tar'), '-C', slow, '.']);
 // Not an archive; and 3 GiB of zeros gzipped (a few MB) to exercise the extracted-size cap
 fs.writeFileSync(path.join(dir, 'not-an-archive.zip'), 'this is plain text, renamed .zip\n');
 const zeros = path.join(dir, 'zeros.bin'); fs.writeFileSync(zeros, ''); fs.truncateSync(zeros, 3 * 1024 ** 3);

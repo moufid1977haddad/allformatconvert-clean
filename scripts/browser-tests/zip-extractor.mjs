@@ -27,22 +27,36 @@ const F = (n) => path.join(dir, n);
 const TAR = 'C:\\Windows\\System32\\tar.exe';
 const alertBox = () => page.locator('div.bg-red-50[role=alert]'); // not Next's empty route announcer, also role=alert
 
-async function waitState() {
-  await Promise.race([
-    page.locator('[data-status]').waitFor({ timeout: 120000 }),
-    page.locator('#archive-password').waitFor({ timeout: 120000 }),
-    alertBox().waitFor({ timeout: 120000 }),
-  ]);
-  if (await page.locator('#archive-password').count()) return { password: await page.locator('label[for=archive-password]').innerText() };
-  if (await alertBox().count()) return { error: await alertBox().innerText() };
-  return { listed: await page.locator('[data-entry]').evaluateAll((els) => els.map((e) => e.dataset.entry)) };
+// The state the page settles in after an action. Read in ONE snapshot of the DOM (three racing waitFor() followed
+// by separate reads could mix two states), only once the page has changed since the action (a MutationObserver
+// armed just before it: the previous state is never taken for the new one), and only when nothing is running
+// (no Cancel button). "Listed" means the status line of a finished listing, not any status line.
+async function armed(action) {
+  await page.evaluate(() => {
+    window.__changed = false; window.__mo?.disconnect();
+    window.__mo = new MutationObserver(() => { window.__changed = true; });
+    // the tool only, not the navbar's animations
+    window.__mo.observe(document.querySelector('input[type=file]').closest('.max-w-3xl'), { subtree: true, childList: true, characterData: true, attributes: true });
+  });
+  await action();
+  const h = await page.waitForFunction(() => {
+    if (!window.__changed) return null;
+    if ([...document.querySelectorAll('button')].some((b) => b.textContent.trim() === 'Cancel')) return null;
+    const pw = document.querySelector('#archive-password');
+    if (pw) return { password: document.querySelector('label[for=archive-password]').innerText };
+    const al = document.querySelector('div.bg-red-50[role=alert]');
+    if (al) return { error: al.innerText };
+    const st = document.querySelector('[data-status]');
+    if (st && /listed in/.test(st.innerText)) return { listed: [...document.querySelectorAll('[data-entry]')].map((e) => e.dataset.entry) };
+    return null;
+  }, null, { timeout: 120000, polling: 50 });
+  return h.jsonValue();
 }
 async function open(names) {
   await page.goto(origin + '/tools/file-tools/zip-extractor', { waitUntil: 'networkidle' });
-  await page.locator('input[type=file]').setInputFiles(names.map(F));
-  return waitState();
+  return armed(() => page.locator('input[type=file]').setInputFiles(names.map(F)));
 }
-async function unlock(pw) { await page.locator('#archive-password').fill(pw); await page.getByRole('button', { name: 'Unlock' }).click(); await page.waitForTimeout(300); return waitState(); }
+async function unlock(pw) { await page.locator('#archive-password').fill(pw); return armed(() => page.getByRole('button', { name: 'Unlock' }).click()); }
 // "Download all as ZIP", reopened by JSZip: { files: { path: Buffer } } -- or the password form if asked now
 async function all(pw) {
   const dl = page.waitForEvent('download', { timeout: 300000 });
@@ -148,17 +162,19 @@ if (engine === chromium && fs.existsSync(F('r5.part1.rar'))) {
   check('Chromium: ZIP streamed to the picked file (showSaveFilePicker)', t.ok && /written to "r5\.zip"/.test(st), `${t.info} · ${st}`);
   await p2.close();
 }
-// 10. Cancel during "all as ZIP", then the archive can be extracted again
+// 10. Cancel during "all as ZIP" (600 MiB, 3 batches: still running when Cancel is clicked), no ZIP comes out,
+// and a file of the same archive can be extracted again
 {
-  await open(['split.7z.001', 'split.7z.002', 'split.7z.003']);
+  await open(['slow.tar']);
+  const seen = []; const onDl = (d) => seen.push(d.suggestedFilename()); page.on('download', onDl);
   await page.getByRole('button', { name: 'Download all as ZIP' }).click();
-  const cancel = page.getByRole('button', { name: 'Cancel' });
-  if (await cancel.waitFor({ timeout: 3000 }).then(() => true, () => false)) {
-    await cancel.click();
-    await alertBox().filter({ hasText: 'Cancelled.' }).waitFor({ timeout: 30000 });
-    const again = await all();
-    check('cancel stops, says so, and the archive can be extracted again', again.files && sha(again.files['d/data.bin'] || Buffer.alloc(0)) === known, show(again));
-  } else console.log('INFO cancel: the ZIP was done before Cancel could be clicked');
+  await page.getByRole('button', { name: 'Cancel' }).click({ timeout: 10000 });
+  await alertBox().filter({ hasText: 'Cancelled.' }).waitFor({ timeout: 30000 });
+  await page.waitForTimeout(2000); // a ZIP finishing anyway would show up here
+  page.off('download', onDl);
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.locator('[data-entry="small.txt"] [data-download]').click()]);
+  const txt = fs.readFileSync(await dl.path(), 'utf8');
+  check('cancel stops (no ZIP comes out), says so, and the archive can be extracted again', seen.length === 0 && dl.suggestedFilename() === 'small.txt' && txt === 'still here after Cancel\n', `downloads after Cancel: ${seen.length} · then ${dl.suggestedFilename()} ${JSON.stringify(txt)}`);
 }
 console.log(fails ? `${fails} FAILED` : 'all passed', `(${engine.name()})`);
 await b.close(); process.exit(fails ? 1 : 0);
