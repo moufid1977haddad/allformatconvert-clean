@@ -21,6 +21,8 @@
     "@lingo-reader/epub-parser": "^0.4.6",
     "@lingo-reader/mobi-parser": "^0.4.6",
     "@supabase/supabase-js": "^2.106.2",
+    "@zip.js/zip.js": "^2.18.2",
+    "client-zip": "^2.5.1",
     "docx": "^9.7.0",
     "fast-xml-parser": "^5.11.1",
     "gif.js": "^0.2.0",
