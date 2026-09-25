@@ -268,12 +268,12 @@ Motif d'`audio-to-text` reproduit à l'identique, **avant** l'upload (`c6ae956a`
 | 4 | image-upscaler | netteté 1,27 contre 3,46 ; « IA » sans IA | Modèle MoSR 4xNomos2_hq auto-hébergé | ~8 h fait · ≈ 0,002 $/image de 1 Mpx | ✅ **fait** — LPIPS 0,107 contre 0,164 chez iLoveIMG |
 | 5 | image-resizer | déformation ; PNG forcé (×5,2) | Verrou de proportions, %, format conservé | ~1 h fait | ✅ **fait** |
 | 6 | audio-converter | Opus cassé | Opus via le service (libopus) ; encodeur natif ailleurs | ~2 h fait | ✅ **fait** |
-| 7 | pdf-split | ni « chaque page », ni « toutes les N pages », ni ZIP | Ces modes + ZIP | 3-4 h | ⬜ ouvert |
-| 8 | text-reverser / case-converter / word-counter | emoji cassés ; Sentence case faux ; phrases mal comptées | `Intl.Segmenter`, casse par phrase | 2-3 h (les trois) | ⬜ ouvert |
+| 7 | pdf-split | ni « chaque page », ni « toutes les N pages », ni ZIP | Ces modes + ZIP | 3-4 h | ✅ **production 23/09** — modes gratuits d'iLovePDF + ZIP ; plages invalides refusées au lieu d'un PDF vide |
+| 8 | text-reverser / case-converter / word-counter | emoji cassés ; Sentence case faux ; phrases mal comptées | `Intl.Segmenter`, casse par phrase | 2-3 h (les trois) | ✅ **production 23/09** — 18 mots / 6 phrases là où wordcounter.net compte 13 / 5 |
 | 9 | hash-generator | ni MD5 ni fichiers | MD5, SHA-384, CRC32, fichiers en Worker | 2-3 h | ⬜ ouvert |
-| 10 | currency-converter | 24 devises / 166 ; API v4 dépréciée | Toutes les devises, source durable (à vérifier en direct) | 1-2 h | ⬜ ouvert |
-| 11 | qr-generator | 400 px, ni couleurs, ni logo, ni types | 2000 px, couleurs, correction, Wi-Fi/vCard | 3-4 h | ⬜ ouvert |
-| 12 | image-converter | 4 sorties | BMP, GIF, ICO, TIFF, PDF | 3-4 h | ⬜ ouvert |
+| 10 | currency-converter | 24 devises / 166 ; API v4 dépréciée | Toutes les devises, source durable (à vérifier en direct) | 1-2 h | ✅ **production 23/09** — 166 devises (open.er-api v6), écart BCE 0,055 % |
+| 11 | qr-generator | 400 px, ni couleurs, ni logo, ni types | 2000 px, couleurs, correction, Wi-Fi/vCard | 3-4 h | ✅ **production 24/09** (`eb4e67a9`) — 8 types, 2000 px, logo, PDF ; chaque code relu par jsQR avant d'être proposé (QRCode Monkey ne le fait pas) ; 11/11 Chromium + Firefox sur préversion puis sur www |
+| 12 | image-converter | 4 sorties | BMP, GIF, ICO, TIFF, PDF | 3-4 h | ✅ **production 24/09** (`eb4e67a9`) — 5 sorties ajoutées (celles de CloudConvert/Convertio) ; GIF 30 Mpx en 3,9 s ; 8/8 Chromium + Firefox sur préversion puis sur www. GIF face à CloudConvert : non mesuré |
 | 13 | grammar-fixer | pas de surlignage | Diff mot à mot | 2-3 h | ⬜ ouvert |
 | 14 | barcode-generator | 5 symbologies | ITF-14, Codabar, MSI ; DataMatrix, PDF417 | 2-4 h | ⬜ ouvert |
 | 15 | zip-extractor | ZIP seul | RAR/7z/ZIP chiffré (libarchive WASM), « tout télécharger » | 4-6 h | ⬜ ouvert |

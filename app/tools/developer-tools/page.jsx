@@ -18,7 +18,7 @@ const tools = [
   { title: 'Lorem Ipsum', description: 'Generate placeholder text', href: '/tools/text-tools/lorem-ipsum', group: 'Generate & Create' },
   { title: 'Base64 Encoder', description: 'Encode and decode Base64', href: '/tools/developer-tools/base64-encoder', group: 'Web & Text Encoding' },
   { title: 'URL Encoder', description: 'Encode and decode URLs', href: '/tools/developer-tools/url-encoder', group: 'Web & Text Encoding' },
-  { title: 'Hash Generator', description: 'Generate SHA hashes', href: '/tools/developer-tools/hash-generator', group: 'Generators & Security' },
+  { title: 'Hash Generator', description: 'MD5, SHA, CRC32 for text and files', href: '/tools/developer-tools/hash-generator', group: 'Generators & Security' },
   { title: 'Password Generator', description: 'Generate secure passwords', href: '/tools/developer-tools/password-generator', group: 'Generators & Security' },
   { title: 'CSV to JSON', description: 'Convert CSV to JSON', href: '/tools/developer-tools/csv-to-json', group: 'Data Format Convert' },
   { title: 'JSON to CSV', description: 'Convert JSON to CSV', href: '/tools/developer-tools/json-to-csv', group: 'JSON Tools' },
