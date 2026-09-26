@@ -4,7 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
 import { GROUPS, ALL, byId, IS_2D } from './symbologies';
 import { MAX_BATCH } from './config';
-import { physical, renderCanvas, renderSvg, svgToEps, svgToPdf, pngWithDpi, jpegBytes, gifBytes, canvasBytes, contrastError, expectedRead, normalizeRead, cleanError, autoQuietZone } from './render';
+import { physical, renderCanvas, contrastError, normalizeRead, cleanError, autoQuietZone, onWhite, readError, fileBytes } from './render';
 
 // References read on 26/09/2026 (docs/audit/RAPPORT-amelioration-14.md): TEC-IT (100+ types, drawn on its server,
 // 10 free codes, non-commercial use only, SVG for subscribers), barcode-maker.com (~35 types, PNG/JPG/GIF/SVG, batch
@@ -44,8 +44,9 @@ export default function BarcodeGeneratorPage() {
   const canvasRef = useRef(null);
   const workerRef = useRef(null);
   const cancelRef = useRef(false);
+  const poolRef = useRef(null);
 
-  useEffect(() => () => { workerRef.current?.terminate(); }, []);
+  useEffect(() => () => { workerRef.current?.terminate(); poolRef.current?.forEach((w) => w.terminate()); }, []);
   useEffect(() => { setOut(null); setError(''); }, [bcid, text, ui]);
   useEffect(() => { setBatchResult(null); }, [bcid, ui, lines, seq, batchFormat, source]);
   const set = (k) => (e) => { const v = e.target.type === 'checkbox' ? e.target.checked : e.target.value; setUi((u) => ({ ...u, [k]: v })); };
@@ -66,11 +67,8 @@ export default function BarcodeGeneratorPage() {
     const w = workerRef.current;
     const onMsg = ({ data }) => { if (data.id !== id) return; w.removeEventListener('message', onMsg); resolve(data); };
     w.addEventListener('message', onMsg);
-    // Read as printed on white paper: transparent pixels are (0,0,0,0), which a reader takes for black (measured).
-    const flat = document.createElement('canvas'); flat.width = canvas.width; flat.height = canvas.height;
-    const fc = flat.getContext('2d'); fc.fillStyle = '#FFFFFF'; fc.fillRect(0, 0, flat.width, flat.height); fc.drawImage(canvas, 0, 0);
-    const image = fc.getImageData(0, 0, flat.width, flat.height);
-    w.postMessage({ id, image, format });
+    const image = onWhite(canvas);
+    w.postMessage({ id, image, format }, [image.data.buffer]);
   });
 
   // Draws one code and reads it back. Returns { canvas, read: { ok, text, skipped } } or throws with a visitor message.
@@ -79,26 +77,14 @@ export default function BarcodeGeneratorPage() {
     if (!sym.zxing) return { read: { skipped: true } };
     const r = await readBack(canvas, sym.zxing);
     if (!r.ok) throw new Error('The check reader failed to start: ' + r.error);
-    if (r.text == null) throw new Error('This barcode did not scan back with these settings. Try a larger module width, more contrast, or a quiet zone.');
-    const want = expectedRead(sym, value, ui);
-    const got = normalizeRead(sym, r.text);
-    if (want != null && got !== want) throw new Error(`This barcode scanned back as "${got}" instead of "${want}". It was not offered.`);
-    return { read: { ok: true, text: got } };
+    const err = readError(sym, value, ui, r.text);
+    if (err) throw new Error(err);
+    return { read: { ok: true, text: normalizeRead(sym, r.text) } };
   };
 
   const files = async (value, canvas, formats) => {
-    const p = physical(ui); const outp = {};
-    for (const f of formats) {
-      if (f === 'png') outp.png = pngWithDpi(await canvasBytes(canvas, 'image/png'), p.dpi);
-      else if (f === 'jpg') outp.jpg = await jpegBytes(canvas, p.dpi, ui.transparent ? '#FFFFFF' : ui.bgColor);
-      else if (f === 'gif') outp.gif = await gifBytes(canvas);
-      else {
-        const v = await renderSvg(sym, value, ui);
-        if (f === 'svg') outp.svg = new TextEncoder().encode(v.svg);
-        else if (f === 'eps') outp.eps = new TextEncoder().encode(svgToEps(v, value));
-        else if (f === 'pdf') outp.pdf = svgToPdf(v);
-      }
-    }
+    const outp = {};
+    for (const f of formats) outp[f] = await fileBytes(sym, value, ui, canvas, f);
     return outp;
   };
 
@@ -126,6 +112,30 @@ export default function BarcodeGeneratorPage() {
     return out;
   };
 
+  // Several Workers, each drawing, reading back and encoding whole codes (batch.worker.js); results land at their
+  // index, so the ZIP keeps the list's order. Rejects with 'fallback' if a Worker cannot draw (no OffscreenCanvas).
+  const inWorkers = (values, results, tick) => new Promise((resolve, reject) => {
+    const n = Math.min(4, Math.max(1, (navigator.hardwareConcurrency || 2) - 1));
+    poolRef.current ??= Array.from({ length: n }, () => new Worker(new URL('./batch.worker.js', import.meta.url), { type: 'module' }));
+    const pool = poolRef.current; const plainUi = { ...ui };
+    let next = 0; let done = 0; let over = false;
+    const stop = (err) => { if (over) return; over = true; if (err) { pool.forEach((w) => w.terminate()); poolRef.current = null; reject(err); } else resolve(); };
+    const feed = (w) => {
+      if (over) return;
+      if (cancelRef.current) { pool.forEach((x) => x.terminate()); poolRef.current = null; stop(); return; }
+      if (next >= values.length) { if (done === values.length) stop(); return; }
+      const i = next++;
+      w.onmessage = ({ data }) => {
+        if (data.fatal) { stop(new Error('fallback')); return; }
+        results[i] = data.error ? { error: data.error } : { bytes: data.bytes, skipped: data.skipped };
+        tick(++done); feed(w);
+      };
+      w.onerror = () => stop(new Error('fallback'));
+      w.postMessage({ id: i, bcid, value: values[i], ui: plainUi, format: batchFormat });
+    };
+    pool.forEach(feed);
+  });
+
   const runBatch = async () => {
     const values = batchValues();
     if (!values.length) { setError(source === 'list' ? 'Type one value per line.' : 'Set how many codes to make.'); return; }
@@ -134,21 +144,31 @@ export default function BarcodeGeneratorPage() {
     if (ce) { setError(ce); return; }
     setBusy(true); setError(''); setBatchResult(null); cancelRef.current = false;
     const t0 = performance.now();
-    const canvas = document.createElement('canvas');
     const pad = String(values.length).length;
-    const failed = []; const entries = []; let skipped = 0;
+    const results = new Array(values.length); // { bytes, skipped } | { error }
+    let shown = 0;
+    const tick = (done) => { const now = performance.now(); if (done === values.length || now - shown > 100) { shown = now; setProgress({ pct: (done / values.length) * 100, label: `${done} of ${values.length} codes made and checked` }); } };
     try {
-      for (let i = 0; i < values.length; i++) {
-        if (cancelRef.current) { setError('Cancelled.'); return; }
-        const v = values[i];
-        try {
-          const { read } = await makeOne(v, canvas);
-          if (read.skipped) skipped++;
-          const f = await files(v, canvas, [batchFormat]);
-          entries.push({ name: `${String(i + 1).padStart(pad, '0')}-${safeName(v)}.${batchFormat}`, input: f[batchFormat] });
-        } catch (e) { failed.push(`line ${i + 1}: ${v} — ${e.message}`); }
-        if (i % 10 === 0 || i === values.length - 1) { setProgress({ pct: ((i + 1) / values.length) * 100, label: `${i + 1} of ${values.length} codes made and checked` }); await new Promise((r) => setTimeout(r, 0)); }
+      let workers = typeof OffscreenCanvas !== 'undefined';
+      if (workers) {
+        try { await inWorkers(values, results, tick); } catch (e) { if (e.message !== 'fallback') throw e; workers = false; }
       }
+      if (!workers) { // no OffscreenCanvas (older Safari): one at a time on the page
+        const canvas = document.createElement('canvas'); let done = results.filter(Boolean).length;
+        for (let i = 0; i < values.length; i++) {
+          if (results[i]) continue;
+          if (cancelRef.current) break;
+          try { const { read } = await makeOne(values[i], canvas); results[i] = { bytes: (await files(values[i], canvas, [batchFormat]))[batchFormat], skipped: !!read.skipped }; } catch (e) { results[i] = { error: e.message }; }
+          tick(++done); if (done % 10 === 0) await new Promise((r) => setTimeout(r, 0));
+        }
+      }
+      if (cancelRef.current) { setError('Cancelled.'); return; }
+      const failed = []; const entries = []; let skipped = 0;
+      results.forEach((r, i) => {
+        if (r.error) { failed.push(`line ${i + 1}: ${values[i]} — ${r.error}`); return; }
+        if (r.skipped) skipped++;
+        entries.push({ name: `${String(i + 1).padStart(pad, '0')}-${safeName(values[i])}.${batchFormat}`, input: r.bytes });
+      });
       if (failed.length) entries.push({ name: 'errors.txt', input: failed.join('\n') + '\n' });
       const { downloadZip } = await import('client-zip');
       const blob = await downloadZip(entries).blob();

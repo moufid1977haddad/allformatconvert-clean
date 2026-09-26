@@ -2,13 +2,14 @@
 // independent of the engine that drew it (bwip-js). The .wasm is served from /wasm (public/wasm/zxing-LICENSE.txt),
 // never from zxing-wasm's default CDN.
 import { prepareZXingModule, readBarcodes } from 'zxing-wasm/reader';
+import { READ_OPTIONS } from './render';
 
 prepareZXingModule({ overrides: { locateFile: (path, prefix) => (path.endsWith('.wasm') ? '/wasm/zxing_reader.wasm' : prefix + path) } });
 
 self.onmessage = async ({ data }) => {
   const { id, image, format } = data; // image: ImageData
   try {
-    const r = await readBarcodes(image, { formats: [format], tryHarder: true, tryRotate: true, maxNumberOfSymbols: 1 });
+    const r = await readBarcodes(image, READ_OPTIONS(format));
     const hit = r.find((x) => x.isValid) || r[0];
     self.postMessage({ id, ok: true, text: hit ? hit.text : null, format: hit?.format || null });
   } catch (e) {

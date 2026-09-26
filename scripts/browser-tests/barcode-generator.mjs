@@ -276,6 +276,33 @@ async function batch(action) {
   const reads = []; for (const n of [names[0], names[12], names.at(-1)]) reads.push(await zx(await svgToPng(z.files[n])));
   check('numbered series: 25 SVG named in order, SKU-00007 … SKU-00079, first/middle/last scan', names.length === 25 && names[0] === '01-SKU-00007.svg' && names.at(-1) === '25-SKU-00079.svg' && reads.join() === 'SKU-00007,SKU-00043,SKU-00079', `${names[0]} … ${names.at(-1)} · read ${reads.join(', ')}`);
 }
+{ // cancel during a run in the Workers: no ZIP, "Cancelled."
+  await page.locator('#bc-type').selectOption('code128');
+  await page.getByLabel('A numbered series').check();
+  for (const [k, v] of Object.entries({ prefix: 'C-', start: '1', count: '5000', step: '1', pad: '5', suffix: '' })) await page.locator(`#bc-seq-${k}`).fill(v);
+  await page.locator('#bc-batch-format').selectOption('pdf');
+  let downloaded = false; const onDl = () => { downloaded = true; }; page.on('download', onDl);
+  await page.getByRole('button', { name: 'Generate all as ZIP' }).click();
+  await page.getByRole('button', { name: 'Cancel' }).click({ timeout: 20000 });
+  const msg = await page.locator('[role=alert]:not(#__next-route-announcer__)').textContent({ timeout: 20000 });
+  await page.waitForTimeout(1500); page.off('download', onDl);
+  check('cancel during 5000 codes: "Cancelled.", no ZIP', msg.trim() === 'Cancelled.' && !downloaded, `${msg} · downloaded=${downloaded}`);
+}
+{ // no OffscreenCanvas (Safari before 16.4): the page does the batch itself, same ZIP
+  const p2 = await ctx.newPage();
+  await p2.addInitScript(() => { delete globalThis.OffscreenCanvas; });
+  await p2.goto(origin + '/tools/qr-barcodes-tools/barcode-generator', { waitUntil: 'networkidle' });
+  await p2.locator('#bc-type').selectOption('ean13');
+  await p2.getByRole('radio', { name: 'Many (ZIP)' }).click();
+  await p2.getByLabel('A list (one value per line)').check();
+  await p2.locator('#bc-lines').fill(['590123412345', 'BAD', '400638133393'].join('\n'));
+  const [d] = await Promise.all([p2.waitForEvent('download', { timeout: 60000 }), p2.getByRole('button', { name: 'Generate all as ZIP' }).click()]);
+  const zip = await JSZip.loadAsync(fs.readFileSync(await d.path()));
+  const names = Object.keys(zip.files).sort();
+  const reads = []; for (const n of names.filter((x) => x.endsWith('.png'))) reads.push(await zx(await zip.files[n].async('uint8array')));
+  check('without OffscreenCanvas: batch still made on the page, in order, bad line in errors.txt', names.join() === '1-590123412345.png,3-400638133393.png,errors.txt' && reads.join() === '5901234123457,4006381333931', `${names.join(', ')} · ${reads.join(', ')}`);
+  await p2.close();
+}
 console.log(fails ? `${fails} FAILED` : 'all passed', `(${engine.name()})`);
 fs.rmSync(tmp, { recursive: true, force: true });
 await b.close(); process.exit(fails ? 1 : 0);

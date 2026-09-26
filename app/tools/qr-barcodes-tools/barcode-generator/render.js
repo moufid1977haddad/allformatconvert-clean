@@ -207,11 +207,15 @@ export function jpgWithDpi(u8, dpi) {
 }
 const concat = (parts) => { const out = new Uint8Array(parts.reduce((s, p) => s + p.length, 0)); let o = 0; for (const p of parts) { out.set(p, o); o += p.length; } return out; };
 
-export const canvasBytes = (canvas, type, q) => new Promise((ok, ko) => canvas.toBlob((b) => (b ? b.arrayBuffer().then((a) => ok(new Uint8Array(a))) : ko(new Error('This browser could not encode the image.'))), type, q));
+// A canvas on the page, or an OffscreenCanvas in a Worker (the batch runs there).
+export const newCanvas = (w = 1, h = 1) => { if (typeof document !== 'undefined') { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; } return new OffscreenCanvas(w, h); };
+export const canvasBytes = (canvas, type, q) => (canvas.convertToBlob
+  ? canvas.convertToBlob({ type, quality: q }).then((b) => b.arrayBuffer()).then((a) => new Uint8Array(a))
+  : new Promise((ok, ko) => canvas.toBlob((b) => (b ? b.arrayBuffer().then((a) => ok(new Uint8Array(a))) : ko(new Error('This browser could not encode the image.'))), type, q)));
 
 // JPEG has no transparency: drawn over white (or the chosen background).
 export async function jpegBytes(canvas, dpi, bg = '#FFFFFF') {
-  const c = document.createElement('canvas'); c.width = canvas.width; c.height = canvas.height;
+  const c = newCanvas(canvas.width, canvas.height);
   const ctx = c.getContext('2d'); ctx.fillStyle = bg; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(canvas, 0, 0);
   return jpgWithDpi(await canvasBytes(c, 'image/jpeg', 0.95), dpi);
 }
@@ -271,3 +275,32 @@ export function expectedRead(sym, text, ui) {
 }
 // zxing reports UPC-A as its 13-digit EAN form (leading 0) and UPC-E expanded the same way (measured).
 export const normalizeRead = (sym, s) => ((sym.bcid === 'upca' || sym.bcid === 'upce') && s.length === 13 && s[0] === '0' ? s.slice(1) : s);
+
+/* ---------- shared by the page (one code) and batch.worker.js (many) ---------- */
+// The pixels a reader sees, as printed on white paper: transparent pixels are (0,0,0,0), which a reader takes for
+// black (measured).
+export function onWhite(canvas) {
+  const c = newCanvas(canvas.width, canvas.height); const x = c.getContext('2d');
+  x.fillStyle = '#FFFFFF'; x.fillRect(0, 0, c.width, c.height); x.drawImage(canvas, 0, 0);
+  return x.getImageData(0, 0, c.width, c.height);
+}
+// zxing-cpp options. Without "try harder" it was no faster on these clean drawings and missed DataBar Expanded
+// Stacked (measured on the 32 readable types, 26/09/2026): the batch gains its speed from running in several Workers.
+export const READ_OPTIONS = (format) => ({ formats: [format], tryHarder: true, tryRotate: true, maxNumberOfSymbols: 1 });
+// What was read, against what was typed: '' when right, else the visitor message.
+export function readError(sym, value, ui, text) {
+  if (text == null) return 'This barcode did not scan back with these settings. Try a larger module width, more contrast, or a quiet zone.';
+  const want = expectedRead(sym, value, ui); const got = normalizeRead(sym, text);
+  return want != null && got !== want ? `This barcode scanned back as "${got}" instead of "${want}". It was not offered.` : '';
+}
+// One file of the drawing on `canvas` (raster) or redrawn as vectors.
+export async function fileBytes(sym, value, ui, canvas, fmt) {
+  const p = physical(ui);
+  if (fmt === 'png') return pngWithDpi(await canvasBytes(canvas, 'image/png'), p.dpi);
+  if (fmt === 'jpg') return jpegBytes(canvas, p.dpi, ui.transparent ? '#FFFFFF' : ui.bgColor);
+  if (fmt === 'gif') return gifBytes(canvas);
+  const v = await renderSvg(sym, value, ui);
+  if (fmt === 'svg') return new TextEncoder().encode(v.svg);
+  if (fmt === 'eps') return new TextEncoder().encode(svgToEps(v, value));
+  return svgToPdf(v);
+}
