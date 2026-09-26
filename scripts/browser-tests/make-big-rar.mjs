@@ -21,4 +21,7 @@ random(path.join(dir, 'a.bin'), 950 * 1024 ** 2); random(path.join(dir, 'b.bin')
 rar('big.rar', ['a.bin', 'b.bin']);
 random(path.join(dir, 'one.bin'), capBytes);
 rar('cap.rar', ['one.bin']);
-for (const n of ['big.rar', 'cap.rar']) console.log(n, fs.statSync(path.join(dir, n)).size);
+// the same file in a stored ZIP: ZIP files take the page's other engine (zip.js), not 7-Zip
+fs.rmSync(path.join(dir, 'cap.zip'), { force: true });
+execFileSync('C:\\Program Files\\WinRAR\\WinRAR.exe', ['a', '-afzip', '-m0', '-ibck', '-ep1', path.join(dir, 'cap.zip'), path.join(dir, 'one.bin')]);
+for (const n of ['big.rar', 'cap.rar', 'cap.zip']) console.log(n, fs.statSync(path.join(dir, n)).size);

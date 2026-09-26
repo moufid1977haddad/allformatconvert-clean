@@ -1,27 +1,38 @@
-// Measures the ZIP Extractor on one big archive: time to extract, whether the tab survives, and the listed sizes.
-// Used to set MAX_EXTRACTED_BYTES in app/tools/file-tools/zip-extractor/config.js.
-// Usage: node scripts/browser-tests/zip-extractor-cap.mjs <origin or _vercel_share URL> <archive> [--browser=firefox]
+// Measures the ZIP Extractor's per-file cap: one archive holding ONE big file, listed, then that file's own
+// Download clicked; time, whether the tab survives, and the downloaded bytes' SHA-256 against the source.
+// Used to set MAX_FILE_BYTES in app/tools/file-tools/zip-extractor/config.js (archives: make-big-rar.mjs).
+// Usage: node scripts/browser-tests/zip-extractor-cap.mjs <origin or _vercel_share URL> <archive> <source file> [--browser=firefox]
 import { chromium, firefox } from '@playwright/test';
+import { createHash } from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
-const [entry, file] = args; const origin = new URL(entry).origin;
+const [entry, file, source] = args; const origin = new URL(entry).origin;
 const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
-const b = await engine.launch(); const page = await (await b.newContext()).newPage();
+const sha = (f) => new Promise((ok) => { const h = createHash('sha256'); fs.createReadStream(f).on('data', (d) => h.update(d)).on('end', () => ok(h.digest('hex'))); });
+const want = await sha(source);
+const b = await engine.launch(); const page = await (await b.newContext({ acceptDownloads: true })).newPage();
 let crashed = false; page.on('crash', () => { crashed = true; });
 if (entry.includes('_vercel_share')) await page.goto(entry);
 await page.goto(origin + '/tools/file-tools/zip-extractor', { waitUntil: 'networkidle' });
+const alert = page.locator('div.bg-red-50[role=alert]');
 const t0 = Date.now();
 await page.locator('input[type=file]').setInputFiles(file);
-const outcome = await Promise.race([
-  page.getByText(/files? extracted \(/).waitFor({ timeout: 900000 }).then(() => 'extracted'),
-  page.locator('div.bg-red-50[role=alert]').waitFor({ timeout: 900000 }).then(() => 'error'),
-  new Promise((r) => page.on('crash', () => r('tab crashed'))),
-]).catch((e) => 'timeout ' + e.message);
-const secs = ((Date.now() - t0) / 1000).toFixed(1);
-let info = '';
-if (!crashed) info = outcome === 'extracted' ? await page.getByText(/files? extracted \(/).innerText() : await page.locator('div.bg-red-50[role=alert]').innerText().catch(() => '');
-if (!crashed && outcome === 'extracted') {
-  // the biggest file really is there: read its last byte through its download link
-  info += ' | ' + await page.evaluate(async () => { const rows = [...document.querySelectorAll('[data-entry]')]; const out = []; for (const r of rows) { try { const blob = await (await fetch(r.querySelector('a[download]').href)).blob(); const tail = new Uint8Array(await blob.slice(-4).arrayBuffer()); out.push(`${r.dataset.entry}=${blob.size} readable(tail ${tail.length} B)`); } catch (e) { out.push(`${r.dataset.entry}: NOT READABLE (${e.message})`); } } return out.join(' '); });
+const row = page.locator(`[data-entry="${path.basename(source)}"]`);
+await Promise.race([row.waitFor({ timeout: 600000 }), alert.waitFor({ timeout: 600000 })]);
+const listed = (Date.now() - t0) / 1000;
+let outcome, info = '';
+if (await alert.count()) outcome = 'error at opening: ' + await alert.innerText();
+else if (await row.getByText('too large').count()) outcome = 'refused: over the declared cap';
+else {
+  const t1 = Date.now();
+  outcome = await Promise.race([
+    page.waitForEvent('download', { timeout: 1800000 }).then(async (d) => { const f = await d.path(); const secs = (Date.now() - t1) / 1000; const size = fs.statSync(f).size; return `downloaded ${size} bytes in ${secs.toFixed(1)} s, ${(await sha(f)) === want ? 'SHA-256 identical' : 'CONTENT DIFFERS'}`; }),
+    alert.waitFor({ timeout: 1800000 }).then(async () => 'error: ' + await alert.innerText()),
+    new Promise((r) => page.on('crash', () => r('tab crashed'))),
+    row.locator('[data-download]').click().then(() => new Promise(() => {})),
+  ]).catch((e) => 'timeout ' + e.message.split('\n')[0]);
+  info = await page.locator('[data-status]').innerText().catch(() => '');
 }
-console.log(engine.name(), outcome, `${secs} s`, info);
+console.log(engine.name(), path.basename(file), `listed in ${listed.toFixed(1)} s ·`, outcome, crashed ? '(crash seen)' : '', info);
 await b.close();

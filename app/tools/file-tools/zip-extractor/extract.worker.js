@@ -201,7 +201,7 @@ self.onmessage = async ({ data }) => {
   }
 };
 
-const fmt = (n) => (n < 1048576 ? `${(n / 1024).toFixed(0)} KB` : n < 1073741824 ? `${(n / 1048576).toFixed(0)} MB` : `${(n / 1073741824).toFixed(2)} GB`);
+const fmt = (n) => (n < 1e6 ? `${(n / 1e3).toFixed(0)} KB` : n < 1e9 ? `${(n / 1e6).toFixed(0)} MB` : `${(n / 1e9).toFixed(2)} GB`); // decimal, like the page
 
 function zipExplain(e, nParts) {
   const m = String(e?.message || e);

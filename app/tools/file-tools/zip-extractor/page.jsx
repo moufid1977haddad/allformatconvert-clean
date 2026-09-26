@@ -6,7 +6,9 @@ import { reportToolError } from '../../../lib/reportError';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { BATCH_BYTES, MOBILE_BATCH_BYTES, MAX_FILE_BYTES, MAX_FILE_LABEL, MOBILE_MAX_FILE_BYTES, MOBILE_MAX_FILE_LABEL, ZIP_IN_MEMORY_MAX, ZIP_IN_MEMORY_LABEL } from './config';
 
-const fmtSize = (n) => (n < 1024 ? `${n} B` : n < 1048576 ? `${(n / 1024).toFixed(1)} KB` : n < 1073741824 ? `${(n / 1048576).toFixed(1)} MB` : `${(n / 1073741824).toFixed(2)} GB`);
+// Decimal units, like the caps shown on the page ("up to 1.9 GB" = 1 900 000 000 bytes): a file listed at 1.95 GB
+// is over it, not "1.82 GB" in binary units that would look under it.
+const fmtSize = (n) => (n < 1000 ? `${n} B` : n < 1e6 ? `${(n / 1e3).toFixed(1)} KB` : n < 1e9 ? `${(n / 1e6).toFixed(1)} MB` : `${(n / 1e9).toFixed(2)} GB`);
 const clock = () => performance.now();
 
 // A split archive is opened from its first part; 7-Zip finds the others by name next to it.
