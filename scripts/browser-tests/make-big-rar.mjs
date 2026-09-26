@@ -30,5 +30,7 @@ const archive = (out, src, names, zip) => {
 };
 const set = (src, names, bytes, outs) => { const fresh = names.map((n) => random(path.join(dir, src, n), bytes)).some(Boolean); for (const [out, zip] of outs) if (fresh || !fs.existsSync(path.join(dir, out))) archive(out, src, names, zip); else console.log(out, fs.statSync(path.join(dir, out)).size, '(kept)'); };
 set('src-big', ['a.bin', 'b.bin'], MiB950, [['big.rar']]);
-if (!process.argv.includes('--no-huge')) set('src-huge', ['a.bin', 'b.bin', 'c.bin', 'd.bin'], MiB950, [['huge.rar']]);
+// the same 3.98 GB as a stored ZIP (Zip64): on 26/09/2026 ezyZip's RAR and 7-Zip workers could not load in Firefox
+// (their /assets/shared-utils-446fc9cf.js answered 404), its ZIP path still could
+if (!process.argv.includes('--no-huge')) set('src-huge', ['a.bin', 'b.bin', 'c.bin', 'd.bin'], MiB950, [['huge.rar'], ['huge.zip', true]]);
 set('src-cap', ['one.bin'], capBytes, [['cap.rar'], ['cap.zip', true]]);

@@ -13,6 +13,8 @@
 // passes the 2 GiB a single array can hold here, so the ceiling is ~1.96 GB, the lowest of all; the other three OK.
 // 2.2 GB: also refused by Firefox + 7-Zip ("Blob ... larger than 2 GB") and Chromium + zip.js. 3 GB: only Firefox +
 // zip.js. Every failure is a message, never a crashed tab. Hence 1.9 GB, under the lowest ceiling.
+// Rechecked after the extracted file became preallocated (extract.worker.js): 1.9 GB still identical everywhere
+// (Chromium RAR 13.9 s, ZIP 15.6 s; Firefox 16.1 s, 23.4 s).
 export const BATCH_BYTES = 256 * 1024 * 1024; // extracted per step of "all as ZIP" / "save all"
 export const MOBILE_BATCH_BYTES = 64 * 1024 * 1024;
 export const MAX_FILE_BYTES = 1900 * 1000 * 1000; // one file, and a .tar unpacked from a .tar.gz
