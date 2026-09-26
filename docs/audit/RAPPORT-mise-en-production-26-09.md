@@ -39,3 +39,35 @@ Vraies pages, vrai billet de la préversion, vrai envoi, vrai libopus, fichiers 
 
 ### 2.3 Collage d'image du lecteur de QR code
 `improvement-17.mjs` ne collait que par un `ClipboardEvent` fabriqué (et pas du tout sous Firefox). Nouvel essai : une image PNG d'un QR mise dans le **presse-papiers Windows** (PowerShell, `Clipboard.SetImage`, comme un outil de capture), puis **Ctrl+V** dans une fenêtre visible : le code est lu, **Chromium et Firefox**. Non couvert : Safari, mobile, collage d'une image copiée depuis une autre page web (le presse-papiers porte alors du HTML + image).
+
+## 3. Mise en production
+
+Rien n'a échoué sur la préversion : **tout le lot part**, rien n'est retiré. Fusion `--no-ff` de `licence-ameliorations` dans master : **`98a32e95`** (aucun push forcé) ; Vercel production **`dpl_E1WvvnFfQA96RQo8YoG2KWLnp1Xw`** (`onlineconvertools-6dff7awzm`), READY, www sert le nouveau code (ITF-14 présent sur la page du générateur).
+
+## 4. Vérification sur www — Chromium et Firefox
+
+| Point | Chromium | Firefox |
+|---|---|---|
+| 14 barcode-generator | **67/67** | **67/67** |
+| 14 nos fichiers + lot (`-vs-references.mjs --sites=ours --batch`) | **102/102** relus ; 1000 EAN-13 en **4,26 s**, 1000/1000 relus | **102/102** ; **4,98 s**, 1000/1000 |
+| 16 unit/color-converter | **30/30** | **30/30** |
+| 13 grammar-fixer, diff | **11/11** | **10/10** |
+| 13 vraie IA face à LanguageTool | **25/25 contre 15/25**, texte sans faute inchangé | — |
+| 17 gif-maker / qr-scanner / audio-trimmer | **20/20** | **18/18** (+1 sauté, voir ligne suivante) |
+| 17 collage QR depuis le vrai presse-papiers | **réussi** | **réussi** |
+| Opus des 4 outils audio, **chemin entièrement réel** (sans relais CORS) | **4/4** | **4/4** |
+
+- **Opus sur www** : Booster 4,00 s ~90 kbit/s, Splitter 3,00 + 1,00 s, **Compressor à 64k : 47 kbit/s**, Audio Converter 4,00 s ; tous en `.opus`, chacun passé par un travail du service.
+- **Incident de mesure, pas de l'outil :** le premier passage Opus sur www s'est arrêté sur « Too many conversions from your connection this hour » — mes propres essais de la journée avaient épuisé les **20 billets/heure** de ma connexion. C'est la limite voulue du site ; message clair, rien de cassé. Rejoué après le changement d'heure UTC : 4/4 et 4/4 (ci-dessus).
+- Observation : le ZIP de 1000 EAN-13 pèse 9,1 Mo sous Chromium et 17,4 Mo sous Firefox (compression PNG du canvas propre à chaque navigateur) ; tous relus exactement.
+
+## 5. Ce qui reste vrai et non fait
+
+- **Non mesuré :** Safari / iPhone et mobiles réels pour tout le lot ; collage d'une image copiée depuis une page web (HTML + image) ; qualité de grammaire hors anglais et sur un corpus plus large que mes 25 erreurs.
+- Références code-barres non rejouées sous Firefox ce soir (mesurées le 26/09 en local, `RAPPORT-amelioration-14.md`).
+- `run_tests.py` n'a tourné qu'en local (même ffmpeg, build Windows) ; le service en ligne est prouvé par `media-service-kbps-live.mjs` et par les pages.
+- Audio Merger propose toujours Opus avec l'encodeur natif (hors périmètre, inchangé).
+
+## Commits
+
+`41baea30` test du débit affiché · **`95e7125f`** service `kbps` sur master · `707e037e` essai du service en ligne · `8caa8e6a` préversion vérifiée · **`98a32e95`** fusion (production) · (ce rapport + plan).
