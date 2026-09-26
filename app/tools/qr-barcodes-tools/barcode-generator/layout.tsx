@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Barcode Generator — Generate Barcodes Online Free" },
-  description: "Barcode Generator creates scannable barcodes directly in your browser — no software installation, no signup, no data ever leaves your device.",
+  description: "Create 35 barcode types — Code 128, EAN/UPC, ISBN, ITF-14, GS1 DataBar, Data Matrix, PDF417, Aztec and more — in print sizes, as PNG, SVG, PDF or EPS, one at a time or thousands in a ZIP. Every code is scanned back; nothing is uploaded.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/qr-barcodes-tools/barcode-generator" },
   openGraph: {
     title: "Barcode Generator — Generate Barcodes Online Free",
-    description: "Barcode Generator creates scannable barcodes directly in your browser — no software installation, no signup, no data ever leaves your device.",
+    description: "Create 35 barcode types — Code 128, EAN/UPC, ISBN, ITF-14, GS1 DataBar, Data Matrix, PDF417, Aztec and more — in print sizes, as PNG, SVG, PDF or EPS, one at a time or thousands in a ZIP. Every code is scanned back; nothing is uploaded.",
     url: "https://www.onlineconvertools.com/tools/qr-barcodes-tools/barcode-generator",
   },
 };
