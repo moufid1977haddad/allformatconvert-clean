@@ -42,5 +42,5 @@ Booster et Splitter n'ont pas besoin du changement de service (128 kbit/s par d�
 
 ## 6. Non fait
 
-- Audio Merger propose aussi Opus (encodeur natif) : hors des trois outils demandés, non touché.
+- ~~Audio Merger propose aussi Opus (encodeur natif)~~ — **FAUX, corrigé le 26/09** (`RAPPORT-opus-audio-merger.md`) : Audio Merger n'a aucun choix de format de sortie et n'encode jamais d'Opus (Opus seulement en entrée : copie sans réencodage si toutes les entrées sont en Opus, MP3 sinon).
 - La qualité libopus elle-même n'est pas re-mesurée ici (tranchée le 24/09).

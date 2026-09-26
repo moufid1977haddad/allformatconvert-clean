@@ -697,4 +697,8 @@ Le bloquant 2 est **mesuré et ses promesses corrigées en ligne** ; ses défaut
 
 Le bloquant 5 est **borné à l'usage** (30-40 outils mis en avant). Le bloquant 6 est **déployé et prouvé en production** (reste Safari réel, dans le bloquant 9). Les bloquants 7, 8 passent après le lancement.
 
+**📝 À FAIRE AVANT LE LANCEMENT — noté le 26/09 à la demande du propriétaire, non traité :**
+- **Limite de 20 conversions par heure et par connexion** (billets du service média, `MEDIA_JOBS_PER_HOUR_PER_IP`) — atteinte le 26/09 par mes seuls essais, en une heure (message clair, rien de cassé). Vérifier qu'elle est au moins aussi généreuse que les offres gratuites des concurrents directs **pour un utilisateur qui convertit un lot de fichiers** (ex. : Audio Splitter consomme un billet par partie en Opus ; un lot de 25 fichiers bute dessus) ; si elle est en dessous, proposer une valeur au propriétaire. Limites réelles des concurrents à relever sur leurs sites, pas de mémoire.
+- **Qualité du correcteur de grammaire hors anglais** — mesurée le 26/09 seulement en anglais, sur un corpus de 25 erreurs écrit par moi (25/25 contre 15/25 pour LanguageTool, `grammar-vs-languagetool.mjs`). La mesurer **dans les autres langues que le site propose**, face à LanguageTool, **sur un corpus d'erreurs publié** (pas le mien).
+
 **Le site est indexé et classé en page 8. Une page qui gagne sa requête vaut plus que 225 pages en position 74.**

@@ -66,7 +66,7 @@ Rien n'a échoué sur la préversion : **tout le lot part**, rien n'est retiré.
 - **Non mesuré :** Safari / iPhone et mobiles réels pour tout le lot ; collage d'une image copiée depuis une page web (HTML + image) ; qualité de grammaire hors anglais et sur un corpus plus large que mes 25 erreurs.
 - Références code-barres non rejouées sous Firefox ce soir (mesurées le 26/09 en local, `RAPPORT-amelioration-14.md`).
 - `run_tests.py` n'a tourné qu'en local (même ffmpeg, build Windows) ; le service en ligne est prouvé par `media-service-kbps-live.mjs` et par les pages.
-- Audio Merger propose toujours Opus avec l'encodeur natif (hors périmètre, inchangé).
+- ~~Audio Merger propose toujours Opus avec l'encodeur natif~~ — **FAUX, corrigé** : il n'encode jamais d'Opus (voir `RAPPORT-opus-audio-merger.md`).
 
 ## Commits
 
