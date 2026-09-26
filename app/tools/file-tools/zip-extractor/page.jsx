@@ -99,7 +99,7 @@ export default function ZipExtractorPage() {
 
   // Extract some entries; asks for the password if 7-Zip needs one only now (file data encrypted, names not).
   const get = async (entries, onPct) => {
-    const r = await ask({ type: 'get', paths: entries.map((e) => e.path), raws: entries.map((e) => e.raw ?? e.path), password: pwRef.current }, onPct);
+    const r = await ask({ type: 'get', paths: entries.map((e) => e.path), raws: entries.map((e) => e.raw ?? e.path), sizes: entries.map((e) => e.size), password: pwRef.current }, onPct);
     if (r.type === 'password') return { needPassword: true, retry: r.retry };
     if (r.type === 'error') throw new Error(r.message);
     const byRaw = new Map(entries.map((e) => [e.raw ?? e.path, e.path]));

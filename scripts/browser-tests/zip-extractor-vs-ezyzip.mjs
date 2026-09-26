@@ -1,53 +1,108 @@
-// Same archive, same browser: time from choosing the archive to holding one extracted file on disk, on our
-// ZIP Extractor and on ezyZip (the reference: 7-Zip WASM + zip.js + libarchive.js), the file's SHA-256 checked
-// against the source. ezyZip extracts a file when its "Save" is clicked; ours extracts everything first.
-// Usage: node scripts/browser-tests/zip-extractor-vs-ezyzip.mjs <our origin or _vercel_share URL> <file inside> <source copy of it> <archive parts...>
-//   [--password=...] [--browser=firefox] [--ours-only | --theirs-only]
+// Same archive, same browser, our ZIP Extractor against ezyZip (the reference: 7-Zip WASM, zip.js, and since
+// 22/09/2026 a streaming RAR engine, rar-stream.wasm). Both list first and extract on demand.
+//   first: time from choosing the archive to holding <file inside> on disk (its own download), SHA-256 checked.
+//   all:   time from choosing the archive to every file written into a folder: our "Save all to a folder",
+//          ezyZip's "Save All". The folder picker is answered with a real folder on disk (a sub-folder of the
+//          origin's private file system, OPFS), the same for both; every file's SHA-256 is then checked in the page.
+// Usage: node scripts/browser-tests/zip-extractor-vs-ezyzip.mjs <our origin or _vercel_share URL> <file inside> <source dir> <archive parts...>
+//   [--mode=first|all] [--password=...] [--browser=firefox] [--ours-only | --theirs-only]
+//   <source dir> holds the archived files under the same relative paths (their SHA-256 is the reference).
 import { chromium, firefox } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
+import path from 'node:path';
 const flags = Object.fromEntries(process.argv.slice(2).filter((a) => a.startsWith('--')).map((a) => { const [k, v] = a.slice(2).split('='); return [k, v ?? true]; }));
-const [entry, inner, source, ...parts] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
+const [entry, inner, srcDir, ...parts] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const origin = new URL(entry).origin;
 const engine = flags.browser === 'firefox' ? firefox : chromium;
-const want = createHash('sha256').update(fs.readFileSync(source)).digest('hex');
+const mode = flags.mode || 'first';
 const sha = (f) => new Promise((ok) => { const h = createHash('sha256'); fs.createReadStream(f).on('data', (d) => h.update(d)).on('end', () => ok(h.digest('hex'))); });
 const b = await engine.launch();
 const base = inner.split('/').pop();
+const want = await sha(path.join(srcDir, inner));
+
+// The folder picker answered with a fresh OPFS folder; after the run, the SHA-256 of every file written there.
+const pickFolder = () => { window.showDirectoryPicker = async () => { const root = await navigator.storage.getDirectory(); const name = 'pick-' + Date.now(); window.__picked = name; return root.getDirectoryHandle(name, { create: true }); }; };
+const folderHashes = (page) => page.evaluate(async () => {
+  const out = {};
+  const walk = async (dir, rel) => { for await (const [n, h] of dir.entries()) { const p = rel ? `${rel}/${n}` : n; if (h.kind === 'directory') await walk(h, p); else { const f = await h.getFile(); const d = new Uint8Array(await crypto.subtle.digest('SHA-256', await f.arrayBuffer())); out[p] = [...d].map((x) => x.toString(16).padStart(2, '0')).join(''); } } };
+  const root = await navigator.storage.getDirectory(); await walk(await root.getDirectoryHandle(window.__picked), '');
+  await root.removeEntry(window.__picked, { recursive: true });
+  return out;
+});
+const expected = () => { const o = {}; const walk = (d, rel) => { for (const n of fs.readdirSync(d)) { const p = path.join(d, n), q = rel ? `${rel}/${n}` : n; if (fs.statSync(p).isDirectory()) walk(p, q); else o[q] = p; } }; walk(srcDir, ''); return o; };
+async function compare(got) {
+  const exp = expected(); const bad = [];
+  for (const [q, p] of Object.entries(exp)) if (got[q] !== await sha(p)) bad.push(q);
+  for (const q of Object.keys(got)) if (!(q in exp)) bad.push(q);
+  return bad.length ? `DIFFERS: ${bad.join(', ')}` : `${Object.keys(exp).length} files identical`;
+}
+async function newPage() {
+  const ctx = await b.newContext({ acceptDownloads: true });
+  if (mode === 'all') await ctx.addInitScript(pickFolder);
+  return ctx.newPage();
+}
 
 async function ours() {
-  const page = await (await b.newContext({ acceptDownloads: true })).newPage();
+  const page = await newPage();
   if (entry.includes('_vercel_share')) await page.goto(entry);
   await page.goto(origin + '/tools/file-tools/zip-extractor', { waitUntil: 'networkidle' });
   const t0 = Date.now();
   await page.locator('input[type=file]').setInputFiles(parts);
   if (flags.password) { await page.locator('#archive-password').waitFor({ timeout: 600000 }); await page.locator('#archive-password').fill(flags.password); await page.getByRole('button', { name: 'Unlock' }).click(); }
-  await page.getByText(/files? extracted \(/).waitFor({ timeout: 1800000 });
-  const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 600000 }), page.locator(`[data-entry="${inner}"] a[download]`).click()]);
-  const f = await dl.path(); const secs = (Date.now() - t0) / 1000;
-  const ok = (await sha(f)) === want; // before closing: the context deletes its downloads
+  let r;
+  if (mode === 'first') {
+    const btn = page.locator(`[data-entry="${inner}"] [data-download]`);
+    await btn.waitFor({ timeout: 600000 });
+    const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 1800000 }), btn.click()]);
+    const f = await dl.path(); const secs = (Date.now() - t0) / 1000;
+    r = { secs, info: (await sha(f)) === want ? 'content identical' : 'CONTENT DIFFERS' }; // before closing: the context deletes its downloads
+  } else {
+    await page.getByRole('button', { name: 'Save all to a folder' }).click({ timeout: 600000 });
+    await page.locator('[data-status]').filter({ hasText: 'saved to the folder' }).waitFor({ timeout: 1800000 });
+    const secs = (Date.now() - t0) / 1000;
+    r = { secs, info: await compare(await folderHashes(page)) };
+  }
   await page.context().close();
-  return { secs, ok };
+  return r;
 }
 async function theirs() {
-  const page = await (await b.newContext({ acceptDownloads: true })).newPage();
+  const page = await newPage();
   await page.goto('https://www.ezyzip.com/open-extract-rar-file-online.html', { waitUntil: 'load' });
   const t0 = Date.now();
   await page.locator('input[type=file]').first().setInputFiles(parts);
   if (flags.password) { const pw = page.locator('input[type=password]').first(); await pw.waitFor({ timeout: 600000 }); await pw.fill(flags.password); await pw.press('Enter'); }
-  // open the folders down to the file, then its "Save"
-  for (const dir of inner.split('/').slice(0, -1)) await page.getByText(dir, { exact: true }).first().click({ timeout: 600000 });
-  // its file row (tr[data-filename]), "More save options", then "Download <name>" (a plain download; "Save" may
-  // open the system's save dialog instead)
-  const row = page.locator(`tr[data-filename="${base}"]`);
-  await row.waitFor({ timeout: 600000 });
-  await row.getByRole('button', { name: 'More save options' }).click();
-  const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 1800000 }), row.getByRole('menuitem', { name: `Download ${base}` }).click()]);
-  const f = await dl.path(); const secs = (Date.now() - t0) / 1000;
-  const ok = f ? (await sha(f)) === want : false;
+  let r;
+  if (mode === 'first') {
+    // open the folders down to the file, then its "More save options" > "Download <name>" (a plain download;
+    // "Save" may open the system's save dialog instead)
+    for (const dir of inner.split('/').slice(0, -1)) await page.getByText(dir, { exact: true }).first().click({ timeout: 600000 });
+    const row = page.locator(`tr[data-filename="${base}"]`);
+    await row.waitFor({ timeout: 600000 });
+    await row.getByRole('button', { name: 'More save options' }).click();
+    const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 1800000 }), row.getByRole('menuitem', { name: `Download ${base}` }).click()]);
+    const f = await dl.path(); const secs = (Date.now() - t0) / 1000;
+    r = { secs, info: f && (await sha(f)) === want ? 'content identical' : 'CONTENT DIFFERS' };
+  } else {
+    await page.locator('tr[data-filename]').first().waitFor({ timeout: 600000 });
+    await page.getByRole('button', { name: 'Save All', exact: true }).click();
+    // done when every file is in the folder at its full size (ezyZip shows no single "finished" line to wait for)
+    const sizes = Object.fromEntries(Object.entries(expected()).map(([q, p]) => [q, fs.statSync(p).size]));
+    await page.waitForFunction(async (sizes) => {
+      if (!window.__picked) return false;
+      const got = {};
+      const walk = async (dir, rel) => { for await (const [n, h] of dir.entries()) { const p = rel ? `${rel}/${n}` : n; if (h.kind === 'directory') await walk(h, p); else got[p] = (await h.getFile()).size; } };
+      try { await walk(await (await navigator.storage.getDirectory()).getDirectoryHandle(window.__picked), ''); } catch { return false; }
+      return Object.entries(sizes).every(([p, s]) => got[p] === s);
+    }, sizes, { timeout: 1800000, polling: 250 });
+    await page.waitForTimeout(1500); // let its last writable close
+    const secs = (Date.now() - t0) / 1000;
+    r = { secs, info: await compare(await folderHashes(page)) };
+  }
   await page.context().close();
-  return { secs, ok };
+  return r;
 }
-if (!flags['theirs-only']) { const r = await ours(); console.log('ours ', engine.name(), r.secs.toFixed(1), 's', r.ok ? 'content identical' : 'CONTENT DIFFERS'); }
-if (!flags['ours-only']) { const r = await theirs().catch((e) => ({ secs: NaN, ok: false, err: e.message.split('\n')[0] })); console.log('ezyZip', engine.name(), r.secs.toFixed(1), 's', r.ok ? 'content identical' : `FAILED ${r.err || 'content differs'}`); }
+const fail = (e) => ({ secs: NaN, info: 'FAILED ' + e.message.split('\n')[0] });
+if (!flags['theirs-only']) { const r = await ours().catch(fail); console.log('ours  ', engine.name(), mode, r.secs.toFixed(1), 's', r.info); }
+if (!flags['ours-only']) { const r = await theirs().catch(fail); console.log('ezyZip', engine.name(), mode, r.secs.toFixed(1), 's', r.info); }
 await b.close();

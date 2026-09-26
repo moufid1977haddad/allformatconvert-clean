@@ -78,6 +78,8 @@ async function load() {
   const wasm = await fetch('/wasm/7zz.wasm').then((r) => { if (!r.ok) throw new Error(`The extraction engine could not be downloaded (HTTP ${r.status}).`); return r.arrayBuffer(); });
   const { default: SevenZip } = await import(/* webpackIgnore: true */ '/wasm/7zz.es6.js');
   sz = await SevenZip({ wasmBinary: wasm, print: (l) => lines.push(l), printErr: (l) => lines.push(l) });
+  installReadAhead();
+  installPreallocation();
 }
 function run(args) {
   lines = [];
@@ -102,11 +104,69 @@ function rmrf(path) {
   let st; try { st = sz.FS.lstat(path); } catch { return; }
   if (sz.FS.isDir(st.mode)) { for (const n of sz.FS.readdir(path)) if (n !== '.' && n !== '..') rmrf(`${path}/${n}`); sz.FS.rmdir(path); } else sz.FS.unlink(path);
 }
-// Progress: count the bytes 7-Zip reads from the archive through WORKERFS (it prints nothing until the end).
+// WORKERFS reads the archive with one FileReaderSync call per 7-Zip read, and 7-Zip reads 128 KB at a time: 7 612
+// calls for one 950 MiB file of a stored RAR, most of the extraction time. Reading 16 MB ahead and serving the next
+// reads from it (measured 2026-09-25, same file): 7-Zip's extraction 10 s -> 4.2 s in Chromium, 8.5 s -> 6.7 s in
+// Firefox; 64 MB ahead gains nothing more. Same result as WORKERFS's own read: bytes [position, position + length)
+// of the file, cut at its end.
+const READ_AHEAD = 16 * 1024 * 1024;
+let readCache = null; // { node, start, bytes }
+let onRead = null;
+function installReadAhead() {
+  const reader = new FileReaderSync();
+  sz.WORKERFS.stream_ops.read = function (stream, buffer, offset, length, position) {
+    const node = stream.node;
+    if (position >= node.size) return 0;
+    const end = Math.min(node.size, position + length);
+    const c = readCache;
+    if (!c || c.node !== node || position < c.start || end > c.start + c.bytes.length) {
+      readCache = { node, start: position, bytes: new Uint8Array(reader.readAsArrayBuffer(node.contents.slice(position, Math.min(node.size, Math.max(end, position + READ_AHEAD))))) };
+    }
+    buffer.set(readCache.bytes.subarray(position - readCache.start, end - readCache.start), offset);
+    onRead?.(end - position);
+    return end - position;
+  };
+}
+// 7-Zip writes each extracted file 128 KB at a time into Emscripten's in-memory file, which grows by 1/8 and copies
+// itself at every step (about nine copies of the whole file), then readFile() copied it once more. The sizes are
+// known from the listing, so the file is allocated once at its exact size and handed over without a copy (measured
+// 2026-09-25, 950 MiB stored in a RAR: 7-Zip's extraction 4.8 s -> 2.05 s in Chromium, 7.0 s -> 4.7 s in Firefox;
+// writing nothing at all takes 1.83 s). A write past the expected size falls back to Emscripten's own growth.
+let expectedSizes = null; // Map of '/out/<entry>' -> size, during a 'get'
+function installPreallocation() {
+  sz.FS.writeFile('/probe', ''); const ops = sz.FS.lookupPath('/probe').node.stream_ops; sz.FS.unlink('/probe');
+  const write = ops.write;
+  ops.write = function (stream, buffer, offset, length, position, canOwn) {
+    const want = expectedSizes?.get(stream.path);
+    if (!want || !length || position + length > want) return write.call(this, stream, buffer, offset, length, position, canOwn);
+    const node = stream.node;
+    if (!node.contents || node.contents.length < want) {
+      const c = new Uint8Array(want);
+      if (node.usedBytes) c.set(node.contents.subarray(0, node.usedBytes));
+      node.contents = c;
+    }
+    node.contents.set(buffer.subarray(offset, offset + length), position);
+    node.usedBytes = Math.max(node.usedBytes, position + length);
+    node.mtime = node.ctime = Date.now();
+    return length;
+  };
+}
+// An extracted file as a Blob, straight from the in-memory file (no copy but the Blob's own), in pieces of at most
+// 1 GiB: Firefox refuses to build a Blob from one array over 2 GB.
+function takeFile(path) {
+  const node = sz.FS.lookupPath(path).node;
+  const n = node.usedBytes, c = node.contents;
+  const parts = [];
+  for (let i = 0; i < n; i += 1 << 30) parts.push(c.subarray(i, Math.min(n, i + (1 << 30))));
+  const blob = new Blob(parts);
+  sz.FS.unlink(path); // free the worker's copy
+  return blob;
+}
+// Progress: count the bytes 7-Zip reads from the archive (it prints nothing until the end).
 function watchReads(total) {
-  const ops = sz.WORKERFS.stream_ops; const read = ops.read; let seen = 0;
-  ops.read = function (stream, buffer, offset, length, position) { const n = read.call(this, stream, buffer, offset, length, position); seen += n; progress((seen / total) * 100); return n; };
-  return () => { ops.read = read; };
+  let seen = 0;
+  onRead = (n) => { seen += n; progress((seen / total) * 100); };
+  return () => { onRead = null; readCache = null; };
 }
 
 // A .tar.gz/.tgz/.tar.bz2/.tar.xz/.tar.zst opens in 7-Zip as a compressor holding one .tar, and its command line
@@ -121,6 +181,7 @@ async function sevenOpen(files, main, password, maxTarBytes) {
   try { sz.FS.unmount('/in'); } catch { /* first time */ }
   try { sz.FS.mkdir('/in'); } catch { /* exists */ }
   sz.FS.mount(sz.WORKERFS, { files }, '/in');
+  readCache = null;
   const pw = '-p' + (password || NO_PASSWORD);
   let archive = `/in/${main}`;
   let r = run(['l', '-slt', '-sccUTF-8', pw, archive]);
@@ -148,22 +209,22 @@ async function sevenOpen(files, main, password, maxTarBytes) {
   return { type: 'listing', entries: entries.filter((e) => !e.dir && !e.link).map((e) => ({ path: safePath(e.path), raw: e.path, size: e.size, encrypted: e.encrypted })), format, volumes, stagedTar, links };
 }
 
-async function sevenGet(raws) {
+async function sevenGet(raws, sizes) {
   rmrf('/out'); sz.FS.mkdir('/out');
   // -spd: names are literal, never wildcards; -i@: only these entries (a solid block is still decoded from its start)
   sz.FS.writeFile('/want.txt', raws.join('\n') + '\n');
   const unwatch = session.stagedTar ? () => {} : watchReads(session.total);
-  const r = run(['x', '-y', '-sccUTF-8', '-scsUTF-8', '-spd', '-p' + (session.password || NO_PASSWORD), '-i@/want.txt', '-o/out', session.archive]);
-  unwatch();
+  expectedSizes = new Map(raws.map((raw, i) => [`/out/${raw}`, sizes?.[i] || 0]));
+  let r;
+  try { r = run(['x', '-y', '-sccUTF-8', '-scsUTF-8', '-spd', '-p' + (session.password || NO_PASSWORD), '-i@/want.txt', '-o/out', session.archive]); } finally { expectedSizes = null; unwatch(); }
   if (wrongPassword(r.out)) { rmrf('/out'); return { type: 'password', retry: !!session.password }; }
   const files = [];
   for (const raw of raws) {
     const p = `/out/${raw}`;
     let st; try { st = sz.FS.lstat(p); } catch { continue; }
     if (!sz.FS.isFile(st.mode)) continue;
-    const bytes = sz.FS.readFile(p);
-    sz.FS.unlink(p); // hand it over, and free the worker's copy
-    files.push({ raw, blob: new Blob([bytes]), size: bytes.length });
+    const blob = takeFile(p); // hand it over, and free the worker's copy
+    files.push({ raw, blob, size: blob.size });
   }
   rmrf('/out');
   const missing = raws.length - files.length;
@@ -194,7 +255,7 @@ self.onmessage = async ({ data }) => {
           if (isPasswordError(e)) self.postMessage({ type: 'password', retry: !!data.password });
           else self.postMessage({ type: 'error', message: zipExplain(e, 1) });
         }
-      } else self.postMessage(await sevenGet(data.raws));
+      } else self.postMessage(await sevenGet(data.raws, data.sizes));
     }
   } catch (e) {
     self.postMessage({ type: 'error', message: /memory|allocation|Array buffer/i.test(String(e?.message)) ? 'This browser tab ran out of memory extracting these files.' : (e?.message || String(e)) });

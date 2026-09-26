@@ -1,27 +1,34 @@
-// Builds the 1.99 GB RAR used to compare the ZIP Extractor with ezyZip and to measure its per-file cap:
-// two random files of 950 MiB (a.bin, b.bin) stored (-m0) in one RAR5 by WinRAR's Rar.exe, plus one random file of
-// ~1.9 GB (one.bin, alone in cap.rar) for the per-file cap. The sources are kept next to the archives: the tests
-// compare the extracted bytes with them.
-// Usage: node scripts/browser-tests/make-big-rar.mjs <dir> [--cap-bytes=1900000000]
+// Builds the big archives of the ZIP Extractor's measurements, with WinRAR's Rar.exe (RAR5, stored: -m0):
+//   big.rar   two random files of 950 MiB (1.99 GB): the comparison with ezyZip (zip-extractor-vs-ezyzip.mjs);
+//   huge.rar  four of them (3.98 GB, over the 2.8 GiB that froze Firefox when everything was held in memory);
+//   cap.rar / cap.zip  ONE random file of --cap-bytes (1.9 GB by default): the per-file cap (zip-extractor-cap.mjs);
+//             the ZIP takes the page's other engine (zip.js), not 7-Zip.
+// The sources are kept (src-big/, src-huge/, src-cap/): the tests compare the extracted bytes with them.
+// Usage: node scripts/browser-tests/make-big-rar.mjs <dir> [--cap-bytes=1900000000] [--no-huge]
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { randomFillSync } from 'node:crypto';
-const dir = path.resolve(process.argv[2]); fs.mkdirSync(dir, { recursive: true });
+const dir = path.resolve(process.argv[2]);
 const capBytes = Number((process.argv.find((a) => a.startsWith('--cap-bytes=')) || '=1900000000').split('=')[1]);
-const RAR = 'C:\\Program Files\\WinRAR\\Rar.exe';
+const WR = 'C:\\Program Files\\WinRAR\\';
+const MiB950 = 950 * 1024 ** 2;
 const random = (file, bytes) => {
-  if (fs.existsSync(file) && fs.statSync(file).size === bytes) return;
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  if (fs.existsSync(file) && fs.statSync(file).size === bytes) return false;
   const fd = fs.openSync(file, 'w'); const chunk = Buffer.alloc(64 * 1024 * 1024);
   for (let done = 0; done < bytes; done += chunk.length) { const n = Math.min(chunk.length, bytes - done); randomFillSync(chunk, 0, n); fs.writeSync(fd, chunk, 0, n); }
-  fs.closeSync(fd);
+  fs.closeSync(fd); return true;
 };
-const rar = (out, names) => { fs.rmSync(path.join(dir, out), { force: true }); execFileSync(RAR, ['a', '-m0', '-ma5', '-ep1', '-idq', path.join(dir, out), ...names.map((n) => path.join(dir, n))]); };
-random(path.join(dir, 'a.bin'), 950 * 1024 ** 2); random(path.join(dir, 'b.bin'), 950 * 1024 ** 2);
-rar('big.rar', ['a.bin', 'b.bin']);
-random(path.join(dir, 'one.bin'), capBytes);
-rar('cap.rar', ['one.bin']);
-// the same file in a stored ZIP: ZIP files take the page's other engine (zip.js), not 7-Zip
-fs.rmSync(path.join(dir, 'cap.zip'), { force: true });
-execFileSync('C:\\Program Files\\WinRAR\\WinRAR.exe', ['a', '-afzip', '-m0', '-ibck', '-ep1', path.join(dir, 'cap.zip'), path.join(dir, 'one.bin')]);
-for (const n of ['big.rar', 'cap.rar', 'cap.zip']) console.log(n, fs.statSync(path.join(dir, n)).size);
+const archive = (out, src, names, zip) => {
+  const target = path.join(dir, out);
+  fs.rmSync(target, { force: true });
+  const files = names.map((n) => path.join(dir, src, n));
+  if (zip) execFileSync(WR + 'WinRAR.exe', ['a', '-afzip', '-m0', '-ibck', '-ep1', target, ...files]);
+  else execFileSync(WR + 'Rar.exe', ['a', '-m0', '-ma5', '-ep1', '-idq', target, ...files]);
+  console.log(out, fs.statSync(target).size);
+};
+const set = (src, names, bytes, outs) => { const fresh = names.map((n) => random(path.join(dir, src, n), bytes)).some(Boolean); for (const [out, zip] of outs) if (fresh || !fs.existsSync(path.join(dir, out))) archive(out, src, names, zip); else console.log(out, fs.statSync(path.join(dir, out)).size, '(kept)'); };
+set('src-big', ['a.bin', 'b.bin'], MiB950, [['big.rar']]);
+if (!process.argv.includes('--no-huge')) set('src-huge', ['a.bin', 'b.bin', 'c.bin', 'd.bin'], MiB950, [['huge.rar']]);
+set('src-cap', ['one.bin'], capBytes, [['cap.rar'], ['cap.zip', true]]);
