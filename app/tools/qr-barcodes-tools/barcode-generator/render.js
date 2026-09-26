@@ -46,12 +46,16 @@ export function bwipOptions(sym, text, ui, scale, unitsPerMm) {
   const p = physical(ui);
   const twoD = IS_2D(sym);
   const o = { bcid: sym.bcid, text, scale, rotate: ui.rotate || 'N', barcolor: hex(ui.barColor), ...(sym.extra || {}) };
+  // GS1 allows 7 to 12 modules between a code and its add-on; BWIPP draws 12, where zxing-cpp no longer finds the
+  // add-on (found at 7 and 9, measured 26/09/2026): 9.
+  if (addonOf(sym, text)) o.addongap = 9;
   if (!twoD) {
     // bar height in bwip-js units: mm at 72 dpi, times scale
     o.height = Math.max(1, (p.heightMm * unitsPerMm * 25.4) / (72 * scale));
     if (ui.showText) {
       o.includetext = true; o.textxalign = 'center'; o.textcolor = hex(ui.textColor);
       o.textsize = Math.max(4, (Number(ui.textPt) * 25.4 * unitsPerMm) / (72 * scale));
+      if (ui.caption) o.alttext = String(ui.caption); // the visitor's own text under the bars
     }
   }
   if (!ui.transparent) o.backgroundcolor = hex(ui.bgColor);
@@ -262,10 +266,22 @@ function upceToUpca(e) { // 8 digits: number system, 6 data, check
   else m = d1 + d2 + d3 + d4 + d5 + '0000' + d6;
   return ns + m + ck;
 }
-// Returns the text zxing-cpp is expected to read, or null when this page cannot predict it (then it only checks
-// that something of the right type was read).
+// EAN/UPC/ISBN/ISMN add-on typed after the code and a space ("9781565812314 51299"); for ISSN after the variant
+// ("0311-175X 00 05"). '' when there is none.
+export function addonOf(sym, text) {
+  if (!sym.addon) return '';
+  const parts = String(text).trim().split(/\s+/); const a = parts[sym.bcid === 'issn' ? 2 : 1] ?? '';
+  return /^(\d{2}|\d{5})$/.test(a) ? a : '';
+}
+// Returns the text zxing-cpp is expected to read (code, then add-on), or null when this page cannot predict it (then
+// it only checks that something of the right type was read).
 export function expectedRead(sym, text, ui) {
-  const t = text.trim();
+  const main = expectedMain(sym, text, ui);
+  return main == null ? null : main + addonOf(sym, text);
+}
+function expectedMain(sym, text, ui) {
+  const parts = text.trim().split(/\s+/);
+  const t = sym.addon ? parts[0] : text.trim();
   switch (sym.bcid) {
     case 'ean13': { const d = digits(t); return d.length === 12 ? d + gtinCheck(d) : d; }
     case 'ean8': { const d = digits(t); return d.length === 7 ? d + gtinCheck(d) : d; }
@@ -273,7 +289,7 @@ export function expectedRead(sym, text, ui) {
     case 'upce': { let d = digits(t); if (d.length === 7) { const a = upceToUpca(d + '0').slice(0, 11); d = d + gtinCheck(a); } return upceToUpca(d); }
     case 'itf14': { const d = digits(t); return d.length === 13 ? d + gtinCheck(d) : d; }
     case 'isbn': case 'ismn': { let d = digits(t); if (sym.bcid === 'isbn' && t.replace(/[-\s]/g, '').length === 10) { d = '978' + t.replace(/[-\s]/g, '').slice(0, 9); d += gtinCheck(d); } return d.length === 12 ? d + gtinCheck(d) : d.slice(0, 13); }
-    case 'issn': { const d = '977' + t.replace(/[-\s]/g, '').slice(0, 7) + '00'; return d + gtinCheck(d); }
+    case 'issn': { const d = '977' + t.replace(/[-\s]/g, '').slice(0, 7) + (/^\d{2}$/.test(parts[1] ?? '') ? parts[1] : '00'); return d + gtinCheck(d); }
     case 'code32': { const d = digits(t).slice(0, 8); let sum = 0; for (let i = 0; i < 8; i++) { const v = Number(d[i]) * (i % 2 ? 2 : 1); sum += Math.floor(v / 10) + (v % 10); } return 'A' + d + (sum % 10); }
     case 'pzn': { const d = digits(t).slice(0, 7); let sum = 0; for (let i = 0; i < 7; i++) sum += Number(d[i]) * (i + 1); return '-' + d + (sum % 11); }
     case 'code39': case 'interleaved2of5': return ui.checkDigit ? null : t; // readers differ on whether they return an optional check character
@@ -281,7 +297,8 @@ export function expectedRead(sym, text, ui) {
   }
 }
 // zxing reports UPC-A as its 13-digit EAN form (leading 0) and UPC-E expanded the same way (measured).
-export const normalizeRead = (sym, s) => ((sym.bcid === 'upca' || sym.bcid === 'upce') && s.length === 13 && s[0] === '0' ? s.slice(1) : s);
+// With an add-on, zxing appends its 2 or 5 digits.
+export const normalizeRead = (sym, s) => ((sym.bcid === 'upca' || sym.bcid === 'upce') && [13, 15, 18].includes(s.length) && s[0] === '0' ? s.slice(1) : s);
 
 /* ---------- shared by the page (one code) and batch.worker.js (many) ---------- */
 // The pixels a reader sees, as printed on white paper: transparent pixels are (0,0,0,0), which a reader takes for
@@ -293,7 +310,7 @@ export function onWhite(canvas) {
 }
 // zxing-cpp options. Without "try harder" it was no faster on these clean drawings and missed DataBar Expanded
 // Stacked (measured on the 32 readable types, 26/09/2026): the batch gains its speed from running in several Workers.
-export const READ_OPTIONS = (format) => ({ formats: [format], tryHarder: true, tryRotate: true, maxNumberOfSymbols: 1 });
+export const READ_OPTIONS = (format, addon) => ({ formats: [format], tryHarder: true, tryRotate: true, maxNumberOfSymbols: 1, eanAddOnSymbol: addon ? 'Require' : 'Ignore' });
 // What was read, against what was typed: '' when right, else the visitor message.
 export function readError(sym, value, ui, text) {
   if (text == null) return 'This barcode did not scan back with these settings. Try a larger module width, more contrast, or a quiet zone.';

@@ -4,7 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
 import { GROUPS, ALL, byId, IS_2D } from './symbologies';
 import { MAX_BATCH } from './config';
-import { physical, renderCanvas, contrastError, normalizeRead, cleanError, autoQuietZone, onWhite, readError, fileBytes } from './render';
+import { physical, renderCanvas, contrastError, normalizeRead, cleanError, autoQuietZone, onWhite, readError, fileBytes, addonOf } from './render';
 import { TEMPLATES, ROLLS, PAPERS, sheetOf, rollOf, layoutError, labelPdf, MAX_LABELS, LABEL_INSET_MM } from './labels';
 
 // References read on 26/09/2026 (docs/audit/RAPPORT-amelioration-14.md): TEC-IT (100+ types, drawn on its server,
@@ -23,6 +23,25 @@ const ROTATIONS = [['N', '0°'], ['R', '90°'], ['I', '180°'], ['L', '270°']];
 // GS1 minimum module widths (GS1 General Specifications, symbol specification tables): under them retail scanners
 // are not required to read the code.
 const GS1_MIN_MM = { ean13: 0.264, ean8: 0.264, upca: 0.264, upce: 0.264, isbn: 0.264, ismn: 0.264, issn: 0.264, itf14: 0.495 };
+// CSV or TSV text -> [value, caption] rows (quotes as in RFC 4180); the separator is tab if the first line has one,
+// else whichever of ';' and ',' it has more of.
+function parseCsv(text) {
+  const first = text.split(/\r?\n/, 1)[0] || '';
+  const sep = first.includes('\t') ? '\t' : (first.split(';').length > first.split(',').length ? ';' : ',');
+  const rows = []; let row = []; let f = ''; let q = false;
+  const endRow = () => { row.push(f.trim()); f = ''; if (row.some(Boolean)) rows.push(row); row = []; };
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; continue; }
+    if (c === '"' && f === '') q = true;
+    else if (c === sep) { row.push(f.trim()); f = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; endRow(); }
+    else f += c;
+  }
+  endRow();
+  const flat = (s) => (s || '').replace(/[\t\r\n]+/g, ' ');
+  return rows.filter((r) => r[0]).map((r) => [flat(r[0]), flat(r[1])]);
+}
 const safeName = (s) => s.replace(/[^\w.-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 60) || 'barcode';
 
 export default function BarcodeGeneratorPage() {
@@ -33,7 +52,7 @@ export default function BarcodeGeneratorPage() {
   const [ui, setUi] = useState({
     unit: 'mm', module: 0.33, dpi: 300, height: 15, textPt: 10, showText: true, barColor: '#000000', bgColor: '#FFFFFF',
     transparent: false, textColor: '#000000', rotate: 'N', quiet: '', checkDigit: false, msiCheck: 'mod10', qrEc: 'M',
-    dmShape: 'square', pdfColumns: '', pdfEc: '', aztecEc: 23,
+    dmShape: 'square', pdfColumns: '', pdfEc: '', aztecEc: 23, caption: '',
   });
   const [out, setOut] = useState(null); // single: { urls, read, size, name }
   const [error, setError] = useState('');
@@ -74,30 +93,30 @@ export default function BarcodeGeneratorPage() {
     });
   };
 
-  const readBack = (canvas, format) => new Promise((resolve) => {
+  const readBack = (canvas, format, addon) => new Promise((resolve) => {
     workerRef.current ??= new Worker(new URL('./read.worker.js', import.meta.url), { type: 'module' });
     const id = Math.random();
     const w = workerRef.current;
     const onMsg = ({ data }) => { if (data.id !== id) return; w.removeEventListener('message', onMsg); resolve(data); };
     w.addEventListener('message', onMsg);
     const image = onWhite(canvas);
-    w.postMessage({ id, image, format }, [image.data.buffer]);
+    w.postMessage({ id, image, format, addon }, [image.data.buffer]);
   });
 
   // Draws one code and reads it back. Returns { canvas, read: { ok, text, skipped } } or throws with a visitor message.
-  const makeOne = async (value, canvas) => {
-    try { await renderCanvas(sym, value, ui, canvas); } catch (e) { throw new Error(cleanError(e)); }
+  const makeOne = async (value, canvas, u = ui) => {
+    try { await renderCanvas(sym, value, u, canvas); } catch (e) { throw new Error(cleanError(e)); }
     if (!sym.zxing) return { read: { skipped: true } };
-    const r = await readBack(canvas, sym.zxing);
+    const r = await readBack(canvas, sym.zxing, !!addonOf(sym, value));
     if (!r.ok) throw new Error('The check reader failed to start: ' + r.error);
-    const err = readError(sym, value, ui, r.text);
+    const err = readError(sym, value, u, r.text);
     if (err) throw new Error(err);
     return { read: { ok: true, text: normalizeRead(sym, r.text) } };
   };
 
-  const files = async (value, canvas, formats) => {
+  const files = async (value, canvas, formats, u = ui) => {
     const outp = {};
-    for (const f of formats) outp[f] = await fileBytes(sym, value, ui, canvas, f);
+    for (const f of formats) outp[f] = await fileBytes(sym, value, u, canvas, f);
     return outp;
   };
 
@@ -118,16 +137,27 @@ export default function BarcodeGeneratorPage() {
     setBusy(false);
   };
 
-  const batchValues = () => {
-    if (source === 'list') return lines.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  // A list line is a value, optionally a tab and the text to print under the bars (as imported from a CSV).
+  const batchItems = () => {
+    if (source === 'list') return lines.split(/\r?\n/).map((l) => { const [v, ...c] = l.split('\t'); return { value: v.trim(), caption: c.join(' ').trim() }; }).filter((x) => x.value);
     const n = Math.max(0, Math.floor(Number(seq.count) || 0)); const out = [];
-    for (let i = 0; i < n; i++) out.push(`${seq.prefix}${String(Number(seq.start) + i * Number(seq.step)).padStart(Number(seq.pad) || 0, '0')}${seq.suffix}`);
+    for (let i = 0; i < n; i++) out.push({ value: `${seq.prefix}${String(Number(seq.start) + i * Number(seq.step)).padStart(Number(seq.pad) || 0, '0')}${seq.suffix}`, caption: '' });
     return out;
+  };
+  const batchValues = () => batchItems().map((x) => x.value);
+  const importCsv = async (e) => {
+    const file = e.target.files?.[0]; e.target.value = '';
+    if (!file) return;
+    if (file.size > 5e6) { setError(`That file is over 5 MB: one run holds up to ${MAX_BATCH} codes.`); return; }
+    const rows = parseCsv(await file.text());
+    if (!rows.length) { setError(`No values found in ${file.name}.`); return; }
+    setSource('list'); setError('');
+    setLines(rows.map((r) => (r[1] ? `${r[0]}\t${r[1]}` : r[0])).join('\n'));
   };
 
   // Several Workers, each drawing, reading back and encoding whole codes (batch.worker.js); results land at their
   // index, so the ZIP keeps the list's order. Rejects with 'fallback' if a Worker cannot draw (no OffscreenCanvas).
-  const inWorkers = (values, results, tick) => new Promise((resolve, reject) => {
+  const inWorkers = (values, captions, results, tick) => new Promise((resolve, reject) => {
     const n = Math.min(4, Math.max(1, (navigator.hardwareConcurrency || 2) - 1));
     poolRef.current ??= Array.from({ length: n }, () => new Worker(new URL('./batch.worker.js', import.meta.url), { type: 'module' }));
     const pool = poolRef.current; const plainUi = { ...ui };
@@ -144,7 +174,7 @@ export default function BarcodeGeneratorPage() {
         tick(++done); feed(w);
       };
       w.onerror = () => stop(new Error('fallback'));
-      w.postMessage({ id: i, bcid, value: values[i], ui: plainUi, format: outFormat });
+      w.postMessage({ id: i, bcid, value: values[i], ui: { ...plainUi, caption: captions[i] }, format: outFormat });
     };
     pool.forEach(feed);
   });
@@ -163,7 +193,7 @@ export default function BarcodeGeneratorPage() {
   };
 
   const runBatch = async () => {
-    const values = batchValues();
+    const items = batchItems(); const values = items.map((x) => x.value); const captions = items.map((x) => x.caption);
     if (!values.length) { setError(source === 'list' ? 'Type one value per line.' : 'Set how many codes to make.'); return; }
     if (values.length > MAX_BATCH) { setError(`That is ${values.length} codes: one ${batchFormat === 'labels' ? 'PDF' : 'ZIP'} holds up to ${MAX_BATCH}. Split the list.`); return; }
     if (batchFormat === 'labels') {
@@ -182,14 +212,14 @@ export default function BarcodeGeneratorPage() {
     try {
       let workers = typeof OffscreenCanvas !== 'undefined';
       if (workers) {
-        try { await inWorkers(values, results, tick); } catch (e) { if (e.message !== 'fallback') throw e; workers = false; }
+        try { await inWorkers(values, captions, results, tick); } catch (e) { if (e.message !== 'fallback') throw e; workers = false; }
       }
       if (!workers) { // no OffscreenCanvas (older Safari): one at a time on the page
         const canvas = document.createElement('canvas'); let done = results.filter(Boolean).length;
         for (let i = 0; i < values.length; i++) {
           if (results[i]) continue;
           if (cancelRef.current) break;
-          try { const { read } = await makeOne(values[i], canvas); results[i] = { bytes: (await files(values[i], canvas, [outFormat]))[outFormat], skipped: !!read.skipped }; } catch (e) { results[i] = { error: e.message }; }
+          try { const u = { ...ui, caption: captions[i] }; const { read } = await makeOne(values[i], canvas, u); results[i] = { bytes: (await files(values[i], canvas, [outFormat], u))[outFormat], skipped: !!read.skipped }; } catch (e) { results[i] = { error: e.message }; }
           tick(++done); if (done % 10 === 0) await new Promise((r) => setTimeout(r, 0));
         }
       }
@@ -244,10 +274,12 @@ export default function BarcodeGeneratorPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              <div className="flex gap-4 text-sm">
+              <div className="flex flex-wrap gap-4 text-sm">
                 <label className="flex items-center gap-2"><input type="radio" name="bc-src" checked={source === 'list'} onChange={() => setSource('list')} /> A list (one value per line)</label>
                 <label className="flex items-center gap-2"><input type="radio" name="bc-src" checked={source === 'sequence'} onChange={() => setSource('sequence')} /> A numbered series</label>
+                <label className="ml-auto text-indigo-600 cursor-pointer underline">Import CSV / TSV…<input id="bc-csv" type="file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values,text/plain" onChange={importCsv} className="sr-only" /></label>
               </div>
+              {source === 'list' && <p className="text-xs text-neutral-500">One value per line. To print your own text under a code, put it after a tab (a CSV's second column goes there). Delete a header row if your file has one.</p>}
               {source === 'list' ? (
                 <textarea id="bc-lines" value={lines} onChange={(e) => setLines(e.target.value)} placeholder={`${sym.sample}\n…`} className={input + ' h-40 font-mono text-sm'} aria-label="Values, one per line" />
               ) : (
@@ -330,6 +362,7 @@ export default function BarcodeGeneratorPage() {
             <summary className="cursor-pointer text-sm font-semibold text-neutral-700">Text and colours{sym.checkOption || sym.msi || sym.twoD ? ' · options for this type' : ''}</summary>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 text-sm">
               {!twoD && <label className="flex items-center gap-2"><input id="bc-show-text" type="checkbox" checked={ui.showText} onChange={set('showText')} /> Show the value under the bars</label>}
+              {!twoD && ui.showText && mode === 'single' && <label className="block sm:col-span-2"><span className="block text-neutral-500 mb-1">Text under the bars (leave empty to print the value)</span><input id="bc-caption" type="text" value={ui.caption} onChange={set('caption')} placeholder="e.g. Blue T-shirt, size M — 12.99" className={input} /></label>}
               {!twoD && ui.showText && <label className="flex items-center justify-between gap-2">Text size (pt) <input id="bc-text-pt" type="number" min="4" max="36" value={ui.textPt} onChange={set('textPt')} className="w-20 bg-neutral-50 border border-neutral-200 rounded-lg p-1" /></label>}
               <label className="flex items-center justify-between gap-2">Bar colour <input id="bc-bar-color" type="color" value={ui.barColor} onChange={set('barColor')} aria-label="Bar colour" /></label>
               <label className="flex items-center justify-between gap-2">Background <input id="bc-bg-color" type="color" value={ui.bgColor} onChange={set('bgColor')} disabled={ui.transparent} aria-label="Background colour" /></label>
@@ -369,7 +402,7 @@ export default function BarcodeGeneratorPage() {
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                 {FORMATS.map((f) => <a key={f.id} href={out.urls[f.id]} download={`${out.name}.${f.id}`} data-format={f.id} className="block text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">{f.label}</a>)}
               </div>
-              <button type="button" id="bc-to-labels" onClick={() => { setLines(text.trim()); setSource('list'); setBatchFormat('labels'); setMode('batch'); }} className="block mx-auto text-sm text-indigo-600 underline">Print it on label sheets…</button>
+              <button type="button" id="bc-to-labels" onClick={() => { setLines(text.trim() + (ui.caption ? `\t${ui.caption}` : '')); setSource('list'); setBatchFormat('labels'); setMode('batch'); }} className="block mx-auto text-sm text-indigo-600 underline">Print it on label sheets…</button>
             </>
           )}
           {batchResult && mode === 'batch' && (
@@ -391,7 +424,7 @@ export default function BarcodeGeneratorPage() {
       </div>
       <SeoContent
         title="Barcode Generator"
-        description={`Barcode Generator creates ${ALL.length} kinds of barcodes in your browser — Code 128, GS1-128, Code 39, Code 93, Codabar, Interleaved 2 of 5, ITF-14, MSI Plessey, Pharmacode, Code 11, Telepen, PZN, EAN-13, EAN-8, UPC-A, UPC-E, ISBN, ISMN, ISSN, the GS1 DataBar family, QR Code, Micro QR, Data Matrix, GS1 DataMatrix, PDF417, MicroPDF417, Aztec and MaxiCode — with print sizes in millimetres or mils, colours, rotation and quiet zones. Download PNG, JPG or GIF with the resolution written in, or vector SVG, PDF and EPS for print; or generate thousands at once from a list or a numbered series into one ZIP, or onto printable label sheets (Avery A4 and US Letter, thermal roll labels) as one PDF. Every code is read back by an independent decoder before it is offered, and nothing is uploaded.`}
+        description={`Barcode Generator creates ${ALL.length} kinds of barcodes in your browser — Code 128, GS1-128, Code 39, Code 93, Codabar, Interleaved 2 of 5, ITF-14, MSI Plessey, Pharmacode, Code 11, Telepen, PZN, EAN-13, EAN-8, UPC-A, UPC-E, ISBN, ISMN, ISSN with or without EAN-5 and EAN-2 add-ons, the GS1 DataBar family, QR Code, Micro QR, Data Matrix, GS1 DataMatrix, PDF417, MicroPDF417, Aztec and MaxiCode — with print sizes in millimetres or mils, colours, rotation and quiet zones. Download PNG, JPG or GIF with the resolution written in, or vector SVG, PDF and EPS for print; or generate thousands at once from a list or a numbered series into one ZIP, or onto printable label sheets (Avery A4 and US Letter, thermal roll labels) as one PDF. Every code is read back by an independent decoder before it is offered, and nothing is uploaded.`}
         howTo={[
           'Choose the barcode type; the hint under it says what it accepts.',
           'Type the value, or switch to "Many (ZIP)" and paste one value per line or set up a numbered series.',
@@ -404,7 +437,8 @@ export default function BarcodeGeneratorPage() {
           { q: 'How do I know the barcode scans?', a: 'After drawing it, the page decodes it with zxing-cpp, an open-source reader independent of the engine that drew it, and only offers the files if it reads exactly what you entered (check digits included). MSI Plessey, Pharmacode and Code 11 have no such reader in a browser: they are marked as not scanned back. Test with your own scanner before printing large runs.' },
           { q: 'What size should I choose for print?', a: 'Retail EAN/UPC codes are nominally 0.33 mm per module (100 %), from 0.264 mm (80 %) to 0.66 mm (200 %). Vector files (SVG, PDF, EPS) have exactly the module width you set. PNG, JPG and GIF use a whole number of pixels per module so bars stay sharp: the page shows the closest size it can make at your resolution, and writes that resolution into the file.' },
           { q: 'Does it add the check digit?', a: 'For EAN-13, EAN-8, UPC-A, UPC-E and ITF-14, type the number without its last digit and it is calculated; type it in full and it is verified. GS1 codes check the digits of each Application Identifier. Code 93 always includes its two check characters, as its standard requires; Code 39 and Interleaved 2 of 5 can add an optional one; MSI offers the usual schemes.' },
-          { q: 'Can I make many barcodes at once?', a: 'Yes. Paste one value per line, or set a prefix, a first number, a count, a step, zero-padding and a suffix to number a series; every code is checked and they come as one ZIP, with any value that could not be encoded listed in errors.txt.' },
+          { q: 'Can I make many barcodes at once?', a: 'Yes. Paste one value per line (or import a CSV or TSV file: first column the value, second column an optional text to print under the code), or set a prefix, a first number, a count, a step, zero-padding and a suffix to number a series; every code is checked and they come as one ZIP, with any value that could not be encoded listed in errors.txt.' },
+          { q: 'How do I add a price or issue add-on (EAN-5, EAN-2)?', a: 'Type it after the code and a space: 978-1-56581-231-4 51299 for a book price, 0311-175X 00 05 for a periodical issue (ISSN, variant, issue). The add-on is drawn 9 modules from the code, inside the 7-12 modules the GS1 standard allows, and scanned back with it. EAN-5 and EAN-2 can also be made on their own.' },
           { q: 'Can I print barcodes on label sheets?', a: 'Yes. In "Many", choose "Label sheets (PDF)", pick an Avery A4 or US Letter sheet, a thermal roll size, or your own layout, the first free label and the number of copies. Each code keeps the size you set (it is only shrunk if it does not fit, and the page tells you by how much), or you can ask it to fill the label. Print the PDF at 100 % ("Actual size").' },
           { q: 'Is my data private?', a: 'Yes. Everything is drawn and checked in your browser; nothing you type is sent to a server.' },
         ]}

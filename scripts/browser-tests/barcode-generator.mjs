@@ -49,9 +49,12 @@ const CASES = {
   maxicode: ['MaxiCode test', 'MaxiCode test'],
   // no zxing reader: this file's decoders. MSI default scheme Mod 10: 1234567 -> check 4 (Luhn); Code 11: C check.
   msi: ['1234567', '12345674'], pharmacode: ['1234', '1234'], code11: ['0123-4567', null],
+  // add-ons alone (no zxing reader either): GS1's own example price 51299; EAN-2 issue 05. Parity checked too.
+  ean5: ['51299', '51299'], ean2: ['05', '05'],
 };
 
 /* ---------- independent readers ---------- */
+async function zxAddon(bytes) { const r = await readBarcodes(new Uint8Array(bytes), { tryHarder: true, eanAddOnSymbol: 'Require', maxNumberOfSymbols: 1 }); return r[0]?.text ?? null; }
 async function zx(bytes) { const r = await readBarcodes(new Uint8Array(bytes), { tryHarder: true, tryRotate: true, maxNumberOfSymbols: 1 }); return r[0]?.text ?? null; }
 function pngRgba(bytes) { const img = UPNG.decode(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.length)); return { w: img.width, h: img.height, rgba: new Uint8Array(UPNG.toRGBA8(img)[0]) }; }
 function gsRender(file, dpi = 600) { // 600: a common laser printer (300 is tested separately, with whole-dot modules)
@@ -93,7 +96,31 @@ function decodeCode11(img) {
   return s;
 }
 const code11Checks = (v) => { const val = (c) => (c === '-' ? 10 : Number(c)); const ck = (s, max) => { let sum = 0; [...s].reverse().forEach((c, i) => { sum += val(c) * ((i % max) + 1); }); const r = sum % 11; return r === 10 ? '-' : String(r); }; const c = ck(v, 10); return v.length >= 10 ? c + ck(v + c, 9) : c; };
-const ownDecoder = { msi: decodeMsi, pharmacode: decodePharmacode, code11: decodeCode11 };
+// EAN-5 / EAN-2: start 1011, 7-module digits (L or G codes) separated by 01; the L/G pattern must match the
+// checksum (EAN-5: 3 x odd + 9 x even positions, mod 10; EAN-2: value mod 4), per GS1 General Specifications.
+// The module is the symbol's width over its module count (EAN-5: 47, EAN-2: 20), not the narrowest run, which
+// anti-aliased renders (browser SVG, pdf.js) blur.
+function decodeEanAddon(img) {
+  const rs = runs(img, Math.floor(img.h * 0.75)); const total = rs.reduce((s, r) => s + r[1], 0);
+  const tries = [47, 20].map((n) => decodeAddonBits(rs, total / n));
+  return tries.find((t) => /^\d+$/.test(t)) ?? tries.join(' / ');
+}
+function decodeAddonBits(rs, m) {
+  let bits = ''; for (const [d, n] of rs) bits += (d ? '1' : '0').repeat(Math.max(1, Math.round(n / m)));
+  if (!bits.startsWith('1011')) return 'no start';
+  const L = ['0001101', '0011001', '0010011', '0111101', '0100011', '0110001', '0101111', '0111011', '0110111', '0001011'];
+  const G = ['0100111', '0110011', '0011011', '0100001', '0011101', '0111001', '0000101', '0010001', '0001001', '0010111'];
+  let i = 4, digits = '', par = '';
+  while (i + 7 <= bits.length) {
+    const c = bits.slice(i, i + 7); let d = L.indexOf(c), p = 'L'; if (d < 0) { d = G.indexOf(c); p = 'G'; } if (d < 0) return 'bad ' + c;
+    digits += d; par += p; i += 7; if (bits.slice(i, i + 2) === '01') i += 2; else break;
+  }
+  const P5 = ['GGLLL', 'GLGLL', 'GLLGL', 'GLLLG', 'LGGLL', 'LLGGL', 'LLLGG', 'LGLGL', 'LGLLG', 'LLGLG'];
+  if (digits.length === 5) { const ck = (3 * (+digits[0] + +digits[2] + +digits[4]) + 9 * (+digits[1] + +digits[3])) % 10; return par === P5[ck] ? digits : 'parity ' + par; }
+  if (digits.length === 2) return par === ['LL', 'LG', 'GL', 'GG'][Number(digits) % 4] ? digits : 'parity ' + par;
+  return 'length ' + digits;
+}
+const ownDecoder = { msi: decodeMsi, pharmacode: decodePharmacode, code11: decodeCode11, ean5: decodeEanAddon, ean2: decodeEanAddon };
 
 /* ---------- page ---------- */
 const b = await engine.launch();
@@ -276,6 +303,46 @@ async function batch(action) {
   const reads = []; for (const n of [names[0], names[12], names.at(-1)]) reads.push(await zx(await svgToPng(z.files[n])));
   check('numbered series: 25 SVG named in order, SKU-00007 … SKU-00079, first/middle/last scan', names.length === 25 && names[0] === '01-SKU-00007.svg' && names.at(-1) === '25-SKU-00079.svg' && reads.join() === 'SKU-00007,SKU-00043,SKU-00079', `${names[0]} … ${names.at(-1)} · read ${reads.join(', ')}`);
 }
+/* ---------- 5b. add-ons, own text under the bars, CSV import ---------- */
+{
+  await page.getByRole('radio', { name: 'One barcode' }).click();
+  await setUi({ 'bc-unit': 'mm', 'bc-module': '0.33', 'bc-dpi': '300', 'bc-quiet': '', 'bc-rotate': 'N', 'bc-transparent': false });
+  // [type, typed, what zxing-cpp must read with the add-on required] -- ISBN price 51299 (GS1/ISBN agency example),
+  // UPC-A 036000291452 + EAN-2 12, ISSN 0311-175X variant 00 issue 05.
+  for (const [bcid, value, want] of [['isbn', '978-1-56581-231-4 51299', '978156581231451299'], ['upca', '03600029145 12', '003600029145212'], ['issn', '0311-175X 00 05', '977031117500105']]) {
+    const r = await generate(bcid, value);
+    const png = (await download('png')).bytes; const pdf = await download('pdf');
+    const got = [await zxAddon(png), GS ? await zxAddon(gsRender(pdf.file, 600)) : 'no gs'];
+    check(bcid + ' with add-on "' + value + '": scanned back with it, PNG and PDF read ' + want, r.status && got.every((g) => g === want), JSON.stringify(got) + ' · ' + (r.status || r.error).slice(0, 80));
+  }
+}
+{
+  await setUi({ 'bc-show-text': true });
+  await generate('code128', 'CAP-1');
+  const plain = Buffer.from((await download('svg')).bytes).toString();
+  await setUi({ 'bc-caption': 'Blue T-shirt M' });
+  const r = await generate('code128', 'CAP-1');
+  const svg = (await download('svg')).bytes; const png = (await download('png')).bytes;
+  fs.writeFileSync(path.join(os.tmpdir(), 'bc-caption-check.png'), png);
+  check('own text under the bars: drawing changes, still reads CAP-1 (PNG and SVG)', r.status && Buffer.from(svg).toString() !== plain && (await zx(png)) === 'CAP-1' && (await zx(await svgToPng(svg))) === 'CAP-1', (r.status || r.error).slice(0, 80) + ' · PNG kept at ' + path.join(os.tmpdir(), 'bc-caption-check.png'));
+  await setUi({ 'bc-caption': '' });
+}
+{
+  const csv = path.join(tmp, 'items.csv');
+  fs.writeFileSync(csv, 'sku;name\r\n"590123412345";"Mug ""XL"", blue"\r\n400638133393;Tea\r\n\r\n');
+  await page.getByRole('radio', { name: /^Many/ }).click();
+  await page.locator('#bc-type').selectOption('ean13');
+  await page.locator('#bc-csv').setInputFiles(csv);
+  const lines = await page.locator('#bc-lines').inputValue();
+  check('CSV import (semicolons, quotes, CRLF): value and text per line, tab-separated', lines === 'sku\tname\n590123412345\tMug "XL", blue\n400638133393\tTea', JSON.stringify(lines));
+  await page.locator('#bc-lines').fill(lines.split('\n').slice(1).join('\n'));
+  await page.locator('#bc-batch-format').selectOption('png');
+  const [d] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Generate all as ZIP' }).click()]);
+  const zip = await JSZip.loadAsync(fs.readFileSync(await d.path()));
+  const names = Object.keys(zip.files).sort(); const reads = []; for (const n of names) reads.push(await zx(await zip.files[n].async('uint8array')));
+  check('imported list -> ZIP: 2 codes named by value (not by text), each reads', names.join() === '1-590123412345.png,2-400638133393.png' && reads.join() === '5901234123457,4006381333931', names.join(', ') + ' · ' + reads.join(', '));
+}
+
 /* ---------- 6. label sheets (PDF) ---------- */
 // Geometry written here from Avery's templates, not taken from the page: L7160 = A4, 63.5 x 38.1 mm, 3 x 7,
 // top 15.15 mm, left 7.25 mm, 2.5 mm between columns.

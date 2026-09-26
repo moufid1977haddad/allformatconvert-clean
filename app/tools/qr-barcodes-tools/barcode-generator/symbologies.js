@@ -26,13 +26,17 @@ export const GROUPS = [
   {
     name: 'EAN / UPC / ISBN',
     items: [
-      { bcid: 'ean13', label: 'EAN-13', sample: '5901234123457', hint: '12 digits (check digit added) or 13 digits (verified).', zxing: 'EAN13', check: 'auto' },
+      { bcid: 'ean13', label: 'EAN-13', sample: '5901234123457', hint: '12 digits (check digit added) or 13 digits (verified). Add-on: a space and 2 or 5 digits.', zxing: 'EAN13', check: 'auto', addon: true },
       { bcid: 'ean8', label: 'EAN-8', sample: '96385074', hint: '7 digits (check digit added) or 8 digits (verified).', zxing: 'EAN8', check: 'auto' },
-      { bcid: 'upca', label: 'UPC-A', sample: '036000291452', hint: '11 digits (check digit added) or 12 digits (verified).', zxing: 'UPCA', check: 'auto' },
-      { bcid: 'upce', label: 'UPC-E', sample: '01234565', hint: '7 digits starting with 0 or 1 (check digit added) or 8 digits.', zxing: 'UPCE', check: 'auto' },
-      { bcid: 'isbn', label: 'ISBN (Bookland EAN-13)', sample: '978-1-56581-231-4', hint: 'ISBN-13 with hyphens, e.g. 978-1-56581-231-4 (ISBN-10 is converted).', zxing: 'EAN13' },
-      { bcid: 'ismn', label: 'ISMN (sheet music)', sample: '979-0-2605-3211-3', hint: 'ISMN with hyphens.', zxing: 'EAN13' },
-      { bcid: 'issn', label: 'ISSN (periodicals)', sample: '0311-175X', hint: 'ISSN with hyphen, e.g. 0311-175X.', zxing: 'EAN13' },
+      { bcid: 'upca', label: 'UPC-A', sample: '036000291452', hint: '11 digits (check digit added) or 12 digits (verified). Add-on: a space and 2 or 5 digits.', zxing: 'UPCA', check: 'auto', addon: true },
+      { bcid: 'upce', label: 'UPC-E', sample: '01234565', hint: '7 digits starting with 0 or 1 (check digit added) or 8 digits. Add-on: a space and 2 or 5 digits.', zxing: 'UPCE', check: 'auto', addon: true },
+      { bcid: 'isbn', label: 'ISBN (Bookland EAN-13)', sample: '978-1-56581-231-4', hint: 'ISBN-13 with hyphens, e.g. 978-1-56581-231-4 (ISBN-10 is converted). Price add-on: a space and 5 digits, e.g. 978-1-56581-231-4 51299.', zxing: 'EAN13', addon: true },
+      { bcid: 'ismn', label: 'ISMN (sheet music)', sample: '979-0-2605-3211-3', hint: 'ISMN with hyphens. Add-on: a space and 2 or 5 digits.', zxing: 'EAN13', addon: true },
+      { bcid: 'issn', label: 'ISSN (periodicals)', sample: '0311-175X', hint: 'ISSN with hyphen, e.g. 0311-175X; then optionally the 2-digit variant and the issue add-on, e.g. 0311-175X 00 05.', zxing: 'EAN13', addon: true },
+      // Standalone add-ons (barcode-maker.com offers them): no reader decodes an add-on on its own, so they are not read
+      // back; the suite checks them with its own decoder.
+      { bcid: 'ean5', label: 'EAN-5 add-on (alone)', sample: '51299', hint: '5 digits (book price add-on), printed on its own. To attach it to an EAN-13 or ISBN, type it after that code instead.', zxing: null },
+      { bcid: 'ean2', label: 'EAN-2 add-on (alone)', sample: '05', hint: '2 digits (periodical issue), printed on its own. To attach it to an EAN-13 or ISSN, type it after that code instead.', zxing: null },
     ],
   },
   {

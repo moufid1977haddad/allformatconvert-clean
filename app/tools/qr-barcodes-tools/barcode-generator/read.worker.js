@@ -7,9 +7,9 @@ import { READ_OPTIONS } from './render';
 prepareZXingModule({ overrides: { locateFile: (path, prefix) => (path.endsWith('.wasm') ? '/wasm/zxing_reader.wasm' : prefix + path) } });
 
 self.onmessage = async ({ data }) => {
-  const { id, image, format } = data; // image: ImageData
+  const { id, image, format, addon } = data; // image: ImageData
   try {
-    const r = await readBarcodes(image, READ_OPTIONS(format));
+    const r = await readBarcodes(image, READ_OPTIONS(format, addon));
     const hit = r.find((x) => x.isValid) || r[0];
     self.postMessage({ id, ok: true, text: hit ? hit.text : null, format: hit?.format || null });
   } catch (e) {

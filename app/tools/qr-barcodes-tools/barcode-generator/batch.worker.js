@@ -2,7 +2,7 @@
 // Workers side by side. The page falls back to doing it itself where OffscreenCanvas is missing.
 import { prepareZXingModule, readBarcodes } from 'zxing-wasm/reader';
 import { byId } from './symbologies';
-import { renderCanvas, cleanError, onWhite, READ_OPTIONS, readError, fileBytes } from './render';
+import { renderCanvas, cleanError, onWhite, READ_OPTIONS, readError, fileBytes, addonOf } from './render';
 
 prepareZXingModule({ overrides: { locateFile: (path, prefix) => (path.endsWith('.wasm') ? '/wasm/zxing_reader.wasm' : prefix + path) } });
 
@@ -16,7 +16,7 @@ self.onmessage = async ({ data }) => {
     let skipped = true;
     if (sym.zxing) {
       const image = onWhite(canvas);
-      const r = await readBarcodes(image, READ_OPTIONS(sym.zxing));
+      const r = await readBarcodes(image, READ_OPTIONS(sym.zxing, !!addonOf(sym, value)));
       const err = readError(sym, value, ui, (r.find((x) => x.isValid) || r[0])?.text ?? null);
       if (err) throw new Error(err);
       skipped = false;
