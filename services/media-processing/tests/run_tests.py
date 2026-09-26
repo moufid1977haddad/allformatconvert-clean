@@ -298,12 +298,14 @@ try:
         req(srv, "POST", f"/v1/jobs/{jid}/start", tk)
         j, secs = wait_done(srv, jid, tk)
         ok = j["status"] == "done"
+        detail = j.get("error")
         if ok:
             st, out, h = download(srv, jid, tk, "opus")
             dur = decoded_seconds(out)
             kbps_real = os.path.getsize(out) * 8 / 1000 / dur if dur else 0
+            detail = f"HTTP {st}, {kbps_real:.1f} kbit/s measured"
             ok = st == 200 and 0.7 * kbps < kbps_real < 1.3 * kbps  # VBR around the target; Ogg overhead included
-        check(f"opus kbps={kbps}: file at ~{kbps} kbit/s ({kbps_real if ok else j.get('error')})", ok)
+        check(f"opus kbps={kbps}: file at ~{kbps} kbit/s ({detail})", ok)
     jid, tk, st, j = upload(srv, short, "convert", {"target": "mp3", "kbps": 64})
     req(srv, "POST", f"/v1/jobs/{jid}/start", tk)
     j, secs = wait_done(srv, jid, tk)
