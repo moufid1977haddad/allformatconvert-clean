@@ -31,7 +31,7 @@ fs.mkdirSync(out, { recursive: true });
 const GS = ['C:\\Program Files\\gs\\gs10.07.1\\bin\\gswin64c.exe'].find((p) => fs.existsSync(p));
 
 // value typed, text a reader must return, the page on each reference (null: the type is not offered there),
-// [value typed on the references when they refuse ours]
+// [value typed on barqode, which refuses ours]
 const CODES = [
   ['ean13', '5901234123457', '5901234123457', 'Ean13', 'ean-13-barcode-generator'],
   ['upca', '036000291452', '0036000291452', 'Upc', 'upc-a-barcode-generator'],
@@ -196,7 +196,8 @@ const drivers = { ours, bm, bq };
 const where = (site, c) => (site === 'ours' ? 'x' : site === 'bm' ? c[3] : c[4]);
 
 /* ---------- 1. same codes, every file ---------- */
-const results = [];
+const results = []; const bad = []; const batch = [];
+const saveAll = () => fs.writeFileSync(path.join(out, `results-${engine.name()}.json`), JSON.stringify({ results, bad, batch }, null, 1));
 for (const c of CODES) {
   const [bcid, ourValue, want] = c;
   if (only.length && !only.includes(bcid)) continue;
@@ -204,7 +205,7 @@ for (const c of CODES) {
     const loc = where(site, c); if (!loc) { results.push({ site, bcid, offered: false }); continue; }
     const dr = drivers[site];
     try {
-      const value = site !== 'ours' && c[5] ? c[5] : ourValue;
+      const value = site === 'bq' && c[5] ? c[5] : ourValue;
       await dr.open(loc); const m = await dr.make(bcid, value);
       if (m.error && site === 'ours') { results.push({ site, bcid, error: m.error }); continue; }
       for (const fmt of dr.formats) {
@@ -214,8 +215,8 @@ for (const c of CODES) {
     } catch (e) { results.push({ site, bcid, fail: e.message.split('\n')[0] }); console.log(site, bcid, 'FAIL', e.message.split('\n')[0]); }
   }
 }
+saveAll();
 /* ---------- 2. bad input ---------- */
-const bad = [];
 if (!only.length) for (const [bcid, value, expect] of BAD) {
   const c = CODES.find((x) => x[0] === bcid);
   for (const site of SITES) {
@@ -228,8 +229,8 @@ if (!only.length) for (const [bcid, value, expect] of BAD) {
     } catch (e) { bad.push({ site, bcid, value, fail: e.message.split('\n')[0] }); }
   }
 }
+saveAll();
 /* ---------- 3. batch: 1000 EAN-13 in one ZIP ---------- */
-const batch = [];
 if (process.argv.includes('--batch')) {
   const gtin = (d) => { let s = 0; for (let i = d.length - 1, w = 3; i >= 0; i--, w = w === 3 ? 1 : 3) s += Number(d[i]) * w; return d + ((10 - (s % 10)) % 10); };
   const values = Array.from({ length: 1000 }, (_, i) => gtin(String(400638133000 + i * 7)));
@@ -242,9 +243,13 @@ if (process.argv.includes('--batch')) {
     for (const n of names) { const u8 = await zip.files[n].async('uint8array'); const t = await zx(n.endsWith('.svg') ? await svgToPng(u8) : u8); if (t && values.includes(t)) { ok++; seen.add(t); } }
     const r = { site, files: names.length, readRight: ok, distinct: seen.size, secs, zipBytes: fs.statSync(f).size }; batch.push(r); console.log('BATCH', JSON.stringify(r));
   };
-  if (SITES.includes('ours')) { await ours.open(); await ours.page.locator('#bc-type').selectOption('ean13'); await run('ours', async (p) => { await p.getByRole('radio', { name: 'Many (ZIP)' }).click(); await p.getByLabel('A list (one value per line)').check(); await p.locator('#bc-lines').fill(values.join('\n')); await p.locator('#bc-batch-format').selectOption('png'); await p.getByRole('button', { name: 'Generate all as ZIP' }).click(); }); }
+  if (SITES.includes('ours')) { await ours.open(); await ours.page.locator('#bc-type').selectOption('ean13'); await run('ours', async (p) => { await p.getByRole('radio', { name: /^Many/ }).click(); await p.getByLabel('A list (one value per line)').check(); await p.locator('#bc-lines').fill(values.join('\n')); await p.locator('#bc-batch-format').selectOption('png'); await p.getByRole('button', { name: 'Generate all as ZIP' }).click(); }); }
   if (SITES.includes('bm')) { await bm.open('Ean13'); await run('bm', async (p) => { await p.locator('textarea#input').fill(values.join('\n'));await p.locator('button').filter({ hasText: /^\s*(PNG|JPG|GIF|SVG)\s*$/ }).last().click(); await p.getByRole('menuitem', { name: 'PNG', exact: true }).or(p.getByRole('option', { name: 'PNG', exact: true })).first().click(); await p.locator('button').filter({ hasText: 'Download' }).first().click(); }); }
 }
 fs.writeFileSync(path.join(out, `results-${engine.name()}.json`), JSON.stringify({ results, bad, batch }, null, 1));
 console.log('saved', path.join(out, `results-${engine.name()}.json`));
 await b.close();
+// Summary (also: node -e on the JSON). One line per site, then EAN-13 print sizes, bad input, batch.
+for (const s of SITES) { const f = results.filter((x) => x.site === s && x.fmt); const ko = f.filter((x) => !x.ok); console.log('SUMMARY', s, `${f.length - ko.length}/${f.length} files read right`, `${new Set(f.map((x) => x.bcid)).size} of the ${CODES.length} codes offered`, ko.map((x) => `${x.bcid}.${x.fmt}(${x.fail ? 'fail' : x.realType !== x.fmt ? 'is ' + x.realType : 'read ' + x.read})`).join(' ')); }
+for (const x of results.filter((r) => r.bcid === 'ean13' && r.fmt)) console.log('EAN13', x.site, x.fmt, x.declared, 'module', x.moduleMm, x.moduleBasis || '', 'bars', x.barError ?? '', 'print300', x.print300 === undefined ? '' : x.print300 === '5901234123457' ? 'reads' : x.print300);
+for (const x of bad) console.log('BADIN', x.site, x.bcid, x.value, '| error:', (x.error || '').slice(0, 70), '| file:', x.fileMade, '| reads:', x.read);
