@@ -18,7 +18,7 @@ export const GROUPS = [
       { bcid: 'itf14', label: 'ITF-14 (GTIN-14 cartons)', sample: '1540014128876', hint: '13 digits (check digit added) or 14 digits (check digit verified).', zxing: 'ITF', check: 'auto' },
       { bcid: 'msi', label: 'MSI Plessey', sample: '1234567', hint: 'Digits only. Choose the check digit scheme your scanner expects.', zxing: null, msi: true },
       { bcid: 'pharmacode', label: 'Pharmacode (one-track)', sample: '1234', hint: 'A number from 3 to 131070.', zxing: null },
-      { bcid: 'code11', label: 'Code 11', sample: '0123-4567', hint: 'Digits and dash.', zxing: null },
+      { bcid: 'code11', label: 'Code 11', sample: '0123-4567', hint: 'Digits and dash. Most scanners expect the check digit(s): C, and K over 10 characters.', zxing: null, checkOption: 'includecheck' },
       { bcid: 'telepen', label: 'Telepen (alpha)', sample: 'Telepen 1', hint: 'Any ASCII text.', zxing: 'Telepen' },
       { bcid: 'pzn', label: 'PZN8 (German pharmacy)', sample: '1234562', hint: '7 digits (check digit added) or 8 digits (verified).', zxing: 'PZN', extra: { pzn8: true } }, // PZN7 was retired in 2013; bwip-js's default is PZN7, which readers take for plain Code 39
     ],

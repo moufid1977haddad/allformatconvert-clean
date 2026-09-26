@@ -55,7 +55,8 @@
     "upng-js": "2.1.0",
     "utif2": "^4.1.0",
     "wavesurfer.js": "^7.12.7",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "zxing-wasm": "3.1.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
@@ -66,7 +67,6 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "zxing-wasm": "3.1.4"
+    "typescript": "^5"
   }
 }
