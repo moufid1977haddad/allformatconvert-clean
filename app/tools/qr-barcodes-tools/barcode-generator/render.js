@@ -154,8 +154,8 @@ export function svgToEps({ raw, w, h, mmPerUnit }, title = 'barcode') {
   return `%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 ${Math.ceil(W)} ${Math.ceil(h * s)}\n%%HiResBoundingBox: 0 0 ${n3(W)} ${n3(h * s)}\n%%Title: ${title.replace(/[^\x20-\x7e]/g, '?')}\n%%Creator: onlineconvertools.com Barcode Generator (bwip-js)\n%%Pages: 1\n%%EndComments\n%%Page: 1 1\ngsave\n${body}\ngrestore\nshowpage\n%%EOF\n`;
 }
 
-// PDF 1.4, one page the size of the barcode, vector.
-export function svgToPdf({ raw, w, h, mmPerUnit }) {
+// The drawing as PDF page operators, origin bottom-left, in points; w/h in points (label sheets reuse it).
+export function pdfContent({ raw, w, h, mmPerUnit }) {
   const s = (mmPerUnit * 72) / 25.4; const H = h;
   const kw = { m: 'm', l: 'l', c: 'c', h: 'h' };
   const content = parseSvg(raw).map((op) => {
@@ -163,6 +163,13 @@ export function svgToPdf({ raw, w, h, mmPerUnit }) {
     if (op.rect) { const [x, y, rw, rh] = op.rect; return `${r} ${g} ${b} rg ${n3(x * s)} ${n3((H - y - rh) * s)} ${n3(rw * s)} ${n3(rh * s)} re f`; }
     return `${r} ${g} ${b} rg\n${pathOps(op.path, s, H, kw)}\n${op.evenodd ? 'f*' : 'f'}`;
   }).join('\n');
+  return { content, w: w * s, h: h * s };
+}
+
+// PDF 1.4, one page the size of the barcode, vector.
+export function svgToPdf(v) {
+  const { w, h, mmPerUnit } = v; const s = (mmPerUnit * 72) / 25.4;
+  const { content } = pdfContent(v);
   const enc = new TextEncoder();
   const objs = [
     '<< /Type /Catalog /Pages 2 0 R >>',
@@ -302,5 +309,6 @@ export async function fileBytes(sym, value, ui, canvas, fmt) {
   const v = await renderSvg(sym, value, ui);
   if (fmt === 'svg') return new TextEncoder().encode(v.svg);
   if (fmt === 'eps') return new TextEncoder().encode(svgToEps(v, value));
+  if (fmt === 'label') return pdfContent(v); // placed on a label sheet by labels.js
   return svgToPdf(v);
 }

@@ -21,7 +21,7 @@ self.onmessage = async ({ data }) => {
       if (err) throw new Error(err);
       skipped = false;
     }
-    const bytes = await fileBytes(sym, value, ui, canvas, format);
-    self.postMessage({ id, bytes, skipped }, [bytes.buffer]);
+    const bytes = await fileBytes(sym, value, ui, canvas, format); // for a label sheet: { content, w, h }
+    self.postMessage({ id, bytes, skipped }, bytes instanceof Uint8Array ? [bytes.buffer] : []);
   } catch (e) { self.postMessage({ id, error: e.message || String(e) }); }
 };

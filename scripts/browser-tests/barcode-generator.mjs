@@ -248,7 +248,7 @@ if (only.length) { console.log(fails ? `${fails} FAILED` : 'all passed', `(${eng
 }
 /* ---------- 5. batch ---------- */
 async function batch(action) {
-  await page.getByRole('radio', { name: 'Many (ZIP)' }).click();
+  await page.getByRole('radio', { name: /^Many/  }).click();
   const dl = page.waitForEvent('download', { timeout: 600000 });
   const t0 = Date.now(); await action(); const d = await dl; const secs = (Date.now() - t0) / 1000;
   const zip = await JSZip.loadAsync(fs.readFileSync(await d.path()));
@@ -276,6 +276,86 @@ async function batch(action) {
   const reads = []; for (const n of [names[0], names[12], names.at(-1)]) reads.push(await zx(await svgToPng(z.files[n])));
   check('numbered series: 25 SVG named in order, SKU-00007 … SKU-00079, first/middle/last scan', names.length === 25 && names[0] === '01-SKU-00007.svg' && names.at(-1) === '25-SKU-00079.svg' && reads.join() === 'SKU-00007,SKU-00043,SKU-00079', `${names[0]} … ${names.at(-1)} · read ${reads.join(', ')}`);
 }
+/* ---------- 6. label sheets (PDF) ---------- */
+// Geometry written here from Avery's templates, not taken from the page: L7160 = A4, 63.5 x 38.1 mm, 3 x 7,
+// top 15.15 mm, left 7.25 mm, 2.5 mm between columns.
+function gsPages(file, dpi) {
+  const o = `${file}-p%03d.png`;
+  execFileSync(GS, ['-q', '-dSAFER', '-dBATCH', '-dNOPAUSE', '-sDEVICE=png16m', `-r${dpi}`, `-sOutputFile=${o}`, file], { stdio: 'pipe' });
+  const pages = []; for (let i = 1; fs.existsSync(o.replace('%03d', String(i).padStart(3, '0'))); i++) pages.push(pngRgba(new Uint8Array(fs.readFileSync(o.replace('%03d', String(i).padStart(3, '0'))))));
+  return pages;
+}
+function crop(img, xMm, yMm, wMm, hMm, dpi) {
+  const k = dpi / 25.4; const x0 = Math.round(xMm * k), y0 = Math.round(yMm * k), w = Math.round(wMm * k), h = Math.round(hMm * k);
+  const out = new Uint8Array(w * h * 4);
+  for (let y = 0; y < h; y++) out.set(img.rgba.subarray(((y0 + y) * img.w + x0) * 4, ((y0 + y) * img.w + x0 + w) * 4), y * w * 4);
+  return { w, h, rgba: out, png: new Uint8Array(UPNG.encode([out.buffer], w, h, 0)) };
+}
+async function labelsRun(setup) {
+  await page.getByRole('radio', { name: /^Many/ }).click();
+  await page.locator('#bc-batch-format').selectOption('labels');
+  await setup();
+  const [d] = await Promise.all([page.waitForEvent('download', { timeout: 120000 }), page.getByRole('button', { name: 'Generate label sheets (PDF)' }).click()]);
+  const f = path.join(tmp, `${Date.now()}-${d.suggestedFilename()}`); await d.saveAs(f);
+  await page.locator('[data-status]').waitFor();
+  return { file: f, status: await page.locator('[data-status]').innerText() };
+}
+if (GS) {
+  await setUi({ 'bc-unit': 'mm', 'bc-module': '0.33', 'bc-dpi': '300', 'bc-height': '15', 'bc-quiet': '', 'bc-rotate': 'N' });
+  await page.locator('#bc-type').selectOption('ean13');
+  const base = Array.from({ length: 25 }, (_, i) => String(400638133393 + i * 11).slice(0, 12));
+  const gtin = (d) => { let s = 0; for (let k = d.length - 1, w = 3; k >= 0; k--, w = w === 3 ? 1 : 3) s += Number(d[k]) * w; return d + ((10 - (s % 10)) % 10); };
+  const r = await labelsRun(async () => {
+    await page.locator('#bc-label-template').selectOption('L7160');
+    await page.getByLabel('A list (one value per line)').check(); await page.locator('#bc-lines').fill(base.join('\n'));
+    await page.locator('#bc-label-start').fill('3'); await page.locator('#bc-label-guides').check();
+  });
+  const pages = gsPages(r.file, 600);
+  const at = (slot) => { const p = Math.floor(slot / 21), k = slot % 21, col = k % 3, row = Math.floor(k / 3); return { p, x: 7.25 + col * 66, y: 15.15 + row * 38.1 }; };
+  const got = []; let emptyOk = true; let modMm = null;
+  for (let slot = 0; slot < 42; slot++) {
+    const { p, x, y } = at(slot); if (!pages[p]) continue;
+    const cell = crop(pages[p], x + 0.4, y + 0.4, 63.5 - 0.8, 38.1 - 0.8, 600); // inside the dashed outline
+    const t = await zx(cell.png);
+    if (slot < 2 || slot >= 27) { if (t) emptyOk = false; continue; }
+    got.push(t);
+    if (slot === 2) { const rs = runs(cell, Math.floor(cell.h / 2)); modMm = (rs.reduce((s, [, n]) => s + n, 0) / 95) * (25.4 / 600); }
+  }
+  const want = base.map(gtin);
+  check('labels, Avery L7160, start at label 3: 25 EAN-13 on 2 pages, each in its cell in list order, labels 1-2 and 28-42 empty', pages.length === 2 && got.join() === want.join() && emptyOk, `${pages.length} pages · ${got.filter((t, i) => t === want[i]).length}/25 in place · empty ok ${emptyOk} · ${r.status.split('\n')[0].slice(0, 80)}`);
+  check('labels: printed at the module set (0.33 mm), measured on the page at 600 dpi', modMm && Math.abs(modMm - 0.33) < 0.012 && /0\.330 mm per module/.test(r.status), `${modMm?.toFixed(3)} mm · ${r.status.split('\n')[1] ?? ''}`);
+}
+if (GS) { // thermal roll: one label per page, page = label; copies in order
+  await page.locator('#bc-type').selectOption('code128');
+  const r = await labelsRun(async () => {
+    await page.locator('#bc-label-template').selectOption('roll:50x30');
+    await page.getByLabel('A list (one value per line)').check(); await page.locator('#bc-lines').fill('ROLL-A\nROLL-B\nROLL-C');
+    await page.locator('#bc-label-copies').fill('2');
+  });
+  const doc = await (pdfjs ??= await import('pdfjs-dist/legacy/build/pdf.mjs')).getDocument({ data: new Uint8Array(fs.readFileSync(r.file)), isEvalSupported: false }).promise;
+  const pg = await doc.getPage(1); const [, , W, H] = pg.view;
+  const reads = []; for (const im of gsPages(r.file, 600)) reads.push(await zx(Buffer.from(UPNG.encode([im.rgba.buffer], im.w, im.h, 0))));
+  check('roll labels 50 x 30 mm, 2 copies: 6 pages of 50 x 30 mm, A A B B C C', doc.numPages === 6 && Math.abs((W * 25.4) / 72 - 50) < 0.01 && Math.abs((H * 25.4) / 72 - 30) < 0.01 && reads.join() === 'ROLL-A,ROLL-A,ROLL-B,ROLL-B,ROLL-C,ROLL-C', `${doc.numPages} pages ${((W * 25.4) / 72).toFixed(2)} x ${((H * 25.4) / 72).toFixed(2)} mm · ${reads.join(',')}`);
+  await page.locator('#bc-label-copies').fill('1');
+}
+{ // too big for the label: shrunk, and says so with the GS1 minimum
+  await page.locator('#bc-type').selectOption('itf14');
+  await setUi({ 'bc-module': '0.5' });
+  const r = await labelsRun(async () => {
+    await page.locator('#bc-label-template').selectOption('L7651');
+    await page.getByLabel('A list (one value per line)').check(); await page.locator('#bc-lines').fill('1540014128876');
+  });
+  check('ITF-14 at 0.5 mm on a 38.1 mm label: shrunk, % and module given, GS1 minimum (0.495 mm) flagged', /shrunk to \d+ %/.test(r.status) && /GS1 minimum of 0\.495 mm/.test(r.status), r.status.replace(/\n/g, ' | ').slice(0, 220));
+  await setUi({ 'bc-module': '0.33' });
+}
+{ // one code -> "Print it on label sheets…"
+  await page.getByRole('radio', { name: 'One barcode' }).click();
+  await generate('code128', 'ONE-LABEL');
+  await page.locator('#bc-to-labels').click();
+  const st = { mode: await page.getByRole('radio', { name: /^Many/ }).getAttribute('aria-checked'), out: await page.locator('#bc-batch-format').inputValue(), lines: await page.locator('#bc-lines').inputValue() };
+  check('single code -> "Print it on label sheets…": Many, label sheets, the value in the list', st.mode === 'true' && st.out === 'labels' && st.lines === 'ONE-LABEL', JSON.stringify(st));
+  await page.locator('#bc-batch-format').selectOption('png');
+}
 { // cancel during a run in the Workers: no ZIP, "Cancelled."
   await page.locator('#bc-type').selectOption('code128');
   await page.getByLabel('A numbered series').check();
@@ -293,7 +373,7 @@ async function batch(action) {
   await p2.addInitScript(() => { delete globalThis.OffscreenCanvas; });
   await p2.goto(origin + '/tools/qr-barcodes-tools/barcode-generator', { waitUntil: 'networkidle' });
   await p2.locator('#bc-type').selectOption('ean13');
-  await p2.getByRole('radio', { name: 'Many (ZIP)' }).click();
+  await p2.getByRole('radio', { name: /^Many/  }).click();
   await p2.getByLabel('A list (one value per line)').check();
   await p2.locator('#bc-lines').fill(['590123412345', 'BAD', '400638133393'].join('\n'));
   const [d] = await Promise.all([p2.waitForEvent('download', { timeout: 60000 }), p2.getByRole('button', { name: 'Generate all as ZIP' }).click()]);
