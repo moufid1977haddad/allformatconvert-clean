@@ -3,6 +3,7 @@
 // Used to set MAX_FILE_BYTES in app/tools/file-tools/zip-extractor/config.js (archives: make-big-rar.mjs).
 // Usage: node scripts/browser-tests/zip-extractor-cap.mjs <origin or _vercel_share URL> <archive> <source file> [--browser=firefox]
 import { chromium, firefox } from '@playwright/test';
+import { authorize } from './vercel-preview-auth.mjs';
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,7 +12,7 @@ const [entry, file, source] = args; const origin = new URL(entry).origin;
 const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
 const sha = (f) => new Promise((ok) => { const h = createHash('sha256'); fs.createReadStream(f).on('data', (d) => h.update(d)).on('end', () => ok(h.digest('hex'))); });
 const want = await sha(source);
-const b = await engine.launch(); const page = await (await b.newContext({ acceptDownloads: true })).newPage();
+const b = await engine.launch(); const bctx = await b.newContext({ acceptDownloads: true }); await authorize(bctx, origin); const page = await bctx.newPage();
 let crashed = false; page.on('crash', () => { crashed = true; });
 if (entry.includes('_vercel_share')) await page.goto(entry);
 await page.goto(origin + '/tools/file-tools/zip-extractor', { waitUntil: 'networkidle' });

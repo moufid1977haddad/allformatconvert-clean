@@ -4,6 +4,7 @@
 // "Download all as ZIP" says when the browser cannot stream a ZIP to disk.
 // Usage: node scripts/browser-tests/zip-extractor-huge.mjs <origin or _vercel_share URL> <archive> <source dir> [--browser=firefox]
 import { chromium, firefox } from '@playwright/test';
+import { authorize } from './vercel-preview-auth.mjs';
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -13,6 +14,7 @@ const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
 const sha = (f) => new Promise((ok) => { const h = createHash('sha256'); fs.createReadStream(f).on('data', (d) => h.update(d)).on('end', () => ok(h.digest('hex'))); });
 const b = await engine.launch();
 const ctx = await b.newContext({ acceptDownloads: true });
+await authorize(ctx, origin);
 await ctx.addInitScript(() => { delete window.showSaveFilePicker; delete window.showDirectoryPicker; }); // Firefox's own situation, in any browser
 const page = await ctx.newPage();
 let crashed = false; page.on('crash', () => { crashed = true; });

@@ -6,6 +6,7 @@
 // (Chromium's showSaveFilePicker, stubbed to capture the bytes), and cancel.
 // Usage: node scripts/browser-tests/zip-extractor.mjs <origin or _vercel_share URL> <fixtures dir> [--browser=firefox]
 import { chromium, firefox } from '@playwright/test';
+import { authorize } from './vercel-preview-auth.mjs';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import zlib from 'node:zlib';
@@ -17,6 +18,7 @@ const [entry, dir] = args; const origin = new URL(entry).origin;
 const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
 const b = await engine.launch();
 const ctx = await b.newContext({ acceptDownloads: true });
+await authorize(ctx, origin);
 // Default: no File System Access, so "Download all as ZIP" is a plain download we can reopen (Firefox's path).
 await ctx.addInitScript(() => { if (!window.__keepPickers) { delete window.showSaveFilePicker; delete window.showDirectoryPicker; } });
 const page = await ctx.newPage();

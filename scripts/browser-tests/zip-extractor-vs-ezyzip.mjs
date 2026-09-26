@@ -8,6 +8,7 @@
 //   [--mode=first|all] [--password=...] [--browser=firefox] [--ours-only | --theirs-only]
 //   <source dir> holds the archived files under the same relative paths (their SHA-256 is the reference).
 import { chromium, firefox } from '@playwright/test';
+import { authorize } from './vercel-preview-auth.mjs';
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -44,6 +45,7 @@ const profiles = [];
 async function newPage() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'zx-profile-')); profiles.push(dir);
   const ctx = await engine.launchPersistentContext(dir, { acceptDownloads: true });
+  await authorize(ctx, origin); // our origin only, never ezyZip
   if (mode === 'all') await ctx.addInitScript(pickFolder);
   return ctx.pages()[0] || ctx.newPage();
 }
