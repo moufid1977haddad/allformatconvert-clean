@@ -357,6 +357,13 @@ def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_pa
                    "-loop", "0", "-f", "gif"]
             return gif_base + maps + clip + gif + [out_path], ext, mime
         args = base + maps + vf + builder(quality, ctx) + [out_path]
+        # Optional exact bitrate (Audio Compressor sends the one its visitor picked, 64-320 kbit/s). Opus only,
+        # the one target that tool sends here; absent = the quality level's bitrate, as before (additive).
+        kbps = params.get("kbps")
+        if kbps is not None:
+            if target != "opus" or isinstance(kbps, bool) or not isinstance(kbps, int) or not 6 <= kbps <= 510:
+                raise ValueError("Unsupported bitrate.")
+            args[args.index("-b:a") + 1] = f"{kbps}k"
         return args, ext, mime
 
     raise ValueError("Unknown operation.")

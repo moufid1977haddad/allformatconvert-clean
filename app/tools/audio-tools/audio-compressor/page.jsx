@@ -5,6 +5,7 @@ import SeoContent from '../../../components/SeoContent';
 import { AUDIO_ACCEPT } from '../../../lib/mediaSupport';
 import { COMPRESSIBLE_AUDIO_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
 import { reportToolError } from '../../../lib/reportError';
+import { opusOnService, encodeOpusOnService, LOSSLESS_INTERMEDIATE } from '../../../lib/opusService';
 
 export default function AudioCompressorPage() {
   const [file, setFile] = useState(null);
@@ -33,9 +34,15 @@ export default function AudioCompressorPage() {
       const inputName = 'input.' + sanitizedInputExt(file);
       const { outputName, extraArgs, mime, ext } = buildOutputSpec(format);
       await ffmpeg.writeFile(inputName, await fetchFile(file));
-      await ffmpeg.exec(['-i', inputName, '-b:a', bitrate + 'k', ...extraArgs, outputName]);
-      const data = await ffmpeg.readFile(outputName);
-      const blob = new Blob([data.buffer], { type: mime });
+      let blob;
+      if (opusOnService(format)) { // decoded here to lossless FLAC; libopus at the chosen bitrate on our service (lib/opusService.js)
+        await ffmpeg.exec(['-i', inputName, ...LOSSLESS_INTERMEDIATE.args, LOSSLESS_INTERMEDIATE.name]);
+        blob = await encodeOpusOnService(await ffmpeg.readFile(LOSSLESS_INTERMEDIATE.name), 'compressed', { kbps: Number(bitrate) });
+      } else {
+        await ffmpeg.exec(['-i', inputName, '-b:a', bitrate + 'k', ...extraArgs, outputName]);
+        const data = await ffmpeg.readFile(outputName);
+        blob = new Blob([data.buffer], { type: mime });
+      }
       const url = URL.createObjectURL(blob);
       const reduction = (((file.size - blob.size) / file.size) * 100).toFixed(1);
       setResult({ url, name: 'compressed_' + file.name.replace(/\.[^.]+$/, '') + '.' + ext, originalSize: (file.size/1024/1024).toFixed(2), newSize: (blob.size/1024/1024).toFixed(2), reduction });
@@ -96,7 +103,7 @@ export default function AudioCompressorPage() {
       </div>
       <SeoContent
         title="Audio Compressor"
-        description="Audio Compressor reduces an audio file's size by re-encoding it at a lower bitrate (64–320 kbps) using ffmpeg.wasm, entirely in your browser. Note: this is bitrate-based file-size compression — it does not apply dynamic-range compression (threshold/ratio/attack/release) despite the tool's name. Output format is your choice among the bitrate-controllable codecs (MP3, AAC, M4A, OGG, Opus, WMA, AC3) — lossless formats like WAV and FLAC aren't offered here since a bitrate target doesn't apply to them."
+        description="Audio Compressor reduces an audio file's size by re-encoding it at a lower bitrate (64–320 kbps) using ffmpeg.wasm in your browser (Opus is encoded at the chosen bitrate by our own server with libopus, then deleted). Note: this is bitrate-based file-size compression — it does not apply dynamic-range compression (threshold/ratio/attack/release) despite the tool's name. Output format is your choice among the bitrate-controllable codecs (MP3, AAC, M4A, OGG, Opus, WMA, AC3) — lossless formats like WAV and FLAC aren't offered here since a bitrate target doesn't apply to them."
         howTo={[
           "Click the upload area and select an audio file.",
           "Choose a target bitrate from the presets (64k–320k).",
@@ -108,7 +115,7 @@ export default function AudioCompressorPage() {
           { q: "Does this apply dynamic-range compression?", a: "No — despite the name, this tool re-encodes your audio at a lower bitrate to shrink file size. It doesn't touch the audio's dynamic range (loud vs. quiet parts)." },
           { q: "What output format do I get?", a: "Your choice among MP3, AAC, M4A, OGG, Opus, WMA, and AC3 — all bitrate-controllable, lossy codecs where a lower bitrate actually shrinks the file. Lossless formats (WAV, FLAC) aren't offered since bitrate compression doesn't apply to them." },
           { q: "Is there a file size limit?", a: "No hard limit is enforced by the tool — very large files are limited only by your browser's available memory." },
-          { q: "Is my file uploaded anywhere?", a: "No. Everything is processed client-side via ffmpeg.wasm — nothing is uploaded to a server." }
+          { q: "Is my file uploaded anywhere?", a: "For every format except Opus, no: processing happens in your browser via ffmpeg.wasm. For Opus, the processed audio is sent to our own server (not a third party), encoded with the reference libopus encoder (the in-browser one is not as good), and deleted as soon as you have downloaded the result." }
         ]}
         tips={[
           "128 kbps is a reasonable default for most music; drop to 64–96 kbps for voice-only content where size matters most.",

@@ -5,6 +5,7 @@ import SeoContent from '../../../components/SeoContent';
 import { AUDIO_ACCEPT } from '../../../lib/mediaSupport';
 import { AUDIO_OUTPUT_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
 import { reportToolError } from '../../../lib/reportError';
+import { opusOnService, encodeOpusOnService, LOSSLESS_INTERMEDIATE } from '../../../lib/opusService';
 
 export default function AudioBoosterPage() {
   const [file, setFile] = useState(null);
@@ -33,10 +34,17 @@ export default function AudioBoosterPage() {
       const inputName = 'input.' + sanitizedInputExt(file);
       const { outputName, extraArgs, mime, ext } = buildOutputSpec(format);
       await ffmpeg.writeFile(inputName, await fetchFile(file));
-      await ffmpeg.exec(['-i', inputName, '-af', `volume=${volume}`, ...extraArgs, outputName]);
-      const data = await ffmpeg.readFile(outputName);
-      const url = URL.createObjectURL(new Blob([data.buffer], { type: mime }));
-      setResult({ url, name: 'boosted_' + file.name.replace(/\.[^.]+$/, '') + '.' + ext });
+      const base = file.name.replace(/\.[^.]+$/, '');
+      if (opusOnService(format)) { // boosted here, losslessly; libopus on our service (lib/opusService.js)
+        await ffmpeg.exec(['-i', inputName, '-af', `volume=${volume}`, ...LOSSLESS_INTERMEDIATE.args, LOSSLESS_INTERMEDIATE.name]);
+        const opus = await encodeOpusOnService(await ffmpeg.readFile(LOSSLESS_INTERMEDIATE.name), 'boosted_' + base);
+        setResult({ url: URL.createObjectURL(opus), name: 'boosted_' + base + '.opus' });
+      } else {
+        await ffmpeg.exec(['-i', inputName, '-af', `volume=${volume}`, ...extraArgs, outputName]);
+        const data = await ffmpeg.readFile(outputName);
+        const url = URL.createObjectURL(new Blob([data.buffer], { type: mime }));
+        setResult({ url, name: 'boosted_' + base + '.' + ext });
+      }
     } catch(e) {
       // Full error object + stack to the console -- ffmpeg.wasm frequently
       // throws non-Error values (or Errors with no .message) on internal
@@ -86,7 +94,7 @@ export default function AudioBoosterPage() {
       </div>
       <SeoContent
         title="Audio Booster"
-        description="Audio Booster amplifies an audio file's volume using a simple gain multiplier (1x–5x), processed entirely in your browser via ffmpeg.wasm (WebAssembly) — nothing is uploaded to a server. Choose the output format that matches your source (or any other supported format) instead of always getting MP3 back."
+        description="Audio Booster amplifies an audio file's volume using a simple gain multiplier (1x–5x), processed in your browser via ffmpeg.wasm (WebAssembly) — nothing is uploaded, except for Opus, which our own server encodes with libopus and then deletes. Choose the output format that matches your source (or any other supported format) instead of always getting MP3 back."
         howTo={[
           "Click the upload area and select an audio file.",
           "Set your desired boost level using the slider (1x–5x).",
@@ -98,7 +106,7 @@ export default function AudioBoosterPage() {
           { q: "What does the boost actually do?", a: "It applies a straightforward volume/gain multiplier to the whole file via ffmpeg — it's not adaptive loudness normalization, so high boost levels can cause clipping or distortion." },
           { q: "What output format do I get?", a: "Your choice — MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, or AC3, picked from a dropdown before boosting." },
           { q: "Is Audio Booster free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Is my file uploaded anywhere?", a: "No. Processing runs entirely in your browser using ffmpeg.wasm — your file is never uploaded to a server." }
+          { q: "Is my file uploaded anywhere?", a: "For every format except Opus, no: processing happens in your browser via ffmpeg.wasm. For Opus, the processed audio is sent to our own server (not a third party), encoded with the reference libopus encoder (the in-browser one is not as good), and deleted as soon as you have downloaded the result." }
         ]}
         tips={[
           "Start around 1.5x–2x and listen for distortion before pushing toward the 5x maximum.",

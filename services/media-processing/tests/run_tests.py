@@ -292,6 +292,23 @@ try:
                 check(f"{tgt:5s} -> not heavier than the source ({size/1024:.0f} KB vs {src_size/1024:.0f} KB{', MPEG-2 tolerance +5%' if limit > src_size else ''})", size <= limit)
         check(f"{tgt:5s} -> valid, playable, right extension  ({detail or j.get('error')})", ok)
 
+    print("convert: Opus at an exact bitrate (Audio Compressor), refused elsewhere")
+    for kbps in (64, 256):
+        jid, tk, st, j = upload(srv, short, "convert", {"target": "opus", "kbps": kbps})
+        req(srv, "POST", f"/v1/jobs/{jid}/start", tk)
+        j, secs = wait_done(srv, jid, tk)
+        ok = j["status"] == "done"
+        if ok:
+            st, out, h = download(srv, jid, tk, "opus")
+            dur = decoded_seconds(out)
+            kbps_real = os.path.getsize(out) * 8 / 1000 / dur if dur else 0
+            ok = st == 200 and 0.7 * kbps < kbps_real < 1.3 * kbps  # VBR around the target; Ogg overhead included
+        check(f"opus kbps={kbps}: file at ~{kbps} kbit/s ({kbps_real if ok else j.get('error')})", ok)
+    jid, tk, st, j = upload(srv, short, "convert", {"target": "mp3", "kbps": 64})
+    req(srv, "POST", f"/v1/jobs/{jid}/start", tk)
+    j, secs = wait_done(srv, jid, tk)
+    check("kbps on mp3: refused, says why", j["status"] != "done" and "bitrate" in (j.get("error") or "").lower(), str(j.get("error")))
+
     print("compress: already-optimal source is reported honestly, never returned bigger")
     tiny = os.path.join(tempfile.gettempdir(), "media-test-tiny.mp4")
     subprocess.run([FFMPEG, "-hide_banner", "-loglevel", "error", "-y", "-t", "6", "-i", short, "-vf", "scale=320:-2", "-c:v", "libx264", "-preset", "veryfast", "-crf", "51",

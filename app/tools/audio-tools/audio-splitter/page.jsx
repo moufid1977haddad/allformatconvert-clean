@@ -5,6 +5,7 @@ import SeoContent from '../../../components/SeoContent';
 import { AUDIO_ACCEPT } from '../../../lib/mediaSupport';
 import { AUDIO_OUTPUT_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
 import { reportToolError } from '../../../lib/reportError';
+import { opusOnService, encodeOpusOnService, LOSSLESS_INTERMEDIATE } from '../../../lib/opusService';
 
 export default function AudioSplitterPage() {
   const [file, setFile] = useState(null);
@@ -54,15 +55,25 @@ export default function AudioSplitterPage() {
       const part1Name = 'part1.' + ext;
       const part2Name = 'part2.' + ext;
       await ffmpeg.writeFile(inputName, await fetchFile(file));
-      await ffmpeg.exec(['-i', inputName, '-t', String(splitAt), ...extraArgs, part1Name]);
-      await ffmpeg.exec(['-i', inputName, '-ss', String(splitAt), ...extraArgs, part2Name]);
-      const data1 = await ffmpeg.readFile(part1Name);
-      const data2 = await ffmpeg.readFile(part2Name);
       const baseName = file.name.replace(/\.[^.]+$/, '');
-      setResults([
-        { url: URL.createObjectURL(new Blob([data1.buffer], { type: mime })), name: 'part1_' + baseName + '.' + ext },
-        { url: URL.createObjectURL(new Blob([data2.buffer], { type: mime })), name: 'part2_' + baseName + '.' + ext },
-      ]);
+      if (opusOnService(format)) { // cut here, losslessly; each part encoded with libopus on our service (lib/opusService.js)
+        const parts = [];
+        for (const [i, cut] of [['-t', String(splitAt)], ['-ss', String(splitAt)]].entries()) {
+          await ffmpeg.exec(['-i', inputName, ...cut, ...LOSSLESS_INTERMEDIATE.args, LOSSLESS_INTERMEDIATE.name]);
+          const name = `part${i + 1}_${baseName}`;
+          parts.push({ url: URL.createObjectURL(await encodeOpusOnService(await ffmpeg.readFile(LOSSLESS_INTERMEDIATE.name), name)), name: name + '.opus' });
+        }
+        setResults(parts);
+      } else {
+        await ffmpeg.exec(['-i', inputName, '-t', String(splitAt), ...extraArgs, part1Name]);
+        await ffmpeg.exec(['-i', inputName, '-ss', String(splitAt), ...extraArgs, part2Name]);
+        const data1 = await ffmpeg.readFile(part1Name);
+        const data2 = await ffmpeg.readFile(part2Name);
+        setResults([
+          { url: URL.createObjectURL(new Blob([data1.buffer], { type: mime })), name: 'part1_' + baseName + '.' + ext },
+          { url: URL.createObjectURL(new Blob([data2.buffer], { type: mime })), name: 'part2_' + baseName + '.' + ext },
+        ]);
+      }
     } catch(e) {
       // Full error object + stack to the console -- ffmpeg.wasm frequently
       // throws non-Error values (or Errors with no .message) on internal
@@ -115,7 +126,7 @@ export default function AudioSplitterPage() {
       </div>
       <SeoContent
         title="Audio Splitter"
-        description="Audio Splitter cuts an audio file into two parts at a single point you choose, using ffmpeg.wasm entirely in your browser — nothing is uploaded to a server. Move the slider to set exactly where the split happens, and pick the output format for both parts from a dropdown."
+        description="Audio Splitter cuts an audio file into two parts at a single point you choose, using ffmpeg.wasm in your browser — nothing is uploaded, except for Opus, which our own server encodes with libopus and then deletes. Move the slider to set exactly where the split happens, and pick the output format for both parts from a dropdown."
         howTo={[
           "Click the upload area and select an audio file.",
           "Use the slider to set the exact second where you want to split the file.",
@@ -127,7 +138,7 @@ export default function AudioSplitterPage() {
           { q: "Can I split into more than two parts?", a: "Not in a single pass — this tool creates exactly two parts at one split point. Run the tool again on one of the resulting parts if you need further splits." },
           { q: "What output format do the parts use?", a: "Your choice — MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, or AC3, picked from a dropdown, applied to both parts." },
           { q: "Is there a file size limit?", a: "No hard limit is enforced by the tool — you're limited by your browser's available memory." },
-          { q: "Is my file uploaded anywhere?", a: "No. Everything happens locally via ffmpeg.wasm — your file is never uploaded to a server." }
+          { q: "Is my file uploaded anywhere?", a: "For every format except Opus, no: processing happens in your browser via ffmpeg.wasm. For Opus, the processed audio is sent to our own server (not a third party), encoded with the reference libopus encoder (the in-browser one is not as good), and deleted as soon as you have downloaded the result." }
         ]}
         tips={[
           "Preview the audio near your intended split point first to make sure you're cutting at the right moment.",

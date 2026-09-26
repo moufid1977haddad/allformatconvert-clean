@@ -49,7 +49,8 @@ export default function AudioConverterPage() {
           onStage: (s) => { if (typeof s.pct === 'number') setProgress(Math.round(s.pct)); },
         });
         if (!out.bytes || out.ext !== 'opus') throw new Error('The service returned no Opus file.');
-        setResult({ url: URL.createObjectURL(out.blob), name: file.name.replace(/\.[^.]+$/, '') + '.opus' });
+        // Re-typed: sent as audio/ogg, Firefox saved "x.opus" as "x.ogg" (measured 26/09/2026 on the other audio tools).
+        setResult({ url: URL.createObjectURL(new Blob([out.blob], { type: 'audio/opus' })), name: file.name.replace(/\.[^.]+$/, '') + '.opus' });
         setProgress(100);
       } catch (e) {
         reportToolError({ tool: 'audio-converter', file, error: e instanceof Error ? e : new Error(String(e)) });
