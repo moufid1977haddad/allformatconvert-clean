@@ -57,6 +57,12 @@ export default function ZipExtractorPage() {
 
   useEffect(() => { setIsMobile(isMobileDevice()); setCanSaveFolder(typeof window !== 'undefined' && 'showDirectoryPicker' in window); }, []);
   useEffect(() => () => { workerRef.current?.terminate(); }, []);
+  // Start the engine (worker + 7-Zip) once the page is idle, so an archive is listed without waiting for it.
+  useEffect(() => {
+    const warm = () => { if (!workerRef.current) worker().postMessage({ type: 'warm' }); };
+    if ('requestIdleCallback' in window) { const id = requestIdleCallback(warm, { timeout: 3000 }); return () => cancelIdleCallback(id); }
+    const id = setTimeout(warm, 1000); return () => clearTimeout(id);
+  }, []);
   const maxFile = isMobile ? MOBILE_MAX_FILE_BYTES : MAX_FILE_BYTES;
   const maxFileLabel = isMobile ? MOBILE_MAX_FILE_LABEL : MAX_FILE_LABEL;
   const batchBytes = isMobile ? MOBILE_BATCH_BYTES : BATCH_BYTES;

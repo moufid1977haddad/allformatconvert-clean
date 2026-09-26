@@ -73,13 +73,16 @@ async function zipGet(paths) {
 
 let sz = null;
 let lines = [];
-async function load() {
-  if (sz) return;
-  const wasm = await fetch('/wasm/7zz.wasm').then((r) => { if (!r.ok) throw new Error(`The extraction engine could not be downloaded (HTTP ${r.status}).`); return r.arrayBuffer(); });
-  const { default: SevenZip } = await import(/* webpackIgnore: true */ '/wasm/7zz.es6.js');
-  sz = await SevenZip({ wasmBinary: wasm, print: (l) => lines.push(l), printErr: (l) => lines.push(l) });
-  installReadAhead();
-  installPreallocation();
+let loading = null; // one load, shared by the page's warm-up and the first 'open' (which may arrive during it)
+function load() {
+  loading ??= (async () => {
+    const wasm = await fetch('/wasm/7zz.wasm').then((r) => { if (!r.ok) throw new Error(`The extraction engine could not be downloaded (HTTP ${r.status}).`); return r.arrayBuffer(); });
+    const { default: SevenZip } = await import(/* webpackIgnore: true */ '/wasm/7zz.es6.js');
+    sz = await SevenZip({ wasmBinary: wasm, print: (l) => lines.push(l), printErr: (l) => lines.push(l) });
+    installReadAhead();
+    installPreallocation();
+  })().catch((e) => { loading = null; throw e; }); // a failed load can be tried again
+  return loading;
 }
 function run(args) {
   lines = [];
@@ -234,6 +237,9 @@ async function sevenGet(raws, sizes) {
 /* ---------------- messages ---------------- */
 
 self.onmessage = async ({ data }) => {
+  // The page loads 7-Zip while it is idle, before any archive is chosen: measured on www on 26/09, loading it on the
+  // choice made our listing 0.9 s against ezyZip's 0.45 s. No reply: a failure shows up at 'open', which loads again.
+  if (data.type === 'warm') { load().catch(() => {}); return; }
   try {
     if (data.type === 'open') {
       if (session?.kind === 'zip') await session.zr.close().catch(() => {});
