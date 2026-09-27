@@ -31,6 +31,9 @@ export default function ImageResizerPage() {
     if (!f) return;
     setError('');
     setResult(null);
+    // Size fields stay disabled until the new image's own size is known: typed earlier, a width was kept without
+    // its locked height (seen under WebKit, 28/09/2026: 2000x1500 resized to 879x1500).
+    setOrig(null);
     const url = URL.createObjectURL(f);
     const img = new Image();
     img.onload = () => { setOrig({ w: img.naturalWidth, h: img.naturalHeight }); setWidth(String(img.naturalWidth)); setHeight(String(img.naturalHeight)); setFile(f); setImage(url); };
@@ -111,8 +114,8 @@ export default function ImageResizerPage() {
           {mode === 'pixels' ? (
             <div className="space-y-2">
               <div className="grid grid-cols-2 gap-4">
-                <label className="text-sm text-neutral-600">Width (px)<input type="number" min="1" value={width} onChange={(e) => onWidth(e.target.value)} className={field} /></label>
-                <label className="text-sm text-neutral-600">Height (px)<input type="number" min="1" value={height} onChange={(e) => onHeight(e.target.value)} className={field} /></label>
+                <label className="text-sm text-neutral-600">Width (px)<input type="number" min="1" value={width} disabled={!orig} onChange={(e) => onWidth(e.target.value)} className={field} /></label>
+                <label className="text-sm text-neutral-600">Height (px)<input type="number" min="1" value={height} disabled={!orig} onChange={(e) => onHeight(e.target.value)} className={field} /></label>
               </div>
               <label className="flex items-center gap-2 text-sm text-neutral-700"><input type="checkbox" checked={lock} onChange={(e) => { setLock(e.target.checked); if (e.target.checked && orig && Number(width) > 0) setHeight(String(Math.max(1, Math.round((Number(width) * orig.h) / orig.w)))); }} />Keep proportions</label>
             </div>

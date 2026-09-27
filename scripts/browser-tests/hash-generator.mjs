@@ -4,7 +4,7 @@
 // Usage: node scripts/browser-tests/hash-generator.mjs <origin or _vercel_share URL> <dir with test files> [--browser=firefox] [--mobile]
 //   --mobile: Chromium as a Pixel 7 (100 MB in-memory ceiling, so the 3 MB file stays native and 760 MiB streams)
 //   test files (made by the caller): empty.bin, one.bin (1 byte), r3.bin (3 MB random), big.bin (> 700 MiB)
-import { chromium, firefox, devices } from '@playwright/test';
+import { chromium, firefox, webkit, devices } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
