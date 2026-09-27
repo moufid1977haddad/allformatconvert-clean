@@ -1,8 +1,17 @@
 # RAPPORT — Audio Merger : ordre des fichiers et fondu enchaîné
 
-**Date :** 26 septembre 2026 · **Branche :** `licence-ameliorations` · **Production avant :** `master` = `de3dec9d` · **Restauration :** balise `avant-audio-merger-ordre-fondu`
+**Date :** 26 septembre 2026 · **Branche :** `licence-ameliorations` · **Production avant :** `master` = `de3dec9d` · **Restauration :** balise `avant-audio-merger-ordre-fondu` · **Production après :** fusion `c60c0167`, déploiement `onlineconvertools-dp2mf3ikx` · **Vérifié sur www, Chromium et Firefox.**
 
-<!-- RÉSUMÉ -->
+## 0. En une table
+
+| Point | Verdict |
+|---|---|
+| Recherche (3 concurrents, vrais fichiers, courbes mesurées) | 123apps : **fondu imposé par défaut** (1,5-3 s, non réglable) ; Clideo : désactivé, 0,8 s fixe ; onlineconverter : désactivé, 1-10 s, **fait disparaître un fichier court**. Tous linéaires |
+| Défaut retenu | **fondu désactivé** (comme 2 concurrents sur 3) — jonction exacte, 0 ms, commande identique à avant |
+| Construit | ordre par glisser + flèches, ajout/retrait ; fondu 0,1-10 s, puissance constante ou linéaire, avec ou sans chevauchement, jonction par jonction ; fondus de début/fin ; garde contre les fichiers courts ; **durée annoncée = durée obtenue, à l'échantillon** |
+| Trouvé en route | la **barre de progression d'Audio Merger restait figée** en production (ffmpeg.wasm gardait le `-v error` de ffprobe) — corrigé |
+| Tests | plan 20/20 · natif 13/13 · local, préversion et **www** : ordre/fondu 12/12 + 12/12, jonctions 9/9 + 9/9 |
+| Point 4 | audit de tous les outils qui joignent/coupent/copient sans réencoder : **noté dans le plan, non traité** |
 
 ## 1. Recherche — faits mesurés
 
@@ -47,6 +56,7 @@ Méthode : les vraies pages, pilotées par Playwright (Chromium), trois fichiers
 | Local (build de test), `audio-merger-order-fade.mjs` | **Chromium 12/12, Firefox 12/12** |
 | Local, non-régression | `audio-merger-formats.mjs` Chromium + Firefox : tout passe ; `audio-merger-join.mjs --format=flac/mp3/wav` × 2 navigateurs : tout passe (0 ms, aucun silence aux jonctions) |
 | **Préversion** `gvqlq56lo` | ordre/fondu **12/12 Chromium, 12/12 Firefox** (Opus par le vrai service : 1 travail, `libopus`, 9,6 s, lu jusqu'au bout) ; jonctions **9/9 + 9/9** (Opus 12,000 s, 0 ms) |
+| **www** (fusion `c60c0167`, déploiement `dp2mf3ikx`, chemin entièrement réel) | ordre/fondu **12/12 Chromium, 12/12 Firefox** ; jonctions **9/9 Chromium, 9/9 Firefox** (fondu désactivé : 0 ms, aucun silence ; Opus : 1 travail, 12,000 s) |
 
 Détail des cas de `audio-merger-order-fade.mjs` (mêmes résultats sur les deux navigateurs) :
 
@@ -62,4 +72,27 @@ Détail des cas de `audio-merger-order-fade.mjs` (mêmes résultats sur les deux
 | c10 / c11 | fondu vers MP3 ; vers Opus (vrai service) | 9,6 s ; Opus : 1 travail, encodeur `libopus` |
 | c12 | progression réelle, 2 × 10 min + fondu 5 s → MP3 | 33 à 100 valeurs distinctes de la barre ; 19:55 annoncé et obtenu |
 
-<!-- SUITE -->
+## 4. Face aux trois concurrents
+
+| | 123apps | Clideo | onlineconverter | **Nous** |
+|---|---|---|---|---|
+| Réordonner | flèches | glisser | non | **glisser + flèches**, retrait, ajout |
+| Fondu par défaut | activé (imposé) | désactivé | désactivé | **désactivé** — jonction exacte, 0 ms |
+| Longueur | imposée, ≤ 3 s | 0,8 s fixe | 1-10 s entières, une pour toutes | **0,1-10 s au dixième** |
+| Par jonction | oui | non | non | **oui** |
+| Courbe | linéaire | linéaire | linéaire | **puissance constante** (pas de creux) ou linéaire |
+| Sans chevauchement | non | non | oui | **oui** |
+| Fondu début / fin | oui | non | non | **oui** |
+| Fichier trop court | règle « moitié » | ? | **disparaît** | réduit **et dit** |
+| Durée annoncée avant | non | « Final output » arrondi à la seconde | non | **oui, au dixième, = durée obtenue** |
+
+## 5. Limites, dites telles quelles
+
+- **Mesures de courbe sur des sons purs** : la différence puissance constante / linéaire (−0,01 dB / −2,96 dB au milieu) est mesurée sur deux bruits roses indépendants, pas sur de la musique réelle ; sur deux enregistrements identiques en phase, la puissance constante monte de 3 dB au milieu (écrêté s'il dépasse la pleine échelle, testé) — c'est pourquoi le linéaire reste proposé.
+- **Glisser-déposer au doigt** : le glisser HTML5 ne marche pas au toucher sur téléphone ; les flèches ↑/↓ y servent (rendu vérifié à 375 px, sans défilement horizontal). Safari non testé (bloquant 9).
+- **Fondu vers un format compressé** : un encodage, comme toute fusion vers un compressé ; la fin peut s'allonger d'un bloc d'encodeur (limite déjà décrite dans `RAPPORT-audio-merger-format-sortie.md`).
+- Coût : inchangé — 1 billet du service par fusion Opus seulement. Cette session en a utilisé 8 (préversion + www).
+
+## 6. Hygiène
+
+Balise `avant-audio-merger-ordre-fondu` sur `de3dec9d`. Aucun fichier d'environnement lu, modifié ni copié : la build locale lit elle-même `.env.local` (Next.js), la préversion a été atteinte par un dossier temporaire ne contenant que `.vercel/project.json` et `vercel env run` (jeton en mémoire), relais arrêté puis **dossier supprimé**. Aucune surveillance ni boucle d'attente : une attente bloquante par build (`vercel inspect --wait`), tâches de fond notifiées à leur fin. Aucun push forcé. Serveurs locaux (site, banc ffmpeg.wasm, relais) arrêtés. `.serena/` laissé tel quel. Audit « jonctions/coupes sans réencodage de tous les outils » **noté dans le plan, non traité**, comme demandé.
