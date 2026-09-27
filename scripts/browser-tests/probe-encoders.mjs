@@ -1,7 +1,7 @@
 // Real-browser probe: which image type does each engine REALLY produce when asked?
 // Also drives the live image-converter UI (option disabled state + real download).
 // Run: node scripts/browser-tests/probe-encoders.mjs [baseUrl]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import fs from 'node:fs';
 
 const base = process.argv[2] || 'https://www.onlineconvertools.com';

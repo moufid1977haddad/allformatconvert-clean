@@ -9,7 +9,7 @@
 // - Cancel stops a merge and the next one works.
 // With a build made with NEXT_PUBLIC_MEDIA_SERVICE_URL=https://media.test.invalid (no env file involved).
 // Usage: node scripts/browser-tests/audio-merger-formats.mjs <origin> <ffmpeg> [--browser=firefox]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -18,7 +18,7 @@ import path from 'node:path';
 
 const [entry, FF] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const origin = new URL(entry).origin;
-const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
+const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const FP = FF.replace(/ffmpeg(\.exe)?$/i, 'ffprobe$1');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'merger-formats-'));
 const run = (args) => execFileSync(FF, ['-hide_banner', '-loglevel', 'error', '-y', ...args], { cwd: tmp, maxBuffer: 1 << 28, stdio: ['ignore', 'pipe', 'pipe'] });

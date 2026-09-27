@@ -4,7 +4,7 @@
 // Camera: Chromium is fed a Y4M video made here with a QR code in it (--use-file-for-fake-video-capture); Firefox's
 // fake camera shows its own test pattern, so there only start/stop/no-false-read is checked.
 // Usage: node scripts/browser-tests/improvement-17.mjs <origin> [--browser=firefox]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -14,7 +14,8 @@ import { createCanvas, loadImage } from '@napi-rs/canvas';
 
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--'))).origin;
 const isFx = process.argv.includes('--browser=firefox');
-const engine = isFx ? firefox : chromium;
+const isWk = process.argv.includes('--browser=webkit'); // WebKit: no fake camera file, treated like Firefox below
+const engine = isFx ? firefox : isWk ? webkit : chromium;
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'imp17-'));
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 
@@ -50,10 +51,10 @@ function readWav(buf) { // -> { rate, channels, samples: Float32 of channel 0 }
 const rms = (s, a, b) => { let t = 0; for (let i = a; i < b; i++) t += s[i] * s[i]; return Math.sqrt(t / Math.max(1, b - a)); };
 
 /* ---------- browser ---------- */
-const b = await engine.launch(isFx
+const b = await engine.launch(isWk ? {} : isFx
   ? { firefoxUserPrefs: { 'media.navigator.streams.fake': true, 'media.navigator.permission.disabled': true } }
   : { args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', `--use-file-for-fake-video-capture=${camFile}`] });
-const ctx = await b.newContext({ acceptDownloads: true, ...(isFx ? {} : { permissions: ['camera'] }) });
+const ctx = await b.newContext({ acceptDownloads: true, ...(isFx || isWk ? {} : { permissions: ['camera'] }) });
 const dl = async (p, sel) => { const [d] = await Promise.all([p.waitForEvent('download'), p.locator(sel).first().click()]); return { name: d.suggestedFilename(), bytes: fs.readFileSync(await d.path()) }; };
 
 /* ---------- GIF Maker ---------- */
@@ -98,12 +99,19 @@ const dl = async (p, sel) => { const [d] = await Promise.all([p.waitForEvent('do
 {
   const p = await ctx.newPage(); await p.goto(origin + '/tools/qr-barcodes-tools/qr-scanner', { waitUntil: 'networkidle' });
   await p.getByRole('button', { name: 'Scan with camera' }).click();
-  if (!isFx) {
+  if (!isFx && !isWk) {
     await p.locator('[data-text]').waitFor({ timeout: 20000 }).catch(() => {});
     const text = await p.locator('[data-text]').textContent().catch(() => null);
     const live = await p.evaluate(() => !!document.querySelector('video')?.srcObject);
     check('camera: the QR code in the video is read, then the camera stops', text === QR_TEXT && !live && (await p.getByRole('button', { name: 'Scan with camera' }).count()) === 1, `${text} · camera still on: ${live}`);
     check('camera result is a link: "Open link" offered, with the warning', (await p.getByRole('link', { name: 'Open link' }).getAttribute('href')) === QR_TEXT);
+  } else if (isWk) {
+    // Playwright's WebKit on Windows has no camera device: the page must say so clearly (real Safari: owner's pass).
+    await Promise.race([p.getByRole('button', { name: 'Stop camera' }).waitFor({ timeout: 20000 }), p.locator('[role=status]').filter({ hasText: /refused|No camera|camera/i }).waitFor({ timeout: 20000 })]).catch(() => {});
+    const st = await p.locator('[role=status]').textContent().catch(() => '');
+    const running = await p.getByRole('button', { name: 'Stop camera' }).count();
+    if (running) { await p.getByRole('button', { name: 'Stop camera' }).click(); check('WebKit: camera starts and stops', await p.evaluate(() => !document.querySelector('video')?.srcObject)); }
+    else check('WebKit without a camera: a clear message, upload suggested', /refused|No camera|does not give web pages access/.test(st) && /photo/.test(st) && !/secure https/.test(st), st);
   } else {
     await p.getByRole('button', { name: 'Stop camera' }).waitFor({ timeout: 20000 });
     await p.waitForTimeout(2000);
@@ -135,7 +143,7 @@ const dl = async (p, sel) => { const [d] = await Promise.all([p.waitForEvent('do
   check('upload still works', (await p.locator('[data-text]').textContent()) === QR_TEXT);
   await p.close();
 }
-if (!isFx) { // camera refused: says so
+if (!isFx && !isWk) { // camera refused: says so (Chromium only)
   const b2 = await chromium.launch(); const c2 = await b2.newContext(); const p = await c2.newPage();
   await p.goto(origin + '/tools/qr-barcodes-tools/qr-scanner', { waitUntil: 'networkidle' });
   await p.getByRole('button', { name: 'Scan with camera' }).click();
@@ -178,12 +186,14 @@ if (!isFx) { // camera refused: says so
   check('fade in 1 s, fade out 0.5 s: 3.4 s; silent at the edges, ~half at the fade midpoints, full between', Math.abs(s.length / R - 3.4) < 0.002 && env.start < 0.1 && env.half > 0.4 && env.half < 0.6 && env.afterIn > 0.97 && env.beforeOut > 0.97 && env.halfOut > 0.4 && env.halfOut < 0.6 && env.end < 0.1, JSON.stringify(Object.fromEntries(Object.entries(env).map(([k, v]) => [k, +v.toFixed(2)]))));
   await p.locator('#at-fade-in').fill('3'); await p.locator('#at-fade-out').fill('1');
   await p.getByRole('button', { name: 'Trim Audio' }).click();
-  check('fades longer than the part kept: refused, says why', /longer than the part kept/.test(await p.locator('[role=alert]:not(#__next-route-announcer__)').textContent({ timeout: 5000 }).catch(() => '')));
+  check('fades longer than the part kept: refused, says why', await p.locator('[role=alert]').filter({ hasText: /longer than the part kept/ }).waitFor({ timeout: 5000 }).then(() => true).catch(() => false));
   await p.locator('#at-fade-in').fill('0'); await p.locator('#at-fade-out').fill('0');
-  await p.evaluate(() => { document.querySelector('audio').currentTime = 2.5; });
-  await p.waitForTimeout(300);
-  await p.getByRole('button', { name: "Set to the player's position" }).first().click();
-  check('"Set to the player\'s position": start = 2.5', (await p.locator('#at-start').inputValue()) === '2.5');
+  if (await p.locator('audio').count()) {
+    await p.evaluate(() => { document.querySelector('audio').currentTime = 2.5; });
+    await p.waitForTimeout(300);
+    await p.getByRole('button', { name: "Set to the player's position" }).first().click();
+    check('"Set to the player\'s position": start = 2.5', (await p.locator('#at-start').inputValue()) === '2.5');
+  } else console.log('SKIP "Set to the player\'s position": this engine cannot play the file (no preview, said on the page)');
   await p.close();
 }
 console.log(fails ? `${fails} FAILED` : 'all passed', `(${engine.name()})`);

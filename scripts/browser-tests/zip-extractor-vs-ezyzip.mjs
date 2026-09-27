@@ -7,7 +7,7 @@
 // Usage: node scripts/browser-tests/zip-extractor-vs-ezyzip.mjs <our origin or _vercel_share URL> <file inside> <source dir> <archive parts...>
 //   [--mode=first|all] [--password=...] [--browser=firefox] [--ours-only | --theirs-only]
 //   <source dir> holds the archived files under the same relative paths (their SHA-256 is the reference).
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import { authorize } from './vercel-preview-auth.mjs';
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
@@ -16,7 +16,7 @@ import os from 'node:os';
 const flags = Object.fromEntries(process.argv.slice(2).filter((a) => a.startsWith('--')).map((a) => { const [k, v] = a.slice(2).split('='); return [k, v ?? true]; }));
 const [entry, inner, srcDir, ...parts] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const origin = new URL(entry).origin;
-const engine = flags.browser === 'firefox' ? firefox : chromium;
+const engine = { firefox, webkit }[flags.browser] || chromium;
 const mode = flags.mode || 'first';
 const sha = (f) => new Promise((ok) => { const h = createHash('sha256'); fs.createReadStream(f).on('data', (d) => h.update(d)).on('end', () => ok(h.digest('hex'))); });
 const base = inner.split('/').pop();

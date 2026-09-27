@@ -9,7 +9,7 @@
 // Then bad input (wrong check digits, lower case, non-ASCII) and, with --batch, 1000 EAN-13 in one ZIP.
 // Usage: node scripts/browser-tests/barcode-generator-vs-references.mjs <our origin> [--browser=firefox]
 //        [--sites=ours,bm,bq] [--only=ean13,qrcode] [--batch] [--out=dir]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -23,7 +23,7 @@ import { authorize } from './vercel-preview-auth.mjs';
 
 const arg = (k) => (process.argv.find((a) => a.startsWith(`--${k}=`)) || '').slice(k.length + 3);
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--'))).origin;
-const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
+const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const SITES = (arg('sites') || 'ours,bm,bq').split(',');
 const only = arg('only').split(',').filter(Boolean);
 const out = arg('out') || fs.mkdtempSync(path.join(os.tmpdir(), 'bcvs-'));

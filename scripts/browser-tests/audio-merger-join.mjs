@@ -7,7 +7,7 @@
 // Sources are pink noise + a tone (never silent), so any silence at a junction is the join's.
 // Usage: node scripts/browser-tests/audio-merger-join.mjs <origin> <ffmpeg> [--browser=firefox] [--only=opus,mp3]
 //        [--format=<value of the output select>] (the output-format choice, once it exists)
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -16,7 +16,7 @@ import path from 'node:path';
 const [entry, FF] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const origin = new URL(entry).origin;
 const arg = (k) => (process.argv.find((a) => a.startsWith(`--${k}=`)) || '').split('=')[1];
-const engine = arg('browser') === 'firefox' ? firefox : chromium;
+const engine = { firefox, webkit }[arg('browser')] || chromium;
 const only = arg('only') ? arg('only').split(',') : null;
 const FORMAT = arg('format');
 const ff = (args) => execFileSync(FF, ['-hide_banner', '-loglevel', 'error', ...args], { maxBuffer: 1 << 28, stdio: ['ignore', 'pipe', 'pipe'] });

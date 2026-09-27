@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const [entry, dir] = args; const origin = new URL(entry).origin;
-const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
+const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const mobile = process.argv.includes('--mobile');
 const b = await engine.launch(); const page = await (await b.newContext({ ...(mobile ? devices['Pixel 7'] : {}), acceptDownloads: true, permissions: engine === chromium ? ['clipboard-read', 'clipboard-write'] : [] })).newPage();
 if (entry.includes('_vercel_share')) await page.goto(entry);

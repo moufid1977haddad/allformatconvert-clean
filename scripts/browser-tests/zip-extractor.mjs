@@ -5,7 +5,7 @@
 // and at extraction time), split volumes (complete and incomplete), a non-archive, the ZIP streamed to disk
 // (Chromium's showSaveFilePicker, stubbed to capture the bytes), and cancel.
 // Usage: node scripts/browser-tests/zip-extractor.mjs <origin or _vercel_share URL> <fixtures dir> [--browser=firefox]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import { authorize } from './vercel-preview-auth.mjs';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -15,7 +15,7 @@ import path from 'node:path';
 import JSZip from 'jszip';
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const [entry, dir] = args; const origin = new URL(entry).origin;
-const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
+const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const b = await engine.launch();
 const ctx = await b.newContext({ acceptDownloads: true });
 await authorize(ctx, origin);

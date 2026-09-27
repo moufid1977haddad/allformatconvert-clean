@@ -3,7 +3,7 @@
 // visible browser window. improvement-17.mjs only dispatches a scripted ClipboardEvent (and cannot at all in Firefox).
 // Overwrites the clipboard's content. Windows only.
 // Usage: node scripts/browser-tests/qr-scanner-paste-real.mjs <origin> [--browser=firefox]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import QRCode from 'qrcode';
 import fs from 'node:fs';

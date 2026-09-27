@@ -3,14 +3,14 @@
 // own Download, each SHA-256 checked against the source; whether the tab survives and still answers; and what
 // "Download all as ZIP" says when the browser cannot stream a ZIP to disk.
 // Usage: node scripts/browser-tests/zip-extractor-huge.mjs <origin or _vercel_share URL> <archive> <source dir> [--browser=firefox]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import { authorize } from './vercel-preview-auth.mjs';
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const [entry, archive, srcDir] = args; const origin = new URL(entry).origin;
-const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
+const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const sha = (f) => new Promise((ok) => { const h = createHash('sha256'); fs.createReadStream(f).on('data', (d) => h.update(d)).on('end', () => ok(h.digest('hex'))); });
 const b = await engine.launch();
 const ctx = await b.newContext({ acceptDownloads: true });

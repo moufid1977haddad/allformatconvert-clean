@@ -1,9 +1,9 @@
 // Real pages, same inputs as given to convertcase.net and wordcounter.net (RAPPORT-licence-et-ameliorations.md §5).
 // Usage: node scripts/browser-tests/text-tools.mjs <origin or _vercel_share URL> [--browser=firefox]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 const entry = process.argv[2];
 const origin = new URL(entry).origin;
-const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
+const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const b = await engine.launch(); const page = await b.newPage();
 if (entry.includes('_vercel_share')) await page.goto(entry);
 let fails = 0;

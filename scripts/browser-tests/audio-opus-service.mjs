@@ -6,13 +6,13 @@
 // Needs a build made with a test service URL (never a real one, no env file involved):
 //   NEXT_PUBLIC_MEDIA_SERVICE_URL=https://media.test.invalid npm run build && npx next start -p 3100
 // Usage: node scripts/browser-tests/audio-opus-service.mjs <origin> [--browser=firefox]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--'))).origin;
-const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
+const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const SERVICE = 'https://media.test.invalid';
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 

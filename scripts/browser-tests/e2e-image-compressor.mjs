@@ -1,7 +1,7 @@
 // End-to-end: the real image-compressor page in a real browser (Worker + WASM encoders), several files at
 // once, every download reopened and measured against its original.
 // Usage: node scripts/browser-tests/e2e-image-compressor.mjs <site origin or _vercel_share URL> <file>... [--browser=firefox]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import sharp from 'sharp';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -10,7 +10,7 @@ import path from 'node:path';
 const args = process.argv.slice(2);
 const entry = args[0];
 const files = args.slice(1).filter((a) => !a.startsWith('--'));
-const engine = args.includes('--browser=firefox') ? firefox : chromium;
+const engine = args.includes('--browser=firefox') ? firefox : args.includes('--browser=webkit') ? webkit : chromium;
 const origin = new URL(entry).origin;
 const out = fs.mkdtempSync(path.join(os.tmpdir(), 'imgcomp-'));
 
