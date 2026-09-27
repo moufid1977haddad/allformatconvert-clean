@@ -3,6 +3,7 @@ import { Inter, Noto_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import NewVersionBanner from "./components/NewVersionBanner";
 import Script from "next/script";
 import { getToolCounts } from "@/lib/toolCounts";
 const inter = Inter({ subsets: ["latin"] });
@@ -62,6 +63,10 @@ export default function RootLayout({
             insertBefore/removeChild against a node GT already moved, crashing to the
             default Next.js error screen. This patch makes those two DOM ops no-op/append
             instead of throwing. */}
+        {/* A browser driven by a test robot (Playwright, Selenium, Puppeteer: navigator.webdriver) is marked, so
+            that the errors our own tests provoke are never written to tool_errors (docs/audit/RAPPORT-global-28-09.md, 5e).
+            A visitor's browser never has navigator.webdriver set: real errors are reported exactly as before. */}
+        <Script id="automation-marker" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: `try { if (navigator.webdriver) document.cookie = 'oct_automation=1; path=/; max-age=86400; SameSite=Lax'; } catch (e) {}` }} />
         <Script id="google-translate-dom-patch" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: `
           (function () {
             if (typeof Node !== 'function' || !Node.prototype) return;
@@ -107,6 +112,7 @@ export default function RootLayout({
             }, 'google_translate_element');
           }
         `}} />
+        <NewVersionBanner />
       </body>
     </html>
   );

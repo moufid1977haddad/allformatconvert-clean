@@ -165,7 +165,7 @@ export async function POST(request) {
       tool: 'contact',
       file: null,
       error: new Error(dbError.message || 'db_insert_failed'),
-      userAgent: request.headers.get('user-agent'),
+      userAgent: request.headers.get('user-agent'), headers: request.headers,
     }));
     return NextResponse.json({ error: 'Failed to save your message' }, { status: 500 });
   }

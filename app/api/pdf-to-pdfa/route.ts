@@ -89,7 +89,7 @@ async function convertPdfa(req: NextRequest, file: File, conformance: string, se
       tool: "pdf-to-pdfa",
       file,
       error: err,
-      userAgent: req.headers.get("user-agent"),
+      userAgent: req.headers.get("user-agent"), headers: req.headers,
     }));
     return NextResponse.json({ ok: false, error: "Could not reach the PDF/A service." }, { status: 502 });
   } finally {
@@ -104,7 +104,7 @@ async function convertPdfa(req: NextRequest, file: File, conformance: string, se
       tool: "pdf-to-pdfa",
       file,
       error: new Error(`service_error_${serviceResponse.status}`),
-      userAgent: req.headers.get("user-agent"),
+      userAgent: req.headers.get("user-agent"), headers: req.headers,
     }));
   }
 

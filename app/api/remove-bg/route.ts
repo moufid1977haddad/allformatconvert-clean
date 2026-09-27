@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
           tool: "background-remover",
           file: null,
           error: new Error("timeout"),
-          userAgent: req.headers.get("user-agent"),
+          userAgent: req.headers.get("user-agent"), headers: req.headers,
         }));
         return NextResponse.json({ error: "Background removal timed out. Please try again." }, { status: 504 });
       }
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
         tool: "background-remover",
         file: null,
         error: err,
-        userAgent: req.headers.get("user-agent"),
+        userAgent: req.headers.get("user-agent"), headers: req.headers,
       }));
       return NextResponse.json({ error: "Could not reach the background removal service." }, { status: 502 });
     } finally {
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
         tool: "background-remover",
         file: null,
         error: new Error(`service_error_${serviceResponse.status}`),
-        userAgent: req.headers.get("user-agent"),
+        userAgent: req.headers.get("user-agent"), headers: req.headers,
       }));
 
       if (serviceResponse.status === 429) {

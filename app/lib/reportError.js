@@ -11,6 +11,8 @@
 // browser label. reportToolError() must never throw and must never block
 // or slow down the caller.
 
+import { isChunkLoadError, announceNewVersion } from './chunkError';
+
 const REPORT_ENDPOINT = '/api/report-error';
 const MAX_MESSAGE_LENGTH = 300;
 
@@ -105,6 +107,11 @@ export function sanitizeErrorMessage(message, fileName) {
  */
 export function reportToolError({ tool, source = 'browser', file = null, error, detectedExt = null }) {
   try {
+    // A code file of an older version of the site could not be loaded: the page is out of date, not the
+    // tool broken -- offer a reload (NewVersionBanner) instead of filling tool_errors.
+    if (isChunkLoadError(error)) { announceNewVersion(); return; }
+    // A browser driven by a test robot never reports: our own tests must not fill tool_errors.
+    if (typeof navigator !== 'undefined' && navigator.webdriver) return;
     const message = (error && typeof error.message === 'string') ? error.message
       : (typeof error === 'string' ? error : '');
     const payload = {

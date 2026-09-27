@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { checkToolErrorRateLimit } from '@/lib/quota/toolErrorRateLimit';
-import { insertToolError } from '@/lib/reportError';
+import { insertToolError, isAutomatedCookie } from '@/lib/reportError';
 
 // sendBeacon's own payload ceiling is ~64KB; our real payloads are under
 // 500 bytes. 4KB is generous headroom while still rejecting anything that
@@ -71,7 +71,8 @@ export async function POST(request) {
   if (typeof errorMessage !== 'string' || errorMessage.length > 300) return new NextResponse(null, { status: 400 });
   if (browser !== undefined && (typeof browser !== 'string' || !BROWSER_RE.test(browser))) return new NextResponse(null, { status: 400 });
 
-  await insertToolError({
+  const written = await insertToolError({
+    automated: isAutomatedCookie(request.headers.get('cookie')),
     tool,
     source: 'browser',
     ext: ext || null,
@@ -82,5 +83,6 @@ export async function POST(request) {
     browser: browser || 'unknown',
   });
 
-  return new NextResponse(null, { status: 204 });
+  // Says whether a row was written (never what): lets a test prove it wrote nothing, without reading the table.
+  return new NextResponse(null, { status: 204, headers: { 'X-Tool-Error-Recorded': written ? 'yes' : 'no' } });
 }
