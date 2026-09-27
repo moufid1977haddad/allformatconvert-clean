@@ -45,6 +45,7 @@ async function ai(lines) {
   aiCalls++;
   const r = await fetch(`${origin}/api/ai`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt, tool: 'grammar-fixer' }) });
   const j = await r.json().catch(() => ({}));
+  if (r.status === 429) { aiCalls--; const e = new Error(`AI 429, Retry-After ${r.headers.get('retry-after')} s (${Number(r.headers.get('retry-after')) > 3600 ? 'daily' : 'hourly'} limit)`); e.limit = true; throw e; }
   if (!j.text) throw new Error(`AI ${r.status}: ${JSON.stringify(j).slice(0, 200)}`);
   const got = new Map();
   for (const line of j.text.split('\n')) { const m = /^\s*(\d+)[).]\s*(.*)$/.exec(line); if (m) got.set(Number(m[1]), m[2]); }
@@ -67,7 +68,9 @@ const summary = (rows) => rows.length ? { exact: rows.filter((r) => r.exact).len
 
 const langs = langsArg ? langsArg.split(',') : Object.keys(LT);
 const results = {};
+let stopped = null; // a 429 (hourly or daily limit) ends the run; finished languages are still written
 for (const lang of langs) {
+  if (stopped) break;
   const file = path.join(dir, `${lang}.jsonl`);
   if (!fs.existsSync(file)) { console.log(lang, 'no corpus'); continue; }
   const pairs = fs.readFileSync(file, 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
@@ -75,7 +78,8 @@ for (const lang of langs) {
   let unparsed = 0;
   for (const b of batches(lang, pairs)) {
     const srcs = b.map((p) => p.src);
-    const a = noAi ? null : await ai(srcs);
+    let a = null;
+    if (!noAi) try { a = await ai(srcs); } catch (e) { if (!e.limit) throw e; stopped = e.message; break; }
     const l = LT[lang] && !noLt ? await languageTool(srcs, LT[lang]) : null;
     b.forEach((p, i) => {
       if (a) { if (!a[i].parsed) unparsed++; oursRows.push(score(p.src, a[i].out, p.ref)); }
@@ -84,10 +88,11 @@ for (const lang of langs) {
     });
     if (!noLt) await new Promise((ok) => setTimeout(ok, 3500)); // LanguageTool's public API: 20 requests/minute
   }
+  if (stopped) { console.log(lang, 'incomplete, not written:', stopped); break; }
   results[lang] = { pairs: pairs.length, ours: summary(oursRows), languageTool: summary(ltRows), unparsedAiLines: unparsed, samples };
   console.log(lang, JSON.stringify({ ours: results[lang].ours, languageTool: results[lang].languageTool, unparsed }));
 }
-console.log('AI calls:', aiCalls);
+console.log('AI calls:', aiCalls, stopped ? `(stopped: ${stopped})` : '');
 const here = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1'));
 const tag = (process.argv.find((a) => a.startsWith('--tag=')) || '').slice(6);
-fs.writeFileSync(path.join(here, `results${tag ? '-' + tag : ''}${langsArg ? '-' + langsArg.replace(/,/g, '-') : ''}.json`), JSON.stringify(results, null, 1));
+fs.writeFileSync(path.join(process.env.BENCH_OUT || here, `results${tag ? '-' + tag : ''}${langsArg ? '-' + langsArg.replace(/,/g, '-') : ''}.json`), JSON.stringify(results, null, 1));
