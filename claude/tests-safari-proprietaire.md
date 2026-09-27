@@ -109,6 +109,7 @@ Un « RÉUSSI » exige que **le fichier produit s'ouvre et soit correct**, pas s
 - **Risque :** `WASM` `MÉM` `TÉLÉCH`. Moteur ffmpeg (~10 Mo) téléchargé au premier usage ; plafond mobile 100 Mo. La coupe s'aligne sur l'image-clé et **la page le dit**.
 - **Geste :** la **VIDÉO** > coupe 1 s au début > **Trim** > télécharge.
 - **Attendu :** une vidéo de ≈ 4 s (± 1-3 s, alignement annoncé) qui se lit.
+- **Depuis le 28/09 (après déploiement) :** refais-le en cochant **Precise cut** : un `.mp4` de **4 s exactement** qui commence à l'image choisie (réencodé dans le navigateur : note le temps que ça prend sur l'iPhone).
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
 #### 5. Voice Recorder **[S2]**
