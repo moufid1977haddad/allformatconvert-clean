@@ -60,7 +60,7 @@ const jobsPosted = () => serviceCalls.filter((c) => c === 'POST /v1/jobs').lengt
 
 for (const [tool, run] of [
   ['audio-booster', async (p) => { await p.locator('main select, select.w-full').first().selectOption('opus'); await p.getByRole('button', { name: 'Boost Audio' }).click(); await done(p); }],
-  ['audio-splitter', async (p) => { await p.locator('main select, select.w-full').first().selectOption('opus'); await p.waitForFunction(() => document.querySelector('input[type=range]')?.max === '3'); await p.getByRole('button', { name: /Split/ }).click(); await done(p, 1); }],
+  ['audio-splitter', async (p) => { await p.locator('main select, select.w-full').first().selectOption('opus'); await p.waitForFunction(() => document.querySelector('input[type=range]')?.max === '3.9'); await p.locator('#split-at').fill('3'); await p.getByRole('button', { name: /Split/ }).click(); await done(p, 1); }],
   ['audio-compressor', async (p) => { await p.getByRole('button', { name: '64k', exact: true }).click(); await p.locator('main select, select.w-full').first().selectOption('opus'); await p.getByRole('button', { name: /Compress/ }).click(); await done(p); }],
   ['audio-converter', async (p) => { await p.locator('main select, select.w-full').first().selectOption('opus'); await p.getByRole('button', { name: /Convert/ }).first().click(); await done(p); }],
 ]) {
