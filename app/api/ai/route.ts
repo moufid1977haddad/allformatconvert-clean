@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     // browser (lib/ai/toolPrompts.js explains why).
     const resolved = resolveTextTool(body);
     if (!resolved.ok) return NextResponse.json({ error: resolved.error }, { status: 400 });
-    const { system, temperature } = resolved;
+    const { system } = resolved;
     const { prompt, tool } = body;
     if (!prompt || typeof prompt !== "string") return NextResponse.json({ error: "No prompt provided" }, { status: 400 });
 
@@ -33,8 +33,6 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
           model: "gpt-4o-mini",
           max_tokens: 1000,
-          // Set per tool on the server only (grammar-fixer: 0); the browser cannot send it.
-          ...(temperature === undefined ? {} : { temperature }),
           messages: [
             { role: "system", content: system },
             { role: "user", content: prompt },
