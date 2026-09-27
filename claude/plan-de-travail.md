@@ -421,8 +421,7 @@ Et les deux outils de données : **`xml-to-json`** (`b77f988b`, guillemets écha
 - **Replis silencieux de `lib/quota/config.js` — 2 corrigés le 19 septembre, 8 restent (état réel lu, noms seulement).** `IP_RATE_LIMIT_PER_HOUR` / `_PER_DAY` : le code retombait sur 10/h et 30/jour (production : 30/h et 100/jour) ; **désormais une variable absente ou invalide fait échouer le build/démarrage** (`lib/quota/requiredEnv.js`, test `scripts/quota-tests/16-required-env.js`). **Les 8 autres constantes gardent leur repli.** État réel en production (`vercel env ls`, filtré sur les noms) : **présentes** `GLOBAL_SPEND_CAP_USD`, `USER_QUOTA_PDF_CONVERSIONS`, `USER_QUOTA_IMAGES`, `IP_RATE_LIMIT_PER_HOUR`, `IP_RATE_LIMIT_PER_DAY` (Production + Preview, **jamais Development**) ; **ABSENTES, donc tournant sur leur repli en production** : `TOOL_ERROR_RATE_LIMIT_PER_HOUR` (20), `TOOL_ERROR_RATE_LIMIT_PER_DAY` (100), `TOOL_ERROR_ALERT_THRESHOLD_PER_DAY` (10), `CONTACT_RATE_LIMIT_PER_HOUR` (5), `CONTACT_RATE_LIMIT_PER_DAY` (15). Ces 5 replis sont les valeurs voulues (justifiées dans les commentaires du fichier) : l'écart est de forme, pas de valeur. **Ordre obligatoire pour la suite (« B ») : créer les 5 variables dans Vercel D'ABORD, puis retirer les replis** — l'inverse casse le build. Détail et chiffrage : `RAPPORT-replis-quota.md`.
 - **Envisager la veille Serverless de `pdf-tools`** : le service est actif 24 h/24 alors que ses outils sont « Coming Soon » (même mécanisme que le détourage).
 - **Supprimer à la main** `Downloads\fidelite-01..06.pdf` (verrouillés par Chrome) — **toujours présents le 20/09**.
-- **Supprimer la variable `REMOVEBG_API_KEY`** de Vercel : plus aucun code ne l'utilise.
-- **Supprimer le sitemap en double dans Search Console** — garder **uniquement celui en `www`**.
+- ✅ **`REMOVEBG_API_KEY` n'existe plus dans Vercel — vérifié le 27/09 par les noms seulement** (`vercel env ls --project onlineconvertools`, sans lien local : 36 variables, aucune ne contient `REMOVEBG`). Rien à supprimer. Le code n'en dépend pas : `REMOVEBG_PER_IMAGE_DOLLARS` et `MAX_REMOVEBG_*` sont des constantes de `lib/quota/config.js` et `lib/quota/limits.js`, pas des variables d'environnement.
 - **Vérifier l'adresse de facturation des cinq fournisseurs** (Anthropic, Google Workspace, Railway, Cloudflare, OpenAI).
 - ✅ **DPA ConvertAPI — N'EST PLUS UN BLOQUANT DE LANCEMENT (corrigé le 22/09).** Le document légal officiel de ConvertAPI, lu directement (`https://www.convertapi.com/compliance/dpa.pdf`, « Privacy Policy and Data Processing Terms », 7 février 2025 — pas un résumé de seconde main), dit noir sur blanc que ses conditions **s'appliquent déjà, automatiquement, sans signature** : la protection RGPD est donc déjà en place aujourd'hui. `help.convertapi.com` reste injoignable depuis ce poste, mais `convertapi.com` répond. Un DPA individuel signé reste utile (traçabilité contractuelle formelle) mais n'a plus d'urgence de lancement. **Contact officiel confirmé dans le document lui-même : privacy@convertapi.com** (DPO ConvertAPI, UAB, Vilnius, Lituanie). **Courriel prêt à envoyer rédigé dans `RAPPORT-gotenberg-independance.md` §5** (à adapter avec le nom exact de l'entité cliente et l'email du compte avant envoi). **Étapes quand tu voudras le faire (~15 min) :** ① se connecter au tableau de bord ConvertAPI, vérifier le palier tarifaire (Startup/49 $ et au-dessus inclut « Signed NDA & DPA », non vérifié pour ce compte) ; ② chercher une section « Contracts »/« Legal » dans le tableau de bord (signalée par une source indirecte, à confirmer à l'écran) ; ③ à défaut, envoyer le courriel préparé à **privacy@convertapi.com** ; ④ conserver la copie signée ; ⑤ noter la date ici.
 - **Centraliser les notifications fournisseurs** vers `contact@onlineconvertools.com`.
@@ -442,7 +441,7 @@ Et les deux outils de données : **`xml-to-json`** (`b77f988b`, guillemets écha
 |---|---|
 | ✅ **Déclenché le 22/09 — le rapport Indexation a dépassé le 03/09, relevé au 17/09/2026** | **45 pages indexées sur 248, 203 non indexées.** Répartition des 203 : **192 « Détectée, actuellement non indexée »** — autorité de domaine, ne se corrige pas par du code, cohérent avec la position moyenne 74,7 déjà documentée ; **7 imputables au site, toutes relevées et diagnostiquées le 22/09 via Claude in Chrome** (voir ADMINISTRATIF) — aucune n'est cassée aujourd'hui : les 3 « 404 » étaient de vraies pannes avant le 31/08 (corrigées depuis par `lib/legacyRedirects.ts`), les 3 « Page avec redirection » sont des variantes non canoniques de l'accueil (comportement voulu), la 1 « Erreur liée aux redirections » (`/tools/media-tools`) fonctionne aujourd'hui en un seul saut propre (aléa de crawl probable, non reproduit). Aucune URL saine retirée du sitemap ni passée en `noindex`. |
 | ✅ **Relu le 25 septembre** | Pourcentage de stockage Vercel — attendu ~2,7 % si l'hypothèse du recalcul quotidien est juste, 77,9 % sinon. **Lu le 25/09/2026 (Usage, 30 derniers jours, 26 août-25 sept.) : « Deployment Storage » 1,83 Go / 10 Go = 18,3 %** (et « Functions Storage » 1,52 Go, affiché à part). **Ni l'un ni l'autre** : le chiffre a bien baissé (77,9 → 18,3 %), donc il n'était pas figé et l'allègement du 22/09 a porté ; mais pas jusqu'aux ~2,7 % projetés, qui supposaient 3 déploiements seulement — des déploiements se sont ajoutés depuis (préversions et production des 23-25/09). Aucune action prise, conformément à la consigne. |
-| **Le 27 de chaque mois** | Renouvellement Anthropic Pro — CA$ 32,19 |
+| **Le 24 de chaque mois** (prochain : **24 octobre 2026**) | Renouvellement Anthropic **Max** — passage du forfait Pro au forfait Max le 24/09/2026 (montant à relever sur la facture ; l'ancien Pro coûtait CA$ 32,19) |
 | **6 juin 2027** | Renouvellement du domaine chez Cloudflare Registrar — US$ 10,98/an. **Si le domaine tombe, tout tombe.** |
 
 ## Déclenchés par le lancement
@@ -454,7 +453,7 @@ Et les deux outils de données : **`xml-to-json`** (`b77f988b`, guillemets écha
 | **Juste APRÈS** | **Décider de la direction : référencement de niche ou B2B**, sur les données d'usage réel |
 | **Juste APRÈS** | **Vérifier les références croisées Gotenberg** (`npx @railway/cli`, filtre noms seulement) · **Corriger les 8 replis restants (« B »)** : créer d'abord les 5 variables absentes dans Vercel |
 | **Juste APRÈS** | **Vague 5 de l'audit** · **les deux réserves du réviseur** (IP falsifiable, compensation non atomique) · **purge de `tool_errors`** au-delà de 90 jours |
-| **AVANT (décision du 20/09)** | ~~D8~~ ✅ fait le 21/09 (voir 2 bis) · 🔴 **signer le DPA ConvertAPI — RENDU PLUS URGENT le 22/09** : les `.docx` et les PDF jusqu'à 100 Mo transitent maintenant par ConvertAPI (avant D8 : plafonné à 25 Mo puis 4,5 Mo, exposition beaucoup plus faible) · **trancher la saturation (dimensionnement du service ffmpeg et de Gotenberg) avant Product Hunt** · ~~décider `API_TIMEOUT` de Gotenberg~~ ✅ fait le 22/09 (240 s) · **décider du sort de `gotenberg-fonts`** (voir 2 bis, coût réel + recommandation) |
+| **AVANT (décision du 20/09)** | ~~D8~~ ✅ fait le 21/09 (voir 2 bis) · ~~signer le DPA ConvertAPI — « rendu plus urgent » (22/09, 21 h 29)~~ **✅ n'est pas un bloquant — tranché le 27/09** : ses conditions de traitement s'appliquent déjà sans signature (document légal relu en direct le 27/09, version du 07/02/2025 : *« unless the individual Data Processing Agreement is signed the terms of this Privacy Policy and Data Processing Terms will apply to all our processing »*). L'exposition a bien grandi depuis D8 (`.docx` et PDF jusqu'à 100 Mo par ConvertAPI) mais cela ne change pas le cadre légal ; un DPA signé reste un plus de traçabilité, **facultatif** (voir ADMINISTRATIF) · **trancher la saturation (dimensionnement du service ffmpeg et de Gotenberg) avant Product Hunt** · ~~décider `API_TIMEOUT` de Gotenberg~~ ✅ fait le 22/09 (240 s) · **décider du sort de `gotenberg-fonts`** (voir 2 bis, coût réel + recommandation) |
 
 ## Déclenchés par le trafic
 
@@ -523,6 +522,7 @@ Et les deux outils de données : **`xml-to-json`** (`b77f988b`, guillemets écha
 
 | Chantier | Preuve |
 |---|---|
+| **Sitemap Search Console — tâche retirée le 27/09, NE PLUS JAMAIS LA REPOSER** | Le propriétaire a vérifié plusieurs fois : **il n'existe qu'un seul sitemap dans Search Console, celui en `www` (240 URL)**. La tâche « supprimer le sitemap en double » reposait sur un doublon qui n'existe pas. |
 | **Outils mis en avant : 10 résultats faux silencieux (22/09)** | 36 outils ouverts avec de vrais fichiers en production ; 10 corrigés (`30235fe7`, `8b5d5645`, `609ba261`, `46306611`, `bf533569`), tests unitaires sur les entrées fautives, `verify-fixes.mjs` 16/16 sur préversion puis 16/16 en production (`dpl_BXrZoKXq`, 22/09). Écarts de qualité/couverture : chiffrés, en attente (bloquant 5). |
 | **Promesses de fidélité Office → PDF** | *« professional-quality »* retiré des **5 outils**, remplacé par des formulations adossées à des mesures écrites ; `<meta description>` corrigées ; substitution de police divulguée sur `ppt-to-pdf`. **Vérifié sur le HTML servi en production.** Corpus reproductible versionné. |
 | **Gras Excel (D1)** | Cause réelle identifiée (polices `.xlsx` sans nom), `lib/xlsxDefaultFont.js` + test, **Carlito-Bold en production**, au niveau des deux concurrents. |
@@ -692,6 +692,32 @@ Get-Content .env.local | ForEach-Object {
 ---
 
 # CRITÈRE DE LANCEMENT
+
+## 🏁 LIGNE D'ARRIVÉE — tout ce qui reste avant le lancement (établi le 27/09)
+
+**Ce que seul le propriétaire peut faire** (durées estimées, pas mesurées)
+
+| # | Quoi | Durée |
+|---|---|---|
+| P1 | **Passe Safari réelle** (iPhone puis MacBook) avec `tests-safari-proprietaire.md` mis à jour le 27/09 — bloquant 9, dont les retests S1-S5 | ≈ 3 h 30 (moitié la plus risquée : ≈ 1 h 45) |
+| P2 | **Tests manuels du bloquant 11** (`tests-manuels-proprietaire.md`) + contrôles de la vague 1 (5 outils + 2 outils de données) | ≈ 2 h |
+| P3 | **Trancher la saturation** sur la proposition chiffrée de Claude (`RAPPORT-seance-27-09.md` §4), puis donner l'accord pour le test de charge contre la production | 15 min + 1 h de présence pendant le test |
+| P4 | **Trancher la limite de 20 conversions/heure/connexion** sur la comparaison que Claude prépare (C4) | 10 min |
+| P5 | **Galerie Product Hunt** refaite, juste avant, en dernier | ≈ 2 h |
+| P6 | Décisions sur ce que P1/P2 feront remonter (priorité de chaque défaut trouvé) | ≈ 30 min |
+
+**Ce que Claude fait**
+
+| # | Quoi | Durée |
+|---|---|---|
+| C1 | Corriger les défauts que P1 (Safari) et P2 feront remonter, puis les retester | 2 à 8 h selon ce qui remonte (inconnu) |
+| C2 | **Test de charge** du service ffmpeg et de Gotenberg selon la méthode acceptée (P3), puis dimensionnement (Railway par la CLI/API) et retest des outils | ≈ 3 h |
+| C3 | **Gotenberg à 3 réplicas plusieurs jours avant**, laisser stabiliser, retester les 5 outils (déclencheur « Plusieurs jours AVANT ») | ≈ 1 h |
+| C4 | Limite de 20 conversions/h : relever les limites réelles des concurrents pour un lot de fichiers, proposer une valeur (déjà noté ci-dessous) | ≈ 1 h |
+| C5 | **Audit des outils qui joignent, coupent ou copient sans réencoder** (noté ci-dessous) : recensement dans le code, mesure de chacun dans les deux navigateurs, correctifs | 4 à 8 h |
+| C6 | Correcteur de grammaire hors anglais : mesuré le 27/09 (`RAPPORT-seance-27-09.md` §3) ; si une langue est sous LanguageTool, appliquer la solution que le propriétaire aura acceptée | selon décision |
+
+**Ne sont pas des bloquants** (pour éviter qu'ils le redeviennent) : DPA ConvertAPI signé (facultatif, conditions déjà applicables), sitemap Search Console (un seul, en `www`), D7/D9 (après le lancement), `REMOVEBG_API_KEY` (n'existe plus).
 
 **Bloquants avant le lancement : 9 (Safari — macOS mesuré, iPhone et retest des correctifs à faire par le propriétaire) ; ~~D8 (plafond de ≈ 4,5 Mo)~~ ✅ fait le 21/09, **en production et vérifié** (pptx 99 Mio en 53,7 s sur www ; rapport) ; la saturation à trancher avant Product Hunt ; ~~le DPA ConvertAPI~~ ✅ n'est plus un bloquant (22/09 — ses conditions s'appliquent déjà sans signature, voir 2 bis).** Railway Gotenberg à 3 réplicas, et la galerie Product Hunt.
 
