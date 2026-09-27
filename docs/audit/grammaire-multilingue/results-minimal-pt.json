@@ -1,0 +1,14 @@
+{
+ "pt": {
+  "pairs": 40,
+  "ours": {
+   "exact": 31,
+   "gain": 0.803,
+   "medianGain": 1,
+   "worse": 0,
+   "unchanged": 6
+  },
+  "languageTool": null,
+  "unparsedAiLines": 0
+ }
+}

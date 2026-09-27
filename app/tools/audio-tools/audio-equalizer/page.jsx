@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { decodeAnyAudio } from '../../../lib/decodeAudio';
 import { AUDIO_ACCEPT } from '../../../lib/mediaSupport';
 
 export default function AudioEqualizerPage() {
@@ -100,9 +101,8 @@ export default function AudioEqualizerPage() {
     setError('');
     try {
       if (!decodedBufferRef.current) {
-        const arrayBuffer = await file.arrayBuffer();
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        decodedBufferRef.current = await ctx.decodeAudioData(arrayBuffer);
+        decodedBufferRef.current = await decodeAnyAudio(file, ctx); // ffmpeg.wasm when the browser cannot decode the format
         ctx.close();
       }
       const original = decodedBufferRef.current;
@@ -135,7 +135,7 @@ export default function AudioEqualizerPage() {
             {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-400 text-sm">Click to upload an audio file</p>}
           </div>
           <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
-          {audioUrl && <audio ref={audioElRef} src={audioUrl} controls onPlay={setupEQ} className="w-full" />}
+          {audioUrl && <audio ref={audioElRef} src={audioUrl} controls onPlay={setupEQ} onError={() => setError('This browser cannot play this format, so there is no live preview; "Export as WAV" still applies the equalizer to the whole file.')} className="w-full" />}
           <div className="grid grid-cols-3 gap-4">
             {[['bass', 'Bass', 200], ['mid', 'Mid', 1000], ['treble', 'Treble', 3000]].map(([key, label]) => (
               <div key={key} className="text-center">
@@ -170,7 +170,7 @@ export default function AudioEqualizerPage() {
           { q: "Can I download the equalized audio file?", a: "Yes — click \"Export as WAV\" to render the audio through your current Bass/Mid/Treble settings and get a downloadable WAV file, independent of what's currently playing." },
           { q: "Can I save my EQ settings as a preset?", a: "Not currently — each adjustment only applies to the current session; there's no saved-preset feature." },
           { q: "What format is the exported file?", a: "Always WAV, regardless of the format you uploaded." },
-          { q: "What audio formats can I upload?", a: "Any format your browser can play, such as MP3, WAV, OGG, or FLAC." },
+          { q: "What audio formats can I upload?", a: "Any common audio format: MP3, WAV, OGG, FLAC, M4A, and also WMA, AC3 or AMR — those cannot be previewed live in a browser, but \"Export as WAV\" decodes them with ffmpeg.wasm and applies the equalizer." },
           { q: "Is my file uploaded anywhere?", a: "No. Everything happens locally in your browser via the Web Audio API — your file is never uploaded to a server." }
         ]}
         tips={[

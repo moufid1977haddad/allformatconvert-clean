@@ -427,7 +427,7 @@ export default function Home() {
               }}>Instantly. Free.</span>
             </h1>
             <p style={{ fontSize:'18px', color: dark ? '#94a3b8' : '#1e293b', lineHeight:'1.7', marginBottom:'20px', maxWidth:'480px' }}>
-              The fastest way to convert, compress, and transform your files — {totalTools} tools, zero installation, completely free.
+              Convert, compress, and transform your files — {totalTools} tools, zero installation, completely free.
             </p>
             <div style={{
               display:'flex', alignItems:'flex-start', gap:'8px', maxWidth:'480px', marginBottom:'24px',

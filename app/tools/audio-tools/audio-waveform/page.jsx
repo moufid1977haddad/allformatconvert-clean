@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { decodeAnyAudio } from '../../../lib/decodeAudio';
 import { AUDIO_ACCEPT, checkedDataURL } from '../../../lib/mediaSupport';
 
 const MIN_ZOOM = 1;
@@ -24,9 +25,8 @@ export default function AudioWaveformPage() {
     setAudioUrl(URL.createObjectURL(f));
     setError('');
     try {
-      const arrayBuffer = await f.arrayBuffer();
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+      const audioBuffer = await decodeAnyAudio(f, audioCtx); // ffmpeg.wasm when the browser cannot decode the format
       audioCtx.close();
       audioBufferRef.current = audioBuffer;
       setView({ zoom: 1, start: 0 });
@@ -182,7 +182,7 @@ export default function AudioWaveformPage() {
         faqs={[
           { q: "Can I zoom or pan the waveform?", a: "Yes — scroll over the canvas to zoom in or out (centered on your cursor), and click-and-drag to pan across the waveform. Use \"Reset Zoom\" to return to the full view." },
           { q: "Can I export or download the waveform image?", a: "Yes — click \"Download PNG\" to save the currently visible waveform (including your current zoom/pan) as a PNG image." },
-          { q: "What audio formats are supported?", a: "Any format your browser's Web Audio API can decode, such as MP3, WAV, FLAC, or OGG." },
+          { q: "What audio formats are supported?", a: "MP3, WAV, FLAC, OGG, M4A and the others your browser decodes directly; formats it cannot decode (WMA, AC3, AMR…) are decoded in your browser by ffmpeg.wasm first. Nothing is uploaded." },
           { q: "Is my file uploaded anywhere?", a: "No. Decoding and rendering happen entirely in your browser — your file is never uploaded to a server." }
         ]}
         tips={[

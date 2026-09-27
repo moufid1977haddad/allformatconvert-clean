@@ -1,6 +1,6 @@
 // Real measurements of the ffmpeg.wasm video-trimmer in Chromium and Firefox.
 // Usage: node scripts/browser-tests/measure-video-trimmer.mjs <baseUrl> <dir with s30.mp4 clip.mov surf.mp4 fake.mp4 big.mp4>
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 

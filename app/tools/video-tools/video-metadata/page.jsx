@@ -1,90 +1,63 @@
-﻿'use client';
-import { useState, useRef, useEffect } from 'react';
+'use client';
+import { useState, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import MediaInfo from '../../../components/MediaInfo';
 import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
-export default function VideoMetadataPage() {
-  const [metadata, setMetadata] = useState(null);
-  const [file, setFile] = useState(null);
-  const [error, setError] = useState('');
-  const videoRef = useRef();
-  const inputRef = useRef();
 
+// 28/09/2026: the page used to list only name, size, MIME type, duration, width and height from the browser's
+// player, and nothing but an error for a format the player cannot read (AVI, WMV, MKV in Safari…). The full
+// technical report now comes from ffprobe in the browser (MediaInfo): codecs, bitrates, frame rate, pixel format,
+// color, rotation, audio tracks, subtitles, chapters, tags -- what the reference (metadata2go.com) shows after
+// uploading the file, here without uploading it and without its 75 MB cap.
+export default function VideoMetadataPage() {
+  const [file, setFile] = useState(null);
+  const [videoUrl, setVideoUrl] = useState(null);
+  const [inputEl, setInputEl] = useState(null);
+
+  useEffect(() => () => { if (videoUrl) URL.revokeObjectURL(videoUrl); }, [videoUrl]);
   const handleFile = (e) => {
     const f = e.target.files[0];
-    if (!f) return;
     e.target.value = '';
+    if (!f) return;
     setFile(f);
-    setMetadata(null);
-    setError('');
-    const url = URL.createObjectURL(f);
-    const video = document.createElement('video');
-    video.onloadedmetadata = () => {
-      setMetadata({
-        name: f.name,
-        size: (f.size / (1024*1024)).toFixed(2) + ' MB',
-        type: f.type,
-        duration: Math.floor(video.duration / 60) + ':' + Math.floor(video.duration % 60).toString().padStart(2,'0'),
-        width: video.videoWidth + 'px',
-        height: video.videoHeight + 'px',
-        lastModified: new Date(f.lastModified).toLocaleString(),
-      });
-    };
-    video.onerror = () => setError('Failed to read video metadata. The file may be corrupt or in an unsupported format.');
-    video.src = url;
+    setVideoUrl(URL.createObjectURL(f));
   };
-
-  useEffect(() => {
-    // videoRef.current is only guaranteed to exist after this render commits
-    // (the <video> element only mounts once `file` is set), so the src must
-    // be assigned here rather than inline in handleFile — otherwise the very
-    // first file selection silently fails to load since the ref is still null.
-    if (file && videoRef.current) videoRef.current.src = URL.createObjectURL(file);
-  }, [file]);
 
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Video Metadata</h1>
-        <p className="text-neutral-500 text-center mb-8">View video metadata and information</p>
+        <p className="text-neutral-500 text-center mb-8">Codecs, bitrate, frame rate, resolution, audio tracks and tags of any video — read in your browser, nothing uploaded</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
+          <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputEl && inputEl.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
-            <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />
+            <input ref={setInputEl} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />
           </div>
-          {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" />}
-          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {metadata && (
-            <div className="space-y-2">
-              {Object.entries(metadata).map(([k, v]) => (
-                <div key={k} className="flex justify-between bg-neutral-50 rounded-lg border border-neutral-200 p-3">
-                  <span className="text-neutral-500 capitalize">{k.replace(/([A-Z])/g,' $1')}</span>
-                  <span className="text-indigo-400 font-mono">{v}</span>
-                </div>
-              ))}
-            </div>
-          )}
+          {videoUrl && <video src={videoUrl} controls playsInline className="w-full rounded-xl bg-neutral-800" />}
+          <MediaInfo file={file} />
         </div>
       </div>
       <SeoContent
         title="Video Metadata"
-        description="Video Metadata reads a video file's basic properties — name, size, type, duration, resolution, and last-modified date — directly in your browser using the native HTML5 video element. Note: it doesn't extract codec, bitrate, or frame rate information."
+        description="Video Metadata shows the full technical report of a video file — container, duration, overall bitrate, and for each stream the codec and profile, resolution, display aspect, frame rate, pixel format, color, rotation, bitrate, audio sample rate and channels, subtitle and audio languages — plus tags and chapters, read by ffprobe running in your browser. Nothing is uploaded, and the file is read from your disk in pieces, so its size does not matter. The report can be copied or downloaded as JSON."
         howTo={[
-          "Click the upload area and select a video file.",
-          "The video loads into the player and its metadata is read automatically.",
-          "Review the properties listed below the player.",
-          "Upload a different file at any time to see its metadata instead."
+          "Click the upload area and select a video file (MP4, MOV, MKV, WebM, AVI, WMV, FLV, MPEG, TS and more).",
+          "The report appears in a few seconds (the first time also loads the ~10 MB reading engine).",
+          "Read the general information, then each stream: video, audio tracks, subtitles.",
+          "Copy or download the full report as JSON if you need every field."
         ]}
         faqs={[
-          { q: "What information does it show?", a: "File name, size, MIME type, duration, width, height, and last-modified date." },
-          { q: "Does it show codec, bitrate, or frame rate?", a: "Not currently — only the properties listed above are extracted." },
-          { q: "Can I download a metadata report?", a: "Not currently — the information is displayed on the page only, with no export button." },
-          { q: "Is my file uploaded anywhere?", a: "No, metadata is read entirely in your browser via the File and video APIs." }
+          { q: "What information does it show?", a: "Container, duration and overall bitrate; for each video stream the codec, profile, resolution, display aspect, frame rate, pixel format, color and rotation; for each audio track the codec, sample rate, channels and language; subtitle tracks; tags (title, creation date, encoder…) and chapters." },
+          { q: "What video formats are supported?", a: "Everything ffmpeg can read, including formats your browser cannot play (AVI, WMV, FLV…): for those there is no preview player, but the report is complete." },
+          { q: "Can I download a metadata report?", a: "Yes: copy it or download it as a JSON file — ffprobe's complete output, every field included." },
+          { q: "Is there a size limit?", a: "No: the file is read from your disk in pieces, never copied whole into memory." },
+          { q: "Is my file uploaded anywhere?", a: "No. ffprobe (part of ffmpeg, compiled to WebAssembly) runs in your browser; your file never leaves your device." }
         ]}
         tips={[
-          "Use the duration and resolution fields to quickly confirm you have the right video file before further editing.",
-          "The \"type\" field shows your browser's detected MIME type, which can help spot mislabeled file extensions.",
-          "For deeper technical details like codec or bitrate, you'll need a dedicated media-inspection tool.",
-          "Check the file size here before uploading elsewhere if a platform has strict size limits."
+          "“Rotation” explains why a phone video plays sideways in some players: the picture is stored landscape with a rotation flag.",
+          "Compare the overall bitrate of two versions of a video to see which one kept more quality.",
+          "The frame rate and pixel format tell you whether a video will play smoothly on older devices (e.g. 60 fps or 10-bit HDR).",
+          "Download the JSON report to keep a record of a file's exact technical details."
         ]}
       />
     </div>

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Video Metadata — Read a Video File's Basic Properties Online" },
-  description: "Video Metadata reads a video file's basic properties — name, size, type, duration, resolution, and date — directly in your browser.",
+  description: "Video Metadata shows a video's codecs, bitrate, frame rate, resolution, rotation, audio tracks, subtitles and tags — read in your browser, nothing uploaded.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-metadata" },
   openGraph: {
     title: "Video Metadata — Read a Video File's Basic Properties Online",
-    description: "Video Metadata reads a video file's basic properties — name, size, type, duration, resolution, and date — directly in your browser.",
+    description: "Video Metadata shows a video's codecs, bitrate, frame rate, resolution, rotation, audio tracks, subtitles and tags — read in your browser, nothing uploaded.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-metadata",
   },
 };

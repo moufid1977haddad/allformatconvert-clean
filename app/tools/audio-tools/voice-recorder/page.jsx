@@ -18,6 +18,12 @@ export default function VoiceRecorderPage() {
   const [recExt, setRecExt] = useState('webm');
 
   const start = async () => {
+    // Say what is really wrong (28/09/2026: a browser without recording support was told "Microphone access denied:
+    // undefined is not an object…").
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      setError(window.isSecureContext ? 'This browser cannot record audio. Please use a current Safari, Chrome, Edge or Firefox.' : 'Recording needs a secure (https) page.');
+      return;
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorder.current = new MediaRecorder(stream);
@@ -39,7 +45,9 @@ export default function VoiceRecorderPage() {
       setWavUrl(null);
       setError('');
     } catch(e) {
-      setError('Microphone access denied: ' + e.message);
+      setError(e && e.name === 'NotAllowedError' ? 'Microphone access was refused. Allow the microphone for this site in your browser settings, then try again.'
+        : e && e.name === 'NotFoundError' ? 'No microphone was found on this device.'
+        : 'The microphone could not be started: ' + ((e && e.message) || e));
     }
   };
 
@@ -129,7 +137,7 @@ export default function VoiceRecorderPage() {
             </svg>
           </div>
           {recording && <p className="text-red-500 font-medium animate-pulse">Recording...</p>}
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
           <div className="flex gap-3 justify-center">
             {!recording ? (
               <button onClick={start} className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-6 py-3 font-semibold transition">Start Recording</button>

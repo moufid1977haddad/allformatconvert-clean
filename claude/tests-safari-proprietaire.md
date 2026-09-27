@@ -1,28 +1,27 @@
 # TESTS SAFARI — feuille du propriétaire (bloquant 9)
 
-> **Rôle de ce document :** feuille opérationnelle du **bloquant 9**, comme `tests-manuels-proprietaire.md` l'est pour le bloquant 11. **Tu es le seul à pouvoir la remplir** : ni Claude, ni WebKit local, ni un service de test ne remplacent un vrai Safari. Les verdicts se reportent dans `plan-de-travail.md` ; **ce qui échoue remonte dans le bloquant 9, jamais dans « CLOS »**.
+> **Rôle de ce document :** feuille opérationnelle du **bloquant 9**, comme `tests-manuels-proprietaire.md` l'est pour le bloquant 11. **Tu es le seul à pouvoir la remplir** : ni Claude, ni le WebKit de Playwright (il n'a même pas `OffscreenCanvas`), ni un service de test ne remplacent un vrai Safari. Les verdicts se reportent dans `plan-de-travail.md` ; **ce qui échoue remonte dans le bloquant 9, jamais dans « CLOS »**.
 >
-> **Préparée le 19 septembre 2026 à partir de la lecture du code.** Rien ici n'a été exécuté dans Safari. Les mentions « suspect » sont des **hypothèses tirées du code, à confirmer ou infirmer par toi** — pas des constats.
+> **Mise à jour du 27 septembre 2026** pour la passe du 28/09 : la feuille du 19/09 couvrait 20 outils ; depuis, **31 outils ont été créés ou modifiés** (relevé dans l'historique `git log --since=2026-09-19 -- app/tools`), dont les correctifs S1 à S5 issus de la mesure Safari 17.6 du 19/09. Cette version couvre **29 outils**, classés par **risque Safari lu dans le code** (fonctions utilisées : Web Worker, WebAssembly, OffscreenCanvas, caméra, presse-papiers, envoi par morceaux, formats audio). **Rien ici n'a été exécuté dans un vrai Safari.** Les mentions « risque » sont des hypothèses tirées du code, à confirmer ou infirmer par toi.
 
 ---
 
-## 0. AVANT DE COMMENCER (10 min)
+## 0. AVANT DE COMMENCER (15 min)
 
-**Durée honnête : ~2 h au total, en deux séances.**
+**Durée honnête : ≈ 3 h 45 au total** (estimation, pas mesure), en quatre séances — **+ ≈ 15 min depuis le 28/09 pour le n° 30** (les 5 outils MediaRecorder, en séance B/D). **Avant de commencer, lis le §8** : ce que la passe préalable WebKit du 28/09 a déjà montré, et ce qui reste à regarder sur ton Safari.
 
 | Séance | Contenu | Durée |
 |---|---|---|
-| **A — iPhone, outils 1 à 10** | les 10 plus risqués | **35-45 min** |
-| **B — iPhone, outils 11 à 20** | le reste | **25-35 min** |
-| **C — MacBook, outils 1 à 10** | les 10 plus risqués | **20-25 min** |
-| **D — MacBook, outils 11 à 20** | le reste | **15-20 min** |
+| **A — iPhone, outils 1 à 15** | la moitié la plus risquée | **≈ 75 min** |
+| **C — MacBook, outils 1 à 15** | la même moitié | **≈ 40 min** |
+| **B — iPhone, outils 16 à 29** | le reste | **≈ 50 min** |
+| **D — MacBook, outils 16 à 29** | le reste | **≈ 25 min** |
 
-**Si tu t'arrêtes à la moitié : fais A puis C.** Ils couvrent les 10 outils les plus risqués sur les deux appareils. B et D sont du confort.
+**Si tu t'arrêtes à la moitié : fais A puis C (≈ 2 h avec la préparation).** Ils couvrent les 15 outils les plus risqués sur les deux appareils, dont tous les retests S1-S5.
 
 ### Ce qu'il te faut
-- L'iPhone, en **Safari** (pas Chrome iOS : Chrome sur iPhone utilise le moteur de Safari mais ce n'est pas ce qu'on teste). **Pas en navigation privée.**
-- Le MacBook, en **Safari**.
-- **Charge > 30 %**, Wi-Fi. **Mode économie d'énergie désactivé** (Réglages > Batterie) — il bride le processeur et fausserait les temps.
+- L'iPhone, en **Safari** (pas Chrome iOS). **Pas en navigation privée.** Le MacBook, en **Safari**.
+- **Charge > 30 %**, Wi-Fi, **mode économie d'énergie désactivé** (il bride le processeur).
 - Une app de notes ouverte à côté (voir §5).
 
 ### Note ta version (une seule fois)
@@ -31,244 +30,280 @@
 
 ### Les fichiers d'essai
 
-**Fournis dans le dépôt** — dossier `docs/audit/fixtures-safari/` (régénérable : `node scripts/generate-safari-fixtures.js`) :
+**Fournis dans le dépôt** — dossier `docs/audit/fixtures-safari/` (régénérables : `node scripts/generate-safari-fixtures.js`, puis `node scripts/browser-tests/archive-fixtures.mjs <dossier>` et `node scripts/generate-safari-fixtures-2.mjs <dossier> <ffmpeg>`) :
 
-| Fichier | Taille | Sert pour |
-|---|---|---|
-| `safari-A-3pages.pdf` | 1,4 Ko | Merge PDF |
-| `safari-B-3pages.pdf` | 1,4 Ko | Merge PDF |
-| `safari-30pages.pdf` | 8 Ko | Split PDF, Compress PDF |
-| `safari-test.zip` | 0,5 Ko | (non utilisé dans les 20 ; réserve) |
-| `safari-qr.png` | 2,5 Ko | QR Scanner — contient le texte `SAFARI-QR-OK-2026` |
+| Fichier | Taille | Sert pour | Contenu attendu |
+|---|---|---|---|
+| `safari-A-3pages.pdf`, `safari-B-3pages.pdf` | 1,4 Ko | 27 Merge PDF | « FICHIER A » / « FICHIER B », 3 pages chacun |
+| `safari-30pages.pdf` | 8 Ko | 18 Split PDF, 19 Compress PDF | 30 pages |
+| `safari-qr.png` | 2,5 Ko | 9 QR Scanner | texte `SAFARI-QR-OK-2026` |
+| `safari-winrar.rar` | 5,6 Ko | 1 Zip Extractor | fait par WinRAR, **noms de fichiers en chinois** |
+| `safari-rar-password-1234.rar` | 0,4 Ko | 1 Zip Extractor | mot de passe **`1234`** (même la liste est chiffrée) |
+| `safari-7z-password-data-only.7z` | 0,2 Ko | 1 Zip Extractor | mot de passe **`data-only`**, contient `secret.txt` = « top secret » |
+| `safari-split.part1.rar` / `.part2.rar` / `.part3.rar` | 2,5 Mo | 1 Zip Extractor | RAR en 3 volumes, mot de passe **`mot de passe`** |
+| `safari-tree.zip` | 0,3 Mo | 1 Zip Extractor | une arborescence de dossiers |
+| `safari-tone-A-5s.flac`, `safari-tone-B-3s.mp3`, `safari-tone-C-4s.wav` | 0,1-0,7 Mo | 6 Audio Merger | trois sons purs : grave 5 s, moyen 3 s, aigu 4 s |
+| `safari-tone-12s.wav` | 2 Mo | 12 Audio Trimmer | un son continu de 12 s |
+| `safari-small-800x600.jpg` | 38 Ko | 11 Image Upscaler | mire de test 800×600 (0,48 Mpx) |
+| `docs/audit/fixtures-fidelite/fidelite-01.docx` | 40 Ko | 17 Word to PDF | document Word avec tableau |
 
-**Comment les avoir sur l'iPhone :** copie le dossier vers **iCloud Drive** depuis le PC (ou envoie-le-toi par e-mail), puis ouvre-le dans l'app **Fichiers** de l'iPhone. Sur le MacBook, même chose (ou clone le dépôt `moufid1977haddad/allformatconvert-clean`, connecté à ton compte GitHub).
+**Comment les avoir sur l'iPhone :** copie le dossier `fixtures-safari` (et `fidelite-01.docx`) vers **iCloud Drive** depuis le PC, puis ouvre-le dans l'app **Fichiers**. Sur le MacBook, même chose.
 
-**À produire toi-même, sur l'iPhone (2 min) — c'est aussi ce que ferait un vrai visiteur :**
+**À produire toi-même sur l'iPhone (3 min) — c'est aussi ce que ferait un vrai visiteur :**
 
 | Fichier | Comment | Servira pour |
 |---|---|---|
-| **VIDÉO** de 5 s | App **Appareil photo** > Vidéo > filme 5 secondes, n'importe quoi | outils 1, 2, 3, 8, 9 |
-| **PHOTO** normale | Prends une photo (12 Mpx par défaut) | outils 5, 6, 7, 15, 17 |
-| **PHOTO en Fichiers** | Ouvre la photo > Partager > **Enregistrer dans Fichiers** (elle reste au format HEIC) | outil 5 (test HEIC) |
-| **MÉMO VOCAL** de 10 s | App **Dictaphone**, parle 10 secondes | outils 10, 11 |
-| **PHOTO 48 Mpx** *(seulement si ton iPhone a le mode 48 Mpx : 14 Pro et plus)* | Appareil photo > réglage « Résolution » > 48 MP | outils 6, 7 — **sinon saute ces deux cas, marque « non testé »** |
+| **VIDÉO** de 5 s | Appareil photo > Vidéo > 5 s | 2, 3, 4, 15 |
+| **PHOTO** normale | une photo (12 Mpx) | 10, 11, 13, 16, 24, 25 |
+| **PHOTO en Fichiers** (HEIC) | photo > Partager > **Enregistrer dans Fichiers** | 10 |
+| **MÉMO VOCAL** de 10 s | app **Dictaphone** | 7 |
+| **PHOTO 48 Mpx** *(iPhone 14 Pro et plus)* | Appareil photo > Résolution 48 MP | 25 — sinon « non testé » |
 
-**Pour le MacBook :** mêmes fichiers, transférés par **AirDrop** depuis l'iPhone (vidéo, photo, mémo) — ce sont des fichiers d'iPhone réels.
+**Pour le MacBook :** les mêmes, par **AirDrop** depuis l'iPhone. Pour le test caméra (n° 9) sur iPhone, **ouvre `safari-qr.png` en grand sur l'écran du MacBook** : l'iPhone le filmera.
 
 ### Comment vérifier un téléchargement (règle valable partout)
 Un « RÉUSSI » exige que **le fichier produit s'ouvre et soit correct**, pas seulement qu'un bouton ait réagi.
-- **iPhone :** après le clic, une flèche de téléchargement apparaît dans la barre Safari (icône **aA** ou flèche) > **Téléchargements** > touche le fichier > il doit **s'ouvrir avec le bon contenu**.
-- **MacBook :** flèche de téléchargement en haut à droite de Safari > ouvre le fichier depuis la liste.
-- **Le nom et l'extension comptent.** Un fichier « .webm » qui ne s'ouvre pas, c'est ÉCHOUÉ.
+- **iPhone :** flèche de téléchargement dans la barre Safari > **Téléchargements** > touche le fichier > il doit **s'ouvrir avec le bon contenu**.
+- **MacBook :** flèche de téléchargement en haut à droite > ouvre le fichier.
+- **Le nom et l'extension comptent.** Un `.webm` ou un `.opus` qui ne s'ouvre pas, c'est ÉCHOUÉ — sauf si la page a dit **avant** que ton navigateur ne sait pas le lire (voir n° 6 et 8).
 
 ### Les trois verdicts
 - **RÉUSSI** : le résultat attendu est obtenu **et** le fichier produit s'ouvre.
-- **ÉCHOUÉ** : erreur, page blanche, résultat faux, fichier qui ne s'ouvre pas, ou la page **se recharge toute seule / affiche « Un problème est survenu sur cette page »** (= Safari a tué l'onglet, mémoire saturée).
-- **BLOQUÉ** : tu n'as pas pu faire le test (fichier introuvable, site inaccessible, iPhone sans mode 48 Mpx…). **Dis pourquoi.**
+- **ÉCHOUÉ** : erreur, page blanche, résultat faux, fichier illisible, ou la page **se recharge toute seule / « Un problème est survenu sur cette page »** (Safari a tué l'onglet : mémoire).
+- **BLOQUÉ** : test impossible (fichier introuvable, pas de mode 48 Mpx…). **Dis pourquoi.**
 
 ---
 
-## 1. LES 20 OUTILS — CLASSÉS DU PLUS AU MOINS RISQUÉ
+## 1. LES 29 OUTILS — CLASSÉS DU PLUS AU MOINS RISQUÉ
 
-**Comment les 20 ont été choisis (critère écrit, pour pouvoir le contester) :** les **6 « Popular Tools »** de l'accueil et du pied de page (Merge PDF, Image Compressor, Background Remover, Grammar Fixer, QR Generator, Video to GIF), puis **14 outils cités sur les cartes de catégorie de l'accueil** (`app/page.jsx`), retenus **d'abord par le risque Safari lu dans le code**. Non retenus : les 216 autres, dont Word/Excel/PPT to PDF (routes serveur, hors des cartes de l'accueil) — **candidat n° 21 si tu veux couvrir le chemin « envoi au serveur + PDF renvoyé » sur Safari.**
-
-**Ordre = risque décroissant d'après le code.** Base : `https://www.onlineconvertools.com`
-
-**Légende des risques :** `Worker` Web Worker · `TÉLÉCH` téléchargement de fichier · `WASM` WebAssembly · `OffCanvas` OffscreenCanvas · `MÉDIA` API média (MediaRecorder, captureStream, getUserMedia) · `PRESSE` presse-papiers · `PLEIN` plein écran · `MÉM` mémoire / taille de canvas.
-*(Aucun des 20 n'utilise le plein écran : vérifié par recherche dans le code, rien à tester de ce côté.)*
+**Base :** `https://www.onlineconvertools.com` — **Légende des risques :** `Worker` Web Worker · `WASM` WebAssembly · `OffCanvas` OffscreenCanvas · `MÉDIA` API média (MediaRecorder, getUserMedia) · `ENVOI` envoi par morceaux vers notre service · `OPUS` fichier Opus (Safari peut ne pas le lire) · `PRESSE` presse-papiers · `TÉLÉCH` téléchargement · `MÉM` mémoire.
+**Ordre = risque décroissant d'après le code.** Les retests des défauts du 19/09 sont marqués **[S1]** à **[S5]**.
 
 ---
 
-### ▶ SÉANCE A/C — LES 10 PLUS RISQUÉS
+### ▶ SÉANCE A/C — LES 15 PLUS RISQUÉS
 
-#### 1. Video Compressor
-`https://www.onlineconvertools.com/tools/video-tools/video-compressor`
-- **Risque :** `MÉDIA` `TÉLÉCH`. **Suspect n° 1 du site.** Le code appelle `video.captureStream()` puis `new MediaRecorder(stream, { mimeType: 'video/webm' })` **sans jamais tester si Safari le permet** (aucun `isTypeSupported`). À ma connaissance, Safari ne fournit pas `captureStream()` sur un élément vidéo et n'a longtemps pas écrit de WebM — **à confirmer par le test.** Même si ça passe, la sortie est un **.webm**, que l'iPhone peut ne pas savoir ouvrir.
-- **Fichier :** ta **VIDÉO** 5 s (~10-20 Mo).
-- **Geste :** ouvre la page > touche la zone > **Vidéos** (ou Fichiers) > choisis la vidéo > touche **Compress Video** > attends la fin de la lecture.
-- **Attendu :** une taille « avant / après » s'affiche et le bouton **Download** donne un fichier `compressed.webm` **qui s'ouvre**.
+#### 1. Zip Extractor *(refait le 26/09 : 7-Zip en WebAssembly, 40+ formats)*
+`/tools/file-tools/zip-extractor`
+- **Risque :** `Worker` `WASM` `MÉM` `TÉLÉCH`. Moteur 7-Zip compilé en WebAssembly, dans un Worker. **Safari n'a pas `showSaveFilePicker`** : « Save all to a folder » ne doit **pas** apparaître, et « Download all as ZIP » construit le ZIP en mémoire (plafonné à 1,9 Go ; sur iPhone la mémoire peut céder bien avant — ne teste pas de gros fichier).
+- **Gestes :** (a) `safari-winrar.rar` > la liste s'affiche avec des **noms chinois lisibles** > **Download** d'un fichier > il s'ouvre ; (b) `safari-rar-password-1234.rar` > la page demande un mot de passe > `1234` > **Unlock** > la liste apparaît ; (c) `safari-7z-password-data-only.7z` > ouvre `secret.txt` > mot de passe `data-only` > il contient « top secret » ; (d) sélectionne **les trois** `safari-split.part*.rar` ensemble > mot de passe `mot de passe` > la liste s'affiche ; (e) `safari-tree.zip` > **Download all as ZIP** > le ZIP se décompresse dans Fichiers.
+- **Attendu :** les 5 sous-cas réussissent ; **« Save all to a folder » absent** sur Safari.
+- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(note a-e séparément)*
+
+#### 2. Video Compressor **[S1]** *(passé sur notre service ffmpeg le 20/09)*
+`/tools/video-tools/video-compressor`
+- **Risque :** `ENVOI` `TÉLÉCH`. Ne dépend plus de `captureStream` (cause de S1) : la vidéo est envoyée **par morceaux** à notre service. **Défaut WebKit connu** (envoi d'un `Blob.slice` par XHR) contourné en envoyant des tableaux d'octets — **jamais prouvé sur un vrai Safari.**
+- **Geste :** ta **VIDÉO** 5 s (un `.MOV` d'iPhone) > niveau par défaut > **Compress** > attends (réveil du service ≈ 3 s) > télécharge.
+- **Attendu :** progression visible, un fichier **plus léger** qui s'ouvre et se lit. *(Si la page dit « déjà bien compressée », c'est un résultat honnête, pas un échec : note-le.)*
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
-#### 2. Video Converter
-`https://www.onlineconvertools.com/tools/video-tools/video-converter`
-- **Risque :** `MÉDIA` `TÉLÉCH`. Même mécanisme que le n° 1 (`captureStream` + `MediaRecorder` webm, sans détection).
-- **Fichier :** la **VIDÉO** 5 s.
-- **Geste :** choisis la vidéo > touche **Convert to WebM** > attends.
-- **Attendu :** une seconde vidéo apparaît sous la première et **Download WebM** donne `converted.webm` qui s'ouvre.
+#### 3. Video Converter **[S1]**
+`/tools/video-tools/video-converter`
+- **Risque :** `ENVOI` `TÉLÉCH`. Même tuyau que le n° 2.
+- **Geste :** la **VIDÉO** > sortie **MP4** > convertis > télécharge ; refais en **WebM**.
+- **Attendu :** le MP4 s'ouvre et se lit ; le WebM se télécharge avec la bonne extension (le lire sur iPhone n'est pas exigé : note s'il se lit).
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
-#### 3. Video Trimmer
-`https://www.onlineconvertools.com/tools/video-tools/video-trimmer`
-- **Risque :** `MÉDIA` `TÉLÉCH`. Même mécanisme (`captureStream` + `MediaRecorder` webm).
-- **Fichier :** la **VIDÉO** 5 s.
-- **Geste :** choisis la vidéo > laisse les réglages par défaut (ou coupe 1 s au début) > touche **Trim Video** > attends.
-- **Attendu :** la vidéo découpée apparaît et **Download** donne `trimmed.webm` qui s'ouvre.
+#### 4. Video Trimmer **[S1]** *(refait sur ffmpeg.wasm le 20/09)*
+`/tools/video-tools/video-trimmer`
+- **Risque :** `WASM` `MÉM` `TÉLÉCH`. Moteur ffmpeg (~10 Mo) téléchargé au premier usage ; plafond mobile 100 Mo. La coupe s'aligne sur l'image-clé et **la page le dit**.
+- **Geste :** la **VIDÉO** > coupe 1 s au début > **Trim** > télécharge.
+- **Attendu :** une vidéo de ≈ 4 s (± 1-3 s, alignement annoncé) qui se lit.
+- **Depuis le 28/09 (après déploiement) :** refais-le en cochant **Precise cut** : un `.mp4` de **4 s exactement** qui commence à l'image choisie (réencodé dans le navigateur : note le temps que ça prend sur l'iPhone).
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
-#### 4. Voice Recorder
-`https://www.onlineconvertools.com/tools/audio-tools/voice-recorder`
-- **Risque :** `MÉDIA` `TÉLÉCH`. Le code crée `new MediaRecorder(stream)` **sans type**, puis **étiquette de force le résultat `audio/webm`** et propose `recording.webm`. Safari enregistre en **MP4/AAC** : on risque un fichier **mal nommé** (`.webm` qui contient du MP4), donc illisible ailleurs. Demande aussi l'autorisation du micro.
-- **Fichier :** aucun. Tu parles.
-- **Geste :** ouvre la page > **Start Recording** > **Autoriser** le micro > parle 5 s > **Stop Recording** > écoute le lecteur > touche **Download WebM**, puis **Download WAV**.
-- **Attendu :** l'écoute restitue ta voix ; `recording.wav` s'ouvre et se lit ; **note si `recording.webm` s'ouvre**.
-- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(précise WAV et WEBM séparément dans tes notes)*
-
-#### 5. Image Converter
-`https://www.onlineconvertools.com/tools/image-tools/image-converter`
-- **Risque :** `Worker` `OffCanvas` `TÉLÉCH` `MÉM`. Le convertisseur tourne dans un **Web Worker** et crée un `OffscreenCanvas` puis `convertToBlob`. **Le format par défaut est WebP** — à ma connaissance Safari n'encode pas le WebP (ni l'AVIF) via canvas et peut **renvoyer un PNG sans le dire**. Le HEIC passe par `heic2any`. « Download all » lance **plusieurs téléchargements d'affilée** et chaque lien est **révoqué immédiatement après le clic** (risque : téléchargement vide ou refusé).
-- **Fichiers :** (a) **PHOTO** normale ; (b) **PHOTO en Fichiers** (HEIC).
-- **Geste (a) :** choisis la photo > format **WebP** (défaut) > touche **Convert** > **Download** > ouvre. **Refais avec PNG puis JPG.**
-- **Geste (b) :** même chose avec le fichier HEIC pris **depuis Fichiers**.
-- **Attendu :** chaque conversion donne un fichier **du format demandé** (`.webp`, `.png`, `.jpg`) qui s'ouvre. **Vérifie que le fichier WebP est bien du WebP** : Fichiers > appui long > **Informations** > Type.
-- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(3 sous-cas : WebP / PNG-JPG / HEIC)*
-
-#### 6. Background Remover
-`https://www.onlineconvertools.com/tools/ai-tools/background-remover`
-- **Risque :** `MÉM` `TÉLÉCH`. Réduit la photo à 1024 px pour l'envoi, mais **recompose le résultat à la pleine résolution dans un canvas** (`getImageData`). **Safari iOS limite la surface d'un canvas** (de l'ordre de 16 Mpx) : une photo 48 Mpx peut donner un résultat **vide ou noir**. ⚠️ **Appelle un service payant** — voir la règle n° 8 en fin de document.
-- **Fichiers :** (a) **PHOTO** normale (12 Mpx) avec un sujet net ; (b) **PHOTO 48 Mpx** si dispo.
-- **Geste :** choisis la photo > touche **Remove Background** > attends (~5 s, jusqu'à ~15 s au réveil du service) > **Download PNG**.
-- **Attendu :** le sujet est détouré sur fond **transparent** et le PNG téléchargé **s'ouvre avec la transparence** (fond en damier dans l'aperçu, pas de noir).
-- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(sous-cas 12 Mpx / 48 Mpx)*
-
-#### 7. Image Upscaler
-`https://www.onlineconvertools.com/tools/ai-tools/image-upscaler`
-- **Risque :** `MÉM`. **Mise à l'échelle jusqu'à ×8 directement dans un canvas** : une photo 12 Mpx × 2 = 48 Mpx, bien **au-delà de la limite de canvas de Safari iOS**. Suspect : résultat vide, ou onglet tué.
-- **Fichiers :** **PHOTO** normale ; puis une **petite** image (capture d'écran, ~1 Mpx).
-- **Geste :** choisis la photo > facteur **×2** > **Upscale Image**. Refais avec la petite image en **×4**.
-- **Attendu :** une image agrandie s'affiche avec ses nouvelles dimensions et se télécharge. **Note à partir de quel facteur / quelle taille ça casse.**
-- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(sous-cas : photo ×2 / petite image ×4)*
-
-#### 8. Video to GIF
-`https://www.onlineconvertools.com/tools/gif-tools/video-to-gif`
-- **Risque :** `MÉDIA` `MÉM` `TÉLÉCH`. Le code se place sur chaque image avec `video.currentTime = …` puis **attend l'événement `seeked` sans aucune limite de temps** (contrairement à MP4 to GIF qui en a une). Sur iOS, une vidéo pas encore chargée peut **ne jamais l'émettre** : le bouton reste bloqué indéfiniment. Il garde aussi chaque image en **data-URL PNG** en mémoire.
-- **Fichier :** la **VIDÉO** 5 s.
-- **Geste :** choisis la vidéo > laisse FPS et durée par défaut > touche **Convert to GIF Frames** > attends **30 s au maximum**.
-- **Attendu :** « N frames captured » s'affiche puis un **GIF animé** apparaît ; le bouton **Download GIF** donne un `.gif` qui s'ouvre **et s'anime**. *(Si rien ne bouge après 30 s : ÉCHOUÉ, note « bloqué à l'attente ».)*
+#### 5. Voice Recorder **[S2]**
+`/tools/audio-tools/voice-recorder`
+- **Risque :** `MÉDIA` `TÉLÉCH`. Défaut du 19/09 : Safari enregistre en MP4 et l'outil l'étiquetait `webm`. Corrigé : le type réel est détecté.
+- **Geste :** **Start Recording** > **Autoriser** le micro > parle 5 s > **Stop Recording** > écoute > télécharge chaque format proposé.
+- **Attendu :** ta voix au lecteur ; **chaque fichier porte l'extension de son vrai format** (`.m4a`/`.mp4` sur Safari, pas `.webm`) et se lit ; le WAV se lit.
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
-#### 9. MP4 to GIF
-`https://www.onlineconvertools.com/tools/gif-tools/mp4-to-gif`
-- **Risque :** `MÉDIA` `TÉLÉCH`. Accepte seulement `video/mp4` (or l'iPhone filme en **.MOV**, extension `.mov`). Une garde existe pour un `seeked` qui n'arrive pas. Suspect : la vidéo iPhone est **refusée au choix du fichier**.
-- **Fichier :** la **VIDÉO** 5 s (essaie-la telle quelle, sans la convertir).
-- **Geste :** choisis la vidéo > **Convert to GIF** > **Download GIF**.
-- **Attendu :** soit un GIF qui s'anime, soit un **message clair** disant que le format n'est pas accepté. *(Un fichier grisé et non sélectionnable dans le sélecteur = note-le, c'est un défaut d'usage.)*
+#### 6. Audio Merger *(refait les 26-27/09 : 14 formats, ordre, fondu enchaîné)*
+`/tools/audio-tools/audio-merger`
+- **Risque :** `WASM` `MÉM` `OPUS` `ENVOI` `TÉLÉCH`. ffmpeg.wasm ; **le glisser-déposer de la liste ne marche pas au doigt** (flèches ↑/↓ prévues pour le téléphone) ; sortie Opus encodée sur notre service ; certains formats (WMA, AC3, AIFF, CAF…) ne se lisent pas dans Safari et la page doit alors dire « no preview » au lieu d'un lecteur cassé.
+- **Gestes :** (a) choisis `safari-tone-A-5s.flac`, `safari-tone-B-3s.mp3`, `safari-tone-C-4s.wav` > la liste montre format et durée > **flèche ↓** sur le premier : l'ordre devient B, A, C > sortie **FLAC** (défaut : MP3 pour ce mélange) > **Merge** > écoute : moyen, grave, aigu, **sans blanc** entre eux, durée 0:12.0 ; (b) coche **Crossfade between files**, longueur 1 > la note annonce « lasts 0:10.0 instead of 0:12.0 » > **Merge** > écoute : les sons se fondent, durée 0:10.0 ; (c) sortie **Opus** > **Merge** > le fichier `.opus` se télécharge (lecteur ou message « no preview » : note lequel) ; (d) **sur MacBook seulement** : glisse un fichier de la liste pour le remonter.
+- **Attendu :** a-c (et d sur Mac) réussissent ; le fichier téléchargé se lit (au moins dans l'app Fichiers ou un lecteur externe pour l'Opus).
+- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(note a-d)*
+
+#### 7. Audio Converter / Booster / Splitter / Compressor — sortie Opus *(Opus sur le service depuis le 23-26/09)*
+`/tools/audio-tools/audio-converter` (puis `audio-booster`, `audio-splitter`, `audio-compressor`)
+- **Risque :** `WASM` `ENVOI` `OPUS` `TÉLÉCH`. Le son est préparé par ffmpeg.wasm puis encodé en Opus sur notre service. Défaut trouvé sous Firefox le 26/09 (« .opus » enregistré « .ogg ») : **vérifie l'extension sur Safari**.
+- **Geste :** le **MÉMO VOCAL** > Audio Converter, sortie **MP3** > télécharge ; puis sortie **Opus** > télécharge. Puis, rapidement, **Opus** dans Booster (gain par défaut) et Compressor (défaut), et Splitter en 2 parties.
+- **Attendu :** MP3 lisible ≈ 10 s ; chaque fichier Opus se télécharge **avec l'extension `.opus`** (la lecture dans Safari n'est pas exigée : note-la).
+- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(note Converter MP3 / Opus, Booster, Splitter, Compressor)*
+
+#### 8. Barcode Generator *(refait le 24-26/09 : 37 types, lot, planches PDF)*
+`/tools/qr-barcodes-tools/barcode-generator`
+- **Risque :** `Worker` `OffCanvas` `WASM` `TÉLÉCH`. Le dessin passe par `OffscreenCanvas` **dans des Workers** (absent du WebKit de Playwright : jamais exécuté en WebKit) ; chaque code est **relu par un décodeur WebAssembly** avant d'être proposé.
+- **Gestes :** (a) type **EAN-13**, valeur `5901234123457` > PNG > télécharge ; SVG > télécharge ; (b) type **QR Code** ou **DataMatrix** > PNG ; (c) mode lot (« Values, one per line ») : 3 valeurs EAN-13 > télécharge le ZIP ; (d) **Print it on label sheets…** > PDF.
+- **Attendu :** chaque fichier s'ouvre ; le code EAN-13 se lit avec l'appareil photo d'un autre téléphone ou une app de scan (facultatif) ; aucun message « could not verify ».
+- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(note a-d)*
+
+#### 9. QR Scanner — caméra et collage *(ajoutés le 26/09)*
+`/tools/qr-barcodes-tools/qr-scanner`
+- **Risque :** `MÉDIA` `PRESSE`. La caméra (`getUserMedia`) sur iPhone exige un geste et une autorisation ; le **collage d'une image** dépend du presse-papiers de Safari.
+- **Gestes :** (a) **Scan with camera** > **Autoriser** > vise `safari-qr.png` affiché sur l'écran du MacBook > le texte `SAFARI-QR-OK-2026` apparaît > **Stop camera** ; (b) **Upload an image** > `safari-qr.png` > même texte > **Copy** > colle dans Notes ; (c) ouvre `safari-qr.png` dans Fichiers/Photos > **Copier** > reviens sur la page > touche la zone de collage (appui long > **Coller**) > même texte ; (d) sur MacBook : glisse `safari-qr.png` sur la page.
+- **Attendu :** a-c sur iPhone, b-d sur MacBook ; le texte collé dans Notes est exact.
+- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(note a-d)*
+
+#### 10. Image Converter **[S3]** *(5 sorties ajoutées le 24/09, AVIF réel le 20/09)*
+`/tools/image-tools/image-converter`
+- **Risque :** `Worker` `OffCanvas` `WASM` `TÉLÉCH` `MÉM`. Défaut du 19/09 : un PNG livré sous le nom `.webp`. Corrigé : le type réel est vérifié. **L'AVIF passe par un encodeur WebAssembly jamais exécuté en WebKit.**
+- **Gestes :** la **PHOTO** > **WebP** > télécharge ; **AVIF** > télécharge ; puis **BMP**, **TIFF**, **PDF** ; enfin la **PHOTO en Fichiers** (HEIC) > **JPG**.
+- **Attendu :** chaque fichier est **du format demandé** (Fichiers > appui long > Informations > Type) et s'ouvre ; si Safari ne sait pas produire un format, **la page le dit avant**, elle ne ment pas sur l'extension.
+- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(note WebP / AVIF / BMP-TIFF-PDF / HEIC)*
+
+#### 11. Image Upscaler **[S4]** *(modèle IA sur notre service depuis le 23/09)*
+`/tools/ai-tools/image-upscaler`
+- **Risque :** `ENVOI` `MÉM` `TÉLÉCH`. Défaut du 19/09 : canvas géant, fichier vide annoncé « réussi ». Désormais : ×2/×4 sur le service, image d'entrée **≤ 1 Mpx** — au-delà, l'outil **refuse avec un message** (il ne réduit pas).
+- **Gestes :** (a) la **PHOTO** 12 Mpx > la page doit la **refuser avec un message clair** (taille en mégapixels) ; (b) `safari-small-800x600.jpg` > **×4** > **Upscale Image** > compare avant/après > **Download**.
+- **Attendu :** (a) refus lisible, rien ne plante ; (b) une image de **3200×2400**, **non vide**, qui s'ouvre.
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
-#### 10. Audio Converter
-`https://www.onlineconvertools.com/tools/audio-tools/audio-converter`
-- **Risque :** `WASM` `Worker` `MÉM` `TÉLÉCH`. **ffmpeg.wasm** : le moteur (~25-30 Mo, dit la page) est **téléchargé au premier usage** puis exécuté dans un Worker. Sur iPhone : temps de chargement et **mémoire**. *(Version mono-thread : elle n'exige pas les en-têtes spéciaux que Safari réclame pour le multi-thread.)*
-- **Fichier :** le **MÉMO VOCAL** (.m4a, ~100-200 Ko).
-- **Geste :** choisis le mémo > format de sortie **MP3** > **Convert Audio** > **attends jusqu'à 60 s la première fois** > télécharge.
-- **Attendu :** un `.mp3` **qui se lit** et dure ~10 s.
+#### 12. Audio Trimmer *(26/09 : dixième de seconde, fondus, coupe exacte WAV/FLAC)*
+`/tools/audio-tools/audio-trimmer`
+- **Risque :** `WASM` `MÉM` `TÉLÉCH`.
+- **Geste :** `safari-tone-12s.wav` > début 2.0, fin 7.5 > fondu d'entrée et de sortie > coupe > **Download**.
+- **Attendu :** un `.wav` de **5,5 s** qui se lit, avec fondus audibles au début et à la fin.
+- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
+
+#### 13. Image Compressor *(refait le 23/09 : MozJPEG, WebP, lot + ZIP)*
+`/tools/image-tools/image-compressor`
+- **Risque :** `Worker` `WASM` `MÉM` `TÉLÉCH`.
+- **Geste :** la **PHOTO** + 2 autres photos > compresse > télécharge une image, puis **le ZIP**.
+- **Attendu :** chaque image est **plus légère** que l'originale, s'ouvre et ressemble à l'original ; le ZIP se décompresse.
+- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
+
+#### 14. Hash Generator *(refait le 24/09 : 17 algorithmes, fichiers, 4 Workers)*
+`/tools/developer-tools/hash-generator`
+- **Risque :** `Worker` `WASM` `PRESSE` `TÉLÉCH`.
+- **Geste :** texte `abc` > les empreintes s'affichent ; **SHA-256 attendu : `ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad`** ; **MD5 : `900150983cd24fb0d6963f7d28e17f72`** > **Copy** d'une empreinte > colle dans Notes ; puis un fichier (`safari-tree.zip`) > **Download checksums.txt**.
+- **Attendu :** empreintes exactes, collage correct, `checksums.txt` s'ouvre.
+- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
+
+#### 15. MP4 to GIF / MOV to GIF **[S5]** *(sur le service depuis le 23/09)*
+`/tools/gif-tools/mp4-to-gif` puis `/tools/gif-tools/mov-to-gif`
+- **Risque :** `ENVOI` `TÉLÉCH`. Défaut du 19/09 : les `.mov` d'iPhone étaient refusés au choix du fichier.
+- **Geste :** la **VIDÉO** (`.MOV`) dans **MP4 to GIF** > options par défaut > convertis > télécharge. Refais dans **MOV to GIF**.
+- **Attendu :** la vidéo est **sélectionnable** (pas grisée) ; un GIF **animé, aux bonnes proportions** (une vidéo verticale reste verticale), qui s'ouvre.
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
 ---
 
-### ▶ SÉANCE B/D — LES 10 SUIVANTS
+### ▶ SÉANCE B/D — LES 14 SUIVANTS
 
-#### 11. Audio Trimmer
-`https://www.onlineconvertools.com/tools/audio-tools/audio-trimmer`
-- **Risque :** `WASM` `Worker` `MÉM` `TÉLÉCH` (ffmpeg.wasm, comme le n° 10).
-- **Fichier :** le **MÉMO VOCAL**.
-- **Geste :** choisis le mémo > règle Start/End pour garder ~5 s > **Trim Audio** > télécharge.
-- **Attendu :** un fichier audio de ~5 s qui se lit.
+#### 16. GIF Maker *(26/09 : ajuster/rogner/étirer, ordre, boucles)*
+`/tools/gif-tools/gif-maker` — `MÉM` `TÉLÉCH`
+- **Geste :** 3 photos (sélection multiple) > mode **Fit (keep proportions, add background)** > **Download GIF**.
+- **Attendu :** un `.gif` animé de 3 images, **non déformées**, qui s'ouvre et s'anime.
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
-#### 12. Merge PDF
-`https://www.onlineconvertools.com/tools/pdf-tools/pdf-merge`
-- **Risque :** `Worker` (module) `TÉLÉCH` `MÉM`. Web Worker de type `module` (pris en charge par Safari récent, mais **c'est précisément ce qui casse sur un Safari ancien**) + pdf-lib. Plafond mobile : 100 Mo / 300 pages.
-- **Fichiers :** `safari-A-3pages.pdf` **et** `safari-B-3pages.pdf` (depuis Fichiers, sélection multiple).
-- **Geste :** choisis les deux > **Merge PDFs** > **Download** > ouvre.
-- **Attendu :** **un PDF de 6 pages** : « FICHIER A » pages 1-3 puis « FICHIER B » pages 1-3.
+#### 17. Word to PDF *(envoi par morceaux au-delà de 4 Mio depuis le 21/09)*
+`/tools/pdf-tools/word-to-pdf` — `ENVOI` `TÉLÉCH` — ⚠️ appel payant (ConvertAPI, 0,01 $), une seule fois
+- **Geste :** `fidelite-01.docx` > convertis > télécharge.
+- **Attendu :** un PDF qui s'ouvre, tableau lisible. *(Le petit fichier passe par le chemin direct ; le chemin par morceaux, pour > 4 Mio, n'est pas couvert ici.)*
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
-#### 13. Split PDF
-`https://www.onlineconvertools.com/tools/pdf-tools/pdf-split`
-- **Risque :** `Worker` `TÉLÉCH`. Produit potentiellement **plusieurs fichiers** : Safari peut n'en accepter qu'un ou demander une permission.
-- **Fichier :** `safari-30pages.pdf`.
-- **Geste :** choisis-le > séparation par défaut (ou plage 1-10) > **Split** > **Download**.
-- **Attendu :** des PDF (ou un ZIP) **qui s'ouvrent** avec les bonnes pages. *(Note le nombre de fichiers reçus.)*
+#### 18. Split PDF *(23/09 : chaque page, toutes les N pages, ZIP)*
+`/tools/pdf-tools/pdf-split` — `Worker` `TÉLÉCH`
+- **Geste :** `safari-30pages.pdf` > mode **toutes les 10 pages** > télécharge le **ZIP**.
+- **Attendu :** un ZIP de 3 PDF de 10 pages, qui se décompresse ; les PDF s'ouvrent.
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
-#### 14. Compress PDF
-`https://www.onlineconvertools.com/tools/pdf-tools/pdf-compress`
-- **Risque :** `Worker` `TÉLÉCH`.
-- **Fichier :** `safari-30pages.pdf`.
-- **Geste :** choisis-le > **Compress** > **Download**.
-- **Attendu :** un PDF de **30 pages** qui s'ouvre. *(Un fichier déjà minuscule peut ne pas rétrécir : ce n'est pas un échec tant qu'il s'ouvre et garde 30 pages.)*
+#### 19. Compress PDF *(23/09 : sur le service pdf-tools, 3 niveaux)*
+`/tools/pdf-tools/pdf-compress` — `ENVOI` `TÉLÉCH`
+- **Geste :** `safari-30pages.pdf` > niveau recommandé > télécharge.
+- **Attendu :** un PDF de **30 pages** qui s'ouvre (un fichier minuscule peut ne pas rétrécir : pas un échec).
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
-#### 15. Image Compressor
-`https://www.onlineconvertools.com/tools/image-tools/image-compressor`
-- **Risque :** `TÉLÉCH` `MÉM`. Passe par un canvas puis `toDataURL('image/jpeg')` ; le téléchargement est un **lien data-URL** (`compressed.jpg`), plus fragile que les liens `blob:` quand l'image est grosse.
-- **Fichier :** la **PHOTO** normale (12 Mpx).
-- **Geste :** choisis la photo > **Compress** > **Download**.
-- **Attendu :** un `compressed.jpg` **plus léger** qui s'ouvre et ressemble à l'original.
+#### 20. QR Generator *(24/09 : 8 types, 2000 px, logo, PDF)*
+`/tools/qr-barcodes-tools/qr-generator` — `TÉLÉCH`
+- **Geste :** texte `SAFARI-QR-OK-2026` > **PNG**, **SVG**, **PDF** ; puis type **Wi-Fi** (réseau `Test`, mot de passe `12345678`) > PNG.
+- **Attendu :** chaque fichier s'ouvre (le SVG **en image**, pas en texte) ; l'appareil photo de l'iPhone lit le QR Wi-Fi et propose de rejoindre « Test ».
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
-#### 16. GIF Maker
-`https://www.onlineconvertools.com/tools/gif-tools/gif-maker`
-- **Risque :** `TÉLÉCH` `MÉM`. Sélection **multiple** d'images, encodage GIF dans la page.
-- **Fichiers :** **3 photos** de ta photothèque (sélection multiple).
-- **Geste :** choisis 3 photos > **Create GIF** > **Download GIF**.
-- **Attendu :** un `.gif` **animé de 3 images** qui s'ouvre.
+#### 21. Grammar Fixer *(26/09 : corrections montrées mot à mot)* — ⚠️ appel payant, une seule fois
+`/tools/ai-tools/grammar-fixer` — `PRESSE`
+- **Geste :** colle `i has went to the store yesterday and buyed two apple` > corrige > touche **une** correction surlignée pour la défaire, puis la rétablir > **Undo all** puis **Keep all** > **Copy** > colle dans Notes.
+- **Attendu :** chaque correction se défait/rétablit d'un toucher ; le texte collé = la phrase corrigée.
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
-#### 17. Zip Creator
-`https://www.onlineconvertools.com/tools/file-tools/zip-creator`
-- **Risque :** `Worker` (module) `TÉLÉCH` `MÉM`. Plafond mobile 100 Mo.
-- **Fichiers :** `safari-A-3pages.pdf` + `safari-B-3pages.pdf` + la **PHOTO**.
-- **Geste :** choisis les 3 > **Create ZIP** > **Download ZIP** > ouvre le ZIP dans Fichiers (appui long > Décompresser).
-- **Attendu :** un `.zip` qui **se décompresse** avec les 3 fichiers intacts.
+#### 22. Unit Converter *(26/09 : temps, données, pression, énergie, puissance)*
+`/tools/converter-tools/unit-converter`
+- **Geste :** Données : 1 GB → MB ; Pression : 1 atm → kPa ; saisis `abc`.
+- **Attendu :** **1000** MB ; **101,325** kPa ; `abc` refusé avec un message.
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
-#### 18. QR Scanner
-`https://www.onlineconvertools.com/tools/qr-barcodes-tools/qr-scanner`
-- **Risque :** `PRESSE` `MÉM`. Lit une **image** (pas la caméra) via `jsQR` et un canvas. Bouton **Copy** = `navigator.clipboard.writeText` (Safari l'autorise **seulement** en réponse directe à un toucher).
-- **Fichier :** `safari-qr.png`.
-- **Geste :** choisis-le > le texte apparaît > touche **Copy** > colle dans ton app de notes.
-- **Attendu :** le texte lu est **`SAFARI-QR-OK-2026`** et **la note contient ce texte après le collage**.
+#### 23. Color Converter *(26/09 : HSV, CMYK)*
+`/tools/converter-tools/color-converter` — `PRESSE`
+- **Geste :** saisis `#FF8000` > lis HSV et CMYK > **Copy** une valeur > colle dans Notes ; saisis `#GG0000`.
+- **Attendu :** HSV ≈ 30°, 100 %, 100 % ; CMYK 0 %, 50 %, 100 %, 0 % ; collage exact ; `#GG0000` signalé invalide.
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
-#### 19. Grammar Fixer
-`https://www.onlineconvertools.com/tools/ai-tools/grammar-fixer`
-- **Risque :** `PRESSE`. Appel réseau `/api/ai` (service payant) + bouton **Copy**. ⚠️ Voir la règle n° 8 en fin de document.
-- **Fichier :** aucun. **Texte à coller** : `i has went to the store yesterday and buyed two apple`
-- **Geste :** colle le texte > **Fix Grammar** > attends > touche **Copy** > colle dans les notes.
-- **Attendu :** une phrase **corrigée** (ex. « I went to the store yesterday and bought two apples. ») et **le collage dans les notes fonctionne**.
+#### 24. Image Resizer *(23/09 : verrou de proportions, %, format conservé)*
+`/tools/image-tools/image-resizer` — `MÉM` `TÉLÉCH`
+- **Geste :** la **PHOTO** > largeur 1000 px, verrou de proportions actif > télécharge.
+- **Attendu :** image de 1000 px de large, **non déformée**, **au format d'origine** (JPEG pour une photo).
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
-#### 20. QR Generator
-`https://www.onlineconvertools.com/tools/qr-barcodes-tools/qr-generator`
-- **Risque :** `TÉLÉCH`. Deux téléchargements : **PNG** (canvas) et **SVG**. Un SVG téléchargé sur iPhone s'ouvre parfois comme du **texte** au lieu d'une image.
-- **Fichier :** aucun. **Texte :** `SAFARI-QR-OK-2026`
-- **Geste :** saisis le texte > **Generate QR Code** > **Download PNG**, puis **Download SVG**.
-- **Attendu :** `qrcode.png` s'ouvre en image ; `qrcode.svg` s'ouvre **en image** (sinon note « s'ouvre en texte »).
-- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(précise PNG et SVG séparément)*
+#### 25. Background Remover — ⚠️ appel payant (~0,003 $), une seule fois par sous-cas
+`/tools/ai-tools/background-remover` — `ENVOI` `MÉM` `TÉLÉCH`
+- **Geste :** (a) la **PHOTO** 12 Mpx avec un sujet net > **Remove Background** > **Download PNG** ; (b) la **PHOTO 48 Mpx** si disponible.
+- **Attendu :** sujet détouré sur fond **transparent**, PNG en **pleine résolution** qui s'ouvre (damier, pas de noir).
+- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(12 / 48 Mpx)*
+
+#### 26. Tar Extractor *(22/09 : en-têtes PAX)*
+`/tools/file-tools/tar-extractor` — `TÉLÉCH`
+- **Fichier :** crée-le sur le MacBook : Terminal > `cd ~/Desktop && mkdir t && echo bonjour > t/a.txt && tar -czf t.tar.gz t` (le `tar` de macOS écrit des en-têtes étendus). **MacBook seulement.**
+- **Attendu :** la liste montre `t/a.txt` (et **aucun** fichier parasite `PaxHeader`) ; `a.txt` se télécharge et contient `bonjour`.
+- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
+
+#### 27. Merge PDF *(inchangé, outil vedette)*
+`/tools/pdf-tools/pdf-merge` — `Worker` `TÉLÉCH`
+- **Geste :** `safari-A-3pages.pdf` + `safari-B-3pages.pdf` > **Merge PDFs** > télécharge.
+- **Attendu :** un PDF de 6 pages : A pages 1-3 puis B pages 1-3.
+- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
+
+#### 28. Outils de texte *(23/09 : emoji, phrases)* — Word Counter, Case Converter, Text Reverser
+`/tools/text-tools/word-counter`, `case-converter`, `text-reverser`
+- **Texte :** `Hello 👋🏽 world. This is a test! Is it?`
+- **Attendu :** Word Counter : **3 phrases** ; Case Converter « Sentence case » : `Hello 👋🏽 world. This is a test! Is it?` ; Text Reverser : l'emoji **reste entier** (pas de carré ni de « ? »).
+- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
+
+#### 29. Currency Converter *(23/09 : 166 devises)*
+`/tools/converter-tools/currency-converter`
+- **Geste :** 100 CAD → **MAD** (dirham marocain, absent de l'ancienne liste) ; lis la date des taux.
+- **Attendu :** un montant plausible ; la date affichée est **celle des taux** (pas l'heure de ton appareil).
+- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
+
+---
+
+#### 30. Les 5 outils vidéo à MediaRecorder — Video Merger, Video Filter, Video Rotator, Video Resizer, Screen Recorder *(ajouté le 28/09 : jamais testés sous Safari ; le WebKit de Playwright n'a pas MediaRecorder)*
+`/tools/video-tools/video-merger`, `video-filter`, `video-rotator`, `video-resizer`, `screen-recorder` — `MÉDIA` `TÉLÉCH`
+- **Risque :** ces outils rejouent la vidéo dans un canvas et l'**enregistrent** (MediaRecorder) : Safari n'écrit que du **MP4**. Le fichier doit s'appeler `.mp4`, **se lire, et avoir le son** (Filter, Rotator, Resizer, et **Merger depuis le 28/09** : il perdait le son et ne finissait pas sous Firefox). La durée de traitement = la durée de la vidéo (temps réel) : **garde l'onglet au premier plan**.
+- **Gestes (MacBook d'abord, ≈ 10 min ; iPhone : Merger et Rotator seulement) :** (a) **Rotator** : la **VIDÉO** > 90° > **Rotate Video** > télécharge ; (b) **Merger** : la **VIDÉO** deux fois > **Merge Videos** > télécharge ; (c) **Resizer** : la **VIDÉO** > 480p > **Resize Video** (mode « Fit » par défaut) > télécharge ; (d) **Filter** : Grayscale > télécharge ; (e) **Screen Recorder** (MacBook seulement) : **Start** > partage une fenêtre 5 s > **Stop** > télécharge.
+- **Attendu :** chaque fichier en `.mp4`, qui se lit **jusqu'au bout avec le son** ; (a) image tournée ; (b) durée ≈ 2 × celle de la vidéo ; (c) image non déformée (bandes noires si la forme change). Si la page dit **avant** qu'elle ne peut pas tourner dans ton Safari : note-le (c'est honnête), avec la version.
+- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(note a-e)*
 
 ---
 
 ## 2. SECTION iPHONE (Safari iOS) — CE QUI CHANGE
 
-**Ce que les sections précédentes testent déjà, appliqué à l'iPhone. Surveille en plus :**
-
-1. **Téléchargement du fichier produit** — la cause n° 1 d'échec sur iPhone. Vérifie **à chaque outil** avec la règle du §0. Signale : aucune flèche de téléchargement, fichier vide, mauvaise extension, fichier introuvable dans Téléchargements.
-2. **Mémoire** — Safari iOS **tue l'onglet** sans préavis quand il déborde. Symptôme : **la page se recharge toute seule** ou affiche « Un problème est survenu sur cette page web ». **C'est un ÉCHOUÉ**, à noter même si « ça remarche ensuite ». Les plus exposés : n° 6, 7, 8, 10, 11 (photos 48 Mpx, agrandissement, ffmpeg).
-3. **Après chaque outil lourd (6, 7, 8, 10) : ferme l'onglet** (pas seulement la page) avant le suivant, sinon l'échec du n° 8 peut venir de la mémoire laissée par le n° 7.
-4. **Sélecteur de fichiers** — note si un fichier est **grisé** (format refusé par le champ) : c'est un défaut d'usage réel (n° 9 surtout).
-5. **Autorisations** — micro (n° 4) : si la fenêtre d'autorisation n'apparaît pas, note-le.
-6. **Rotation / verrouillage de l'écran pendant un traitement** : ne le fais pas exprès ; mais si l'écran se verrouille tout seul pendant n° 1-3 ou 10, **note-le** (la lecture s'arrête, l'enregistrement aussi).
+1. **Téléchargement du fichier produit** — cause n° 1 d'échec sur iPhone. Vérifie **à chaque outil** avec la règle du §0.
+2. **Mémoire** — Safari iOS **tue l'onglet** sans préavis. Symptôme : **la page se recharge toute seule** ou « Un problème est survenu sur cette page web ». **C'est un ÉCHOUÉ**, même si « ça remarche ensuite ». Les plus exposés : n° 1, 4, 6, 7, 10, 12, 13, 25.
+3. **Après chaque outil lourd (1, 4, 6, 7, 10, 12, 13) : ferme l'onglet** avant le suivant.
+4. **Sélecteur de fichiers** — note si un fichier est **grisé** (n° 15 surtout, et n° 1 pour `.rar`/`.7z`).
+5. **Autorisations** — micro (n° 5), caméra (n° 9) : si la fenêtre n'apparaît pas, note-le.
+6. **Écran verrouillé pendant un envoi** (n° 2, 3, 6c, 7, 11) : ne le fais pas exprès ; si ça arrive, note si l'envoi reprend ou échoue avec un message.
 
 ## 3. SECTION MacBook (Safari macOS) — CE QUI CHANGE
 
-Le MacBook a beaucoup de mémoire : les **plantages mémoire sont improbables**. Les défaillances attendues sont **de compatibilité** (API absentes), pas de ressources.
-
-1. **`captureStream` / `MediaRecorder` webm** (n° 1-3) : les erreurs seront **franches et lisibles** ici — c'est le meilleur endroit pour lire le message exact.
-2. **`OffscreenCanvas` / WebP** (n° 5) : vérifie le **format réellement produit**.
-3. **Téléchargements multiples** (n° 5 « Download all », n° 13) : Safari demande **« Autoriser plusieurs téléchargements ? »** — note si la demande apparaît, et ce qui se passe si tu refuses.
-4. **Presse-papiers** (n° 18, 19) : autorisé seulement sur geste direct. Colle dans TextEdit / Notes pour vérifier.
-5. **La console — utile ici seulement :** Safari > Réglages > **Avancées** > coche **« Afficher les fonctionnalités pour les développeurs »**. Après un échec : menu **Développement > Afficher la console JavaScript** (⌥⌘C) et **copie le message rouge**. **C'est ce qui rend la correction possible sans refaire le test.**
-6. **Ne fais pas** ce test dans Chrome/Firefox en croyant représenter Safari.
+1. Les plantages mémoire sont improbables ; attends-toi à des défauts **de compatibilité** (API absentes).
+2. **Téléchargements multiples** (n° 1e, 8c, 13, 18) : Safari peut demander **« Autoriser plusieurs téléchargements ? »** — note la demande et ce qui se passe si tu refuses.
+3. **Glisser-déposer** : n° 6d (liste d'Audio Merger) et n° 9d (image sur le QR Scanner).
+4. **Presse-papiers** (n° 9, 14, 21, 23) : colle dans Notes pour vérifier.
+5. **La console — utile ici seulement :** Safari > Réglages > **Avancées** > « Afficher les fonctionnalités pour les développeurs ». Après un échec : **Développement > Afficher la console JavaScript** (⌥⌘C) et **copie le message rouge**.
 
 ---
 
@@ -276,48 +311,32 @@ Le MacBook a beaucoup de mémoire : les **plantages mémoire sont improbables**.
 
 | Étape | Quoi | Durée |
 |---|---|---|
-| 0 | Préparation, fichiers, versions | 10 min |
-| **A** | **iPhone, outils 1 → 10** | **35-45 min** |
-| **C** | **MacBook, outils 1 → 10** | **20-25 min** |
-| B | iPhone, outils 11 → 20 | 25-35 min |
-| D | MacBook, outils 11 → 20 | 15-20 min |
-| | **Total** | **~1 h 50 à 2 h 15** |
+| 0 | Préparation, fichiers, versions | 15 min |
+| **A** | **iPhone, outils 1 → 15** | **≈ 75 min** |
+| **C** | **MacBook, outils 1 → 15** | **≈ 40 min** |
+| B | iPhone, outils 16 → 29 | ≈ 50 min |
+| D | MacBook, outils 16 → 29 | ≈ 25 min |
+| | **Total** | **≈ 3 h 40** (dont n° 30 ≈ 15 min) |
 
-**Tu peux tout faire en deux jours : A + C le premier, B + D le second.** Ces durées sont des **estimations**, pas des mesures — le premier lancement de ffmpeg (n° 10, 11) et le réveil du détourage (n° 6) sont les moments longs.
-
-**Si un outil bloque plus de 5 minutes : note ÉCHOUÉ ou BLOQUÉ, passe au suivant.** Ne cherche pas à réparer.
+**Estimations, pas mesures.** Les moments longs : premier chargement de ffmpeg.wasm (n° 4, 6, 7, 12) et de 7-Zip (n° 1), réveil des services (n° 2, 3, 11, 15, 25 : quelques secondes). **Si un outil bloque plus de 5 minutes : note ÉCHOUÉ ou BLOQUÉ, passe au suivant.**
 
 ---
 
-## 5. COMMENT RAPPORTER (pour que la correction soit possible sans refaire le test)
+## 5. COMMENT RAPPORTER
 
-**Pendant le test, sur l'iPhone :** ouvre l'app **Notes** à côté. **Une ligne par outil**, tout de suite :
+Dans **Notes**, **une ligne par outil**, tout de suite : `N° | R / É / B | ce que j'ai vu en une phrase` (ex. `6c | R | .opus téléchargé, "no preview" affiché`).
 
-```
-N° | R / É / B | ce que j'ai vu en une phrase
-```
-Exemples : `1 | É | "captureStream is not a function"` · `4 | É | wav OK, webm ne s'ouvre pas` · `9 | R | GIF animé OK`
+**Pour chaque ÉCHOUÉ ou BLOQUÉ :** l'outil et le sous-cas ; l'appareil et sa version ; le fichier et le geste ; une **capture d'écran** au moment de l'échec ; le **message exact** ; le comportement (*rien ne se passe* · *chargement infini* · *message d'erreur* · *page rechargée* · *fichier illisible* · *fichier absent*) ; **reproductible ?** (refais une seule fois) ; **sur MacBook : le message de la console**.
 
-**Pour chaque ÉCHOUÉ ou BLOQUÉ, note en plus — c'est ce dont on a besoin :**
-1. **L'outil** (numéro) et **l'appareil** : iPhone/MacBook + version iOS/Safari.
-2. **Ce que tu faisais** : le fichier utilisé (nom, taille approximative) et le geste, en une phrase.
-3. **L'écran** : **capture d'écran** (iPhone : bouton latéral + volume haut ; Mac : ⇧⌘4) **au moment de l'échec**.
-4. **Le message exact**, mot pour mot (ou « aucun message »).
-5. **Le comportement** parmi : *rien ne se passe* · *bouton bloqué / chargement infini* · *message d'erreur* · *page rechargée toute seule* · *fichier obtenu mais illisible* · *fichier absent*.
-6. **Reproductible ?** Refais **une seule fois** : « 2 fois sur 2 » ou « 1 fois sur 2 ».
-7. **Sur MacBook : le message de la console** (voir §3, point 5).
-
-**À la fin :** envoie-moi les notes (colle-les dans la conversation) et les captures. **Je reporte les verdicts dans `plan-de-travail.md` (bloquant 9) ; chaque ÉCHOUÉ devient un défaut chiffré, et aucun n'est marqué « CLOS » sans un retest de ta part sur le vrai Safari.**
+**À la fin :** colle les notes dans la conversation avec les captures. Je reporte les verdicts dans `plan-de-travail.md` (bloquant 9) ; chaque ÉCHOUÉ devient un défaut chiffré, et aucun n'est marqué « CLOS » sans ton retest sur le vrai Safari.
 
 ---
 
-## 6. RÈGLE À CONNAÎTRE AVANT DE LANCER (règle permanente n° 8)
+## 6. OPÉRATIONS PAYANTES (règle permanente n° 8)
 
-**Deux outils déclenchent une opération payante en production : n° 6 Background Remover (~0,003 $ l'image, service Railway) et n° 19 Grammar Fixer (appel OpenAI, fraction de centime).** La règle n° 8 du projet demande de tester ce genre d'opération **sur une préversion**. Cette feuille pointe **la production** parce qu'une préversion Vercel est protégée par une connexion, pénible sur un iPhone. **Décision qui t'appartient :**
-- **Par défaut : tu les lances en production, chacun UNE fois** (quelques dixièmes de centime au total, très loin du plafond de 20 $).
-- Si tu préfères la préversion : dis-le avant, et je fournis l'adresse et le moyen de t'y connecter.
+**Quatre tests déclenchent un coût en production :** n° 17 Word to PDF (ConvertAPI, 0,01 $), n° 21 Grammar Fixer (OpenAI, une fraction de centime), n° 25 Background Remover (~0,003 $ l'image), et les **conversions sur notre service** (n° 2, 3, 6c, 7, 11, 15, 19 : coût Railway ≈ 0,001 $ chacune). **Total estimé : moins de 0,05 $.** Décision du 19/09 : **production, une fois chacun.**
 
-**Ne relance pas ces deux tests en boucle** : les limites par IP (30 par heure) et le quota utilisateur s'appliquent.
+⚠️ **Limite de 20 conversions par heure et par connexion** sur notre service média (n° 2, 3, 6c, 7 — Splitter compte un billet par partie en Opus —, 11, 15) : la séance A en consomme ≈ 12 à 14. **Ne relance pas ces tests en boucle.** Si la page dit que la limite est atteinte, note-le (message attendu, pas un défaut) et reprends ces outils une heure plus tard.
 
 ---
 
@@ -325,27 +344,86 @@ Exemples : `1 | É | "captureStream is not a function"` · `4 | É | wav OK, web
 
 | # | Outil | iPhone | MacBook | Note |
 |---|---|---|---|---|
-| 1 | Video Compressor | | | |
-| 2 | Video Converter | | | |
-| 3 | Video Trimmer | | | |
-| 4 | Voice Recorder | | | |
-| 5 | Image Converter | | | |
-| 6 | Background Remover | | | |
-| 7 | Image Upscaler | | | |
-| 8 | Video to GIF | | | |
-| 9 | MP4 to GIF | | | |
-| 10 | Audio Converter | | | |
-| 11 | Audio Trimmer | | | |
-| 12 | Merge PDF | | | |
-| 13 | Split PDF | | | |
-| 14 | Compress PDF | | | |
-| 15 | Image Compressor | | | |
+| 1 | Zip Extractor (a-e) | | | |
+| 2 | Video Compressor [S1] | | | |
+| 3 | Video Converter [S1] | | | |
+| 4 | Video Trimmer [S1] | | | |
+| 5 | Voice Recorder [S2] | | | |
+| 6 | Audio Merger (a-d) | | | |
+| 7 | Audio Opus ×4 + MP3 | | | |
+| 8 | Barcode Generator (a-d) | | | |
+| 9 | QR Scanner (a-d) | | | |
+| 10 | Image Converter [S3] | | | |
+| 11 | Image Upscaler [S4] | | | |
+| 12 | Audio Trimmer | | | |
+| 13 | Image Compressor | | | |
+| 14 | Hash Generator | | | |
+| 15 | MP4/MOV to GIF [S5] | | | |
 | 16 | GIF Maker | | | |
-| 17 | Zip Creator | | | |
-| 18 | QR Scanner | | | |
-| 19 | Grammar Fixer | | | |
+| 17 | Word to PDF | | | |
+| 18 | Split PDF | | | |
+| 19 | Compress PDF | | | |
 | 20 | QR Generator | | | |
+| 21 | Grammar Fixer | | | |
+| 22 | Unit Converter | | | |
+| 23 | Color Converter | | | |
+| 24 | Image Resizer | | | |
+| 25 | Background Remover | | | |
+| 26 | Tar Extractor | — | | |
+| 27 | Merge PDF | | | |
+| 28 | Outils de texte | | | |
+| 29 | Currency Converter | | | |
+| 30 | 5 outils MediaRecorder (a-e) | | | |
 
 *Légende : R = RÉUSSI · É = ÉCHOUÉ · B = BLOQUÉ.*
 
-**Ce que cette feuille ne prouve pas, même 20/20 :** les 200+ autres outils, les fichiers volumineux (les plafonds mobiles 100 Mo / 300 pages ne sont pas éprouvés ici), et les versions de Safari autres que la tienne.
+**Ce que cette feuille ne prouve pas, même 29/29 :** les ≈ 190 autres outils, les gros fichiers (plafonds mobiles non éprouvés ici), le chemin Office par morceaux (> 4 Mio), et les versions de Safari autres que la tienne. **Retirés de la feuille du 19/09 :** Zip Creator et Video to GIF (inchangés depuis, ou couverts par les n° 1 et 15).
+
+---
+
+## 8. PASSE PRÉALABLE SOUS LE WEBKIT DE PLAYWRIGHT — 28/09/2026 (nuit), par Claude
+
+> **Ce n'est pas Safari.** Le WebKit de Playwright sous Windows n'a **ni `OffscreenCanvas`, ni `MediaRecorder`, ni `captureStream`, ni caméra, ni micro, ni lecture audio/vidéo** (il répond « probably » à `canPlayType('audio/wav')` mais ne lit rien). Cette passe **ne clôt aucun point du bloquant 9** ; elle a servi à corriger avant ta passe ce qui cassait déjà. Outils payants ou sur nos services : **route ou service joués par le test** (aucun appel payant, aucun secret) — ce qui prouve le chemin navigateur (envoi, octets reçus, téléchargement), pas l'encodage réel.
+> Suites : `scripts/browser-tests/*.mjs --browser=webkit` (option ajoutée à toutes), plus `service-tools-mock.mjs`, `webkit-sheet-rest.mjs`, `mediarecorder-tools.mjs`, `audio-trimmer-no-preview.mjs`, `video-trimmer-no-preview.mjs`, `cut-join-audit.mjs`.
+
+**Corrigé cette nuit (en local, testé WebKit + Chromium + Firefox, un commit chacun) :**
+- **Audio Trimmer** — un format que le lecteur du navigateur ne lit pas (WMA, AC3 partout ; tout sous ce WebKit) : **les réglages n'apparaissaient jamais, sans message**. Durée lue par ffmpeg.wasm, « pas d'aperçu » dit (`9f01beac`).
+- **Audio Splitter** — même défaut + point de coupe à la seconde + MP3 imposé par défaut (`91dbf2f4`).
+- **Video Trimmer** — AVI, WMV acceptés mais jamais coupables (message « sliders unavailable ») ; même correction (`11326601`).
+- **Image Resizer** — sous WebKit, une largeur tapée avant la lecture de l'image gardait la hauteur d'origine : **2000×1500 → 879×1500, image déformée** ; champs désactivés tant que la taille n'est pas lue (`e81d4b62`).
+- **Voice Recorder** — sans enregistrement possible : « Microphone access denied: undefined is not an object… » ; vraie cause dite (`2d101e55`).
+- **QR Scanner** — sans caméra sur une page https : « il faut une page https sécurisée » (faux) ; corrigé (`3559d7d4`).
+- **Video Merger / Filter / Rotator / Resizer** — textes « toujours WebM » faux sous Safari (MP4) (`15053bfa`).
+
+| # | Outil | Sous WebKit (Playwright) | Ce qui reste à regarder sur le vrai Safari |
+|---|---|---|---|
+| 1 | Zip Extractor | **20/20** (www) : RAR WinRAR noms chinois, en-têtes chiffrés, 7z/ZIP AES, volumes, CAB, LZH, annulation, « Download all as ZIP » ; **nouveau (local, non déployé) : ZIP de 2,2 Go en flux, octets identiques** | mémoire de l'iPhone ; « Save all to a folder » **absent** (normal) ; après déploiement, un « all as ZIP » > 1,9 Go sur le MacBook |
+| 2-3 | Video Compressor / Converter [S1] | **envoi par morceaux vérifié** (service joué : octets reçus = fichier, SHA-256 de chaque morceau), `.mov` accepté, téléchargement | **l'encodage réel** et le temps (service vrai), un `.MOV` d'iPhone |
+| 4 | Video Trimmer [S1] | coupe MP4/AVI/WMV **faite sans aperçu** (ce WebKit ne lit aucune vidéo) ; copie alignée sur l'image-clé | lecture de l'aperçu, curseurs, un `.MOV` d'iPhone |
+| 5 | Voice Recorder [S2] | pas de micro ici : **message juste** (corrigé) | l'enregistrement réel, extension `.m4a`/`.mp4` |
+| 6 | Audio Merger | jonctions **exactes** (c1 « exact » ; FLAC, fondus, ordre) ; **lecture impossible dans ce WebKit** (échecs « play » attendus) ; Opus non joué ici | écoute, « no preview » pour WMA/AC3, Opus |
+| 7 | Audio Opus ×4 | Booster, Splitter, Compressor, Converter : **FLAC envoyé exact, `.opus` téléchargé** (service joué) — 5/5 | l'extension `.opus` à l'enregistrement dans Safari |
+| 8 | Barcode Generator | **67/67** (WebKit a les Workers ; sans OffscreenCanvas, le repli fonctionne), chaque code relu par zxing-cpp | rien de particulier |
+| 9 | QR Scanner | dépôt, **collage** et envoi lus ; caméra absente : message juste (corrigé) | **caméra de l'iPhone**, collage depuis Photos |
+| 10 | Image Converter [S3] | **ce WebKit n'a pas OffscreenCanvas** : message clair « needs Safari 16.4 or later », rien de faux produit | **tout** : WebP (Safari n'en encode pas : doit le dire avant), AVIF, BMP/TIFF/PDF, HEIC |
+| 11 | Image Upscaler [S4] | refus au-delà de 1 Mpx dit, **envoi par morceaux + route** vérifiés (service joué), PNG téléchargé | le résultat réel ×4 |
+| 12 | Audio Trimmer | **corrigé** (voir plus haut) ; coupes à l'échantillon, fondus | écoute, « Set to the player's position » |
+| 13 | Image Compressor | même message qu'Image Converter (pas d'OffscreenCanvas) | **tout** |
+| 14 | Hash Generator | **17/17**, dont 760 Mio en flux | collage |
+| 15 | MP4 / MOV to GIF [S5] | `.mov` accepté, envoi et téléchargement vérifiés (service joué) | le GIF réel, proportions d'une vidéo verticale |
+| 16 | GIF Maker | ajuster/rogner/étirer, ordre, boucles : **tout passe** | — |
+| 17 | Word to PDF | page, envoi et téléchargement vérifiés (route jouée) | la conversion réelle (payante, une fois) |
+| 18 | Split PDF | **9/9** (plages, toutes les N pages, ZIP de 30) | — |
+| 19 | Compress PDF | page, envoi et téléchargement vérifiés (route jouée) | la compression réelle |
+| 20 | QR Generator | **11/11** (logo, PNG/SVG/PDF, relu par jsQR) | lecture Wi-Fi par l'appareil photo |
+| 21 | Grammar Fixer | surlignage, défaire/rétablir, copier : **10/10** (IA jouée) | l'appel réel (payant, une fois) |
+| 22-23 | Unit / Color Converter | **30/30** | collage |
+| 24 | Image Resizer | **corrigé** (déformation sous WebKit) ; 2/2 | — |
+| 25 | Background Remover | **non passé** (payant ; sa route n'a pas été jouée cette nuit) | tout |
+| 26 | Tar Extractor | en-têtes PAX : **pas de fichier parasite**, contenu exact | — |
+| 27 | Merge PDF | 6 pages, A puis B : **exact** | — |
+| 28 | Outils de texte | **7/7** (emoji entier, 3 phrases) | — |
+| 29 | Currency Converter | **5/5** (date des taux, écart BCE 0,006 %) | — |
+| 30 | **Video Merger, Filter, Rotator, Resizer, Screen Recorder** (MediaRecorder) | ce WebKit n'a **ni MediaRecorder ni captureStream** : la page le **dit avant** et garde le bouton désactivé (4 outils vérifiés) ; sous Chromium/Firefox, les 4 donnent un WebM qui se relit jusqu'au bout, aux bonnes dimensions | **les 5 outils sur le vrai Safari** : Safari a MediaRecorder (MP4) — vérifier que le fichier `.mp4` se lit, **avec le son** (Filter/Rotator/Resizer) ; Screen Recorder : Safari macOS seulement (pas d'iPhone) |
+
+**Trouvé en route et corrigé (Chromium + Firefox, `85a614bf`) :** Video Merger **ne finissait jamais sous Firefox** et **perdait le son partout** ; il garde maintenant le son de chaque clip et ajuste (bandes noires) au lieu d'étirer. **Aussi corrigé (`ac75f9f0`) :** Video Resizer étirait l'image quand la taille demandée n'avait pas les proportions de la source ; il propose maintenant « Fit » (bandes noires, par défaut), « Fill » ou « Stretch », comme les références.

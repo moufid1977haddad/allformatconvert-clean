@@ -1,13 +1,13 @@
 // Image Converter's BMP / GIF / TIFF / ICO / PDF outputs on the real page: each download reopened and checked
 // (pixels compared with the source where the format allows), plus the time of the slowest one on a big photo.
 // Usage: node scripts/browser-tests/image-converter-formats.mjs <origin or _vercel_share URL> <photo.jpg> <transparent.png> [big.jpg] [--browser=firefox]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import sharp from 'sharp';
 import { PDFDocument } from 'pdf-lib';
 import fs from 'node:fs';
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const [entry, photo, transparent, big] = args; const origin = new URL(entry).origin;
-const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
+const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const b = await engine.launch(); const page = await (await b.newContext({ acceptDownloads: true })).newPage();
 if (entry.includes('_vercel_share')) await page.goto(entry);
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };

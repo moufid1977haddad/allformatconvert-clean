@@ -2,14 +2,14 @@
 // Download clicked; time, whether the tab survives, and the downloaded bytes' SHA-256 against the source.
 // Used to set MAX_FILE_BYTES in app/tools/file-tools/zip-extractor/config.js (archives: make-big-rar.mjs).
 // Usage: node scripts/browser-tests/zip-extractor-cap.mjs <origin or _vercel_share URL> <archive> <source file> [--browser=firefox]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import { authorize } from './vercel-preview-auth.mjs';
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const [entry, file, source] = args; const origin = new URL(entry).origin;
-const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
+const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const sha = (f) => new Promise((ok) => { const h = createHash('sha256'); fs.createReadStream(f).on('data', (d) => h.update(d)).on('end', () => ok(h.digest('hex'))); });
 const want = await sha(source);
 const b = await engine.launch(); const bctx = await b.newContext({ acceptDownloads: true }); await authorize(bctx, origin); const page = await bctx.newPage();

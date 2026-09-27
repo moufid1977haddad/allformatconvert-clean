@@ -6,7 +6,7 @@
 // through Playwright and adds that header, nothing else. On www, run without it: everything is the real path.
 // Uses 5 tickets (the site allows 20 per hour per connection).
 // Usage: node scripts/browser-tests/audio-opus-real.mjs <origin> <ffmpeg> [--browser=firefox] [--cors-shim]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -14,7 +14,7 @@ import path from 'node:path';
 
 const [entry, FF] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const origin = new URL(entry).origin;
-const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
+const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const SERVICE = 'https://media-processing-production-d2f4.up.railway.app';
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 

@@ -1,10 +1,10 @@
 // Same file, same algorithms (MD5, SHA-1, SHA-256, SHA-512, CRC32), same browser: time from click to results on
 // our Hash Generator and on the reference (html-code-generator.com file hash generator), results checked equal.
 // Usage: node scripts/browser-tests/hash-vs-reference.mjs <our origin or _vercel_share URL> <file> [--browser=firefox] [--ours-only]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const [entry, file] = args; const origin = new URL(entry).origin;
-const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
+const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const b = await engine.launch();
 const ours = async () => {
   const page = await (await b.newContext()).newPage();

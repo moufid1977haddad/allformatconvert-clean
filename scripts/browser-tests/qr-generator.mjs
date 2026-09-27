@@ -1,13 +1,13 @@
 // QR Code Generator, real page: every content type downloaded as PNG and SVG and decoded here with jsQR
 // (independently of the page's own check), the PDF opened, a logo, and the refusal of light-on-dark.
 // Usage: node scripts/browser-tests/qr-generator.mjs <origin or _vercel_share URL> <logo.png> [--browser=firefox]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import sharp from 'sharp';
 import jsQR from 'jsqr';
 import { PDFDocument } from 'pdf-lib';
 import fs from 'node:fs';
 const [entry, logo] = process.argv.slice(2); const origin = new URL(entry).origin;
-const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
+const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const b = await engine.launch(); const page = await (await b.newContext({ acceptDownloads: true })).newPage();
 if (entry.includes('_vercel_share')) await page.goto(entry);
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };

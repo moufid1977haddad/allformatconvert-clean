@@ -24,6 +24,16 @@ export default function VideoMergerPage() {
     if (files.length < 2) return;
     setError('');
     setStatus('Merging videos...');
+    const support = videoReRecordSupport();
+    if (!support.ok) { setError(support.reason); setStatus(''); return; }
+    // The sound of every clip goes through Web Audio into the recording (28/09/2026: the merged file had no
+    // sound at all, and Firefox never finished -- its recorder waits forever for the audio track that
+    // "video/webm;codecs=vp8,opus" promises when the stream has none). Created and resumed here, inside the
+    // click, before any await: a resume() after the click's activation has expired may never settle.
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const audioContext = new AudioCtx();
+    const resumed = audioContext.state === 'suspended' ? audioContext.resume() : Promise.resolve();
+    const closeAudio = () => { audioContext.close().catch(() => {}); };
     try {
       const canvas = document.createElement('canvas');
       const videos = await Promise.all(files.map(f => new Promise((resolve, reject) => {
@@ -35,9 +45,11 @@ export default function VideoMergerPage() {
       canvas.width = videos[0].videoWidth;
       canvas.height = videos[0].videoHeight;
       const ctx = canvas.getContext('2d');
-      const stream = canvas.captureStream(30);
-      const support = videoReRecordSupport();
-      if (!support.ok) throw new Error(support.reason);
+      const videoStream = canvas.captureStream(30);
+      const audioOut = audioContext.createMediaStreamDestination();
+      for (const v of videos) audioContext.createMediaElementSource(v).connect(audioOut);
+      await resumed;
+      const stream = new MediaStream([...videoStream.getVideoTracks(), ...audioOut.stream.getAudioTracks()]);
       const recorder = new MediaRecorder(stream, { mimeType: support.mime });
       const chunks = [];
       recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
@@ -47,14 +59,19 @@ export default function VideoMergerPage() {
           setResult({ url: URL.createObjectURL(blob), ext });
         } catch (e) { setError(e.message); }
         setStatus('');
+        closeAudio();
       };
-      recorder.onerror = () => { setError('Recording failed in this browser.'); setStatus(''); };
+      recorder.onerror = () => { setError('Recording failed in this browser.'); setStatus(''); closeAudio(); };
       recorder.start();
       for (const video of videos) {
         await video.play();
         await new Promise(resolve => {
+          // Fitted, not stretched: a clip of another shape keeps its proportions, with black bars.
+          const k = Math.min(canvas.width / video.videoWidth, canvas.height / video.videoHeight);
+          const w = video.videoWidth * k, h = video.videoHeight * k;
           const draw = () => {
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(video, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
             if (!video.ended) requestAnimationFrame(draw);
             else resolve();
           };
@@ -63,7 +80,7 @@ export default function VideoMergerPage() {
         video.pause();
       }
       recorder.stop();
-    } catch(e) { setError('Error: ' + e.message); setStatus(''); }
+    } catch(e) { setError('Error: ' + e.message); setStatus(''); closeAudio(); }
   };
 
   return (
@@ -95,23 +112,23 @@ export default function VideoMergerPage() {
       </div>
       <SeoContent
         title="Video Merger"
-        description="Video Merger plays your videos back-to-back onto a canvas and records the result as one file, entirely in your browser. Note: the output is always WebM and has no audio, since canvas recordings don't carry sound; videos merge in the order you added them, and all clips are drawn at the first video's dimensions — later videos with a different aspect ratio will be stretched to fit."
+        description="Video Merger plays your videos back-to-back onto a canvas and records the result as one file, entirely in your browser. The sound of each clip is kept. Note: the output is the format your browser records (WebM in Chrome, Edge and Firefox; MP4 in Safari), made in real time (a 1-minute result takes about a minute); videos merge in the order you added them, at the first video's dimensions — a clip of another shape keeps its proportions, with black bars."
         howTo={[
           "Click the upload area and add two or more video files — they'll merge in the order you add them.",
           "Review the list and remove any you don't want.",
           "Click \"Merge Videos\" — each video plays through in sequence while the combined result is recorded.",
-          "Preview and download the merged WebM file."
+          "Preview and download the merged file (WebM, or MP4 in Safari)."
         ]}
         faqs={[
           { q: "Can I reorder videos before merging?", a: "Not currently — they merge in the order they were added; remove and re-add files if you need a different order." },
-          { q: "Does the merged video have audio?", a: "No — since merging works by drawing frames to a canvas, and canvas recordings never carry audio, the output is silent." },
-          { q: "What if my videos have different resolutions?", a: "All videos are drawn at the first video's dimensions, so later clips with a different aspect ratio will appear stretched rather than letterboxed." },
+          { q: "Does the merged video have audio?", a: "Yes: the sound of each clip is recorded with its pictures." },
+          { q: "What if my videos have different resolutions?", a: "The result has the first video's dimensions; a clip of another shape keeps its proportions, with black bars (letterboxed), never stretched." },
           { q: "Is my file uploaded anywhere?", a: "No, merging happens entirely in your browser." }
         ]}
         tips={[
           "Merge videos with matching resolution and aspect ratio for the cleanest-looking result.",
           "Merging takes roughly as long as the combined duration of all your clips, since each one plays through in full.",
-          "Since output has no audio, add a soundtrack afterward with a dedicated video editor if you need sound.",
+          "Each clip keeps its own sound; if a clip is silent, that part of the result is silent too.",
           "Keep the browser tab active and visible while merging, since the videos need to actually play for the canvas to capture them."
         ]}
       />

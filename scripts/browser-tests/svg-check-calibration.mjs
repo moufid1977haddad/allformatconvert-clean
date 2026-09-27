@@ -1,7 +1,7 @@
 // Calibrates the SVG render check of image-compressor (page.jsx svgMaxPixelDiff) in real browsers:
 // SVGO outputs must stay under SVG_MAX_PIXEL_DIFF, a copy with one shape deleted must go above it.
 // Usage: node scripts/browser-tests/svg-check-calibration.mjs <dir with tux.svg, map.svg, ours-tux.svg>
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 const require = createRequire(process.cwd() + '/');

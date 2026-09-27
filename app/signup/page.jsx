@@ -140,7 +140,7 @@ export default function SignUpPage() {
               We sent a confirmation link to <span className="font-medium">{form.email}</span>.
             </p>
             <p className="text-neutral-400 text-xs mb-1">Please check your inbox — and your spam folder — and confirm your address before signing in.</p>
-            <p className="text-neutral-400 text-xs mb-4">Using iCloud or Yahoo Mail? If it lands in Junk, please mark it "Not Junk" — it helps make sure our emails reach you (and others) reliably in the future.</p>
+            <p className="text-neutral-400 text-xs mb-4">Found it in spam or junk? Please mark it as &ldquo;Not spam&rdquo; (&ldquo;Not junk&rdquo; in iCloud, Yahoo and Outlook) and add us to your contacts, so our next emails reach your inbox.</p>
             <div className="mb-6">
               {resendState === 'sent' ? (
                 <span className="text-green-600 text-sm font-medium">Confirmation email resent — check your inbox.</span>

@@ -64,7 +64,7 @@ export default function VideoScreenshotPage() {
           </div>
           {file && (
             <div className="space-y-3">
-              <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" />
+              <video ref={videoRef} controls playsInline onError={() => setError("This browser cannot play this video's format, so no frame can be captured here. Convert it to MP4 first with the Video Converter, then capture.")} className="w-full rounded-xl bg-neutral-800" />
               <div className="flex flex-wrap gap-4 items-center">
                 <div>
                   <label className="text-xs text-neutral-500 block mb-1">Format</label>

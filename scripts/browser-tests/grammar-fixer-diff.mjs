@@ -3,10 +3,10 @@
 // changes shown, the result text for every choice (all kept = the correction, all undone = the original, exactly),
 // one change undone and restored, texts with accents, emoji and line breaks, no change, a full rewrite, Copy.
 // Usage: node scripts/browser-tests/grammar-fixer-diff.mjs <origin> [--browser=firefox]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--'))).origin;
-const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
+const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 
 const b = await engine.launch();

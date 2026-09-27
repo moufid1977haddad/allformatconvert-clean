@@ -61,7 +61,7 @@ export default function QrScannerPage() {
 
   const startCamera = async (id = deviceId) => {
     setResult(''); setStatus('');
-    if (!navigator.mediaDevices?.getUserMedia) { setStatus('This browser cannot use a camera here (a camera needs a secure https page). Upload a photo of the code instead.'); return; }
+    if (!navigator.mediaDevices?.getUserMedia) { setStatus(window.isSecureContext ? 'This browser does not give web pages access to a camera. Upload a photo of the code instead.' : 'This browser cannot use a camera here (a camera needs a secure https page). Upload a photo of the code instead.'); return; }
     stopCamera();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: id ? { deviceId: { exact: id } } : { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } }, audio: false });

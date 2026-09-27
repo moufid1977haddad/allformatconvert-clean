@@ -10,7 +10,7 @@
 // Also: check digits added/refused, contrast refused, dpi written in PNG/JPG, pixels per module, exact mm in vector
 // files, rotation, transparency, batch from a list (with bad lines) and from a numbered series.
 // Usage: node scripts/browser-tests/barcode-generator.mjs <origin> [--browser=firefox] [--only=code128,ean13]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -25,7 +25,7 @@ import { authorize } from './vercel-preview-auth.mjs';
 
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const origin = new URL(args[0]).origin;
-const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
+const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const only = (process.argv.find((a) => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean);
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'bc-'));
 const GS = ['C:\\Program Files\\gs\\gs10.07.1\\bin\\gswin64c.exe'].find((p) => fs.existsSync(p));

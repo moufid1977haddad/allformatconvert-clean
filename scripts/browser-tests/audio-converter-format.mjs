@@ -1,11 +1,11 @@
 // Real audio-converter page, one output format, one real file: does a playable file come out?
 // Usage: node scripts/browser-tests/audio-converter-format.mjs <origin or share URL> <file> <format label> [--browser=firefox]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 const [entry, file, label] = process.argv.slice(2);
-const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
+const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const b = await engine.launch(); const ctx = await b.newContext({ acceptDownloads: true }); const p = await ctx.newPage();
 const logs = []; p.on('console', (m) => logs.push(m.text()));
 if (entry.includes('_vercel_share')) await p.goto(entry);

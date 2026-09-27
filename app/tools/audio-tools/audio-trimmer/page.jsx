@@ -4,6 +4,7 @@ import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { AUDIO_ACCEPT } from '../../../lib/mediaSupport';
 import { reportToolError } from '../../../lib/reportError';
+import { ffmpegAudioDuration } from '../../../lib/audioDuration';
 
 // Start and end to a tenth of a second (typed, slid, or taken from the player) and fades in/out, as the reference
 // cutter offers (mp3cut.net, read 26/09/2026: fades, keyboard nudges). The duration used to be rounded down to whole
@@ -29,8 +30,14 @@ export default function AudioTrimmerPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  // The browser's own player cannot read every format ffmpeg.wasm can (WMA, AC3, AMR… in every browser; more in
+  // Safari): the duration then comes from ffmpeg.wasm itself, and the page says there is no preview (27-28/09/2026:
+  // the controls never appeared and nothing was said).
+  const [noPreview, setNoPreview] = useState(false);
+  const [probing, setProbing] = useState(false);
   const fileRef = useRef();
   const audioRef = useRef();
+  const fileIdRef = useRef(0);
 
   const handleFile = (e) => {
     const f = e.target.files[0];
@@ -42,14 +49,40 @@ export default function AudioTrimmerPage() {
     setStart(0);
     setEnd(0);
     setDuration(0);
+    setNoPreview(false);
+    const id = ++fileIdRef.current;
     setAudioUrl(URL.createObjectURL(f));
+    // Some engines never fire either event for a format they cannot play: do not wait on them forever.
+    setTimeout(() => { const d = audioRef.current?.duration; if (fileIdRef.current === id && !(Number.isFinite(d) && d > 0)) probeWithFfmpeg(f, id); }, 4000);
   };
 
-  const onLoaded = () => {
-    const dur = Math.floor(audioRef.current.duration * 10) / 10; // tenths, never beyond the real end
+  const applyDuration = (seconds) => {
+    const dur = Math.floor(seconds * 10) / 10; // tenths, never beyond the real end
     setDuration(dur);
     setStart(0);
     setEnd(dur);
+  };
+  const onLoaded = () => {
+    const d = audioRef.current.duration;
+    if (Number.isFinite(d) && d > 0) applyDuration(d);
+    else probeWithFfmpeg(file, fileIdRef.current, true); // plays, but no length in its header (a MediaRecorder WebM: Infinity)
+  };
+  const probedRef = useRef(0);
+  const probeWithFfmpeg = async (f, id, playable = false) => {
+    // Once per file: the player's error and the 4-second check can both ask for it.
+    if (fileIdRef.current !== id || probedRef.current === id) return;
+    probedRef.current = id;
+    if (!playable) setNoPreview(true);
+    setProbing(true);
+    try {
+      const seconds = await ffmpegAudioDuration(f); // releases its ffmpeg.wasm instance on every path
+      if (fileIdRef.current !== id) return;
+      applyDuration(seconds);
+    } catch (e) {
+      if (fileIdRef.current === id) setError(`This file could not be read (${e.message || e}). Please try another file or format.`);
+    } finally {
+      if (fileIdRef.current === id) setProbing(false);
+    }
   };
   const setTime = (which, v) => {
     const x = Math.min(duration, Math.max(0, tenth(Number(v) || 0)));
@@ -121,7 +154,8 @@ export default function AudioTrimmerPage() {
             {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-400 text-sm">Click to upload an audio file</p>}
           </div>
           <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
-          {audioUrl && <audio ref={audioRef} src={audioUrl} onLoadedMetadata={onLoaded} controls className="w-full" />}
+          {audioUrl && !noPreview && <audio ref={audioRef} src={audioUrl} onLoadedMetadata={onLoaded} onError={() => probeWithFfmpeg(file, fileIdRef.current)} controls className="w-full" />}
+          {noPreview && !error && <p className="text-sm text-neutral-600" role="status">{probing ? 'Reading the file…' : 'This browser cannot play this format, so there is no preview; trimming works the same (type the start and end).'}</p>}
           {duration > 0 && (
             <>
               <div className="grid grid-cols-2 gap-4">
@@ -130,7 +164,7 @@ export default function AudioTrimmerPage() {
                     <label htmlFor={`at-${k}`} className="block text-sm text-neutral-500">{label} (seconds): {clock(v)}</label>
                     <input id={`at-${k}`} type="number" min="0" max={duration} step="0.1" value={v} onChange={e => setTime(k, e.target.value)} className={num} />
                     <input type="range" min={0} max={duration} step={0.1} value={v} onChange={e => setTime(k, e.target.value)} className="w-full" aria-label={`${label} slider`} />
-                    <button type="button" onClick={() => fromPlayer(k)} className="text-xs text-indigo-600 underline">Set to the player's position</button>
+                    {!noPreview && <button type="button" onClick={() => fromPlayer(k)} className="text-xs text-indigo-600 underline">Set to the player's position</button>}
                   </div>
                 ))}
               </div>
@@ -144,7 +178,7 @@ export default function AudioTrimmerPage() {
               {(fadeIn > 0 || fadeOut > 0) && <p className="text-xs text-neutral-500">With a fade, the audio is re-encoded (same format at a high setting; WAV if this format cannot be written here). Without one, it is copied exactly.</p>}
             </>
           )}
-          <button onClick={trim} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          <button onClick={trim} disabled={!file || loading || !(duration > 0)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Trimming...' : 'Trim Audio'}
           </button>
           {error && <p className="text-red-600 text-center text-sm" role="alert">{error}</p>}

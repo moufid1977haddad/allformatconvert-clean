@@ -8,7 +8,7 @@
 //   the files allow is shortened and said; fade-in / fade-out on MP3 inputs start and end on silence;
 // - into MP3, and (--opus, real media service) into Opus.
 // Usage: node scripts/browser-tests/audio-merger-order-fade.mjs <origin> <ffmpeg> [--browser=firefox] [--opus] [--cors-shim] [--only=c1,c5]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 const [entry, FF] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const origin = new URL(entry).origin;
 const arg = (k) => (process.argv.find((a) => a.startsWith(`--${k}=`)) || '').split('=')[1];
-const engine = arg('browser') === 'firefox' ? firefox : chromium;
+const engine = { firefox, webkit }[arg('browser')] || chromium;
 const only = arg('only') ? arg('only').split(',') : null;
 const here = path.dirname(fileURLToPath(import.meta.url));
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'merger-order-fade-'));

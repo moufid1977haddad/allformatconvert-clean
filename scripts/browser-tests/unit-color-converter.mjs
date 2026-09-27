@@ -3,10 +3,10 @@
 // page. With --refs, the same conversions are typed into unitconverters.net and the same colours into RapidTables,
 // and their answers are compared with the same expected values.
 // Usage: node scripts/browser-tests/unit-color-converter.mjs <origin> [--browser=firefox] [--refs]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--'))).origin;
-const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
+const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const refs = process.argv.includes('--refs');
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 const rel = (a, b) => (b === 0 ? Math.abs(a) : Math.abs(a - b) / Math.abs(b));

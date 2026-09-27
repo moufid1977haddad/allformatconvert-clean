@@ -134,12 +134,12 @@ export default function VideoFilterPage() {
       </div>
       <SeoContent
         title="Video Filter"
-        description="Video Filter applies one visual effect (Grayscale, Sepia, Invert, Blur, Brightness, Contrast, or Saturate) to your video by redrawing each frame on a canvas and re-recording it, entirely in your browser. The original audio is preserved by routing it through the Web Audio API alongside the filtered video track, so the output isn't silent. Note: the output is always WebM, and only one filter can be active at a time, each at a fixed intensity."
+        description="Video Filter applies one visual effect (Grayscale, Sepia, Invert, Blur, Brightness, Contrast, or Saturate) to your video by redrawing each frame on a canvas and re-recording it, entirely in your browser. The original audio is preserved by routing it through the Web Audio API alongside the filtered video track, so the output isn't silent. Note: the output is the format your browser records (WebM in Chrome, Edge and Firefox; MP4 in Safari), and only one filter can be active at a time, each at a fixed intensity."
         howTo={[
           "Click the upload area and select a video file.",
           "Click one of the 8 filter buttons to preview it live on the video player.",
           "Click \"Apply Filter\" — the video plays through once while the filtered version (with its original audio) is recorded.",
-          "Preview and download the filtered WebM file."
+          "Preview and download the filtered file (WebM, or MP4 in Safari)."
         ]}
         faqs={[
           { q: "Can I combine multiple filters?", a: "No, only one filter can be applied at a time — selecting a new one replaces the previous choice." },

@@ -6,14 +6,15 @@
 // Needs a build made with a test service URL (never a real one, no env file involved):
 //   NEXT_PUBLIC_MEDIA_SERVICE_URL=https://media.test.invalid npm run build && npx next start -p 3100
 // Usage: node scripts/browser-tests/audio-opus-service.mjs <origin> [--browser=firefox]
-import { chromium, firefox } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--'))).origin;
-const engine = process.argv.includes('--browser=firefox') ? firefox : chromium;
-const SERVICE = 'https://media.test.invalid';
+const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
+// On a deployed preview the page's service URL is the real one: MOCK_SERVICE_URL names it so the test still plays it (routes intercepted, nothing reaches it).
+const SERVICE = process.env.MOCK_SERVICE_URL || 'https://media.test.invalid';
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 
 // 4 s, 44.1 kHz stereo 16-bit WAV: a 440 Hz tone at 1/8 of full scale (so a 2x boost does not clip)
@@ -74,10 +75,10 @@ async function downloads(p, n) { const out = []; for (const a of await p.locator
   check('booster: MP3 still made in the browser, no job sent', jobs.length === 0, `${jobs.length} jobs`);
   await p.close();
 }
-{ // Audio Splitter: 4 s split at 3 s (the page's default for a 4 s file), Opus
+{ // Audio Splitter: 4 s split at 3 s, Opus
   const p = await open('audio-splitter');
   await p.locator('main select, select.w-full').first().selectOption('opus');
-  await p.waitForFunction(() => document.querySelector('input[type=range]')?.max === '3');
+  await p.locator('#split-at').fill('3'); // split point typed to the tenth since 28/09 (was a whole-second slider)
   await p.getByRole('button', { name: /Split/ }).click();
   await p.locator('a[download]').nth(1).waitFor({ timeout: 120000 });
   const f = jobs.map((j) => flacInfo(sent(j))); const ds = await downloads(p, 2);
