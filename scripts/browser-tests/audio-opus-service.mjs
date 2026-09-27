@@ -13,7 +13,8 @@ import path from 'node:path';
 
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--'))).origin;
 const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
-const SERVICE = 'https://media.test.invalid';
+// On a deployed preview the page's service URL is the real one: MOCK_SERVICE_URL names it so the test still plays it (routes intercepted, nothing reaches it).
+const SERVICE = process.env.MOCK_SERVICE_URL || 'https://media.test.invalid';
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 
 // 4 s, 44.1 kHz stereo 16-bit WAV: a 440 Hz tone at 1/8 of full scale (so a 2x boost does not clip)
