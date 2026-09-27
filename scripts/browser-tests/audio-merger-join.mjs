@@ -2,7 +2,7 @@
 // 1. Here, by ffmpeg: each input is decoded ON ITS OWN (encoder delay / pre-skip / padding removed by its own headers,
 //    the reference a listener hears when playing the files one after the other), then each input is located in the
 //    decoded result by correlation. Per junction: where the next file really starts (drift, ms), the longest near-silence
-//    around it (gap, ms), and how faithful the first 50 ms after it are (SNR, dB). Plus total length against the sum.
+//    around it beyond the quiet the two sources already have there (gap, ms), and how faithful the first 50 ms after it are (SNR, dB). Plus total length against the sum.
 // 2. In the browser that made it: decodeAudioData duration, <audio> duration, and a full play to 'ended'.
 // Sources are pink noise + a tone (never silent), so any silence at a junction is the join's.
 // Usage: node scripts/browser-tests/audio-merger-join.mjs <origin> <ffmpeg> [--browser=firefox] [--only=opus,mp3]
@@ -60,6 +60,9 @@ function probe(file) {
   const j = JSON.parse(out); const a = (j.streams || []).find((s) => s.sample_rate) || {};
   return { container: j.format?.format_name, duration: Number(j.format?.duration), codec: a.codec_name, rate: Number(a.sample_rate) };
 }
+// Quiet already inside a source (an encoder's trailing padding, measured on ffmpeg's AAC): a player plays it too, so it
+// is not the join's. Leading / trailing run under 1e-3, in samples.
+const quiet = (x) => { let a = 0; while (a < x.length && Math.abs(x[a]) < 1e-3) a++; let z = 0; while (z < x.length && Math.abs(x[x.length - 1 - z]) < 1e-3) z++; return [a, z]; };
 const snrDb = (ref, out) => { let s = 0, n = 0; for (let i = 0; i < ref.length; i++) { s += ref[i] ** 2; n += (ref[i] - out[i]) ** 2; } return n === 0 ? 'identical' : 10 * Math.log10(s / n); };
 function locate(ref, out, expected, rate) {
   // Match 1 s taken from the middle of the input; search ±150 ms around where it should be.
@@ -84,7 +87,8 @@ function analyse(outFile, inputs) {
       const snr = snrDb(ref.subarray(0, H), out.subarray(at, at + H));
       let run = 0, gap = 0; const lo = Math.max(0, start - Math.floor(0.2 * rate)), hi = Math.min(out.length, start + Math.floor(0.2 * rate));
       for (let k = lo; k < hi; k++) { if (Math.abs(out[k]) < 1e-3) { run++; gap = Math.max(gap, run); } else run = 0; }
-      junctions.push({ driftMs: +((d / rate) * 1000).toFixed(2), gapMs: +((gap / rate) * 1000).toFixed(2), snr50: typeof snr === 'number' ? +snr.toFixed(1) : snr });
+      const own = quiet(refs[i - 1])[1] + quiet(ref)[0];
+      junctions.push({ driftMs: +((d / rate) * 1000).toFixed(2), gapMs: +((Math.max(0, gap - own) / rate) * 1000).toFixed(2), sourceQuietMs: +((own / rate) * 1000).toFixed(2), snr50: typeof snr === 'number' ? +snr.toFixed(1) : snr });
     }
     start = at + ref.length;
   });
@@ -94,6 +98,19 @@ function analyse(outFile, inputs) {
 const b = await engine.launch(engine === firefox ? { firefoxUserPrefs: { 'media.autoplay.default': 0 } } : {});
 const ctx = await b.newContext({ acceptDownloads: true });
 const { authorize } = await import('./vercel-preview-auth.mjs'); await authorize(ctx, origin);
+// Opus goes to the real media service. On an origin it does not list (a preview, or the localhost proxy of one) it
+// answers without CORS headers: --cors-shim relays its calls through Playwright and adds that header, nothing else
+// (same as audio-opus-real.mjs). On www, run without it.
+const SERVICE = 'https://media-processing-production-d2f4.up.railway.app';
+const serviceCalls = [];
+await ctx.route(SERVICE + '/**', async (r) => {
+  const req = r.request(); serviceCalls.push(`${req.method()} ${new URL(req.url()).pathname}`);
+  if (!process.argv.includes('--cors-shim')) return r.continue();
+  const cors = { 'access-control-allow-origin': origin, 'access-control-allow-headers': 'Authorization, Content-Type, X-Chunk-Sha256', 'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS' };
+  if (req.method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
+  const resp = await r.fetch();
+  return r.fulfill({ response: resp, headers: { ...resp.headers(), ...cors } });
+});
 let fails = 0;
 for (const name of Object.keys(SETS).filter((n) => !only || only.includes(n))) {
   const inputs = inputsFor(name);
@@ -101,28 +118,36 @@ for (const name of Object.keys(SETS).filter((n) => !only || only.includes(n))) {
   try {
     await p.goto(`${origin}/tools/audio-tools/audio-merger`, { waitUntil: 'networkidle' });
     await p.locator('input[type=file]').setInputFiles(inputs);
-    if (FORMAT) await p.locator('select').first().selectOption(FORMAT);
+    if (FORMAT) await p.locator('#merge-format').selectOption(FORMAT, { timeout: 120000 });
     await p.getByRole('button', { name: /^Merge/ }).click();
     await Promise.race([p.locator('a[download]').first().waitFor({ timeout: 180000 }),
       p.locator('text=/Merge failed/').waitFor({ timeout: 180000 }).then(async () => { throw new Error(await p.locator('text=/Merge failed/').innerText()); })]);
     const browser = await p.evaluate(async () => {
-      const url = document.querySelector('audio').src;
+      const url = document.querySelector('a[download]').href;
       const buf = await (await fetch(url)).arrayBuffer();
       let decoded; try { decoded = +(await new OfflineAudioContext(1, 1, 48000).decodeAudioData(buf.slice(0))).duration.toFixed(3); } catch (e) { decoded = 'ERR ' + e.message; }
       const a = new Audio(url); a.muted = true;
       await new Promise((r) => { a.onloadedmetadata = r; a.onerror = r; setTimeout(r, 10000); });
-      const elDur = a.duration;
+      const elDur = a.duration; const errCode = a.error?.code;
       a.playbackRate = 4;
       const played = await new Promise((r) => { a.onended = () => r({ ended: true, t: a.currentTime }); a.onerror = () => r({ ended: false, err: a.error?.code }); setTimeout(() => r({ ended: false, t: a.currentTime }), 20000); a.play().catch((e) => r({ ended: false, err: e.message })); });
-      return { decoded, elDur: Number.isFinite(elDur) ? +elDur.toFixed(3) : String(elDur), ...played, t: played.t != null ? +played.t.toFixed(3) : undefined };
+      return { decoded, errCode, elDur: Number.isFinite(elDur) ? +elDur.toFixed(3) : String(elDur), ...played, t: played.t != null ? +played.t.toFixed(3) : undefined };
     });
+    // A format this browser cannot play at all (Chromium: WMA, AC3, ALAC, AIFF) is not the merge's fault: the file is
+    // still checked by ffmpeg below, and the page must say there is no preview instead of showing a broken player.
+    const unplayable = typeof browser.decoded === 'string' && browser.errCode === 4; // MEDIA_ERR_SRC_NOT_SUPPORTED
+    if (unplayable) browser.noPreviewShown = await p.locator('[data-testid=no-preview]').isVisible();
     const [d] = await Promise.all([p.waitForEvent('download'), p.locator('a[download]').first().click()]);
     const outFile = path.join(tmp, `${name}-out-${d.suggestedFilename()}`); await d.saveAs(outFile);
     const r = analyse(outFile, inputs);
-    const ok = Math.abs(r.diffMs) <= 1 && r.junctions.every((j) => Math.abs(j.driftMs) <= 1 && j.gapMs <= 1)
-      && typeof browser.decoded === 'number' && Math.abs(browser.decoded - r.sumSecs) <= 0.05 && browser.ended && Math.abs(browser.t - r.sumSecs) <= 0.05;
+    // Lossy outputs may end with up to one codec frame of the encoder's padding (46 ms max, see audio-merger-formats.mjs);
+    // nothing may be missing, and the joins must be exact either way.
+    const lossy = !/^(flac|alac|pcm_)/.test(r.codec);
+    const ok = (lossy ? r.diffMs >= -1 && r.diffMs <= 47 : Math.abs(r.diffMs) <= 1) && r.junctions.every((j) => Math.abs(j.driftMs) <= 1 && j.gapMs <= 1)
+      && (unplayable ? browser.noPreviewShown === true
+        : typeof browser.decoded === 'number' && Math.abs(browser.decoded - r.outSecs) <= 0.05 && browser.ended && Math.abs(browser.t - r.outSecs) <= 0.05);
     if (!ok) fails++;
-    console.log(ok ? 'PASS' : 'FAIL', name, '->', d.suggestedFilename(), JSON.stringify({ codec: r.codec, container: r.container, probeSecs: r.duration, outSecs: r.outSecs, sumSecs: r.sumSecs, diffMs: r.diffMs, junctions: r.junctions, browser }));
+    console.log(ok ? 'PASS' : 'FAIL', name, '->', d.suggestedFilename(), JSON.stringify({ serviceJobs: serviceCalls.filter((c) => c === 'POST /v1/jobs').length, codec: r.codec, container: r.container, probeSecs: r.duration, outSecs: r.outSecs, sumSecs: r.sumSecs, diffMs: r.diffMs, junctions: r.junctions, browser }));
   } catch (e) { fails++; console.log('FAIL', name, String(e.message || e).slice(0, 300)); }
   await p.close();
 }
