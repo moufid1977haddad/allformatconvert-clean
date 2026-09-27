@@ -85,7 +85,9 @@ async function test1(name) {
     const f = await save(d, `t1-${name}-before-play.jpg`);
     const im = await rgb(f);
     const tb = await q.locator('video').evaluate((e) => e.currentTime); const r0n = await bestNear(src, tb, im);
-    check(`test1 ${name}: capture before playing gives the frame shown (${tb.toFixed(2)} s), neither black nor blank (luma ${meanLuma(im.data).toFixed(1)}, best PSNR ${r0n.p.toFixed(1)} dB at ${r0n.dt} frame)`, meanLuma(im.data) > 20 && meanLuma(im.data) < 250 && r0n.p > 24);
+    // Reference: how close a CORRECT capture of this video gets to ffmpeg's frame (colour conversion differs
+    // slightly between a browser and ffmpeg) -- the capture made after playing, just above.
+    check(`test1 ${name}: capture before playing gives the frame shown (${tb.toFixed(2)} s), neither black nor blank (luma ${meanLuma(im.data).toFixed(1)}, best PSNR ${r0n.p.toFixed(1)} dB at ${r0n.dt} frame; a correct capture of this video: ${pr.toFixed(1)} dB)`, meanLuma(im.data) > 20 && meanLuma(im.data) < 250 && r0n.p > pr - 2);
   } else {
     const msg = await q.locator('text=/no readable frame|wait for it to load/i').count();
     check(`test1 ${name}: capture before playing refused with a message (no black file)`, msg > 0);
@@ -162,52 +164,61 @@ function compareGrid(label, rows) {
   check(`test3 ${label}: every value right (decimal commas, accents, quoted ; and "")`, !bad.length, bad.slice(0, 8).join(' ; '));
 }
 async function test3() {
-  for (const [file, enc] of [['C-excel-fr.csv', 'UTF-8 + BOM (Excel "CSV UTF-8")'], ['C-excel-fr-ansi.csv', 'Windows-1252 (Excel "CSV (point-virgule)")']]) {
+  const FILES = [['C-excel-fr.csv', 'UTF-8 + BOM (Excel "CSV UTF-8")', /UTF-8/], ['C-excel-fr-ansi.csv', 'Windows-1252 (Excel "CSV (point-virgule)")', /1252/]];
+  // The CSV family: csv-to-json, csv-to-excel, csv-to-sql (Web Worker, file streamed) and csv-to-tsv (in page).
+  const open = async (tool, src) => {
+    const p = await newPage();
+    await p.goto(`${origin}/tools/developer-tools/${tool}`, { waitUntil: 'networkidle' });
+    await p.locator('input[type=file]').first().setInputFiles(src);
+    await p.waitForFunction(() => !/Comma/.test(document.querySelector('#csv-delimiter option[value=auto]')?.textContent || 'Comma'), null, { timeout: 5000 }).catch(() => {});
+    const det = await p.locator('#csv-delimiter option[value=auto]').innerText();
+    const encOpt = p.locator('#csv-encoding option[value=auto]');
+    const enc = (await encOpt.count()) ? await encOpt.innerText() : '(no encoding choice)';
+    return { p, det, enc };
+  };
+  for (const [file, label, encWant] of FILES) {
     const src = path.join(FX, file);
-    // csv-to-json
-    {
-      const p = await newPage();
-      await p.goto(`${origin}/tools/developer-tools/csv-to-json`, { waitUntil: 'networkidle' });
-      await p.locator('input[type=file]').first().setInputFiles(src);
-      await p.waitForFunction(() => !/Comma/.test(document.querySelector('#csv-delimiter option[value=auto]')?.textContent || 'Comma'), null, { timeout: 5000 }).catch(() => {});
-      const det = await p.locator('#csv-delimiter option[value=auto]').innerText();
-      check(`test3 csv-to-json ${enc}: delimiter auto-detected as semicolon`, /semicolon|;/i.test(det), det);
-      const [d] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), p.getByRole('button', { name: /Convert/ }).click()]);
-      const f = await save(d, `t3-${file}.json`);
-      const arr = JSON.parse(fs.readFileSync(f, 'utf8'));
-      const keys = Object.keys(arr[0] || {});
-      compareGrid(`csv-to-json ${enc}`, [keys, ...arr.map((o) => keys.map((k) => o[k]))]);
-      await p.close();
-    }
-    // csv-to-excel
-    {
-      const p = await newPage();
-      await p.goto(`${origin}/tools/developer-tools/csv-to-excel`, { waitUntil: 'networkidle' });
-      await p.locator('input[type=file]').first().setInputFiles(src);
-      await p.waitForFunction(() => !/Comma/.test(document.querySelector('#csv-delimiter option[value=auto]')?.textContent || 'Comma'), null, { timeout: 5000 }).catch(() => {});
-      const det = await p.locator('#csv-delimiter option[value=auto]').innerText();
-      check(`test3 csv-to-excel ${enc}: delimiter auto-detected as semicolon`, /semicolon|;/i.test(det), det);
-      const [d] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), p.getByRole('button', { name: /Convert|Download/ }).last().click()]);
-      const f = await save(d, `t3-${file}.xlsx`);
-      const wb = XLSX.read(fs.readFileSync(f));
-      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false, defval: '' });
-      compareGrid(`csv-to-excel ${enc}`, rows);
-      const raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true, defval: '' });
-      note(`csv-to-excel ${enc}: cell B2 stored as ${typeof raw[1]?.[1]} ${JSON.stringify(raw[1]?.[1])}, D4 ${typeof raw[3]?.[3]} ${JSON.stringify(raw[3]?.[3])}`);
+    for (const tool of ['csv-to-json', 'csv-to-excel', 'csv-to-sql', 'csv-to-tsv']) {
+      const { p, det, enc } = await open(tool, src);
+      check(`test3 ${tool} ${label}: delimiter auto-detected as semicolon`, /semicolon|;/i.test(det), det);
+      check(`test3 ${tool} ${label}: encoding auto-detected`, encWant.test(enc), enc);
+      let rows;
+      if (tool === 'csv-to-tsv') {
+        await p.getByRole('button', { name: 'Convert', exact: true }).click();
+        const [d] = await Promise.all([p.waitForEvent('download'), p.getByRole('button', { name: /Download/ }).click()]);
+        const out = fs.readFileSync(await save(d, `t3-${file}.tsv`), 'utf8');
+        rows = out.replace(/\r/g, '').split('\n').filter(Boolean).map((l) => l.split('\t'));
+      } else {
+        const [d] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), p.getByRole('button', { name: /Convert|Download/ }).last().click()]);
+        const out = await save(d, `t3-${file}.${tool.split('-').pop()}`);
+        if (tool === 'csv-to-json') {
+          const arr = JSON.parse(fs.readFileSync(out, 'utf8'));
+          const keys = Object.keys(arr[0] || {});
+          rows = [keys, ...arr.map((o) => keys.map((k) => o[k]))];
+          check(`test3 csv-to-json ${label}: decimal comma read as a number (12,5 → 12.5), dates left as text`, arr[0]['Prix unitaire'] === 12.5 && arr[2]['Prix unitaire'] === 1234.5 && arr[0].Date === '28/09/2026', JSON.stringify(arr[0]));
+        } else if (tool === 'csv-to-excel') {
+          const wb = XLSX.read(fs.readFileSync(out));
+          rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false, defval: '' });
+          const raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true, defval: '' });
+          check(`test3 csv-to-excel ${label}: number cells (B2 = 12.5, D4 = 2469), text stays text`, raw[1][1] === 12.5 && raw[3][3] === 2469 && raw[1][0] === 'Café moulu', `B2 ${typeof raw[1][1]} ${raw[1][1]}, D4 ${typeof raw[3][3]} ${raw[3][3]}, A2 ${raw[1][0]}`);
+        } else {
+          const sql = fs.readFileSync(out, 'utf8');
+          check(`test3 csv-to-sql ${label}: numeric columns typed, 12,5 written 12.5, accents intact`, /Prix unitaire DECIMAL/.test(sql) && /Quantité INTEGER/.test(sql) && sql.includes("VALUES ('Café moulu', 12.5, 3, 37.5, '28/09/2026'"), sql.split('\n').slice(0, 9).join(' | ').slice(0, 300));
+          await p.close();
+          continue;
+        }
+      }
+      compareGrid(`${tool} ${label}`, rows);
       await p.close();
     }
   }
-  // csv-to-tsv: paste only (no file input) -- the text as a visitor would copy it from the file.
-  const p = await newPage();
-  await p.goto(`${origin}/tools/developer-tools/csv-to-tsv`, { waitUntil: 'networkidle' });
-  check('test3 csv-to-tsv: has no file input (paste only)', (await p.locator('input[type=file]').count()) === 0);
-  const text = fs.readFileSync(path.join(FX, 'C-excel-fr.csv'), 'utf8').replace(/^\uFEFF/, '');
-  await p.locator('textarea').first().fill(text);
-  await p.getByRole('button', { name: /Convert/ }).click();
-  const out = await p.locator('textarea').nth(1).inputValue().catch(async () => p.locator('pre').first().innerText());
-  compareGrid('csv-to-tsv (pasted)', out.replace(/\r/g, '').split('\n').filter(Boolean).map((l) => l.split('\t')));
-  const claims = (await p.locator('body').innerText()).match(/[^.]*(delimiter|semicolon|detect)[^.]*\./gi) || [];
-  note(`csv-to-tsv page says: ${claims.slice(0, 4).join(' / ') || '(nothing about delimiters)'}`);
+  // Leading zeros (phone numbers, postcodes) must stay text; a mixed column stays text.
+  const idFile = path.join(FX, 'C-ids.csv');
+  fs.writeFileSync(idFile, 'Nom;Téléphone;Code;Montant\nA;0612345678;01000;12,5\nB;0712345678;75001;3\n');
+  const { p } = await open('csv-to-json', idFile);
+  const [d] = await Promise.all([p.waitForEvent('download'), p.getByRole('button', { name: /Convert/ }).click()]);
+  const arr = JSON.parse(fs.readFileSync(await save(d, 't3-ids.json'), 'utf8'));
+  check('test3 csv-to-json: phone numbers and postcodes with a leading zero stay text, amounts become numbers', arr[0]['Téléphone'] === '0612345678' && arr[0].Code === '01000' && arr[1].Code === '75001' && arr[0].Montant === 12.5, JSON.stringify(arr));
   await p.close();
 }
 
@@ -332,7 +343,7 @@ async function test6() {
   for (const q of ['fran', 'fr', 'français', 'Français', 'french']) {
     await search.fill(q);
     const opts = await sel.locator('option').allInnerTexts();
-    check(`test6 search "${q}": French found`, opts.some((o) => /^French$/.test(o)), `${opts.length} options: ${opts.slice(0, 6).join(', ')}`);
+    check(`test6 search "${q}": French found`, opts.some((o) => /^French( —|$)/.test(o)), `${opts.length} options: ${opts.slice(0, 6).join(', ')}`);
   }
   // What the visitor sees vs what will be used: after typing "fr", is the shown language the one the OCR takes?
   await search.fill('fr');
@@ -354,7 +365,7 @@ async function test6() {
   await p.close();
   // A visitor who types "french", SEES "French" in the list and runs the OCR without opening the list: which
   // language does Tesseract load? (The language data file it fetches says it.)
-  const q = await newPage();
+  const ctx2 = await browser.newContext(); const q = await ctx2.newPage(); q.setDefaultTimeout(60000); // fresh context: no language data cached
   const langs = [];
   q.on('request', (r) => { const m = /\/([a-z_]{3,8})\.traineddata/.exec(r.url()); if (m) langs.push(m[1]); });
   await q.goto(`${origin}/tools/pdf-tools/pdf-ocr`, { waitUntil: 'networkidle' });
@@ -370,6 +381,42 @@ async function test6() {
   await q.close();
 }
 
+// Every language offered by pdf-ocr loads ITS OWN model: for each option, run the OCR, catch the model
+// request (aborted: nothing downloaded) and compare it with the option; then check that file exists on the CDN.
+async function test6models() {
+  const pdfF = await makeScan();
+  const mctx = await browser.newContext(); const p = await mctx.newPage(); p.setDefaultTimeout(60000); // fresh context: no model already cached
+  const seen = [];
+  await p.route(/\.traineddata/, (r) => { seen.push(r.request().url()); return r.abort(); });
+  await p.goto(`${origin}/tools/pdf-tools/pdf-ocr`, { waitUntil: 'networkidle' });
+  await p.locator('input[type=file]').first().setInputFiles(pdfF);
+  const sel = p.getByPlaceholder('Search languages...').locator('xpath=following-sibling::select[1]');
+  const codes = await sel.locator('option').evaluateAll((os) => os.map((o) => o.value));
+  const wrong = [], missing = [], urls = [], noMessage = [];
+  for (const code of codes) {
+    seen.length = 0;
+    await sel.selectOption(code);
+    await p.getByRole('button', { name: 'Run OCR' }).click();
+    const t0 = Date.now();
+    while (!seen.length && Date.now() - t0 < 30000) await p.waitForTimeout(100);
+    const u = seen[0] || '';
+    urls.push([code, u]);
+    if (!u) missing.push(code); else if (!u.includes(`/${code}/`) || !u.includes(`${code}.traineddata`)) wrong.push(`${code} -> ${u}`);
+    const told = await p.locator('text=/language data could not be downloaded/').first().waitFor({ timeout: 45000 }).then(() => true, () => false);
+    if (!told) noMessage.push(code);
+  }
+  check(`test6 all ${codes.length} languages: a failed model download is told to the visitor (not an endless wait)`, !noMessage.length, noMessage.join(', '));
+  check(`test6 all ${codes.length} languages: each requests its own model`, !wrong.length && !missing.length, [...wrong, ...missing.map((c) => c + ' -> (no request)')].slice(0, 6).join(' ; '));
+  const absent = [];
+  for (const [code, u] of urls) {
+    if (!u) continue;
+    const r = await fetch(u, { headers: { Range: 'bytes=0-3' } }).catch(() => null);
+    if (!r || (r.status !== 200 && r.status !== 206)) absent.push(`${code} (${r ? r.status : 'network'})`);
+  }
+  check(`test6 all ${urls.length} models exist on the CDN Tesseract.js loads them from`, !absent.length, absent.join(', '));
+  await p.close();
+}
+
 const t = Date.now();
 try {
   if (want(1)) for (const n of ['A', 'B', 'B-rot']) await test1(n).catch((e) => check(`test1 ${n} ran`, false, e.message.split('\n')[0]));
@@ -378,6 +425,7 @@ try {
   if (want(4)) await test4().catch((e) => check('test4 ran', false, e.message.split('\n')[0]));
   if (want(5)) await test5('C:/Program Files/LibreOffice/program/soffice.exe').catch((e) => check('test5 ran', false, e.message.split('\n')[0]));
   if (want(6)) await test6().catch((e) => check('test6 ran', false, e.message.split('\n')[0]));
+  if (want('6m')) await test6models().catch((e) => check('test6 models ran', false, e.message.split('\n')[0]));
 } finally { await browser.close(); }
 console.log(`${fails ? 'FAILURES: ' + fails : 'ALL PASS'} (${browserName}, ${((Date.now() - t) / 1000).toFixed(0)} s)`);
 process.exit(fails ? 1 : 0);
