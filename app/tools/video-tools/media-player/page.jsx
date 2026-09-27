@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react';
 import { Music } from 'lucide-react';
 import SeoContent from '../../../components/SeoContent';
-import { AUDIO_ACCEPT, VIDEO_ACCEPT } from '../../../lib/mediaSupport';
+import { AUDIO_ACCEPT, VIDEO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
 export default function MediaPlayerPage() {
   const [file, setFile] = useState(null);
   const [isVideo, setIsVideo] = useState(false);
@@ -34,7 +34,9 @@ export default function MediaPlayerPage() {
             <p className="text-neutral-400 text-sm mt-1">Supports MP4, MP3, WAV, OGG, WebM</p>
             <input ref={inputRef} type="file" accept={`${AUDIO_ACCEPT},${VIDEO_ACCEPT}`} className="hidden" onChange={handleFile} />
           </div>
-          {cannotPlay && (
+          {file && encryptedMusicMessage(file.name) ? (
+            <p role="alert" className="text-sm text-red-600 text-center">{encryptedMusicMessage(file.name)}</p>
+          ) : cannotPlay && (
             <p role="alert" className="text-sm text-red-600 text-center">
               This browser cannot play {ext ? `this ${ext} file` : 'this file'}. Convert it first with the <a className="underline" href={isVideo ? '/tools/video-tools/video-converter' : '/tools/audio-tools/audio-converter'}>{isVideo ? 'Video Converter (to MP4)' : 'Audio Converter (to MP3)'}</a>, then play it here.
             </p>

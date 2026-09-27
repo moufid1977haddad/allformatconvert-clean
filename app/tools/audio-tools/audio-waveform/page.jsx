@@ -3,7 +3,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { decodeAnyAudio } from '../../../lib/decodeAudio';
-import { AUDIO_ACCEPT, checkedDataURL } from '../../../lib/mediaSupport';
+import { AUDIO_ACCEPT, checkedDataURL, encryptedMusicMessage } from '../../../lib/mediaSupport';
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 200;
@@ -20,6 +20,7 @@ export default function AudioWaveformPage() {
 
   const handleFile = async (e) => {
     const f = e.target.files[0];
+    if (f && encryptedMusicMessage(f.name)) { e.target.value = ''; setError(encryptedMusicMessage(f.name)); return; }
     if (!f) return;
     setFile(f);
     setAudioUrl(URL.createObjectURL(f));

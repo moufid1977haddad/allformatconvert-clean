@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { transcribeAudio, checkAudioSize, audioMaxLabel } from '../../../lib/officeUpload';
+import { encryptedMusicMessage } from '../../../lib/mediaSupport';
 
 export default function AudioTranscriberPage() {
   const [output, setOutput] = useState('');
@@ -12,6 +13,7 @@ export default function AudioTranscriberPage() {
 
   const handleFile = async (e) => {
     const file = e.target.files[0];
+    if (file && encryptedMusicMessage(file.name)) { e.target.value = ''; setError(encryptedMusicMessage(file.name)); return; }
     if (!file) return;
     e.target.value = '';
     setFileName(file.name);

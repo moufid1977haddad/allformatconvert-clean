@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import MediaInfo from '../../../components/MediaInfo';
-import { AUDIO_ACCEPT } from '../../../lib/mediaSupport';
+import { AUDIO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
 
 // 28/09/2026: the page used to list only name, size, MIME type, date and the player's duration (nothing for a
 // format the player cannot read). The full technical report now comes from ffprobe in the browser (MediaInfo):
@@ -35,6 +35,7 @@ export default function AudioMetadataPage() {
           </div>
           <input ref={setInputEl} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
           {audioUrl && <audio src={audioUrl} controls className="w-full" />}
+          {file && encryptedMusicMessage(file.name) && <p role="alert" className="text-sm text-red-600 text-center">{encryptedMusicMessage(file.name)}</p>}
           <MediaInfo file={file} />
         </div>
       </div>
