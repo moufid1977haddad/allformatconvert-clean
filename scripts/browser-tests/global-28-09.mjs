@@ -62,7 +62,8 @@ try {
     for (const t of tools) {
       const ctx = await newCtx(); const p = await ctx.newPage();
       // Any upload to our site or our services (analytics beacons are not the file).
-      const ours = (u) => u.startsWith(origin) || /railway\.app|onlineconvertools/.test(u);
+      // By HOST: an analytics beacon carries the page address in its query string, it is not an upload.
+      const ours = (u) => { const h = new URL(u).hostname; return u.startsWith(origin) || /railway\.app$/.test(h) || /(^|\.)onlineconvertools\.com$/.test(h); };
       const posts = []; p.on('request', (r) => { if (r.method() !== 'GET' && ours(r.url())) posts.push(r.url()); });
       await p.goto(`${origin}/tools/${t}`, { waitUntil: 'networkidle' });
       if (t.endsWith('audio-to-text')) await p.getByRole('button', { name: /Upload Audio File/ }).click();
