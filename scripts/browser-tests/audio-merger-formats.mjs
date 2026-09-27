@@ -125,7 +125,8 @@ for (const v of Object.keys(EXPECT)) {
 }
 
 // 3. Opus: joined losslessly here, sent as FLAC with the bitrate picked, the service's bytes downloaded.
-{
+// --real-service (a preview or www build, whose service is the real one): skipped here, proven by audio-merger-join.mjs.
+if (!process.argv.includes('--real-service')) {
   const p = await open([F.flac, F.wav]); jobs = [];
   await p.locator('#merge-format').selectOption('opus');
   await p.locator('#merge-kbps').selectOption('128');

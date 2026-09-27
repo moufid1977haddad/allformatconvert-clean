@@ -40,3 +40,7 @@ Chromium et Firefox donnent les mêmes fichiers et les mêmes défauts :
 - `app/lib/audioMerge.js` (planificateur pur) + page réécrite : 14 formats (6 sans perte : FLAC, WAV, AIFF, ALAC, CAF, W64 ; 8 compressés : MP3, M4A, AAC brut, M4R, OGG Vorbis, Opus, WMA, AC3), débit au choix pour les compressés, défaut calculé d'après les entrées, notes dites avant la fusion.
 - Tests : `scripts/audio-merge-tests/01-plan.mjs` 13/13 ; `02-commands-native.mjs` 7/7 (ffmpeg natif n8.1.2) ; `audio-merger-formats.mjs` Chromium et Firefox tout passé ; `audio-merger-join.mjs` : 8 cas d'entrées + 11 formats de sortie × 2 navigateurs, **0 ms de décalage et aucun silence aux jonctions partout** ; seul écart : AAC brut (.aac) sous Firefox affiche 13,7 s pour 12,03 s — limite du format, dite sur la page, jamais proposé par défaut.
 - Trouvé en route : Firefox enregistrait « .m4r » en « .m4a » (corrigé) ; l'encodeur WMA de ffmpeg perd le dernier bloc incomplet (−31 ms ; Clideo −12 ms) → fin complétée de silence ; ses débits réels (275/183/137/110/69) affichés tels quels ; politique de confidentialité et FAQ audio n'annonçaient pas l'Opus sur serveur de Booster/Splitter/Compressor (corrigé, + Merger).
+
+## Étape 4a — Préversion `onlineconvertools-7mavbi2vp` (commit `52f4da4e`)
+
+`audio-merger-join.mjs --cors-shim` (vrai service pour l'Opus) : **9/9 Chromium, 9/9 Firefox** — Opus par le vrai service (1 travail, encodeur `libopus`, 12,000 s, 0 ms, aucun silence) ; `audio-merger-formats.mjs --real-service` : tout passé dans les deux navigateurs.
