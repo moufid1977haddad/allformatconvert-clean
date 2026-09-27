@@ -1,0 +1,339 @@
+{
+ "service": "https://media-charge-charge.up.railway.app",
+ "waves": [
+  {
+   "visitors": 1,
+   "errors": [],
+   "last_done_s": 27.2,
+   "jobs": [
+    {
+     "kind": "video_compress_30s",
+     "upload_s": 5.4,
+     "busy_retries": 0,
+     "max_queue_position": 0,
+     "wait_s": 0.7,
+     "processing_s": 20.5,
+     "result_bytes": 11978839,
+     "total_s": 27.2,
+     "done_at_s": 27.2
+    }
+   ]
+  },
+  {
+   "visitors": 2,
+   "errors": [],
+   "last_done_s": 26.3,
+   "jobs": [
+    {
+     "kind": "audio_opus",
+     "upload_s": 0.8,
+     "busy_retries": 0,
+     "max_queue_position": 0,
+     "wait_s": 0.5,
+     "processing_s": 1.4,
+     "result_bytes": 1029084,
+     "total_s": 3.0,
+     "done_at_s": 3.0
+    },
+    {
+     "kind": "video_compress_30s",
+     "upload_s": 5.4,
+     "busy_retries": 0,
+     "max_queue_position": 0,
+     "wait_s": 0.5,
+     "processing_s": 19.5,
+     "result_bytes": 11978839,
+     "total_s": 26.3,
+     "done_at_s": 26.3
+    }
+   ]
+  },
+  {
+   "visitors": 4,
+   "errors": [],
+   "last_done_s": 36.5,
+   "jobs": [
+    {
+     "kind": "audio_opus",
+     "upload_s": 0.8,
+     "busy_retries": 0,
+     "max_queue_position": 0,
+     "wait_s": 0.4,
+     "processing_s": 0.7,
+     "result_bytes": 1029084,
+     "total_s": 2.2,
+     "done_at_s": 2.2
+    },
+    {
+     "kind": "audio_opus",
+     "upload_s": 0.8,
+     "busy_retries": 0,
+     "max_queue_position": 0,
+     "wait_s": 0.5,
+     "processing_s": 0.6,
+     "result_bytes": 1029084,
+     "total_s": 2.3,
+     "done_at_s": 2.3
+    },
+    {
+     "kind": "precise_cut_10s",
+     "upload_s": 9.5,
+     "busy_retries": 0,
+     "max_queue_position": 0,
+     "wait_s": 0.4,
+     "processing_s": 13.0,
+     "result_bytes": 11968918,
+     "total_s": 23.9,
+     "done_at_s": 23.9
+    },
+    {
+     "kind": "video_compress_30s",
+     "upload_s": 10.6,
+     "busy_retries": 0,
+     "max_queue_position": 0,
+     "wait_s": 0.5,
+     "processing_s": 24.6,
+     "result_bytes": 11978839,
+     "total_s": 36.5,
+     "done_at_s": 36.5
+    }
+   ]
+  },
+  {
+   "visitors": 8,
+   "errors": [],
+   "last_done_s": 57.0,
+   "jobs": [
+    {
+     "kind": "audio_opus",
+     "upload_s": 1.1,
+     "busy_retries": 0,
+     "max_queue_position": 0,
+     "wait_s": 0.5,
+     "processing_s": 1.3,
+     "result_bytes": 1029084,
+     "total_s": 3.2,
+     "done_at_s": 3.2
+    },
+    {
+     "kind": "audio_opus",
+     "upload_s": 1.5,
+     "busy_retries": 0,
+     "max_queue_position": 0,
+     "wait_s": 0.4,
+     "processing_s": 1.3,
+     "result_bytes": 1029084,
+     "total_s": 3.7,
+     "done_at_s": 3.7
+    },
+    {
+     "kind": "audio_opus",
+     "upload_s": 1.6,
+     "busy_retries": 0,
+     "max_queue_position": 1,
+     "wait_s": 1.0,
+     "processing_s": 1.3,
+     "result_bytes": 1029084,
+     "total_s": 5.0,
+     "done_at_s": 5.0
+    },
+    {
+     "kind": "audio_opus",
+     "upload_s": 1.6,
+     "busy_retries": 0,
+     "max_queue_position": 2,
+     "wait_s": 1.6,
+     "processing_s": 1.5,
+     "result_bytes": 1029084,
+     "total_s": 5.4,
+     "done_at_s": 5.4
+    },
+    {
+     "kind": "audio_opus",
+     "upload_s": 1.6,
+     "busy_retries": 0,
+     "max_queue_position": 3,
+     "wait_s": 2.3,
+     "processing_s": 0.8,
+     "result_bytes": 1029084,
+     "total_s": 5.4,
+     "done_at_s": 5.4
+    },
+    {
+     "kind": "precise_cut_10s",
+     "upload_s": 12.2,
+     "busy_retries": 0,
+     "max_queue_position": 0,
+     "wait_s": 0.5,
+     "processing_s": 17.9,
+     "result_bytes": 11968918,
+     "total_s": 31.4,
+     "done_at_s": 31.4
+    },
+    {
+     "kind": "video_compress_30s",
+     "upload_s": 14.2,
+     "busy_retries": 0,
+     "max_queue_position": 0,
+     "wait_s": 0.6,
+     "processing_s": 27.7,
+     "result_bytes": 11978839,
+     "total_s": 43.1,
+     "done_at_s": 43.1
+    },
+    {
+     "kind": "video_compress_30s",
+     "upload_s": 15.5,
+     "busy_retries": 0,
+     "max_queue_position": 1,
+     "wait_s": 15.1,
+     "processing_s": 25.7,
+     "result_bytes": 11978839,
+     "total_s": 57.0,
+     "done_at_s": 57.0
+    }
+   ]
+  },
+  {
+   "visitors": 12,
+   "errors": [],
+   "last_done_s": 394.1,
+   "jobs": [
+    {
+     "kind": "audio_opus",
+     "upload_s": 1.5,
+     "busy_retries": 0,
+     "max_queue_position": 0,
+     "wait_s": 0.3,
+     "processing_s": 1.4,
+     "result_bytes": 1029084,
+     "total_s": 3.8,
+     "done_at_s": 3.8
+    },
+    {
+     "kind": "audio_opus",
+     "upload_s": 1.6,
+     "busy_retries": 0,
+     "max_queue_position": 0,
+     "wait_s": 0.3,
+     "processing_s": 1.4,
+     "result_bytes": 1029084,
+     "total_s": 3.9,
+     "done_at_s": 3.9
+    },
+    {
+     "kind": "audio_opus",
+     "upload_s": 1.7,
+     "busy_retries": 0,
+     "max_queue_position": 1,
+     "wait_s": 1.7,
+     "processing_s": 0.7,
+     "result_bytes": 1029084,
+     "total_s": 4.5,
+     "done_at_s": 4.5
+    },
+    {
+     "kind": "audio_opus",
+     "upload_s": 1.7,
+     "busy_retries": 0,
+     "max_queue_position": 2,
+     "wait_s": 1.7,
+     "processing_s": 0.7,
+     "result_bytes": 1029084,
+     "total_s": 4.6,
+     "done_at_s": 4.6
+    },
+    {
+     "kind": "audio_opus",
+     "upload_s": 1.9,
+     "busy_retries": 0,
+     "max_queue_position": 4,
+     "wait_s": 2.3,
+     "processing_s": 0.6,
+     "result_bytes": 1029084,
+     "total_s": 5.2,
+     "done_at_s": 5.2
+    },
+    {
+     "kind": "audio_opus",
+     "upload_s": 1.8,
+     "busy_retries": 0,
+     "max_queue_position": 3,
+     "wait_s": 2.4,
+     "processing_s": 0.7,
+     "result_bytes": 1029084,
+     "total_s": 5.3,
+     "done_at_s": 5.3
+    },
+    {
+     "kind": "audio_opus",
+     "upload_s": 1.9,
+     "busy_retries": 0,
+     "max_queue_position": 5,
+     "wait_s": 3.0,
+     "processing_s": 0.7,
+     "result_bytes": 1029084,
+     "total_s": 6.0,
+     "done_at_s": 6.0
+    },
+    {
+     "kind": "audio_opus",
+     "upload_s": 1.9,
+     "busy_retries": 0,
+     "max_queue_position": 6,
+     "wait_s": 3.1,
+     "processing_s": 1.4,
+     "result_bytes": 1029084,
+     "total_s": 6.7,
+     "done_at_s": 6.7
+    },
+    {
+     "kind": "video_compress_30s",
+     "upload_s": 19.8,
+     "busy_retries": 0,
+     "max_queue_position": 0,
+     "wait_s": 0.6,
+     "processing_s": 31.9,
+     "result_bytes": 11978839,
+     "total_s": 53.2,
+     "done_at_s": 53.2
+    },
+    {
+     "kind": "video_compress_30s",
+     "upload_s": 19.2,
+     "busy_retries": 0,
+     "max_queue_position": 0,
+     "wait_s": 0.6,
+     "processing_s": 31.7,
+     "result_bytes": 11978839,
+     "total_s": 54.8,
+     "done_at_s": 54.8
+    },
+    {
+     "kind": "precise_cut_10s",
+     "upload_s": 19.9,
+     "busy_retries": 0,
+     "max_queue_position": 1,
+     "wait_s": 31.7,
+     "processing_s": 13.3,
+     "result_bytes": 11968918,
+     "total_s": 66.6,
+     "done_at_s": 66.6
+    },
+    {
+     "kind": "heavy_webm_3min",
+     "upload_s": 38.6,
+     "busy_retries": 0,
+     "max_queue_position": 2,
+     "wait_s": 13.7,
+     "processing_s": 338.9,
+     "result_bytes": 118544953,
+     "total_s": 394.1,
+     "done_at_s": 394.1
+    }
+   ]
+  }
+ ],
+ "health_first_s": 0.29,
+ "health_status": 200
+}
