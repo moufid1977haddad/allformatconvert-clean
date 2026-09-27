@@ -65,3 +65,6 @@ services/background-removal/models/
 services/background-removal/**/__pycache__/
 services/background-removal/**/*.pyc
 Claude outputs/
+
+# AI upscaler model for the in-browser path: fetched and verified at build (scripts/fetch-upscale-model.mjs)
+public/models/
