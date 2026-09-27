@@ -7,6 +7,19 @@ import { changes, applyChoices } from './diff';
 // The corrected text used to replace the visitor's without showing what changed. Now every change is shown in
 // place (removed words struck through, added words underlined) and can be undone or restored one by one, as
 // LanguageTool lets its visitors accept each suggestion (read 26/09/2026); the text to copy follows the choices.
+// Languages where our corrections were measured less reliable (28/09: learner corpora, 40 sentences each,
+// docs/audit/RAPPORT-deploiement-28-09.md §3) -- told on the page, as LanguageTool says its level of
+// support differs between languages, and as soon as the text is recognised as one of them (by its script,
+// or by letters only Turkish uses).
+const WEAK_LANGUAGES = [
+  ['Japanese', /[\u3040-\u30ff]/],
+  ['Chinese', /[\u4e00-\u9fff]/],
+  ['Russian', /[\u0400-\u04ff]/],
+  ['Hindi', /[\u0900-\u097f]/],
+  ['Turkish', /[ğĞıİşŞ]/],
+];
+const weakLanguage = (text) => (WEAK_LANGUAGES.find(([, re]) => re.test(text)) || [null])[0];
+
 export default function GrammarFixerPage() {
   const [input, setInput] = useState('');
   const [sent, setSent] = useState(''); // the text the correction was made from
@@ -47,6 +60,7 @@ export default function GrammarFixerPage() {
   const toggle = (id) => setUndone((u) => { const n = new Set(u); if (n.has(id)) n.delete(id); else n.add(id); return n; });
   const copy = () => { navigator.clipboard.writeText(result); setCopied(true); setTimeout(() => setCopied(false), 1500); };
   const kept = ids.length - undone.size;
+  const weak = weakLanguage(output ? sent : input);
 
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -58,6 +72,11 @@ export default function GrammarFixerPage() {
           <button onClick={process} disabled={!input.trim() || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Processing...' : 'Fix Grammar'}
           </button>
+          {weak && (
+            <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2" role="note" data-weak-language={weak}>
+              <strong>{weak}:</strong> corrections are less reliable in this language than in English — in our tests on published learner texts, some sentences that were already correct got changed. Check each change before keeping it (click a change to undo it).
+            </p>
+          )}
           {error && <p className="text-red-400 text-center text-sm" role="alert">{error}</p>}
           {output && (
             <div className="space-y-3">
@@ -104,7 +123,7 @@ export default function GrammarFixerPage() {
           { q: "What types of errors does Grammar Fixer detect?", a: "It can catch spelling mistakes, punctuation errors, subject-verb agreement issues, and other common grammatical mistakes as part of rewriting your text." },
           { q: "Can I see what was changed?", a: "Yes. Every change is shown word by word in your text, and each one can be undone on its own; the text you copy includes only the changes you kept. Undoing them all gives back your original text exactly." },
           { q: "Is my text private when using Grammar Fixer?", a: "Your text is sent to OpenAI's API to generate the correction. It is not stored on our servers or shared for any purpose beyond producing your result." },
-          { q: "Can Grammar Fixer handle multiple languages?", a: "It works primarily with English text; results for other languages may be less reliable." }
+          { q: "Which languages does Grammar Fixer handle well?", a: "English best: in our tests it fixed 25 of 25 typical errors and left correct text untouched. We also measured Portuguese, German, Italian, Spanish and Arabic on published learner texts, where it corrects most errors while changing few correct sentences. In Russian, Chinese, Japanese, Hindi and Turkish, corrections are less reliable — some correct sentences get changed — and the page says so when your text is in one of these languages. Every change is shown and can be undone." }
         ]}
         tips={[
           "For best results, paste complete sentences or paragraphs rather than single words, so the AI has context.",
