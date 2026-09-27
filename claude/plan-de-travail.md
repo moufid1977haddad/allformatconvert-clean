@@ -23,6 +23,11 @@
 >
 > Le résultat doit être ÉGAL OU SUPÉRIEUR aux sites de référence, jamais inférieur.
 
+> ## ═══ RÈGLE DE DÉCISION — posée par le propriétaire le 28 septembre ═══
+>
+> **Le propriétaire n'est pas développeur. Claude ne lui soumet aucun choix technique, d'interface ou de formulation.** Pour chaque choix : rechercher comment les meilleurs concurrents font et par quel moyen, retenir une solution au moins égale à la leur, et s'il existe un moyen plus court ou moins coûteux pour le même résultat, l'appliquer immédiatement.
+> **Claude ne s'arrête pour demander que ce que le propriétaire seul peut faire :** une dépense au-delà des plafonds existants, un compte ou un abonnement, un secret à générer, un geste physique, ou la suppression de données de production.
+
 > ## 🚦 RÈGLE ZÉRO — MESURER AVANT DE CONSTRUIRE
 >
 > **Avant d'ouvrir un chantier, répondre à trois questions. Aucune exception.**
