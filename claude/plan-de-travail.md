@@ -702,10 +702,11 @@ Get-Content .env.local | ForEach-Object {
 
 | # | Quoi | Durée |
 |---|---|---|
-| P1 | **Passe Safari réelle** (iPhone puis MacBook) avec `tests-safari-proprietaire.md` mis à jour le 27/09 — bloquant 9, dont les retests S1-S5 | ≈ 3 h 30 (moitié la plus risquée : ≈ 1 h 45) |
-| P2 | **Tests manuels du bloquant 11** (`tests-manuels-proprietaire.md`) + contrôles de la vague 1 (5 outils + 2 outils de données) | ≈ 2 h |
+| P0 | **Déployer les correctifs de la nuit du 28/09** (liste commit par commit dans `docs/audit/RAPPORT-nuit-27-09.md` §3) : préversion unique, puis production — **sans** les commits du correcteur de grammaire tant que sa mesure n'est pas finie | ≈ 30 min + ma vérification |
+| P1 | **Passe Safari réelle** (iPhone puis MacBook) avec `tests-safari-proprietaire.md` **mis à jour le 28/09** (§8 : ce que la passe préalable WebKit a déjà montré ; n° 30 ajouté) — bloquant 9, dont les retests S1-S5 | ≈ 3 h 40 (moitié la plus risquée : ≈ 1 h 45) |
+| P2 | **Tests manuels du bloquant 11** — ~~contrôles de la vague 1~~ **automatisés et passés le 28/09 (12/12, Chromium + Firefox)** ; reste la feuille des « sept tests », **absente du dépôt : à me fournir** pour que j'en automatise ce qui peut l'être | 5 min (me la donner) + ce qui exige un humain |
 | P3 | **Trancher la saturation** sur la proposition chiffrée de Claude (`RAPPORT-seance-27-09.md` §4), puis donner l'accord pour le test de charge contre la production | 15 min + 1 h de présence pendant le test |
-| P4 | **Trancher la limite de 20 conversions/heure/connexion** sur la comparaison que Claude prépare (C4) | 10 min |
+| P4 | **Trancher la limite de 20 conversions/heure/connexion** — comparaison faite le 28/09 (C4), recommandation H1 : 40/h, jour inchangé | 10 min |
 | P5 | **Galerie Product Hunt** refaite, juste avant, en dernier | ≈ 2 h |
 | P6 | Décisions sur ce que P1/P2 feront remonter (priorité de chaque défaut trouvé) | ≈ 30 min |
 
@@ -716,9 +717,9 @@ Get-Content .env.local | ForEach-Object {
 | C1 | Corriger les défauts que P1 (Safari) et P2 feront remonter, puis les retester | 2 à 8 h selon ce qui remonte (inconnu) |
 | C2 | **Test de charge** selon la méthode du 27/09 (`RAPPORT-seance-27-09.md` §4 : copie jetable du service ffmpeg sur Railway, < 0,50 $ ; Gotenberg de bout en bout sur www en `.xlsx`/`.pptx`, ≈ 0,05-0,20 $), puis dimensionnement et retest. **Mesuré en local le 27/09 :** ajouter des emplacements parallèles n'augmente pas le débit (ffmpeg prend tous les cœurs), ≈ 80 s de CPU par vidéo 30 s 1080p ; LibreOffice convertit un document à la fois par instance | ≈ 3 h |
 | C3 | **Gotenberg à 3 réplicas plusieurs jours avant**, laisser stabiliser, retester les 5 outils (déclencheur « Plusieurs jours AVANT ») | ≈ 1 h |
-| C4 | Limite de 20 conversions/h : relever les limites réelles des concurrents pour un lot de fichiers, proposer une valeur (déjà noté ci-dessous) | ≈ 1 h |
-| C5 | **Audit des outils qui joignent, coupent ou copient sans réencoder** (noté ci-dessous) : recensement dans le code, mesure de chacun dans les deux navigateurs, correctifs | 4 à 8 h |
-| C6 | Correcteur de grammaire : option A **mesurée le 27/09, non mise en production** (recul es/it/ru de 1-2 phrases) ; appliquer la suite retenue (T : température 0 + remesure ; puis production) | ≈ 1 h (T) |
+| C4 | ~~Limite de 20 conversions/h : relever les limites réelles des concurrents~~ ✅ **fait le 28/09** (voir « À FAIRE AVANT LE LANCEMENT ») | — |
+| C5 | ~~Audit des outils qui joignent, coupent ou copient sans réencoder~~ ✅ **fait le 28/09**, 4 défauts corrigés en local + mode « coupe précise » de Video Trimmer | — |
+| C6 | Correcteur de grammaire : T **appliquée et mesurée à moitié le 28/09** (6 langues sur 10, arrêt par la limite journalière de 100 appels/IP) ; finir la mesure (≈ 80 appels, ce soir après 20 h ou avec la limite de préversion relevée), puis décision | ≈ 3 h d'horloge (30 appels/h), ≈ 20 min de travail |
 
 **📌 POUR DEMAIN (28/09) — noté le 27/09 au soir à la demande du propriétaire, non traité :**
 - **a. Image Upscaler refuse au-delà de 1 Mpx au lieu de réduire.** État documentaire vérifié : la limite a été **fixée d'après une mesure de temps** (1 Mpx ×4 = 34,5 s sur Railway, 8 vCPU lus dans le cgroup — `RAPPORT-ecarts-marche.md` §« image-upscaler », `services/background-removal/app/upscale.py` `UPSCALE_MAX_INPUT_PIXELS`), avec la mention « au-delà non éprouvé » ; **elle n'a jamais été comparée aux limites d'entrée des concurrents** (iLoveIMG, Upscale.media, Let's Enhance…). Probablement en dessous du marché : relever leurs limites réelles sur leurs sites, mesurer le temps au-delà de 1 Mpx, et décider entre relever la limite, réduire dans le navigateur avant l'envoi (comme le détourage), ou les deux.
