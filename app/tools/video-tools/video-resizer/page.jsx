@@ -7,6 +7,9 @@ export default function VideoResizerPage() {
   const [file, setFile] = useState(null);
   const [width, setWidth] = useState(1280);
   const [height, setHeight] = useState(720);
+  // How a source of another shape fills the new size (28/09/2026: it was always stretched). The references offer
+  // the same choice ("fit" with bars, "fill" by cropping); fit is the default, like theirs.
+  const [mode, setMode] = useState('fit');
   const [result, setResult] = useState(null);
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
@@ -87,7 +90,14 @@ export default function VideoResizerPage() {
         setStatus('');
       };
       recorder.onerror = () => { setError('Recording failed in this browser.'); setStatus(''); };
-      const drawFrame = () => { ctx.drawImage(videoRef.current, 0, 0, width, height); if (!videoRef.current.paused && !videoRef.current.ended) requestAnimationFrame(drawFrame); };
+      const v = videoRef.current;
+      const k = mode === 'fit' ? Math.min(width / v.videoWidth, height / v.videoHeight) : Math.max(width / v.videoWidth, height / v.videoHeight);
+      const dw = mode === 'stretch' ? width : v.videoWidth * k, dh = mode === 'stretch' ? height : v.videoHeight * k;
+      const drawFrame = () => {
+        ctx.fillStyle = '#000'; ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(v, (width - dw) / 2, (height - dh) / 2, dw, dh);
+        if (!v.paused && !v.ended) requestAnimationFrame(drawFrame);
+      };
       videoRef.current.currentTime = 0;
       await videoRef.current.play();
       recorder.start();
@@ -112,6 +122,14 @@ export default function VideoResizerPage() {
             <div><label className="block text-sm text-neutral-500 mb-1">Height</label><input type="number" value={height} onChange={e => setHeight(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
           </div>
           <div className="grid grid-cols-3 gap-2">{[['720p',1280,720],['1080p',1920,1080],['480p',854,480]].map(([label,w,h]) => <button key={label} onClick={() => { setWidth(w); setHeight(h); }} className="bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800 rounded-lg py-2 text-sm font-semibold transition">{label}</button>)}</div>
+          <div>
+            <label htmlFor="vr-mode" className="block text-sm text-neutral-500 mb-1">If the shape differs from the video's</label>
+            <select id="vr-mode" value={mode} onChange={(e) => setMode(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3 text-sm">
+              <option value="fit">Fit — keep the whole picture, black bars</option>
+              <option value="fill">Fill — crop the edges, no bars</option>
+              <option value="stretch">Stretch — distort to the exact size</option>
+            </select>
+          </div>
           {supportReason && <p role="alert" className="text-red-500 text-center text-sm">{supportReason}</p>}
           {status && <p className="text-yellow-400 text-center">{status}</p>}
           {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
@@ -121,7 +139,7 @@ export default function VideoResizerPage() {
       </div>
       <SeoContent
         title="Video Resizer"
-        description="Video Resizer redraws your video at a new width and height on a canvas and records the result, entirely in your browser. The original audio is preserved by routing it through the Web Audio API alongside the resized video track, so the output isn't silent. Note: the output is the format your browser records (WebM in Chrome, Edge and Firefox; MP4 in Safari), and dimensions aren't aspect-ratio-locked — entering a width/height that doesn't match your source video's proportions will stretch the result."
+        description="Video Resizer redraws your video at a new width and height on a canvas and records the result, entirely in your browser. The original audio is preserved by routing it through the Web Audio API alongside the resized video track, so the output isn't silent. Note: the output is the format your browser records (WebM in Chrome, Edge and Firefox; MP4 in Safari); when the new size has another shape, the picture is fitted with black bars by default, or cropped, or stretched — your choice."
         howTo={[
           "Click the upload area and select a video file — its native dimensions fill the Width/Height fields automatically.",
           "Enter custom dimensions, or click a preset (720p, 1080p, or 480p).",
@@ -129,13 +147,13 @@ export default function VideoResizerPage() {
           "Preview and download the resized file (WebM, or MP4 in Safari)."
         ]}
         faqs={[
-          { q: "Does it preserve aspect ratio automatically?", a: "No — enter a width and height that match your source video's proportions yourself, or the result will be stretched." },
+          { q: "Does it preserve aspect ratio automatically?", a: "Yes, by default: when the new size has another shape than your video, the whole picture is kept with black bars (Fit). You can also crop the edges instead (Fill), or stretch it to the exact size (Stretch)." },
           { q: "Does the resized video have audio?", a: "Yes — the source video's original audio is captured alongside the resized picture and included in the output unchanged." },
           { q: "What output format do I get?", a: "The format your browser records: WebM in Chrome, Edge and Firefox, MP4 in Safari. The file's extension always matches its real content." },
           { q: "Is my file uploaded anywhere?", a: "No, resizing happens entirely in your browser." }
         ]}
         tips={[
-          "Divide your source video's width and height by the same number to keep proportions correct and avoid a stretched result.",
+          "To avoid black bars without cropping, divide your video's width and height by the same number.",
           "The audio is carried straight through unchanged — resizing only affects the picture.",
           "Resizing takes about as long as the video's full duration, since frames and audio are captured as it plays in real time.",
           "Use the 720p/1080p/480p presets for common platform-ready sizes instead of typing custom numbers."
