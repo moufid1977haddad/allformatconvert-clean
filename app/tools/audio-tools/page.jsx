@@ -11,7 +11,7 @@ const tools = [
   { title: 'Audio Booster', description: 'Boost audio volume', href: '/tools/audio-tools/audio-booster' },
   { title: 'Audio Equalizer', description: 'Adjust audio frequencies', href: '/tools/audio-tools/audio-equalizer' },
   { title: 'Audio Waveform', description: 'Visualize audio waveform', href: '/tools/audio-tools/audio-waveform' },
-  { title: 'Audio Metadata', description: 'View and edit audio metadata', href: '/tools/audio-tools/audio-metadata' },
+  { title: 'Audio Metadata', description: 'Codec, bitrate, tags and cover art of any audio file', href: '/tools/audio-tools/audio-metadata' },
   { title: 'Voice Recorder', description: 'Record voice from microphone', href: '/tools/audio-tools/voice-recorder' },
   { title: 'Audio to Text', description: 'Transcribe audio to text', href: '/tools/audio-tools/audio-to-text' },
 ];

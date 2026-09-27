@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Audio Metadata — Instantly Reads and Displays an Audio" },
-  description: "Audio Metadata instantly reads an audio file's basic properties — name, size, type, date, and duration — directly in your browser. No upload required.",
+  description: "Audio Metadata shows an audio file's codec, bitrate, sample rate, channels, bit depth, tags and cover art — read in your browser, nothing uploaded, any file size.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/audio-tools/audio-metadata" },
   openGraph: {
     title: "Audio Metadata — Instantly Reads and Displays an Audio",
-    description: "Audio Metadata instantly reads an audio file's basic properties — name, size, type, date, and duration — directly in your browser. No upload required.",
+    description: "Audio Metadata shows an audio file's codec, bitrate, sample rate, channels, bit depth, tags and cover art — read in your browser, nothing uploaded, any file size.",
     url: "https://www.onlineconvertools.com/tools/audio-tools/audio-metadata",
   },
 };

@@ -10,7 +10,7 @@ const tools = [
   { title: 'Video to GIF', description: 'Convert video clips to GIF', href: '/tools/video-tools/video-to-gif', group: 'Convert' },
   { title: 'Video Screenshot', description: 'Capture screenshots from video', href: '/tools/video-tools/video-screenshot', group: 'Capture & Record' },
   { title: 'Media Player', description: 'Play audio and video files', href: '/tools/video-tools/media-player', group: 'Capture & Record' },
-  { title: 'Video Metadata', description: 'View and edit video metadata', href: '/tools/video-tools/video-metadata', group: 'Info & Extras' },
+  { title: 'Video Metadata', description: 'Codecs, bitrate, frame rate and tracks of any video', href: '/tools/video-tools/video-metadata', group: 'Info & Extras' },
   { title: 'Video Watermark', description: 'Add watermark to video', href: '/tools/video-tools/video-watermark', group: 'Edit & Transform' },
   { title: 'Subtitle Generator', description: 'Generate subtitles for video', href: '/tools/video-tools/subtitle-generator', group: 'Info & Extras' },
   { title: 'Screen Recorder', description: 'Record your screen', href: '/tools/video-tools/screen-recorder', group: 'Capture & Record' },
