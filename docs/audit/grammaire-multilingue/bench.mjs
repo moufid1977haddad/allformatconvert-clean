@@ -5,7 +5,7 @@
 // Per sentence, against the corpus reference (NFC, spaces collapsed): exact match, and the share of the character
 // distance to the reference that was closed, gain = (d(src,ref) - d(out,ref)) / d(src,ref): 1 = the reference,
 // 0 = unchanged, < 0 = made worse.
-// Usage: node docs/audit/grammaire-multilingue/bench.mjs <origin> <corpus dir> [--langs=fr,es] [--no-ai]
+// Usage: node docs/audit/grammaire-multilingue/bench.mjs <origin> <corpus dir> [--langs=fr,es] [--no-ai] [--no-lt] [--tag=x]
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -13,6 +13,7 @@ const [entry, dir] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const origin = new URL(entry).origin;
 const langsArg = (process.argv.find((a) => a.startsWith('--langs=')) || '').slice(8);
 const noAi = process.argv.includes('--no-ai');
+const noLt = process.argv.includes('--no-lt'); // compare with a previous run's LanguageTool results instead
 const LT = { fr: 'fr', es: 'es', de: 'de-DE', pt: 'pt-BR', it: 'it', ru: 'ru-RU', zh: 'zh-CN', ja: 'ja-JP', ar: 'ar', hi: null, tr: null };
 const norm = (s) => String(s || '').normalize('NFC').replace(/\s+/g, ' ').trim();
 function lev(a, b) {
@@ -75,17 +76,18 @@ for (const lang of langs) {
   for (const b of batches(lang, pairs)) {
     const srcs = b.map((p) => p.src);
     const a = noAi ? null : await ai(srcs);
-    const l = LT[lang] ? await languageTool(srcs, LT[lang]) : null;
+    const l = LT[lang] && !noLt ? await languageTool(srcs, LT[lang]) : null;
     b.forEach((p, i) => {
       if (a) { if (!a[i].parsed) unparsed++; oursRows.push(score(p.src, a[i].out, p.ref)); }
       if (l) ltRows.push(score(p.src, l[i], p.ref));
       samples.push({ src: p.src, ref: p.ref, ours: a?.[i].out, lt: l?.[i] }); // every output, so a corpus can be re-scored without calling the AI again
     });
-    await new Promise((ok) => setTimeout(ok, 3500)); // LanguageTool's public API: 20 requests/minute
+    if (!noLt) await new Promise((ok) => setTimeout(ok, 3500)); // LanguageTool's public API: 20 requests/minute
   }
   results[lang] = { pairs: pairs.length, ours: summary(oursRows), languageTool: summary(ltRows), unparsedAiLines: unparsed, samples };
   console.log(lang, JSON.stringify({ ours: results[lang].ours, languageTool: results[lang].languageTool, unparsed }));
 }
 console.log('AI calls:', aiCalls);
 const here = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1'));
-fs.writeFileSync(path.join(here, `results${langsArg ? '-' + langsArg.replace(/,/g, '-') : ''}.json`), JSON.stringify(results, null, 1));
+const tag = (process.argv.find((a) => a.startsWith('--tag=')) || '').slice(6);
+fs.writeFileSync(path.join(here, `results${tag ? '-' + tag : ''}${langsArg ? '-' + langsArg.replace(/,/g, '-') : ''}.json`), JSON.stringify(results, null, 1));

@@ -1,0 +1,216 @@
+{
+ "pt": {
+  "pairs": 40,
+  "ours": {
+   "exact": 31,
+   "gain": 0.803,
+   "medianGain": 1,
+   "worse": 0,
+   "unchanged": 6
+  },
+  "languageTool": null,
+  "unparsedAiLines": 0,
+  "samples": [
+   {
+    "src": "Isso é algo que me faz muito mau.",
+    "ref": "Isso é algo que me faz muito mal.",
+    "ours": "Isso é algo que me faz muito mal."
+   },
+   {
+    "src": "Senão estiver entendendo, leia o manual de instruções.",
+    "ref": "Se não estiver entendendo, leia o manual de instruções.",
+    "ours": "Se não estiver entendendo, leia o manual de instruções."
+   },
+   {
+    "src": "Eu jurava que haviam mais moedas dentro do pote.",
+    "ref": "Eu jurava que havia mais moedas dentro do pote.",
+    "ours": "Eu jurava que havia mais moedas dentro do pote."
+   },
+   {
+    "src": "Meu gato saiu detrás do sofá.",
+    "ref": "Meu gato saiu de trás do sofá.",
+    "ours": "Meu gato saiu de trás do sofá."
+   },
+   {
+    "src": "Hora estou feliz, hora estou triste.",
+    "ref": "Ora estou feliz, ora estou triste.",
+    "ours": "Hora estou feliz, hora estou triste."
+   },
+   {
+    "src": "Já reservei o meu acento no voo para a Europa.",
+    "ref": "Já reservei o meu assento no voo para a Europa.",
+    "ours": "Já reservei meu assento no voo para a Europa."
+   },
+   {
+    "src": "Eu gosto do inverno por que não fico suando o tempo inteiro.",
+    "ref": "Eu gosto do inverno porque não fico suando o tempo inteiro.",
+    "ours": "Eu gosto do inverno porque não fico suando o tempo inteiro."
+   },
+   {
+    "src": "Deve a ver alguém nos esperando no destino.",
+    "ref": "Deve haver alguém nos esperando no destino.",
+    "ours": "Deve haver alguém nos esperando no destino."
+   },
+   {
+    "src": "Mais será possível que ele tenha ido tão longe?",
+    "ref": "Mas será possível que ele tenha ido tão longe?",
+    "ours": "Mas será possível que ele tenha ido tão longe?"
+   },
+   {
+    "src": "Eles tem dois cachorros.",
+    "ref": "Eles têm dois cachorros.",
+    "ours": "Eles têm dois cachorros."
+   },
+   {
+    "src": "A Avenida Paulista me trás lembranças de quando morei naquela região.",
+    "ref": "A Avenida Paulista me traz lembranças de quando morei naquela região.",
+    "ours": "A Avenida Paulista me traz lembranças de quando morei naquela região."
+   },
+   {
+    "src": "O lugar em que combinamos o ponto de encontro fica a cinco minutos daqui.",
+    "ref": "O lugar onde combinamos o ponto de encontro fica a cinco minutos daqui.",
+    "ours": "O lugar em que combinamos o ponto de encontro fica a cinco minutos daqui."
+   },
+   {
+    "src": "A nota da imprensa continha informações equivocadas, foi necessário emitir um comunicado para ratificá-la.",
+    "ref": "A nota da imprensa continha informações equivocadas, foi necessário emitir um comunicado para retificá-la.",
+    "ours": "A nota da imprensa continha informações equivocadas, foi necessário emitir um comunicado para ratificá-la."
+   },
+   {
+    "src": "O problema está nele acabar deixando de seguir seus sonhos para continuar com uma vida infeliz.",
+    "ref": "O problema está em ele acabar deixando de seguir seus sonhos para continuar com uma vida infeliz.",
+    "ours": "O problema está nele acabar deixando de seguir seus sonhos para continuar com uma vida infeliz."
+   },
+   {
+    "src": "O volume do som está muito auto, não consigo entender uma palavra dessa conversa.",
+    "ref": "O volume do som está muito alto, não consigo entender uma palavra dessa conversa.",
+    "ours": "O volume do som está muito alto, não consigo entender uma palavra dessa conversa."
+   },
+   {
+    "src": "O evento oferecido aos clientes foi iminente, não tinha absolutamente nada a ser criticado.",
+    "ref": "O evento oferecido aos clientes foi eminente, não tinha absolutamente nada a ser criticado.",
+    "ours": "O evento oferecido aos clientes foi iminente, não tinha absolutamente nada a ser criticado."
+   },
+   {
+    "src": "O melhor prato daquele restaurante é a beringela empanada.",
+    "ref": "O melhor prato daquele restaurante é a berinjela empanada.",
+    "ours": "O melhor prato daquele restaurante é a berinjela empanada."
+   },
+   {
+    "src": "A análize do documento será feita por um advogado.",
+    "ref": "A análise do documento será feita por um advogado.",
+    "ours": "A análise do documento será feita por um advogado."
+   },
+   {
+    "src": "O grupo empresarial promoveu um grande evento beneficiente ontem.",
+    "ref": "O grupo empresarial promoveu um grande evento beneficente ontem.",
+    "ours": "O grupo empresarial promoveu um grande evento beneficente ontem."
+   },
+   {
+    "src": "Estou adorando a sua compania.",
+    "ref": "Estou adorando a sua companhia.",
+    "ours": "Estou adorando a sua companhia."
+   },
+   {
+    "src": "Tomara que ela esteje conseguindo descansar.",
+    "ref": "Tomara que ela esteja conseguindo descansar.",
+    "ours": "Tomara que ela esteja conseguindo descansar."
+   },
+   {
+    "src": "Encontrei uma plataforma virtual que oferece um ótimo curso gratuíto sobre história.",
+    "ref": "Encontrei uma plataforma virtual que oferece um ótimo curso gratuito sobre história.",
+    "ours": "Encontrei uma plataforma virtual que oferece um ótimo curso gratuito sobre história."
+   },
+   {
+    "src": "O muro do prédio onde moro amanheceu todo pixado.",
+    "ref": "O muro do prédio onde moro amanheceu todo pichado.",
+    "ours": "O muro do prédio onde moro amanheceu todo pixado."
+   },
+   {
+    "src": "Ela é muito alérgica a pó por isso precisa estar com a casa sempre limpa.",
+    "ref": "Ela é muito alérgica a pó, por isso precisa estar com a casa sempre limpa.",
+    "ours": "Ela é muito alérgica a pó, por isso precisa estar com a casa sempre limpa."
+   },
+   {
+    "src": "O anti-biótico me deixou com muita dor de estômago.",
+    "ref": "O antibiótico me deixou com muita dor de estômago.",
+    "ours": "O antibiótico me deixou com muita dor de estômago."
+   },
+   {
+    "src": "Amanhã é dia de excursão a Pinacoteca de São Paulo.",
+    "ref": "Amanhã é dia de excursão à Pinacoteca de São Paulo.",
+    "ours": "Amanhã é dia de excursão à Pinacoteca de São Paulo."
+   },
+   {
+    "src": "O senhor enxeu o balde de água.",
+    "ref": "O senhor encheu o balde de água.",
+    "ours": "O senhor encheu o balde de água."
+   },
+   {
+    "src": "As duas meninas que, foram tão amigas no passado, hoje já não têm mais contato.",
+    "ref": "As duas meninas, que foram tão amigas no passado, hoje já não têm mais contato.",
+    "ours": "As duas meninas que foram tão amigas no passado, hoje já não têm mais contato."
+   },
+   {
+    "src": "O edifício onde se encontra a administração de um município é chamado de passo municipal.",
+    "ref": "O edifício onde se encontra a administração de um município é chamado de paço municipal.",
+    "ours": "O edifício onde se encontra a administração de um município é chamado de paço municipal."
+   },
+   {
+    "src": "É muito fácil enchergar a solução do problema quando não estamos envolvidos nele.",
+    "ref": "É muito fácil enxergar a solução do problema quando não estamos envolvidos nele.",
+    "ours": "É muito fácil enxergar a solução do problema quando não estamos envolvidos nele."
+   },
+   {
+    "src": "O vidro do carro estava tão embassado que não era possível enxergar nada ao redor.",
+    "ref": "O vidro do carro estava tão embaçado que não era possível enxergar nada ao redor.",
+    "ours": "O vidro do carro estava tão embaçado que não era possível enxergar nada ao redor."
+   },
+   {
+    "src": "ela madou um aiduio muito lingo par minha mae falando mal de nim",
+    "ref": "Ela mandou um áudio muito longo para minha mãe falando mal de mim.",
+    "ours": "Ela mandou um áudio muito longo para minha mãe falando mal de mim."
+   },
+   {
+    "src": "e3stou muito animada coma promoção que reb i no trbalho",
+    "ref": "Estou muito animada com a promoção que recebi no trabalho.",
+    "ours": "Estou muito animada com a promoção que recebi no trabalho."
+   },
+   {
+    "src": "o açraf~rao é u mtempero com prorpiredades anti0-inflamtoiera",
+    "ref": "O açafrão é um tempero com propriedades anti-inflamatórias.",
+    "ours": "O açafrão é um tempero com propriedades anti-inflamatórias."
+   },
+   {
+    "src": "ele já quebru todos oc copos nvoos que comepri esse mêsd",
+    "ref": "Ele já quebrou todos os copos novos que comprei esse mês.",
+    "ours": "Ele já quebrou todos os copos novos que comprei esse mês."
+   },
+   {
+    "src": "ek foi reprovado tr/~es vez ers na prova prática de rieção",
+    "ref": "Ele foi reprovado três vezes na prova prática de direção.",
+    "ours": "Ele foi reprovado três vezes na prova prática de direção."
+   },
+   {
+    "src": "corri qtnto que naço tie tempo de lerm eu kivro ontem",
+    "ref": "Corri tanto que não tive tempo de ler meu livro ontem.",
+    "ours": "Corri tanto que não tive tempo de ler meu livro ontem."
+   },
+   {
+    "src": "aquilo com ctza eh vdd",
+    "ref": "Aquilo com certeza é verdade.",
+    "ours": "Aquilo com certeza é verdade."
+   },
+   {
+    "src": "vou viajar nesse proximo fds",
+    "ref": "Vou viajar nesse próximo {fim,final} de semana.",
+    "ours": "Vou viajar nesse próximo fim de semana."
+   },
+   {
+    "src": "eu gosto de vc pq vc eh mt calmo",
+    "ref": "Eu gosto de você porque você é muito calmo.",
+    "ours": "Eu gosto de você porque você é muito calmo."
+   }
+  ]
+ }
+}
