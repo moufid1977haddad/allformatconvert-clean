@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
-import { checkedDataURL } from '../../../lib/mediaSupport';
+import { checkedDataURL, drawDecodedVideoFrame } from '../../../lib/mediaSupport';
 export default function VideoScreenshotPage() {
   const [file, setFile] = useState(null);
   const [screenshots, setScreenshots] = useState([]);
@@ -27,25 +27,27 @@ export default function VideoScreenshotPage() {
     if (file && videoRef.current) videoRef.current.src = URL.createObjectURL(file);
   }, [file]);
 
-  const capture = () => {
+  const capture = async () => {
     if (!videoRef.current) return;
     setError('');
-    const canvas = document.createElement('canvas');
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
-    const ctx = canvas.getContext('2d');
-    if (format === 'jpg') {
-      // JPG has no alpha channel -- paint a white background first so
-      // transparent letterboxing (rare, but possible from some codecs)
-      // doesn't come out black the way an unfilled canvas would.
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-    ctx.drawImage(videoRef.current, 0, 0);
-    // A frame that is not decoded yet leaves a 0x0 canvas: never report a capture then.
+    // The frame is drawn only once it is really decoded (a video not played yet
+    // gave an all-white JPG under Chromium, 28/09) -- drawDecodedVideoFrame
+    // waits, forces the decode, and refuses an empty picture.
     let url;
     try {
-      if (!canvas.width || !canvas.height) throw new Error('The video has no readable frame yet — wait for it to load, then try again.');
+      const frame = await drawDecodedVideoFrame(videoRef.current);
+      let canvas = frame;
+      if (format === 'jpg') {
+        // JPG has no alpha channel: white under transparent letterboxing (rare,
+        // some codecs), painted UNDER the frame that was already checked.
+        canvas = document.createElement('canvas');
+        canvas.width = frame.width;
+        canvas.height = frame.height;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(frame, 0, 0);
+      }
       url = format === 'jpg' ? checkedDataURL(canvas, 'image/jpeg', quality / 100) : checkedDataURL(canvas, 'image/png');
     } catch (e) { setError(e.message); return; }
     const time = videoRef.current.currentTime.toFixed(2);
@@ -64,7 +66,7 @@ export default function VideoScreenshotPage() {
           </div>
           {file && (
             <div className="space-y-3">
-              <video ref={videoRef} controls playsInline onError={() => setError("This browser cannot play this video's format, so no frame can be captured here. Convert it to MP4 first with the Video Converter, then capture.")} className="w-full rounded-xl bg-neutral-800" />
+              <video ref={videoRef} controls playsInline preload="auto" onError={() => setError("This browser cannot play this video's format, so no frame can be captured here. Convert it to MP4 first with the Video Converter, then capture.")} className="w-full rounded-xl bg-neutral-800" />
               <div className="flex flex-wrap gap-4 items-center">
                 <div>
                   <label className="text-xs text-neutral-500 block mb-1">Format</label>

@@ -236,6 +236,24 @@ export function finishRecording(chunks, recorder, fallbackMime) {
 // message -- refusing it at the picker just hides the problem.
 export const VIDEO_ACCEPT =
   'video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts';
+// Encrypted music files from streaming apps. They are not audio a converter can
+// read: the sound is encrypted for the app that downloaded it (NetEase Cloud
+// Music .ncm, QQ Music .qmc*/.mflac/.mgg, KuGou .kgm/.kgma/.vpr, Kuwo .kwm,
+// Apple Music/iTunes protected .m4p, Audible .aa/.aax). A visitor
+// sent one (tool_errors line 24, audio-converter, .ncm) and got a raw ffmpeg
+// error. Reference converters refuse them too; we say why, and what to do.
+const ENCRYPTED_MUSIC = {
+  ncm: 'NetEase Cloud Music', qmc0: 'QQ Music', qmc2: 'QQ Music', qmc3: 'QQ Music', qmcflac: 'QQ Music', qmcogg: 'QQ Music',
+  mflac: 'QQ Music', mflac0: 'QQ Music', mgg: 'QQ Music', mgg1: 'QQ Music', tkm: 'QQ Music', bkcmp3: 'QQ Music', bkcflac: 'QQ Music',
+  kgm: 'KuGou', kgma: 'KuGou', vpr: 'KuGou', kwm: 'Kuwo', m4p: 'Apple Music / iTunes', aa: 'Audible', aax: 'Audible',
+};
+export function encryptedMusicMessage(fileName) {
+  const ext = String(fileName || '').split('.').pop().toLowerCase();
+  const app = ENCRYPTED_MUSIC[ext];
+  if (!app) return null;
+  return `This .${ext} file is an encrypted download from ${app}: its sound can only be played inside that app, so no converter can read it. Save or export the song from ${app} as MP3, FLAC or another standard format (if your subscription allows it), then open that file here.`;
+}
+
 export const AUDIO_ACCEPT =
   'audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.opus,.wma,.aiff,.aif,.amr,.mka,.weba,.caf';
 
@@ -266,6 +284,51 @@ export function assertFrameNotBlank(data) {
   throw new OutputError(
     'A frame came out empty — the browser could not decode this part of the video, so no GIF was produced. Try another file or re-export it as H.264 MP4.'
   );
+}
+
+const onceEvent = (el, name, ms) => new Promise((resolve) => {
+  const done = () => { clearTimeout(t); el.removeEventListener(name, done); resolve(); };
+  const t = setTimeout(done, ms);
+  el.addEventListener(name, done);
+});
+
+// True when nothing was painted: a video frame not decoded yet draws nothing
+// (alpha 0 everywhere). Sampled on a 32x32 reduction.
+function canvasLooksUnpainted(canvas) {
+  const probe = document.createElement('canvas');
+  probe.width = 32; probe.height = 32;
+  const p = probe.getContext('2d', { willReadFrequently: true });
+  p.drawImage(canvas, 0, 0, 32, 32);
+  const d = p.getImageData(0, 0, 32, 32).data;
+  for (let i = 3; i < d.length; i += 4) if (d[i] !== 0) return false;
+  return true;
+}
+
+// Draws the video's CURRENT frame on a new canvas of its own size, and only
+// once that frame is really decoded. Chromium does not decode a frame of a
+// video that has not been played (drawImage then paints nothing, and a JPG made
+// from it came out all white -- the white we paint under a JPG -- measured
+// 28/09). So: wait for 'loadeddata', and if the drawing is still empty, seek to
+// the same time (which makes every browser decode that frame) and try again.
+// Throws OutputError rather than ever returning an empty picture.
+export async function drawDecodedVideoFrame(video) {
+  if (video.readyState < 2) await onceEvent(video, 'loadeddata', 8000);
+  assertVideoReadable(video);
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  for (let attempt = 0; attempt < 3; attempt++) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    if (!canvasLooksUnpainted(canvas)) return canvas;
+    const t = video.currentTime;
+    const seeked = onceEvent(video, 'seeked', 5000);
+    video.currentTime = attempt === 0 ? t : Math.min(t + 0.001, Math.max(0, (video.duration || t) - 0.001));
+    await seeked;
+    await new Promise((r) => (video.requestVideoFrameCallback ? video.requestVideoFrameCallback(() => r()) : requestAnimationFrame(() => r())));
+  }
+  throw new OutputError('This frame could not be read yet — play the video for a moment (or move the slider), then capture again.');
 }
 
 // GIF bytes -> Blob, refusing anything that is not a real GIF.
