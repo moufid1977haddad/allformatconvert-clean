@@ -6,6 +6,9 @@ import { AUDIO_ACCEPT } from '../../../lib/mediaSupport';
 import { AUDIO_OUTPUT_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
 import { reportToolError } from '../../../lib/reportError';
 import { opusOnService, encodeOpusOnService, LOSSLESS_INTERMEDIATE } from '../../../lib/opusService';
+import { ffmpegAudioDuration } from '../../../lib/audioDuration';
+
+const tenth = (x) => Math.round(x * 10) / 10;
 
 export default function AudioSplitterPage() {
   const [file, setFile] = useState(null);
@@ -15,8 +18,14 @@ export default function AudioSplitterPage() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [error, setError] = useState('');
+  const [audioUrl, setAudioUrl] = useState(null);
+  // The browser's player cannot read every format (WMA, AC3… everywhere; more in Safari): ffmpeg.wasm reads the
+  // length instead and the page says there is no preview (28/09/2026: the split control never appeared).
+  const [noPreview, setNoPreview] = useState(false);
   const fileRef = useRef();
   const audioRef = useRef();
+  const fileIdRef = useRef(0);
+  const probedRef = useRef(0);
 
   const handleFile = (e) => {
     const f = e.target.files[0];
@@ -26,11 +35,35 @@ export default function AudioSplitterPage() {
     setError('');
     setDuration(0);
     setSplitAt(30);
+    setNoPreview(false);
+    if (!f) return;
+    // Same format as the source by default when it can be written here (it used to be MP3 for everything, so a WAV
+    // or FLAC was made lossy unless the visitor changed it).
+    const ext = sanitizedInputExt(f);
+    setFormat(AUDIO_OUTPUT_FORMATS.some((x) => x.value === ext) ? ext : 'mp3');
+    const id = ++fileIdRef.current;
+    setAudioUrl(URL.createObjectURL(f));
+    setTimeout(() => { if (fileIdRef.current === id && !audioRef.current?.duration) probe(f, id); }, 4000);
+  };
+  const applyLength = (seconds) => {
+    const dur = Math.floor(seconds * 10) / 10; // tenths, never beyond the real end
+    setDuration(dur);
+    setSplitAt((s) => Math.min(Math.max(tenth(s), 0.1), tenth(dur - 0.1)));
+  };
+  const probe = async (f, id) => {
+    if (fileIdRef.current !== id || probedRef.current === id) return;
+    probedRef.current = id;
+    setNoPreview(true);
+    try {
+      const seconds = await ffmpegAudioDuration(f);
+      if (fileIdRef.current === id) applyLength(seconds);
+    } catch (e) {
+      if (fileIdRef.current === id) setError(`This file could not be read (${e.message || e}). Please try another file or format.`);
+    }
   };
   const onLoaded = () => {
-    const dur = Math.floor(audioRef.current.duration);
-    setDuration(dur);
-    setSplitAt(s => Math.min(Math.max(s, 1), Math.max(dur - 1, 1)));
+    const d = audioRef.current.duration;
+    if (Number.isFinite(d) && d > 0) applyLength(d);
   };
 
   const split = async () => {
@@ -56,17 +89,20 @@ export default function AudioSplitterPage() {
       const part2Name = 'part2.' + ext;
       await ffmpeg.writeFile(inputName, await fetchFile(file));
       const baseName = file.name.replace(/\.[^.]+$/, '');
+      // Cut in the filter graph, to the sample: "-t" stopped on a whole frame of the source, so an M4A's part 1 ran
+      // 17 ms past the split point and the two parts overlapped (measured 28/09/2026, cut-join-audit.mjs).
+      const cuts = [`atrim=end=${splitAt},asetpts=PTS-STARTPTS`, `atrim=start=${splitAt},asetpts=PTS-STARTPTS`];
       if (opusOnService(format)) { // cut here, losslessly; each part encoded with libopus on our service (lib/opusService.js)
         const parts = [];
-        for (const [i, cut] of [['-t', String(splitAt)], ['-ss', String(splitAt)]].entries()) {
-          await ffmpeg.exec(['-i', inputName, ...cut, ...LOSSLESS_INTERMEDIATE.args, LOSSLESS_INTERMEDIATE.name]);
+        for (const [i, cut] of cuts.entries()) {
+          await ffmpeg.exec(['-i', inputName, '-af', cut, '-vn', ...LOSSLESS_INTERMEDIATE.args, LOSSLESS_INTERMEDIATE.name]);
           const name = `part${i + 1}_${baseName}`;
           parts.push({ url: URL.createObjectURL(await encodeOpusOnService(await ffmpeg.readFile(LOSSLESS_INTERMEDIATE.name), name)), name: name + '.opus' });
         }
         setResults(parts);
       } else {
-        await ffmpeg.exec(['-i', inputName, '-t', String(splitAt), ...extraArgs, part1Name]);
-        await ffmpeg.exec(['-i', inputName, '-ss', String(splitAt), ...extraArgs, part2Name]);
+        await ffmpeg.exec(['-i', inputName, '-af', cuts[0], '-vn', ...extraArgs, part1Name]);
+        await ffmpeg.exec(['-i', inputName, '-af', cuts[1], '-vn', ...extraArgs, part2Name]);
         const data1 = await ffmpeg.readFile(part1Name);
         const data2 = await ffmpeg.readFile(part2Name);
         setResults([
@@ -98,11 +134,13 @@ export default function AudioSplitterPage() {
             {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-400 text-sm">Click to upload an audio file</p>}
           </div>
           <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
-          {file && <audio ref={audioRef} src={URL.createObjectURL(file)} onLoadedMetadata={onLoaded} controls className="w-full" />}
+          {audioUrl && !noPreview && <audio ref={audioRef} src={audioUrl} onLoadedMetadata={onLoaded} onError={() => probe(file, fileIdRef.current)} controls className="w-full" />}
+          {noPreview && <p className="text-sm text-neutral-600" role="status">{duration > 0 ? 'This browser cannot play this format, so there is no preview; splitting works the same.' : 'Reading the file…'}</p>}
           {duration > 0 && (
             <div>
-              <label className="block text-sm text-neutral-500 mb-1">Split at: {splitAt}s (of {duration}s)</label>
-              <input type="range" min={1} max={duration - 1} value={splitAt} onChange={e => setSplitAt(Number(e.target.value))} className="w-full" />
+              <label htmlFor="split-at" className="block text-sm text-neutral-500 mb-1">Split at (seconds, to 0.1): {splitAt}s (of {duration}s)</label>
+              <input id="split-at" type="number" min={0.1} max={tenth(duration - 0.1)} step={0.1} value={splitAt} onChange={e => setSplitAt(Math.min(tenth(duration - 0.1), Math.max(0.1, tenth(Number(e.target.value) || 0))))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-sm mb-2" />
+              <input type="range" min={0.1} max={tenth(duration - 0.1)} step={0.1} value={splitAt} onChange={e => setSplitAt(tenth(Number(e.target.value)))} className="w-full" aria-label="Split point slider" />
             </div>
           )}
           <div>
@@ -111,7 +149,7 @@ export default function AudioSplitterPage() {
               {AUDIO_OUTPUT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
             </select>
           </div>
-          <button onClick={split} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          <button onClick={split} disabled={!file || loading || !(duration > 0)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Splitting...' : 'Split Audio'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
@@ -129,14 +167,14 @@ export default function AudioSplitterPage() {
         description="Audio Splitter cuts an audio file into two parts at a single point you choose, using ffmpeg.wasm in your browser — nothing is uploaded, except for Opus, which our own server encodes with libopus and then deletes. Move the slider to set exactly where the split happens, and pick the output format for both parts from a dropdown."
         howTo={[
           "Click the upload area and select an audio file.",
-          "Use the slider to set the exact second where you want to split the file.",
+          "Type the split point to a tenth of a second, or use the slider.",
           "Choose an output format for both resulting parts.",
           "Click \"Split Audio\" to process it locally.",
           "Preview and download Part 1 and Part 2 separately."
         ]}
         faqs={[
           { q: "Can I split into more than two parts?", a: "Not in a single pass — this tool creates exactly two parts at one split point. Run the tool again on one of the resulting parts if you need further splits." },
-          { q: "What output format do the parts use?", a: "Your choice — MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, or AC3, picked from a dropdown, applied to both parts." },
+          { q: "What output format do the parts use?", a: "Your source's own format by default when it can be written here, otherwise MP3; or your choice — MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, or AC3 — applied to both parts. The cut is made to the sample: measured on WAV, FLAC, MP3 and OGG, the two parts put back together last exactly as long as the original; with M4A (AAC) and WMA, whose audio comes in fixed-size frames, a part can be up to a tenth of a second longer or shorter (measured: M4A +17 ms, WMA −0.1 s)." },
           { q: "Is there a file size limit?", a: "No hard limit is enforced by the tool — you're limited by your browser's available memory." },
           { q: "Is my file uploaded anywhere?", a: "For every format except Opus, no: processing happens in your browser via ffmpeg.wasm. For Opus, the processed audio is sent to our own server (not a third party), encoded with the reference libopus encoder (the in-browser one is not as good), and deleted as soon as you have downloaded the result." }
         ]}

@@ -74,10 +74,10 @@ async function downloads(p, n) { const out = []; for (const a of await p.locator
   check('booster: MP3 still made in the browser, no job sent', jobs.length === 0, `${jobs.length} jobs`);
   await p.close();
 }
-{ // Audio Splitter: 4 s split at 3 s (the page's default for a 4 s file), Opus
+{ // Audio Splitter: 4 s split at 3 s, Opus
   const p = await open('audio-splitter');
   await p.locator('main select, select.w-full').first().selectOption('opus');
-  await p.waitForFunction(() => document.querySelector('input[type=range]')?.max === '3');
+  await p.locator('#split-at').fill('3'); // split point typed to the tenth since 28/09 (was a whole-second slider)
   await p.getByRole('button', { name: /Split/ }).click();
   await p.locator('a[download]').nth(1).waitFor({ timeout: 120000 });
   const f = jobs.map((j) => flacInfo(sent(j))); const ds = await downloads(p, 2);
