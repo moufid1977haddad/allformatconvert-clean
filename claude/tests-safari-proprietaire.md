@@ -8,7 +8,7 @@
 
 ## 0. AVANT DE COMMENCER (15 min)
 
-**Durée honnête : ≈ 3 h 30 au total** (estimation, pas mesure), en quatre séances.
+**Durée honnête : ≈ 3 h 45 au total** (estimation, pas mesure), en quatre séances — **+ ≈ 15 min depuis le 28/09 pour le n° 30** (les 5 outils MediaRecorder, en séance B/D). **Avant de commencer, lis le §8** : ce que la passe préalable WebKit du 28/09 a déjà montré, et ce qui reste à regarder sur ton Safari.
 
 | Séance | Contenu | Durée |
 |---|---|---|
@@ -278,6 +278,15 @@ Un « RÉUSSI » exige que **le fichier produit s'ouvre et soit correct**, pas s
 
 ---
 
+#### 30. Les 5 outils vidéo à MediaRecorder — Video Merger, Video Filter, Video Rotator, Video Resizer, Screen Recorder *(ajouté le 28/09 : jamais testés sous Safari ; le WebKit de Playwright n'a pas MediaRecorder)*
+`/tools/video-tools/video-merger`, `video-filter`, `video-rotator`, `video-resizer`, `screen-recorder` — `MÉDIA` `TÉLÉCH`
+- **Risque :** ces outils rejouent la vidéo dans un canvas et l'**enregistrent** (MediaRecorder) : Safari n'écrit que du **MP4**. Le fichier doit s'appeler `.mp4`, **se lire, et avoir le son** (Filter, Rotator, Resizer, et **Merger depuis le 28/09** : il perdait le son et ne finissait pas sous Firefox). La durée de traitement = la durée de la vidéo (temps réel) : **garde l'onglet au premier plan**.
+- **Gestes (MacBook d'abord, ≈ 10 min ; iPhone : Merger et Rotator seulement) :** (a) **Rotator** : la **VIDÉO** > 90° > **Rotate Video** > télécharge ; (b) **Merger** : la **VIDÉO** deux fois > **Merge Videos** > télécharge ; (c) **Resizer** : la **VIDÉO** > 480p > **Resize Video** (mode « Fit » par défaut) > télécharge ; (d) **Filter** : Grayscale > télécharge ; (e) **Screen Recorder** (MacBook seulement) : **Start** > partage une fenêtre 5 s > **Stop** > télécharge.
+- **Attendu :** chaque fichier en `.mp4`, qui se lit **jusqu'au bout avec le son** ; (a) image tournée ; (b) durée ≈ 2 × celle de la vidéo ; (c) image non déformée (bandes noires si la forme change). Si la page dit **avant** qu'elle ne peut pas tourner dans ton Safari : note-le (c'est honnête), avec la version.
+- ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(note a-e)*
+
+---
+
 ## 2. SECTION iPHONE (Safari iOS) — CE QUI CHANGE
 
 1. **Téléchargement du fichier produit** — cause n° 1 d'échec sur iPhone. Vérifie **à chaque outil** avec la règle du §0.
@@ -306,7 +315,7 @@ Un « RÉUSSI » exige que **le fichier produit s'ouvre et soit correct**, pas s
 | **C** | **MacBook, outils 1 → 15** | **≈ 40 min** |
 | B | iPhone, outils 16 → 29 | ≈ 50 min |
 | D | MacBook, outils 16 → 29 | ≈ 25 min |
-| | **Total** | **≈ 3 h 25** |
+| | **Total** | **≈ 3 h 40** (dont n° 30 ≈ 15 min) |
 
 **Estimations, pas mesures.** Les moments longs : premier chargement de ffmpeg.wasm (n° 4, 6, 7, 12) et de 7-Zip (n° 1), réveil des services (n° 2, 3, 11, 15, 25 : quelques secondes). **Si un outil bloque plus de 5 minutes : note ÉCHOUÉ ou BLOQUÉ, passe au suivant.**
 
@@ -363,6 +372,7 @@ Dans **Notes**, **une ligne par outil**, tout de suite : `N° | R / É / B | ce 
 | 27 | Merge PDF | | | |
 | 28 | Outils de texte | | | |
 | 29 | Currency Converter | | | |
+| 30 | 5 outils MediaRecorder (a-e) | | | |
 
 *Légende : R = RÉUSSI · É = ÉCHOUÉ · B = BLOQUÉ.*
 
@@ -413,6 +423,6 @@ Dans **Notes**, **une ligne par outil**, tout de suite : `N° | R / É / B | ce 
 | 27 | Merge PDF | 6 pages, A puis B : **exact** | — |
 | 28 | Outils de texte | **7/7** (emoji entier, 3 phrases) | — |
 | 29 | Currency Converter | **5/5** (date des taux, écart BCE 0,006 %) | — |
-| — | **Video Merger, Filter, Rotator, Resizer, Screen Recorder** (MediaRecorder) | ce WebKit n'a **ni MediaRecorder ni captureStream** : la page le **dit avant** et garde le bouton désactivé (4 outils vérifiés) ; sous Chromium/Firefox, les 4 donnent un WebM qui se relit jusqu'au bout, aux bonnes dimensions | **les 5 outils sur le vrai Safari** : Safari a MediaRecorder (MP4) — vérifier que le fichier `.mp4` se lit, **avec le son** (Filter/Rotator/Resizer) ; Screen Recorder : Safari macOS seulement (pas d'iPhone) |
+| 30 | **Video Merger, Filter, Rotator, Resizer, Screen Recorder** (MediaRecorder) | ce WebKit n'a **ni MediaRecorder ni captureStream** : la page le **dit avant** et garde le bouton désactivé (4 outils vérifiés) ; sous Chromium/Firefox, les 4 donnent un WebM qui se relit jusqu'au bout, aux bonnes dimensions | **les 5 outils sur le vrai Safari** : Safari a MediaRecorder (MP4) — vérifier que le fichier `.mp4` se lit, **avec le son** (Filter/Rotator/Resizer) ; Screen Recorder : Safari macOS seulement (pas d'iPhone) |
 
-**Trouvé en route et corrigé (Chromium + Firefox, `85a614bf`) :** Video Merger **ne finissait jamais sous Firefox** et **perdait le son partout** ; il garde maintenant le son de chaque clip et ajuste (bandes noires) au lieu d'étirer. **Non corrigé (décision, voir le plan) :** Video Resizer étire l'image quand la taille demandée n'a pas les proportions de la source (dit honnêtement dans sa FAQ ; les références proposent « ajuster / remplir »).
+**Trouvé en route et corrigé (Chromium + Firefox, `85a614bf`) :** Video Merger **ne finissait jamais sous Firefox** et **perdait le son partout** ; il garde maintenant le son de chaque clip et ajuste (bandes noires) au lieu d'étirer. **Aussi corrigé (`ac75f9f0`) :** Video Resizer étirait l'image quand la taille demandée n'avait pas les proportions de la source ; il propose maintenant « Fit » (bandes noires, par défaut), « Fill » ou « Stretch », comme les références.
