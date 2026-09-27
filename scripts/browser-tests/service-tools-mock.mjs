@@ -20,7 +20,8 @@ const [entry, FF] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const origin = new URL(entry).origin;
 const browserName = (process.argv.find((a) => a.startsWith('--browser=')) || '--browser=chromium').slice(10);
 const engine = { chromium, firefox, webkit }[browserName];
-const SERVICE = 'https://media.test.invalid';
+// On a deployed preview the page's service URL is the real one: MOCK_SERVICE_URL names it so the test still plays it (routes intercepted, nothing reaches it).
+const SERVICE = process.env.MOCK_SERVICE_URL || 'https://media.test.invalid';
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'svcmock-'));
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', `${browserName} ${n}`, info); };
 const sha = (b) => createHash('sha256').update(b).digest('hex');
