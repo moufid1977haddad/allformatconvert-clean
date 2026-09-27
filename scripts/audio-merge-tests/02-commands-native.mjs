@@ -3,12 +3,12 @@
 // The page runs the same commands in ffmpeg.wasm; audio-merger-join.mjs proves that path in the browsers.
 // Run: node scripts/audio-merge-tests/02-commands-native.mjs <ffmpeg>
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { planMerge, parseProbe, defaultFormat, MERGE_FORMATS } from '../../app/lib/audioMerge.js';
+import { planMerge, planLastCount, parseSampleCount, parseProbe, defaultFormat, MERGE_FORMATS } from '../../app/lib/audioMerge.js';
 
 const FF = process.argv[2]; const FP = FF.replace(/ffmpeg(\.exe)?$/i, 'ffprobe$1');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'merge-cmd-'));
@@ -84,6 +84,72 @@ ok('every lossy format at every offered bitrate decodes, full length, near the b
       assert.ok(kb > want * 0.6 && kb < want * 1.25, `${f.value} ${k}k: measured ${kb.toFixed(0)} kbit/s`);
     }
     console.log('   ', f.value, f.kbps.join('/'));
+  }
+});
+// Crossfade (off by default). Samples of a file as signed 16-bit stereo interleaved.
+// volumedetect prints its count on stderr.
+const require_stderr = (args) => spawnSync(FF, ['-hide_banner', ...args], { cwd: tmp }).stderr.toString();
+const s16 = (f) => { const b = run(['-i', f, '-map', '0:a', '-f', 's16le', '-']); return new Int16Array(b.buffer, b.byteOffset, b.length / 2); };
+const rms = (a, from, to) => { let s = 0; for (let i = from; i < to; i++) s += a[i] * a[i]; return Math.sqrt(s / (to - from)); };
+function fadeMerge(files, fmt, fade, kbps) {
+  const probes = files.map(probe); const plan = planMerge(probes, files, fmt, kbps, fade); run(plan.args);
+  const out = `fade${++seq}.${plan.ext}`; fs.renameSync(path.join(tmp, plan.outputName), path.join(tmp, out)); return { out, plan };
+}
+ok('crossfade: length = sum - joins x overlap, to the sample; outside the overlaps every sample unchanged', () => {
+  src('x1.flac', 3, 11, ['-ar', '44100', '-ac', '2', '-sample_fmt', 's16']); src('x2.flac', 2, 12, ['-ar', '44100', '-ac', '2', '-sample_fmt', 's16']);
+  src('x3.flac', 2.5, 13, ['-ar', '44100', '-ac', '2', '-sample_fmt', 's16']);
+  const { out, plan } = fadeMerge(['x1.flac', 'x2.flac', 'x3.flac'], 'flac', { seconds: 0.5, curve: 'qsin' });
+  const o = s16(out), a = s16('x1.flac'), b = s16('x2.flac'), c = s16('x3.flac'), n = plan.fadeSamples * 2; // stereo
+  assert.equal(o.length, a.length + b.length + c.length - 2 * n, `length ${o.length / 88200} s`);
+  const same = (x, xFrom, y, yFrom, len) => { for (let i = 0; i < len; i++) if (x[xFrom + i] !== y[yFrom + i]) return `sample ${i}: ${x[xFrom + i]} vs ${y[yFrom + i]}`; return true; };
+  assert.equal(same(o, 0, a, 0, a.length - n), true, 'file 1 before its crossfade');
+  assert.equal(same(o, a.length, b, n, b.length - 2 * n), true, 'file 2 between its crossfades');
+  assert.equal(same(o, o.length - (c.length - n), c, n, c.length - n), true, 'file 3 after its crossfade');
+});
+ok('fade without overlap: full length kept; silent at the join, full level outside the fades', () => {
+  const { out, plan } = fadeMerge(['x1.flac', 'x2.flac'], 'flac', { seconds: 0.5, curve: 'tri', overlap: false });
+  const o = s16(out), a = s16('x1.flac'), b = s16('x2.flac'), n = plan.fadeSamples * 2;
+  assert.equal(o.length, a.length + b.length, `length ${o.length / 88200} s`);
+  let same = 0; for (let i = 0; i < a.length - n; i++) if (o[i] === a[i]) same++;
+  assert.equal(same, a.length - n, 'file 1 before its fade-out');
+  const w = 441 * 2; assert.ok(rms(o, a.length - w, a.length + w) < rms(o, 0, a.length - n) * 0.05, 'not silent at the join');
+});
+ok('fade-in / fade-out: exact count of the last file, silence at both ends, joins untouched', () => {
+  const files = ['m.mp3', 'mono.flac']; const probes = files.map(probe);
+  const c = planLastCount(probes, files, 'wav');
+  const err = require_stderr(c.args);
+  const lastSamples = parseSampleCount(err, c.channels);
+  assert.equal(lastSamples, 1.5 * 44100, `count ${lastSamples}`);
+  const { out, plan } = fadeMerge(files, 'wav', { seconds: 0.5, curve: 'qsin', joins: [false], fadeIn: true, fadeOut: true, lastSamples });
+  const o = s16(out); const n = plan.fadeSamples * 2;
+  assert.equal(o.length, (2 * 44100 + lastSamples) * 2);
+  assert.ok(Math.abs(o[0]) + Math.abs(o[1]) < 50, `first sample ${o[0]}`); assert.ok(Math.abs(o.at(-1)) + Math.abs(o.at(-2)) < 50, `last sample ${o.at(-1)}`);
+  const mono = s16('mono.flac'); let same = 0; const off = 2 * 44100 * 2; // mono file duplicated to both channels
+  for (let i = 0; i < mono.length - plan.fadeSamples; i++) if (o[off + 2 * i] === mono[i] && o[off + 2 * i + 1] === mono[i]) same++;
+  assert.equal(same, mono.length - plan.fadeSamples, 'last file before its fade-out');
+  assert.ok(rms(o, o.length - n, o.length - n / 2) > rms(o, o.length - n / 2, o.length), 'level falls through the fade-out');
+});
+ok('crossfade loudness, two different signals: equal power stays level, linear dips about 3 dB halfway', () => {
+  const lvl = {};
+  for (const curve of ['qsin', 'tri']) {
+    const { out, plan } = fadeMerge(['x1.flac', 'x2.flac'], 'wav', { seconds: 1, curve });
+    const o = s16(out), n = plan.fadeSamples * 2, start = s16('x1.flac').length - n, mid = start + n / 2, w = 4410 * 2;
+    lvl[curve] = 20 * Math.log10(rms(o, mid - w, mid + w) / rms(o, 0, start - w));
+  }
+  console.log('    level halfway through the overlap, against before it: equal power', lvl.qsin.toFixed(2), 'dB, linear', lvl.tri.toFixed(2), 'dB');
+  assert.ok(Math.abs(lvl.qsin) < 0.5, `equal power ${lvl.qsin}`); assert.ok(lvl.tri < -2.5 && lvl.tri > -3.5, `linear ${lvl.tri}`);
+});
+ok('crossfade of two loud in-phase files into 16 bits: clipped at full scale, never wrapped around', () => {
+  run(['-f', 'lavfi', '-i', 'sine=frequency=220:sample_rate=44100', '-t', '2', '-af', 'volume=7.6', '-ac', '2', '-sample_fmt', 's16', 'loud.flac']); // peak ~0.95
+  const { out, plan } = fadeMerge(['loud.flac', 'loud.flac'], 'flac', { seconds: 1, curve: 'qsin' });
+  const o = s16(out), ref = s16('loud.flac'), n = plan.fadeSamples * 2, start = ref.length - n;
+  let wrong = 0; for (let i = start; i < start + n; i++) if (Math.sign(o[i]) !== Math.sign(ref[i]) && Math.abs(ref[i]) > 3000) wrong++;
+  assert.equal(wrong, 0, `${wrong} samples flipped sign (wrap-around)`);
+});
+ok('crossfade into every lossy format: length = sum - overlap (within one encoder block)', () => {
+  for (const f of MERGE_FORMATS.filter((x) => x.kbps)) {
+    const { out } = fadeMerge(['f16.flac', 'm.mp3'], f.value, { seconds: 1, curve: 'tri' }, f.defaultKbps); const d = decodedSecs(out);
+    assert.ok(Math.abs(d - 4) < 0.08, `${f.value}: ${d} s`);
   }
 });
 console.log(fails ? `${fails} FAILED, ${pass} passed` : `${pass} passed`);

@@ -106,14 +106,45 @@ export function defaultFormat(probes) {
   return same || 'mp3';
 }
 
+// ffmpeg.wasm keeps the log level of the previous command: after the page's `ffprobe -v error` it printed nothing
+// more, so the merge's progress ("time=") never showed and a sample count could not be read (measured 26/09/2026).
+const LOG_INFO = ['-loglevel', 'info'];
+
 const LAYOUT = { 1: 'mono', 2: 'stereo', 3: '2.1', 4: 'quad', 5: '5.0', 6: '5.1', 7: '6.1', 8: '7.1' };
 const FILTER_FMT = { 16: 's16', 24: 's32', 32: 's32', f32: 'flt', f64: 'dbl' };
 
-// The join: inputs named in order, the chosen format, the chosen bitrate (lossy only).
-// Returns { args, outputName, ext, mime, depth, rate, channels, rounded, resampled }.
-export function planMerge(probes, inputNames, formatValue, kbps) {
-  const fmt = getMergeFormat(formatValue);
-  if (!fmt) throw new Error(`Unknown output format: ${formatValue}`);
+// Crossfade and fades (all off by default -- the default join adds and removes nothing). Measured on 26/09/2026
+// (docs/audit/RAPPORT-audio-merger-ordre-fondu.md): 123apps crossfades every join unless told otherwise, over half the
+// shorter file up to 3 s, never chosen by the visitor, and offers a fade-in at the start and a fade-out at the end by the
+// same rule; Clideo offers a 0.8 s crossfade behind a box; onlineconverter 1 to 10 s (whole seconds) for all joins at
+// once, with or without overlap. All three are linear. Here: 0.1 to 10 s, join by join, equal power or linear, with
+// overlap (each crossfaded join shortens the result by its length) or without (fade out, then fade in: the length is
+// kept), plus an optional fade-in at the start and fade-out at the end.
+export const FADE_CURVES = [
+  // Equal power: sin/cos gains, the loudness of two different songs stays level through the overlap.
+  { value: 'qsin', label: 'Equal power (steady loudness)' },
+  // Linear: gains add up to 1 (what 123apps and Clideo do); two different songs dip by about 3 dB halfway.
+  { value: 'tri', label: 'Linear' },
+];
+export const FADE_MIN = 0.1;
+export const FADE_MAX = 10;
+export const FADE_DEFAULT = 2;
+const curveOf = (fade) => (FADE_CURVES.some((c) => c.value === fade.curve) ? fade.curve : FADE_CURVES[0].value);
+
+// The longest fade these files allow: a file can't give more than its length to its fades (half of it each when both
+// of its ends fade), rounded down to 0.1 s. joins[i]: files i and i+1 are crossfaded; ends: { fadeIn, fadeOut }.
+export function maxCrossfade(durations, joins, ends = {}) {
+  let max = FADE_MAX;
+  const last = durations.length - 1;
+  durations.forEach((d, i) => {
+    const sides = (joins[i - 1] || (i === 0 && ends.fadeIn) ? 1 : 0) + (joins[i] || (i === last && ends.fadeOut) ? 1 : 0);
+    if (sides) max = Math.min(max, (Number(d) || 0) / sides);
+  });
+  return Math.max(0, Math.floor(max * 10 + 1e-9) / 10);
+}
+
+// Output rate, channels and the per-file filter steps (mono duplicated, resampled if needed, common format).
+function layoutOf(probes, fmt) {
   const depth = combinedDepth(probes.map(depthOf));
   let rate = Math.max(...probes.map((p) => Number(p.sampleRate) || 44100));
   if (fmt.maxRate && rate > fmt.maxRate) rate = fmt.maxRate;
@@ -121,25 +152,88 @@ export function planMerge(probes, inputNames, formatValue, kbps) {
   let channels = Math.max(...probes.map((p) => Number(p.channels) || 2));
   if (fmt.maxChannels && channels > fmt.maxChannels) channels = fmt.maxChannels;
   if (!LAYOUT[channels]) channels = 2;
-  const layout = LAYOUT[channels];
-  const sampleFmt = fmt.lossless ? FILTER_FMT[fmt.maxDepth ? upTo24(depth) : depth] : 'fltp';
-  const chains = probes.map((p, i) => {
-    const steps = [];
+  const steps = (p, sampleFmt) => {
+    const s = [];
     // Mono into stereo: the same samples on both sides (ffmpeg's default upmix lowers them by 3 dB).
-    if (Number(p.channels) === 1 && channels === 2) steps.push('pan=stereo|c0=c0|c1=c0');
-    if ((Number(p.sampleRate) || rate) !== rate) steps.push(`aresample=${rate}:filter_size=64:phase_shift=10:cutoff=0.97`);
-    steps.push(`aformat=sample_fmts=${sampleFmt}:sample_rates=${rate}:channel_layouts=${layout}`);
-    return `[${i}:a:0]${steps.join(',')}[a${i}]`;
+    if (Number(p.channels) === 1 && channels === 2) s.push('pan=stereo|c0=c0|c1=c0');
+    if ((Number(p.sampleRate) || rate) !== rate) s.push(`aresample=${rate}:filter_size=64:phase_shift=10:cutoff=0.97`);
+    s.push(`aformat=sample_fmts=${sampleFmt}:sample_rates=${rate}:channel_layouts=${LAYOUT[channels]}`);
+    return s;
+  };
+  return { depth, rate, channels, steps };
+}
+
+// A fade-out at the end starts a fixed number of samples before the last one, so that count must be exact -- a
+// container's duration is only an estimate for some formats (raw AAC, some MP3). The page runs this command on the
+// last file first: it decodes it through the same steps as the merge and prints "n_samples: N" (N / channels = frames).
+export function planLastCount(probes, inputNames, formatValue) {
+  const fmt = getMergeFormat(formatValue);
+  const { steps, channels } = layoutOf(probes, fmt);
+  return { channels, args: [...LOG_INFO, '-i', inputNames.at(-1), '-map', '0:a:0', '-af', [...steps(probes.at(-1), 'flt'), 'volumedetect'].join(','), '-f', 'null', '-'] };
+}
+// ffmpeg may set the filter up twice and print a first "n_samples: 0": the largest count is the real one.
+export const parseSampleCount = (log, channels) => {
+  const n = [...String(log || '').matchAll(/n_samples:\s*(\d+)/g)].map((m) => Number(m[1]));
+  return n.length && Math.max(...n) > 0 ? Math.round(Math.max(...n) / channels) : null;
+};
+
+// The join: inputs named in order, the chosen format, the chosen bitrate (lossy only), and optional fades
+// { seconds, curve, joins: [bool per join], overlap (default true), fadeIn, fadeOut, lastSamples (needed by fadeOut:
+// the last file's length in output samples, from planLastCount) } -- with nothing ticked the command is the exact join.
+// Returns { args, outputName, ext, mime, depth, rate, channels, rounded, resampled, fadedJoins, fadeSamples, lostSamples }.
+export function planMerge(probes, inputNames, formatValue, kbps, fade = null) {
+  const fmt = getMergeFormat(formatValue);
+  if (!fmt) throw new Error(`Unknown output format: ${formatValue}`);
+  const { depth, rate, channels, steps } = layoutOf(probes, fmt);
+  const sampleFmt = fmt.lossless ? FILTER_FMT[fmt.maxDepth ? upTo24(depth) : depth] : 'fltp';
+  const on = Boolean(fade && fade.seconds > 0);
+  const joins = probes.slice(1).map((_, i) => on && Boolean(fade.joins ? fade.joins[i] : true));
+  const fadedJoins = joins.filter(Boolean).length;
+  const fadeIn = on && Boolean(fade.fadeIn), fadeOut = on && Boolean(fade.fadeOut);
+  const anyFade = fadedJoins > 0 || fadeIn || fadeOut;
+  const fadeSamples = anyFade ? Math.round(fade.seconds * rate) : 0;
+  if (fadeOut && !(fade.lastSamples > 0)) throw new Error('A fade-out needs the exact length of the last file (planLastCount).');
+  const curve = anyFade ? curveOf(fade) : null;
+  // Fades are mixed in floating point (doubles for 32-bit integers, which floats can't hold exactly), so an overlap
+  // that sums above full scale is clipped by the final conversion rather than by the mixing code of whichever ffmpeg
+  // build runs it. Outside the fades the samples pass through unchanged, and the conversion back to 16/24 bits is exact.
+  const chainFmt = anyFade ? (fmt.lossless && (depth === 32 || depth === 'f64') ? 'dbl' : 'flt') : sampleFmt;
+  const last = probes.length - 1;
+  const chains = probes.map((p, i) => {
+    const s = steps(p, chainFmt);
+    if (i === 0 && fadeIn) s.push(`afade=t=in:ss=0:ns=${fadeSamples}:curve=${curve}`);
+    if (i === last && fadeOut) s.push(`afade=t=out:ss=${Math.max(0, fade.lastSamples - fadeSamples)}:ns=${fadeSamples}:curve=${curve}`);
+    return `[${i}:a:0]${s.join(',')}[a${i}]`;
   });
-  const joined = `${probes.map((_, i) => `[a${i}]`).join('')}concat=n=${probes.length}:v=0:a=1`;
+  let joined;
+  if (!anyFade) {
+    joined = `${probes.map((_, i) => `[a${i}]`).join('')}concat=n=${probes.length}:v=0:a=1`;
+  } else if (!fadedJoins) {
+    joined = `${probes.map((_, i) => `[a${i}]`).join('')}concat=n=${probes.length}:v=0:a=1,aformat=sample_fmts=${sampleFmt}`;
+  } else {
+    // File by file: a crossfade overlaps the last fadeSamples of what is already joined with the first ones of the
+    // next file (or, without overlap, fades them out then the next file in); an unticked join is the plain join.
+    const js = [];
+    let cur = 'a0';
+    for (let i = 1; i < probes.length; i++) {
+      const next = i === last ? 'x' : `x${i}`;
+      js.push(joins[i - 1]
+        ? `[${cur}][a${i}]acrossfade=ns=${fadeSamples}:o=${fade.overlap === false ? 0 : 1}:c1=${curve}:c2=${curve}[${next}]`
+        : `[${cur}][a${i}]concat=n=2:v=0:a=1[${next}]`);
+      cur = next;
+    }
+    joined = `${js.join(';')};[x]aformat=sample_fmts=${sampleFmt}`;
+  }
   const graph = `${chains.join(';')};${joined}${fmt.padEnd ? `[j];[j]apad=pad_len=${fmt.padEnd}` : ''}[out]`;
   const outputName = `output.${fmt.muxExt || fmt.ext}`;
   const k = fmt.kbps ? (fmt.kbps.includes(Number(kbps)) ? Number(kbps) : fmt.defaultKbps) : null;
   const codecArgs = fmt.lossless ? fmt.args(depth) : fmt.args(k);
-  const args = [...inputNames.flatMap((n) => ['-i', n]), '-filter_complex', graph, '-map', '[out]', '-map_metadata', '-1', ...codecArgs, outputName];
+  const args = [...LOG_INFO, ...inputNames.flatMap((n) => ['-i', n]), '-filter_complex', graph, '-map', '[out]', '-map_metadata', '-1', ...codecArgs, outputName];
   const rounded = fmt.lossless && fmt.maxDepth && !(typeof depth === 'number' && depth <= fmt.maxDepth);
   const resampled = probes.some((p) => (Number(p.sampleRate) || rate) !== rate);
-  return { args, outputName, ext: fmt.ext, mime: fmt.mime, kbps: k, depth, rate, channels, rounded, resampled };
+  // Samples the crossfades take off the plain join (none without overlap).
+  const lostSamples = fadedJoins && fade.overlap !== false ? fadedJoins * fadeSamples : 0;
+  return { args, outputName, ext: fmt.ext, mime: fmt.mime, kbps: k, depth, rate, channels, rounded, resampled, fadedJoins, fadeSamples, lostSamples, fadeIn, fadeOut };
 }
 
 // ffprobe -of json output -> the fields planMerge needs.
