@@ -15,7 +15,8 @@
 | 7 | Écran post-inscription ; dossier `quota-spend-infra` | ✅ fait | Invitation « Not spam / contacts » pour tous (`82e6b071`) ; dossier vide supprimé. |
 | 8 | Product Hunt (brouillons) | ✅ fait | Recherche (8 lancements, règles officielles), galerie régénérable en une commande (7 × 1270×760 + vignette), textes anglais. Rien publié. |
 | 9 | « Download all as ZIP » > 1,9 Go (Firefox, Safari) | ✅ fait en local | Service worker limité à `/zipdl/` ; 2,2 Go vérifiés octet par octet sous Firefox et WebKit ; ezyZip n'offre rien de tel hors Chrome/Edge. |
-| + | Revue indépendante du code de la nuit | ✅ faite | 6 défauts réels trouvés (dont 1 grave : page bloquée « busy » si le téléchargement est annulé), **tous corrigés et retestés**. |
+| + | Revue indépendante du code de la nuit (deux passes) | ✅ faite | 1re : 6 défauts réels (dont 1 grave : page bloquée « busy » si le téléchargement est annulé) ; 2e : 6 sur la coupe précise et le Resizer — **tous corrigés et retestés**. |
+| + | Même famille de défauts ailleurs | ✅ | **Audio / Video Metadata** refaits sur ffprobe (rapport complet, rien envoyé, taille libre ; la référence metadata2go envoie le fichier, 75 Mo) ; **Media Player** et **Video Screenshot** disent qu'un format ne se lit pas au lieu de rester muets. |
 
 ## 2) Décisions qui t'attendent, par importance pour le lancement
 
@@ -53,6 +54,8 @@ Tous testés en local (build de production `next build` + `next start`, service 
 | `714a3b85` | Video Merger : AudioContext dans le clic (revue) | `mediarecorder-tools.mjs` Chromium + Firefox | `85a614bf` |
 | `dbcc52bc` | Video Trimmer : mode « Precise cut » (image exacte, réencodage MP4) | `video-trimmer-precise.mjs` Chromium + Firefox (et source de taille impaire) | `11326601`, `a87a2fab` |
 | `aded38a6` | Video Resizer : proportions calculées à chaque image (revue) | `mediarecorder-tools.mjs` | `ac75f9f0` |
+| `fd8c2d79` | Audio / Video Metadata : rapport technique complet (ffprobe dans le navigateur), textes et cartes de catégorie corrigés (« edit » était faux) | `media-metadata.mjs` Chromium, Firefox, WebKit 9/9 (dont un WAV de 1,27 Go lu en 4-5 s) | — |
+| `6d39450b` | Media Player, Video Screenshot : format illisible dit, renvoi au convertisseur | `unplayable-messages.mjs` 3 navigateurs | — |
 | `9e3ce5db` | *(branche `deploiement-nuit-28-09` seulement)* correcteur de grammaire remis comme en production | `ai-prompt-tests` 15/15, `grammar-fixer-diff.mjs` | — |
 | **À NE PAS déployer seuls** | `09dc35a0`, `567e089c`, `4e879162` (consigne minimale), `608817da` (température 0) | mesure inachevée | décision n° 2 |
 
