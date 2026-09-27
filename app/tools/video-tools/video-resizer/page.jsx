@@ -91,9 +91,10 @@ export default function VideoResizerPage() {
       };
       recorder.onerror = () => { setError('Recording failed in this browser.'); setStatus(''); };
       const v = videoRef.current;
-      const k = mode === 'fit' ? Math.min(width / v.videoWidth, height / v.videoHeight) : Math.max(width / v.videoWidth, height / v.videoHeight);
-      const dw = mode === 'stretch' ? width : v.videoWidth * k, dh = mode === 'stretch' ? height : v.videoHeight * k;
       const drawFrame = () => {
+        // Computed at each frame: the video's own size is only known once it has loaded (0 before).
+        const k = mode === 'fit' ? Math.min(width / v.videoWidth, height / v.videoHeight) : Math.max(width / v.videoWidth, height / v.videoHeight);
+        const dw = mode === 'stretch' || !Number.isFinite(k) ? width : v.videoWidth * k, dh = mode === 'stretch' || !Number.isFinite(k) ? height : v.videoHeight * k;
         ctx.fillStyle = '#000'; ctx.fillRect(0, 0, width, height);
         ctx.drawImage(v, (width - dw) / 2, (height - dh) / 2, dw, dh);
         if (!v.paused && !v.ended) requestAnimationFrame(drawFrame);
