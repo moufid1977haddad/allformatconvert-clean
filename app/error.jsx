@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { reportToolError } from './lib/reportError';
+import { isChunkLoadError, reloadOnceForNewVersion } from './lib/chunkError';
 
 // Root error boundary for the whole app (excluding the root layout itself,
 // which only global-error.jsx can catch). Without this file, an uncaught
@@ -10,6 +11,8 @@ import { reportToolError } from './lib/reportError';
 // Google Translate widget, and (b) was never reported to tool_errors.
 export default function Error({ error, reset }) {
   useEffect(() => {
+    // Out-of-date page (a code file of the old version is gone): reload once instead of an error screen.
+    if (isChunkLoadError(error) && reloadOnceForNewVersion()) return;
     const tool = (typeof window !== 'undefined'
       ? window.location.pathname.split('/').filter(Boolean).pop()
       : null) || 'unknown';
