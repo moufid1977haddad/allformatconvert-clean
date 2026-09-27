@@ -9,6 +9,7 @@ import { checkFileSize, MAX_PDF_TO_WORD_STAGED_BYTES } from "@/lib/quota/limits"
 import { isStagedRequest, respondStaged, fileResponse } from "@/lib/media/stagedRoute";
 import { alertServerError } from "@/lib/quota/errorAlerts";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
+import { contentDisposition } from "@/lib/contentDisposition";
 
 type Spec = {
   tool: "pdf-to-excel" | "pdf-to-ppt";
@@ -57,7 +58,7 @@ export function makePdfToOfficeHandler(spec: Spec) {
 
     const report = async (code: string) => {
       await alertServerError(spec.tool, code);
-      await insertToolError(buildServerToolError({ tool: spec.tool, file, error: new Error(code), userAgent: req.headers.get("user-agent") }));
+      await insertToolError(buildServerToolError({ tool: spec.tool, file, error: new Error(code), userAgent: req.headers.get("user-agent"), headers: req.headers }));
     };
 
     try {
@@ -71,7 +72,7 @@ export function makePdfToOfficeHandler(spec: Spec) {
         return NextResponse.json({ error: "Conversion failed. Please try again." }, { status: 502 });
       }
       const outName = file.name.replace(/\.[^.]+$/, "") + "." + spec.ext;
-      return fileResponse(bytes, { "Content-Type": spec.mime, "Content-Disposition": `attachment; filename="${outName.replace(/"/g, "")}"` }, staged);
+      return fileResponse(bytes, { "Content-Type": spec.mime, "Content-Disposition": contentDisposition(outName) }, staged);
     } catch (err) {
       if (err instanceof ConvertApiError && (err as any).billed) await guard.commit(null);
       else await guard.release();

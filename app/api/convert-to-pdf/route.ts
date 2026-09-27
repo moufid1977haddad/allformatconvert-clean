@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { contentDisposition } from "@/lib/contentDisposition";
 import { detectProprietarySymbolFonts } from "@/lib/officeSymbolFonts";
 import { nameNamelessFonts } from "@/lib/xlsxDefaultFont";
 import { convertDocxToPdf, ConvertApiError } from "@/lib/providers/convertApi";
@@ -202,7 +203,7 @@ async function handleConvertApi(req: NextRequest, file: File, staged: boolean): 
         tool: "word-to-pdf",
         file,
         error: new Error("non_pdf_response"),
-        userAgent: req.headers.get("user-agent"),
+        userAgent: req.headers.get("user-agent"), headers: req.headers,
       }));
       return NextResponse.json({ error: "Conversion failed. Please try again." }, { status: 502 });
     }
@@ -210,7 +211,7 @@ async function handleConvertApi(req: NextRequest, file: File, staged: boolean): 
     const outName = file.name.replace(/\.[^.]+$/, "") + ".pdf";
     return fileResponse(bytes, {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${outName.replace(/"/g, "")}"`,
+      "Content-Disposition": contentDisposition(outName),
     }, staged);
   } catch (err) {
     // No automatic fallback to Gotenberg on any ConvertAPI failure -- every
@@ -240,7 +241,7 @@ async function handleConvertApi(req: NextRequest, file: File, staged: boolean): 
           tool: "word-to-pdf",
           file,
           error: new Error(`${err.code} (HTTP ${err.httpStatus ?? "n/a"})`),
-          userAgent: req.headers.get("user-agent"),
+          userAgent: req.headers.get("user-agent"), headers: req.headers,
         }));
       }
       return NextResponse.json({ error: mapped.message }, { status: mapped.status });
@@ -251,7 +252,7 @@ async function handleConvertApi(req: NextRequest, file: File, staged: boolean): 
       tool: "word-to-pdf",
       file,
       error: err instanceof Error ? err : new Error("unexpected_error"),
-      userAgent: req.headers.get("user-agent"),
+      userAgent: req.headers.get("user-agent"), headers: req.headers,
     }));
     return NextResponse.json({ error: "Conversion failed. Please try again." }, { status: 500 });
   }
@@ -324,7 +325,7 @@ async function handleGotenberg(req: NextRequest, file: File, extension: string, 
       tool: "convert-to-pdf-" + extension,
       file,
       error: err,
-      userAgent: req.headers.get("user-agent"),
+      userAgent: req.headers.get("user-agent"), headers: req.headers,
     }));
     return NextResponse.json({ error: "Could not reach the conversion service." }, { status: 502 });
   } finally {
@@ -344,7 +345,7 @@ async function handleGotenberg(req: NextRequest, file: File, extension: string, 
       tool: "convert-to-pdf-" + extension,
       file,
       error: new Error(`service_error_${gotenbergResponse.status}`),
-      userAgent: req.headers.get("user-agent"),
+      userAgent: req.headers.get("user-agent"), headers: req.headers,
     }));
     return NextResponse.json(
       { error: "Conversion failed. The document may be corrupted or in an unsupported format." },
@@ -362,7 +363,7 @@ async function handleGotenberg(req: NextRequest, file: File, extension: string, 
       tool: "convert-to-pdf-" + extension,
       file,
       error: new Error("non_pdf_response"),
-      userAgent: req.headers.get("user-agent"),
+      userAgent: req.headers.get("user-agent"), headers: req.headers,
     }));
     return NextResponse.json({ error: "Conversion service returned an unexpected response." }, { status: 502 });
   }
@@ -371,7 +372,7 @@ async function handleGotenberg(req: NextRequest, file: File, extension: string, 
   const detectedFonts = await detectedFontsPromise;
   const headers: Record<string, string> = {
     "Content-Type": "application/pdf",
-    "Content-Disposition": `attachment; filename="${outName.replace(/"/g, "")}"`,
+    "Content-Disposition": contentDisposition(outName),
   };
   // Only set this header when it has something to say -- an empty-string
   // header would be a false "we checked and found nothing worth this
