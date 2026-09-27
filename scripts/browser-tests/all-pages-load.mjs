@@ -18,6 +18,9 @@ for (const cat of fs.readdirSync(root)) {
 }
 const b = await engine.launch();
 const ctx = await b.newContext();
+// On a Vercel PREVIEW, Vercel injects its comment toolbar (vercel.live feedback.js); under WebKit it throws
+// "navigator.storage.persisted" on every page. Not the site's code (absent on www): --no-vercel-toolbar blocks only it.
+if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((url) => url.hostname === 'vercel.live', (r) => r.abort());
 const bad = [];
 let n = 0;
 for (const u of urls) {
