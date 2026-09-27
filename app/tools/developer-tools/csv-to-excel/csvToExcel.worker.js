@@ -1,4 +1,5 @@
 import { IncrementalCsvParser } from '../../../lib/csvParser';
+import { detectDecimalSeparator, numericColumns, parseLocaleNumber } from '../../../lib/csvEncoding';
 import { MAX_ROWS } from './config';
 
 class RowLimitExceededError extends Error {
@@ -14,7 +15,7 @@ const MIME_TYPES = {
   xls: 'application/vnd.ms-excel',
 };
 
-async function run({ file, text, maxRows, bookType, delimiter }) {
+async function run({ file, text, maxRows, bookType, delimiter, encoding, typeNumbers = true }) {
   const limit = maxRows || MAX_ROWS;
   const rows = [];
   const parser = new IncrementalCsvParser((row) => {
@@ -31,7 +32,7 @@ async function run({ file, text, maxRows, bookType, delimiter }) {
     const total = file.size || 0;
     let read = 0;
     let lastReportedPct = -1;
-    const reader = file.stream().pipeThrough(new TextDecoderStream()).getReader();
+    const reader = file.stream().pipeThrough(new TextDecoderStream(encoding || 'utf-8')).getReader();
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -55,6 +56,18 @@ async function run({ file, text, maxRows, bookType, delimiter }) {
   const xlsxModule = await import('xlsx');
   const XLSX = xlsxModule.default || xlsxModule;
   const wb = XLSX.utils.book_new();
+  // Number cells, as Excel itself makes them when it opens the CSV: read with the
+  // file's decimal separator ("12,5" in a ';' export = 12.5), whole columns only,
+  // identifiers with a leading zero kept as text.
+  const decimalSep = detectDecimalSeparator(rows.slice(1), delimiter || ',');
+  const numeric = typeNumbers ? numericColumns(rows, decimalSep) : [];
+  if (numeric.some(Boolean)) {
+    for (let r = 1; r < rows.length; r++) for (let c = 0; c < rows[r].length; c++) {
+      if (!numeric[c]) continue;
+      const t = String(rows[r][c]).trim();
+      if (t !== '') rows[r][c] = parseLocaleNumber(t, decimalSep);
+    }
+  }
   const ws = XLSX.utils.aoa_to_sheet(rows);
   XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
 
@@ -70,7 +83,7 @@ async function run({ file, text, maxRows, bookType, delimiter }) {
   const buffer = XLSX.write(wb, { type: 'buffer', bookType: type });
   const blob = new Blob([buffer], { type: MIME_TYPES[type] });
 
-  self.postMessage({ type: 'done', blob, rowCount: rows.length, bookType: type });
+  self.postMessage({ type: 'done', blob, rowCount: rows.length, bookType: type, decimalSep, numericCount: numeric.filter(Boolean).length });
 }
 
 self.onmessage = (e) => {
