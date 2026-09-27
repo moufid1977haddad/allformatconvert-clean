@@ -94,6 +94,11 @@ for (const kind of ['mp4', 'webm']) {
     check(`${name}: video ${pr.width}x${pr.height}`, !t.size || (pr.width === t.size[0] && pr.height === t.size[1]), `expected ${t.size}`);
     check(`${name}: duration ${pr.lastFrame.toFixed(2)} s for ${want} s`, Math.abs(pr.lastFrame - want) < 0.7, `codec ${pr.codec}`);
     check(`${name}: the sound is kept`, pr.audio && pr.audioLevel > -40, `audio stream ${pr.audio}, mean level ${pr.audioLevel} dB`);
+    if (t.key === 'resizer') { // 4:3 source into 854x480 (16:9): fitted by default, so black bars at the sides
+      const px = execFileSync(ffmpeg, ['-v', 'error', '-ss', '1', '-i', out, '-frames:v', '1', '-vf', 'crop=10:10:15:235', '-f', 'rawvideo', '-pix_fmt', 'gray', '-']);
+      const edge = px.reduce((a, v) => a + v, 0) / px.length;
+      check(`${name}: fitted (black bar at the left edge, not stretched)`, edge < 30, `mean grey ${edge.toFixed(0)}`);
+    }
     console.log('INFO', name, JSON.stringify({ size: fs.statSync(out).size, ...pr, decodeErrors: undefined }), 'recorder types', JSON.stringify(support.types));
     await ctx.close();
   }

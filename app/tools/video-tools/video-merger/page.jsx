@@ -24,6 +24,16 @@ export default function VideoMergerPage() {
     if (files.length < 2) return;
     setError('');
     setStatus('Merging videos...');
+    const support = videoReRecordSupport();
+    if (!support.ok) { setError(support.reason); setStatus(''); return; }
+    // The sound of every clip goes through Web Audio into the recording (28/09/2026: the merged file had no
+    // sound at all, and Firefox never finished -- its recorder waits forever for the audio track that
+    // "video/webm;codecs=vp8,opus" promises when the stream has none). Created and resumed here, inside the
+    // click, before any await: a resume() after the click's activation has expired may never settle.
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const audioContext = new AudioCtx();
+    const resumed = audioContext.state === 'suspended' ? audioContext.resume() : Promise.resolve();
+    const closeAudio = () => { audioContext.close().catch(() => {}); };
     try {
       const canvas = document.createElement('canvas');
       const videos = await Promise.all(files.map(f => new Promise((resolve, reject) => {
@@ -36,17 +46,10 @@ export default function VideoMergerPage() {
       canvas.height = videos[0].videoHeight;
       const ctx = canvas.getContext('2d');
       const videoStream = canvas.captureStream(30);
-      // The sound of every clip goes through Web Audio into the recording (28/09/2026: the merged file had no
-      // sound at all, and Firefox never finished -- its recorder waits forever for the audio track that
-      // "video/webm;codecs=vp8,opus" promises when the stream has none).
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      const audioContext = new AudioCtx();
       const audioOut = audioContext.createMediaStreamDestination();
       for (const v of videos) audioContext.createMediaElementSource(v).connect(audioOut);
-      if (audioContext.state === 'suspended') await audioContext.resume();
+      await resumed;
       const stream = new MediaStream([...videoStream.getVideoTracks(), ...audioOut.stream.getAudioTracks()]);
-      const support = videoReRecordSupport();
-      if (!support.ok) throw new Error(support.reason);
       const recorder = new MediaRecorder(stream, { mimeType: support.mime });
       const chunks = [];
       recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
@@ -56,9 +59,9 @@ export default function VideoMergerPage() {
           setResult({ url: URL.createObjectURL(blob), ext });
         } catch (e) { setError(e.message); }
         setStatus('');
-        audioContext.close().catch(() => {});
+        closeAudio();
       };
-      recorder.onerror = () => { setError('Recording failed in this browser.'); setStatus(''); };
+      recorder.onerror = () => { setError('Recording failed in this browser.'); setStatus(''); closeAudio(); };
       recorder.start();
       for (const video of videos) {
         await video.play();
@@ -77,7 +80,7 @@ export default function VideoMergerPage() {
         video.pause();
       }
       recorder.stop();
-    } catch(e) { setError('Error: ' + e.message); setStatus(''); }
+    } catch(e) { setError('Error: ' + e.message); setStatus(''); closeAudio(); }
   };
 
   return (
