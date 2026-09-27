@@ -7,15 +7,21 @@ export default function MediaPlayerPage() {
   const [file, setFile] = useState(null);
   const [isVideo, setIsVideo] = useState(false);
   const [url, setUrl] = useState(null);
+  // 28/09/2026: a file the browser cannot play (AVI, WMV, FLV, WMA…) showed a dead player and nothing else.
+  const [cannotPlay, setCannotPlay] = useState(false);
   const inputRef = useRef();
 
   const handleFile = (e) => {
     const f = e.target.files[0];
+    e.target.value = '';
     if (!f) return;
     setFile(f);
-    setIsVideo(f.type.startsWith('video'));
-    setUrl(URL.createObjectURL(f));
+    setCannotPlay(false);
+    // The MIME type is often empty for .mkv, .avi, .flv…: fall back on the extension.
+    setIsVideo(f.type ? f.type.startsWith('video') : /\.(mp4|m4v|mov|qt|webm|mkv|avi|wmv|flv|ogv|3gp|3g2|mpg|mpeg|ts|mts|m2ts)$/i.test(f.name));
+    setUrl((old) => { if (old) URL.revokeObjectURL(old); return URL.createObjectURL(f); });
   };
+  const ext = file ? (file.name.split('.').pop() || '').toUpperCase() : '';
 
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -28,15 +34,20 @@ export default function MediaPlayerPage() {
             <p className="text-neutral-400 text-sm mt-1">Supports MP4, MP3, WAV, OGG, WebM</p>
             <input ref={inputRef} type="file" accept={`${AUDIO_ACCEPT},${VIDEO_ACCEPT}`} className="hidden" onChange={handleFile} />
           </div>
+          {cannotPlay && (
+            <p role="alert" className="text-sm text-red-600 text-center">
+              This browser cannot play {ext ? `this ${ext} file` : 'this file'}. Convert it first with the <a className="underline" href={isVideo ? '/tools/video-tools/video-converter' : '/tools/audio-tools/audio-converter'}>{isVideo ? 'Video Converter (to MP4)' : 'Audio Converter (to MP3)'}</a>, then play it here.
+            </p>
+          )}
           {url && (
             <div className="space-y-3">
               {isVideo ? (
-                <video controls src={url} className="w-full rounded-xl bg-neutral-800" />
+                <video controls playsInline src={url} onError={() => setCannotPlay(true)} className="w-full rounded-xl bg-neutral-800" />
               ) : (
                 <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-8 text-center space-y-4">
                   <Music className="w-16 h-16 mx-auto text-neutral-400" />
                   <p className="text-neutral-300 font-semibold">{file.name}</p>
-                  <audio controls src={url} className="w-full" />
+                  <audio controls src={url} onError={() => setCannotPlay(true)} className="w-full" />
                 </div>
               )}
             </div>
