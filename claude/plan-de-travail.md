@@ -719,6 +719,22 @@ Get-Content .env.local | ForEach-Object {
 
 **📌 POUR DEMAIN (28/09) — noté le 27/09 au soir à la demande du propriétaire, non traité :**
 - **a. Image Upscaler refuse au-delà de 1 Mpx au lieu de réduire.** État documentaire vérifié : la limite a été **fixée d'après une mesure de temps** (1 Mpx ×4 = 34,5 s sur Railway, 8 vCPU lus dans le cgroup — `RAPPORT-ecarts-marche.md` §« image-upscaler », `services/background-removal/app/upscale.py` `UPSCALE_MAX_INPUT_PIXELS`), avec la mention « au-delà non éprouvé » ; **elle n'a jamais été comparée aux limites d'entrée des concurrents** (iLoveIMG, Upscale.media, Let's Enhance…). Probablement en dessous du marché : relever leurs limites réelles sur leurs sites, mesurer le temps au-delà de 1 Mpx, et décider entre relever la limite, réduire dans le navigateur avant l'envoi (comme le détourage), ou les deux.
+  **✅ Recherche faite le 27/09 (sans appel payant, sans code) — limites lues sur les pages des concurrents :**
+
+  | Service | Entrée maximale | Agrandissement |
+  |---|---|---|
+  | **iLoveIMG** (notre référence de qualité, LPIPS 0,164 contre 0,107 pour nous) | **« any image smaller than 6MP »** (outil marqué Premium) | ×2, ×4 |
+  | **Upscale.media** | ×4 : **2 500×2 500 (6,25 Mpx) sans compte**, 5 000×5 000 (25 Mpx) avec compte ; ×2 : 5 000×5 000 / 10 000×10 000 | ×1 à ×8 |
+  | **Bigjpg** | gratuit **3 000×3 000 (9 Mpx), 5 Mo** ; payant 50 Mo | gratuit ×4, payant ×16 |
+  | **LetsEnhance** | entrée non publiée ; **sortie 64 Mpx en gratuit** (soit ≈ 4 Mpx d'entrée en ×4), 512 Mpx payant | ×2 à ×16 |
+  | **Nous** | **1 Mpx** | ×2, ×4 |
+
+  **Verdict : 4 à 9 fois en dessous des offres gratuites** (iLoveIMG 6 Mpx, Upscale.media 6,25 Mpx, Bigjpg 9 Mpx). **Réduire dans le navigateur n'est pas une solution** pour un agrandisseur (réduire puis agrandir perd le détail que le visiteur veut garder) : elle ne vaut que comme repli annoncé au-delà du plafond.
+  **Le moyen des concurrents** : aucun ne le publie ; ils traitent sur serveur, vraisemblablement sur carte graphique (non vérifié). Notre moyen actuel : modèle MoSR sur **processeur** (8 vCPU Railway), **par tuiles de 256 px** (la mémoire ne dépend donc pas de la taille de l'image) — la limite n'est **que le temps** : 1 Mpx ×4 = **34,5 s** mesurés.
+  **Proposition chiffrée (estimations, à mesurer avant toute promesse — interdit n° 20) :**
+  - **P1 — relever à 6 Mpx sur le processeur actuel (parité iLoveIMG / Upscale.media sans compte).** Temps estimé ≈ linéaire aux pixels : **≈ 3,5 min pour 6 Mpx ×4** ; coût Railway ≈ 8 vCPU × 207 s ≈ **0,013 $ par image de 6 Mpx** (0,002 $ à 1 Mpx). Risques : le service d'images est **partagé avec le détourage** (un agrandissement de 3,5 min le bloquerait) → file d'attente propre à l'agrandisseur ou service séparé ; progression visible obligatoire. **Travail ≈ 4-6 h** : mesurer 2, 4, 6 Mpx sur Railway, régler `UPSCALE_MAX_INPUT_PIXELS`, file et progression, textes, suites Chromium + Firefox, préversion. **À trancher avec les tests de charge de demain** (même service, même question de capacité).
+  - **P2 — carte graphique à la demande** (Modal, RunPod, Replicate… : fournisseur à vérifier en direct, interdit n° 15) pour ramener 6 Mpx à quelques secondes. Coût par image probablement inférieur à P1, mais nouveau fournisseur, compte et clé à créer par le propriétaire. **Travail ≈ 1-2 jours.** Non chiffré précisément tant que le fournisseur n'est pas choisi.
+  - **Recommandation : P1 d'abord** (aucun nouveau fournisseur, parité avec les offres gratuites), en gardant P2 si le temps de 3,5 min se révèle rédhibitoire à la mesure.
 - **b. Les deux tests de charge sont ACCEPTÉS sur le principe** (`RAPPORT-seance-27-09.md` §4 : copie jetable du service ffmpeg sur Railway, < 0,50 $ ; Gotenberg de bout en bout sur www, ≈ 0,05-0,20 $). **À faire demain AVEC le propriétaire. La clé de test de la copie jetable, c'est LUI qui la génère** (annexe B), jamais Claude.
 - **c. Corpus de grammaire français et coréen : facultatifs, pour plus tard** — ils exigent une inscription que seul le propriétaire peut faire (MultiGEC-2025, Kor-Lang8).
 
