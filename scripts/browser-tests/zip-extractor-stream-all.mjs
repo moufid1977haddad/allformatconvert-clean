@@ -50,6 +50,20 @@ if (!d) {
   }
   fs.rmSync(tmp, { recursive: true, force: true });
 }
+{ // the visitor cancels the download in the browser: the page must say so and become usable again, not stay busy
+  const p2 = await ctx.newPage();
+  await p2.goto(origin + '/tools/file-tools/zip-extractor', { waitUntil: 'networkidle' });
+  await p2.locator('input[type=file]').first().setInputFiles(zip);
+  await p2.getByRole('button', { name: /Download all as ZIP/ }).waitFor({ timeout: 60000 });
+  const dl2 = p2.waitForEvent('download', { timeout: 120000 }).catch(() => null);
+  await p2.getByRole('button', { name: /Download all as ZIP/ }).click();
+  const d2 = await dl2;
+  if (d2) { await p2.waitForTimeout(1500); await d2.cancel(); }
+  const said = await p2.locator('[role=alert], .bg-red-50').filter({ hasText: /could not be written|cancel|stopped/i }).first().textContent({ timeout: 60000 }).catch(() => '');
+  const usable = await p2.getByRole('button', { name: /Download all as ZIP/ }).isEnabled({ timeout: 10000 }).catch(() => false);
+  check('download cancelled in the browser: the page says so and is usable again', !!d2 && !!said && usable, `${said.slice(0, 120)} · button enabled ${usable}`);
+  await p2.close();
+}
 await b.close();
 console.log(fails ? `${fails} FAILED (${engine.name()})` : `all passed (${engine.name()})`);
 process.exit(fails ? 1 : 0);

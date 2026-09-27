@@ -12,6 +12,7 @@ self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim(
 self.addEventListener('message', (event) => {
   const data = event.data || {};
   if (data.type !== 'register' || !event.ports[0] || !/^[A-Za-z0-9]{16,64}$/.test(String(data.id))) return; // 'ping' keeps the worker awake
+  for (const [id, job] of pending) if (Date.now() - job.created > 60000) pending.delete(id); // never picked up
   pending.set(data.id, { name: String(data.name || 'download.zip'), port: event.ports[0], created: Date.now() });
   event.ports[0].postMessage({ type: 'ready' });
 });
@@ -24,9 +25,11 @@ self.addEventListener('fetch', (event) => {
   if (!job) { event.respondWith(new Response('This download link has expired. Please start it again from the page.', { status: 404, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })); return; }
   const { port, name } = job;
   let waiting = null; // the pull in progress
-  port.onmessage = ({ data }) => { const w = waiting; waiting = null; if (w) w(data); };
+  let stopped = null; // an error or cancel from the page that came between two pulls: never end such a file cleanly
+  port.onmessage = ({ data }) => { const w = waiting; waiting = null; if (w) w(data); else if (data && data.type === 'error') stopped = data; };
   const stream = new ReadableStream({
     pull(controller) {
+      if (stopped) { controller.error(new Error(stopped.message || 'The download was stopped.')); return undefined; }
       return new Promise((resolve) => {
         waiting = (data) => {
           if (data.type === 'chunk') controller.enqueue(new Uint8Array(data.chunk));

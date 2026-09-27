@@ -41,16 +41,20 @@ export async function streamToDownload(readable, name) {
   try { await ready; } catch { return null; }
 
   const reader = readable.getReader();
-  let finish, fail;
+  let finish, fail, cancelled = false, pulled = false;
   const done = new Promise((resolve, reject) => { finish = resolve; fail = reject; });
   const keepAlive = setInterval(() => sw.postMessage({ type: 'ping' }), 10000); // the worker must not be stopped mid-download
   const stop = () => { clearInterval(keepAlive); setTimeout(() => frame.remove(), 60000); };
   port1.onmessage = async ({ data }) => {
     if (!data) return;
-    if (data.type === 'cancel') { reader.cancel().catch(() => {}); stop(); fail(new Error('The download was cancelled in the browser.')); return; }
+    if (data.type === 'cancel') { cancelled = true; reader.cancel().catch(() => {}); stop(); fail(new Error('The download was cancelled in the browser.')); return; }
     if (data.type !== 'pull') return;
+    pulled = true;
+    // After a cancel or an error, never answer "end": the file would be saved as complete.
+    if (cancelled) { port1.postMessage({ type: 'error', message: 'Cancelled.' }); return; }
     try {
       const { done: end, value } = await reader.read();
+      if (cancelled) { port1.postMessage({ type: 'error', message: 'Cancelled.' }); return; } // cancelled while reading
       if (end) { port1.postMessage({ type: 'end' }); stop(); finish(); return; }
       const copy = value.slice(); // a chunk may be a view into a larger buffer: send an exact copy
       port1.postMessage({ type: 'chunk', chunk: copy.buffer }, [copy.buffer]);
@@ -63,5 +67,8 @@ export async function streamToDownload(readable, name) {
   frame.hidden = true;
   frame.src = `${SCOPE}${id}/${encodeURIComponent(name)}`;
   document.body.appendChild(frame);
-  return { done, cancel: () => { reader.cancel().catch(() => {}); port1.postMessage({ type: 'error', message: 'Cancelled.' }); stop(); } };
+  const cancel = () => { if (cancelled) return; cancelled = true; reader.cancel().catch(() => {}); port1.postMessage({ type: 'error', message: 'Cancelled.' }); stop(); };
+  // The browser never asked for the file (worker stopped, download blocked): say so instead of waiting forever.
+  setTimeout(() => { if (!pulled && !cancelled) { cancel(); fail(new Error('The download did not start in this browser.')); } }, 20000);
+  return { done, cancel };
 }

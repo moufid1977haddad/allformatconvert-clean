@@ -192,15 +192,18 @@ export default function ZipExtractorPage() {
       if (!sw) { setPhase('ready'); setError(`These files add up to ${fmtSize(total)}: over the ${ZIP_IN_MEMORY_LABEL} this browser can build into one ZIP in memory, and it could not stream the download. Download the files one by one, or use Chrome or Edge.`); return null; }
     }
     const target = writable ? zipStream.pipeTo(writable) : sw ? sw.done : new Response(zipStream).blob();
+    // A download stopped in the browser leaves nothing pulling the ZIP: stop feeding it instead of waiting forever.
+    let failed = null;
+    Promise.resolve(target).catch((e) => { failed = e; });
     try {
-      result = await eachBatch(async (f) => { push(f); while (queue.length > 2) await new Promise((r) => setTimeout(r, 20)); });
+      result = await eachBatch(async (f) => { push(f); while (queue.length > 2 && !failed) await new Promise((r) => setTimeout(r, 20)); if (failed) throw failed; });
       finished = true; wake?.();
       if (result.needPassword || result.cancelled) { await writable?.abort?.().catch(() => {}); sw?.cancel(); return result.needPassword ? result : null; }
       const blob = await target;
       if (!writable && !sw) saveBlob(blob, name);
       setStatus(summary(result, writable ? `written to "${handle.name}"` : sw ? `in ${name}, streamed to your downloads` : `in ${name}`));
       return null;
-    } catch (err) { finished = true; wake?.(); await writable?.abort?.().catch(() => {}); if (!cancelledRef.current) setError('The ZIP could not be written: ' + err.message); return null; }
+    } catch (err) { finished = true; wake?.(); sw?.cancel(); await writable?.abort?.().catch(() => {}); if (!cancelledRef.current) setError('The ZIP could not be written: ' + err.message); return null; }
     finally { setProgress(null); setPhase('ready'); }
   });
 
