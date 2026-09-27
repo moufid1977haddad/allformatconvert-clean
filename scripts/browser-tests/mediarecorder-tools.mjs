@@ -6,7 +6,7 @@
 // can decode; each one is tried).
 // Usage: node scripts/browser-tests/mediarecorder-tools.mjs <origin> <ffmpeg> [--browser=firefox|webkit] [--only=rotator]
 import { chromium, firefox, webkit } from '@playwright/test';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -40,7 +40,9 @@ function probe(file) {
     const out = execFileSync(ffprobe, ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'frame=pts_time,best_effort_timestamp_time', '-of', 'csv=p=0', file]).toString();
     for (const line of out.split('\n')) { const t = Math.max(...line.split(',').map(Number).filter(Number.isFinite)); if (t > last) last = t; }
   } catch { /* reported by decodeErrors */ }
-  return { format: j.format.format_name, width: v?.width, height: v?.height, codec: v?.codec_name, audio: j.streams.some((s) => s.codec_type === 'audio'), lastFrame: last, decodeErrors: decodeErrors.trim() };
+  let audioLevel = null; // mean level of the recorded sound (the sources carry a 440 Hz tone at about -21 dB)
+  { const r = spawnSync(ffmpeg, ['-v', 'info', '-i', file, '-map', '0:a:0?', '-af', 'volumedetect', '-f', 'null', '-']); const m = String(r.stderr).match(/mean_volume: (-?[\d.]+) dB/); audioLevel = m ? Number(m[1]) : null; }
+  return { audioLevel, format: j.format.format_name, width: v?.width, height: v?.height, codec: v?.codec_name, audio: j.streams.some((s) => s.codec_type === 'audio'), lastFrame: last, decodeErrors: decodeErrors.trim() };
 }
 const extOk = (ext, format) => (ext === 'webm' ? /webm|matroska/.test(format) : ext === 'mp4' ? /mp4|mov/.test(format) : false);
 
@@ -90,7 +92,8 @@ for (const kind of ['mp4', 'webm']) {
     check(`${name}: extension .${ext} matches the real container`, extOk(ext, pr.format), pr.format);
     check(`${name}: decodes to the end without error`, !pr.decodeErrors, pr.decodeErrors.slice(0, 200));
     check(`${name}: video ${pr.width}x${pr.height}`, !t.size || (pr.width === t.size[0] && pr.height === t.size[1]), `expected ${t.size}`);
-    check(`${name}: duration ${pr.lastFrame.toFixed(2)} s for ${want} s`, Math.abs(pr.lastFrame - want) < 0.7, `codec ${pr.codec}, audio ${pr.audio}`);
+    check(`${name}: duration ${pr.lastFrame.toFixed(2)} s for ${want} s`, Math.abs(pr.lastFrame - want) < 0.7, `codec ${pr.codec}`);
+    check(`${name}: the sound is kept`, pr.audio && pr.audioLevel > -40, `audio stream ${pr.audio}, mean level ${pr.audioLevel} dB`);
     console.log('INFO', name, JSON.stringify({ size: fs.statSync(out).size, ...pr, decodeErrors: undefined }), 'recorder types', JSON.stringify(support.types));
     await ctx.close();
   }

@@ -367,3 +367,52 @@ Dans **Notes**, **une ligne par outil**, tout de suite : `N° | R / É / B | ce 
 *Légende : R = RÉUSSI · É = ÉCHOUÉ · B = BLOQUÉ.*
 
 **Ce que cette feuille ne prouve pas, même 29/29 :** les ≈ 190 autres outils, les gros fichiers (plafonds mobiles non éprouvés ici), le chemin Office par morceaux (> 4 Mio), et les versions de Safari autres que la tienne. **Retirés de la feuille du 19/09 :** Zip Creator et Video to GIF (inchangés depuis, ou couverts par les n° 1 et 15).
+
+---
+
+## 8. PASSE PRÉALABLE SOUS LE WEBKIT DE PLAYWRIGHT — 28/09/2026 (nuit), par Claude
+
+> **Ce n'est pas Safari.** Le WebKit de Playwright sous Windows n'a **ni `OffscreenCanvas`, ni `MediaRecorder`, ni `captureStream`, ni caméra, ni micro, ni lecture audio/vidéo** (il répond « probably » à `canPlayType('audio/wav')` mais ne lit rien). Cette passe **ne clôt aucun point du bloquant 9** ; elle a servi à corriger avant ta passe ce qui cassait déjà. Outils payants ou sur nos services : **route ou service joués par le test** (aucun appel payant, aucun secret) — ce qui prouve le chemin navigateur (envoi, octets reçus, téléchargement), pas l'encodage réel.
+> Suites : `scripts/browser-tests/*.mjs --browser=webkit` (option ajoutée à toutes), plus `service-tools-mock.mjs`, `webkit-sheet-rest.mjs`, `mediarecorder-tools.mjs`, `audio-trimmer-no-preview.mjs`, `video-trimmer-no-preview.mjs`, `cut-join-audit.mjs`.
+
+**Corrigé cette nuit (en local, testé WebKit + Chromium + Firefox, un commit chacun) :**
+- **Audio Trimmer** — un format que le lecteur du navigateur ne lit pas (WMA, AC3 partout ; tout sous ce WebKit) : **les réglages n'apparaissaient jamais, sans message**. Durée lue par ffmpeg.wasm, « pas d'aperçu » dit (`9f01beac`).
+- **Audio Splitter** — même défaut + point de coupe à la seconde + MP3 imposé par défaut (`91dbf2f4`).
+- **Video Trimmer** — AVI, WMV acceptés mais jamais coupables (message « sliders unavailable ») ; même correction (`11326601`).
+- **Image Resizer** — sous WebKit, une largeur tapée avant la lecture de l'image gardait la hauteur d'origine : **2000×1500 → 879×1500, image déformée** ; champs désactivés tant que la taille n'est pas lue (`e81d4b62`).
+- **Voice Recorder** — sans enregistrement possible : « Microphone access denied: undefined is not an object… » ; vraie cause dite (`2d101e55`).
+- **QR Scanner** — sans caméra sur une page https : « il faut une page https sécurisée » (faux) ; corrigé (`3559d7d4`).
+- **Video Merger / Filter / Rotator / Resizer** — textes « toujours WebM » faux sous Safari (MP4) (`15053bfa`).
+
+| # | Outil | Sous WebKit (Playwright) | Ce qui reste à regarder sur le vrai Safari |
+|---|---|---|---|
+| 1 | Zip Extractor | **20/20** (www) : RAR WinRAR noms chinois, en-têtes chiffrés, 7z/ZIP AES, volumes, CAB, LZH, annulation, « Download all as ZIP » | mémoire de l'iPhone ; « Save all to a folder » **absent** (normal) |
+| 2-3 | Video Compressor / Converter [S1] | **envoi par morceaux vérifié** (service joué : octets reçus = fichier, SHA-256 de chaque morceau), `.mov` accepté, téléchargement | **l'encodage réel** et le temps (service vrai), un `.MOV` d'iPhone |
+| 4 | Video Trimmer [S1] | coupe MP4/AVI/WMV **faite sans aperçu** (ce WebKit ne lit aucune vidéo) ; copie alignée sur l'image-clé | lecture de l'aperçu, curseurs, un `.MOV` d'iPhone |
+| 5 | Voice Recorder [S2] | pas de micro ici : **message juste** (corrigé) | l'enregistrement réel, extension `.m4a`/`.mp4` |
+| 6 | Audio Merger | jonctions **exactes** (c1 « exact » ; FLAC, fondus, ordre) ; **lecture impossible dans ce WebKit** (échecs « play » attendus) ; Opus non joué ici | écoute, « no preview » pour WMA/AC3, Opus |
+| 7 | Audio Opus ×4 | Booster, Splitter, Compressor, Converter : **FLAC envoyé exact, `.opus` téléchargé** (service joué) — 5/5 | l'extension `.opus` à l'enregistrement dans Safari |
+| 8 | Barcode Generator | **67/67** (WebKit a les Workers ; sans OffscreenCanvas, le repli fonctionne), chaque code relu par zxing-cpp | rien de particulier |
+| 9 | QR Scanner | dépôt, **collage** et envoi lus ; caméra absente : message juste (corrigé) | **caméra de l'iPhone**, collage depuis Photos |
+| 10 | Image Converter [S3] | **ce WebKit n'a pas OffscreenCanvas** : message clair « needs Safari 16.4 or later », rien de faux produit | **tout** : WebP (Safari n'en encode pas : doit le dire avant), AVIF, BMP/TIFF/PDF, HEIC |
+| 11 | Image Upscaler [S4] | refus au-delà de 1 Mpx dit, **envoi par morceaux + route** vérifiés (service joué), PNG téléchargé | le résultat réel ×4 |
+| 12 | Audio Trimmer | **corrigé** (voir plus haut) ; coupes à l'échantillon, fondus | écoute, « Set to the player's position » |
+| 13 | Image Compressor | même message qu'Image Converter (pas d'OffscreenCanvas) | **tout** |
+| 14 | Hash Generator | **17/17**, dont 760 Mio en flux | collage |
+| 15 | MP4 / MOV to GIF [S5] | `.mov` accepté, envoi et téléchargement vérifiés (service joué) | le GIF réel, proportions d'une vidéo verticale |
+| 16 | GIF Maker | ajuster/rogner/étirer, ordre, boucles : **tout passe** | — |
+| 17 | Word to PDF | page, envoi et téléchargement vérifiés (route jouée) | la conversion réelle (payante, une fois) |
+| 18 | Split PDF | **9/9** (plages, toutes les N pages, ZIP de 30) | — |
+| 19 | Compress PDF | page, envoi et téléchargement vérifiés (route jouée) | la compression réelle |
+| 20 | QR Generator | **11/11** (logo, PNG/SVG/PDF, relu par jsQR) | lecture Wi-Fi par l'appareil photo |
+| 21 | Grammar Fixer | surlignage, défaire/rétablir, copier : **10/10** (IA jouée) | l'appel réel (payant, une fois) |
+| 22-23 | Unit / Color Converter | **30/30** | collage |
+| 24 | Image Resizer | **corrigé** (déformation sous WebKit) ; 2/2 | — |
+| 25 | Background Remover | **non passé** (payant ; sa route n'a pas été jouée cette nuit) | tout |
+| 26 | Tar Extractor | en-têtes PAX : **pas de fichier parasite**, contenu exact | — |
+| 27 | Merge PDF | 6 pages, A puis B : **exact** | — |
+| 28 | Outils de texte | **7/7** (emoji entier, 3 phrases) | — |
+| 29 | Currency Converter | **5/5** (date des taux, écart BCE 0,006 %) | — |
+| — | **Video Merger, Filter, Rotator, Resizer, Screen Recorder** (MediaRecorder) | ce WebKit n'a **ni MediaRecorder ni captureStream** : la page le **dit avant** et garde le bouton désactivé (4 outils vérifiés) ; sous Chromium/Firefox, les 4 donnent un WebM qui se relit jusqu'au bout, aux bonnes dimensions | **les 5 outils sur le vrai Safari** : Safari a MediaRecorder (MP4) — vérifier que le fichier `.mp4` se lit, **avec le son** (Filter/Rotator/Resizer) ; Screen Recorder : Safari macOS seulement (pas d'iPhone) |
+
+**Défauts trouvés et NON corrigés (décision à prendre, voir le plan) :** Video Merger **perd le son** et dure 6,33 s pour deux vidéos de 3 s (+0,33 s, non localisé), en temps réel ; Video Resizer **déforme** (pas de verrou de proportions : 4:3 → 854×480).
