@@ -2,7 +2,17 @@
 
 **Session :** propriétaire présent. **Branche de travail :** `licence-ameliorations`. **Production :** `master` passé de `4d8ed7ff` à `77a47594` (fusion sans push forcé). **Balise de restauration :** `restauration-avant-deploiement-28-09` → `4d8ed7ff` (poussée).
 
-*(rapport complété au fil des étapes — version finale en fin de session)*
+## En une ligne par point
+
+| # | Point | État |
+|---|---|---|
+| 0 | Documents lus ; feuille du bloquant 11 versée | ✅ `a5fdc576` |
+| 1 | Nuit du 28/09 en production | ✅ **`77a47594`**, préversion puis **www vérifiés sous Chromium, Firefox, WebKit** (238 pages + toutes les suites) ; rien retiré du lot |
+| 2 | Limite média 20 → 40/h | ✅ Production + Preview ; **prouvé sur www** (40 accordés, 41ᵉ refusé) ; jour inchangé (60) |
+| 3 | Grammaire : fin de la mesure | ✅ 80 appels ≈ 0,04 $ ; Preview remise à l'identique ; **verdict : T0 tient partout sauf le russe (−1/−2 exactes, deux fois moins d'empirées)** — rien en production, **décision à toi** |
+| 4 | Bloquant 11 : sept tests | ✅ exécutés (www ; test 7 sur préversion) : **2, 4, 5 passent ; 1 bis, 3, 6 échouent** (5 défauts B11-1 à B11-5, non corrigés) ; **à toi : lire 3 lignes dans `tool_errors`** |
+| 5 | `origin/worktree-quota-spend-infra` | ✅ supprimée (entièrement dans master) |
+| 6 | Slogan, agrandisseur, coupe précise | 📋 préparés, rien changé ; **constat : l'agrandisseur n'est pas compté dans le plafond global de 20 $** |
 
 ## 0. Documents lus, feuille versée
 
@@ -96,3 +106,65 @@ Bancs : `scripts/browser-tests/b11-tests-proprietaire.mjs` (tests 1-6 ; chaque f
 ## 5. Branche distante `origin/worktree-quota-spend-infra` — ✅ supprimée
 
 Sa pointe `f3acb3b5` (30/08, « docs: disclose usage-metrics collection… ») est **un ancêtre de master** : 0 commit hors de master (`git rev-list origin/master..` vide). Supprimée (`git push origin --delete`), vérifiée absente. Restauration possible : `git push origin f3acb3b5:refs/heads/worktree-quota-spend-infra`.
+
+## 6. Préparé pour ta décision — **rien changé**
+
+### 6a. Slogan de l'accueil (aujourd'hui : « Convert anything. / Instantly. Free. »)
+
+Ce qui ne tient pas dans l'actuel : **« anything »** (formats hors de portée écrits dans le plan : RM/RMVB, MXF, SWF…) et **« Instantly »** (une conversion vidéo de 3 min prend 147 s, mesuré le 20/09). Accroche Product Hunt recommandée : **« 225 free online tools — most never upload your file »** (`docs/lancement/03-textes-en.md`).
+
+| # | Titre (h1, deux lignes comme aujourd'hui) | Fait mesuré qui le porte | Cohérence avec l'accroche PH |
+|---|---|---|---|
+| **S1 (ma préférence)** | **225 free tools.** / **Most never upload your file.** | audit de confidentialité : **198 pages « traitement local » sur 225**, croisées avec les 27 à appel réseau, zéro contradiction (plan, CLOS) ; compteur 225 gardé par le build (`check-tool-links.js`) | identique mot pour mot : le visiteur venu de Product Hunt retrouve la promesse qu'il a lue |
+| S2 | **Free file tools,** / **tested against the leaders.** | comparaisons sur le même fichier : PDF sans perte −35,4 % pixels identiques (iLovePDF « recommandé » −35,0 %) ; premier fichier d'un RAR de 1,99 Go en 5,1 s contre 7,25 s (ezyZip) ; LPIPS 0,107 contre 0,164 (iLoveIMG) ; grammaire anglaise 25/25 contre 15/25 (LanguageTool) | reprend le premier commentaire du fondateur ; **exige** que la page montre ces preuves (sinon promesse invérifiable pour le visiteur) |
+| S3 | **Convert, compress, extract —** / **in your browser. Free, no sign-up.** | 198/225 outils dans le navigateur (même audit) ; **aucun outil n'exige de compte** : vérifié dans le code le 28/09, `reserveUserQuota` n'est appelé par aucune route | reprend « no sign-up » de la description PH ; « in your browser » doit rester vrai pour les trois verbes (vidéo et Office passent par un serveur : formulé sans « all ») |
+
+Sous-titre possible pour chacun (déjà mesuré) : « About 200 of our 225 tools run entirely in your browser; the others say so, and state their size limits before you pick a file. »
+
+### 6b. Agrandisseur (Image Upscaler) — coût réel par image, avant / après 6 Mpx
+
+**Tarifs Railway relus en direct le 28/09** (railway.com/pricing) : **0,00000772 $/vCPU·s**, 0,00000386 $/Go·s de mémoire, **0,05 $/Go sortant**. **Temps mesurés** (Railway, 8 vCPU, `RAPPORT-ecarts-marche.md` §3c) : 0,17 Mpx → 5,7 s ; **1 Mpx → 34,5 s** ; soit ≈ 34 s par Mpx, **linéaire par construction** (tuiles de 256 px : 1 000×1 000 = 16 tuiles, 3 000×2 000 = 96 = ×6). **×2 coûte autant que ×4** (le code passe toujours par le modèle ×4 puis réduit). Les agrandissements sont **faits un par un** (`_run_lock`).
+
+| Par image | Calcul (mesuré × tarif) | Sortie réseau (estimée ⁱ) | Mémoire (estimée ⁱⁱ) | **Total** |
+|---|---|---|---|---|
+| **Avant — 1 Mpx ×4** (16 Mpx en sortie) | 34,5 s × 8 vCPU = 276 vCPU·s → **0,0021 $** | 24-64 Mo → 0,001-0,003 $ | ≈ 0,0003 $ | **≈ 0,004-0,006 $** |
+| **Après — 6 Mpx ×4** (96 Mpx en sortie) | ≈ 207 s × 8 = 1 656 vCPU·s → **0,0128 $** | 144-384 Mo → 0,007-0,019 $ | ≈ 0,0016 $ | **≈ 0,022-0,034 $** |
+| Après — 6 Mpx ×2 (24 Mpx) | 0,0128 $ | 36-96 Mo → 0,002-0,005 $ | ≈ 0,0016 $ | **≈ 0,016-0,019 $** |
+
+ⁱ PNG d'une photo agrandie ≈ 1,5-2 octets/pixel (**non mesuré**) ; le PNG sort **une ou deux fois** du réseau Railway selon que le service d'images joint le service média par son adresse publique ou privée (adresse non lue : c'est une variable du service). ⁱⁱ ≤ 2 Go pendant le calcul (non mesuré). **Correction d'un chiffre écrit** : le « ≈ 0,002 $/image de 1 Mpx » du 23/09 ne comptait que le processeur ; avec la sortie réseau c'est **≈ 0,004-0,006 $**.
+
+**« Coût mensuel au plafond de dépense actuel » — constat d'abord : le plafond global de 20 $ (`GLOBAL_SPEND_CAP_USD`) NE COUVRE PAS l'agrandisseur.** La route `/api/image-upscale` ne réserve aucune dépense (contrairement au détourage, compté à 0,0031 $/image) : seules bornes réelles, les limites par connexion du compartiment `office_rate` (billets « stage », **désormais 40/h et 60/jour**, partagés avec les conversions Office de la même connexion) et le débit du service (une image à la fois).
+
+| Borne | Avant (1 Mpx) | Après (6 Mpx ×4) |
+|---|---|---|
+| Une connexion au maximum (60/jour × 30) | 1 800 images → **≈ 7-11 $/mois** | 1 800 images → **≈ 40-61 $/mois** |
+| Service saturé 24 h/24 (une image à la fois) | ≈ 75 000 images → **≈ 300-450 $/mois** | ≈ 12 500 images → **≈ 275-425 $/mois** |
+| Repère : 500 images/mois | ≈ 2-3 $ | ≈ 11-17 $ (si toutes à 6 Mpx) |
+
+Le plafond théorique ne change presque pas (le coût suit le temps de calcul, qui suit les pixels) ; ce qui change, c'est qu'**une seule connexion** peut coûter 5 à 6 fois plus, et qu'**une image de 6 Mpx occupe le service ≈ 3,5 min** — le détourage, sur le même service, attend derrière (verrou et processeur partagés). **Préalables que je recommande avant P1 :** compter l'agrandisseur dans le plafond global (réservation par image, comme le détourage) et donner à l'agrandisseur sa propre file ou son propre service.
+
+### 6c. Coupe précise par notre service (pour Firefox et Safari) — charge ajoutée
+
+**Mesuré aujourd'hui** (ffmpeg natif n8.1.2, **exactement les réglages de la page** : libx264 `veryfast`, CRF 18, AAC 192k ; 8 processeurs logiques ; sources 1080p synthétiques, l'une bruitée comme une caméra) : **26,6-32 s de processeur pour 10 s d'extrait**, soit **≈ 3 s de CPU par seconde de 1080p** ; 4,4-5,4 s de temps réel pour 10 s ; sortie 10,8-15,8 Mo par 10 s. **Même ordre qu'une compression** (77-90 s de CPU pour 30 s de 1080p, mesuré le 27/09) : **une coupe précise de N secondes pèse comme la compression de N secondes.**
+
+**Mis en regard de la saturation mesurée** (`RAPPORT-seance-27-09.md` §4) : le service fait ≈ 4,3-4,7 compressions de 30 s par minute (le débit est fixé par les vCPU, pas par les emplacements), avec 2 emplacements + 10 places de file. Donc :
+
+| Coupes précises (extrait moyen 20 s ≈ 60 s de CPU) | Charge | Effet |
+|---|---|---|
+| 10 par jour | ≈ 10 min de CPU/jour ≈ **1,3 min de service plein** | négligeable |
+| 100 par jour | ≈ 100 min de CPU ≈ **12,5 min de service plein** | faible, sauf en rafale |
+| **10 en même temps** (vague Product Hunt) | ≈ 75 s de service plein | **occupe les 2 emplacements et 8 des 10 places de file** : les compressions et conversions qui arrivent pendant ce temps attendent derrière, et au-delà voient « All conversion slots are busy » |
+
+**Qui en profiterait :** Safari 15,83 % + Firefox 2,98 % ≈ **19 % des pages vues** (StatCounter, août 2026) ; aujourd'hui Firefox met **292 s** pour 10 s de 1080p dans le navigateur (37 s sous Chromium) ; la vitesse sous le vrai Safari n'est pas mesurée. **Coût par coupe :** ≈ 60 vCPU·s → 0,0005 $ + sortie ≈ 20-30 Mo → 0,001-0,0015 $ ≈ **0,002 $**, un billet par coupe (40/h, 60/jour). **Temps pour le visiteur :** quelques secondes de calcul **+ l'envoi du fichier**, qui domine pour une longue source ; le moyen de le borner existe déjà dans l'outil : couper d'abord **sans réencodage dans le navigateur** (0,2-0,9 s, aligné sur l'image-clé précédente) et n'envoyer que ce morceau. **Recommandation :** acceptable en charge à condition de le faire **après** le test de charge (P3) et de réserver ce chemin aux navigateurs lents (Firefox, Safari) et aux extraits au-delà de quelques secondes.
+
+## Hygiène
+
+- **Aucun fichier d'environnement lu, modifié ou copié.** Variables Vercel touchées : `MEDIA_JOBS_PER_HOUR_PER_IP` (40) et, le temps de la mesure, la **cible** de `IP_RATE_LIMIT_PER_DAY` + une variable Preview temporaire (190), supprimée, cible d'origine rétablie ; seules des valeurs de limite ont été écrites, aucune autre valeur affichée. Jeton des préversions : injecté par `vercel env run` dans un dossier temporaire ne contenant que `.vercel/project.json`, jamais affiché ; les trois relais arrêtés (vérifié : 0 processus restant).
+- **Aucun monitor, aucune boucle de surveillance** : tâches de fond avec notification à la fin ; une seule attente courte (70 s) pour franchir l'heure UTC avant un lot de grammaire.
+- **Aucun push forcé**, aucune suppression ni aucun renommage d'outil ou de service. Suppression d'une branche distante entièrement fusionnée (demandée).
+- **Appels payants :** 80 appels d'IA sur préversion (≈ 0,04 $, plafond 0,10 $). Conversions Office `.doc`/`.ppt`/`.ods` (Gotenberg, sans coût à l'appel) : 3 sur préversion, 6 sur www. 40 billets média inutilisés (vérification du point 2).
+- **Écritures en base :** 3 lignes `tool_errors` (test 7, préversion — la feuille le prévoit).
+- Excel : réglages de séparateurs propres à Excel changés le temps de l'export, puis rétablis (relus) ; paramètres régionaux de Windows non touchés.
+- **Pas de clé nécessaire aujourd'hui** : aucun test de charge n'était demandé (le point 6c s'appuie sur les mesures de saturation du 27/09 et sur une mesure locale) ; la clé jetable reste à générer par toi le jour du test P3.
+
+Sources extérieures lues le 28/09 : [Railway — tarifs](https://railway.com/pricing) ; [StatCounter — parts des navigateurs](https://gs.statcounter.com/browser-market-share).
