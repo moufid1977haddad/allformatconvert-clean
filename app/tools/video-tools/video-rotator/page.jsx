@@ -124,12 +124,12 @@ export default function VideoRotatorPage() {
       </div>
       <SeoContent
         title="Video Rotator"
-        description="Video Rotator rotates your video by 90°, 180°, or 270° by redrawing each frame on a rotated canvas and recording the result, entirely in your browser. The original audio is preserved by routing it through the Web Audio API alongside the rotated video track, so the output isn't silent. Note: the output is always WebM, and only these three fixed angles are available — there's no custom-angle option."
+        description="Video Rotator rotates your video by 90°, 180°, or 270° by redrawing each frame on a rotated canvas and recording the result, entirely in your browser. The original audio is preserved by routing it through the Web Audio API alongside the rotated video track, so the output isn't silent. Note: the output is the format your browser records (WebM in Chrome, Edge and Firefox; MP4 in Safari), and only these three fixed angles are available — there's no custom-angle option."
         howTo={[
           "Click the upload area and select a video file.",
           "Click 90°, 180°, or 270° to choose your rotation angle.",
           "Click \"Rotate Video\" — the video plays through once while the rotated version (with its original audio) is recorded.",
-          "Preview and download the rotated WebM file."
+          "Preview and download the rotated file (WebM, or MP4 in Safari)."
         ]}
         faqs={[
           { q: "Can I rotate by a custom angle?", a: "Not currently — only 90°, 180°, and 270° are available." },

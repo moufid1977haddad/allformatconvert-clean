@@ -121,17 +121,17 @@ export default function VideoResizerPage() {
       </div>
       <SeoContent
         title="Video Resizer"
-        description="Video Resizer redraws your video at a new width and height on a canvas and records the result, entirely in your browser. The original audio is preserved by routing it through the Web Audio API alongside the resized video track, so the output isn't silent. Note: the output is always WebM, and dimensions aren't aspect-ratio-locked — entering a width/height that doesn't match your source video's proportions will stretch the result."
+        description="Video Resizer redraws your video at a new width and height on a canvas and records the result, entirely in your browser. The original audio is preserved by routing it through the Web Audio API alongside the resized video track, so the output isn't silent. Note: the output is the format your browser records (WebM in Chrome, Edge and Firefox; MP4 in Safari), and dimensions aren't aspect-ratio-locked — entering a width/height that doesn't match your source video's proportions will stretch the result."
         howTo={[
           "Click the upload area and select a video file — its native dimensions fill the Width/Height fields automatically.",
           "Enter custom dimensions, or click a preset (720p, 1080p, or 480p).",
           "Click \"Resize Video\" — the video plays through once while the resized version (with its original audio) is recorded.",
-          "Preview and download the resized WebM file."
+          "Preview and download the resized file (WebM, or MP4 in Safari)."
         ]}
         faqs={[
           { q: "Does it preserve aspect ratio automatically?", a: "No — enter a width and height that match your source video's proportions yourself, or the result will be stretched." },
           { q: "Does the resized video have audio?", a: "Yes — the source video's original audio is captured alongside the resized picture and included in the output unchanged." },
-          { q: "What output format do I get?", a: "Always WebM." },
+          { q: "What output format do I get?", a: "The format your browser records: WebM in Chrome, Edge and Firefox, MP4 in Safari. The file's extension always matches its real content." },
           { q: "Is my file uploaded anywhere?", a: "No, resizing happens entirely in your browser." }
         ]}
         tips={[

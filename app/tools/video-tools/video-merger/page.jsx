@@ -95,12 +95,12 @@ export default function VideoMergerPage() {
       </div>
       <SeoContent
         title="Video Merger"
-        description="Video Merger plays your videos back-to-back onto a canvas and records the result as one file, entirely in your browser. Note: the output is always WebM and has no audio, since canvas recordings don't carry sound; videos merge in the order you added them, and all clips are drawn at the first video's dimensions — later videos with a different aspect ratio will be stretched to fit."
+        description="Video Merger plays your videos back-to-back onto a canvas and records the result as one file, entirely in your browser. Note: the output is the format your browser records (WebM in Chrome, Edge and Firefox; MP4 in Safari) and has no audio, since canvas recordings don't carry sound; videos merge in the order you added them, and all clips are drawn at the first video's dimensions — later videos with a different aspect ratio will be stretched to fit."
         howTo={[
           "Click the upload area and add two or more video files — they'll merge in the order you add them.",
           "Review the list and remove any you don't want.",
           "Click \"Merge Videos\" — each video plays through in sequence while the combined result is recorded.",
-          "Preview and download the merged WebM file."
+          "Preview and download the merged file (WebM, or MP4 in Safari)."
         ]}
         faqs={[
           { q: "Can I reorder videos before merging?", a: "Not currently — they merge in the order they were added; remove and re-add files if you need a different order." },
