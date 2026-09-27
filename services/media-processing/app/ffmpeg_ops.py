@@ -294,8 +294,35 @@ def gif_options(params: dict, info: ProbeResult):
     return float(start), (float(dur) if dur is not None else None), wexpr, fps
 
 
+# Precise cut (Video Trimmer, 28/09): an optional clip of a video/audio conversion, to the frame. The browser
+# sends a piece it already cut WITHOUT re-encoding (fast, it starts on the keyframe before the wanted start),
+# and here "-ss clipStart" before "-i" + re-encoding lands on the exact frame; "-t clipDuration" ends it.
+# Absent = the whole file, as before (additive).
+def clip_options(params: dict, info: ProbeResult):
+    """Validated (start, duration) or None. Raises ValueError with a user-safe message."""
+    start, dur = params.get("clipStart"), params.get("clipDuration")
+    if start is None and dur is None:
+        return None
+    for v in (start, dur):
+        if not isinstance(v, (int, float)) or isinstance(v, bool):
+            raise ValueError("Invalid cut points.")
+    if start < 0 or (info.duration and start >= info.duration):
+        raise ValueError("The start time is outside the video.")
+    if not dur > 0:
+        raise ValueError("The clip must last more than zero seconds.")
+    return float(start), float(dur)
+
+
 def effective_duration(op: str, params: dict, info: ProbeResult) -> float:
     """Length of what ffmpeg will actually encode -- the progress bar's 100 %."""
+    if op == "convert" and params.get("target") != "gif":
+        try:
+            clip = clip_options(params, info)
+        except ValueError:
+            clip = None
+        if clip:
+            remaining = max(0.0, info.duration - clip[0]) if info.duration else clip[1]
+            return min(clip[1], remaining) if remaining else clip[1]
     if op == "convert" and params.get("target") == "gif":
         try:
             start, dur, _, _ = gif_options(params, info)
@@ -356,6 +383,10 @@ def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_pa
             gif = ["-an", "-vf", f"fps={fps},scale={wexpr}:-2:flags=lanczos,split[s0][s1];[s0]palettegen=stats_mode=diff[p];[s1][p]paletteuse=dither=bayer:bayer_scale=4",
                    "-loop", "0", "-f", "gif"]
             return gif_base + maps + clip + gif + [out_path], ext, mime
+        clip = clip_options(params, info)
+        if clip:
+            base = base[:base.index("-i")] + ["-ss", f"{clip[0]:.3f}"] + base[base.index("-i"):]
+            maps = maps + ["-t", f"{clip[1]:.3f}"]
         args = base + maps + vf + builder(quality, ctx) + [out_path]
         # Optional exact bitrate (Audio Compressor sends the one its visitor picked, 64-320 kbit/s). Opus only,
         # the one target that tool sends here; absent = the quality level's bitrate, as before (additive).
