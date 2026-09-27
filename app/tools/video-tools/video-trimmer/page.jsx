@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { reportToolError } from '../../../lib/reportError';
+import { ffmpegAudioDuration } from '../../../lib/audioDuration';
 
 // Engine: ffmpeg.wasm stream copy ("-c copy"), the same engine audio-trimmer
 // already runs under real Safari. No re-encoding: the cut is near-instant and
@@ -34,6 +35,7 @@ export default function VideoTrimmerPage() {
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [isMobile, setIsMobile] = useState(false);
+  const [noPreview, setNoPreview] = useState(false);
   const videoRef = useRef();
   const inputRef = useRef();
   const ffmpegRef = useRef(null);
@@ -51,6 +53,7 @@ export default function VideoTrimmerPage() {
     setResult(null);
     setError('');
     setDuration(0);
+    setNoPreview(false);
     if (f.size > maxMB * 1024 * 1024) {
       setFile(null);
       setError(`This file is ${fmtMB(f.size)}, over the ${maxMB} MB limit${isMobile ? ' on this device' : ''}. Trimming runs in your browser's memory, so the limit is declared up front.`);
@@ -65,14 +68,31 @@ export default function VideoTrimmerPage() {
     if (file && videoRef.current) {
       const v = videoRef.current;
       v.src = URL.createObjectURL(file);
-      v.onloadedmetadata = () => {
-        const d = Math.floor(v.duration);
-        if (!Number.isFinite(d) || d < 1) return;
+      const applyLength = (seconds) => {
+        const d = Math.floor(seconds);
+        if (!Number.isFinite(d) || d < 1) return false;
         setDuration(d);
         setStart(0);
         setEnd(d);
+        return true;
       };
-      v.onerror = () => setError("This browser can't preview this video, so the start and end sliders are unavailable. The file itself may still be fine in another browser.");
+      let probed = false;
+      // No preview in this browser (MKV, AVI, WMV, FLV…; more in Safari): ffmpeg.wasm reads the length, and the
+      // cut itself never needed the browser's decoder.
+      const probe = async () => {
+        if (probed) return;
+        probed = true;
+        setNoPreview(true);
+        try {
+          if (!applyLength(await ffmpegAudioDuration(file, { video: true }))) throw new Error('unknown length');
+        } catch (e) {
+          setError(`This file could not be read as a video (${e.message || e}). Please try another file.`);
+        }
+      };
+      v.onloadedmetadata = () => { if (!applyLength(v.duration)) probe(); };
+      v.onerror = probe;
+      const timer = setTimeout(() => { if (!(v.duration > 0)) probe(); }, 4000);
+      return () => clearTimeout(timer);
     }
   }, [file]);
 
@@ -148,7 +168,8 @@ export default function VideoTrimmerPage() {
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
             <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />
           </div>
-          {file && <video ref={videoRef} controls playsInline className="w-full rounded-xl bg-neutral-800" />}
+          {file && <video ref={videoRef} controls playsInline className={noPreview ? 'hidden' : 'w-full rounded-xl bg-neutral-800'} />}
+          {file && noPreview && <p role="status" className="text-sm text-neutral-600 text-center">{duration > 0 ? 'This browser cannot play this format, so there is no preview; cutting works the same.' : 'Reading the file…'}</p>}
           {duration > 0 && (
             <div className="grid grid-cols-2 gap-4">
               <div><label className="block text-sm text-neutral-500 mb-1">Start: {start}s</label><input type="range" min="0" max={Math.max(0, duration - 1)} value={start} onChange={e => { const v = parseInt(e.target.value); setStart(v); if (v >= end) setEnd(Math.min(duration, v + 1)); }} className="w-full" /></div>
