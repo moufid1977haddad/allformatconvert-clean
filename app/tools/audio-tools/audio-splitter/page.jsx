@@ -89,8 +89,9 @@ export default function AudioSplitterPage() {
       const part2Name = 'part2.' + ext;
       await ffmpeg.writeFile(inputName, await fetchFile(file));
       const baseName = file.name.replace(/\.[^.]+$/, '');
-      // Cut in the filter graph, to the sample: "-t" stopped on a whole frame of the source, so an M4A's part 1 ran
-      // 17 ms past the split point and the two parts overlapped (measured 28/09/2026, cut-join-audit.mjs).
+      // Cut in the filter graph (atrim: to the sample, whatever the source's frame size). Measured 28/09/2026
+      // (cut-join-audit.mjs): WAV, FLAC, MP3, OGG parts meet with 0 ms of gap or overlap; M4A's part 1 still lasts
+      // 17 ms more -- the AAC encoder's last frame, the same with the former "-t", not the cut.
       const cuts = [`atrim=end=${splitAt},asetpts=PTS-STARTPTS`, `atrim=start=${splitAt},asetpts=PTS-STARTPTS`];
       if (opusOnService(format)) { // cut here, losslessly; each part encoded with libopus on our service (lib/opusService.js)
         const parts = [];
