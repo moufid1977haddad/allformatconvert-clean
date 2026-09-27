@@ -17,11 +17,17 @@ const engine = { chromium, firefox, webkit }[browserName];
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'atnp-'));
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 
+const FF_ = ffmpeg;
 const SRC = [['wma', ['-c:a', 'wmav2']], ['ac3', ['-c:a', 'ac3']], ['wav', ['-c:a', 'pcm_s16le']]].map(([ext, codec]) => {
   const f = path.join(tmp, `tone6.${ext}`);
   execFileSync(ffmpeg, ['-y', '-v', 'error', '-f', 'lavfi', '-i', 'sine=frequency=440:duration=6', ...codec, f]);
   return [ext, f];
 });
+{ // a WebM written to a pipe, like MediaRecorder's: no length in its header (the player says Infinity)
+  const f = path.join(tmp, 'tone6-live.webm');
+  const b = execFileSync(FF_, ['-v', 'error', '-f', 'lavfi', '-i', 'sine=frequency=440:duration=6', '-c:a', 'libopus', '-f', 'webm', 'pipe:1'], { maxBuffer: 1 << 26 });
+  fs.writeFileSync(f, b); SRC.push(['webm', f]);
+}
 const dur = (f) => Number(execFileSync(ffprobe, ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString());
 
 const b = await engine.launch();
@@ -32,7 +38,7 @@ for (const [ext, f] of SRC) {
   await p.locator('input[type=file]').setInputFiles(f);
   const ok = await p.locator('#at-end').waitFor({ timeout: 60000 }).then(() => true).catch(() => false);
   const said = await p.locator('[role=status]').allTextContents();
-  const canPlay = await p.evaluate((e) => document.createElement('audio').canPlayType({ wma: 'audio/x-ms-wma', ac3: 'audio/ac3', wav: 'audio/wav' }[e]), ext);
+  const canPlay = await p.evaluate((e) => document.createElement('audio').canPlayType({ wma: 'audio/x-ms-wma', ac3: 'audio/ac3', wav: 'audio/wav', webm: 'audio/webm' }[e]), ext);
   check(`${browserName} .${ext}: start/end controls appear, end = 6`, ok && (await p.locator('#at-end').inputValue()) === '6', `status ${JSON.stringify(said)} · canPlayType "${canPlay}"`);
   if (!ok) { await ctx.close(); continue; }
   const hasPlayer = (await p.locator('audio').count()) > 0;

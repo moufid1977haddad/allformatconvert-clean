@@ -43,17 +43,17 @@ export default function AudioSplitterPage() {
     setFormat(AUDIO_OUTPUT_FORMATS.some((x) => x.value === ext) ? ext : 'mp3');
     const id = ++fileIdRef.current;
     setAudioUrl(URL.createObjectURL(f));
-    setTimeout(() => { if (fileIdRef.current === id && !audioRef.current?.duration) probe(f, id); }, 4000);
+    setTimeout(() => { const d = audioRef.current?.duration; if (fileIdRef.current === id && !(Number.isFinite(d) && d > 0)) probe(f, id); }, 4000);
   };
   const applyLength = (seconds) => {
     const dur = Math.floor(seconds * 10) / 10; // tenths, never beyond the real end
     setDuration(dur);
     setSplitAt((s) => Math.min(Math.max(tenth(s), 0.1), tenth(dur - 0.1)));
   };
-  const probe = async (f, id) => {
+  const probe = async (f, id, playable = false) => {
     if (fileIdRef.current !== id || probedRef.current === id) return;
     probedRef.current = id;
-    setNoPreview(true);
+    if (!playable) setNoPreview(true);
     try {
       const seconds = await ffmpegAudioDuration(f);
       if (fileIdRef.current === id) applyLength(seconds);
@@ -64,6 +64,7 @@ export default function AudioSplitterPage() {
   const onLoaded = () => {
     const d = audioRef.current.duration;
     if (Number.isFinite(d) && d > 0) applyLength(d);
+    else probe(file, fileIdRef.current, true); // plays, but no length in its header (a MediaRecorder WebM: Infinity)
   };
 
   const split = async () => {
@@ -136,7 +137,7 @@ export default function AudioSplitterPage() {
           </div>
           <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
           {audioUrl && !noPreview && <audio ref={audioRef} src={audioUrl} onLoadedMetadata={onLoaded} onError={() => probe(file, fileIdRef.current)} controls className="w-full" />}
-          {noPreview && <p className="text-sm text-neutral-600" role="status">{duration > 0 ? 'This browser cannot play this format, so there is no preview; splitting works the same.' : 'Reading the file…'}</p>}
+          {noPreview && !error && <p className="text-sm text-neutral-600" role="status">{duration > 0 ? 'This browser cannot play this format, so there is no preview; splitting works the same.' : 'Reading the file…'}</p>}
           {duration > 0 && (
             <div>
               <label htmlFor="split-at" className="block text-sm text-neutral-500 mb-1">Split at (seconds, to 0.1): {splitAt}s (of {duration}s)</label>

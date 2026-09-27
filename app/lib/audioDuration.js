@@ -17,7 +17,9 @@ export async function ffmpegAudioDuration(file, { video = false } = {}) {
     await ffmpeg.writeFile(name, await fetchFile(file));
     await ffmpeg.exec(['-hide_banner', '-i', name]).catch(() => {}); // no output: only prints the streams
     const report = log.join(' ');
-    if (!(video ? /Video:/ : /Audio:/).test(report)) throw new Error(video ? 'no video stream' : 'no audio stream');
+    // A cover picture in an audio file shows as "Video: mjpeg … (attached pic)": not a video.
+    const hasVideo = log.some((l) => /Video:/.test(l) && !/attached pic/.test(l));
+    if (video ? !hasVideo : !/Audio:/.test(report)) throw new Error(video ? 'no video stream' : 'no audio stream');
     const m = report.match(/Duration: (\d+):(\d+):(\d+(?:\.\d+)?)/);
     let seconds = m ? +m[1] * 3600 + +m[2] * 60 + +m[3] : 0;
     if (!seconds) { // no length in the header: decode it to the end

@@ -76,7 +76,7 @@ export default function VideoTrimmerPage() {
         setEnd(d);
         return true;
       };
-      let probed = false;
+      let probed = false, alive = true; // alive: this file is still the one on the page
       // No preview in this browser (MKV, AVI, WMV, FLV…; more in Safari): ffmpeg.wasm reads the length, and the
       // cut itself never needed the browser's decoder.
       const probe = async () => {
@@ -84,15 +84,16 @@ export default function VideoTrimmerPage() {
         probed = true;
         setNoPreview(true);
         try {
-          if (!applyLength(await ffmpegAudioDuration(file, { video: true }))) throw new Error('unknown length');
+          const seconds = await ffmpegAudioDuration(file, { video: true });
+          if (alive && !applyLength(seconds)) throw new Error('unknown length');
         } catch (e) {
-          setError(`This file could not be read as a video (${e.message || e}). Please try another file.`);
+          if (alive) setError(`This file could not be read as a video (${e.message || e}). Please try another file.`);
         }
       };
       v.onloadedmetadata = () => { if (!applyLength(v.duration)) probe(); };
       v.onerror = probe;
       const timer = setTimeout(() => { if (!(v.duration > 0)) probe(); }, 4000);
-      return () => clearTimeout(timer);
+      return () => { alive = false; clearTimeout(timer); };
     }
   }, [file]);
 
@@ -169,7 +170,7 @@ export default function VideoTrimmerPage() {
             <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />
           </div>
           {file && <video ref={videoRef} controls playsInline className={noPreview ? 'hidden' : 'w-full rounded-xl bg-neutral-800'} />}
-          {file && noPreview && <p role="status" className="text-sm text-neutral-600 text-center">{duration > 0 ? 'This browser cannot play this format, so there is no preview; cutting works the same.' : 'Reading the file…'}</p>}
+          {file && noPreview && !error && <p role="status" className="text-sm text-neutral-600 text-center">{duration > 0 ? 'This browser cannot play this format, so there is no preview; cutting works the same.' : 'Reading the file…'}</p>}
           {duration > 0 && (
             <div className="grid grid-cols-2 gap-4">
               <div><label className="block text-sm text-neutral-500 mb-1">Start: {start}s</label><input type="range" min="0" max={Math.max(0, duration - 1)} value={start} onChange={e => { const v = parseInt(e.target.value); setStart(v); if (v >= end) setEnd(Math.min(duration, v + 1)); }} className="w-full" /></div>

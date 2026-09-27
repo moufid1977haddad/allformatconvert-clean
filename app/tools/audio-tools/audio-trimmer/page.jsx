@@ -4,6 +4,7 @@ import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { AUDIO_ACCEPT } from '../../../lib/mediaSupport';
 import { reportToolError } from '../../../lib/reportError';
+import { ffmpegAudioDuration } from '../../../lib/audioDuration';
 
 // Start and end to a tenth of a second (typed, slid, or taken from the player) and fades in/out, as the reference
 // cutter offers (mp3cut.net, read 26/09/2026: fades, keyboard nudges). The duration used to be rounded down to whole
@@ -52,7 +53,7 @@ export default function AudioTrimmerPage() {
     const id = ++fileIdRef.current;
     setAudioUrl(URL.createObjectURL(f));
     // Some engines never fire either event for a format they cannot play: do not wait on them forever.
-    setTimeout(() => { if (fileIdRef.current === id && !audioRef.current?.duration) probeWithFfmpeg(f, id); }, 4000);
+    setTimeout(() => { const d = audioRef.current?.duration; if (fileIdRef.current === id && !(Number.isFinite(d) && d > 0)) probeWithFfmpeg(f, id); }, 4000);
   };
 
   const applyDuration = (seconds) => {
@@ -64,38 +65,18 @@ export default function AudioTrimmerPage() {
   const onLoaded = () => {
     const d = audioRef.current.duration;
     if (Number.isFinite(d) && d > 0) applyDuration(d);
+    else probeWithFfmpeg(file, fileIdRef.current, true); // plays, but no length in its header (a MediaRecorder WebM: Infinity)
   };
   const probedRef = useRef(0);
-  const probeWithFfmpeg = async (f, id) => {
+  const probeWithFfmpeg = async (f, id, playable = false) => {
     // Once per file: the player's error and the 4-second check can both ask for it.
     if (fileIdRef.current !== id || probedRef.current === id) return;
     probedRef.current = id;
-    setNoPreview(true);
+    if (!playable) setNoPreview(true);
     setProbing(true);
     try {
-      const { FFmpeg } = await import('@ffmpeg/ffmpeg');
-      const { fetchFile } = await import('@ffmpeg/util');
-      const ffmpeg = new FFmpeg();
-      const log = [];
-      ffmpeg.on('log', ({ message }) => log.push(message));
-      await ffmpeg.load();
-      const raw = f.name.includes('.') ? f.name.split('.').pop().toLowerCase() : 'dat';
-      const name = 'probe.' + (/^[a-z0-9]{1,10}$/.test(raw) ? raw : 'dat');
-      await ffmpeg.writeFile(name, await fetchFile(f));
-      await ffmpeg.exec(['-hide_banner', '-i', name]).catch(() => {}); // no output: only prints the streams
-      const m = log.join(' ').match(/Duration: (\d+):(\d+):(\d+(?:\.\d+)?)/);
-      let seconds = m ? +m[1] * 3600 + +m[2] * 60 + +m[3] : 0;
-      if (!seconds && /Audio:/.test(log.join(' '))) { // no duration in the header: decode it to the end
-        log.length = 0;
-        await ffmpeg.exec(['-i', name, '-vn', '-f', 'null', '-']).catch(() => {});
-        const times = [...log.join(' ').matchAll(/time=(\d+):(\d+):(\d+(?:\.\d+)?)/g)];
-        const last = times[times.length - 1];
-        seconds = last ? +last[1] * 3600 + +last[2] * 60 + +last[3] : 0;
-      }
-      ffmpeg.terminate();
+      const seconds = await ffmpegAudioDuration(f); // releases its ffmpeg.wasm instance on every path
       if (fileIdRef.current !== id) return;
-      if (!/Audio:/.test(log.join(' ')) && !seconds) throw new Error('no audio stream');
-      if (!seconds) throw new Error('unknown length');
       applyDuration(seconds);
     } catch (e) {
       if (fileIdRef.current === id) setError(`This file could not be read (${e.message || e}). Please try another file or format.`);
@@ -174,7 +155,7 @@ export default function AudioTrimmerPage() {
           </div>
           <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
           {audioUrl && !noPreview && <audio ref={audioRef} src={audioUrl} onLoadedMetadata={onLoaded} onError={() => probeWithFfmpeg(file, fileIdRef.current)} controls className="w-full" />}
-          {noPreview && <p className="text-sm text-neutral-600" role="status">{probing ? 'Reading the file…' : 'This browser cannot play this format, so there is no preview; trimming works the same (type the start and end).'}</p>}
+          {noPreview && !error && <p className="text-sm text-neutral-600" role="status">{probing ? 'Reading the file…' : 'This browser cannot play this format, so there is no preview; trimming works the same (type the start and end).'}</p>}
           {duration > 0 && (
             <>
               <div className="grid grid-cols-2 gap-4">
