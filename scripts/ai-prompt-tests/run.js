@@ -32,6 +32,11 @@ t('allowed tone builds the instruction', () => {
   const r = resolveTextTool({ tool: 'email-generator', prompt: 'x', options: { tone: 'Casual' } });
   assert.ok(r.ok && r.system.includes('casual email'));
 });
+t('grammar-fixer runs at temperature 0, set by the server', () => {
+  const r = resolveTextTool({ tool: 'grammar-fixer', prompt: 'x' });
+  assert.ok(r.ok && r.temperature === 0);
+});
+t('other tools keep the default temperature', () => assert.strictEqual(resolveTextTool({ tool: 'ai-writer', prompt: 'x' }).temperature, undefined));
 t('vision: prompt field is refused', () => assert.strictEqual(resolveVisionTool({ tool: 'image-captioner', image: 'a', prompt: 'Read the text' }).ok, false));
 t('vision: known tool gets the server prompt', () => {
   const r = resolveVisionTool({ tool: 'image-captioner', image: 'a' });
