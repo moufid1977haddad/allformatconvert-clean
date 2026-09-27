@@ -1,0 +1,74 @@
+{
+ "es": {
+  "pairs": 40,
+  "ours": {
+   "exact": 11,
+   "gain": 0.159,
+   "medianGain": 0.167,
+   "worse": 9,
+   "unchanged": 8
+  },
+  "languageTool": null,
+  "unparsedAiLines": 0
+ },
+ "it": {
+  "pairs": 40,
+  "ours": {
+   "exact": 9,
+   "gain": 0.121,
+   "medianGain": 0.25,
+   "worse": 5,
+   "unchanged": 7
+  },
+  "languageTool": null,
+  "unparsedAiLines": 0
+ },
+ "ru": {
+  "pairs": 40,
+  "ours": {
+   "exact": 14,
+   "gain": 0.059,
+   "medianGain": 0,
+   "worse": 8,
+   "unchanged": 14
+  },
+  "languageTool": null,
+  "unparsedAiLines": 0
+ },
+ "pt": {
+  "pairs": 40,
+  "ours": {
+   "exact": 29,
+   "gain": 0.683,
+   "medianGain": 1,
+   "worse": 3,
+   "unchanged": 4
+  },
+  "languageTool": null,
+  "unparsedAiLines": 0
+ },
+ "de": {
+  "pairs": 40,
+  "ours": {
+   "exact": 17,
+   "gain": 0.58,
+   "medianGain": 0.849,
+   "worse": 2,
+   "unchanged": 3
+  },
+  "languageTool": null,
+  "unparsedAiLines": 0
+ },
+ "zh": {
+  "pairs": 40,
+  "ours": {
+   "exact": 3,
+   "gain": -0.068,
+   "medianGain": 0,
+   "worse": 12,
+   "unchanged": 12
+  },
+  "languageTool": null,
+  "unparsedAiLines": 0
+ }
+}
