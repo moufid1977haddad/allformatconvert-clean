@@ -386,7 +386,7 @@ Dans **Notes**, **une ligne par outil**, tout de suite : `N° | R / É / B | ce 
 
 | # | Outil | Sous WebKit (Playwright) | Ce qui reste à regarder sur le vrai Safari |
 |---|---|---|---|
-| 1 | Zip Extractor | **20/20** (www) : RAR WinRAR noms chinois, en-têtes chiffrés, 7z/ZIP AES, volumes, CAB, LZH, annulation, « Download all as ZIP » | mémoire de l'iPhone ; « Save all to a folder » **absent** (normal) |
+| 1 | Zip Extractor | **20/20** (www) : RAR WinRAR noms chinois, en-têtes chiffrés, 7z/ZIP AES, volumes, CAB, LZH, annulation, « Download all as ZIP » ; **nouveau (local, non déployé) : ZIP de 2,2 Go en flux, octets identiques** | mémoire de l'iPhone ; « Save all to a folder » **absent** (normal) ; après déploiement, un « all as ZIP » > 1,9 Go sur le MacBook |
 | 2-3 | Video Compressor / Converter [S1] | **envoi par morceaux vérifié** (service joué : octets reçus = fichier, SHA-256 de chaque morceau), `.mov` accepté, téléchargement | **l'encodage réel** et le temps (service vrai), un `.MOV` d'iPhone |
 | 4 | Video Trimmer [S1] | coupe MP4/AVI/WMV **faite sans aperçu** (ce WebKit ne lit aucune vidéo) ; copie alignée sur l'image-clé | lecture de l'aperçu, curseurs, un `.MOV` d'iPhone |
 | 5 | Voice Recorder [S2] | pas de micro ici : **message juste** (corrigé) | l'enregistrement réel, extension `.m4a`/`.mp4` |
