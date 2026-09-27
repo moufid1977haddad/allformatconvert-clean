@@ -44,3 +44,7 @@ Chromium et Firefox donnent les mêmes fichiers et les mêmes défauts :
 ## Étape 4a — Préversion `onlineconvertools-7mavbi2vp` (commit `52f4da4e`)
 
 `audio-merger-join.mjs --cors-shim` (vrai service pour l'Opus) : **9/9 Chromium, 9/9 Firefox** — Opus par le vrai service (1 travail, encodeur `libopus`, 12,000 s, 0 ms, aucun silence) ; `audio-merger-formats.mjs --real-service` : tout passé dans les deux navigateurs.
+
+## Étape 4b — Production `d4f4b12c` (`onlineconvertools-pk059pvel`), vérifiée sur www
+
+Jonctions 9/9 Chromium + 9/9 Firefox (Opus : libopus, vrai chemin sans relais) ; suite des formats complète dans les deux. Rapport final : `RAPPORT-audio-merger-format-sortie.md`.
