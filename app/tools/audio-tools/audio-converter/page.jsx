@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
-import { AUDIO_ACCEPT } from '../../../lib/mediaSupport';
+import { AUDIO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
 import ProgressBar from '../../../components/ProgressBar';
 import { AUDIO_OUTPUT_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
 import { reportToolError } from '../../../lib/reportError';
@@ -20,6 +20,7 @@ export default function AudioConverterPage() {
 
   const handleFile = (e) => {
     const f = e.target.files[0];
+    if (f && encryptedMusicMessage(f.name)) { e.target.value = ''; setError(encryptedMusicMessage(f.name)); return; }
     e.target.value = '';
     setFile(f);
     setResult(null);

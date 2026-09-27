@@ -3,7 +3,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
-import { AUDIO_ACCEPT } from '../../../lib/mediaSupport';
+import { AUDIO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
 import { sanitizedInputExt } from '../../../lib/audioFormats';
 import {
   MERGE_FORMATS, getMergeFormat, defaultFormat, planMerge, parseProbe, isLosslessCodec, depthOf, combinedDepth,
@@ -90,6 +90,8 @@ export default function AudioMergerPage() {
 
   // New files are added after the ones already listed (pick or drop them in several goes).
   const addFiles = async (list) => {
+    const locked = list.find((x) => encryptedMusicMessage(x.name));
+    if (locked) { setError(encryptedMusicMessage(locked.name)); list = list.filter((x) => !encryptedMusicMessage(x.name)); if (!list.length) return; }
     if (!list.length || analysing || loading) return;
     const added = list.map((file) => { const id = nextId++; return { id, file, name: `in${id}.${sanitizedInputExt(file)}`, probe: null }; });
     const all = [...items, ...added];

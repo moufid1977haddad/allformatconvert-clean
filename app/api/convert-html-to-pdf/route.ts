@@ -83,7 +83,7 @@ async function convertHtml(req: NextRequest, file: File, staged = false): Promis
       tool: "convert-html-to-pdf",
       file,
       error: err,
-      userAgent: req.headers.get("user-agent"),
+      userAgent: req.headers.get("user-agent"), headers: req.headers,
     }));
     return NextResponse.json({ error: "Could not reach the conversion service." }, { status: 502 });
   } finally {
@@ -103,7 +103,7 @@ async function convertHtml(req: NextRequest, file: File, staged = false): Promis
       tool: "convert-html-to-pdf",
       file,
       error: new Error(`service_error_${gotenbergResponse.status}`),
-      userAgent: req.headers.get("user-agent"),
+      userAgent: req.headers.get("user-agent"), headers: req.headers,
     }));
     return NextResponse.json(
       { error: "Conversion failed. The document may be corrupted or in an unsupported format." },
@@ -121,7 +121,7 @@ async function convertHtml(req: NextRequest, file: File, staged = false): Promis
       tool: "convert-html-to-pdf",
       file,
       error: new Error("non_pdf_response"),
-      userAgent: req.headers.get("user-agent"),
+      userAgent: req.headers.get("user-agent"), headers: req.headers,
     }));
     return NextResponse.json({ error: "Conversion service returned an unexpected response." }, { status: 502 });
   }

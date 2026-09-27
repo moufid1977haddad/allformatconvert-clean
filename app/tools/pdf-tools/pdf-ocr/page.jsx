@@ -61,7 +61,7 @@ const LANGUAGES = [
   { code: 'kaz', label: "Kazakh" },
   { code: 'kir', label: "Kirghiz; Kyrgyz" },
   { code: 'kor', label: "Korean" },
-  { code: 'kur', label: "Kurdish" },
+  { code: 'kmr', label: "Kurdish (Kurmanji)" },
   { code: 'lao', label: "Lao" },
   { code: 'lat', label: "Latin" },
   { code: 'lav', label: "Latvian" },
@@ -92,7 +92,7 @@ const LANGUAGES = [
   { code: 'swa', label: "Swahili" },
   { code: 'swe', label: "Swedish" },
   { code: 'syr', label: "Syriac" },
-  { code: 'tgl', label: "Tagalog" },
+  { code: 'fil', label: "Filipino (Tagalog)" },
   { code: 'tgk', label: "Tajik" },
   { code: 'tam', label: "Tamil" },
   { code: 'tel', label: "Telugu" },
@@ -110,6 +110,112 @@ const LANGUAGES = [
   { code: 'yid', label: "Yiddish" },
 ];
 
+// Each language's name in the language itself (CLDR, generated once and frozen here so that
+// every browser shows and searches the same names). The search matches the English
+// name, the native name and the code, ignoring case and accents, anywhere in the name:
+// "fran", "fr", "français" and "francais" all find French -- the way Google Translate's
+// language picker searches (before 28/09 only the English name was searched: "fran" and
+// "français" found nothing). 'kur' and 'tgl' had no model on the CDN Tesseract.js loads
+// from (404, checked 28/09): replaced by the models that exist, 'kmr' and 'fil'.
+const NATIVE = {
+  sqi: "shqip",
+  amh: "አማርኛ",
+  ara: "العربية",
+  asm: "অসমীয়া",
+  aze: "azərbaycan",
+  aze_cyrl: "азәрбајҹан (Кирил)",
+  eus: "euskara",
+  bel: "беларуская",
+  ben: "বাংলা",
+  bos: "bosanski",
+  bul: "български",
+  mya: "မြန်မာ",
+  cat: "català",
+  khm: "ខ្មែរ",
+  chr: "ᏣᎳᎩ",
+  chi_sim: "简体中文",
+  chi_tra: "繁體中文",
+  hrv: "hrvatski",
+  ces: "čeština",
+  dan: "dansk",
+  nld: "Nederlands",
+  dzo: "རྫོང་ཁ",
+  est: "eesti",
+  fin: "suomi",
+  fra: "français",
+  glg: "galego",
+  kat: "ქართული",
+  kat_old: "ქართული",
+  deu: "Deutsch",
+  ell: "Ελληνικά",
+  guj: "ગુજરાતી",
+  hat: "Kreyòl ayisyen",
+  heb: "עברית",
+  hin: "हिन्दी",
+  hun: "magyar",
+  isl: "íslenska",
+  ind: "Bahasa Indonesia",
+  gle: "Gaeilge",
+  ita: "italiano",
+  ita_old: "italiano",
+  jpn: "日本語",
+  jav: "Jawa",
+  kan: "ಕನ್ನಡ",
+  kaz: "қазақ тілі",
+  kir: "кыргызча",
+  kor: "한국어",
+  lao: "ລາວ",
+  lav: "latviešu",
+  lit: "lietuvių",
+  mkd: "македонски",
+  msa: "Bahasa Melayu",
+  mal: "മലയാളം",
+  mlt: "Malti",
+  mar: "मराठी",
+  nep: "नेपाली",
+  nor: "norsk",
+  ori: "ଓଡ଼ିଆ",
+  pan: "ਪੰਜਾਬੀ",
+  fas: "فارسی",
+  pol: "polski",
+  por: "português",
+  pus: "پښتو",
+  ron: "română",
+  rus: "русский",
+  san: "संस्कृत भाषा",
+  srp: "српски",
+  srp_latn: "srpski (latinica)",
+  sin: "සිංහල",
+  slk: "slovenčina",
+  slv: "slovenščina",
+  spa: "español",
+  spa_old: "español",
+  swa: "Kiswahili",
+  swe: "svenska",
+  syr: "ܣܘܪܝܝܐ",
+  tgk: "тоҷикӣ",
+  tam: "தமிழ்",
+  tel: "తెలుగు",
+  tha: "ไทย",
+  bod: "བོད་སྐད་",
+  tir: "ትግርኛ",
+  tur: "Türkçe",
+  uig: "ئۇيغۇرچە",
+  ukr: "українська",
+  urd: "اردو",
+  uzb: "o‘zbek",
+  uzb_cyrl: "ўзбекча (Кирил)",
+  vie: "Tiếng Việt",
+  cym: "Cymraeg",
+  yid: "ייִדיש",
+  kmr: "kurdî (kurmancî)",
+  fil: "Filipino",
+};
+const fold = (s) => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+const optionLabel = (l) => (NATIVE[l.code] ? `${l.label} — ${NATIVE[l.code]}` : l.label);
+const SEARCH_KEYS = Object.fromEntries(LANGUAGES.map((l) => [l.code, fold(`${l.label} ${NATIVE[l.code] || ''} ${l.code}`)]));
+const matchLanguages = (q) => { const f = fold(q); return f ? LANGUAGES.filter((l) => SEARCH_KEYS[l.code].includes(f)) : LANGUAGES; };
+
 export default function Page() {
   const [file, setFile] = useState(null);
   const [lang, setLang] = useState('eng');
@@ -124,9 +230,15 @@ export default function Page() {
   const [totalPages, setTotalPages] = useState(0);
   const fileRef = useRef();
 
-  const filteredLanguages = LANGUAGES.filter((l) =>
-    l.label.toLowerCase().includes(langFilter.toLowerCase()) || l.code.toLowerCase().includes(langFilter.toLowerCase())
-  );
+  const filteredLanguages = matchLanguages(langFilter);
+  // The language used is always the one the list shows: when the search hides the
+  // current choice, the first match becomes the choice (before 28/09 the list showed
+  // "French" while the OCR still ran in English -- 13 accents read out of 27).
+  const onSearch = (value) => {
+    setLangFilter(value);
+    const found = matchLanguages(value);
+    if (found.length && !found.some((l) => l.code === lang)) setLang(found[0].code);
+  };
 
   const handleFile = (e) => {
     const f = e.target.files[0];
@@ -165,8 +277,19 @@ export default function Page() {
       // (first-run only, then browser-cached) OCR engine + language data
       // download, and during each page's recognition -- surfaced as two
       // separate progress bars so there's never a silent multi-second gap.
-      worker = await createWorker(lang, 1, {
+      // Tesseract.js never rejects when the engine or a language model cannot be downloaded (blocked CDN,
+      // network cut): the page stayed on "Downloading … language data" forever (found 28/09). Its errors are
+      // caught here, and loading stops when nothing has progressed for 30 s.
+      let failLoad;
+      const loadFailed = new Promise((_, reject) => { failLoad = reject; });
+      let stall;
+      const armStall = () => { clearTimeout(stall); stall = setTimeout(() => failLoad(new Error('download stalled')), 30000); };
+      armStall();
+      const loadMessage = `The ${langLabel} language data could not be downloaded. Check your connection (a blocker or firewall may stop cdn.jsdelivr.net), then run the OCR again.`;
+      const creating = createWorker(lang, 1, {
+        errorHandler: (err) => failLoad(err instanceof Error ? err : new Error(String(err))),
         logger: (m) => {
+          armStall();
           if (m.status === 'loading tesseract core') {
             setDownloadLabel('Downloading OCR engine...');
             setDownloadPct(Math.round(m.progress * 100));
@@ -178,6 +301,18 @@ export default function Page() {
           }
         },
       });
+      creating.catch(() => {}); // settled by the race below
+      try {
+        worker = await Promise.race([creating, loadFailed]);
+      } catch (loadErr) {
+        creating.then((w) => w.terminate()).catch(() => {});
+        const err = new Error(loadMessage);
+        err.name = 'OcrDownloadError';
+        err.cause = loadErr;
+        throw err;
+      } finally {
+        clearTimeout(stall);
+      }
 
       let fullText = '';
       for (let i = 1; i <= pdf.numPages; i++) {
@@ -199,8 +334,9 @@ export default function Page() {
       // Only the decode/OCR-engine error itself is ever reported -- never
       // `output` (the recognized text), which is exactly the file content
       // this feature must never transmit.
-      reportToolError({ tool: 'pdf-ocr', file, error: e });
-      setError('OCR failed: ' + e.message);
+      // A download that failed on the visitor's side is not a defect of the tool: said, not reported.
+      if (e.name !== 'OcrDownloadError') reportToolError({ tool: 'pdf-ocr', file, error: e });
+      setError(e.name === 'OcrDownloadError' ? e.message : 'OCR failed: ' + e.message);
     } finally {
       if (worker) {
         try { await worker.terminate(); } catch { /* worker already gone */ }
@@ -225,13 +361,13 @@ export default function Page() {
             <input
               type="text"
               value={langFilter}
-              onChange={(e) => setLangFilter(e.target.value)}
+              onChange={(e) => onSearch(e.target.value)}
               disabled={loading}
               placeholder="Search languages..."
               className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm mb-2"
             />
             <select value={lang} onChange={(e) => setLang(e.target.value)} disabled={loading} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
-              {filteredLanguages.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
+              {filteredLanguages.length ? filteredLanguages.map((l) => <option key={l.code} value={l.code}>{optionLabel(l)}</option>) : <option value="" disabled>No language matches — try the English name</option>}
             </select>
           </div>
           {loading ? (
@@ -247,7 +383,7 @@ export default function Page() {
               )}
             </div>
           ) : (
-            <button onClick={ocr} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+            <button onClick={ocr} disabled={!file || !filteredLanguages.some((l) => l.code === lang)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
               Run OCR
             </button>
           )}

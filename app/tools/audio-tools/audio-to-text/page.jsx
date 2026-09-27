@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import { Mic, Folder } from 'lucide-react';
 import SeoContent from '../../../components/SeoContent';
 import { transcribeAudio, checkAudioSize, audioMaxBytes, audioMaxLabel } from '../../../lib/officeUpload';
+import { encryptedMusicMessage } from '../../../lib/mediaSupport';
 
 export default function AudioToTextPage() {
   // Mode : 'mic' ou 'file'
@@ -63,6 +64,7 @@ export default function AudioToTextPage() {
   // waited for the button to respond.
   const handleFile = (e) => {
     const f = e.target.files[0];
+    if (f && encryptedMusicMessage(f.name)) { e.target.value = ''; setError(encryptedMusicMessage(f.name)); return; }
     e.target.value = '';
     setFile(f);
     setFileTranscript('');

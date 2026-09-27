@@ -45,7 +45,7 @@ async function reportFailure(req: NextRequest, status: number, file?: File) {
     tool: "pdf-compress",
     file: file as any,
     error: new Error(`service_error_${status}`),
-    userAgent: req.headers.get("user-agent"),
+    userAgent: req.headers.get("user-agent"), headers: req.headers,
   }));
 }
 

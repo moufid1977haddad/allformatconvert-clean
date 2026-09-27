@@ -4,7 +4,7 @@
 
 ⚠️ **Two things to check before publishing** (found while writing, not changed):
 1. The live **homepage says "The fastest way to convert…"** — no measurement supports "fastest" across 225 tools (rule n° 20). Suggest replacing it before the launch (Product Hunt visitors will land there).
-2. **"Most tools never upload your file"** is true (≈ 200 of 225, privacy audit) but the other ones DO send files to a server — some to third parties (ConvertAPI for Word/PDF↔Office, OpenAI for the AI tools). Never write "nothing leaves your device" for the whole site.
+2. **"Most tools never upload your file"** is true (≈ 180 of 225, recounted in the code on 28/09: 43 tools use a server in at least one case) but the other ones DO send files to a server — some to third parties (ConvertAPI for Word/PDF↔Office, OpenAI for the AI tools). Never write "nothing leaves your device" for the whole site.
 
 ---
 
@@ -20,7 +20,7 @@ Recommendation: **A** — the two successful "in-browser" launches studied (Comp
 
 ## Description (≤ 260 characters)
 
-> 225 free tools for PDF, images, audio, video, archives and developers, no sign-up. About 200 run entirely in your browser. Our main tools are tested against the market leader on the same files — e.g. lossless PDF compression: −35.4 %, pixels identical.
+> 225 free tools for PDF, images, audio, video, archives and developers, no sign-up. About 180 run entirely in your browser. Our main tools are tested against the market leader on the same files — e.g. lossless PDF compression: −35.4 %, pixels identical.
 
 (≈ 250 characters — recount after any edit.) [privacy audit; RAPPORT-ecarts-marche §3a]
 
@@ -42,7 +42,7 @@ Recommendation: **A** — the two successful "in-browser" launches studied (Comp
 > - **Grammar fixer**: fixed 25 of 25 test errors (LanguageTool: 15), and every change can be undone word by word.
 > - **Hashes**: 17 algorithms; a 760 MiB file hashed in 11.7 s vs 31.8 s on the reference site.
 >
-> About 200 of the 225 tools run entirely in your browser — your file never leaves your device. The others (video conversion, Office ↔ PDF, AI tools) need a server; their pages say so, and state their size limits before you pick a file.
+> About 180 of the 225 tools run entirely in your browser — your file never leaves your device. The others (video conversion, Office ↔ PDF, AI tools) need a server; their pages say so, and state their size limits before you pick a file.
 >
 > It's free and there is no sign-up. I'd love to hear which tool you'd test against which site — and where we fall short.
 
@@ -52,7 +52,7 @@ Recommendation: **A** — the two successful "in-browser" launches studied (Comp
 
 | Image | Caption |
 |---|---|
-| 01-hero | 225 free tools, no sign-up — about 200 run entirely in your browser. |
+| 01-hero | 225 free tools, no sign-up — about 180 run entirely in your browser. |
 | 02-zip-extractor | RAR, 7z, ZIP and 40+ formats, opened in the browser — first file out in 5.1 s vs 7.25 s at ezyZip (same 1.99 GB RAR). |
 | 03-pdf-compress | Lossless PDF compression: −35.4 %, every page pixel-identical to the original. |
 | 04-image-upscaler | AI upscaling ×2/×4 that stays closer to the original photo (LPIPS 0.107 vs 0.164 for iLoveIMG). |

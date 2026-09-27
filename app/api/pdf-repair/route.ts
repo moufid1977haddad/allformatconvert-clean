@@ -80,7 +80,7 @@ async function repairFile(req: NextRequest, file: File, serviceUrl: string, apiK
       tool: "pdf-repair",
       file,
       error: err,
-      userAgent: req.headers.get("user-agent"),
+      userAgent: req.headers.get("user-agent"), headers: req.headers,
     }));
     return NextResponse.json({ ok: false, error: "Could not reach the repair service." }, { status: 502 });
   } finally {
@@ -95,7 +95,7 @@ async function repairFile(req: NextRequest, file: File, serviceUrl: string, apiK
       tool: "pdf-repair",
       file,
       error: new Error(`service_error_${serviceResponse.status}`),
-      userAgent: req.headers.get("user-agent"),
+      userAgent: req.headers.get("user-agent"), headers: req.headers,
     }));
   }
 

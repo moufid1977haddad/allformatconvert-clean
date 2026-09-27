@@ -1,0 +1,50 @@
+{
+ "ja": {
+  "pairs": 40,
+  "ours": {
+   "exact": 19,
+   "gain": 0.15,
+   "medianGain": 0,
+   "worse": 7,
+   "unchanged": 11
+  },
+  "languageTool": null,
+  "unparsedAiLines": 0
+ },
+ "ar": {
+  "pairs": 40,
+  "ours": {
+   "exact": 6,
+   "gain": 0.515,
+   "medianGain": 0.633,
+   "worse": 4,
+   "unchanged": 0
+  },
+  "languageTool": null,
+  "unparsedAiLines": 0
+ },
+ "hi": {
+  "pairs": 40,
+  "ours": {
+   "exact": 2,
+   "gain": -1.225,
+   "medianGain": -0.667,
+   "worse": 32,
+   "unchanged": 4
+  },
+  "languageTool": null,
+  "unparsedAiLines": 0
+ },
+ "tr": {
+  "pairs": 40,
+  "ours": {
+   "exact": 12,
+   "gain": -0.379,
+   "medianGain": 0,
+   "worse": 14,
+   "unchanged": 3
+  },
+  "languageTool": null,
+  "unparsedAiLines": 0
+ }
+}

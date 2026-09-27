@@ -418,13 +418,13 @@ export default function Home() {
               <Sparkles size={14} style={{ flexShrink:0 }} /> {totalTools} free tools · No signup
             </div>
             <h1 style={{ fontSize:'clamp(46px,6.4vw,76px)', fontWeight:'800', color: dark ? '#f1f5f9' : '#0f172a', lineHeight:'1.1', marginBottom:'20px', letterSpacing:'-0.02em' }}>
-              Convert anything.<br /><span style={{
+              {totalTools} free tools.<br /><span style={{
                 backgroundImage: dark ? 'linear-gradient(135deg, #378add, #F4C0D1)' : 'linear-gradient(135deg, #185fa5, #D4537E)',
                 WebkitBackgroundClip: 'text',
                 backgroundClip: 'text',
                 color: 'transparent',
                 WebkitTextFillColor: 'transparent',
-              }}>Instantly. Free.</span>
+              }}>Most never upload your file.</span>
             </h1>
             <p style={{ fontSize:'18px', color: dark ? '#94a3b8' : '#1e293b', lineHeight:'1.7', marginBottom:'20px', maxWidth:'480px' }}>
               Convert, compress, and transform your files — {totalTools} tools, zero installation, completely free.

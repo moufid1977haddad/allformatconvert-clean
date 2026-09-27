@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
-import { AUDIO_ACCEPT } from '../../../lib/mediaSupport';
+import { AUDIO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
 import { reportToolError } from '../../../lib/reportError';
 import { ffmpegAudioDuration } from '../../../lib/audioDuration';
 
@@ -41,6 +41,7 @@ export default function AudioTrimmerPage() {
 
   const handleFile = (e) => {
     const f = e.target.files[0];
+    if (f && encryptedMusicMessage(f.name)) { e.target.value = ''; setError(encryptedMusicMessage(f.name)); return; }
     e.target.value = '';
     if (!f) return;
     setFile(f);

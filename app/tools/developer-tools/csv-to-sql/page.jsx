@@ -5,6 +5,8 @@ import ProgressBar from '../../../components/ProgressBar';
 import { MAX_ROWS, MOBILE_MAX_ROWS, PASTE_MAX_ROWS } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { detectDelimiter, CSV_DELIMITERS } from '../../../lib/csvParser';
+import { sniffCsvFile } from '../../../lib/csvEncoding';
+import CsvReadOptions, { numbersNote } from '../../../components/CsvReadOptions';
 
 // Only the first 8KB is needed to see several rows -- detectDelimiter only
 // looks at the first 10 non-empty logical lines anyway, so sampling more of
@@ -70,6 +72,9 @@ export default function CsvToSqlPage() {
   const [timeEstimate, setTimeEstimate] = useState('');
   const [delimiterChoice, setDelimiterChoice] = useState('auto');
   const [detectedDelimiter, setDetectedDelimiter] = useState(',');
+  const [encodingChoice, setEncodingChoice] = useState('auto');
+  const [detectedEncoding, setDetectedEncoding] = useState('utf-8');
+  const [typeNumbers, setTypeNumbers] = useState(true);
   const inputRef = useRef();
   const workerRef = useRef(null);
 
@@ -98,9 +103,12 @@ export default function CsvToSqlPage() {
     setInput('');
     setDelimiterChoice('auto');
     setTimeEstimate(formatEstimate(estimateSeconds(f.size)));
-    f.slice(0, DELIMITER_SAMPLE_BYTES).text().then((sample) => {
-      setDetectedDelimiter(detectDelimiter(sample));
-    });
+    setEncodingChoice('auto');
+    // Encoding first (an Excel "CSV" is not UTF-8), then the delimiter on correctly decoded text.
+    sniffCsvFile(f).then(({ encoding, text }) => {
+      setDetectedEncoding(encoding);
+      setDetectedDelimiter(detectDelimiter(text.slice(0, DELIMITER_SAMPLE_BYTES)));
+    }).catch(() => {});
   };
 
   const cancel = () => {
@@ -147,10 +155,10 @@ export default function CsvToSqlPage() {
           a.click();
           a.remove();
           URL.revokeObjectURL(url);
-          setStatus(`Downloaded! ${msg.rowCount.toLocaleString()} rows.`);
+          setStatus(`Downloaded! ${msg.rowCount.toLocaleString()} rows.` + numbersNote(msg));
         } else {
           setOutput(msg.sql);
-          setStatus(`Converted! ${msg.rowCount.toLocaleString()} rows.`);
+          setStatus(`Converted! ${msg.rowCount.toLocaleString()} rows.` + numbersNote(msg));
         }
       } else if (msg.type === 'row_limit') {
         setConverting(false);
@@ -170,7 +178,8 @@ export default function CsvToSqlPage() {
       setError('Conversion failed: ' + (err?.message || 'unknown worker error'));
     };
     const delimiter = delimiterChoice === 'auto' ? detectedDelimiter : delimiterChoice;
-    worker.postMessage(file ? { file, mode, maxRows, tableName, delimiter } : { text: input, mode, maxRows, tableName, delimiter });
+    const encoding = encodingChoice === 'auto' ? detectedEncoding : encodingChoice;
+    worker.postMessage(file ? { file, mode, maxRows, tableName, delimiter, encoding, typeNumbers } : { text: input, mode, maxRows, tableName, delimiter, typeNumbers });
   };
 
   return (
@@ -229,6 +238,9 @@ export default function CsvToSqlPage() {
               </select>
             </div>
           )}
+          {!converting && (
+            <CsvReadOptions showEncoding={!!file} encodingChoice={encodingChoice} detectedEncoding={detectedEncoding} onEncoding={setEncodingChoice} numbers={typeNumbers} onNumbers={setTypeNumbers} numbersLabel="Numeric columns as INTEGER / DECIMAL" />
+          )}
           {error && (
             <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 text-sm rounded-lg px-4 py-3">{error}</div>
           )}
@@ -248,7 +260,7 @@ export default function CsvToSqlPage() {
       </div>
       <SeoContent
         title="CSV to SQL"
-        description="CSV to SQL generates a CREATE TABLE statement and one INSERT statement per row from a CSV file (or pasted CSV text), entirely in your browser — nothing is uploaded to a server. The field delimiter (comma, semicolon, tab, or pipe) is detected automatically, with a dropdown to override it. CSV parsing is quote-aware: a field wrapped in double quotes can safely contain a comma or the delimiter itself (like 'Smith, John') without being split into extra values. Values are also escaped for SQL string literals (a quote inside a value is doubled, the standard SQL escaping). Large files are read and parsed off the main thread in a Web Worker, so the page stays responsive. Column and table names typed into the Table Name field are not escaped, so avoid spaces or SQL reserved words there."
+        description="CSV to SQL generates a CREATE TABLE statement and one INSERT statement per row from a CSV file (or pasted CSV text), entirely in your browser — nothing is uploaded to a server. The field delimiter (comma, semicolon, tab, or pipe) is detected automatically, with a dropdown to override it. CSV parsing is quote-aware: a field wrapped in double quotes can safely contain a comma or the delimiter itself (like 'Smith, John') without being split into extra values. Values are also escaped for SQL string literals (a quote inside a value is doubled, the standard SQL escaping). Large files are read and parsed off the main thread in a Web Worker, so the page stays responsive. Column and table names typed into the Table Name field are not escaped, so avoid spaces or SQL reserved words there. The file's character encoding is detected too — Excel's classic CSV export is Windows-1252, not UTF-8, and its accents come through intact — and whole columns of numbers become INTEGER or DECIMAL columns, European decimal commas included (12,5 → 12.5)."
         howTo={[
           "Type your table name, or keep the default.",
           "Click the upload area and select a .csv file, or paste CSV text directly into the box below it.",

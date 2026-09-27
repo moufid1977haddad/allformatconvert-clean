@@ -15,11 +15,13 @@
 | 7 | Écran post-inscription ; dossier `quota-spend-infra` | ✅ fait | Invitation « Not spam / contacts » pour tous (`82e6b071`) ; dossier vide supprimé. |
 | 8 | Product Hunt (brouillons) | ✅ fait | Recherche (8 lancements, règles officielles), galerie régénérable en une commande (7 × 1270×760 + vignette), textes anglais. Rien publié. |
 | 9 | « Download all as ZIP » > 1,9 Go (Firefox, Safari) | ✅ fait en local | Service worker limité à `/zipdl/` ; 2,2 Go vérifiés octet par octet sous Firefox et WebKit ; ezyZip n'offre rien de tel hors Chrome/Edge. |
-| + | Revue indépendante du code de la nuit | ✅ faite | 6 défauts réels trouvés (dont 1 grave : page bloquée « busy » si le téléchargement est annulé), **tous corrigés et retestés**. |
+| + | Revue indépendante du code de la nuit (deux passes) | ✅ faite | 1re : 6 défauts réels (dont 1 grave : page bloquée « busy » si le téléchargement est annulé) ; 2e : 6 sur la coupe précise et le Resizer — **tous corrigés et retestés**. |
+| + | Même famille de défauts ailleurs | ✅ | **Audio / Video Metadata** refaits sur ffprobe (rapport complet, rien envoyé, taille libre ; la référence metadata2go envoie le fichier, 75 Mo) ; **Media Player** et **Video Screenshot** disent qu'un format ne se lit pas au lieu de rester muets ; **Audio Waveform / Equalizer** décodent WMA, AC3… au lieu d'échouer. |
+| + | Chargement de toutes les pages | ✅ | **238 pages** (accueil, 12 catégories, 225 outils) ouvertes sans erreur JavaScript, titre présent : **WebKit, Chromium, Firefox 238/238** (`all-pages-load.mjs`). |
 
 ## 2) Décisions qui t'attendent, par importance pour le lancement
 
-1. **Déployer les correctifs de la nuit** (§3). ⚠️ **Ne pas fusionner la branche telle quelle** : elle contient aussi la consigne « modifications minimales » + température 0 du correcteur de grammaire (`09dc35a0`, `567e089c`, `4e879162`, `608817da`), **non validée**. Options : (a) **recommandée** — préversion de la branche, je lance les suites dessus, puis fusion **en excluant** ces 4 commits (je prépare la branche de fusion) ; (b) fusionner tout, grammaire comprise (non recommandé tant que es/ru ne sont pas tranchés).
+1. **Déployer les correctifs de la nuit** (§3). ⚠️ **Ne pas fusionner `licence-ameliorations` telle quelle** : elle contient aussi la consigne « modifications minimales » + température 0 du correcteur de grammaire (`09dc35a0`, `567e089c`, `4e879162`, `608817da`), **non validée**. **Préparé pour toi : la branche `deploiement-nuit-28-09`** (poussée, sa préversion se construit) = `licence-ameliorations` + un commit qui remet le correcteur **à l'identique de la production** (`9e3ce5db` ; `lib/ai` et `app/api/ai` identiques à `4d8ed7ff`, vérifié). **Revérifiée à 04 h 27 dans son état final** (build de production local) : **238 pages sans erreur sous Chromium et WebKit**, et 12 suites (grammaire mot à mot, Metadata, décodage de secours, formats illisibles, Audio Trimmer, coupe précise, 4 outils MediaRecorder, service joué, ZIP en flux sous Firefox, amélioration 17, vague 1) **toutes passées** ; plus tôt dans la nuit, 17 suites / 211 vérifications sur la même branche. Options : (a) **recommandée** — préversion de `deploiement-nuit-28-09`, je relance les suites dessus, puis production ; (b) déployer commit par commit (§3) ; (c) fusionner tout, grammaire comprise (non recommandé).
 2. **Grammaire — finir la mesure** (≈ 80 appels, ≈ 0,04 $) : **O1 (recommandée)** ce soir après 20 h (nouveau jour UTC ; 3 heures d'horloge à cause des 30/h) ; O2 relever `IP_RATE_LIMIT_PER_DAY` **en Preview seulement** (toi, dans Vercel) pour finir en une fois. Puis, **ma recommandation si le 2e passage confirme le 1er** : mettre en production « minimale + T0 » (les phrases empirées baissent dans toutes les langues mesurées face à la production actuelle ; l'écart espagnol vient surtout de la référence du corpus, voir §4) **avec l'avertissement W** pour le russe, le chinois, le japonais, le hindi et le turc (réellement sous LanguageTool ou sans point de comparaison) ; M1/M2 mesurés ensuite sur ces langues seulement. **Résultat partiel** : les phrases empirées baissent dans les 6 langues mesurées (es 12→9, it 13→5, ru 14→8, de 11→2, zh 24→12, pt 3→3) ; exactes −2 en espagnol, −1 en russe face à un seul passage de la production.
 3. **La feuille `tests-manuels-proprietaire.md`** : me la fournir (ou la verser dans `claude/`) — sans elle, le bloquant 11 ne peut pas être fermé.
 4. **Limite média 20/h** : **H1 (recommandée)** 40/h, jour inchangé à 60 (le pire coût par IP et par jour ne bouge pas) ; H2 garder 20/h ; H3 (complément code, 1 h) un seul billet pour les 2 parties d'Audio Splitter en Opus. À trancher avec le test de charge (même service).
@@ -51,8 +53,15 @@ Tous testés en local (build de production `next build` + `next start`, service 
 | `03272678` | Zip Extractor, flux : annulation et erreurs (revue) | `zip-extractor-stream-all.mjs` (annulation) Firefox + WebKit | `6a760fce` |
 | `a87a2fab` | Durée par ffmpeg : WebM sans durée, sonde périmée, fuite, pochette MP3 (revue) | trimmer 3 navigateurs, splitter, video trimmer | `9f01beac`, `91dbf2f4`, `11326601` |
 | `714a3b85` | Video Merger : AudioContext dans le clic (revue) | `mediarecorder-tools.mjs` Chromium + Firefox | `85a614bf` |
-| *(voir §5)* | Video Trimmer : mode « Precise cut » | `video-trimmer-precise.mjs` | `11326601`, `a87a2fab` |
+| `dbcc52bc` | Video Trimmer : mode « Precise cut » (image exacte, réencodage MP4) | `video-trimmer-precise.mjs` Chromium + Firefox (et source de taille impaire) | `11326601`, `a87a2fab` |
+| `aded38a6` | Video Resizer : proportions calculées à chaque image (revue) | `mediarecorder-tools.mjs` | `ac75f9f0` |
+| `fd8c2d79` | Audio / Video Metadata : rapport technique complet (ffprobe dans le navigateur), textes et cartes de catégorie corrigés (« edit » était faux) | `media-metadata.mjs` Chromium, Firefox, WebKit 9/9 (dont un WAV de 1,27 Go lu en 4-5 s) | — |
+| `6d39450b` | Media Player, Video Screenshot : format illisible dit, renvoi au convertisseur | `unplayable-messages.mjs` 3 navigateurs | — |
+| `ba3d2e11` | Audio Waveform, Audio Equalizer : WMA/AC3 décodés par ffmpeg.wasm au lieu d'échouer | `audio-decode-fallback.mjs` Chromium + Firefox 4/4 | — |
+| `9e3ce5db` | *(branche `deploiement-nuit-28-09` seulement)* correcteur de grammaire remis comme en production | `ai-prompt-tests` 15/15, `grammar-fixer-diff.mjs` | — |
 | **À NE PAS déployer seuls** | `09dc35a0`, `567e089c`, `4e879162` (consigne minimale), `608817da` (température 0) | mesure inachevée | décision n° 2 |
+
+**La branche `deploiement-nuit-28-09` contient tous les commits de code ci-dessus** (les derniers y ont été reportés par `cherry-pick -x`) + `9e3ce5db`.
 
 Commits de tests et de documents (sans effet sur le site) : `fc2befa7`, `8f0740f6`, `eaf3f593`, `258872de`, `9f7e7886`, les `docs(...)`.
 
@@ -86,9 +95,12 @@ Tableau des concurrents dans le plan (Zamzar 2/24 h, 123apps 5/j, CloudConvert 1
 ### Point 9 — ZIP en flux
 `public/zipdl/sw.js` (portée `/zipdl/` seulement), `app/lib/streamDownload.js`, intégration dans `zip-extractor/page.jsx` au-delà de `ZIP_IN_MEMORY_MAX` uniquement. 2,2 Go : Firefox 67-70 s, WebKit 25-33 s, octets identiques ; annulation dans le navigateur : message clair, page utilisable.
 
-## 5) Video Trimmer — coupe précise
+## 5) Video Trimmer — coupe précise (`dbcc52bc`)
 
-(à compléter par la mesure Firefox en cours au moment de l'écriture : voir la fin du rapport)
+Recherche d'abord : les coupeurs vidéo dans le navigateur proposent deux modes — copie rapide sans perte, alignée sur l'image-clé, et coupe précise qui réencode. Nous n'avions que le premier (une vidéo de téléphone pouvait commencer 2-3 s trop tôt). Ajouté : case « Precise cut » (désactivée par défaut), MP4 H.264/AAC (CRF 18), curseurs au dixième de seconde.
+- **Mesuré** (`video-trimmer-precise.mjs`, source à une image-clé toutes les 2 s) : 1,3 → 3,7 s donne **2,40 s qui commencent à l'image de 1,32 s** (première image après 1,3 s ; PSNR 57 dB contre la source), son gardé, Chromium et Firefox ; source de taille impaire (641×361) acceptée.
+- **Temps, 10 s de 1080p : 37 s sous Chromium, 292 s sous Firefox** (le WebAssembly de Firefox est bien plus lent) — **écrit sur la page** à côté de la case. **Décision possible** : faire la coupe précise sur notre service ffmpeg (quelques secondes, un billet par coupe, changement du service par toi) au moins pour Firefox et les longues vidéos.
+- Revue indépendante : progression fausse (calculée sur toute la vidéo), sous-titres image qui faisaient échouer, fuite d'URL — corrigés avant le commit.
 
 ## 6) Hygiène
 
@@ -96,4 +108,6 @@ Tableau des concurrents dans le plan (Zamzar 2/24 h, 123apps 5/j, CloudConvert 1
 - Appels payants : **15 appels à l'IA (≈ 0,008 $)**, sous le plafond de 0,20 $. Aucun autre : outils payants testés avec leur route jouée par le test ; contrôles de la vague 1 sur des outils gratuits.
 - Aucun réglage changé chez Vercel, Railway, Search Console ; aucune publication, aucun e-mail, aucun compte ; aucun outil ni service supprimé ou renommé.
 - Recherches confiées à deux agents (lecture seule) et une revue de code indépendante (lecture seule) ; aucun n'a touché au site.
+- Fin de nuit (04 h 30) : serveur local arrêté, aucune tâche de fond, aucun processus `vercel env run` ni relais ; branche courante `licence-ameliorations`. **La build locale `.next` est une build de test** (faite avec une adresse de service factice, `https://media.test.invalid`) : à refaire normalement avant tout usage local.
+- Arrêt volontaire avant 09 h 30 : tout ce qui restait demande ta décision, ou un appel payant qu'interdit la limite journalière jusqu'à 20 h.
 - Écart de méthode signalé : une attente de démarrage du serveur local a été faite une fois par une petite boucle `until curl` (quelques secondes), puis abandonnée.

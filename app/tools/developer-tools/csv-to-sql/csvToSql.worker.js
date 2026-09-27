@@ -1,4 +1,5 @@
 import { IncrementalCsvParser } from '../../../lib/csvParser';
+import { detectDecimalSeparator, numericColumns, parseLocaleNumber } from '../../../lib/csvEncoding';
 import { MAX_ROWS } from './config';
 
 // Standard SQL string-literal escaping: a single quote inside a value must be
@@ -14,7 +15,7 @@ class RowLimitExceededError extends Error {
   }
 }
 
-async function run({ file, text, maxRows, mode, tableName, delimiter }) {
+async function run({ file, text, maxRows, mode, tableName, delimiter, encoding, typeNumbers = true }) {
   const limit = maxRows || MAX_ROWS;
   const rows = [];
   const parser = new IncrementalCsvParser((row) => {
@@ -26,7 +27,7 @@ async function run({ file, text, maxRows, mode, tableName, delimiter }) {
     const total = file.size || 0;
     let read = 0;
     let lastReportedPct = -1;
-    const reader = file.stream().pipeThrough(new TextDecoderStream()).getReader();
+    const reader = file.stream().pipeThrough(new TextDecoderStream(encoding || 'utf-8')).getReader();
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -51,17 +52,27 @@ async function run({ file, text, maxRows, mode, tableName, delimiter }) {
   const table = tableName || 'my_table';
   const headers = rows[0].map((h) => h.trim());
   const dataRows = rows.slice(1).map((r) => r.map((v) => v.trim()));
-  const create = 'CREATE TABLE ' + table + ' (\n' + headers.map((h) => '  ' + h + ' VARCHAR(255)').join(',\n') + '\n);\n\n';
-  const inserts = dataRows.map((row) => 'INSERT INTO ' + table + ' (' + headers.join(', ') + ') VALUES (' + row.map((v) => "'" + escapeSqlString(v) + "'").join(', ') + ');').join('\n');
+  // Numeric columns (ConvertCSV's CSV-to-SQL infers them too): INTEGER or DECIMAL,
+  // values written with a '.' whatever the file's decimal separator ("12,5" -> 12.5).
+  const decimalSep = detectDecimalSeparator(dataRows, delimiter || ',');
+  const numeric = typeNumbers ? numericColumns([headers, ...dataRows], decimalSep) : [];
+  const isInt = headers.map((_, i) => !!numeric[i] && dataRows.every((r) => !r[i] || Number.isInteger(parseLocaleNumber(r[i], decimalSep))));
+  const colType = (i) => (numeric[i] ? (isInt[i] ? 'INTEGER' : 'DECIMAL(18,6)') : 'VARCHAR(255)');
+  const sqlValue = (v, i) => {
+    if (numeric[i]) return v === '' || v === undefined ? 'NULL' : String(parseLocaleNumber(v, decimalSep));
+    return "'" + escapeSqlString(v ?? '') + "'";
+  };
+  const create = 'CREATE TABLE ' + table + ' (\n' + headers.map((h, i) => '  ' + h + ' ' + colType(i)).join(',\n') + '\n);\n\n';
+  const inserts = dataRows.map((row) => 'INSERT INTO ' + table + ' (' + headers.join(', ') + ') VALUES (' + row.map((v, i) => sqlValue(v, i)).join(', ') + ');').join('\n');
   const sqlText = create + inserts;
 
   self.postMessage({ type: 'progress', pct: 97, phase: 'building' });
 
   if (mode === 'file') {
     const blob = new Blob([sqlText], { type: 'application/sql' });
-    self.postMessage({ type: 'done', mode, blob, rowCount: dataRows.length });
+    self.postMessage({ type: 'done', mode, blob, rowCount: dataRows.length, decimalSep, numericCount: numeric.filter(Boolean).length });
   } else {
-    self.postMessage({ type: 'done', mode, sql: sqlText, rowCount: dataRows.length });
+    self.postMessage({ type: 'done', mode, sql: sqlText, rowCount: dataRows.length, decimalSep, numericCount: numeric.filter(Boolean).length });
   }
 }
 

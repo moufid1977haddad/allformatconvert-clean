@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { contentDisposition } from "@/lib/contentDisposition";
 import { convertPdfToDocx, ConvertApiError } from "@/lib/providers/convertApi";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkFileSize, MAX_PDF_TO_WORD_STAGED_BYTES } from "@/lib/quota/limits";
@@ -160,7 +161,7 @@ async function convertPdf(req: NextRequest, file: File, staged = false): Promise
         tool: "pdf-to-word",
         file,
         error: new Error("non_docx_response"),
-        userAgent: req.headers.get("user-agent"),
+        userAgent: req.headers.get("user-agent"), headers: req.headers,
       }));
       return NextResponse.json({ error: "Conversion failed. Please try again." }, { status: 502 });
     }
@@ -168,7 +169,7 @@ async function convertPdf(req: NextRequest, file: File, staged = false): Promise
     const outName = file.name.replace(/\.[^.]+$/, "") + ".docx";
     return fileResponse(bytes, {
       "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "Content-Disposition": `attachment; filename="${outName.replace(/"/g, "")}"`,
+      "Content-Disposition": contentDisposition(outName),
     }, staged);
   } catch (err) {
     // No automatic fallback to a different provider on any ConvertAPI
@@ -199,7 +200,7 @@ async function convertPdf(req: NextRequest, file: File, staged = false): Promise
           tool: "pdf-to-word",
           file,
           error: new Error(`${err.code} (HTTP ${err.httpStatus ?? "n/a"})`),
-          userAgent: req.headers.get("user-agent"),
+          userAgent: req.headers.get("user-agent"), headers: req.headers,
         }));
       }
       return NextResponse.json({ error: mapped.message }, { status: mapped.status });
@@ -210,7 +211,7 @@ async function convertPdf(req: NextRequest, file: File, staged = false): Promise
       tool: "pdf-to-word",
       file,
       error: err instanceof Error ? err : new Error("unexpected_error"),
-      userAgent: req.headers.get("user-agent"),
+      userAgent: req.headers.get("user-agent"), headers: req.headers,
     }));
     return NextResponse.json({ error: "Conversion failed. Please try again." }, { status: 500 });
   }

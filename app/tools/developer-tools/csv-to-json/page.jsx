@@ -5,6 +5,8 @@ import ProgressBar from '../../../components/ProgressBar';
 import { MAX_ROWS, MOBILE_MAX_ROWS, PASTE_MAX_ROWS } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { detectDelimiter, CSV_DELIMITERS } from '../../../lib/csvParser';
+import { sniffCsvFile } from '../../../lib/csvEncoding';
+import CsvReadOptions, { numbersNote } from '../../../components/CsvReadOptions';
 
 // Only the first 8KB is needed to see several rows -- detectDelimiter only
 // looks at the first 10 non-empty logical lines anyway, so sampling more of
@@ -73,6 +75,9 @@ export default function CsvToJsonPage() {
   const [timeEstimate, setTimeEstimate] = useState('');
   const [delimiterChoice, setDelimiterChoice] = useState('auto');
   const [detectedDelimiter, setDetectedDelimiter] = useState(',');
+  const [encodingChoice, setEncodingChoice] = useState('auto');
+  const [detectedEncoding, setDetectedEncoding] = useState('utf-8');
+  const [typeNumbers, setTypeNumbers] = useState(true);
   const inputRef = useRef();
   const workerRef = useRef(null);
 
@@ -101,9 +106,12 @@ export default function CsvToJsonPage() {
     setInput('');
     setDelimiterChoice('auto');
     setTimeEstimate(formatEstimate(estimateSeconds(f.size)));
-    f.slice(0, DELIMITER_SAMPLE_BYTES).text().then((sample) => {
-      setDetectedDelimiter(detectDelimiter(sample));
-    });
+    setEncodingChoice('auto');
+    // Encoding first (an Excel "CSV" is not UTF-8), then the delimiter on correctly decoded text.
+    sniffCsvFile(f).then(({ encoding, text }) => {
+      setDetectedEncoding(encoding);
+      setDetectedDelimiter(detectDelimiter(text.slice(0, DELIMITER_SAMPLE_BYTES)));
+    }).catch(() => {});
   };
 
   const cancel = () => {
@@ -150,10 +158,10 @@ export default function CsvToJsonPage() {
           a.click();
           a.remove();
           URL.revokeObjectURL(url);
-          setStatus(`Downloaded! ${msg.rowCount.toLocaleString()} rows.`);
+          setStatus(`Downloaded! ${msg.rowCount.toLocaleString()} rows.` + numbersNote(msg));
         } else {
           setOutput(msg.json);
-          setStatus(`Converted! ${msg.rowCount.toLocaleString()} rows.`);
+          setStatus(`Converted! ${msg.rowCount.toLocaleString()} rows.` + numbersNote(msg));
         }
       } else if (msg.type === 'row_limit') {
         setConverting(false);
@@ -173,7 +181,8 @@ export default function CsvToJsonPage() {
       setError('Conversion failed: ' + (err?.message || 'unknown worker error'));
     };
     const delimiter = delimiterChoice === 'auto' ? detectedDelimiter : delimiterChoice;
-    worker.postMessage(file ? { file, mode, maxRows, delimiter } : { text: input, mode, maxRows, delimiter });
+    const encoding = encodingChoice === 'auto' ? detectedEncoding : encodingChoice;
+    worker.postMessage(file ? { file, mode, maxRows, delimiter, encoding, typeNumbers } : { text: input, mode, maxRows, delimiter, typeNumbers });
   };
 
   return (
@@ -228,6 +237,9 @@ export default function CsvToJsonPage() {
               </select>
             </div>
           )}
+          {!converting && (
+            <CsvReadOptions showEncoding={!!file} encodingChoice={encodingChoice} detectedEncoding={detectedEncoding} onEncoding={setEncodingChoice} numbers={typeNumbers} onNumbers={setTypeNumbers} numbersLabel="Numbers as numbers" />
+          )}
           {error && (
             <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 text-sm rounded-lg px-4 py-3">{error}</div>
           )}
@@ -247,7 +259,7 @@ export default function CsvToJsonPage() {
       </div>
       <SeoContent
         title="CSV to JSON"
-        description="CSV to JSON converts a CSV file (or pasted CSV text) into an array of JSON objects entirely in your browser — nothing is uploaded to a server. The first line is treated as the header row. The field delimiter (comma, semicolon, tab, or pipe) is detected automatically, with a dropdown to override it. Parsing is quote-aware: a field wrapped in double quotes can safely contain a comma, the delimiter itself, or a newline (like 'Smith, John') without being split into extra columns. Large files are read and parsed off the main thread in a Web Worker, so the page stays responsive, and the result downloads automatically as a .json file."
+        description="CSV to JSON converts a CSV file (or pasted CSV text) into an array of JSON objects entirely in your browser — nothing is uploaded to a server. The first line is treated as the header row. The field delimiter (comma, semicolon, tab, or pipe) is detected automatically, with a dropdown to override it. Parsing is quote-aware: a field wrapped in double quotes can safely contain a comma, the delimiter itself, or a newline (like 'Smith, John') without being split into extra columns. Large files are read and parsed off the main thread in a Web Worker, so the page stays responsive, and the result downloads automatically as a .json file. The file's character encoding is detected too — Excel's classic CSV export is Windows-1252, not UTF-8, and its accents come through intact — and whole columns of numbers become JSON numbers, European decimal commas included (12,5 → 12.5); values with a leading zero, like phone numbers, stay text."
         howTo={[
           "Click the upload area and select a .csv file, or paste CSV text directly into the box below it.",
           "The delimiter is detected automatically — check the dropdown and correct it if needed.",
