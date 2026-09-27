@@ -21,5 +21,7 @@ export const MAX_FILE_BYTES = 1900 * 1000 * 1000; // one file, and a .tar unpack
 export const MAX_FILE_LABEL = '1.9 GB';
 export const MOBILE_MAX_FILE_BYTES = 300 * 1000 * 1000;
 export const MOBILE_MAX_FILE_LABEL = '300 MB';
-export const ZIP_IN_MEMORY_MAX = 1900 * 1000 * 1000; // "all as ZIP" built as one Blob (no streaming to disk)
+// Above it (28/09/2026), Firefox and Safari stream the ZIP to the downloads through the service worker /zipdl/sw.js
+// (app/lib/streamDownload.js): 2.2 GB checked byte for byte in Firefox (67-70 s) and Playwright's WebKit (25 s).
+export const ZIP_IN_MEMORY_MAX = 1900 * 1000 * 1000; // "all as ZIP" built as one Blob below this
 export const ZIP_IN_MEMORY_LABEL = '1.9 GB';

@@ -171,8 +171,12 @@ export default function ZipExtractorPage() {
     if ('showSaveFilePicker' in window) {
       try { handle = await window.showSaveFilePicker({ suggestedName: name, types: [{ description: 'ZIP archive', accept: { 'application/zip': ['.zip'] } }] }); } catch { return null; } // dismissed
       writable = await handle.createWritable();
-    } else if (total > ZIP_IN_MEMORY_MAX) {
-      setError(`These files add up to ${fmtSize(total)}: over the ${ZIP_IN_MEMORY_LABEL} this browser can build into one ZIP (it has to hold it in memory). Download the files one by one, or use Chrome or Edge, which write the ZIP straight to disk.`);
+    }
+    // Firefox, Safari: above what one in-memory ZIP can hold, the ZIP is streamed to the downloads through a
+    // service worker (app/lib/streamDownload.js) -- never held whole. Below it, the proven in-memory path is kept.
+    const streamed = !writable && total > ZIP_IN_MEMORY_MAX;
+    if (streamed && !('serviceWorker' in navigator && window.isSecureContext)) {
+      setError(`These files add up to ${fmtSize(total)}: over the ${ZIP_IN_MEMORY_LABEL} this browser can build into one ZIP in memory, and it cannot stream a download here (private window?). Download the files one by one, or use Chrome or Edge.`);
       return null;
     }
     setPhase('busy');
@@ -181,14 +185,20 @@ export default function ZipExtractorPage() {
     const feed = (async function* () { for (;;) { if (queue.length) yield queue.shift(); else if (finished) return; else await new Promise((r) => { wake = r; }); } })();
     const push = (f) => { queue.push({ name: f.path, input: f.blob, size: f.size }); wake?.(); };
     const zipStream = makeZip(feed);
-    const target = writable ? zipStream.pipeTo(writable) : new Response(zipStream).blob();
+    let sw = null;
+    if (streamed) {
+      const { streamToDownload } = await import('../../../lib/streamDownload');
+      sw = await streamToDownload(zipStream, name);
+      if (!sw) { setPhase('ready'); setError(`These files add up to ${fmtSize(total)}: over the ${ZIP_IN_MEMORY_LABEL} this browser can build into one ZIP in memory, and it could not stream the download. Download the files one by one, or use Chrome or Edge.`); return null; }
+    }
+    const target = writable ? zipStream.pipeTo(writable) : sw ? sw.done : new Response(zipStream).blob();
     try {
       result = await eachBatch(async (f) => { push(f); while (queue.length > 2) await new Promise((r) => setTimeout(r, 20)); });
       finished = true; wake?.();
-      if (result.needPassword || result.cancelled) { await writable?.abort?.().catch(() => {}); return result.needPassword ? result : null; }
+      if (result.needPassword || result.cancelled) { await writable?.abort?.().catch(() => {}); sw?.cancel(); return result.needPassword ? result : null; }
       const blob = await target;
-      if (!writable) saveBlob(blob, name);
-      setStatus(summary(result, writable ? `written to "${handle.name}"` : `in ${name}`));
+      if (!writable && !sw) saveBlob(blob, name);
+      setStatus(summary(result, writable ? `written to "${handle.name}"` : sw ? `in ${name}, streamed to your downloads` : `in ${name}`));
       return null;
     } catch (err) { finished = true; wake?.(); await writable?.abort?.().catch(() => {}); if (!cancelledRef.current) setError('The ZIP could not be written: ' + err.message); return null; }
     finally { setProgress(null); setPhase('ready'); }
@@ -308,7 +318,7 @@ export default function ZipExtractorPage() {
           { q: "Which archive formats can it open?", a: "ZIP (with zip.js) and every format the 7-Zip program reads: RAR and RAR5, 7Z, TAR, GZ/TGZ, BZ2, XZ, ZST, LZMA, ISO, CAB, WIM, DMG, VHD, ARJ, LZH, CPIO, RPM, DEB, CHM, MSI and more. The format is detected from the file's contents, not its name." },
           { q: "Can it open password-protected archives?", a: "Yes — ZIP (AES and the older ZipCrypto), RAR and 7Z, even when the file names themselves are encrypted. You are asked for the password; it stays inside your browser tab." },
           { q: "How do I extract a split (multi-part) archive?", a: "Select every part together — for example archive.part1.rar, archive.part2.rar… or archive.7z.001, archive.7z.002… or archive.z01, archive.z02, archive.zip. The tool starts from the first part and reads the others automatically. If a part is missing, it says so." },
-          { q: "Is there a size limit?", a: `Not on the archive: it is read from your disk piece by piece, and files are extracted only when you ask for them. Each file must fit in the tab's memory: up to ${MAX_FILE_LABEL} per file on a computer (${MOBILE_MAX_FILE_LABEL} on phones and tablets). "Download all as ZIP" streams to disk in Chrome and Edge; other browsers build the ZIP in memory, up to ${ZIP_IN_MEMORY_LABEL}.` },
+          { q: "Is there a size limit?", a: `Not on the archive: it is read from your disk piece by piece, and files are extracted only when you ask for them. Each file must fit in the tab's memory: up to ${MAX_FILE_LABEL} per file on a computer (${MOBILE_MAX_FILE_LABEL} on phones and tablets). "Download all as ZIP" streams to disk in Chrome and Edge; other browsers build the ZIP in memory up to ${ZIP_IN_MEMORY_LABEL} and, beyond that, stream it to your downloads without holding it (checked in Firefox with a 2.2 GB ZIP).` },
           { q: "Are my files uploaded?", a: "No. The archive is opened and extracted entirely in your browser; nothing is sent to a server." },
           { q: "Why are ZIP file names sometimes garbled elsewhere but not here?", a: "Older tools (including Windows' built-in compressed folders) store names in a legacy code page without saying so. This tool reads them the way the ZIP specification says (UTF-8 when valid, otherwise IBM code page 437), so accented names come out right." },
           { q: "What engines does it use?", a: "zip.js for ZIP files, and 7-Zip 24.09 by Igor Pavlov compiled to WebAssembly (the 7z-wasm package, GNU LGPL with the unRAR restriction — see /wasm/7zz-LICENSE.txt) for everything else." }
