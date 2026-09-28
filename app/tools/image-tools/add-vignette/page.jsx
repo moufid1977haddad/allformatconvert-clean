@@ -1,8 +1,10 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function AddVignettePage() {
+  const [srcType, setSrcType] = useState('image/png');
   const [image, setImage] = useState(null);
   const [intensity, setIntensity] = useState(50);
   const [result, setResult] = useState(null);
@@ -12,7 +14,7 @@ export default function AddVignettePage() {
     const f = e.target.files[0];
     e.target.value = '';
     if (!f) return;
-    setImage(URL.createObjectURL(f));
+    setImage(URL.createObjectURL(f)); setSrcType(f.type);
     setResult(null);
     setError('');
   };
@@ -28,7 +30,7 @@ export default function AddVignettePage() {
       gradient.addColorStop(1, `rgba(0,0,0,${intensity/100})`);
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
+      try { setResult(encodeLike(canvas, srcType)); } catch (e) { setError(e.message); }
       setError('');
     };
     img.onerror = () => {
@@ -49,7 +51,7 @@ export default function AddVignettePage() {
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <div><label className="block text-sm text-neutral-500 mb-1">Intensity: {intensity}%</label><input type="range" min="1" max="100" value={intensity} onChange={e => setIntensity(parseInt(e.target.value))} className="w-full" /></div>
           <button onClick={apply} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Add Vignette</button>
-          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="vignette.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download={`vignette.${extOf(result)}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
       <SeoContent
@@ -62,7 +64,7 @@ export default function AddVignettePage() {
           "Click the download button to save your image with the vignette applied."
         ]}
         faqs={[
-          { q: "What image formats does Add Vignette support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The output is always a PNG file." },
+          { q: "What image formats does Add Vignette support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP where the browser can save WebP (otherwise PNG)." },
           { q: "Is there a file size limit for uploading images?", a: "There's no fixed size limit — processing happens locally in your browser, so it's limited only by your device's available memory." },
           { q: "Can I control how far the darkening extends from the edges?", a: "No, there's a single intensity slider — the radial gradient always spans from the image's edges to its center, with no separate size control." },
           { q: "Will the vignette effect reduce image quality?", a: "No, the effect is drawn on top of your original image at full resolution, so no quality is lost in the process." }

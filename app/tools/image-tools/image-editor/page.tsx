@@ -1,11 +1,13 @@
 'use client';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { encodeLike, extOf, pixelateImageData, roundedRectPath } from '../../../lib/imageOutput';
 
 export default function ImageEditorPage() {
   const [image, setImage] = useState<string | null>(null);
   const [originalImage, setOriginalImage] = useState<HTMLImageElement | null>(null);
   const [activeTab, setActiveTab] = useState('adjust');
+  const [srcType, setSrcType] = useState('image/png');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [brightness, setBrightness] = useState(0);
@@ -29,6 +31,7 @@ export default function ImageEditorPage() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setSrcType(file.type);
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
@@ -61,22 +64,21 @@ export default function ImageEditorPage() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     const img = originalImage;
-    let width = img.width;
-    let height = img.height;
+    // A 90 or 270 degree rotation swaps the canvas sides: the canvas used to keep
+    // the original size, so a rotated landscape photo was cut off (29/09).
+    const rot = ((rotation % 360) + 360) % 360;
+    const swap = rot === 90 || rot === 270;
+    const width = swap ? img.height : img.width;
+    const height = swap ? img.width : img.height;
     canvas.width = width;
     canvas.height = height;
     ctx.clearRect(0, 0, width, height);
     ctx.save();
-    if (rotation !== 0) {
-      ctx.translate(width / 2, height / 2);
-      ctx.rotate((rotation * Math.PI) / 180);
-      ctx.translate(-width / 2, -height / 2);
-    }
-    if (flipH || flipV) {
-      ctx.translate(flipH ? width : 0, flipV ? height : 0);
-      ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
-    }
-    ctx.drawImage(img, 0, 0);
+    ctx.translate(width / 2, height / 2);
+    if (rot !== 0) ctx.rotate((rot * Math.PI) / 180);
+    if (flipH || flipV) ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+    ctx.drawImage(img, -img.width / 2, -img.height / 2);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     const imageData = ctx.getImageData(0, 0, width, height);
     const data = imageData.data;
     for (let i = 0; i < data.length; i += 4) {
@@ -112,24 +114,8 @@ export default function ImageEditorPage() {
     }
     ctx.putImageData(imageData, 0, 0);
     if (pixelSize > 1) {
-      const newData = ctx.getImageData(0, 0, width, height);
-      for (let y = 0; y < height; y += pixelSize) {
-        for (let x = 0; x < width; x += pixelSize) {
-          const idx = (y * width + x) * 4;
-          const r = newData.data[idx];
-          const g = newData.data[idx + 1];
-          const b = newData.data[idx + 2];
-          for (let dy = 0; dy < pixelSize && y + dy < height; dy++) {
-            for (let dx = 0; dx < pixelSize && x + dx < width; dx++) {
-              const id = ((y + dy) * width + (x + dx)) * 4;
-              newData.data[id] = r;
-              newData.data[id + 1] = g;
-              newData.data[id + 2] = b;
-            }
-          }
-        }
-      }
-      ctx.putImageData(newData, 0, 0);
+      // Block average, as the Image Pixelator (it used to copy the top-left pixel, 29/09).
+      ctx.putImageData(pixelateImageData(ctx.getImageData(0, 0, width, height), pixelSize), 0, 0);
     }
     if (noiseIntensity > 0) {
       const noiseData = ctx.getImageData(0, 0, width, height);
@@ -143,11 +129,12 @@ export default function ImageEditorPage() {
     }
     ctx.restore();
     if (cornerRadius > 0) {
+      // Keep only the rounded rectangle: drawing the canvas onto itself inside a
+      // clip (the previous code) erased nothing, so the corners stayed square (29/09).
       ctx.save();
-      ctx.beginPath();
-      (ctx as any).roundRect(0, 0, width, height, cornerRadius);
-      ctx.clip();
-      ctx.drawImage(canvas, 0, 0);
+      ctx.globalCompositeOperation = 'destination-in';
+      roundedRectPath(ctx, 0, 0, width, height, cornerRadius);
+      ctx.fill();
       ctx.restore();
     }
     if (borderWidth > 0) {
@@ -186,8 +173,11 @@ export default function ImageEditorPage() {
   const downloadImage = () => {
     if (!canvasRef.current) return;
     const link = document.createElement('a');
-    link.download = 'edited-image.png';
-    link.href = canvasRef.current.toDataURL();
+    // The photo's own format (JPG stays JPG), except when the corners were made
+    // transparent, which needs PNG.
+    const url = cornerRadius > 0 ? canvasRef.current.toDataURL('image/png') : encodeLike(canvasRef.current, srcType);
+    link.download = `edited-image.${extOf(url)}`;
+    link.href = url;
     link.click();
   };
 
