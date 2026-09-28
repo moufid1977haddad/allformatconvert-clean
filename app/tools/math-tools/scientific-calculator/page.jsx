@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useEffect, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { evaluateExpression } from '../../../lib/mathTools';
 
 export default function ScientificCalculatorPage() {
   const [expression, setExpression] = useState('');
@@ -8,24 +9,14 @@ export default function ScientificCalculatorPage() {
   const [memory, setMemory] = useState(0);
   const inputRef = useRef(null);
 
-  const evaluate = (expr) => {
-    try {
-      const e = expr
-        .replace(/sin\(/g, 'Math.sin(').replace(/cos\(/g, 'Math.cos(')
-        .replace(/tan\(/g, 'Math.tan(').replace(/log\(/g, 'Math.log10(')
-        .replace(/ln\(/g, 'Math.log(').replace(/sqrt\(/g, 'Math.sqrt(')
-        .replace(/π/g, 'Math.PI')
-        // Only a standalone "e" (not preceded by a digit) means Euler's
-        // number — an "e" directly after a digit is scientific notation
-        // (e.g. "2e5"), which must be left alone.
-        .replace(/(?<![0-9.])e(?![0-9])/g, 'Math.E')
-        .replace(/\^/g, '**');
-      const r = eval(e);
-      if (!isFinite(r)) return 'Cannot divide by zero';
-      return parseFloat(r.toFixed(10)).toString();
-    } catch { return 'Error'; }
+  const [angle, setAngle] = useState('rad');
+  // mathjs replaces eval(): results keep 12 significant digits (1/3e12 was
+  // shown as 0), 2π and 2(3) multiply, and sqrt(-1) / log(0) get their own
+  // message instead of "Cannot divide by zero" (29/09).
+  const run = async (expr) => {
+    try { setResult(await evaluateExpression(expr, { angle })); }
+    catch (e) { setResult(e.message); }
   };
-
   const insertAtCursor = (before, after = '') => {
     const input = inputRef.current;
     if (!input) return;
@@ -41,7 +32,7 @@ export default function ScientificCalculatorPage() {
 
   const handleBtn = (val) => {
     if (val === 'C') { setExpression(''); setResult('0'); inputRef.current?.focus(); return; }
-    if (val === '=') { setResult(evaluate(expression)); return; }
+    if (val === '=') { run(expression); return; }
     if (val === '⌫') {
       const input = inputRef.current;
       if (!input) return;
@@ -66,11 +57,11 @@ export default function ScientificCalculatorPage() {
 
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); setResult(evaluate(expression)); }
+      if (e.key === 'Enter') { e.preventDefault(); run(expression); }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [expression]);
+  }, [expression, angle]);
 
   const getLabel = (btn) => {
     const m = { 'sin(': 'sin()', 'cos(': 'cos()', 'tan(': 'tan()', 'log(': 'log()', 'ln(': 'ln()', 'sqrt(': 'sqrt()' };
@@ -106,7 +97,7 @@ export default function ScientificCalculatorPage() {
               type="text"
               value={expression}
               onChange={e => setExpression(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); setResult(evaluate(expression)); } }}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); run(expression); } }}
               className="w-full bg-transparent text-right text-neutral-600 dark:text-neutral-300 text-sm outline-none font-mono"
               placeholder="Type or click buttons..."
               autoFocus
@@ -115,6 +106,11 @@ export default function ScientificCalculatorPage() {
               {memory !== 0 && <span className="text-xs font-sans text-indigo-500 mr-2 align-middle">M</span>}
               {result}
             </div>
+          </div>
+          <div className="flex justify-center gap-2 text-sm" role="radiogroup" aria-label="Angle unit">
+            {[['rad', 'Radians'], ['deg', 'Degrees']].map(([v, l]) => (
+              <button key={v} onMouseDown={e => { e.preventDefault(); setAngle(v); }} aria-pressed={angle === v} className={"px-3 py-1 rounded-lg font-semibold transition " + (angle === v ? 'bg-indigo-600 text-white' : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-white')}>{l}</button>
+            ))}
           </div>
           <div className="grid grid-cols-3 gap-2">
             <button onMouseDown={e => { e.preventDefault(); memoryClear(); }} className="py-3 rounded-xl font-semibold transition text-sm bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-900 dark:text-white">MC</button>
@@ -134,25 +130,25 @@ export default function ScientificCalculatorPage() {
         </div>
       </div>
       <SeoContent
-        title="Scientific Calculator"
-        description="Scientific Calculator evaluates expressions with trigonometric functions, logarithms, square roots, exponents, and parentheses, entirely in your browser — type an expression or build it with the buttons, and press equals for an instant result. Includes a memory register (M+/MR/MC) and a working Euler's number button."
+        title={"Scientific Calculator"}
+        description={"Scientific Calculator evaluates expressions with trigonometric functions (in radians or degrees), logarithms (log = base 10, ln = natural), square roots, powers, factorials (5!), π, e and parentheses, entirely in your browser — type an expression or build it with the buttons. It uses the mathjs expression engine instead of raw JavaScript evaluation: implicit multiplication works (2π, 3(4+1)), results keep 12 significant digits (1/3e12 = 3.33333333333e-13, never rounded to 0), 0.1+0.2 shows 0.3, and impossible results get a precise message (not a real number, infinite, or tan undefined). Includes a memory register (M+/MR/MC)."}
         howTo={[
-          "Type an expression directly into the display, or build it using the number and function buttons.",
-          "Use function buttons like sin(, cos(, log(, sqrt( to insert scientific functions — they auto-add closing parentheses.",
-          "Use \"^\" for exponents and parentheses to control the order of operations.",
-          "Press \"=\" or Enter to evaluate the expression and see the result."
+          "Choose Radians or Degrees for trigonometric functions.",
+          "Type an expression or build it with the buttons.",
+          "Press '=' or Enter.",
+          "Use M+, MR and MC to keep a value in memory."
         ]}
         faqs={[
-          { q: "Are trig functions in degrees or radians?", a: "Radians only — sin(, cos(, and tan( all operate in radians; there's no degree mode toggle. To work with degrees, convert first (degrees × π / 180)." },
-          { q: "Does the \"e\" button insert Euler's number?", a: "Yes — pressing \"e\" on its own inserts Euler's number (≈2.71828). It also correctly leaves scientific notation alone, so typing \"2e5\" directly still means 2×10⁵, not 2×Euler's number×5." },
-          { q: "Does it have memory functions?", a: "Yes — M+ adds the current result to memory, MR recalls the stored value into the expression, and MC clears memory. An \"M\" indicator appears next to the result whenever memory holds a non-zero value. There's no factorial button." },
-          { q: "Is Scientific Calculator free to use?", a: "Yes, it's completely free with no signup, running entirely in your browser." }
+          { q: "Is Scientific Calculator free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Does it work in degrees?", a: "Yes — switch to Degrees and sin(30) gives 0.5, cos(90) gives 0 and tan(90) is reported as undefined." },
+          { q: "What is the difference between log and ln?", a: "log is the base-10 logarithm (log(1000) = 3); ln is the natural logarithm (ln(e) = 1)." },
+          { q: "How precise are the results?", a: "Results are computed in double precision and shown to 12 significant digits; very large or very small results use scientific notation instead of being rounded to 0." },
+          { q: "Can I type 2π or 3(4+1)?", a: "Yes — implicit multiplication is supported, as on a handheld scientific calculator." }
         ]}
         tips={[
-          "For degree-based trig, convert your angle to radians first (degrees × π / 180) before using sin(/cos(/tan(.",
-          "log( computes the base-10 logarithm; use ln( for the natural logarithm (base e).",
-          "Use M+ to accumulate a running total across several calculations, then MR to bring it back into a new expression.",
-          "Press \"C\" to clear the expression (memory is kept separately — use \"MC\" to clear that)."
+          "Use ^ for powers (2^10) and ! for factorials (5!).",
+          "The square root or logarithm of a negative number is reported as 'not a real number'.",
+          "Press Enter to evaluate what you typed."
         ]}
       />
     </div>
