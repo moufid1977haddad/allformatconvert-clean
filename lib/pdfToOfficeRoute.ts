@@ -78,6 +78,8 @@ export function makePdfToOfficeHandler(spec: Spec) {
       else await guard.release();
       if (err instanceof ConvertApiError) {
         const mapped = ERRORS[(err as any).code] || ERRORS.upstream_error;
+        // Numbers only (never the body, never with the Authorization header): enough to tell which failure it was.
+        console.error(`[convertapi] pdf->${spec.ext} failed code=${(err as any).code} http=${(err as any).httpStatus ?? "n/a"} convertapi_code=${(err as any).bodyCode ?? "n/a"}`);
         if (mapped.alert) await report(`${(err as any).code} (HTTP ${(err as any).httpStatus ?? "n/a"})`);
         return NextResponse.json({ error: mapped.message }, { status: mapped.status });
       }
