@@ -392,15 +392,21 @@ export default function BarcodeGeneratorPage() {
           )}
           {error && <p className="text-center text-red-600 text-sm" role="alert">{error}</p>}
 
-          <div className={`flex justify-center bg-white rounded-xl p-4 ${out && mode === 'single' ? '' : 'hidden'}`}>
-            <canvas ref={canvasRef} className="max-w-full h-auto" style={{ maxHeight: 320 }} />
-          </div>
+          {/* The canvas draws and reads the code back; what is shown is the SVG itself, enlarged to the width available
+              (sharp at any size). The files keep their print size: a browser opening the SVG shows it at that physical
+              size, e.g. 37 mm for an EAN-13, small on a screen (owner, 28/09). */}
+          <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
+          {out && mode === 'single' && (
+            <div className="flex justify-center bg-white rounded-xl p-4">
+              <img src={out.urls.svg} alt={`${sym.label}: ${text.trim()}`} data-preview-svg className="w-full h-auto" style={{ maxWidth: 480, maxHeight: 320, objectFit: 'contain', imageRendering: 'crisp-edges' }} />
+            </div>
+          )}
           {out && mode === 'single' && (
             <>
               <p className="text-center text-sm font-semibold" data-status>{out.read.skipped
                 ? <span className="text-amber-700">Created, but not scanned back: no independent reader exists for {sym.label} in a browser. Test it with your scanner before printing a batch.</span>
                 : <span className="text-green-700">✓ Scanned back by an independent reader (zxing-cpp): {out.read.text}</span>}</p>
-              <p className="text-center text-xs text-neutral-500">Image {out.w} × {out.h} px{ui.unit === 'px' ? '' : ` = ${((out.w * 25.4) / out.p.dpi).toFixed(1)} × ${((out.h * 25.4) / out.p.dpi).toFixed(1)} mm at ${out.p.dpi} dpi`}</p>
+              <p className="text-center text-xs text-neutral-500">Image {out.w} × {out.h} px{ui.unit === 'px' ? '' : ` = ${((out.w * 25.4) / out.p.dpi).toFixed(1)} × ${((out.h * 25.4) / out.p.dpi).toFixed(1)} mm at ${out.p.dpi} dpi`}. Shown enlarged here; the SVG, PDF and EPS keep this exact print size (opened in a browser, they appear at that physical size).</p>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                 {FORMATS.map((f) => <a key={f.id} href={out.urls[f.id]} download={`${out.name}.${f.id}`} data-format={f.id} className="block text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">{f.label}</a>)}
               </div>
