@@ -6,6 +6,16 @@ import { AUDIO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
 import { COMPRESSIBLE_AUDIO_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
 import { reportToolError } from '../../../lib/reportError';
 import { opusOnService, encodeOpusOnService, LOSSLESS_INTERMEDIATE } from '../../../lib/opusService';
+import PlayablePreview from '../../../components/PlayablePreview';
+
+// kb/s of the source's audio: the stream's own figure from ffmpeg ("Audio: aac …, 57 kb/s"), else the file's average.
+function sourceKbps(log, bytes) {
+  const stream = log.match(/Stream #[^\n]*Audio:[^\n]*?(\d+) kb\/s/);
+  if (stream) return Number(stream[1]);
+  const d = log.match(/Duration: (\d+):(\d+):(\d+(?:\.\d+)?)/);
+  const secs = d ? Number(d[1]) * 3600 + Number(d[2]) * 60 + Number(d[3]) : 0;
+  return secs > 0 ? (bytes * 8) / secs / 1000 : 0;
+}
 
 export default function AudioCompressorPage() {
   const [file, setFile] = useState(null);
@@ -30,23 +40,29 @@ export default function AudioCompressorPage() {
       // ffmpeg.wasm's own stderr/stdout -- this is where the real reason for
       // a failure lives. Without this, a failed exec() surfaces only as a
       // generic rejection with no way to diagnose what actually happened.
-      ffmpeg.on('log', ({ message }) => console.log('[ffmpeg]', message));
+      const logs = [];
+      ffmpeg.on('log', ({ message }) => { logs.push(message); console.log('[ffmpeg]', message); });
       await ffmpeg.load();
       const inputName = 'input.' + sanitizedInputExt(file);
       const { outputName, extraArgs, mime, ext } = buildOutputSpec(format);
       await ffmpeg.writeFile(inputName, await fetchFile(file));
+      // The source's real bitrate (28/09, owner: a 0.05 MB iPhone memo "compressed" at 128 kbps came out twice as big):
+      // never encode above it. ffmpeg reports the audio stream's own kb/s; else size × 8 / duration.
+      await ffmpeg.exec(['-hide_banner', '-i', inputName]).catch(() => {});
+      const srcKbps = sourceKbps(logs.join('\n'), file.size);
+      const kbps = srcKbps ? Math.min(Number(bitrate), Math.max(8, Math.floor(srcKbps))) : Number(bitrate);
       let blob;
       if (opusOnService(format)) { // decoded here to lossless FLAC; libopus at the chosen bitrate on our service (lib/opusService.js)
         await ffmpeg.exec(['-i', inputName, ...LOSSLESS_INTERMEDIATE.args, LOSSLESS_INTERMEDIATE.name]);
-        blob = await encodeOpusOnService(await ffmpeg.readFile(LOSSLESS_INTERMEDIATE.name), 'compressed', { kbps: Number(bitrate) });
+        blob = await encodeOpusOnService(await ffmpeg.readFile(LOSSLESS_INTERMEDIATE.name), 'compressed', { kbps });
       } else {
-        await ffmpeg.exec(['-i', inputName, '-b:a', bitrate + 'k', ...extraArgs, outputName]);
+        await ffmpeg.exec(['-i', inputName, '-b:a', kbps + 'k', ...extraArgs, outputName]);
         const data = await ffmpeg.readFile(outputName);
         blob = new Blob([data.buffer], { type: mime });
       }
       const url = URL.createObjectURL(blob);
       const reduction = (((file.size - blob.size) / file.size) * 100).toFixed(1);
-      setResult({ url, name: 'compressed_' + file.name.replace(/\.[^.]+$/, '') + '.' + ext, originalSize: (file.size/1024/1024).toFixed(2), newSize: (blob.size/1024/1024).toFixed(2), reduction });
+      setResult({ url, name: 'compressed_' + file.name.replace(/\.[^.]+$/, '') + '.' + ext, originalSize: (file.size/1024/1024).toFixed(2), newSize: (blob.size/1024/1024).toFixed(2), reduction, larger: blob.size >= file.size, srcKbps, kbps, asked: Number(bitrate) });
     } catch(e) {
       // Full error object + stack to the console -- ffmpeg.wasm frequently
       // throws non-Error values (or Errors with no .message) on internal
@@ -94,10 +110,17 @@ export default function AudioCompressorPage() {
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="bg-neutral-50 rounded-lg p-3 border border-neutral-200"><div className="text-xs text-neutral-500">Original</div><div className="font-bold text-sm">{result.originalSize} MB</div></div>
                 <div className="bg-neutral-50 rounded-lg p-3 border border-neutral-200"><div className="text-xs text-neutral-500">Compressed</div><div className="font-bold text-sm text-indigo-600">{result.newSize} MB</div></div>
-                <div className="bg-neutral-50 rounded-lg p-3 border border-neutral-200"><div className="text-xs text-neutral-500">Saved</div><div className="font-bold text-sm text-green-600">{result.reduction}%</div></div>
+                <div className="bg-neutral-50 rounded-lg p-3 border border-neutral-200"><div className="text-xs text-neutral-500">{result.larger ? 'Larger by' : 'Saved'}</div><div className={`font-bold text-sm ${result.larger ? 'text-amber-700' : 'text-green-600'}`} data-saved>{result.larger ? `${Math.abs(result.reduction)}%` : `${result.reduction}%`}</div></div>
               </div>
-              <audio controls src={result.url} className="w-full" />
-              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download</a>
+              {result.kbps < result.asked && <p className="text-xs text-neutral-600 text-center" data-capped>Your file is already at about {Math.round(result.srcKbps)} kbps, so it was encoded at {result.kbps} kbps instead of {result.asked} — a higher bitrate would only make it bigger.</p>}
+              {result.larger ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-900 space-y-1" data-larger>
+                  <p className="font-semibold">Your file is already well compressed.</p>
+                  <p>Re-encoding it gives {result.newSize} MB, not less than your {result.originalSize} MB: keep your original. The re-encoded file is below only if you need this format.</p>
+                </div>
+              ) : null}
+              <PlayablePreview src={result.url} name={result.name} />
+              <a href={result.url} download={result.name} className={result.larger ? 'block w-full text-center text-indigo-600 underline text-sm' : 'block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition'}>{result.larger ? `Download the ${result.newSize} MB version anyway` : 'Download'}</a>
             </div>
           )}
         </div>
