@@ -8,7 +8,7 @@
 | 2 — json-to-rust, json-to-php, env-to-json | **au niveau du marché ou au-dessus** ; contenu SEO non touché ; inscrits « éligibles » au plan | converter-tests/02 (13/13) : `tsc --strict`, Python, `dotenv`/`dotenv-expand` comme oracles |
 | 3 — les deux réserves du réviseur | **faites** : IP lue seulement dans `x-real-ip` (écrit par Vercel) ; réservations heure/jour atomiques par une fonction SQL. **Migration SQL écrite, NON exécutée** (tâche du propriétaire, P13 ①) | quota-tests 19 (5/5) et 20 (12/12, la vraie SQL exécutée dans PGlite) ; réviseur indépendant : aucun bloquant, ses remarques appliquées (§3) |
 | 4 — plan | mis à jour : bloquant 1 (3 outils éligibles), bloquant 5 (audit du jour + liste de ce qui reste), P13, réserves retirées de « Juste APRÈS » | `claude/plan-de-travail.md` |
-| 5 — vérification finale | voir §5 | — |
+| 5 — vérification finale | **238 pages ×3 moteurs propres ; banc des outils modifiés vert ×3 ; tous les tests Node verts** | §5 |
 
 **Rien en production, rien poussé, aucune préversion, aucune fusion, aucun compte, aucun envoi, aucune dépense.**
 
@@ -155,7 +155,20 @@ Inscrit au plan (bloquant 5), même méthode à appliquer : une partie des image
 
 ## 5. Vérification finale
 
-*(rempli à la fin de la session, voir ci-dessous)*
+Sur l'état définitif de la branche (build complète `npm run build`, contrôle des liens compris, servie en local par `next start`) :
+
+| Contrôle | Chromium | Firefox | WebKit |
+|---|---|---|---|
+| 238 pages (225 outils + 12 catégories + accueil) : statut 200, `<h1>`, aucune erreur JavaScript — `scripts/browser-tests/all-pages-load.mjs` | **238/238** | **238/238** | **238/238** |
+| Banc des outils modifiés, utilisés pour de vrai (saisie, clic, lecture du résultat, fichiers relus) — `scripts/browser-tests/qualite-29-09.mjs` | **76/76** | **76/76** | **75/75** + 1 sauté (Audio Equalizer : ce WebKit de Playwright n'a pas de Web Audio ; Safari réel en a — à voir avec la feuille Safari) |
+
+**Tests Node** (tous verts) : converter-tests 01 (9/9), 02 (13/13), 03 (7/7), 04 (4/4), 05 (10/10), 06 (9/9), 07 (7/7), 08 (5/5), 09 (2/2), 10 (6/6), 11 (2/2) ; quota-tests 19 (5/5), 20 (12/12) ; et, sans régression, csv-tests (5 + 30), sql-to-csv (9/9), json-text (5/5), exact-numbers (10/10), text-tests (8/8). Les quota-tests 00-18 exigent la clé `service_role` : non lancés (règle absolue).
+
+**Build** : un seul avertissement, la trace NFT déclenchée par `lib/toolCounts.js` (lecture de `app/tools` par `process.cwd()`), fichier **inchangé** sur cette branche. Une build de comparaison de `croissance-29-09` n'a pas pu être faite (Turbopack refuse un `node_modules` partagé par jonction) ; l'avertissement vient d'un fichier non modifié.
+
+**ESLint** sur les fichiers modifiés : aucune erreur nouvelle bloquante ; signalés : `set-state-in-effect` sur les deux pages cron (le calcul des prochaines exécutions après montage, voulu pour éviter un écart d'hydratation — même motif déjà présent dans Excel to JSON), et les `require()` préexistants de `lib/quota`.
+
+**Nettoyage** : serveurs, navigateurs de test et relais arrêtés ; aucun processus node restant (vérifié par `tasklist`).
 
 ## 6. Règles tenues, écarts
 
