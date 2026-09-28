@@ -2,7 +2,9 @@
 -- NOT executed by the agent. To be run by the owner in the Supabase SQL editor,
 -- BEFORE the code that calls increment_usage_counters_all_or_none is deployed
 -- (schema change before code: the new code calls this RPC on every rate-limited
--- request -- deployed first, every /api route behind a rate limit would answer 503).
+-- request -- deployed first, every rate-limited route would fail closed: contact,
+-- report-error and media tickets answer 503, the AI routes an error before any provider
+-- call or spend -- independent review, 29/09).
 --
 -- Additive only: creates one new function, touches no existing function, table or row.
 -- The previous code keeps working after this migration (it does not call the new function).
@@ -16,6 +18,10 @@ select p.proname, pg_get_function_identity_arguments(p.oid) as args
  order by 1;
 
 -- ==== MIGRATION ====
+-- One transaction: anon/authenticated can never call the function in the window
+-- between CREATE and REVOKE (independent review, 29/09).
+begin;
+
 -- All-or-none reservation across several counters (added 29/09, see
 -- docs/audit/migration-quota-atomique-29-09.sql). Replaces the old
 -- "increment A, increment B, and if B is denied decrement A in a separate
@@ -41,7 +47,9 @@ select p.proname, pg_get_function_identity_arguments(p.oid) as args
 create or replace function increment_usage_counters_all_or_none(
   p_buckets text[], p_periods text[], p_amounts bigint[], p_caps bigint[]
 ) returns table(idx integer, new_value bigint, over_cap boolean, allowed boolean)
-language plpgsql as $$
+language plpgsql
+set search_path = public
+as $$
 declare
   n bigint := coalesce(cardinality(p_buckets), 0);
   r record;
@@ -99,10 +107,20 @@ $$;
 
 revoke execute on function increment_usage_counters_all_or_none(text[], text[], bigint[], bigint[])
   from public, anon, authenticated;
+grant execute on function increment_usage_counters_all_or_none(text[], text[], bigint[], bigint[])
+  to service_role;
+
+commit;
+
+-- PostgREST caches the schema: without this the new RPC can answer PGRST202
+-- ("function not found") until the cache reloads.
+notify pgrst, 'reload schema';
 
 -- ==== AFTER ====
--- 1. The function exists, and anon/authenticated cannot execute it (expected: false, false).
+-- 1. The function exists; anon/authenticated cannot execute it, service_role can
+--    (expected: false, false, true -- the server code calls it as service_role).
 select p.proname, pg_get_function_identity_arguments(p.oid) as args,
+       has_function_privilege('service_role', p.oid, 'execute') as service_role_can_execute,
        has_function_privilege('anon', p.oid, 'execute') as anon_can_execute,
        has_function_privilege('authenticated', p.oid, 'execute') as authenticated_can_execute
   from pg_proc p join pg_namespace n on n.oid = p.pronamespace

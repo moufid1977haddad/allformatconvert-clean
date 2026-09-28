@@ -78,7 +78,7 @@ async function t(name, fn) {
   const { PGlite } = await import('@electric-sql/pglite');
   db = new PGlite();
   // Supabase's roles, so the file's REVOKE statements run exactly as written.
-  await db.exec('create role anon; create role authenticated;');
+  await db.exec('create role anon; create role authenticated; create role service_role;');
   await db.exec(fs.readFileSync(path.join(ROOT, 'supabase/usage_counters.sql'), 'utf8'));
 
   await t('the migration file creates the function and revokes it from public/anon/authenticated', async () => {
@@ -87,8 +87,9 @@ async function t(name, fn) {
     const body = migration.split('-- ==== MIGRATION ====')[1].split('-- ==== AFTER ====')[0];
     await db.exec(body);
     const r = await db.query(`select has_function_privilege('anon', 'increment_usage_counters_all_or_none(text[],text[],bigint[],bigint[])', 'execute') as anon,
-                                     has_function_privilege('authenticated', 'increment_usage_counters_all_or_none(text[],text[],bigint[],bigint[])', 'execute') as auth`);
-    assert.deepStrictEqual(r.rows[0], { anon: false, auth: false });
+                                     has_function_privilege('authenticated', 'increment_usage_counters_all_or_none(text[],text[],bigint[],bigint[])', 'execute') as auth,
+                                     has_function_privilege('service_role', 'increment_usage_counters_all_or_none(text[],text[],bigint[],bigint[])', 'execute') as service`);
+    assert.deepStrictEqual(r.rows[0], { anon: false, auth: false, service: true });
   });
 
   await t('both under cap: both incremented, one row per input in input order', async () => {

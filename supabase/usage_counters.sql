@@ -91,7 +91,9 @@ revoke execute on function increment_usage_counter, decrement_usage_counter, adj
 create or replace function increment_usage_counters_all_or_none(
   p_buckets text[], p_periods text[], p_amounts bigint[], p_caps bigint[]
 ) returns table(idx integer, new_value bigint, over_cap boolean, allowed boolean)
-language plpgsql as $$
+language plpgsql
+set search_path = public
+as $$
 declare
   n bigint := coalesce(cardinality(p_buckets), 0);
   r record;
@@ -149,3 +151,5 @@ $$;
 
 revoke execute on function increment_usage_counters_all_or_none(text[], text[], bigint[], bigint[])
   from public, anon, authenticated;
+grant execute on function increment_usage_counters_all_or_none(text[], text[], bigint[], bigint[])
+  to service_role;
