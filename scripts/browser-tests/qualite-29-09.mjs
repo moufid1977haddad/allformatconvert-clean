@@ -372,6 +372,24 @@ await T('svg-to-png proportions', async () => {
   check('svg ratio locked', (await nums.nth(1).inputValue()) === '576', await nums.nth(1).inputValue());
 });
 
+await T('png-to-ico proportions', async () => {
+  await open('/tools/image-tools/png-to-ico');
+  const png = await page.evaluate(async () => { const c = document.createElement('canvas'); c.width = 200; c.height = 100; const x = c.getContext('2d'); x.fillStyle = '#f00'; x.fillRect(0, 0, 200, 100); const b = await new Promise((r) => c.toBlob(r, 'image/png')); return Array.from(new Uint8Array(await b.arrayBuffer())); });
+  await page.locator('input[type="file"]').setInputFiles({ name: 'wide.png', mimeType: 'image/png', buffer: Buffer.from(png) });
+  await page.getByRole('button', { name: 'Convert to ICO' }).click();
+  const href = await page.locator('a[download="favicon.ico"]').getAttribute('href', { timeout: 20000 });
+  // Largest frame (256): read its PNG from the ICO directory, decode, sample.
+  const px = await page.evaluate(async (u) => {
+    const buf = new Uint8Array(await (await fetch(u)).arrayBuffer()); const dv = new DataView(buf.buffer);
+    const n = dv.getUint16(4, true); let best = null;
+    for (let i = 0; i < n; i++) { const e = 6 + i * 16; const w = buf[e] || 256; if (!best || w > best.w) best = { w, size: dv.getUint32(e + 8, true), off: dv.getUint32(e + 12, true) }; }
+    const bmp = await createImageBitmap(new Blob([buf.slice(best.off, best.off + best.size)], { type: 'image/png' }));
+    const c = document.createElement('canvas'); c.width = bmp.width; c.height = bmp.height; const x = c.getContext('2d'); x.drawImage(bmp, 0, 0);
+    return { top: Array.from(x.getImageData(128, 10, 1, 1).data), mid: Array.from(x.getImageData(128, 128, 1, 1).data) };
+  }, href);
+  check('ico padded, not stretched', px.top[3] === 0 && px.mid[0] > 200 && px.mid[3] === 255, JSON.stringify(px));
+});
+
 await b.close();
 for (const e of errors) { fails++; console.log('PAGE ERROR', e.slice(0, 200)); }
 console.log(`${passes} passed, ${fails} failed (${browserName})`);
