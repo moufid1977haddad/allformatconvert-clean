@@ -1,4 +1,5 @@
 import { MAX_TOTAL_PAGES } from './config';
+import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 
 class LimitExceededError extends Error {
   constructor(message, kind) {
@@ -16,7 +17,7 @@ async function run({ files, maxPages }) {
   let totalPages = 0;
   for (let i = 0; i < files.length; i++) {
     const arrayBuffer = await files[i].arrayBuffer();
-    const pdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+    const pdf = await PDFDocument.load(await openablePdfBytes(arrayBuffer), { ignoreEncryption: true });
     const indices = pdf.getPageIndices();
     if (totalPages + indices.length > limit) {
       throw new LimitExceededError(

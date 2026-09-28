@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import SeoContent from '../../../components/SeoContent';
+import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 
 export default function PdfReorderPagesPage() {
   const [file, setFile] = useState(null);
@@ -22,7 +23,7 @@ export default function PdfReorderPagesPage() {
     setPageCount(0);
     try {
       const arrayBuffer = await f.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+      const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer), { ignoreEncryption: true });
       const count = pdfDoc.getPageCount();
       setPageCount(count);
       setOrder(Array.from({ length: count }, (_, i) => i + 1).join(', '));
@@ -41,7 +42,7 @@ export default function PdfReorderPagesPage() {
     try {
       const newOrder = order.split(',').map(p => parseInt(p.trim()) - 1).filter(p => p >= 0);
       const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+      const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer), { ignoreEncryption: true });
       const newPdf = await PDFDocument.create();
       for (const pageIndex of newOrder) {
         if (pageIndex < pdfDoc.getPageCount()) {

@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -22,7 +23,7 @@ export default function Page() {
       const pdfjsLib = await import('pdfjs-dist');
       pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
       const arrayBuffer = await file.arrayBuffer();
-      const srcDoc = await PDFDocument.load(arrayBuffer);
+      const srcDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer));
       const outDoc = await PDFDocument.create();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       const kw = keyword.trim().toLowerCase();

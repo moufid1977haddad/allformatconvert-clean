@@ -327,6 +327,25 @@ await T('text-to-pdf', async () => {
   check('text-to-pdf unsupported chars listed', (await body()).includes("can't be written with the built-in PDF font"), '');
 });
 
+await T('pdf-rotate encrypted', async () => {
+  const fs = await import('node:fs');
+  const { execFileSync } = await import('node:child_process');
+  const os = await import('node:os');
+  await open('/tools/pdf-tools/pdf-rotate');
+  await page.locator('input[type="file"]').setInputFiles('scripts/converter-tests/fixtures/encrypted-aes-256.pdf');
+  await page.getByRole('button', { name: 'Rotate PDF' }).click();
+  const href = await page.locator('a[download$="-rotated.pdf"]').getAttribute('href', { timeout: 30000 });
+  const bytes = await page.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href);
+  const f = `${os.tmpdir()}/rot-${browserName}.pdf`;
+  fs.writeFileSync(f, Buffer.from(bytes));
+  let txt = ''; try { txt = execFileSync('pdftotext', [f, '-'], { stdio: ['ignore', 'pipe', 'ignore'] }).toString(); } catch { /* unreadable */ }
+  check('encrypted PDF rotated and readable', txt.includes('Hello encrypted world page 2'), txt.slice(0, 80));
+  await page.locator('input[type="file"]').setInputFiles('scripts/converter-tests/fixtures/encrypted-user-password.pdf');
+  await page.getByRole('button', { name: 'Rotate PDF' }).click();
+  await page.waitForTimeout(2500);
+  check('password PDF refused clearly', (await body()).includes('PDF Unlock'), '');
+});
+
 await b.close();
 for (const e of errors) { fails++; console.log('PAGE ERROR', e.slice(0, 200)); }
 console.log(`${passes} passed, ${fails} failed (${browserName})`);

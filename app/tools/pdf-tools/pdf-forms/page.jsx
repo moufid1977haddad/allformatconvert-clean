@@ -24,7 +24,7 @@ export default function Page() {
     try {
       const { PDFDocument } = await import('pdf-lib');
       const arrayBuffer = await f.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer);
+      const pdfDoc = await PDFDocument.load(arrayBuffer).catch((e) => { throw /encrypted/i.test(e.message) ? new Error('This PDF is encrypted. Remove its protection first with the PDF Unlock tool, then fill the form here.') : e; });
       const form = pdfDoc.getForm();
       const fieldList = form.getFields().map(field => ({ name: field.getName(), type: field.constructor.name }));
       setFields(fieldList);
@@ -46,7 +46,7 @@ export default function Page() {
     try {
       const { PDFDocument } = await import('pdf-lib');
       const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer);
+      const pdfDoc = await PDFDocument.load(arrayBuffer).catch((e) => { throw /encrypted/i.test(e.message) ? new Error('This PDF is encrypted. Remove its protection first with the PDF Unlock tool, then fill the form here.') : e; });
       const form = pdfDoc.getForm();
       for (const [name, value] of Object.entries(values)) {
         try {

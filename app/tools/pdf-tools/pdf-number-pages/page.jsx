@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import SeoContent from '../../../components/SeoContent';
+import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 
 export default function PdfNumberPagesPage() {
   const [file, setFile] = useState(null);
@@ -26,7 +27,7 @@ export default function PdfNumberPagesPage() {
     setDownloadUrl(null);
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+      const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer), { ignoreEncryption: true });
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const pages = pdfDoc.getPages();
       const total = pages.length;
