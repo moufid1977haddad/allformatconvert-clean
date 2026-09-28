@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { formatSignificant } from '../../../lib/exactNumbers';
+import { SEO } from './seo';
 
 // Results use significant digits, not toFixed(2): 0.001 % of 5 used to read "0.00" (measured 2026-09-22).
 
@@ -60,12 +61,9 @@ export default function PercentageCalculatorPage() {
           "The result appears instantly below the inputs — no calculate button needed.",
           "Each panel keeps its own values, so you can fill in more than one calculation at a time."
         ]}
-        faqs={[
-          { q: "Do the three panels work independently?", a: "Yes — each panel has its own two input fields, so entering values in one doesn't change or clear the others." },
-          { q: "Is Percentage Calculator free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "How accurate are the results?", a: "Results use standard floating-point math and are shown to 2 decimal places." },
-          { q: "What calculations are available?", a: "Percentage of a number, what percent one number is of another, and percentage change between two numbers." }
-        ]}
+        faqs={SEO.faqs}
+        example={SEO.example}
+        related={SEO.related}
         tips={[
           "Since each panel is independent, you can keep values filled in across all three at once for quick comparisons.",
           "For percentage change, a negative result means a decrease and a positive result means an increase.",

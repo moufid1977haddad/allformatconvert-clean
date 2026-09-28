@@ -1,6 +1,7 @@
 'use client';
 import { useRef, useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { SEO } from './seo';
 import { parseCsvRows, detectDelimiter, CSV_DELIMITERS } from '../../../lib/csvParser';
 import { detectEncoding } from '../../../lib/csvEncoding';
 import CsvReadOptions from '../../../components/CsvReadOptions';
@@ -112,13 +113,9 @@ export default function CsvToTsvPage() {
           "Click 'Convert'.",
           "Copy the result or download it as a .tsv file."
         ]}
-        faqs={[
-          { q: "What's the difference between CSV and TSV?", a: "CSV separates values with commas (or semicolons in many European exports); TSV uses tabs. TSV can be more reliable for data that itself contains commas, since tabs rarely appear inside a value." },
-          { q: "Does it read semicolon-separated files from Excel?", a: "Yes — the delimiter is detected from the file (comma, semicolon, tab or pipe), so a French or German Excel export with values like 12,5 keeps its columns and its decimal commas intact." },
-          { q: "Why do accents show correctly from an Excel CSV?", a: "Excel's classic 'CSV' export uses your Windows code page (Windows-1252 in Western Europe), not UTF-8. The tool detects this from the file's bytes and decodes it accordingly; you can also pick the encoding yourself." },
-          { q: "Is my data uploaded to a server?", a: "No, the conversion happens entirely in your browser." },
-          { q: "Does it handle quoted fields?", a: "Yes — a field wrapped in double quotes is parsed as a single value, and in the TSV a value that contains a tab or a line break is written in quotes, so that Excel and LibreOffice read it back as one cell." }
-        ]}
+        faqs={SEO.faqs}
+        example={SEO.example}
+        related={SEO.related}
         tips={[
           "If a column looks split in the wrong place, switch the delimiter from the dropdown and convert again.",
           "Files up to 50 MB are read in one go in your browser; very large pastes depend on your browser's performance.",

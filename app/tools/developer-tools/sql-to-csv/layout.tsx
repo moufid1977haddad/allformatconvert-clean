@@ -1,20 +1,24 @@
 import type { Metadata } from 'next';
+import ToolJsonLd from '../../../components/ToolJsonLd';
+import { SEO } from './seo';
+
+// Title, description and structured data come from seo.js, the same object the page renders its FAQ from.
+const url = 'https://www.onlineconvertools.com' + SEO.path;
 
 export const metadata: Metadata = {
-  title: { absolute: "SQL to CSV — Extract Data From INSERT INTO .. Online Free" },
-  description: "SQL to CSV extracts data from INSERT INTO VALUES statements in pasted SQL text and turns them into CSV rows, in your browser.",
-  alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/sql-to-csv" },
-  openGraph: {
-    title: "SQL to CSV — Extract Data From INSERT INTO .. Online Free",
-    description: "SQL to CSV extracts data from INSERT INTO VALUES statements in pasted SQL text and turns them into CSV rows, in your browser.",
-    url: "https://www.onlineconvertools.com/tools/developer-tools/sql-to-csv",
-  },
+  title: { absolute: SEO.title },
+  description: SEO.description,
+  alternates: { canonical: url },
+  openGraph: { title: SEO.title, description: SEO.description, url },
 };
 
-// This layout only passes its children through -- it exists solely to host
-// the static `metadata` export above, since the page.jsx/tsx it wraps is a
-// 'use client' component and can't export metadata itself. It has no effect
-// on rendering or behavior.
+// The page is a 'use client' component and can't export metadata itself; this layout hosts it and adds the
+// JSON-LD script. It has no effect on rendering or behavior.
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <ToolJsonLd seo={SEO} />
+      {children}
+    </>
+  );
 }

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { SEO } from './seo';
 import ProgressBar from '../../../components/ProgressBar';
 import { GROUPS, ALL, byId, IS_2D } from './symbologies';
 import { MAX_BATCH } from './config';
@@ -442,17 +443,8 @@ export default function BarcodeGeneratorPage() {
           'Set the size — module width and bar height in millimetres (or mils, or pixels) and the print resolution — and, if you like, colours, rotation and the quiet zone.',
           'Click Generate: each code is drawn, then scanned back by a separate reader. Download PNG, SVG, PDF, EPS, JPG or GIF, or the ZIP.',
         ]}
-        faqs={[
-          { q: 'Is Barcode Generator free?', a: 'Yes — no signup, no watermark, no limit on how many barcodes you make, and you may use them commercially. Up to 5,000 codes fit in one ZIP.' },
-          { q: 'Which barcode types are supported?', a: `${ALL.length} types: ${ALL.map((s) => s.label).join(', ')}.` },
-          { q: 'How do I know the barcode scans?', a: 'After drawing it, the page decodes it with zxing-cpp, an open-source reader independent of the engine that drew it, and only offers the files if it reads exactly what you entered (check digits included). MSI Plessey, Pharmacode and Code 11 have no such reader in a browser: they are marked as not scanned back. Test with your own scanner before printing large runs.' },
-          { q: 'What size should I choose for print?', a: 'Retail EAN/UPC codes are nominally 0.33 mm per module (100 %), from 0.264 mm (80 %) to 0.66 mm (200 %). Vector files (SVG, PDF, EPS) have exactly the module width you set. PNG, JPG and GIF use a whole number of pixels per module so bars stay sharp: the page shows the closest size it can make at your resolution, and writes that resolution into the file.' },
-          { q: 'Does it add the check digit?', a: 'For EAN-13, EAN-8, UPC-A, UPC-E and ITF-14, type the number without its last digit and it is calculated; type it in full and it is verified. GS1 codes check the digits of each Application Identifier. Code 93 always includes its two check characters, as its standard requires; Code 39 and Interleaved 2 of 5 can add an optional one; MSI offers the usual schemes.' },
-          { q: 'Can I make many barcodes at once?', a: 'Yes. Paste one value per line (or import a CSV or TSV file: first column the value, second column an optional text to print under the code), or set a prefix, a first number, a count, a step, zero-padding and a suffix to number a series; every code is checked and they come as one ZIP, with any value that could not be encoded listed in errors.txt.' },
-          { q: 'How do I add a price or issue add-on (EAN-5, EAN-2)?', a: 'Type it after the code and a space: 978-1-56581-231-4 51299 for a book price, 0311-175X 00 05 for a periodical issue (ISSN, variant, issue). The add-on is drawn 9 modules from the code, inside the 7-12 modules the GS1 standard allows, and scanned back with it. EAN-5 and EAN-2 can also be made on their own.' },
-          { q: 'Can I print barcodes on label sheets?', a: 'Yes. In "Many", choose "Label sheets (PDF)", pick an Avery A4 or US Letter sheet, a thermal roll size, or your own layout, the first free label and the number of copies. Each code keeps the size you set (it is only shrunk if it does not fit, and the page tells you by how much), or you can ask it to fill the label. Print the PDF at 100 % ("Actual size").' },
-          { q: 'Is my data private?', a: 'Yes. Everything is drawn and checked in your browser; nothing you type is sent to a server.' },
-        ]}
+        faqs={SEO.faqs}
+        related={SEO.related}
         tips={[
           'Use PDF, EPS or SVG for packaging and labels: they print at exactly the size you set.',
           'Keep the quiet zone (the blank margin); scanners need it — "auto" uses the size each standard recommends.',

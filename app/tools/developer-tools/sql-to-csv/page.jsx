@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { SEO } from './seo';
 import { sqlInsertsToCsv } from './sqlToCsv';
 
 export default function SqlToCsvPage() {
@@ -39,12 +40,9 @@ export default function SqlToCsvPage() {
           "Review the output, especially for values containing commas.",
           "Click 'Copy' to copy the CSV to your clipboard."
         ]}
-        faqs={[
-          { q: "Does it run my SQL against a database or convert SELECT query results?", a: "No — it doesn't execute any SQL. It only pattern-matches the text of INSERT INTO ... VALUES (...) statements you paste in." },
-          { q: "Is SQL to CSV free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I customize the CSV delimiter?", a: "No, output always uses commas — there's no option for semicolons, tabs, or pipes." },
-          { q: "Does it handle values containing commas?", a: "Yes — a quoted SQL string like 'Smith, John' is parsed as a single value, and the resulting CSV field is quoted too if needed, so it stays as one column rather than splitting apart." }
-        ]}
+        faqs={SEO.faqs}
+        example={SEO.example}
+        related={SEO.related}
         tips={[
           "This tool only works with INSERT statement text — it can't process SELECT queries or connect to an actual database.",
           "Values are parsed with SQL's own quoting rules, so commas and even closing parentheses inside a quoted string (e.g. 'Smith (Jr)') are handled correctly.",

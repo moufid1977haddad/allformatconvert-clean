@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { stringify } from 'smol-toml';
 import SeoContent from '../../../components/SeoContent';
+import { SEO } from './seo';
 export default function JsonToTomlPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -46,14 +47,9 @@ export default function JsonToTomlPage() {
           "The output is copy-paste-ready TOML, including nested tables and arrays.",
           "Click 'Copy' to copy the result to your clipboard."
         ]}
-        faqs={[
-          { q: "Is JSON to TOML free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it convert JSON arrays correctly?", a: "Yes — array values become proper TOML array syntax, e.g. tags = [\"a\", \"b\"], at any nesting depth." },
-          { q: "Does it handle deeply nested JSON?", a: "Yes — nested objects convert into TOML tables (or tables of tables, using dotted section headers) at any depth, not just one level." },
-          { q: "What happens to a JSON null value?", a: "A null value on an object key is simply omitted from the output, since TOML has no null type. A null inside an array isn't representable at all and produces an error instead of silently corrupting the array — remove it from your JSON first." },
-          { q: "Why do I get an error even though my JSON is valid?", a: "TOML documents are key/value tables at the top level, so the JSON you paste must be an object ({...}), not a top-level array or a bare string/number." },
-          { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser." }
-        ]}
+        faqs={SEO.faqs}
+        example={SEO.example}
+        related={SEO.related}
         tips={[
           "Wrap top-level arrays in an object first (e.g. { \"items\": [...] }), since TOML itself has no concept of a top-level array.",
           "Remove any null values inside arrays before converting — TOML can't represent them there.",
