@@ -1,9 +1,23 @@
-﻿'use client';
+'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { writeRgbaFrame, hasTransparency } from '../../../lib/gifEncode';
+
+// Audit 2 (29/09): transparent PNGs came out on black (gifenc's default quantizer ignores alpha), and every image was
+// stretched to the size of the first. Now transparency is kept (1-bit, as GIF allows) and, as on ezgif and in our
+// GIF Maker, an image of another shape is fitted inside the GIF (transparent around it) or cropped to fill it;
+// stretching stays available on request.
+const FITS = [['fit', 'Fit (keep proportions, transparent around)'], ['fill', 'Crop to fill (keep proportions)'], ['stretch', 'Stretch to the first image']];
+function place(w, h, W, H, fit) {
+  if (fit === 'stretch') return { dx: 0, dy: 0, dw: W, dh: H };
+  const k = fit === 'fill' ? Math.max(W / w, H / h) : Math.min(W / w, H / h);
+  const dw = w * k, dh = h * k;
+  return { dx: (W - dw) / 2, dy: (H - dh) / 2, dw, dh };
+}
 export default function ImageToGifPage() {
   const [images, setImages] = useState([]);
   const [delay, setDelay] = useState(200);
+  const [fit, setFit] = useState('fit');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef();
@@ -26,24 +40,23 @@ export default function ImageToGifPage() {
     setLoading(true);
     setResult(null);
     try {
-      const { GIFEncoder, quantize, applyPalette } = await import('gifenc');
+      const gifenc = await import('gifenc');
+      const load = (src) => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('One of the images could not be read.')); im.src = src; });
+      const imgs = [];
+      for (const image of images) imgs.push(await load(image.src));
       const canvas = document.createElement('canvas');
-      const firstImg = new Image();
-      await new Promise((res, rej) => { firstImg.onload = res; firstImg.onerror = rej; firstImg.src = images[0].src; });
-      canvas.width = firstImg.width;
-      canvas.height = firstImg.height;
-      const ctx = canvas.getContext('2d');
-      const gif = GIFEncoder();
-      for (const image of images) {
-        const im = new Image();
-        await new Promise((res, rej) => { im.onload = res; im.onerror = rej; im.src = image.src; });
+      canvas.width = imgs[0].naturalWidth;
+      canvas.height = imgs[0].naturalHeight;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      const frames = imgs.map((im) => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(im, 0, 0, canvas.width, canvas.height);
-        const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const palette = quantize(data, 256);
-        const index = applyPalette(data, palette);
-        gif.writeFrame(index, canvas.width, canvas.height, { palette, delay });
-      }
+        const p = place(im.naturalWidth, im.naturalHeight, canvas.width, canvas.height, fit);
+        ctx.drawImage(im, p.dx, p.dy, p.dw, p.dh);
+        return ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      });
+      const dispose = frames.some(hasTransparency) ? 2 : -1;
+      const gif = gifenc.GIFEncoder();
+      for (const data of frames) writeRgbaFrame(gif, gifenc, data, canvas.width, canvas.height, { delay, dispose });
       gif.finish();
       const blob = new Blob([gif.bytes()], { type: 'image/gif' });
       setResult({ url: URL.createObjectURL(blob), frameCount: images.length });
@@ -72,6 +85,8 @@ export default function ImageToGifPage() {
               ))}
             </div>
           )}
+          <label className="block text-sm"><span className="block text-neutral-500 mb-1">Images of another shape than the first</span>
+            <select value={fit} onChange={e => { setFit(e.target.value); setResult(null); }} className="w-full border border-neutral-200 rounded-lg px-3 py-2">{FITS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></label>
           <div><label className="block text-sm text-neutral-500 mb-1">Frame Delay: {delay}ms</label><input type="range" min="50" max="1000" value={delay} onChange={e => setDelay(parseInt(e.target.value))} className="w-full" /></div>
           <button onClick={createGif} disabled={images.length < 2 || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">{loading ? 'Creating...' : 'Create GIF'}</button>
           {result && (
@@ -85,7 +100,7 @@ export default function ImageToGifPage() {
       </div>
       <SeoContent
         title="Image to GIF"
-        description="Image to GIF turns a batch of photos already sitting on your device into one animated GIF file, processed entirely client-side with the gifenc library so nothing leaves your browser. Playback uses a single adjustable delay you control with a slider, and colors are quantized per-frame to a 256-color palette — mixing differently sized images stretches the odd ones out to match your first upload."
+        description="Image to GIF turns a batch of photos already sitting on your device into one animated GIF file, processed entirely client-side with the gifenc library so nothing leaves your browser. Playback uses a single adjustable delay you control with a slider, and colors are quantized per-frame to a 256-color palette. The GIF takes the size of your first image; an image of another shape is fitted inside it without distortion (transparent around it), cropped to fill it, or stretched, as you choose. Transparent areas of PNG images stay transparent."
         howTo={[
           "Click the upload area and add two or more images.",
           "Remove any image you don't want with the \"x\" on its thumbnail — the rest keep their order.",
@@ -100,7 +115,7 @@ export default function ImageToGifPage() {
           { q: "Is my data private?", a: "Yes. Everything happens locally in your browser — nothing is uploaded to a server." }
         ]}
         tips={[
-          "Match your source photos to the same resolution beforehand if possible — the tool scales everything to the first image's size rather than letterboxing.",
+          "The GIF takes the first image's size: put the image with the shape you want first, and choose \"Crop to fill\" if you don't want transparent borders.",
           "High-resolution photos and large batches take longer to quantize and encode; downscale first if the conversion feels slow.",
           "Expect some color banding on photos with smooth gradients or skin tones, since the 256-color palette is applied per frame without dithering.",
           "The finished GIF and its frame count are shown before you download, so you can re-run with a different delay if the timing feels off."

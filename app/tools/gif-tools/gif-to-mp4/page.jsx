@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { reportToolError } from '../../../lib/reportError';
@@ -23,14 +23,28 @@ export default function GifToMp4Page() {
       // generic rejection with no way to diagnose what actually happened.
       ffmpeg.on('log', ({ message }) => console.log('[ffmpeg]', message));
       await ffmpeg.load();
-      await ffmpeg.writeFile('input.gif', await fetchFile(file));
+      const bytes = await fetchFile(file);
+      // ffmpeg.wasm writes a constant frame rate and gave the LAST frame one frame period only: a GIF of
+      // 100/200/300 ms came out 0.4 s long instead of 0.6 s, and a final pause was lost (audit 2, 29/09).
+      // The last frame is now held (tpad) and the video cut at the GIF's real length: the sum of its frame
+      // delays, read with gifuct-js (under 20 ms counts as 100 ms, as ffmpeg's GIF demuxer and browsers do).
+      const { parseGIF } = await import('gifuct-js');
+      const delays = parseGIF(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)).frames
+        .filter((f) => f.image).map((f) => { const d = f.gce ? f.gce.delay * 10 : 0; return d < 20 ? 100 : d; });
+      const total = delays.length > 1 ? delays.reduce((a, d) => a + d, 0) : 0;
+      const gcd = (a, b) => (b ? gcd(b, a % b) : a);
+      await ffmpeg.writeFile('input.gif', bytes);
       // libx264 requires even width/height; GIFs often aren't, so scale down
       // to the nearest even dimension if needed.
       await ffmpeg.exec([
         '-i', 'input.gif',
         '-movflags', 'faststart',
         '-pix_fmt', 'yuv420p',
-        '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
+        // fps first: tpad cannot clone on a GIF stream, which has no declared frame rate (ffmpeg 5.1 in
+        // ffmpeg.wasm). The rate is the GIF's own time grid (1000 / gcd of the delays, 100 at most: GIF delays
+        // are in hundredths of a second), so every frame keeps its exact duration.
+        '-vf', (total ? `fps=${1000 / delays.reduce(gcd)},tpad=stop_mode=clone:stop_duration=${delays[delays.length - 1] / 1000},` : '') + 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
+        ...(total ? ['-t', String(total / 1000)] : []),
         'output.mp4'
       ]);
       const data = await ffmpeg.readFile('output.mp4');
@@ -74,7 +88,9 @@ export default function GifToMp4Page() {
           "Click \"Download\" to save it."
         ]}
         faqs={[
-          { q: "Does the output preserve my GIF's full animation?", a: "Yes — every frame and its original timing from the source GIF is carried over into the video, not just a single frame." },
+          { q: "Does the output preserve my GIF's full animation?", a: "Yes — every frame and its original timing from the source GIF is carried over into the video, not just a single frame — the last frame keeps its full delay, so a final pause is not cut short." },
+          { q: "What happens to a transparent GIF?", a: "Video has no transparency: transparent areas become white, as the GIF looks on a white web page." },
+          { q: "Will the MP4 loop like my GIF?", a: "The MP4 contains the animation once; a GIF's loop setting has no equivalent in the file. Web pages and most social platforms loop short videos themselves (the loop attribute of the video tag)." },
           { q: "What format is the output actually in?", a: "A real MP4 file using H.264 video, playable in virtually any video player or website that accepts MP4 uploads." },
           { q: "Does the video have sound?", a: "No — GIFs never contain audio, so there's nothing to carry over; the output video is silent." },
           { q: "Is GIF to MP4 free to use?", a: "Yes, it's completely free with no signup required." },
@@ -83,7 +99,7 @@ export default function GifToMp4Page() {
         tips={[
           "The first conversion after loading the page takes longer since the ffmpeg.wasm engine needs to download.",
           "MP4 is far more widely compatible than GIF for sharing on social platforms or embedding in video players.",
-          "If your GIF has an odd width or height, it's automatically scaled down by one pixel to satisfy H.264's even-dimension requirement — this is a 1px crop, not a visible quality change.",
+          "If your GIF has an odd width or height, it's automatically scaled down by one pixel to satisfy H.264's even-dimension requirement — the picture is resized by that one pixel, not cropped, which is not visible.",
           "For a much smaller file than the original GIF at similar visual quality, MP4/H.264 is typically far more efficient than GIF's format."
         ]}
       />
