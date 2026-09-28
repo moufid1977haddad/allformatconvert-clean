@@ -456,6 +456,12 @@ await T('audio-equalizer no clipping', async () => {
   data.write('RIFF', 0); data.writeUInt32LE(36 + n * 2, 4); data.write('WAVE', 8); data.write('fmt ', 12); data.writeUInt32LE(16, 16); data.writeUInt16LE(1, 20); data.writeUInt16LE(1, 22); data.writeUInt32LE(sr, 24); data.writeUInt32LE(sr * 2, 28); data.writeUInt16LE(2, 32); data.writeUInt16LE(16, 34); data.write('data', 36); data.writeUInt32LE(n * 2, 40);
   for (let i = 0; i < n; i++) data.writeInt16LE(Math.round(Math.sin(2 * Math.PI * 100 * i / sr) * 0.89 * 32767), 44 + i * 2);
   await open('/tools/audio-tools/audio-equalizer');
+  // Playwright's WebKit build for Windows has no Web Audio at all (AudioContext
+  // is undefined; real Safari has it): the tool cannot run there -- skipped, said.
+  if (!(await page.evaluate(() => typeof (window.AudioContext || window.webkitAudioContext) === 'function'))) {
+    console.log('SKIP audio-equalizer: no Web Audio in this engine build');
+    return;
+  }
   await page.locator('input[type="file"]').setInputFiles({ name: 'sine.wav', mimeType: 'audio/wav', buffer: data });
   await page.locator('input[type="range"]').first().fill('12');
   await page.getByRole('button', { name: /Export as WAV/ }).click();
