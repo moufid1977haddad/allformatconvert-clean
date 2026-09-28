@@ -1,13 +1,40 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { gifFrames } from '../../../lib/gifFrames';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function GIFtoPNGPage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const inputRef = useRef();
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setResult(null); setError(''); } };
+  const [gifFile, setGifFile] = useState(null);
+  const [zip, setZip] = useState(null);
+  const [zipBusy, setZipBusy] = useState(false);
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setGifFile(f); setResult(null); setZip(null); setError(''); } };
+  // Every frame of an animated GIF, fully composited, as PNGs in a ZIP -- what
+  // ezgif's "split" does. Only the first frame was available before (29/09).
+  const extractAll = async () => {
+    setZipBusy(true);
+    setError('');
+    try {
+      const { width, height, frames } = await gifFrames(await gifFile.arrayBuffer());
+      const { zipSync } = await import('fflate');
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      const files = {};
+      const pad = String(frames.length).length;
+      for (let i = 0; i < frames.length; i++) {
+        ctx.putImageData(frames[i].imageData, 0, 0);
+        const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'));
+        if (!blob) throw new Error('Could not encode frame ' + (i + 1));
+        files[`frame_${String(i + 1).padStart(pad, '0')}.png`] = new Uint8Array(await blob.arrayBuffer());
+      }
+      setZip({ url: URL.createObjectURL(new Blob([zipSync(files, { level: 0 })], { type: 'application/zip' })), count: frames.length });
+    } catch (e) { setError('Could not extract the frames: ' + e.message); }
+    setZipBusy(false);
+  };
   const convert = () => {
     const img = new Image();
     img.onload = () => {
@@ -35,11 +62,13 @@ export default function GIFtoPNGPage() {
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <button onClick={convert} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert</button>
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="converted.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          {gifFile && <button onClick={extractAll} disabled={zipBusy} className="w-full bg-neutral-800 hover:bg-neutral-700 text-white disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">{zipBusy ? 'Extracting frames...' : 'Extract all frames (ZIP of PNGs)'}</button>}
+          {zip && <a href={zip.url} download="gif-frames.zip" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download {zip.count} frame{zip.count === 1 ? '' : 's'} (ZIP)</a>}
         </div>
       </div>
       <SeoContent
         title="GIF to PNG"
-        description="GIF to PNG converts a GIF image to PNG format entirely in your browser using the HTML canvas — your file is never uploaded to a server. For an animated GIF, it captures a single static frame (the one shown when the browser renders it) rather than extracting every frame."
+        description="GIF to PNG converts a GIF image to PNG format entirely in your browser using the HTML canvas — your file is never uploaded to a server. For an animated GIF, 'Convert' gives the first frame as a PNG, and 'Extract all frames' gives every frame, fully composited (transparency and disposal methods applied as a GIF player does), as numbered PNGs in a ZIP."
         howTo={[
           "Click the upload area and select a GIF file from your device.",
           "Click 'Convert' to render it to PNG.",
@@ -48,12 +77,12 @@ export default function GIFtoPNGPage() {
         ]}
         faqs={[
           { q: "Is GIF to PNG completely free to use?", a: "Yes, it's 100% free with no registration required." },
-          { q: "Can it extract every frame from an animated GIF?", a: "No, it captures a single static frame — there's no frame-by-frame extraction or frame selector." },
+          { q: "Can it extract every frame from an animated GIF?", a: "Yes — click 'Extract all frames' to get every frame as a PNG, numbered in order, in one ZIP. Each frame is the full image as it appears in the animation, not just the changed pixels." },
           { q: "Can I convert multiple GIFs at once?", a: "No, only one file can be converted at a time — there's no batch upload." },
           { q: "Will my uploaded files be stored or shared?", a: "No. Conversion happens entirely in your browser — your file is never uploaded to a server." }
         ]}
         tips={[
-          "If you need a specific frame from an animation, pause the GIF at that frame in an image viewer first, then screenshot or export it before converting.",
+          "To keep one particular frame of an animation, extract all frames and pick it from the ZIP.",
           "PNG preserves transparency, so it's a good target format if your GIF uses a transparent background.",
           "Convert one GIF at a time and download each result before starting the next.",
           "Keep the original GIF as a backup in case you need the animation again later."

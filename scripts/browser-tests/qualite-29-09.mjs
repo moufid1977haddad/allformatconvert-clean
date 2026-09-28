@@ -412,6 +412,20 @@ await T('image-blur', async () => {
   check('blur applied at the edge', px[0] > 40 && px[0] < 215, JSON.stringify(px));
 });
 
+await T('gif-to-png all frames', async () => {
+  const { unzipSync } = await import('fflate');
+  await open('/tools/image-tools/gif-to-png');
+  await page.locator('input[type="file"]').setInputFiles('scripts/converter-tests/fixtures/optimised.gif');
+  await page.getByRole('button', { name: /Extract all frames/ }).click();
+  const href = await page.locator('a[download="gif-frames.zip"]').getAttribute('href', { timeout: 20000 });
+  const zipBytes = await page.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href);
+  const files = unzipSync(new Uint8Array(zipBytes));
+  const f2 = files['frame_2.png'];
+  check('two frames in the ZIP', Object.keys(files).length === 2, Object.keys(files).join(','));
+  const px = await page.evaluate(async (arr) => { const bmp = await createImageBitmap(new Blob([new Uint8Array(arr)], { type: 'image/png' })); const c = document.createElement('canvas'); c.width = bmp.width; c.height = bmp.height; const x = c.getContext('2d'); x.drawImage(bmp, 0, 0); return [Array.from(x.getImageData(0, 0, 1, 1).data), Array.from(x.getImageData(4, 4, 1, 1).data)]; }, Array.from(f2));
+  check('frame 2 composited (blue pixel on red, no hole)', px[0][2] > 200 && px[1][0] > 200 && px[1][3] === 255, JSON.stringify(px));
+});
+
 await b.close();
 for (const e of errors) { fails++; console.log('PAGE ERROR', e.slice(0, 200)); }
 console.log(`${passes} passed, ${fails} failed (${browserName})`);
