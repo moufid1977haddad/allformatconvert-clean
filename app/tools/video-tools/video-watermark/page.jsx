@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import ProgressBar from '../../../components/ProgressBar';
 import { reportToolError } from '../../../lib/reportError';
+import IosOriginalNote from '../../../components/IosOriginalNote';
 
 const MAX_DURATION = 120;
 
@@ -435,6 +436,7 @@ export default function VideoWatermarkPage() {
         <p className="text-neutral-500 text-sm text-center mb-2">Works on videos up to <strong>2 minutes</strong> long. Watermarking runs entirely in your browser and takes roughly as long as the video itself (about 1 second of processing per second of video).</p>
         <p className="text-neutral-400 text-xs text-center mb-8">Best supported formats: <strong>MP4 (H.264)</strong> and <strong>WebM</strong>. Formats like .avi, many .mov/.mkv files, or uncommon codecs often can&apos;t be decoded in-browser at all -- convert to MP4 first if your file is rejected.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
+          <IosOriginalNote />
           <div className={"border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center transition " + (loading ? 'opacity-50 pointer-events-none' : 'cursor-pointer hover:border-indigo-500')} onClick={() => !loading && inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
             <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} disabled={loading} />
