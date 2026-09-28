@@ -30,8 +30,8 @@ export default function JsonToPythonPage() {
         </div>
       </div>
       <SeoContent
-        title="JSON to Python Class"
-        description="JSON to Python Class generates Python @dataclass definitions from a JSON sample — the type schema, not a dict of your data — entirely in your browser. It uses quicktype, the open-source engine behind app.quicktype.io: every nested object gets its own dataclass, arrays of objects become List[Item], integers are typed int and decimals float, fields that are missing or null become Optional, and JSON keys are turned into valid snake_case Python names."
+        title={"JSON to Python Class"}
+        description={"JSON to Python Class generates Python @dataclass definitions from a JSON sample — the type schema, not a dict of your data — entirely in your browser. It uses quicktype, the open-source engine behind app.quicktype.io: every nested object gets its own dataclass, arrays of objects become List[Item], integers are typed int and decimals float, fields that are missing or null become Optional, and JSON keys are turned into valid snake_case Python names."}
         howTo={[
           "Paste a JSON object or array (an API response, a config file) into the input box.",
           "Click 'Convert': one named type is generated for every nested object, and the fields of every element of an array are merged.",

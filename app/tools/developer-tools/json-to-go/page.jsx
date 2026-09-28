@@ -30,8 +30,8 @@ export default function JsonToGoPage() {
         </div>
       </div>
       <SeoContent
-        title="JSON to Go Struct"
-        description="JSON to Go Struct generates Go struct types from a JSON sample, entirely in your browser — nothing is uploaded to a server. It uses quicktype, the open-source engine behind app.quicktype.io: every nested object gets its own named struct, arrays of objects become []Item, integers are typed int64 and decimals float64, optional fields become pointers, field names follow Go convention (FirstName) and each field keeps a json struct tag with the original key, so encoding/json marshals and unmarshals it unchanged."
+        title={"JSON to Go Struct"}
+        description={"JSON to Go Struct generates Go struct types from a JSON sample, entirely in your browser — nothing is uploaded to a server. It uses quicktype, the open-source engine behind app.quicktype.io: every nested object gets its own named struct, arrays of objects become []Item, integers are typed int64 and decimals float64, optional fields become pointers, field names follow Go convention (FirstName) and each field keeps a json struct tag with the original key, so encoding/json marshals and unmarshals it unchanged."}
         howTo={[
           "Paste a JSON object or array (an API response, a config file) into the input box.",
           "Click 'Convert': one named type is generated for every nested object, and the fields of every element of an array are merged.",

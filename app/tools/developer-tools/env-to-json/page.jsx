@@ -46,8 +46,8 @@ export default function EnvToJsonPage() {
         </div>
       </div>
       <SeoContent
-        title=".env to JSON"
-        description=".env to JSON parses a .env file into a JSON object, and converts a JSON object back into .env lines, entirely in your browser — nothing is uploaded to a server. It follows the rules of dotenv, the parser used by Node.js, Next.js and Vite: an optional export prefix, KEY=value or KEY: value, single quotes kept literally, double quotes expanding \\n, backtick quotes, values spanning several lines inside quotes, and # comments (a # inside quotes is kept). Options convert numbers, booleans and null to JSON types (a value with a leading zero such as 007 stays text) and expand ${VAR} references like dotenv-expand. Lines that aren't KEY=value are reported, not silently dropped."
+        title={".env to JSON"}
+        description={".env to JSON parses a .env file into a JSON object, and converts a JSON object back into .env lines, entirely in your browser — nothing is uploaded to a server. It follows the rules of dotenv, the parser used by Node.js, Next.js and Vite: an optional export prefix, KEY=value or KEY: value, single quotes kept literally, double quotes expanding \\n, backtick quotes, values spanning several lines inside quotes, and # comments (a # inside quotes is kept). Options convert numbers, booleans and null to JSON types (a value with a leading zero such as 007 stays text) and expand ${VAR} references like dotenv-expand. Lines that aren't KEY=value are reported, not silently dropped."}
         howTo={[
           "Paste your .env content into the input box, or a JSON object to convert the other way.",
           "Optionally tick 'Convert numbers…' to get typed JSON values, or 'Expand ${VAR}' to resolve references to earlier variables.",

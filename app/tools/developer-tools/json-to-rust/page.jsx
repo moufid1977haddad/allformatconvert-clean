@@ -30,8 +30,8 @@ export default function JsonToRustPage() {
         </div>
       </div>
       <SeoContent
-        title="JSON to Rust Struct"
-        description="JSON to Rust Struct generates Rust structs for serde from a JSON sample, entirely in your browser — nothing is uploaded to a server. It uses quicktype, the open-source engine behind app.quicktype.io: every nested object gets its own struct, arrays become Vec<Item>, null or missing fields become Option<T>, integers are typed i64 and decimals f64, field names are converted to snake_case with #[serde(rename_all)] or #[serde(rename = \"...\")] attributes that keep the original JSON keys, and every struct derives Debug, Clone, Serialize and Deserialize."
+        title={"JSON to Rust Struct"}
+        description={"JSON to Rust Struct generates Rust structs for serde from a JSON sample, entirely in your browser — nothing is uploaded to a server. It uses quicktype, the open-source engine behind app.quicktype.io: every nested object gets its own struct, arrays become Vec<Item>, null or missing fields become Option<T>, integers are typed i64 and decimals f64, field names are converted to snake_case with #[serde(rename_all)] or #[serde(rename = \"...\")] attributes that keep the original JSON keys, and every struct derives Debug, Clone, Serialize and Deserialize."}
         howTo={[
           "Paste a JSON object or array (an API response, a config file) into the input box.",
           "Click 'Convert': one named type is generated for every nested object, and the fields of every element of an array are merged.",

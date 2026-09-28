@@ -5,12 +5,23 @@ export default function AspectRatioPage() {
   const [w, setW] = useState('1920');
   const [h, setH] = useState('1080');
   const gcd = (a,b) => b === 0 ? a : gcd(b, a%b);
-  const parseVal = (v) => { const n = parseInt(v, 10); return Number.isNaN(n) ? 1 : n; };
-  const wNum = parseVal(w);
-  const hNum = parseVal(h);
-  const g = gcd(wNum, hNum);
-  const ratio = `${wNum/g}:${hNum/g}`;
-  const decimal = (wNum/hNum).toFixed(4);
+  // Previously an empty or invalid field silently counted as 1, and 1920.5
+  // was truncated to 1920: the ratio shown was not the one typed (29/09).
+  // Decimals are scaled to integers first, so 2.35:1 gives 47:20.
+  const parseVal = (v) => (/^\s*\d+(\.\d+)?\s*$/.test(v) && Number(v) > 0 ? v.trim() : null);
+  const wStr = parseVal(w);
+  const hStr = parseVal(h);
+  let ratio = '—';
+  let decimal = '—';
+  if (wStr && hStr) {
+    const places = Math.max((wStr.split('.')[1] || '').length, (hStr.split('.')[1] || '').length);
+    const scale = 10 ** places;
+    const wNum = Math.round(Number(wStr) * scale);
+    const hNum = Math.round(Number(hStr) * scale);
+    const g = gcd(wNum, hNum);
+    ratio = `${wNum / g}:${hNum / g}`;
+    decimal = String(Number((wNum / hNum).toFixed(4)));
+  }
   const presets = [['16:9','1920x1080'],['4:3','1024x768'],['1:1','1080x1080'],['21:9','2560x1080'],['9:16','1080x1920']];
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -47,7 +58,7 @@ export default function AspectRatioPage() {
         tips={[
           "Click a preset to quickly load common ratios like 16:9 or 1:1 instead of typing dimensions by hand.",
           "The decimal value (width ÷ height) is handy for CSS aspect-ratio properties.",
-          "Non-numeric or empty inputs default to 1, so double-check a field if the result looks off.",
+          "Both fields must be positive numbers; if one is empty or invalid, no ratio is shown rather than a wrong one. Decimals are accepted (2.35 and 1 give 47:20).",
           "To find a height that matches a target ratio at a given width, try different height values until the ratio shown matches what you need."
         ]}
       />

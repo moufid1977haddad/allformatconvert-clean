@@ -30,8 +30,8 @@ export default function JsonToTypescriptPage() {
         </div>
       </div>
       <SeoContent
-        title="JSON to TypeScript"
-        description="JSON to TypeScript generates TypeScript interfaces from a JSON sample, entirely in your browser — nothing is uploaded to a server. It uses quicktype, the open-source engine behind app.quicktype.io: every nested object gets its own named interface, every element of an array is examined and merged (so an array of objects becomes Item[]), fields missing from some elements become optional (field?:), null values are typed, and keys that aren't valid identifiers (\"first-name\") are quoted so the code compiles."
+        title={"JSON to TypeScript"}
+        description={"JSON to TypeScript generates TypeScript interfaces from a JSON sample, entirely in your browser — nothing is uploaded to a server. It uses quicktype, the open-source engine behind app.quicktype.io: every nested object gets its own named interface, every element of an array is examined and merged (so an array of objects becomes Item[]), fields missing from some elements become optional (field?:), null values are typed, and keys that aren't valid identifiers (\"first-name\") are quoted so the code compiles."}
         howTo={[
           "Paste a JSON object or array (an API response, a config file) into the input box.",
           "Click 'Convert': one named type is generated for every nested object, and the fields of every element of an array are merged.",

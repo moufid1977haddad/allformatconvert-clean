@@ -30,8 +30,8 @@ export default function JsonToCsharpPage() {
         </div>
       </div>
       <SeoContent
-        title="JSON to C# Class"
-        description="JSON to C# Class generates C# classes from a JSON sample, entirely in your browser — nothing is uploaded to a server. It uses quicktype, the open-source engine behind app.quicktype.io: every nested object gets its own class, arrays of objects become Item[], integers are typed long and decimals double, optional or null fields become nullable, property names follow PascalCase and each property carries a System.Text.Json [JsonPropertyName] attribute with the original key."
+        title={"JSON to C# Class"}
+        description={"JSON to C# Class generates C# classes from a JSON sample, entirely in your browser — nothing is uploaded to a server. It uses quicktype, the open-source engine behind app.quicktype.io: every nested object gets its own class, arrays of objects become Item[], integers are typed long and decimals double, optional or null fields become nullable, property names follow PascalCase and each property carries a System.Text.Json [JsonPropertyName] attribute with the original key."}
         howTo={[
           "Paste a JSON object or array (an API response, a config file) into the input box.",
           "Click 'Convert': one named type is generated for every nested object, and the fields of every element of an array are merged.",

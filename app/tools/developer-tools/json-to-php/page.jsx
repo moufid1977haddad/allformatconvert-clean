@@ -35,8 +35,8 @@ export default function JsonToPhpPage() {
         </div>
       </div>
       <SeoContent
-        title="JSON to PHP Class"
-        description="JSON to PHP converts JSON into PHP code, entirely in your browser — nothing is uploaded to a server. Two outputs: a PHP array literal holding your actual data (short [] syntax, exactly what json_decode($json, true) returns — strings escaped, numbers written as in your JSON, integers beyond PHP_INT_MAX kept as strings so no digit is lost), or PHP 8 classes describing its shape: one class per nested object, typed promoted properties, nullable types for fields that are null or missing, arrays of objects mapped to their own class, keys such as \"first-name\" turned into valid camelCase properties, and a fromArray() factory that reads the original JSON keys."
+        title={"JSON to PHP Class"}
+        description={"JSON to PHP converts JSON into PHP code, entirely in your browser — nothing is uploaded to a server. Two outputs: a PHP array literal holding your actual data (short [] syntax, exactly what json_decode($json, true) returns — strings escaped, numbers written as in your JSON, integers beyond PHP_INT_MAX kept as strings so no digit is lost), or PHP 8 classes describing its shape: one class per nested object, typed promoted properties, nullable types for fields that are null or missing, arrays of objects mapped to their own class, keys such as \"first-name\" turned into valid camelCase properties, and a fromArray() factory that reads the original JSON keys."}
         howTo={[
           "Paste your JSON into the input box.",
           "Choose 'PHP array' to get your data as a PHP array, or 'PHP classes' to get typed classes.",
