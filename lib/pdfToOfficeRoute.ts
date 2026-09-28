@@ -10,6 +10,7 @@ import { isStagedRequest, respondStaged, fileResponse } from "@/lib/media/staged
 import { alertServerError } from "@/lib/quota/errorAlerts";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
 import { contentDisposition } from "@/lib/contentDisposition";
+import { PDF_NO_TABLES_MESSAGE, PDF_NO_TABLES_CODES } from "@/lib/pdfNoTables";
 
 type Spec = {
   tool: "pdf-to-excel" | "pdf-to-ppt";
@@ -77,6 +78,11 @@ export function makePdfToOfficeHandler(spec: Spec) {
       if (err instanceof ConvertApiError && (err as any).billed) await guard.commit(null);
       else await guard.release();
       if (err instanceof ConvertApiError) {
+        // A text-only PDF has no table for ConvertAPI: not an incident (no alert); the page builds the sheet from the text.
+        if (spec.ext === "xlsx" && PDF_NO_TABLES_CODES.includes((err as any).bodyCode)) {
+          console.log(`[convertapi] pdf->xlsx no table (convertapi_code=${(err as any).bodyCode}): the page builds the sheet`);
+          return NextResponse.json({ error: PDF_NO_TABLES_MESSAGE }, { status: 422 });
+        }
         const mapped = ERRORS[(err as any).code] || ERRORS.upstream_error;
         // Numbers only (never the body, never with the Authorization header): enough to tell which failure it was.
         console.error(`[convertapi] pdf->${spec.ext} failed code=${(err as any).code} http=${(err as any).httpStatus ?? "n/a"} convertapi_code=${(err as any).bodyCode ?? "n/a"}`);
