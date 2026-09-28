@@ -4,9 +4,9 @@
 
 | Point | État | Preuve |
 |---|---|---|
-| 1 — résultats faux sans avertissement | **106 outils audités** : 84 modifiés, 22 lus sans défaut. **68 rendaient un résultat faux sans le dire** (F ci-dessous), 16 étaient sous le marché, annonçaient une capacité absente ou échouaient avec un message obscur (M) | tests Node `scripts/converter-tests/01`…`10` (tous verts), banc navigateur `scripts/browser-tests/qualite-29-09.mjs` ×3 moteurs |
+| 1 — résultats faux sans avertissement | **106 outils audités** : 84 modifiés, 22 lus sans défaut. **68 rendaient un résultat faux sans le dire** (F ci-dessous), 16 étaient sous le marché, annonçaient une capacité absente ou échouaient avec un message obscur (M) | tests Node `scripts/converter-tests/01`…`11` (tous verts), banc navigateur `scripts/browser-tests/qualite-29-09.mjs` ×3 moteurs |
 | 2 — json-to-rust, json-to-php, env-to-json | **au niveau du marché ou au-dessus** ; contenu SEO non touché ; inscrits « éligibles » au plan | converter-tests/02 (13/13) : `tsc --strict`, Python, `dotenv`/`dotenv-expand` comme oracles |
-| 3 — les deux réserves du réviseur | **faites** : IP lue seulement dans `x-real-ip` (écrit par Vercel) ; réservations heure/jour atomiques par une fonction SQL. **Migration SQL écrite, NON exécutée** (tâche du propriétaire, P13 ①) | quota-tests 19 (5/5) et 20 (12/12, la vraie SQL exécutée dans PGlite) ; réviseur indépendant : aucun bloquant, ses 5 remarques appliquées |
+| 3 — les deux réserves du réviseur | **faites** : IP lue seulement dans `x-real-ip` (écrit par Vercel) ; réservations heure/jour atomiques par une fonction SQL. **Migration SQL écrite, NON exécutée** (tâche du propriétaire, P13 ①) | quota-tests 19 (5/5) et 20 (12/12, la vraie SQL exécutée dans PGlite) ; réviseur indépendant : aucun bloquant, ses remarques appliquées (§3) |
 | 4 — plan | mis à jour : bloquant 1 (3 outils éligibles), bloquant 5 (audit du jour + liste de ce qui reste), P13, réserves retirées de « Juste APRÈS » | `claude/plan-de-travail.md` |
 | 5 — vérification finale | voir §5 | — |
 
@@ -163,4 +163,5 @@ Inscrit au plan (bloquant 5), même méthode à appliquer : une partie des image
 - Aucun fichier d'environnement lu ; aucune commande exposant un secret ; `SUPABASE_SERVICE_ROLE_KEY` jamais utilisée : les tests de quota qui l'exigent (00-18) n'ont pas été lancés ; les nouveaux (19, 20) tournent sur des doublures et PGlite.
 - Aucune valeur de repli silencieuse ajoutée ; aucun fichier de production modifié pour un problème local (le seul réglage de build ajouté, `turbopack.resolveAlias` pour `fs` côté navigateur, sert le code du site : quicktype importe `fs` dans une branche Node).
 - Aucune boucle de surveillance ni réveil planifié. Aucun compte, envoi ni dépense.
-- Dépendances ajoutées (toutes chargées au clic, sauf marked déjà présent) : quicktype-core, terser, js-beautify, sql-formatter, diff, sucrase, sass, mathjs, figlet, cronstrue, cron-parser ; en développement : @electric-sql/pglite, dotenv, dotenv-expand.
+- Dépendances ajoutées, licences vérifiées (MIT, BSD, Apache-2.0) : quicktype-core, terser, js-beautify, sql-formatter, diff, sucrase, sass, mathjs, exifr (chargés au clic) ; figlet, cronstrue, cron-parser (importés par leur seule page) ; en développement seulement : @electric-sql/pglite, dotenv, dotenv-expand.
+- Aucun sous-agent hors du point 3 (un implémenteur, un réviseur indépendant). Une copie de travail temporaire de `croissance-29-09` a été créée pour comparer l'avertissement de build, puis supprimée.
