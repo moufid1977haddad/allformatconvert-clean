@@ -49,9 +49,16 @@ export default function GifCompressorPage() {
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">Before</div><div className="font-bold">{formatSize(result.originalSize)}</div></div>
                 <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">After</div><div className="font-bold text-indigo-400">{formatSize(result.newSize)}</div></div>
-                <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">Saved</div><div className="font-bold text-green-400">{Math.max(0, Math.round((1-result.newSize/result.originalSize)*100))}%</div></div>
+                {/* A compressor never hands back a bigger file as a success (28/09): a GIF that is already optimised is said so. */}
+                <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">{result.newSize >= result.originalSize ? 'Larger by' : 'Saved'}</div><div className={`font-bold ${result.newSize >= result.originalSize ? 'text-amber-700' : 'text-green-700'}`} data-saved>{Math.abs(Math.round((1 - result.newSize / result.originalSize) * 100))}%</div></div>
               </div>
-              <a href={result.url} download="compressed.gif" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a>
+              {result.newSize >= result.originalSize && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-900" data-larger>
+                  <p className="font-semibold">Your GIF is already well optimised.</p>
+                  <p>At this quality the result is {formatSize(result.newSize)}, not smaller than your {formatSize(result.originalSize)}: keep your original, or lower the quality and try again.</p>
+                </div>
+              )}
+              <a href={result.url} download="compressed.gif" className={result.newSize >= result.originalSize ? 'block w-full text-center text-indigo-600 underline text-sm' : 'block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition'}>{result.newSize >= result.originalSize ? `Download the ${formatSize(result.newSize)} version anyway` : 'Download'}</a>
             </div>
           )}
         </div>

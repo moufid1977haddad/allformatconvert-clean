@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { MAX_SPREADSHEET_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 
@@ -12,6 +13,7 @@ export default function ExcelToPdfPage() {
   const [done, setDone] = useState(false);
   const [detectedFonts, setDetectedFonts] = useState([]);
   const inputRef = useRef();
+  const [pdf, offer, clearPdf] = useDownloadable();
 
   const handleFile = (e) => {
     const f = e.target.files[0];
@@ -22,6 +24,7 @@ export default function ExcelToPdfPage() {
     const sizeCheck = checkOfficeSize(f, MAX_SPREADSHEET_STAGED_BYTES);
     setError(sizeCheck.ok ? '' : sizeCheck.message);
     setDone(false);
+    clearPdf();
   };
 
   const convert = async () => {
@@ -31,6 +34,7 @@ export default function ExcelToPdfPage() {
     setLoading(true);
     setError('');
     setDone(false);
+    clearPdf();
     setDetectedFonts([]);
 
     try {
@@ -39,14 +43,7 @@ export default function ExcelToPdfPage() {
       setDetectedFonts(result.detectedFonts);
       const blob = result.blob;
       const filename = (file.name.replace(/\.[^.]+$/, '') || 'spreadsheet') + '.pdf';
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      offer(blob, filename);
       setDone(true);
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -77,15 +74,15 @@ export default function ExcelToPdfPage() {
             {loading && (
               <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden="true" />
             )}
-            {loading ? officeStageLabel(stage) : 'Download PDF'}
+            {loading ? officeStageLabel(stage) : 'Convert to PDF'}
           </button>
           {error && (
             <p className="text-center text-red-500 text-sm" role="alert">{error}</p>
           )}
           {done && !error && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
-              <div className="text-green-500 text-xl font-bold mb-1">PDF downloaded!</div>
-              <p className="text-neutral-500 text-sm">Check your browser's downloads for the converted file.</p>
+              <div className="text-green-500 text-xl font-bold mb-1">PDF ready</div>
+              <DownloadReady file={pdf} className="mt-3" />
               {detectedFonts.length > 0 && (
                 <p className="text-amber-600 text-sm mt-3">
                   Heads up: this file uses {detectedFontsList} icon font{detectedFonts.length > 1 ? 's' : ''}, which can&apos;t legally be reproduced — those specific characters may appear as blank boxes in your PDF. Everything else converted normally.
@@ -100,7 +97,7 @@ export default function ExcelToPdfPage() {
         description="Excel to PDF converts your .xlsx, .xls, .csv, or .ods file into a PDF using LibreOffice. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. We tested .xlsx workbooks with currency, percentage and date formats, merged cells, cell borders, color-scale conditional formatting, a bar chart, a wrapped-text column and formulas (multiplication, IF and cross-sheet lookups): the formulas were recalculated to the right values, and a sheet set to fit on one page stayed on one page. A sheet wider than the page, with no print area or scaling, is split across several PDF pages by groups of columns (another converter shrank the same sheet onto fewer pages). The chart was drawn, but its styling differs from what other converters produce, so check it in your PDF. One disclosed exception: Wingdings and Webdings icon fonts can't legally be embedded in our conversion service (a font-licensing restriction, not a bug), so those specific characters come through as blank boxes if your file uses them."
         howTo={[
           "Click the upload area and select an .xlsx, .xls, .csv, or .ods file from your device.",
-          "Click 'Download PDF'. Your file is uploaded securely for conversion and the PDF downloads automatically once it's ready.",
+          "Click 'Convert to PDF'. Your file is uploaded securely for conversion; once the PDF is ready, click 'Download'.",
           "Save the resulting PDF file to your device."
         ]}
         faqs={[

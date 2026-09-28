@@ -5,6 +5,25 @@ import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { reportToolError } from '../../../lib/reportError';
 import { ffmpegAudioDuration } from '../../../lib/audioDuration';
+import { runMediaJob, mediaServiceConfigured } from '../../../lib/mediaJob';
+import IosOriginalNote from '../../../components/IosOriginalNote';
+import PlayablePreview from '../../../components/PlayablePreview';
+
+// Precise cut, 28/09: re-encoding in ffmpeg.wasm measured ~3.7 s per second of 1080p in Chrome but ~29 s in
+// Firefox (292 s for 10 s). The reference way to cut fast AND exact (LosslessCut's "smart cut") re-encodes only
+// what must be; in a browser it is unreliable (the re-encoded head and the copied rest must share one H.264
+// header, otherwise some players break -- silently). So when the local re-encode would be long, the browser
+// cuts WITHOUT re-encoding from the keyframe before the start (fractions of a second), sends only that piece,
+// and our ffmpeg service re-encodes it to the exact frame (native ffmpeg on 8 vCPU: ~3 s of CPU per second of
+// 1080p, a few seconds of waiting). Short clips in Chrome/Edge stay entirely in the browser.
+const SECONDS_PER_1080P_SECOND = { blink: 3.7, other: 29 };
+const isBlink = () => typeof navigator !== 'undefined' && !!navigator.userAgentData?.brands?.some((b) => /Chromium/.test(b.brand));
+function preciseOnService(len, w, h) {
+  if (!mediaServiceConfigured() || !w || !h || w % 2 || h % 2) return false; // H.264 needs even sizes: odd ones stay local
+  const local = len * ((w * h) / 2073600) * SECONDS_PER_1080P_SECOND[isBlink() ? 'blink' : 'other'];
+  return local > 45;
+}
+const firstNumber = (bytes) => { const n = parseFloat(new TextDecoder().decode(bytes).trim().split(/\s+/)[0]); return Number.isFinite(n) ? n : null; };
 
 // Engine: ffmpeg.wasm stream copy ("-c copy"), the same engine audio-trimmer
 // already runs under real Safari. No re-encoding: the cut is near-instant and
@@ -136,6 +155,54 @@ export default function VideoTrimmerPage() {
       // -ss before -i: fast seek; with stream copy it lands on the keyframe at or before `start`, with re-encoding
       // ffmpeg decodes from that keyframe and drops the frames before `start` (exact). -t is the clip length.
       // -avoid_negative_ts make_zero keeps the copied clip starting at 0.
+      const v = videoRef.current;
+      let vw = v?.videoWidth || 0, vh = v?.videoHeight || 0;
+      if (precise && (!vw || !vh)) {
+        // No preview in this browser (MKV, AVI…; every video in some engines): ffprobe reads the size.
+        try {
+          await ffmpeg.ffprobe(['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'csv=p=0:s=x', inputName, '-o', '/wh.txt']);
+          const [pw, ph] = new TextDecoder().decode(await ffmpeg.readFile('/wh.txt')).trim().split('x').map(Number);
+          if (pw > 0 && ph > 0) { vw = pw; vh = ph; }
+        } catch {}
+      }
+      if (precise && preciseOnService(len, vw, vh)) {
+        // 1. the keyframe at or before the start, 2. the piece from it, copied (no quality change), 3. its first
+        // video timestamp -> where the start falls inside the piece, 4. the exact cut on our service.
+        setStatus('Preparing the clip…');
+        let piece = null, clipStart = start;
+        try {
+          await ffmpeg.ffprobe(['-v', 'error', '-select_streams', 'v:0', '-read_intervals', `${start}%+#1`, '-skip_frame', 'nokey', '-show_entries', 'frame=pts_time', '-of', 'csv=p=0', inputName, '-o', '/k.txt']);
+          const k = firstNumber(await ffmpeg.readFile('/k.txt'));
+          if (k !== null && k <= start + 0.001) {
+            const pc = await ffmpeg.exec(['-ss', String(k), '-i', inputName, '-t', String(Math.round((end - k + 1) * 1000) / 1000), '-map', '0:v:0', '-map', '0:a:0?', '-sn', '-dn', '-c', 'copy', '-avoid_negative_ts', 'make_zero', 'piece.mkv']);
+            await ffmpeg.ffprobe(['-v', 'error', '-select_streams', 'v:0', '-read_intervals', '%+#1', '-show_entries', 'frame=pts_time', '-of', 'csv=p=0', 'piece.mkv', '-o', '/p.txt']);
+            const p0 = firstNumber(await ffmpeg.readFile('/p.txt'));
+            const bytes = pc === 0 ? await ffmpeg.readFile('piece.mkv') : null;
+            if (bytes && bytes.byteLength && p0 !== null) { piece = new File([bytes], 'piece.mkv', { type: 'video/x-matroska' }); clipStart = p0 + (start - k); }
+          }
+        } catch { piece = null; }
+        if (cancelledRef.current) return;
+        // No keyframe found (rare containers): the whole file goes, cut at the same start.
+        const src = piece || file;
+        const ac = new AbortController();
+        ffmpegRef.current = { terminate: () => ac.abort() }; // Cancel stops the service job too
+        const out = await runMediaJob({
+          file: src, op: 'convert', signal: ac.signal,
+          params: { target: 'mp4', quality: 'high', clipStart: Math.round(Math.max(0, clipStart) * 1000) / 1000, clipDuration: len },
+          onStage: (st) => {
+            if (st.stage === 'upload') setStatus(`Sending the clip (${fmtMB(src.size)}) to our video service… ${Math.round(st.pct || 0)}%`);
+            else if (st.stage === 'queued' && st.position) setStatus(`Waiting for the video service — you are number ${st.position} in line…`);
+            else if (st.stage === 'busy') setStatus('The video service is busy, retrying…');
+            else if (st.stage === 'processing') setStatus(`Cutting to the frame on our video service… ${Math.round(st.pct || 0)}%`);
+            else if (st.stage === 'download') setStatus(`Downloading… ${Math.round(st.pct || 0)}%`);
+          },
+        });
+        if (cancelledRef.current) return;
+        if (!out.blob || out.blob.size === 0) throw new Error('The video service returned nothing. Please try again.');
+        const blob = new Blob([out.blob], { type: 'video/mp4' });
+        setResult({ url: URL.createObjectURL(blob), name: 'trimmed_' + file.name.replace(/\.[^.]+$/, '') + '.mp4', size: blob.size, asked: len, actual: null, precise: true, onService: true });
+        return;
+      }
       const code = await ffmpeg.exec(precise
         ? ['-ss', String(start), '-i', inputName, '-t', String(len), '-map', '0:v:0', '-map', '0:a:0?', '-sn', '-dn', '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', outputName]
         : ['-ss', String(start), '-i', inputName, '-t', String(len), '-c', 'copy', '-avoid_negative_ts', 'make_zero', outputName]);
@@ -170,8 +237,9 @@ export default function VideoTrimmerPage() {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Video Trimmer</h1>
         <p className="text-neutral-500 text-center mb-2">Trim and cut video files — instantly and losslessly by default, or to the exact frame</p>
-        <p className="text-neutral-400 text-xs text-center mb-8">Files up to {maxMB} MB{isMobile ? ' on this device' : ''} · MP4, MOV, WebM, MKV and more · nothing is uploaded</p>
+        <p className="text-neutral-400 text-xs text-center mb-8">Files up to {maxMB} MB{isMobile ? ' on this device' : ''} · MP4, MOV, WebM, MKV and more · the fast cut never uploads your video</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
+          <IosOriginalNote />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
             <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />
@@ -187,7 +255,7 @@ export default function VideoTrimmerPage() {
           {duration > 0 && (
             <label className="flex items-start gap-2 text-sm text-neutral-700">
               <input type="checkbox" checked={precise} disabled={!!status} onChange={(e) => { setPrecise(e.target.checked); setResult((r) => { if (r) URL.revokeObjectURL(r.url); return null; }); }} className="mt-1" />
-              <span><b>Precise cut</b> — starts on the exact frame; the clip is re-encoded to MP4 (H.264) in your browser, which takes time: measured about 4× the clip's length for a 1080p video in Chrome, about 30× in Firefox (a 10-second 1080p clip: 37 s and 5 min). Unchecked: an instant lossless copy that starts on the nearest keyframe before your start (often 1–3 s earlier on phone videos).</span>
+              <span><b>Precise cut</b> — starts on the exact frame; the clip is re-encoded to MP4 (H.264). Short clips are re-encoded in your browser (about 4× the clip's length for 1080p in Chrome); when that would be long — in Firefox and Safari, or for longer clips — only the part you cut is sent to our own video service, which re-encodes it in seconds and then deletes it. Unchecked: an instant lossless copy that starts on the nearest keyframe before your start (often 1–3 s earlier on phone videos).</span>
             </label>
           )}
           {status && <p className="text-yellow-500 text-center text-sm">{status}</p>}
@@ -199,7 +267,7 @@ export default function VideoTrimmerPage() {
           )}
           {result && (
             <div className="space-y-2">
-              <video controls playsInline src={result.url} className="w-full rounded-xl" onLoadedMetadata={(e) => { const d = e.currentTarget.duration; setResult(r => r && ({ ...r, actual: d })); }} />
+              <PlayablePreview src={result.url} name={result.name} kind="video" className="w-full rounded-xl" onLoadedMetadata={(e) => { const d = e.currentTarget.duration; setResult(r => r && ({ ...r, actual: d })); }} />
               <p className="text-xs text-neutral-500 text-center">
                 {fmtMB(result.size)}{result.actual ? ` · ${fmtSecs(result.actual)} long (you asked for ${fmtSecs(result.asked)}${result.precise ? '; cut to the frame' : '; a fast cut starts on the keyframe at or before your start'})` : ''}
               </p>
@@ -210,7 +278,7 @@ export default function VideoTrimmerPage() {
       </div>
       <SeoContent
         title="Video Trimmer"
-        description="Video Trimmer cuts a section out of your video with ffmpeg.wasm's stream copy, entirely in your browser — nothing is uploaded. Because the video is not re-encoded, the cut takes seconds instead of the length of the clip, and the result keeps your original codec, container and quality. By default, cut points snap to the nearest keyframe, so the clip can start slightly before the point you picked; tick “Precise cut” to start on the exact frame (the clip is then re-encoded to MP4, which takes longer). The page shows the real length of the result."
+        description="Video Trimmer cuts a section out of your video with ffmpeg.wasm's stream copy, entirely in your browser — for that fast cut nothing is uploaded. Because the video is not re-encoded, the cut takes seconds instead of the length of the clip, and the result keeps your original codec, container and quality. By default, cut points snap to the nearest keyframe, so the clip can start slightly before the point you picked; tick “Precise cut” to start on the exact frame (the clip is then re-encoded to MP4, which takes longer). The page shows the real length of the result."
         howTo={[
           "Click the upload area and select a video file.",
           "Use the Start and End sliders to set the section you want to keep.",
@@ -223,7 +291,7 @@ export default function VideoTrimmerPage() {
           { q: "Is the cut frame-accurate?", a: "With \"Precise cut\", yes. With the default fast cut, no: without re-encoding a cut can only start on a keyframe, so the clip may begin a little before the start you chose (often 1–3 s on phone videos). The page shows the real length of the result." },
           { q: "Does it work on iPhone videos?", a: "Yes, iPhone .mov and .mp4 files are accepted. On phones the file size limit is lower (" + MAX_MB_MOBILE + " MB) because a browser tab has much less memory." },
           { q: "What is the file size limit?", a: MAX_MB_DESKTOP + " MB on a computer and " + MAX_MB_MOBILE + " MB on a phone, shown before you pick a file, because the video is held in your browser's memory while it is cut." },
-          { q: "Is my file uploaded anywhere?", a: "No, trimming happens entirely in your browser." }
+          { q: "Is my file uploaded anywhere?", a: "Not for the default fast cut, which happens entirely in your browser. For a Precise cut that would take long in your browser (Firefox, Safari, longer clips), only the part you cut — not the whole video — is sent to our own video service, re-encoded, and deleted after you download it." }
         ]}
         tips={[
           "The first trim downloads the video engine (about 10 MB, 32 MB once unpacked); later trims reuse it from the browser cache.",

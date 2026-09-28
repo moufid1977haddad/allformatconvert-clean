@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import IosOriginalNote from '../../../components/IosOriginalNote';
 
 const formatSize = (bytes) => (bytes < 1024 * 1024 ? (bytes / 1024).toFixed(1) + ' KB' : (bytes / (1024 * 1024)).toFixed(2) + ' MB');
 const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/svg+xml': 'svg' };
@@ -165,6 +166,7 @@ export default function ImageCompressorPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Image Compressor</h1>
         <p className="text-neutral-500 text-center mb-8">Compress JPG, PNG, WebP and SVG in your browser — the format is kept, your images never leave your device</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
+          <IosOriginalNote kind="photo" />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => !busy && inputRef.current.click()}>
             <p className="text-neutral-500">{items.length ? `${items.length} image${items.length > 1 ? 's' : ''} selected — click to choose others` : `Click to choose images (up to ${MAX_FILES})`}</p>
             <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml,.svg,image/*" multiple className="hidden" onChange={handleFiles} disabled={busy} />

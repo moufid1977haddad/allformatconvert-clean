@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 
 export default function PptToPdfPage() {
@@ -11,6 +12,7 @@ export default function PptToPdfPage() {
   const [done, setDone] = useState(false);
   const [detectedFonts, setDetectedFonts] = useState([]);
   const inputRef = useRef();
+  const [pdf, offer, clearPdf] = useDownloadable();
 
   const handleFile = (e) => {
     const f = e.target.files[0];
@@ -21,6 +23,7 @@ export default function PptToPdfPage() {
     const sizeCheck = checkOfficeSize(f);
     setError(sizeCheck.ok ? '' : sizeCheck.message);
     setDone(false);
+    clearPdf();
   };
 
   const convert = async () => {
@@ -30,6 +33,7 @@ export default function PptToPdfPage() {
     setLoading(true);
     setError('');
     setDone(false);
+    clearPdf();
     setDetectedFonts([]);
 
     try {
@@ -38,14 +42,7 @@ export default function PptToPdfPage() {
       setDetectedFonts(result.detectedFonts);
       const blob = result.blob;
       const filename = (file.name.replace(/\.[^.]+$/, '') || 'presentation') + '.pdf';
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      offer(blob, filename);
       setDone(true);
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -76,15 +73,15 @@ export default function PptToPdfPage() {
             {loading && (
               <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden="true" />
             )}
-            {loading ? officeStageLabel(stage) : 'Download PDF'}
+            {loading ? officeStageLabel(stage) : 'Convert to PDF'}
           </button>
           {error && (
             <p className="text-center text-red-500 text-sm" role="alert">{error}</p>
           )}
           {done && !error && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
-              <div className="text-green-500 text-xl font-bold mb-1">PDF downloaded!</div>
-              <p className="text-neutral-500 text-sm">Check your browser's downloads for the converted file.</p>
+              <div className="text-green-500 text-xl font-bold mb-1">PDF ready</div>
+              <DownloadReady file={pdf} className="mt-3" />
               {detectedFonts.length > 0 && (
                 <p className="text-amber-600 text-sm mt-3">
                   Heads up: this file uses {detectedFontsList} icon font{detectedFonts.length > 1 ? 's' : ''}, which can&apos;t legally be reproduced — those specific characters may appear as blank boxes in your PDF. Everything else converted normally.
@@ -99,7 +96,7 @@ export default function PptToPdfPage() {
         description="PowerPoint to PDF converts your .pptx or .ppt file into a PDF using LibreOffice. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. We tested .pptx files with custom slide backgrounds, two-level bullets, a full-bleed image, overlapping shapes and text boxes, a gradient fill, a table and a pie chart: all of them matched the output of two other online converters. Three disclosed limits. First, text boxes: PowerPoint lets the text of a box set to 'do not wrap' run past the edge of the box, while our converter (LibreOffice) wraps it at the edge. In our test a slide title in such a box, longer than the box, wrapped onto a second line and part of it was hidden behind an overlapping text box — this also happened when converting with the real Segoe UI font, so it is not a font problem. Second, fonts: a font not installed on our conversion servers is substituted with a similar typeface rather than left blank; Segoe UI, which is Windows-only, is replaced by Selawik, Microsoft's open replacement, whose letter widths matched Segoe UI in our measurement (its kerning is not identical). Third, and not a substitution: Wingdings and Webdings icon fonts can't legally be embedded in our conversion service (a font-licensing restriction, not a bug), so those specific characters come through as blank boxes if your presentation uses them. We measured .pptx only, not the older .ppt format."
         howTo={[
           "Click the upload area and select a .pptx or .ppt file from your device.",
-          "Click 'Download PDF'. Your file is uploaded securely for conversion and the PDF downloads automatically once it's ready.",
+          "Click 'Convert to PDF'. Your file is uploaded securely for conversion; once the PDF is ready, click 'Download'.",
           "Save the resulting PDF file to your device."
         ]}
         faqs={[
@@ -115,7 +112,7 @@ export default function PptToPdfPage() {
           "In our tests on .pptx files, images, shapes, gradients, tables and charts matched two other online converters.",
           "Each slide becomes one page in the PDF, in its original order.",
           "Make each text box at least as wide as its text: a box set to \"do not wrap\" that is narrower than its text wraps in our converter and can hide part of it behind other shapes.",
-          "Very large presentations or ones with many embedded media files may take a little longer to convert — keep the tab open until the download starts."
+          "Very large presentations or ones with many embedded media files may take a little longer to convert — keep the tab open until the Download button appears."
         ]}
       />
     </div>

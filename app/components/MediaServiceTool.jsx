@@ -5,6 +5,8 @@ import ProgressBar from './ProgressBar';
 import { runMediaJob, MediaJobError } from '../lib/mediaJob';
 import { VIDEO_ACCEPT } from '../lib/mediaSupport';
 import { reportToolError } from '../lib/reportError';
+import IosOriginalNote from './IosOriginalNote';
+import PlayablePreview from './PlayablePreview';
 
 // Shared UI of the tools that run on the media-processing service
 // (video-compressor, video-converter). The engine is the service; the browser
@@ -108,6 +110,7 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
         <p className="text-neutral-500 text-center mb-2">{subtitle}</p>
         <p className="text-neutral-400 text-xs text-center mb-8">Files up to {MAX_UPLOAD_MB >= 1024 ? MAX_UPLOAD_MB / 1024 + ' GB' : MAX_UPLOAD_MB + ' MB'} · MP4, MOV, MKV, WebM, AVI, WMV, FLV and more · works in every browser, including Safari and iPhone · files are deleted from our server as soon as you have downloaded the result</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
+          <IosOriginalNote />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => !busy && inputRef.current.click()}>
             <p className="text-neutral-500">{file ? `${file.name} — ${fmt(file.size)}` : 'Click or drop a video file here'}</p>
             <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onClick={(e) => { e.target.value = ''; }} onChange={pick} />
@@ -139,8 +142,8 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
                 <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">After ({result.ext.toUpperCase()})</div><div className="font-bold text-indigo-500">{fmt(result.bytes)}</div></div>
                 <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">{change >= 0 ? 'Saved' : 'Larger by'}</div><div className={`font-bold ${change >= 0 ? 'text-green-500' : 'text-orange-500'}`}>{Math.abs(change)}%</div></div>
               </div>
-              {result.isVideo && <video controls playsInline src={result.url} className="w-full rounded-xl max-h-72" />}
-              {result.isAudio && <audio controls src={result.url} className="w-full" />}
+              {result.isVideo && <PlayablePreview src={result.url} name={result.name} kind="video" className="w-full rounded-xl max-h-72" />}
+              {result.isAudio && <PlayablePreview src={result.url} name={result.name} kind="audio" />}
               {result.isImage && <img src={result.url} alt="Result" className="mx-auto max-h-96 rounded-xl" />}
               <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download {result.ext.toUpperCase()}</a>
             </div>

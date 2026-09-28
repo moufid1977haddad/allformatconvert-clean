@@ -62,6 +62,8 @@
 **Pour le MacBook :** les mêmes, par **AirDrop** depuis l'iPhone. Pour le test caméra (n° 9) sur iPhone, **ouvre `safari-qr.png` en grand sur l'écran du MacBook** : l'iPhone le filmera.
 
 ### Comment vérifier un téléchargement (règle valable partout)
+**Depuis le 28/09 (déploiement 2) : aucun outil ne télécharge plus tout seul.** Après le traitement, un bouton vert **« Download … (taille) »** apparaît ; pour un PDF, aussi **« Open the PDF in a new tab »** (la page de l'outil reste derrière, avec tes réglages). Un lien affiché reste valable tant qu'il est affiché (même après plusieurs minutes). Si Safari ne sait pas lire un format (Opus, WMA…), la page le dit **à la place du lecteur** : ce n'est pas un échec.
+**Tests 9 à 30 : à faire APRÈS le déploiement 2** (sinon les n° 11, 13, 17 ne correspondent pas à la feuille).
 Un « RÉUSSI » exige que **le fichier produit s'ouvre et soit correct**, pas seulement qu'un bouton ait réagi.
 - **iPhone :** flèche de téléchargement dans la barre Safari > **Téléchargements** > touche le fichier > il doit **s'ouvrir avec le bon contenu**.
 - **MacBook :** flèche de téléchargement en haut à droite > ouvre le fichier.
@@ -86,7 +88,7 @@ Un « RÉUSSI » exige que **le fichier produit s'ouvre et soit correct**, pas s
 #### 1. Zip Extractor *(refait le 26/09 : 7-Zip en WebAssembly, 40+ formats)*
 `/tools/file-tools/zip-extractor`
 - **Risque :** `Worker` `WASM` `MÉM` `TÉLÉCH`. Moteur 7-Zip compilé en WebAssembly, dans un Worker. **Safari n'a pas `showSaveFilePicker`** : « Save all to a folder » ne doit **pas** apparaître, et « Download all as ZIP » construit le ZIP en mémoire (plafonné à 1,9 Go ; sur iPhone la mémoire peut céder bien avant — ne teste pas de gros fichier).
-- **Gestes :** (a) `safari-winrar.rar` > la liste s'affiche avec des **noms chinois lisibles** > **Download** d'un fichier > il s'ouvre ; (b) `safari-rar-password-1234.rar` > la page demande un mot de passe > `1234` > **Unlock** > la liste apparaît ; (c) `safari-7z-password-data-only.7z` > ouvre `secret.txt` > mot de passe `data-only` > il contient « top secret » ; (d) sélectionne **les trois** `safari-split.part*.rar` ensemble > mot de passe `mot de passe` > la liste s'affiche ; (e) `safari-tree.zip` > **Download all as ZIP** > le ZIP se décompresse dans Fichiers.
+- **Gestes :** (a) `safari-winrar.rar` > la liste montre **2 fichiers** : `Folder1/Folder Space/long.txt` (1,0 Mo) et `Folder1/Folder 中文/2中文.txt` (15 o), **noms chinois lisibles** > **Open** ou **Download** de chacun : `2中文.txt` contient « 中文中文 » ; `long.txt` ne contient **que des chiffres 0 et 1** (1 Mo) — c'est son vrai contenu (fichier d'essai du corpus WinRAR, empreinte CRC identique à celle que WinRAR a enregistrée), **pas un défaut** ; (b) `safari-rar-password-1234.rar` > la page demande un mot de passe > `1234` > **Unlock** > la liste apparaît ; (c) `safari-7z-password-data-only.7z` > ouvre `secret.txt` > mot de passe `data-only` > il contient « top secret » ; (d) sélectionne **les trois** `safari-split.part*.rar` ensemble > mot de passe `mot de passe` > la liste s'affiche ; (e) `safari-tree.zip` > **Download all as ZIP** > le ZIP se décompresse dans Fichiers.
 - **Attendu :** les 5 sous-cas réussissent ; **« Save all to a folder » absent** sur Safari.
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(note a-e séparément)*
 
@@ -156,9 +158,9 @@ Un « RÉUSSI » exige que **le fichier produit s'ouvre et soit correct**, pas s
 
 #### 11. Image Upscaler **[S4]** *(modèle IA sur notre service depuis le 23/09)*
 `/tools/ai-tools/image-upscaler`
-- **Risque :** `ENVOI` `MÉM` `TÉLÉCH`. Défaut du 19/09 : canvas géant, fichier vide annoncé « réussi ». Désormais : ×2/×4 sur le service, image d'entrée **≤ 1 Mpx** — au-delà, l'outil **refuse avec un message** (il ne réduit pas).
-- **Gestes :** (a) la **PHOTO** 12 Mpx > la page doit la **refuser avec un message clair** (taille en mégapixels) ; (b) `safari-small-800x600.jpg` > **×4** > **Upscale Image** > compare avant/après > **Download**.
-- **Attendu :** (a) refus lisible, rien ne plante ; (b) une image de **3200×2400**, **non vide**, qui s'ouvre.
+- **Risque :** `ENVOI` `MÉM` `TÉLÉCH`. Depuis le 28/09 : image d'entrée **jusqu'à 6 Mpx** ; le calcul se fait **sur l'appareil** quand le navigateur a WebGPU (Safari 26 sur iPhone et Mac ; **pas Safari 17.6** de ton MacBook) — l'image n'est alors pas envoyée — sinon sur notre serveur (au-delà de 2 Mpx, par bandes).
+- **Gestes :** (a) la **PHOTO** 12 Mpx > la page doit la **refuser avec un message clair** (« up to 6 megapixels ») ; (b) `safari-small-800x600.jpg` > **×4** > **Upscale Image** > compare avant/après > **Download**.
+- **Attendu :** (a) refus lisible, rien ne plante ; (b) une image de **3200×2400**, **non vide**, qui s'ouvre ; **note ce que dit la page sous le résultat : « made on your device » ou « made on our server »** (iPhone iOS 26 : appareil attendu ; MacBook Safari 17.6 : serveur attendu).
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
 #### 12. Audio Trimmer *(26/09 : dixième de seconde, fondus, coupe exacte WAV/FLAC)*
@@ -171,8 +173,8 @@ Un « RÉUSSI » exige que **le fichier produit s'ouvre et soit correct**, pas s
 #### 13. Image Compressor *(refait le 23/09 : MozJPEG, WebP, lot + ZIP)*
 `/tools/image-tools/image-compressor`
 - **Risque :** `Worker` `WASM` `MÉM` `TÉLÉCH`.
-- **Geste :** la **PHOTO** + 2 autres photos > compresse > télécharge une image, puis **le ZIP**.
-- **Attendu :** chaque image est **plus légère** que l'originale, s'ouvre et ressemble à l'original ; le ZIP se décompresse.
+- **Geste :** la **PHOTO** + 2 autres photos > compresse > télécharge une image, puis **le ZIP**. *(Sur iPhone, un encadré rappelle qu'une photo choisie dans Photothèque arrive déjà convertie en JPEG par iOS : pour partir du fichier d'origine, choisis-la avec « Choisir des fichiers ».)*
+- **Attendu :** chaque image est **plus légère** que l'originale, s'ouvre et ressemble à l'original ; le ZIP se décompresse. Une image **déjà très compressée** peut être annoncée « Already well compressed… Nothing to download » : c'est honnête, pas un échec.
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
 #### 14. Hash Generator *(refait le 24/09 : 17 algorithmes, fichiers, 4 Workers)*
@@ -186,7 +188,7 @@ Un « RÉUSSI » exige que **le fichier produit s'ouvre et soit correct**, pas s
 `/tools/gif-tools/mp4-to-gif` puis `/tools/gif-tools/mov-to-gif`
 - **Risque :** `ENVOI` `TÉLÉCH`. Défaut du 19/09 : les `.mov` d'iPhone étaient refusés au choix du fichier.
 - **Geste :** la **VIDÉO** (`.MOV`) dans **MP4 to GIF** > options par défaut > convertis > télécharge. Refais dans **MOV to GIF**.
-- **Attendu :** la vidéo est **sélectionnable** (pas grisée) ; un GIF **animé, aux bonnes proportions** (une vidéo verticale reste verticale), qui s'ouvre.
+- **Attendu :** la vidéo est **sélectionnable** (pas grisée) ; un GIF **animé, aux bonnes proportions** (une vidéo verticale reste verticale), qui s'ouvre. Sur iPhone, l'encadré « a video picked from Photo Library reaches this page already shrunk by iOS » s'affiche au-dessus de la zone de choix (normal, voir défaut 1c).
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
 ---
@@ -195,13 +197,13 @@ Un « RÉUSSI » exige que **le fichier produit s'ouvre et soit correct**, pas s
 
 #### 16. GIF Maker *(26/09 : ajuster/rogner/étirer, ordre, boucles)*
 `/tools/gif-tools/gif-maker` — `MÉM` `TÉLÉCH`
-- **Geste :** 3 photos (sélection multiple) > mode **Fit (keep proportions, add background)** > **Download GIF**.
+- **Geste :** 3 photos (sélection multiple) > mode **Fit (keep proportions, add background)** > **Create GIF** > **Download GIF**.
 - **Attendu :** un `.gif` animé de 3 images, **non déformées**, qui s'ouvre et s'anime.
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
 #### 17. Word to PDF *(envoi par morceaux au-delà de 4 Mio depuis le 21/09)*
 `/tools/pdf-tools/word-to-pdf` — `ENVOI` `TÉLÉCH` — ⚠️ appel payant (ConvertAPI, 0,01 $), une seule fois
-- **Geste :** `fidelite-01.docx` > convertis > télécharge.
+- **Geste :** `fidelite-01.docx` > **Convert to PDF** > le bouton vert **Download fidelite-01.pdf** apparaît (rien ne se télécharge tout seul) > touche-le ; touche aussi **Open the PDF in a new tab**.
 - **Attendu :** un PDF qui s'ouvre, tableau lisible. *(Le petit fichier passe par le chemin direct ; le chemin par morceaux, pour > 4 Mio, n'est pas couvert ici.)*
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
@@ -427,3 +429,49 @@ Dans **Notes**, **une ligne par outil**, tout de suite : `N° | R / É / B | ce 
 | 30 | **Video Merger, Filter, Rotator, Resizer, Screen Recorder** (MediaRecorder) | ce WebKit n'a **ni MediaRecorder ni captureStream** : la page le **dit avant** et garde le bouton désactivé (4 outils vérifiés) ; sous Chromium/Firefox, les 4 donnent un WebM qui se relit jusqu'au bout, aux bonnes dimensions | **les 5 outils sur le vrai Safari** : Safari a MediaRecorder (MP4) — vérifier que le fichier `.mp4` se lit, **avec le son** (Filter/Rotator/Resizer) ; Screen Recorder : Safari macOS seulement (pas d'iPhone) |
 
 **Trouvé en route et corrigé (Chromium + Firefox, `85a614bf`) :** Video Merger **ne finissait jamais sous Firefox** et **perdait le son partout** ; il garde maintenant le son de chaque clip et ajuste (bandes noires) au lieu d'étirer. **Aussi corrigé (`ac75f9f0`) :** Video Resizer étirait l'image quand la taille demandée n'avait pas les proportions de la source ; il propose maintenant « Fit » (bandes noires, par défaut), « Fill » ou « Stretch », comme les références.
+
+
+---
+
+## 9. PASSE PRÉALABLE N° 2 — nuit du 28 au 29/09, tests 9 à 30, par Claude (WebKit de Playwright, build local)
+
+> **Toujours pas Safari.** Build local de la branche `licence-ameliorations` (déploiement 2 + travail de la nuit), fichiers de `docs/audit/fixtures-safari/`. Rien n'a été mis en production.
+
+**Tests 1 à 8 — faits par toi sur iPhone et MacBook le 28/09.** Défauts relevés, tous traités cette nuit (en local, à déployer avec toi) :
+
+| Défaut | État |
+|---|---|
+| 1a Opus : lecteur « Error » sur Safari Mac (converter, booster, compressor) | **corrigé** : lecteur commun, `canPlayType` puis l'erreur du lecteur → la phrase d'Audio Merger, sur **tous** les outils audio et vidéo dont le résultat peut être illisible |
+| 1b Audio Compressor rend plus gros (−95,4 % en vert) | **corrigé** : débit réel de la source mesuré, jamais dépassé ; si le résultat reste plus gros → « Larger by » en ambre, « keep your original », téléchargement « anyway » seulement. Même règle ajoutée au GIF Compressor ; image, PDF et vidéo le faisaient déjà |
+| 1c Vidéo choisie dans Photothèque réduite par iOS ; aperçu noir sur iPhone | **aucun attribut HTML n'empêche iOS de réencoder** (forum Apple 731042) : encadré iPhone sur les outils vidéo (et Image Compressor) « enregistre-la dans Fichiers, puis Choisir des fichiers » ; **première image affichée** sur iOS (module global) — **à confirmer sur ton iPhone** |
+| 1d `long.txt` affiche des 0 et des 1 | **pas un défaut** : c'est son vrai contenu (CRC identique à celui de WinRAR) ; fiche corrigée (n° 1a) |
+| 1e SVG trop petit à l'écran | **corrigé** : l'aperçu de la page est le SVG agrandi ; le fichier garde sa taille d'impression en mm (c'est pour ça qu'un navigateur l'ouvre en petit), la page le dit |
+| 1f 7z « Wrong password » | pas un défaut (mot de passe du RAR tapé ; celui du 7z est `data-only`) |
+
+**Tests 9 à 30 sous WebKit :**
+
+| # | Résultat | Reste pour ton Safari |
+|---|---|---|
+| 9 | `safari-qr.png` : envoi, **dépôt** et **collage** lus → `SAFARI-QR-OK-2026` (3/3) | caméra de l'iPhone ; collage depuis Photos |
+| 10 | ce WebKit n'a pas OffscreenCanvas : message clair, rien de faux (inchangé) | **tout** |
+| 11 | photo 12 Mpx refusée : « 4032×3024 (12.2 megapixels)… up to 6 megapixels » ; chemin serveur vérifié (service joué) | ×4 réel ; « device » ou « server » |
+| 12 | 12/12 | écoute |
+| 13 | message clair (pas d'OffscreenCanvas) | **tout** |
+| 14 | tout (texte `abc`, fichiers, 720 Mio en flux, checksums.txt, annulation) | collage |
+| 15 | chemin serveur vérifié (service joué) | le GIF réel |
+| 16 | 3 photos de formes différentes, **Fit** → GIF animé de 3 images | — |
+| 17 | route jouée : `.docx` envoyé, PDF rendu, **bouton Download** | la conversion réelle (payante, une fois) |
+| 18 | 8/8 (toutes les 10 pages → ZIP de 3 PDF de 10 pages) | — |
+| 19 | route jouée : PDF envoyé, PDF rendu | la compression réelle |
+| 20 | 11/11 (PNG, SVG, PDF, logo, relu) | QR Wi-Fi lu par l'appareil photo |
+| 21 | 10/10 (IA jouée) | l'appel réel (payant, une fois) |
+| 22-23 | 30/30 | collage |
+| 24 | 2/2 | — |
+| 25 | **nouveau** : route jouée, PNG **4032×3024**, fond transparent, sujet opaque | le détourage réel (payant, une fois par sous-cas) |
+| 26 | pas de `PaxHeader`, `a.txt` = « bonjour » | — |
+| 27 | 6 pages, A puis B | — |
+| 28 | 7/7 | — |
+| 29 | 5/5 | — |
+| 30 | ce WebKit n'a ni MediaRecorder ni captureStream : **message avant**, bouton désactivé | **les 5 outils sur le vrai Safari** |
+
+**Ce que seul un vrai Safari peut confirmer (à ne pas sauter) :** caméra et collage depuis Photos (9), tous les formats d'image (10, 13), le ×4 réel et l'endroit du calcul (11), l'écoute (12), les appels réels payants (17, 21, 25), le QR Wi-Fi (20), les 5 outils MediaRecorder (30), et sur iPhone l'aperçu de la **première image** d'une vidéo (défaut 1c).

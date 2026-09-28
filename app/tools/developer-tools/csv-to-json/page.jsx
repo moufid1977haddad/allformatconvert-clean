@@ -6,6 +6,7 @@ import { MAX_ROWS, MOBILE_MAX_ROWS, PASTE_MAX_ROWS } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { detectDelimiter, CSV_DELIMITERS } from '../../../lib/csvParser';
 import { sniffCsvFile } from '../../../lib/csvEncoding';
+import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import CsvReadOptions, { numbersNote } from '../../../components/CsvReadOptions';
 
 // Only the first 8KB is needed to see several rows -- detectDelimiter only
@@ -80,6 +81,7 @@ export default function CsvToJsonPage() {
   const [typeNumbers, setTypeNumbers] = useState(true);
   const inputRef = useRef();
   const workerRef = useRef(null);
+  const [result, offer, clearResult] = useDownloadable();
 
   useEffect(() => {
     setIsMobile(isMobileDevice());
@@ -95,6 +97,7 @@ export default function CsvToJsonPage() {
     setError('');
     setStatus('');
     setOutput('');
+    clearResult();
     if (f.size > MAX_FILE_SIZE_BYTES) {
       setError(`This file is ${(f.size / (1024 * 1024)).toFixed(0)} MB, which is over the ${MAX_FILE_SIZE_LABEL} limit for this tool. Try splitting it into smaller files first.`);
       setFile(null);
@@ -122,6 +125,7 @@ export default function CsvToJsonPage() {
     setConverting(false);
     setProgress(0);
     setPhase('');
+    clearResult();
     setStatus('Cancelled.');
   };
 
@@ -130,6 +134,7 @@ export default function CsvToJsonPage() {
     setError('');
     setStatus('');
     setOutput('');
+    clearResult();
     setProgress(0);
     setPhase('reading');
     setConverting(true);
@@ -150,15 +155,8 @@ export default function CsvToJsonPage() {
         setConverting(false);
         workerRef.current = null;
         if (msg.mode === 'file') {
-          const url = URL.createObjectURL(msg.blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'converted.json';
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(url);
-          setStatus(`Downloaded! ${msg.rowCount.toLocaleString()} rows.` + numbersNote(msg));
+          offer(msg.blob, 'converted.json');
+          setStatus(`Converted ${msg.rowCount.toLocaleString()} rows.` + numbersNote(msg));
         } else {
           setOutput(msg.json);
           setStatus(`Converted! ${msg.rowCount.toLocaleString()} rows.` + numbersNote(msg));
@@ -206,6 +204,7 @@ export default function CsvToJsonPage() {
                 onChange={e => {
                   const val = e.target.value;
                   setInput(val);
+                  clearResult();
                   setFileName('');
                   setFile(null);
                   setDelimiterChoice('auto');
@@ -250,21 +249,22 @@ export default function CsvToJsonPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
-              <button onClick={convert} disabled={!file && !input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 dark:disabled:bg-neutral-700 disabled:text-gray-600 dark:disabled:text-neutral-500 text-white rounded-xl py-3 font-semibold transition">{file ? 'Convert and Download' : 'Convert'}</button>
+              <button onClick={convert} disabled={!file && !input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 dark:disabled:bg-neutral-700 disabled:text-gray-600 dark:disabled:text-neutral-500 text-white rounded-xl py-3 font-semibold transition">Convert</button>
               <button onClick={() => navigator.clipboard.writeText(output)} disabled={!output} className="bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 dark:disabled:bg-neutral-700 disabled:text-gray-600 dark:disabled:text-neutral-500 text-white rounded-xl py-3 font-semibold transition">Copy</button>
             </div>
           )}
           {status && !converting && <p className="text-center text-sm text-green-600 dark:text-green-400">{status}</p>}
+          {!converting && <DownloadReady file={result} />}
         </div>
       </div>
       <SeoContent
         title="CSV to JSON"
-        description="CSV to JSON converts a CSV file (or pasted CSV text) into an array of JSON objects entirely in your browser — nothing is uploaded to a server. The first line is treated as the header row. The field delimiter (comma, semicolon, tab, or pipe) is detected automatically, with a dropdown to override it. Parsing is quote-aware: a field wrapped in double quotes can safely contain a comma, the delimiter itself, or a newline (like 'Smith, John') without being split into extra columns. Large files are read and parsed off the main thread in a Web Worker, so the page stays responsive, and the result downloads automatically as a .json file. The file's character encoding is detected too — Excel's classic CSV export is Windows-1252, not UTF-8, and its accents come through intact — and whole columns of numbers become JSON numbers, European decimal commas included (12,5 → 12.5); values with a leading zero, like phone numbers, stay text."
+        description="CSV to JSON converts a CSV file (or pasted CSV text) into an array of JSON objects entirely in your browser — nothing is uploaded to a server. The first line is treated as the header row. The field delimiter (comma, semicolon, tab, or pipe) is detected automatically, with a dropdown to override it. Parsing is quote-aware: a field wrapped in double quotes can safely contain a comma, the delimiter itself, or a newline (like 'Smith, John') without being split into extra columns. Large files are read and parsed off the main thread in a Web Worker, so the page stays responsive, and the result is offered as a .json file to download. The file's character encoding is detected too — Excel's classic CSV export is Windows-1252, not UTF-8, and its accents come through intact — and whole columns of numbers become JSON numbers, European decimal commas included (12,5 → 12.5); values with a leading zero, like phone numbers, stay text."
         howTo={[
           "Click the upload area and select a .csv file, or paste CSV text directly into the box below it.",
           "The delimiter is detected automatically — check the dropdown and correct it if needed.",
           "Click 'Convert' to generate the JSON.",
-          "A file upload downloads automatically as converted.json; pasted text appears in the output box for you to copy.",
+          "For a file upload, click 'Download' to save converted.json; pasted text appears in the output box for you to copy.",
           "Validate the JSON in a linter or your target application before relying on it."
         ]}
         faqs={[
@@ -279,7 +279,7 @@ export default function CsvToJsonPage() {
           "Wrap a value in double quotes if it contains a comma (e.g. \"Smith, John\") — quoted fields are parsed correctly and won't shift into the wrong keys.",
           "Rows with fewer values than headers get empty strings for the missing fields.",
           "The delimiter dropdown shows what was auto-detected — double check it on unusual files, and switch it manually if a column split looks wrong.",
-          "For a large CSV, upload it as a file rather than pasting it — the file path supports far more rows and downloads the result directly instead of rendering it on the page."
+          "For a large CSV, upload it as a file rather than pasting it — the file path supports far more rows and offers the result as a file to download instead of rendering it on the page."
         ]}
       />
     </div>

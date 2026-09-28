@@ -28,7 +28,7 @@ const categories = [
   { title: 'Audio Tools',      description: 'Convert, compress, and edit audio files',          href: '/tools/audio-tools',         slug: 'audio-tools',         tools: ['Audio Converter', 'Audio Trimmer', 'Voice Recorder'],                        count: 11 },
   { title: 'Video Tools',      description: 'Convert, compress, and edit videos',               href: '/tools/video-tools',         slug: 'video-tools',         tools: ['Video Converter', 'Video Compressor', 'Video Trimmer'],                      count: 15 },
   { title: 'File Tools',       description: 'ZIP compression, file conversion, Base64',         href: '/tools/file-tools',          slug: 'file-tools',          tools: ['ZIP Extractor', 'ZIP Creator', 'TAR Extractor'],                              count: 9  },
-  { title: 'QR & Barcodes',   description: 'Generate and scan QR codes and barcodes',          href: '/tools/qr-barcodes-tools',   slug: 'qr-barcodes-tools',   tools: ['QR Generator', 'Barcode Generator', 'QR Scanner'],                           count: 3  },
+  { title: 'QR & Barcode Tools', description: 'Generate and scan QR codes and barcodes',          href: '/tools/qr-barcodes-tools',   slug: 'qr-barcodes-tools',   tools: ['QR Generator', 'Barcode Generator', 'QR Scanner'],                           count: 3  },
   { title: 'Converter Tools',  description: 'Convert units, colors, and currencies',            href: '/tools/converter-tools',     slug: 'converter-tools',     tools: ['Currency Converter', 'Unit Converter', 'Color Converter'],                    count: 4  },
   { title: 'Developer Tools',  description: 'JSON, Base64, URL encoding, and more',             href: '/tools/developer-tools',     slug: 'developer-tools',     tools: ['JSON Formatter', 'XML to JSON', 'Hash Generator'],                           count: 57 },
   { title: 'Math Tools',       description: 'Number conversion, percentage calculator',         href: '/tools/math-tools',          slug: 'math-tools',          tools: ['Number Base Converter', 'Percentage Calculator', 'Roman Numeral Converter'],  count: 6  },
@@ -317,6 +317,9 @@ function FileDropZone({ dark, toolCounts }) {
   );
 }
 
+// "+3 more tools", "+1 more tool"; nothing when every tool of the category is already listed on the card.
+const moreLabel = (n) => (n > 0 ? `+${n} more tool${n === 1 ? '' : 's'}` : '');
+
 export default function Home() {
   const dark = useDarkMode();
   const [statsVisible, setStatsVisible] = useState(false);
@@ -519,7 +522,7 @@ export default function Home() {
                   {cat.tools.map(tool => (
                     <div key={tool} className="text-neutral-500 dark:text-neutral-400 text-xs">• {tool}</div>
                   ))}
-                  <div className="text-indigo-500 text-xs font-semibold mt-2">+{Math.max(0, (toolCounts.counts[cat.slug] || cat.count) - cat.tools.length)} more tools</div>
+                  {moreLabel((toolCounts.counts[cat.slug] || cat.count) - cat.tools.length) && <div className="text-indigo-500 text-xs font-semibold mt-2" data-more-tools>{moreLabel((toolCounts.counts[cat.slug] || cat.count) - cat.tools.length)}</div>}
                 </div>
               </Link>
             ))}

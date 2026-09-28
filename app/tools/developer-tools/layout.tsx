@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "Developer Tools — Json, Base64, URL Encoding, and More" },
+  title: { absolute: "Developer Tools — JSON, Base64, URL Encoding, and More" },
   description: "Developer Tools is a free online suite of utilities to help programmers and web developers streamline their workflow.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools" },
   openGraph: {
-    title: "Developer Tools — Json, Base64, URL Encoding, and More",
+    title: "Developer Tools — JSON, Base64, URL Encoding, and More",
     description: "Developer Tools is a free online suite of utilities to help programmers and web developers streamline their workflow.",
     url: "https://www.onlineconvertools.com/tools/developer-tools",
   },

@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import { videoReRecordSupport, captureMediaElementStream, finishRecording } from '../../../lib/mediaSupport';
+import IosOriginalNote from '../../../components/IosOriginalNote';
 export default function LegacyVideoCompressorPage() {
   const [file, setFile] = useState(null);
   const [quality, setQuality] = useState(0.5);
@@ -88,6 +89,7 @@ export default function LegacyVideoCompressorPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Video Compressor</h1>
         <p className="text-neutral-500 text-center mb-8">Compress video files</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
+          <IosOriginalNote />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
             <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />
@@ -103,7 +105,7 @@ export default function LegacyVideoCompressorPage() {
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">Before</div><div className="font-bold">{fmt(result.original)}</div></div>
                 <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">After</div><div className="font-bold text-indigo-400">{fmt(result.size)}</div></div>
-                <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">Saved</div><div className={`font-bold ${result.size <= result.original ? 'text-green-400' : 'text-red-400'}`}>{Math.round((1-result.size/result.original)*100)}%</div></div>
+                <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">{result.size <= result.original ? 'Saved' : 'Larger by — keep your original'}</div><div className={`font-bold ${result.size <= result.original ? 'text-green-600' : 'text-amber-700'}`}>{Math.abs(Math.round((1-result.size/result.original)*100))}%</div></div>
               </div>
               <video controls src={result.url} className="w-full rounded-xl" />
               <a href={result.url} download={`compressed.${result.ext}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a>

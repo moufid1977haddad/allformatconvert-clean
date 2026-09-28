@@ -11,18 +11,18 @@ import {
 } from 'lucide-react';
 
 const categories = [
-  { href: '/tools/pdf-tools', label: 'PDF', icon: FileText },
-  { href: '/tools/image-tools', label: 'Image', icon: ImageIcon },
-  { href: '/tools/gif-tools', label: 'GIF', icon: Film },
-  { href: '/tools/audio-tools', label: 'Audio', icon: Headphones },
-  { href: '/tools/video-tools', label: 'Video', icon: Video },
-  { href: '/tools/text-tools', label: 'Text', icon: Type },
-  { href: '/tools/file-tools', label: 'File', icon: Folder },
-  { href: '/tools/qr-barcodes-tools', label: 'QR', icon: QrCode },
-  { href: '/tools/converter-tools', label: 'Convert', icon: Repeat },
-  { href: '/tools/developer-tools', label: 'Dev', icon: Code },
-  { href: '/tools/math-tools', label: 'Math', icon: Calculator },
-  { href: '/tools/ai-tools', label: 'AI', icon: Bot },
+  { href: '/tools/pdf-tools', name: 'PDF Tools', label: 'PDF', icon: FileText },
+  { href: '/tools/image-tools', name: 'Image Tools', label: 'Image', icon: ImageIcon },
+  { href: '/tools/gif-tools', name: 'GIF Tools', label: 'GIF', icon: Film },
+  { href: '/tools/audio-tools', name: 'Audio Tools', label: 'Audio', icon: Headphones },
+  { href: '/tools/video-tools', name: 'Video Tools', label: 'Video', icon: Video },
+  { href: '/tools/text-tools', name: 'Text Tools', label: 'Text', icon: Type },
+  { href: '/tools/file-tools', name: 'File Tools', label: 'File', icon: Folder },
+  { href: '/tools/qr-barcodes-tools', name: 'QR & Barcode Tools', label: 'QR', icon: QrCode },
+  { href: '/tools/converter-tools', name: 'Converter Tools', label: 'Convert', icon: Repeat },
+  { href: '/tools/developer-tools', name: 'Developer Tools', label: 'Dev', icon: Code },
+  { href: '/tools/math-tools', name: 'Math Tools', label: 'Math', icon: Calculator },
+  { href: '/tools/ai-tools', name: 'AI Tools', label: 'AI', icon: Bot },
 ];
 
 // Maps a category's group count to a literal xl:grid-cols-N class so Tailwind's
@@ -808,13 +808,14 @@ export default function Navbar() {
                 >
                   <Link
                     href={cat.href}
-                    title={cat.label}
+                    title={cat.name}
                     className={`flex items-center gap-0.5 min-[1410px]:gap-1 px-0.5 min-[1410px]:px-2 py-1 text-[11px] min-[1410px]:text-xs font-bold uppercase tracking-wide transition border-b-2 text-black dark:text-white ${isActive ? 'border-current' : 'border-transparent hover:opacity-60'}`}
                   >
                     <span className="flex items-center justify-center shrink-0 rounded-md bg-neutral-100 dark:bg-neutral-800 w-[29px] h-[29px]">
                       <cat.icon className={`w-[21px] h-[21px] ${catColor}`} aria-hidden="true" />
                     </span>
-                    <span className="sr-only min-[2100px]:not-sr-only min-[2100px]:truncate min-[2100px]:max-w-[64px]">{cat.label}</span>
+                    <span className="sr-only">{cat.name}</span>
+                    <span aria-hidden="true" className="hidden min-[2100px]:inline-block min-[2100px]:truncate min-[2100px]:max-w-[64px]">{cat.label}</span>
                     <svg xmlns="http://www.w3.org/2000/svg" className={`w-2.5 h-2.5 shrink-0 opacity-50 transition-transform ${openCat === cat.href ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
@@ -917,13 +918,13 @@ export default function Navbar() {
                               <span className="flex items-center justify-center shrink-0 rounded-md bg-neutral-100 dark:bg-neutral-800 w-8 h-8">
                                 <cat.icon className={`w-[18px] h-[18px] ${catColor}`} aria-hidden="true" />
                               </span>
-                              <span className="truncate">{cat.label}</span>
+                              <span className="truncate">{cat.name}</span>
                             </Link>
                             <button
                               type="button"
                               onClick={() => setMobileOpenCat(expanded ? null : cat.href)}
                               aria-expanded={expanded}
-                              aria-label={`${expanded ? 'Collapse' : 'Expand'} ${cat.label}`}
+                              aria-label={`${expanded ? 'Collapse' : 'Expand'} ${cat.name}`}
                               className="shrink-0 p-2.5"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" className={`w-3.5 h-3.5 opacity-50 transition-transform ${expanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">

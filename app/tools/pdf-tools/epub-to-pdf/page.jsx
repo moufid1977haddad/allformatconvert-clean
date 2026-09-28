@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 
@@ -172,6 +173,7 @@ export default function EpubToPdfPage() {
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
   const inputRef = useRef();
+  const [pdf, offer, clearPdf] = useDownloadable();
 
   const handleFile = (e) => {
     const f = e.target.files[0];
@@ -180,12 +182,14 @@ export default function EpubToPdfPage() {
     setStatus('');
     setError('');
     setDone(false);
+    clearPdf();
   };
 
   const convert = async () => {
     if (!file) return;
     setLoading(true);
     setDone(false);
+    clearPdf();
     setError('');
     setStatus('Parsing EPUB file...');
 
@@ -229,14 +233,7 @@ export default function EpubToPdfPage() {
       const result = await convertOffice({ file: new File([htmlBlob], 'book.html', { type: 'text/html' }), endpoint: '/api/convert-html-to-pdf', onStage: setStage });
       const pdfBlob = result.blob;
       const filename = (file.name.replace(/\.epub$/i, '') || 'document') + '.pdf';
-      const url = URL.createObjectURL(pdfBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      offer(pdfBlob, filename);
       setDone(true);
       setStatus('');
     } catch (err) {
@@ -270,8 +267,8 @@ export default function EpubToPdfPage() {
           )}
           {done && !error && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
-              <div className="text-green-500 text-xl font-bold mb-1">PDF downloaded!</div>
-              <p className="text-neutral-500 text-sm">Check your browser's downloads for the converted file.</p>
+              <div className="text-green-500 text-xl font-bold mb-1">PDF ready</div>
+              <DownloadReady file={pdf} className="mt-3" />
             </div>
           )}
         </div>
@@ -282,7 +279,7 @@ export default function EpubToPdfPage() {
         howTo={[
           "Click the upload area and select an EPUB file.",
           "Click \"Convert to PDF\". The file is parsed locally, then the extracted content is uploaded for PDF rendering.",
-          "Wait for the download to start automatically.",
+          "Once the PDF is ready, click 'Download'.",
           "Open the downloaded PDF to confirm it looks right."
         ]}
         faqs={[
@@ -295,7 +292,7 @@ export default function EpubToPdfPage() {
         tips={[
           "DRM-protected EPUBs from some stores aren't supported — this converter only handles unencrypted files.",
           "Chapters are separated by page breaks in the resulting PDF for easier navigation.",
-          "Very large books may take a little longer to render — keep the tab open until the download starts."
+          "Very large books may take a little longer to render — keep the tab open until the Download button appears."
         ]}
       />
     </div>

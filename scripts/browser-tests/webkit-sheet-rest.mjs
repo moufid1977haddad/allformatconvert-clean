@@ -61,7 +61,8 @@ const tinyPdf = await (async () => { const d = await PDFDocument.create(); d.add
   await ctx.route('**/api/convert-to-pdf', async (r) => { asked = r.request().postDataBuffer()?.length || 0; return r.fulfill({ status: 200, headers: { 'Content-Type': 'application/pdf' }, body: tinyPdf }); });
   const p = await ctx.newPage(); await p.goto(origin + '/tools/pdf-tools/word-to-pdf', { waitUntil: 'networkidle' });
   await p.locator('input[type=file]').setInputFiles(path.resolve('docs/audit/fixtures-fidelite/fidelite-01.docx'));
-  const d = await Promise.all([p.waitForEvent('download', { timeout: 60000 }), p.getByRole('button', { name: 'Download PDF' }).click()]).then(([x]) => x).catch(() => null);
+  await p.getByRole('button', { name: 'Convert to PDF' }).click();
+  const d = await p.locator('a[data-download]').waitFor({ timeout: 60000 }).then(() => Promise.all([p.waitForEvent('download'), p.locator('a[data-download]').click()])).then(([x]) => x).catch(() => null);
   if (!d) check('word to PDF (route played): result', false, (await p.locator('[role=alert]').allTextContents()).join(' '));
   else { const f = path.join(tmp, d.suggestedFilename()); await d.saveAs(f); check('word to PDF (route played): the .docx is sent, the PDF returned is downloaded as .pdf', asked > 200 && fs.readFileSync(f).equals(tinyPdf) && f.endsWith('.pdf'), `${asked} B sent · ${path.basename(f)}`); }
   await p.close();

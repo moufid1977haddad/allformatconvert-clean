@@ -12,7 +12,7 @@ export default function QrBarcodesToolsPage() {
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-2 flex items-center justify-center gap-2"><CategoryIcon slug="qr-barcodes-tools" className={`w-8 h-8 ${categoryColors['qr-barcodes-tools']}`} /> QR & Barcodes Tools</h1>
+        <h1 className="text-4xl font-bold text-center mb-2 flex items-center justify-center gap-2"><CategoryIcon slug="qr-barcodes-tools" className={`w-8 h-8 ${categoryColors['qr-barcodes-tools']}`} /> QR & Barcode Tools</h1>
         <p className="text-neutral-500 text-center mb-10">All your QR and barcode tools in one place - {tools.length} tools</p>
         <div className="flex flex-wrap gap-4 justify-center">
           {tools.map((tool) => (
@@ -26,13 +26,13 @@ export default function QrBarcodesToolsPage() {
       </div>
       <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Qr Barcodes Tools</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">QR Barcodes Tools is a free online platform that allows you to generate, decode, and manage QR codes and barcodes instantly without any software installation. Perfect for businesses, marketers, and individuals who need to create scannable codes for URLs, text, contact information, and more.</p>
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About QR & Barcode Tools</h2>
+          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">QR & Barcode Tools is a free online platform that allows you to generate, decode, and manage QR codes and barcodes instantly without any software installation. Perfect for businesses, marketers, and individuals who need to create scannable codes for URLs, text, contact information, and more.</p>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Qr Barcodes Tools</h2>
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use QR & Barcode Tools</h2>
           <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the QR Barcodes Tools website and select whether you want to generate or decode a QR code or barcode</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the QR & Barcode Tools website and select whether you want to generate or decode a QR code or barcode</li>
             <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Enter the information you want to encode, such as a URL, text, phone number, or email address into the input field</li>
             <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Customize your QR code with colors, size, and error correction level if desired</li>
             <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the generate button and download your QR code in PNG, SVG, or PDF format for immediate use</li>
@@ -41,7 +41,7 @@ export default function QrBarcodesToolsPage() {
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
           <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is QR Barcodes Tools completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, QR Barcodes Tools is completely free with no hidden charges, registration requirements, or premium features locked behind paywalls.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is QR & Barcode Tools completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, QR & Barcode Tools is completely free with no hidden charges, registration requirements, or premium features locked behind paywalls.</p></div>
             <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What types of data can I encode into a QR code?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">You can encode URLs, plain text, email addresses, phone numbers, SMS messages, WiFi credentials, contact information (vCard), and calendar events.</p></div>
             <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I track scans of my generated QR codes?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">The basic version provides static QR codes without tracking, but advanced features may include analytics in future updates.</p></div>
             <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats are available for download?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Generated QR codes can be downloaded in PNG, SVG, and PDF formats, ensuring compatibility with various printing and digital applications.</p></div>

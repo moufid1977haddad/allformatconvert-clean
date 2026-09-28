@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
 import { MAX_ROWS, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL, MOBILE_MAX_ROWS, MOBILE_MAX_FILE_SIZE_BYTES, MOBILE_MAX_FILE_SIZE_LABEL } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
+import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 
 const MAX_ROWS_LABEL = MAX_ROWS.toLocaleString();
 const MOBILE_MAX_ROWS_LABEL = MOBILE_MAX_ROWS.toLocaleString();
@@ -57,6 +58,7 @@ export default function ExcelToJsonPage() {
   const [sheetNames, setSheetNames] = useState(null);
   const inputRef = useRef();
   const workerRef = useRef(null);
+  const [result, offer, clearResult] = useDownloadable();
 
   useEffect(() => {
     setIsMobile(isMobileDevice());
@@ -73,6 +75,7 @@ export default function ExcelToJsonPage() {
     if (!f) return;
     setError('');
     setStatus('');
+    clearResult();
     if (f.size > maxFileBytes) {
       setError(`This file is ${(f.size / (1024 * 1024)).toFixed(0)} MB, which is over the ${maxFileLabel} limit${isMobile ? ' on this device' : ''}. Try splitting it into smaller files first.`);
       setFileName('');
@@ -92,12 +95,14 @@ export default function ExcelToJsonPage() {
     setConverting(false);
     setProgress(0);
     setPhase('');
+    clearResult();
     setStatus('Cancelled.');
   };
 
   const convertFile = (f) => {
     setError('');
     setStatus('');
+    clearResult();
     setProgress(0);
     setPhase('reading');
     setSheetNames(null);
@@ -117,18 +122,11 @@ export default function ExcelToJsonPage() {
         setProgress(100);
         setConverting(false);
         workerRef.current = null;
-        const url = URL.createObjectURL(msg.blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'converted.json';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
+        offer(msg.blob, 'converted.json');
         setStatus(
           msg.sheetNames && msg.sheetNames.length > 1
-            ? `Downloaded! ${msg.sheetNames.length} sheets, ${msg.rowCount.toLocaleString()} rows total.`
-            : `Downloaded! ${msg.rowCount.toLocaleString()} rows.`
+            ? `JSON ready: ${msg.sheetNames.length} sheets, ${msg.rowCount.toLocaleString()} rows total.`
+            : `JSON ready: ${msg.rowCount.toLocaleString()} rows.`
         );
       } else if (msg.type === 'row_limit') {
         setConverting(false);
@@ -177,15 +175,16 @@ export default function ExcelToJsonPage() {
             </div>
           )}
           {status && !converting && <p className="text-center text-sm text-green-600 dark:text-green-400">{status}</p>}
+          {!converting && <DownloadReady file={result} />}
         </div>
       </div>
       <SeoContent
         title="Excel to JSON"
-        description="Excel to JSON reads an uploaded .xlsx, .xls, .ods, or .csv file using the xlsx library and converts every sheet to an array of row objects, entirely in your browser — your file is never uploaded to a server. Reading and parsing run off the main thread in a Web Worker, so the page stays responsive even on large files, and the result downloads automatically as a .json file. The result is a single JSON object keyed by sheet name, with each sheet's first row used as the property names for that sheet's rows."
+        description="Excel to JSON reads an uploaded .xlsx, .xls, .ods, or .csv file using the xlsx library and converts every sheet to an array of row objects, entirely in your browser — your file is never uploaded to a server. Reading and parsing run off the main thread in a Web Worker, so the page stays responsive even on large files, and the result is offered as a .json file to download. The result is a single JSON object keyed by sheet name, with each sheet's first row used as the property names for that sheet's rows."
         howTo={[
           "Click the upload area and select an .xlsx, .xls, .ods, or .csv file.",
           "Conversion runs automatically in the background — no button click needed.",
-          "The result downloads automatically as converted.json once it's ready.",
+          "Once it's ready, click 'Download' to save converted.json.",
           "Open it in a code editor or your target application."
         ]}
         faqs={[
@@ -193,7 +192,7 @@ export default function ExcelToJsonPage() {
           { q: "Is my file uploaded to a server?", a: "No, conversion happens entirely in your browser using the xlsx library, in a background Web Worker so the page never freezes." },
           { q: "Can I convert multiple sheets at once?", a: "Yes — every sheet in the workbook is converted automatically, each becoming its own array under a key named after the sheet. There's no option to merge sheets or select specific ones." },
           { q: "Why is there a row and file-size limit?", a: `Excel files can't be parsed incrementally the way plain text can, so converting a very large workbook risks the tab running out of memory or taking too long. Uploaded files are capped at ${maxRowsLabel} rows across all sheets combined and ${maxFileLabel}${isMobile ? ' on this device' : ' on desktop'}, measured to convert reliably.` },
-          { q: "Can I download the JSON as a file, or is it only shown on the page?", a: "It downloads automatically as converted.json — there's no inline preview, since a large workbook's JSON output can be too big to safely render on the page." }
+          { q: "Can I download the JSON as a file, or is it only shown on the page?", a: "As a file — click 'Download' to save converted.json once it's ready. There's no inline preview, since a large workbook's JSON output can be too big to safely render on the page." }
         ]}
         tips={[
           "Each sheet's first row becomes the property names for that sheet's row objects, so make sure your headers are in row 1.",

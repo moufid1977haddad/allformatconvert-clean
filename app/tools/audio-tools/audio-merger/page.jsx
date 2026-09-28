@@ -11,6 +11,7 @@ import {
 } from '../../../lib/audioMerge';
 import { opusOnService, encodeOpusOnService } from '../../../lib/opusService';
 import { reportToolError } from '../../../lib/reportError';
+import PlayablePreview from '../../../components/PlayablePreview';
 
 const LOSSLESS = MERGE_FORMATS.filter((f) => f.lossless);
 const COMPRESSED = MERGE_FORMATS.filter((f) => !f.lossless);
@@ -396,9 +397,7 @@ export default function AudioMergerPage() {
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {result && (
             <div className="space-y-2">
-              {result.noPreview
-                ? <p className="text-sm text-neutral-600 text-center" data-testid="no-preview">Your browser can&apos;t play {result.label} files, so there is no preview — the downloaded file is complete and plays in apps that support {result.label}.</p>
-                : <audio controls src={result.url} className="w-full" onError={() => setResult((r) => (r ? { ...r, noPreview: true } : r))} />}
+              <PlayablePreview src={result.url} name={result.name} />
               <p className="text-xs text-neutral-500 text-center">{result.label} · {fmtTime(result.secs)} · {fmtSize(result.size)}</p>
               <a href={result.downloadUrl} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download {result.name}</a>
             </div>

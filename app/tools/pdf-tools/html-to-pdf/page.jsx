@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 
@@ -13,12 +14,14 @@ export default function HtmlToPdfPage() {
   const [error, setError] = useState('');
   const [mode, setMode] = useState('file');
   const inputRef = useRef();
+  const [pdf, offer, clearPdf] = useDownloadable();
 
   const handleFile = async (e) => {
     const f = e.target.files[0];
     e.target.value = '';
     setFile(f);
     setDone(false);
+    clearPdf();
     // Checked on selection: the HTML is uploaded as-is, so its size is the upload size.
     const sizeCheck = checkOfficeSize(f, MAX_HTML_STAGED_BYTES);
     setError(sizeCheck.ok ? '' : sizeCheck.message);
@@ -33,20 +36,14 @@ export default function HtmlToPdfPage() {
     if (!sizeCheck.ok) { setError(sizeCheck.message); return; }
     setLoading(true);
     setDone(false);
+    clearPdf();
     setError('');
     try {
       setStage(null);
       const result = await convertOffice({ file: new File([uploadBlob], 'document.html', { type: 'text/html' }), endpoint: '/api/convert-html-to-pdf', onStage: setStage });
       const pdfBlob = result.blob;
       const filename = (file?.name ? file.name.replace(/\.[^.]+$/, '') : 'document') + '.pdf';
-      const url = URL.createObjectURL(pdfBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      offer(pdfBlob, filename);
       setDone(true);
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -62,8 +59,8 @@ export default function HtmlToPdfPage() {
         <p className="text-neutral-500 text-center mb-8">Convert HTML files or code to PDF in your browser</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="flex gap-2">
-            <button onClick={() => { setMode('file'); setHtmlContent(''); setFile(null); setDone(false); setError(''); }} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'file' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>Upload File</button>
-            <button onClick={() => { setMode('paste'); setHtmlContent(''); setFile(null); setDone(false); setError(''); }} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'paste' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>Paste Code</button>
+            <button onClick={() => { setMode('file'); setHtmlContent(''); setFile(null); setDone(false); clearPdf(); setError(''); }} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'file' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>Upload File</button>
+            <button onClick={() => { setMode('paste'); setHtmlContent(''); setFile(null); setDone(false); clearPdf(); setError(''); }} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'paste' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>Paste Code</button>
           </div>
           {mode === 'file' ? (
             <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
@@ -71,7 +68,7 @@ export default function HtmlToPdfPage() {
               <input ref={inputRef} type="file" accept=".html,.htm" className="hidden" onChange={handleFile} />
             </div>
           ) : (
-            <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm font-mono h-48 resize-none" placeholder="Paste your HTML code here..." value={htmlContent} onChange={(e) => setHtmlContent(e.target.value)} />
+            <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm font-mono h-48 resize-none" placeholder="Paste your HTML code here..." value={htmlContent} onChange={(e) => { setHtmlContent(e.target.value); setDone(false); clearPdf(); }} />
           )}
           <p className="text-neutral-400 text-xs text-center -mt-2">Max {officeMaxLabel(MAX_HTML_STAGED_BYTES)} of HTML</p>
           <button onClick={convert} disabled={!htmlContent || loading || new Blob([htmlContent]).size > officeMaxBytes(MAX_HTML_STAGED_BYTES)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
@@ -82,19 +79,19 @@ export default function HtmlToPdfPage() {
           )}
           {done && !error && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
-              <div className="text-green-400 text-xl font-bold mb-2">PDF downloaded!</div>
-              <p className="text-neutral-500 text-sm">Check your browser&apos;s downloads for the converted file.</p>
+              <div className="text-green-400 text-xl font-bold mb-2">PDF ready</div>
+              <DownloadReady file={pdf} className="mt-3" />
             </div>
           )}
         </div>
       </div>
       <SeoContent
         title="HTML to PDF"
-        description="HTML to PDF uploads your HTML code or file — including its CSS — to our conversion service, which renders it with a real browser engine (Chromium via Gotenberg) and returns a PDF that downloads automatically. We tested a page with CSS grid, flexbox, a gradient with a shadow, a table with a merged cell, two-column text, an inline SVG, print-only CSS and French accents: it matched what Chrome prints for the same page. The one difference: a font that isn't installed on our servers (Georgia in our test) is replaced by a similar one (Liberation Serif), so line breaks can shift slightly."
+        description="HTML to PDF uploads your HTML code or file — including its CSS — to our conversion service, which renders it with a real browser engine (Chromium via Gotenberg) and returns a PDF for you to download. We tested a page with CSS grid, flexbox, a gradient with a shadow, a table with a merged cell, two-column text, an inline SVG, print-only CSS and French accents: it matched what Chrome prints for the same page. The one difference: a font that isn't installed on our servers (Georgia in our test) is replaced by a similar one (Liberation Serif), so line breaks can shift slightly."
         howTo={[
           "Choose 'Upload File' to select an .html file, or 'Paste Code' to type or paste HTML directly.",
           "Click 'Convert to PDF'. Your HTML is uploaded and rendered by a real browser engine into a PDF.",
-          "Wait for the download to start automatically.",
+          "Once the PDF is ready, click 'Download'.",
           "Open the downloaded PDF to confirm it looks right."
         ]}
         faqs={[
@@ -107,7 +104,7 @@ export default function HtmlToPdfPage() {
           "Use absolute image URLs (starting with https://) rather than relative paths, since a relative path won't resolve on the conversion service.",
           "Check your HTML with your browser's Print preview first — in our test the PDF matched Chrome's print output, and print-only CSS (@media print) applies.",
           "For pasted code, make sure to include a full HTML document (with <html> and <body> tags) for the most reliable rendering.",
-          "Very large or complex HTML files may take a little longer to convert — keep the tab open until the download starts."
+          "Very large or complex HTML files may take a little longer to convert — keep the tab open until the Download button appears."
         ]}
       />
     </div>

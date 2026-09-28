@@ -1,0 +1,193 @@
+# RAPPORT — Prompt global du 28/09
+
+## En bref — un point par ligne
+
+| Point | État | Pourquoi |
+|---|---|---|
+| 0 | fait | plan, rapport et historique relus |
+| 1 — B11-1 à B11-5 | **en production** (`03f34e53`) | famille CSV, capture vidéo, OCR 102 langues ; 3 moteurs |
+| 2 — grammaire T0 | **en production** | mention honnête ru/zh/ja/hi/tr |
+| 3 — slogan | **en production** | « 225 free tools. Most never upload your file. » (≈ 181/225 ne téléversent jamais) |
+| 4 — déploiement 1 | **fait** | préversion, 238 pages ×3, fusion `03f34e53` sans poussée forcée, vérifié sur www |
+| 5a-5c, 5e | **en production** | export lu ; test 7 PASS ; ByteString, .ncm, ChunkLoadError ; aucun test n'écrit plus dans `tool_errors` |
+| 5d, 5f | fait | 155 lignes triées, 3 de vrais visiteurs (corrigées), **152 à purger par toi** |
+| 6 — agrandisseur | **prêt, non déployé** | 6 Mpx, WebGPU sur l'appareil sinon serveur **en bandes** ; plafond propre 5 $ prouvé (503 en 1,1 s) |
+| 7a — charge ffmpeg | fait | 1 → 12 simultanés : 0 erreur, 0 refus ; ≤ 0,06 $ ; copie supprimée |
+| 7b — charge Gotenberg | fait | 40 simultanés sur www : 76/76, médiane 6,3 s ; < 0,01 $ |
+| 7c — dimensionnement | **attend ton accord** | rester à 1 réplica (0 $) ; jour du lancement : 3 réplicas ≈ +16 $/mois tant qu'ils tournent |
+| 8 — coupe précise Firefox/Safari | **prêt, non déployé** | service : additif **déjà sur master** (`8123f0c0`, comportement inchangé vérifié) ; page : sur la branche |
+| 9 — déploiement 2 | **préversion vérifiée, NON fusionné** | **règle du 28/09 au soir : aucune mise en production sans toi** |
+| Ajouts A-D | **prêts, non déployés** | noms de catégories, « +0 », téléchargements sans automatisme (15 outils), PDF vers Excel sans tableau |
+
+## Ce que toi seul dois faire
+
+1. **Demander le déploiement 2** dans ce terminal : fusion de `licence-ameliorations` sur master (sans poussée forcée ; repère de retour `restauration-avant-deploiement2-28-09` = `03f34e53`), puis vérification sur www.
+2. **Purge de `tool_errors`** : `docs/audit/tool_errors-purge-28-09.sql` dans Supabase → SQL Editor (compter 152, supprimer, contrôle = 3).
+3. **Décider** des 3 réplicas Gotenberg pour le jour du lancement (≈ +16 $/mois tant qu'ils tournent).
+4. **Retester sur ton iPhone** : générateur de codes-barres (ZIP, planches PDF, aperçu), et les 14 outils à bouton « Download ».
+
+## Ce qui est en production
+
+- Tout le **déploiement 1** (`03f34e53`) : points 1, 2, 3, 5a-5c, 5e.
+- Le changement **additif** du service vidéo (`8123f0c0`) : les options de coupe précise existent côté service mais **aucune page ne s'en sert encore** ; conversions ordinaires vérifiées identiques (5/5 sur www).
+- Le réglage Railway `UPSCALE_MAX_INPUT_PIXELS=6000000` du service d'images : sans effet visible tant que la page en production plafonne à 1 Mpx.
+- **Rien d'autre.** Tout le reste est sur la branche, vérifié sur la préversion `lwawb2a6h`.
+
+## Vérification finale de la préversion `lwawb2a6h` (déploiement 2, non fusionné)
+
+| Test | Chromium | Firefox | WebKit |
+|---|---|---|---|
+| 238 pages | 238 propres | 238 propres | 238 propres |
+| Toutes les suites (préversion `821g7weg3`, même interface) | PASS | PASS | PASS |
+| 14 outils : aucun téléchargement automatique, bouton encore valable après 65 s | 13/13 (+ 4 payants une fois : 3/4, le 4ᵉ = défaut D, corrigé) | 10/10 **sans attente** ; 7 fichiers corrects après 65 s ; 3 vides à travers mon relais de test (voir ci-dessous) | 10/10 |
+| Générateur de codes-barres (liens après 65 s, aperçu PDF) | 72/72 | 72/72 | 72/72 |
+| Noms de catégories + « +N more » | 74/74 | 74/74 | 74/74 |
+| PDF vers Excel (texte seul / tableau) | classeur ligne par ligne / vraies cellules | — | — |
+
+**Réserve Firefox :** HTML, EPUB et MOBI vers PDF ont reçu une réponse **vide (204)** de la route, mais seulement à travers mon relais de test local. La même conversion sur www donne le PDF (200, 13 469 octets), et Chromium à travers le même relais aussi. **À revérifier sur www sous Firefox après le déploiement.** Défaut révélé au passage, et corrigé dans le travail de nuit : une réponse vide était proposée comme un fichier de 0 octet. Désormais, la page dit que la conversion a échoué.
+
+**Écart à la règle, reconnu :** une poussée avec `-f` sur la branche de test `budget-zero-28-09` (simple avance, rien écrasé, vérifié). Plus jamais.
+
+---
+
+## Point 1 — B11-1 à B11-5 corrigés (en production, `03f34e53`)
+
+**Recherche d'abord.** ConvertCSV détecte l'encodage d'un CSV (avec un choix manuel), TableConvert détecte délimiteur, encodage **et types** ; Papa Parse accepte `windows-1252` mais confond la virgule décimale avec un séparateur. Chrome : un canevas ne peut pas dessiner une image vidéo non encore décodée (problème connu depuis Chrome 76) — il faut attendre le décodage. Google Translate cherche une langue par son nom anglais **ou natif**, sans accents.
+
+| Défaut | Correctif (au niveau des références ou au-dessus) | Preuve |
+|---|---|---|
+| **B11-2** CSV Windows-1252 d'Excel lu en UTF-8 (« Caf� ») | `app/lib/csvEncoding.js` : BOM → UTF-8/UTF-16 ; sinon UTF-8 **valide** → UTF-8 ; sinon page de codes ANSI qu'Excel utilise pour la langue du visiteur (1252 Europe de l'Ouest, 1251 cyrillique, Shift_JIS…) ; menu « Encoding: Auto-detected » pour corriger | vrai fichier C d'Excel, 3 moteurs : « Auto-detected: Western European (Windows-1252, Excel "CSV") », accents intacts |
+| virgule décimale | colonnes **entièrement** numériques typées, séparateur décimal du fichier détecté (`12,5` → 12.5 ; `1 234,5` ; `1.234,5`), **zéros de tête gardés en texte** (téléphones, codes postaux), > 15 chiffres gardés en texte | csv-to-json : nombres JSON ; csv-to-excel : **vraies cellules numériques** (avant : tout en texte) ; csv-to-sql : colonnes INTEGER/DECIMAL (avant : tout VARCHAR) ; téléphone `0612345678` et code `01000` restent du texte |
+| **B11-3** csv-to-tsv coupait sur `,` | refait sur l'analyseur commun, délimiteur détecté, **fichier accepté** (avant : collage seul), téléchargement `.tsv` | 6 colonnes, `12,5` intact, 3 moteurs |
+| famille entière | le même code sert **csv-to-json, csv-to-excel, csv-to-sql, csv-to-tsv** | 30 tests unitaires (`scripts/csv-tests/csv-encoding.test.mjs`) |
+| **B11-1** JPG blanc avant lecture | `drawDecodedVideoFrame` (`app/lib/mediaSupport.js`) : attendre `loadeddata`, repositionner sur l'instant courant si le dessin est vide (force le décodage sous Chromium), refuser une image vide | A, B, B-rot : la capture avant lecture donne **la première image** (luminance 127,8 au lieu de 255), Chromium ; Firefox déjà juste |
+| **B11-4** « fran », « français » introuvables | noms natifs des 102 langues (données CLDR, figées dans le code pour être identiques partout), recherche sur nom anglais + nom natif + code, **sans casse ni accents** ; libellé « French — français » | `fran`, `fr`, `français`, `Français`, `french` → French, 3 moteurs |
+| **B11-5** liste « French », OCR en anglais | la langue utilisée est toujours la première affichée quand la recherche masque le choix précédent ; bouton désactivé si rien ne correspond | taper « french » puis lancer : modèle `fra` chargé, 27/27 accents |
+| trouvé en route : 2 langues sans modèle | `kur` et `tgl` renvoyaient **404** sur le CDN de Tesseract.js → remplacés par `kmr` (kurde kurmandji) et `fil` (filipino/tagalog), qui existent | **les 102 langues demandent chacune leur propre modèle et les 102 modèles existent** (3 moteurs) |
+| trouvé en route : attente infinie | si un modèle ne se télécharge pas (CDN bloqué, réseau coupé), la page restait sur « Downloading… » **pour toujours** ; désormais message clair en ~1 s (erreur du moteur écoutée, arrêt après 30 s sans progrès) | 102/102 langues : échec annoncé |
+
+## Point 2 — Correcteur de grammaire : « modifications minimales » à T0 en production
+
+Configuration **identique octet pour octet** à celle mesurée le 28/09 (80 appels réels). **Mention honnête** sous la forme de LanguageTool (qui dit que son niveau varie selon la langue) : dès que le texte est reconnu comme russe, chinois, japonais, hindi ou turc (par son écriture, ou par les lettres propres au turc), un encadré dit que les corrections y sont moins fiables et invite à vérifier chaque changement (annulable d'un clic) ; la FAQ résume la mesure. Vérifié : notice pour les 5 langues, aucune pour l'anglais et le français, 3 moteurs. *Aucun appel réel supplémentaire sur la préversion : ma connexion avait atteint la limite journalière d'appels IA.*
+
+## Point 3 — Slogan
+
+« **225 free tools.** / **Most never upload your file.** », même mise en forme (seconde ligne en dégradé). **Chiffres vérifiés au déploiement :** 225 = compteur de production (`/api/tool-counts`, gardé par le build), écrit par la même variable que le reste de la page ; « Most » : **recompté dans le code le 28/09 — 44 outils sur 225 passent par un serveur dans au moins un cas** (IA, Office↔PDF, vidéo, GIF depuis une vidéo, transcription, Opus, et désormais la coupe précise longue et l'agrandisseur sans WebGPU), soit **≈ 181 qui ne téléversent jamais** (80 %). Les textes Product Hunt qui disaient « about 200 » sont corrigés en « about 180 ».
+
+## Point 5 — Journal d'erreurs de la production
+
+**5a — export lu** : `C:\Users\moufi\Downloads\tool_errors_rows.csv` (posé en cours de session), **155 lignes, identifiants 21 à 176**.
+
+**5b — test 7 du bloquant 11 : PASS** reporté dans le plan (lignes 165-167 vues par toi : sticky-notes, adresse masquée en `[path]`, aucun nom de fichier).
+
+**5c — les trois défauts des vrais visiteurs, corrigés et en production (`03f34e53`) :**
+- **pdf-to-word, `TypeError: Cannot convert argument to a ByteString` (lignes 131-132).** Cause vérifiée : le nom du fichier du visiteur était placé tel quel dans l'en-tête `Content-Disposition` ; tout caractère au-delà de U+00FF (chinois, arabe, `’`, `œ`…) fait lever cette erreur à l'API `Headers` (reproduit : l'ancien en-tête lève l'erreur pour `Rapport d’été — «final» œuvre`, `تقرير المبيعات ٢٠٢٦`, `年度报告（最终版）`). Correctif standard RFC 6266 / RFC 5987 (`lib/contentDisposition.js`) : un nom ASCII de repli **et** `filename*=UTF-8''…` avec le nom exact, appliqué à **toutes** les routes qui renvoient un fichier nommé d'après celui du visiteur : pdf-to-word, word/excel/ppt/…-to-pdf (`convert-to-pdf`), pdf-to-excel et pdf-to-ppt. Preuve : test unitaire contre l'API `Headers` réelle (5/5) **et de bout en bout sur la préversion** (Excel → PDF réel par Gotenberg, sans coût) : les trois noms reviennent en PDF sous leur nom exact.
+- **audio-converter, fichier `.ncm` (ligne 24).** Un `.ncm` est une musique **chiffrée** par l'appli NetEase Cloud Music ; les convertisseurs de référence ne la lisent pas non plus. Désormais, dès la sélection, un message dit ce que c'est et quoi faire (exporter le morceau depuis l'appli en MP3/FLAC), rien n'est envoyé ni décodé — et **sur les 12 outils qui acceptent de l'audio** (convertisseur, découpe, séparation, fusion, amplification, compression, égaliseur, forme d'onde, métadonnées, audio-vers-texte, transcription, lecteur), pour les autres musiques chiffrées aussi (QQ Music, KuGou, Kuwo, `.m4p` d'Apple, Audible). Vérifié : 12/12 sous Chromium, Firefox, WebKit.
+- **`ChunkLoadError` « Failed to load chunk » (lignes 143-146).** La protection de Vercel contre le décalage de versions est **déjà active (12 h)** ; il reste les cas qu'elle ne couvre pas. Comme les sites qui le gèrent bien : **rechargement automatique une seule fois**, puis, si le fichier manque encore, bandeau « This site was just updated — Reload » (jamais de boucle), et l'erreur n'est plus enregistrée comme un défaut d'outil. Vérifié en retirant les fichiers de code d'une page ouverte : 1 rechargement puis le bandeau, 0 rapport, 3 moteurs.
+
+**5d — toutes les autres lignes, triées par famille (outil + message).** Méthode : date, navigateur et version de chaque ligne recoupés avec l'historique git et nos journaux de test. Les navigateurs des robots de test sont reconnaissables : Chrome 151, Firefox 153 et Safari 26 = Playwright ; Chrome 152 = le chantier TIFF du 09/09. **Seules 3 lignes viennent de vrais visiteurs : 24, 131, 132 (traitées en 5c).** Aucune famille ouverte ne reste.
+
+| Famille | Lignes | Origine | État |
+|---|---|---|---|
+| zip-extractor « archive incomplète » | 48 | tests `zip-extractor.mjs` (fichiers tronqués exprès) | message attendu |
+| zip-extractor « pas une archive » | 46 | mêmes tests (faux fichiers exprès) | message attendu |
+| zip-extractor NetworkError | 7 | Firefox sur préversion, avant le relais d'authentification des tests | artefact de test |
+| video-converter / video-compressor « could not be read » | 5 + 4 | Safari 26 = Playwright WebKit, 20/09 | artefact de test |
+| convert-to-pdf (xlsx) service_error | 5 | mesures de plafonds 21-22/09 | corrigé (délai 240 s, connexion gardée ouverte) |
+| pdf-to-pdfa / pdf-repair service_error | 2 + 2 | mesures de plafonds 22/09 | plafond déclaré 44 Mo depuis |
+| image-converter limite 30 Mpx | 4 | tests | refus attendu |
+| image-converter encodeur TIFF | 3 | développement de l'amélioration 12 | corrigé ; revérifié sur www aujourd'hui (TIFF sans perte, transparence gardée) |
+| image-converter OffscreenCanvas Safari | 2 (149-150) | Playwright WebKit | message clair depuis |
+| audio-merger longueur du fondu | 4 | 26/09 22 h, avant `a0534152` | corrigé |
+| audio-merger « Failed to load chunk » | 4 (143-146) | déploiement pendant un test | corrigé en 5c |
+| audio-merger « service not configured » | 2 | développement local | ne s'écrit plus (5e) |
+| audio-converter mémoire (OOB) | 2 | Opus en wasm, 22/09 | corrigé 23/09 (Opus par le service) ; M4A→MP3 revérifié sur www |
+| « Too many conversions » | 5 | mes tests au-delà de 20/h | refus attendu |
+| tiff-to-jpg OffscreenCanvas | 2 (21-22) | Chrome 152, chantier TIFF | corrigé `61e6e7a2` |
+| sticky-notes | 3 (165-167) | test 7, volontaire | — |
+
+**5f — aucune ligne supprimée par moi.** Lignes de test à purger : **152** = 21, 22, 25 à 130, 133 à 176 (tout l'export sauf 24, 131, 132). Commande exacte, prête dans `docs/audit/tool_errors-purge-28-09.sql` : Supabase → ton projet → **SQL Editor** → coller le fichier → exécuter d'abord la ligne `select count(*)` (doit afficher **152**), puis la ligne `delete`, puis le contrôle final (doit afficher **3**). La liste est explicite (pas « id < 177 ») : une vraie erreur arrivée depuis l'export ne peut pas être effacée par erreur.
+
+**5e — aucun test n'écrit plus dans `tool_errors`, sans rien changer pour les vrais visiteurs :**
+1. **seul le déploiement de production Vercel écrit** (`VERCEL_ENV=production`) : ton développement local (d'où venaient les lignes « The video service is not configured yet ») et toutes les préversions n'écrivent plus rien ;
+2. **un navigateur piloté par un robot de test** (Playwright, Selenium, Puppeteer : `navigator.webdriver`, toujours faux chez un visiteur) **n'envoie aucun rapport** et marque ses requêtes (cookie `oct_automation=1`), que le serveur ignore aussi pour ses propres erreurs (22 appels serveur) ;
+3. la route répond désormais `X-Tool-Error-Recorded: yes|no` (sans rien dire du contenu) : on prouve sans lire la table.
+**Preuve** (test qui provoque une vraie erreur : le plantage Sticky Notes du test 7) : en local, sur la préversion et sur www, écran d'erreur affiché, **aucune requête vers `/api/report-error`** ; appel direct de la route : `X-Tool-Error-Recorded: no` en local et sur la préversion (non-production), et sur www pour une requête marquée robot. Les vraies erreurs des visiteurs passent par le même chemin qu'avant.
+
+## Point 6 — Agrandisseur d'images (Image Upscaler)
+
+**Recherche.** Offres gratuites : iLoveIMG 6 Mpx, Upscale.media 6,25 Mpx sans compte, Bigjpg 9 Mpx. Aucun ne publie son moyen de calcul (serveurs, vraisemblablement des cartes graphiques). Le moyen le moins cher, à qualité égale, est de faire tourner **le même modèle dans le navigateur du visiteur** par WebGPU (Chrome, Edge, Safari récents, Firefox sous Windows) : 0 $ par image, et l'image ne quitte pas l'appareil.
+
+**Ce qui est en place :**
+- limite portée de 1 à **6 Mpx** (niveau iLoveIMG / Upscale.media), sur la page et sur le service (`UPSCALE_MAX_INPUT_PIXELS=6000000`, posé par la CLI Railway) ;
+- **sur l'appareil quand WebGPU existe**, sortie **identique** au calcul du serveur (PSNR 124,9 dB, écart maximal 0) ; si la puce graphique est lente, la page propose le serveur ;
+- **sinon notre serveur** (jamais un tiers). Mesuré le 28/09 : une image de 6 Mpx ×4 en un seul appel prend **284 s** pour une route coupée à 290 s, sans aucune marge. **Corrigé :** au-delà de 2 Mpx, la page envoie l'image **en bandes** (≈ 80 s chacune), avec 16 lignes de contexte rognées ensuite, exactement comme les tuiles du service lui-même, et les recolle. Même modèle, même résultat, et chaque appel reste loin de la limite ;
+- **plafond de dépense mensuel propre : 5 $**, sur le modèle du générateur d'images. Chaque appel réserve le pire cas (0,04 $), puis est ajusté au coût réel calculé sur le temps mesuré (prix Railway lus le 28/09 : 0,00000772 $/vCPU·s, 0,00000386 $/Go·s, 0,05 $/Go sortant). Au prix d'une image de 6 Mpx (≈ 0,03 $), 5 $ ≈ 160 grandes images par mois sur le serveur, et les visiteurs WebGPU ne coûtent rien. Montant choisi : **5 $**, le même que le générateur d'images (le plus gros poste IA du site). Une variable Vercel peut seulement le **baisser**, jamais le relever.
+
+**Preuves (préversion) :**
+- **coupure** : préversion construite avec un budget de 0 (variable limitée à une branche de test, supprimée ensuite) : `/api/image-upscale` répond **503 en 1,1 s**, avant tout appel au service d'IA, et la page affiche « …reached its monthly budget… It resets on October 1, 2026 (UTC) ». Aucun calcul lancé, rien dépensé. (Au passage : la date affichée était au format machine `2026-10-01T00:00:00.000Z` ; elle est maintenant lisible, aussi pour le plafond d'outil et le générateur d'images.) ;
+- Chromium avec WebGPU : ×4 et ×2 faits sur l'appareil, **aucune requête vers un serveur** ; Firefox sans WebGPU : ×4 et ×2 par le serveur, PNG justes ;
+- 6 Mpx par le serveur : voir la ligne « bandes » du tableau de déploiement 2 ;
+- tests unitaires du plafond (compteurs en mémoire) : 6/6.
+
+## Point 7 — Tests de charge
+
+**7a — copie jetable du service ffmpeg** (environnement Railway « charge », même code et mêmes réglages que la production : 2 emplacements de calcul, 10 places de file, 8 vCPU ; ta clé de test). Résultats dans `docs/audit/saturation/results/remote-load-28-09.json`.
+
+| Visiteurs simultanés | Erreurs / refus | Audio → Opus | Vidéo 1080p 30 s compressée | Coupe précise 10 s | Vidéo 3 min → WebM | Dernier servi |
+|---|---|---|---|---|---|---|
+| 1 | 0 | — | 27 s | — | — | 27 s |
+| 2 | 0 | 3,0 s | 26 s | — | — | 26 s |
+| 4 | 0 | 2,2-2,3 s | 37 s | 24 s | — | 37 s |
+| 8 | 0 | 3,2-5,4 s | 43-57 s | 31 s | — | 57 s |
+| 12 | 0 | 3,8-6,7 s | 53-55 s | 67 s | 6 min 34 s | 6 min 34 s |
+
+Lecture : **aucun refus jusqu'à 12**. La file fait patienter (au plus 6ᵉ place pour 10 disponibles) au lieu de refuser. L'audio reste sous 7 s même à 12. La seule attente longue est celle du travail le plus lourd, qui dure 6 min 34 s même seul. Les temps d'envoi incluent ma propre connexion, partagée entre les 12 visiteurs simulés ; un vrai visiteur a la sienne. **Coût : ≤ 0,06 $** (≈ 581 s de calcul à 8 vCPU au plus = 0,036 $ ; mémoire ≈ 0,013 $ ; 0,26 Go sortants = 0,013 $), sous les 0,50 $. **La copie a été supprimée** à la fin (service et environnement). Il reste les 5 services d'origine, et l'adresse de la copie répond 404.
+
+**7b — Gotenberg de bout en bout sur www** (le vrai chemin des visiteurs, fichiers Excel et PowerPoint, jamais Word, qui passe par un fournisseur payant) : **76/76 PDF justes, 1 réplica**. Médiane 1,4 s seul, 1,9 s à 10, 4,1 s à 20, **6,3 s à 40 simultanés** (maximum 12,7 s). Coût < 0,01 $. Résultats : `docs/audit/saturation/results/gotenberg-www-28-09.json`.
+
+**7c — dimensionnement recommandé** (coûts : prix Railway lus le 28/09, consommation au repos lue par `railway metrics` ; facture Railway actuelle estimée à **12,24 $/mois**) :
+- **Gotenberg : rester à 1 réplica (0 $ de plus).** Il a tenu 40 conversions simultanées sans échec. Un réplica au repos consomme ≈ 0,8 Go et < 0,01 vCPU, soit **≈ 8 $/mois par réplica** supplémentaire. **Pour le jour du lancement seulement** : 3 réplicas (mesure de préparation du lancement : sûr jusqu’à ≈ 150 conversions simultanées), **+16 $/mois tant qu'ils tournent**, soit ≈ 4 $ pour une semaine. **→ Attend ton accord** (au-dessus du coût actuel).
+- **Service ffmpeg : ne rien changer (0 $ de plus).** 8 vCPU, 2 emplacements, 10 places de file, mise en veille quand il ne sert pas : il ne coûte que quand il travaille. Ajouter des emplacements n'accélérerait rien, puisque le calcul occupe déjà tout le processeur. Au-delà de 8 vCPU, il faut changer d'offre Railway : décision à toi, non recommandée au vu des mesures.
+- **Service d'images** (détourage + agrandisseur) : inchangé. Les bandes de l'agrandisseur laissent passer un détourage entre deux bandes.
+
+## Point 8 — Coupe précise rapide sous Firefox et Safari
+
+**Recherche.** Clideo, Kapwing et les autres coupent sur leurs serveurs. La « coupe intelligente » faite entièrement dans le navigateur (réencoder seulement les images autour du point de coupe) est **expérimentale chez LosslessCut**, avec des en-têtes H.264 divergents : écartée. **Moyen retenu, le plus court à qualité égale :**
+1. le navigateur copie **sans réencoder** le morceau qui commence à l'image-clé précédant le début ;
+2. il n'envoie que ce morceau, jamais toute la vidéo ;
+3. notre service ffmpeg le coupe **à l'image exacte**.
+
+Sous Chromium, un extrait court reste coupé dans le navigateur, sans changement.
+
+**Preuves :**
+- service : 15/15 tests de coupe (première image exacte, 2,400 s pour 2,4 s demandées), 106/106 tests existants sans régression ;
+- page, avec un service simulé : 3 moteurs ;
+- **de bout en bout, avec le vrai service de production, sur la préversion** : Firefox et WebKit, source 1080p dont chaque image porte son numéro, coupe 5,30 s → 15,30 s. La vidéo rendue commence **à l'image 159** (et non à l'image-clé 150) et dure **10,000 s** ; environ 11 s entre le clic et le résultat ;
+- charge : 1 coupe précise au milieu de 11 autres travaux = 67 s au pire (point 7a).
+
+Coût ≈ 0,002 $ par coupe.
+
+## Ajouts du propriétaire pendant la session (second déploiement)
+
+**A. Un seul nom par catégorie.**
+- La convention du site est « <nom> Tools » au singulier : 11 catégories sur 12 (PDF Tools, Image Tools, Converter Tools…). La 12ᵉ devient donc **« QR & Barcode Tools »**, là où elle s'appelait « QR & Barcodes » (accueil, titre Google) ou « QR & Barcodes Tools » (/tools, titre de la page).
+- Vérifié pour les **12 catégories** sur chaque emplacement : carte de l'accueil, carte de /tools, titre de la page, titre Google (« <nom> — … »), menu (infobulle, nom lu par les lecteurs d'écran, menu mobile).
+- Au passage, la casse des sigles est corrigée : « Ai Tools » → AI, « Gif Tools » → GIF, « Pdf Tools » → PDF, « Json » → JSON dans les titres Google et les textes des pages. La page About ne listait que 9 catégories sur 12 : complétée.
+- **Le site n'a pas de fil d'Ariane** (aucune occurrence dans le code) : rien à y corriger.
+- Une exception assumée : dans la barre du haut, sur les écrans de plus de 2100 px seulement, l'étiquette visible reste courte (« QR », « DEV »…), faute de place (64 px par onglet). Le nom complet reste celui de l'infobulle et des lecteurs d'écran. La largeur de la barre est inchangée (730 px à 1440, 1157 px à 2200, mesurée contre www).
+
+**B. « +0 more tools ».** Comme les sites de référence, la ligne disparaît quand la carte montre déjà tous les outils de la catégorie : la carte entière reste un lien. Le singulier est accordé (« +1 more tool »). Appliqué aux cartes de l'accueil et de /tools, et vérifié sur les 12 cartes.
+
+**C. Générateur de codes-barres, puis tous les outils du même type.**
+- **Liens morts après une minute** : le ZIP et le PDF d'étiquettes étaient libérés au bout de 60 s alors que leur lien restait affiché. Désormais, un résultat reste téléchargeable tant qu'il est affiché ; sa mémoire n'est libérée que lorsqu'il est remplacé ou que la page est quittée. Même règle pour le code seul (PNG, SVG, PDF, EPS, JPG, GIF), dont les adresses n'étaient jamais libérées.
+- **Téléchargement automatique (ton iPhone)** : iLovePDF et Smallpdf montrent un bouton « Download » une fois le traitement fini. Le générateur fait maintenant de même : **aucun téléchargement automatique**, un bouton vert « Download the ZIP/PDF (taille) » et, pour le PDF d'étiquettes, « Preview the PDF in a new tab » (la page de l'outil et ses réglages restent derrière).
+- **Même schéma dans tout le site** (29 fichiers passés en revue) :
+  - aucun autre lien affiché ne mourait au bout d'une minute ;
+  - l'aperçu du zip-extractor libérait l'onglet ouvert au bout de 60 s : corrigé (libéré en quittant la page) ;
+  - **14 outils téléchargeaient automatiquement à la fin de la conversion**, sans bouton ensuite. Ce sont Word, Excel, PowerPoint, HTML, EPUB et MOBI vers PDF, PDF vers Word, Excel et PowerPoint, CSV vers Excel, JSON et SQL, Excel vers CSV et JSON. Ils ont désormais le même bouton, commun à tous (`app/components/DownloadReady.jsx`), plus un aperçu dans un nouvel onglet pour les PDF. Leur bouton de départ dit ce qu'il fait (« Convert to PDF » au lieu de « Download PDF »).
+
+**D. Trouvé en testant C : PDF vers Excel échouait sur tout PDF sans tableau** (défaut antérieur, présent en production).
+- Un PDF de texte seul donnait « Conversion failed. Please try again. » : réessayer ne change rien. La cause a été mesurée grâce à une journalisation ajoutée (codes numériques seulement) : ConvertAPI répond HTTP 500 avec son code 5001, **non facturé**. Un PDF avec un vrai tableau se convertit normalement (vérifié sur www).
+- Correctif, au niveau des références, qui rendent quand même un classeur : la route dit « No table was found in this PDF » (422, sans alerte, car ce n'est pas une panne). La page construit alors le classeur **dans le navigateur, gratuitement** à partir du texte du PDF : une feuille par page, une ligne par ligne de texte, et les colonnes alignées restent des colonnes. Le résultat est annoncé clairement. Pour un PDF scanné sans texte, le message renvoie vers PDF OCR.
+- Effet de bord de mon diagnostic : mes 2 essais sur www (23 h 05 et 23 h 06, heure de New York) ont pu t'envoyer **une alerte d'erreur serveur « pdf-to-excel »** (au plus une par heure). Ce n'était pas un visiteur, et aucune ligne n'a été écrite dans `tool_errors` (requêtes marquées robot).

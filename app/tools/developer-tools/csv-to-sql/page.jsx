@@ -7,6 +7,7 @@ import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { detectDelimiter, CSV_DELIMITERS } from '../../../lib/csvParser';
 import { sniffCsvFile } from '../../../lib/csvEncoding';
 import CsvReadOptions, { numbersNote } from '../../../components/CsvReadOptions';
+import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 
 // Only the first 8KB is needed to see several rows -- detectDelimiter only
 // looks at the first 10 non-empty logical lines anyway, so sampling more of
@@ -77,6 +78,7 @@ export default function CsvToSqlPage() {
   const [typeNumbers, setTypeNumbers] = useState(true);
   const inputRef = useRef();
   const workerRef = useRef(null);
+  const [result, offer, clearResult] = useDownloadable();
 
   useEffect(() => {
     setIsMobile(isMobileDevice());
@@ -92,6 +94,7 @@ export default function CsvToSqlPage() {
     setError('');
     setStatus('');
     setOutput('');
+    clearResult();
     if (f.size > MAX_FILE_SIZE_BYTES) {
       setError(`This file is ${(f.size / (1024 * 1024)).toFixed(0)} MB, which is over the ${MAX_FILE_SIZE_LABEL} limit for this tool. Try splitting it into smaller files first.`);
       setFile(null);
@@ -119,6 +122,7 @@ export default function CsvToSqlPage() {
     setConverting(false);
     setProgress(0);
     setPhase('');
+    clearResult();
     setStatus('Cancelled.');
   };
 
@@ -127,6 +131,7 @@ export default function CsvToSqlPage() {
     setError('');
     setStatus('');
     setOutput('');
+    clearResult();
     setProgress(0);
     setPhase('reading');
     setConverting(true);
@@ -147,15 +152,8 @@ export default function CsvToSqlPage() {
         setConverting(false);
         workerRef.current = null;
         if (msg.mode === 'file') {
-          const url = URL.createObjectURL(msg.blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'converted.sql';
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(url);
-          setStatus(`Downloaded! ${msg.rowCount.toLocaleString()} rows.` + numbersNote(msg));
+          offer(msg.blob, 'converted.sql');
+          setStatus(`Converted ${msg.rowCount.toLocaleString()} rows.` + numbersNote(msg));
         } else {
           setOutput(msg.sql);
           setStatus(`Converted! ${msg.rowCount.toLocaleString()} rows.` + numbersNote(msg));
@@ -207,6 +205,7 @@ export default function CsvToSqlPage() {
                 onChange={e => {
                   const val = e.target.value;
                   setInput(val);
+                  clearResult();
                   setFileName('');
                   setFile(null);
                   setDelimiterChoice('auto');
@@ -251,11 +250,12 @@ export default function CsvToSqlPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
-              <button onClick={convert} disabled={!file && !input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 dark:disabled:bg-neutral-700 disabled:text-gray-600 dark:disabled:text-neutral-500 text-white rounded-xl py-3 font-semibold transition">{file ? 'Convert and Download' : 'Convert'}</button>
+              <button onClick={convert} disabled={!file && !input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 dark:disabled:bg-neutral-700 disabled:text-gray-600 dark:disabled:text-neutral-500 text-white rounded-xl py-3 font-semibold transition">Convert</button>
               <button onClick={() => navigator.clipboard.writeText(output)} disabled={!output} className="bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 dark:disabled:bg-neutral-700 disabled:text-gray-600 dark:disabled:text-neutral-500 text-white rounded-xl py-3 font-semibold transition">Copy</button>
             </div>
           )}
           {status && !converting && <p className="text-center text-sm text-green-600 dark:text-green-400">{status}</p>}
+          {!converting && <DownloadReady file={result} />}
         </div>
       </div>
       <SeoContent
@@ -266,7 +266,7 @@ export default function CsvToSqlPage() {
           "Click the upload area and select a .csv file, or paste CSV text directly into the box below it.",
           "The delimiter is detected automatically — check the dropdown and correct it if needed.",
           "Click 'Convert' to generate a CREATE TABLE statement plus one INSERT per row.",
-          "A file upload downloads automatically as converted.sql; pasted text appears in the output box for you to copy."
+          "For a file upload, click 'Download' to save converted.sql; pasted text appears in the output box for you to copy."
         ]}
         faqs={[
           { q: "Is CSV to SQL free to use?", a: "Yes, it's completely free with no signup required." },

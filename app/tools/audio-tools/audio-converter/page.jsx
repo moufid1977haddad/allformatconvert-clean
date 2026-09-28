@@ -7,6 +7,7 @@ import ProgressBar from '../../../components/ProgressBar';
 import { AUDIO_OUTPUT_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
 import { reportToolError } from '../../../lib/reportError';
 import { runMediaJob, mediaServiceConfigured } from '../../../lib/mediaJob';
+import PlayablePreview from '../../../components/PlayablePreview';
 
 export default function AudioConverterPage() {
   const [file, setFile] = useState(null);
@@ -128,7 +129,7 @@ export default function AudioConverterPage() {
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {result && (
             <div className="space-y-2">
-              <audio controls src={result.url} className="w-full" />
+              <PlayablePreview src={result.url} name={result.name} />
               <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download {result.name}</a>
             </div>
           )}

@@ -1,0 +1,608 @@
+{
+ "origin": "https://www.onlineconvertools.com",
+ "at": "2026-09-27T22:10:41.439Z",
+ "waves": [
+  {
+   "n": 1,
+   "ok": 1,
+   "failed": 0,
+   "statuses": [
+    200
+   ],
+   "median_s": 1.38,
+   "p90_s": 1.38,
+   "max_s": 1.38,
+   "wall_s": 1.38,
+   "res": [
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 1.38,
+     "pdf": true,
+     "bytes": 29528
+    }
+   ]
+  },
+  {
+   "n": 5,
+   "ok": 5,
+   "failed": 0,
+   "statuses": [
+    200
+   ],
+   "median_s": 1.732,
+   "p90_s": 2.373,
+   "max_s": 2.373,
+   "wall_s": 2.376,
+   "res": [
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 1.732,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 1.948,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 0.988,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 2.373,
+     "pdf": true,
+     "bytes": 26658
+    },
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 0.555,
+     "pdf": true,
+     "bytes": 29528
+    }
+   ]
+  },
+  {
+   "n": 10,
+   "ok": 10,
+   "failed": 0,
+   "statuses": [
+    200
+   ],
+   "median_s": 1.939,
+   "p90_s": 3.494,
+   "max_s": 3.494,
+   "wall_s": 3.498,
+   "res": [
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 0.926,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 1.939,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 2.294,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 0.657,
+     "pdf": true,
+     "bytes": 26658
+    },
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 3.494,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 3.278,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 3.037,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 1.742,
+     "pdf": true,
+     "bytes": 26658
+    },
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 1.403,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 1.149,
+     "pdf": true,
+     "bytes": 27871
+    }
+   ]
+  },
+  {
+   "n": 20,
+   "ok": 20,
+   "failed": 0,
+   "statuses": [
+    200
+   ],
+   "median_s": 4.101,
+   "p90_s": 6.666,
+   "max_s": 6.879,
+   "wall_s": 6.886,
+   "res": [
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 0.533,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 0.773,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 4.101,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 1.799,
+     "pdf": true,
+     "bytes": 26658
+    },
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 1.24,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 4.28,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 5.591,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 4.636,
+     "pdf": true,
+     "bytes": 26658
+    },
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 6.879,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 2.863,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 4.994,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 2.168,
+     "pdf": true,
+     "bytes": 26658
+    },
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 6.505,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 1.006,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 5.886,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 3.334,
+     "pdf": true,
+     "bytes": 26658
+    },
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 1.45,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 6.666,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 5.269,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 3.709,
+     "pdf": true,
+     "bytes": 26658
+    }
+   ]
+  },
+  {
+   "n": 40,
+   "ok": 40,
+   "failed": 0,
+   "statuses": [
+    200
+   ],
+   "median_s": 6.281,
+   "p90_s": 11.43,
+   "max_s": 12.651,
+   "wall_s": 12.671,
+   "res": [
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 1.037,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 0.625,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 6.832,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 1.596,
+     "pdf": true,
+     "bytes": 26658
+    },
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 6.281,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 10.482,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 7.721,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 2.075,
+     "pdf": true,
+     "bytes": 26658
+    },
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 1.231,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 0.826,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 9.352,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 5.455,
+     "pdf": true,
+     "bytes": 26658
+    },
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 5.709,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 6.441,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 12.157,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 4.413,
+     "pdf": true,
+     "bytes": 26658
+    },
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 11.43,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 1.768,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 10.827,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 4.106,
+     "pdf": true,
+     "bytes": 26658
+    },
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 2.604,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 10.999,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 9.692,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 4.738,
+     "pdf": true,
+     "bytes": 26658
+    },
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 2.802,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 11.208,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 9.033,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 6.028,
+     "pdf": true,
+     "bytes": 26658
+    },
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 3.725,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 3,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 10.016,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 7.05,
+     "pdf": true,
+     "bytes": 26658
+    },
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 3.166,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 12.651,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 10.279,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 8.014,
+     "pdf": true,
+     "bytes": 26658
+    },
+    {
+     "file": "fidelite-03.xlsx",
+     "status": 200,
+     "s": 3.507,
+     "pdf": true,
+     "bytes": 29528
+    },
+    {
+     "file": "fidelite-04.xlsx",
+     "status": 200,
+     "s": 3.323,
+     "pdf": true,
+     "bytes": 27871
+    },
+    {
+     "file": "fidelite-05.pptx",
+     "status": 200,
+     "s": 12.441,
+     "pdf": true,
+     "bytes": 110811
+    },
+    {
+     "file": "fidelite-06.pptx",
+     "status": 200,
+     "s": 7.341,
+     "pdf": true,
+     "bytes": 26658
+    }
+   ]
+  }
+ ]
+}

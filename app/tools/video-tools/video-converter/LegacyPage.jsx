@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import { videoReRecordSupport, captureMediaElementStream, finishRecording } from '../../../lib/mediaSupport';
+import IosOriginalNote from '../../../components/IosOriginalNote';
 export default function LegacyVideoConverterPage() {
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState('');
@@ -63,6 +64,7 @@ export default function LegacyVideoConverterPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Video Converter</h1>
         <p className="text-neutral-500 text-center mb-8">Convert video files to WebM format</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
+          <IosOriginalNote />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
             <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />

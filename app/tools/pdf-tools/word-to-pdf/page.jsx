@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 
 export default function WordToPdfPage() {
@@ -11,6 +12,7 @@ export default function WordToPdfPage() {
   const [done, setDone] = useState(false);
   const [detectedFonts, setDetectedFonts] = useState([]);
   const inputRef = useRef();
+  const [pdf, offer, clearPdf] = useDownloadable();
 
   const handleFile = (e) => {
     const f = e.target.files[0];
@@ -21,6 +23,7 @@ export default function WordToPdfPage() {
     const sizeCheck = checkOfficeSize(f);
     setError(sizeCheck.ok ? '' : sizeCheck.message);
     setDone(false);
+    clearPdf();
   };
 
   const convert = async () => {
@@ -30,6 +33,7 @@ export default function WordToPdfPage() {
     setLoading(true);
     setError('');
     setDone(false);
+    clearPdf();
     setDetectedFonts([]);
 
     try {
@@ -38,14 +42,7 @@ export default function WordToPdfPage() {
       setDetectedFonts(result.detectedFonts);
       const blob = result.blob;
       const filename = (file.name.replace(/\.[^.]+$/, '') || 'document') + '.pdf';
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      offer(blob, filename);
       setDone(true);
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -76,15 +73,15 @@ export default function WordToPdfPage() {
             {loading && (
               <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden="true" />
             )}
-            {loading ? officeStageLabel(stage) : 'Download PDF'}
+            {loading ? officeStageLabel(stage) : 'Convert to PDF'}
           </button>
           {error && (
             <p className="text-center text-red-500 text-sm" role="alert">{error}</p>
           )}
           {done && !error && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
-              <div className="text-green-500 text-xl font-bold mb-1">PDF downloaded!</div>
-              <p className="text-neutral-500 text-sm">Check your browser's downloads for the converted file.</p>
+              <div className="text-green-500 text-xl font-bold mb-1">PDF ready</div>
+              <DownloadReady file={pdf} className="mt-3" />
               {detectedFonts.length > 0 && (
                 <p className="text-amber-600 text-sm mt-3">
                   Heads up: this file uses {detectedFontsList} icon font{detectedFonts.length > 1 ? 's' : ''}, which can&apos;t legally be reproduced — those specific characters may appear as blank boxes in your PDF. Everything else converted normally.
@@ -99,7 +96,7 @@ export default function WordToPdfPage() {
         description="Word to PDF converts your .docx or .doc file into a PDF using our conversion service. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. We tested .docx files with Calibri, Cambria, Arial and Arial Narrow text, two-level numbered lists, a table with merged cells, an image with text wrapping, a two-column section, headers and footers with page numbers, footnotes and a watermark: every page matched the output of two other online converters, and the text stays fully selectable. Two disclosed limits: a Word-generated table of contents is not recalculated during conversion — it shows whatever was last cached in the .docx, not a freshly rebuilt table — and the older .doc format takes a different conversion path that we have not measured."
         howTo={[
           "Click the upload area and select a .docx or .doc file from your device.",
-          "Click 'Download PDF'. Your file is uploaded securely for conversion and the PDF downloads automatically once it's ready.",
+          "Click 'Convert to PDF'. Your file is uploaded securely for conversion; once the PDF is ready, click 'Download'.",
           "Save the resulting PDF file to your device."
         ]}
         faqs={[
@@ -115,7 +112,7 @@ export default function WordToPdfPage() {
           "In our tests on .docx files, fonts, spacing and page layout matched two other online converters.",
           "The resulting PDF has selectable, searchable text rather than a flattened image.",
           "Update any table of contents or calculated fields in Word before converting — they carry over as last saved, not recalculated.",
-          "Very large or complex files may take a little longer to convert — keep the tab open until the download starts."
+          "Very large or complex files may take a little longer to convert — keep the tab open until the Download button appears."
         ]}
       />
     </div>
