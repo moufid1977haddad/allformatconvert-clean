@@ -43,4 +43,16 @@ const tiff = buf.subarray(0, data);
 const payload = Buffer.concat([Buffer.from('Exif\0\0', 'latin1'), tiff]);
 const app1 = Buffer.concat([Buffer.from([0xff, 0xe1]), Buffer.from([(payload.length + 2) >> 8, (payload.length + 2) & 0xff]), payload]);
 writeFileSync(join(dir, 'exif-gps.jpg'), Buffer.concat([jpeg.subarray(0, 2), app1, jpeg.subarray(2)]));
+
+// exif-orient6.jpg: same picture (stored 800x600, landscape) tagged
+// Orientation = 6 ("rotate 90° clockwise to display"), as phones write
+// portrait photos. Displayed correctly, it is 600 wide and 800 high.
+const t = Buffer.alloc(26);
+t.write('II', 0); t.writeUInt16LE(42, 2); t.writeUInt32LE(8, 4);
+t.writeUInt16LE(1, 8); // one entry
+t.writeUInt16LE(0x0112, 10); t.writeUInt16LE(3, 12); t.writeUInt32LE(1, 14); t.writeUInt16LE(6, 18);
+t.writeUInt32LE(0, 22);
+const p6 = Buffer.concat([Buffer.from([0x45, 0x78, 0x69, 0x66, 0, 0]), t]);
+const a6 = Buffer.concat([Buffer.from([0xff, 0xe1]), Buffer.from([(p6.length + 2) >> 8, (p6.length + 2) & 0xff]), p6]);
+writeFileSync(join(dir, 'exif-orient6.jpg'), Buffer.concat([jpeg.subarray(0, 2), a6, jpeg.subarray(2)]));
 console.log('written', join(dir, 'exif-gps.jpg'));

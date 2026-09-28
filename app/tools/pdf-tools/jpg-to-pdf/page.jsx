@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { PDFDocument } from 'pdf-lib';
 import SeoContent from '../../../components/SeoContent';
+import { addImagePage } from '../../../lib/pdfImages';
 
 export default function Page() {
   const [files, setFiles] = useState([]);
@@ -20,14 +21,8 @@ export default function Page() {
     try {
       const pdfDoc = await PDFDocument.create();
       for (const file of files) {
-        const arrayBuffer = await file.arrayBuffer();
-        const ext = file.name.split('.').pop().toLowerCase();
-        let image;
-        if (ext === 'jpg' || ext === 'jpeg') image = await pdfDoc.embedJpg(arrayBuffer);
-        else if (ext === 'png') image = await pdfDoc.embedPng(arrayBuffer);
-        else continue;
-        const page = pdfDoc.addPage([image.width, image.height]);
-        page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
+        // Upright (EXIF orientation) and never silently skipped (29/09).
+        await addImagePage(pdfDoc, file);
       }
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });

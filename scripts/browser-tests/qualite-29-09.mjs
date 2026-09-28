@@ -439,6 +439,17 @@ await T('pdf-compare highlights', async () => {
   check('pdf-compare 1 removed / 1 added', t.includes('1 line(s) only in a.pdf') && t.includes('1 line(s) only in b.pdf') && t.includes('- Beta line') && t.includes('+ Beta CHANGED'), t.slice(t.indexOf('line(s)') - 20, t.indexOf('line(s)') + 120));
 });
 
+await T('jpg-to-pdf orientation', async () => {
+  const { PDFDocument } = await import('pdf-lib');
+  await open('/tools/pdf-tools/jpg-to-pdf');
+  await page.locator('input[type="file"]').setInputFiles('scripts/converter-tests/fixtures/exif-orient6.jpg');
+  await page.getByRole('button', { name: 'Convert to PDF' }).click();
+  const href = await page.locator('a[download="converted.pdf"]').first().getAttribute('href', { timeout: 20000 });
+  const bytes = await page.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href);
+  const size = (await PDFDocument.load(new Uint8Array(bytes))).getPage(0).getSize();
+  check('portrait phone photo stays portrait', size.width === 600 && size.height === 800, JSON.stringify(size));
+});
+
 await b.close();
 for (const e of errors) { fails++; console.log('PAGE ERROR', e.slice(0, 200)); }
 console.log(`${passes} passed, ${fails} failed (${browserName})`);
