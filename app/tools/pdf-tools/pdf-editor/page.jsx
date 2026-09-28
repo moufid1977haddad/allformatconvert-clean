@@ -231,8 +231,26 @@ export default function PdfEditorPage() {
     }
     const pos = imageInputRef.current._pendingPos || { x: 50, y: 700 };
     const reader = new FileReader();
-    reader.onload = () => {
-      const bytes = new Uint8Array(reader.result);
+    reader.onload = async () => {
+      let bytes = new Uint8Array(reader.result);
+      // A phone photo is stored sideways with an EXIF "rotate" tag: the
+      // preview showed it upright but the raw bytes were embedded, so the
+      // PDF got it lying on its side and squeezed into the upright box
+      // (29/09). Redraw it upright first (createImageBitmap applies the tag).
+      if (format === 'jpg') {
+        try {
+          const exifr = (await import('exifr')).default;
+          const orientation = (await exifr.orientation(bytes)) || 1;
+          if (orientation !== 1) {
+            const bmp = await createImageBitmap(new Blob([bytes], { type: 'image/jpeg' }));
+            const c = document.createElement('canvas');
+            c.width = bmp.width; c.height = bmp.height;
+            c.getContext('2d').drawImage(bmp, 0, 0);
+            const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.92));
+            if (blob) bytes = new Uint8Array(await blob.arrayBuffer());
+          }
+        } catch { /* no readable EXIF: the image is stored as displayed */ }
+      }
       const el = document.createElement('img');
       el.onload = () => {
         const aspect = el.naturalHeight / el.naturalWidth;
