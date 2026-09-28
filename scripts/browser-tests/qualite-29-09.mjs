@@ -354,6 +354,14 @@ await T('pdf-extract-text', async () => {
   check('extract text per line', v.includes('Page 1:\nHello encrypted world page 1'), JSON.stringify(v.slice(0, 120)));
 });
 
+await T('image-metadata', async () => {
+  await open('/tools/image-tools/image-metadata');
+  await page.locator('input[type="file"]').setInputFiles('scripts/converter-tests/fixtures/exif-gps.jpg');
+  await page.waitForTimeout(2500);
+  const t = await body();
+  check('EXIF make + GPS shown', t.includes('OnlineConvertToolsCam') && t.includes('48.858400') && t.includes('GPS location'), '');
+});
+
 await b.close();
 for (const e of errors) { fails++; console.log('PAGE ERROR', e.slice(0, 200)); }
 console.log(`${passes} passed, ${fails} failed (${browserName})`);
