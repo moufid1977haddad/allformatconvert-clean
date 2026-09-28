@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { reformatJson } from '../../../lib/jsonText';
 export default function ApiTesterPage() {
   const [url, setUrl] = useState('');
   const [method, setMethod] = useState('GET');
@@ -11,12 +12,19 @@ export default function ApiTesterPage() {
   const send = async () => {
     setLoading(true);
     try {
-      const opts = { method, headers: { 'Content-Type': 'application/json', ...(headers ? JSON.parse(headers) : {}) } };
-      if (body && method !== 'GET') opts.body = body;
+      // Content-Type is sent only with a body (29/09): forcing it on every GET
+      // made the browser send a CORS preflight, so APIs that allow simple
+      // cross-origin GETs but not preflights failed here and nowhere else.
+      const extra = headers ? JSON.parse(headers) : {};
+      const hasBody = body && method !== 'GET' && method !== 'HEAD';
+      const opts = { method, headers: hasBody ? { 'Content-Type': 'application/json', ...extra } : extra };
+      if (hasBody) opts.body = body;
       const res = await fetch(url, opts);
       const text = await res.text();
+      // The body is shown as received (re-indented when it is JSON), so a
+      // 64-bit id is not rounded by JSON.parse + stringify.
       let data;
-      try { data = JSON.parse(text); } catch { data = text; }
+      try { data = reformatJson(text, 2); } catch { data = text; }
       setResponse({ status: res.status, statusText: res.statusText, data });
     } catch(e) { setResponse({ error: e.message }); }
     setLoading(false);
@@ -36,7 +44,7 @@ export default function ApiTesterPage() {
           <div><label className="block text-sm text-neutral-500 mb-1">Headers (JSON)</label><textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-3 text-sm h-16 resize-none font-mono" placeholder='{"Authorization": "Bearer token"}' value={headers} onChange={e => setHeaders(e.target.value)} /></div>
           {method !== 'GET' && <div><label className="block text-sm text-neutral-500 mb-1">Body</label><textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-3 text-sm h-32 resize-none font-mono" placeholder='{"key": "value"}' value={body} onChange={e => setBody(e.target.value)} /></div>}
           <button onClick={send} disabled={!url || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">{loading ? 'Sending...' : 'Send Request'}</button>
-          {response && <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 space-y-2"><div className={response.error ? 'text-red-400' : response.status < 400 ? 'text-green-400' : 'text-yellow-400'}>{response.error ? response.error : `${response.status} ${response.statusText}`}</div><pre className="font-mono text-sm overflow-x-auto text-indigo-400">{JSON.stringify(response.data, null, 2)}</pre></div>}
+          {response && <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 space-y-2"><div className={response.error ? 'text-red-400' : response.status < 400 ? 'text-green-400' : 'text-yellow-400'}>{response.error ? response.error : `${response.status} ${response.statusText}`}</div><pre className="font-mono text-sm overflow-x-auto text-indigo-400">{response.data}</pre></div>}
         </div>
       </div>
       <SeoContent

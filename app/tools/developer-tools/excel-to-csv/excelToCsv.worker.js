@@ -1,4 +1,5 @@
 import { MAX_ROWS } from './config';
+import { fixSupplementaryCharRefs } from '../../../lib/xlsxSupplementaryChars';
 
 class RowLimitExceededError extends Error {
   constructor(limit, actual) {
@@ -69,7 +70,9 @@ async function run({ file, maxRows }) {
   self.postMessage({ type: 'progress', pct: 50, phase: 'parsing' });
   const xlsxModule = await import('xlsx');
   const XLSX = xlsxModule.default || xlsxModule;
-  const workbook = XLSX.read(bytes, { type: 'array' });
+  // Emoji written as &#128512; (openpyxl, pandas) would otherwise come out as
+  // U+F600 -- see app/lib/xlsxSupplementaryChars.js (29/09).
+  const workbook = XLSX.read(fixSupplementaryCharRefs(bytes).bytes, { type: 'array' });
 
   const sheetNames = workbook.SheetNames;
   // Sent as soon as the workbook structure is known -- well before the CSV

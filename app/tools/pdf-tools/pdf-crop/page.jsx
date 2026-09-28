@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -20,7 +21,7 @@ export default function Page() {
     try {
       const { PDFDocument } = await import('pdf-lib');
       const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer);
+      const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer));
       const pages = pdfDoc.getPages();
       for (const page of pages) {
         const { width, height } = page.getSize();

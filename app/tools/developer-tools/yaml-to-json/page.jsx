@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { load } from 'js-yaml';
+import { yamlToJson } from '../../../lib/yamlJson';
 import SeoContent from '../../../components/SeoContent';
 export default function YamlToJsonPage() {
   const [input, setInput] = useState('');
@@ -8,8 +8,7 @@ export default function YamlToJsonPage() {
   const [error, setError] = useState('');
   const convert = () => {
     try {
-      const obj = load(input);
-      setOutput(JSON.stringify(obj, null, 2));
+      setOutput(yamlToJson(input));
       setError('');
     } catch(e) { setError('Invalid YAML: ' + e.message); }
   };
@@ -32,7 +31,7 @@ export default function YamlToJsonPage() {
       </div>
       <SeoContent
         title="YAML to JSON"
-        description="YAML to JSON parses YAML using the js-yaml library and converts it to JSON, entirely in your browser — nothing is uploaded to a server. Nested structures, lists (- item), multi-line strings, comments, booleans, and null all parse correctly, matching how a real YAML parser reads the file."
+        description="YAML to JSON parses YAML using the js-yaml library and converts it to JSON, entirely in your browser — nothing is uploaded to a server. Nested structures, lists (- item), multi-line strings, comments, anchors, booleans, and null all parse correctly (YAML 1.2 core schema). Values are never silently altered: a date like 2024-01-01 stays the text 2024-01-01, a 20-digit integer keeps every digit, a file with several --- documents becomes a JSON array, and .inf or .nan (which JSON cannot hold) are reported instead of being turned into null."
         howTo={[
           "Paste any valid YAML into the input box — flat, nested, or with lists.",
           "Click 'Convert' to parse it into JSON.",

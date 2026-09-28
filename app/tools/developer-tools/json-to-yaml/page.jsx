@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { dump } from 'js-yaml';
+import { jsonToYaml } from '../../../lib/yamlJson';
 import SeoContent from '../../../components/SeoContent';
 export default function JsonToYamlPage() {
   const [input, setInput] = useState('');
@@ -8,10 +8,9 @@ export default function JsonToYamlPage() {
   const [error, setError] = useState('');
   const convert = () => {
     try {
-      const obj = JSON.parse(input);
-      setOutput(dump(obj, { lineWidth: -1 }));
+      setOutput(jsonToYaml(input));
       setError('');
-    } catch(e) { setError('Invalid JSON'); }
+    } catch(e) { setError('Invalid JSON: ' + e.message); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -32,7 +31,7 @@ export default function JsonToYamlPage() {
       </div>
       <SeoContent
         title="JSON to YAML"
-        description="JSON to YAML converts JSON into valid YAML using the js-yaml library, entirely in your browser — nothing is uploaded to a server. Arrays convert into proper YAML list items (- item), nested objects convert at any depth, and string values are quoted automatically whenever needed (a colon, a leading special character, and similar cases) so the output parses back correctly."
+        description="JSON to YAML converts JSON into valid YAML using the js-yaml library, entirely in your browser — nothing is uploaded to a server. Arrays convert into proper YAML list items (- item), nested objects convert at any depth, and every number is written exactly as in your JSON (a 20-digit id or 1.10 is never rounded), and string values are quoted automatically whenever needed (a colon, a leading special character, and similar cases) so the output parses back correctly."
         howTo={[
           "Paste your JSON into the input box.",
           "Click 'Convert' to generate YAML.",

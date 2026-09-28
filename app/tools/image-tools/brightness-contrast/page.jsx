@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { supportsCanvasFilter, applyBrightnessContrast } from '../../../lib/canvasFilters';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function BrightnessContrastPage() {
   const [image, setImage] = useState(null);
@@ -16,8 +17,14 @@ export default function BrightnessContrastPage() {
       const canvas = document.createElement('canvas');
       canvas.width = img.width; canvas.height = img.height;
       const ctx = canvas.getContext('2d');
-      ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
-      ctx.drawImage(img, 0, 0);
+      // Safari has no ctx.filter: it used to return the image unchanged (29/09).
+      if (supportsCanvasFilter()) {
+        ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
+        ctx.drawImage(img, 0, 0);
+      } else {
+        ctx.drawImage(img, 0, 0);
+        ctx.putImageData(applyBrightnessContrast(ctx.getImageData(0, 0, canvas.width, canvas.height), brightness, contrast), 0, 0);
+      }
       try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
       setError('');
     };

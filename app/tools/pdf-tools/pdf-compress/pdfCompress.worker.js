@@ -1,4 +1,5 @@
 import { MAX_PAGES } from './config';
+import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 
 class LimitExceededError extends Error {
   constructor(message) {
@@ -13,7 +14,7 @@ async function run({ file, maxPages }) {
   self.postMessage({ type: 'progress', pct: 20, phase: 'loading' });
 
   const { PDFDocument } = await import('pdf-lib');
-  const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+  const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer), { ignoreEncryption: true });
   const pageCount = pdfDoc.getPageCount();
   if (pageCount > limit) {
     throw new LimitExceededError(`This PDF has ${pageCount.toLocaleString()} pages, more than the ${limit.toLocaleString()}-page limit.`);

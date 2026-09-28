@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { gifFrames } from '../../../lib/gifFrames';
 export default function GifToApngPage() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
@@ -19,36 +20,14 @@ export default function GifToApngPage() {
     if (!file) return;
     setLoading(true);
     try {
-      const { parseGIF, decompressFrames } = await import('gifuct-js');
       const UPNGModule = await import('upng-js');
       const UPNG = UPNGModule.default || UPNGModule;
-      const arrayBuffer = await file.arrayBuffer();
-      const gifData = parseGIF(arrayBuffer);
-      const frames = decompressFrames(gifData, true);
-      const width = gifData.lsd.width;
-      const height = gifData.lsd.height;
-
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-
-      const rgbaFrames = [];
-      const delays = [];
-      for (const frame of frames) {
-        const { dims, patch, delay, disposalType } = frame;
-        const frameImageData = ctx.createImageData(dims.width, dims.height);
-        frameImageData.data.set(patch);
-        ctx.putImageData(frameImageData, dims.left, dims.top);
-        const full = ctx.getImageData(0, 0, width, height);
-        rgbaFrames.push(full.data.buffer);
-        delays.push(delay || 100);
-        // Disposal method 2 (restore to background) clears the frame's region
-        // before the next frame is drawn; other disposal types (1: leave as
-        // is, 3: restore to previous) aren't specially handled, which can
-        // produce compositing artifacts on GIFs that rely on them.
-        if (disposalType === 2) ctx.clearRect(dims.left, dims.top, dims.width, dims.height);
-      }
+      // Frames composited as a GIF decoder does (29/09): the old putImageData
+      // pasting left holes wherever an optimised GIF uses transparency for
+      // "unchanged", and ignored disposal 3.
+      const { width, height, frames } = await gifFrames(await file.arrayBuffer());
+      const rgbaFrames = frames.map((f) => f.imageData.data.buffer);
+      const delays = frames.map((f) => f.delay);
 
       const pngBuffer = UPNG.encode(rgbaFrames, width, height, 0, delays);
       const blob = new Blob([pngBuffer], { type: 'image/png' });
@@ -83,7 +62,7 @@ export default function GifToApngPage() {
         faqs={[
           { q: "Does this tool produce a real animated PNG?", a: "Yes — every frame of the source GIF is decoded and re-encoded into the APNG, not just a single snapshot." },
           { q: "Will colors improve compared to the original GIF?", a: "Colors are carried over as-is from the GIF's existing 256-color-per-frame palette — this tool doesn't add color detail the source GIF didn't have, it just repackages the same frames as APNG." },
-          { q: "Does it handle every kind of GIF correctly?", a: "Most GIFs, yes. Frames using the \"restore to background\" disposal method are handled by clearing that region before the next frame; the rarer \"restore to previous\" disposal method isn't specially handled and can occasionally produce compositing artifacts on GIFs that rely on it." },
+          { q: "Does it handle every kind of GIF correctly?", a: "Yes for standard GIFs: each frame is composited over the previous one as a GIF player does, so optimised GIFs that only store the changed pixels come out complete, and the three disposal methods (leave, restore to background, restore to previous) are applied." },
           { q: "Is GIF to APNG free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can process." },
           { q: "Is my file uploaded anywhere?", a: "No. Everything runs locally in your browser — your file is never uploaded to a server." }
         ]}

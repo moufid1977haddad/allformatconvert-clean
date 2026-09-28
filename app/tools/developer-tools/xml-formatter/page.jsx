@@ -66,8 +66,17 @@ export default function XmlFormatterPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
-  const format = () => {
+  const format = async () => {
     try {
+      // Invalid XML used to be "formatted" anyway, hiding the error (29/09):
+      // validate first, as codebeautify and freeformatter do.
+      const { XMLValidator } = await import('fast-xml-parser');
+      const check = XMLValidator.validate(input.replace(/^\uFEFF/, ''));
+      if (check !== true) {
+        setOutput('');
+        setError(`Invalid XML (line ${check.err.line}, column ${check.err.col}): ${check.err.msg}`);
+        return;
+      }
       let indent = 0;
       const formatted = splitXmlTags(input).split('\n').map(line => {
         if (line.match(/^<\//)) indent = Math.max(0, indent-1);

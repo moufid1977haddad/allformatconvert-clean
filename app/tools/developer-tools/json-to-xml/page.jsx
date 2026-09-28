@@ -1,13 +1,40 @@
 'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { parseJsonLossless, losslessToText } from '../../../lib/jsonLossless';
+// XML 1.0 element names: a letter or _ first, then letters, digits, _ . - (and
+// : for a namespace prefix). Keys starting with @_ become attributes and #text
+// is element text (fast-xml-parser's conventions), so they are allowed.
+const XML_NAME = /^[\p{L}_][\p{L}\p{N}_.:-]*$/u;
+function findInvalidXmlName(v, path) {
+  if (Array.isArray(v)) {
+    for (let i = 0; i < v.length; i++) { const r = findInvalidXmlName(v[i], `${path}[${i}]`); if (r) return r; }
+  } else if (v && typeof v === 'object') {
+    for (const k of Object.keys(v)) {
+      const name = k.startsWith('@_') ? k.slice(2) : k;
+      if (k !== '#text' && !XML_NAME.test(name)) {
+        return `The key "${k}"${path ? ' (in ' + path + ')' : ''} can't be an XML ${k.startsWith('@_') ? 'attribute' : 'element'} name: names start with a letter or _ and contain no spaces or symbols other than _ . - :. Rename it and convert again.`;
+      }
+      const r = findInvalidXmlName(v[k], path ? `${path}.${k}` : k);
+      if (r) return r;
+    }
+  }
+  return null;
+}
+
 export default function JsonToXmlPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
   const convert = async () => {
     try {
-      const obj = JSON.parse(input);
+      // Numbers keep their exact text (12345678901234567890 was written as
+      // 12345678901234567000, 1.10 as 1.1), and a key that cannot be an XML
+      // element name ("first name", "1st") is reported: it used to produce a
+      // document no XML parser accepts, without a word (29/09).
+      const obj = losslessToText(parseJsonLossless(input));
+      const badName = findInvalidXmlName(obj, '');
+      if (badName) { setOutput(''); setError(badName); return; }
       // fast-xml-parser is loaded on demand -- it's only needed once the
       // visitor actually clicks Convert, so it doesn't add to the page's
       // initial JS payload.
@@ -21,7 +48,7 @@ export default function JsonToXmlPage() {
       const xml = builder.build({ root: payload });
       setOutput('<?xml version="1.0" encoding="UTF-8"?>\n' + xml);
       setError('');
-    } catch(e) { setError('Invalid JSON'); }
+    } catch(e) { setOutput(''); setError('Invalid JSON: ' + e.message); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

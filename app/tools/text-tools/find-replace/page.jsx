@@ -29,7 +29,9 @@ export default function FindReplacePage() {
     }
     const matches = (text.match(regex) || []).length;
     setCount(matches);
-    setResult(text.replace(regex, replace));
+    // Plain-text mode: the replacement is literal too. String.replace would
+    // read $&, $1 or $$ in it as regex patterns ("US$$" became "US$", 29/09).
+    setResult(useRegex ? text.replace(regex, replace) : text.replace(regex, () => replace));
     setHasResult(true);
   };
 

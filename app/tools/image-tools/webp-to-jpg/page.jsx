@@ -15,7 +15,13 @@ export default function WebPtoJPGPage() {
     img.onload = () => {
       const canvas = document.createElement('canvas');
       canvas.width = img.width; canvas.height = img.height;
-      canvas.getContext('2d').drawImage(img, 0, 0);
+      // JPG has no transparency: flatten onto white, as iLoveIMG and
+      // CloudConvert do and as Image Converter does since 22/09. Transparent
+      // areas used to come out black (29/09).
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
       try { setResult(checkedDataURL(canvas, 'image/jpeg')); } catch (e) { setError(e.message); }
     };
     img.src = image;
@@ -53,7 +59,7 @@ export default function WebPtoJPGPage() {
         tips={[
           "Converting can't add detail beyond what's in the original WebP file, so start with the highest-quality source you have.",
           "There's no quality slider here — the browser's default JPEG encoding is used.",
-          "JPG doesn't support transparency, so any transparent areas in your WebP will render as black.",
+          "JPG doesn't support transparency, so any transparent areas in your WebP become white.",
           "Convert one file at a time and download each result before starting the next."
         ]}
       />

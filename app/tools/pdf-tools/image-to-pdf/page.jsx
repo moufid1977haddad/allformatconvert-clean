@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import SeoContent from '../../../components/SeoContent';
+import { addImagePage } from '../../../lib/pdfImages';
 
 export default function ImageToPdfPage() {
   const [files, setFiles] = useState([]);
@@ -30,17 +31,9 @@ export default function ImageToPdfPage() {
     try {
       const pdfDoc = await PDFDocument.create();
       for (const file of files) {
-        const arrayBuffer = await file.arrayBuffer();
-        let image;
-        if (file.type === 'image/jpeg' || file.type === 'image/jpg') {
-          image = await pdfDoc.embedJpg(arrayBuffer);
-        } else if (file.type === 'image/png') {
-          image = await pdfDoc.embedPng(arrayBuffer);
-        } else {
-          continue;
-        }
-        const page = pdfDoc.addPage([image.width, image.height]);
-        page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
+        // Upright (EXIF orientation), any format the browser can display, and
+        // never silently skipped (29/09).
+        await addImagePage(pdfDoc, file);
       }
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
@@ -60,7 +53,7 @@ export default function ImageToPdfPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">Click to add images (JPG, PNG)</p>
-            <input ref={inputRef} type="file" accept=".jpg,.jpeg,.png" multiple className="hidden" onChange={handleFiles} />
+            <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
           </div>
           {files.length > 0 && (
             <div className="space-y-2">

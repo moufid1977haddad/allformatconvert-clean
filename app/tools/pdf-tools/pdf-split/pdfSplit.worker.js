@@ -1,4 +1,5 @@
 import { MAX_PAGES } from './config';
+import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 
 class LimitExceededError extends Error {
   constructor(message) {
@@ -17,7 +18,7 @@ async function handleLoad({ file, maxPages }) {
   const limit = maxPages || MAX_PAGES;
   const arrayBuffer = await file.arrayBuffer();
   const { PDFDocument } = await import('pdf-lib');
-  const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+  const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer), { ignoreEncryption: true });
   const pageCount = pdfDoc.getPageCount();
   if (pageCount > limit) {
     loadedDoc = null;

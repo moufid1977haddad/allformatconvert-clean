@@ -1,16 +1,21 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { removeDuplicateLines } from '../../../lib/textTools';
 
 export default function DuplicateRemoverPage() {
   const [text, setText] = useState('');
   const [result, setResult] = useState('');
   const [hasResult, setHasResult] = useState(false);
   const [copyError, setCopyError] = useState(false);
+  const [ignoreCase, setIgnoreCase] = useState(false);
+  const [trim, setTrim] = useState(false);
+  const [removeEmpty, setRemoveEmpty] = useState(false);
+  const [removed, setRemoved] = useState(0);
   const removeDuplicates = () => {
-    const lines = text.split('\n');
-    const unique = [...new Set(lines)];
-    setResult(unique.join('\n'));
+    const r = removeDuplicateLines(text, { caseSensitive: !ignoreCase, trim, removeEmpty });
+    setResult(r.text);
+    setRemoved(r.removed);
     setHasResult(true);
   };
   return (
@@ -20,6 +25,12 @@ export default function DuplicateRemoverPage() {
         <p className="text-neutral-500 text-center mb-8">Remove duplicate lines from text</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste your text here..." value={text} onChange={e => setText(e.target.value)} />
+          <div className="flex flex-wrap gap-4 justify-center text-sm text-neutral-600">
+            <label className="flex items-center gap-2"><input type="checkbox" checked={ignoreCase} onChange={e => setIgnoreCase(e.target.checked)} /> Ignore case</label>
+            <label className="flex items-center gap-2"><input type="checkbox" checked={trim} onChange={e => setTrim(e.target.checked)} /> Ignore surrounding spaces</label>
+            <label className="flex items-center gap-2"><input type="checkbox" checked={removeEmpty} onChange={e => setRemoveEmpty(e.target.checked)} /> Remove empty lines</label>
+          </div>
+          {hasResult && <p className="text-sm text-neutral-500 text-center">{removed} line{removed === 1 ? '' : 's'} removed</p>}
           <button onClick={removeDuplicates} disabled={!text} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Remove Duplicates</button>
           {hasResult && (result ? (
             <div className="space-y-2">
@@ -33,25 +44,24 @@ export default function DuplicateRemoverPage() {
         </div>
       </div>
       <SeoContent
-        title="Duplicate Remover"
-        description="Duplicate Remover strips out repeated lines from a block of text, keeping only the first occurrence of each line, entirely in your browser."
+        title={"Duplicate Remover"}
+        description={"Duplicate Remover deletes repeated lines from a block of text, keeping the first occurrence of each line in its original order, entirely in your browser. Windows (CRLF), Mac and Unix line endings are all recognised, so a line is never kept twice just because one copy ends differently. Options make the comparison ignore upper/lower case or surrounding spaces, and remove empty lines; the number of lines removed is shown."}
         howTo={[
-          "Paste your text into the input field, with one entry per line.",
-          "Click \"Remove Duplicates\" to process your content.",
-          "Review the deduplicated result in the output box.",
-          "Click \"Copy\" to copy the cleaned text to your clipboard."
+          "Paste your list or text, one item per line.",
+          "Tick 'Ignore case', 'Ignore surrounding spaces' or 'Remove empty lines' if needed.",
+          "Click 'Remove Duplicates'.",
+          "Copy the result."
         ]}
         faqs={[
           { q: "Is Duplicate Remover free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Is duplicate detection case-sensitive?", a: "Yes, always — \"Apple\" and \"apple\" are treated as different lines. There's no toggle to make matching case-insensitive." },
-          { q: "Can it handle large lists?", a: "Yes, though very large lists are limited only by your browser's performance since everything runs locally." },
-          { q: "Is my data private?", a: "Yes, deduplication happens entirely in your browser — your text is never uploaded to a server." }
+          { q: "Which occurrence is kept?", a: "The first one; the order of the remaining lines doesn't change." },
+          { q: "Are \"Apple\" and \"apple\" duplicates?", a: "Only if you tick 'Ignore case'. With 'Ignore surrounding spaces', \" apple \" and \"apple\" are duplicates too." },
+          { q: "Does it work with text copied from Excel or Windows?", a: "Yes — CRLF line endings are handled, so the last line is compared like the others." },
+          { q: "Is my text uploaded to a server?", a: "No — everything happens in your browser." }
         ]}
         tips={[
-          "Use Duplicate Remover before importing lists into spreadsheets to catch accidental repeat entries.",
-          "Since matching is case-sensitive, normalize your text's capitalization first with Case Converter if you want \"Apple\" and \"apple\" treated as the same entry.",
-          "Only the first occurrence of each line is kept — remaining copies are removed, not merged or counted.",
-          "Copy your cleaned results right after processing, since the tool doesn't save your data between visits."
+          "Sort the result afterwards with the Text Sorter if you need it alphabetical.",
+          "The count of removed lines tells you at a glance how many duplicates there were."
         ]}
       />
     </div>

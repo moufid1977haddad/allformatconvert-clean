@@ -35,7 +35,15 @@ export async function POST(req: NextRequest) {
   // 1) the generator's own limits (per visitor per day, own monthly budget), then 2) the shared guard.
   const own = await reserveImageGen(req);
   if (!own.ok) return NextResponse.json({ error: own.error }, { status: own.status, headers: { "Retry-After": String(own.retryAfter) } });
-  const guard = await guardPaidRoute(req, { route: "ai-image", tool: "image-generator" });
+  // If the shared guard throws (database error), the generator's own
+  // reservation must not stay counted: nothing was generated (review 29/09).
+  let guard: Awaited<ReturnType<typeof guardPaidRoute>>;
+  try {
+    guard = await guardPaidRoute(req, { route: "ai-image", tool: "image-generator" });
+  } catch (err) {
+    await own.release();
+    throw err;
+  }
   if (!guard.ok) {
     await own.release();
     return guard.response;

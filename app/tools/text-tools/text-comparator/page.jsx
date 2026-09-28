@@ -1,25 +1,27 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { diffLines } from '../../../lib/codeTools';
 
 export default function TextComparatorPage() {
   const [text1, setText1] = useState('');
   const [text2, setText2] = useState('');
   const [result, setResult] = useState(null);
-
-  const compare = () => {
-    const lines1 = text1.split('\n');
-    const lines2 = text2.split('\n');
-    const maxLines = Math.max(lines1.length, lines2.length);
-    const diff = [];
-    for (let i = 0; i < maxLines; i++) {
-      const l1 = lines1[i] || '';
-      const l2 = lines2[i] || '';
-      diff.push({ l1, l2, same: l1 === l2 });
+  // Myers line diff, then removed/added runs paired side by side. The old
+  // version compared line N with line N: one inserted line marked every line
+  // after it as different (29/09).
+  const compare = async () => {
+    const d = await diffLines(text1, text2);
+    const rows = [];
+    for (let i = 0; i < d.length;) {
+      if (d[i].type === 'same') { rows.push({ l1: d[i].line, l2: d[i].line, same: true }); i++; continue; }
+      const rem = [], add = [];
+      while (i < d.length && d[i].type === 'removed') rem.push(d[i++].line);
+      while (i < d.length && d[i].type === 'added') add.push(d[i++].line);
+      for (let k = 0; k < Math.max(rem.length, add.length); k++) rows.push({ l1: rem[k] ?? '', l2: add[k] ?? '', same: false });
     }
-    setResult(diff);
+    setResult(rows);
   };
-
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-5xl mx-auto">
@@ -51,25 +53,23 @@ export default function TextComparatorPage() {
         </div>
       </div>
       <SeoContent
-        title="Text Comparator"
-        description="Text Comparator compares two texts line by line, highlighting which lines match exactly and which don't, entirely in your browser. Note: comparison is a whole-line exact match, not a character-level or word-level diff — a line with even one different character is simply marked as different, without showing exactly what changed within it."
+        title={"Text Comparator"}
+        description={"Text Comparator compares two texts line by line and shows them side by side, entirely in your browser. It uses the Myers diff algorithm (the one git and diffchecker use), so an added or deleted line is shown as just that line — the lines after it are still matched with their counterparts instead of all being marked as different. Changed lines are paired across the two columns; Windows and Unix line endings compare as equal."}
         howTo={[
-          "Paste your first text into the \"Text 1\" box.",
-          "Paste your second text into the \"Text 2\" box.",
-          "Click \"Compare\" to check both texts line by line.",
-          "Review the results — matching lines and differing lines are shown side by side, with a count of differences found."
+          "Paste the first text on the left and the second on the right.",
+          "Click 'Compare'.",
+          "Matching lines are grey, differing lines are highlighted, with the number of differences above.",
+          "Edit and compare again as needed."
         ]}
         faqs={[
           { q: "Is Text Comparator free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it highlight exactly which words or characters changed within a line?", a: "No — comparison works at the whole-line level. A line is marked as either identical or different; it doesn't pinpoint the specific word or character that changed." },
-          { q: "Can I compare long documents?", a: "Yes, though very large texts are limited only by your browser's performance since everything runs locally." },
-          { q: "Is my data private?", a: "Yes, comparison happens entirely in your browser — neither text is uploaded to a server." }
+          { q: "What if a line was inserted in the middle?", a: "Only that line is shown as a difference; the rest of the text stays aligned." },
+          { q: "Does it compare words within a line?", a: "It compares whole lines; a changed line is shown next to its new version so you can spot the edit." },
+          { q: "Is my text uploaded to a server?", a: "No — everything happens in your browser." }
         ]}
         tips={[
-          "Since comparison is line-by-line, make sure both texts use consistent line breaks for a meaningful comparison.",
-          "For code or documents where you need to see exactly which words changed within a line, use a dedicated word-level diff tool instead.",
-          "A shifted line (e.g., one extra blank line inserted early in one text) will cause every line after it to show as different — check for that if you see unexpectedly many differences.",
-          "Manually copy the results if you need them elsewhere, since there's no built-in copy or export button for the comparison output."
+          "For code, the Diff Viewer shows line numbers and can ignore whitespace.",
+          "Trailing spaces count as a difference; remove them first with the Whitespace Remover if they don't matter."
         ]}
       />
     </div>

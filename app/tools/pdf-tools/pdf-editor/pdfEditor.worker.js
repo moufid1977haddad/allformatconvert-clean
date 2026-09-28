@@ -1,4 +1,5 @@
 import { MAX_PAGES, MAX_FILE_SIZE_BYTES } from './config';
+import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 
 class LimitExceededError extends Error {
   constructor(message) {
@@ -90,7 +91,7 @@ async function run({ file, pageOrder, overlays, mode, selectedIndices, maxPages 
   self.postMessage({ type: 'progress', pct: 28, phase: 'loading' });
 
   const { PDFDocument, StandardFonts, rgb, degrees } = await import('pdf-lib');
-  const srcDoc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+  const srcDoc = await PDFDocument.load(await openablePdfBytes(bytes), { ignoreEncryption: true });
 
   if (mode === 'extract') {
     if (!selectedIndices || selectedIndices.length === 0) throw new Error('No pages selected.');

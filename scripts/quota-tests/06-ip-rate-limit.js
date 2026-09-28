@@ -11,7 +11,7 @@ const { hashIp } = require('../../lib/quota/ipHash');
 const { currentUtcHourKey, currentUtcDayKey } = require('../../lib/quota/period');
 
 function fakeReq(ip) {
-  return { headers: { get: (name) => (name === 'x-forwarded-for' ? ip : null) } };
+  return { headers: { get: (name) => (name === 'x-real-ip' ? ip : null) } };
 }
 
 async function cleanup(ip) {

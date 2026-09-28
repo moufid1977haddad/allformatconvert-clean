@@ -1,14 +1,13 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { textToHex, hexToText } from '../../../lib/textCodecs';
 export default function HexToTextPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const toHex = () => setOutput(input.split('').map(c => c.charCodeAt(0).toString(16).padStart(2,'0')).join(' '));
+  const toHex = () => setOutput(textToHex(input));
   const fromHex = () => {
-    const cleaned = input.replace(/\s/g,'');
-    if (!/^([0-9a-fA-F]{2})+$/.test(cleaned)) { setOutput('Invalid hex'); return; }
-    setOutput(cleaned.match(/.{2}/g).map(h => String.fromCharCode(parseInt(h,16))).join(''));
+    try { setOutput(hexToText(input)); } catch(e) { setOutput(e.message); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -25,24 +24,23 @@ export default function HexToTextPage() {
         </div>
       </div>
       <SeoContent
-        title="Hex to Text"
-        description="Hex to Text converts between plain text and hexadecimal character codes entirely in your browser using JavaScript's built-in character-code functions — nothing is uploaded to a server. It reliably round-trips Latin1 text (character codes 0-255); characters outside that range (emoji, most non-Latin scripts) produce hex codes wider than the standard 2-digit pairs, which won't convert back correctly since the reverse direction always splits the hex into fixed 2-character chunks."
+        title={"Hex to Text"}
+        description={"Hex to Text converts between plain text and hexadecimal bytes entirely in your browser — nothing is uploaded to a server. Text is encoded as UTF-8, like every hex editor and programming language, so é becomes c3 a9 and emoji or non-Latin scripts round-trip exactly. Hex input may use spaces, commas, colons, 0x prefixes or \\x escapes between bytes; an odd number of digits, a non-hex character, or bytes that aren't valid UTF-8 text are reported instead of producing garbled output."}
         howTo={[
           "Paste or type text or hex into the input box.",
-          "Click 'Text to Hex' to convert text into space-free hex character codes, or 'Hex to Text' to convert hex back into text.",
+          "Click 'Text to Hex' to get the UTF-8 bytes as space-separated hex pairs, or 'Hex to Text' to decode hex back into text.",
           "Read the result in the output box.",
           "Click 'Copy' to copy it to your clipboard."
         ]}
         faqs={[
           { q: "Is Hex to Text free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What hex format does it expect?", a: "Two-character hex pairs, with or without spaces between them (e.g. 48656c6c6f or 48 65 6c 6c 6f). Both uppercase and lowercase are accepted." },
-          { q: "Does it work with any Unicode text, like emoji?", a: "Not reliably — it works cleanly for Latin1 text (character codes 0-255). Characters outside that range produce hex wider than 2 digits, which the hex-to-text direction can't correctly reconstruct since it always reads fixed 2-character chunks." },
-          { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser." }
+          { q: "What hex format does it expect?", a: "Two hex digits per byte, upper- or lowercase, with or without separators: 48656c6c6f, 48 65 6c 6c 6f, 0x48,0x65 and \\x48\\x65 all work." },
+          { q: "Does it work with any Unicode text, like emoji?", a: "Yes — text is converted to UTF-8 bytes (é is c3 a9, 😀 is f0 9f 98 80), and hex is decoded as UTF-8, so any text round-trips exactly." },
+          { q: "What if the hex isn't text?", a: "If the bytes aren't valid UTF-8 (binary data, or text in another encoding), the tool says so instead of showing garbled characters." }
         ]}
         tips={[
-          "Stick to Latin1 text (standard Latin letters, digits, and common punctuation) for reliable round-trip conversion.",
-          "If Hex to Text shows 'Invalid hex', check for an odd number of hex digits or stray non-hex characters in your input.",
-          "For text with accented or non-Latin characters, expect the hex output to not cleanly convert back — that's a limitation of this simple character-code approach.",
+          "Hex output is the UTF-8 encoding, the same bytes Python's text.encode().hex() or a hex editor shows.",
+          "An odd number of hex digits means a byte is incomplete — the tool points it out.",
           "Copy your result right away, since it isn't saved after you leave the page."
         ]}
       />

@@ -14,6 +14,7 @@ export default function AudioEqualizerPage() {
   const [exporting, setExporting] = useState(false);
   const [exportUrl, setExportUrl] = useState(null);
   const [error, setError] = useState('');
+  const [note, setNote] = useState('');
   const fileRef = useRef();
   const audioCtxRef = useRef();
   const sourceRef = useRef();
@@ -120,6 +121,22 @@ export default function AudioEqualizerPage() {
       source.connect(bass).connect(mid).connect(treble).connect(offlineCtx.destination);
       source.start();
       const rendered = await offlineCtx.startRendering();
+      // A boost could push samples past full scale; they were then clipped
+      // (hard distortion) without a word (29/09). As an equalizer's preamp
+      // does, the whole output is lowered just enough to fit, and we say so.
+      let peak = 0;
+      for (let c = 0; c < rendered.numberOfChannels; c++) {
+        const d = rendered.getChannelData(c);
+        for (let i = 0; i < d.length; i++) { const a = Math.abs(d[i]); if (a > peak) peak = a; }
+      }
+      if (peak > 1) {
+        const g = 0.999 / peak;
+        for (let c = 0; c < rendered.numberOfChannels; c++) {
+          const d = rendered.getChannelData(c);
+          for (let i = 0; i < d.length; i++) d[i] *= g;
+        }
+        setNote(`Your settings pushed the sound past full scale; the whole file was lowered by ${(20 * Math.log10(peak / 0.999)).toFixed(1)} dB to avoid distortion (clipping).`);
+      } else setNote('');
       const wavBuffer = encodeWav(rendered);
       setExportUrl(URL.createObjectURL(new Blob([wavBuffer], { type: 'audio/wav' })));
     } catch (e) { setError('Export failed: ' + e.message); }
@@ -151,6 +168,7 @@ export default function AudioEqualizerPage() {
             {exporting ? 'Exporting...' : 'Export as WAV'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+          {note && <p className="text-amber-700 text-sm text-center">{note}</p>}
           {exportUrl && (
             <div className="space-y-2">
               <PlayablePreview src={exportUrl} name="equalized.wav" />

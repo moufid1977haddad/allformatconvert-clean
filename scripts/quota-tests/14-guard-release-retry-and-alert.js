@@ -65,7 +65,7 @@ const ROUTE = 'ai'; // must be a real route key -- reserveGlobalSpend() looks up
 const TOOL = 'test-release-retry'; // unique to this script -- scopes usage_events cleanup
 
 function fakeReq(ip) {
-  return { headers: { get: (name) => (name === 'x-forwarded-for' ? ip : null) } };
+  return { headers: { get: (name) => (name === 'x-real-ip' ? ip : null) } };
 }
 
 async function cleanupIpAndEvents(ip) {

@@ -1,19 +1,22 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { sortLines, splitLines } from '../../../lib/textTools';
 
 export default function TextSorterPage() {
   const [text, setText] = useState('');
   const [result, setResult] = useState('');
   const [hasResult, setHasResult] = useState(false);
   const [copyError, setCopyError] = useState(false);
-  const sortAZ = () => { setResult(text.split('\n').sort().join('\n')); setHasResult(true); };
-  const sortZA = () => { setResult(text.split('\n').sort().reverse().join('\n')); setHasResult(true); };
-  const sortByLength = () => { setResult(text.split('\n').sort((a, b) => a.length - b.length).join('\n')); setHasResult(true); };
+  const sortAZ = () => { setResult(sortLines(text, 'az')); setHasResult(true); };
+  const sortZA = () => { setResult(sortLines(text, 'za')); setHasResult(true); };
+  const sortByLength = () => { setResult(sortLines(text, 'length')); setHasResult(true); };
   const shuffle = () => {
-    const lines = text.split('\n');
+    const lines = splitLines(text);
+    const rnd = new Uint32Array(lines.length);
+    crypto.getRandomValues(rnd);
     for (let i = lines.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      const j = rnd[i] % (i + 1);
       [lines[i], lines[j]] = [lines[j], lines[i]];
     }
     setResult(lines.join('\n'));
@@ -44,25 +47,24 @@ export default function TextSorterPage() {
         </div>
       </div>
       <SeoContent
-        title="Text Sorter"
-        description="Text Sorter organizes lines of text alphabetically (A-Z or Z-A), by line length, or in random order, entirely in your browser."
+        title={"Text Sorter"}
+        description={"Text Sorter sorts lines alphabetically (A-Z or Z-A), by length, or in random order, entirely in your browser. Alphabetical order is the one people expect, not raw character codes: upper and lower case sort together (apple, Banana, cherry), accented letters sit next to their base letter (éclair before zebra), and numbers inside lines are compared by value (item 2 before item 10). Windows line endings are handled, and length counts characters as you see them."}
         howTo={[
-          "Paste your text into the input box, with one entry per line.",
-          "Click \"Sort A-Z\", \"Sort Z-A\", \"Sort by Length\", or \"Shuffle\" to organize your lines.",
-          "Review the result in the output box.",
-          "Click \"Copy\" to copy the sorted text to your clipboard."
+          "Paste the lines to sort.",
+          "Click A-Z, Z-A, By Length or Shuffle.",
+          "Review the result.",
+          "Copy it."
         ]}
         faqs={[
           { q: "Is Text Sorter free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Is sorting case-sensitive?", a: "Yes, always — alphabetical sorting uses standard character-code order, so uppercase letters sort before lowercase ones. There's no toggle to change this." },
-          { q: "Can I sort numbers numerically?", a: "Not specifically — lines are sorted as text, so \"10\" would sort before \"9\" alphabetically. There's no dedicated numeric sort mode." },
-          { q: "Is my data private?", a: "Yes, all sorting happens locally in your browser — nothing is sent to a server." }
+          { q: "Is sorting case-sensitive?", a: "No — Apple and apple sort together, as in a dictionary; when two lines differ only by case or accents, the order is still stable and predictable." },
+          { q: "How are numbers sorted?", a: "By value when they appear at the same place in the line: file2 comes before file10." },
+          { q: "Is the shuffle really random?", a: "Yes — it uses the browser's cryptographic random generator with an unbiased Fisher-Yates shuffle." },
+          { q: "Is my text uploaded to a server?", a: "No — everything happens in your browser." }
         ]}
         tips={[
-          "If you need case-insensitive sorting, convert your text to one consistent case first with Case Converter.",
-          "Use \"Sort by Length\" to quickly find your shortest or longest entries in a list.",
-          "\"Shuffle\" randomizes line order — handy for randomizing quiz questions or picking a random item from a list.",
-          "Remove duplicate lines with the Duplicate Remover tool before sorting for a cleaner final result."
+          "Remove duplicates first with the Duplicate Remover if needed.",
+          "Sort by length orders from shortest to longest; lines of the same length are alphabetical."
         ]}
       />
     </div>

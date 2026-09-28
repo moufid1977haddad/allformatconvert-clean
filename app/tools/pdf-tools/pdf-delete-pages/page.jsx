@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import SeoContent from '../../../components/SeoContent';
+import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 
 export default function PdfDeletePagesPage() {
   const [file, setFile] = useState(null);
@@ -22,7 +23,7 @@ export default function PdfDeletePagesPage() {
     setPageCount(0);
     try {
       const arrayBuffer = await f.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+      const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer), { ignoreEncryption: true });
       setPageCount(pdfDoc.getPageCount());
     } catch (err) {
       setStatus('Error: ' + err.message);
@@ -38,7 +39,7 @@ export default function PdfDeletePagesPage() {
     try {
       const pages = pagesToDelete.split(',').map(p => parseInt(p.trim()) - 1).filter(p => p >= 0);
       const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+      const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer), { ignoreEncryption: true });
       const sortedPages = [...new Set(pages)].sort((a, b) => b - a);
       sortedPages.forEach(p => { if (p < pdfDoc.getPageCount()) pdfDoc.removePage(p); });
       const pdfBytes = await pdfDoc.save();

@@ -1,12 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
-
-const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
-const simplify = (num, den) => {
-  const g = gcd(Math.abs(num), Math.abs(den));
-  return { num: num / g, den: den / g };
-};
+import { parseFraction, fractionOp, describeFraction } from '../../../lib/mathTools';
 
 export default function FractionCalculatorPage() {
   const [n1, setN1] = useState('');
@@ -19,26 +14,17 @@ export default function FractionCalculatorPage() {
 
   const calculate = () => {
     setError('');
-    const a = parseInt(n1), b = parseInt(d1), c = parseInt(n2), d = parseInt(d2);
-    if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d) || b === 0 || d === 0) {
+    try {
+      // Each field accepts an integer or a decimal; numerator/denominator are
+      // combined exactly (BigInt), so 1.5/2 = 3/4 and huge values keep every digit.
+      const f1 = fractionOp(parseFraction(n1), parseFraction(d1), '/');
+      const f2 = fractionOp(parseFraction(n2), parseFraction(d2), '/');
+      setResult(describeFraction(fractionOp(f1, f2, op)));
+    } catch (e) {
       setResult(null);
-      setError('Denominators cannot be zero.');
-      return;
+      setError(e.message);
     }
-    let num, den;
-    if (op === '+') { num = a*d + c*b; den = b*d; }
-    else if (op === '-') { num = a*d - c*b; den = b*d; }
-    else if (op === '*') { num = a*c; den = b*d; }
-    else { num = a*d; den = b*c; }
-    if (den === 0) {
-      setResult(null);
-      setError('Cannot divide by zero.');
-      return;
-    }
-    const simplified = simplify(num, den);
-    setResult({ ...simplified, decimal: (simplified.num / simplified.den).toFixed(6) });
   };
-
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-lg mx-auto">
@@ -50,10 +36,10 @@ export default function FractionCalculatorPage() {
 
             {/* Fraction 1 */}
             <div className="text-center">
-              <input type="number" value={n1} onChange={e => setN1(e.target.value)}
+              <input type="text" inputMode="decimal" value={n1} onChange={e => setN1(e.target.value)}
                 className="w-20 bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center text-neutral-800 focus:outline-none" placeholder="1" />
               <div className="border-t-2 border-neutral-400 my-1.5" />
-              <input type="number" value={d1} onChange={e => setD1(e.target.value)}
+              <input type="text" inputMode="decimal" value={d1} onChange={e => setD1(e.target.value)}
                 className="w-20 bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center text-neutral-800 focus:outline-none" placeholder="2" />
             </div>
 
@@ -74,10 +60,10 @@ export default function FractionCalculatorPage() {
 
             {/* Fraction 2 */}
             <div className="text-center">
-              <input type="number" value={n2} onChange={e => setN2(e.target.value)}
+              <input type="text" inputMode="decimal" value={n2} onChange={e => setN2(e.target.value)}
                 className="w-20 bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center text-neutral-800 focus:outline-none" placeholder="1" />
               <div className="border-t-2 border-neutral-400 my-1.5" />
-              <input type="number" value={d2} onChange={e => setD2(e.target.value)}
+              <input type="text" inputMode="decimal" value={d2} onChange={e => setD2(e.target.value)}
                 className="w-20 bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center text-neutral-800 focus:outline-none" placeholder="3" />
             </div>
           </div>
@@ -94,8 +80,9 @@ export default function FractionCalculatorPage() {
           {/* Result */}
           {result && (
             <div className="mt-5 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 rounded-xl p-6 text-center">
-              <div className="text-4xl font-extrabold text-indigo-500">{result.num}/{result.den}</div>
-              <div className="text-neutral-500 mt-2">= {result.decimal}</div>
+              <div className="text-4xl font-extrabold text-indigo-500 break-all">{result.fraction}</div>
+              {result.mixed !== result.fraction && <div className="text-neutral-600 mt-2">= {result.mixed} (mixed number)</div>}
+              <div className="text-neutral-500 mt-1 break-all">= {result.decimal}</div>
             </div>
           )}
           {error && (
@@ -106,25 +93,23 @@ export default function FractionCalculatorPage() {
         </div>
       </div>
       <SeoContent
-        title="Fraction Calculator"
-        description="Fraction Calculator adds, subtracts, multiplies, and divides two fractions entirely in your browser, automatically reducing every result to its simplest form and showing the decimal equivalent alongside it."
+        title={"Fraction Calculator"}
+        description={"Fraction Calculator adds, subtracts, multiplies and divides two fractions and simplifies the result, entirely in your browser. Arithmetic is exact at any size (no rounding, even with 20-digit numerators), signs are normalised (1/-2 is shown as -1/2), and the result is given as a simplified fraction, a mixed number (1 1/8) and a decimal — exact when the decimal terminates, otherwise rounded to 12 significant digits and marked as such. Each box also accepts a decimal such as 1.5; anything that isn't a number is reported, never read as a different value."}
         howTo={[
-          "Enter the numerator and denominator of your first fraction.",
-          "Click one of the four operator buttons (+, −, ×, ÷) to choose the operation.",
-          "Enter the numerator and denominator of your second fraction.",
-          "Click \"Calculate\" to see the simplified result and its decimal equivalent."
+          "Enter the numerator and denominator of each fraction (decimals such as 0.5 are accepted).",
+          "Choose +, -, × or ÷.",
+          "Click 'Calculate'.",
+          "Read the simplified fraction, the mixed number and the decimal."
         ]}
         faqs={[
-          { q: "Does this calculator simplify fractions automatically?", a: "Yes, every result is automatically reduced to its lowest terms using the greatest common divisor." },
           { q: "Is Fraction Calculator free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What operations can I perform?", a: "Addition, subtraction, multiplication, and division, working with positive and negative whole-number numerators and denominators." },
-          { q: "Does it show a decimal equivalent?", a: "Yes, the decimal value is displayed alongside the simplified fraction result." }
+          { q: "Does it simplify the result?", a: "Yes — the result is always reduced to lowest terms using the greatest common divisor." },
+          { q: "Can I use negative numbers or decimals?", a: "Yes — -3/4, 3/-4 and 0.75 are all accepted; the sign is moved to the numerator in the result." },
+          { q: "Is the decimal exact?", a: "When the fraction has a terminating decimal (like 9/8 = 1.125) it is exact; otherwise (like 1/3) it is rounded to 12 significant digits and marked '(rounded)'." }
         ]}
         tips={[
-          "Enter a negative sign in the numerator field to work with negative fractions.",
-          "Use the decimal result shown alongside the fraction to sanity-check your answer.",
-          "Make sure your second fraction's numerator isn't zero when dividing — division by zero won't produce a valid result.",
-          "Bookmark this page for quick access whenever you need to check fraction homework or calculations."
+          "To enter a mixed number like 1 1/2, type 3 over 2 (or 1.5 over 1).",
+          "Dividing by a fraction equal to zero is reported instead of giving an infinite result."
         ]}
       />
     </div>

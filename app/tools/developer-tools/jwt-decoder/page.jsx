@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { reformatJson } from '../../../lib/jsonText';
 export default function JwtDecoderPage() {
   const [token, setToken] = useState('');
   const [decoded, setDecoded] = useState(null);
@@ -14,9 +15,18 @@ export default function JwtDecoderPage() {
     try {
       const parts = token.split('.');
       if (parts.length !== 3) throw new Error('Invalid JWT format');
-      const header = JSON.parse(b64UrlDecodeUtf8(parts[0]));
-      const payload = JSON.parse(b64UrlDecodeUtf8(parts[1]));
-      setDecoded({ header, payload });
+      // Shown from the decoded TEXT, re-indented: JSON.parse + stringify
+      // rounded 64-bit ids in claims (29/09). JSON.parse still validates.
+      const headerText = b64UrlDecodeUtf8(parts[0]);
+      const payloadText = b64UrlDecodeUtf8(parts[1]);
+      const payloadObj = JSON.parse(payloadText);
+      JSON.parse(headerText);
+      const times = ['exp', 'iat', 'nbf'].filter(c => typeof payloadObj[c] === 'number').map(c => {
+        const d = new Date(payloadObj[c] * 1000);
+        const note = c === 'exp' ? (d < new Date() ? ' — expired' : ' — not expired yet') : c === 'nbf' && d > new Date() ? ' — not valid yet' : '';
+        return `${c}: ${d.toISOString().replace('.000Z', 'Z')} (UTC)${note}`;
+      });
+      setDecoded({ header: reformatJson(headerText, 2), payload: reformatJson(payloadText, 2), times });
       setError('');
     } catch(e) { setError('Invalid JWT token'); }
   };
@@ -29,7 +39,7 @@ export default function JwtDecoderPage() {
           <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none font-mono" placeholder="Paste JWT token here..." value={token} onChange={e => setToken(e.target.value)} />
           <button onClick={decode} disabled={!token} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Decode</button>
           {error && <p className="text-red-400 text-center">{error}</p>}
-          {decoded && ['header','payload'].map(k => <div key={k} className="bg-neutral-50 rounded-xl border border-neutral-200 p-4"><div className="text-neutral-500 text-sm mb-2 uppercase">{k}</div><pre className="font-mono text-sm text-indigo-400 overflow-x-auto">{JSON.stringify(decoded[k], null, 2)}</pre></div>)}
+          {decoded && ['header','payload'].map(k => <div key={k} className="bg-neutral-50 rounded-xl border border-neutral-200 p-4"><div className="text-neutral-500 text-sm mb-2 uppercase">{k}</div><pre className="font-mono text-sm text-indigo-400 overflow-x-auto">{decoded[k]}</pre>{k === 'payload' && decoded.times.length > 0 && <ul className="mt-2 text-sm text-neutral-600">{decoded.times.map(t => <li key={t}>{t}</li>)}</ul>}</div>)}
         </div>
       </div>
       <SeoContent

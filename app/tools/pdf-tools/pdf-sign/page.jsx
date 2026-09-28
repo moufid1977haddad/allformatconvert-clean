@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { checkedDataURL } from '../../../lib/mediaSupport';
+import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -65,7 +66,7 @@ export default function Page() {
       const signatureDataUrl = checkedDataURL(canvasRef.current, 'image/png');
       const signatureBytes = await fetch(signatureDataUrl).then(r => r.arrayBuffer());
       const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer);
+      const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer));
       const signatureImage = await pdfDoc.embedPng(signatureBytes);
       const pages = pdfDoc.getPages();
       const firstPage = pages[pages.length - 1];

@@ -1,12 +1,16 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { markdownToHtml } from '../../../lib/codeTools';
+
 export default function MarkdownToHtmlPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const convert = () => {
-    let html = input.replace(/^### (.*)/gm,'<h3>$1</h3>').replace(/^## (.*)/gm,'<h2>$1</h2>').replace(/^# (.*)/gm,'<h1>$1</h1>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/^- (.*)/gm,'<li>$1</li>').replace(/\n/g,'<br>');
-    setOutput('<!DOCTYPE html>\n<html>\n<head><meta charset="utf-8"></head>\n<body>\n' + html + '\n</body>\n</html>');
+  const convert = async () => {
+    try {
+      const html = await markdownToHtml(input);
+      setOutput('<!DOCTYPE html>\n<html>\n<head><meta charset="utf-8"></head>\n<body>\n' + html + '</body>\n</html>');
+    } catch (e) { setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -25,25 +29,23 @@ export default function MarkdownToHtmlPage() {
         </div>
       </div>
       <SeoContent
-        title="Markdown to HTML"
-        description="Markdown to HTML converts a small subset of Markdown — headings (#, ##, ###), bold (**text**), italic (*text*), and simple list items (- item) — into a complete HTML document, entirely in your browser. Unlike this site's Markdown Editor and Previewer, the output here is displayed as HTML source text in a read-only box, not rendered live, so there's no injection risk from pasted content."
+        title={"Markdown to HTML"}
+        description={"Markdown to HTML converts Markdown into a complete HTML document with marked, a CommonMark and GitHub Flavored Markdown parser, entirely in your browser. Headings, paragraphs, emphasis, links, images, block quotes, ordered and nested lists, fenced code blocks (with their language class), inline code, tables, strikethrough and horizontal rules are all converted, and < > & in code are escaped."}
         howTo={[
-          "Paste or type your Markdown into the input box.",
-          "Click 'Convert' to generate a full HTML document as text.",
-          "Review the generated HTML in the output box.",
-          "Click 'Copy' to copy it to your clipboard."
+          "Paste your Markdown into the input box.",
+          "Click 'Convert'.",
+          "Review the HTML output.",
+          "Click 'Copy' to copy it."
         ]}
         faqs={[
           { q: "Is Markdown to HTML free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What Markdown syntax does it support?", a: "Only headings, bold, italic, and simple list items. Links, images, code blocks, tables, and blockquotes aren't supported." },
-          { q: "Does it convert in real time as I type?", a: "No — you need to click 'Convert' each time; output doesn't update automatically." },
-          { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser." }
+          { q: "Which Markdown syntax is supported?", a: "CommonMark plus GitHub Flavored Markdown: tables, fenced code blocks, strikethrough, autolinks and task lists." },
+          { q: "Does it produce a full HTML page?", a: "Yes — the output is wrapped in a minimal HTML5 document with UTF-8 encoding, ready to save as .html." },
+          { q: "Is my code uploaded to a server?", a: "No — everything runs in your browser; the engine is downloaded once when you first click." }
         ]}
         tips={[
-          "Stick to headings, bold, italic, and list items — other Markdown syntax passes through as plain text rather than being converted.",
-          "The output is a complete, standalone HTML document (with doctype, head, and body), ready to save as an .html file.",
-          "List items aren't wrapped in a <ul> or <ol> container, so you may want to add that manually for fully valid HTML.",
-          "Click 'Convert' again after editing your Markdown, since the output doesn't refresh automatically."
+          "To preview the rendered result instead of the code, use the Markdown Previewer.",
+          "Raw HTML written inside your Markdown is passed through as is."
         ]}
       />
     </div>

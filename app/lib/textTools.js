@@ -1,0 +1,114 @@
+// Line and character helpers for the text tools (29/09).
+//
+// Measured before (scripts/converter-tests/06-text-tools.mjs replays each case):
+//   - Character Counter: "😀" counted 2 characters, "café" 3 letters + 1
+//     "special character" (letters were A-Z only);
+//   - Duplicate Remover: with Windows line endings the last line never matched
+//     its duplicate ("a\r" vs "a");
+//   - Text Sorter: plain code-unit order -- "Banana" before "apple", "éclair"
+//     after "zebra", "10" before "9";
+//   - Text Truncator: could cut an emoji in half (a lone surrogate "�"), and
+//     "words" ignored line breaks;
+//   - Lorem Ipsum: "5 sentences" gave 5 whole paragraphs, and more than 69
+//     words were silently capped at 69;
+//   - Find & Replace: in plain-text mode, "$&", "$1" or "$$" in the
+//     replacement were interpreted as regex patterns ("US$$" became "US$").
+import { graphemes } from './textSegments.js';
+
+export const splitLines = (text) => text.split(/\r\n|\r|\n/);
+
+export function countCharacters(text) {
+  const g = graphemes(text);
+  let letters = 0, digits = 0, spaces = 0, other = 0;
+  for (const c of g) {
+    if (/^\p{L}/u.test(c)) letters++;
+    else if (/^\p{N}/u.test(c)) digits++;
+    else if (/^\s/u.test(c)) spaces++;
+    else other++;
+  }
+  return {
+    characters: g.length,
+    charactersNoSpaces: g.length - spaces,
+    letters, digits, spaces, other,
+    utf16Units: text.length,
+    utf8Bytes: new TextEncoder().encode(text).length,
+    lines: text === '' ? 0 : splitLines(text).length,
+  };
+}
+
+export function removeDuplicateLines(text, { caseSensitive = true, trim = false, removeEmpty = false } = {}) {
+  const seen = new Set();
+  const out = [];
+  let removed = 0;
+  for (const line of splitLines(text)) {
+    let key = trim ? line.trim() : line;
+    if (!caseSensitive) key = key.toLocaleLowerCase();
+    if (removeEmpty && line.trim() === '') { removed++; continue; }
+    if (seen.has(key)) { removed++; continue; }
+    seen.add(key);
+    out.push(line);
+  }
+  return { text: out.join('\n'), removed };
+}
+
+// Alphabetical like a dictionary: case-insensitive first, accents after their
+// base letter, and numbers compared by value (2 < 10), as natural-sort tools do.
+const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+const tieBreak = new Intl.Collator(undefined, { numeric: true, sensitivity: 'variant' });
+const compare = (a, b) => collator.compare(a, b) || tieBreak.compare(a, b);
+
+export function sortLines(text, mode) {
+  const lines = splitLines(text);
+  if (mode === 'az') return lines.sort(compare).join('\n');
+  if (mode === 'za') return lines.sort((a, b) => compare(b, a)).join('\n');
+  if (mode === 'length') return lines.sort((a, b) => graphemes(a).length - graphemes(b).length || compare(a, b)).join('\n');
+  throw new Error(`Unknown sort mode ${mode}`);
+}
+
+// Keeps at most `limit` characters (user-perceived) or words; the ellipsis is
+// added after the kept part and reported separately so the count stays exact.
+export function truncate(text, limit, type, ellipsis = '...') {
+  if (!Number.isInteger(limit) || limit < 0) throw new Error('The limit must be a whole number, 0 or more.');
+  if (type === 'characters') {
+    const g = graphemes(text);
+    return g.length > limit ? g.slice(0, limit).join('').replace(/\s+$/u, '') + ellipsis : text;
+  }
+  // words: cut after the limit-th word, keeping the original spacing and line breaks
+  const re = /\S+/gu;
+  let m, n = 0;
+  while ((m = re.exec(text))) {
+    n++;
+    if (n === limit) {
+      const end = m.index + m[0].length;
+      return text.slice(end).trim() ? text.slice(0, end) + ellipsis : text;
+    }
+  }
+  return limit === 0 && text.trim() ? ellipsis : text;
+}
+
+const LOREM_WORDS = ('lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum').split(' ');
+const cap = (s) => s[0].toUpperCase() + s.slice(1);
+
+// Deterministic word stream: the classic passage, then repeated, so any count
+// is honoured (the old version stopped at 69 words without saying so).
+function words(n, offset = 0) {
+  return Array.from({ length: n }, (_, i) => LOREM_WORDS[(offset + i) % LOREM_WORDS.length]);
+}
+function sentence(k) {
+  const len = 8 + ((k * 7) % 9); // 8-16 words
+  const w = words(len, k * 11);
+  if (k === 0) { w[0] = 'lorem'; w[1] = 'ipsum'; }
+  return cap(w.join(' ')) + '.';
+}
+export function lorem(count, type) {
+  if (!Number.isInteger(count) || count < 1) throw new Error('Enter a whole number of 1 or more.');
+  if (type === 'words') { const w = words(count); return cap(w.join(' ')) + '.'; }
+  if (type === 'sentences') return Array.from({ length: count }, (_, k) => sentence(k)).join(' ');
+  return Array.from({ length: count }, (_, p) => Array.from({ length: 5 }, (_, k) => sentence(p * 5 + k)).join(' ')).join('\n\n');
+}
+
+export function literalReplaceAll(text, find, replacement) {
+  if (!find) return { text, count: 0 };
+  const parts = text.split(find);
+  return { text: parts.join(replacement), count: parts.length - 1 };
+}

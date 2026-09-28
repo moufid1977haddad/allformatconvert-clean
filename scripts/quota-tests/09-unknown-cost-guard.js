@@ -32,7 +32,7 @@ const ROUTE = 'ai'; // must be a real route key -- reserveGlobalSpend() looks up
 const TOOL = 'test-unknown-cost'; // unique to this script -- used to scope usage_events cleanup, since ROUTE is shared with real 'ai' traffic
 
 function fakeReq(ip) {
-  return { headers: { get: (name) => (name === 'x-forwarded-for' ? ip : null) } };
+  return { headers: { get: (name) => (name === 'x-real-ip' ? ip : null) } };
 }
 
 // ip_rate:* and usage_events rows here are scoped to a fake test IP/tool

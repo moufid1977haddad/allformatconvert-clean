@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { mintTicket, readConfig, validateRequest } from '@/lib/media/ticket';
-import { incrementCounter, decrementCounter } from '@/lib/quota/counters';
-import { currentUtcHourKey, currentUtcDayKey, secondsUntilNextUtcHour, secondsUntilNextUtcDay } from '@/lib/quota/period';
-import { hashIp, getClientIp } from '@/lib/quota/ipHash';
+import { checkHourDayRateLimit } from '@/lib/quota/hourDayRateLimit';
 import { MAX_OFFICE_STAGED_BYTES, MAX_PDF_COMPRESS_STAGED_BYTES } from '@/lib/quota/limits';
 
 // Documents whose tool has its own measured ceiling (allow-list; anything else gets the Office one).
@@ -31,19 +29,14 @@ export async function POST(req) {
 
   // Own buckets, separate from the paid-tool bucket (ip_rate:*): a visitor
   // converting videos must not use up their AI-tool allowance, and vice versa.
-  const ip = getClientIp(req);
-  const hash = ip ? hashIp(ip) : 'unknown-ip';
-  const hourKey = currentUtcHourKey();
-  const dayKey = currentUtcDayKey();
+  // Hour and day are reserved together, atomically (lib/quota/hourDayRateLimit.js).
   try {
-    const hour = await incrementCounter(`${bucket}:hour:${hash}`, hourKey, 1, cfg.perHour);
-    if (!hour.allowed) {
-      return NextResponse.json({ error: 'rate_limited', message: 'Too many conversions from your connection this hour. Please try again later.' }, { status: 429, headers: { 'Retry-After': String(secondsUntilNextUtcHour()) } });
+    const rl = await checkHourDayRateLimit(req, { prefix: bucket, perHour: cfg.perHour, perDay: cfg.perDay });
+    if (!rl.allowed && rl.layer === 'hour') {
+      return NextResponse.json({ error: 'rate_limited', message: 'Too many conversions from your connection this hour. Please try again later.' }, { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } });
     }
-    const day = await incrementCounter(`${bucket}:day:${hash}`, dayKey, 1, cfg.perDay);
-    if (!day.allowed) {
-      await decrementCounter(`${bucket}:hour:${hash}`, hourKey, 1);
-      return NextResponse.json({ error: 'rate_limited', message: 'Daily conversion limit reached for your connection. Please try again tomorrow.' }, { status: 429, headers: { 'Retry-After': String(secondsUntilNextUtcDay()) } });
+    if (!rl.allowed) {
+      return NextResponse.json({ error: 'rate_limited', message: 'Daily conversion limit reached for your connection. Please try again tomorrow.' }, { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } });
     }
   } catch (e) {
     console.error('[media/ticket] rate-limit backend failed:', e && e.message);

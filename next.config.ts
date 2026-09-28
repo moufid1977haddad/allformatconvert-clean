@@ -11,6 +11,13 @@ const nextConfig: NextConfig = {
   experimental: {
     serverSourceMaps: false,
   },
+  // quicktype-core (JSON to TypeScript/Go/C#/Rust/Python, loaded in the browser) imports
+  // `fs` in a Node-only code path; the browser gets app/lib/browserFsStub.js instead (29/09).
+  turbopack: {
+    resolveAlias: {
+      fs: { browser: "./app/lib/browserFsStub.js" },
+    },
+  },
   async redirects() {
     return legacyRedirects;
   },

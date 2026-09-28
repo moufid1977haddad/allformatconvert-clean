@@ -1,11 +1,13 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { reformatJson } from '../../../lib/jsonText';
+import { stripBom } from '../../../lib/jsonLossless';
 export default function JsonMinifierPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
-  const minify = () => { try { setOutput(JSON.stringify(JSON.parse(input))); setError(''); } catch(e) { setError('Invalid JSON'); } };
+  const minify = () => { try { setOutput(reformatJson(stripBom(input), 0)); setError(''); } catch(e) { setError('Invalid JSON: ' + e.message); } };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-4xl mx-auto">
@@ -26,7 +28,7 @@ export default function JsonMinifierPage() {
       </div>
       <SeoContent
         title="JSON Minifier"
-        description="JSON Minifier parses your JSON with the browser's built-in JSON.parse and re-serializes it with JSON.stringify (no spacing argument), entirely in your browser — nothing is uploaded to a server. Because it goes through a real parser rather than a text-based whitespace strip, invalid JSON is caught and reported instead of silently producing broken output."
+        description="JSON Minifier validates your JSON with the browser's built-in JSON.parse, then removes every space and line break outside strings from your original text, entirely in your browser — nothing is uploaded to a server. Because it works on the text you pasted rather than re-serializing it, nothing else changes: a 20-digit id, 1.10 or 1e21 stay exactly as written (re-serializing through JSON.stringify would round them). Invalid JSON is reported with the parser's own message instead of silently producing broken output."
         howTo={[
           "Paste your JSON into the input box.",
           "Click 'Minify' to compress it to a single line.",
@@ -35,8 +37,8 @@ export default function JsonMinifierPage() {
         ]}
         faqs={[
           { q: "Is JSON Minifier free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Will minifying change my data?", a: "No — parsing and re-serializing preserves the exact same data and structure; only whitespace and indentation are removed." },
-          { q: "What happens if my JSON is invalid?", a: "You'll see an 'Invalid JSON' message instead of output, since the tool relies on the browser's real JSON parser rather than a best-effort text strip." },
+          { q: "Will minifying change my data?", a: "No — only whitespace and indentation outside strings are removed; every key, value, number and escape stays exactly as you wrote it (large ids and numbers like 1.10 are not rounded)." },
+          { q: "What happens if my JSON is invalid?", a: "You'll see 'Invalid JSON' with the parser's own explanation instead of output, since the tool relies on the browser's real JSON parser rather than a best-effort text strip." },
           { q: "Is my data uploaded to a server?", a: "No, minifying happens entirely in your browser." }
         ]}
         tips={[
