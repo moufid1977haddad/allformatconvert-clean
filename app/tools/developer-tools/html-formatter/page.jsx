@@ -1,49 +1,13 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
-
-// Splits adjacent tags ('><') onto separate lines like a plain
-// `replace(/></g, '>\n<')` would, but tracks whether the scan is inside a
-// tag and inside a quoted attribute value, so a '>' or '<' appearing inside
-// a quoted attribute (e.g. placeholder="a><b") is never mistaken for a real
-// tag boundary and split apart.
-function splitTags(input) {
-  let out = '';
-  let insideTag = false;
-  let quote = null;
-  for (let i = 0; i < input.length; i++) {
-    const c = input[i];
-    out += c;
-    if (!insideTag) {
-      if (c === '<') insideTag = true;
-      continue;
-    }
-    if (quote) {
-      if (c === quote) quote = null;
-      continue;
-    }
-    if (c === '"' || c === "'") { quote = c; continue; }
-    if (c === '>') {
-      insideTag = false;
-      if (input[i + 1] === '<') out += '\n';
-    }
-  }
-  return out;
-}
+import { beautify } from '../../../lib/codeTools';
 
 export default function HtmlFormatterPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const format = () => {
-    let indent = 0;
-    const lines = splitTags(input).split('\n');
-    const formatted = lines.map(line => {
-      if (line.match(/^<\//)) indent--;
-      const result = '  '.repeat(Math.max(0,indent)) + line.trim();
-      if (line.match(/^<[^/][^>]*[^/]>/) && !line.match(/^<(br|hr|img|input|link|meta)/i)) indent++;
-      return result;
-    });
-    setOutput(formatted.join('\n'));
+  const format = async () => {
+    try { setOutput(await beautify(input, 'html')); } catch (e) { setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -62,25 +26,23 @@ export default function HtmlFormatterPage() {
         </div>
       </div>
       <SeoContent
-        title="HTML Formatter"
-        description="HTML Formatter adds line breaks and indentation to HTML entirely in your browser using simple pattern-based rules — splitting on adjacent tags and tracking nesting depth — rather than a full HTML parser. It recognizes common self-closing tags (br, hr, img, input, link, meta) so they don't affect indentation depth, but it doesn't validate your markup or offer indentation customization."
+        title={"HTML Formatter"}
+        description={"HTML Formatter re-indents HTML with js-beautify, the engine of beautifier.io, entirely in your browser. It understands HTML structure: void elements such as <br>, <img> and <input> don't increase the indentation, attributes containing > are handled, and the contents of <pre> and <textarea> are left exactly as written (whitespace there is visible on the page). Inline <script> and <style> blocks are formatted as JavaScript and CSS."}
         howTo={[
           "Paste your HTML into the input box.",
-          "Click 'Format' to add line breaks and indent nested tags.",
-          "Review the result in the output box.",
-          "Click 'Copy' to copy it to your clipboard."
+          "Click 'Format'.",
+          "Review the indented result.",
+          "Click 'Copy' to copy it."
         ]}
         faqs={[
           { q: "Is HTML Formatter free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Will it validate my HTML or flag errors?", a: "No — it only reformats indentation and line breaks; it doesn't check for invalid or malformed markup." },
-          { q: "Can I customize indentation size or style?", a: "No, indentation is always 2 spaces per nesting level — there's no option to change it." },
-          { q: "Is my code uploaded to a server?", a: "No, formatting happens entirely in your browser." }
+          { q: "Can formatting change how my page looks?", a: "Only where whitespace between inline elements matters; <pre> and <textarea> contents, where it always matters, are never touched." },
+          { q: "Does it format embedded CSS and JavaScript?", a: "Yes — <style> and <script> blocks are formatted with the CSS and JavaScript rules." },
+          { q: "Is my code uploaded to a server?", a: "No — everything runs in your browser; the engine is downloaded once when you first click." }
         ]}
         tips={[
-          "Works well for typical, well-formed HTML with standard tags; unusual or deeply nested markup may not indent perfectly since it's pattern-based, not a full parser.",
-          "Self-closing tags like br, hr, img, input, link, and meta are recognized and won't throw off indentation — other void elements (like source or wbr) aren't specifically handled.",
-          "A quoted attribute value containing '><' (e.g. placeholder=\"a><b\") is scanned correctly and won't be split onto separate lines.",
-          "Copy the result right away, since there's no file download or save feature."
+          "Paste minified HTML from a site to make it readable.",
+          "For a full document or a fragment, the result keeps your tags and attributes exactly."
         ]}
       />
     </div>

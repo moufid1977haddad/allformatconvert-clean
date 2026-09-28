@@ -1,16 +1,13 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { typescriptToJs } from '../../../lib/codeTools';
+
 export default function TypescriptToJsPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const convert = () => {
-    let js = input;
-    js = js.replace(/:\s*[\w<>\[\]|&,\s]+(?=[\s]*[=,);{])/g,'');
-    js = js.replace(/interface\s+\w+\s*\{[^}]*\}/g,'');
-    js = js.replace(/type\s+\w+\s*=\s*[^;]+;/g,'');
-    js = js.replace(/<[\w,\s]+>/g,'');
-    setOutput(js.trim());
+  const convert = async () => {
+    try { setOutput(await typescriptToJs(input, { jsx: /<\/?[A-Za-z][^>]*>/.test(input) && /return\s*\(?\s*</.test(input) })); } catch (e) { setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -29,25 +26,24 @@ export default function TypescriptToJsPage() {
         </div>
       </div>
       <SeoContent
-        title="TypeScript to JavaScript"
-        description="TypeScript to JavaScript strips type annotations using regex pattern matching, not the real TypeScript compiler, entirely in your browser. It handles common cases — simple parameter and variable type annotations, interface declarations, type aliases, and generic angle brackets — but pattern matching can misfire on code that merely resembles a type annotation. Most notably, a ternary expression followed by a comma in the same statement can get corrupted, since the colon looks like a type annotation to the regex."
+        title={"TypeScript to JavaScript"}
+        description={"TypeScript to JS removes TypeScript syntax and keeps your JavaScript, entirely in your browser, using Sucrase's TypeScript transform (the same type-stripping approach as the TypeScript compiler and Babel). It parses the code, so type annotations, interfaces, type aliases, generics, access modifiers, non-null assertions and satisfies/as casts are removed without touching object literals, ternaries or arrow functions; enums become plain JavaScript objects. Modern JavaScript syntax is kept as is. Code that doesn't parse is reported with the error position."}
         howTo={[
-          "Paste your TypeScript code into the input box.",
-          "Click 'Convert' to strip type annotations, interfaces, and type aliases.",
-          "Review the output carefully, especially ternary expressions and generics.",
-          "Click 'Copy' to copy the JavaScript result."
+          "Paste your TypeScript into the input box.",
+          "Click 'Convert'.",
+          "Review the JavaScript output.",
+          "Click 'Copy' to copy it."
         ]}
         faqs={[
           { q: "Is TypeScript to JavaScript free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it use the real TypeScript compiler?", a: "No — it uses regex pattern matching to strip common type syntax, not the actual TypeScript compiler (tsc) or a TypeScript-aware transpiler like Babel." },
-          { q: "Can it corrupt valid code?", a: "In specific cases, yes — a ternary expression followed by a comma in the same statement can be misread as a type annotation and stripped incorrectly." },
-          { q: "Is my code uploaded to a server?", a: "No, conversion happens entirely in your browser." }
+          { q: "Does it type-check my code?", a: "No — like Babel and esbuild, it removes types without checking them; use tsc for type errors." },
+          { q: "What happens to enums and namespaces?", a: "Enums are converted to the equivalent JavaScript object; everything else that only exists for the type system is removed." },
+          { q: "Does it support TSX?", a: "Yes — JSX in the file is kept as JSX." },
+          { q: "Is my code uploaded to a server?", a: "No — everything runs in your browser; the engine is downloaded once when you first click." }
         ]}
         tips={[
-          "Test the output by running it, especially for code with ternary expressions, generics, or unusual type syntax.",
-          "For reliable TypeScript-to-JavaScript conversion, use the actual TypeScript compiler (tsc) or a build tool with TypeScript support instead.",
-          "Simple parameter and variable type annotations convert reliably; complex or unusual type syntax is more likely to be mishandled.",
-          "Keep your original TypeScript file, since this conversion isn't guaranteed to be correct for all code."
+          "The output keeps your formatting and comments, so it stays readable.",
+          "import type statements disappear, since they only exist for the type checker."
         ]}
       />
     </div>
