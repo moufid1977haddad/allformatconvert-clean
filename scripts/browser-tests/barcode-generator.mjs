@@ -158,6 +158,13 @@ async function generate(bcid, value, opts = {}) {
   await page.locator('#bc-text').fill(value);
   return armed(() => page.getByRole('button', { name: 'Generate Barcode' }).click());
 }
+// Since 28/09 a batch (ZIP or label PDF) is no longer downloaded by itself: the page shows a Download button.
+async function batchDownload(pg, timeout = 600000) {
+  const link = pg.locator('a[data-batch-download]');
+  await link.waitFor({ timeout });
+  const [d] = await Promise.all([pg.waitForEvent('download'), link.click()]);
+  return d;
+}
 async function download(fmt) {
   const [d] = await Promise.all([page.waitForEvent('download'), page.locator(`a[data-format="${fmt}"]`).click()]);
   const f = path.join(tmp, `${Date.now()}-${d.suggestedFilename()}`); await d.saveAs(f); return { file: f, bytes: fs.readFileSync(f), name: d.suggestedFilename() };
@@ -276,8 +283,8 @@ if (only.length) { console.log(fails ? `${fails} FAILED` : 'all passed', `(${eng
 /* ---------- 5. batch ---------- */
 async function batch(action) {
   await page.getByRole('radio', { name: /^Many/  }).click();
-  const dl = page.waitForEvent('download', { timeout: 600000 });
-  const t0 = Date.now(); await action(); const d = await dl; const secs = (Date.now() - t0) / 1000;
+  const t0 = Date.now(); await action(); await page.locator('a[data-batch-download]').waitFor({ timeout: 600000 }); const secs = (Date.now() - t0) / 1000;
+  const d = await batchDownload(page);
   const zip = await JSZip.loadAsync(fs.readFileSync(await d.path()));
   const files = {}; for (const [n, f] of Object.entries(zip.files)) if (!f.dir) files[n] = await f.async('uint8array');
   return { files, secs, name: d.suggestedFilename() };
@@ -337,7 +344,7 @@ async function batch(action) {
   check('CSV import (semicolons, quotes, CRLF): value and text per line, tab-separated', lines === 'sku\tname\n590123412345\tMug "XL", blue\n400638133393\tTea', JSON.stringify(lines));
   await page.locator('#bc-lines').fill(lines.split('\n').slice(1).join('\n'));
   await page.locator('#bc-batch-format').selectOption('png');
-  const [d] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Generate all as ZIP' }).click()]);
+  await page.getByRole('button', { name: 'Generate all as ZIP' }).click(); const d = await batchDownload(page);
   const zip = await JSZip.loadAsync(fs.readFileSync(await d.path()));
   const names = Object.keys(zip.files).sort(); const reads = []; for (const n of names) reads.push(await zx(await zip.files[n].async('uint8array')));
   check('imported list -> ZIP: 2 codes named by value (not by text), each reads', names.join() === '1-590123412345.png,2-400638133393.png' && reads.join() === '5901234123457,4006381333931', names.join(', ') + ' · ' + reads.join(', '));
@@ -362,7 +369,7 @@ async function labelsRun(setup) {
   await page.getByRole('radio', { name: /^Many/ }).click();
   await page.locator('#bc-batch-format').selectOption('labels');
   await setup();
-  const [d] = await Promise.all([page.waitForEvent('download', { timeout: 120000 }), page.getByRole('button', { name: 'Generate label sheets (PDF)' }).click()]);
+  await page.getByRole('button', { name: 'Generate label sheets (PDF)' }).click(); const d = await batchDownload(page, 120000);
   const f = path.join(tmp, `${Date.now()}-${d.suggestedFilename()}`); await d.saveAs(f);
   await page.locator('[data-status]').waitFor();
   return { file: f, status: await page.locator('[data-status]').innerText() };
@@ -443,12 +450,57 @@ if (GS) { // thermal roll: one label per page, page = label; copies in order
   await p2.getByRole('radio', { name: /^Many/  }).click();
   await p2.getByLabel('A list (one value per line)').check();
   await p2.locator('#bc-lines').fill(['590123412345', 'BAD', '400638133393'].join('\n'));
-  const [d] = await Promise.all([p2.waitForEvent('download', { timeout: 60000 }), p2.getByRole('button', { name: 'Generate all as ZIP' }).click()]);
+  await p2.getByRole('button', { name: 'Generate all as ZIP' }).click(); const d = await batchDownload(p2, 60000);
   const zip = await JSZip.loadAsync(fs.readFileSync(await d.path()));
   const names = Object.keys(zip.files).sort();
   const reads = []; for (const n of names.filter((x) => x.endsWith('.png'))) reads.push(await zx(await zip.files[n].async('uint8array')));
   check('without OffscreenCanvas: batch still made on the page, in order, bad line in errors.txt', names.join() === '1-590123412345.png,3-400638133393.png,errors.txt' && reads.join() === '5901234123457,4006381333931', `${names.join(', ')} · ${reads.join(', ')}`);
   await p2.close();
+}
+{ // 28/09 (owner, real iPhone): nothing downloads by itself, the page and its settings stay, every link still works after a minute
+  const p3 = await ctx.newPage();
+  await p3.goto(origin + '/tools/qr-barcodes-tools/barcode-generator', { waitUntil: 'networkidle' });
+  let auto = 0; p3.on('download', () => { auto++; });
+  await p3.locator('#bc-type').selectOption('ean13');
+  await p3.locator('#bc-text').fill('590123412345');
+  await p3.getByRole('button', { name: 'Generate Barcode' }).click();
+  await p3.locator('a[data-format="png"]').waitFor();
+  await p3.getByRole('radio', { name: /^Many/ }).click();
+  await p3.getByLabel('A list (one value per line)').check();
+  const LIST = ['590123412345', '400638133393'].join('\n');
+  await p3.locator('#bc-lines').fill(LIST);
+  await p3.locator('#bc-batch-format').selectOption('png');
+  await p3.getByRole('button', { name: 'Generate all as ZIP' }).click();
+  await p3.locator('a[data-batch-download]').waitFor({ timeout: 60000 });
+  await p3.waitForTimeout(3000);
+  check('ZIP: no download by itself, a Download button instead; the settings stay', auto === 0 && (await p3.locator('#bc-lines').inputValue()) === LIST, `automatic downloads: ${auto}, button: ${await p3.locator('a[data-batch-download]').innerText()}`);
+  await p3.waitForTimeout(65000);
+  const [dz] = await Promise.all([p3.waitForEvent('download'), p3.locator('a[data-batch-download]').click()]);
+  const zz = await JSZip.loadAsync(fs.readFileSync(await dz.path()));
+  check('ZIP link still works after 65 s', Object.keys(zz.files).length === 2, Object.keys(zz.files).join(', '));
+  await p3.getByRole('radio', { name: /^One/ }).click();
+  const single = [];
+  for (const fmt of ['png', 'svg', 'pdf', 'eps']) {
+    const [d1] = await Promise.all([p3.waitForEvent('download'), p3.locator(`a[data-format="${fmt}"]`).click()]);
+    single.push(`${fmt}:${fs.statSync(await d1.path()).size}`);
+  }
+  check('one code, made over a minute ago: PNG, SVG, PDF, EPS links still download, the page stays', single.every((x) => +x.split(':')[1] > 100) && p3.url().includes('barcode-generator'), single.join(' '));
+  await p3.getByRole('radio', { name: /^Many/ }).click();
+  await p3.locator('#bc-batch-format').selectOption('labels');
+  await p3.getByRole('button', { name: 'Generate label sheets (PDF)' }).click();
+  await p3.locator('a[data-batch-download]').waitFor({ timeout: 120000 });
+  const before = auto; // 1 ZIP + 4 single files so far, all clicked
+  await p3.waitForTimeout(65000);
+  const [dp] = await Promise.all([p3.waitForEvent('download'), p3.locator('a[data-batch-download]').click()]);
+  const head = fs.readFileSync(await dp.path()).subarray(0, 5).toString();
+  const prev = p3.locator('a[data-batch-preview]');
+  check('label PDF: no download by itself; after 65 s the Download button gives the PDF; the preview link opens a new tab', before === 5 && head === '%PDF-' && (await prev.getAttribute('target')) === '_blank' && p3.url().includes('barcode-generator'), `downloads before the click: ${before} (5 expected, all clicked), head ${head}`);
+  if (engine.name() === 'chromium') {
+    const [tab] = await Promise.all([ctx.waitForEvent('page'), prev.click()]);
+    check('preview tab shows the PDF (blob), the tool page stays open behind it', tab.url().startsWith('blob:') && !p3.isClosed(), tab.url().slice(0, 40));
+    await tab.close();
+  }
+  await p3.close();
 }
 console.log(fails ? `${fails} FAILED` : 'all passed', `(${engine.name()})`);
 fs.rmSync(tmp, { recursive: true, force: true });

@@ -35,7 +35,7 @@ export default function AboutPage() {
         <div className="bg-white border border-neutral-200 rounded-xl p-8 mb-5">
           <h2 className="text-xl font-bold text-neutral-800 mb-4">What we offer</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {['PDF Tools', 'Image Tools', 'Video Tools', 'Audio Tools', 'Text Tools', 'AI Tools', 'Developer Tools', 'File Tools', 'GIF Tools'].map((item) => (
+            {['PDF Tools', 'Image Tools', 'Video Tools', 'Audio Tools', 'Text Tools', 'AI Tools', 'Developer Tools', 'File Tools', 'GIF Tools', 'QR & Barcode Tools', 'Converter Tools', 'Math Tools'].map((item) => (
               <div key={item} className="bg-neutral-100 rounded-lg px-3 py-2 text-sm text-neutral-700 text-center">
                 {item}
               </div>

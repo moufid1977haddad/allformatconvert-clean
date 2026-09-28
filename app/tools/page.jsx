@@ -40,7 +40,7 @@ const categories = [
     href: '/tools/file-tools', tools: ['ZIP Extractor', 'ZIP Creator', 'TAR Extractor'], count: 9,
   },
   {
-    color: 'text-teal-500', title: 'QR & Barcodes Tools',
+    color: 'text-teal-500', title: 'QR & Barcode Tools',
     description: 'Generate and scan QR codes and barcodes',
     href: '/tools/qr-barcodes-tools', tools: ['QR Generator', 'Barcode Generator', 'QR Scanner'], count: 3,
   },
@@ -65,6 +65,9 @@ const categories = [
     href: '/tools/ai-tools', tools: ['Background Remover', 'Image Upscaler', 'Grammar Fixer'], count: 16,
   },
 ];
+
+// "+3 more tools", "+1 more tool"; nothing when every tool of the category is already listed on the card.
+const moreLabel = (n) => (n > 0 ? `+${n} more tool${n === 1 ? '' : 's'}` : '');
 
 export default function ToolsPage() {
   const [toolCounts, setToolCounts] = useState({});
@@ -92,7 +95,7 @@ export default function ToolsPage() {
                   {cat.tools.map(tool => (
                     <div key={tool} className="text-neutral-500 text-xs">• {tool}</div>
                   ))}
-                  <div className="text-indigo-500 text-xs font-semibold mt-2">+{Math.max(0, count - cat.tools.length)} more tools</div>
+                  {moreLabel(count - cat.tools.length) && <div className="text-indigo-500 text-xs font-semibold mt-2" data-more-tools>{moreLabel(count - cat.tools.length)}</div>}
                 </div>
               </Link>
             );

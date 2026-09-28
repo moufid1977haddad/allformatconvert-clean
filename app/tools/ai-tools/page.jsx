@@ -40,11 +40,11 @@ export default function AiToolsPage() {
       </div>
       <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Ai Tools</h2>
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About AI Tools</h2>
           <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">AI Tools is a comprehensive free online platform that provides access to powerful artificial intelligence utilities for productivity, content creation, and data analysis. Whether you're a student, professional, or business owner, AI Tools helps you automate tasks and enhance your work without any subscription fees.</p>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Ai Tools</h2>
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use AI Tools</h2>
           <ol className="space-y-2">
             <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the AI Tools website and browse the available tools from the home page dashboard</li>
             <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Select the specific AI tool you want to use and click on it to open the tool interface</li>

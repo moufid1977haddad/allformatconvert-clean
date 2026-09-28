@@ -63,11 +63,11 @@ export default function PdfToolsPage() {
       </div>
       <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Pdf Tools</h2>
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About PDF Tools</h2>
           <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">PDF Tools is a free online platform that allows users to edit, convert, merge, and manipulate PDF files without requiring software installation or paid subscriptions. Whether you need to compress, split, rotate, or watermark PDFs, this comprehensive toolkit handles all your document management needs instantly in your browser.</p>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Pdf Tools</h2>
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use PDF Tools</h2>
           <ol className="space-y-2">
             <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the PDF Tools website and select the specific tool you need from the menu options</li>
             <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Upload your PDF file by clicking the upload button or dragging and dropping it into the designated area</li>

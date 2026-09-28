@@ -81,6 +81,9 @@ export default function BarcodeGeneratorPage() {
   useEffect(() => () => { workerRef.current?.terminate(); poolRef.current?.forEach((w) => w.terminate()); }, []);
   useEffect(() => { setOut(null); setError(''); }, [bcid, text, ui]);
   useEffect(() => { setBatchResult(null); }, [bcid, ui, lines, seq, batchFormat, source, labels]);
+  // A result's files stay downloadable for as long as it is shown: freed only when it is replaced or the page is left.
+  useEffect(() => () => { if (out) Object.values(out.urls).forEach((u) => URL.revokeObjectURL(u)); }, [out]);
+  useEffect(() => () => { if (batchResult) URL.revokeObjectURL(batchResult.url); }, [batchResult]);
   const set = (k) => (e) => { const v = e.target.type === 'checkbox' ? e.target.checked : e.target.value; setUi((u) => ({ ...u, [k]: v })); };
   const setUnit = (e) => {
     const unit = e.target.value;
@@ -185,11 +188,11 @@ export default function BarcodeGeneratorPage() {
     results.forEach((r, i) => { if (r.error) failed.push(`line ${i + 1}: ${values[i]} — ${r.error}`); else { codes.push(r.bytes); if (r.skipped) skipped++; } });
     if (!codes.length) { setError('No code could be made: ' + failed.slice(0, 3).join(' · ')); return; }
     const pdf = await labelPdf(codes, labels);
-    const url = URL.createObjectURL(new Blob([pdf.bytes], { type: 'application/pdf' }));
+    const pdfBlob = new Blob([pdf.bytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(pdfBlob);
     const name = `barcode-labels-${safeName(sym.label.split(' ')[0])}-${pdf.labels}.pdf`;
-    const a = document.createElement('a'); a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 60000);
     const moduleMm = physical(ui).xMm * pdf.minScale; const min = GS1_MIN_MM[bcid];
-    setBatchResult({ ok: codes.length, failed, skipped, secs: (performance.now() - t0) / 1000, name, url, labels: pdf.labels, pages: pdf.pages, scale: pdf.minScale, moduleMm, belowGs1: min && moduleMm < min - 1e-9 ? min : 0 });
+    setBatchResult({ ok: codes.length, failed, skipped, secs: (performance.now() - t0) / 1000, name, url, bytes: pdfBlob.size, labels: pdf.labels, pages: pdf.pages, scale: pdf.minScale, moduleMm, belowGs1: min && moduleMm < min - 1e-9 ? min : 0 });
   };
 
   const runBatch = async () => {
@@ -236,8 +239,7 @@ export default function BarcodeGeneratorPage() {
       const blob = await downloadZip(entries).blob();
       const url = URL.createObjectURL(blob);
       const name = `barcodes-${safeName(sym.label.split(' ')[0])}-${values.length}.zip`;
-      const a = document.createElement('a'); a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 60000);
-      setBatchResult({ ok: entries.length - (failed.length ? 1 : 0), failed, skipped, secs: (performance.now() - t0) / 1000, name, url });
+      setBatchResult({ ok: entries.length - (failed.length ? 1 : 0), failed, skipped, secs: (performance.now() - t0) / 1000, name, url, bytes: blob.size });
     } catch (e) { setError(`The ${batchFormat === 'labels' ? 'PDF' : 'ZIP'} could not be made: ` + (e.message || e)); }
     finally { setBusy(false); setProgress(null); }
   };
@@ -417,7 +419,10 @@ export default function BarcodeGeneratorPage() {
                   : `Enlarged to fill the label: ${Math.round(batchResult.scale * 100)} % (${batchResult.moduleMm.toFixed(3)} mm per module).`}
                 {batchResult.belowGs1 ? ` Under the GS1 minimum of ${batchResult.belowGs1} mm: use bigger labels, a smaller module, or fewer characters.` : ''}</p>}
               {batchResult.failed.length > 0 && <p className="text-red-600">{batchResult.failed.length} left out{batchResult.labels ? '' : ' (listed in errors.txt inside the ZIP)'}: {batchResult.failed.slice(0, 3).join(' · ')}{batchResult.failed.length > 3 ? ' …' : ''}</p>}
-              <a href={batchResult.url} download={batchResult.name} className="text-indigo-600">Download the {batchResult.labels ? 'PDF' : 'ZIP'} again</a>
+              {/* No automatic download (on an iPhone it left the page or saved without asking): the visitor downloads when ready,
+                  as on iLovePDF / Smallpdf; the settings stay in place. */}
+              <a href={batchResult.url} download={batchResult.name} data-batch-download className="block text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-3 font-semibold transition mt-2">Download the {batchResult.labels ? 'PDF' : 'ZIP'} ({(batchResult.bytes / 1048576).toFixed(batchResult.bytes < 1048576 ? 2 : 1)} MB)</a>
+              {batchResult.labels && <a href={batchResult.url} target="_blank" rel="noopener" data-batch-preview className="block text-center text-indigo-600 underline">Preview the PDF in a new tab</a>}
             </div>
           )}
         </div>

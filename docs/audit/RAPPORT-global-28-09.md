@@ -65,3 +65,57 @@ Configuration **identique octet pour octet** à celle mesurée le 28/09 (80 appe
 2. **un navigateur piloté par un robot de test** (Playwright, Selenium, Puppeteer : `navigator.webdriver`, toujours faux chez un visiteur) **n'envoie aucun rapport** et marque ses requêtes (cookie `oct_automation=1`), que le serveur ignore aussi pour ses propres erreurs (22 appels serveur) ;
 3. la route répond désormais `X-Tool-Error-Recorded: yes|no` (sans rien dire du contenu) : on prouve sans lire la table.
 **Preuve** (test qui provoque une vraie erreur : le plantage Sticky Notes du test 7) : en local, sur la préversion et sur www, écran d'erreur affiché, **aucune requête vers `/api/report-error`** ; appel direct de la route : `X-Tool-Error-Recorded: no` en local et sur la préversion (non-production), et sur www pour une requête marquée robot. Les vraies erreurs des visiteurs passent par le même chemin qu'avant.
+
+## Point 6 — Agrandisseur d'images (Image Upscaler)
+
+**Recherche.** Offres gratuites : iLoveIMG 6 Mpx, Upscale.media 6,25 Mpx sans compte, Bigjpg 9 Mpx. Aucun ne publie son moyen de calcul (serveurs, vraisemblablement des cartes graphiques). Le moyen le moins cher, à qualité égale, est de faire tourner **le même modèle dans le navigateur du visiteur** par WebGPU (Chrome, Edge, Safari récents, Firefox sous Windows) : 0 $ par image, et l'image ne quitte pas l'appareil.
+
+**Ce qui est en place :**
+- limite portée de 1 à **6 Mpx** (niveau iLoveIMG / Upscale.media), sur la page et sur le service (`UPSCALE_MAX_INPUT_PIXELS=6000000`, posé par la CLI Railway) ;
+- **sur l'appareil quand WebGPU existe**, sortie **identique** au calcul du serveur (PSNR 124,9 dB, écart maximal 0) ; si la puce graphique est lente, la page propose le serveur ;
+- **sinon notre serveur** (jamais un tiers). Mesuré le 28/09 : une image de 6 Mpx ×4 en un seul appel prend **284 s** pour une route coupée à 290 s, sans aucune marge. **Corrigé :** au-delà de 2 Mpx, la page envoie l'image **en bandes** (≈ 80 s chacune), avec 16 lignes de contexte rognées ensuite, exactement comme les tuiles du service lui-même, et les recolle. Même modèle, même résultat, et chaque appel reste loin de la limite ;
+- **plafond de dépense mensuel propre : 5 $**, sur le modèle du générateur d'images. Chaque appel réserve le pire cas (0,04 $), puis est ajusté au coût réel calculé sur le temps mesuré (prix Railway lus le 28/09 : 0,00000772 $/vCPU·s, 0,00000386 $/Go·s, 0,05 $/Go sortant). Au prix d'une image de 6 Mpx (≈ 0,03 $), 5 $ ≈ 160 grandes images par mois sur le serveur, et les visiteurs WebGPU ne coûtent rien. Montant choisi : **5 $**, le même que le générateur d'images (le plus gros poste IA du site). Une variable Vercel peut seulement le **baisser**, jamais le relever.
+
+**Preuves (préversion) :**
+- **coupure** : préversion construite avec un budget de 0 (variable limitée à une branche de test, supprimée ensuite) : `/api/image-upscale` répond **503 en 1,1 s**, avant tout appel au service d'IA, et la page affiche « …reached its monthly budget… It resets on October 1, 2026 (UTC) ». Aucun calcul lancé, rien dépensé. (Au passage : la date affichée était au format machine `2026-10-01T00:00:00.000Z` ; elle est maintenant lisible, aussi pour le plafond d'outil et le générateur d'images.) ;
+- Chromium avec WebGPU : ×4 et ×2 faits sur l'appareil, **aucune requête vers un serveur** ; Firefox sans WebGPU : ×4 et ×2 par le serveur, PNG justes ;
+- 6 Mpx par le serveur : voir la ligne « bandes » du tableau de déploiement 2 ;
+- tests unitaires du plafond (compteurs en mémoire) : 6/6.
+
+## Point 7 — Tests de charge
+
+**7a — copie jetable du service ffmpeg** (environnement Railway « charge », même code et mêmes réglages que la production : 2 emplacements de calcul, 10 places de file, 8 vCPU ; ta clé de test). Résultats dans `docs/audit/saturation/results/remote-load-28-09.json`.
+
+| Visiteurs simultanés | Erreurs / refus | Audio → Opus | Vidéo 1080p 30 s compressée | Coupe précise 10 s | Vidéo 3 min → WebM | Dernier servi |
+|---|---|---|---|---|---|---|
+| 1 | 0 | — | 27 s | — | — | 27 s |
+| 2 | 0 | 3,0 s | 26 s | — | — | 26 s |
+| 4 | 0 | 2,2-2,3 s | 37 s | 24 s | — | 37 s |
+| 8 | 0 | 3,2-5,4 s | 43-57 s | 31 s | — | 57 s |
+| 12 | 0 | 3,8-6,7 s | 53-55 s | 67 s | 6 min 34 s | 6 min 34 s |
+
+Lecture : **aucun refus jusqu'à 12**. La file fait patienter (au plus 6ᵉ place pour 10 disponibles) au lieu de refuser. L'audio reste sous 7 s même à 12. La seule attente longue est celle du travail le plus lourd, qui dure 6 min 34 s même seul. Les temps d'envoi incluent ma propre connexion, partagée entre les 12 visiteurs simulés ; un vrai visiteur a la sienne. **Coût : ≤ 0,06 $** (≈ 581 s de calcul à 8 vCPU au plus = 0,036 $ ; mémoire ≈ 0,013 $ ; 0,26 Go sortants = 0,013 $), sous les 0,50 $. **La copie a été supprimée** à la fin (service et environnement). Il reste les 5 services d'origine, et l'adresse de la copie répond 404.
+
+**7b — Gotenberg de bout en bout sur www** (le vrai chemin des visiteurs, fichiers Excel et PowerPoint, jamais Word, qui passe par un fournisseur payant) : **76/76 PDF justes, 1 réplica**. Médiane 1,4 s seul, 1,9 s à 10, 4,1 s à 20, **6,3 s à 40 simultanés** (maximum 12,7 s). Coût < 0,01 $. Résultats : `docs/audit/saturation/results/gotenberg-www-28-09.json`.
+
+**7c — dimensionnement recommandé** (coûts : prix Railway lus le 28/09, consommation au repos lue par `railway metrics` ; facture Railway actuelle estimée à **12,24 $/mois**) :
+- **Gotenberg : rester à 1 réplica (0 $ de plus).** Il a tenu 40 conversions simultanées sans échec. Un réplica au repos consomme ≈ 0,8 Go et < 0,01 vCPU, soit **≈ 8 $/mois par réplica** supplémentaire. **Pour le jour du lancement seulement** : 3 réplicas (mesure de préparation du lancement : sûr jusqu’à ≈ 150 conversions simultanées), **+16 $/mois tant qu'ils tournent**, soit ≈ 4 $ pour une semaine. **→ Attend ton accord** (au-dessus du coût actuel).
+- **Service ffmpeg : ne rien changer (0 $ de plus).** 8 vCPU, 2 emplacements, 10 places de file, mise en veille quand il ne sert pas : il ne coûte que quand il travaille. Ajouter des emplacements n'accélérerait rien, puisque le calcul occupe déjà tout le processeur. Au-delà de 8 vCPU, il faut changer d'offre Railway : décision à toi, non recommandée au vu des mesures.
+- **Service d'images** (détourage + agrandisseur) : inchangé. Les bandes de l'agrandisseur laissent passer un détourage entre deux bandes.
+
+## Point 8 — Coupe précise rapide sous Firefox et Safari
+
+**Recherche.** Clideo, Kapwing et les autres coupent sur leurs serveurs. La « coupe intelligente » faite entièrement dans le navigateur (réencoder seulement les images autour du point de coupe) est **expérimentale chez LosslessCut**, avec des en-têtes H.264 divergents : écartée. **Moyen retenu, le plus court à qualité égale :**
+1. le navigateur copie **sans réencoder** le morceau qui commence à l'image-clé précédant le début ;
+2. il n'envoie que ce morceau, jamais toute la vidéo ;
+3. notre service ffmpeg le coupe **à l'image exacte**.
+
+Sous Chromium, un extrait court reste coupé dans le navigateur, sans changement.
+
+**Preuves :**
+- service : 15/15 tests de coupe (première image exacte, 2,400 s pour 2,4 s demandées), 106/106 tests existants sans régression ;
+- page, avec un service simulé : 3 moteurs ;
+- **de bout en bout, avec le vrai service de production, sur la préversion** : Firefox et WebKit, source 1080p dont chaque image porte son numéro, coupe 5,30 s → 15,30 s. La vidéo rendue commence **à l'image 159** (et non à l'image-clé 150) et dure **10,000 s** ; environ 11 s entre le clic et le résultat ;
+- charge : 1 coupe précise au milieu de 11 autres travaux = 67 s au pire (point 7a).
+
+Coût ≈ 0,002 $ par coupe.
