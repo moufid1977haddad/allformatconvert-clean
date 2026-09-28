@@ -66,3 +66,36 @@ export async function decryptText(b64, password) {
     throw new Error('Wrong password, or this is not a text encrypted by this tool.');
   }
 }
+
+// ---------- files (File Encryptor, 29/09) ----------
+// Same scheme for bytes. Format: "OCF1" | salt (16) | iv (12) | ciphertext+tag.
+// Before: the same repeating-key XOR, so decrypting with a WRONG password
+// silently produced a corrupted file instead of an error.
+const FILE_MAGIC = [0x4f, 0x43, 0x46, 0x31]; // "OCF1"
+
+export async function encryptBytes(bytes, password) {
+  if (!password) throw new Error('Enter a password: without one, the file cannot be encrypted.');
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(password, salt);
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, bytes));
+  const out = new Uint8Array(32 + ct.length);
+  out.set(FILE_MAGIC, 0); out.set(salt, 4); out.set(iv, 20); out.set(ct, 32);
+  return out;
+}
+
+// Returns { bytes, legacy }. Throws on a wrong password (AES format).
+export async function decryptBytes(bytes, password) {
+  if (!password) throw new Error('Enter the password used to encrypt this file.');
+  if (bytes.length >= 48 && FILE_MAGIC.every((b, i) => bytes[i] === b)) {
+    const key = await deriveKey(password, bytes.subarray(4, 20));
+    try {
+      return { bytes: new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bytes.subarray(20, 32) }, key, bytes.subarray(32))), legacy: false };
+    } catch {
+      throw new Error('Wrong password, or the encrypted file was changed or cut: it cannot be decrypted.');
+    }
+  }
+  // Files encrypted by the old XOR version: no way to check the password.
+  const k = enc.encode(password);
+  return { bytes: bytes.map((b, i) => b ^ k[i % k.length]), legacy: true };
+}

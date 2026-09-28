@@ -64,6 +64,18 @@ test('encryptor: texts from the old XOR version still decrypt, flagged legacy', 
   assert.deepEqual(await c.decryptText(old, 'key'), { text: 'hello é', legacy: true });
 });
 
+test('file encryptor: AES-GCM bytes round trip, wrong password refused, legacy XOR flagged', async () => {
+  const data = new Uint8Array([0, 1, 2, 255, 254, 10, 13]);
+  const e = await c.encryptBytes(data, 'pw');
+  assert.equal(e.length, data.length + 48);
+  const d = await c.decryptBytes(e, 'pw');
+  assert.deepEqual([...d.bytes], [...data]); assert.equal(d.legacy, false);
+  await assert.rejects(() => c.decryptBytes(e, 'bad'), /Wrong password/);
+  const old = data.map((x, i) => x ^ [0x6b, 0x65, 0x79][i % 3]);
+  const l = await c.decryptBytes(old, 'key');
+  assert.deepEqual([...l.bytes], [...data]); assert.equal(l.legacy, true);
+});
+
 for (const [name, fn] of tests) {
   try { await fn(); passed++; console.log('  PASS', name); } catch (e) { console.error('  FAIL', name, '\n', e.message); process.exitCode = 1; }
 }

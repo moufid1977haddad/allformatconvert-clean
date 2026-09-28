@@ -18,6 +18,9 @@ const open = async (path) => {
   page.on('pageerror', (e) => errors.push(`${path}: ${e.message}`));
   await page.goto(origin + path, { waitUntil: 'networkidle' });
 };
+// The navbar has its own search box and the page a translation widget: skip them.
+const TEXT_IN = 'input[type="text"]:not([placeholder="Search tools..."])';
+const SELECT = 'select:not(.goog-te-combo)';
 const ta = (i = 0) => page.locator('textarea').nth(i);
 const outTa = () => page.locator('textarea[readonly]').last();
 const click = (name) => page.getByRole('button', { name, exact: true }).first().click();
@@ -101,7 +104,7 @@ await T('html-entity-decoder', async () => {
 });
 await T('timestamp', async () => {
   await open('/tools/developer-tools/timestamp-converter');
-  await page.locator('input[type="text"]').first().fill('1700000000000');
+  await page.locator(TEXT_IN).first().fill('1700000000000');
   await page.getByRole('button', { name: 'Convert' }).first().click();
   const t = await body();
   check('timestamp ms detected', t.includes('milliseconds') && t.includes('2023-11-14T22:13:20.000Z'), '');
@@ -109,9 +112,9 @@ await T('timestamp', async () => {
 await T('aspect-ratio', async () => {
   await open('/tools/developer-tools/aspect-ratio');
   await page.locator('input[type="number"]').nth(0).fill('2.35'); await page.locator('input[type="number"]').nth(1).fill('1');
-  check('aspect decimal', (await body()).includes('47:20'), '');
+  check('aspect decimal', (await page.locator('.text-4xl').first().innerText()).trim() === '47:20', '');
   await page.locator('input[type="number"]').nth(1).fill('');
-  check('aspect empty -> no fake ratio', !(await body()).includes('47:20'), '');
+  check('aspect empty -> no fake ratio', (await page.locator('.text-4xl').first().innerText()).trim() === '—', '');
 });
 await T('json-to-xml', async () => {
   await open('/tools/developer-tools/json-to-xml');
@@ -201,7 +204,7 @@ await T('cron', async () => {
 
 await T('fraction', async () => {
   await open('/tools/math-tools/fraction-calculator');
-  const ins = page.locator('input[type="text"]');
+  const ins = page.locator(TEXT_IN);
   await ins.nth(0).fill('1.5'); await ins.nth(1).fill('1'); await ins.nth(2).fill('3'); await ins.nth(3).fill('4');
   await page.getByRole('button', { name: '*', exact: true }).click();
   await page.getByRole('button', { name: 'Calculate' }).click();
@@ -216,7 +219,7 @@ await T('statistics', async () => {
 });
 await T('scientific', async () => {
   await open('/tools/math-tools/scientific-calculator');
-  const inp = page.locator('input[type="text"]').first();
+  const inp = page.locator(TEXT_IN).first();
   await inp.fill('1/3e12'); await inp.press('Enter');
   await page.waitForTimeout(1500);
   check('scientific tiny', (await body()).includes('3.33333333333e-13'), '');
@@ -240,13 +243,13 @@ await T('text-sorter', async () => {
 });
 await T('find-replace', async () => {
   await open('/tools/text-tools/find-replace');
-  await ta().fill('price X'); await page.locator('input[type="text"]').nth(0).fill('X'); await page.locator('input[type="text"]').nth(1).fill('US$$');
+  await ta().fill('price X'); await page.locator(TEXT_IN).nth(0).fill('X'); await page.locator(TEXT_IN).nth(1).fill('US$$');
   await click('Replace All');
   check('replace literal $', (await outText()) === 'price US$$', await outTa().inputValue());
 });
 await T('lorem', async () => {
   await open('/tools/text-tools/lorem-ipsum');
-  await page.locator('input[type="number"]').fill('200'); await page.locator('select').selectOption('words');
+  await page.locator('input[type="number"]').fill('200'); await page.locator(SELECT).selectOption('words');
   await click('Generate');
   check('lorem 200 words', (await outText()).split(/\s+/).length === 200);
 });
@@ -273,7 +276,7 @@ await T('text-encryptor', async () => {
 });
 await T('ascii-art', async () => {
   await open('/tools/text-tools/ascii-art');
-  await page.locator('input[type="text"]').fill('Hi 42!'); await click('Generate');
+  await page.locator(TEXT_IN).fill('Hi 42!'); await click('Generate');
   await page.waitForTimeout(1500);
   const pre = await page.locator('pre').first().innerText();
   check('ascii digits rendered', pre.split('\n').length >= 5 && /\|/.test(pre), pre);

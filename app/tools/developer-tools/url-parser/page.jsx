@@ -8,8 +8,9 @@ export default function UrlParserPage() {
   const parse = () => {
     try {
       const u = new URL(url);
-      const params = {};
-      u.searchParams.forEach((v,k) => params[k] = v);
+      const params = Object.create(null);
+      // A repeated key (?tag=a&tag=b) keeps every value; it used to keep the last one only (29/09).
+      u.searchParams.forEach((v,k) => { params[k] = Object.prototype.hasOwnProperty.call(params, k) ? params[k] + ', ' + v : v; });
       setParsed({ protocol: u.protocol, hostname: u.hostname, port: u.port, pathname: u.pathname, search: u.search, hash: u.hash, params });
       setError('');
     } catch(e) { setError('Invalid URL'); }
