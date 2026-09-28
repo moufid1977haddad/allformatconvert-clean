@@ -6,6 +6,32 @@ export default function ImageComparisonPage() {
   const [image1, setImage1] = useState(null);
   const [image2, setImage2] = useState(null);
   const [sliderPos, setSliderPos] = useState(50);
+  const [mode, setMode] = useState('slider');
+  const [diff, setDiff] = useState(null);
+  const [error, setError] = useState('');
+  // Pixel differences (as Diffchecker's image compare): image 2 is drawn at the size of image 1; a pixel differs
+  // when one channel (or alpha) differs by more than 16/255, and is shown in red over a faded copy of image 1.
+  const computeDiff = async () => {
+    setError('');
+    try {
+      const load = (src) => new Promise((ok, ko) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ko(new Error('Could not read one of the images.')); im.src = src; });
+      const [a, bImg] = await Promise.all([load(image1), load(image2)]);
+      const w = a.naturalWidth, h = a.naturalHeight;
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const x = c.getContext('2d', { willReadFrequently: true });
+      x.drawImage(a, 0, 0); const A = x.getImageData(0, 0, w, h);
+      x.clearRect(0, 0, w, h); x.drawImage(bImg, 0, 0, w, h); const B = x.getImageData(0, 0, w, h);
+      const out = x.createImageData(w, h);
+      let n = 0;
+      for (let i = 0; i < A.data.length; i += 4) {
+        const d = Math.max(Math.abs(A.data[i] - B.data[i]), Math.abs(A.data[i + 1] - B.data[i + 1]), Math.abs(A.data[i + 2] - B.data[i + 2]), Math.abs(A.data[i + 3] - B.data[i + 3]));
+        if (d > 16) { n++; out.data[i] = 255; out.data[i + 1] = 0; out.data[i + 2] = 0; out.data[i + 3] = 255; }
+        else { const g = 0.2126 * A.data[i] + 0.7152 * A.data[i + 1] + 0.0722 * A.data[i + 2]; out.data[i] = out.data[i + 1] = out.data[i + 2] = 255 - (255 - g) * 0.3; out.data[i + 3] = 255; }
+      }
+      x.putImageData(out, 0, 0);
+      setDiff({ url: c.toDataURL('image/png'), changed: n, total: w * h, resized: bImg.naturalWidth !== w || bImg.naturalHeight !== h, w, h, w2: bImg.naturalWidth, h2: bImg.naturalHeight });
+    } catch (e) { setDiff(null); setError(e.message); }
+  };
   const ref1 = useRef();
   const ref2 = useRef();
 
@@ -18,19 +44,32 @@ export default function ImageComparisonPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="border-2 border-dashed border-neutral-200 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => ref1.current.click()}>
               {image1 ? <img src={image1} className="max-h-32 mx-auto rounded" /> : <p className="text-neutral-500 text-sm">Image 1 (Before)</p>}
-              <input ref={ref1} type="file" accept="image/*" className="hidden" onChange={e => setImage1(URL.createObjectURL(e.target.files[0]))} />
+              <input ref={ref1} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage1(URL.createObjectURL(f)); setDiff(null); } }} />
             </div>
             <div className="border-2 border-dashed border-neutral-200 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => ref2.current.click()}>
               {image2 ? <img src={image2} className="max-h-32 mx-auto rounded" /> : <p className="text-neutral-500 text-sm">Image 2 (After)</p>}
-              <input ref={ref2} type="file" accept="image/*" className="hidden" onChange={e => setImage2(URL.createObjectURL(e.target.files[0]))} />
+              <input ref={ref2} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage2(URL.createObjectURL(f)); setDiff(null); } }} />
             </div>
           </div>
           {image1 && image2 && (
+            <div className="flex gap-2 justify-center">
+              {[['slider', 'Slider'], ['diff', 'Differences']].map(([v, l]) => <button key={v} onClick={() => { setMode(v); if (v === 'diff' && !diff) computeDiff(); }} className={'px-4 py-2 rounded-lg text-sm font-semibold transition ' + (mode === v ? 'bg-indigo-600 text-white' : 'bg-neutral-200 text-neutral-800')}>{l}</button>)}
+            </div>
+          )}
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+          {image1 && image2 && mode === 'diff' && diff && (
+            <div className="space-y-2 text-center">
+              <p className="text-sm text-neutral-700" data-diff-summary>{diff.changed === 0 ? 'The two images are identical (no pixel differs by more than 16/255).' : `${diff.changed.toLocaleString()} of ${diff.total.toLocaleString()} pixels differ (${(100 * diff.changed / diff.total).toFixed(2)} %), shown in red.`}{diff.resized ? ` Image 2 (${diff.w2}×${diff.h2}) was scaled to the size of image 1 (${diff.w}×${diff.h}) to compare them.` : ''}</p>
+              <img src={diff.url} className="max-w-full mx-auto rounded border border-neutral-200" alt="Differences" />
+              <a href={diff.url} download="differences.png" className="inline-block text-sm text-indigo-600 underline">Download the difference image</a>
+            </div>
+          )}
+          {image1 && image2 && mode === 'slider' && (
             <div className="space-y-4">
               <div className="relative overflow-hidden rounded-xl" style={{height: '300px'}}>
-                <img src={image2} className="absolute inset-0 w-full h-full object-cover" />
+                <img src={image2} className="absolute inset-0 w-full h-full object-contain bg-neutral-100" />
                 <div className="absolute inset-0 overflow-hidden" style={{width: sliderPos + '%'}}>
-                  <img src={image1} className="absolute inset-0 w-full h-full object-cover" style={{width: (100 / sliderPos * 100) + '%', maxWidth: 'none'}} />
+                  <img src={image1} className="absolute inset-0 w-full h-full object-contain bg-neutral-100" style={{width: (100 / Math.max(sliderPos, 1) * 100) + '%', maxWidth: 'none'}} />
                 </div>
                 <div className="absolute top-0 bottom-0 w-1 bg-white" style={{left: sliderPos + '%'}}>
                   <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center text-neutral-900 font-bold shadow-lg">⇄</div>
@@ -44,24 +83,24 @@ export default function ImageComparisonPage() {
       </div>
       <SeoContent
         title="Image Comparison"
-        description="Image Comparison shows two images stacked with a draggable vertical divider, letting you slide between a 'before' and 'after' view to spot differences. Both images stay in your browser — nothing is uploaded to a server."
+        description="Image Comparison shows two images stacked with a draggable vertical divider, letting you slide between a 'before' and 'after' view, and a Differences view that marks in red every pixel that changed (more than 16/255 on any channel) with the share of pixels that differ, as Diffchecker's image compare does. Whole images are shown, never cropped. Both images stay in your browser — nothing is uploaded to a server."
         howTo={[
           "Click the first box and upload your 'before' image.",
           "Click the second box and upload your 'after' image.",
           "Drag the slider left and right to reveal more or less of each image.",
-          "Compare the two visually — there's no export or download for the comparison itself."
+          "Switch to Differences to see exactly which pixels changed, and download that difference image if needed."
         ]}
         faqs={[
           { q: "What image formats does Image Comparison support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP." },
           { q: "Is my image data stored or shared?", a: "No, both images stay in your browser and are never uploaded to a server." },
           { q: "Can I compare more than two images at once?", a: "No, the tool only supports comparing two images at a time." },
-          { q: "Can I export or download the comparison view?", a: "No, there's no export or screenshot feature built in — the slider is for on-screen viewing only." }
+          { q: "Does it highlight what changed?", a: "Yes — the Differences view paints every changed pixel red over a faded copy of the first image, gives the percentage of changed pixels, and can be downloaded as a PNG. Images of different sizes are compared after scaling the second to the first." }
         ]}
         tips={[
           "Use images with the same dimensions and framing for the most useful comparison.",
           "Drag the slider slowly across areas you want to inspect closely.",
           "If you want to share the comparison, take a manual screenshot of your browser window.",
-          "This is a visual before/after tool, not a pixel-difference detector — it won't highlight changes automatically."
+          "Tiny differences from JPEG re-compression stay below the 16/255 threshold, so only real changes are painted."
         ]}
       />
     </div>

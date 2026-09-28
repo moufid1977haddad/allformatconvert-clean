@@ -1,34 +1,38 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { sha256Hex, dHash, findPairs } from '../../../lib/imageSimilarity';
 export default function DuplicateImageFinderPage() {
   const [images, setImages] = useState([]);
-  const [duplicates, setDuplicates] = useState([]);
+  const [pairs, setPairs] = useState(null);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const inputRef = useRef();
   const handleFiles = (e) => {
     const files = Array.from(e.target.files);
     e.target.value = '';
-    const readers = files.map(file => new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve({ name: file.name, data: reader.result });
-      reader.onerror = () => reject(new Error(`Failed to read ${file.name}. It may be corrupted or unreadable.`));
-      reader.readAsDataURL(file);
-    }));
-    Promise.all(readers)
-      .then(imgs => { setImages(imgs); setError(''); })
-      .catch(err => setError(err.message || 'Failed to read one or more of the selected images.'));
-    setDuplicates([]);
+    setPairs(null);
+    setError('');
+    setImages(files.map((file) => ({ name: file.name, file, url: URL.createObjectURL(file) })));
   };
-  const findDuplicates = () => {
-    const seen = {};
-    const dups = [];
-    images.forEach(img => {
-      const key = img.data;
-      if (seen[key]) dups.push([seen[key], img.name]);
-      else seen[key] = img.name;
-    });
-    setDuplicates(dups);
+  const findDuplicates = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      const unreadable = [];
+      const items = [];
+      for (const im of images) {
+        const sha = await sha256Hex(await im.file.arrayBuffer());
+        let hash = null;
+        try { const bmp = await createImageBitmap(im.file); hash = dHash(bmp); bmp.close && bmp.close(); } catch { unreadable.push(im.name); }
+        items.push({ name: im.name, sha, hash });
+      }
+      setPairs(findPairs(items));
+      if (unreadable.length) setError(`This browser cannot display ${unreadable.join(', ')}: compared for exact copies only.`);
+    } catch (err) {
+      setError('Could not compare the images: ' + (err?.message || err));
+    }
+    setBusy(false);
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -43,34 +47,32 @@ export default function DuplicateImageFinderPage() {
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {images.length > 0 && (
             <div className="grid grid-cols-4 gap-2">
-              {images.map((img, i) => <div key={i} className="relative"><img src={img.data} className="w-full h-16 object-cover rounded" /><p className="text-xs text-neutral-500 truncate">{img.name}</p></div>)}
+              {images.map((img, i) => <div key={i} className="relative"><img src={img.url} className="w-full h-16 object-cover rounded" /><p className="text-xs text-neutral-500 truncate">{img.name}</p></div>)}
             </div>
           )}
-          <button onClick={findDuplicates} disabled={images.length < 2} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Find Duplicates</button>
-          {duplicates.length === 0 && images.length > 0 && <p className="text-green-400 text-center">No duplicates found!</p>}
-          {duplicates.map(([a, b], i) => <div key={i} className="bg-red-900/30 rounded-xl p-3 text-sm"><span className="text-red-400">Duplicate: </span>{a} = {b}</div>)}
+          <button onClick={findDuplicates} disabled={images.length < 2 || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">{busy ? 'Comparing…' : 'Find Duplicates'}</button>
+          {pairs && pairs.length === 0 && <p className="text-green-600 text-center">No duplicates or near-duplicates among these {images.length} images.</p>}
+          {pairs && pairs.map((d, i) => <div key={i} className={'rounded-xl p-3 text-sm ' + (d.kind === 'exact' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-800')}><strong>{d.kind === 'exact' ? 'Identical files' : 'Same picture'}</strong>{d.kind === 'similar' ? ` (${64 - d.bits}/64 matching)` : ''}: {d.a} = {d.b}</div>)}
         </div>
       </div>
       <SeoContent
-        title="Duplicate Image Finder"
-        description="Duplicate Image Finder scans a batch of images you select and flags pairs that are byte-for-byte identical, entirely in your browser — nothing is uploaded to a server. It works by comparing each image's full encoded data, so it only flags true exact duplicates and does not detect visually similar images with different resolutions or edits."
+        title={"Duplicate Image Finder"}
+        description={"Duplicate Image Finder compares a batch of images entirely in your browser — nothing is uploaded. It finds identical files (same SHA-256 fingerprint) and also the same picture saved differently — resized, re-compressed, converted from PNG to JPG — using a perceptual difference hash (dHash, the method of the imagehash library): two images are reported as the same picture when at most 6 of their 64 hash bits differ. Results appear only after you click Find Duplicates."}
         howTo={[
-          "Click the upload area and select multiple images from your device.",
-          "Click 'Find Duplicates' to scan the batch.",
-          "Review the list of detected duplicate pairs.",
-          "Manually delete the duplicate files from your device using your file manager — the tool doesn't remove files itself."
+          "Click the upload area and select several images at once.",
+          "Click 'Find Duplicates'.",
+          "Red lines are identical files; amber lines are the same picture in another size, quality or format, with how many of the 64 hash bits match.",
+          "Delete the copies you don't need from your device."
         ]}
         faqs={[
-          { q: "Is Duplicate Image Finder really free to use?", a: "Yes, it's completely free with no account required." },
-          { q: "How many images can I upload at once?", a: "There's no fixed limit — you can select as many as your browser can comfortably load at once, though very large batches will take longer." },
-          { q: "Will my images be stored on your servers?", a: "No, images are read and compared entirely in your browser using the File API. They are never uploaded anywhere." },
-          { q: "Can it find similar images, or just exact duplicates?", a: "It only flags images whose full encoded data matches exactly, so it's reliable for catching true duplicate files without false positives. It does not use visual similarity matching, so resized, cropped, or edited copies of the same photo generally won't be flagged." }
+          { q: "Is Duplicate Image Finder free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "Does it find resized or re-saved copies?", a: "Yes — besides byte-identical files, it compares a perceptual hash, so the same photo resized, re-compressed or converted to another format is reported as the same picture." },
+          { q: "Can it be fooled?", a: "Heavily edited copies (cropped, rotated, filtered) may not be matched, and two very plain images (for example two blank pages) can look alike to the hash; check the thumbnails before deleting anything." },
+          { q: "Are my images uploaded?", a: "No — everything is computed in your browser." }
         ]}
         tips={[
-          "This tool doesn't delete anything for you — it only identifies duplicate pairs, so remove files manually afterward.",
-          "For very similar-looking but non-identical photos (different resolution, slight edits), you'll need to compare them visually yourself.",
-          "Back up your images before deleting anything, just in case.",
-          "Run the tool again after reorganizing your photos to catch any duplicates you missed."
+          "Compare one folder at a time for the clearest results.",
+          "An amber match between two files of different sizes usually means one is a smaller copy of the other: keep the larger one."
         ]}
       />
     </div>

@@ -112,6 +112,52 @@ await T('image-editor corners', async () => {
   check('image-editor: corner radius makes the corners transparent', px(r, 0, 0)[3] === 0 && px(r, 20, 20)[3] === 255, `corner ${px(r, 0, 0)[3]}, centre ${px(r, 20, 20)[3]}`);
 });
 
+await T('duplicate-finder', async () => {
+  await open('/tools/image-tools/duplicate-image-finder');
+  // the same picture three ways (PNG 40x40, JPEG 40x40, PNG resized 20x20) + an unrelated one + an exact copy
+  const set = await page.evaluate(async () => {
+    const draw = (w, h, inv) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); const g = x.createLinearGradient(0, 0, w, 0); g.addColorStop(0, inv ? '#fff' : '#000'); g.addColorStop(1, inv ? '#000' : '#fff'); x.fillStyle = g; x.fillRect(0, 0, w, h); x.fillStyle = '#c00'; x.fillRect(w / 4, h / 4, w / 4, h / 2); return c; };
+    const enc = async (c, t) => Array.from(new Uint8Array(await (await new Promise((r) => c.toBlob(r, t, 0.8))).arrayBuffer()));
+    return [await enc(draw(40, 40), 'image/png'), await enc(draw(40, 40), 'image/jpeg'), await enc(draw(20, 20), 'image/png'), await enc(draw(40, 40, true), 'image/png')];
+  });
+  await page.locator('input[type="file"]').setInputFiles([
+    { name: 'a.png', mimeType: 'image/png', buffer: Buffer.from(set[0]) },
+    { name: 'a-copy.png', mimeType: 'image/png', buffer: Buffer.from(set[0]) },
+    { name: 'a.jpg', mimeType: 'image/jpeg', buffer: Buffer.from(set[1]) },
+    { name: 'a-small.png', mimeType: 'image/png', buffer: Buffer.from(set[2]) },
+    { name: 'other.png', mimeType: 'image/png', buffer: Buffer.from(set[3]) },
+  ]);
+  const before = await page.locator('body').innerText();
+  check('duplicate-finder: no verdict is shown before the search', !/No duplicates/.test(before));
+  await page.getByRole('button', { name: /Find Duplicates/ }).click();
+  await page.waitForTimeout(1500);
+  const t = await page.locator('body').innerText();
+  check('duplicate-finder: exact copy found', /Identical files[^\n]*a\.png = a-copy\.png/.test(t));
+  check('duplicate-finder: JPEG and resized copies found as the same picture', /Same picture[^\n]*a\.png = a\.jpg/.test(t) && /Same picture[^\n]*a\.png = a-small\.png/.test(t));
+  check('duplicate-finder: the unrelated image is not matched', !/other\.png/.test(t.split('Find Duplicates')[1] || ''));
+});
+await T('image-comparison', async () => {
+  await open('/tools/image-tools/image-comparison');
+  const two = await page.evaluate(async () => {
+    const mk = async (spot) => { const c = document.createElement('canvas'); c.width = c.height = 20; const x = c.getContext('2d'); x.fillStyle = '#08f'; x.fillRect(0, 0, 20, 20); if (spot) { x.fillStyle = '#f00'; x.fillRect(5, 5, 2, 2); } return Array.from(new Uint8Array(await (await new Promise((r) => c.toBlob(r, 'image/png'))).arrayBuffer())); };
+    return [await mk(false), await mk(true)];
+  });
+  const inputs = page.locator('input[type="file"]');
+  await inputs.nth(0).setInputFiles({ name: 'a.png', mimeType: 'image/png', buffer: Buffer.from(two[0]) });
+  await inputs.nth(1).setInputFiles({ name: 'b.png', mimeType: 'image/png', buffer: Buffer.from(two[1]) });
+  await page.getByRole('button', { name: 'Differences' }).click();
+  const txt = await page.locator('[data-diff-summary]').innerText({ timeout: 10000 });
+  check('image-comparison: the 4 changed pixels are counted', /^4 of 400 pixels differ/.test(txt), txt);
+});
+await T('image-to-base64', async () => {
+  await open('/tools/image-tools/image-to-base64');
+  const im = await makeImage('blue');
+  await page.locator('input[type="file"]').setInputFiles({ name: 'noext', mimeType: '', buffer: Buffer.from(im.bytes) });
+  await page.waitForTimeout(800);
+  const val = await page.locator('textarea').first().inputValue().catch(() => '');
+  check('image-to-base64: a file of unknown type still gets its real MIME type', val.startsWith('data:image/png;base64,'), val.slice(0, 40));
+});
+
 await b.close();
 for (const e of errors) { fails++; console.log('PAGE ERROR', e.slice(0, 200)); }
 console.log(`${passes} passed, ${fails} failed (${name})`);
