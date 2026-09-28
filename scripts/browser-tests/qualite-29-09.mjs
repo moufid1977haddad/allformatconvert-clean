@@ -450,6 +450,22 @@ await T('jpg-to-pdf orientation', async () => {
   check('portrait phone photo stays portrait', size.width === 600 && size.height === 800, JSON.stringify(size));
 });
 
+await T('audio-equalizer no clipping', async () => {
+  // 1 s of a 100 Hz sine at -1 dBFS, 16-bit mono 44.1 kHz: a +12 dB bass boost must not clip.
+  const sr = 44100, n = sr, data = Buffer.alloc(44 + n * 2);
+  data.write('RIFF', 0); data.writeUInt32LE(36 + n * 2, 4); data.write('WAVE', 8); data.write('fmt ', 12); data.writeUInt32LE(16, 16); data.writeUInt16LE(1, 20); data.writeUInt16LE(1, 22); data.writeUInt32LE(sr, 24); data.writeUInt32LE(sr * 2, 28); data.writeUInt16LE(2, 32); data.writeUInt16LE(16, 34); data.write('data', 36); data.writeUInt32LE(n * 2, 40);
+  for (let i = 0; i < n; i++) data.writeInt16LE(Math.round(Math.sin(2 * Math.PI * 100 * i / sr) * 0.89 * 32767), 44 + i * 2);
+  await open('/tools/audio-tools/audio-equalizer');
+  await page.locator('input[type="file"]').setInputFiles({ name: 'sine.wav', mimeType: 'audio/wav', buffer: data });
+  await page.locator('input[type="range"]').first().fill('12');
+  await page.getByRole('button', { name: /Export as WAV/ }).click();
+  const href = await page.locator('a[download^="equalized_"]').getAttribute('href', { timeout: 30000 });
+  const wav = await page.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href);
+  const buf = Buffer.from(wav); let clipped = 0;
+  for (let i = 44; i + 1 < buf.length; i += 2) { const v = buf.readInt16LE(i); if (v >= 32767 || v <= -32768) clipped++; }
+  check('equalizer output not clipped, and said so', clipped < 5 && (await body()).includes('lowered by'), `clipped=${clipped}`);
+});
+
 await b.close();
 for (const e of errors) { fails++; console.log('PAGE ERROR', e.slice(0, 200)); }
 console.log(`${passes} passed, ${fails} failed (${browserName})`);
