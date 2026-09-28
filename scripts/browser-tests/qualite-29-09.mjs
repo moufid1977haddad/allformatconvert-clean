@@ -466,6 +466,41 @@ await T('audio-equalizer no clipping', async () => {
   check('equalizer output not clipped, and said so', clipped < 5 && (await body()).includes('lowered by'), `clipped=${clipped}`);
 });
 
+await T('code-minifier css/html', async () => {
+  await open('/tools/developer-tools/code-minifier');
+  await page.getByRole('button', { name: 'css', exact: true }).click();
+  await ta().fill('a { background: url(data:image/png;base64,AAA=) }  /* c */');
+  await click('Minify');
+  check('code-minifier css', (await waitOut((x) => x.includes('url('))).includes('url(data:image/png;base64,AAA=)'));
+  await page.getByRole('button', { name: 'html', exact: true }).click();
+  await ta().fill('<p>a   b</p>\n<pre>  x\n  y</pre><!-- c -->');
+  await click('Minify');
+  check('code-minifier html keeps pre', (await waitOut((x) => x.includes('<pre>'))) === '<p>a b</p><pre>  x\n  y</pre>', await outTa().inputValue());
+});
+await T('file-converter csv/html', async () => {
+  await open('/tools/file-tools/file-converter');
+  await page.locator('input[type="file"]').setInputFiles({ name: 't.txt', mimeType: 'text/plain', buffer: Buffer.from('name\tnote\nSmith, John\t<b>"x"</b>') });
+  const sel = page.locator(SELECT).first();
+  await sel.selectOption('csv');
+  await page.getByRole('button', { name: /Convert/ }).first().click();
+  const href = await page.locator('a[download]').first().getAttribute('href', { timeout: 20000 });
+  const csv = await page.evaluate(async (u) => (await fetch(u)).text(), href);
+  check('file-converter csv quoted', csv === 'name,note\r\n"Smith, John","<b>""x""</b>"', JSON.stringify(csv));
+  await sel.selectOption('html');
+  await page.getByRole('button', { name: /Convert/ }).first().click();
+  await page.waitForTimeout(500);
+  const href2 = await page.locator('a[download]').first().getAttribute('href');
+  const html = await page.evaluate(async (u) => (await fetch(u)).text(), href2);
+  check('file-converter html escaped', html.includes('&lt;b&gt;"x"&lt;/b&gt;'), html.slice(0, 160));
+});
+await T('api-tester same-origin GET', async () => {
+  await open('/tools/developer-tools/api-tester');
+  await page.locator(TEXT_IN).first().fill(origin + '/api/tool-counts');
+  await page.getByRole('button', { name: /Send/ }).first().click();
+  await page.waitForTimeout(2000);
+  check('api-tester shows 200 and JSON', /200/.test(await body()) && (await body()).includes('{'), '');
+});
+
 await b.close();
 for (const e of errors) { fails++; console.log('PAGE ERROR', e.slice(0, 200)); }
 console.log(`${passes} passed, ${fails} failed (${browserName})`);
