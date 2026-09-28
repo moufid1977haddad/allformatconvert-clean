@@ -1,41 +1,25 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { encryptText, decryptText } from '../../../lib/textCrypto';
 
 export default function TextEncryptorPage() {
   const [text, setText] = useState('');
   const [key, setKey] = useState('');
   const [result, setResult] = useState('');
+  const [note, setNote] = useState('');
   const [copyError, setCopyError] = useState(false);
-
-  const encrypt = () => {
-    try {
-      const bytes = new TextEncoder().encode(text);
-      const keyBytes = new TextEncoder().encode(key);
-      let binary = '';
-      for (let i = 0; i < bytes.length; i++) {
-        binary += String.fromCharCode(bytes[i] ^ keyBytes[i % keyBytes.length]);
-      }
-      setResult(btoa(binary));
-    } catch(e) {
-      setResult('Encryption failed: ' + e.message);
-    }
+  const encrypt = async () => {
+    try { setResult(await encryptText(text, key)); setNote(''); }
+    catch (e) { setResult(''); setNote(e.message); }
   };
-
-  const decrypt = () => {
+  const decrypt = async () => {
     try {
-      const binary = atob(text);
-      const keyBytes = new TextEncoder().encode(key);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i) ^ keyBytes[i % keyBytes.length];
-      }
-      setResult(new TextDecoder().decode(bytes));
-    } catch(e) {
-      setResult('Invalid encrypted text');
-    }
+      const r = await decryptText(text, key);
+      setResult(r.text);
+      setNote(r.legacy ? 'Decrypted from the old XOR format this tool used before 29 September 2026. That format is weak: encrypt the text again to protect it with AES-256.' : '');
+    } catch (e) { setResult(''); setNote(e.message); }
   };
-
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
@@ -51,6 +35,7 @@ export default function TextEncryptorPage() {
             <button onClick={encrypt} disabled={!text || !key} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Encrypt</button>
             <button onClick={decrypt} disabled={!text || !key} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Decrypt</button>
           </div>
+          {note && <p className="text-amber-700 text-sm text-center">{note}</p>}
           {result && (
             <div className="space-y-2">
               <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none" value={result} readOnly />
@@ -61,25 +46,25 @@ export default function TextEncryptorPage() {
         </div>
       </div>
       <SeoContent
-        title="Text Encryptor"
-        description="Text Encryptor obfuscates text with a password-based XOR cipher and Base64 encoding, entirely in your browser. It's a quick way to make text unreadable to a casual viewer without the password, though it is not a substitute for strong encryption standards like AES when protecting truly sensitive information."
+        title={"Text Encryptor"}
+        description={"Text Encryptor encrypts text with a password using AES-256-GCM, the standard used by browsers, banks and messaging apps, through your browser's built-in Web Crypto API — nothing is uploaded. The key is derived from your password with PBKDF2-SHA-256 and 600,000 iterations (OWASP's 2023 recommendation), with a fresh random salt and IV for every message, so the same text encrypts differently each time. Decryption is authenticated: a wrong password or an altered text is refused, never turned into garbage. The result is Base64 text you can paste anywhere."}
         howTo={[
-          "Enter or paste the text you want to encrypt.",
-          "Type a secret key — this becomes your password, so remember it exactly.",
-          "Click \"Encrypt\" to scramble the text, or \"Decrypt\" to reverse a previously encrypted message with the same key.",
-          "Copy the result from the output field."
+          "Paste the text to encrypt, or the encrypted Base64 to decrypt.",
+          "Enter the password.",
+          "Click 'Encrypt' or 'Decrypt'.",
+          "Copy the result."
         ]}
         faqs={[
-          { q: "Is Text Encryptor completely free to use?", a: "Yes, it's 100% free with no signup and no limits on how much text you can process." },
-          { q: "How secure is this encryption?", a: "It uses a password-based XOR cipher followed by Base64 encoding — not AES or any \"military-grade\" standard. It's a fast way to obfuscate text so it isn't readable at a glance, but it shouldn't be relied on to protect highly sensitive or confidential information." },
-          { q: "What if I forget my key?", a: "The text can't be recovered without the exact original key — there's no password recovery option." },
-          { q: "Is my data uploaded anywhere?", a: "No, encryption and decryption both happen entirely in your browser — your text and key are never sent to a server." }
+          { q: "Is Text Encryptor free to use?", a: "Yes, it's completely free with no signup required." },
+          { q: "How strong is the encryption?", a: "AES-256-GCM with a PBKDF2-SHA-256 key (600,000 iterations). Security then depends on your password: use a long, unique one." },
+          { q: "What if I forget the password?", a: "The text cannot be recovered — there is no back door." },
+          { q: "Why is the output different each time I encrypt the same text?", a: "A random salt and IV are generated for each message, as they should be; any of the outputs decrypts with the same password." },
+          { q: "Can I still decrypt texts made with the previous version?", a: "Yes — texts encrypted with the old XOR method before 29 September 2026 still decrypt, with a notice recommending to encrypt them again." },
+          { q: "Is my text uploaded to a server?", a: "No — everything happens in your browser." }
         ]}
         tips={[
-          "Use a key you'll remember exactly — even one character off will produce garbled, unrecoverable output when decrypting.",
-          "This tool suits casual privacy (keeping a note unreadable at a glance), not protecting data against a determined attacker.",
-          "Always keep a copy of your original text, since there's no way to verify the key before you've already encrypted or decrypted.",
-          "AES and Caesar Cipher options aren't available — the encrypt/decrypt buttons both use the same XOR + Base64 method regardless of what you type."
+          "Share the password through a different channel than the encrypted text.",
+          "The encrypted text includes everything needed to decrypt it except the password."
         ]}
       />
     </div>
