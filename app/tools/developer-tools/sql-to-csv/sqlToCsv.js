@@ -26,6 +26,9 @@ export function parseSqlParenList(input, start) {
   while (i < n) {
     const c = input[i];
     if (inString) {
+      // MySQL (mysqldump) escapes a quote as \' -- 'O\'Brien'. Standard SQL keeps a backslash literal, so 'C:\' closes
+      // right after it: a \' followed by a comma or a closing parenthesis is read as that end of string.
+      if (c === '\\' && input[i + 1] === "'" && !/^\s*[,)]/.test(input.slice(i + 2))) { item += "\\'"; i += 2; continue; }
       if (c === "'") {
         if (input[i + 1] === "'") { item += "''"; i += 2; continue; }
         inString = false; item += c; i++; continue;
@@ -42,11 +45,12 @@ export function parseSqlParenList(input, start) {
 }
 
 // Strips the surrounding quotes from a single SQL value (leaving numeric/NULL
-// values as-is) and unescapes a doubled '' back to a literal single quote.
+// values as-is) and unescapes a doubled '' (standard) or a \' (MySQL) back to a literal single quote. Other
+// backslash sequences are kept as written: their meaning differs between MySQL and standard SQL.
 export function unquoteSqlValue(v) {
   const t = v.trim();
   if (t.length >= 2 && t[0] === "'" && t[t.length - 1] === "'") {
-    return t.slice(1, -1).replace(/''/g, "'");
+    return t.slice(1, -1).replace(/''/g, "'").replace(/\\'/g, "'");
   }
   return t;
 }

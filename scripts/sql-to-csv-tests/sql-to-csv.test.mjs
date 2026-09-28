@@ -27,3 +27,9 @@ test('a separate tuple-looking text after the statement is not swallowed', () =>
 test('no INSERT: clear error', () => {
   assert.throws(() => sqlInsertsToCsv('SELECT 1;'), /No INSERT statements found/);
 });
+test("MySQL \' escape keeps one value (was: split into wrong columns)", () => {
+  assert.equal(sqlInsertsToCsv(String.raw`INSERT INTO t (a,b) VALUES ('O\'Brien, Pat', 2),('it\'s', 3);`), 'a,b\n"O\'Brien, Pat",2\nit\'s,3');
+});
+test("standard SQL: a backslash just before the closing quote stays literal ('C:\\')", () => {
+  assert.equal(sqlInsertsToCsv(String.raw`INSERT INTO t (a,b) VALUES ('C:\', 2);`), 'a,b\nC:\\,2');
+});
