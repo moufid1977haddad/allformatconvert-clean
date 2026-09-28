@@ -1,6 +1,54 @@
 # RAPPORT — Prompt global du 28/09
 
-*(en cours de rédaction — version finale à la fin de la session)*
+## En bref — un point par ligne
+
+| Point | État | Pourquoi |
+|---|---|---|
+| 0 | fait | plan, rapport et historique relus |
+| 1 — B11-1 à B11-5 | **en production** (`03f34e53`) | famille CSV, capture vidéo, OCR 102 langues ; 3 moteurs |
+| 2 — grammaire T0 | **en production** | mention honnête ru/zh/ja/hi/tr |
+| 3 — slogan | **en production** | « 225 free tools. Most never upload your file. » (≈ 181/225 ne téléversent jamais) |
+| 4 — déploiement 1 | **fait** | préversion, 238 pages ×3, fusion `03f34e53` sans poussée forcée, vérifié sur www |
+| 5a-5c, 5e | **en production** | export lu ; test 7 PASS ; ByteString, .ncm, ChunkLoadError ; aucun test n'écrit plus dans `tool_errors` |
+| 5d, 5f | fait | 155 lignes triées, 3 de vrais visiteurs (corrigées), **152 à purger par toi** |
+| 6 — agrandisseur | **prêt, non déployé** | 6 Mpx, WebGPU sur l'appareil sinon serveur **en bandes** ; plafond propre 5 $ prouvé (503 en 1,1 s) |
+| 7a — charge ffmpeg | fait | 1 → 12 simultanés : 0 erreur, 0 refus ; ≤ 0,06 $ ; copie supprimée |
+| 7b — charge Gotenberg | fait | 40 simultanés sur www : 76/76, médiane 6,3 s ; < 0,01 $ |
+| 7c — dimensionnement | **attend ton accord** | rester à 1 réplica (0 $) ; jour du lancement : 3 réplicas ≈ +16 $/mois tant qu'ils tournent |
+| 8 — coupe précise Firefox/Safari | **prêt, non déployé** | service : additif **déjà sur master** (`8123f0c0`, comportement inchangé vérifié) ; page : sur la branche |
+| 9 — déploiement 2 | **préversion vérifiée, NON fusionné** | **règle du 28/09 au soir : aucune mise en production sans toi** |
+| Ajouts A-D | **prêts, non déployés** | noms de catégories, « +0 », téléchargements sans automatisme (15 outils), PDF vers Excel sans tableau |
+
+## Ce que toi seul dois faire
+
+1. **Demander le déploiement 2** dans ce terminal : fusion de `licence-ameliorations` sur master (sans poussée forcée ; repère de retour `restauration-avant-deploiement2-28-09` = `03f34e53`), puis vérification sur www.
+2. **Purge de `tool_errors`** : `docs/audit/tool_errors-purge-28-09.sql` dans Supabase → SQL Editor (compter 152, supprimer, contrôle = 3).
+3. **Décider** des 3 réplicas Gotenberg pour le jour du lancement (≈ +16 $/mois tant qu'ils tournent).
+4. **Retester sur ton iPhone** : générateur de codes-barres (ZIP, planches PDF, aperçu), et les 14 outils à bouton « Download ».
+
+## Ce qui est en production
+
+- Tout le **déploiement 1** (`03f34e53`) : points 1, 2, 3, 5a-5c, 5e.
+- Le changement **additif** du service vidéo (`8123f0c0`) : les options de coupe précise existent côté service mais **aucune page ne s'en sert encore** ; conversions ordinaires vérifiées identiques (5/5 sur www).
+- Le réglage Railway `UPSCALE_MAX_INPUT_PIXELS=6000000` du service d'images : sans effet visible tant que la page en production plafonne à 1 Mpx.
+- **Rien d'autre.** Tout le reste est sur la branche, vérifié sur la préversion `lwawb2a6h`.
+
+## Vérification finale de la préversion `lwawb2a6h` (déploiement 2, non fusionné)
+
+| Test | Chromium | Firefox | WebKit |
+|---|---|---|---|
+| 238 pages | 238 propres | 238 propres | 238 propres |
+| Toutes les suites (préversion `821g7weg3`, même interface) | PASS | PASS | PASS |
+| 14 outils : aucun téléchargement automatique, bouton encore valable après 65 s | 13/13 (+ 4 payants une fois : 3/4, le 4ᵉ = défaut D, corrigé) | 10/10 **sans attente** ; 7 fichiers corrects après 65 s ; 3 vides à travers mon relais de test (voir ci-dessous) | 10/10 |
+| Générateur de codes-barres (liens après 65 s, aperçu PDF) | 72/72 | 72/72 | 72/72 |
+| Noms de catégories + « +N more » | 74/74 | 74/74 | 74/74 |
+| PDF vers Excel (texte seul / tableau) | classeur ligne par ligne / vraies cellules | — | — |
+
+**Réserve Firefox :** HTML, EPUB et MOBI vers PDF ont reçu une réponse **vide (204)** de la route, mais seulement à travers mon relais de test local. La même conversion sur www donne le PDF (200, 13 469 octets), et Chromium à travers le même relais aussi. **À revérifier sur www sous Firefox après le déploiement.** Défaut révélé au passage, et corrigé dans le travail de nuit : une réponse vide était proposée comme un fichier de 0 octet. Désormais, la page dit que la conversion a échoué.
+
+**Écart à la règle, reconnu :** une poussée avec `-f` sur la branche de test `budget-zero-28-09` (simple avance, rien écrasé, vérifié). Plus jamais.
+
+---
 
 ## Point 1 — B11-1 à B11-5 corrigés (en production, `03f34e53`)
 

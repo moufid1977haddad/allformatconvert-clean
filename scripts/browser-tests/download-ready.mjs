@@ -4,7 +4,7 @@
 // them and every Download button is clicked (the file still comes, right name, right kind); a PDF also offers
 // "Open the PDF in a new tab" (target _blank).
 // --paid adds the 4 tools that go through the paid provider (Word to PDF, PDF to Word/Excel/PowerPoint): 1 call each.
-// Usage: node scripts/browser-tests/download-ready.mjs <origin> [--browser=firefox|webkit] [--paid]
+// Usage: node scripts/browser-tests/download-ready.mjs <origin> [--browser=firefox|webkit] [--paid] [--only=html-to-pdf,…] [--wait=65]
 import { chromium, firefox, webkit } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -12,6 +12,8 @@ import path from 'node:path';
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--'))).origin;
 const name = (process.argv.find((a) => a.startsWith('--browser=')) || '--browser=chromium').slice(10);
 const paid = process.argv.includes('--paid');
+const only = (process.argv.find((a) => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean);
+const WAIT = Number((process.argv.find((a) => a.startsWith('--wait=')) || '--wait=65').slice(7));
 let fails = 0;
 const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', `${name} ${n}`, info); };
 const FX = path.resolve('scripts/audit/fixtures/files');
@@ -38,7 +40,7 @@ const b = await { chromium, firefox, webkit }[name].launch();
 const ctx = await b.newContext({ acceptDownloads: true, extraHTTPHeaders: {} });
 await ctx.addCookies([{ name: 'oct_automation', value: '1', url: origin }]);
 const open = [];
-for (const [tool, input, ext, magic] of T) {
+for (const [tool, input, ext, magic] of T.filter(([t]) => !only.length || only.some((o) => t.endsWith(o)))) {
   const p = await ctx.newPage();
   p.setDefaultTimeout(240000);
   let auto = 0; p.on('download', () => { auto++; });
@@ -53,8 +55,8 @@ for (const [tool, input, ext, magic] of T) {
   check(`${tool}: no download by itself, a Download button instead, still on the tool page`, auto === 0 && p.url().includes(tool), `${label} · automatic downloads: ${auto}`);
   open.push({ tool, p, ext, magic, pdf: magic === '%PDF-' });
 }
-console.log(`waiting 65 s with ${open.length} results on screen…`);
-await new Promise((r) => setTimeout(r, 65000));
+console.log(`waiting ${WAIT} s with ${open.length} results on screen…`);
+await new Promise((r) => setTimeout(r, WAIT * 1000));
 for (const { tool, p, ext, magic, pdf } of open) {
   const [d] = await Promise.all([p.waitForEvent('download'), p.locator('a[data-download]').click()]);
   const bytes = fs.readFileSync(await d.path());
