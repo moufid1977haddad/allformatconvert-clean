@@ -390,6 +390,28 @@ await T('png-to-ico proportions', async () => {
   check('ico padded, not stretched', px.top[3] === 0 && px.mid[0] > 200 && px.mid[3] === 255, JSON.stringify(px));
 });
 
+// Canvas filters: must change the pixels in every engine (WebKit has no ctx.filter).
+const makePng = (fill) => page.evaluate(async (f) => { const c = document.createElement('canvas'); c.width = 40; c.height = 40; const x = c.getContext('2d'); if (f === 'half') { x.fillStyle = '#000'; x.fillRect(0, 0, 40, 40); x.fillStyle = '#fff'; x.fillRect(20, 0, 20, 40); } else { x.fillStyle = f; x.fillRect(0, 0, 40, 40); } const bl = await new Promise((r) => c.toBlob(r, 'image/png')); return Array.from(new Uint8Array(await bl.arrayBuffer())); }, fill);
+const pixelOf = (sel, x, y) => page.evaluate(async ([s, px, py]) => { const u = document.querySelector(s).getAttribute('href'); const img = new Image(); img.src = u; await img.decode(); const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d'); g.drawImage(img, 0, 0); return Array.from(g.getImageData(px, py, 1, 1).data); }, [sel, x, y]);
+await T('brightness-contrast', async () => {
+  await open('/tools/image-tools/brightness-contrast');
+  await page.locator('input[type="file"]').setInputFiles({ name: 'w.png', mimeType: 'image/png', buffer: Buffer.from(await makePng('#ffffff')) });
+  await page.locator('input[type="range"]').first().fill('50');
+  await page.getByRole('button', { name: /Apply/ }).click();
+  await page.locator('a[download="adjusted.png"]').waitFor({ timeout: 20000 });
+  const px = await pixelOf('a[download="adjusted.png"]', 5, 5);
+  check('brightness 50% applied', px[0] >= 126 && px[0] <= 129, JSON.stringify(px));
+});
+await T('image-blur', async () => {
+  await open('/tools/image-tools/image-blur');
+  await page.locator('input[type="file"]').setInputFiles({ name: 'h.png', mimeType: 'image/png', buffer: Buffer.from(await makePng('half')) });
+  await page.locator('input[type="range"]').first().fill('4');
+  await page.getByRole('button', { name: /Apply/ }).click();
+  await page.locator('a[download="blurred.png"]').waitFor({ timeout: 20000 });
+  const px = await pixelOf('a[download="blurred.png"]', 19, 20);
+  check('blur applied at the edge', px[0] > 40 && px[0] < 215, JSON.stringify(px));
+});
+
 await b.close();
 for (const e of errors) { fails++; console.log('PAGE ERROR', e.slice(0, 200)); }
 console.log(`${passes} passed, ${fails} failed (${browserName})`);

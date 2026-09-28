@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { supportsCanvasFilter } from '../../../lib/canvasFilters';
 import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import { videoReRecordSupport, finishRecording } from '../../../lib/mediaSupport';
 import IosOriginalNote from '../../../components/IosOriginalNote';
@@ -80,6 +81,11 @@ export default function VideoFilterPage() {
       canvas.height = videoRef.current.videoHeight;
       const ctx = canvas.getContext('2d');
       const selectedFilter = filters.find(f => f.value === filter);
+      // Safari has no canvas filters: the video used to be re-recorded
+      // UNFILTERED and offered as the result (29/09). Say so instead.
+      if (selectedFilter.css && !supportsCanvasFilter()) {
+        throw new Error('This browser (Safari) cannot apply video filters: the result would be your video unchanged. Use Chrome, Edge or Firefox for this tool.');
+      }
       ctx.filter = selectedFilter.css || 'none';
       const videoStream = canvas.captureStream(30);
       const audioTrack = getAudioTrack();
