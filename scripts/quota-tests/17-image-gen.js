@@ -19,12 +19,20 @@ function memCounters() {
       m.set(k(b, p), v);
       return { allowed: true, value: v };
     },
+    // Same contract as counters.js#incrementCountersAllOrNone: all go up, or none does.
+    async incrementCountersAllOrNone(items) {
+      const cur = items.map((i) => m.get(k(i.bucketKey, i.periodKey)) || 0);
+      const over = items.map((i, n) => cur[n] + i.amount > i.cap);
+      if (over.some(Boolean)) return { allowed: false, results: items.map((i, n) => ({ newValue: cur[n], overCap: over[n] })) };
+      items.forEach((i, n) => m.set(k(i.bucketKey, i.periodKey), cur[n] + i.amount));
+      return { allowed: true, results: items.map((i, n) => ({ newValue: cur[n] + i.amount, overCap: false })) };
+    },
     async decrementCounter(b, p, amount) { m.set(k(b, p), (m.get(k(b, p)) || 0) - amount); },
     async adjustCounter(b, p, delta) { m.set(k(b, p), (m.get(k(b, p)) || 0) + delta); },
     budget() { for (const [key, v] of m) if (key.startsWith('imagegen_spend_micros')) return v; return 0; },
   };
 }
-const req = (ip) => ({ headers: { get: (h) => (h.toLowerCase() === 'x-forwarded-for' ? ip : null) } });
+const req = (ip) => ({ headers: { get: (h) => (h.toLowerCase() === 'x-real-ip' ? ip : null) } });
 let pass = 0;
 async function t(name, fn) { await fn(); pass++; console.log('PASS', name); }
 

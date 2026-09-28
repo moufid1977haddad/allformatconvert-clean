@@ -1,71 +1,21 @@
--- The single atomic-capped-counter primitive behind all three layers: global
--- spend, the Adobe transaction counter, per-user quotas, per-IP rate limits,
--- and the exactly-once-per-threshold alert flags all reuse this one table
--- and function pair. See docs/specs/2026-08-28-quota-spend-limits-design.md.
-create table if not exists usage_counters (
-  bucket_key  text not null,
-  period_key  text not null,
-  value       bigint not null default 0,
-  updated_at  timestamptz not null default now(),
-  primary key (bucket_key, period_key)
-);
-alter table usage_counters enable row level security;
--- No policies added: only the service role (used server-side in lib/quota/*)
--- can read/write this table.
+-- Migration 29/09 -- atomic multi-counter reservation for the quota layer.
+-- NOT executed by the agent. To be run by the owner in the Supabase SQL editor,
+-- BEFORE the code that calls increment_usage_counters_all_or_none is deployed
+-- (schema change before code: the new code calls this RPC on every rate-limited
+-- request -- deployed first, every /api route behind a rate limit would answer 503).
+--
+-- Additive only: creates one new function, touches no existing function, table or row.
+-- The previous code keeps working after this migration (it does not call the new function).
+-- Source of truth: supabase/usage_counters.sql (the block below is copied from it verbatim).
 
-create or replace function increment_usage_counter(
-  p_bucket_key text, p_period_key text, p_amount bigint, p_cap bigint
-) returns table(new_value bigint, allowed boolean)
-language sql as $$
-  -- The `where p_amount <= p_cap` on the SELECT gates the plain-INSERT path
-  -- (a brand-new bucket_key/period_key -- true for every first request of
-  -- every new hour/day/month bucket, i.e. routine, not an edge case), and
-  -- the `where` on DO UPDATE gates the conflict path. Without the first
-  -- one, a fresh bucket's opening request bypassed the cap entirely.
-  -- Safe to add: since decrement/adjust both clamp at 0, stored value is
-  -- always >= 0, so `p_amount <= p_cap` failing implies
-  -- `existing.value + p_amount <= p_cap` also fails -- this can only
-  -- narrow, never change, the conflict path's own outcome.
-  with upsert as (
-    insert into usage_counters (bucket_key, period_key, value)
-    select p_bucket_key, p_period_key, p_amount
-    where p_amount <= p_cap
-    on conflict (bucket_key, period_key) do update
-      set value = usage_counters.value + p_amount, updated_at = now()
-      where usage_counters.value + p_amount <= p_cap
-    returning value
-  )
-  select
-    coalesce((select value from upsert), (select value from usage_counters where bucket_key = p_bucket_key and period_key = p_period_key), 0),
-    exists(select 1 from upsert);
-$$;
+-- ==== BEFORE ====
+-- Expected: the three existing functions, and NOT increment_usage_counters_all_or_none.
+select p.proname, pg_get_function_identity_arguments(p.oid) as args
+  from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+ where n.nspname = 'public' and p.proname like '%usage_counter%'
+ order by 1;
 
-create or replace function decrement_usage_counter(
-  p_bucket_key text, p_period_key text, p_amount bigint
-) returns void
-language sql as $$
-  update usage_counters
-     set value = greatest(value - p_amount, 0), updated_at = now()
-   where bucket_key = p_bucket_key and period_key = p_period_key;
-$$;
-
--- Post-hoc correction after a real cost is known. Unconditional by design: a
--- reconciliation must never fail even if it pushes the counter over cap -- it
--- is recording what already happened, not gating a new request.
-create or replace function adjust_usage_counter(
-  p_bucket_key text, p_period_key text, p_delta bigint
-) returns bigint
-language sql as $$
-  insert into usage_counters (bucket_key, period_key, value)
-  values (p_bucket_key, p_period_key, greatest(p_delta, 0))
-  on conflict (bucket_key, period_key) do update
-    set value = greatest(usage_counters.value + p_delta, 0), updated_at = now()
-  returning value;
-$$;
-
-revoke execute on function increment_usage_counter, decrement_usage_counter, adjust_usage_counter
-  from public, anon, authenticated;
-
+-- ==== MIGRATION ====
 -- All-or-none reservation across several counters (added 29/09, see
 -- docs/audit/migration-quota-atomique-29-09.sql). Replaces the old
 -- "increment A, increment B, and if B is denied decrement A in a separate
@@ -149,3 +99,24 @@ $$;
 
 revoke execute on function increment_usage_counters_all_or_none(text[], text[], bigint[], bigint[])
   from public, anon, authenticated;
+
+-- ==== AFTER ====
+-- 1. The function exists, and anon/authenticated cannot execute it (expected: false, false).
+select p.proname, pg_get_function_identity_arguments(p.oid) as args,
+       has_function_privilege('anon', p.oid, 'execute') as anon_can_execute,
+       has_function_privilege('authenticated', p.oid, 'execute') as authenticated_can_execute
+  from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+ where n.nspname = 'public' and p.proname = 'increment_usage_counters_all_or_none';
+
+-- 2. Harmless test calls on 'test:' buckets in period '2000-01' (never a real period).
+-- Expected (a): allowed = true on both rows, new_value 1 and 2.
+select * from increment_usage_counters_all_or_none(
+  array['test:atomic:a', 'test:atomic:b'], array['2000-01', '2000-01'], array[1, 2]::bigint[], array[1, 5]::bigint[]);
+-- Expected (b): allowed = false on both rows; row 1 over_cap = true; new_value still 1 and 2 (nothing changed).
+select * from increment_usage_counters_all_or_none(
+  array['test:atomic:a', 'test:atomic:b'], array['2000-01', '2000-01'], array[1, 1]::bigint[], array[1, 5]::bigint[]);
+-- Expected (c): exactly two rows, values 1 and 2.
+select bucket_key, period_key, value from usage_counters where bucket_key like 'test:atomic:%' and period_key = '2000-01' order by 1;
+
+-- 3. Cleanup (only the test rows written above). Expected: DELETE 2.
+delete from usage_counters where bucket_key like 'test:atomic:%' and period_key = '2000-01';

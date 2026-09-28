@@ -12,7 +12,7 @@ const { hashIp } = require('../../lib/quota/ipHash');
 const { adjustCounter } = require('../../lib/quota/counters');
 
 function fakeReq(ip) {
-  return { headers: { get: (name) => (name === 'x-forwarded-for' ? ip : null) } };
+  return { headers: { get: (name) => (name === 'x-real-ip' ? ip : null) } };
 }
 
 // ip_rate:* and usage_events rows here are scoped to a fake test IP/tool
