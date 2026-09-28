@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { SEO } from './seo';
 import ProgressBar from '../../../components/ProgressBar';
 import { MAX_ROWS, MOBILE_MAX_ROWS, PASTE_MAX_ROWS } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
@@ -268,17 +269,12 @@ export default function CsvToSqlPage() {
           "Click 'Convert' to generate a CREATE TABLE statement plus one INSERT per row.",
           "For a file upload, click 'Download' to save converted.sql; pasted text appears in the output box for you to copy."
         ]}
-        faqs={[
-          { q: "Is CSV to SQL free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Are values safely escaped in the generated SQL?", a: "Yes — quotes inside values are doubled following standard SQL string escaping, so values containing an apostrophe (like a name such as O'Brien) produce valid, safe SQL rather than broken or exploitable statements." },
-          { q: "What data types does the CREATE TABLE statement use?", a: "Every column is created as VARCHAR(255), regardless of whether the CSV data looks numeric, a date, or text — edit the generated statement if you need different types." },
-          { q: "Does it support file upload, or only pasted text?", a: "Both — upload a .csv file, or paste CSV text directly into the box." },
-          { q: "Does it support semicolon- or tab-delimited files, not just commas?", a: "Yes — the delimiter (comma, semicolon, tab, or pipe) is auto-detected from the file, which matters for European CSVs that commonly use semicolons. A dropdown lets you override the detected delimiter if it's ever wrong." },
-          { q: "Why is there a row limit, and why is it lower for pasted text?", a: `Converting a very large CSV in a browser tab risks running out of memory and crashing the tab. Uploaded files support up to ${MAX_ROWS_LABEL} rows on desktop (${MOBILE_MAX_ROWS_LABEL} on phones/tablets); pasted text is capped lower, at ${PASTE_MAX_ROWS_LABEL} rows on any device, since pasted text has to live in the page itself and be re-rendered into the input box, rather than being streamed in like a file. The count includes the header row.` }
-        ]}
+        faqs={SEO.faqs}
+        example={SEO.example}
+        related={SEO.related}
         tips={[
           "Values are escaped for SQL, but the table name and column headers are inserted as-is — avoid spaces, quotes, or reserved SQL keywords in the Table Name field or your CSV header row.",
-          "Every column defaults to VARCHAR(255); adjust the CREATE TABLE statement afterward if you need numeric, date, or other column types.",
+          "Whole numeric columns become INTEGER or DECIMAL(18,6) and the rest VARCHAR(255); adjust the CREATE TABLE statement afterward if you need date or other column types.",
           "Wrap a value in double quotes if it contains a comma (e.g. \"Smith, John\") — quoted fields are parsed correctly and stay as a single value.",
           "The delimiter dropdown shows what was auto-detected — double check it on unusual files, and switch it manually if a column split looks wrong.",
           "Always review generated SQL — and test it on a development database — before running it against production."

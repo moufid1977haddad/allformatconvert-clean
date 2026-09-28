@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { SEO } from './seo';
 
 // RFC 4180-style CSV field writer: a value that itself contains a comma,
 // double quote, or newline is indistinguishable from a delimiter unless it's
@@ -42,12 +43,9 @@ export default function TsvToCsvPage() {
           "Review the result in the output box.",
           "Click 'Copy' to copy it to your clipboard."
         ]}
-        faqs={[
-          { q: "What's the difference between TSV and CSV?", a: "TSV separates values with tabs; CSV uses commas. This tool converts the delimiter from tabs to commas." },
-          { q: "Does it support file upload, or only pasted text?", a: "Only pasted text — there's no file picker or drag-and-drop upload." },
-          { q: "Is my data uploaded to a server?", a: "No, the conversion happens entirely in your browser." },
-          { q: "Does it handle values that already contain a comma?", a: "Yes — any value containing a comma, quote, or newline is automatically wrapped in double quotes in the output, so it's read back as a single column rather than looking like an extra one." }
-        ]}
+        faqs={SEO.faqs}
+        example={SEO.example}
+        related={SEO.related}
         tips={[
           "Values containing a comma, quote, or newline are quoted automatically in the output — no manual cleanup needed for those.",
           "There's no file size limit enforced by the tool, but very large pastes are limited by your browser's performance.",

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "ZIP Extractor — Extract ZIP Online Free" },
-  description: "ZIP Extractor is a free online tool that extracts files from a ZIP archive directly in your browser using JSZip — no upload, no software required.",
+  description: "Open ZIP, RAR, 7Z, TAR, GZ, ISO and 40+ other archive formats in your browser with 7-Zip and zip.js — password-protected and split archives included, nothing uploaded, no software to install.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/file-tools/zip-extractor" },
   openGraph: {
     title: "ZIP Extractor — Extract ZIP Online Free",
-    description: "ZIP Extractor is a free online tool that extracts files from a ZIP archive directly in your browser using JSZip — no upload, no software required.",
+    description: "Open ZIP, RAR, 7Z, TAR, GZ, ISO and 40+ other archive formats in your browser with 7-Zip and zip.js — password-protected and split archives included, nothing uploaded, no software to install.",
     url: "https://www.onlineconvertools.com/tools/file-tools/zip-extractor",
   },
 };

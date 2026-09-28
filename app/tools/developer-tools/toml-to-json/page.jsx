@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { parse } from 'smol-toml';
 import SeoContent from '../../../components/SeoContent';
+import { SEO } from './seo';
 export default function TomlToJsonPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -39,12 +40,9 @@ export default function TomlToJsonPage() {
           "The output preserves nested tables, arrays, and native types (numbers, booleans, dates) correctly.",
           "Click 'Copy' to copy the JSON to your clipboard."
         ]}
-        faqs={[
-          { q: "Is TOML to JSON free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it support nested tables, like [section.subsection]?", a: "Yes — dotted and nested table headers convert into properly nested JSON objects at any depth." },
-          { q: "Does it support TOML arrays or date/time values?", a: "Yes — arrays (including arrays of tables) convert to JSON arrays, and TOML's native date/time literals convert to ISO 8601 date strings in the JSON output." },
-          { q: "Can I download the JSON as a file?", a: "No, there's only a 'Copy' button — paste the copied text into a file yourself if you need one." }
-        ]}
+        faqs={SEO.faqs}
+        example={SEO.example}
+        related={SEO.related}
         tips={[
           "Works on any valid TOML file, not just simple flat key-value pairs — nested tables and arrays of tables both convert correctly.",
           "TOML date/time values come through as ISO 8601 strings in the JSON, since JSON has no native date type.",

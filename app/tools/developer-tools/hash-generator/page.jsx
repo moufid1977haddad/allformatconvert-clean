@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { SEO } from './seo';
 import ProgressBar from '../../../components/ProgressBar';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { HASH_ALGORITHMS, DEFAULT_ALGORITHMS, TAG_NAME, byId, toHex, toBase64, parseExpected, sameBytes, algorithmsOfLength } from '../../../lib/hashAlgorithms';
@@ -296,15 +297,9 @@ export default function HashGeneratorPage() {
           "To verify a download, paste the checksum published with it in \"Expected hash\": the matching algorithm turns green.",
           "Copy any value, or download every result as checksums.txt."
         ]}
-        faqs={[
-          { q: "Which algorithms are supported?", a: "MD5, SHA-1, SHA-224, SHA-256, SHA-384, SHA-512, SHA3-256, SHA3-512, Keccak-256 (the Ethereum variant, which differs from SHA3-256), BLAKE2b-512, BLAKE3, RIPEMD-160, CRC32, CRC32C, xxHash64, XXH3-64 and XXH128. SHA-1 and the SHA-2 family use your browser's built-in Web Crypto; the others use hash-wasm, an open-source WebAssembly library." },
-          { q: "Is there a file size limit?", a: "No. Files are read in 8 MB pieces, so even files larger than your device's memory can be hashed; speed depends on your device. Files up to 700 MB (100 MB on phones and tablets) are also held in memory once so SHA-1 and SHA-2 can use the browser's faster native code. A 5 GB file was hashed in under a minute on a desktop computer in our tests." },
-          { q: "Are my files or text uploaded?", a: "No. Hashing runs in a background worker inside your browser tab; nothing is sent to a server." },
-          { q: "How do I verify a downloaded file?", a: "Drop the file, then paste the checksum published by the site you downloaded it from into \"Expected hash\" (hex or Base64). The matching algorithm is highlighted in green; if none matches, the tool says which algorithms produce a hash of that length." },
-          { q: "What is the checksums.txt file?", a: "One line per file and algorithm, in the \"SHA256 (file) = hash\" format that `sha256sum -c`, `md5sum -c` and `shasum -c` understand, so you can check the files again later from a terminal." },
-          { q: "What does the HMAC key do?", a: "With a key, the tool computes a keyed HMAC (for example HMAC-SHA256) instead of a plain hash — used to sign API requests and webhooks. HMAC is not defined for checksums such as CRC32 or xxHash, nor for BLAKE3 and Keccak, so they are skipped while a key is set." },
-          { q: "Why does my text give a different hash elsewhere?", a: "Text is hashed as UTF-8, exactly as it appears in the box. A trailing newline, Windows line endings (CRLF) or a different encoding change the hash; the byte count under the results helps spot this." }
-        ]}
+        faqs={SEO.faqs}
+        example={SEO.example}
+        related={SEO.related}
         tips={[
           "Avoid MD5 and SHA-1 for anything security-sensitive — they are fine as checksums against accidental corruption, not against tampering. Use SHA-256 or better.",
           "None of these are appropriate for storing passwords — use a slow, salted algorithm such as bcrypt or Argon2.",

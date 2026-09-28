@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { SEO } from './seo';
 import ProgressBar from '../../../components/ProgressBar';
 import { MAX_ROWS, MOBILE_MAX_ROWS, PASTE_MAX_ROWS } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
@@ -267,13 +268,9 @@ export default function CsvToJsonPage() {
           "For a file upload, click 'Download' to save converted.json; pasted text appears in the output box for you to copy.",
           "Validate the JSON in a linter or your target application before relying on it."
         ]}
-        faqs={[
-          { q: "Does it support file upload, or only pasted text?", a: "Both — upload a .csv file, or paste CSV text directly into the box." },
-          { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser, in a background Web Worker so the page never freezes." },
-          { q: "Does it support delimiters other than commas, like semicolons or tabs?", a: "Yes — the delimiter (comma, semicolon, tab, or pipe) is auto-detected from the file, which matters for European CSVs that commonly use semicolons. A dropdown lets you override the detected delimiter if it's ever wrong." },
-          { q: "Why is there a row limit?", a: `Converting a very large CSV in a browser tab risks running out of memory and crashing the tab rather than just being slow. Uploaded files support up to ${MAX_ROWS_LABEL} rows on desktop (${MOBILE_MAX_ROWS_LABEL} on phones/tablets); pasted text is capped lower, at ${PASTE_MAX_ROWS_LABEL} rows, since pasted text has to live in the page itself rather than being streamed in like a file. The count includes the header row.` },
-          { q: "Why is the pasted-text limit lower than the file-upload limit?", a: "A pasted CSV sits in the page's own memory and gets re-rendered into the input box on every change, on both desktop and mobile — an uploaded file is instead streamed straight into the background worker without that overhead, so it can safely handle far more rows." }
-        ]}
+        faqs={SEO.faqs}
+        example={SEO.example}
+        related={SEO.related}
         tips={[
           "Include a header row as the first line — those values become the keys in each JSON object.",
           "Wrap a value in double quotes if it contains a comma (e.g. \"Smith, John\") — quoted fields are parsed correctly and won't shift into the wrong keys.",
