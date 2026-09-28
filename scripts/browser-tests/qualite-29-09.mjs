@@ -468,11 +468,11 @@ await T('audio-equalizer no clipping', async () => {
 
 await T('code-minifier css/html', async () => {
   await open('/tools/developer-tools/code-minifier');
-  await page.getByRole('button', { name: 'css', exact: true }).click();
+  await page.getByRole('button', { name: 'CSS', exact: true }).click();
   await ta().fill('a { background: url(data:image/png;base64,AAA=) }  /* c */');
   await click('Minify');
   check('code-minifier css', (await waitOut((x) => x.includes('url('))).includes('url(data:image/png;base64,AAA=)'));
-  await page.getByRole('button', { name: 'html', exact: true }).click();
+  await page.getByRole('button', { name: 'HTML', exact: true }).click();
   await ta().fill('<p>a   b</p>\n<pre>  x\n  y</pre><!-- c -->');
   await click('Minify');
   check('code-minifier html keeps pre', (await waitOut((x) => x.includes('<pre>'))) === '<p>a b</p><pre>  x\n  y</pre>', await outTa().inputValue());
