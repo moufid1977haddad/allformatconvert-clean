@@ -4,7 +4,7 @@
 
 | Point | État | Preuve |
 |---|---|---|
-| 1 — résultats faux sans avertissement | **82 outils audités** : 70 modifiés, 12 lus sans défaut. **57 rendaient un résultat faux sans le dire** (F ci-dessous), 13 étaient sous le marché ou échouaient avec un message obscur (M) | tests Node `scripts/converter-tests/01`…`10` (tous verts), banc navigateur `scripts/browser-tests/qualite-29-09.mjs` ×3 moteurs |
+| 1 — résultats faux sans avertissement | **93 outils audités** : 75 modifiés, 18 lus sans défaut. **61 rendaient un résultat faux sans le dire** (F ci-dessous), 14 étaient sous le marché, annonçaient une capacité absente ou échouaient avec un message obscur (M) | tests Node `scripts/converter-tests/01`…`10` (tous verts), banc navigateur `scripts/browser-tests/qualite-29-09.mjs` ×3 moteurs |
 | 2 — json-to-rust, json-to-php, env-to-json | **au niveau du marché ou au-dessus** ; contenu SEO non touché ; inscrits « éligibles » au plan | converter-tests/02 (13/13) : `tsc --strict`, Python, `dotenv`/`dotenv-expand` comme oracles |
 | 3 — les deux réserves du réviseur | **faites** : IP lue seulement dans `x-real-ip` (écrit par Vercel) ; réservations heure/jour atomiques par une fonction SQL. **Migration SQL écrite, NON exécutée** (tâche du propriétaire, P13 ①) | quota-tests 19 (5/5) et 20 (12/12, la vraie SQL exécutée dans PGlite) ; réviseur indépendant : aucun bloquant, ses 5 remarques appliquées |
 | 4 — plan | mis à jour : bloquant 1 (3 outils éligibles), bloquant 5 (audit du jour + liste de ce qui reste), P13, réserves retirées de « Juste APRÈS » | `claude/plan-de-travail.md` |
@@ -28,7 +28,7 @@
 
 ## 1. Chasse aux résultats faux sans avertissement
 
-**Inventaire.** 225 dossiers d'outils. Déjà audités avant aujourd'hui : les 36 outils mis en avant (22/09), les améliorations 1-17 (23-26/09), l'audit coupes/jonctions (28/09), les outils du 29/09 (SQL to CSV, CSV to SQL/JSON/TSV, TSV to CSV, TOML ↔ JSON, hash, barcode). **Audités aujourd'hui : 82**, dans l'ordre demandé (developer-tools, text, math, convertisseurs de données, puis PDF, fichiers et images là où un défaut de la même famille était probable).
+**Inventaire.** 225 dossiers d'outils. Déjà audités avant aujourd'hui : les 36 outils mis en avant (22/09), les améliorations 1-17 (23-26/09), l'audit coupes/jonctions (28/09), les outils du 29/09 (SQL to CSV, CSV to SQL/JSON/TSV, TSV to CSV, TOML ↔ JSON, hash, barcode). **Audités aujourd'hui : 93**, dans l'ordre demandé (developer-tools, text, math, convertisseurs de données, puis PDF, fichiers et images là où un défaut de la même famille était probable).
 
 **Méthode.** Pour chaque outil : lecture du code, jeu de cas limites (grands nombres et précision, zéros en tête, Unicode et émojis, guillemets et échappements, lignes vides, BOM, CRLF, entrées invalides, fichiers chiffrés), comparaison à un oracle : bibliothèque de référence (`dotenv`, `dotenv-expand`, `js-yaml`, `Buffer`, `tsc`, Python, Poppler `pdftotext`, fast-xml-parser), spécification (YAML 1.2, RFC 4180, HTML5) ou valeur exacte. Chaque défaut a d'abord été **reproduit** (plusieurs tests rejouent l'ancien comportement pour prouver que le défaut était réel), puis corrigé, puis testé en Node et dans le vrai navigateur.
 
@@ -106,13 +106,18 @@ Légende : **F** = rendait un résultat faux sans le dire · **M** = sous le mar
 | text-to-pdf | tout .txt Windows (CRLF) et toute tabulation → « WinAnsi cannot encode » | M | oui ; caractères hors police latine listés clairement. **Reste : police Unicode** (au plan) | navigateur |
 | file-encryptor | XOR ; **mauvais mot de passe = fichier corrompu sans erreur** | F | oui — AES-256-GCM, refus explicite, anciens fichiers lisibles avec avertissement | tests 06, navigateur |
 | png-to-jpg, webp-to-jpg | transparence → noir (divulgué, mais sous iLoveIMG/CloudConvert et Image Converter) | M | oui — fond blanc | navigateur (pixel relu) |
-| file-splitter | — | — | aucun défaut trouvé (lu) | — |
+| pdf-extract-text | toute la page sur une seule ligne (fragments joints par une espace) | F | oui — retours et espaces d'après la position du texte | tests 11 (défaut rejoué), navigateur |
+| svg-to-png | tout SVG non carré étiré en 512 × 512 | F | oui — taille lue dans le SVG, proportions verrouillées | navigateur (viewBox 160×90 → 512×288) |
+| png-to-ico | image non carrée étirée dans l'icône | F | oui — centrée sur un carré transparent | navigateur (trame 256 décodée) |
+| file-converter | CSV : champs non guillemetés (« Smith, John » → 2 colonnes) ; HTML : texte non échappé (balises interprétées) | F | oui — RFC 4180, échappement | lecture + build |
+| image-metadata | sous-titre « View image metadata and EXIF data » sans aucune lecture EXIF | M | oui — exifr : EXIF, GPS (mis en évidence), IPTC, XMP, ICC | navigateur (fixture EXIF + GPS écrite à la main) |
+| file-splitter, pdf-to-jpg, pdf-to-image, image-cropper, image-rotate, gif-compressor, video-to-audio | — | — | aucun défaut trouvé (lus : fond blanc de pdf.js, échelle naturelle du recadrage, boîte englobante de la rotation, refus d'un GIF plus lourd depuis le 28/09, formats audio partagés) | — |
 
-**Décompte, outil par outil (une ligne de tableau peut regrouper plusieurs outils) :** F = 35 developer-tools + 8 text-tools + 3 math-tools + 10 PDF + File Encryptor = **57** ; M = 4 developer-tools (markdown-to-html, markdown-editor, markdown-previewer, api-tester) + Text Encryptor + 4 PDF (crop, organize, redact, sign) + pdf-forms + text-to-pdf + png-to-jpg + webp-to-jpg = **13** ; lus sans défaut = **12**. Total **82**.
+**Décompte, outil par outil (une ligne de tableau peut regrouper plusieurs outils) :** F = 35 developer-tools + 8 text-tools + 3 math-tools + 11 PDF (les 10 du chiffrement + extract-text) + File Encryptor + SVG to PNG + PNG to ICO + File Converter = **61** ; M = 4 developer-tools (markdown-to-html, markdown-editor, markdown-previewer, api-tester) + Text Encryptor + 4 PDF (crop, organize, redact, sign) + pdf-forms + text-to-pdf + png-to-jpg + webp-to-jpg + image-metadata = **14** ; lus sans défaut = **18**. Total **93**.
 
 ### Ce qui reste NON audité
 
-Inscrit au plan (bloquant 5), même méthode à appliquer : la majorité des image-tools, gif-tools (apng-to-gif, gif-compressor, gif-to-apng, gif-to-mp4, image-to-gif), les PDF non listés ci-dessus (epub/image/jpg/markdown/mobi-to-pdf, pdf-ai-summary, pdf-compare, pdf-extract-text, pdf-ocr, pdf-to-html/image/jpg, pdf-unlock), audio-equalizer, audio-waveform, six video-tools, file-comparator/converter/metadata, base64 fichiers, les ai-tools non encore audités, mobi-to-epub.
+Inscrit au plan (bloquant 5), même méthode à appliquer : la majorité des image-tools, gif-tools (apng-to-gif, gif-compressor, gif-to-apng, gif-to-mp4, image-to-gif), les PDF non listés ci-dessus (epub/image/jpg/markdown/mobi-to-pdf, pdf-ai-summary, pdf-compare, pdf-ocr, pdf-to-html, pdf-unlock), audio-equalizer, audio-waveform, six video-tools, file-comparator, file-metadata, base64 fichiers, les ai-tools non encore audités, mobi-to-epub.
 
 ## 2. Les 3 outils écartés
 
