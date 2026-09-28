@@ -314,6 +314,19 @@ await T('png-to-jpg transparency', async () => {
   check('transparent -> white', px[0] > 245 && px[1] > 245 && px[2] > 245, JSON.stringify(px));
 });
 
+await T('text-to-pdf', async () => {
+  await open('/tools/pdf-tools/text-to-pdf');
+  await ta().fill('Line one\r\n\tindented café €\r\nLine three');
+  await page.getByRole('button', { name: 'Convert to PDF' }).click();
+  const href = await page.locator('a[download="document.pdf"]').getAttribute('href', { timeout: 20000 });
+  const head = await page.evaluate(async (u) => new TextDecoder().decode((await (await fetch(u)).arrayBuffer()).slice(0, 5)), href);
+  check('text-to-pdf CRLF + tab -> PDF', head === '%PDF-', head);
+  await ta().fill('я 😀');
+  await page.getByRole('button', { name: 'Convert to PDF' }).click();
+  await page.waitForTimeout(1000);
+  check('text-to-pdf unsupported chars listed', (await body()).includes("can't be written with the built-in PDF font"), '');
+});
+
 await b.close();
 for (const e of errors) { fails++; console.log('PAGE ERROR', e.slice(0, 200)); }
 console.log(`${passes} passed, ${fails} failed (${browserName})`);

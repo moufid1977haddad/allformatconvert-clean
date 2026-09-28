@@ -36,8 +36,18 @@ export default function TextToPdfPage() {
       const pageHeight = 842;
       const maxWidth = pageWidth - margin * 2;
       const lineHeight = fontSize * 1.5;
+      // Measured 29/09: every .txt saved on Windows (CRLF line endings) and any
+      // tab failed with "WinAnsi cannot encode" -- the standard PDF font has no
+      // glyph for control characters. Line endings are normalised and a tab
+      // becomes 4 spaces. Characters the font cannot draw (non-Latin scripts,
+      // emoji) are listed plainly instead of the library's cryptic error.
+      const clean = text.replace(/\r\n?/g, '\n').replace(/\t/g, '    ');
+      const unsupported = [...new Set(Array.from(clean.replace(/\n/g, '')))].filter(ch => { try { font.encodeText(ch); return false; } catch { return true; } });
+      if (unsupported.length) {
+        throw new Error(`These characters can't be written with the built-in PDF font (Latin script only): ${unsupported.slice(0, 20).join(' ')}${unsupported.length > 20 ? ' …' : ''}. Remove or replace them and convert again.`);
+      }
       const lines = [];
-      text.split('\n').forEach(paragraph => {
+      clean.split('\n').forEach(paragraph => {
         const words = paragraph.split(' ');
         let currentLine = '';
         words.forEach(word => {
@@ -104,7 +114,7 @@ export default function TextToPdfPage() {
       </div>
       <SeoContent
         title="Text to PDF"
-        description="Text to PDF converts plain text — pasted directly or from an uploaded .txt file — into a PDF using the pdf-lib library entirely in your browser, with automatic word-wrapping and page breaks. Your content is never uploaded to a server. Font size (12pt Helvetica), margins, and page size (A4) are fixed and can't be customized, and there's no document title field."
+        description="Text to PDF converts plain text — pasted directly or from an uploaded .txt file — into a PDF using the pdf-lib library entirely in your browser, with automatic word-wrapping and page breaks. Your content is never uploaded to a server. Font size (12pt Helvetica), margins, and page size (A4) are fixed and can't be customized, and there's no document title field. Windows line endings and tabs are handled; the built-in PDF font covers Latin-script text (Western European accents, €), and characters outside it, such as Cyrillic, Greek, Asian scripts or emoji, are listed instead of producing a broken file."
         howTo={[
           "Choose 'Paste Text' to type or paste content, or 'Upload File' to select a .txt file.",
           "Review the text — uploading a file auto-fills the text area with its content.",
