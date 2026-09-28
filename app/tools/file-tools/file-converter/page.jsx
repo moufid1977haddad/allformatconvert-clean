@@ -16,8 +16,20 @@ export default function FileConverterPage() {
       let content = text;
       let mimeType = 'text/plain';
       if (format === 'json') { try { content = JSON.stringify({ content: text }, null, 2); mimeType = 'application/json'; } catch(e) {} }
-      else if (format === 'csv') { content = text.split('\n').map(l => l.split('\t').join(',')).join('\n'); mimeType = 'text/csv'; }
-      else if (format === 'html') { content = '<!DOCTYPE html><html><body><pre>' + text + '</pre></body></html>'; mimeType = 'text/html'; }
+      // CSV: tab-separated lines become RFC 4180 CSV. Fields were joined with
+      // commas without quoting, so "Smith, John" split into two columns (29/09).
+      else if (format === 'csv') {
+        const field = (v) => (/[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v);
+        content = text.replace(/\r\n?/g, '\n').split('\n').map(l => l.split('\t').map(field).join(',')).join('\r\n');
+        mimeType = 'text/csv';
+      }
+      // HTML: the text is escaped. It was inserted raw, so "a < b" or any tag
+      // in the text was interpreted by the browser instead of shown (29/09).
+      else if (format === 'html') {
+        const esc = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        content = '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><pre>' + esc + '</pre></body></html>';
+        mimeType = 'text/html';
+      }
       const blob = new Blob([content], { type: mimeType });
       setDownloadUrl(URL.createObjectURL(blob));
     } catch (err) {
@@ -54,7 +66,7 @@ export default function FileConverterPage() {
           { q: "Is File Converter free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can convert." },
           { q: "What formats does File Converter support?", a: "Text-based formats only: it accepts .txt, .csv, .json, .html, and .md files, and converts between TXT, JSON, CSV, and HTML. It does not convert images, video, audio, or PDFs." },
           { q: "Is my file uploaded anywhere?", a: "No. The conversion runs entirely in your browser — your file is never sent to a server." },
-          { q: "How does the CSV conversion work?", a: "It's a simple tab-to-comma replacement. For complex spreadsheet data with embedded commas or quotes, a dedicated spreadsheet tool will give more reliable results." }
+          { q: "How does the CSV conversion work?", a: "Tab-separated lines become comma-separated CSV following RFC 4180: a value containing a comma, a double quote or a line break is wrapped in double quotes (internal quotes doubled), so it stays in one column in Excel or Google Sheets." }
         ]}
         tips={[
           "JSON output wraps your file's text in a {\"content\": \"...\"} object rather than parsing it into structured data.",
