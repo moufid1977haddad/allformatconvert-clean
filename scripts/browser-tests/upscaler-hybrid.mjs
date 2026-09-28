@@ -2,7 +2,7 @@
 // Checks on the real page: which path runs, that the on-device path sends NOTHING to a server, the output size
 // (x2 and x4), a valid PNG that matches the source (downscaled back, PSNR), and the 6-megapixel limit.
 // WebGPU needs a real GPU: Chromium is launched with a window (--headed) for the device path.
-// Usage: node scripts/browser-tests/upscaler-hybrid.mjs <origin> [--browser=firefox|webkit] [--headed] [--server-only]
+// Usage: node scripts/browser-tests/upscaler-hybrid.mjs <origin> [--browser=firefox|webkit] [--headed] [--server-only] [--cors-shim]
 import { chromium, firefox, webkit } from '@playwright/test';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -27,6 +27,14 @@ await sharp({ create: { width: 3100, height: 2000, channels: 3, background: '#88
 const engine = { chromium, firefox, webkit }[browserName];
 const b = await engine.launch(browserName === 'chromium' ? { headless: !headed, args: ['--enable-unsafe-webgpu'] } : {});
 const ctx = await b.newContext({ acceptDownloads: true });
+// --cors-shim: on a preview the media service sends no CORS header for the preview's address; relay its calls and
+// add that header, nothing else (as audio-opus-real.mjs). On www, run without it.
+if (process.argv.includes('--cors-shim')) await ctx.route(/railway\.app/, async (r) => {
+  const cors = { 'access-control-allow-origin': origin, 'access-control-allow-headers': 'Authorization, Content-Type, X-Chunk-Sha256', 'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS', 'access-control-expose-headers': '*' };
+  if (r.request().method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
+  const resp = await r.fetch();
+  return r.fulfill({ response: resp, headers: { ...resp.headers(), ...cors } });
+});
 const p = await ctx.newPage();
 p.setDefaultTimeout(600000);
 const sent = [];

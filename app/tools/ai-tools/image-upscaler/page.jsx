@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { runStagedToolResult, mediaServiceConfigured, MediaJobError } from '../../../lib/mediaJob';
-import { webgpuAvailable, readImage, localOutputProblem, upscaleInBrowser, serverSecondsFor } from '../../../lib/localUpscale';
+import { webgpuAvailable, readImage, localOutputProblem, upscaleInBrowser, serverSecondsFor, serverNeedsParts, upscaleOnServerInParts } from '../../../lib/localUpscale';
 
 // Input ceiling, the free offers' level (iLoveIMG 6 Mpx, Upscale.media 6.25 Mpx without an account; 28/09),
 // checked here BEFORE any work. The same on our server (UPSCALE_MAX_INPUT_PIXELS) and on this device.
@@ -59,15 +59,26 @@ export default function ImageUpscalerPage() {
     if (!mediaServiceConfigured()) throw new Error('The AI upscaler is not available right now.');
     setWhere('server');
     const est = dims ? serverSecondsFor(dims.w, dims.h) : 60;
-    const { json, blob } = await runStagedToolResult({
-      file, endpoint: '/api/image-upscale', fields: { scale }, signal: ac.signal,
-      onStage: (st) => {
-        if (st.stage === 'upload') { setPhase('Uploading to our server'); setPct(Math.round(st.pct || 0)); }
-        else if (st.stage === 'converting') { setPhase('Upscaling on our server — about ' + (est < 90 ? est + ' seconds' : Math.round(est / 60) + ' minutes')); setPct(0); }
-        else if (st.stage === 'download') { setPhase('Downloading'); setPct(Math.round(st.pct || 0)); }
-      },
-    });
-    if (!json.ok || !blob) throw new Error(json.error || 'Upscaling failed. Please try again.');
+    const t0 = Date.now();
+    const one = async (f, part = '') => {
+      const { json, blob } = await runStagedToolResult({
+        file: f, endpoint: '/api/image-upscale', fields: { scale }, signal: ac.signal,
+        onStage: (st) => {
+          const left = Math.max(10, est - Math.round((Date.now() - t0) / 1000));
+          if (st.stage === 'upload') { setPhase(`Uploading to our server${part}`); setPct(Math.round(st.pct || 0)); }
+          else if (st.stage === 'converting') { setPhase(`Upscaling on our server${part} — about ` + (left < 90 ? left + ' seconds' : Math.round(left / 60) + ' minutes') + ' left'); setPct(0); }
+          else if (st.stage === 'download') { setPhase(`Downloading${part}`); setPct(Math.round(st.pct || 0)); }
+        },
+      });
+      if (!json.ok || !blob) throw new Error(json.error || 'Upscaling failed. Please try again.');
+      return { json, blob };
+    };
+    // A large image goes in bands, each well within the server's time (see localUpscale.js).
+    if (dims && serverNeedsParts(dims.w, dims.h, scale)) {
+      const r = await upscaleOnServerInParts(file, scale, async (f, i, n) => (await one(f, ` (part ${i + 1} of ${n})`)).blob, { signal: ac.signal });
+      return { blob: r.blob, w: r.width, h: r.height };
+    }
+    const { json, blob } = await one(file);
     return { blob, w: json.width, h: json.height };
   };
 

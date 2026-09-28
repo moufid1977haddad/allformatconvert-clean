@@ -132,3 +132,47 @@ export async function upscaleInBrowser(img, scale, { onProgress, onPhase, signal
 
 // Server time for comparison: measured 34.5 s per megapixel on Railway (8 vCPU), plus transfers.
 export const serverSecondsFor = (w, h) => Math.round((w * h / 1e6) * 35 + 10);
+
+// The site's route waits at most 290 s for our server; a 6-Mpx image x4 takes 284 s there (measured 28/09) --
+// no margin. Above SERVER_PART_PIXELS the image goes in horizontal bands (≈ 80 s each), each with OVERLAP rows of
+// context above and below that are cropped away after, exactly as the service's own tiles: same model, same result.
+// Bands are sent as PNG (lossless), stitched here. Only when this browser can hold the result canvas.
+export const SERVER_PART_PIXELS = 2_000_000;
+export const serverNeedsParts = (w, h, scale) => w * h > SERVER_PART_PIXELS && !localOutputProblem(w, h, scale);
+
+/**
+ * runPart(file, index, count) -> Promise<Blob> (the band upscaled by our server).
+ * @returns {Promise<{ blob: Blob, width: number, height: number }>}
+ */
+export async function upscaleOnServerInParts(file, scale, runPart, { signal } = {}) {
+  let bmp;
+  try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); } catch { bmp = await createImageBitmap(file); }
+  const w = bmp.width, h = bmp.height;
+  const rows = Math.max(1, Math.floor(SERVER_PART_PIXELS / w));
+  const count = Math.ceil(h / rows);
+  const out = document.createElement('canvas');
+  out.width = w * scale; out.height = h * scale;
+  const octx = out.getContext('2d');
+  try {
+    for (let i = 0; i < count; i++) {
+      if (signal?.aborted) throw new DOMException('Cancelled', 'AbortError');
+      const y0 = i * rows, y1 = Math.min(h, y0 + rows);
+      const py0 = Math.max(0, y0 - OVERLAP), py1 = Math.min(h, y1 + OVERLAP);
+      const band = document.createElement('canvas');
+      band.width = w; band.height = py1 - py0;
+      band.getContext('2d').drawImage(bmp, 0, py0, w, py1 - py0, 0, 0, w, py1 - py0);
+      const png = await new Promise((r) => band.toBlob(r, 'image/png'));
+      if (!png) throw new LocalUpscaleError('The browser could not prepare the image.', 'encode');
+      const res = await runPart(new File([png], `part-${i + 1}.png`, { type: 'image/png' }), i, count);
+      const rb = await createImageBitmap(res);
+      const oy = (y0 - py0) * scale, oh = (y1 - y0) * scale;
+      octx.drawImage(rb, 0, oy, w * scale, oh, 0, y0 * scale, w * scale, oh);
+      rb.close?.();
+    }
+  } finally {
+    bmp.close?.();
+  }
+  const blob = await new Promise((r) => out.toBlob(r, 'image/png'));
+  if (!blob || blob.size < 100) throw new LocalUpscaleError('The browser could not save the result.', 'encode');
+  return { blob, width: out.width, height: out.height };
+}
