@@ -1,24 +1,16 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { jsonToCode } from '../../../lib/jsonCodegen';
 export default function JsonToGoPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
-  const convert = () => {
+  const convert = async () => {
     try {
-      const obj = JSON.parse(input);
-      const typeMap = { string: 'string', number: 'float64', boolean: 'bool' };
-      const lines = ['type Root struct {'];
-      Object.entries(obj).forEach(([k,v]) => {
-        const goType = Array.isArray(v) ? '[]interface{}' : (typeMap[typeof v] || 'interface{}');
-        const name = k.charAt(0).toUpperCase() + k.slice(1);
-        lines.push('  ' + name + ' ' + goType + ' `json:"' + k + '"`');
-      });
-      lines.push('}');
-      setOutput(lines.join('\n'));
+      setOutput(await jsonToCode(input, 'go'));
       setError('');
-    } catch(e) { setError('Invalid JSON'); }
+    } catch(e) { setOutput(''); setError('Invalid JSON: ' + e.message); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -39,24 +31,23 @@ export default function JsonToGoPage() {
       </div>
       <SeoContent
         title="JSON to Go Struct"
-        description="JSON to Go Struct generates a single Root struct with one field per top-level JSON key, entirely in your browser — nothing is uploaded to a server. Strings, numbers, and booleans map to string, float64, and bool with json struct tags matching your original keys; arrays become []interface{} and nested objects become interface{}, since nested values aren't recursively converted into their own structs."
+        description="JSON to Go Struct generates Go struct types from a JSON sample, entirely in your browser — nothing is uploaded to a server. It uses quicktype, the open-source engine behind app.quicktype.io: every nested object gets its own named struct, arrays of objects become []Item, integers are typed int64 and decimals float64, optional fields become pointers, field names follow Go convention (FirstName) and each field keeps a json struct tag with the original key, so encoding/json marshals and unmarshals it unchanged."
         howTo={[
-          "Paste your JSON into the input box.",
-          "Click 'Convert' to generate a Go struct from the top-level properties.",
-          "Review the output and add nested struct types by hand where needed.",
+          "Paste a JSON object or array (an API response, a config file) into the input box.",
+          "Click 'Convert': one named type is generated for every nested object, and the fields of every element of an array are merged.",
+          "Review the output — fields missing from some elements or holding null are marked optional.",
           "Click 'Copy' to copy the code into your project."
         ]}
         faqs={[
           { q: "Is JSON to Go Struct free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it generate nested structs for nested JSON?", a: "No — only top-level keys become typed fields. Nested objects are typed as interface{} and arrays as []interface{}, rather than generating separate nested struct types." },
-          { q: "Is the generated code ready to use as-is?", a: "For flat JSON, yes. For nested data, you'll need to manually define additional struct types and update the field types to reference them." },
+          { q: "Does it generate nested structs for nested JSON?", a: "Yes — each nested object becomes its own struct type, referenced from its parent." },
+          { q: "Is the generated code ready to use as-is?", a: "Yes for encoding/json: every field carries a json tag with the original key. Types come from your sample, so review them against real data." },
           { q: "Is my data uploaded to a server?", a: "No, generation happens entirely in your browser." }
         ]}
         tips={[
-          "Field names are capitalized only on the first letter (e.g. first_name becomes First_name) so they're exported — rename them to proper Go convention (FirstName) by hand if you want that style.",
-          "The json struct tag preserves your original JSON key, so encoding/json still marshals and unmarshals correctly even after you rename the Go field.",
-          "For nested objects or arrays of objects, manually create additional struct types and update the generated field types to match.",
-          "Numbers always map to float64 — change to int or another numeric type if that better fits your data."
+          "Field names are converted to Go convention (first_name becomes FirstName); the json tag keeps the original key.",
+          "Paste several array elements so fields that are sometimes missing become pointers.",
+          "Whole numbers are typed int64 — change to a smaller type if your data allows."
         ]}
       />
     </div>

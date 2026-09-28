@@ -2,16 +2,7 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 
-// RFC 4180-style CSV field writer: a value that itself contains a comma,
-// double quote, or newline is indistinguishable from a delimiter unless it's
-// wrapped in double quotes (with any internal quote doubled), so a JSON
-// string value like "Smith, John" must be quoted on the way out or a
-// spreadsheet will read it as two columns.
-function csvField(v) {
-  const s = String(v ?? '');
-  if (/[",\r\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
-  return s;
-}
+import { jsonToCsv } from '../../../lib/jsonToCsv';
 
 export default function JsonToCsvPage() {
   const [input, setInput] = useState('');
@@ -19,11 +10,7 @@ export default function JsonToCsvPage() {
   const [error, setError] = useState('');
   const convert = () => {
     try {
-      const data = JSON.parse(input);
-      if (!Array.isArray(data)) throw new Error('JSON must be an array');
-      const headers = Object.keys(data[0]);
-      const csv = [headers.map(csvField).join(','), ...data.map(row => headers.map(h => csvField(row[h] ?? '')).join(','))].join('\n');
-      setOutput(csv);
+      setOutput(jsonToCsv(input));
       setError('');
     } catch(e) { setError(e.message); }
   };
@@ -46,7 +33,7 @@ export default function JsonToCsvPage() {
       </div>
       <SeoContent
         title="JSON to CSV"
-        description="JSON to CSV converts a JSON array of objects into CSV text, using the browser's built-in JSON.parse, entirely in your browser — nothing is uploaded to a server. Column headers come only from the first object's keys. Output follows standard CSV quoting: a value containing a comma, double quote, or newline is automatically wrapped in double quotes (with any internal quote doubled), so it stays in a single column when the CSV is reopened. Nested objects or arrays inside a row become the literal text object Object rather than being flattened."
+        description="JSON to CSV converts a JSON array of objects (or a single object) into CSV text, entirely in your browser — nothing is uploaded to a server. Every key found in any object becomes a column, in the order first seen, so no field is dropped when rows differ. Nested objects are flattened into dotted column names (address.city) and arrays into indexed ones (tags.0, tags.1), the way ConvertCSV and json-csv.com do. Numbers are written exactly as in your JSON (a 20-digit id is never rounded), and a value containing a comma, double quote, or line break is wrapped in double quotes with internal quotes doubled, so it stays in a single column when reopened."
         howTo={[
           'Paste a JSON array of objects into the input box, e.g. [{"name":"John","age":30}].',
           "Click 'Convert' to generate CSV text.",
@@ -55,15 +42,15 @@ export default function JsonToCsvPage() {
         ]}
         faqs={[
           { q: "Is JSON to CSV free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it flatten nested JSON into columns?", a: "No — a nested object or array inside a row becomes the literal text \"[object Object]\" rather than being split into separate columns." },
-          { q: "What if my objects have different keys?", a: "Only the first object's keys become CSV columns; other objects' extra keys are ignored, and missing keys show as blank." },
+          { q: "Does it flatten nested JSON into columns?", a: "Yes — a nested object becomes dotted columns (address.city, address.zip) and an array becomes indexed columns (tags.0, tags.1). An empty object or array is written as {} or []." },
+          { q: "What if my objects have different keys?", a: "Every key that appears in any object becomes a column; a row that lacks a key gets an empty cell there. Nothing is dropped." },
           { q: "Does it handle values that contain commas?", a: "Yes — a value containing a comma, quote, or newline is automatically wrapped in double quotes in the output, so it's read back as a single column." }
         ]}
         tips={[
-          "Your JSON must be a top-level array of objects — a single object or a deeply nested structure will show an error.",
-          "Keep every object in the array with the same set of keys for clean, aligned columns.",
+          "Paste an array of objects, a single object (one row), or an array of plain values (one \"value\" column).",
+          "Objects with different keys are fine: the columns are the union of all keys, in first-seen order.",
           "Values containing a comma, quote, or newline are quoted automatically in the output — no manual cleanup needed for those.",
-          "For nested JSON, flatten it into simple key-value objects yourself before converting."
+          "Nested JSON is flattened automatically; rename the dotted headers afterwards if you prefer other column names."
         ]}
       />
     </div>

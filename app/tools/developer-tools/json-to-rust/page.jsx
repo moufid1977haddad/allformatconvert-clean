@@ -1,23 +1,16 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { jsonToCode } from '../../../lib/jsonCodegen';
 export default function JsonToRustPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
-  const convert = () => {
+  const convert = async () => {
     try {
-      const obj = JSON.parse(input);
-      const typeMap = { string: 'String', number: 'f64', boolean: 'bool' };
-      const lines = ['#[derive(Debug, Serialize, Deserialize)]','struct Root {'];
-      Object.entries(obj).forEach(([k,v]) => {
-        const rustType = Array.isArray(v) ? 'Vec<serde_json::Value>' : (typeMap[typeof v] || 'serde_json::Value');
-        lines.push('  ' + k + ': ' + rustType + ',');
-      });
-      lines.push('}');
-      setOutput(lines.join('\n'));
+      setOutput(await jsonToCode(input, 'rust'));
       setError('');
-    } catch(e) { setError('Invalid JSON'); }
+    } catch(e) { setOutput(''); setError('Invalid JSON: ' + e.message); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -38,24 +31,24 @@ export default function JsonToRustPage() {
       </div>
       <SeoContent
         title="JSON to Rust Struct"
-        description="JSON to Rust Struct generates a single Root struct annotated with #[derive(Debug, Serialize, Deserialize)] and one field per top-level JSON key, entirely in your browser — nothing is uploaded to a server. Strings, numbers, and booleans map to String, f64, and bool; arrays become Vec of serde_json::Value and nested objects become serde_json::Value, since nested values aren't recursively converted into their own structs. The Serialize/Deserialize derives assume your project already depends on the serde and serde_json crates."
+        description="JSON to Rust Struct generates Rust structs for serde from a JSON sample, entirely in your browser — nothing is uploaded to a server. It uses quicktype, the open-source engine behind app.quicktype.io: every nested object gets its own struct, arrays become Vec<Item>, null or missing fields become Option<T>, integers are typed i64 and decimals f64, field names are converted to snake_case with #[serde(rename_all)] or #[serde(rename = \"...\")] attributes that keep the original JSON keys, and every struct derives Debug, Clone, Serialize and Deserialize."
         howTo={[
-          "Paste your JSON into the input box.",
-          "Click 'Convert' to generate a Rust struct from the top-level properties.",
-          "Review the output and add nested struct types by hand where needed.",
+          "Paste a JSON object or array (an API response, a config file) into the input box.",
+          "Click 'Convert': one named type is generated for every nested object, and the fields of every element of an array are merged.",
+          "Review the output — fields missing from some elements or holding null are marked optional.",
           "Click 'Copy' to copy the code into your project."
         ]}
         faqs={[
           { q: "Is JSON to Rust Struct free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it generate nested structs for nested JSON?", a: "No — only top-level keys become typed fields. Nested objects are typed as serde_json::Value and arrays as Vec<serde_json::Value>, rather than generating separate nested struct types." },
-          { q: "Do I need any dependencies to use the generated code?", a: "Yes — the derive(Serialize, Deserialize) attribute requires the serde crate (with the derive feature) and serde_json in your Cargo.toml." },
-          { q: "Is my data uploaded to a server?", a: "No, generation happens entirely in your browser." }
+          { q: "Does it generate nested structs for nested JSON?", a: "Yes — each nested object becomes its own struct, and arrays of objects become Vec of that struct." },
+          { q: "How are camelCase or hyphenated keys handled?", a: "Fields are renamed to snake_case, and serde attributes (#[serde(rename_all = \"camelCase\")] or #[serde(rename = \"last-name\")]) keep the original JSON key, so serde_json reads and writes it unchanged." },
+          { q: "How are null values handled?", a: "A field that is null or missing in the sample becomes Option<T>, and optional fields are skipped when serializing if they are None." },
+          { q: "Do I need any dependencies to use the generated code?", a: "Yes — serde (with the derive feature) and serde_json in your Cargo.toml." }
         ]}
         tips={[
-          "Add serde with the derive feature, plus serde_json, to your Cargo.toml before using the generated struct.",
-          "For nested objects or arrays of objects, manually define additional struct types and update the field types to reference them.",
-          "Numbers always map to f64 — change to a specific integer type like i32 or u64 if that better matches your data.",
-          "Field names are used exactly as written in your JSON; rename to snake_case and add a serde rename attribute if your JSON uses a different naming convention."
+          "Add serde = { version = \"1\", features = [\"derive\"] } and serde_json = \"1\" to Cargo.toml.",
+          "Paste several array elements so fields that are sometimes missing become Option.",
+          "Whole numbers are typed i64 — change to u32 or another type if your data allows."
         ]}
       />
     </div>

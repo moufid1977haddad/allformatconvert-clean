@@ -1,24 +1,16 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { jsonToCode } from '../../../lib/jsonCodegen';
 export default function JsonToCsharpPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
-  const convert = () => {
+  const convert = async () => {
     try {
-      const obj = JSON.parse(input);
-      const typeMap = { string: 'string', number: 'double', boolean: 'bool' };
-      const lines = ['public class Root','{'];
-      Object.entries(obj).forEach(([k,v]) => {
-        const csType = Array.isArray(v) ? 'List<object>' : (typeMap[typeof v] || 'object');
-        const name = k.charAt(0).toUpperCase() + k.slice(1);
-        lines.push('  public ' + csType + ' ' + name + ' { get; set; }');
-      });
-      lines.push('}');
-      setOutput(lines.join('\n'));
+      setOutput(await jsonToCode(input, 'csharp'));
       setError('');
-    } catch(e) { setError('Invalid JSON'); }
+    } catch(e) { setOutput(''); setError('Invalid JSON: ' + e.message); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -39,24 +31,23 @@ export default function JsonToCsharpPage() {
       </div>
       <SeoContent
         title="JSON to C# Class"
-        description="JSON to C# Class generates a single 'Root' class with one property per top-level JSON key, entirely in your browser — nothing is uploaded to a server. Strings, numbers, and booleans map to string, double, and bool; arrays always become a generic List of object, and nested objects become plain object, since nested values aren't recursively converted into their own classes."
+        description="JSON to C# Class generates C# classes from a JSON sample, entirely in your browser — nothing is uploaded to a server. It uses quicktype, the open-source engine behind app.quicktype.io: every nested object gets its own class, arrays of objects become Item[], integers are typed long and decimals double, optional or null fields become nullable, property names follow PascalCase and each property carries a System.Text.Json [JsonPropertyName] attribute with the original key."
         howTo={[
-          "Paste your JSON into the input box.",
-          "Click 'Convert' to generate a C# class from the top-level properties.",
-          "Review the output — adjust types and add nested classes by hand where needed.",
+          "Paste a JSON object or array (an API response, a config file) into the input box.",
+          "Click 'Convert': one named type is generated for every nested object, and the fields of every element of an array are merged.",
+          "Review the output — fields missing from some elements or holding null are marked optional.",
           "Click 'Copy' to copy the code into your project."
         ]}
         faqs={[
           { q: "Is JSON to C# Class free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it handle nested objects and arrays as their own classes?", a: "No — only top-level keys become typed properties. Nested objects are typed as plain object and arrays as List<object>, rather than generating separate nested classes." },
-          { q: "Is the generated code ready to use as-is?", a: "For flat JSON with simple string, number, and boolean values, yes. For nested data, you'll need to manually define and wire up additional classes for the nested structures." },
+          { q: "Does it handle nested objects and arrays as their own classes?", a: "Yes — each nested object becomes its own class, and arrays of objects become arrays of that class." },
+          { q: "Is the generated code ready to use as-is?", a: "Yes with System.Text.Json: each property keeps the original JSON key in a [JsonPropertyName] attribute, so JsonSerializer.Deserialize maps it correctly." },
           { q: "Is my data uploaded to a server?", a: "No, generation happens entirely in your browser." }
         ]}
         tips={[
-          "Property names are capitalized only on the first letter (e.g. first_name becomes First_name, not FirstName) — rename them by hand if you want strict PascalCase.",
-          "For nested objects or arrays of objects, manually create additional classes and update the generated property types to match.",
-          "Numbers always map to double, even if your data is really an integer — change the type if you need int or decimal precision.",
-          "Test deserialization with real sample data, especially for any properties you retype after generation."
+          "Property names are PascalCase (first_name becomes FirstName); the attribute keeps the JSON key.",
+          "Paste several array elements so optional properties are detected.",
+          "Whole numbers are typed long — change to int if your data allows."
         ]}
       />
     </div>

@@ -1,22 +1,16 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { jsonToCode } from '../../../lib/jsonCodegen';
 export default function JsonToPythonPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
-  const convert = () => {
+  const convert = async () => {
     try {
-      const obj = JSON.parse(input);
-      const typeMap = { string: 'str', number: 'float', boolean: 'bool' };
-      const lines = ['from dataclasses import dataclass','','@dataclass','class Root:'];
-      Object.entries(obj).forEach(([k,v]) => {
-        const pyType = Array.isArray(v) ? 'list' : (typeMap[typeof v] || 'dict');
-        lines.push('  ' + k + ': ' + pyType);
-      });
-      setOutput(lines.join('\n'));
+      setOutput(await jsonToCode(input, 'python'));
       setError('');
-    } catch(e) { setError('Invalid JSON'); }
+    } catch(e) { setOutput(''); setError('Invalid JSON: ' + e.message); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -37,24 +31,24 @@ export default function JsonToPythonPage() {
       </div>
       <SeoContent
         title="JSON to Python Class"
-        description="JSON to Python Class generates a Python @dataclass with one type-annotated field per top-level JSON key — not a populated dictionary or list containing your actual data — entirely in your browser. Strings, numbers, and booleans map to str, float, and bool; arrays are annotated as list and nested objects as dict, since nested values aren't recursively converted into their own dataclasses."
+        description="JSON to Python Class generates Python @dataclass definitions from a JSON sample — the type schema, not a dict of your data — entirely in your browser. It uses quicktype, the open-source engine behind app.quicktype.io: every nested object gets its own dataclass, arrays of objects become List[Item], integers are typed int and decimals float, fields that are missing or null become Optional, and JSON keys are turned into valid snake_case Python names."
         howTo={[
-          "Paste your JSON into the input box.",
-          "Click 'Convert' to generate a Python dataclass from the top-level properties.",
-          "Review the output — this defines field types, not populated data.",
+          "Paste a JSON object or array (an API response, a config file) into the input box.",
+          "Click 'Convert': one named type is generated for every nested object, and the fields of every element of an array are merged.",
+          "Review the output — fields missing from some elements or holding null are marked optional.",
           "Click 'Copy' to copy the code into your project."
         ]}
         faqs={[
           { q: "Is JSON to Python Class free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it generate a Python dict or list with my actual data?", a: "No — it generates a @dataclass type definition with annotated fields like name: str, not populated data. To get your actual JSON as a Python dict, use Python's own json.loads(json_string) instead." },
-          { q: "Does it handle nested JSON objects?", a: "No — only top-level keys become typed fields; nested objects are annotated as dict and arrays as list, without generating nested dataclasses." },
+          { q: "Does it generate a Python dict or list with my actual data?", a: "No — it generates @dataclass type definitions. To load your actual JSON as a Python dict, use json.loads(json_string)." },
+          { q: "Does it handle nested JSON objects?", a: "Yes — each nested object becomes its own dataclass, referenced from its parent; arrays of objects become List of that class." },
+          { q: "Are integers and decimals distinguished?", a: "Yes — whole numbers are typed int, decimals float." },
           { q: "Is my data uploaded to a server?", a: "No, generation happens entirely in your browser." }
         ]}
         tips={[
-          "If you need your actual JSON values as Python data, use json.loads() directly — this tool only generates a type schema, not populated data.",
-          "For nested objects, manually define additional @dataclass types and update the field annotations to reference them.",
-          "Numbers always map to float, even for values that look like integers — change to int where that fits your data better.",
-          "Field names are used exactly as written in your JSON, so non-identifier characters like spaces or hyphens will produce invalid Python — rename them first if needed."
+          "Paste several array elements so optional fields are detected.",
+          "Keys such as \"first-name\" become valid snake_case attribute names; map them back when you load data.",
+          "Rename the Root class to something specific to your data."
         ]}
       />
     </div>
