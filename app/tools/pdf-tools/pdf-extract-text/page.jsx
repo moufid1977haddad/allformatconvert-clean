@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { itemsToText } from '../../../lib/pdfTextLayout';
 import { reportToolError } from '../../../lib/reportError';
 
 export default function PdfExtractTextPage() {
@@ -32,7 +33,9 @@ export default function PdfExtractTextPage() {
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        const pageText = textContent.items.map(item => item.str).join(' ');
+        // Line breaks and spaces from the text positions: the old one-space
+        // join put a whole page on a single line (29/09).
+        const pageText = itemsToText(textContent.items);
         fullText += 'Page ' + i + ':\n' + pageText + '\n\n';
       }
       setText(fullText);
@@ -100,7 +103,7 @@ export default function PdfExtractTextPage() {
           "Output is grouped by page (\"Page 1:\", \"Page 2:\", etc.) so you can tell where each chunk of text came from.",
           "Works only on PDFs that already have a text layer — scanned or image-only pages won't produce any text.",
           "Copy the text directly to your clipboard if you just need to paste it elsewhere, without downloading a file.",
-          "Word spacing in the output may not exactly match the original layout, since extracted text items are joined with a single space."
+          "Line breaks and word spaces are rebuilt from the position of the text on the page; multi-column layouts are read line by line across the columns."
         ]}
       />
     </div>

@@ -346,6 +346,14 @@ await T('pdf-rotate encrypted', async () => {
   check('password PDF refused clearly', (await body()).includes('PDF Unlock'), '');
 });
 
+await T('pdf-extract-text', async () => {
+  await open('/tools/pdf-tools/pdf-extract-text');
+  await page.locator('input[type="file"]').setInputFiles('scripts/converter-tests/fixtures/encrypted-rc4-128.pdf');
+  await page.getByRole('button', { name: /Extract/ }).first().click();
+  const v = await waitOut((x) => x.includes('Page 2'), 30000);
+  check('extract text per line', v.includes('Page 1:\nHello encrypted world page 1'), JSON.stringify(v.slice(0, 120)));
+});
+
 await b.close();
 for (const e of errors) { fails++; console.log('PAGE ERROR', e.slice(0, 200)); }
 console.log(`${passes} passed, ${fails} failed (${browserName})`);
