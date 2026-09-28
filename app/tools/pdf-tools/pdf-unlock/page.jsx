@@ -1,7 +1,8 @@
-﻿'use client';
+'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { unlockPdfBytes } from '../../../lib/pdfUnlock';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -17,17 +18,16 @@ export default function Page() {
     if (!file) return;
     setLoading(true);
     setError('');
+    setResult(null);
     try {
-      const { PDFDocument } = await import('@cantoo/pdf-lib');
       const arrayBuffer = await file.arrayBuffer();
-      const decryptedDoc = await PDFDocument.load(arrayBuffer, { password });
-      // Rebuild into a brand new document rather than re-saving decryptedDoc directly:
-      // the source file's now-orphaned /Encrypt dictionary and old xref data can otherwise
-      // get carried over as unreferenced objects, causing some readers to still flag the file as encrypted.
-      const pdfDoc = await PDFDocument.create();
-      const copiedPages = await pdfDoc.copyPages(decryptedDoc, decryptedDoc.getPageIndices());
-      copiedPages.forEach(p => pdfDoc.addPage(p));
-      const pdfBytes = await pdfDoc.save();
+      // The decrypted document itself is saved (bookmarks, form fields and metadata kept), see lib/pdfUnlock.js.
+      const { bytes: pdfBytes, wasEncrypted } = await unlockPdfBytes(new Uint8Array(arrayBuffer), password);
+      if (!wasEncrypted) {
+        setError('This PDF is not protected: it opens without a password and has no restrictions, so there is nothing to remove.');
+        setLoading(false);
+        return;
+      }
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setResult(URL.createObjectURL(blob));
     } catch(e) {
@@ -67,7 +67,7 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Unlock"
-        description="PDF Unlock decrypts a password-protected PDF using the password you provide, via the @cantoo/pdf-lib library's standard PDF security handler entirely in your browser — your file is never uploaded to a server. It then re-saves the document without encryption, so the downloaded copy opens without a password."
+        description="PDF Unlock decrypts a password-protected PDF using the password you provide, via the @cantoo/pdf-lib library's standard PDF security handler entirely in your browser — your file is never uploaded to a server. It then saves the same document without encryption, so the downloaded copy opens without a password and without printing or copying restrictions, and keeps its bookmarks, form fields and document information. A PDF that is not protected is reported as such."
         howTo={[
           "Click the upload area and select a password-protected PDF file.",
           "Type the PDF's password into the field.",

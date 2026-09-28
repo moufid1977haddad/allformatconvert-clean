@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
@@ -19,12 +19,15 @@ export default function Page() {
     setLoading(true);
     setError('');
     setCoverage('');
+    setOutput(''); // a failed run must not leave the previous summary on screen (29/09)
     try {
       // Extract the document's real text (the tool used to send the raw file
       // bytes, base64-encoded, so the model summarized binary noise).
       const pdfjsLib = await import('pdfjs-dist');
       pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
-      const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise.catch((e) => {
+        throw e?.name === 'PasswordException' ? new Error('this PDF needs a password to open. Remove it first with PDF Unlock, then summarize the unlocked file.') : e;
+      });
       let text = '';
       let pagesRead = 0;
       for (let i = 1; i <= pdf.numPages && text.length < MAX_PROMPT_CHARS; i++) {
@@ -52,9 +55,10 @@ export default function Page() {
           tool: 'pdf-ai-summary',
         }),
       });
-      const data = await response.json();
+      // A gateway error page is not JSON: say what happened instead of a parse error (29/09).
+      const data = await response.json().catch(() => ({ error: `The summary service did not answer correctly (HTTP ${response.status}). Try again in a moment.` }));
       if (data.text) setOutput(data.text);
-      else setError(data.error || 'Failed to summarize');
+      else { setCoverage(''); setError(data.error || 'Failed to summarize'); }
     } catch(e) { setError('Error: ' + e.message); }
     setLoading(false);
   };

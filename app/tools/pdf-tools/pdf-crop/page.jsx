@@ -1,8 +1,9 @@
-﻿'use client';
+'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
+import { cropRect } from '../../../lib/pdfCropBox';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -12,26 +13,30 @@ export default function Page() {
   const [error, setError] = useState('');
   const fileRef = useRef();
 
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setResult(null); };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setResult(null); setError(''); };
 
   const crop = async () => {
     if (!file) return;
     setLoading(true);
     setError('');
+    setResult(null);
     try {
       const { PDFDocument } = await import('pdf-lib');
       const arrayBuffer = await file.arrayBuffer();
       const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer));
-      const pages = pdfDoc.getPages();
-      for (const page of pages) {
-        const { width, height } = page.getSize();
-        page.setCropBox(
-          margins.left,
-          margins.bottom,
-          width - margins.left - margins.right,
-          height - margins.top - margins.bottom
-        );
+      const m = {};
+      for (const side of ['top', 'right', 'bottom', 'left']) {
+        const v = Number(margins[side]);
+        if (!Number.isFinite(v) || v < 0) throw new Error(`the ${side} margin must be a number of points, 0 or more.`);
+        m[side] = v;
       }
+      const pages = pdfDoc.getPages();
+      pages.forEach((page, n) => {
+        const box = page.getCropBox();
+        const next = cropRect(box, page.getRotation().angle, m);
+        if (!next) throw new Error(`these margins are larger than page ${n + 1} (${Math.round(box.width)} x ${Math.round(box.height)} pt): nothing would be left of it.`);
+        page.setCropBox(next.x, next.y, next.width, next.height);
+      });
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setResult(URL.createObjectURL(blob));
@@ -54,7 +59,7 @@ export default function Page() {
             {['top', 'bottom', 'left', 'right'].map(side => (
               <div key={side}>
                 <label className="block text-sm text-neutral-500 mb-1 capitalize">{side} margin (pt)</label>
-                <input type="number" min={0} max={200} value={margins[side]} onChange={e => setMargins({...margins, [side]: Number(e.target.value)})} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-400" />
+                <input type="number" min={0} value={margins[side]} onChange={e => { setMargins({...margins, [side]: e.target.value}); setResult(null); }} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-400" />
               </div>
             ))}
           </div>
@@ -67,10 +72,10 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Crop"
-        description="PDF Crop trims each page's crop box by the top, bottom, left, and right margins you enter, using the pdf-lib library entirely in your browser — your file is never uploaded to a server. The same margins are applied to every page; there's no interactive drag-to-select tool or visual preview."
+        description="PDF Crop trims each page's crop box by the top, bottom, left, and right margins you enter, using the pdf-lib library entirely in your browser — your file is never uploaded to a server. Margins are measured on the page as you see it: from its current visible area (a page cropped before is cropped further, not reset) and, on pages displayed rotated, from the edges you see on screen. The same margins are applied to every page; there's no interactive drag-to-select tool or visual preview."
         howTo={[
           "Click the upload area and select a PDF file from your device.",
-          "Enter the top, bottom, left, and right margins (in points, 0–200) to trim from each page.",
+          "Enter the top, bottom, left, and right margins (in points) to trim from each page, as the page appears on screen.",
           "Click 'Crop PDF' to apply those margins to every page.",
           "Click 'Download Cropped PDF' to save the result."
         ]}
@@ -81,7 +86,7 @@ export default function Page() {
           { q: "Is my file uploaded to a server?", a: "No. Cropping happens entirely in your browser using the pdf-lib library." }
         ]}
         tips={[
-          "Margins are in points (1 point = 1/72 inch), and each side is limited to 200pt in the input fields.",
+          "Margins are in points (1 point = 1/72 inch, about 0.35 mm). If the margins would leave nothing of a page, the tool says which page instead of producing a broken file.",
           "Cropping only adjusts the page's visible crop box — content outside it isn't deleted from the file, just hidden from view.",
           "Since there's no preview, try small margin values first and check the downloaded result before committing to larger crops.",
           "Use the same margins across a batch of similarly formatted documents for consistent results."

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { buildChapterHtml, firstPageShowsCover } from '../../../lib/ebookHtml';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
@@ -95,46 +96,12 @@ function blobToDataUri(blob) {
 // Fetches a blob: URL produced by the epub parser (chapter image) and
 // converts it to a data: URI, so the final HTML sent for PDF rendering is a
 // single self-contained file with no external/relative resource references.
-async function blobUrlToDataUri(url) {
-  const res = await fetch(url);
-  const blob = await res.blob();
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
 // Turns a chapter's processed HTML (image/stylesheet blob: URLs already
 // linked by the epub parser) into a fragment safe to drop into the combined
 // document: images become inline data: URIs and stylesheets become inline
 // <style> blocks, both cached by URL so a resource shared across chapters is
 // only fetched once.
-async function buildChapterHtml({ bodyHtml, cssHrefs, cache }) {
-  const doc = new DOMParser().parseFromString(
-    `<!DOCTYPE html><html><head></head><body>${bodyHtml}</body></html>`,
-    'text/html'
-  );
-
-  const images = doc.body.querySelectorAll('img[src^="blob:"]');
-  for (const img of images) {
-    const src = img.getAttribute('src');
-    if (!cache.has(src)) cache.set(src, await blobUrlToDataUri(src));
-    img.setAttribute('src', cache.get(src));
-  }
-
-  let styleBlock = '';
-  for (const cssUrl of cssHrefs) {
-    if (!cache.has(cssUrl)) {
-      const res = await fetch(cssUrl);
-      cache.set(cssUrl, await res.text());
-    }
-    styleBlock += `<style>${cache.get(cssUrl)}</style>`;
-  }
-
-  return styleBlock + doc.body.innerHTML;
-}
+// buildChapterHtml: app/lib/ebookHtml.js (every blob: address inlined, 29/09).
 
 function buildFullDocument({ title, coverDataUri, chaptersHtml }) {
   const cover = coverDataUri
@@ -220,6 +187,8 @@ export default function EpubToPdfPage() {
       const coverBlob = await extractCoverImage(file, JSZip);
       if (coverBlob) coverDataUri = await blobToDataUri(coverBlob);
 
+      // The book's own first page already shows the cover (an EPUB cover page): not added a second time.
+      if (firstPageShowsCover(chaptersHtml[0], coverDataUri)) coverDataUri = null;
       const html = buildFullDocument({ title: metadata.title || file.name, coverDataUri, chaptersHtml });
 
       setStatus('Rendering PDF...');

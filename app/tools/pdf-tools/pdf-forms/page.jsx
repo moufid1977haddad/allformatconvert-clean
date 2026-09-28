@@ -1,7 +1,26 @@
-﻿'use client';
+'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { openablePdfBytes } from '../../../lib/pdfDecrypt';
+
+// Audit 2 (29/09). Before: every field started empty and was written back empty, so the values already in a form were
+// wiped; checkboxes, radio buttons and dropdowns were shown as text boxes whose input was silently dropped; the form
+// was always flattened; a form that opens without a password but carries restrictions (common for official forms)
+// was refused. Now each field shows its current value with the right control (as Sejda and Smallpdf), only fields
+// the user changed are written, flattening is a choice, and such forms are decrypted first.
+// instanceof, not constructor.name: class names are minified in the production build.
+const kindOf = (field, lib) => ['TextField', 'CheckBox', 'RadioGroup', 'Dropdown', 'OptionList'].find((t) => field instanceof lib['PDF' + t]) || 'Other';
+function readField(field, lib) {
+  const kind = kindOf(field, lib);
+  const f = { name: field.getName(), kind, readOnly: field.isReadOnly() };
+  if (kind === 'TextField') f.value = field.getText() || '';
+  if (kind === 'CheckBox') f.value = field.isChecked();
+  if (kind === 'RadioGroup') { f.options = field.getOptions(); f.value = field.getSelected() || ''; }
+  if (kind === 'Dropdown' || kind === 'OptionList') { f.options = field.getOptions(); const sel = field.getSelected(); f.value = kind === 'Dropdown' ? (sel[0] || '') : sel; }
+  if (kind === 'Other') f.label = field instanceof lib.PDFSignature ? 'Signature' : field instanceof lib.PDFButton ? 'Button' : 'This';
+  return f;
+}
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -10,6 +29,8 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [flatten, setFlatten] = useState(false);
+  const [changed, setChanged] = useState({});
   const fileRef = useRef();
 
   const handleFile = async (e) => {
@@ -18,19 +39,20 @@ export default function Page() {
     setFile(f);
     setResult(null);
     setError('');
+    setChanged({});
     setFields([]);
     setValues({});
     setLoading(true);
     try {
-      const { PDFDocument } = await import('pdf-lib');
+      const lib = await import('pdf-lib');
       const arrayBuffer = await f.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer).catch((e) => { throw /encrypted/i.test(e.message) ? new Error('This PDF is encrypted. Remove its protection first with the PDF Unlock tool, then fill the form here.') : e; });
-      const form = pdfDoc.getForm();
-      const fieldList = form.getFields().map(field => ({ name: field.getName(), type: field.constructor.name }));
+      const pdfDoc = await lib.PDFDocument.load(await openablePdfBytes(arrayBuffer));
+      const fieldList = pdfDoc.getForm().getFields().map((x) => readField(x, lib));
       setFields(fieldList);
       const vals = {};
-      fieldList.forEach(f => vals[f.name] = '');
+      fieldList.forEach(x => { vals[x.name] = x.value; });
       setValues(vals);
+      setChanged({});
     } catch(e) {
       setError('Could not read form fields: ' + e.message);
       setFields([]);
@@ -43,19 +65,30 @@ export default function Page() {
     if (!file) return;
     setLoading(true);
     setError('');
+    setResult(null);
     try {
       const { PDFDocument } = await import('pdf-lib');
       const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer).catch((e) => { throw /encrypted/i.test(e.message) ? new Error('This PDF is encrypted. Remove its protection first with the PDF Unlock tool, then fill the form here.') : e; });
+      const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer));
       const form = pdfDoc.getForm();
-      for (const [name, value] of Object.entries(values)) {
+      for (const f of fields) {
+        if (!changed[f.name] || f.readOnly) continue;
+        const v = values[f.name];
         try {
-          const field = form.getTextField(name);
-          field.setText(value);
-        } catch(e) {}
+          if (f.kind === 'TextField') form.getTextField(f.name).setText(v);
+          else if (f.kind === 'CheckBox') { const c = form.getCheckBox(f.name); if (v) c.check(); else c.uncheck(); }
+          else if (f.kind === 'RadioGroup') { const r = form.getRadioGroup(f.name); if (v) r.select(v); else r.clear(); }
+          else if (f.kind === 'Dropdown') { const d = form.getDropdown(f.name); if (v) d.select(v); else d.clear(); }
+          else if (f.kind === 'OptionList') { const o = form.getOptionList(f.name); if (v.length) o.select(v); else o.clear(); }
+        } catch (err) {
+          throw new Error(`the value of "${f.name}" could not be written (${err.message}).`);
+        }
       }
-      form.flatten();
-      const pdfBytes = await pdfDoc.save();
+      if (flatten) form.flatten();
+      let pdfBytes;
+      try { pdfBytes = await pdfDoc.save(); } catch (err) {
+        throw /WinAnsi cannot encode/.test(err.message) ? new Error('a character you typed cannot be written with the form\'s standard font (only Western European letters can). ' + err.message) : err;
+      }
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setResult(URL.createObjectURL(blob));
     } catch(e) { setError('Failed: ' + e.message); }
@@ -75,12 +108,34 @@ export default function Page() {
           <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
           {fields.length > 0 && (
             <div className="space-y-3">
-              {fields.map(field => (
-                <div key={field.name}>
-                  <label className="block text-sm text-neutral-500 mb-1">{field.name}</label>
-                  <input type="text" value={values[field.name] || ''} onChange={e => setValues({...values, [field.name]: e.target.value})} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-400" />
-                </div>
-              ))}
+              {fields.map(field => {
+                const set = (v) => { setValues({ ...values, [field.name]: v }); setChanged({ ...changed, [field.name]: true }); setResult(null); };
+                const cls = 'w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-400';
+                const v = values[field.name];
+                return (
+                  <div key={field.name} data-field={field.name}>
+                    {field.kind === 'CheckBox' ? (
+                      <label className="flex items-center gap-2 text-sm text-neutral-700"><input type="checkbox" checked={!!v} disabled={field.readOnly} onChange={e => set(e.target.checked)} />{field.name}</label>
+                    ) : (
+                      <label className="block text-sm text-neutral-500 mb-1">{field.name}{field.readOnly ? ' (read-only)' : ''}</label>
+                    )}
+                    {field.kind === 'TextField' && <input type="text" value={v} disabled={field.readOnly} onChange={e => set(e.target.value)} className={cls} />}
+                    {(field.kind === 'RadioGroup' || field.kind === 'Dropdown') && (
+                      <select value={v} disabled={field.readOnly} onChange={e => set(e.target.value)} className={cls}>
+                        <option value="">(none)</option>
+                        {field.options.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    )}
+                    {field.kind === 'OptionList' && (
+                      <select multiple value={v} disabled={field.readOnly} onChange={e => set(Array.from(e.target.selectedOptions, o => o.value))} className={cls}>
+                        {field.options.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    )}
+                    {field.kind === 'Other' && <p className="text-xs text-neutral-400">{field.label} field: kept as it is (not editable here).</p>}
+                  </div>
+                );
+              })}
+              <label className="flex items-center gap-2 text-sm text-neutral-700 pt-2"><input type="checkbox" checked={flatten} onChange={e => { setFlatten(e.target.checked); setResult(null); }} />Flatten the form (values become part of the page and can no longer be edited)</label>
             </div>
           )}
           {fields.length === 0 && file && !loading && <p className="text-neutral-400 text-sm text-center">No form fields found in this PDF.</p>}
@@ -93,24 +148,26 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Forms"
-        description="PDF Forms reads the existing fillable fields from a PDF you upload and lets you type a value into each one, entirely in your browser using the pdf-lib library — your file is never uploaded to a server. It only fills in an existing form; it doesn't let you create a new form or add fields, checkboxes, radio buttons, or dropdowns to a PDF that doesn't already have them."
+        description="PDF Forms reads the existing fillable fields from a PDF you upload — text fields, checkboxes, radio buttons, dropdowns and lists — shows each one with its current value, and writes back only what you change, entirely in your browser using the pdf-lib library; your file is never uploaded to a server. The form stays fillable, or can be flattened if you tick that option. It only fills in an existing form; it doesn't let you create a new form or add fields to a PDF that doesn't already have them."
         howTo={[
           "Click the upload area and select a PDF that already contains fillable form fields.",
-          "Type a value into each detected field.",
-          "Click 'Fill and Download PDF' to write in your values and flatten the form.",
-          "The filled, flattened PDF downloads automatically."
+          "Change the fields you need: type text, tick checkboxes, pick radio and dropdown options. Values already in the form are shown and kept.",
+          "Tick 'Flatten the form' if the values must no longer be editable, then click 'Fill and Download PDF'.",
+          "Click 'Download Filled PDF' to save the result."
         ]}
         faqs={[
           { q: "Is PDF Forms free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Can I create a new PDF form or add fields?", a: "No — this tool only fills in fields that already exist in the PDF you upload. It doesn't let you add text boxes, checkboxes, or other fields." },
-          { q: "What happens to checkboxes, radio buttons, or dropdowns in the form?", a: "Their names are detected, but this tool only writes values into text fields, so other field types won't be filled in from this page." },
+          { q: "What happens to checkboxes, radio buttons, or dropdowns in the form?", a: "Each is shown with its own control (a checkbox, or a list of the options the form allows) and filled like a text field. Signature and push-button fields are kept as they are." },
+          { q: "Will fields I leave alone be erased?", a: "No — every field shows its current value, and only the fields you change are written." },
+          { q: "Can I type accents or other alphabets?", a: "Western European letters work with the standard form font. If a form uses that font and you type, for example, Cyrillic or Chinese, the tool says so instead of producing a broken file." },
           { q: "Does it work with a PDF that has no form fields?", a: "No — if the PDF has no fillable fields, you'll see \"No form fields found in this PDF.\"" }
         ]}
         tips={[
-          "After filling, the form is flattened, so your values become part of the page content and can't be edited again as form fields.",
+          "Leave 'Flatten the form' unticked to keep the form fillable; tick it when the values must become part of the page.",
           "Only PDFs with an existing fillable form (an AcroForm) will show anything to fill in.",
-          "If a field doesn't appear editable, it's likely a checkbox, radio button, or dropdown rather than a text field.",
-          "Keep the original PDF if you might need to fill it again with different values, since flattening can't be undone."
+          "A field marked read-only is locked by the form's author and is left unchanged.",
+          "Keep the original PDF if you flatten it, since flattening can't be undone."
         ]}
       />
     </div>

@@ -15,6 +15,8 @@
 // uses), then processed normally. A PDF that needs a password to open is
 // refused with a clear message pointing to PDF Unlock.
 
+import { unlockPdfBytes } from './pdfUnlock.js';
+
 const ENCRYPT = [0x2f, 0x45, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74]; // "/Encrypt"
 
 function mentionsEncrypt(bytes) {
@@ -42,17 +44,11 @@ export async function openablePdfBytes(input) {
   const { PDFDocument } = await import('pdf-lib');
   const probe = await PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false });
   if (!probe.isEncrypted) return bytes;
-  const cantoo = await import('@cantoo/pdf-lib');
-  let src;
+  // Decrypted in place (bookmarks, form fields, metadata kept -- audit 2, 29/09: copying the pages into a new
+  // document dropped them), see lib/pdfUnlock.js.
   try {
-    src = await cantoo.PDFDocument.load(bytes, { password: '' });
+    return (await unlockPdfBytes(bytes, '')).bytes;
   } catch {
     throw new PdfNeedsPasswordError();
   }
-  // Rebuilt into a new document, as PDF Unlock does, so no /Encrypt
-  // dictionary is carried over.
-  const out = await cantoo.PDFDocument.create();
-  const pages = await out.copyPages(src, src.getPageIndices());
-  pages.forEach((p) => out.addPage(p));
-  return out.save();
 }

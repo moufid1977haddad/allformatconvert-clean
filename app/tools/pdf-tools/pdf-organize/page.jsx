@@ -1,8 +1,9 @@
-﻿'use client';
+'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
+import { carryOver } from '../../../lib/pdfCarryOver';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -57,14 +58,16 @@ export default function Page() {
     setLoading(true);
     setError('');
     try {
-      const { PDFDocument } = await import('pdf-lib');
+      const lib = await import('pdf-lib');
+      const { PDFDocument } = lib;
       const arrayBuffer = await file.arrayBuffer();
       const srcDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer));
       const newDoc = await PDFDocument.create();
-      for (const pageNum of order) {
-        const [page] = await newDoc.copyPages(srcDoc, [pageNum - 1]);
-        newDoc.addPage(page);
-      }
+      // One copyPages call: resources and form fields shared by several pages are copied once.
+      const copied = await newDoc.copyPages(srcDoc, order.map((n) => n - 1));
+      copied.forEach((page) => newDoc.addPage(page));
+      // Form fields and document information kept (29/09), see lib/pdfCarryOver.js.
+      carryOver(lib, srcDoc, newDoc);
       const pdfBytes = await newDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setResult(URL.createObjectURL(blob));
@@ -104,7 +107,7 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Organize"
-        description="PDF Organize lets you reorder and remove pages within a single PDF using Up, Down, and Remove buttons next to a list of pages, entirely in your browser using the pdf-lib and PDF.js libraries — your file is never uploaded to a server. It only reorders and removes pages within one file; it does not merge, split, compress, or rotate PDFs."
+        description="PDF Organize lets you reorder and remove pages within a single PDF using Up, Down, and Remove buttons next to a list of pages, entirely in your browser using the pdf-lib and PDF.js libraries — your file is never uploaded to a server. It only reorders and removes pages within one file; it does not merge, split, compress, or rotate PDFs. Form fields on the pages you keep still work, with their values, and the document title and author are kept; removed pages are truly removed from the file, not just hidden."
         howTo={[
           "Click the upload area and select a PDF file — its pages appear in a numbered list.",
           "Use 'Up' and 'Down' next to each page to change its position, or 'Remove' to drop it.",
@@ -115,6 +118,7 @@ export default function Page() {
           { q: "Is PDF Organize free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Can I merge multiple PDFs or split one into several files?", a: "No — this tool only reorders and removes pages inside a single PDF. Use the Merge PDF or Split PDF tools for those tasks." },
           { q: "Can I rotate or compress pages here?", a: "No, PDF Organize only handles page order and removal; rotation and compression aren't available on this page." },
+          { q: "Are form fields and bookmarks kept?", a: "Form fields on the kept pages are kept and still fillable. Bookmarks (the outline) are not carried over to the new file." },
           { q: "Is my file uploaded to a server?", a: "No. Everything happens locally in your browser using the pdf-lib and PDF.js libraries." }
         ]}
         tips={[
