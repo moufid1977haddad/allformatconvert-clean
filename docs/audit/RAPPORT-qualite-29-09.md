@@ -4,7 +4,7 @@
 
 | Point | État | Preuve |
 |---|---|---|
-| 1 — résultats faux sans avertissement | **93 outils audités** : 75 modifiés, 18 lus sans défaut. **61 rendaient un résultat faux sans le dire** (F ci-dessous), 14 étaient sous le marché, annonçaient une capacité absente ou échouaient avec un message obscur (M) | tests Node `scripts/converter-tests/01`…`10` (tous verts), banc navigateur `scripts/browser-tests/qualite-29-09.mjs` ×3 moteurs |
+| 1 — résultats faux sans avertissement | **106 outils audités** : 84 modifiés, 22 lus sans défaut. **68 rendaient un résultat faux sans le dire** (F ci-dessous), 16 étaient sous le marché, annonçaient une capacité absente ou échouaient avec un message obscur (M) | tests Node `scripts/converter-tests/01`…`10` (tous verts), banc navigateur `scripts/browser-tests/qualite-29-09.mjs` ×3 moteurs |
 | 2 — json-to-rust, json-to-php, env-to-json | **au niveau du marché ou au-dessus** ; contenu SEO non touché ; inscrits « éligibles » au plan | converter-tests/02 (13/13) : `tsc --strict`, Python, `dotenv`/`dotenv-expand` comme oracles |
 | 3 — les deux réserves du réviseur | **faites** : IP lue seulement dans `x-real-ip` (écrit par Vercel) ; réservations heure/jour atomiques par une fonction SQL. **Migration SQL écrite, NON exécutée** (tâche du propriétaire, P13 ①) | quota-tests 19 (5/5) et 20 (12/12, la vraie SQL exécutée dans PGlite) ; réviseur indépendant : aucun bloquant, ses 5 remarques appliquées |
 | 4 — plan | mis à jour : bloquant 1 (3 outils éligibles), bloquant 5 (audit du jour + liste de ce qui reste), P13, réserves retirées de « Juste APRÈS » | `claude/plan-de-travail.md` |
@@ -28,7 +28,7 @@
 
 ## 1. Chasse aux résultats faux sans avertissement
 
-**Inventaire.** 225 dossiers d'outils. Déjà audités avant aujourd'hui : les 36 outils mis en avant (22/09), les améliorations 1-17 (23-26/09), l'audit coupes/jonctions (28/09), les outils du 29/09 (SQL to CSV, CSV to SQL/JSON/TSV, TSV to CSV, TOML ↔ JSON, hash, barcode). **Audités aujourd'hui : 93**, dans l'ordre demandé (developer-tools, text, math, convertisseurs de données, puis PDF, fichiers et images là où un défaut de la même famille était probable).
+**Inventaire.** 225 dossiers d'outils. Déjà audités avant aujourd'hui : les 36 outils mis en avant (22/09), les améliorations 1-17 (23-26/09), l'audit coupes/jonctions (28/09), les outils du 29/09 (SQL to CSV, CSV to SQL/JSON/TSV, TSV to CSV, TOML ↔ JSON, hash, barcode). **Audités aujourd'hui : 106**, dans l'ordre demandé (developer-tools, text, math, convertisseurs de données, puis PDF, fichiers et images là où un défaut de la même famille était probable).
 
 **Méthode.** Pour chaque outil : lecture du code, jeu de cas limites (grands nombres et précision, zéros en tête, Unicode et émojis, guillemets et échappements, lignes vides, BOM, CRLF, entrées invalides, fichiers chiffrés), comparaison à un oracle : bibliothèque de référence (`dotenv`, `dotenv-expand`, `js-yaml`, `Buffer`, `tsc`, Python, Poppler `pdftotext`, fast-xml-parser), spécification (YAML 1.2, RFC 4180, HTML5) ou valeur exacte. Chaque défaut a d'abord été **reproduit** (plusieurs tests rejouent l'ancien comportement pour prouver que le défaut était réel), puis corrigé, puis testé en Node et dans le vrai navigateur.
 
@@ -111,13 +111,21 @@ Légende : **F** = rendait un résultat faux sans le dire · **M** = sous le mar
 | png-to-ico | image non carrée étirée dans l'icône | F | oui — centrée sur un carré transparent | navigateur (trame 256 décodée) |
 | file-converter | CSV : champs non guillemetés (« Smith, John » → 2 colonnes) ; HTML : texte non échappé (balises interprétées) | F | oui — RFC 4180, échappement | lecture + build |
 | image-metadata | sous-titre « View image metadata and EXIF data » sans aucune lecture EXIF | M | oui — exifr : EXIF, GPS (mis en évidence), IPTC, XMP, ICC | navigateur (fixture EXIF + GPS écrite à la main) |
-| file-splitter, pdf-to-jpg, pdf-to-image, image-cropper, image-rotate, gif-compressor, video-to-audio | — | — | aucun défaut trouvé (lus : fond blanc de pdf.js, échelle naturelle du recadrage, boîte englobante de la rotation, refus d'un GIF plus lourd depuis le 28/09, formats audio partagés) | — |
+| brightness-contrast, image-blur | **sous Safari** (WebKit : pas de `ctx.filter`, affectation ignorée) l'image était rendue **inchangée** comme résultat | F | oui — calcul au pixel (formules CSS Filter Effects) quand `ctx.filter` manque | navigateur ×3 (pixel relu ; WebKit compris) |
+| video-filter | sous Safari, la vidéo était réenregistrée **sans filtre** | F | refus clair sous Safari | build |
+| gif-to-apng | `putImageData` écrasait : trous dans chaque image d'un GIF optimisé ; disposition 3 ignorée | F | oui — composition GIF89a (`gifFrames.js`) | navigateur (fixture optimised.gif) |
+| gif-to-png | une seule image d'un GIF animé (divulgué ; ezgif les extrait toutes) | M | + « Extract all frames » (ZIP) | navigateur |
+| jpg-to-pdf, image-to-pdf | orientation EXIF ignorée : **photo portrait de téléphone couchée** dans le PDF ; fichiers non JPEG/PNG sautés sans le dire | F | oui — rotation sur la page (sans réencodage), autres formats redressés | navigateur (page 600×800 pour une photo orientée 6) |
+| pdf-editor (insertion d'image) | aperçu redressé, octets bruts intégrés : photo couchée et écrasée | F | oui (compté avec les 10 outils PDF) | build + test d'orientation des 3 moteurs |
+| pdf-compare | aucune différence marquée (divulgué) ; page sur une ligne | M | oui — lignes + Myers, rouge/vert | navigateur |
+| audio-equalizer | un gain écrêtait (distorsion) sans le dire | F | oui — sortie abaissée juste assez, dB affichés | navigateur (sinus −1 dBFS, +12 dB : 0 échantillon écrêté) |
+| file-splitter, pdf-to-jpg, pdf-to-image, image-cropper, image-rotate, gif-compressor, video-to-audio, ico-to-png, jpg-to-webp, png-to-webp, audio-booster | — | — | aucun défaut trouvé (lus ou mesurés : fond blanc de pdf.js, échelle naturelle du recadrage, boîte englobante de la rotation, refus d'un GIF plus lourd depuis le 28/09, formats audio partagés, plus grande image d'un ICO décodée par les 3 moteurs, encodeur WebP vérifié, écrêtage d'Audio Booster divulgué) | — |
 
-**Décompte, outil par outil (une ligne de tableau peut regrouper plusieurs outils) :** F = 35 developer-tools + 8 text-tools + 3 math-tools + 11 PDF (les 10 du chiffrement + extract-text) + File Encryptor + SVG to PNG + PNG to ICO + File Converter = **61** ; M = 4 developer-tools (markdown-to-html, markdown-editor, markdown-previewer, api-tester) + Text Encryptor + 4 PDF (crop, organize, redact, sign) + pdf-forms + text-to-pdf + png-to-jpg + webp-to-jpg + image-metadata = **14** ; lus sans défaut = **18**. Total **93**.
+**Décompte, outil par outil (une ligne de tableau peut regrouper plusieurs outils) :** F = 35 developer-tools + 8 text-tools + 3 math-tools + 13 PDF (les 10 du chiffrement, extract-text, jpg-to-pdf, image-to-pdf) + File Encryptor + File Converter + SVG to PNG + PNG to ICO + Brightness/Contrast + Image Blur + GIF to APNG + Video Filter + Audio Equalizer = **68** ; M = 4 developer-tools (markdown-to-html, markdown-editor, markdown-previewer, api-tester) + Text Encryptor + 5 PDF (crop, organize, redact, sign, compare) + pdf-forms + text-to-pdf + png-to-jpg + webp-to-jpg + image-metadata + gif-to-png = **16** ; lus sans défaut = **22**. Total **106**.
 
 ### Ce qui reste NON audité
 
-Inscrit au plan (bloquant 5), même méthode à appliquer : la majorité des image-tools, gif-tools (apng-to-gif, gif-compressor, gif-to-apng, gif-to-mp4, image-to-gif), les PDF non listés ci-dessus (epub/image/jpg/markdown/mobi-to-pdf, pdf-ai-summary, pdf-compare, pdf-ocr, pdf-to-html, pdf-unlock), audio-equalizer, audio-waveform, six video-tools, file-comparator, file-metadata, base64 fichiers, les ai-tools non encore audités, mobi-to-epub.
+Inscrit au plan (bloquant 5), même méthode à appliquer : une partie des image-tools, gif-tools (apng-to-gif, gif-to-mp4, image-to-gif), les PDF non listés ci-dessus (epub/markdown/mobi-to-pdf, pdf-ai-summary, pdf-ocr, pdf-to-html, pdf-unlock), audio-waveform, cinq video-tools, file-comparator, file-metadata, base64 fichiers, les ai-tools non encore audités, mobi-to-epub.
 
 ## 2. Les 3 outils écartés
 
