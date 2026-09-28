@@ -11,13 +11,40 @@ export default function SvgToPngPage() {
   const [status, setStatus] = useState('');
   const inputRef = useRef();
 
-  const handleFile = (e) => {
+  // Width and height used to stay at 512 x 512 whatever the SVG, so any SVG
+  // that is not square was stretched without a word (29/09). Now the size is
+  // read from the SVG (width/height, else viewBox), the longer side scaled
+  // to 512 by default, and the ratio stays locked while editing, as
+  // svgtopng.com and CloudConvert keep the proportions.
+  const [ratio, setRatio] = useState(1);
+  const [lock, setLock] = useState(true);
+  const handleFile = async (e) => {
     const f = e.target.files[0];
     e.target.value = '';
     setFile(f);
     setResult(null);
     setStatus('');
+    if (!f) return;
+    const text = await f.text();
+    const svg = new DOMParser().parseFromString(text, 'image/svg+xml').documentElement;
+    const num = (v) => { const m = /^\s*([\d.]+)\s*(px)?\s*$/.exec(v || ''); return m ? Number(m[1]) : NaN; };
+    let w = num(svg.getAttribute('width'));
+    let h = num(svg.getAttribute('height'));
+    const vb = (svg.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(Number);
+    if (!(w > 0 && h > 0) && vb.length === 4 && vb[2] > 0 && vb[3] > 0) {
+      if (w > 0) h = w * vb[3] / vb[2];
+      else if (h > 0) w = h * vb[2] / vb[3];
+      else { w = vb[2]; h = vb[3]; }
+    }
+    if (w > 0 && h > 0) {
+      const scale = 512 / Math.max(w, h);
+      setRatio(w / h);
+      setWidth(Math.round(w * scale));
+      setHeight(Math.round(h * scale));
+    }
   };
+  const changeWidth = (v) => { setWidth(v); if (lock && Number.isFinite(v)) setHeight(Math.max(1, Math.round(v / ratio))); };
+  const changeHeight = (v) => { setHeight(v); if (lock && Number.isFinite(v)) setWidth(Math.max(1, Math.round(v * ratio))); };
 
   const dimsValid = Number.isFinite(width) && width > 0 && Number.isFinite(height) && height > 0;
 
@@ -65,9 +92,10 @@ export default function SvgToPngPage() {
             <input ref={inputRef} type="file" accept=".svg" className="hidden" onChange={handleFile} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm text-neutral-500 mb-1">Width (px)</label><input type="number" value={width} onChange={e => setWidth(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
-            <div><label className="block text-sm text-neutral-500 mb-1">Height (px)</label><input type="number" value={height} onChange={e => setHeight(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">Width (px)</label><input type="number" value={width} onChange={e => changeWidth(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">Height (px)</label><input type="number" value={height} onChange={e => changeHeight(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
           </div>
+          <label className="flex items-center gap-2 text-sm text-neutral-600"><input type="checkbox" checked={lock} onChange={e => setLock(e.target.checked)} /> Keep the SVG's proportions</label>
           <button onClick={convert} disabled={!file || !dimsValid} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert to PNG</button>
           {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
           {result && (
@@ -80,7 +108,7 @@ export default function SvgToPngPage() {
       </div>
       <SeoContent
         title="SVG to PNG"
-        description="SVG to PNG rasterizes a vector SVG file into a PNG image at the exact pixel width and height you specify, entirely in your browser using the canvas element — your file is never uploaded to a server. Transparency in the SVG is preserved in the PNG output."
+        description="SVG to PNG rasterizes a vector SVG file into a PNG image at the pixel size you choose: the size starts from the SVG's own proportions (width and height, or viewBox), with the longer side at 512 px, and stays proportional while you edit unless you untick the option, entirely in your browser using the canvas element — your file is never uploaded to a server. Transparency in the SVG is preserved in the PNG output."
         howTo={[
           "Click the upload area and select an SVG file from your device.",
           "Set your desired output width and height in pixels.",

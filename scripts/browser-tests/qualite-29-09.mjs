@@ -362,6 +362,16 @@ await T('image-metadata', async () => {
   check('EXIF make + GPS shown', t.includes('OnlineConvertToolsCam') && t.includes('48.858400') && t.includes('GPS location'), '');
 });
 
+await T('svg-to-png proportions', async () => {
+  await open('/tools/image-tools/svg-to-png');
+  await page.locator('input[type="file"]').setInputFiles({ name: 'w.svg', mimeType: 'image/svg+xml', buffer: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90"><rect width="160" height="90" fill="red"/></svg>') });
+  await page.waitForTimeout(800);
+  const nums = page.locator('input[type="number"]');
+  check('svg size from viewBox', (await nums.nth(0).inputValue()) === '512' && (await nums.nth(1).inputValue()) === '288', `${await nums.nth(0).inputValue()}x${await nums.nth(1).inputValue()}`);
+  await nums.nth(0).fill('1024');
+  check('svg ratio locked', (await nums.nth(1).inputValue()) === '576', await nums.nth(1).inputValue());
+});
+
 await b.close();
 for (const e of errors) { fails++; console.log('PAGE ERROR', e.slice(0, 200)); }
 console.log(`${passes} passed, ${fails} failed (${browserName})`);
