@@ -9,6 +9,9 @@ const browserName = (process.argv.find((a) => a.startsWith('--browser=')) || '--
 const engine = { chromium, firefox, webkit }[browserName];
 const b = await engine.launch();
 const ctx = await b.newContext();
+// On a Vercel PREVIEW, Vercel's comment toolbar (vercel.live) throws "navigator.storage.persisted" under WebKit on
+// every page; absent on www, not the site's code (same option as all-pages-load.mjs).
+if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((url) => url.hostname === 'vercel.live', (r) => r.abort());
 let page;
 let fails = 0, passes = 0;
 const errors = [];
@@ -119,7 +122,7 @@ await T('aspect-ratio', async () => {
 await T('json-to-xml', async () => {
   await open('/tools/developer-tools/json-to-xml');
   await ta().fill('{"id":12345678901234567890}'); await click('Convert');
-  check('xml exact', (await outText()).includes('<id>12345678901234567890</id>'));
+  check('xml exact', (await waitOut((x) => x.includes('<id>'))).includes('<id>12345678901234567890</id>'), await outTa().inputValue());
   await ta().fill('{"first name":1}'); await click('Convert');
   check('xml invalid name reported', (await body()).includes("can't be an XML"), '');
 });
