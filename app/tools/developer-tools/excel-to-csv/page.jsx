@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
 import { MAX_ROWS, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL, MOBILE_MAX_ROWS, MOBILE_MAX_FILE_SIZE_BYTES, MOBILE_MAX_FILE_SIZE_LABEL } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
+import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 
 const MAX_ROWS_LABEL = MAX_ROWS.toLocaleString();
 const MOBILE_MAX_ROWS_LABEL = MOBILE_MAX_ROWS.toLocaleString();
@@ -57,6 +58,7 @@ export default function ExcelToCsvPage() {
   const [sheetNames, setSheetNames] = useState(null);
   const inputRef = useRef();
   const workerRef = useRef(null);
+  const [result, offer, clearResult] = useDownloadable();
 
   useEffect(() => {
     setIsMobile(isMobileDevice());
@@ -73,6 +75,7 @@ export default function ExcelToCsvPage() {
     if (!f) return;
     setError('');
     setStatus('');
+    clearResult();
     if (f.size > maxFileBytes) {
       setError(`This file is ${(f.size / (1024 * 1024)).toFixed(0)} MB, which is over the ${maxFileLabel} limit${isMobile ? ' on this device' : ''}. Try splitting it into smaller files first.`);
       setFile(null);
@@ -94,12 +97,14 @@ export default function ExcelToCsvPage() {
     setConverting(false);
     setProgress(0);
     setPhase('');
+    clearResult();
     setStatus('Cancelled.');
   };
 
   const convertFile = (f) => {
     setError('');
     setStatus('');
+    clearResult();
     setProgress(0);
     setPhase('reading');
     setSheetNames(null);
@@ -119,18 +124,11 @@ export default function ExcelToCsvPage() {
         setProgress(100);
         setConverting(false);
         workerRef.current = null;
-        const url = URL.createObjectURL(msg.blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = msg.isZip ? 'converted.zip' : 'converted.csv';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
+        offer(msg.blob, msg.isZip ? 'converted.zip' : 'converted.csv');
         setStatus(
           msg.isZip
-            ? `Downloaded! ${msg.sheetNames.length} sheets zipped as separate CSVs, ${msg.rowCount.toLocaleString()} rows total.`
-            : `Downloaded! ${msg.rowCount.toLocaleString()} rows.`
+            ? `ZIP ready: ${msg.sheetNames.length} sheets zipped as separate CSVs, ${msg.rowCount.toLocaleString()} rows total.`
+            : `CSV ready: ${msg.rowCount.toLocaleString()} rows.`
         );
       } else if (msg.type === 'row_limit') {
         setConverting(false);
@@ -179,6 +177,7 @@ export default function ExcelToCsvPage() {
             </div>
           )}
           {status && !converting && <p className="text-center text-sm text-green-600 dark:text-green-400">{status}</p>}
+          {!converting && <DownloadReady file={result} />}
         </div>
       </div>
       <SeoContent
@@ -188,16 +187,16 @@ export default function ExcelToCsvPage() {
           "Click the upload area and select an .xlsx, .xls, or .ods file.",
           "Conversion starts automatically in the background — no button click needed.",
           "If the workbook has more than one sheet, you'll see how many were detected and their names.",
-          "The result downloads automatically — converted.csv for a single sheet, or converted.zip (one .csv per sheet) for multiple.",
+          "Click 'Download' to save the result — converted.csv for a single sheet, or converted.zip (one .csv per sheet) for multiple.",
           "Open the CSV(s) in a spreadsheet app or text editor."
         ]}
         faqs={[
           { q: "What file formats does it support?", a: ".xlsx, .xls, and .ods (OpenDocument Spreadsheet)." },
           { q: "Is my file uploaded to a server?", a: "No, the conversion happens entirely in your browser using the xlsx library, in a background Web Worker so the page never freezes." },
-          { q: "What happens with a workbook that has multiple sheets?", a: "Every sheet is converted — you get a .zip file containing one .csv per sheet, each named after the real sheet name. The tool shows you the sheet count and names before the download starts." },
+          { q: "What happens with a workbook that has multiple sheets?", a: "Every sheet is converted — you get a .zip file containing one .csv per sheet, each named after the real sheet name. The tool shows you the sheet count and names next to the Download button." },
           { q: "Why is there a row and file-size limit?", a: `Excel files can't be parsed incrementally the way plain text can, so converting a very large workbook risks the tab running out of memory or taking too long. Uploaded files are capped at ${maxRowsLabel} rows across all sheets combined and ${maxFileLabel}${isMobile ? ' on this device' : ' on desktop'}, measured to convert reliably.` },
           { q: "Will formatting like colors or fonts carry over?", a: "No, CSV is plain text, so only cell values transfer — formatting, formulas' calculated results (not the formulas themselves as text), and structure like merged cells don't." },
-          { q: "Can I download the CSV as a file, or is it only shown on the page?", a: "It downloads automatically — there's no inline preview, since a large workbook's CSV output can be too big to safely render on the page." }
+          { q: "Can I download the CSV as a file, or is it only shown on the page?", a: "As a file — click 'Download' once the conversion is done. There's no inline preview, since a large workbook's CSV output can be too big to safely render on the page." }
         ]}
         tips={[
           "Multi-sheet workbooks now come back as a .zip with one .csv per sheet — check the sheet names shown on the page before downloading to confirm nothing you need is missing.",

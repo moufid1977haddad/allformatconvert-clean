@@ -37,9 +37,9 @@ await page.setInputFiles('input[type=file]', file);
 const size = fs.statSync(file).size;
 await page.waitForTimeout(400);
 
-const btn = page.locator('button:has-text("Download PDF"), button:has-text("Download .docx"), button:has-text("Convert to PDF")').first();
+const btn = page.locator('button:has-text("Convert to PDF"), button:has-text("Convert to .docx")').first();
 const t0 = Date.now(); tStart = t0;
-const dl = page.waitForEvent('download', { timeout: Number(process.env.LIMIT_S || 900) * 1000 }).catch(() => null);
+const dl = page.waitForSelector('a[data-download]', { timeout: Number(process.env.LIMIT_S || 900) * 1000 }).then(async (a) => (await Promise.all([page.waitForEvent('download'), a.click()]))[0]).catch(() => null);
 const errSel = page.waitForSelector('p[role=alert]', { timeout: Number(process.env.LIMIT_S || 900) * 1000 }).catch(() => null);
 for (let i = 0; i < 60 && (await btn.isDisabled()); i++) await page.waitForTimeout(500); // large files are read before the button enables
 if (await btn.isDisabled()) {

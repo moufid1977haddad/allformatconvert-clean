@@ -116,9 +116,9 @@ const dl = async (pg, loc) => { const [d] = await Promise.all([pg.waitForEvent('
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['sku', 'qty'], ['X1', 7]]), 'Stock');
   const xlsx = path.join(tmp, 'two-sheets.xlsx'); XLSX.writeFile(wb, xlsx);
   const p = await open('/tools/developer-tools/excel-to-json');
-  // Conversion and download start by themselves once the file is chosen (no button).
-  const dP = p.waitForEvent('download', { timeout: 30000 }).catch(() => null);
+  // Conversion starts by itself once the file is chosen; the result is then offered by a Download link.
   await p.locator('input[type=file]').setInputFiles(xlsx);
+  const dP = p.locator('a[data-download]').waitFor({ timeout: 30000 }).then(async () => (await Promise.all([p.waitForEvent('download'), p.locator('a[data-download]').click()]))[0]).catch(() => null);
   await p.getByText('Stock').first().waitFor({ timeout: 20000 }).catch(() => {});
   const shown = await p.locator('body').innerText();
   check('7a sheet names shown once the workbook is read', /Clients/.test(shown) && /Stock/.test(shown));

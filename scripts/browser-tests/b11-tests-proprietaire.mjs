@@ -189,7 +189,9 @@ async function test3() {
         const out = fs.readFileSync(await save(d, `t3-${file}.tsv`), 'utf8');
         rows = out.replace(/\r/g, '').split('\n').filter(Boolean).map((l) => l.split('\t'));
       } else {
-        const [d] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), p.getByRole('button', { name: /Convert|Download/ }).last().click()]);
+        await p.getByRole('button', { name: /^Convert/ }).first().click();
+        await p.locator('a[data-download]').waitFor({ timeout: 30000 });
+        const [d] = await Promise.all([p.waitForEvent('download'), p.locator('a[data-download]').click()]);
         const out = await save(d, `t3-${file}.${tool.split('-').pop()}`);
         if (tool === 'csv-to-json') {
           const arr = JSON.parse(fs.readFileSync(out, 'utf8'));
@@ -216,7 +218,9 @@ async function test3() {
   const idFile = path.join(FX, 'C-ids.csv');
   fs.writeFileSync(idFile, 'Nom;Téléphone;Code;Montant\nA;0612345678;01000;12,5\nB;0712345678;75001;3\n');
   const { p } = await open('csv-to-json', idFile);
-  const [d] = await Promise.all([p.waitForEvent('download'), p.getByRole('button', { name: /Convert/ }).click()]);
+  await p.getByRole('button', { name: /^Convert/ }).first().click();
+  await p.locator('a[data-download]').waitFor({ timeout: 30000 });
+  const [d] = await Promise.all([p.waitForEvent('download'), p.locator('a[data-download]').click()]);
   const arr = JSON.parse(fs.readFileSync(await save(d, 't3-ids.json'), 'utf8'));
   check('test3 csv-to-json: phone numbers and postcodes with a leading zero stay text, amounts become numbers', arr[0]['Téléphone'] === '0612345678' && arr[0].Code === '01000' && arr[1].Code === '75001' && arr[0].Montant === 12.5, JSON.stringify(arr));
   await p.close();
@@ -285,9 +289,9 @@ async function test5(soffice) {
     await p.locator('input[type=file]').first().setInputFiles(file);
     const t0 = Date.now();
     const err = p.locator('[role=alert]').filter({ hasText: /S/ }).first();
-    const dlP = p.waitForEvent('download', { timeout: 300000 });
-    await p.getByRole('button', { name: 'Download PDF' }).click();
-    const res = await Promise.race([dlP.then((d) => ({ d })), err.waitFor({ timeout: 300000 }).then(() => 'error')]).catch(() => 'timeout');
+    await p.getByRole('button', { name: 'Convert to PDF' }).click();
+    const ready = p.locator('a[data-download]');
+    const res = await Promise.race([ready.waitFor({ timeout: 300000 }).then(async () => ({ d: (await Promise.all([p.waitForEvent('download'), ready.click()]))[0] })), err.waitFor({ timeout: 300000 }).then(() => 'error')]).catch(() => 'timeout');
     if (!res.d) {
       const msg = res === 'error' ? await err.innerText() : '(nothing shown after 300 s)';
       const clear = res === 'error' && !/\b(500|undefined|null|TypeError|stack|ECONN|fetch failed)\b/i.test(msg) && msg.length > 20;

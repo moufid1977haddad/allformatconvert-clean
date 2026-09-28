@@ -54,7 +54,9 @@ export default function ZipExtractorPage() {
   const pwRef = useRef(''); // the password that opened the archive, reused for every extraction
   const pendingRef = useRef(null); // an extraction waiting for a password (data-only encrypted 7z/RAR)
   const cancelledRef = useRef(false);
+  const previewUrlsRef = useRef(new Set()); // previews opened in a tab: freed only when the page is left, so saving from that tab keeps working
 
+  useEffect(() => { const urls = previewUrlsRef.current; return () => { for (const u of urls) URL.revokeObjectURL(u); }; }, []);
   useEffect(() => { setIsMobile(isMobileDevice()); setCanSaveFolder(typeof window !== 'undefined' && 'showDirectoryPicker' in window); }, []);
   useEffect(() => () => { workerRef.current?.terminate(); }, []);
   // Start the engine (worker + 7-Zip) once the page is idle, so an archive is listed without waiting for it.
@@ -134,7 +136,7 @@ export default function ZipExtractorPage() {
       const f = r.files[0];
       if (!f) { setError(r.warning || `${entry.path} could not be extracted.`); return null; }
       if (f.size !== entry.size) { setError(`${entry.path} came out at ${fmtSize(f.size)} instead of ${fmtSize(entry.size)}: the archive may be damaged.`); return null; }
-      if (open) { const u = URL.createObjectURL(new Blob([f.blob], { type: PREVIEW[extOf(f.path)] })); window.open(u, '_blank', 'noopener'); setTimeout(() => URL.revokeObjectURL(u), 60000); }
+      if (open) { const u = URL.createObjectURL(new Blob([f.blob], { type: PREVIEW[extOf(f.path)] })); window.open(u, '_blank', 'noopener'); previewUrlsRef.current.add(u); }
       else saveBlob(f.blob, f.path.split('/').pop());
       if (r.warning) setWarning(r.warning);
       return null;

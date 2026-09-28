@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { MAX_PDF_TO_WORD_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 
@@ -11,6 +12,7 @@ export default function PdfToWordPage() {
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
   const inputRef = useRef();
+  const [converted, offer, clearConverted] = useDownloadable();
 
   const handleFile = (e) => {
     const f = e.target.files[0];
@@ -21,6 +23,7 @@ export default function PdfToWordPage() {
     const sizeCheck = checkOfficeSize(f, MAX_PDF_TO_WORD_STAGED_BYTES);
     setError(sizeCheck.ok ? '' : sizeCheck.message);
     setDone(false);
+    clearConverted();
   };
 
   const convert = async () => {
@@ -30,6 +33,7 @@ export default function PdfToWordPage() {
     setLoading(true);
     setError('');
     setDone(false);
+    clearConverted();
 
     try {
       setStage(null);
@@ -37,14 +41,7 @@ export default function PdfToWordPage() {
       const blob = result.blob;
 
       const filename = (file.name.replace(/\.[^.]+$/, '') || 'document') + '.docx';
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      offer(blob, filename);
       setDone(true);
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -69,15 +66,15 @@ export default function PdfToWordPage() {
             {loading && (
               <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden="true" />
             )}
-            {loading ? officeStageLabel(stage) : 'Download .docx'}
+            {loading ? officeStageLabel(stage) : 'Convert to .docx'}
           </button>
           {error && (
             <p className="text-center text-red-500 text-sm" role="alert">{error}</p>
           )}
           {done && !error && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
-              <div className="text-green-500 text-xl font-bold mb-1">Word document downloaded!</div>
-              <p className="text-neutral-500 text-sm">Check your browser&apos;s downloads for the converted file.</p>
+              <div className="text-green-500 text-xl font-bold mb-1">Word document ready</div>
+              <DownloadReady file={converted} className="mt-3" />
             </div>
           )}
         </div>
@@ -87,7 +84,7 @@ export default function PdfToWordPage() {
         description="PDF to Word converts your PDF into a real, editable .docx Word document using our conversion service. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. We tested two PDFs exported from Word (one with a table with merged cells, a two-column section, a numbered list, headers and footers, an image with text wrapping; one with footnotes and a watermark). We converted each back to PDF and compared it with the original: headings, table, columns, lists, header and footer, image, footnotes and watermark were all present and in place. We did not test PDFs from other sources (layout software, scans, forms), where results can differ."
         howTo={[
           "Click the upload area and select a PDF file from your device.",
-          "Click 'Download .docx'. Your file is uploaded securely for conversion and the Word document downloads automatically once it's ready.",
+          "Click 'Convert to .docx'. Your file is uploaded securely for conversion; once the Word document is ready, click 'Download'.",
           "Open the resulting .docx file in Word or a compatible editor."
         ]}
         faqs={[
@@ -102,7 +99,7 @@ export default function PdfToWordPage() {
           "In our tests on PDFs exported from Word, the .docx kept headings, tables, columns and lists rather than only the plain text.",
           "Works best on PDFs that already contain a text layer (most PDFs exported from Word, Google Docs, or similar tools).",
           "Scanned or image-only PDFs need OCR performed elsewhere first — this tool doesn't perform OCR.",
-          "Very large or complex files may take a little longer to convert — keep the tab open until the download starts."
+          "Very large or complex files may take a little longer to convert — keep the tab open until the Download button appears."
         ]}
       />
     </div>

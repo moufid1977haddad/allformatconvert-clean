@@ -495,9 +495,13 @@ if (GS) { // thermal roll: one label per page, page = label; copies in order
   const head = fs.readFileSync(await dp.path()).subarray(0, 5).toString();
   const prev = p3.locator('a[data-batch-preview]');
   check('label PDF: no download by itself; after 65 s the Download button gives the PDF; the preview link opens a new tab', before === 5 && head === '%PDF-' && (await prev.getAttribute('target')) === '_blank' && p3.url().includes('barcode-generator'), `downloads before the click: ${before} (5 expected, all clicked), head ${head}`);
-  if (engine.name() === 'chromium') {
+  { // headless Chromium has no PDF viewer: there the new tab hands the PDF over as a download instead of showing it
+    let tabDl = false;
     const [tab] = await Promise.all([ctx.waitForEvent('page'), prev.click()]);
-    check('preview tab shows the PDF (blob), the tool page stays open behind it', tab.url().startsWith('blob:') && !p3.isClosed(), tab.url().slice(0, 40));
+    tab.on('download', () => { tabDl = true; });
+    await tab.waitForURL(/^blob:/, { timeout: 10000 }).catch(() => {});
+    await tab.waitForTimeout(1000);
+    check('preview opens the PDF in a NEW tab, the tool page stays open with its settings', (tab.url().startsWith('blob:') || tabDl) && !p3.isClosed() && p3.url().includes('barcode-generator'), `tab ${tab.url().slice(0, 40)}${tabDl ? ' (headless: handed over as a download)' : ''}`);
     await tab.close();
   }
   await p3.close();

@@ -137,9 +137,8 @@ try {
       const responses = []; p.on('response', (r) => { if (r.url().includes('/api/convert-to-pdf')) responses.push(r); });
       await p.goto(`${origin}/tools/pdf-tools/excel-to-pdf`, { waitUntil: 'networkidle' });
       await p.locator('input[type=file]').first().setInputFiles(f);
-      const dl = p.waitForEvent('download', { timeout: 120000 }).catch(() => null);
-      await p.getByRole('button', { name: 'Download PDF' }).click();
-      const d = await dl;
+      await p.getByRole('button', { name: 'Convert to PDF' }).click();
+      const d = await p.locator('a[data-download]').waitFor({ timeout: 120000 }).then(async () => (await Promise.all([p.waitForEvent('download'), p.locator('a[data-download]').click()]))[0]).catch(() => null);
       const r = responses[0];
       const cd = r ? r.headers()['content-disposition'] || '' : '';
       const star = /filename\*=UTF-8''([^;]+)/.exec(cd);

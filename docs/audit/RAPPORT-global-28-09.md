@@ -119,3 +119,22 @@ Sous Chromium, un extrait court reste coupé dans le navigateur, sans changement
 - charge : 1 coupe précise au milieu de 11 autres travaux = 67 s au pire (point 7a).
 
 Coût ≈ 0,002 $ par coupe.
+
+## Ajouts du propriétaire pendant la session (second déploiement)
+
+**A. Un seul nom par catégorie.**
+- La convention du site est « <nom> Tools » au singulier : 11 catégories sur 12 (PDF Tools, Image Tools, Converter Tools…). La 12ᵉ devient donc **« QR & Barcode Tools »**, là où elle s'appelait « QR & Barcodes » (accueil, titre Google) ou « QR & Barcodes Tools » (/tools, titre de la page).
+- Vérifié pour les **12 catégories** sur chaque emplacement : carte de l'accueil, carte de /tools, titre de la page, titre Google (« <nom> — … »), menu (infobulle, nom lu par les lecteurs d'écran, menu mobile).
+- Au passage, la casse des sigles est corrigée : « Ai Tools » → AI, « Gif Tools » → GIF, « Pdf Tools » → PDF, « Json » → JSON dans les titres Google et les textes des pages. La page About ne listait que 9 catégories sur 12 : complétée.
+- **Le site n'a pas de fil d'Ariane** (aucune occurrence dans le code) : rien à y corriger.
+- Une exception assumée : dans la barre du haut, sur les écrans de plus de 2100 px seulement, l'étiquette visible reste courte (« QR », « DEV »…), faute de place (64 px par onglet). Le nom complet reste celui de l'infobulle et des lecteurs d'écran. La largeur de la barre est inchangée (730 px à 1440, 1157 px à 2200, mesurée contre www).
+
+**B. « +0 more tools ».** Comme les sites de référence, la ligne disparaît quand la carte montre déjà tous les outils de la catégorie : la carte entière reste un lien. Le singulier est accordé (« +1 more tool »). Appliqué aux cartes de l'accueil et de /tools, et vérifié sur les 12 cartes.
+
+**C. Générateur de codes-barres, puis tous les outils du même type.**
+- **Liens morts après une minute** : le ZIP et le PDF d'étiquettes étaient libérés au bout de 60 s alors que leur lien restait affiché. Désormais, un résultat reste téléchargeable tant qu'il est affiché ; sa mémoire n'est libérée que lorsqu'il est remplacé ou que la page est quittée. Même règle pour le code seul (PNG, SVG, PDF, EPS, JPG, GIF), dont les adresses n'étaient jamais libérées.
+- **Téléchargement automatique (ton iPhone)** : iLovePDF et Smallpdf montrent un bouton « Download » une fois le traitement fini. Le générateur fait maintenant de même : **aucun téléchargement automatique**, un bouton vert « Download the ZIP/PDF (taille) » et, pour le PDF d'étiquettes, « Preview the PDF in a new tab » (la page de l'outil et ses réglages restent derrière).
+- **Même schéma dans tout le site** (29 fichiers passés en revue) :
+  - aucun autre lien affiché ne mourait au bout d'une minute ;
+  - l'aperçu du zip-extractor libérait l'onglet ouvert au bout de 60 s : corrigé (libéré en quittant la page) ;
+  - **14 outils téléchargeaient automatiquement à la fin de la conversion**, sans bouton ensuite. Ce sont Word, Excel, PowerPoint, HTML, EPUB et MOBI vers PDF, PDF vers Word, Excel et PowerPoint, CSV vers Excel, JSON et SQL, Excel vers CSV et JSON. Ils ont désormais le même bouton, commun à tous (`app/components/DownloadReady.jsx`), plus un aperçu dans un nouvel onglet pour les PDF. Leur bouton de départ dit ce qu'il fait (« Convert to PDF » au lieu de « Download PDF »).

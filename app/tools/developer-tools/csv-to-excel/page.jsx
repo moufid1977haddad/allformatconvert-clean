@@ -7,6 +7,7 @@ import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { detectDelimiter, CSV_DELIMITERS } from '../../../lib/csvParser';
 import { sniffCsvFile } from '../../../lib/csvEncoding';
 import CsvReadOptions, { numbersNote } from '../../../components/CsvReadOptions';
+import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 
 // Only the first 8KB is needed to see several rows -- detectDelimiter only
 // looks at the first 10 non-empty logical lines anyway, so sampling more of
@@ -84,6 +85,7 @@ export default function CsvToExcelPage() {
   const [typeNumbers, setTypeNumbers] = useState(true);
   const inputRef = useRef();
   const workerRef = useRef(null);
+  const [result, offer, clearResult] = useDownloadable();
 
   useEffect(() => {
     setIsMobile(isMobileDevice());
@@ -98,6 +100,7 @@ export default function CsvToExcelPage() {
     if (!f) return;
     setError('');
     setStatus('');
+    clearResult();
     if (f.size > MAX_FILE_SIZE_BYTES) {
       setError(`This file is ${(f.size / (1024 * 1024)).toFixed(0)} MB, which is over the ${MAX_FILE_SIZE_LABEL} limit for this tool. Try splitting it into smaller files first.`);
       setFile(null);
@@ -125,6 +128,7 @@ export default function CsvToExcelPage() {
     setConverting(false);
     setProgress(0);
     setPhase('');
+    clearResult();
     setStatus('Cancelled.');
   };
 
@@ -132,6 +136,7 @@ export default function CsvToExcelPage() {
     if (!file && !input) return;
     setError('');
     setStatus('');
+    clearResult();
     setProgress(0);
     setPhase('reading');
     setConverting(true);
@@ -145,18 +150,11 @@ export default function CsvToExcelPage() {
         setProgress(msg.pct);
         setPhase(msg.phase);
       } else if (msg.type === 'done') {
-        const url = URL.createObjectURL(msg.blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `converted.${msg.bookType}`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
+        offer(msg.blob, `converted.${msg.bookType}`);
         setProgress(100);
         setConverting(false);
         workerRef.current = null;
-        setStatus(`Downloaded! ${msg.rowCount.toLocaleString()} rows.` + numbersNote(msg));
+        setStatus(`Excel file ready: ${msg.rowCount.toLocaleString()} rows.` + numbersNote(msg));
       } else if (msg.type === 'row_limit') {
         setConverting(false);
         workerRef.current = null;
@@ -195,6 +193,7 @@ export default function CsvToExcelPage() {
             onChange={e => {
               const val = e.target.value;
               setInput(val);
+              clearResult();
               setFileName('');
               setFile(null);
               setDelimiterChoice('auto');
@@ -246,19 +245,20 @@ export default function CsvToExcelPage() {
               <button onClick={cancel} className="w-full bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-800 dark:text-neutral-200 rounded-xl py-3 font-semibold transition">Cancel</button>
             </div>
           ) : (
-            <button onClick={convert} disabled={!file && !input} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 dark:disabled:bg-neutral-700 disabled:text-gray-600 dark:disabled:text-neutral-500 text-white rounded-xl py-3 font-semibold transition">Convert and Download .{bookType}</button>
+            <button onClick={convert} disabled={!file && !input} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 dark:disabled:bg-neutral-700 disabled:text-gray-600 dark:disabled:text-neutral-500 text-white rounded-xl py-3 font-semibold transition">Convert to .{bookType}</button>
           )}
           {status && !converting && <p className="text-center text-sm text-green-600 dark:text-green-400">{status}</p>}
+          {!converting && <DownloadReady file={result} />}
         </div>
       </div>
       <SeoContent
         title="CSV to Excel"
-        description="CSV to Excel builds an .xlsx or legacy .xls workbook from a CSV file (or pasted CSV text) using the xlsx library entirely in your browser, then triggers a download — your data is never uploaded to a server. The file is read and parsed off the main thread in a Web Worker, so the page stays responsive even on large files. The field delimiter (comma, semicolon, tab, or pipe) is detected automatically, with a dropdown to override it if the guess is wrong. The file's character encoding is detected too — Excel's classic CSV export is Windows-1252, not UTF-8, and its accents come through intact — and whole columns of numbers become real number cells, European decimal commas included (12,5 → 12.5); values with a leading zero, like phone numbers, stay text."
+        description="CSV to Excel builds an .xlsx or legacy .xls workbook from a CSV file (or pasted CSV text) using the xlsx library entirely in your browser, then offers it for download — your data is never uploaded to a server. The file is read and parsed off the main thread in a Web Worker, so the page stays responsive even on large files. The field delimiter (comma, semicolon, tab, or pipe) is detected automatically, with a dropdown to override it if the guess is wrong. The file's character encoding is detected too — Excel's classic CSV export is Windows-1252, not UTF-8, and its accents come through intact — and whole columns of numbers become real number cells, European decimal commas included (12,5 → 12.5); values with a leading zero, like phone numbers, stay text."
         howTo={[
           "Click the upload area and select a .csv file, or paste CSV text directly into the box below it.",
           "The delimiter is detected automatically — check the dropdown and correct it if needed.",
           "Choose .xlsx or legacy .xls as the output format.",
-          "Click 'Convert and Download' to build the workbook and save it.",
+          "Click 'Convert' to build the workbook, then 'Download' to save it.",
           "Open it in Excel or any compatible spreadsheet app."
         ]}
         faqs={[
