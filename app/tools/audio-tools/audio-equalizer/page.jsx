@@ -4,6 +4,7 @@ import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { decodeAnyAudio } from '../../../lib/decodeAudio';
 import { AUDIO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
+import PlayablePreview from '../../../components/PlayablePreview';
 
 export default function AudioEqualizerPage() {
   const [file, setFile] = useState(null);
@@ -152,7 +153,7 @@ export default function AudioEqualizerPage() {
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {exportUrl && (
             <div className="space-y-2">
-              <audio controls src={exportUrl} className="w-full" />
+              <PlayablePreview src={exportUrl} name="equalized.wav" />
               <a href={exportUrl} download={'equalized_' + (file?.name.replace(/\.[^.]+$/, '') || 'audio') + '.wav'} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download WAV</a>
             </div>
           )}

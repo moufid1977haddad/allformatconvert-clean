@@ -7,6 +7,7 @@ import { AUDIO_OUTPUT_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../
 import { reportToolError } from '../../../lib/reportError';
 import { opusOnService, encodeOpusOnService, LOSSLESS_INTERMEDIATE } from '../../../lib/opusService';
 import { ffmpegAudioDuration } from '../../../lib/audioDuration';
+import PlayablePreview from '../../../components/PlayablePreview';
 
 const tenth = (x) => Math.round(x * 10) / 10;
 
@@ -159,7 +160,7 @@ export default function AudioSplitterPage() {
           {results.map((r, i) => (
             <div key={i} className="space-y-2">
               <p className="text-sm font-medium text-neutral-700">Part {i+1}</p>
-              <audio controls src={r.url} className="w-full" />
+              <PlayablePreview src={r.url} name={r.name} />
               <a href={r.url} download={r.name} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download Part {i+1}</a>
             </div>
           ))}

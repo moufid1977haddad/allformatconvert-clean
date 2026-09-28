@@ -6,6 +6,8 @@ import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { reportToolError } from '../../../lib/reportError';
 import { ffmpegAudioDuration } from '../../../lib/audioDuration';
 import { runMediaJob, mediaServiceConfigured } from '../../../lib/mediaJob';
+import IosOriginalNote from '../../../components/IosOriginalNote';
+import PlayablePreview from '../../../components/PlayablePreview';
 
 // Precise cut, 28/09: re-encoding in ffmpeg.wasm measured ~3.7 s per second of 1080p in Chrome but ~29 s in
 // Firefox (292 s for 10 s). The reference way to cut fast AND exact (LosslessCut's "smart cut") re-encodes only
@@ -237,6 +239,7 @@ export default function VideoTrimmerPage() {
         <p className="text-neutral-500 text-center mb-2">Trim and cut video files — instantly and losslessly by default, or to the exact frame</p>
         <p className="text-neutral-400 text-xs text-center mb-8">Files up to {maxMB} MB{isMobile ? ' on this device' : ''} · MP4, MOV, WebM, MKV and more · the fast cut never uploads your video</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
+          <IosOriginalNote />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
             <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />
@@ -264,7 +267,7 @@ export default function VideoTrimmerPage() {
           )}
           {result && (
             <div className="space-y-2">
-              <video controls playsInline src={result.url} className="w-full rounded-xl" onLoadedMetadata={(e) => { const d = e.currentTarget.duration; setResult(r => r && ({ ...r, actual: d })); }} />
+              <PlayablePreview src={result.url} name={result.name} kind="video" className="w-full rounded-xl" onLoadedMetadata={(e) => { const d = e.currentTarget.duration; setResult(r => r && ({ ...r, actual: d })); }} />
               <p className="text-xs text-neutral-500 text-center">
                 {fmtMB(result.size)}{result.actual ? ` · ${fmtSecs(result.actual)} long (you asked for ${fmtSecs(result.asked)}${result.precise ? '; cut to the frame' : '; a fast cut starts on the keyframe at or before your start'})` : ''}
               </p>

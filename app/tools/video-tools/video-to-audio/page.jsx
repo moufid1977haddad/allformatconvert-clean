@@ -5,6 +5,8 @@ import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import ProgressBar from '../../../components/ProgressBar';
 import { AUDIO_OUTPUT_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
 import { reportToolError } from '../../../lib/reportError';
+import IosOriginalNote from '../../../components/IosOriginalNote';
+import PlayablePreview from '../../../components/PlayablePreview';
 
 export default function VideoToAudioPage() {
   const [file, setFile] = useState(null);
@@ -79,6 +81,7 @@ export default function VideoToAudioPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Video to Audio</h1>
         <p className="text-neutral-500 text-center mb-8">Extract audio from video files</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
+          <IosOriginalNote />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
             <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />
@@ -98,7 +101,7 @@ export default function VideoToAudioPage() {
           ) : (
             <button onClick={extract} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Extract Audio</button>
           )}
-          {result && <div className="space-y-2"><audio controls src={result.url} className="w-full" /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download {result.name}</a></div>}
+          {result && <div className="space-y-2"><PlayablePreview src={result.url} name={result.name} /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download {result.name}</a></div>}
         </div>
       </div>
       <SeoContent
