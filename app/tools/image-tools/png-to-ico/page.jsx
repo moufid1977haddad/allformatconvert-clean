@@ -10,7 +10,13 @@ function pngBlobForSize(img, size) {
   canvas.height = size;
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, size, size);
-  ctx.drawImage(img, 0, 0, size, size);
+  // A non-square PNG used to be stretched into the square icon (29/09): it is
+  // now scaled to fit and centred on a transparent square, proportions kept.
+  const scale = size / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height);
+  const w = Math.round((img.naturalWidth || img.width) * scale);
+  const h = Math.round((img.naturalHeight || img.height) * scale);
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, Math.floor((size - w) / 2), Math.floor((size - h) / 2), w, h);
   return new Promise((resolve, reject) => {
     canvas.toBlob(blob => (blob ? resolve(blob) : reject(new Error('Could not encode PNG frame'))), 'image/png');
   });
@@ -141,7 +147,7 @@ export default function PngToIcoPage() {
           { q: "Can I convert multiple PNG files at once?", a: "No, only one file can be converted at a time." }
         ]}
         tips={[
-          "For best results, start with a square PNG image at least as large as your biggest selected size (256px if included).",
+          "For best results, start with a PNG at least as large as your biggest selected size (256px if included); a non-square image is centred on a transparent square, never stretched.",
           "Use a PNG with a transparent background if you want the icon to have transparency.",
           "Keep all four sizes selected for maximum compatibility — Windows uses different sizes for the taskbar, desktop, and Explorer views.",
           "Test the downloaded file in your browser's favicon slot, or by setting it as a desktop shortcut icon, to confirm it displays correctly."
