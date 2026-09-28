@@ -1,12 +1,17 @@
 ﻿'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { cronInfo } from '../../../lib/cronInfo';
 export default function CronExpressionBuilderPage() {
   const [minute, setMinute] = useState('*');
   const [hour, setHour] = useState('*');
   const [day, setDay] = useState('*');
   const [month, setMonth] = useState('*');
   const [weekday, setWeekday] = useState('*');
+  // Next runs depend on the current time: computed after mount only, so the
+  // server-rendered HTML and the first client render match.
+  const [now, setNow] = useState(null);
+  useEffect(() => { setNow(new Date()); }, []);
   const cron = minute + ' ' + hour + ' ' + day + ' ' + month + ' ' + weekday;
   const presets = [['Every minute','* * * * *'],['Every hour','0 * * * *'],['Every day','0 0 * * *'],['Every week','0 0 * * 0'],['Every month','0 0 1 * *'],['Every year','0 0 1 1 *'],['Every weekday','0 9 * * 1-5'],['Every 15 min','*/15 * * * *']];
   const apply = (p) => { const parts = p.split(' '); setMinute(parts[0]); setHour(parts[1]); setDay(parts[2]); setMonth(parts[3]); setWeekday(parts[4]); };
@@ -22,6 +27,13 @@ export default function CronExpressionBuilderPage() {
             ))}
           </div>
           <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 text-center"><div className="font-mono text-2xl text-indigo-400">{cron}</div></div>
+          {now && (() => { const info = cronInfo(cron, { from: now }); return info.ok ? (
+            <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 text-sm space-y-2">
+              <div className="text-neutral-800 font-semibold">{info.description}</div>
+              <div className="text-neutral-500">Next runs (your time zone):</div>
+              <ul className="font-mono text-neutral-700">{info.next.map(d => <li key={d.getTime()}>{d.toLocaleString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</li>)}</ul>
+            </div>
+          ) : <p className="text-red-500 text-sm text-center">{info.error}</p>; })()}
           <button onClick={() => navigator.clipboard.writeText(cron)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
           <div><label className="block text-sm text-neutral-500 mb-2">Presets</label><div className="grid grid-cols-2 gap-2">{presets.map(([label,p]) => <button key={label} onClick={() => apply(p)} className="bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800 rounded-lg p-2 text-left transition"><div className="text-sm font-semibold">{label}</div><div className="text-neutral-500 font-mono text-xs">{p}</div></button>)}</div></div>
         </div>
