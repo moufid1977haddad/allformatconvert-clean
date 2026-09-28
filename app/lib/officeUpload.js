@@ -69,7 +69,10 @@ export async function convertOffice({ file, endpoint, fields, onStage, signal })
     throw new Error(message);
   }
   const header = res.headers.get('X-Detected-Symbol-Fonts');
-  return { blob: await res.blob(), detectedFonts: header ? header.split(',') : [] };
+  const blob = await res.blob();
+  // Never offer an empty file as a result (28/09: a 204 with no body was handed over as a 0-byte PDF).
+  if (!blob.size) throw new Error('The conversion returned an empty file. Please try again.');
+  return { blob, detectedFonts: header ? header.split(',') : [] };
 }
 
 // ---- audio transcription (route answers with JSON, nothing to download) ---------------------------------
