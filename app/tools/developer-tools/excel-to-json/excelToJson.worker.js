@@ -1,4 +1,6 @@
+import { fixSupplementaryCharRefs } from '../../../lib/xlsxSupplementaryChars';
 import { MAX_ROWS } from './config';
+import { datesToText } from '../../../lib/sheetDates';
 
 class RowLimitExceededError extends Error {
   constructor(limit, actual) {
@@ -43,7 +45,8 @@ async function run({ file, maxRows }) {
   self.postMessage({ type: 'progress', pct: 50, phase: 'parsing' });
   const xlsxModule = await import('xlsx');
   const XLSX = xlsxModule.default || xlsxModule;
-  const workbook = XLSX.read(bytes, { type: 'array' });
+  // cellNF keeps each cell's number format, so date cells can be recognised.
+  const workbook = XLSX.read(fixSupplementaryCharRefs(bytes).bytes, { type: 'array', cellNF: true });
 
   const sheetNames = workbook.SheetNames;
   // Sent as soon as the workbook structure is known -- well before the JSON
@@ -57,7 +60,10 @@ async function run({ file, maxRows }) {
   const result = {};
   let totalRows = sheetNames.length; // one header row implied per sheet
   sheetNames.forEach((name) => {
-    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[name]);
+    datesToText(workbook.Sheets[name], XLSX);
+    // defval: a cell left empty still gets its key (null), so every row of a
+    // sheet has the same properties -- they used to be silently omitted.
+    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[name], { defval: null });
     result[name] = rows;
     totalRows += rows.length;
   });

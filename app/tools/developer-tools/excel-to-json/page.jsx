@@ -180,7 +180,7 @@ export default function ExcelToJsonPage() {
       </div>
       <SeoContent
         title="Excel to JSON"
-        description="Excel to JSON reads an uploaded .xlsx, .xls, .ods, or .csv file using the xlsx library and converts every sheet to an array of row objects, entirely in your browser — your file is never uploaded to a server. Reading and parsing run off the main thread in a Web Worker, so the page stays responsive even on large files, and the result is offered as a .json file to download. The result is a single JSON object keyed by sheet name, with each sheet's first row used as the property names for that sheet's rows."
+        description="Excel to JSON reads an uploaded .xlsx, .xls, .ods, or .csv file using the xlsx library and converts every sheet to an array of row objects, entirely in your browser — your file is never uploaded to a server. Reading and parsing run off the main thread in a Web Worker, so the page stays responsive even on large files, and the result is offered as a .json file to download. The result is a single JSON object keyed by sheet name, with each sheet's first row used as the property names for that sheet's rows. Date cells are written as ISO 8601 text (2024-01-15, or 2024-02-29T13:45:00 with a time) rather than Excel serial numbers, an empty cell keeps its property with the value null so every row has the same keys, and emoji written by Python tools such as pandas are preserved."
         howTo={[
           "Click the upload area and select an .xlsx, .xls, .ods, or .csv file.",
           "Conversion runs automatically in the background — no button click needed.",
