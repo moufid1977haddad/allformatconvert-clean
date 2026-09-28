@@ -44,6 +44,9 @@ Aucun des deux ne concernait le site ; aucun retour arrière n'était justifié.
 - Le contrôle de limite a consommé l'allocation vidéo horaire de ta connexion (40 billets, jamais utilisés) : les outils vidéo et audio passant par le service te répondront « Too many conversions… » jusqu'à la fin de l'heure (`Retry-After` 1 284 s au moment du test).
 - Aucun appel payant, aucune ligne écrite dans `tool_errors` (la sonde `report-error` n'a été jouée que sur la préversion, qui n'écrit jamais).
 
+### Dernier déploiement de production : `ed5bc690`
+Le commit de ce rapport contenait aussi `scripts/browser-tests/deploiement-29-09-www.mjs` (hors `docs/`) : Vercel a reconstruit la production, **code du site identique** à `48ce5d81` (`git diff` vide sur `app`, `lib`, `next.config.ts`, `package.json`). Contrôlé : READY, accueil et 3 pages en 200, échantillon P13 rejoué tout PASS.
+
 ### Nouveaux scripts
 - `scripts/browser-tests/deploiement-29-09-limits.mjs` — sonde de la fonction SQL, limite atteinte puis refusée, fausse IP.
 - `scripts/browser-tests/deploiement-29-09-www.mjs` — échantillon P13 sur www.
