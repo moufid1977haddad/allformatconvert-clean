@@ -2,6 +2,8 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { itemsToText } from '../../../lib/pdfTextLayout';
+import { diffLines } from '../../../lib/codeTools';
 
 export default function Page() {
   const [file1, setFile1] = useState(null);
@@ -10,6 +12,7 @@ export default function Page() {
   const [text2, setText2] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [diff, setDiff] = useState(null);
   const file1Ref = useRef();
   const file2Ref = useRef();
 
@@ -22,7 +25,7 @@ export default function Page() {
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
-      text += content.items.map(item => item.str).join(' ') + '\n';
+      text += itemsToText(content.items) + '\n';
     }
     return text;
   };
@@ -35,6 +38,9 @@ export default function Page() {
       const [t1, t2] = await Promise.all([extractText(file1), extractText(file2)]);
       setText1(t1);
       setText2(t2);
+      // Line-by-line differences (Myers, as Diffchecker): the page used to show
+      // the two texts side by side with nothing marked (29/09).
+      setDiff(await diffLines(t1, t2, { ignoreWhitespace: true }));
     } catch(e) { setError('Failed: ' + e.message); }
     setLoading(false);
   };
@@ -60,6 +66,18 @@ export default function Page() {
             {loading ? 'Comparing...' : 'Compare PDFs'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+          {diff && (
+            <div className="space-y-1">
+              <p className="text-sm text-neutral-600 text-center">{diff.filter(d => d.type === 'removed').length} line(s) only in {file1.name} (red) · {diff.filter(d => d.type === 'added').length} line(s) only in {file2.name} (green)</p>
+              <div className="font-mono text-xs max-h-96 overflow-y-auto border border-neutral-200 rounded-xl">
+                {diff.map((d, i) => (
+                  <div key={i} className={'px-3 py-0.5 whitespace-pre-wrap ' + (d.type === 'removed' ? 'bg-red-50 text-red-700' : d.type === 'added' ? 'bg-green-50 text-green-700' : 'text-neutral-500')}>
+                    {d.type === 'removed' ? '- ' : d.type === 'added' ? '+ ' : '  '}{d.line}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           {text1 && text2 && (
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -76,21 +94,20 @@ export default function Page() {
       </div>
       <SeoContent
         title="Compare PDF"
-        description="Compare PDF extracts the text content of two PDF files entirely in your browser using the PDF.js library, then displays both extractions side by side as plain text for you to read — it does not highlight differences, detect changes, or generate an automated comparison report."
+        description={"Compare PDF extracts the text of two PDF files entirely in your browser with PDF.js, keeping each line of the page, then highlights the differences line by line with the Myers diff algorithm — lines only in the first PDF in red, lines only in the second in green, spacing ignored — and shows both full texts side by side. It compares text, not layout or images; scanned PDFs without a text layer have no text to compare."}
         howTo={[
           "Click the left box and upload your first PDF file.",
           "Click the right box and upload your second PDF file.",
           "Click 'Compare PDFs' to extract the text from both files.",
-          "Read the two text panels side by side to spot differences yourself."
+          "Read the highlighted differences, then the full texts side by side if needed."
         ]}
         faqs={[
           { q: "Is PDF Compare free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it highlight the differences between the two documents?", a: "No — it shows each PDF's extracted text side by side as plain text. It doesn't mark additions, deletions, or changes for you." },
+          { q: "Does it highlight the differences between the two documents?", a: "Yes — after the comparison, lines found only in the first PDF are shown in red and lines found only in the second in green, using the Myers diff algorithm (as Diffchecker and git); spacing differences are ignored. The full text of both PDFs is also shown side by side." },
           { q: "Are my files uploaded to a server?", a: "No, text extraction happens entirely in your browser using the PDF.js library." },
           { q: "Can it compare scanned PDFs?", a: "Not usefully — extraction only pulls text that's actually embedded in the file. Scanned or image-only pages have no text layer, so those panels will come out empty." }
         ]}
         tips={[
-          "For a true line-by-line diff, copy each panel's text into a dedicated text-comparison tool.",
           "Works best on text-based PDFs; scanned documents without a text layer won't produce readable output.",
           "Only raw text is extracted — page layout, images, and formatting are not compared.",
           "For long documents, use your browser's find (Ctrl/Cmd+F) inside each panel to jump to a specific term."

@@ -426,6 +426,19 @@ await T('gif-to-png all frames', async () => {
   check('frame 2 composited (blue pixel on red, no hole)', px[0][2] > 200 && px[1][0] > 200 && px[1][3] === 255, JSON.stringify(px));
 });
 
+await T('pdf-compare highlights', async () => {
+  const { PDFDocument, StandardFonts } = await import('pdf-lib');
+  const mk = async (lines) => { const d = await PDFDocument.create(); const f = await d.embedFont(StandardFonts.Helvetica); const pg = d.addPage([400, 300]); lines.forEach((l, i) => pg.drawText(l, { x: 40, y: 250 - i * 30, size: 14, font: f })); return Buffer.from(await d.save()); };
+  await open('/tools/pdf-tools/pdf-compare');
+  const inputs = page.locator('input[type="file"]');
+  await inputs.nth(0).setInputFiles({ name: 'a.pdf', mimeType: 'application/pdf', buffer: await mk(['Alpha line', 'Beta line', 'Gamma line']) });
+  await inputs.nth(1).setInputFiles({ name: 'b.pdf', mimeType: 'application/pdf', buffer: await mk(['Alpha line', 'Beta CHANGED', 'Gamma line']) });
+  await page.getByRole('button', { name: 'Compare PDFs' }).click();
+  await page.waitForTimeout(3000);
+  const t = await body();
+  check('pdf-compare 1 removed / 1 added', t.includes('1 line(s) only in a.pdf') && t.includes('1 line(s) only in b.pdf') && t.includes('- Beta line') && t.includes('+ Beta CHANGED'), t.slice(t.indexOf('line(s)') - 20, t.indexOf('line(s)') + 120));
+});
+
 await b.close();
 for (const e of errors) { fails++; console.log('PAGE ERROR', e.slice(0, 200)); }
 console.log(`${passes} passed, ${fails} failed (${browserName})`);
