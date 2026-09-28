@@ -282,6 +282,38 @@ await T('ascii-art', async () => {
   check('ascii digits rendered', pre.split('\n').length >= 5 && /\|/.test(pre), pre);
 });
 
+await T('url-parser', async () => {
+  await open('/tools/developer-tools/url-parser');
+  await page.locator(TEXT_IN).first().fill('https://x.y/p?tag=a&tag=b');
+  await page.getByRole('button', { name: /Parse/ }).first().click();
+  await page.waitForTimeout(300);
+  check('url repeated keys kept', (await body()).includes('a, b'), '');
+});
+await T('file-encryptor', async () => {
+  await open('/tools/file-tools/file-encryptor');
+  await page.locator('input[type="file"]').setInputFiles({ name: 'a.bin', mimeType: 'application/octet-stream', buffer: Buffer.from([0, 1, 2, 250, 251]) });
+  await page.locator('input[type="password"]').fill('pw');
+  await page.getByRole('button', { name: 'Encrypt File' }).click();
+  const href = await page.locator('a[download]').first().getAttribute('href', { timeout: 20000 });
+  const enc = await page.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href);
+  check('file encrypted with AES header', enc.length === 53 && String.fromCharCode(...enc.slice(0, 4)) === 'OCF1', String(enc.length));
+  await page.getByRole('button', { name: 'Decrypt', exact: true }).click();
+  await page.locator('input[type="file"]').setInputFiles({ name: 'a.bin.encrypted', mimeType: 'application/octet-stream', buffer: Buffer.from(enc) });
+  await page.locator('input[type="password"]').fill('wrong');
+  await page.getByRole('button', { name: 'Decrypt File' }).click();
+  await page.waitForTimeout(3000);
+  check('file wrong password refused', (await body()).includes('Wrong password'), '');
+});
+await T('png-to-jpg transparency', async () => {
+  await open('/tools/image-tools/png-to-jpg');
+  const png = await page.evaluate(async () => { const c = document.createElement('canvas'); c.width = 4; c.height = 4; const b = await new Promise((r) => c.toBlob(r, 'image/png')); return Array.from(new Uint8Array(await b.arrayBuffer())); });
+  await page.locator('input[type="file"]').setInputFiles({ name: 't.png', mimeType: 'image/png', buffer: Buffer.from(png) });
+  await page.getByRole('button', { name: 'Convert' }).click();
+  const src = await page.locator('a[download="converted.jpg"]').getAttribute('href', { timeout: 20000 });
+  const px = await page.evaluate(async (u) => { const bmp = await createImageBitmap(await (await fetch(u)).blob()); const c = new OffscreenCanvas(bmp.width, bmp.height); const x = c.getContext('2d'); x.drawImage(bmp, 0, 0); return Array.from(x.getImageData(1, 1, 1, 1).data); }, src).catch(async () => page.evaluate(async (u) => { const img = new Image(); img.src = u; await img.decode(); const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const x = c.getContext('2d'); x.drawImage(img, 0, 0); return Array.from(x.getImageData(1, 1, 1, 1).data); }, src));
+  check('transparent -> white', px[0] > 245 && px[1] > 245 && px[2] > 245, JSON.stringify(px));
+});
+
 await b.close();
 for (const e of errors) { fails++; console.log('PAGE ERROR', e.slice(0, 200)); }
 console.log(`${passes} passed, ${fails} failed (${browserName})`);

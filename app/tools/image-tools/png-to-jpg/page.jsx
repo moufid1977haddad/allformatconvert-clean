@@ -15,7 +15,13 @@ export default function PNGtoJPGPage() {
     img.onload = () => {
       const canvas = document.createElement('canvas');
       canvas.width = img.width; canvas.height = img.height;
-      canvas.getContext('2d').drawImage(img, 0, 0);
+      // JPG has no transparency: flatten onto white, as iLoveIMG and
+      // CloudConvert do and as Image Converter does since 22/09. Transparent
+      // areas used to come out black (29/09).
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
       try { setResult(checkedDataURL(canvas, 'image/jpeg')); } catch (e) { setError(e.message); }
     };
     img.src = image;
@@ -37,7 +43,7 @@ export default function PNGtoJPGPage() {
       </div>
       <SeoContent
         title="PNG to JPG"
-        description="PNG to JPG converts a PNG image to JPG format entirely in your browser using the HTML canvas — your file is never uploaded to a server. If your PNG has transparency, the canvas renders transparent areas as black in the JPG output, since JPG has no alpha channel."
+        description="PNG to JPG converts a PNG image to JPG format entirely in your browser using the HTML canvas — your file is never uploaded to a server. If your PNG has transparency, transparent areas are filled with white in the JPG output (JPG has no alpha channel), as iLoveIMG and CloudConvert do."
         howTo={[
           "Click the upload area and select a PNG file from your device.",
           "Click 'Convert' to render it to JPG.",
@@ -47,11 +53,11 @@ export default function PNGtoJPGPage() {
         faqs={[
           { q: "Is PNG to JPG completely free to use?", a: "Yes, it's 100% free with no registration required." },
           { q: "Will converting PNG to JPG reduce image quality?", a: "JPG uses lossy compression, so there is some quality loss compared to PNG, though it's usually minor at default encoder settings." },
-          { q: "What happens to transparent areas in my PNG?", a: "They render as black, since JPG doesn't support transparency and this tool doesn't fill transparent pixels with a custom background color first." },
+          { q: "What happens to transparent areas in my PNG?", a: "They become white, since JPG doesn't support transparency. Keep the PNG if you need the transparency." },
           { q: "Do you store my images after conversion?", a: "No, conversion happens entirely in your browser — nothing is uploaded to a server." }
         ]}
         tips={[
-          "If your PNG has a transparent background, consider flattening it onto a white background in an image editor before converting, to avoid black areas in the JPG.",
+          "Transparent backgrounds become white in the JPG; for another color, flatten the image in an editor first.",
           "JPG works best for photographs and complex images; keep using PNG for graphics that need transparency.",
           "Keep your original PNG as a backup, since converting to JPG discards the alpha channel.",
           "Convert one file at a time — there's no batch upload option."
