@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { checkedDataURL } from '../../../lib/mediaSupport';
@@ -14,8 +14,8 @@ export default function BMPtoPNGPage() {
       const canvas = document.createElement('canvas');
       canvas.width = img.width; canvas.height = img.height;
       canvas.getContext('2d').drawImage(img, 0, 0);
-      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
-      setError('');
+      // The error of a failed output check used to be erased on the next line (29/09): shown now.
+      try { setError(''); setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setResult(null); setError(e.message); }
     };
     img.onerror = () => {
       setError('Could not load this image. The file may be corrupted or in an unsupported format.');

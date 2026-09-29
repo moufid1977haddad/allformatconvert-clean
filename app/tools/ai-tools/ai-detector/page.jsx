@@ -1,7 +1,8 @@
-﻿'use client';
+'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { checkPromptLength } from '@/lib/quota/limits';
+import { readAiJson } from '../../../lib/aiClient';
 
 export default function AIDetectorPage() {
   const [input, setInput] = useState('');
@@ -25,7 +26,7 @@ export default function AIDetectorPage() {
           tool: 'ai-detector',
         }),
       });
-      const data = await response.json();
+      const data = await readAiJson(response);
       if (data.text) setOutput(data.text);
       else setError(data.error || 'No response received');
     } catch(e) { setError('Error: ' + e.message); }
@@ -43,6 +44,7 @@ export default function AIDetectorPage() {
             {loading ? 'Processing...' : 'Detect AI Content'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+          {output && <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2" data-caveat>This estimate comes from a language model's judgment, not from a trained detector; no AI detector is reliable enough to prove who wrote a text. Do not use it alone to accuse anyone.</p>}
           {output && (
             <div className="space-y-2">
               <label className="block text-sm text-neutral-500">Result</label>

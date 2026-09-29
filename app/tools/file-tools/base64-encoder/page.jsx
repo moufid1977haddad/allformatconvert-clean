@@ -1,11 +1,22 @@
-﻿'use client';
-import { useState, useRef } from 'react';
+'use client';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { detectSignature } from '../../../lib/fileSignature';
+
+// Audit 2 (29/09): a file the browser has no type for (HEIC or AVIF on some systems, a file without extension) came
+// out as data:application/octet-stream, which no browser displays as an image -- the type is now read from the
+// content; the raw Base64 (without the data: prefix) can be chosen, as base64.guru offers; a very large result is
+// no longer pushed whole into the text box (the tab froze): a preview is shown and the full text downloads.
+const PREVIEW_CHARS = 1000000;
 export default function FileBase64EncoderPage() {
   const [result, setResult] = useState('');
   const [fileName, setFileName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [raw, setRaw] = useState(false);
+  const out = useMemo(() => (raw ? result.slice(result.indexOf(',') + 1) : result), [result, raw]);
+  const txtUrl = useMemo(() => (out ? URL.createObjectURL(new Blob([out], { type: 'text/plain' })) : null), [out]);
+  useEffect(() => () => { if (txtUrl) URL.revokeObjectURL(txtUrl); }, [txtUrl]);
   const inputRef = useRef();
   const encode = async (e) => {
     const file = e.target.files[0];
@@ -16,8 +27,15 @@ export default function FileBase64EncoderPage() {
     setResult('');
     setFileName(file.name);
     try {
+      const head = new Uint8Array(await file.slice(0, 0x8010).arrayBuffer());
+      const sig = !file.type || file.type === 'application/octet-stream' ? detectSignature(head) : null;
       const reader = new FileReader();
-      reader.onload = () => { setResult(reader.result); setLoading(false); };
+      reader.onload = () => {
+        let url = reader.result;
+        if (sig) url = url.replace(/^data:[^;,]*/, 'data:' + sig.mime);
+        setResult(url);
+        setLoading(false);
+      };
       reader.onerror = () => { setError('Failed to read file: ' + (reader.error?.message || 'unknown error')); setLoading(false); };
       reader.readAsDataURL(file);
     } catch (err) {
@@ -37,12 +55,23 @@ export default function FileBase64EncoderPage() {
           </div>
           {loading && <p className="text-center text-neutral-500">Encoding...</p>}
           {error && <p className="text-center text-red-400 text-sm">{error}</p>}
-          {result && (
-            <div className="space-y-2">
-              <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-xs h-48 resize-none font-mono" value={result} readOnly />
-              <button onClick={() => navigator.clipboard.writeText(result)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy Base64</button>
-            </div>
-          )}
+          {result && (() => {
+            const big = out.length > PREVIEW_CHARS;
+            return (
+              <div className="space-y-2">
+                <div className="flex gap-2 text-sm">
+                  {[[false, 'Data URL'], [true, 'Raw Base64']].map(([v, l]) => <button key={l} onClick={() => setRaw(v)} className={'px-3 py-1 rounded-lg font-semibold ' + (raw === v ? 'bg-indigo-600 text-white' : 'bg-neutral-200 text-neutral-800')}>{l}</button>)}
+                  <span className="ml-auto self-center text-neutral-500" data-b64-length>{out.length.toLocaleString()} characters</span>
+                </div>
+                <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-xs h-48 resize-none font-mono" value={big ? out.slice(0, PREVIEW_CHARS) : out} readOnly data-b64 />
+                {big && <p className="text-xs text-neutral-500">Preview of the first {PREVIEW_CHARS.toLocaleString()} characters; Copy and Download give the whole text.</p>}
+                <div className="grid grid-cols-2 gap-2">
+                  <button onClick={() => navigator.clipboard.writeText(out)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy Base64</button>
+                  <a href={txtUrl} download={(fileName || 'file') + '.base64.txt'} className="w-full text-center bg-neutral-200 hover:bg-neutral-300 rounded-xl py-2 font-semibold transition">Download .txt</a>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
       <SeoContent
@@ -58,13 +87,13 @@ export default function FileBase64EncoderPage() {
           { q: "Is File to Base64 free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can encode." },
           { q: "Is my file uploaded anywhere?", a: "No. The file is read and encoded locally using the browser's FileReader API — it never leaves your device." },
           { q: "What kinds of files can I encode?", a: "Any file type — images, PDFs, documents, and more — one file at a time." },
-          { q: "What does the output look like?", a: "A full data URL (data:<mime-type>;base64,<data>) ready to paste into an src attribute, JSON payload, or API call." }
+          { q: "What does the output look like?", a: "A full data URL (data:<mime-type>;base64,<data>) ready to paste into an src attribute, or the raw Base64 alone for a JSON payload or API call — switch with the Data URL / Raw Base64 buttons. When the browser does not know the file's type, it is read from the file's content." }
         ]}
         tips={[
           "Use the Base64 output directly as an image or CSS background src to avoid an extra HTTP request for small assets.",
-          "Very large files produce very large Base64 strings and can slow down the browser tab — this works best for small to medium files.",
+          "Base64 is a third larger than the file. For large files the box shows a preview; use Download .txt to keep the whole text.",
           "Base64 is an encoding, not encryption — don't use it to hide or protect sensitive data.",
-          "If you only need the raw Base64 payload, strip the \"data:mime/type;base64,\" prefix from the output."
+          "Choose \"Raw Base64\" when you only need the payload without the \"data:mime/type;base64,\" prefix."
         ]}
       />
     </div>
