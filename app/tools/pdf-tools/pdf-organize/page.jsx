@@ -3,7 +3,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
-import { carryOver } from '../../../lib/pdfCarryOver';
+import { carryOver, carryOutline } from '../../../lib/pdfCarryOver';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -68,6 +68,8 @@ export default function Page() {
       copied.forEach((page) => newDoc.addPage(page));
       // Form fields and document information kept (29/09), see lib/pdfCarryOver.js.
       carryOver(lib, srcDoc, newDoc);
+      // Bookmarks follow their pages (30/09); those of removed pages are dropped.
+      carryOutline(lib, srcDoc, newDoc, order);
       const pdfBytes = await newDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setResult(URL.createObjectURL(blob));
@@ -118,7 +120,7 @@ export default function Page() {
           { q: "Is PDF Organize free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Can I merge multiple PDFs or split one into several files?", a: "No — this tool only reorders and removes pages inside a single PDF. Use the Merge PDF or Split PDF tools for those tasks." },
           { q: "Can I rotate or compress pages here?", a: "No, PDF Organize only handles page order and removal; rotation and compression aren't available on this page." },
-          { q: "Are form fields and bookmarks kept?", a: "Form fields on the kept pages are kept and still fillable. Bookmarks (the outline) are not carried over to the new file." },
+          { q: "Are form fields and bookmarks kept?", a: "Form fields on the kept pages are kept and still fillable. Bookmarks (the outline) are kept too and follow their pages to their new positions; a bookmark pointing to a page you removed is dropped, and the bookmarks under it move up a level." },
           { q: "Is my file uploaded to a server?", a: "No. Everything happens locally in your browser using the pdf-lib and PDF.js libraries." }
         ]}
         tips={[

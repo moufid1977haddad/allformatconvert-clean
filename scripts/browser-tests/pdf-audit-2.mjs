@@ -3,7 +3,7 @@
 // with pdf.js (text left in the file), pdf-lib (structure) and, for flattened pages, the pixels of the page image.
 // Usage: node scripts/browser-tests/pdf-audit-2.mjs <origin> [--browser=chromium|firefox|webkit] [--no-vercel-toolbar]
 import { chromium, firefox, webkit } from '@playwright/test';
-import { PDFDocument, StandardFonts, PDFName, PDFRawStream, PDFArray, degrees } from 'pdf-lib';
+import { PDFDocument, StandardFonts, PDFName, PDFRawStream, PDFArray, PDFHexString, degrees } from 'pdf-lib';
 import zlib from 'node:zlib';
 import UPNGenc from 'upng-js';
 
@@ -240,12 +240,22 @@ await T('pdf-organize', async () => {
   d.setTitle('Application form');
   for (const n of [1, 2]) d.addPage([600, 400]).drawText(`Page ${n}`, { x: 50, y: 300, size: 20, font: f });
   const tf = d.getForm().createTextField('surname'); tf.setText('Martin'); tf.addToPage(d.getPage(1), { x: 50, y: 200, width: 200, height: 30 });
+  // Bookmarks (30/09): "Intro" on page 1 (removed below), "Form" on page 2 -> only "Form", on the output's page 1.
+  const pg = d.getPages().map((p) => p.ref), c = d.context;
+  const items = [['Intro', 0], ['Form', 1]].map(([t, i]) => c.obj({ Title: PDFHexString.fromText(t), Dest: c.obj([pg[i], PDFName.of('Fit')]) }));
+  const refs = items.map((o) => c.register(o)), root = c.register(c.obj({ Type: 'Outlines', First: refs[0], Last: refs[1], Count: 2 }));
+  items.forEach((o) => o.set(PDFName.of('Parent'), root)); items[0].set(PDFName.of('Next'), refs[1]); items[1].set(PDFName.of('Prev'), refs[0]);
+  d.catalog.set(PDFName.of('Outlines'), root);
   await open('/tools/pdf-tools/pdf-organize');
   await page.locator('input[type="file"]').first().setInputFiles({ name: 'doc.pdf', mimeType: 'application/pdf', buffer: Buffer.from(await d.save()) });
   await page.getByRole('button', { name: 'Remove' }).first().click();
   await page.getByRole('button', { name: 'Apply Changes' }).click();
   const out = await PDFDocument.load(await linkBytes('a[download="organized.pdf"]'));
   check('pdf-organize: the form field of a kept page still works, the title is kept', out.getPageCount() === 1 && out.getForm().getFields().length === 1 && out.getTitle() === 'Application form', `pages ${out.getPageCount()}, fields ${out.getForm().getFields().length}, title ${out.getTitle()}`);
+  const js = await pdfjs.getDocument({ data: new Uint8Array(await out.save()), verbosity: 0 }).promise;
+  const ol = (await js.getOutline()) || [];
+  const at = ol.length ? await js.getPageIndex(ol[0].dest[0]) : -1;
+  check('pdf-organize: bookmarks follow their page; the bookmark of the removed page is gone', ol.length === 1 && ol[0].title === 'Form' && at === 0, JSON.stringify(ol.map((o) => o.title)) + ` -> page index ${at}`);
 });
 
 await T('markdown-to-pdf', async () => {
