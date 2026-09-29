@@ -1,5 +1,5 @@
 import { MAX_MEGAPIXELS, NATIVE_WEBP_MAX_PIXELS } from './config';
-import { CANVAS_MAX_PIXELS, decodeToRaster, rasterFromCanvas, rasterFromRGBA, encodeJpegWasm, encodeWebpWasm, encodePngRGBA } from '../../../lib/bigImage';
+import { CANVAS_MAX_PIXELS, decodeToRaster, simulateIosCanvasCap, rasterFromCanvas, rasterFromRGBA, encodeJpegWasm, encodeWebpWasm, encodePngRGBA } from '../../../lib/bigImage';
 import { decodeTiff } from '../../../lib/tiffDecode';
 import { sniffFormat, NATIVE_BITMAP_FORMATS } from '../../../lib/detectFileFormat';
 import { checkedBlob, flattenOntoWhite } from '../../../lib/mediaSupport';
@@ -154,6 +154,7 @@ async function run({ items, format, quality, maxMegapixels }) {
 }
 
 self.onmessage = (e) => {
+  if (e.data && e.data.canvasCap) simulateIosCanvasCap(); // browser tests: the iPhone's canvas limit, here too
   run(e.data).catch((err) => {
     self.postMessage({ type: 'error', message: err?.message || String(err) });
   });

@@ -12,7 +12,7 @@
 import * as iq from 'image-q';
 import UPNG from 'upng-js';
 import { sniffFormat } from '../../../lib/detectFileFormat';
-import { decodeToRaster } from '../../../lib/bigImage';
+import { decodeToRaster, simulateIosCanvasCap } from '../../../lib/bigImage';
 
 const wasmCache = {};
 function wasm(name) {
@@ -209,7 +209,8 @@ async function compressSvg(file, progress) {
 }
 
 self.onmessage = async (e) => {
-  const { id, file, quality, dims, forceBands } = e.data;
+  const { id, file, quality, dims, forceBands, canvasCap } = e.data;
+  if (canvasCap) simulateIosCanvasCap(); // browser tests: the iPhone's canvas limit, here too
   const progress = (pct) => self.postMessage({ id, type: 'progress', pct });
   try {
     if (file.type === 'image/svg+xml' || /\.svg$/i.test(file.name || '') || looksLikeSvg(await file.slice(0, 65536).text())) {

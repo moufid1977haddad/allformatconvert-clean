@@ -205,7 +205,7 @@ export default function ImageConverterPage() {
     armWatchdog();
     // __forceBands: set only by scripts/browser-tests/big-image.mjs, to run the iPhone (band) path in Firefox.
     const forceBands = !!(window as any).__forceBands;
-    worker.postMessage({ items: items.map(it => ({ ...it, forceBands })), format, quality, maxMegapixels });
+    worker.postMessage({ items: items.map(it => ({ ...it, forceBands })), format, quality, maxMegapixels, canvasCap: (window as any).__forceSafariCanvasCap === true });
   };
 
   const downloadOne = (item: ConvertedFile) => {

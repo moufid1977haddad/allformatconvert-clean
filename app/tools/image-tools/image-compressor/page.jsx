@@ -127,7 +127,7 @@ export default function ImageCompressorPage() {
     worker.addEventListener('message', onMessage);
     update(it.id, { status: 'working', pct: 0 });
     // __forceBands: set only by the browser tests, to run the iPhone (band) decode in Firefox.
-    imageDims(it.file).then((dims) => worker.postMessage({ id: it.id, file: it.file, quality, dims, forceBands: !!window.__forceBands }));
+    imageDims(it.file).then((dims) => worker.postMessage({ id: it.id, file: it.file, quality, dims, forceBands: !!window.__forceBands, canvasCap: window.__forceSafariCanvasCap === true }));
   });
 
   const compressAll = async () => {
