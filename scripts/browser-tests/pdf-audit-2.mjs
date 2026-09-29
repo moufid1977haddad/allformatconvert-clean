@@ -204,6 +204,60 @@ await T('pdf-sign', async () => {
   check('pdf-sign: on a page displayed rotated, the signature is upright in the bottom-right corner the reader sees', M[1] > 0 && Math.abs(M[0]) < 1e-6 && vx > 200 && vy < 300, `matrix ${M.map((v) => v.toFixed(1))}, visible centre ${vx.toFixed(0)},${vy.toFixed(0)} of 400x600`);
 });
 
+// Free placement (30/09): the last page is displayed rotated (visible 400 x 600); the signature is dragged to 10 % /
+// 10 % of the page as seen and widened to 40 % of it; the PDF must have it exactly there, upright.
+await T('pdf-sign-drag', async () => {
+  const d = await PDFDocument.create();
+  d.addPage([300, 300]);
+  d.addPage([600, 400]).setRotation(degrees(90));
+  await open('/tools/pdf-tools/pdf-sign');
+  await page.setViewportSize({ width: 1280, height: 1400 }); // the whole page preview on screen, below the sticky header
+  await page.locator('input[type="file"]').first().setInputFiles({ name: 'contract.pdf', mimeType: 'application/pdf', buffer: Buffer.from(await d.save()) });
+  const bb = await page.locator('canvas').first().boundingBox();
+  await page.mouse.move(bb.x + bb.width * 0.2, bb.y + bb.height * 0.5);
+  await page.mouse.down();
+  for (let i = 1; i <= 20; i++) await page.mouse.move(bb.x + bb.width * (0.2 + 0.02 * i), bb.y + bb.height * (0.5 + (i % 2 ? 0.15 : -0.15)));
+  await page.mouse.up();
+  await page.locator('#sign-corner').selectOption('custom');
+  const box = page.locator('[data-sign-box]');
+  await box.waitFor({ timeout: 30000 });
+  const stage = page.locator('[data-sign-stage]');
+  await stage.scrollIntoViewIfNeeded();
+  const st = await stage.boundingBox();
+  check('pdf-sign-drag: the page shown is the last one, as seen (portrait 400 x 600)', Math.abs(st.width / st.height - 400 / 600) < 0.02, `${st.width.toFixed(0)}x${st.height.toFixed(0)}`);
+  let b0 = await box.boundingBox();
+  await page.mouse.move(b0.x + 5, b0.y + 5);
+  await page.mouse.down();
+  await page.mouse.move(st.x + st.width * 0.1 + 5, st.y + st.height * 0.1 + 5, { steps: 8 });
+  await page.mouse.up();
+  b0 = await box.boundingBox();
+  const hb = await page.locator('[data-sign-resize]').boundingBox();
+  const grow = st.width * 0.4 - b0.width;
+  await page.mouse.move(hb.x + hb.width / 2, hb.y + hb.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(hb.x + hb.width / 2 + grow, hb.y + hb.height / 2, { steps: 8 });
+  await page.mouse.up();
+  await page.waitForTimeout(500);
+  const b1 = await box.boundingBox();
+  const shown = { l: (b1.x - st.x) / st.width, t: (b1.y - st.y) / st.height, w: b1.width / st.width, h: b1.height / st.height };
+  check('pdf-sign-drag: dragged and resized on screen (left 10 %, top 10 %, width 40 %)', Math.abs(shown.l - 0.1) < 0.01 && Math.abs(shown.t - 0.1) < 0.01 && Math.abs(shown.w - 0.4) < 0.01, JSON.stringify(Object.fromEntries(Object.entries(shown).map(([k, v]) => [k, +v.toFixed(3)]))));
+  await page.getByRole('button', { name: 'Add Signature to PDF' }).click();
+  const out = await PDFDocument.load(await linkBytes('a[download="signed.pdf"]'));
+  const last = out.getPage(1);
+  const cs = [].concat(last.node.Contents() instanceof PDFArray ? last.node.Contents().asArray() : [last.node.get(PDFName.of('Contents'))]).map((r) => out.context.lookup(r)).map((x) => { try { return zlib.inflateSync(Buffer.from(x.contents)).toString('latin1'); } catch { return Buffer.from(x.contents).toString('latin1'); } }).join('\n');
+  const blk = cs.slice(cs.lastIndexOf('q', cs.indexOf(' Do')), cs.indexOf(' Do'));
+  let M = [1, 0, 0, 1, 0, 0];
+  for (const m of blk.matchAll(/(-?[\d.e-]+) (-?[\d.e-]+) (-?[\d.e-]+) (-?[\d.e-]+) (-?[\d.e-]+) (-?[\d.e-]+) cm/g)) {
+    const [a, b, c, dd, e, f] = m.slice(1).map(Number);
+    M = [a * M[0] + b * M[2], a * M[1] + b * M[3], c * M[0] + dd * M[2], c * M[1] + dd * M[3], e * M[0] + f * M[2] + M[4], e * M[1] + f * M[3] + M[5]];
+  }
+  // Corners of the image in page space, then as seen (rotated 90: visible x = y, visible y from the top = x).
+  const pts = [[0, 0], [1, 0], [0, 1], [1, 1]].map(([u, v]) => [M[0] * u + M[2] * v + M[4], M[1] * u + M[3] * v + M[5]]).map(([x, y]) => [y, x]);
+  const L = Math.min(...pts.map((q) => q[0])), R = Math.max(...pts.map((q) => q[0])), Tp = Math.min(...pts.map((q) => q[1])), B = Math.max(...pts.map((q) => q[1]));
+  check('pdf-sign-drag: in the PDF, at the same place as on screen, same size, upright', Math.abs(L / 400 - shown.l) < 0.01 && Math.abs(Tp / 600 - shown.t) < 0.01 && Math.abs((R - L) / 400 - shown.w) < 0.01 && Math.abs((B - Tp) / 600 - shown.h) < 0.015 && M[1] > 0 && Math.abs(M[0]) < 1e-6, `left ${L.toFixed(1)} top ${Tp.toFixed(1)} width ${(R - L).toFixed(1)} height ${(B - Tp).toFixed(1)} of 400x600`);
+  check('pdf-sign-drag: the first page is untouched', !(out.getPage(0).node.Resources()?.lookup(PDFName.of('XObject'))));
+});
+
 await T('pdf-forms', async () => {
   const d = await PDFDocument.create();
   const p = d.addPage([600, 400]);
