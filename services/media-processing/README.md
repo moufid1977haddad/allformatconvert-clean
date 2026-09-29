@@ -47,6 +47,16 @@ gif, and audio-only mp3, m4a, wav, ogg, opus, flac. `compress`: H.264 MP4 with
 level `light|balanced|strong` and optional `maxHeight`. Input: anything ffmpeg
 decodes.
 
+**Video edits (30 Sept 2026, additive — absent = unchanged behaviour).** `convert` to mp4/mov/m4v also takes
+`rotate` (90|180|270, clockwise, after the source's own rotation), `fit` (`{w, h, mode: fit|fill|stretch}`, even
+16-7680), `filter` (grayscale|sepia|invert|blur|brightness|contrast|saturate — the CSS formulas), `fps` (1-120) and
+`forConcat` (48 kHz stereo audio always present — silence added — and x264 `stitchable=1`, so the browser can join
+the clips of a merge without re-encoding). Used by Video Rotator (formats without a rotation field), Resizer, Filter,
+Merger and Screen Recorder. A browser recording without a duration in its header (MediaRecorder WebM) is now read
+(duration measured by a stream copy). Tests: `tests/run_edit_tests.py` (with `MEDIA_FFMPEG_PATH`, real runs).
+**Deploy this service BEFORE the site that sends these parameters**: an older service ignores unknown parameters,
+so a rotation, size or filter would silently not be applied.
+
 ## Privacy and safety (each point has a test in `tests/run_tests.py`)
 
 - Input deleted **as soon as processing ends**; output deleted after the first
