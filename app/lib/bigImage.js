@@ -200,51 +200,66 @@ function chunk(type, data) {
 }
 
 // Lossless PNG, 8-bit RGB or RGBA, adaptive row filter (the "minimum sum of absolute differences" heuristic of
-// libpng/zlib's own tools). Never needs a canvas.
-export async function encodePngRGBA(rgba, width, height, onProgress = () => {}) {
+// libpng/zlib's own tools), written as rows arrive: only the compressed file is kept, never a second full copy of
+// the pixels. Never needs a canvas.
+export function createPngWriter(width, height, alpha) {
   if (typeof CompressionStream === 'undefined') throw new Error('This browser cannot write PNG files this large (it needs Safari 16.4 or later, or a current Chrome, Edge or Firefox).');
-  const alpha = hasAlpha(rgba), bpp = alpha ? 4 : 3, stride = width * bpp;
+  const bpp = alpha ? 4 : 3, stride = width * bpp;
   const cs = new CompressionStream('deflate');
   const writer = cs.writable.getWriter();
   const idat = [];
   const reading = (async () => { const r = cs.readable.getReader(); for (;;) { const { value, done } = await r.read(); if (done) break; idat.push(value); } })();
-  let prev = new Uint8Array(stride), cur = new Uint8Array(stride);
+  let prev = new Uint8Array(stride), cur = new Uint8Array(stride), written = 0;
   const cand = [new Uint8Array(stride + 1), new Uint8Array(stride + 1), new Uint8Array(stride + 1), new Uint8Array(stride + 1)];
-  const ROWS = Math.max(1, Math.floor(1 << 20) / (stride + 1) | 0);
-  let batch = new Uint8Array(ROWS * (stride + 1)), fill = 0;
-  for (let y = 0; y < height; y++) {
-    let o = y * width * 4;
-    if (alpha) cur.set(rgba.subarray(o, o + stride));
-    else for (let x = 0, j = 0; x < width; x++, o += 4) { cur[j++] = rgba[o]; cur[j++] = rgba[o + 1]; cur[j++] = rgba[o + 2]; }
-    // 0 None, 1 Sub, 2 Up, 4 Paeth
-    const [n, s, u, p] = cand; n[0] = 0; s[0] = 1; u[0] = 2; p[0] = 4;
-    let sn = 0, ss = 0, su = 0, sp = 0;
-    for (let i = 0; i < stride; i++) {
-      const x = cur[i], a = i >= bpp ? cur[i - bpp] : 0, b = prev[i], c = i >= bpp ? prev[i - bpp] : 0;
-      const pa = Math.abs(b - c), pb = Math.abs(a - c), pc = Math.abs(a + b - 2 * c);
-      const pr = pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
-      const vs = (x - a) & 255, vu = (x - b) & 255, vp = (x - pr) & 255;
-      n[i + 1] = x; s[i + 1] = vs; u[i + 1] = vu; p[i + 1] = vp;
-      sn += x < 128 ? x : 256 - x; ss += vs < 128 ? vs : 256 - vs; su += vu < 128 ? vu : 256 - vu; sp += vp < 128 ? vp : 256 - vp;
-    }
-    const best = sn <= ss && sn <= su && sn <= sp ? n : ss <= su && ss <= sp ? s : su <= sp ? u : p;
-    batch.set(best, fill); fill += stride + 1;
-    if (fill + stride + 1 > batch.length || y === height - 1) {
+  return {
+    /** rgba: `rows` rows of RGBA pixels (width * rows * 4). */
+    async writeRows(rgba, rows) {
+      const batch = new Uint8Array(rows * (stride + 1));
+      for (let r = 0; r < rows; r++) {
+        let o = r * width * 4;
+        if (alpha) cur.set(rgba.subarray(o, o + stride));
+        else for (let x = 0, j = 0; x < width; x++, o += 4) { cur[j++] = rgba[o]; cur[j++] = rgba[o + 1]; cur[j++] = rgba[o + 2]; }
+        // 0 None, 1 Sub, 2 Up, 4 Paeth
+        const [n, s, u, p] = cand; n[0] = 0; s[0] = 1; u[0] = 2; p[0] = 4;
+        let sn = 0, ss = 0, su = 0, sp = 0;
+        for (let i = 0; i < stride; i++) {
+          const x = cur[i], a = i >= bpp ? cur[i - bpp] : 0, b = prev[i], c = i >= bpp ? prev[i - bpp] : 0;
+          const pa = Math.abs(b - c), pb = Math.abs(a - c), pc = Math.abs(a + b - 2 * c);
+          const pr = pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+          const vs = (x - a) & 255, vu = (x - b) & 255, vp = (x - pr) & 255;
+          n[i + 1] = x; s[i + 1] = vs; u[i + 1] = vu; p[i + 1] = vp;
+          sn += x < 128 ? x : 256 - x; ss += vs < 128 ? vs : 256 - vs; su += vu < 128 ? vu : 256 - vu; sp += vp < 128 ? vp : 256 - vp;
+        }
+        batch.set(sn <= ss && sn <= su && sn <= sp ? n : ss <= su && ss <= sp ? s : su <= sp ? u : p, r * (stride + 1));
+        [prev, cur] = [cur, prev];
+      }
+      written += rows;
       await writer.ready;
-      writer.write(batch.subarray(0, fill));
-      batch = new Uint8Array(ROWS * (stride + 1)); fill = 0;
-      onProgress((y + 1) / height);
-    }
-    [prev, cur] = [cur, prev];
+      writer.write(batch);
+    },
+    async finish() {
+      if (written !== height) throw new Error('internal: PNG rows missing');
+      await writer.close();
+      await reading;
+      const ihdr = new Uint8Array(13), v = new DataView(ihdr.buffer);
+      v.setUint32(0, width); v.setUint32(4, height); ihdr[8] = 8; ihdr[9] = alpha ? 6 : 2;
+      const parts = [new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), ...chunk('IHDR', ihdr)];
+      for (const d of idat) parts.push(...chunk('IDAT', d));
+      parts.push(...chunk('IEND', new Uint8Array(0)));
+      return new Blob(parts, { type: 'image/png' });
+    },
+  };
+}
+
+export async function encodePngRGBA(rgba, width, height, onProgress = () => {}) {
+  const w = createPngWriter(width, height, hasAlpha(rgba));
+  const rows = Math.max(1, Math.floor((1 << 20) / (width * 4)));
+  for (let y = 0; y < height; y += rows) {
+    const h = Math.min(rows, height - y);
+    await w.writeRows(rgba.subarray(y * width * 4, (y + h) * width * 4), h);
+    onProgress((y + h) / height);
   }
-  await writer.close();
-  await reading;
-  const ihdr = new Uint8Array(13), v = new DataView(ihdr.buffer);
-  v.setUint32(0, width); v.setUint32(4, height); ihdr[8] = 8; ihdr[9] = alpha ? 6 : 2;
-  const parts = [new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), ...chunk('IHDR', ihdr)];
-  for (const d of idat) parts.push(...chunk('IDAT', d));
-  parts.push(...chunk('IEND', new Uint8Array(0)));
-  return new Blob(parts, { type: 'image/png' });
+  return w.finish();
 }
 
 // Area-average downscale of an RGBA buffer (for small derived images: icons, thumbnails). Premultiplied, so
@@ -272,4 +287,31 @@ export function downscaleRGBA(src, sw, sh, dw, dh) {
     }
   }
   return out;
+}
+
+/**
+ * Reads `blob` at full resolution, band by band, into `fn(rgba, y, rows)` -- never more than maxBandPixels decoded
+ * pixels at once in the page (iPhone: the photo is decoded natively for each band; nothing close to the 16.7 MP
+ * canvas limit, and no full-size copy). rgba may be modified by fn (it is the band's own buffer).
+ */
+export async function forEachBand(blob, dims, maxBandPixels, fn) {
+  const { width: W, height: H } = dims;
+  const bandH = Math.max(1, Math.min(H, Math.floor(maxBandPixels / W)));
+  const c = newCanvas(W, bandH), ctx = c.getContext('2d', { willReadFrequently: true });
+  const crop = await bandDecodeWorks();
+  // Chromium crops rotated photos wrongly (see top): it decodes once instead; it has no 16.7 MP limit anyway.
+  const full = crop ? null : await createImageBitmap(blob);
+  if (full && (full.width !== W || full.height !== H)) { full.close(); throw new Error('decode-mismatch'); }
+  for (let y = 0; y < H; y += bandH) {
+    const h = Math.min(bandH, H - y);
+    ctx.clearRect(0, 0, W, bandH);
+    if (crop) {
+      const bmp = await createImageBitmap(blob, 0, y, W, h);
+      if (bmp.width !== W || bmp.height !== h) { bmp.close(); throw new Error('decode-mismatch'); }
+      ctx.drawImage(bmp, 0, 0); bmp.close();
+    } else ctx.drawImage(full, 0, y, W, h, 0, 0, W, h);
+    await fn(ctx.getImageData(0, 0, W, h).data, y, h);
+  }
+  if (full) full.close();
+  c.width = c.height = 1;
 }
