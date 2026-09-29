@@ -25,7 +25,7 @@ const STAGE_LABEL = {
   download: 'Downloading the result',
 };
 
-export default function MediaServiceTool({ op, title, subtitle, buttonLabel, controls, initialParams, buildParams, outName, seo, tool }) {
+export default function MediaServiceTool({ op, title, subtitle, buttonLabel, controls, initialParams, buildParams, outName, seo, tool, previewStyle }) {
   const [file, setFile] = useState(null);
   const [params, setParams] = useState(initialParams);
   const [stage, setStage] = useState(null); // {stage, pct, position}
@@ -116,7 +116,7 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
             <p className="text-neutral-500">{file ? `${file.name} — ${fmt(file.size)}` : 'Click or drop a video file here'}</p>
             <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onClick={(e) => { e.target.value = ''; }} onChange={pick} />
           </div>
-          {file && previewUrl && <video src={previewUrl} controls playsInline className="w-full rounded-xl bg-neutral-800 max-h-72" />}
+          {file && previewUrl && <video src={previewUrl} controls playsInline style={previewStyle ? previewStyle(params) : undefined} className="w-full rounded-xl bg-neutral-800 max-h-72" />}
           {file && controls({ params, setParams, disabled: busy })}
           {stage && (
             <div className="space-y-2" aria-live="polite">

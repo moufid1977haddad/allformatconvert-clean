@@ -9,7 +9,17 @@ import { isIos } from './IosOriginalNote';
 export default function IosVideoFirstFrame() {
   useEffect(() => {
     if (!isIos()) return undefined;
-    const prep = (v) => { if (v.tagName === 'VIDEO' && !v.hasAttribute('preload')) v.preload = 'metadata'; };
+    // 30/09 (owner's iPhone): (1) a <video> without playsinline opens FULL SCREEN when it plays on iPhone -- every
+    // video of the site now plays in the page; (2) a result shown with its src already set (Video Trimmer) stayed
+    // white: iOS had settled on loading nothing before preload was changed, so it is asked to load again.
+    const prep = (v) => {
+      if (v.tagName !== 'VIDEO') return;
+      if (!v.hasAttribute('playsinline')) { v.setAttribute('playsinline', ''); v.playsInline = true; }
+      if (!v.hasAttribute('preload') || v.preload === 'none') {
+        v.preload = 'metadata';
+        if (v.readyState === 0 && !v.srcObject && (v.getAttribute('src') || v.currentSrc)) v.load();
+      }
+    };
     document.querySelectorAll('video').forEach(prep);
     const mo = new MutationObserver((muts) => muts.forEach((m) => m.addedNodes.forEach((n) => {
       if (n.nodeType !== 1) return;

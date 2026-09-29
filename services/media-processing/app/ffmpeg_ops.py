@@ -236,6 +236,23 @@ class ProbeResult:
         self.total_kbps = total_kbps
 
 
+_OUT_TIME_RE = re.compile(r"out_time_us=(\d+)")
+
+
+def _measure_duration(path: str) -> float:
+    """Duration of a file whose header has none: the last timestamp of a stream copy to nowhere (no decoding)."""
+    try:
+        p = subprocess.run(
+            [config.FFMPEG_PATH, "-hide_banner", "-nostdin", "-v", "error", "-protocol_whitelist", "file", "-i", path,
+             "-map", "0", "-c", "copy", "-f", "null", "-", "-progress", "pipe:1"],
+            capture_output=True, timeout=120,
+        )
+    except subprocess.TimeoutExpired:
+        return 0.0
+    times = _OUT_TIME_RE.findall(p.stdout.decode("utf-8", "replace"))
+    return int(times[-1]) / 1e6 if times else 0.0
+
+
 def probe(path: str):
     """Reads container info with `ffmpeg -i` (no ffprobe binary needed).
 
@@ -253,9 +270,16 @@ def probe(path: str):
     if dm and BLOCKED_DEMUXERS & set(dm.group(1).split(",")):
         return None
     m = _DURATION_RE.search(err)
-    if not m:
+    if m:
+        duration = int(m.group(1)) * 3600 + int(m.group(2)) * 60 + float(m.group(3))
+    elif "Duration: N/A" in err:
+        # A browser recording (MediaRecorder WebM: Chrome, Edge, Firefox) has no duration in its header (30/09, found
+        # with Screen Recorder's "Make an MP4"): measured by reading the file once without decoding it.
+        duration = _measure_duration(path)
+        if not duration:
+            return None
+    else:
         return None
-    duration = int(m.group(1)) * 3600 + int(m.group(2)) * 60 + float(m.group(3))
     v = _VIDEO_RE.search(err)
     has_audio = bool(_AUDIO_RE.search(err))
     if not v and not has_audio:
@@ -311,6 +335,72 @@ def clip_options(params: dict, info: ProbeResult):
     if not dur > 0:
         raise ValueError("The clip must last more than zero seconds.")
     return float(start), float(dur)
+
+
+# Video edits (30/09, owner's iPhone): Video Rotator, Resizer, Filter and Merger used to replay the video in a
+# <canvas> and record it with MediaRecorder -- in real time, with the source playing full screen on iPhone, and a
+# WebM that Photos cannot open. Here, as the reference sites do (Clideo, Kapwing, VEED: on a server), the edit is a
+# filter of an MP4 (H.264 + AAC) conversion. All optional and absent by default (additive): the old requests are
+# unchanged. Every value comes from an allowlist or a bounded number, never from the request text.
+_SAT = 3.0  # CSS saturate(300%), the tool's "Saturate": the matrix of the CSS Filter Effects spec
+_S = [0.213 + 0.787 * _SAT, 0.715 - 0.715 * _SAT, 0.072 - 0.072 * _SAT,
+      0.213 - 0.213 * _SAT, 0.715 + 0.285 * _SAT, 0.072 - 0.072 * _SAT,
+      0.213 - 0.213 * _SAT, 0.715 - 0.715 * _SAT, 0.072 + 0.928 * _SAT]
+VIDEO_FILTERS = {
+    # the CSS filters the page previews, with the same matrices (Filter Effects Module Level 1)
+    "grayscale": "colorchannelmixer=.2126:.7152:.0722:0:.2126:.7152:.0722:0:.2126:.7152:.0722:0",
+    "sepia": "colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131:0",
+    "invert": "negate",
+    "blur": "gblur=sigma=3",
+    "brightness": "lutrgb=r='clip(val*1.5,0,255)':g='clip(val*1.5,0,255)':b='clip(val*1.5,0,255)'",
+    "contrast": "lutrgb=r='clip((val-127.5)*2+127.5,0,255)':g='clip((val-127.5)*2+127.5,0,255)':b='clip((val-127.5)*2+127.5,0,255)'",
+    "saturate": "colorchannelmixer=" + ":".join(f"{v:.4f}" for v in (_S[0], _S[1], _S[2], 0, _S[3], _S[4], _S[5], 0, _S[6], _S[7], _S[8], 0)),
+}
+ROTATIONS = {90: "transpose=clock", 180: "hflip,vflip", 270: "transpose=cclock"}
+EDIT_TARGETS = ("mp4", "mov", "m4v")
+
+
+def edit_options(params: dict):
+    """Validated video edit: (filters for -vf, for_concat) or None. Raises ValueError (user-safe message).
+    rotate: 90|180|270 clockwise, applied after the source's own rotation (ffmpeg's autorotate);
+    fit: {w, h, mode: fit|fill|stretch} -- fit = letterbox, fill = crop, as Video Resizer offers;
+    filter: one of VIDEO_FILTERS; fps: 1-120 (constant frame rate);
+    forConcat: every clip of a merge normalised so the browser can join them WITHOUT re-encoding: 48 kHz stereo
+    audio always present (silence added when the clip has none) and x264 "stitchable" headers."""
+    rotate, fit, flt, fps, concat = (params.get(k) for k in ("rotate", "fit", "filter", "fps", "forConcat"))
+    if rotate is None and fit is None and flt is None and fps is None and concat is None:
+        return None
+    vf = []
+    if rotate is not None:
+        if isinstance(rotate, bool) or rotate not in ROTATIONS:
+            raise ValueError("Unsupported rotation.")
+        vf.append(ROTATIONS[rotate])
+    if fit is not None:
+        if not isinstance(fit, dict):
+            raise ValueError("Invalid size.")
+        w, h, mode = fit.get("w"), fit.get("h"), fit.get("mode", "fit")
+        for v in (w, h):
+            if isinstance(v, bool) or not isinstance(v, int) or not 16 <= v <= 7680 or v % 2:
+                raise ValueError("Unsupported size: width and height must be even numbers from 16 to 7680.")
+        if mode == "fit":
+            vf.append(f"scale={w}:{h}:force_original_aspect_ratio=decrease:flags=lanczos,pad={w}:{h}:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1")
+        elif mode == "fill":
+            vf.append(f"scale={w}:{h}:force_original_aspect_ratio=increase:flags=lanczos,crop={w}:{h},setsar=1")
+        elif mode == "stretch":
+            vf.append(f"scale={w}:{h}:flags=lanczos,setsar=1")
+        else:
+            raise ValueError("Unsupported resize mode.")
+    if flt is not None:
+        if flt not in VIDEO_FILTERS:
+            raise ValueError("Unsupported filter.")
+        vf.append(VIDEO_FILTERS[flt])
+    if fps is not None:
+        if isinstance(fps, bool) or not isinstance(fps, (int, float)) or not 1 <= fps <= 120:
+            raise ValueError("Unsupported frame rate.")
+        vf.append(f"fps={round(float(fps), 3)}")
+    if concat is not None and not isinstance(concat, bool):
+        raise ValueError("Invalid option.")
+    return vf, bool(concat)
 
 
 def effective_duration(op: str, params: dict, info: ProbeResult) -> float:
@@ -387,7 +477,24 @@ def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_pa
         if clip:
             base = base[:base.index("-i")] + ["-ss", f"{clip[0]:.3f}"] + base[base.index("-i"):]
             maps = maps + ["-t", f"{clip[1]:.3f}"]
-        args = base + maps + vf + builder(quality, ctx) + [out_path]
+        edit = edit_options(params)
+        extra = []
+        if edit:
+            if target not in EDIT_TARGETS:
+                raise ValueError("Video edits are made in MP4 or MOV only.")
+            filters, for_concat = edit
+            if filters and max_h:
+                raise ValueError("Choose either a size or a maximum height.")
+            if filters:
+                vf = ["-vf", ",".join(filters)]
+            if for_concat:
+                extra = ["-x264-params", "stitchable=1", "-ar", "48000", "-ac", "2", "-video_track_timescale", "90000"]
+                if not info.has_audio:
+                    # silence as long as the video, so every clip of the merge has the same streams
+                    at = base.index(in_path) + 1  # a second INPUT: before the output options (-map_metadata)
+                    base = base[:at] + ["-f", "lavfi", "-t", f"{max(info.duration, 0.1):.3f}", "-i", "anullsrc=r=48000:cl=stereo"] + base[at:]
+                    maps = ["-map", "0:v:0", "-map", "1:a:0"] + maps[4:]
+        args = base + maps + vf + builder(quality, ctx) + extra + [out_path]
         # Optional exact bitrate (Audio Compressor sends the one its visitor picked, 64-320 kbit/s). Opus only,
         # the one target that tool sends here; absent = the quality level's bitrate, as before (additive).
         kbps = params.get("kbps")

@@ -1,166 +1,67 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
-import SeoContent from '../../../components/SeoContent';
-import { recordWholePlayback } from '../../../lib/recordPlayback';
-import { supportsCanvasFilter } from '../../../lib/canvasFilters';
-import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
-import { videoReRecordSupport, finishRecording } from '../../../lib/mediaSupport';
-import IosOriginalNote from '../../../components/IosOriginalNote';
+import MediaServiceTool from '../../../components/MediaServiceTool';
+
+// 30/09 (owner's iPhone): the filter used to replay the video in a <canvas> with a CSS filter and record it with
+// MediaRecorder -- refused on Safari (no canvas filter there), in real time elsewhere, and a WebM out. It now runs
+// on our ffmpeg service, like Video Compressor, in every browser: the same filters with the same formulas as the CSS
+// preview (services/media-processing/app/ffmpeg_ops.py VIDEO_FILTERS, checked colour by colour), an H.264 + AAC MP4
+// with the original sound, never heavier than the original.
+
+const FILTERS = [
+  { name: 'Grayscale', value: 'grayscale', css: 'grayscale(100%)' },
+  { name: 'Sepia', value: 'sepia', css: 'sepia(100%)' },
+  { name: 'Invert', value: 'invert', css: 'invert(100%)' },
+  { name: 'Blur', value: 'blur', css: 'blur(3px)' },
+  { name: 'Brightness', value: 'brightness', css: 'brightness(150%)' },
+  { name: 'Contrast', value: 'contrast', css: 'contrast(200%)' },
+  { name: 'Saturate', value: 'saturate', css: 'saturate(300%)' },
+];
+
+const seo = {
+  title: 'Video Filter',
+  description: 'Video Filter applies one visual effect (Grayscale, Sepia, Invert, Blur, Brightness, Contrast or Saturate) to your video on our ffmpeg server, so it works in every browser, including Safari on iPhone, and faster than the video plays. Preview the filter live on the player, then get an H.264 + AAC MP4 with the original sound, the format every phone and computer plays.',
+  howTo: [
+    'Select or drop a video file (MP4, MOV, MKV, WebM, AVI and more, up to 1 GB).',
+    'Pick a filter: the player shows it live.',
+    'Click "Apply Filter" and follow the real progress.',
+    'Preview and download the filtered MP4.',
+  ],
+  faqs: [
+    { q: 'Can I combine multiple filters?', a: 'No, only one filter can be applied at a time — selecting a new one replaces the previous choice.' },
+    { q: 'Can I adjust filter intensity?', a: 'Not currently — each filter uses a fixed preset value (Blur 3 px, Brightness 150 %, Contrast 200 %, Saturate 300 %), the same as the live preview.' },
+    { q: 'Does the output have sound?', a: 'Yes — the original sound is kept; the visual filter does not change it.' },
+    { q: 'Does it work on iPhone and in Safari?', a: 'Yes. The filter is applied by our video service, not by your browser, so it works in every browser and the MP4 opens in the iPhone Photos app.' },
+    { q: 'Is my file uploaded anywhere?', a: 'Yes, to our own video service, because re-encoding a video needs a real video encoder. The original is deleted as soon as the filter is applied, and the result right after your download (or after 15 minutes if you never download it).' },
+  ],
+  tips: [
+    'Preview the filter on the live player (it updates instantly) before applying it.',
+    'The audio is carried through unchanged — the visual filter has no effect on sound.',
+    'Trim your video first if you only need a filtered clip from a longer video: it uploads and processes faster.',
+    'Grayscale uses the same luminance weights as image editors, so blue stays darker than green.',
+  ],
+};
+
 export default function VideoFilterPage() {
-  const [file, setFile] = useState(null);
-  const [filter, setFilter] = useState('none');
-  const [result, setResult] = useState(null);
-  const [status, setStatus] = useState('');
-  const [error, setError] = useState('');
-  const [supportReason, setSupportReason] = useState('');
-  // Checked on mount so the visitor learns BEFORE running anything.
-  useEffect(() => { setSupportReason(videoReRecordSupport().reason); }, []);
-  const videoRef = useRef();
-  const inputRef = useRef();
-  const audioGraphRef = useRef(null);
-
-  const filters = [
-    { name: 'None', value: 'none', css: '' },
-    { name: 'Grayscale', value: 'grayscale', css: 'grayscale(100%)' },
-    { name: 'Sepia', value: 'sepia', css: 'sepia(100%)' },
-    { name: 'Invert', value: 'invert', css: 'invert(100%)' },
-    { name: 'Blur', value: 'blur', css: 'blur(3px)' },
-    { name: 'Brightness', value: 'brightness', css: 'brightness(150%)' },
-    { name: 'Contrast', value: 'contrast', css: 'contrast(200%)' },
-    { name: 'Saturate', value: 'saturate', css: 'saturate(300%)' },
-  ];
-
-  const handleFile = (e) => {
-    const f = e.target.files[0];
-    if (!f) return;
-    setFile(f);
-    setResult(null);
-  };
-
-  useEffect(() => {
-    // videoRef.current is only guaranteed to exist after this render commits
-    // (the <video> element only mounts once `file` is set), so the src must
-    // be assigned here rather than inline in handleFile — otherwise the very
-    // first file selection silently fails to load since the ref is still null.
-    if (file && videoRef.current) videoRef.current.src = URL.createObjectURL(file);
-  }, [file]);
-
-  // createMediaElementSource() can only be called once per <video> element,
-  // so the Web Audio graph (context, source, and stream destination) is
-  // built once and cached — a second "Apply Filter" click on the same video
-  // would otherwise throw InvalidStateError. The source is connected to both
-  // the stream destination (for recording) and audioContext.destination (so
-  // the preview stays audible during processing, since routing an element
-  // through Web Audio detaches it from its default audio output).
-  const getAudioTrack = () => {
-    try {
-      if (!audioGraphRef.current) {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        const audioContext = new AudioCtx();
-        const destination = audioContext.createMediaStreamDestination();
-        const source = audioContext.createMediaElementSource(videoRef.current);
-        source.connect(destination);
-        source.connect(audioContext.destination);
-        audioGraphRef.current = { audioContext, destination };
-      }
-      if (audioGraphRef.current.audioContext.state === 'suspended') {
-        audioGraphRef.current.audioContext.resume();
-      }
-      return audioGraphRef.current.destination.stream.getAudioTracks()[0] || null;
-    } catch (e) {
-      return null;
-    }
-  };
-
-  const applyFilter = async () => {
-    if (!file || !videoRef.current) return;
-    setError('');
-    setStatus('Applying filter...');
-    try {
-      const canvas = document.createElement('canvas');
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
-      const ctx = canvas.getContext('2d');
-      const selectedFilter = filters.find(f => f.value === filter);
-      // Safari has no canvas filters: the video used to be re-recorded
-      // UNFILTERED and offered as the result (29/09). Say so instead.
-      if (selectedFilter.css && !supportsCanvasFilter()) {
-        throw new Error('This browser (Safari) cannot apply video filters: the result would be your video unchanged. Use Chrome, Edge or Firefox for this tool.');
-      }
-      ctx.filter = selectedFilter.css || 'none';
-      const videoStream = canvas.captureStream(30);
-      const audioTrack = getAudioTrack();
-      const combinedStream = new MediaStream([
-        ...videoStream.getVideoTracks(),
-        ...(audioTrack ? [audioTrack] : []),
-      ]);
-      const support = videoReRecordSupport();
-      if (!support.ok) throw new Error(support.reason);
-      const recorder = new MediaRecorder(combinedStream, { mimeType: support.mime });
-      const chunks = [];
-      recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
-      recorder.onstop = () => {
-        try {
-          const { blob, ext } = finishRecording(chunks, recorder, support.mime);
-          setResult({ url: URL.createObjectURL(blob), ext });
-        } catch (e) { setError(e.message); }
-        setStatus('');
-      };
-      recorder.onerror = () => { setError('Recording failed in this browser.'); setStatus(''); };
-      const drawFrame = () => {
-        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-      };
-      videoRef.current.currentTime = 0;
-      await videoRef.current.play();
-      // Recorded until the video's end, following pauses and stalls (lib/recordPlayback.js, 29/09).
-      recordWholePlayback(videoRef.current, recorder, drawFrame);
-    } catch(e) { setError('Error: ' + e.message); setStatus(''); }
-  };
-
   return (
-    <div className="min-h-screen bg-neutral-100 p-6">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-2">Video Filter</h1>
-        <p className="text-neutral-500 text-center mb-8">Apply filters to video files</p>
-        <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <IosOriginalNote />
-          <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
-            <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />
-          </div>
-          {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" style={{filter: filters.find(f => f.value === filter)?.css || ''}} />}
-          <div className="grid grid-cols-4 gap-2">
-            {filters.map(f => <button key={f.value} onClick={() => setFilter(f.value)} className={"py-2 rounded-lg text-sm font-semibold transition " + (filter===f.value?'bg-indigo-600 text-white':'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800')}>{f.name}</button>)}
-          </div>
-          {supportReason && <p role="alert" className="text-red-500 text-center text-sm">{supportReason}</p>}
-          {status && <p className="text-yellow-400 text-center">{status}</p>}
-          {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
-          <button onClick={applyFilter} disabled={!file || filter === 'none' || !!status || !!supportReason} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Apply Filter</button>
-          {result && <div className="space-y-2"><video controls src={result.url} className="w-full rounded-xl" /><a href={result.url} download={`filtered.${result.ext}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+    <MediaServiceTool
+      op="convert"
+      tool="video-filter"
+      title="Video Filter"
+      subtitle="Apply a filter to a video — any browser, up to 1 GB, MP4 out"
+      buttonLabel="Apply Filter"
+      initialParams={{ filter: 'grayscale' }}
+      buildParams={(p) => ({ target: 'mp4', quality: 'high', filter: p.filter })}
+      outName={(name, ext, p) => `${name.replace(/\.[^.]+$/, '')}-${p.filter}.mp4`}
+      previewStyle={(p) => ({ filter: FILTERS.find((f) => f.value === p.filter)?.css || 'none' })}
+      controls={({ params, setParams, disabled }) => (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" role="radiogroup" aria-label="Filter">
+          {FILTERS.map((f) => (
+            <button key={f.value} type="button" role="radio" aria-checked={params.filter === f.value} disabled={disabled} onClick={() => setParams({ ...params, filter: f.value })}
+              className={`py-2 rounded-lg text-sm font-semibold transition ${params.filter === f.value ? 'bg-indigo-600 text-white' : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800'}`}>{f.name}</button>
+          ))}
         </div>
-      </div>
-      <SeoContent
-        title="Video Filter"
-        description="Video Filter applies one visual effect (Grayscale, Sepia, Invert, Blur, Brightness, Contrast, or Saturate) to your video by redrawing each frame on a canvas and re-recording it, entirely in your browser. The original audio is preserved by routing it through the Web Audio API alongside the filtered video track, so the output isn't silent. Note: the output is the format your browser records (WebM in Chrome, Edge and Firefox; MP4 in Safari), and only one filter can be active at a time, each at a fixed intensity."
-        howTo={[
-          "Click the upload area and select a video file.",
-          "Click one of the 8 filter buttons to preview it live on the video player.",
-          "Click \"Apply Filter\" — the video plays through once while the filtered version (with its original audio) is recorded.",
-          "Preview and download the filtered file (WebM, or MP4 in Safari)."
-        ]}
-        faqs={[
-          { q: "Can I combine multiple filters?", a: "No, only one filter can be applied at a time — selecting a new one replaces the previous choice." },
-          { q: "Can I adjust filter intensity?", a: "Not currently — each filter uses a fixed preset value (e.g., Blur is always 3px, Contrast is always 200%)." },
-          { q: "Does the output have sound?", a: "Yes — the source video's original audio is captured alongside the filtered picture and included in the output; it isn't altered by the visual filter." },
-          { q: "Is my file uploaded anywhere?", a: "No, filtering happens entirely in your browser." }
-        ]}
-        tips={[
-          "Preview the filter on the live player (it updates instantly) before committing to the longer \"Apply Filter\" render step.",
-          "The audio is carried straight through unchanged — the visual filter has no effect on sound.",
-          "Applying a filter takes as long as the video's full duration, since frames and audio are captured in real time as it plays.",
-          "Trim your video first if you only need a filtered clip from a longer video, to reduce processing time."
-        ]}
-      />
-    </div>
+      )}
+      seo={seo}
+    />
   );
 }

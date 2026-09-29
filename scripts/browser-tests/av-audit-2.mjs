@@ -70,7 +70,9 @@ if (FF) {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'av2-'));
   const src = path.join(tmp, 'src.webm');
   execFileSync(FF, ['-y', '-v', 'error', '-f', 'lavfi', '-i', 'testsrc2=size=320x240:rate=30:duration=3', '-f', 'lavfi', '-i', 'sine=frequency=440:duration=3', '-c:v', 'libvpx', '-b:v', '1M', '-c:a', 'libvorbis', '-shortest', src]);
-  for (const [tool, button, pick] of [['video-rotator', 'Rotate Video'], ['video-filter', 'Apply Filter', 'Invert'], ['video-resizer', 'Resize Video']]) {
+  // 30/09: Rotator, Filter and Resizer no longer replay the video in the page (no pause to survive): they run on the
+  // media service or rewrite the rotation matrix -- checked by video-tools-mp4.mjs. This check is kept for history only.
+  for (const [tool, button, pick] of (process.env.AV2_OLD_RECORDER_CHECKS ? [['video-rotator', 'Rotate Video'], ['video-filter', 'Apply Filter', 'Invert'], ['video-resizer', 'Resize Video']] : [])) {
     await T(tool, async () => {
       await open(`/tools/video-tools/${tool}`);
       await page.locator('input[type="file"]').first().setInputFiles({ name: 'src.webm', mimeType: 'video/webm', buffer: fs.readFileSync(src) });
