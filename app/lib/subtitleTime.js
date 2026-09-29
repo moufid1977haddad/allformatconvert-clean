@@ -40,3 +40,17 @@ export function buildSubtitles(rows) {
   const vtt = 'WEBVTT\n\n' + cues.map((c) => `${formatTime(c.a, '.')} --> ${formatTime(c.b, '.')}\n${c.text}\n`).join('\n');
   return { srt, vtt, count: cues.length };
 }
+
+// Whisper's timed segments ([{ start, end, text }] in seconds) -> { srt, vtt } (30/09: Audio Transcriber and Audio to
+// Text only gave plain text; transcription sites -- TurboScribe, Notta, Happy Scribe -- export SRT and VTT). A long
+// segment is kept whole: Whisper already cuts at pauses, as subtitle editors expect.
+export function segmentsToSubtitles(segments) {
+  const cues = (segments || [])
+    .filter((s) => s && Number.isFinite(s.start) && Number.isFinite(s.end) && String(s.text || '').trim())
+    .map((s) => ({ a: Math.round(s.start * 1000), b: Math.max(Math.round(s.end * 1000), Math.round(s.start * 1000) + 1), text: String(s.text).trim() }))
+    .sort((x, y) => x.a - y.a);
+  if (!cues.length) return null;
+  const srt = cues.map((c, i) => `${i + 1}\n${formatTime(c.a)} --> ${formatTime(c.b)}\n${c.text}\n`).join('\n');
+  const vtt = 'WEBVTT\n\n' + cues.map((c) => `${formatTime(c.a, '.')} --> ${formatTime(c.b, '.')}\n${c.text}\n`).join('\n');
+  return { srt, vtt, count: cues.length };
+}

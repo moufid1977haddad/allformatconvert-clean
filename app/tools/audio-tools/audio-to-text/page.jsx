@@ -4,6 +4,7 @@ import { Mic, Folder } from 'lucide-react';
 import SeoContent from '../../../components/SeoContent';
 import { transcribeAudio, checkAudioSize, audioMaxBytes, audioMaxLabel } from '../../../lib/officeUpload';
 import { encryptedMusicMessage } from '../../../lib/mediaSupport';
+import TranscriptExports from '../../../components/TranscriptExports';
 
 export default function AudioToTextPage() {
   // Mode : 'mic' ou 'file'
@@ -18,6 +19,7 @@ export default function AudioToTextPage() {
   // File state
   const [file, setFile] = useState(null);
   const [fileTranscript, setFileTranscript] = useState('');
+  const [fileSegments, setFileSegments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const fileRef = useRef();
@@ -80,7 +82,7 @@ export default function AudioToTextPage() {
     setError('');
     try {
       const data = await transcribeAudio({ file, tool: 'audio-to-text' });
-      if (data.text) setFileTranscript(data.text);
+      if (data.text) { setFileTranscript(data.text); setFileSegments(Array.isArray(data.segments) ? data.segments : []); }
       else setError(data.error || 'Transcription failed');
     } catch (e) { setError('Error: ' + e.message); }
     setLoading(false);
@@ -200,6 +202,7 @@ export default function AudioToTextPage() {
                       Download
                     </button>
                   </div>
+                  <TranscriptExports text={fileTranscript} segments={fileSegments} baseName={file?.name} />
                 </div>
               )}
             </>

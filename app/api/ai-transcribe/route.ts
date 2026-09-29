@@ -96,7 +96,12 @@ async function transcribe(req: NextRequest, file: File, tool: string | null): Pr
       // null, which guard.commit(null) already treats as a real, unknown
       // cost -- never released.
       await guard.commit(actualAiTranscribeCostMicros(data?.duration));
-      return NextResponse.json({ text: data?.text || "" });
+      // Timed segments too (30/09): the page offers SRT and VTT subtitles, as transcription sites do. Only the start,
+      // end and text of each segment are passed on.
+      const segments = Array.isArray(data?.segments)
+        ? data.segments.filter((s: any) => s && typeof s.start === "number" && typeof s.end === "number" && typeof s.text === "string").map((s: any) => ({ start: s.start, end: s.end, text: s.text }))
+        : [];
+      return NextResponse.json({ text: data?.text || "", segments });
     } catch (err: any) {
       // Reaches here only when fetch() itself throws (network failure,
       // DNS, timeout) before OpenAI ever responds -- no response ever

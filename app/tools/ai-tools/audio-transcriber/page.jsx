@@ -3,9 +3,11 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { transcribeAudio, checkAudioSize, audioMaxLabel } from '../../../lib/officeUpload';
 import { encryptedMusicMessage } from '../../../lib/mediaSupport';
+import TranscriptExports from '../../../components/TranscriptExports';
 
 export default function AudioTranscriberPage() {
   const [output, setOutput] = useState('');
+  const [segments, setSegments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [fileName, setFileName] = useState('');
@@ -19,12 +21,13 @@ export default function AudioTranscriberPage() {
     setFileName(file.name);
     setLoading(true);
     setOutput('');
+    setSegments([]);
     setError('');
     try {
       const sizeCheck = checkAudioSize(file);
       if (!sizeCheck.ok) { setLoading(false); setError(sizeCheck.message); return; }
       const data = await transcribeAudio({ file, tool: 'audio-transcriber' });
-      if (data.text) setOutput(data.text);
+      if (data.text) { setOutput(data.text); setSegments(Array.isArray(data.segments) ? data.segments : []); }
       else setError(data.error || 'No response received');
     } catch(e) { setError('Error: ' + e.message); }
     setLoading(false);
@@ -48,6 +51,7 @@ export default function AudioTranscriberPage() {
               <label className="block text-sm text-neutral-500">Transcript</label>
               <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={output} readOnly />
               <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
+              <TranscriptExports text={output} segments={segments} baseName={fileName} />
             </div>
           )}
         </div>
@@ -59,12 +63,13 @@ export default function AudioTranscriberPage() {
           "Click the upload area and select an audio file (MP3, WAV, M4A, and similar formats).",
           "Transcription starts automatically as soon as the file is uploaded.",
           "Wait while the audio is processed using AI-powered speech recognition.",
-          "Copy your completed transcript and edit it as needed."
+          "Copy the transcript, or download it as a TXT file or as SRT / VTT subtitles with timings."
         ]}
         faqs={[
           { q: "Is Audio Transcriber really free to use?", a: "Yes, Audio Transcriber is free to use with no signup or subscription required." },
           { q: "What audio formats does Audio Transcriber support?", a: "It accepts common audio formats such as MP3, WAV, and M4A, and most other formats your browser can select as an audio file." },
           { q: "How large can my audio file be?", a: `Uploads are limited to ${audioMaxLabel()} — the maximum the transcription engine (OpenAI Whisper) itself accepts. For longer recordings, split the audio into smaller segments and transcribe each one separately.` },
+          { q: "Can I get subtitles (SRT or VTT)?", a: "Yes. Besides the plain text, you can download the transcript as SRT or WebVTT subtitles: each line comes with its start and end time, as detected by the speech recognition model, ready for YouTube, VLC or a video editor." },
           { q: "Is my audio data private?", a: "Your audio file is sent directly to the transcription API to generate the transcript. It is not stored on our servers." }
         ]}
         tips={[
