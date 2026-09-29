@@ -2,7 +2,7 @@
 // fixes it shows the defects, after them it must pass. Inputs are generated in the page (canvas), results are read back
 // pixel by pixel. Oracles: the browser's own CSS filters (grayscale, same matrix as the spec), exact geometry
 // (rotation size, corner transparency, circular arc), exact means (pixelation by block average).
-// Usage: node scripts/browser-tests/image-audit-2.mjs <origin> [--browser=chromium|firefox|webkit]
+// Usage: node scripts/browser-tests/image-audit-2.mjs <origin> [--browser=chromium|firefox|webkit] [--only=<check name>]
 import { chromium, firefox, webkit } from '@playwright/test';
 
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--'))).origin;
@@ -41,7 +41,8 @@ const read = async (href) => page.evaluate(async (u) => {
 }, href);
 const px = (r, x, y) => { const i = (y * r.w + x) * 4; return r.data.slice(i, i + 4); };
 const resultHref = async (sel) => page.locator(sel).first().getAttribute('href', { timeout: 20000 });
-const T = async (n, fn) => { try { await fn(); } catch (e) { fails++; console.log('FAIL', `${name} ${n}`, String(e.message).split('\n')[0].slice(0, 200)); } finally { if (page) await page.close().catch(() => {}); page = null; } };
+const only = (process.argv.find((a) => a.startsWith('--only=')) || '').slice(7);
+const T = async (n, fn) => { if (only && !n.startsWith(only)) return; try { await fn(); } catch (e) { fails++; console.log('FAIL', `${name} ${n}`, String(e.message).split('\n')[0].slice(0, 200)); } finally { if (page) await page.close().catch(() => {}); page = null; } };
 
 await T('add-border', async () => {
   await open('/tools/image-tools/add-border-to-image');
