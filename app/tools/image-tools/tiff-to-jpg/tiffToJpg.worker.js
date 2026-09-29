@@ -1,3 +1,4 @@
+import { CANVAS_MAX_PIXELS, flattenedOnWhite, encodeJpegWasm } from '../../../lib/bigImage';
 import { decodeTiff } from '../../../lib/tiffDecode';
 import { sniffFormat } from '../../../lib/detectFileFormat';
 
@@ -26,10 +27,19 @@ self.onmessage = async (e) => {
     if (!decoded || !Number.isFinite(decoded.width) || !Number.isFinite(decoded.height) || decoded.width <= 0 || decoded.height <= 0) {
       throw new Error('Decoded TIFF has no usable width/height');
     }
-    const canvas = new OffscreenCanvas(decoded.width, decoded.height);
-    const ctx = canvas.getContext('2d');
-    ctx.putImageData(new ImageData(new Uint8ClampedArray(decoded.rgba), decoded.width, decoded.height), 0, 0);
-    const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: quality / 100 });
+    // 30/09: one canvas the size of the image fails on iPhone past 16.7 MP; there the JPEG is written by MozJPEG in
+    // WebAssembly from the pixels (lib/bigImage.js). Transparency is flattened onto white either way (JPEG has none;
+    // putImageData onto a canvas then JPEG made transparent areas black).
+    const { width: w, height: h } = decoded;
+    // The decode is over: the 20 s silence watchdog (meant for a stuck decoder) must not cut a long encode.
+    self.postMessage({ type: 'decoded', pixels: w * h });
+    const rgba = flattenedOnWhite(new Uint8ClampedArray(decoded.rgba));
+    let blob;
+    if (w * h <= CANVAS_MAX_PIXELS) {
+      const canvas = new OffscreenCanvas(w, h);
+      canvas.getContext('2d').putImageData(new ImageData(rgba, w, h), 0, 0);
+      blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: quality / 100 });
+    } else blob = await encodeJpegWasm(rgba, w, h, quality);
     self.postMessage({ type: 'done', blob });
   } catch (err) {
     self.postMessage({

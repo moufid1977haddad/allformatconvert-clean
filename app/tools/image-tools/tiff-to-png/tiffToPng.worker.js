@@ -1,3 +1,4 @@
+import { CANVAS_MAX_PIXELS, encodePngRGBA } from '../../../lib/bigImage';
 import { decodeTiff } from '../../../lib/tiffDecode';
 import { sniffFormat } from '../../../lib/detectFileFormat';
 
@@ -26,10 +27,18 @@ self.onmessage = async (e) => {
     if (!decoded || !Number.isFinite(decoded.width) || !Number.isFinite(decoded.height) || decoded.width <= 0 || decoded.height <= 0) {
       throw new Error('Decoded TIFF has no usable width/height');
     }
-    const canvas = new OffscreenCanvas(decoded.width, decoded.height);
-    const ctx = canvas.getContext('2d');
-    ctx.putImageData(new ImageData(new Uint8ClampedArray(decoded.rgba), decoded.width, decoded.height), 0, 0);
-    const blob = await canvas.convertToBlob({ type: 'image/png' });
+    // 30/09: one canvas the size of the image fails on iPhone past 16.7 MP; there the PNG is written from the pixels
+    // over the browser's own deflate (lib/bigImage.js).
+    const { width: w, height: h } = decoded;
+    // The decode is over: the 20 s silence watchdog (meant for a stuck decoder) must not cut a long encode.
+    self.postMessage({ type: 'decoded', pixels: w * h });
+    const rgba = new Uint8ClampedArray(decoded.rgba);
+    let blob;
+    if (w * h <= CANVAS_MAX_PIXELS) {
+      const canvas = new OffscreenCanvas(w, h);
+      canvas.getContext('2d').putImageData(new ImageData(rgba, w, h), 0, 0);
+      blob = await canvas.convertToBlob({ type: 'image/png' });
+    } else blob = await encodePngRGBA(rgba, w, h);
     self.postMessage({ type: 'done', blob });
   } catch (err) {
     self.postMessage({
