@@ -65,7 +65,7 @@ export default function AIDetectorPage() {
               <p className="text-sm">Asked to polish your text, an AI model changed <strong>{result.changed} %</strong> of it. AI models barely change text written by an AI model (in our measurements: {Math.round((1 - AI_AT) * 100)} % or less points to AI) and rewrite human writing more (over {Math.round((1 - HUMAN_BELOW) * 100)} % points to a person); in between, we give no verdict.</p>
             </div>
           )}
-          {result && <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2" data-caveat>No AI detector is reliable enough to prove who wrote a text: measured on 20 texts, this one never called a human text AI, but recognised only 4 of 9 AI texts for sure (4 undecided, 1 missed), and famous texts (classics, speeches) are often left undecided. Do not use it alone to accuse anyone.</p>}
+          {result && <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2" data-caveat>No AI detector is reliable enough to prove who wrote a text: measured on 37 texts in five languages from five AI models, this one called no human text AI, but recognised only 5 of 18 AI texts for sure (12 undecided, 1 missed). Famous or heavily edited texts (classics, encyclopedias, scientific abstracts) are often left undecided. Do not use it alone to accuse anyone.</p>}
         </div>
       </div>
       <SeoContent
@@ -80,7 +80,7 @@ export default function AIDetectorPage() {
         faqs={[
           { q: "Is AI Detector completely free to use?", a: "Yes, AI Detector is free to use with no signup or subscription required." },
           { q: "How does it work?", a: "It uses the rewriting method published by Mao et al. at ICLR 2024: an AI model asked to polish a text changes very little of a text an AI wrote, and much more of a human text. The tool measures the share of characters changed and turns it into a verdict, with a middle band where it gives none." },
-          { q: "How accurate is the detection?", a: "Measured by us on 20 texts of about 100 words in English and French: no human text was called AI; 4 of the 9 AI texts were recognised for sure, 4 got no verdict and 1 was missed. Famous texts (classic novels, speeches) are often left without a verdict because AI models know them. No detector is 100 % reliable: treat the result as a clue, not proof." },
+          { q: "How accurate is the detection?", a: "Measured by us on 37 texts of 80 to 240 words (English, French, German, Spanish, Italian; AI texts from five recent models): no human text was called AI; 5 of the 18 AI texts were recognised for sure, 12 got no verdict and 1 was missed. Famous or heavily edited texts (classic novels, encyclopedias, scientific abstracts) are often left without a verdict because AI models know them or barely change them. No detector is 100 % reliable: treat the result as a clue, not proof." },
           { q: "Why at least 40 words?", a: "On a sentence or two, the share of the text a model changes varies too much to mean anything, for this method as for every detector." },
           { q: "Is my submitted text stored or shared?", a: "Your text is sent to OpenAI's API to be polished. It is not stored on our servers or used for any other purpose." }
         ]}

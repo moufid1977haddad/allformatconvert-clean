@@ -578,21 +578,21 @@
   "lang": "en",
   "genre": "news",
   "model": null,
-  "p_ai": 0.21940742433071136
+  "p_ai": 0.22103659808635712
  },
  "h-news-en-amazon-deforestation-accelerating": {
   "kind": "human",
   "lang": "en",
   "genre": "news",
   "model": null,
-  "p_ai": 0.0008813894237391651
+  "p_ai": 0.6474446654319763
  },
  "h-news-en-arctic-ice-cap-shrank-sharply-this-summe": {
   "kind": "human",
   "lang": "en",
   "genre": "news",
   "model": null,
-  "p_ai": 0.02409418486058712
+  "p_ai": 0.10813774913549423
  },
  "h-news-en-annual-perseids-meteor-shower-visible-in": {
   "kind": "human",
@@ -606,35 +606,35 @@
   "lang": "en",
   "genre": "news",
   "model": null,
-  "p_ai": 0.12753407657146454
+  "p_ai": 0.09644061326980591
  },
  "h-news-fr-afrique-d-clin-du-lac-tchad": {
   "kind": "human",
   "lang": "fr",
   "genre": "news",
   "model": null,
-  "p_ai": 0.046047329902648926
+  "p_ai": 0.27199506759643555
  },
  "h-news-fr-aoste-la-gestion-des-d-chets-co-te-de-pl": {
   "kind": "human",
   "lang": "fr",
   "genre": "news",
   "model": null,
-  "p_ai": 0.3707958459854126
+  "p_ai": 0.8461490273475647
  },
  "h-news-fr-chine-p-kin-en-alerte-rouge-pollution": {
   "kind": "human",
   "lang": "fr",
   "genre": "news",
   "model": null,
-  "p_ai": 0.3964195251464844
+  "p_ai": 0.8269883990287781
  },
  "h-news-fr-compostage-pour-montr-al": {
   "kind": "human",
   "lang": "fr",
   "genre": "news",
   "model": null,
-  "p_ai": 0.7021529078483582
+  "p_ai": 0.7938116788864136
  },
  "h-gut-16901": {
   "kind": "human",
