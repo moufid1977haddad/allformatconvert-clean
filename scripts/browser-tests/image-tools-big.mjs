@@ -57,6 +57,8 @@ const TOOLS = [
 const b = await engine.launch();
 async function runTool(tool, button, file, ios) {
   const ctx = await b.newContext({ acceptDownloads: true });
+  // Preview only: Vercel's comment toolbar (vercel.live) throws navigator.storage.persisted under WebKit -- not the site's code
+  if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((u) => u.hostname === 'vercel.live', (r) => r.abort());
   if (ios) await ctx.addInitScript(() => { window.__forceSafariCanvasCap = true; });
   const page = await ctx.newPage();
   const errs = []; page.on('pageerror', (e) => errs.push(e.message));
