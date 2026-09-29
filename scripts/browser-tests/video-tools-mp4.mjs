@@ -10,6 +10,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { startLocalMediaService } from './lib/local-media-service.mjs';
+import { realMediaService } from './lib/real-media-service.mjs';
 
 const origin = new URL(process.argv[2] || 'http://localhost:3100').origin;
 const arg = (k) => process.argv.find((a) => a.startsWith(`--${k}=`))?.split('=')[1];
@@ -41,7 +42,8 @@ const webm = path.join(dir, 'clip.webm'); ff(...base, '-c:v', 'libvpx-vp9', '-b:
 const tall = path.join(dir, 'vertical.mp4'); ff('-f', 'lavfi', '-i', 'color=c=0x2060A0:s=540x960:r=30:d=3', '-f', 'lavfi', '-i', 'sine=f=440:d=3', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-shortest', tall); // stored vertical, no rotation
 const other = path.join(dir, 'second.mp4'); ff('-f', 'lavfi', '-i', 'testsrc=s=480x270:r=25:d=2', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', other); // silent, other size/rate
 
-const svc = await startLocalMediaService({ origin });
+// --real-service: the production service (a deployed preview or www); --cors-shim when the page is not www.
+const svc = process.argv.includes('--real-service') ? realMediaService({ origin, corsShim: process.argv.includes('--cors-shim') }) : await startLocalMediaService({ origin });
 const b = await engine.launch();
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 

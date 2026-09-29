@@ -15,6 +15,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { startLocalMediaService } from './lib/local-media-service.mjs';
+import { realMediaService } from './lib/real-media-service.mjs';
 
 const origin = new URL(process.argv[2] || 'http://localhost:3100').origin;
 const browserName = (process.argv.find((a) => a.startsWith('--browser=')) || '--browser=chromium').slice(10);
@@ -33,7 +34,8 @@ execFileSync(FF, ['-y', '-v', 'error', '-i', mkv, '-c', 'copy', '-f', 'mov', B])
 const starts = JSON.parse(execFileSync(FP, ['-v', 'error', '-show_entries', 'stream=codec_type,start_time', '-of', 'json', B]).toString()).streams;
 console.log('B stream starts:', starts.map((s) => `${s.codec_type} ${s.start_time}`).join(', '));
 
-const svc = await startLocalMediaService({ origin });
+// --real-service: the production service (a deployed preview or www); --cors-shim when the page is not www.
+const svc = process.argv.includes('--real-service') ? realMediaService({ origin, corsShim: process.argv.includes('--cors-shim') }) : await startLocalMediaService({ origin });
 const b = await engine.launch();
 try {
   for (const [label, src, firstFrame] of [['A numbered MP4', A, 30], ['B MOV, sound before picture', B, null]]) {
