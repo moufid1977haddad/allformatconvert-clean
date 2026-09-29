@@ -12,6 +12,7 @@
 import * as iq from 'image-q';
 import UPNG from 'upng-js';
 import { sniffFormat } from '../../../lib/detectFileFormat';
+import { decodeToRaster } from '../../../lib/bigImage';
 
 const wasmCache = {};
 function wasm(name) {
@@ -63,22 +64,19 @@ const pngTargetDb = (quality) => 32 + quality * 0.145;
 const PALETTE_SIZES = [16, 20, 24, 28, 32, 36, 40, 44, 48, 56, 64, 80, 96, 128, 160, 192, 256];
 const SAMPLE_PIXELS = 262_144; // palette built on a ~0.25 MP sample: measured same PSNR as the full image, 3x faster
 
-async function decode(blob) {
+// Full resolution, as displayed (EXIF orientation applied). 30/09 (owner's iPhone): one canvas the size of the photo
+// failed for every 24/48 MP iPhone photo (iOS: 16.7 MP per canvas at most) -- decoded in bands there
+// (lib/bigImage.js); dims come from the page (<img> reads the header).
+async function decode(blob, dims, forceBands) {
   if (typeof OffscreenCanvas === 'undefined' || typeof createImageBitmap === 'undefined') {
     throw new Error('This browser cannot process images in the background (it needs Safari 16.4 or later, or a current Chrome, Edge or Firefox).');
   }
-  let bmp;
   try {
-    // from-image: a phone photo's EXIF orientation is applied, as every viewer shows it
-    bmp = await createImageBitmap(blob, { imageOrientation: 'from-image' });
+    const raster = await decodeToRaster(blob, dims, { forceBands });
+    return raster.imageData();
   } catch {
     throw new Error('Could not open this image. The file may be damaged or in a format your browser cannot read.');
   }
-  const c = new OffscreenCanvas(bmp.width, bmp.height);
-  const ctx = c.getContext('2d');
-  ctx.drawImage(bmp, 0, 0);
-  bmp.close();
-  return ctx.getImageData(0, 0, c.width, c.height);
 }
 
 function onWhite(img) {
@@ -211,7 +209,7 @@ async function compressSvg(file, progress) {
 }
 
 self.onmessage = async (e) => {
-  const { id, file, quality } = e.data;
+  const { id, file, quality, dims, forceBands } = e.data;
   const progress = (pct) => self.postMessage({ id, type: 'progress', pct });
   try {
     if (file.type === 'image/svg+xml' || /\.svg$/i.test(file.name || '') || looksLikeSvg(await file.slice(0, 65536).text())) {
@@ -223,7 +221,7 @@ self.onmessage = async (e) => {
     const head = new Uint8Array(await file.slice(0, 32).arrayBuffer());
     const format = sniffFormat(head)?.format;
     progress(5);
-    const img = await decode(file);
+    const img = await decode(file, dims, !!forceBands);
     let out, note = '';
     if (format === 'png') {
       const r = await encodePng(img, quality, progress);

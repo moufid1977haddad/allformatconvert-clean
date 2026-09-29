@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import IosOriginalNote from '../../../components/IosOriginalNote';
 import { formatBytes } from '../../../lib/formatBytes';
+import { imageDims } from '../../../lib/bigImage';
 
 const formatSize = formatBytes;
 const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/svg+xml': 'svg' };
@@ -125,7 +126,8 @@ export default function ImageCompressorPage() {
     };
     worker.addEventListener('message', onMessage);
     update(it.id, { status: 'working', pct: 0 });
-    worker.postMessage({ id: it.id, file: it.file, quality });
+    // __forceBands: set only by the browser tests, to run the iPhone (band) decode in Firefox.
+    imageDims(it.file).then((dims) => worker.postMessage({ id: it.id, file: it.file, quality, dims, forceBands: !!window.__forceBands }));
   });
 
   const compressAll = async () => {
