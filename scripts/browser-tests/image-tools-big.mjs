@@ -52,6 +52,7 @@ const TOOLS = [
   ['jpg-to-webp', 'Convert', 'jpg', 'webp', (w, h) => [w, h], false],
   ['png-to-webp', 'Convert', 'png', 'webp', (w, h) => [w, h], false],
   ['bmp-to-png', 'Convert', 'bmp', 'png', (w, h) => [w, h], true],
+  ['image-cropper', 'Crop Image', 'png', 'png', (w, h) => [w, h], true], // whole picture selected (ranges at their max)
 ];
 const b = await engine.launch();
 async function runTool(tool, button, file, ios) {
@@ -61,6 +62,12 @@ async function runTool(tool, button, file, ios) {
   const errs = []; page.on('pageerror', (e) => errs.push(e.message));
   await page.goto(`${origin}/tools/image-tools/${tool}`, { waitUntil: 'networkidle' });
   await page.locator('input[type=file]').first().setInputFiles(file);
+  if (tool === 'image-cropper') {
+    await page.locator('input[type=range]').nth(3).waitFor();
+    await page.waitForFunction(() => { const r = document.querySelectorAll('input[type=range]'); return r.length >= 4 && Number(r[2].max) > 1 && Number(r[3].max) > 1; });
+    await page.waitForTimeout(300);
+    for (const i of [2, 3]) await page.locator('input[type=range]').nth(i).evaluate((r) => { const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(r, r.max); r.dispatchEvent(new Event('input', { bubbles: true })); });
+  }
   const t0 = Date.now();
   await page.getByRole('button', { name: button, exact: true }).click();
   const link = page.getByRole('link', { name: 'Download', exact: true });

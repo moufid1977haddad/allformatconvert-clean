@@ -1,10 +1,12 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { drawToRaster, encodeRasterLike, resultOf, sourceTypeOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
 export default function ImageCropperPage() {
   const [srcType, setSrcType] = useState('image/png');
+  const [file, setFile] = useState(null);
   const [image, setImage] = useState(null);
   const [imgDims, setImgDims] = useState({ width: 0, height: 0 });
   const [result, setResult] = useState(null);
@@ -16,7 +18,7 @@ export default function ImageCropperPage() {
     const f = e.target.files[0];
     e.target.value = '';
     if (!f) return;
-    setImage(URL.createObjectURL(f)); setSrcType(f.type);
+    setImage(URL.createObjectURL(f)); setSrcType(f.type); setFile(f);
     setResult(null);
     setError('');
     setImgDims({ width: 0, height: 0 });
@@ -33,11 +35,11 @@ export default function ImageCropperPage() {
       h: Math.max(1, Math.min(p.h, img.height)),
     }));
   };
-  const applyCrop = () => {
+  const applyCrop = async () => {
     setError('');
     setResult(null);
     const img = imgRef.current;
-    if (!img) return;
+    if (!img || !file) return;
     const scaleX = img.naturalWidth / img.width;
     const scaleY = img.naturalHeight / img.height;
     const x = Math.max(0, Math.min(crop.x, img.width));
@@ -48,12 +50,13 @@ export default function ImageCropperPage() {
       setError('Crop area is outside the image bounds. Adjust X/Y/Width/Height.');
       return;
     }
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.round(w * scaleX);
-    canvas.height = Math.round(h * scaleY);
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, x * scaleX, y * scaleY, w * scaleX, h * scaleY, 0, 0, canvas.width, canvas.height);
-    try { setResult(encodeLike(canvas, srcType)); } catch (e) { setError(e.message); }
+    // 30/09 (owner's iPhone): a crop of a 24/48 MP photo can exceed the 16.7 MP a canvas may hold on iOS: drawn in
+    // bands there (lib/imageOutput.js drawToRaster); the result is a Blob named after the original, not a data: URL.
+    const ow = Math.round(w * scaleX), oh = Math.round(h * scaleY);
+    try {
+      const out = await drawToRaster(ow, oh, (ctx, by) => ctx.drawImage(img, x * scaleX, y * scaleY, w * scaleX, h * scaleY, 0, -by, ow, oh));
+      setResult(resultOf(await encodeRasterLike(out, sourceTypeOf(file)), file.name, 'cropped'));
+    } catch (e) { setError(e?.message || 'The image could not be cropped.'); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -75,7 +78,7 @@ export default function ImageCropperPage() {
           )}
           <button onClick={applyCrop} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Crop Image</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download={`cropped.${extOf(result)}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
       <SeoContent
@@ -88,7 +91,7 @@ export default function ImageCropperPage() {
           "Click 'Crop Image' and then the download button to save the result."
         ]}
         faqs={[
-          { q: "What image formats does Image Cropper support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP where the browser can save WebP (otherwise PNG)." },
+          { q: "What image formats does Image Cropper support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP." },
           { q: "Is Image Cropper really free to use?", a: "Yes, it's completely free with no registration required." },
           { q: "Can I drag crop handles directly on the image?", a: "No, the crop area is set with numeric X/Y/width/height sliders rather than draggable handles on the image preview." },
           { q: "Will my uploaded images be saved or shared?", a: "No, your images are processed locally in your browser and are never uploaded to a server." }

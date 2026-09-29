@@ -236,3 +236,28 @@ export function sourceTypeOf(file) {
   const ext = String(file?.name || '').toLowerCase().match(/\.([a-z0-9]+)$/)?.[1];
   return { jpg: 'image/jpeg', jpeg: 'image/jpeg', jfif: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif', bmp: 'image/bmp', avif: 'image/avif' }[ext] || '';
 }
+
+/**
+ * A new image of outW x outH drawn by `draw(ctx, y)` -- draw the whole result as if on one canvas, shifted up by y
+ * (the band's first row): e.g. ctx.drawImage(img, sx, sy, sw, sh, 0, -y, outW, outH). One canvas when this device
+ * allows it, else bands of at most 16.7 MP (iPhone): each band is the same drawing, so the pixels are the same.
+ */
+export async function drawToRaster(outW, outH, draw) {
+  if (outW * outH <= CANVAS_MAX_PIXELS || (await canvasBeyondSafariCap())) {
+    const c = canvasOf(outW, outH), ctx = c.getContext('2d');
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    await draw(ctx, 0);
+    return rasterFromCanvas(c, outW, outH);
+  }
+  const rgba = new Uint8ClampedArray(outW * outH * 4), step = Math.max(1, Math.floor(CANVAS_MAX_PIXELS / outW));
+  const c = canvasOf(outW, step), ctx = c.getContext('2d', { willReadFrequently: true });
+  for (let y = 0; y < outH; y += step) {
+    const h = Math.min(step, outH - y);
+    ctx.clearRect(0, 0, outW, step);
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    await draw(ctx, y);
+    rgba.set(ctx.getImageData(0, 0, outW, h).data, y * outW * 4);
+  }
+  c.width = 1;
+  return rasterFromRGBA(rgba, outW, outH);
+}
