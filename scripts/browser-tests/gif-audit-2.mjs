@@ -62,6 +62,8 @@ function decodeGif(bytes) {
   const n = Buffer.from(u).indexOf('NETSCAPE2.0');
   return { w, h, frames, loop: n < 0 ? null : u[n + 14] | (u[n + 15] << 8) };
 }
+// Colours after the browser's resampling: within 3 levels (Firefox gives 254 where Chromium gives 255).
+const near = (p, q) => p.every((v, i) => Math.abs(v - q[i]) <= 3);
 const px = (r, fr, x, y) => { const i = (y * r.w + x) * 4; return Array.from(r.frames[fr].rgba.slice(i, i + 4)); };
 const gifFromLink = async (sel) => {
   const href = await page.locator(sel).first().getAttribute('href', { timeout: 30000 });
@@ -101,7 +103,7 @@ await T('image-to-gif transparency and shapes', async () => {
   await page.getByRole('button', { name: 'Create GIF' }).click();
   const r = await gifFromLink('a[download$=".gif"]');
   check('image-to-gif: a transparent PNG stays transparent in the GIF, not black', px(r, 0, 2, 2)[3] === 0 && px(r, 0, 20, 20).join() === '255,0,0,255', `${px(r, 0, 2, 2)} / ${px(r, 0, 20, 20)}`);
-  check('image-to-gif: a 60x20 image in a 40x40 GIF keeps its proportions (fitted, not stretched)', px(r, 1, 20, 3)[3] === 0 && px(r, 1, 5, 20).join() === '255,0,0,255' && px(r, 1, 35, 20).join() === '0,0,255,255', `${px(r, 1, 20, 3)} / ${px(r, 1, 5, 20)} / ${px(r, 1, 35, 20)}`);
+  check('image-to-gif: a 60x20 image in a 40x40 GIF keeps its proportions (fitted, not stretched)', px(r, 1, 20, 3)[3] === 0 && near(px(r, 1, 5, 20), [255, 0, 0, 255]) && near(px(r, 1, 35, 20), [0, 0, 255, 255]), `${px(r, 1, 20, 3)} / ${px(r, 1, 5, 20)} / ${px(r, 1, 35, 20)}`);
 });
 // 21x15 GIF (odd sizes), 3 frames of 100, 200 and 300 ms, transparent background with a red 5x5 square.
 function transparentGif() {

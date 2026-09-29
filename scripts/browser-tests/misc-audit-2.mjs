@@ -75,10 +75,23 @@ await T('mobi-to-epub image', async () => {
 await T('mobi-to-pdf image', async () => {
   await open('/tools/pdf-tools/mobi-to-pdf');
   let sent = null;
-  await page.route('**/api/convert-html-to-pdf', async (route) => { sent = (route.request().postDataBuffer() || Buffer.alloc(0)).toString('utf8'); await route.fulfill({ status: 200, contentType: 'application/pdf', body: Buffer.from('%PDF-1.4\n%%EOF\n') }); });
+  // The rendering service PLAYED in the page (Playwright's WebKit does not give the multipart file part to route()):
+  // the HTML file posted to /api/convert-html-to-pdf is kept in window.__sentHtml and a one-page PDF is answered.
+  await page.evaluate(() => {
+    const real = window.fetch;
+    window.fetch = async (input, init) => {
+      const url = typeof input === 'string' ? input : input.url;
+      if (/\/api\/convert-html-to-pdf/.test(url) && init && init.body instanceof FormData) {
+        window.__sentHtml = await init.body.get('file').text();
+        const pdf = '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj 2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj 3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 10 10]>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n';
+        return new Response(new Blob([pdf], { type: 'application/pdf' }), { status: 200, headers: { 'Content-Type': 'application/pdf' } });
+      }
+      return real(input, init);
+    };
+  });
   await page.locator('input[type="file"]').first().setInputFiles({ name: 'pictures.mobi', mimeType: 'application/x-mobipocket-ebook', buffer: mobiWithImage() });
   await page.getByRole('button', { name: /Convert/ }).first().click();
-  for (let t = 0; t < 120 && sent === null; t++) await page.waitForTimeout(500);
+  for (let t = 0; t < 120 && sent === null; t++) { await page.waitForTimeout(500); sent = await page.evaluate(() => window.__sentHtml ?? null); }
   check('mobi-to-pdf: the chapter image is inlined in the HTML sent for rendering (service played here)', !!sent && /data:image\/png;base64,/.test(sent) && !/blob:/.test(sent), sent ? `${sent.length} bytes` : 'nothing sent');
 });
 

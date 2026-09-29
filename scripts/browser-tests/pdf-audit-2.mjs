@@ -293,6 +293,22 @@ if (!process.argv.includes('--no-ocr')) await T('pdf-ocr', async () => {
   check('pdf-ocr: a searchable PDF is offered (the scan kept, the recognized text added under it, as iLovePDF / PDF24)', searchable, has ? 'no text layer in the PDF' : 'no PDF offered');
 });
 
+// The rendering service PLAYED in the page: fetch() to /api/convert-html-to-pdf is answered with a one-page PDF and the
+// HTML file it carried is kept in window.__sentHtml (Playwright's WebKit does not give the multipart file part to route()).
+async function capturePosted(p) {
+  await p.evaluate(() => {
+    const real = window.fetch;
+    window.fetch = async (input, init) => {
+      const url = typeof input === 'string' ? input : input.url;
+      if (/\/api\/convert-html-to-pdf/.test(url) && init && init.body instanceof FormData) {
+        window.__sentHtml = await init.body.get('file').text();
+        const pdf = '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj 2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj 3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 10 10]>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n';
+        return new Response(new Blob([pdf], { type: 'application/pdf' }), { status: 200, headers: { 'Content-Type': 'application/pdf' } });
+      }
+      return real(input, init);
+    };
+  });
+}
 // EPUB with an SVG cover page (<svg><image xlink:href>), as calibre and Sigil write it, a chapter image and a CSS
 // background image. The conversion service is PLAYED here (route intercepted): the HTML the page sends is checked.
 async function epubFixture() {
@@ -314,15 +330,10 @@ async function epubFixture() {
 await T('epub-to-pdf', async () => {
   await open('/tools/pdf-tools/epub-to-pdf');
   let sent = null;
-  await page.route('**/api/convert-html-to-pdf', async (route) => {
-    const body = route.request().postDataBuffer();
-    sent = body ? body.toString('utf8') : '';
-    const d = await PDFDocument.create(); d.addPage();
-    await route.fulfill({ status: 200, contentType: 'application/pdf', body: Buffer.from(await d.save()) });
-  });
+  await capturePosted(page);
   await page.locator('input[type="file"]').first().setInputFiles({ name: 'book.epub', mimeType: 'application/epub+zip', buffer: await epubFixture() });
   await page.getByRole('button', { name: /Convert/ }).first().click();
-  for (let t = 0; t < 120 && sent === null; t++) await page.waitForTimeout(500);
+  for (let t = 0; t < 120 && sent === null; t++) { await page.waitForTimeout(500); sent = await page.evaluate(() => window.__sentHtml ?? null); }
   if (!sent) console.log('page says:', (await page.locator('main, body').first().innerText()).slice(0, 600).replace(/\s+/g, ' '));
   const html = sent || '';
   const dataImgs = (html.match(/data:image\/png;base64,/g) || []).length;
