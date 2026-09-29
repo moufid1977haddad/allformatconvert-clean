@@ -9,6 +9,7 @@ import {
   MOBILE_MAX_PAGES, MOBILE_MAX_FILE_SIZE_BYTES, MOBILE_MAX_FILE_SIZE_LABEL,
 } from './config';
 import { formatBytes } from '../../../lib/formatBytes';
+import { uprightImage } from '../../../lib/pdfImages';
 
 const THUMB_SCALE = 0.22;
 const CANVAS_MAX_WIDTH = 640;
@@ -243,12 +244,9 @@ export default function PdfEditorPage() {
           const exifr = (await import('exifr')).default;
           const orientation = (await exifr.orientation(bytes)) || 1;
           if (orientation !== 1) {
-            const bmp = await createImageBitmap(new Blob([bytes], { type: 'image/jpeg' }));
-            const c = document.createElement('canvas');
-            c.width = bmp.width; c.height = bmp.height;
-            c.getContext('2d').drawImage(bmp, 0, 0);
-            const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.92));
-            if (blob) bytes = new Uint8Array(await blob.arrayBuffer());
+            // 30/09: in bands past 16.7 Mpx (iOS canvas limit), JPEG re-encoded (lib/pdfImages.js).
+            const u = await uprightImage(new Blob([bytes], { type: 'image/jpeg' }));
+            if (u.kind === 'jpg') bytes = u.bytes;
           }
         } catch { /* no readable EXIF: the image is stored as displayed */ }
       }

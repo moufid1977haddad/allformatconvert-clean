@@ -339,10 +339,13 @@ export default function VideoWatermarkPage() {
         ctx.fillText(text, padX, canvas.height / 2);
       } else {
         const img = await loadImageElement(watermarkImage);
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
+        // A logo is never needed above 2048 px (it is scaled to the video): a phone photo used as a watermark would
+        // otherwise need a canvas iOS refuses past 16.7 Mpx (30/09).
+        const k = Math.min(1, 2048 / Math.max(img.naturalWidth, img.naturalHeight));
+        canvas.width = Math.max(1, Math.round(img.naturalWidth * k));
+        canvas.height = Math.max(1, Math.round(img.naturalHeight * k));
         ctx.globalAlpha = opacity;
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       }
       const pngBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
       const pngBytes = new Uint8Array(await pngBlob.arrayBuffer());

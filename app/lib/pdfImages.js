@@ -20,7 +20,7 @@ const isPng = (b) => b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] ===
 // Upright pixels of an image the browser decodes, re-encoded for the PDF: JPEG when opaque (a photo -- a PNG of a
 // 24 MP HEIC photo weighs ~50 MB), PNG when it has transparency. 30/09 (owner's iPhone): one canvas the size of the
 // photo failed past 16.7 MP on iOS (24/48 MP HEIC from Files); decoded in bands there (lib/bigImage.js).
-async function uprightImage(file) {
+export async function uprightImage(file) {
   const dims = await imageDims(file);
   const raster = await decodeToRaster(file, dims);
   const rgba = raster.rgba();
