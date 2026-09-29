@@ -117,7 +117,7 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
             <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onClick={(e) => { e.target.value = ''; }} onChange={pick} />
           </div>
           {file && previewUrl && <video src={previewUrl} controls playsInline style={previewStyle ? previewStyle(params) : undefined} className="w-full rounded-xl bg-neutral-800 max-h-72" />}
-          {file && controls({ params, setParams, disabled: busy })}
+          {file && controls({ params, setParams, disabled: busy, file })}
           {stage && (
             <div className="space-y-2" aria-live="polite">
               <ProgressBar pct={pct ?? 0} label={pct === null ? label : `${label}`} />
