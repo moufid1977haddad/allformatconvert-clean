@@ -8,6 +8,7 @@ import { detectDelimiter, CSV_DELIMITERS } from '../../../lib/csvParser';
 import { sniffCsvFile } from '../../../lib/csvEncoding';
 import CsvReadOptions, { numbersNote } from '../../../components/CsvReadOptions';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
+import { formatBytes } from '../../../lib/formatBytes';
 
 // Only the first 8KB is needed to see several rows -- detectDelimiter only
 // looks at the first 10 non-empty logical lines anyway, so sampling more of
@@ -102,7 +103,7 @@ export default function CsvToExcelPage() {
     setStatus('');
     clearResult();
     if (f.size > MAX_FILE_SIZE_BYTES) {
-      setError(`This file is ${(f.size / (1024 * 1024)).toFixed(0)} MB, which is over the ${MAX_FILE_SIZE_LABEL} limit for this tool. Try splitting it into smaller files first.`);
+      setError(`This file is ${formatBytes(f.size)}, which is over the ${MAX_FILE_SIZE_LABEL} limit for this tool. Try splitting it into smaller files first.`);
       setFile(null);
       setFileName('');
       return;

@@ -1,3 +1,4 @@
+import { formatBytes } from './formatBytes';
 // Full technical report of an audio or video file, read by ffprobe (ffmpeg.wasm) in the browser -- nothing is
 // uploaded. The file is MOUNTED (WORKERFS: read from disk in pieces, never copied into memory), so its size does not
 // matter. Used by Audio Metadata and Video Metadata (28/09/2026: they showed only name, size, type, duration and
@@ -40,7 +41,7 @@ export function describeProbe(json, file) {
   const f = json.format || {};
   const general = [
     ['File', file.name],
-    ['Size', `${(file.size / 1048576).toFixed(2)} MB (${file.size.toLocaleString('en-US')} bytes)`],
+    ['Size', `${formatBytes(file.size)} (${file.size.toLocaleString('en-US')} bytes)`],
     ['Container', f.format_long_name || f.format_name],
     ['Duration', clock(num(f.duration))],
     ['Overall bitrate', bits(num(f.bit_rate))],

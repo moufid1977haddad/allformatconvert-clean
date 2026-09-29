@@ -7,6 +7,7 @@ import { VIDEO_ACCEPT } from '../lib/mediaSupport';
 import { reportToolError } from '../lib/reportError';
 import IosOriginalNote from './IosOriginalNote';
 import PlayablePreview from './PlayablePreview';
+import { formatBytes } from '../lib/formatBytes';
 
 // Shared UI of the tools that run on the media-processing service
 // (video-compressor, video-converter). The engine is the service; the browser
@@ -14,7 +15,7 @@ import PlayablePreview from './PlayablePreview';
 
 export const MAX_UPLOAD_MB = 1024; // must equal MEDIA_TICKET_MAX_BYTES / MEDIA_MAX_FILE_BYTES in production
 
-const fmt = (b) => (b < 1024 * 1024 ? (b / 1024).toFixed(1) + ' KB' : (b / (1024 * 1024)).toFixed(b < 100 * 1024 * 1024 ? 2 : 0) + ' MB');
+const fmt = formatBytes;
 
 const STAGE_LABEL = {
   ticket: 'Preparing…',

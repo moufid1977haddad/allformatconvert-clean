@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { MAX_IMAGE_CAPTIONER_ORIGINAL_BYTES } from '@/lib/quota/limits';
 import { imageToVisionJpeg } from '../../../lib/imageForVision';
+import { formatBytes } from '../../../lib/formatBytes';
 
 const MAX_MB = MAX_IMAGE_CAPTIONER_ORIGINAL_BYTES / (1024 * 1024);
 
@@ -23,7 +24,7 @@ export default function ImageCaptionerPage() {
     if (file.size > MAX_IMAGE_CAPTIONER_ORIGINAL_BYTES) {
       // Checked the moment the file is picked: nothing is decoded or sent.
       setPreview('');
-      setError(`This image is ${(file.size / (1024 * 1024)).toFixed(1)} MB but this tool accepts images up to ${MAX_MB} MB.`);
+      setError(`This image is ${formatBytes(file.size)} but this tool accepts images up to ${MAX_MB} MB.`);
       return;
     }
     setError('');

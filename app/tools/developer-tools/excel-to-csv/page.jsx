@@ -5,6 +5,7 @@ import ProgressBar from '../../../components/ProgressBar';
 import { MAX_ROWS, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL, MOBILE_MAX_ROWS, MOBILE_MAX_FILE_SIZE_BYTES, MOBILE_MAX_FILE_SIZE_LABEL } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
+import { formatBytes } from '../../../lib/formatBytes';
 
 const MAX_ROWS_LABEL = MAX_ROWS.toLocaleString();
 const MOBILE_MAX_ROWS_LABEL = MOBILE_MAX_ROWS.toLocaleString();
@@ -77,7 +78,7 @@ export default function ExcelToCsvPage() {
     setStatus('');
     clearResult();
     if (f.size > maxFileBytes) {
-      setError(`This file is ${(f.size / (1024 * 1024)).toFixed(0)} MB, which is over the ${maxFileLabel} limit${isMobile ? ' on this device' : ''}. Try splitting it into smaller files first.`);
+      setError(`This file is ${formatBytes(f.size)}, which is over the ${maxFileLabel} limit${isMobile ? ' on this device' : ''}. Try splitting it into smaller files first.`);
       setFile(null);
       setFileName('');
       return;

@@ -9,6 +9,7 @@ import { TIFF_DECODE_TIMEOUT_MS, TIFF_DECODE_TIMEOUT_MESSAGE } from '../../../li
 import { reportToolError, extOf } from '../../../lib/reportError';
 import { canEncodeImageType, extFromMime } from '../../../lib/mediaSupport';
 import { imageDims } from '../../../lib/bigImage';
+import { formatBytes } from '../../../lib/formatBytes';
 
 const GENERIC_CONVERSION_ERROR = 'Conversion failed. Please try again, or try a different file.';
 const GENERIC_HEIC_ERROR = 'Failed to decode this HEIC/HEIF file. It may be corrupted or use a variant this tool doesn\'t support.';
@@ -226,11 +227,7 @@ export default function ImageConverterPage() {
     setConverted([]);
   };
 
-  const formatSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  };
+  const formatSize = (bytes: number) => formatBytes(bytes);
 
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

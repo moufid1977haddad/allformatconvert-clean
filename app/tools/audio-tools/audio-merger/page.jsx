@@ -12,11 +12,12 @@ import {
 import { opusOnService, encodeOpusOnService } from '../../../lib/opusService';
 import { reportToolError } from '../../../lib/reportError';
 import PlayablePreview from '../../../components/PlayablePreview';
+import { formatBytes } from '../../../lib/formatBytes';
 
 const LOSSLESS = MERGE_FORMATS.filter((f) => f.lossless);
 const COMPRESSED = MERGE_FORMATS.filter((f) => !f.lossless);
 const fmtTime = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}${s < 60 ? `.${Math.floor((s * 10) % 10)}` : ''}`;
-const fmtSize = (b) => (b >= 1048576 ? `${(b / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1024))} KB`);
+const fmtSize = formatBytes;
 const CODEC_NAMES = { mp3: 'MP3', aac: 'AAC', vorbis: 'Vorbis', opus: 'Opus', flac: 'FLAC', alac: 'ALAC', wmav2: 'WMA', wmav1: 'WMA', ac3: 'AC3' };
 const describe = (p) => {
   const codec = CODEC_NAMES[p.codec] || (p.codec?.startsWith('pcm_') ? 'PCM' : (p.codec || '?').toUpperCase());

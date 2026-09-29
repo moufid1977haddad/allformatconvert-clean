@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { checkedBlob, canvasSizeProblem, flattenOntoWhite } from '../../../lib/mediaSupport';
+import { formatBytes } from '../../../lib/formatBytes';
 
 // Modelled on the reference site (iLoveIMG "Resize image"): by pixels with the aspect ratio locked by
 // default and "do not enlarge", or by percentage; the output keeps the source format (it used to always
@@ -9,7 +10,7 @@ import { checkedBlob, canvasSizeProblem, flattenOntoWhite } from '../../../lib/m
 const PERCENTS = [25, 50, 75]; // "x% smaller", as on the reference site
 const MIME_BY_TYPE = { 'image/jpeg': 'image/jpeg', 'image/png': 'image/png', 'image/webp': 'image/webp' };
 const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
-const fmtSize = (b) => (b < 1024 * 1024 ? (b / 1024).toFixed(1) + ' KB' : (b / (1024 * 1024)).toFixed(2) + ' MB');
+const fmtSize = formatBytes;
 
 export default function ImageResizerPage() {
   const [file, setFile] = useState(null);

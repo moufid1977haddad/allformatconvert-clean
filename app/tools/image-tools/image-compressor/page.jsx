@@ -2,8 +2,9 @@
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import IosOriginalNote from '../../../components/IosOriginalNote';
+import { formatBytes } from '../../../lib/formatBytes';
 
-const formatSize = (bytes) => (bytes < 1024 * 1024 ? (bytes / 1024).toFixed(1) + ' KB' : (bytes / (1024 * 1024)).toFixed(2) + ' MB');
+const formatSize = formatBytes;
 const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/svg+xml': 'svg' };
 const MAX_FILES = 20;
 // An optimised SVG is only offered if it DRAWS the same as the original: both are rendered at the same size

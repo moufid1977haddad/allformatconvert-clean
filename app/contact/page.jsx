@@ -5,6 +5,7 @@ import {
   MAX_CONTACT_ATTACHMENT_BYTES, MAX_CONTACT_ATTACHMENTS_TOTAL_BYTES, MAX_CONTACT_ATTACHMENTS_COUNT,
   CONTACT_ATTACHMENT_ACCEPTED_FORMATS, CONTACT_ATTACHMENT_ACCEPTED_LABEL,
 } from '@/lib/quota/limits';
+import { formatBytes } from '../lib/formatBytes';
 
 const MAX_ATTACHMENT_BYTES = MAX_CONTACT_ATTACHMENT_BYTES;
 const MAX_ATTACHMENTS_TOTAL_BYTES = MAX_CONTACT_ATTACHMENTS_TOTAL_BYTES;
@@ -12,10 +13,6 @@ const MAX_ATTACHMENTS_COUNT = MAX_CONTACT_ATTACHMENTS_COUNT;
 const ACCEPTED_FORMATS = new Set(CONTACT_ATTACHMENT_ACCEPTED_FORMATS);
 const ACCEPTED_LABEL = CONTACT_ATTACHMENT_ACCEPTED_LABEL;
 const ATTACHMENT_HINT = `Up to ${MAX_ATTACHMENTS_COUNT} images (${ACCEPTED_LABEL}), ${(MAX_ATTACHMENT_BYTES / (1024 * 1024)).toFixed(0)} MB each, ${(MAX_ATTACHMENTS_TOTAL_BYTES / (1024 * 1024)).toFixed(0)} MB total. Click, drag & drop, or paste a screenshot.`;
-
-function formatBytes(bytes) {
-  return bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.ceil(bytes / 1024)} KB`;
-}
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);

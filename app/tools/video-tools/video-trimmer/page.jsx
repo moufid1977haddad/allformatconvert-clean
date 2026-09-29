@@ -8,6 +8,7 @@ import { ffmpegAudioDuration } from '../../../lib/audioDuration';
 import { runMediaJob, mediaServiceConfigured } from '../../../lib/mediaJob';
 import IosOriginalNote from '../../../components/IosOriginalNote';
 import PlayablePreview from '../../../components/PlayablePreview';
+import { formatBytes } from '../../../lib/formatBytes';
 
 // Precise cut, 28/09: re-encoding in ffmpeg.wasm measured ~3.7 s per second of 1080p in Chrome but ~29 s in
 // Firefox (292 s for 10 s). The reference way to cut fast AND exact (LosslessCut's "smart cut") re-encodes only
@@ -42,7 +43,7 @@ const MIME_BY_EXT = {
   '3gp': 'video/3gpp', mpg: 'video/mpeg', mpeg: 'video/mpeg', ts: 'video/mp2t',
 };
 
-const fmtMB = (b) => (b / (1024 * 1024)).toFixed(b < 10 * 1024 * 1024 ? 1 : 0) + ' MB';
+const fmtMB = formatBytes;
 const fmtSecs = (s) => (s < 10 ? s.toFixed(1) : Math.round(s)) + 's';
 
 export default function VideoTrimmerPage() {

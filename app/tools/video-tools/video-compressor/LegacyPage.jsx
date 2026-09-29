@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import { videoReRecordSupport, captureMediaElementStream, finishRecording } from '../../../lib/mediaSupport';
 import IosOriginalNote from '../../../components/IosOriginalNote';
+import { formatBytes } from '../../../lib/formatBytes';
 export default function LegacyVideoCompressorPage() {
   const [file, setFile] = useState(null);
   const [quality, setQuality] = useState(0.5);
@@ -81,7 +82,7 @@ export default function LegacyVideoCompressorPage() {
     }
   };
 
-  const fmt = (b) => b < 1024*1024 ? (b/1024).toFixed(1) + ' KB' : (b/(1024*1024)).toFixed(2) + ' MB';
+  const fmt = formatBytes;
 
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

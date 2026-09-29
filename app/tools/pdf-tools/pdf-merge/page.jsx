@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
 import { MAX_TOTAL_PAGES, MAX_TOTAL_SIZE_BYTES, MAX_TOTAL_SIZE_LABEL, MOBILE_MAX_TOTAL_PAGES, MOBILE_MAX_TOTAL_SIZE_BYTES, MOBILE_MAX_TOTAL_SIZE_LABEL } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
+import { formatBytes } from '../../../lib/formatBytes';
 
 export default function PdfMergePage() {
   const [files, setFiles] = useState([]);
@@ -71,7 +72,7 @@ export default function PdfMergePage() {
 
   const merge = () => {
     if (files.length < 2) { setError('Add at least 2 PDF files.'); return; }
-    if (overSizeLimit) { setError(`These files add up to ${(totalSize / (1024 * 1024)).toFixed(0)} MB, over the ${maxSizeLabel} limit${isMobile ? ' on this device' : ''}. Remove a file or merge in smaller batches.`); return; }
+    if (overSizeLimit) { setError(`These files add up to ${formatBytes(totalSize)}, over the ${maxSizeLabel} limit${isMobile ? ' on this device' : ''}. Remove a file or merge in smaller batches.`); return; }
     setLoading(true);
     setStatus('');
     setError('');
@@ -133,7 +134,7 @@ export default function PdfMergePage() {
                   <button onClick={() => removeFile(index)} disabled={loading} className="text-red-400 hover:text-red-600 px-2">✕</button>
                 </div>
               ))}
-              <p className={`text-xs text-right ${overSizeLimit ? 'text-red-500' : 'text-neutral-400'}`}>{(totalSize / (1024 * 1024)).toFixed(1)} MB total</p>
+              <p className={`text-xs text-right ${overSizeLimit ? 'text-red-500' : 'text-neutral-400'}`}>{formatBytes(totalSize)} total</p>
             </div>
           )}
           {error && (

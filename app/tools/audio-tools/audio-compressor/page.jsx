@@ -7,6 +7,7 @@ import { COMPRESSIBLE_AUDIO_FORMATS, buildOutputSpec, sanitizedInputExt } from '
 import { reportToolError } from '../../../lib/reportError';
 import { opusOnService, encodeOpusOnService, LOSSLESS_INTERMEDIATE } from '../../../lib/opusService';
 import PlayablePreview from '../../../components/PlayablePreview';
+import { formatBytes } from '../../../lib/formatBytes';
 
 // kb/s of the source's audio: the stream's own figure from ffmpeg ("Audio: aac …, 57 kb/s"), else the file's average.
 function sourceKbps(log, bytes) {
@@ -62,7 +63,7 @@ export default function AudioCompressorPage() {
       }
       const url = URL.createObjectURL(blob);
       const reduction = (((file.size - blob.size) / file.size) * 100).toFixed(1);
-      setResult({ url, name: 'compressed_' + file.name.replace(/\.[^.]+$/, '') + '.' + ext, originalSize: (file.size/1024/1024).toFixed(2), newSize: (blob.size/1024/1024).toFixed(2), reduction, larger: blob.size >= file.size, srcKbps, kbps, asked: Number(bitrate) });
+      setResult({ url, name: 'compressed_' + file.name.replace(/\.[^.]+$/, '') + '.' + ext, originalSize: formatBytes(file.size), newSize: formatBytes(blob.size), reduction, larger: blob.size >= file.size, srcKbps, kbps, asked: Number(bitrate) });
     } catch(e) {
       // Full error object + stack to the console -- ffmpeg.wasm frequently
       // throws non-Error values (or Errors with no .message) on internal

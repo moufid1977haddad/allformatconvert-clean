@@ -1,5 +1,6 @@
 import { MAX_PAGES, MAX_FILE_SIZE_BYTES } from './config';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
+import { formatBytes } from '../../../lib/formatBytes';
 
 class LimitExceededError extends Error {
   constructor(message) {
@@ -83,7 +84,7 @@ async function run({ file, pageOrder, overlays, mode, selectedIndices, maxPages 
   const limit = maxPages || MAX_PAGES;
   if (file.size > MAX_FILE_SIZE_BYTES) {
     throw new LimitExceededError(
-      `This file is ${(file.size / (1024 * 1024)).toFixed(0)} MB, over the ${(MAX_FILE_SIZE_BYTES / (1024 * 1024)).toFixed(0)} MB limit.`
+      `This file is ${formatBytes(file.size)}, over the ${(MAX_FILE_SIZE_BYTES / (1024 * 1024)).toFixed(0)} MB limit.`
     );
   }
 

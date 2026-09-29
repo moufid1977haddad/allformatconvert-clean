@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { formatBytes } from '../../../lib/formatBytes';
 // The page promised "View image metadata and EXIF data" but read only the
 // browser's file properties (29/09). exifr (MIT, used by metadata viewers)
 // reads EXIF, GPS, IPTC, XMP and ICC from JPEG, HEIC, TIFF, PNG, WebP and AVIF.
@@ -29,9 +30,9 @@ export default function ImageMetadataPage() {
     setPreview(url);
     const img = new Image();
     img.onload = () => {
-      setMetadata({ name: file.name, size: (file.size/1024).toFixed(2) + ' KB', type: file.type || 'unknown', width: img.naturalWidth + ' px', height: img.naturalHeight + ' px', lastModified: new Date(file.lastModified).toLocaleString() });
+      setMetadata({ name: file.name, size: formatBytes(file.size), type: file.type || 'unknown', width: img.naturalWidth + ' px', height: img.naturalHeight + ' px', lastModified: new Date(file.lastModified).toLocaleString() });
     };
-    img.onerror = () => setMetadata({ name: file.name, size: (file.size/1024).toFixed(2) + ' KB', type: file.type || 'unknown', note: 'This browser cannot display this image; embedded metadata is still read below.' });
+    img.onerror = () => setMetadata({ name: file.name, size: formatBytes(file.size), type: file.type || 'unknown', note: 'This browser cannot display this image; embedded metadata is still read below.' });
     img.src = url;
     try {
       const exifr = (await import('exifr')).default;

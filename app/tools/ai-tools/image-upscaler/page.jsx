@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { runStagedToolResult, mediaServiceConfigured, MediaJobError } from '../../../lib/mediaJob';
 import { webgpuAvailable, readImage, localOutputProblem, upscaleInBrowser, serverSecondsFor, serverNeedsParts, upscaleOnServerInParts } from '../../../lib/localUpscale';
+import { formatBytes } from '../../../lib/formatBytes';
 
 // Input ceiling, the free offers' level (iLoveIMG 6 Mpx, Upscale.media 6.25 Mpx without an account; 28/09),
 // checked here BEFORE any work. The same on our server (UPSCALE_MAX_INPUT_PIXELS) and on this device.
@@ -177,7 +178,8 @@ export default function ImageUpscalerPage() {
               <label className="block text-xs text-neutral-600">Compare
                 <input type="range" min="0" max="100" value={split} onChange={(e) => setSplit(Number(e.target.value))} className="w-full" aria-label="Before/after comparison" />
               </label>
-              <p className="text-center text-sm text-neutral-600">{dims.w}×{dims.h} → <span className="font-semibold text-indigo-600">{result.w}×{result.h}</span> · PNG, {(result.size / 1048576).toFixed(1)} MB · {where === 'device' ? 'made on your device' : 'made on our server'}</p>
+              <p className="text-center text-sm text-neutral-600">{dims.w}×{dims.h} → <span className="font-semibold text-indigo-600">{result.w}×{result.h}</span> · PNG, {formatBytes(result.size)}</p>
+              <p className="text-center text-xs text-neutral-500" data-where={where}>{where === 'device' ? 'The AI ran right here, in your browser: your photo was not uploaded anywhere.' : 'The AI ran on our server: your photo was sent to it for this.'}</p>
               <a href={result.url} download={`${baseName}-upscaled-${scale}x.png`} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download</a>
             </div>
           )}

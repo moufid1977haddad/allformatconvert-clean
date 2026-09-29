@@ -5,6 +5,7 @@ import ProgressBar from '../../../components/ProgressBar';
 import { MAX_PAGES, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL, MOBILE_MAX_PAGES, MOBILE_MAX_FILE_SIZE_BYTES, MOBILE_MAX_FILE_SIZE_LABEL } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { planSplit } from './splitPlan';
+import { formatBytes } from '../../../lib/formatBytes';
 
 // iLovePDF's free modes (splitPlan.js): custom ranges, a file every N pages, every page, chosen pages.
 const MODES = [
@@ -60,7 +61,7 @@ export default function PdfSplitPage() {
     setFileName(f.name);
 
     if (f.size > maxFileBytes) {
-      setError(`This file is ${(f.size / (1024 * 1024)).toFixed(0)} MB, which is over the ${maxFileLabel} limit${isMobile ? ' on this device' : ''}. Try splitting it into smaller files first.`);
+      setError(`This file is ${formatBytes(f.size)}, which is over the ${maxFileLabel} limit${isMobile ? ' on this device' : ''}. Try splitting it into smaller files first.`);
       setFileName('');
       return;
     }

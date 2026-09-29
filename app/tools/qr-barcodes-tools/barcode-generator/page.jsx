@@ -7,6 +7,7 @@ import { GROUPS, ALL, byId, IS_2D } from './symbologies';
 import { MAX_BATCH } from './config';
 import { physical, renderCanvas, contrastError, normalizeRead, cleanError, autoQuietZone, onWhite, readError, fileBytes, addonOf } from './render';
 import { TEMPLATES, ROLLS, PAPERS, sheetOf, rollOf, layoutError, labelPdf, MAX_LABELS, LABEL_INSET_MM } from './labels';
+import { formatBytes } from '../../../lib/formatBytes';
 
 // References read on 26/09/2026 (docs/audit/RAPPORT-amelioration-14.md): TEC-IT (100+ types, drawn on its server,
 // 10 free codes, non-commercial use only, SVG for subscribers), barcode-maker.com (~35 types, PNG/JPG/GIF/SVG, batch
@@ -428,7 +429,7 @@ export default function BarcodeGeneratorPage() {
               {batchResult.failed.length > 0 && <p className="text-red-600">{batchResult.failed.length} left out{batchResult.labels ? '' : ' (listed in errors.txt inside the ZIP)'}: {batchResult.failed.slice(0, 3).join(' · ')}{batchResult.failed.length > 3 ? ' …' : ''}</p>}
               {/* No automatic download (on an iPhone it left the page or saved without asking): the visitor downloads when ready,
                   as on iLovePDF / Smallpdf; the settings stay in place. */}
-              <a href={batchResult.url} download={batchResult.name} data-batch-download className="block text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-3 font-semibold transition mt-2">Download the {batchResult.labels ? 'PDF' : 'ZIP'} ({(batchResult.bytes / 1048576).toFixed(batchResult.bytes < 1048576 ? 2 : 1)} MB)</a>
+              <a href={batchResult.url} download={batchResult.name} data-batch-download className="block text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-3 font-semibold transition mt-2">Download the {batchResult.labels ? 'PDF' : 'ZIP'} ({formatBytes(batchResult.bytes)})</a>
               {batchResult.labels && <a href={batchResult.url} target="_blank" rel="noopener" data-batch-preview className="block text-center text-indigo-600 underline">Preview the PDF in a new tab</a>}
             </div>
           )}
