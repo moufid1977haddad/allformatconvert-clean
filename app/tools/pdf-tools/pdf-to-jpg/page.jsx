@@ -4,6 +4,8 @@ import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { checkedDataURL, assertCanvasSize } from '../../../lib/mediaSupport';
 import { reportToolError } from '../../../lib/reportError';
+import { saveBlob } from '../../../lib/download';
+const toBlobChecked = (c, type, q) => new Promise((ok, ko) => c.toBlob((b) => (b && b.size ? ok(b) : ko(new Error('This page could not be turned into an image on this device.'))), type, q));
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -32,7 +34,10 @@ export default function Page() {
         canvas.width = viewport.width;
         canvas.height = viewport.height;
         await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-        imgs.push({ url: checkedDataURL(canvas, 'image/jpeg', 0.9), name: `page_${i}.jpg` });
+        // 30/09: a Blob named after the PDF, not a data: URL (iOS saves nothing from a data: link).
+        const blob = await toBlobChecked(canvas, 'image/jpeg', 0.9);
+        canvas.width = 1;
+        imgs.push({ url: URL.createObjectURL(blob), blob, name: `${file.name.replace(/\.pdf$/i, '')}-page-${i}.jpg` });
       }
       setImages(imgs);
     } catch(e) {
@@ -40,6 +45,14 @@ export default function Page() {
       setError('Conversion failed: ' + e.message);
     }
     setLoading(false);
+  };
+
+  // All pages in one ZIP (iLovePDF and Smallpdf offer the same "download all"), stored without recompression.
+  const downloadAll = async () => {
+    const { zipSync } = await import('fflate');
+    const files = {};
+    for (const im of images) files[im.name] = new Uint8Array(await im.blob.arrayBuffer());
+    await saveBlob(new Blob([zipSync(files, { level: 0 })], { type: 'application/zip' }), `${file ? file.name.replace(/\.pdf$/i, '') : 'document'}-pages.zip`);
   };
 
   return (
@@ -59,6 +72,7 @@ export default function Page() {
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {images.length > 0 && (
             <div className="space-y-4">
+              {images.length > 1 && <button type="button" onClick={downloadAll} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download all pages (ZIP)</button>}
               {images.map((img, i) => (
                 <div key={i} className="space-y-2">
                   <img src={img.url} className="w-full rounded-xl border border-neutral-200" alt={`Page ${i+1}`} />
@@ -85,7 +99,7 @@ export default function Page() {
           { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser using the PDF.js library." }
         ]}
         tips={[
-          "Each page downloads separately — there's no single \"Download All\" button, so expect to click through each page for a multi-page PDF.",
+          "Download each page separately, or all pages at once with \"Download all pages (ZIP)\".",
           "Images render at 2x scale for reasonably sharp text and detail, good for screen viewing; check the result yourself if you need print quality.",
           "For very long PDFs, converting many pages at once can take a moment and use noticeable browser memory.",
           "Everything happens locally, so there's no upload wait — the limiting factor is your device's available memory."
