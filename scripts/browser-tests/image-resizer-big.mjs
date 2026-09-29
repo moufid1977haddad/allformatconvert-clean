@@ -7,6 +7,7 @@ import sharp from 'sharp';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { iosCanvasCapInit, applyIosCanvasCap, iosCapHits, iosCapLabel } from './lib/ios-canvas-cap.mjs';
 const origin = new URL(process.argv[2] || 'http://localhost:3100').origin;
 const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const dir = path.join(os.tmpdir(), 'resizer-big'); fs.mkdirSync(dir, { recursive: true });
@@ -23,7 +24,7 @@ const b = await engine.launch();
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 async function resize(file, width, ios) {
   const ctx = await b.newContext({ acceptDownloads: true });
-  if (ios) await ctx.addInitScript(() => { window.__forceSafariCanvasCap = true; });
+  if (ios) await ctx.addInitScript(iosCanvasCapInit);
   const p = await ctx.newPage();
   await p.goto(origin + '/tools/image-tools/image-resizer', { waitUntil: 'networkidle' });
   await p.locator('input[type=file]').setInputFiles(file);
@@ -49,7 +50,7 @@ async function psnr(a, c) {
 const n = await resize(src, 7000, false);
 const i = await resize(src, 7000, true);
 const mn = await sharp(n.out, { limitInputPixels: false }).metadata(), mi = await sharp(i.out, { limitInputPixels: false }).metadata();
-check('48 MP -> 7000 px wide, normal path', mn.format === 'jpeg' && mn.width === 7000 && mn.height === 5250 && n.name === 'p48-7000x5250.jpg', `${mn.width}x${mn.height} ${n.name} ${n.secs.toFixed(1)} s`);
+check('48 MP -> 7000 px wide, desktop reference (no iPhone limit)', mn.format === 'jpeg' && mn.width === 7000 && mn.height === 5250 && n.name === 'p48-7000x5250.jpg', `${mn.width}x${mn.height} ${n.name} ${n.secs.toFixed(1)} s`);
 const p = await psnr(n.out, i.out);
 check('same, iPhone path (bands, 36.75 MP > 16.7 MP): same size, same picture', mi.format === 'jpeg' && mi.width === 7000 && mi.height === 5250 && p > 38, `PSNR between paths ${p.toFixed(1)} dB (two JPEG encoders), ${i.secs.toFixed(1)} s`);
 const w = await resize(webp, 5000, true);

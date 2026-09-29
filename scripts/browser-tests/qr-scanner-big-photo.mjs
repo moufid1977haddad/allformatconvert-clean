@@ -13,9 +13,14 @@ const T = 'BIG-PHOTO-QR-' + Date.now();
 const qr = await sharp(await QRCode.toBuffer(T, { width: 900, margin: 4 })).toBuffer();
 const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'qrbig-')), 'IMG_48MP.jpg');
 fs.writeFileSync(f, await sharp({ create: { width: 8064, height: 6048, channels: 3, background: '#8899aa' }, limitInputPixels: false }).composite([{ input: qr, left: 3500, top: 2500 }]).jpeg({ quality: 90 }).toBuffer());
-const b = await engine.launch(); const p = await b.newPage();
+import { applyIosCanvasCap, iosCapHits, iosCapLabel } from './lib/ios-canvas-cap.mjs';
+const b = await engine.launch(); const qctx = await b.newContext();
+await applyIosCanvasCap(qctx); // P16: the iPhone's canvas limit, always
+const p = await qctx.newPage();
 await p.goto(origin + '/tools/qr-barcodes-tools/qr-scanner', { waitUntil: 'networkidle' });
 await p.locator('input[type=file]').first().setInputFiles(f);
 const got = await p.locator('[data-text]').textContent({ timeout: 60000 }).catch(() => null);
-console.log(got === T ? 'PASS' : 'FAIL', `(${engine.name()}) 48 MP photo: ${JSON.stringify(got)}`);
-await b.close(); process.exit(got === T ? 0 : 1);
+const hits = await iosCapHits(p);
+const okq = got === T && !hits.length;
+console.log(okq ? 'PASS' : 'FAIL', `(${engine.name()}, ${iosCapLabel()}) 48 MP photo: ${JSON.stringify(got)}${hits.length ? ' CANVAS OVER THE LIMIT: ' + hits.join(', ') : ''}`);
+await b.close(); process.exit(okq ? 0 : 1);

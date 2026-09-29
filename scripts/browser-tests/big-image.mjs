@@ -9,6 +9,7 @@ import { PDFDocument } from 'pdf-lib';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import { iosCanvasCapInit, applyIosCanvasCap, iosCapHits, iosCapLabel } from './lib/ios-canvas-cap.mjs';
 const origin = new URL(process.argv[2] || 'http://localhost:3100').origin;
 const arg = (k) => process.argv.find((a) => a.startsWith(`--${k}=`))?.split('=')[1];
 const engine = arg('browser') === 'firefox' ? firefox : arg('browser') === 'webkit' ? webkit : chromium;
@@ -52,6 +53,7 @@ async function psnr(src, buf) {
 
 const b = await engine.launch();
 const ctx = await b.newContext({ acceptDownloads: true });
+await applyIosCanvasCap(ctx); // P16: the iPhone's canvas limit, always (lib/ios-canvas-cap.mjs)
 // --bands: the iPhone path (no canvas over 16.7 MP) forced, in a browser that could have used one big canvas
 if (process.argv.includes('--bands')) await ctx.addInitScript(() => { window.__forceBands = true; });
 const page = await ctx.newPage();

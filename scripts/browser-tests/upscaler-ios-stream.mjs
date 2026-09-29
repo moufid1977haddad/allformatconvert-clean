@@ -11,6 +11,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { startLocalMediaService } from './lib/local-media-service.mjs';
+import { iosCanvasCapInit, applyIosCanvasCap, iosCapHits, iosCapLabel } from './lib/ios-canvas-cap.mjs';
 const origin = new URL(process.argv[2] || 'http://localhost:3100').origin;
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'upscale-ios-'));
 const W = 2990, H = 2000, SCALE = 4;
@@ -23,7 +24,7 @@ let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.l
 async function run(ios) {
   const ctx = await b.newContext({ acceptDownloads: true });
   await svc.routeTickets(ctx);
-  if (ios) await ctx.addInitScript(() => { window.__forceSafariCanvasCap = true; });
+  if (ios) await ctx.addInitScript(iosCanvasCapInit);
   const calls = [];
   await ctx.route('**/api/image-upscale', async (route) => {
     const body = JSON.parse(route.request().postData() || '{}');

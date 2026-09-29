@@ -7,6 +7,7 @@ import sharp from 'sharp';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { iosCanvasCapInit, applyIosCanvasCap, iosCapHits, iosCapLabel } from './lib/ios-canvas-cap.mjs';
 const origin = new URL(process.argv[2] || 'http://localhost:3100').origin;
 const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'heic-'));
@@ -16,7 +17,9 @@ fs.writeFileSync(fake, await sharp({ create: { width: 4032, height: 3024, channe
 const b = await engine.launch();
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 async function run(tool, file) {
-  const ctx = await b.newContext({ acceptDownloads: true }); const p = await ctx.newPage();
+  const ctx = await b.newContext({ acceptDownloads: true });
+  await applyIosCanvasCap(ctx); // P16: the iPhone's canvas limit, always (lib/ios-canvas-cap.mjs)
+  const p = await ctx.newPage();
   await p.goto(`${origin}/tools/image-tools/${tool}`, { waitUntil: 'networkidle' });
   await p.locator('input[type=file]').first().setInputFiles(file);
   await p.getByRole('button', { name: /Convert/ }).first().click();

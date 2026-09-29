@@ -75,28 +75,39 @@ export async function decodeToRaster(blob, dims, { onProgress = () => {}, forceB
   const big = dims && dims.width * dims.height > CANVAS_MAX_PIXELS;
   // Bands only where one canvas can't hold the image (iOS/iPadOS): elsewhere one canvas keeps the browser's own,
   // much faster, encoders. forceBands: set by the browser tests to run the iOS path in Firefox.
-  if (dims && (forceBands || (big && !(await canvasBeyondSafariCap()))) && (await bandDecodeWorks())) {
+  const needBands = !!dims && (forceBands || (big && !(await canvasBeyondSafariCap())));
+  if (needBands) {
     const { width: W, height: H } = dims;
     const bandH = Math.max(1, Math.min(H, forceBands && !big ? Math.ceil(H / 3) : Math.floor(CANVAS_MAX_PIXELS / W)));
+    const crop = await bandDecodeWorks();
+    // P16 (30/09): where the cropped decode is not right (Chromium: rotated JPEGs come back mirrored; any engine
+    // whose probe fails), the photo was refused ("too-big-for-canvas") instead of being processed. It is now decoded
+    // once as an ImageBitmap (not a canvas: no 16.7 MP limit) and copied band by band -- like forEachBand below.
+    const full = crop ? null : await createImageBitmap(blob);
+    if (full && (full.width !== W || full.height !== H)) { full.close(); throw new Error('decode-mismatch'); }
     const out = new Uint8ClampedArray(W * H * 4);
     const c = newCanvas(W, bandH), ctx = c.getContext('2d', { willReadFrequently: true });
     for (let y = 0; y < H; y += bandH) {
       const h = Math.min(bandH, H - y);
-      const bmp = await createImageBitmap(blob, 0, y, W, h);
-      if (bmp.width !== W || bmp.height !== h) { bmp.close(); throw new Error('decode-mismatch'); }
       ctx.clearRect(0, 0, W, bandH);
-      ctx.drawImage(bmp, 0, 0); bmp.close();
+      if (crop) {
+        const bmp = await createImageBitmap(blob, 0, y, W, h);
+        if (bmp.width !== W || bmp.height !== h) { bmp.close(); throw new Error('decode-mismatch'); }
+        ctx.drawImage(bmp, 0, 0); bmp.close();
+      } else ctx.drawImage(full, 0, y, W, h, 0, 0, W, h);
       out.set(ctx.getImageData(0, 0, W, h).data, y * W * 4);
       onProgress((y + h) / H);
     }
+    if (full) full.close();
     c.width = c.height = 1;
     return new Raster(W, H, null, out);
   }
   const bmp = await createImageBitmap(blob);
   const { width, height } = bmp;
   if (width * height > CANVAS_MAX_PIXELS && !(await canvasBeyondSafariCap())) {
+    // dims unknown (the page could not read the header): the size is known now, decode by bands from this bitmap
     bmp.close();
-    throw new Error('too-big-for-canvas');
+    return decodeToRaster(blob, { width, height }, { onProgress });
   }
   const c = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(width, height) : Object.assign(document.createElement('canvas'), { width, height });
   c.getContext('2d').drawImage(bmp, 0, 0);
@@ -124,6 +135,30 @@ export function canvasBeyondSafariCap() {
     })();
   }
   return bigCanvasProbe;
+}
+
+// Browser tests only (P16): the iPhone's canvas limit reproduced in a Worker, where the page's init script cannot
+// reach -- set when the page passes `canvasCap: true` (its window.__forceSafariCanvasCap). As on iOS, a canvas over
+// 16.7 MP gets no context, and drawing into or reading one that was enlarged past it fails. Same rules as the
+// page-side copy in scripts/browser-tests/lib/ios-canvas-cap.mjs.
+export function simulateIosCanvasCap() {
+  self.__forceSafariCanvasCap = true;
+  if (self.__iosCanvasCapInstalled) return;
+  self.__iosCanvasCapInstalled = true;
+  const over = (c) => c && c.width * c.height > CANVAS_MAX_PIXELS;
+  const refuse = () => { self.__iosCanvasCapHits = (self.__iosCanvasCapHits || 0) + 1; };
+  for (const C of [self.OffscreenCanvas, self.HTMLCanvasElement]) {
+    if (!C) continue;
+    const get = C.prototype.getContext;
+    C.prototype.getContext = function (...a) { if (over(this)) { refuse(); return null; } return get.apply(this, a); };
+  }
+  for (const X of [self.OffscreenCanvasRenderingContext2D, self.CanvasRenderingContext2D]) {
+    if (!X) continue;
+    for (const m of ['drawImage', 'getImageData', 'putImageData']) {
+      const f = X.prototype[m];
+      X.prototype[m] = function (...a) { if (over(this.canvas)) { refuse(); throw new Error('Simulated iPhone canvas limit: canvas over 16,777,216 pixels'); } return f.apply(this, a); };
+    }
+  }
 }
 
 export function hasAlpha(rgba) { for (let i = 3; i < rgba.length; i += 4) if (rgba[i] < 255) return true; return false; }

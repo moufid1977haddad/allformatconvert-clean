@@ -3,8 +3,11 @@
 import { chromium, firefox, webkit } from '@playwright/test';
 import sharp from 'sharp';
 import fs from 'node:fs';
+import { iosCanvasCapInit, applyIosCanvasCap, iosCapHits, iosCapLabel } from './lib/ios-canvas-cap.mjs';
 const [entry, file] = process.argv.slice(2);
-const b = await (process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium).launch(); const ctx = await b.newContext({ acceptDownloads: true }); const p = await ctx.newPage();
+const b = await (process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium).launch(); const ctx = await b.newContext({ acceptDownloads: true });
+await applyIosCanvasCap(ctx); // P16: the iPhone's canvas limit, always (lib/ios-canvas-cap.mjs)
+const p = await ctx.newPage();
 if (entry.includes('_vercel_share')) await p.goto(entry);
 await p.goto(new URL(entry).origin + '/tools/image-tools/image-resizer', { waitUntil: 'networkidle' });
 await p.locator('input[type=file]').setInputFiles(file);

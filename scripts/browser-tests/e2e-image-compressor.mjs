@@ -6,6 +6,7 @@ import sharp from 'sharp';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { iosCanvasCapInit, applyIosCanvasCap, iosCapHits, iosCapLabel } from './lib/ios-canvas-cap.mjs';
 
 const args = process.argv.slice(2);
 const entry = args[0];
@@ -26,6 +27,7 @@ function psnrOnWhite(a, b) {
 
 const browser = await engine.launch();
 const ctx = await browser.newContext({ acceptDownloads: true });
+await applyIosCanvasCap(ctx); // P16: the iPhone's canvas limit, always (lib/ios-canvas-cap.mjs)
 const page = await ctx.newPage();
 if (entry.includes('_vercel_share')) await page.goto(entry);
 await page.goto(`${origin}/tools/image-tools/image-compressor`, { waitUntil: 'networkidle' });

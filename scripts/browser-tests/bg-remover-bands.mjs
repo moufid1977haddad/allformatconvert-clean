@@ -8,6 +8,7 @@ import sharp from 'sharp';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import { iosCanvasCapInit, applyIosCanvasCap, iosCapHits, iosCapLabel } from './lib/ios-canvas-cap.mjs';
 const origin = new URL(process.argv[2] || 'http://localhost:3100').origin;
 const arg = (k) => process.argv.find((a) => a.startsWith(`--${k}=`))?.split('=')[1];
 const engine = arg('browser') === 'firefox' ? firefox : arg('browser') === 'webkit' ? webkit : chromium;
@@ -29,6 +30,7 @@ const b = await engine.launch();
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 for (const [label, file, W, H] of cases) {
   const ctx = await b.newContext({ acceptDownloads: true });
+  await applyIosCanvasCap(ctx); // P16: the iPhone's canvas limit, always (lib/ios-canvas-cap.mjs)
   await ctx.addInitScript(() => {
     window.__maxCanvas = 0;
     const d = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, 'height');
