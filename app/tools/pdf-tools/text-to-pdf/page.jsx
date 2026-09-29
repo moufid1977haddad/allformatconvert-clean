@@ -1,6 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { textToPdf } from '../../../lib/textPdf';
 import SeoContent from '../../../components/SeoContent';
 
 export default function TextToPdfPage() {
@@ -28,51 +28,8 @@ export default function TextToPdfPage() {
     setStatus('Converting...');
     setDownloadUrl(null);
     try {
-      const pdfDoc = await PDFDocument.create();
-      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-      const fontSize = 12;
-      const margin = 50;
-      const pageWidth = 595;
-      const pageHeight = 842;
-      const maxWidth = pageWidth - margin * 2;
-      const lineHeight = fontSize * 1.5;
-      // Measured 29/09: every .txt saved on Windows (CRLF line endings) and any
-      // tab failed with "WinAnsi cannot encode" -- the standard PDF font has no
-      // glyph for control characters. Line endings are normalised and a tab
-      // becomes 4 spaces. Characters the font cannot draw (non-Latin scripts,
-      // emoji) are listed plainly instead of the library's cryptic error.
-      const clean = text.replace(/\r\n?/g, '\n').replace(/\t/g, '    ');
-      const unsupported = [...new Set(Array.from(clean.replace(/\n/g, '')))].filter(ch => { try { font.encodeText(ch); return false; } catch { return true; } });
-      if (unsupported.length) {
-        throw new Error(`These characters can't be written with the built-in PDF font (Latin script only): ${unsupported.slice(0, 20).join(' ')}${unsupported.length > 20 ? ' …' : ''}. Remove or replace them and convert again.`);
-      }
-      const lines = [];
-      clean.split('\n').forEach(paragraph => {
-        const words = paragraph.split(' ');
-        let currentLine = '';
-        words.forEach(word => {
-          const testLine = currentLine ? currentLine + ' ' + word : word;
-          const width = font.widthOfTextAtSize(testLine, fontSize);
-          if (width > maxWidth && currentLine) {
-            lines.push(currentLine);
-            currentLine = word;
-          } else {
-            currentLine = testLine;
-          }
-        });
-        lines.push(currentLine);
-      });
-      let page = pdfDoc.addPage([pageWidth, pageHeight]);
-      let y = pageHeight - margin;
-      for (const line of lines) {
-        if (y < margin + lineHeight) {
-          page = pdfDoc.addPage([pageWidth, pageHeight]);
-          y = pageHeight - margin;
-        }
-        page.drawText(line, { x: margin, y, size: fontSize, font, color: rgb(0, 0, 0) });
-        y -= lineHeight;
-      }
-      const pdfBytes = await pdfDoc.save();
+      // Any script since 30/09 (lib/textPdf.js): Noto fonts, shaping by fontkit, right-to-left paragraphs.
+      const pdfBytes = await textToPdf(text, { onPhase: setStatus });
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setDownloadUrl(URL.createObjectURL(blob));
       setStatus('');
@@ -107,14 +64,14 @@ export default function TextToPdfPage() {
           {downloadUrl && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
               <div className="text-green-400 text-xl font-bold mb-3">Done!</div>
-              <a href={downloadUrl} download="document.pdf" className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition">Download PDF</a>
+              <a href={downloadUrl} download={file ? file.name.replace(/\.[^.]+$/, '') + '.pdf' : 'document.pdf'} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition">Download PDF</a>
             </div>
           )}
         </div>
       </div>
       <SeoContent
         title="Text to PDF"
-        description="Text to PDF converts plain text — pasted directly or from an uploaded .txt file — into a PDF using the pdf-lib library entirely in your browser, with automatic word-wrapping and page breaks. Your content is never uploaded to a server. Font size (12pt Helvetica), margins, and page size (A4) are fixed and can't be customized, and there's no document title field. Windows line endings and tabs are handled; the built-in PDF font covers Latin-script text (Western European accents, €), and characters outside it, such as Cyrillic, Greek, Asian scripts or emoji, are listed instead of producing a broken file."
+        description="Text to PDF converts plain text — pasted directly or from an uploaded .txt file — into a PDF entirely in your browser, with automatic word-wrapping and page breaks — in almost any language: Latin, Greek and Cyrillic alphabets, Vietnamese, Arabic and Hebrew (right to left), Hindi, Tamil, Thai, Chinese, Japanese and Korean, with the free Noto fonts. Your content is never uploaded to a server. Font size (12pt Helvetica), margins, and page size (A4) are fixed and can't be customized, and there's no document title field. Windows line endings and tabs are handled; the built-in PDF font covers Latin-script text (Western European accents, €), and characters outside it, such as Cyrillic, Greek, Asian scripts or emoji, are listed instead of producing a broken file."
         howTo={[
           "Choose 'Paste Text' to type or paste content, or 'Upload File' to select a .txt file.",
           "Review the text — uploading a file auto-fills the text area with its content.",
@@ -123,9 +80,10 @@ export default function TextToPdfPage() {
         ]}
         faqs={[
           { q: "Is Text to PDF completely free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I adjust font size, margins, or the document title?", a: "No — every PDF uses a fixed 12pt Helvetica font, fixed margins, and standard A4-sized pages; there's no title field or style settings." },
+          { q: "Which languages and alphabets work?", a: "Latin alphabets (with every accent, Polish, Turkish, Vietnamese…), Greek, Cyrillic, Arabic and Hebrew (written right to left, lines aligned right), Hindi and other Devanagari languages, Tamil, Thai, Chinese, Japanese and Korean (Bengali is not supported yet). Each character is drawn with a matching Noto font, and only the letters used are embedded, so the PDF stays small. For Chinese, Japanese or Korean only the parts of the font your text needs are downloaded. Emoji are not supported." },
+          { q: "Can I adjust font size, margins, or the document title?", a: "No — every PDF uses 12 pt Noto Sans, fixed margins and standard A4 pages; there's no title field or style settings." },
           { q: "What file types can I upload?", a: "Only plain .txt files — the content is read as text and filled into the paste box." },
-          { q: "Is my text uploaded to a server?", a: "No, the PDF is generated entirely in your browser using the pdf-lib library." }
+          { q: "Is my text uploaded to a server?", a: "No, the PDF is generated entirely in your browser. Only the fonts are downloaded (never your text)." }
         ]}
         tips={[
           "Line breaks in your original text are preserved as paragraph breaks; long lines wrap automatically to fit the page width.",
