@@ -51,7 +51,7 @@ export default function Page() {
             {loading ? 'Converting...' : 'Convert to PDF'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <a href={result} download="converted.pdf" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download PDF</a>}
+          {result && <a href={result} download={files[0] ? `${files[0].name.replace(/\.[^.]+$/, '')}${files.length > 1 ? `-and-${files.length - 1}-more` : ''}.pdf` : 'images.pdf'} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download PDF</a>}
         </div>
       </div>
       <SeoContent

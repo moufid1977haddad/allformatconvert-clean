@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { formatBytes } from '../../../lib/formatBytes';
 export default function FileComparatorPage() {
   const [file1, setFile1] = useState(null);
   const [file2, setFile2] = useState(null);
@@ -35,7 +36,7 @@ export default function FileComparatorPage() {
     }
     setBusy(false);
   };
-  const formatSize = (b) => b < 1024 ? b + ' B' : b < 1024*1024 ? (b/1024).toFixed(2) + ' KB' : (b/(1024*1024)).toFixed(2) + ' MB';
+  const formatSize = formatBytes;
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { decodeAnyAudio } from '../../../lib/decodeAudio';
 import { AUDIO_ACCEPT, checkedDataURL, encryptedMusicMessage } from '../../../lib/mediaSupport';
+import { saveBlob } from '../../../lib/download';
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 200;
@@ -135,12 +136,11 @@ export default function AudioWaveformPage() {
     const canvas = canvasRef.current;
     // Never hand over the empty placeholder canvas as if it were a waveform.
     if (!canvas || !audioBufferRef.current) { setError('Load an audio file first — there is no waveform to save yet.'); return; }
-    let url;
-    try { url = checkedDataURL(canvas, 'image/png'); } catch (e) { setError(e.message); return; }
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = (file?.name.replace(/\.[^.]+$/, '') || 'waveform') + '-waveform.png';
-    a.click();
+    // 30/09: a Blob, not a data: URL (iOS saves nothing from a data: link).
+    canvas.toBlob((blob) => {
+      if (!blob || !blob.size) { setError('The waveform image could not be made on this device.'); return; }
+      saveBlob(blob, (file?.name.replace(/\.[^.]+$/, '') || 'waveform') + '-waveform.png');
+    }, 'image/png');
   };
 
   return (

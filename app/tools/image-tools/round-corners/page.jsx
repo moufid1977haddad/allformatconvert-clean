@@ -1,12 +1,16 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf } from '../../../lib/imageOutput';
+import { rasterFromRGBA } from '../../../lib/bigImage';
 import { roundedRectPath } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 
 export default function RoundCornersPage() {
   const [image, setImage] = useState(null);
   const [radius, setRadius] = useState(20);
+  const [file, setFile] = useState(null);
+  const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const inputRef = useRef();
@@ -15,29 +19,29 @@ export default function RoundCornersPage() {
     const f = e.target.files[0];
     e.target.value = '';
     if (!f) return;
-    setImage(URL.createObjectURL(f));
+    setImage(URL.createObjectURL(f)); setFile(f);
     setResult(null);
     setError('');
   };
 
-  const apply = () => {
-    setError('');
-    const img = new Image();
-    img.onerror = () => setError('Could not load image file');
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      const r = (radius / 100) * Math.min(img.width, img.height) / 2;
-      // True circular arcs (as CSS border-radius); the quadratic curves used before
-      // bulged about 6 % of the radius towards the corner (29/09).
-      roundedRectPath(ctx, 0, 0, img.width, img.height, r);
-      ctx.clip();
-      ctx.drawImage(img, 0, 0);
-      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
-    };
-    img.src = image;
+  const apply = async () => {
+    setError(''); setResult(null);
+    if (!file) return;
+    setBusy(true);
+    try {
+      const raster = await loadRaster(file);
+      const W = raster.width, H = raster.height;
+      const r = (radius / 100) * Math.min(W, H) / 2;
+      const out = await renderFull(raster, W, H, (ctx, drawSource) => {
+        // True circular arcs (as CSS border-radius); the quadratic curves used before
+        // bulged about 6 % of the radius towards the corner (29/09).
+        roundedRectPath(ctx, 0, 0, W, H, r);
+        ctx.clip();
+        drawSource(ctx);
+      });
+      setResult(resultOf(await encodeRaster(out, 'image/png'), file.name, 'rounded'));
+    } catch (e) { setError(e?.message || 'Could not process this image.'); }
+    setBusy(false);
   };
 
   return (
@@ -51,9 +55,9 @@ export default function RoundCornersPage() {
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
           <div><label className="block text-sm text-neutral-500 mb-1">Corner Radius: {radius}%</label><input type="range" min="1" max="50" value={radius} onChange={e => setRadius(parseInt(e.target.value))} className="w-full" /></div>
-          <button onClick={apply} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Apply Round Corners</button>
+          <button onClick={apply} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Apply Round Corners</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="rounded.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
       <SeoContent

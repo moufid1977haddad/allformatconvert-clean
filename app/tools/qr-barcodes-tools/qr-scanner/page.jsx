@@ -50,8 +50,11 @@ export default function QrScannerPage() {
       await new Promise((ok, ko) => { img.onload = ok; img.onerror = ko; img.src = url; });
       // Full resolution first (small or distant codes), then downscaled.
       jsqrRef.current ??= (await import('jsqr')).default;
-      const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
-      const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0);
+      // At most 12 Mpx (30/09): a 24/48 MP iPhone photo on one canvas fails on iOS (16.7 Mpx per canvas at most);
+      // a QR code in such a photo stays several pixels per module at 12 Mpx.
+      const k = Math.min(1, Math.sqrt(12e6 / (img.naturalWidth * img.naturalHeight)));
+      const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(img.naturalWidth * k)); c.height = Math.max(1, Math.round(img.naturalHeight * k));
+      const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, c.width, c.height);
       const d = ctx.getImageData(0, 0, c.width, c.height);
       const code = jsqrRef.current(d.data, d.width, d.height) || await decode(img, img.naturalWidth, img.naturalHeight);
       if (code) found(code.data); else setStatus('No QR code found in image');
@@ -99,6 +102,32 @@ export default function QrScannerPage() {
     window.addEventListener('paste', onPaste); return () => window.removeEventListener('paste', onPaste);
   }, []);
 
+  // iPhone (owner, 30/09): a long press on the drop zone offered no "Paste" -- iOS only shows it on editable
+  // fields. So, as QR scanners with a paste feature do (scanqr.org, qrcodescan.in: a "Paste" button, and an
+  // editable box), two ways: the button reads the clipboard (Async Clipboard API, Safari 13.1+: iOS shows its own
+  // "Paste" confirmation), and the box below is editable, so a long press there offers "Paste".
+  const pasteButton = async () => {
+    setResult(''); setStatus('');
+    if (!navigator.clipboard?.read) { setStatus('This browser does not let pages read an image from the clipboard. Long-press (or right-click) the paste box below and choose Paste, or upload the image.'); return; }
+    try {
+      for (const item of await navigator.clipboard.read()) {
+        const type = item.types.find((t) => t.startsWith('image/'));
+        if (type) { const blob = await item.getType(type); scanFile(new File([blob], 'pasted.' + type.split('/')[1], { type })); return; }
+      }
+      setStatus('The clipboard holds no image. Copy the QR code image first (in Photos: Share, then Copy), then tap Paste image again.');
+    } catch (e) {
+      setStatus(e?.name === 'NotAllowedError' ? 'Pasting was not allowed. Tap Paste image again and choose Paste when your browser asks, or long-press the paste box below.' : 'The clipboard could not be read. Long-press the paste box below and choose Paste, or upload the image.');
+    }
+  };
+  const onPasteBox = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    const cd = e.clipboardData;
+    const f = [...(cd?.files || [])].find((x) => x.type.startsWith('image/'))
+      || [...(cd?.items || [])].find((i) => i.kind === 'file' && i.type.startsWith('image/'))?.getAsFile();
+    e.currentTarget.textContent = '';
+    if (f) scanFile(f); else setStatus('What you pasted is not an image. Copy the QR code image itself, then paste it here.');
+  };
+
   const isLink = /^https?:\/\/\S+$/i.test(result);
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -106,11 +135,12 @@ export default function QrScannerPage() {
         <h1 className="text-3xl font-bold text-center mb-2">QR Code Scanner</h1>
         <p className="text-neutral-500 text-center mb-8">Scan QR codes with your camera or from an image</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {camera
               ? <button type="button" onClick={stopCamera} className="bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl py-3 font-semibold">Stop camera</button>
               : <button type="button" onClick={() => startCamera()} className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl py-3 font-semibold">Scan with camera</button>}
             <button type="button" onClick={() => inputRef.current.click()} className="bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl py-3 font-semibold">Upload an image</button>
+            <button type="button" onClick={pasteButton} className="bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl py-3 font-semibold">Paste image</button>
           </div>
           <div className={camera ? 'space-y-2' : 'hidden'}>
             <video ref={videoRef} playsInline muted className="w-full rounded-xl bg-black" aria-label="Camera view" />
@@ -130,6 +160,17 @@ export default function QrScannerPage() {
             <p className="text-neutral-500">Click, drop or paste (Ctrl+V) a QR code image here</p>
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files[0]; e.target.value = ''; scanFile(f); }} />
           </div>
+          <div
+            contentEditable
+            suppressContentEditableWarning
+            role="textbox"
+            aria-label="Paste box: paste a QR code image here"
+            data-pastebox
+            onPaste={onPasteBox}
+            onInput={(e) => { e.currentTarget.textContent = ''; }}
+            className="border border-neutral-200 rounded-xl px-4 py-3 text-center text-sm text-neutral-400 focus:outline-none focus:border-indigo-500 empty:before:content-[attr(data-placeholder)]"
+            data-placeholder="Paste box — on a phone, long-press here and choose Paste"
+          />
           {status && <p className="text-center text-amber-700 text-sm" role="status">{loading ? 'Scanning...' : status}</p>}
           {result && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 space-y-3" data-result>
@@ -148,7 +189,7 @@ export default function QrScannerPage() {
         title="QR Code Scanner"
         description="QR Code Scanner is a free online tool that decodes QR codes live from your camera or from any image, directly in your browser — no software installation, no registration, and no image or video ever leaves your device. Scan with your phone's or laptop's camera, or upload, drop or paste a photo or screenshot, and instantly retrieve the URL, text, or other data it contains."
         howTo={[
-          "Click \"Scan with camera\" and allow the camera, then point it at the QR code — it stops by itself when the code is read. Or upload, drop or paste an image containing a QR code.",
+          "Click \"Scan with camera\" and allow the camera, then point it at the QR code — it stops by itself when the code is read. Or upload, drop or paste an image containing a QR code — on a phone, copy the image (in Photos: Share, then Copy) and tap \"Paste image\", or long-press the paste box and choose Paste.",
           "Wait a moment while the tool decodes the code locally in your browser.",
           "View the decoded text or URL displayed on screen.",
           "Click \"Copy\" to copy the result, or \"Open link\" for a web address."

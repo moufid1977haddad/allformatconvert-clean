@@ -8,6 +8,7 @@ import { ffmpegAudioDuration } from '../../../lib/audioDuration';
 import { runMediaJob, mediaServiceConfigured } from '../../../lib/mediaJob';
 import IosOriginalNote from '../../../components/IosOriginalNote';
 import PlayablePreview from '../../../components/PlayablePreview';
+import { formatBytes } from '../../../lib/formatBytes';
 
 // Precise cut, 28/09: re-encoding in ffmpeg.wasm measured ~3.7 s per second of 1080p in Chrome but ~29 s in
 // Firefox (292 s for 10 s). The reference way to cut fast AND exact (LosslessCut's "smart cut") re-encodes only
@@ -42,7 +43,7 @@ const MIME_BY_EXT = {
   '3gp': 'video/3gpp', mpg: 'video/mpeg', mpeg: 'video/mpeg', ts: 'video/mp2t',
 };
 
-const fmtMB = (b) => (b / (1024 * 1024)).toFixed(b < 10 * 1024 * 1024 ? 1 : 0) + ' MB';
+const fmtMB = formatBytes;
 const fmtSecs = (s) => (s < 10 ? s.toFixed(1) : Math.round(s)) + 's';
 
 export default function VideoTrimmerPage() {
@@ -203,8 +204,13 @@ export default function VideoTrimmerPage() {
         setResult({ url: URL.createObjectURL(blob), name: 'trimmed_' + file.name.replace(/\.[^.]+$/, '') + '.mp4', size: blob.size, asked: len, actual: null, precise: true, onService: true });
         return;
       }
+      // Precise, 30/09 (real Safari: 118 frames for 120): "-ss" before "-i" is shifted by the container's start time,
+      // so when the sound starts before the video (B-frames, phone MOVs) the cut landed 1-2 frames late and "-t" cut
+      // the end. Cut on the file's own clock instead (-copyts): coarse seek 5 s before (speed only), then trim/atrim
+      // at the exact start and length -- video and sound both last exactly `len` (same as our ffmpeg service).
+      const lo = Math.max(0, start - 0.0025).toFixed(4), hi = (start + len - 0.0025).toFixed(4);
       const code = await ffmpeg.exec(precise
-        ? ['-ss', String(start), '-i', inputName, '-t', String(len), '-map', '0:v:0', '-map', '0:a:0?', '-sn', '-dn', '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', outputName]
+        ? ['-copyts', '-ss', Math.max(0, start - 5).toFixed(3), '-i', inputName, '-map', '0:v:0', '-map', '0:a:0?', '-sn', '-dn', '-vf', `trim=start=${lo}:end=${hi},setpts=PTS-STARTPTS,scale=trunc(iw/2)*2:trunc(ih/2)*2`, '-af', `atrim=start=${start.toFixed(4)}:end=${(start + len).toFixed(4)},asetpts=PTS-STARTPTS`, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', outputName]
         : ['-ss', String(start), '-i', inputName, '-t', String(len), '-c', 'copy', '-avoid_negative_ts', 'make_zero', outputName]);
       if (cancelledRef.current) return;
 

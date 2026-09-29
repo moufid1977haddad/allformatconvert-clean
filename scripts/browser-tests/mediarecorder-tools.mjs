@@ -1,3 +1,5 @@
+// SUPERSEDED on 30/09: Video Merger, Filter, Rotator and Resizer no longer record a <canvas> with MediaRecorder
+// (WebM on iPhone, real time, full screen). See scripts/browser-tests/video-tools-mp4.mjs. Kept for history.
 // The four canvas + MediaRecorder video tools (Video Merger, Filter, Rotator, Resizer), real pages: a short source
 // video is loaded, the tool is run, and the downloaded file is reopened here by ffprobe/ffmpeg -- container matching
 // the extension, video stream present with the expected size, duration close to the source, decoded to the end

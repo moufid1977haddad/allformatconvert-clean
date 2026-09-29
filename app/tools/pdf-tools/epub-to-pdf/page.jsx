@@ -5,6 +5,7 @@ import { buildChapterHtml, firstPageShowsCover } from '../../../lib/ebookHtml';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
+import { formatBytes } from '../../../lib/formatBytes';
 
 const escapeHtml = (str) => String(str)
   .replace(/&/g, '&amp;')
@@ -196,7 +197,7 @@ export default function EpubToPdfPage() {
       // What is uploaded is the prepared HTML (chapters + inlined images), which can be
       // far larger than the book file itself -- so that is what the ceiling applies to.
       if (htmlBlob.size > officeMaxBytes(MAX_HTML_STAGED_BYTES)) {
-        throw new Error(`This book is ${(htmlBlob.size / (1024 * 1024)).toFixed(1)} MB once prepared for conversion (images included), but this tool accepts up to ${officeMaxLabel(MAX_HTML_STAGED_BYTES)}.`);
+        throw new Error(`This book is ${formatBytes(htmlBlob.size)} once prepared for conversion (images included), but this tool accepts up to ${officeMaxLabel(MAX_HTML_STAGED_BYTES)}.`);
       }
       setStage(null);
       const result = await convertOffice({ file: new File([htmlBlob], 'book.html', { type: 'text/html' }), endpoint: '/api/convert-html-to-pdf', onStage: setStage });

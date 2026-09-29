@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
 import { MAX_TOTAL_SIZE_BYTES, MAX_TOTAL_SIZE_LABEL, MOBILE_MAX_TOTAL_SIZE_BYTES, MOBILE_MAX_TOTAL_SIZE_LABEL } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
+import { formatBytes } from '../../../lib/formatBytes';
 
 export default function ZipCreatorPage() {
   const [files, setFiles] = useState([]);
@@ -48,7 +49,7 @@ export default function ZipCreatorPage() {
 
   const createZip = () => {
     if (files.length === 0) return;
-    if (overSizeLimit) { setError(`These files add up to ${(totalSize / (1024 * 1024)).toFixed(0)} MB, over the ${maxTotalLabel} limit${isMobile ? ' on this device' : ''}. Remove a file or zip in smaller batches.`); return; }
+    if (overSizeLimit) { setError(`These files add up to ${formatBytes(totalSize)}, over the ${maxTotalLabel} limit${isMobile ? ' on this device' : ''}. Remove a file or zip in smaller batches.`); return; }
     setLoading(true);
     setError('');
     setStatus('');
@@ -105,7 +106,7 @@ export default function ZipCreatorPage() {
                   <button onClick={() => removeFile(i)} disabled={loading} className="text-red-400 hover:text-red-300 ml-2">Remove</button>
                 </div>
               ))}
-              <p className={`text-xs text-right ${overSizeLimit ? 'text-red-500' : 'text-neutral-400'}`}>{(totalSize / (1024 * 1024)).toFixed(1)} MB total</p>
+              <p className={`text-xs text-right ${overSizeLimit ? 'text-red-500' : 'text-neutral-400'}`}>{formatBytes(totalSize)} total</p>
             </div>
           )}
           <div className="flex items-center justify-between gap-3">

@@ -1,6 +1,6 @@
 // BMP, GIF, ICO, TIFF and PDF output for Image Converter -- the outputs CloudConvert and Convertio offer beyond
 // PNG/JPG/WebP/AVIF (docs/audit/RAPPORT-licence-et-ameliorations.md §5). Runs in the worker, on the decoded
-// OffscreenCanvas. Every result is checked by its own signature bytes before it is handed over.
+// image (a Raster: app/lib/bigImage.js -- no canvas above Safari's 16.7 MP cap). Every result is checked by its own signature bytes before it is handed over.
 //   BMP  -- 24-bit, bottom-up, transparency flattened on white (32-bit BMP alpha is not read by most viewers)
 //   GIF  -- 256-colour palette (Wu quantiser) with Floyd-Steinberg dithering, the way ImageMagick (CloudConvert's
 //           engine) dithers by default; 1-bit transparency (image-q MIT, gifenc MIT)
@@ -8,8 +8,10 @@
 //   TIFF -- uncompressed RGBA, alpha kept (utif2, MIT)
 //   PDF  -- one page the size of the image at 72 dpi; JPEG inside when opaque, PNG when transparent (pdf-lib, MIT)
 
+import { hasAlpha, downscaleRGBA, encodeJpegWasm, encodePngRGBA } from '../../../lib/bigImage';
+import { checkedBlob } from '../../../lib/mediaSupport';
+
 const u8 = async (blob) => new Uint8Array(await blob.arrayBuffer());
-const hasAlpha = (rgba) => { for (let i = 3; i < rgba.length; i += 4) if (rgba[i] < 255) return true; return false; };
 const startsWith = (b, sig) => sig.every((v, i) => b[i] === v);
 function verified(bytes, sig, what, type) {
   if (!bytes || bytes.length < 16 || !startsWith(bytes, sig)) throw new Error(`The ${what} encoder produced no valid file.`);
@@ -106,18 +108,23 @@ async function encodeGif(rgba, w, h, onProgress) {
 }
 
 const ICO_SIZES = [16, 32, 48, 64, 128, 256];
-async function encodeIco(canvas, w, h) {
+async function encodeIco(raster) {
+  const { width: w, height: h } = raster;
   const side = Math.max(w, h);
   const sizes = ICO_SIZES.filter((s) => s <= side);
   if (!sizes.length) sizes.push(16);
+  // One 512 px (or smaller) copy first: every icon size is scaled from it, never from a canvas of the full photo.
+  const k0 = Math.min(1, 512 / side), bw = Math.max(1, Math.round(w * k0)), bh = Math.max(1, Math.round(h * k0));
+  const base = new OffscreenCanvas(bw, bh);
+  base.getContext('2d').putImageData(new ImageData(k0 < 1 ? downscaleRGBA(raster.rgba(), w, h, bw, bh) : new Uint8ClampedArray(raster.rgba()), bw, bh), 0, 0);
   const entries = [];
   for (const s of sizes) {
     // Square icon: the image fitted and centred, transparent around it (never stretched).
     const c = new OffscreenCanvas(s, s), ctx = c.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     const k = s / side, dw = Math.max(1, Math.round(w * k)), dh = Math.max(1, Math.round(h * k));
-    const bmp = await createImageBitmap(canvas, { resizeWidth: dw, resizeHeight: dh, resizeQuality: 'high' });
-    ctx.drawImage(bmp, Math.floor((s - dw) / 2), Math.floor((s - dh) / 2)); bmp.close();
+    ctx.drawImage(base, Math.floor((s - dw) / 2), Math.floor((s - dh) / 2), dw, dh);
     const png = await u8(await c.convertToBlob({ type: 'image/png' }));
     if (!startsWith(png, [0x89, 0x50, 0x4e, 0x47])) throw new Error('The icon encoder produced no valid image.');
     entries.push({ s, png });
@@ -145,12 +152,13 @@ async function encodeTiff(rgba, w, h) {
   return verified(bytes, bytes[0] === 0x4d ? [0x4d, 0x4d, 0x00, 0x2a] : [0x49, 0x49, 0x2a, 0x00], 'TIFF', 'image/tiff');
 }
 
-async function encodePdf(canvas, rgba, w, h, quality) {
+async function encodePdf(raster, rgba, w, h, quality, onProgress) {
   const { PDFDocument } = await import('pdf-lib');
   const doc = await PDFDocument.create();
   let img;
-  if (hasAlpha(rgba)) img = await doc.embedPng(await u8(await canvas.convertToBlob({ type: 'image/png' })));
-  else img = await doc.embedJpg(await u8(await canvas.convertToBlob({ type: 'image/jpeg', quality: Math.max(0.5, quality / 100) })));
+  const q = Math.max(0.5, quality / 100);
+  if (hasAlpha(rgba)) img = await doc.embedPng(await u8(raster.canvas ? await checkedBlob(raster.canvas, 'image/png') : await encodePngRGBA(rgba, w, h, onProgress)));
+  else img = await doc.embedJpg(await u8(raster.canvas ? await checkedBlob(raster.canvas, 'image/jpeg', q) : await encodeJpegWasm(rgba, w, h, Math.round(q * 100))));
   const page = doc.addPage([w, h]); // 1 px = 1 pt: the page is the image, at 72 dpi
   page.drawImage(img, { x: 0, y: 0, width: w, height: h });
   return verified(await doc.save(), [0x25, 0x50, 0x44, 0x46], 'PDF', 'application/pdf');
@@ -159,14 +167,15 @@ async function encodePdf(canvas, rgba, w, h, quality) {
 export const EXTRA_FORMATS = ['bmp', 'gif', 'ico', 'tiff', 'pdf'];
 
 // Returns { blob, note } -- note says what the format changed (flattened, palette, icon sizes).
-export async function encodeExtra(format, canvas, width, height, quality, onProgress = () => {}) {
-  const rgba = canvas.getContext('2d').getImageData(0, 0, width, height).data;
+export async function encodeExtra(format, raster, quality, onProgress = () => {}) {
+  const { width, height } = raster;
+  const rgba = raster.rgba();
   switch (format) {
     case 'bmp': return { blob: encodeBmp(rgba, width, height), note: hasAlpha(rgba) ? 'transparency flattened onto white (BMP)' : '' };
     case 'gif': return { blob: await encodeGif(rgba, width, height, onProgress), note: 'reduced to 256 colours with dithering (GIF limit)' };
-    case 'ico': { const r = await encodeIco(canvas, width, height); return { blob: r.blob, note: `icon sizes ${r.sizes.join(', ')} px` }; }
+    case 'ico': { const r = await encodeIco(raster); return { blob: r.blob, note: `icon sizes ${r.sizes.join(', ')} px` }; }
     case 'tiff': return { blob: await encodeTiff(rgba, width, height), note: '' };
-    case 'pdf': return { blob: await encodePdf(canvas, rgba, width, height, quality), note: '' };
+    case 'pdf': return { blob: await encodePdf(raster, rgba, width, height, quality, onProgress), note: '' };
     default: throw new Error('Unknown output format.');
   }
 }

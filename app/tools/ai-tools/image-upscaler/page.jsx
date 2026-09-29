@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { runStagedToolResult, mediaServiceConfigured, MediaJobError } from '../../../lib/mediaJob';
 import { webgpuAvailable, readImage, localOutputProblem, upscaleInBrowser, serverSecondsFor, serverNeedsParts, upscaleOnServerInParts } from '../../../lib/localUpscale';
+import { formatBytes } from '../../../lib/formatBytes';
 
 // Input ceiling, the free offers' level (iLoveIMG 6 Mpx, Upscale.media 6.25 Mpx without an account; 28/09),
 // checked here BEFORE any work. The same on our server (UPSCALE_MAX_INPUT_PIXELS) and on this device.
@@ -76,7 +77,7 @@ export default function ImageUpscalerPage() {
     // A large image goes in bands, each well within the server's time (see localUpscale.js).
     if (dims && serverNeedsParts(dims.w, dims.h, scale)) {
       const r = await upscaleOnServerInParts(file, scale, async (f, i, n) => (await one(f, ` (part ${i + 1} of ${n})`)).blob, { signal: ac.signal });
-      return { blob: r.blob, w: r.width, h: r.height };
+      return { blob: r.blob, w: r.width, h: r.height, preview: r.preview };
     }
     const { json, blob } = await one(file);
     return { blob, w: json.width, h: json.height };
@@ -109,7 +110,7 @@ export default function ImageUpscalerPage() {
               if (done >= 2 && etaSeconds > serverEst * 2 && etaSeconds > 60) setOfferServer(serverEst);
             },
           });
-          out = { blob: r.blob, w: r.width, h: r.height };
+          out = { blob: r.blob, w: r.width, h: r.height, preview: r.preview };
         } catch (e) {
           if (e?.name === 'AbortError' && !serverNowRef.current) throw e;
           // The visitor chose the server, or the GPU failed: our server takes over.
@@ -119,7 +120,8 @@ export default function ImageUpscalerPage() {
         }
       }
       if (!out) out = await runOnServer(ac);
-      setResult({ url: URL.createObjectURL(out.blob), size: out.blob.size, w: out.w, h: out.h });
+      // A result too big for this device to show (iPhone, streamed PNG) is shown through its small preview.
+      setResult({ url: URL.createObjectURL(out.blob), previewUrl: out.preview ? URL.createObjectURL(out.preview) : null, size: out.blob.size, w: out.w, h: out.h });
     } catch (e) {
       if (!((e instanceof MediaJobError && e.code === 'cancelled') || e?.name === 'AbortError')) setError(e?.message || 'Upscaling failed. Please try again.');
     } finally {
@@ -169,7 +171,7 @@ export default function ImageUpscalerPage() {
               <div className="relative select-none overflow-hidden rounded-lg border border-neutral-200" style={{ aspectRatio: `${result.w} / ${result.h}` }}>
                 {/* before (the original, stretched by the browser) under after (the AI result), split by the slider */}
                 <img src={preview} alt="Original" className="absolute inset-0 w-full h-full" style={{ imageRendering: 'auto' }} />
-                <img src={result.url} alt="Upscaled" className="absolute inset-0 w-full h-full" style={{ clipPath: `inset(0 0 0 ${split}%)` }} />
+                <img src={result.previewUrl || result.url} alt="Upscaled" className="absolute inset-0 w-full h-full" style={{ clipPath: `inset(0 0 0 ${split}%)` }} />
                 <div className="absolute top-0 bottom-0 w-0.5 bg-white shadow" style={{ left: `${split}%` }} />
                 <span className="absolute left-2 top-2 rounded bg-black/60 px-2 py-0.5 text-xs text-white">Before</span>
                 <span className="absolute right-2 top-2 rounded bg-black/60 px-2 py-0.5 text-xs text-white">After</span>
@@ -177,7 +179,8 @@ export default function ImageUpscalerPage() {
               <label className="block text-xs text-neutral-600">Compare
                 <input type="range" min="0" max="100" value={split} onChange={(e) => setSplit(Number(e.target.value))} className="w-full" aria-label="Before/after comparison" />
               </label>
-              <p className="text-center text-sm text-neutral-600">{dims.w}×{dims.h} → <span className="font-semibold text-indigo-600">{result.w}×{result.h}</span> · PNG, {(result.size / 1048576).toFixed(1)} MB · {where === 'device' ? 'made on your device' : 'made on our server'}</p>
+              <p className="text-center text-sm text-neutral-600">{dims.w}×{dims.h} → <span className="font-semibold text-indigo-600">{result.w}×{result.h}</span> · PNG, {formatBytes(result.size)}</p>
+              <p className="text-center text-xs text-neutral-500" data-where={where}>{where === 'device' ? 'The AI ran right here, in your browser: your photo was not uploaded anywhere.' : 'The AI ran on our server: your photo was sent to it for this.'}</p>
               <a href={result.url} download={`${baseName}-upscaled-${scale}x.png`} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download</a>
             </div>
           )}

@@ -1,21 +1,24 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { drawToRaster, encodeRaster, resultOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function ICOtoPNGPage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const inputRef = useRef();
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setResult(null); setError(''); } };
+  const [file, setFile] = useState(null);
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setFile(f); setResult(null); setError(''); } };
   const convert = () => {
     const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width; canvas.height = img.height;
-      canvas.getContext('2d').drawImage(img, 0, 0);
-      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
+    img.onload = async () => {
+      // 30/09: a Blob named after the original (a data: link saves nothing on iPhone), any size (bands on iPhone).
       setError('');
+      try {
+        const out = await drawToRaster(img.naturalWidth, img.naturalHeight, (ctx, y) => ctx.drawImage(img, 0, -y));
+        setResult(resultOf(await encodeRaster(out, 'image/png'), file?.name || 'image', ''));
+      } catch (e) { setError(e.message); }
     };
     img.onerror = () => {
       setError('Could not load this image. The file may be corrupted or in an unsupported format.');
@@ -34,7 +37,7 @@ export default function ICOtoPNGPage() {
           </div>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <button onClick={convert} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert</button>
-          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="converted.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
       <SeoContent

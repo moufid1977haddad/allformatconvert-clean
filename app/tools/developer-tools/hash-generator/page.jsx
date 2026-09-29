@@ -5,9 +5,10 @@ import { SEO } from './seo';
 import ProgressBar from '../../../components/ProgressBar';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { HASH_ALGORITHMS, DEFAULT_ALGORITHMS, TAG_NAME, byId, toHex, toBase64, parseExpected, sameBytes, algorithmsOfLength } from '../../../lib/hashAlgorithms';
+import { formatBytes } from '../../../lib/formatBytes';
 
 const GROUPS = [...new Set(HASH_ALGORITHMS.map((a) => a.group))];
-const fmtSize = (n) => (n < 1024 ? `${n} B` : n < 1048576 ? `${(n / 1024).toFixed(1)} KB` : n < 1073741824 ? `${(n / 1048576).toFixed(1)} MB` : `${(n / 1073741824).toFixed(2)} GB`);
+const fmtSize = formatBytes;
 
 // Relative cost per byte of each algorithm in WebAssembly (measured in Chromium, 2026-09-24), used to share
 // the algorithms out between workers. SHA-1/2 held in memory run natively and cost next to nothing.

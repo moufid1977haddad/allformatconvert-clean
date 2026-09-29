@@ -312,7 +312,7 @@ await T('png-to-jpg transparency', async () => {
   const png = await page.evaluate(async () => { const c = document.createElement('canvas'); c.width = 4; c.height = 4; const b = await new Promise((r) => c.toBlob(r, 'image/png')); return Array.from(new Uint8Array(await b.arrayBuffer())); });
   await page.locator('input[type="file"]').setInputFiles({ name: 't.png', mimeType: 'image/png', buffer: Buffer.from(png) });
   await page.getByRole('button', { name: 'Convert' }).click();
-  const src = await page.locator('a[download="converted.jpg"]').getAttribute('href', { timeout: 20000 });
+  const src = await page.locator('a[download$=".jpg"]').getAttribute('href', { timeout: 20000 });
   const px = await page.evaluate(async (u) => { const bmp = await createImageBitmap(await (await fetch(u)).blob()); const c = new OffscreenCanvas(bmp.width, bmp.height); const x = c.getContext('2d'); x.drawImage(bmp, 0, 0); return Array.from(x.getImageData(1, 1, 1, 1).data); }, src).catch(async () => page.evaluate(async (u) => { const img = new Image(); img.src = u; await img.decode(); const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const x = c.getContext('2d'); x.drawImage(img, 0, 0); return Array.from(x.getImageData(1, 1, 1, 1).data); }, src));
   check('transparent -> white', px[0] > 245 && px[1] > 245 && px[2] > 245, JSON.stringify(px));
 });
@@ -327,7 +327,8 @@ await T('text-to-pdf', async () => {
   await ta().fill('я 😀');
   await page.getByRole('button', { name: 'Convert to PDF' }).click();
   await page.waitForTimeout(1000);
-  check('text-to-pdf unsupported chars listed', (await body()).includes("can't be written with the built-in PDF font"), '');
+  // 30/09: Cyrillic is written now (Noto fonts, lib/textPdf.js); only the emoji is refused, and named.
+  { const t = await body(); check('text-to-pdf unsupported chars listed (the emoji, not the Cyrillic)', t.includes('no glyph in the fonts used') && t.includes('😀') && !/: [^.]*я/.test(t.slice(t.indexOf('no glyph'))), ''); }
 });
 
 await T('pdf-rotate encrypted', async () => {
@@ -401,8 +402,8 @@ await T('brightness-contrast', async () => {
   await page.locator('input[type="file"]').setInputFiles({ name: 'w.png', mimeType: 'image/png', buffer: Buffer.from(await makePng('#ffffff')) });
   await page.locator('input[type="range"]').first().fill('50');
   await page.getByRole('button', { name: /Apply/ }).click();
-  await page.locator('a[download="adjusted.png"]').waitFor({ timeout: 20000 });
-  const px = await pixelOf('a[download="adjusted.png"]', 5, 5);
+  await page.locator('a[download$="-adjusted.png"]').waitFor({ timeout: 20000 });
+  const px = await pixelOf('a[download$="-adjusted.png"]', 5, 5);
   check('brightness 50% applied', px[0] >= 126 && px[0] <= 129, JSON.stringify(px));
 });
 await T('image-blur', async () => {
@@ -410,8 +411,8 @@ await T('image-blur', async () => {
   await page.locator('input[type="file"]').setInputFiles({ name: 'h.png', mimeType: 'image/png', buffer: Buffer.from(await makePng('half')) });
   await page.locator('input[type="range"]').first().fill('4');
   await page.getByRole('button', { name: /Apply/ }).click();
-  await page.locator('a[download="blurred.png"]').waitFor({ timeout: 20000 });
-  const px = await pixelOf('a[download="blurred.png"]', 19, 20);
+  await page.locator('a[download$="-blurred.png"]').waitFor({ timeout: 20000 });
+  const px = await pixelOf('a[download$="-blurred.png"]', 19, 20);
   check('blur applied at the edge', px[0] > 40 && px[0] < 215, JSON.stringify(px));
 });
 
@@ -447,7 +448,7 @@ await T('jpg-to-pdf orientation', async () => {
   await open('/tools/pdf-tools/jpg-to-pdf');
   await page.locator('input[type="file"]').setInputFiles('scripts/converter-tests/fixtures/exif-orient6.jpg');
   await page.getByRole('button', { name: 'Convert to PDF' }).click();
-  const href = await page.locator('a[download="converted.pdf"]').first().getAttribute('href', { timeout: 20000 });
+  const href = await page.locator('a[download$=".pdf"]').first().getAttribute('href', { timeout: 20000 });
   const bytes = await page.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href);
   const size = (await PDFDocument.load(new Uint8Array(bytes))).getPage(0).getSize();
   check('portrait phone photo stays portrait', size.width === 600 && size.height === 800, JSON.stringify(size));

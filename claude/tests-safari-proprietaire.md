@@ -145,7 +145,7 @@ Un « RÉUSSI » exige que **le fichier produit s'ouvre et soit correct**, pas s
 #### 9. QR Scanner — caméra et collage *(ajoutés le 26/09)*
 `/tools/qr-barcodes-tools/qr-scanner`
 - **Risque :** `MÉDIA` `PRESSE`. La caméra (`getUserMedia`) sur iPhone exige un geste et une autorisation ; le **collage d'une image** dépend du presse-papiers de Safari.
-- **Gestes :** (a) **Scan with camera** > **Autoriser** > vise `safari-qr.png` affiché sur l'écran du MacBook > le texte `SAFARI-QR-OK-2026` apparaît > **Stop camera** ; (b) **Upload an image** > `safari-qr.png` > même texte > **Copy** > colle dans Notes ; (c) ouvre `safari-qr.png` dans Fichiers/Photos > **Copier** > reviens sur la page > touche la zone de collage (appui long > **Coller**) > même texte ; (d) sur MacBook : glisse `safari-qr.png` sur la page.
+- **Gestes :** (a) **Scan with camera** > **Autoriser** > vise `safari-qr.png` affiché sur l'écran du MacBook > le texte `SAFARI-QR-OK-2026` apparaît > **Stop camera** ; (b) **Upload an image** > `safari-qr.png` > même texte > **Copy** > colle dans Notes ; (c) ouvre `safari-qr.png` dans Fichiers/Photos > **Copier** > reviens sur la page > touche **Paste image** (iOS affiche sa bulle « Coller » : touche-la) > même texte ; refais avec la **zone de collage** sous la zone de dépôt : appui long > **Coller** > même texte *(30/09 : l'appui long sur la zone de dépôt ne proposait pas « Coller » — défaut B)* ; (d) sur MacBook : glisse `safari-qr.png` sur la page.
 - **Attendu :** a-c sur iPhone, b-d sur MacBook ; le texte collé dans Notes est exact.
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(note a-d)*
 
@@ -153,14 +153,14 @@ Un « RÉUSSI » exige que **le fichier produit s'ouvre et soit correct**, pas s
 `/tools/image-tools/image-converter`
 - **Risque :** `Worker` `OffCanvas` `WASM` `TÉLÉCH` `MÉM`. Défaut du 19/09 : un PNG livré sous le nom `.webp`. Corrigé : le type réel est vérifié. **L'AVIF passe par un encodeur WebAssembly jamais exécuté en WebKit.**
 - **Gestes :** la **PHOTO** > **WebP** > télécharge ; **AVIF** > télécharge ; puis **BMP**, **TIFF**, **PDF** ; enfin la **PHOTO en Fichiers** (HEIC) > **JPG**.
-- **Attendu :** chaque fichier est **du format demandé** (Fichiers > appui long > Informations > Type) et s'ouvre ; si Safari ne sait pas produire un format, **la page le dit avant**, elle ne ment pas sur l'extension.
+- **Attendu :** chaque fichier est **du format demandé** (Fichiers > appui long > Informations > Type) et s'ouvre ; **la photo d'iPhone (12, 24 ou 48 Mpx) est acceptée** (limite 50 Mpx sur téléphone depuis le 30/09) ; **WebP est proposé et produit** (libwebp en WebAssembly : quelques secondes, jusqu'à 1-2 min pour 48 Mpx) ; la note sur WebP n'apparaît que si WebP est choisi. *(29/09 : refus « 12 megapixels, more than the 12-megapixel limit », WebP désactivé, avertissement WebP affiché pour PDF/JPG — défaut A.)*
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(note WebP / AVIF / BMP-TIFF-PDF / HEIC)*
 
 #### 11. Image Upscaler **[S4]** *(modèle IA sur notre service depuis le 23/09)*
 `/tools/ai-tools/image-upscaler`
 - **Risque :** `ENVOI` `MÉM` `TÉLÉCH`. Depuis le 28/09 : image d'entrée **jusqu'à 6 Mpx** ; le calcul se fait **sur l'appareil** quand le navigateur a WebGPU (Safari 26 sur iPhone et Mac ; **pas Safari 17.6** de ton MacBook) — l'image n'est alors pas envoyée — sinon sur notre serveur (au-delà de 2 Mpx, par bandes).
 - **Gestes :** (a) la **PHOTO** 12 Mpx > la page doit la **refuser avec un message clair** (« up to 6 megapixels ») ; (b) `safari-small-800x600.jpg` > **×4** > **Upscale Image** > compare avant/après > **Download**.
-- **Attendu :** (a) refus lisible, rien ne plante ; (b) une image de **3200×2400**, **non vide**, qui s'ouvre ; **note ce que dit la page sous le résultat : « made on your device » ou « made on our server »** (iPhone iOS 26 : appareil attendu ; MacBook Safari 17.6 : serveur attendu).
+- **Attendu :** (a) refus lisible, rien ne plante ; (b) une image de **3200×2400**, **non vide**, qui s'ouvre ; **note ce que dit la page sous le résultat : « The AI ran right here, in your browser… » ou « The AI ran on our server… »** (phrase reformulée le 30/09, défaut I) (iPhone iOS 26 : appareil attendu ; MacBook Safari 17.6 : serveur attendu).
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ
 
 #### 12. Audio Trimmer *(26/09 : dixième de seconde, fondus, coupe exacte WAV/FLAC)*
@@ -252,7 +252,7 @@ Un « RÉUSSI » exige que **le fichier produit s'ouvre et soit correct**, pas s
 #### 25. Background Remover — ⚠️ appel payant (~0,003 $), une seule fois par sous-cas
 `/tools/ai-tools/background-remover` — `ENVOI` `MÉM` `TÉLÉCH`
 - **Geste :** (a) la **PHOTO** 12 Mpx avec un sujet net > **Remove Background** > **Download PNG** ; (b) la **PHOTO 48 Mpx** si disponible.
-- **Attendu :** sujet détouré sur fond **transparent**, PNG en **pleine résolution** qui s'ouvre (damier, pas de noir).
+- **Attendu :** sujet détouré sur fond **transparent**, PNG en **pleine résolution** qui s'ouvre (damier, pas de noir), **enregistré dans Téléchargements, l'onglet reste vivant**. *(29/09 : « A problem repeatedly occurred » au Download PNG d'une photo 12 Mpx — défaut C, recomposition par bandes depuis le 30/09.)*
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(12 / 48 Mpx)*
 
 #### 26. Tar Extractor *(22/09 : en-têtes PAX)*
@@ -285,7 +285,7 @@ Un « RÉUSSI » exige que **le fichier produit s'ouvre et soit correct**, pas s
 `/tools/video-tools/video-merger`, `video-filter`, `video-rotator`, `video-resizer`, `screen-recorder` — `MÉDIA` `TÉLÉCH`
 - **Risque :** ces outils rejouent la vidéo dans un canvas et l'**enregistrent** (MediaRecorder) : Safari n'écrit que du **MP4**. Le fichier doit s'appeler `.mp4`, **se lire, et avoir le son** (Filter, Rotator, Resizer, et **Merger depuis le 28/09** : il perdait le son et ne finissait pas sous Firefox). La durée de traitement = la durée de la vidéo (temps réel) : **garde l'onglet au premier plan**.
 - **Gestes (MacBook d'abord, ≈ 10 min ; iPhone : Merger et Rotator seulement) :** (a) **Rotator** : la **VIDÉO** > 90° > **Rotate Video** > télécharge ; (b) **Merger** : la **VIDÉO** deux fois > **Merge Videos** > télécharge ; (c) **Resizer** : la **VIDÉO** > 480p > **Resize Video** (mode « Fit » par défaut) > télécharge ; (d) **Filter** : Grayscale > télécharge ; (e) **Screen Recorder** (MacBook seulement) : **Start** > partage une fenêtre 5 s > **Stop** > télécharge.
-- **Attendu :** chaque fichier en `.mp4`, qui se lit **jusqu'au bout avec le son** ; (a) image tournée ; (b) durée ≈ 2 × celle de la vidéo ; (c) image non déformée (bandes noires si la forme change). Si la page dit **avant** qu'elle ne peut pas tourner dans ton Safari : note-le (c'est honnête), avec la version.
+- **Attendu (depuis le 30/09, défaut D) :** (a) **Rotator** : une vidéo `.MOV`/`.MP4` est tournée **instantanément**, sans envoi, même format (`IMG_xxxx-rotated.mov`), même taille, et **s'ouvre tournée dans Photos** ; (b) **Merger** : un seul **`.mp4`** qui s'ouvre dans Photos, durée ≈ 2 × la vidéo, avec le son (deux fois la même vidéo : joint en quelques secondes, sans envoi) ; (c) **Resizer** et (d) **Filter** : un `.mp4` fait sur notre service (progression réelle, pas de lecture de la vidéo pendant le traitement), avec le son, pas plus lourd que l'original ; (e) **Screen Recorder** (MacBook) : un `.mp4`. **Aucune vidéo ne doit s'ouvrir en plein écran pendant le traitement.** *(29/09 : rotated.webm / merged.webm illisibles par Photos, source en plein écran, temps réel, fichiers plus lourds.)*
 - ☐ RÉUSSI ☐ ÉCHOUÉ ☐ BLOQUÉ *(note a-e)*
 
 ---
@@ -346,21 +346,21 @@ Dans **Notes**, **une ligne par outil**, tout de suite : `N° | R / É / B | ce 
 
 | # | Outil | iPhone | MacBook | Note |
 |---|---|---|---|---|
-| 1 | Zip Extractor (a-e) | | | |
-| 2 | Video Compressor [S1] | | | |
-| 3 | Video Converter [S1] | | | |
-| 4 | Video Trimmer [S1] | | | |
-| 5 | Voice Recorder [S2] | | | |
-| 6 | Audio Merger (a-d) | | | |
-| 7 | Audio Opus ×4 + MP3 | | | |
-| 8 | Barcode Generator (a-d) | | | |
-| 9 | QR Scanner (a-d) | | | |
-| 10 | Image Converter [S3] | | | |
-| 11 | Image Upscaler [S4] | | | |
+| 1 | Zip Extractor (a-e) | R | | |
+| 2 | Video Compressor [S1] | R | | |
+| 3 | Video Converter [S1] | R | | |
+| 4 | Video Trimmer [S1] | R | | |
+| 5 | Voice Recorder [S2] | R | | |
+| 6 | Audio Merger (a-d) | R | | |
+| 7 | Audio Opus ×4 + MP3 | R | | |
+| 8 | Barcode Generator (a-d) | R | | |
+| 9 | QR Scanner (a-d) | É → corrigé 30/09 (B), à refaire | | |
+| 10 | Image Converter [S3] | É → corrigé 30/09 (A), à refaire | | |
+| 11 | Image Upscaler [S4] | R (phrase reformulée 30/09, I) | | |
 | 12 | Audio Trimmer | | | |
-| 13 | Image Compressor | | | |
+| 13 | Image Compressor | R | | |
 | 14 | Hash Generator | | | |
-| 15 | MP4/MOV to GIF [S5] | | | |
+| 15 | MP4/MOV to GIF [S5] | R | | |
 | 16 | GIF Maker | | | |
 | 17 | Word to PDF | | | |
 | 18 | Split PDF | | | |
@@ -370,14 +370,14 @@ Dans **Notes**, **une ligne par outil**, tout de suite : `N° | R / É / B | ce 
 | 22 | Unit Converter | | | |
 | 23 | Color Converter | | | |
 | 24 | Image Resizer | | | |
-| 25 | Background Remover | | | |
+| 25 | Background Remover | É → corrigé 30/09 (C), à refaire | | |
 | 26 | Tar Extractor | — | | |
 | 27 | Merge PDF | | | |
 | 28 | Outils de texte | | | |
 | 29 | Currency Converter | | | |
-| 30 | 5 outils MediaRecorder (a-e) | | | |
+| 30 | 5 outils MediaRecorder (a-e) | É → refait 30/09 (D), à refaire | | |
 
-*Légende : R = RÉUSSI · É = ÉCHOUÉ · B = BLOQUÉ.*
+*Légende : R = RÉUSSI · É = ÉCHOUÉ · B = BLOQUÉ.* **Colonne iPhone : verdicts du propriétaire du 29/09 (production `828cfe75`)** ; les tests 31 à 39 (feuille du propriétaire, séance E, absents de cette version du dépôt) sont au §10. Colonne MacBook : tests 9 à 30 et séance E en cours par safaridriver, résultats à venir.
 
 **Ce que cette feuille ne prouve pas, même 29/29 :** les ≈ 190 autres outils, les gros fichiers (plafonds mobiles non éprouvés ici), le chemin Office par morceaux (> 4 Mio), et les versions de Safari autres que la tienne. **Retirés de la feuille du 19/09 :** Zip Creator et Video to GIF (inchangés depuis, ou couverts par les n° 1 et 15).
 
@@ -475,3 +475,28 @@ Dans **Notes**, **une ligne par outil**, tout de suite : `N° | R / É / B | ce 
 | 30 | ce WebKit n'a ni MediaRecorder ni captureStream : **message avant**, bouton désactivé | **les 5 outils sur le vrai Safari** |
 
 **Ce que seul un vrai Safari peut confirmer (à ne pas sauter) :** caméra et collage depuis Photos (9), tous les formats d'image (10, 13), le ×4 réel et l'endroit du calcul (11), l'écoute (12), les appels réels payants (17, 21, 25), le QR Wi-Fi (20), les 5 outils MediaRecorder (30), et sur iPhone l'aperçu de la **première image** d'une vidéo (défaut 1c).
+
+---
+
+## 10. RÉSULTATS iPHONE DU 29/09 (production `828cfe75`) ET CORRECTIONS DU 30/09
+
+**Verdicts du propriétaire, iPhone :** **RÉUSSI 1 à 8, 11, 13, 15, 31, 34, 39** ; **ÉCHOUÉ 9, 10, 25, 30, 36.**
+Les tests 31 à 39 (séance E) viennent de la feuille du propriétaire ; ils ne figurent pas dans cette version du dépôt.
+
+**Test 34 (tailles affichées) — le verdict RÉUSSI est juste, c'est la valeur attendue de la feuille qui était fausse.** Le site affichait **4,91 MB** pour un fichier de **5 151 217 octets** : c'est exact en unités binaires (5 151 217 / 1 048 576 = 4,91), alors que l'iPhone et le Mac affichent **5,2 MB** (unités décimales, 1 MB = 1 000 000 octets). **Valeur attendue corrigée : 5 151 217 octets = 4,91 MB avec l'ancien affichage (production `828cfe75`) ; après P15, le site affiche 5,2 MB comme Fichiers et le Finder** (convention décimale adoptée le 30/09, défaut H).
+
+**Défauts relevés le 29/09 et leur état (branche locale `safari-iphone-30-09`, NON déployée — P15) :**
+
+| # | Test | Défaut | Cause | Correctif (30/09) | État |
+|---|---|---|---|---|---|
+| A | 10 | Image Converter : photo d'iPhone refusée (« 12 megapixels, more than the 12-megapixel limit »), WebP désactivé, AVIF et HEIC→JPG en échec, avertissement WebP hors de propos | plafond téléphone de 12 Mpx fixé sans mesure ; Safari n'encode pas le WebP ; un canvas iOS ne dépasse pas 16,7 Mpx | 50 Mpx sur téléphone, 100 sur ordinateur ; au-delà de 16,7 Mpx : décodage par bandes + encodeurs WebAssembly ; WebP par libwebp ; HEIC décodé par Safari ; note WebP seulement quand WebP est choisi | corrigé en local, **à refaire** |
+| B | 9 | QR Scanner : pas de « Coller » à l'appui long | iOS ne propose « Coller » que dans un champ éditable | bouton **Paste image** + zone de collage éditable | corrigé en local, **à refaire** |
+| C | 25 | Background Remover : onglet tué au Download PNG (12 Mpx) | URL data: de la photo + 2 canvas pleine taille + 2 copies des pixels + PNG en URL data: (~350 Mo) | recomposition par bandes de 4 Mpx écrites dans un seul PNG, aperçu réduit | corrigé en local, **à refaire** |
+| D | 30 | Rotator/Merger (et Resizer, Filter, Screen Recorder) : WebM illisible par Photos, source en plein écran, temps réel, plus lourd | canvas rejoué et enregistré par MediaRecorder | Rotator : matrice de rotation réécrite (instantané, sans perte) ; Merger : jonction sans réencodage (ffmpeg.wasm), sinon clips alignés sur le service ; Resizer/Filter : service ffmpeg → MP4 ; Screen Recorder : MP4 ; toute vidéo en `playsinline` | corrigé en local ; **service média à déployer AVANT le site** ; **à refaire** |
+| E | 36 | Brightness & Contrast, Image Blur : téléchargement par URL data: (« View / Download », rien d'enregistré) | URL data: | Blob nommé d'après l'original sur les 20 outils image (et toutes les autres URL data: de téléchargement du site) | corrigé en local, **à refaire** |
+| F | (36/39) | PDF (JPG to PDF, Image to PDF…) : Download ouvre le PDF | iOS ouvre un lien blob: de PDF dans sa visionneuse | sur iOS, chaque lien Download du site passe par une réponse « Content-Disposition: attachment » (service worker `/zipdl/`), le moyen d'iLovePDF/Smallpdf | corrigé en local, **à refaire (test 39)** |
+| G | 8 (note) | Barcode Generator : SVG minuscule à l'ouverture | taille d'impression en mm | le SVG remplit la fenêtre à l'écran et garde sa taille en mm à l'impression | corrigé en local |
+| H | 34 | 4,91 MB au lieu de 5,2 MB | unités binaires | unités décimales partout (lib/formatBytes.js) | corrigé en local |
+| I | 11 / 4 | Upscaler : « made on your device » peu clair ; Video Trimmer : aperçu du résultat blanc | phrase ; iOS ne chargeait pas l'aperçu | phrase reformulée ; aperçu chargé sur sa première image | corrigé en local |
+
+**À refaire sur iPhone après le déploiement (P15) :** 9, 10, 25, 30, 36, et 39 (téléchargement : le fichier doit arriver dans Fichiers > Téléchargements). Sur MacBook : tests 9 à 30 et séance E, en cours par safaridriver (résultats à venir).

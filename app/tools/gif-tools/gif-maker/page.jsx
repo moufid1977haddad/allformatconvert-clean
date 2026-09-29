@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { formatBytes } from '../../../lib/formatBytes';
 
 // Frames of different sizes used to be stretched to the first image's size (a portrait photo after a landscape one
 // came out squashed). Now, as on ezgif (read 26/09/2026: crop to a common size, alignment, reordering), each frame
@@ -82,7 +83,7 @@ export default function GifMakerPage() {
       }
       gif.finish();
       const blob = new Blob([gif.bytes()], { type: 'image/gif' });
-      setResult({ url: URL.createObjectURL(blob), frameCount: images.length, W, H, kb: blob.size / 1024 });
+      setResult({ url: URL.createObjectURL(blob), frameCount: images.length, W, H, bytes: blob.size });
     } catch (e) { setError('The GIF could not be made: ' + (e?.message || e)); }
     setLoading(false);
   };
@@ -138,7 +139,7 @@ export default function GifMakerPage() {
           {error && <p className="text-red-600 text-sm text-center" role="alert">{error}</p>}
           {result && (
             <div className="text-center space-y-3">
-              <p className="text-green-700" data-result>GIF created ({result.frameCount} frames, {result.W} × {result.H} px, {result.kb.toFixed(0)} KB)</p>
+              <p className="text-green-700" data-result>GIF created ({result.frameCount} frames, {result.W} × {result.H} px, {formatBytes(result.bytes)})</p>
               <img src={result.url} alt="The animated GIF" className="max-w-full mx-auto rounded-xl border border-neutral-200" />
               <a href={result.url} download="animated.gif" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download GIF</a>
             </div>

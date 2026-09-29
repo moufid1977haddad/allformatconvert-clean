@@ -48,7 +48,7 @@ await T('add-border', async () => {
   await open('/tools/image-tools/add-border-to-image');
   await upload('holed', 'logo.png');
   await page.getByRole('button', { name: 'Add Border' }).click();
-  const r = await read(await resultHref('a[download^="bordered"]'));
+  const r = await read(await resultHref('a[download$="-border.png"]')); // 30/09: named after the original (logo-border.png)
   const b0 = r.w - 40; // border width x2
   check('add-border: the transparent areas of the image stay transparent (inside the border)', px(r, b0 / 2 + 2, b0 / 2 + 2)[3] === 0, JSON.stringify(px(r, b0 / 2 + 2, b0 / 2 + 2)));
 });

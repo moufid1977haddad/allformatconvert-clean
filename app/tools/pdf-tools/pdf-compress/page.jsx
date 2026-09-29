@@ -6,6 +6,7 @@ import { MAX_PAGES, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL, MOBILE_MAX_PAGES, 
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { runStagedToolResult, mediaServiceConfigured, MediaJobError } from '../../../lib/mediaJob';
 import { MAX_PDF_COMPRESS_STAGED_BYTES, OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
+import { formatBytes } from '../../../lib/formatBytes';
 
 const MIB = 1024 * 1024;
 const SERVER_MAX_LABEL = `${Math.round(MAX_PDF_COMPRESS_STAGED_BYTES / MIB)} MB`;
@@ -165,11 +166,7 @@ export default function PdfCompressPage() {
     else compressOnServer();
   };
 
-  const formatSize = (bytes) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-  };
+  const formatSize = formatBytes;
 
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

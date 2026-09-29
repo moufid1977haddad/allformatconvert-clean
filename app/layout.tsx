@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import NewVersionBanner from "./components/NewVersionBanner";
 import IosVideoFirstFrame from "./components/IosVideoFirstFrame";
+import IosDownloadBridge from "./components/IosDownloadBridge";
 import Script from "next/script";
 import { getToolCounts } from "@/lib/toolCounts";
 const inter = Inter({ subsets: ["latin"] });
@@ -115,6 +116,7 @@ export default function RootLayout({
         `}} />
         <NewVersionBanner />
         <IosVideoFirstFrame />
+        <IosDownloadBridge />
       </body>
     </html>
   );

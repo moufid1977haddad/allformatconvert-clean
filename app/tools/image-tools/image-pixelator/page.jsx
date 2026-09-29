@@ -1,6 +1,8 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf, sourceTypeOf } from '../../../lib/imageOutput';
+import { rasterFromRGBA } from '../../../lib/bigImage';
 import { encodeLike, extOf, pixelateImageData } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 
@@ -8,6 +10,8 @@ export default function ImagePixelatorPage() {
   const [srcType, setSrcType] = useState('image/png');
   const [image, setImage] = useState(null);
   const [pixelSize, setPixelSize] = useState(10);
+  const [file, setFile] = useState(null);
+  const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const inputRef = useRef();
@@ -16,26 +20,27 @@ export default function ImagePixelatorPage() {
     const f = e.target.files[0];
     e.target.value = '';
     if (!f) return;
-    setImage(URL.createObjectURL(f)); setSrcType(f.type);
+    setImage(URL.createObjectURL(f)); setFile(f); setSrcType(f.type);
     setResult(null);
     setError('');
   };
 
-  const apply = () => {
-    setError('');
-    const img = new Image();
-    img.onerror = () => setError('Could not load image file');
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      // Block AVERAGE, as the page says (it used to copy each block's top-left pixel, 29/09).
-      ctx.putImageData(pixelateImageData(ctx.getImageData(0, 0, canvas.width, canvas.height), pixelSize), 0, 0);
-      try { setResult(encodeLike(canvas, srcType)); } catch (e) { setError(e.message); }
-    };
-    img.src = image;
+  const apply = async () => {
+    setError(''); setResult(null);
+    if (!file) return;
+    setBusy(true);
+    try {
+      const raster = await loadRaster(file);
+      // Block AVERAGE, as the page says (it used to copy each block's top-left pixel, 29/09). Done on the whole
+      // image's pixels at once (blocks must not be cut by bands).
+      const img = raster.imageData();
+      pixelateImageData(img, pixelSize);
+      let out;
+      if (raster.canvas) { raster.canvas.getContext('2d').putImageData(new ImageData(img.data, img.width, img.height), 0, 0); out = raster; }
+      else out = rasterFromRGBA(img.data, img.width, img.height);
+      setResult(resultOf(await encodeRasterLike(out, sourceTypeOf(file)), file.name, 'pixelated'));
+    } catch (e) { setError(e?.message || 'Could not process this image.'); }
+    setBusy(false);
   };
 
   return (
@@ -49,9 +54,9 @@ export default function ImagePixelatorPage() {
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
           <div><label className="block text-sm text-neutral-500 mb-1">Pixel Size: {pixelSize}px</label><input type="range" min="2" max="50" value={pixelSize} onChange={e => setPixelSize(parseInt(e.target.value))} className="w-full" /></div>
-          <button onClick={apply} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Apply Pixelate</button>
+          <button onClick={apply} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Apply Pixelate</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download={`pixelated.${extOf(result)}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
       <SeoContent
@@ -65,7 +70,7 @@ export default function ImagePixelatorPage() {
         ]}
         faqs={[
           { q: "Is Image Pixelator really free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "What image formats does Image Pixelator support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP where the browser can save WebP (otherwise PNG)." },
+          { q: "What image formats does Image Pixelator support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP." },
           { q: "Is my image data secure and private?", a: "Yes, all processing happens locally in your browser — your image is never uploaded to a server." },
           { q: "Can I pixelate only a specific area, like a face?", a: "No, the effect is applied uniformly across the whole image — there's no selection tool for pixelating a specific region." }
         ]}

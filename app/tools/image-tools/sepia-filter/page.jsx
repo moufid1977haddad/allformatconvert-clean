@@ -1,37 +1,41 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf, sourceTypeOf } from '../../../lib/imageOutput';
+import { rasterFromRGBA } from '../../../lib/bigImage';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function SepiaFilterPage() {
   const [srcType, setSrcType] = useState('image/png');
   const [image, setImage] = useState(null);
   const [intensity, setIntensity] = useState(100);
+  const [file, setFile] = useState(null);
+  const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const inputRef = useRef();
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setSrcType(f.type); setResult(null); setError(''); } };
-  const apply = () => {
-    setError('');
-    const img = new Image();
-    img.onerror = () => setError('Could not load image file');
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width; canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const f = intensity / 100;
-      for (let i = 0; i < data.data.length; i += 4) {
-        const r = data.data[i], g = data.data[i+1], b = data.data[i+2];
-        data.data[i] = Math.min(255, r*(1-0.607*f) + g*0.769*f + b*0.189*f);
-        data.data[i+1] = Math.min(255, r*0.349*f + g*(1-0.314*f) + b*0.168*f);
-        data.data[i+2] = Math.min(255, r*0.272*f + g*0.534*f + b*(1-0.869*f));
-      }
-      ctx.putImageData(data, 0, 0);
-      try { setResult(encodeLike(canvas, srcType)); } catch (e) { setError(e.message); }
-    };
-    img.src = image;
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setFile(f); setSrcType(f.type); setResult(null); setError(''); } };
+  const apply = async () => {
+    setError(''); setResult(null);
+    if (!file) return;
+    setBusy(true);
+    try {
+      const raster = await loadRaster(file);
+      const out = await renderFull(raster, raster.width, raster.height, (ctx, drawSource, band) => {
+        drawSource(ctx);
+        const data = ctx.getImageData(0, 0, band.width, band.rows);
+        const f = intensity / 100;
+        for (let i = 0; i < data.data.length; i += 4) {
+          const r = data.data[i], g = data.data[i+1], b = data.data[i+2];
+          data.data[i] = Math.min(255, r*(1-0.607*f) + g*0.769*f + b*0.189*f);
+          data.data[i+1] = Math.min(255, r*0.349*f + g*(1-0.314*f) + b*0.168*f);
+          data.data[i+2] = Math.min(255, r*0.272*f + g*0.534*f + b*(1-0.869*f));
+        }
+        ctx.putImageData(data, 0, 0);
+      });
+      setResult(resultOf(await encodeRasterLike(out, sourceTypeOf(file)), file.name, 'sepia'));
+    } catch (e) { setError(e?.message || 'Could not process this image.'); }
+    setBusy(false);
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -44,9 +48,9 @@ export default function SepiaFilterPage() {
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
           <div><label className="block text-sm text-neutral-500 mb-1">Intensity: {intensity}%</label><input type="range" min="0" max="100" value={intensity} onChange={e => setIntensity(parseInt(e.target.value))} className="w-full" /></div>
-          <button onClick={apply} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Apply Sepia</button>
+          <button onClick={apply} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Apply Sepia</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download={`sepia.${extOf(result)}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
       <SeoContent
@@ -60,7 +64,7 @@ export default function SepiaFilterPage() {
         ]}
         faqs={[
           { q: "Is Sepia Filter completely free to use?", a: "Yes, it's 100% free with no subscriptions required." },
-          { q: "What image formats are supported?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP where the browser can save WebP (otherwise PNG)." },
+          { q: "What image formats are supported?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP." },
           { q: "Do you store my uploaded images?", a: "No, your images are processed directly in your browser and are never uploaded to a server." },
           { q: "Can I upload an image by pasting a URL?", a: "No, only file upload from your device is supported — there's no URL input option." }
         ]}

@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { detectSignature, extensionOf } from '../../../lib/fileSignature';
+import { formatBytes } from '../../../lib/formatBytes';
 export default function FileMetadataPage() {
   const [metadata, setMetadata] = useState(null);
   const [warning, setWarning] = useState('');
@@ -26,12 +27,7 @@ export default function FileMetadataPage() {
     });
     setWarning(mismatch ? `The content is a ${sig.label}, but the name ends in ${ext ? '.' + ext : 'no extension'}${sig.exts[0] ? ` (usually .${sig.exts.filter(Boolean)[0]})` : ''}. Check where this file comes from before opening it.` : '');
   };
-  const formatSize = (bytes) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024*1024) return (bytes/1024).toFixed(2) + ' KB';
-    if (bytes < 1024*1024*1024) return (bytes/(1024*1024)).toFixed(2) + ' MB';
-    return (bytes/(1024*1024*1024)).toFixed(2) + ' GB';
-  };
+  const formatSize = formatBytes;
   const LABELS = { name: 'Name', size: 'Size', extension: 'Extension', typeFromName: 'Type given by the name', detectedFromContent: 'Real format (from content)', lastModified: 'Last modified' };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

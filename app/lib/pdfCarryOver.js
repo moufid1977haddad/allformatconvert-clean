@@ -36,3 +36,119 @@ export function carryOver(lib, src, out) {
   }
   out.catalog.set(PDFName.of('AcroForm'), ctx.register(form));
 }
+
+// Bookmarks (the outline) kept (30/09, known gap of 29/09): the catalog's Outlines are not copied by copyPages either.
+// As in Acrobat and PDFWix, each bookmark follows its page to its new position; a bookmark whose page was removed is
+// dropped and its children move up to its place; bookmarks without a destination (folders) stay while they hold
+// others; links to web pages stay. Named destinations are resolved to explicit ones. `order`: the 1-based source page
+// of each output page (a page used twice points to its first copy).
+export function carryOutline(lib, src, out, order) {
+  const { PDFName, PDFDict, PDFArray, PDFRef, PDFString, PDFHexString, PDFNumber } = lib;
+  const N = (s) => PDFName.of(s);
+  const outlines = src.catalog.lookupMaybe(N('Outlines'), PDFDict);
+  if (!outlines) return 0;
+  const sctx = src.context, ctx = out.context;
+  const srcPages = src.getPages(), outPages = out.getPages();
+  const target = new Map(); // source page ref tag -> output page ref
+  order.forEach((n, i) => { const ref = srcPages[n - 1]?.ref; if (ref && !target.has(ref.tag)) target.set(ref.tag, outPages[i].ref); });
+  const copier = lib.PDFObjectCopier.for(sctx, ctx);
+
+  const named = (name) => {
+    const key = name instanceof PDFName ? name.decodeText() : name.decodeText();
+    const old = src.catalog.lookupMaybe(N('Dests'), PDFDict);
+    if (old) { for (const [k, v] of old.entries()) if (String(k).slice(1) === key) return sctx.lookup(v); }
+    const tree = src.catalog.lookupMaybe(N('Names'), PDFDict)?.lookupMaybe(N('Dests'), PDFDict);
+    const walk = (node, depth) => {
+      if (!node || depth > 32) return undefined;
+      const names = node.lookupMaybe(N('Names'), PDFArray);
+      if (names) for (let i = 0; i + 1 < names.size(); i += 2) {
+        const k = names.lookup(i);
+        if ((k instanceof PDFString || k instanceof PDFHexString) && k.decodeText() === key) return sctx.lookup(names.get(i + 1));
+      }
+      const kids = node.lookupMaybe(N('Kids'), PDFArray);
+      if (kids) for (let i = 0; i < kids.size(); i++) { const r = walk(kids.lookupMaybe(i, PDFDict), depth + 1); if (r) return r; }
+      return undefined;
+    };
+    return walk(tree, 0);
+  };
+  // An explicit destination on the output page, or null if its page is gone; undefined when the item has none.
+  const destOf = (item) => {
+    let d = item.lookup(N('Dest'));
+    if (d === undefined) {
+      const a = item.lookupMaybe(N('A'), PDFDict);
+      if (!a || String(a.get(N('S'))) !== '/GoTo') return undefined;
+      d = a.lookup(N('D'));
+    }
+    if (d instanceof PDFName || d instanceof PDFString || d instanceof PDFHexString) d = named(d);
+    if (d instanceof PDFDict) d = d.lookup(N('D')); // named destination stored as << /D [...] >>
+    if (!(d instanceof PDFArray) || !d.size()) return null;
+    const page = d.get(0);
+    const to = page instanceof PDFRef ? target.get(page.tag) : page instanceof PDFNumber ? target.get(srcPages[page.asNumber()]?.ref.tag) : undefined;
+    if (!to) return null;
+    const arr = ctx.obj([to]);
+    for (let i = 1; i < d.size(); i++) arr.push(copier.copy(d.get(i)));
+    return arr;
+  };
+
+  const seen = new Set();
+  // Returns the kept output items for a source item's children list (dropped items give their children instead).
+  const build = (first, depth) => {
+    const res = [];
+    let ref = first;
+    while (ref instanceof PDFRef && !seen.has(ref.tag) && depth < 64) {
+      seen.add(ref.tag);
+      const item = sctx.lookup(ref);
+      if (!(item instanceof PDFDict)) break;
+      const children = build(item.get(N('First')), depth + 1);
+      const dest = destOf(item);
+      const action = item.lookupMaybe(N('A'), PDFDict);
+      const keepsAction = dest === undefined && action && String(action.get(N('S'))) !== '/GoTo';
+      if (dest === null || (dest === undefined && !keepsAction && !children.length)) res.push(...children);
+      else {
+        const o = ctx.obj({});
+        o.set(N('Title'), copier.copy(item.lookup(N('Title')) ?? PDFString.of('')));
+        if (dest) o.set(N('Dest'), dest);
+        else if (keepsAction) o.set(N('A'), copier.copy(action));
+        for (const k of ['C', 'F']) { const v = item.lookup(N(k)); if (v !== undefined) o.set(N(k), copier.copy(v)); }
+        const count = item.lookup(N('Count'));
+        res.push({ dict: o, children, open: !(count instanceof PDFNumber) || count.asNumber() > 0 });
+      }
+      ref = item.get(N('Next'));
+    }
+    return res;
+  };
+  // Links the items under `parent`; returns how many are visible when the parent is open.
+  const link = (items, parentRef) => {
+    const refs = items.map((it) => ctx.register(it.dict));
+    let visible = 0;
+    items.forEach((it, i) => {
+      it.dict.set(N('Parent'), parentRef);
+      if (i) it.dict.set(N('Prev'), refs[i - 1]);
+      if (i < items.length - 1) it.dict.set(N('Next'), refs[i + 1]);
+      visible++;
+      if (it.children.length) {
+        const inner = link(it.children, refs[i]);
+        it.dict.set(N('Count'), PDFNumber.of(it.open ? inner : -inner));
+        if (it.open) visible += inner;
+      }
+    });
+    items.forEach((it) => {
+      if (!it.children.length) return;
+      it.dict.set(N('First'), it.children[0].ref);
+      it.dict.set(N('Last'), it.children[it.children.length - 1].ref);
+    });
+    items.forEach((it, i) => { it.ref = refs[i]; });
+    return visible;
+  };
+  const items = build(outlines.get(N('First')), 0);
+  if (!items.length) return 0;
+  const root = ctx.obj({ Type: 'Outlines' });
+  const rootRef = ctx.register(root);
+  const visible = link(items, rootRef);
+  root.set(N('First'), items[0].ref);
+  root.set(N('Last'), items[items.length - 1].ref);
+  root.set(N('Count'), PDFNumber.of(visible));
+  out.catalog.set(N('Outlines'), rootRef);
+  if (String(src.catalog.get(N('PageMode'))) === '/UseOutlines') out.catalog.set(N('PageMode'), N('UseOutlines'));
+  return items.length;
+}

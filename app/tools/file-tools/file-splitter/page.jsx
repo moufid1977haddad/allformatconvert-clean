@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL, MAX_CHUNKS } from './config';
+import { formatBytes } from '../../../lib/formatBytes';
 export default function FileSplitterPage() {
   const [file, setFile] = useState(null);
   const [chunkSize, setChunkSize] = useState(1);
@@ -16,7 +17,7 @@ export default function FileSplitterPage() {
     setChunks([]);
     setError('');
     if (f && f.size > MAX_FILE_SIZE_BYTES) {
-      setError(`This file is ${(f.size / (1024 * 1024 * 1024)).toFixed(1)} GB, which is over the ${MAX_FILE_SIZE_LABEL} limit.`);
+      setError(`This file is ${formatBytes(f.size)}, which is over the ${MAX_FILE_SIZE_LABEL} limit.`);
       setFile(null);
       return;
     }
@@ -57,7 +58,7 @@ export default function FileSplitterPage() {
     }
     setLoading(false);
   };
-  const formatSize = (b) => b < 1024 ? b + ' B' : b < 1024*1024 ? (b/1024).toFixed(2) + ' KB' : (b/(1024*1024)).toFixed(2) + ' MB';
+  const formatSize = formatBytes;
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">

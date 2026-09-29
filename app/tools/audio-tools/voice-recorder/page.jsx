@@ -26,7 +26,10 @@ export default function VoiceRecorderPage() {
     }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorder.current = new MediaRecorder(stream);
+      // 30/09: AAC in MP4 (.m4a) wherever the browser can record it (Safari, Chrome and Edge 126+): the format an
+      // iPhone plays and shares; Firefox can only record WebM (Opus).
+      const type = ['audio/mp4;codecs=mp4a.40.2', 'audio/mp4', 'audio/webm;codecs=opus', 'audio/webm'].find((t) => MediaRecorder.isTypeSupported?.(t));
+      mediaRecorder.current = type ? new MediaRecorder(stream, { mimeType: type }) : new MediaRecorder(stream);
       chunks.current = [];
       mediaRecorder.current.ondataavailable = e => { if (e.data && e.data.size) chunks.current.push(e.data); };
       mediaRecorder.current.onstop = () => {

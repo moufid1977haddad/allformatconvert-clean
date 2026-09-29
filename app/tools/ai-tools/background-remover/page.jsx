@@ -2,7 +2,9 @@
 import { useEffect, useRef, useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
-import { checkedDataURL, assertCanvasSize } from '../../../lib/mediaSupport';
+import { checkedDataURL, checkedBlob } from '../../../lib/mediaSupport';
+import { createPngWriter, forEachBand, imageDims } from '../../../lib/bigImage';
+import { derivedName } from '../../../lib/download';
 import { checkFileSize, MAX_REMOVEBG_ORIGINAL_BYTES } from '@/lib/quota/limits';
 
 // Matches the model's own fixed internal input resolution (see
@@ -40,45 +42,52 @@ function resizeForUpload(img) {
   return checkedDataURL(canvas, 'image/jpeg', 0.92);
 }
 
-// Scales the (small) returned mask up to the ORIGINAL image's full
-// resolution and applies it as the alpha channel of the ORIGINAL image --
-// never the resized upload copy -- so the visitor always gets their photo
-// back at its real, full resolution. The mask is a grayscale ('L' mode)
-// PNG: R, G and B channels all hold the same intensity value, so the R
-// channel alone is used as the alpha value for each pixel.
-function recompositeAtFullResolution(originalImg, maskImg) {
-  const width = originalImg.naturalWidth;
-  const height = originalImg.naturalHeight;
-  assertCanvasSize(width, height);
-
-  const originalCanvas = document.createElement('canvas');
-  originalCanvas.width = width;
-  originalCanvas.height = height;
-  const originalCtx = originalCanvas.getContext('2d');
-  originalCtx.drawImage(originalImg, 0, 0, width, height);
-  const originalData = originalCtx.getImageData(0, 0, width, height);
-
-  const maskCanvas = document.createElement('canvas');
-  maskCanvas.width = width;
-  maskCanvas.height = height;
-  const maskCtx = maskCanvas.getContext('2d');
-  maskCtx.imageSmoothingEnabled = true;
-  maskCtx.imageSmoothingQuality = 'high';
-  maskCtx.drawImage(maskImg, 0, 0, width, height);
-  const maskData = maskCtx.getImageData(0, 0, width, height);
-
-  const pixels = originalData.data;
-  const maskPixels = maskData.data;
-  for (let i = 0; i < pixels.length; i += 4) {
-    pixels[i + 3] = maskPixels[i];
-  }
-  originalCtx.putImageData(originalData, 0, 0);
-  return checkedDataURL(originalCanvas, 'image/png');
+// Applies the (small) returned mask, scaled up, as the alpha channel of the ORIGINAL photo -- never the resized
+// upload copy -- so the visitor always gets their photo back at its real, full resolution.
+// 30/09 (owner's iPhone, 12 MP photo): "Download PNG" made Safari kill the tab ("A problem repeatedly occurred").
+// The old code held the photo as a data: URL, two full-size canvases, two full copies of their pixels and the
+// PNG as a ~40 MB data: string at once (~350 MB for 12 MP). Now, as remove.bg and Pixian keep full resolution
+// without holding everything: the photo is read band by band (4 MP at a time, decoded natively), the mask
+// applied to the band, and the band's rows written straight into ONE PNG Blob (app/lib/bigImage.js); the page
+// shows a small preview. No canvas ever exceeds 4 MP, no copy of the full image is kept besides the PNG itself.
+const BAND_PIXELS = 4_000_000;
+const PREVIEW_PIXELS = 1_500_000;
+async function recompositeAtFullResolution(file, dims, maskImg) {
+  const { width: W, height: H } = dims;
+  const png = createPngWriter(W, H, true);
+  const k = Math.min(1, Math.sqrt(PREVIEW_PIXELS / (W * H)));
+  const preview = document.createElement('canvas');
+  preview.width = Math.max(1, Math.round(W * k)); preview.height = Math.max(1, Math.round(H * k));
+  const pctx = preview.getContext('2d');
+  pctx.imageSmoothingEnabled = true; pctx.imageSmoothingQuality = 'high';
+  const bandRows = Math.max(1, Math.floor(BAND_PIXELS / W));
+  const maskCanvas = document.createElement('canvas'), bandCanvas = document.createElement('canvas');
+  maskCanvas.width = bandCanvas.width = W; maskCanvas.height = bandCanvas.height = Math.min(H, bandRows);
+  const mctx = maskCanvas.getContext('2d', { willReadFrequently: true }), bctx = bandCanvas.getContext('2d');
+  mctx.imageSmoothingEnabled = true; mctx.imageSmoothingQuality = 'high';
+  await forEachBand(file, dims, BAND_PIXELS, async (rgba, y, rows) => {
+    // The mask's R channel (grayscale 'L' PNG) becomes the alpha: the same scaled drawing as on one big canvas,
+    // shifted to this band.
+    mctx.clearRect(0, 0, W, maskCanvas.height);
+    mctx.drawImage(maskImg, 0, -y, W, H);
+    const m = mctx.getImageData(0, 0, W, rows).data;
+    for (let i = 3; i < rgba.length; i += 4) rgba[i] = m[i - 3];
+    bctx.clearRect(0, 0, W, bandCanvas.height);
+    bctx.putImageData(new ImageData(rgba, W, rows), 0, 0);
+    pctx.drawImage(bandCanvas, 0, 0, W, rows, 0, y * k, W * k, rows * k);
+    await png.writeRows(rgba, rows);
+  });
+  maskCanvas.width = bandCanvas.width = 1;
+  const blob = await png.finish();
+  const previewBlob = await checkedBlob(preview, 'image/png');
+  preview.width = 1;
+  return { blob, url: URL.createObjectURL(blob), previewUrl: URL.createObjectURL(previewBlob), name: derivedName(file.name, 'no-background', 'png') };
 }
 
 export default function BackgroundRemoverPage() {
   const [preview, setPreview] = useState('');
-  const [result, setResult] = useState('');
+  const [file, setFile] = useState(null);
+  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
@@ -91,13 +100,11 @@ export default function BackgroundRemoverPage() {
     const file = e.target.files[0];
     if (!file) return;
     e.target.value = '';
-    setResult('');
+    setResult(null);
     const sizeCheck = checkFileSize(file, MAX_REMOVEBG_ORIGINAL_BYTES, 'Images');
-    if (!sizeCheck.ok) { setPreview(''); setError(sizeCheck.message); return; }
-    const reader = new FileReader();
-    reader.onload = (ev) => { setPreview(ev.target.result); setError(''); };
-    reader.onerror = () => { setPreview(''); setError('Failed to read the image file. It may be corrupt or in an unsupported format.'); };
-    reader.readAsDataURL(file);
+    if (!sizeCheck.ok) { setPreview(''); setFile(null); setError(sizeCheck.message); return; }
+    // An object URL, not a data: URL: the photo is not copied into a string (tens of MB on a phone).
+    setPreview(URL.createObjectURL(file)); setFile(file); setError('');
   };
 
   // There is no real progress feed for a single server round trip, so this
@@ -121,11 +128,13 @@ export default function BackgroundRemoverPage() {
   const process = async () => {
     if (!preview) return;
     setLoading(true);
-    setResult('');
+    setResult(null);
     setError('');
     try {
       startProgress();
       const originalImg = await loadImage(preview);
+      const dims = await imageDims(file);
+      if (!dims) throw new Error('Could not open this image. The file may be damaged or in a format your browser cannot read.');
       const resizedDataUrl = resizeForUpload(originalImg);
       const resizedBase64 = resizedDataUrl.split(',')[1];
 
@@ -149,7 +158,7 @@ export default function BackgroundRemoverPage() {
       }
 
       const maskImg = await loadImage('data:image/png;base64,' + data.mask);
-      setResult(recompositeAtFullResolution(originalImg, maskImg));
+      setResult(await recompositeAtFullResolution(file, dims, maskImg));
       stopProgress(100);
     } catch(e) { setError('Error: ' + e.message); stopProgress(0); }
     setLoading(false);
@@ -180,9 +189,9 @@ export default function BackgroundRemoverPage() {
             <div className="space-y-3">
               <label className="block text-sm text-neutral-500">Result</label>
               <div className="rounded-xl overflow-hidden" style={{backgroundImage: 'linear-gradient(45deg, #ddd 25%, transparent 25%), linear-gradient(-45deg, #ddd 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ddd 75%), linear-gradient(-45deg, transparent 75%, #ddd 75%)', backgroundSize: '20px 20px', backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px'}}>
-                <img src={result} className="max-h-64 mx-auto" alt="result" />
+                <img src={result.previewUrl} className="max-h-64 mx-auto" alt="result" />
               </div>
-              <a href={result} download="no-background.png" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download PNG</a>
+              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download PNG</a>
             </div>
           )}
         </div>

@@ -2,6 +2,8 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { reportToolError } from '../../../lib/reportError';
+import { imageDims } from '../../../lib/bigImage';
+import { loadRaster, encodeRaster } from '../../../lib/imageOutput';
 
 export default function HeicToJpgPage() {
   const [file, setFile] = useState(null);
@@ -22,12 +24,15 @@ export default function HeicToJpgPage() {
     setLoading(true);
     setStatus('Converting...');
     try {
-      const heic2any = (await import('heic2any')).default;
-      const blob = await heic2any({
-        blob: file,
-        toType: 'image/jpeg',
-        quality: quality / 100,
-      });
+      // 30/09 (owner's iPhone): Safari (iPhone, iPad, Mac) decodes HEIC itself, at full size -- 24 and 48 MP photos
+      // included, in bands beyond iOS's 16.7 MP canvas limit (lib/bigImage.js) -- where heic2any needed one canvas
+      // the size of the photo. heic2any (libheif in WebAssembly) stays for the browsers that cannot read HEIC.
+      let blob;
+      if (await imageDims(file)) blob = await encodeRaster(await loadRaster(file), 'image/jpeg', quality);
+      else {
+        const heic2any = (await import('heic2any')).default;
+        blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: quality / 100 });
+      }
       const url = URL.createObjectURL(blob);
       setResult(url);
       setStatus('');

@@ -1,166 +1,106 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
-import SeoContent from '../../../components/SeoContent';
-import { recordWholePlayback } from '../../../lib/recordPlayback';
-import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
-import { videoReRecordSupport, finishRecording } from '../../../lib/mediaSupport';
-import IosOriginalNote from '../../../components/IosOriginalNote';
-export default function VideoResizerPage() {
-  const [file, setFile] = useState(null);
-  const [width, setWidth] = useState(1280);
-  const [height, setHeight] = useState(720);
-  // How a source of another shape fills the new size (28/09/2026: it was always stretched). The references offer
-  // the same choice ("fit" with bars, "fill" by cropping); fit is the default, like theirs.
-  const [mode, setMode] = useState('fit');
-  const [result, setResult] = useState(null);
-  const [status, setStatus] = useState('');
-  const [error, setError] = useState('');
-  const [supportReason, setSupportReason] = useState('');
-  // Checked on mount so the visitor learns BEFORE running anything.
-  useEffect(() => { setSupportReason(videoReRecordSupport().reason); }, []);
-  const videoRef = useRef();
-  const inputRef = useRef();
-  const audioGraphRef = useRef(null);
+import { useEffect, useState } from 'react';
+import MediaServiceTool from '../../../components/MediaServiceTool';
 
-  const handleFile = (e) => {
-    const f = e.target.files[0];
-    if (!f) return;
-    setFile(f);
-    setResult(null);
-  };
+// 30/09 (owner's iPhone): the resizer used to replay the video in a <canvas> and record it with MediaRecorder --
+// as long as the video lasts, with the source playing full screen on iPhone, and a WebM that the iPhone's Photos
+// app cannot open. It now runs like Video Compressor, on our ffmpeg service (the way Clideo, Kapwing and VEED
+// resize): faster than real time, an H.264 + AAC MP4 that plays everywhere, sound kept, and never heavier than the
+// original (the service re-tries at a stronger setting first). Fit / Fill / Stretch as before (28/09).
 
+const even = (n) => Math.max(16, Math.min(7680, 2 * Math.round((Number(n) || 0) / 2)));
+// 30/09 (real Safari on the Mac): "480p" turned a vertical 1080×1920 phone video into a landscape 854×480. 480p,
+// 720p and 1080p name the SHORT side (as YouTube, Clideo and HandBrake use them): a vertical video gets 480×854.
+// `oriented` presets follow the video's shape; Square and Vertical are exact sizes.
+const PRESETS = [['480p', 854, 480, true], ['720p', 1280, 720, true], ['1080p', 1920, 1080, true], ['Square 1080', 1080, 1080, false], ['Vertical 1080×1920', 1080, 1920, false]];
+const sized = (w, h, oriented, src) => (oriented && src && src.h > src.w ? [h, w] : [w, h]);
+
+// The size the video is SHOWN at (the browser applies a phone's rotation), or null when this browser cannot read it.
+function useShownSize(file) {
+  const [size, setSize] = useState(null); // { file, w, h }: only valid for the file it was read from
   useEffect(() => {
-    // videoRef.current is only guaranteed to exist after this render commits
-    // (the <video> element only mounts once `file` is set), so the src must
-    // be assigned here rather than inline in handleFile — otherwise the very
-    // first file selection silently fails to load since the ref is still null.
-    if (file && videoRef.current) {
-      videoRef.current.src = URL.createObjectURL(file);
-      videoRef.current.onloadedmetadata = () => { setWidth(videoRef.current.videoWidth); setHeight(videoRef.current.videoHeight); };
-    }
+    if (!file) return undefined;
+    const url = URL.createObjectURL(file);
+    const v = document.createElement('video');
+    v.preload = 'metadata'; v.muted = true; v.playsInline = true;
+    v.onloadedmetadata = () => { if (v.videoWidth && v.videoHeight) setSize({ file, w: v.videoWidth, h: v.videoHeight }); };
+    v.src = url;
+    return () => { v.removeAttribute('src'); v.load(); URL.revokeObjectURL(url); };
   }, [file]);
+  return size && size.file === file ? size : null;
+}
 
-  // createMediaElementSource() can only be called once per <video> element,
-  // so the Web Audio graph (context, source, and stream destination) is
-  // built once and cached — a second "Resize Video" click on the same video
-  // would otherwise throw InvalidStateError. The source is connected to both
-  // the stream destination (for recording) and audioContext.destination (so
-  // the preview stays audible during processing, since routing an element
-  // through Web Audio detaches it from its default audio output).
-  const getAudioTrack = () => {
-    try {
-      if (!audioGraphRef.current) {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        const audioContext = new AudioCtx();
-        const destination = audioContext.createMediaStreamDestination();
-        const source = audioContext.createMediaElementSource(videoRef.current);
-        source.connect(destination);
-        source.connect(audioContext.destination);
-        audioGraphRef.current = { audioContext, destination };
-      }
-      if (audioGraphRef.current.audioContext.state === 'suspended') {
-        audioGraphRef.current.audioContext.resume();
-      }
-      return audioGraphRef.current.destination.stream.getAudioTracks()[0] || null;
-    } catch (e) { return null; }
-  };
-
-  const resize = async () => {
-    if (!file || !videoRef.current) return;
-    setError('');
-    setStatus('Resizing...');
-    try {
-      const canvas = document.createElement('canvas');
-      canvas.width = width; canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      const videoStream = canvas.captureStream(30);
-      const audioTrack = getAudioTrack();
-      const combinedStream = new MediaStream([
-        ...videoStream.getVideoTracks(),
-        ...(audioTrack ? [audioTrack] : []),
-      ]);
-      const support = videoReRecordSupport();
-      if (!support.ok) throw new Error(support.reason);
-      const recorder = new MediaRecorder(combinedStream, { mimeType: support.mime });
-      const chunks = [];
-      recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
-      recorder.onstop = () => {
-        try {
-          const { blob, ext } = finishRecording(chunks, recorder, support.mime);
-          setResult({ url: URL.createObjectURL(blob), ext });
-        } catch (e) { setError(e.message); }
-        setStatus('');
-      };
-      recorder.onerror = () => { setError('Recording failed in this browser.'); setStatus(''); };
-      const v = videoRef.current;
-      const drawFrame = () => {
-        // Computed at each frame: the video's own size is only known once it has loaded (0 before).
-        const k = mode === 'fit' ? Math.min(width / v.videoWidth, height / v.videoHeight) : Math.max(width / v.videoWidth, height / v.videoHeight);
-        const dw = mode === 'stretch' || !Number.isFinite(k) ? width : v.videoWidth * k, dh = mode === 'stretch' || !Number.isFinite(k) ? height : v.videoHeight * k;
-        ctx.fillStyle = '#000'; ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(v, (width - dw) / 2, (height - dh) / 2, dw, dh);
-      };
-      videoRef.current.currentTime = 0;
-      await videoRef.current.play();
-      // Recorded until the video's end, following pauses and stalls (lib/recordPlayback.js, 29/09).
-      recordWholePlayback(videoRef.current, recorder, drawFrame);
-    } catch(e) { setError('Error: ' + e.message); setStatus(''); }
-  };
-
+function ResizerControls({ params, setParams, disabled, file }) {
+  const src = useShownSize(file);
+  // A vertical video starts on the vertical 720p (720×1280), not on a landscape size.
+  useEffect(() => {
+    if (src && params.w === 1280 && params.h === 720 && src.h > src.w) setParams({ ...params, w: 720, h: 1280 });
+  }, [src]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
-    <div className="min-h-screen bg-neutral-100 p-6">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-2">Video Resizer</h1>
-        <p className="text-neutral-500 text-center mb-8">Resize video dimensions</p>
-        <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <IosOriginalNote />
-          <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
-            <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />
-          </div>
-          {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" />}
+        <div className="space-y-3">
+          {src && <p className="text-sm text-neutral-500">Your video: {src.w}×{src.h} ({src.h > src.w ? 'vertical' : src.h === src.w ? 'square' : 'horizontal'}). 480p, 720p and 1080p keep its orientation.</p>}
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm text-neutral-500 mb-1">Width</label><input type="number" value={width} onChange={e => setWidth(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
-            <div><label className="block text-sm text-neutral-500 mb-1">Height</label><input type="number" value={height} onChange={e => setHeight(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
+            <label className="block text-sm text-neutral-500">Width
+              <input type="number" min="16" max="7680" step="2" disabled={disabled} value={params.w} onChange={(e) => setParams({ ...params, w: e.target.value })} onBlur={() => setParams({ ...params, w: even(params.w) })} className="mt-1 w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3 text-neutral-900" />
+            </label>
+            <label className="block text-sm text-neutral-500">Height
+              <input type="number" min="16" max="7680" step="2" disabled={disabled} value={params.h} onChange={(e) => setParams({ ...params, h: e.target.value })} onBlur={() => setParams({ ...params, h: even(params.h) })} className="mt-1 w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3 text-neutral-900" />
+            </label>
           </div>
-          <div className="grid grid-cols-3 gap-2">{[['720p',1280,720],['1080p',1920,1080],['480p',854,480]].map(([label,w,h]) => <button key={label} onClick={() => { setWidth(w); setHeight(h); }} className="bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800 rounded-lg py-2 text-sm font-semibold transition">{label}</button>)}</div>
-          <div>
-            <label htmlFor="vr-mode" className="block text-sm text-neutral-500 mb-1">If the shape differs from the video's</label>
-            <select id="vr-mode" value={mode} onChange={(e) => setMode(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3 text-sm">
+          <div className="flex flex-wrap gap-2">
+            {PRESETS.map(([label, w, h, oriented]) => {
+              const [pw, ph] = sized(w, h, oriented, src);
+              return <button key={label} type="button" disabled={disabled} onClick={() => setParams({ ...params, w: pw, h: ph })} title={`${pw}×${ph}`} className="bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800 rounded-lg px-3 py-2 text-sm font-semibold transition">{label}</button>;
+            })}
+          </div>
+          <label htmlFor="vr-mode" className="block text-sm text-neutral-500">If the shape differs from the video&apos;s
+            <select id="vr-mode" disabled={disabled} value={params.mode} onChange={(e) => setParams({ ...params, mode: e.target.value })} className="mt-1 w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3 text-sm text-neutral-900">
               <option value="fit">Fit — keep the whole picture, black bars</option>
               <option value="fill">Fill — crop the edges, no bars</option>
               <option value="stretch">Stretch — distort to the exact size</option>
             </select>
-          </div>
-          {supportReason && <p role="alert" className="text-red-500 text-center text-sm">{supportReason}</p>}
-          {status && <p className="text-yellow-400 text-center">{status}</p>}
-          {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
-          <button onClick={resize} disabled={!file || !!status || !!supportReason} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Resize Video</button>
-          {result && <div className="space-y-2"><video controls src={result.url} className="w-full rounded-xl" /><a href={result.url} download={`resized.${result.ext}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          </label>
         </div>
-      </div>
-      <SeoContent
-        title="Video Resizer"
-        description="Video Resizer redraws your video at a new width and height on a canvas and records the result, entirely in your browser. The original audio is preserved by routing it through the Web Audio API alongside the resized video track, so the output isn't silent. Note: the output is the format your browser records (WebM in Chrome, Edge and Firefox; MP4 in Safari); when the new size has another shape, the picture is fitted with black bars by default, or cropped, or stretched — your choice."
-        howTo={[
-          "Click the upload area and select a video file — its native dimensions fill the Width/Height fields automatically.",
-          "Enter custom dimensions, or click a preset (720p, 1080p, or 480p).",
-          "Click \"Resize Video\" — the video plays through once while the resized version (with its original audio) is recorded.",
-          "Preview and download the resized file (WebM, or MP4 in Safari)."
-        ]}
-        faqs={[
-          { q: "Does it preserve aspect ratio automatically?", a: "Yes, by default: when the new size has another shape than your video, the whole picture is kept with black bars (Fit). You can also crop the edges instead (Fill), or stretch it to the exact size (Stretch)." },
-          { q: "Does the resized video have audio?", a: "Yes — the source video's original audio is captured alongside the resized picture and included in the output unchanged." },
-          { q: "What output format do I get?", a: "The format your browser records: WebM in Chrome, Edge and Firefox, MP4 in Safari. The file's extension always matches its real content." },
-          { q: "Is my file uploaded anywhere?", a: "No, resizing happens entirely in your browser." }
-        ]}
-        tips={[
-          "To avoid black bars without cropping, divide your video's width and height by the same number.",
-          "The audio is carried straight through unchanged — resizing only affects the picture.",
-          "Resizing takes about as long as the video's full duration, since frames and audio are captured as it plays in real time.",
-          "Use the 720p/1080p/480p presets for common platform-ready sizes instead of typing custom numbers."
-        ]}
-      />
-    </div>
+  );
+}
+
+const seo = {
+  title: 'Video Resizer',
+  description: 'Video Resizer changes the width and height of a video on our ffmpeg server, so it works in any browser, including Safari on iPhone, and runs faster than the video plays. Keep the whole picture with black bars (Fit), crop the edges (Fill) or stretch it to the exact size. You get an H.264 + AAC MP4 with the original sound, the format every phone and computer plays.',
+  howTo: [
+    'Select or drop a video file (MP4, MOV, MKV, WebM, AVI and more, up to 1 GB).',
+    'Enter the new width and height, or click a preset (480p, 720p, 1080p, square, vertical). 480p, 720p and 1080p keep your video’s orientation: a vertical video becomes 480×854, 720×1280 or 1080×1920.',
+    'Choose Fit, Fill or Stretch for a video of another shape, then click "Resize Video" and follow the real progress.',
+    'Preview and download the resized MP4.',
+  ],
+  faqs: [
+    { q: 'Does it preserve aspect ratio automatically?', a: 'Yes, by default: when the new size has another shape than your video, the whole picture is kept with black bars (Fit). You can also crop the edges instead (Fill), or stretch it to the exact size (Stretch).' },
+    { q: 'Does the resized video have audio?', a: 'Yes — the original sound is kept (re-encoded in AAC, like the picture in H.264).' },
+    { q: 'What output format do I get?', a: 'An MP4 (H.264 video, AAC audio), which plays on iPhone, Android, Mac, Windows and every browser. Width and height are rounded to even numbers, as H.264 requires.' },
+    { q: 'Is my file uploaded anywhere?', a: 'Yes, to our own video service, because resizing a video needs a real video encoder. The original is deleted as soon as the resize ends, and the result right after your download (or after 15 minutes if you never download it).' },
+    { q: 'How long does it take?', a: 'Usually less than the length of the video, plus the upload. It no longer has to play the whole video in your browser.' },
+  ],
+  tips: [
+    'To avoid black bars without cropping, divide your video\'s width and height by the same number.',
+    'For Instagram Reels, TikTok or Shorts, use the vertical 1080×1920 preset with Fill.',
+    'Making a video smaller than its original size also makes the file much lighter.',
+    'Use the presets for common platform sizes instead of typing custom numbers.',
+  ],
+};
+
+export default function VideoResizerPage() {
+  return (
+    <MediaServiceTool
+      op="convert"
+      tool="video-resizer"
+      title="Video Resizer"
+      subtitle="Resize video dimensions — any browser, up to 1 GB, MP4 out"
+      buttonLabel="Resize Video"
+      initialParams={{ w: 1280, h: 720, mode: 'fit' }}
+      buildParams={(p) => ({ target: 'mp4', quality: 'high', fit: { w: even(p.w), h: even(p.h), mode: p.mode } })}
+      outName={(name, ext, p) => `${name.replace(/\.[^.]+$/, '')}-${even(p.w)}x${even(p.h)}.mp4`}
+      controls={(props) => <ResizerControls {...props} />}
+      seo={seo}
+    />
   );
 }

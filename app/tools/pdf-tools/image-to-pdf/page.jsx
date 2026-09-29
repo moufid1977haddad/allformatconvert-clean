@@ -73,7 +73,7 @@ export default function ImageToPdfPage() {
           {downloadUrl && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
               <div className="text-green-400 text-xl font-bold mb-3">Done!</div>
-              <a href={downloadUrl} download="images.pdf" className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition">Download PDF</a>
+              <a href={downloadUrl} download={files[0] ? `${files[0].name.replace(/\.[^.]+$/, '')}${files.length > 1 ? `-and-${files.length - 1}-more` : ''}.pdf` : 'images.pdf'} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition">Download PDF</a>
             </div>
           )}
         </div>

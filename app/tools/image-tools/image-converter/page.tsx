@@ -8,6 +8,8 @@ import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { TIFF_DECODE_TIMEOUT_MS, TIFF_DECODE_TIMEOUT_MESSAGE } from '../../../lib/tiffDecode';
 import { reportToolError, extOf } from '../../../lib/reportError';
 import { canEncodeImageType, extFromMime } from '../../../lib/mediaSupport';
+import { imageDims } from '../../../lib/bigImage';
+import { formatBytes } from '../../../lib/formatBytes';
 
 const GENERIC_CONVERSION_ERROR = 'Conversion failed. Please try again, or try a different file.';
 const GENERIC_HEIC_ERROR = 'Failed to decode this HEIC/HEIF file. It may be corrupted or use a variant this tool doesn\'t support.';
@@ -30,17 +32,19 @@ export default function ImageConverterPage() {
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState('');
   const [isMobile, setIsMobile] = useState(false);
-  // Which output formats THIS browser can really encode. Probed, not assumed:
-  // Safari cannot encode WebP or AVIF from a canvas and would return a PNG.
+  // Which output formats THIS browser can really encode. Probed, not assumed: Safari cannot encode WebP from a
+  // canvas (it returns a PNG), so there WebP comes from libwebp in WebAssembly, as AVIF does everywhere.
   const [encodable, setEncodable] = useState<Record<string, boolean>>({ webp: true, png: true, jpg: true, avif: true });
+  const [nativeWebp, setNativeWebp] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const workerRef = useRef<Worker | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setIsMobile(isMobileDevice());
+    setNativeWebp(canEncodeImageType('image/webp'));
     const support = {
-      webp: canEncodeImageType('image/webp'),
+      webp: typeof WebAssembly === 'object' || canEncodeImageType('image/webp'),
       png: true,
       jpg: canEncodeImageType('image/jpeg'),
       // Browsers cannot encode AVIF from a canvas (measured), but the worker encodes it with WebAssembly.
@@ -103,25 +107,26 @@ export default function ImageConverterPage() {
     const results: ConvertedFile[] = [];
     const failures: string[] = [];
 
-    // HEIC/HEIF needs heic2any, which relies on a <canvas> element and only
-    // runs on the main thread (DOM-dependent, unlike createImageBitmap) --
-    // decode it here to a PNG blob before handing off to the worker, which
-    // then re-encodes that PNG into the user's chosen output format like
-    // any other image.
-    const items: { name: string; originalSize: number; blob: Blob }[] = [];
+    // HEIC/HEIF: Safari decodes it natively (iPhone photos), exactly like a JPEG -- including the 24 and 48 MP
+    // ones, in bands. Other browsers can't: there heic2any (a <canvas>, main thread only) turns it into a PNG
+    // first, which the worker then re-encodes like any other image.
+    // dims = the displayed size read from the header by <img>: the worker needs it to decode a photo bigger than
+    // Safari's 16.7 MP canvas limit band by band.
+    const items: { name: string; originalSize: number; blob: Blob; dims: { width: number; height: number } | null }[] = [];
     for (const file of files) {
-      if (isHeic(file)) {
+      const dims = await imageDims(file);
+      if (isHeic(file) && !dims) {
         try {
           const heic2any = (await import('heic2any')).default;
           const decoded = await heic2any({ blob: file, toType: 'image/png' });
           const pngBlob = Array.isArray(decoded) ? decoded[0] : decoded;
-          items.push({ name: file.name, originalSize: file.size, blob: pngBlob });
+          items.push({ name: file.name, originalSize: file.size, blob: pngBlob, dims: await imageDims(pngBlob) });
         } catch (err: any) {
           reportToolError({ tool: 'image-converter', file, error: err instanceof Error ? err : new Error(String(err)) });
           failures.push(`${file.name}: ${GENERIC_HEIC_ERROR}`);
         }
       } else {
-        items.push({ name: file.name, originalSize: file.size, blob: file });
+        items.push({ name: file.name, originalSize: file.size, blob: file, dims });
       }
     }
     if (failures.length > 0) {
@@ -142,7 +147,9 @@ export default function ImageConverterPage() {
     // silent for the full timeout -- a large batch of many valid files
     // keeps resetting it as each one finishes, only a stuck one lets it run
     // out.
-    const armWatchdog = () => {
+    // 'long' = the worker is about to run a WebAssembly encoder that cannot report progress; it says for how long
+    // at most it may stay silent (scaled on the image's size).
+    const armWatchdog = (ms: number = TIFF_DECODE_TIMEOUT_MS) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
         stopWorker();
@@ -150,12 +157,12 @@ export default function ImageConverterPage() {
         setProgress(0);
         reportToolError({ tool: 'image-converter', error: new Error('decode_timeout') });
         setError(TIFF_DECODE_TIMEOUT_MESSAGE);
-      }, TIFF_DECODE_TIMEOUT_MS);
+      }, ms);
     };
 
     worker.onmessage = (e) => {
-      armWatchdog();
       const msg = e.data;
+      armWatchdog(msg.type === 'long' ? msg.ms : undefined);
       if (msg.type === 'progress') {
         setProgress(msg.pct);
       } else if (msg.type === 'file-done') {
@@ -196,7 +203,9 @@ export default function ImageConverterPage() {
       setError(GENERIC_CONVERSION_ERROR);
     };
     armWatchdog();
-    worker.postMessage({ items, format, quality, maxMegapixels });
+    // __forceBands: set only by scripts/browser-tests/big-image.mjs, to run the iPhone (band) path in Firefox.
+    const forceBands = !!(window as any).__forceBands;
+    worker.postMessage({ items: items.map(it => ({ ...it, forceBands })), format, quality, maxMegapixels });
   };
 
   const downloadOne = (item: ConvertedFile) => {
@@ -218,11 +227,7 @@ export default function ImageConverterPage() {
     setConverted([]);
   };
 
-  const formatSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  };
+  const formatSize = (bytes: number) => formatBytes(bytes);
 
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -295,7 +300,7 @@ export default function ImageConverterPage() {
                       disabled={processing}
                       className="bg-white border border-neutral-200 rounded-lg px-3 py-2 text-sm text-neutral-800 focus:outline-none focus:border-indigo-400"
                     >
-                      <option value="webp" disabled={!encodable.webp}>WebP{encodable.webp ? '' : ' (not supported by this browser)'}</option>
+                      <option value="webp" disabled={!encodable.webp}>WebP{encodable.webp ? '' : ' (needs WebAssembly)'}</option>
                       <option value="png">PNG</option>
                       <option value="jpg" disabled={!encodable.jpg}>JPG{encodable.jpg ? '' : ' (not supported by this browser)'}</option>
                       <option value="avif" disabled={!encodable.avif}>AVIF{encodable.avif ? '' : ' (not supported by this browser)'}</option>
@@ -305,9 +310,9 @@ export default function ImageConverterPage() {
                       <option value="ico">ICO (favicon, 16–256 px)</option>
                       <option value="pdf">PDF</option>
                     </select>
-                    {!encodable.webp && (
-                      <p className="text-xs text-amber-600 mt-1 max-w-xs">
-                        WebP output is disabled: this browser (Safari, including every browser on iPhone) cannot create WebP; Chrome, Edge or Firefox on a computer can. Use PNG, JPG or AVIF instead.
+                    {format === 'webp' && !nativeWebp && (
+                      <p className="text-xs text-neutral-500 mt-1 max-w-xs">
+                        This browser has no WebP encoder of its own, so WebP is made here with libwebp in WebAssembly (the encoder Squoosh uses): a few seconds per photo, and the first use downloads about 0.3 MB.
                       </p>
                     )}
                     {format === 'avif' && (
@@ -408,7 +413,7 @@ export default function ImageConverterPage() {
       </div>
       <SeoContent
         title="Image Converter"
-        description="Image Converter is a free online tool that converts images — including TIFF and iPhone HEIC/HEIF photos — to PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, ICO (a multi-size favicon) or PDF entirely in your browser (AVIF is encoded with a WebAssembly encoder because no browser can encode it natively; WebP output needs a browser that can encode it: Chrome, Edge and Firefox can, Safari cannot) — nothing is ever uploaded to a server. Drop in one or many images, pick your target format and quality, and download the results instantly, with a live before/after size comparison for every file. Conversion runs in a background Web Worker so the page stays responsive even on large batches."
+        description="Image Converter is a free online tool that converts images — including TIFF and iPhone HEIC/HEIF photos — to PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, ICO (a multi-size favicon) or PDF entirely in your browser (AVIF is encoded with a WebAssembly encoder because no browser can encode it natively, and WebP too on Safari, which has no WebP encoder of its own) — nothing is ever uploaded to a server. Drop in one or many images, pick your target format and quality, and download the results instantly, with a live before/after size comparison for every file. Conversion runs in a background Web Worker so the page stays responsive even on large batches."
         howTo={[
           "Drop or click to upload one or more images (PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, and HEIC/HEIF are all accepted).",
           "Choose your output format: WebP, PNG, JPG, AVIF, GIF, BMP, TIFF, ICO or PDF.",
@@ -418,9 +423,10 @@ export default function ImageConverterPage() {
         faqs={[
           { q: "Is Image Converter free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Are my images uploaded anywhere?", a: "No. Every conversion happens locally in your browser, in a background Web Worker — your files never leave your device." },
+          { q: "Can I make WebP on an iPhone or in Safari?", a: "Yes. Safari has no WebP encoder of its own (it would quietly produce a PNG), so on Safari the WebP file is made by libwebp compiled to WebAssembly — the same encoder Squoosh uses — right in your browser. The result is a real WebP file." },
           { q: "Which formats are supported?", a: "You can upload PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, or HEIC/HEIF (iPhone photos) images, and convert them to WebP, PNG, JPG, AVIF, GIF, BMP, TIFF, ICO or PDF. GIF is limited to 256 colours (photos are dithered, as desktop converters do), BMP has no transparency (it is flattened onto white), ICO produces a favicon holding every standard size from 16 to 256 px, and PDF puts the image on a page of its own size. AVIF is encoded with a WebAssembly encoder (browsers cannot encode it natively), so it takes a few seconds per photo. TIFF is decoded with a dedicated in-browser decoder (planar-color-storage TIFFs aren't supported and are rejected with a clear error), and HEIC/HEIF is decoded on the main thread before being re-encoded to your chosen format." },
           { q: "Can I convert several images at once?", a: "Yes, you can add multiple files and convert them all in one batch, then download them individually or together." },
-          { q: "Is there an image-size limit?", a: `Yes: each image can be up to ${MAX_MEGAPIXELS} megapixels on desktop (${MOBILE_MAX_MEGAPIXELS} on phones and tablets), measured against how long large images take to encode in the browser — WebP in particular gets dramatically slower past a certain size. There's no limit on how many images you can batch-convert, since they're processed one at a time.` }
+          { q: "Is there an image-size limit?", a: `Each image can be up to ${MAX_MEGAPIXELS} megapixels on a computer and ${MOBILE_MAX_MEGAPIXELS} on phones and tablets — every iPhone photo fits, 48-megapixel ones included — and files up to ${MAX_FILE_SIZE_LABEL}. Safari on iPhone cannot hold more than about 16.7 megapixels in one canvas, so a larger photo is decoded in strips and encoded by WebAssembly encoders at full resolution: it works, it just takes longer (about a minute or two for a 48-megapixel photo to WebP on a phone). There's no limit on how many images you can batch-convert, since they're processed one at a time.` }
         ]}
         tips={[
           "WebP usually gives the best balance of quality and file size for web use — a solid default choice.",

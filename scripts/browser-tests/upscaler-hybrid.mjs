@@ -65,8 +65,8 @@ for (const scale of [4, 2]) {
   const ref = await sharp(src).removeAlpha().raw().toBuffer();
   let se = 0; for (let i = 0; i < ref.length; i++) se += (back[i] - ref[i]) ** 2;
   const psnr = 10 * Math.log10(255 * 255 / (se / ref.length));
-  const madeOn = (await p.locator('text=/made on (your device|our server)/').first().innerText().catch(() => '')).match(/made on (your device|our server)/)?.[1];
-  if (gpu) check(`x${scale}: runs on this device, nothing sent to a server`, where === 'device' && madeOn === 'your device' && sent.length === 0, `where=${where}, requests: ${sent.join(' ')}`);
+  const madeOn = await p.locator('[data-where]').first().getAttribute('data-where').catch(() => '');
+  if (gpu) check(`x${scale}: runs on this device, nothing sent to a server`, where === 'device' && madeOn === 'device' && sent.length === 0, `where=${where}, requests: ${sent.join(' ')}`);
   else check(`x${scale}: no WebGPU -> our server`, where === 'server', `where=${where}`);
   check(`x${scale}: PNG ${meta.width}x${meta.height} = ${W * scale}x${H * scale}, faithful to the source (PSNR ${psnr.toFixed(1)} dB back at its size) in ${((Date.now() - t0) / 1000).toFixed(0)} s`, meta.format === 'png' && meta.width === W * scale && meta.height === H * scale && psnr > 28);
 }

@@ -74,6 +74,17 @@ export default function TiffToJpgPage() {
 
     worker.onmessage = (e) => {
       const msg = e.data;
+      if (msg.type === 'decoded') {
+        // Decoded: the encode of a very large image (WebAssembly past 16.7 MP) gets time in proportion to its size.
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => {
+          stopWorker();
+          reportToolError({ tool: 'tiff-to-jpg', file, error: new Error('encode_timeout') });
+          setError('This image is taking too long to convert on this device. Try a smaller image, or a computer.');
+          setLoading(false);
+        }, Math.max(TIFF_DECODE_TIMEOUT_MS, (msg.pixels / 1e6) * 8000));
+        return;
+      }
       if (msg.type === 'done') {
         stopWorker();
         const url = URL.createObjectURL(msg.blob);
@@ -143,7 +154,7 @@ export default function TiffToJpgPage() {
             </div>
           )}
           {error && <p className="text-red-400 text-center text-sm whitespace-pre-line">{error}</p>}
-          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="converted.jpg" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download JPG</a></div>}
+          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download={file ? file.name.replace(/\.[^.]+$/, '') + '.jpg' : 'converted.jpg'} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download JPG</a></div>}
         </div>
       </div>
       <SeoContent

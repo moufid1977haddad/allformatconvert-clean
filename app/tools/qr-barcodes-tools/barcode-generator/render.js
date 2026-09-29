@@ -84,7 +84,13 @@ export async function renderCanvas(sym, text, ui, canvas) {
   return canvas;
 }
 
-// Vector SVG at the exact physical size (width/height in mm).
+// Vector SVG at the exact physical size (width/height in mm) -- what label, layout and print software reads.
+// 30/09 (owner's iPhone): opened on its own, a 38 mm EAN-13 showed as a thumbnail lost on a white page, because a
+// viewer shows an SVG at its declared size. barcode-maker.com declares pixels (260 px: readable, but no print
+// size); barqode.io declares nothing (fills the window, no print size either); a print size in mm is what GS1 and
+// TEC-IT's print-oriented output give. Both here: the mm size stays in the attributes (and on paper: @media print),
+// and a screen-only style makes the barcode fill the window when the file is opened in a browser or in Files.
+const SCREEN_FIT = '<style>@media screen{svg{width:100%;height:100%}}</style>';
 export async function renderSvg(sym, text, ui) {
   const b = await engine();
   const p = physical(ui);
@@ -92,7 +98,7 @@ export async function renderSvg(sym, text, ui) {
   const svg = b.toSVG(bwipOptions(sym, text, ui, k, k / p.xMm));
   const [, , w, h] = svg.match(/viewBox="([^"]+)"/)[1].split(/\s+/).map(Number);
   const mmPerUnit = p.xMm / k;
-  const sized = svg.replace('<svg ', `<svg width="${fmt(w * mmPerUnit)}mm" height="${fmt(h * mmPerUnit)}mm" `);
+  const sized = svg.replace('<svg ', `<svg width="${fmt(w * mmPerUnit)}mm" height="${fmt(h * mmPerUnit)}mm" `).replace(/(<svg\b[^>]*>)/, `$1${SCREEN_FIT}`);
   return { svg: sized, raw: svg, w, h, mmPerUnit };
 }
 const fmt = (n) => String(Math.round(n * 10000) / 10000);

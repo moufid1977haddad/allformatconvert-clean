@@ -1,5 +1,6 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
+import { formatBytes } from '../lib/formatBytes';
 
 // A finished file, offered for download when the visitor wants it (28/09). No automatic download at the end of a
 // conversion: on an iPhone that saved without asking, or opened a PDF in place of the tool, losing its settings.
@@ -14,7 +15,7 @@ export function useDownloadable() {
   return [file, offer, clear];
 }
 
-const size = (b) => (b < 1024 ? `${b} B` : b < 1048576 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1048576).toFixed(1)} MB`);
+const size = formatBytes;
 
 /** The Download button (and, for a PDF, a preview in a new tab: the tool page stays open). */
 export default function DownloadReady({ file, className = '' }) {

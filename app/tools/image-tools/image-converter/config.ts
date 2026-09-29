@@ -17,14 +17,17 @@
 // Applied uniformly across output formats for one simple, safe cap rather
 // than a per-format table; JPEG/PNG/AVIF have large margin to spare at
 // this size (JPEG: 1.7s at 48MP; PNG: 3.2s at 48MP).
-export const MAX_MEGAPIXELS = 30;
+// Above this size WebP goes to libwebp in WebAssembly instead (app/lib/bigImage.js).
+export const NATIVE_WEBP_MAX_PIXELS = 30_000_000;
 
-// Mobile/tablet cap: no real-device data available (this project's
-// measurement environment is desktop-only), so kept well under the
-// desktop-safe tier to absorb a mobile CPU that could plausibly be
-// several times slower at WASM/SIMD-heavy image encoding -- 12MP is also
-// a typical default phone-camera resolution, not an unusual ceiling.
-export const MOBILE_MAX_MEGAPIXELS = 12;
+// 30/09 (owner's iPhone): the old 12 MP phone cap refused every iPhone photo (4032 x 3024 = 12.19 MP). No
+// competitor publishes a pixel cap -- they cap the file (Convertio 100 MB, CloudConvert/FreeConvert 1 GB) --
+// so the cap is now set by what was measured to finish (scripts/browser-tests/big-image.mjs,
+// docs/audit/RAPPORT-safari-iphone-30-09.md): past Safari's 16.7 MP canvas limit the image is decoded in
+// bands and encoded in WebAssembly, never on one canvas.
+export const MAX_MEGAPIXELS = 100;
+// Phones: every iPhone photo, 48 MP (8064 x 6048 = 48.8 MP) included.
+export const MOBILE_MAX_MEGAPIXELS = 50;
 
 // Coarse defense-in-depth file-size backstop -- decode cost is driven by
 // pixel count (checked above), not file bytes, but this catches a
@@ -32,5 +35,6 @@ export const MOBILE_MAX_MEGAPIXELS = 12;
 // to the decoder.
 export const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024; // 100 MB
 export const MAX_FILE_SIZE_LABEL = '100 MB';
-export const MOBILE_MAX_FILE_SIZE_BYTES = 30 * 1024 * 1024; // 30 MB
-export const MOBILE_MAX_FILE_SIZE_LABEL = '30 MB';
+// Same on phones since 30/09: a 48 MP iPhone JPEG reaches 20-30 MB; decode cost is capped by pixels above.
+export const MOBILE_MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_BYTES;
+export const MOBILE_MAX_FILE_SIZE_LABEL = MAX_FILE_SIZE_LABEL;

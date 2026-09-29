@@ -49,7 +49,10 @@ export default function VideoScreenshotPage() {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(frame, 0, 0);
       }
-      url = format === 'jpg' ? checkedDataURL(canvas, 'image/jpeg', quality / 100) : checkedDataURL(canvas, 'image/png');
+      // 30/09: a Blob, not a data: URL (iOS saves nothing from a data: link); checked like the data URL was.
+      const blob = await new Promise((ok) => canvas.toBlob(ok, format === 'jpg' ? 'image/jpeg' : 'image/png', format === 'jpg' ? quality / 100 : undefined));
+      if (!blob || !blob.size || blob.type !== (format === 'jpg' ? 'image/jpeg' : 'image/png')) throw new Error('This browser could not save the frame as ' + format.toUpperCase() + '.');
+      url = URL.createObjectURL(blob);
     } catch (e) { setError(e.message); return; }
     const time = videoRef.current.currentTime.toFixed(2);
     setScreenshots(prev => [...prev, { url, time, format }]);
@@ -97,7 +100,7 @@ export default function VideoScreenshotPage() {
                     <img src={s.url} className="w-full rounded" />
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-neutral-500">At {s.time}s</span>
-                      <a href={s.url} download={"screenshot-" + s.time + "." + (s.format || 'png')} className="text-xs text-indigo-400 hover:text-indigo-300">Download</a>
+                      <a href={s.url} download={`${(file?.name || 'video').replace(/\.[^.]+$/, '')}-${s.time}s.${s.format || 'png'}`} className="text-xs text-indigo-400 hover:text-indigo-300">Download</a>
                     </div>
                   </div>
                 ))}

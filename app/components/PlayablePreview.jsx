@@ -37,5 +37,6 @@ export default function PlayablePreview({ src, name, kind, type, className = 'w-
     return <p className="text-sm text-neutral-600 text-center" data-no-preview data-testid="no-preview">Your browser can&apos;t play {label} files, so there is no preview — the downloaded file is complete and plays in apps that support {label}.</p>;
   }
   const Tag = k;
-  return <Tag controls playsInline={k === 'video' ? true : undefined} src={src} className={className} onError={() => setBad(true)} data-preview={k} {...rest} />;
+  // preload=metadata: iOS loads nothing before a tap otherwise, and the first image of a video result stays blank.
+  return <Tag controls playsInline={k === 'video' ? true : undefined} preload="metadata" src={src} className={className} onError={() => setBad(true)} data-preview={k} {...rest} />;
 }

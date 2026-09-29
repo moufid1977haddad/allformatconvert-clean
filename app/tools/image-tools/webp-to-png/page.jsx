@@ -1,9 +1,13 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf } from '../../../lib/imageOutput';
+import { rasterFromRGBA } from '../../../lib/bigImage';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function WebPtoPNGPage() {
   const [image, setImage] = useState(null);
+  const [file, setFile] = useState(null);
+  const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const inputRef = useRef();
@@ -13,22 +17,21 @@ export default function WebPtoPNGPage() {
   const handleFile = async (e) => {
     const f = e.target.files[0]; e.target.value = '';
     if (!f) return;
-    setImage(URL.createObjectURL(f)); setResult(null); setError('');
+    setImage(URL.createObjectURL(f)); setFile(f); setResult(null); setError('');
     const head = new Uint8Array(await f.slice(0, 64).arrayBuffer());
     const animated = String.fromCharCode(...head.slice(12, 16)) === 'VP8X' && (head[20] & 0x02) !== 0;
     setNote(animated ? 'This WebP is animated: the PNG will contain its first frame only (PNG has no animation). For every frame, convert it to GIF, or split it with an animation tool.' : '');
   };
-  const convert = () => {
-    setError('');
-    const img = new Image();
-    img.onerror = () => setError('Could not load image file');
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width; canvas.height = img.height;
-      canvas.getContext('2d').drawImage(img, 0, 0);
-      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
-    };
-    img.src = image;
+  const convert = async () => {
+    setError(''); setResult(null);
+    if (!file) return;
+    setBusy(true);
+    try {
+      const raster = await loadRaster(file);
+      const out = raster;
+      setResult(resultOf(await encodeRaster(out, 'image/png'), file.name, ''));
+    } catch (e) { setError(e?.message || 'Could not process this image.'); }
+    setBusy(false);
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -40,10 +43,10 @@ export default function WebPtoPNGPage() {
             {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept=".webp" className="hidden" onChange={handleFile} />
           </div>
-          <button onClick={convert} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert</button>
+          <button onClick={convert} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {note && <p className="text-amber-700 text-center text-sm">{note}</p>}
-          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="converted.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
       <SeoContent
