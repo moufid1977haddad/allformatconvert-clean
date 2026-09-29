@@ -1,4 +1,5 @@
-import { MAX_MEGAPIXELS } from './config';
+import { MAX_MEGAPIXELS, NATIVE_WEBP_MAX_PIXELS } from './config';
+import { CANVAS_MAX_PIXELS, decodeToRaster, rasterFromCanvas, rasterFromRGBA, encodeJpegWasm, encodeWebpWasm, encodePngRGBA } from '../../../lib/bigImage';
 import { decodeTiff } from '../../../lib/tiffDecode';
 import { sniffFormat, NATIVE_BITMAP_FORMATS } from '../../../lib/detectFileFormat';
 import { checkedBlob, flattenOntoWhite } from '../../../lib/mediaSupport';
@@ -24,9 +25,8 @@ function loadAvif() {
   return avifModulePromise;
 }
 
-async function encodeAvif(canvas, width, height, quality) {
+async function encodeAvif(rgba, width, height, quality) {
   const mod = await loadAvif();
-  const rgba = canvas.getContext('2d').getImageData(0, 0, width, height).data;
   const bytes = mod.encode(new Uint8Array(rgba.buffer, rgba.byteOffset, rgba.byteLength), width, height, {
     quality, qualityAlpha: -1, denoiseLevel: 0, tileRowsLog2: 0, tileColsLog2: 0, speed: 8,
     subsample: 1, chromaDeltaQ: false, sharpness: 0, tune: 0, enableSharpYUV: false, bitDepth: 8, lossless: false,
@@ -46,19 +46,15 @@ class LimitExceededError extends Error {
   }
 }
 
-const MIME_BY_FORMAT = {
-  webp: 'image/webp',
-  jpg: 'image/jpeg',
-  png: 'image/png',
-  avif: 'image/avif',
-};
+// Seconds of silence the page must tolerate while a WebAssembly encoder runs (it cannot report progress).
+const longWork = (pixels, perMp) => self.postMessage({ type: 'long', ms: Math.max(20000, Math.round((pixels / 1e6) * perMp)) });
 
 async function convertOne(item, format, quality, maxMegapixels) {
   // Found in a WebKit build without OffscreenCanvas: say so plainly instead of a raw ReferenceError.
   if (typeof OffscreenCanvas === 'undefined') {
     throw new Error('This browser cannot process images in the background (it needs Safari 16.4 or later, or a current Chrome, Edge or Firefox).');
   }
-  const { blob, name } = item;
+  const { blob, name, dims } = item;
   // Route by the file's real header bytes, not its filename -- a PNG (or
   // any other browser-native format) saved with a mismatched or generic
   // extension still converts correctly this way, and a genuine TIFF still
@@ -66,9 +62,11 @@ async function convertOne(item, format, quality, maxMegapixels) {
   // docs/audit/RAPPORT-tiff-paint.md.
   const headerBuf = await blob.slice(0, 32).arrayBuffer();
   const detected = sniffFormat(new Uint8Array(headerBuf));
-  let width, height;
-  const canvas = new OffscreenCanvas(1, 1);
-  const ctx = canvas.getContext('2d');
+  const tooBig = (w, h) => {
+    const mp = (w * h) / 1e6;
+    if (mp > maxMegapixels) throw new LimitExceededError(`"${name}" is ${w} × ${h} pixels (${mp.toFixed(1)} megapixels), more than the ${maxMegapixels}-megapixel limit.`);
+  };
+  let raster;
 
   if (detected?.format === 'tiff') {
     let decoded;
@@ -87,18 +85,17 @@ async function convertOne(item, format, quality, maxMegapixels) {
     if (!decoded || !Number.isFinite(decoded.width) || !Number.isFinite(decoded.height) || decoded.width <= 0 || decoded.height <= 0) {
       throw new Error(`Failed to decode "${name}". It may be corrupted, or use a TIFF variant this tool doesn't support.`);
     }
-    ({ width, height } = decoded);
-    const megapixels = (width * height) / 1e6;
-    if (megapixels > maxMegapixels) {
-      throw new LimitExceededError(`"${name}" is ${megapixels.toFixed(0)} megapixels, more than the ${maxMegapixels}-megapixel limit.`);
-    }
-    canvas.width = width;
-    canvas.height = height;
-    ctx.putImageData(new ImageData(new Uint8ClampedArray(decoded.rgba), width, height), 0, 0);
+    tooBig(decoded.width, decoded.height);
+    const rgba = new Uint8ClampedArray(decoded.rgba);
+    if (decoded.width * decoded.height <= CANVAS_MAX_PIXELS) {
+      const c = new OffscreenCanvas(decoded.width, decoded.height);
+      c.getContext('2d').putImageData(new ImageData(rgba, decoded.width, decoded.height), 0, 0);
+      raster = rasterFromCanvas(c, decoded.width, decoded.height);
+    } else raster = rasterFromRGBA(rgba, decoded.width, decoded.height);
   } else {
-    let bitmap;
+    if (dims) tooBig(dims.width, dims.height);
     try {
-      bitmap = await createImageBitmap(blob);
+      raster = await decodeToRaster(blob, dims, { forceBands: !!item.forceBands });
     } catch {
       const err = new Error(
         detected
@@ -109,29 +106,35 @@ async function convertOne(item, format, quality, maxMegapixels) {
       err.detectedFormat = detected ? detected.format : null;
       throw err;
     }
-    width = bitmap.width;
-    height = bitmap.height;
-    const megapixels = (width * height) / 1e6;
-    if (megapixels > maxMegapixels) {
-      bitmap.close();
-      throw new LimitExceededError(`"${name}" is ${megapixels.toFixed(0)} megapixels, more than the ${maxMegapixels}-megapixel limit.`);
-    }
-    canvas.width = width;
-    canvas.height = height;
-    ctx.drawImage(bitmap, 0, 0);
-    bitmap.close();
+    tooBig(raster.width, raster.height);
   }
+  const { width, height } = raster;
+  self.postMessage({ type: 'decoded', index: item.index, path: raster.canvas ? 'canvas' : 'bands' });
 
   // Verified, never trusted: a browser that cannot encode the requested format
-  // (Safari + WebP/AVIF) silently returns a PNG -- which used to be shipped as
+  // (Safari + WebP) silently returns a PNG -- which used to be shipped as
   // a ".webp" file 86% heavier, with no warning. checkedBlob throws instead.
   // 'alive' keeps the page's silence watchdog from firing during a long (but progressing) encode.
   let last = 0;
   const alive = () => { const now = Date.now(); if (now - last > 1000) { last = now; self.postMessage({ type: 'alive' }); } };
-  if (EXTRA_FORMATS.includes(format)) return encodeExtra(format, canvas, width, height, quality, alive);
-  if (format === 'avif') return { blob: await encodeAvif(canvas, width, height, quality), note: '' };
-  if (format === 'jpg') flattenOntoWhite(ctx, width, height);
-  return { blob: await checkedBlob(canvas, MIME_BY_FORMAT[format], quality / 100), note: '' };
+  if (EXTRA_FORMATS.includes(format)) { longWork(raster.pixels, 3000); return encodeExtra(format, raster, quality, alive); }
+  if (format === 'avif') { longWork(raster.pixels, 20000); return { blob: await encodeAvif(raster.rgba(), width, height, quality), note: '' }; }
+  if (format === 'webp') {
+    // The browser's own WebP encoder when it has one (Chrome, Edge, Firefox) and the image is under the size where
+    // Chrome's gets non-linearly slow (config.ts); libwebp in WebAssembly otherwise -- Safari has none.
+    if (raster.canvas && raster.pixels <= NATIVE_WEBP_MAX_PIXELS) {
+      try { return { blob: await checkedBlob(raster.canvas, 'image/webp', quality / 100), note: '' }; } catch { /* Safari: no native WebP */ }
+    }
+    longWork(raster.pixels, 6000);
+    return { blob: await encodeWebpWasm(raster.rgba(), width, height, quality), note: '' };
+  }
+  if (format === 'jpg') {
+    if (raster.canvas) { flattenOntoWhite(raster.canvas.getContext('2d'), width, height); return { blob: await checkedBlob(raster.canvas, 'image/jpeg', quality / 100), note: '' }; }
+    longWork(raster.pixels, 3000);
+    return { blob: await encodeJpegWasm(raster.rgba(), width, height, quality), note: '' };
+  }
+  if (raster.canvas) return { blob: await checkedBlob(raster.canvas, 'image/png'), note: '' };
+  return { blob: await encodePngRGBA(raster.rgba(), width, height, alive), note: '' };
 }
 
 async function run({ items, format, quality, maxMegapixels }) {
@@ -139,7 +142,7 @@ async function run({ items, format, quality, maxMegapixels }) {
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     try {
-      const { blob, note } = await convertOne(item, format, quality, limit);
+      const { blob, note } = await convertOne({ ...item, index: i }, format, quality, limit);
       self.postMessage({ type: 'file-done', index: i, name: item.name, originalSize: item.originalSize, blob, convertedSize: blob.size, note });
     } catch (err) {
       const isLimit = err instanceof LimitExceededError;
