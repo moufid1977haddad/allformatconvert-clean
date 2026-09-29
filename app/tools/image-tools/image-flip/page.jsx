@@ -1,7 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf } from '../../../lib/imageOutput';
+import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf, sourceTypeOf } from '../../../lib/imageOutput';
 import { rasterFromRGBA } from '../../../lib/bigImage';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
@@ -26,7 +26,7 @@ export default function ImageFlipPage() {
         else { ctx.translate(0, H); ctx.scale(1, -1); }
         drawSource(ctx);
       });
-      setResult(resultOf(await encodeRasterLike(out, file.type), file.name, 'flipped'));
+      setResult(resultOf(await encodeRasterLike(out, sourceTypeOf(file)), file.name, 'flipped'));
     } catch (e) { setError(e?.message || 'Could not process this image.'); }
     setBusy(false);
   };

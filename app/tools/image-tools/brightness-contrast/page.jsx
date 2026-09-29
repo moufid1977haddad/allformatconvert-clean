@@ -1,7 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf } from '../../../lib/imageOutput';
+import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf, sourceTypeOf } from '../../../lib/imageOutput';
 import { rasterFromRGBA } from '../../../lib/bigImage';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { supportsCanvasFilter, applyBrightnessContrast } from '../../../lib/canvasFilters';
@@ -28,7 +28,7 @@ export default function BrightnessContrastPage() {
         if (supportsCanvasFilter()) { ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`; drawSource(ctx); }
         else { drawSource(ctx); ctx.putImageData(applyBrightnessContrast(ctx.getImageData(0, 0, band.width, band.rows), brightness, contrast), 0, 0); }
       });
-      setResult(resultOf(await encodeRasterLike(out, file.type), file.name, 'adjusted'));
+      setResult(resultOf(await encodeRasterLike(out, sourceTypeOf(file)), file.name, 'adjusted'));
     } catch (e) { setError(e?.message || 'Could not process this image.'); }
     setBusy(false);
   };

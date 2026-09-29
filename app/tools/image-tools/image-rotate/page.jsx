@@ -1,7 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf } from '../../../lib/imageOutput';
+import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf, sourceTypeOf } from '../../../lib/imageOutput';
 import { rasterFromRGBA } from '../../../lib/bigImage';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
@@ -22,7 +22,7 @@ export default function ImageRotatePage() {
     try {
       const raster = await loadRaster(file);
       const out = await rotateRaster(raster, angle);
-      setResult(resultOf(await (angle % 90 === 0 ? encodeRasterLike(out, file.type) : encodeRaster(out, 'image/png')), file.name, 'rotated'));
+      setResult(resultOf(await (angle % 90 === 0 ? encodeRasterLike(out, sourceTypeOf(file)) : encodeRaster(out, 'image/png')), file.name, 'rotated'));
     } catch (e) { setError(e?.message || 'Could not process this image.'); }
     setBusy(false);
   };

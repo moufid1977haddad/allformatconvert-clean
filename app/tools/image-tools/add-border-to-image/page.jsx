@@ -1,7 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf } from '../../../lib/imageOutput';
+import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf, sourceTypeOf } from '../../../lib/imageOutput';
 import { rasterFromRGBA } from '../../../lib/bigImage';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
@@ -41,7 +41,7 @@ export default function AddBorderToImagePage() {
         ctx.clearRect(bw, bw, W, H);
         drawSource(ctx, bw, bw);
       });
-      setResult(resultOf(await encodeRasterLike(out, file.type), file.name, 'border'));
+      setResult(resultOf(await encodeRasterLike(out, sourceTypeOf(file)), file.name, 'border'));
     } catch (e) { setError(e?.message || 'Could not process this image.'); }
     setBusy(false);
   };

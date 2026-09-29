@@ -1,7 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf } from '../../../lib/imageOutput';
+import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf, sourceTypeOf } from '../../../lib/imageOutput';
 import { rasterFromRGBA } from '../../../lib/bigImage';
 import { encodeLike, extOf, pixelateImageData } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
@@ -38,7 +38,7 @@ export default function ImagePixelatorPage() {
       let out;
       if (raster.canvas) { raster.canvas.getContext('2d').putImageData(new ImageData(img.data, img.width, img.height), 0, 0); out = raster; }
       else out = rasterFromRGBA(img.data, img.width, img.height);
-      setResult(resultOf(await encodeRasterLike(out, file.type), file.name, 'pixelated'));
+      setResult(resultOf(await encodeRasterLike(out, sourceTypeOf(file)), file.name, 'pixelated'));
     } catch (e) { setError(e?.message || 'Could not process this image.'); }
     setBusy(false);
   };

@@ -1,7 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf } from '../../../lib/imageOutput';
+import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf, sourceTypeOf } from '../../../lib/imageOutput';
 import { rasterFromRGBA } from '../../../lib/bigImage';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
@@ -43,7 +43,7 @@ export default function AddTextToImagePage() {
         ctx.textAlign = 'center';
         ctx.fillText(text, W * posX / 100, H * posY / 100);
       });
-      setResult(resultOf(await encodeRasterLike(out, file.type), file.name, 'text'));
+      setResult(resultOf(await encodeRasterLike(out, sourceTypeOf(file)), file.name, 'text'));
     } catch (e) { setError(e?.message || 'Could not process this image.'); }
     setBusy(false);
   };

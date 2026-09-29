@@ -245,7 +245,7 @@ def _measure_duration(path: str) -> float:
         p = subprocess.run(
             [config.FFMPEG_PATH, "-hide_banner", "-nostdin", "-v", "error", "-protocol_whitelist", "file", "-i", path,
              "-map", "0", "-c", "copy", "-f", "null", "-", "-progress", "pipe:1"],
-            capture_output=True, timeout=120,
+            capture_output=True, timeout=45,  # runs inside the /start request: kept short (security review 30/09)
         )
     except subprocess.TimeoutExpired:
         return 0.0
@@ -372,13 +372,15 @@ def edit_options(params: dict):
         return None
     vf = []
     if rotate is not None:
-        if isinstance(rotate, bool) or rotate not in ROTATIONS:
+        if isinstance(rotate, bool) or not isinstance(rotate, int) or rotate not in ROTATIONS:
             raise ValueError("Unsupported rotation.")
         vf.append(ROTATIONS[rotate])
     if fit is not None:
         if not isinstance(fit, dict):
             raise ValueError("Invalid size.")
         w, h, mode = fit.get("w"), fit.get("h"), fit.get("mode", "fit")
+        if not isinstance(mode, str):
+            raise ValueError("Unsupported resize mode.")
         for v in (w, h):
             if isinstance(v, bool) or not isinstance(v, int) or not 16 <= v <= 7680 or v % 2:
                 raise ValueError("Unsupported size: width and height must be even numbers from 16 to 7680.")
@@ -391,7 +393,7 @@ def edit_options(params: dict):
         else:
             raise ValueError("Unsupported resize mode.")
     if flt is not None:
-        if flt not in VIDEO_FILTERS:
+        if not isinstance(flt, str) or flt not in VIDEO_FILTERS:
             raise ValueError("Unsupported filter.")
         vf.append(VIDEO_FILTERS[flt])
     if fps is not None:
@@ -426,7 +428,7 @@ def effective_duration(op: str, params: dict, info: ProbeResult) -> float:
 def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_path: str, input_bytes: int = 0, crf_offset: int = 0):
     """Returns (ffmpeg argv, extension, mime). Raises ValueError with a user-safe message."""
     quality = params.get("quality", "medium")
-    if quality not in CRF:
+    if not isinstance(quality, str) or quality not in CRF:
         raise ValueError("Unknown quality level.")
     max_h = params.get("maxHeight")
     if max_h is not None and (not isinstance(max_h, int) or not 144 <= max_h <= 4320):

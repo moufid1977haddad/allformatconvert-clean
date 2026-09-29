@@ -1,7 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf } from '../../../lib/imageOutput';
+import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf, sourceTypeOf } from '../../../lib/imageOutput';
 import { rasterFromRGBA } from '../../../lib/bigImage';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { supportsCanvasFilter, applyGaussianBlur } from '../../../lib/canvasFilters';
@@ -28,7 +28,7 @@ export default function ImageBlurPage() {
         if (supportsCanvasFilter()) { ctx.filter = `blur(${blur}px)`; ctx.drawImage(band.source, 0, 0); }
         else { ctx.drawImage(band.source, 0, 0); ctx.putImageData(applyGaussianBlur(ctx.getImageData(0, 0, band.width, band.rows), Number(blur)), 0, 0); }
       }, { margin: Math.ceil(Number(blur) * 3) + 2 });
-      setResult(resultOf(await encodeRasterLike(out, file.type), file.name, 'blurred'));
+      setResult(resultOf(await encodeRasterLike(out, sourceTypeOf(file)), file.name, 'blurred'));
     } catch (e) { setError(e?.message || 'Could not process this image.'); }
     setBusy(false);
   };

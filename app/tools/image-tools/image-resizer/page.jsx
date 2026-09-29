@@ -1,7 +1,9 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { checkedBlob, canvasSizeProblem, flattenOntoWhite } from '../../../lib/mediaSupport';
+import { canvasSizeProblem } from '../../../lib/mediaSupport';
+import { CANVAS_MAX_PIXELS, canvasBeyondSafariCap, rasterFromCanvas, rasterFromRGBA } from '../../../lib/bigImage';
+import { encodeRasterLike, sourceTypeOf } from '../../../lib/imageOutput';
 import { formatBytes } from '../../../lib/formatBytes';
 
 // Modelled on the reference site (iLoveIMG "Resize image"): by pixels with the aspect ratio locked by
@@ -70,26 +72,35 @@ export default function ImageResizerPage() {
       const img = new Image();
       img.src = image;
       await img.decode();
-      const canvas = document.createElement('canvas');
-      canvas.width = dims.w; canvas.height = dims.h;
-      const ctx = canvas.getContext('2d');
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(img, 0, 0, dims.w, dims.h);
-      let type = MIME_BY_TYPE[file.type] || 'image/png';
-      let note = MIME_BY_TYPE[file.type] ? '' : 'Saved as PNG (the original format cannot be written by browsers).';
-      if (type === 'image/jpeg') flattenOntoWhite(ctx, dims.w, dims.h);
-      let blob;
-      try {
-        blob = await checkedBlob(canvas, type, type === 'image/png' ? undefined : 0.92);
-      } catch (e) {
-        if (type !== 'image/webp') throw e;
-        type = 'image/png'; // Safari cannot encode WebP from a canvas: say so, never mislabel
-        note = 'Saved as PNG: this browser cannot write WebP.';
-        blob = await checkedBlob(canvas, type);
+      // 30/09 (owner's iPhone): a result over 16.7 MP (e.g. 90 % of a 48 MP photo) exceeded the only canvas iOS
+      // allows. The resized image is now drawn in bands of at most that size -- each band the same scaled drawing,
+      // shifted, so the pixels are those of one big canvas -- then encoded without a canvas (lib/bigImage.js).
+      let out;
+      const drawBand = (ctx, y) => { ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, -y, dims.w, dims.h); };
+      if (dims.w * dims.h <= CANVAS_MAX_PIXELS || (await canvasBeyondSafariCap())) {
+        const canvas = document.createElement('canvas');
+        canvas.width = dims.w; canvas.height = dims.h;
+        drawBand(canvas.getContext('2d'), 0);
+        out = rasterFromCanvas(canvas, dims.w, dims.h);
+      } else {
+        const rgba = new Uint8ClampedArray(dims.w * dims.h * 4), step = Math.floor(CANVAS_MAX_PIXELS / dims.w);
+        const c = document.createElement('canvas'); c.width = dims.w; c.height = step;
+        const ctx = c.getContext('2d', { willReadFrequently: true });
+        for (let y = 0; y < dims.h; y += step) {
+          const h = Math.min(step, dims.h - y);
+          ctx.clearRect(0, 0, dims.w, step);
+          drawBand(ctx, y);
+          rgba.set(ctx.getImageData(0, 0, dims.w, h).data, y * dims.w * 4);
+        }
+        c.width = 1;
+        out = rasterFromRGBA(rgba, dims.w, dims.h);
       }
+      // Same format as the original (WebP too on Safari: libwebp in WebAssembly); other formats as PNG.
+      const srcType = sourceTypeOf(file);
+      const note = MIME_BY_TYPE[srcType] ? '' : 'Saved as PNG (the original format cannot be written by browsers).';
+      const blob = await encodeRasterLike(out, MIME_BY_TYPE[srcType] || 'image/png');
       const base = file.name.replace(/\.[^.]+$/, '') || 'image';
-      setResult({ url: URL.createObjectURL(blob), size: blob.size, w: dims.w, h: dims.h, name: `${base}-${dims.w}x${dims.h}.${EXT[type]}`, note });
+      setResult({ url: URL.createObjectURL(blob), size: blob.size, w: dims.w, h: dims.h, name: `${base}-${dims.w}x${dims.h}.${EXT[blob.type] || 'png'}`, note });
     } catch (e) {
       setError(e.message || 'The image could not be resized.');
     }

@@ -229,3 +229,10 @@ export async function rotateRaster(raster, angle) {
   }
   return rasterFromRGBA(out, outW, outH);
 }
+
+// The file's image type, from its name when the browser gives none (seen: WebKit on Windows gives '' for .webp).
+export function sourceTypeOf(file) {
+  if (file && file.type) return file.type;
+  const ext = String(file?.name || '').toLowerCase().match(/\.([a-z0-9]+)$/)?.[1];
+  return { jpg: 'image/jpeg', jpeg: 'image/jpeg', jfif: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif', bmp: 'image/bmp', avif: 'image/avif' }[ext] || '';
+}

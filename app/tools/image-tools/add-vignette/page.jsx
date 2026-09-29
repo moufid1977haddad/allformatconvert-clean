@@ -1,7 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf } from '../../../lib/imageOutput';
+import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf, sourceTypeOf } from '../../../lib/imageOutput';
 import { rasterFromRGBA } from '../../../lib/bigImage';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
@@ -37,7 +37,7 @@ export default function AddVignettePage() {
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, W, H);
       });
-      setResult(resultOf(await encodeRasterLike(out, file.type), file.name, 'vignette'));
+      setResult(resultOf(await encodeRasterLike(out, sourceTypeOf(file)), file.name, 'vignette'));
     } catch (e) { setError(e?.message || 'Could not process this image.'); }
     setBusy(false);
   };

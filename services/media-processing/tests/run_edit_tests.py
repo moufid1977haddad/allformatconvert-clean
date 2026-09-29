@@ -42,7 +42,8 @@ check("forConcat: stitchable x264, 48 kHz stereo, fixed timescale", "stitchable=
 for bad, why in (({"rotate": 45}, "rotation 45"), ({"rotate": True}, "rotation boolean"), ({"fit": {"w": 853, "h": 480}}, "odd width"),
                  ({"fit": {"w": 99999, "h": 480}}, "huge width"), ({"fit": {"w": 640, "h": 480, "mode": "zoom"}}, "unknown mode"),
                  ({"filter": "sharpen; rm -rf"}, "unknown filter"), ({"fps": 0}, "fps 0"), ({"fps": "30"}, "fps string"),
-                 ({"target": "webm", "rotate": 90}, "edit in WebM"), ({"fit": {"w": 640, "h": 360}, "maxHeight": 480}, "size and max height")):
+                 ({"target": "webm", "rotate": 90}, "edit in WebM"), ({"rotate": []}, "rotation list (unhashable)"), ({"filter": {}}, "filter object"),
+                 ({"fit": {"w": 640, "h": 480, "mode": []}}, "mode list"), ({"quality": []}, "quality list"), ({"fit": {"w": 640, "h": 360}, "maxHeight": 480}, "size and max height")):
     try:
         cmd({"target": "mp4", **bad}); ok = False
     except ValueError:
