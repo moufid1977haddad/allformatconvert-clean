@@ -77,7 +77,7 @@ export default function ImageUpscalerPage() {
     // A large image goes in bands, each well within the server's time (see localUpscale.js).
     if (dims && serverNeedsParts(dims.w, dims.h, scale)) {
       const r = await upscaleOnServerInParts(file, scale, async (f, i, n) => (await one(f, ` (part ${i + 1} of ${n})`)).blob, { signal: ac.signal });
-      return { blob: r.blob, w: r.width, h: r.height };
+      return { blob: r.blob, w: r.width, h: r.height, preview: r.preview };
     }
     const { json, blob } = await one(file);
     return { blob, w: json.width, h: json.height };
@@ -110,7 +110,7 @@ export default function ImageUpscalerPage() {
               if (done >= 2 && etaSeconds > serverEst * 2 && etaSeconds > 60) setOfferServer(serverEst);
             },
           });
-          out = { blob: r.blob, w: r.width, h: r.height };
+          out = { blob: r.blob, w: r.width, h: r.height, preview: r.preview };
         } catch (e) {
           if (e?.name === 'AbortError' && !serverNowRef.current) throw e;
           // The visitor chose the server, or the GPU failed: our server takes over.
@@ -120,7 +120,8 @@ export default function ImageUpscalerPage() {
         }
       }
       if (!out) out = await runOnServer(ac);
-      setResult({ url: URL.createObjectURL(out.blob), size: out.blob.size, w: out.w, h: out.h });
+      // A result too big for this device to show (iPhone, streamed PNG) is shown through its small preview.
+      setResult({ url: URL.createObjectURL(out.blob), previewUrl: out.preview ? URL.createObjectURL(out.preview) : null, size: out.blob.size, w: out.w, h: out.h });
     } catch (e) {
       if (!((e instanceof MediaJobError && e.code === 'cancelled') || e?.name === 'AbortError')) setError(e?.message || 'Upscaling failed. Please try again.');
     } finally {
@@ -170,7 +171,7 @@ export default function ImageUpscalerPage() {
               <div className="relative select-none overflow-hidden rounded-lg border border-neutral-200" style={{ aspectRatio: `${result.w} / ${result.h}` }}>
                 {/* before (the original, stretched by the browser) under after (the AI result), split by the slider */}
                 <img src={preview} alt="Original" className="absolute inset-0 w-full h-full" style={{ imageRendering: 'auto' }} />
-                <img src={result.url} alt="Upscaled" className="absolute inset-0 w-full h-full" style={{ clipPath: `inset(0 0 0 ${split}%)` }} />
+                <img src={result.previewUrl || result.url} alt="Upscaled" className="absolute inset-0 w-full h-full" style={{ clipPath: `inset(0 0 0 ${split}%)` }} />
                 <div className="absolute top-0 bottom-0 w-0.5 bg-white shadow" style={{ left: `${split}%` }} />
                 <span className="absolute left-2 top-2 rounded bg-black/60 px-2 py-0.5 text-xs text-white">Before</span>
                 <span className="absolute right-2 top-2 rounded bg-black/60 px-2 py-0.5 text-xs text-white">After</span>

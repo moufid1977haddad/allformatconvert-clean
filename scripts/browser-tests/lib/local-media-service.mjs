@@ -40,6 +40,21 @@ export async function startLocalMediaService({ origin, port = 8621, ffmpeg = pro
         await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ jid: t.jid, ticket: t.ticket, expiresAt: t.expiresAt }) });
       });
     },
+    // What a site route does server-side for a staged job: read the uploaded file, deposit a result.
+    async readSource(jid) {
+      const t = mintTicket({ secret, op: 'stage', maxBytes: 1024 ** 3, jid, role: 'server' });
+      const r = await fetch(`http://127.0.0.1:${port}/v1/jobs/${jid}/source`, { headers: { Authorization: 'Bearer ' + t.ticket } });
+      if (!r.ok) throw new Error('source ' + r.status);
+      return Buffer.from(await r.arrayBuffer());
+    },
+    async depositOutput(jid, buf, ext) {
+      const t = mintTicket({ secret, op: 'stage', maxBytes: 1024 ** 3, jid, role: 'server' });
+      const sha = (await import('node:crypto')).createHash('sha256').update(buf).digest('hex');
+      const r = await fetch(`http://127.0.0.1:${port}/v1/jobs/${jid}/output`, { method: 'PUT', body: buf, headers: { Authorization: 'Bearer ' + t.ticket, 'X-Output-Ext': ext, 'X-Output-Sha256': sha, 'Content-Length': String(buf.length) } });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error('output ' + r.status + ' ' + JSON.stringify(j));
+      return j.outputBytes;
+    },
     stop() { proc.kill(); try { fs.rmSync(work, { recursive: true, force: true }); } catch {} },
   };
 }
