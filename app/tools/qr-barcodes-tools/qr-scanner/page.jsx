@@ -50,8 +50,11 @@ export default function QrScannerPage() {
       await new Promise((ok, ko) => { img.onload = ok; img.onerror = ko; img.src = url; });
       // Full resolution first (small or distant codes), then downscaled.
       jsqrRef.current ??= (await import('jsqr')).default;
-      const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
-      const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0);
+      // At most 12 Mpx (30/09): a 24/48 MP iPhone photo on one canvas fails on iOS (16.7 Mpx per canvas at most);
+      // a QR code in such a photo stays several pixels per module at 12 Mpx.
+      const k = Math.min(1, Math.sqrt(12e6 / (img.naturalWidth * img.naturalHeight)));
+      const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(img.naturalWidth * k)); c.height = Math.max(1, Math.round(img.naturalHeight * k));
+      const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, c.width, c.height);
       const d = ctx.getImageData(0, 0, c.width, c.height);
       const code = jsqrRef.current(d.data, d.width, d.height) || await decode(img, img.naturalWidth, img.naturalHeight);
       if (code) found(code.data); else setStatus('No QR code found in image');
