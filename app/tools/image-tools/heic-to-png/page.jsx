@@ -2,6 +2,8 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { reportToolError } from '../../../lib/reportError';
+import { imageDims } from '../../../lib/bigImage';
+import { loadRaster, encodeRaster } from '../../../lib/imageOutput';
 
 export default function HeicToPngPage() {
   const [file, setFile] = useState(null);
@@ -21,8 +23,15 @@ export default function HeicToPngPage() {
     setLoading(true);
     setStatus('Converting...');
     try {
-      const heic2any = (await import('heic2any')).default;
-      const blob = await heic2any({ blob: file, toType: 'image/png' });
+      // 30/09 (owner's iPhone): Safari (iPhone, iPad, Mac) decodes HEIC itself, at full size -- 24 and 48 MP photos
+      // included, in bands beyond iOS's 16.7 MP canvas limit (lib/bigImage.js) -- where heic2any needed one canvas
+      // the size of the photo. heic2any (libheif in WebAssembly) stays for the browsers that cannot read HEIC.
+      let blob;
+      if (await imageDims(file)) blob = await encodeRaster(await loadRaster(file), 'image/png', 92);
+      else {
+        const heic2any = (await import('heic2any')).default;
+        blob = await heic2any({ blob: file, toType: 'image/png' });
+      }
       const url = URL.createObjectURL(blob);
       setResult(url);
       setStatus('');
