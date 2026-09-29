@@ -327,7 +327,8 @@ await T('text-to-pdf', async () => {
   await ta().fill('я 😀');
   await page.getByRole('button', { name: 'Convert to PDF' }).click();
   await page.waitForTimeout(1000);
-  check('text-to-pdf unsupported chars listed', (await body()).includes("can't be written with the built-in PDF font"), '');
+  // 30/09: Cyrillic is written now (Noto fonts, lib/textPdf.js); only the emoji is refused, and named.
+  { const t = await body(); check('text-to-pdf unsupported chars listed (the emoji, not the Cyrillic)', t.includes('no glyph in the fonts used') && t.includes('😀') && !/: [^.]*я/.test(t.slice(t.indexOf('no glyph'))), ''); }
 });
 
 await T('pdf-rotate encrypted', async () => {
@@ -447,7 +448,7 @@ await T('jpg-to-pdf orientation', async () => {
   await open('/tools/pdf-tools/jpg-to-pdf');
   await page.locator('input[type="file"]').setInputFiles('scripts/converter-tests/fixtures/exif-orient6.jpg');
   await page.getByRole('button', { name: 'Convert to PDF' }).click();
-  const href = await page.locator('a[download="converted.pdf"]').first().getAttribute('href', { timeout: 20000 });
+  const href = await page.locator('a[download$=".pdf"]').first().getAttribute('href', { timeout: 20000 });
   const bytes = await page.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href);
   const size = (await PDFDocument.load(new Uint8Array(bytes))).getPage(0).getSize();
   check('portrait phone photo stays portrait', size.width === 600 && size.height === 800, JSON.stringify(size));

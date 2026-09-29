@@ -25,7 +25,15 @@ await p.goto(origin + '/tools/image-tools/image-compressor', { waitUntil: 'netwo
 await p.locator('input[type=file]').first().setInputFiles(src);
 await p.getByRole('button', { name: /^Compress/ }).first().click();
 const link = p.locator('a[download]').filter({ hasText: /Download/ }).first();
-await link.waitFor({ timeout: 600000 });
+// The page's own message ends the wait too: Playwright's WebKit has no OffscreenCanvas (real Safari has it since 16.4),
+// and the page says so instead of compressing -- reported as an engine gap, not a pass.
+const shown = p.locator('p.text-red-600').first();
+await Promise.race([link.waitFor({ timeout: 600000 }), shown.waitFor({ timeout: 600000 })]);
+if (!(await link.isVisible())) {
+  const msg = await shown.textContent();
+  console.log(/Safari 16\.4/.test(msg) ? 'SKIP' : 'FAIL', `${engine.name()}: no result, the page says: ${msg}`);
+  await b.close(); process.exit(/Safari 16\.4/.test(msg) ? 0 : 1);
+}
 const [d] = await Promise.all([p.waitForEvent('download'), link.click()]);
 const out = path.join(dir, `${Date.now()}-${d.suggestedFilename()}`); await d.saveAs(out);
 const m = await sharp(out).metadata();
