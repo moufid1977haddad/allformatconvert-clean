@@ -407,7 +407,7 @@ export default function BarcodeGeneratorPage() {
               <p className="text-center text-sm font-semibold" data-status>{out.read.skipped
                 ? <span className="text-amber-700">Created, but not scanned back: no independent reader exists for {sym.label} in a browser. Test it with your scanner before printing a batch.</span>
                 : <span className="text-green-700">✓ Scanned back by an independent reader (zxing-cpp): {out.read.text}</span>}</p>
-              <p className="text-center text-xs text-neutral-500">Image {out.w} × {out.h} px{ui.unit === 'px' ? '' : ` = ${((out.w * 25.4) / out.p.dpi).toFixed(1)} × ${((out.h * 25.4) / out.p.dpi).toFixed(1)} mm at ${out.p.dpi} dpi`}. Shown enlarged here; the SVG, PDF and EPS keep this exact print size (opened in a browser, they appear at that physical size).</p>
+              <p className="text-center text-xs text-neutral-500">Image {out.w} × {out.h} px{ui.unit === 'px' ? '' : ` = ${((out.w * 25.4) / out.p.dpi).toFixed(1)} × ${((out.h * 25.4) / out.p.dpi).toFixed(1)} mm at ${out.p.dpi} dpi`}. Shown enlarged here. The SVG fills the window when you open it on its own, and keeps this exact print size on paper and in label or layout software, as do the PDF and EPS.</p>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                 {FORMATS.map((f) => <a key={f.id} href={out.urls[f.id]} download={`${out.name}.${f.id}`} data-format={f.id} className="block text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">{f.label}</a>)}
               </div>
