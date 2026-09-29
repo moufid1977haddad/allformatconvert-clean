@@ -77,10 +77,12 @@ if (run('detector')) {
     await page.goto(origin + '/tools/ai-tools/ai-detector', { waitUntil: 'networkidle' });
     await page.getByPlaceholder('Paste text to analyze...').fill(text);
     await page.getByRole('button', { name: /Detect AI Content/ }).click();
-    await page.waitForFunction(() => { const t = document.querySelectorAll('textarea'); return t.length > 1 && t[t.length - 1].value.length > 20; }, null, { timeout: 90000 }).catch(() => {});
-    const out = await page.locator('textarea').last().inputValue().catch(() => '');
+    // since 30/09 the page shows a verdict (RAIDAR); before, the model's opinion in a text box
+    await page.waitForFunction(() => document.querySelector('[data-verdict]') || [...document.querySelectorAll('textarea')].slice(1).some((t) => t.value.length > 20), null, { timeout: 90000 }).catch(() => {});
+    const verdict = await page.locator('[data-verdict]').getAttribute('data-verdict').catch(() => null);
+    const out = verdict ? await page.locator('[data-verdict]').innerText() : await page.locator('textarea').last().inputValue().catch(() => '');
     const pct = (out.match(/(\d{1,3})\s?%/) || [])[1];
-    log(`detector ${label}`, costText(text.length + 200, out), `${pct ?? '?'} % :: ${out.slice(0, 180).replace(/\n/g, ' ')}`);
+    log(`detector ${label}`, costText(text.length * 2 + 200, text), `${verdict || '(old page)'} ${pct ?? '?'} % :: ${out.slice(0, 160).replace(/\n/g, ' ')}`);
   }
 }
 if (run('transcriber')) {

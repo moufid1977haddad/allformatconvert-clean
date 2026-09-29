@@ -158,16 +158,26 @@ await T('ai-chatbot', async () => {
 await T('ai-detector', async () => {
   await open('/tools/ai-tools/ai-detector');
   await page.route('**/api/ai', (route) => route.fulfill({ status: 504, contentType: 'text/html', body: '<html><body>Gateway Timeout</body></html>' }));
-  await page.getByPlaceholder('Paste text to analyze...').fill('Some text to check.');
+  // 30/09: at least 40 words (RAIDAR), and the page measures the model's rewrite (lib/ai/raidar.js)
+  const para = 'The quick brown fox jumps over the lazy dog while the farmer watches from the old wooden porch. '.repeat(3);
+  await page.getByPlaceholder('Paste text to analyze...').fill(para);
   await page.getByRole('button', { name: 'Detect AI Content' }).click();
   await page.waitForTimeout(1500);
   const err = await page.locator('p.text-red-400').first().textContent().catch(() => '');
   check('ai tools: a gateway error page gives a readable message, not a JSON parse error', /did not answer correctly \(HTTP 504\)/.test(err) && !/Unexpected token/.test(err), err);
   await page.unroute('**/api/ai');
-  await page.route('**/api/ai', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ text: 'Likelihood of AI: 85%' }) }));
+  await page.route('**/api/ai', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ text: 'Here is the polished text:\n' + para.replace('old wooden', 'wooden') }) }));
   await page.getByRole('button', { name: 'Detect AI Content' }).click();
   await page.waitForTimeout(1000);
-  check('ai-detector: the estimate is shown with its caveat next to it (not only in the page text below)', await page.locator('[data-caveat]').count() === 1);
+  check('ai-detector: a text the model barely changes -> "Likely written by AI", with the share changed and its caveat', (await page.locator('[data-verdict]').getAttribute('data-verdict')) === 'ai' && /changed <?\w*>?\s*\d+ %/.test(await page.locator('[data-verdict]').innerText()) && await page.locator('[data-caveat]').count() === 1);
+  await page.unroute('**/api/ai');
+  await page.route('**/api/ai', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ text: 'A nimble russet fox leaps above an idle hound as the rancher observes from a weathered veranda. Meanwhile, a quick fox vaults a sleepy dog; the grower looks on from the aged timber deck. Again the fox springs over the drowsy dog, watched by the farmer on his porch.' }) }));
+  await page.getByRole('button', { name: 'Detect AI Content' }).click();
+  await page.waitForTimeout(1000);
+  check('ai-detector: a text the model rewrites heavily -> "Likely written by a person"', (await page.locator('[data-verdict]').getAttribute('data-verdict')) === 'human');
+  await page.getByPlaceholder('Paste text to analyze...').fill('Too short to judge.');
+  await page.getByRole('button', { name: 'Detect AI Content' }).click();
+  check('ai-detector: under 40 words, no verdict and a clear message', /at least 40 words/.test(await page.locator('p.text-red-400').first().textContent().catch(() => '')));
 });
 
 console.log(`\n${name}: ${passes} passed, ${fails} failed`);
