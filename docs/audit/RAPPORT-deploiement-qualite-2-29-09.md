@@ -38,7 +38,9 @@ Aucune suite complète rejouée sur www, aucun appel payant, aucun appel au serv
 
 - `scripts/browser-tests/image-audit-2.mjs` : option `--only=` ajoutée pour ne jouer que le contrôle de format sur www.
   Ce commit contient ce script (hors `docs/`) : Vercel reconstruira la production avec un **code du site identique**
-  à `828cfe75` ; contrôlé après la poussée (voir la fin du terminal de la session).
+  à `828cfe75` (`git diff` vide sur `app`, `lib`, `next.config.ts`, `package.json`). **Dernier déploiement de production :
+  `82da9cf5`** (`onlineconvertools-35djgimn3`, Ready, alias www) — contrôlé : accueil, PDF Redact, APNG to GIF, AI Chatbot en 200,
+  contrôle Markdown to PDF rejoué PASS.
 
 ## Pour le propriétaire, ensuite
 
