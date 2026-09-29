@@ -1,0 +1,74 @@
+[
+  {
+    "id": "ai-sonnet-1",
+    "lang": "en",
+    "kind": "ai",
+    "model": "claude-sonnet-5",
+    "genre": "encyclopedia",
+    "prompt": "Write a Wikipedia-style introduction about glaciers.",
+    "text": "A glacier is a persistent body of dense ice that forms over years or centuries wherever snow accumulation exceeds ablation, the combined loss of ice through melting, sublimation, and evaporation, and that flows slowly downslope or outward under the pull of its own weight. Glaciers exist on every continent except Australia, most extensively in polar regions such as Antarctica and Greenland, and also at high elevations in mountain ranges including the Himalayas, the Andes, the Rockies, and the Alps. They begin as fresh snow that gradually compacts under its own weight into a granular material called firn, which over time recrystallizes into dense glacial ice, a process that can take anywhere from a few years to several decades depending on climate and snowfall. Glaciers are commonly divided into two broad categories: continental ice sheets, which cover enormous areas largely independent of the underlying terrain, and alpine or valley glaciers, which are confined by surrounding mountains and typically follow existing valley systems as they move. Collectively, glaciers store roughly three-quarters of the planet's freshwater, making them essential to the global water cycle and sensitive indicators of climate change, since their advance or retreat reflects shifts in temperature and precipitation, while their meltwater sustains rivers, wetlands, and communities across the world."
+  },
+  {
+    "id": "ai-sonnet-2",
+    "lang": "en",
+    "kind": "ai",
+    "model": "claude-sonnet-5",
+    "genre": "blog",
+    "prompt": "Write a short blog post about the pros and cons of working from home.",
+    "text": "Working from home has become one of the defining features of modern careers, and like most major shifts in how we work, it comes with genuine trade-offs worth weighing. On the upside, remote work eliminates the daily commute, handing people back hours each week that can go toward family time, exercise, or simply rest. It also offers real flexibility: you can shape your day around your own energy levels, schedule appointments without requesting time off, and in many cases work from wherever you have a stable internet connection. Employees frequently report higher job satisfaction and better work-life balance as a result, along with fewer interruptions from office chatter and impromptu meetings that used to eat into focused time. That said, remote work isn't without its downsides. Isolation is a common complaint, particularly among people who thrive on in-person collaboration and the small, spontaneous conversations that happen naturally in an office. Boundaries between work and personal life can blur, pushing some people to work longer hours than they ever would on-site. Home setups aren't always ergonomic, and not everyone has a quiet, dedicated space to concentrate. Career visibility can suffer too, since remote employees are sometimes overlooked for promotions simply because they're less visible to decision-makers day to day."
+  },
+  {
+    "id": "ai-sonnet-3",
+    "lang": "en",
+    "kind": "ai",
+    "model": "claude-sonnet-5",
+    "genre": "fiction",
+    "prompt": "Write a short scene: an old fisherman goes out to sea at dawn.",
+    "text": "The old man woke before the light did, as he always had, and pulled on his boots in the dark without needing to see them. The village lay silent except for the creak of his door and the distant hush of waves against the hull of his boat. He walked down to the shore with the same slow, deliberate steps he had used for forty years, his hands already remembering the weight of the nets before he even touched them. The sea was calm that morning, gray and glassy, holding its breath before the sun arrived. He pushed the boat off the wet sand, felt the cold water bite through his trousers, and climbed in with the ease of habit rather than youth. The oars dipped and pulled, dipped and pulled, carrying him past the breakwater and out into open water where the horizon was just beginning to blush pink at its edge. Gulls circled overhead, sensing the start of the day's work before he did. He cut the engine once he judged himself far enough out, letting the boat drift while he checked his lines, his weathered face unreadable in the half-light. Whatever the sea gave him today, he would take, as he always had, without complaint and without much hope of anything more than that."
+  },
+  {
+    "id": "ai-sonnet-4",
+    "lang": "en",
+    "kind": "ai",
+    "model": "claude-sonnet-5",
+    "genre": "abstract",
+    "prompt": "Write the abstract of a research paper that proposes a new vision transformer for image classification.",
+    "text": "We introduce a novel vision transformer architecture designed to improve both efficiency and accuracy in image classification. Existing vision transformers achieve strong performance but often demand substantial computational resources because self-attention scales quadratically with the number of image patches. To address this limitation, we propose a hierarchical attention mechanism that progressively reduces spatial resolution while expanding channel capacity, paired with a lightweight local-global attention module that captures fine-grained detail without incurring the full cost of dense attention over the entire feature map. Our architecture further incorporates a learnable token-merging strategy that adaptively consolidates redundant patches during the forward pass, reducing computational overhead without discarding informative regions. We evaluate the proposed model on several standard image classification benchmarks, including large-scale natural image datasets, and show that it matches or exceeds the accuracy of existing convolutional and transformer-based architectures while requiring substantially fewer floating-point operations and less memory during both training and inference. Ablation studies confirm that each proposed component contributes meaningfully to the overall performance gains, and additional experiments demonstrate strong transferability to downstream tasks such as object detection and semantic segmentation. These results suggest that carefully designed attention sparsity combined with adaptive tokenization can substantially improve the efficiency of vision transformers without sacrificing the representational power that has made them effective across a wide range of visual recognition tasks."
+  },
+  {
+    "id": "ai-sonnet-5",
+    "lang": "fr",
+    "kind": "ai",
+    "model": "claude-sonnet-5",
+    "genre": "encyclopedia",
+    "prompt": "Écris une introduction de type encyclopédique sur les marées.",
+    "text": "Les marées désignent les variations périodiques du niveau des mers et des océans, provoquées principalement par l'attraction gravitationnelle exercée par la Lune et, dans une moindre mesure, par le Soleil, combinée à la force centrifuge résultant de la rotation du système Terre-Lune autour de leur centre de masse commun. Ce phénomène se traduit par une alternance régulière entre marée haute, appelée pleine mer, et marée basse, appelée basse mer, dont le rythme suit approximativement un cycle de douze heures et vingt-cinq minutes dans la plupart des régions du globe. L'amplitude des marées, c'est-à-dire la différence de hauteur d'eau entre la pleine mer et la basse mer, varie considérablement selon la configuration des côtes, la profondeur des fonds marins et la position relative de la Lune et du Soleil. Lorsque ces deux astres sont alignés avec la Terre, lors des nouvelles et des pleines lunes, leurs effets gravitationnels s'additionnent et produisent des marées de vive-eau, particulièrement marquées. À l'inverse, lorsqu'ils forment un angle droit par rapport à la Terre, les marées dites de mortes-eaux présentent une amplitude nettement réduite. Les marées jouent un rôle essentiel dans de nombreux écosystèmes littoraux, influencent la navigation maritime et la pêche côtière, et constituent depuis longtemps une source d'énergie renouvelable exploitée par certaines centrales marémotrices."
+  },
+  {
+    "id": "ai-sonnet-6",
+    "lang": "fr",
+    "kind": "ai",
+    "model": "claude-sonnet-5",
+    "genre": "letter",
+    "prompt": "Écris une lettre à la mairie de ta commune pour demander une piste cyclable devant l'école.",
+    "text": "Madame, Monsieur le Maire, Par la présente, je souhaite attirer votre attention sur un problème de sécurité qui concerne les abords de l'école de notre quartier. Chaque matin et chaque après-midi, de nombreux enfants se rendent à pied ou à vélo devant l'établissement, dans une rue où la circulation automobile reste dense et parfois rapide aux heures d'entrée et de sortie des classes. L'absence d'aménagement cyclable sécurisé oblige les familles à circuler au milieu des voitures, ce qui représente un risque réel pour les plus jeunes usagers de la route. Je me permets donc de vous demander, au nom de plusieurs parents d'élèves partageant cette inquiétude, d'étudier la possibilité de créer une piste cyclable ou, à défaut, une bande cyclable clairement matérialisée devant l'école. Un tel aménagement encouragerait également davantage de familles à privilégier le vélo pour les trajets scolaires, réduisant ainsi la congestion automobile et les émissions polluantes aux heures de pointe. Je reste convaincu que de petits investissements en matière de voirie peuvent avoir un effet durable sur la sécurité et la qualité de vie de l'ensemble des habitants du quartier. Je vous remercie par avance de l'attention que vous porterez à cette demande et reste à votre disposition pour en discuter plus en détail si nécessaire. Un parent d'élève"
+  },
+  {
+    "id": "ai-sonnet-7",
+    "lang": "de",
+    "kind": "ai",
+    "model": "claude-sonnet-5",
+    "genre": "encyclopedia",
+    "prompt": "Schreibe einen kurzen enzyklopädischen Text über den Buchdruck.",
+    "text": "Der Buchdruck bezeichnet ein Verfahren zur Vervielfältigung von Texten mittels beweglicher, wiederverwendbarer Lettern, das im fünfzehnten Jahrhundert in Europa maßgeblich von Johannes Gutenberg weiterentwickelt wurde, auch wenn ähnliche Techniken bereits zuvor in Ostasien bekannt waren und dort in anderer Form eingesetzt wurden. Gutenbergs entscheidender Beitrag bestand in der Kombination einer geeigneten Metalllegierung für die einzelnen Lettern, einer ölbasierten Druckfarbe und einer angepassten Druckerpresse, die ursprünglich auf dem Prinzip der Weinpressen beruhte. Diese technische Innovation ermöglichte es erstmals, Bücher in vergleichsweise kurzer Zeit und in großer Stückzahl herzustellen, was die Kosten für schriftliche Werke erheblich senkte und ihre Verbreitung enorm beschleunigte. Vor der Erfindung des Buchdrucks wurden Texte überwiegend von Hand abgeschrieben, ein langwieriger und fehleranfälliger Prozess, der Bücher zu kostbaren und vergleichsweise seltenen Gütern machte. Mit der raschen Ausbreitung der Druckerpressen im späten fünfzehnten und frühen sechzehnten Jahrhundert veränderte sich die europäische Gesellschaft grundlegend: Wissen konnte schneller verbreitet werden, die Alphabetisierung nahm zu, und Bewegungen wie die Reformation profitierten unmittelbar von der neuen Möglichkeit, Schriften in großer Auflage zu verbreiten. Der Buchdruck gilt daher als eine der folgenreichsten technischen Errungenschaften der Menschheitsgeschichte und legte den Grundstein für die moderne Massenkommunikation."
+  },
+  {
+    "id": "ai-sonnet-8",
+    "lang": "fr",
+    "kind": "ai",
+    "model": "claude-sonnet-5",
+    "genre": "fiction",
+    "prompt": "Écris une courte scène : une boulangerie de village au petit matin.",
+    "text": "Il n'est pas encore six heures lorsque la lumière jaune du fournil s'allume, seule tache de clarté dans la rue encore plongée dans l'obscurité. À l'intérieur, la chaleur du four enveloppe déjà la petite pièce, chargée de l'odeur tiède de la farine et de la pâte qui lève depuis la nuit. Le boulanger, les mains blanches de farine, façonne les pains un à un avec des gestes précis, répétés depuis tant d'années qu'ils ne demandent plus aucune réflexion particulière. Dehors, le village dort encore, silencieux, à peine troublé par le passage d'un chat ou le grincement lointain d'un volet mal fermé. Peu à peu, une odeur de pain chaud commence à se répandre dans la rue, se faufilant sous les portes et réveillant sans bruit les tout premiers habitants du quartier. La cloche de la porte tinte enfin lorsque le premier client entre, encore emmitouflé, à la recherche d'une baguette et d'un peu de chaleur avant le reste de la journée. Le boulanger lève les yeux, sourit brièvement, puis continue son travail sans interrompre le rythme installé depuis l'aube. Dans quelques minutes, la petite boutique s'emplira de voix et de bruits, mais pour l'instant, seul compte le silence complice entre lui et son four."
+  }
+]

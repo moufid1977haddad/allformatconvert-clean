@@ -1,0 +1,399 @@
+{
+ "calls": [
+  {
+   "at": "2026-09-29T21:04:17.224Z",
+   "tool": "ai-chatbot",
+   "status": 200,
+   "inChars": 130,
+   "outChars": 1340
+  },
+  {
+   "at": "2026-09-29T21:04:20.092Z",
+   "tool": "ai-chatbot",
+   "status": 200,
+   "inChars": 147,
+   "outChars": 1288
+  },
+  {
+   "at": "2026-09-29T21:04:23.980Z",
+   "tool": "ai-chatbot",
+   "status": 200,
+   "inChars": 140,
+   "outChars": 1139
+  },
+  {
+   "at": "2026-09-29T21:04:27.052Z",
+   "tool": "ai-chatbot",
+   "status": 200,
+   "inChars": 181,
+   "outChars": 1498
+  },
+  {
+   "at": "2026-09-29T21:04:31.303Z",
+   "tool": "ai-chatbot",
+   "status": 200,
+   "inChars": 139,
+   "outChars": 1181
+  },
+  {
+   "at": "2026-09-29T21:04:34.360Z",
+   "tool": "ai-chatbot",
+   "status": 200,
+   "inChars": 209,
+   "outChars": 1229
+  },
+  {
+   "at": "2026-09-29T21:04:40.979Z",
+   "tool": "ai-chatbot",
+   "status": 200,
+   "inChars": 147,
+   "outChars": 1097
+  },
+  {
+   "at": "2026-09-29T21:04:44.818Z",
+   "tool": "ai-chatbot",
+   "status": 200,
+   "inChars": 145,
+   "outChars": 1273
+  },
+  {
+   "at": "2026-09-29T21:04:49.199Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1317,
+   "outChars": 1326
+  },
+  {
+   "at": "2026-09-29T21:04:52.484Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1339,
+   "outChars": 1286
+  },
+  {
+   "at": "2026-09-29T21:04:56.424Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1345,
+   "outChars": 1328
+  },
+  {
+   "at": "2026-09-29T21:04:58.936Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1232,
+   "outChars": 1266
+  },
+  {
+   "at": "2026-09-29T21:05:02.154Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1544,
+   "outChars": 1509
+  },
+  {
+   "at": "2026-09-29T21:05:07.710Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1132,
+   "outChars": 1074
+  },
+  {
+   "at": "2026-09-29T21:05:13.056Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1427,
+   "outChars": 1351
+  },
+  {
+   "at": "2026-09-29T21:05:16.020Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1432,
+   "outChars": 1452
+  },
+  {
+   "at": "2026-09-29T21:05:22.565Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1439,
+   "outChars": 1394
+  },
+  {
+   "at": "2026-09-29T21:05:33.311Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1407,
+   "outChars": 1378
+  },
+  {
+   "at": "2026-09-29T21:05:38.160Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1268,
+   "outChars": 1264
+  },
+  {
+   "at": "2026-09-29T21:05:41.598Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1399,
+   "outChars": 1344
+  },
+  {
+   "at": "2026-09-29T21:05:46.472Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1558,
+   "outChars": 1514
+  },
+  {
+   "at": "2026-09-29T21:05:51.197Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1481,
+   "outChars": 1433
+  },
+  {
+   "at": "2026-09-29T21:05:55.935Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1386,
+   "outChars": 1353
+  },
+  {
+   "at": "2026-09-29T21:05:59.770Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1180,
+   "outChars": 1160
+  },
+  {
+   "at": "2026-09-29T21:06:04.948Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1766,
+   "outChars": 1706
+  },
+  {
+   "at": "2026-09-29T21:06:08.311Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1411,
+   "outChars": 1327
+  },
+  {
+   "at": "2026-09-29T21:06:12.221Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1524,
+   "outChars": 1443
+  },
+  {
+   "at": "2026-09-29T21:06:15.465Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1359,
+   "outChars": 1313
+  },
+  {
+   "at": "2026-09-29T21:06:18.127Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 808,
+   "outChars": 796
+  },
+  {
+   "at": "2026-09-29T21:06:22.174Z",
+   "tool": "ai-detector",
+   "status": 200,
+   "inChars": 1210,
+   "outChars": 1150
+  },
+  {
+   "at": "2026-09-29T21:06:23.341Z",
+   "tool": "ai-detector",
+   "status": 429,
+   "inChars": 1255,
+   "outChars": 0
+  }
+ ],
+ "rows": {
+  "h-wiki-en-glacier": {
+   "kind": "human",
+   "lang": "en",
+   "genre": "encyclopedia",
+   "model": null,
+   "sim": 0.7481146304675717,
+   "verdict": "human"
+  },
+  "ai-fable-1": {
+   "kind": "ai",
+   "lang": "en",
+   "genre": "encyclopedia",
+   "model": "claude-fable-5-1",
+   "sim": 0.9471228615863142,
+   "verdict": "ai"
+  },
+  "h-wiki-en-photosynthesis": {
+   "kind": "human",
+   "lang": "en",
+   "genre": "encyclopedia",
+   "model": null,
+   "sim": 0.6980421686746988,
+   "verdict": "human"
+  },
+  "ai-fable-2": {
+   "kind": "ai",
+   "lang": "en",
+   "genre": "blog",
+   "model": "claude-fable-5-1",
+   "sim": 0.5781990521327014,
+   "verdict": "human"
+  },
+  "h-wiki-en-bicycle": {
+   "kind": "human",
+   "lang": "en",
+   "genre": "encyclopedia",
+   "model": null,
+   "sim": 0.5321831453218315,
+   "verdict": "human"
+  },
+  "ai-fable-3": {
+   "kind": "ai",
+   "lang": "en",
+   "genre": "fiction",
+   "model": "claude-fable-5-1",
+   "sim": 0.8426443202979516,
+   "verdict": "uncertain"
+  },
+  "h-wiki-en-chess": {
+   "kind": "human",
+   "lang": "en",
+   "genre": "encyclopedia",
+   "model": null,
+   "sim": 0.6821533923303835,
+   "verdict": "human"
+  },
+  "ai-fable-4": {
+   "kind": "ai",
+   "lang": "en",
+   "genre": "abstract",
+   "model": "claude-fable-5-1",
+   "sim": 0.8739669421487604,
+   "verdict": "uncertain"
+  },
+  "h-wiki-en-printing-press": {
+   "kind": "human",
+   "lang": "en",
+   "genre": "encyclopedia",
+   "model": null,
+   "sim": 0.8292682926829268,
+   "verdict": "uncertain"
+  },
+  "ai-fable-5": {
+   "kind": "ai",
+   "lang": "fr",
+   "genre": "encyclopedia",
+   "model": "claude-fable-5-1",
+   "sim": 0.867198838896952,
+   "verdict": "uncertain"
+  },
+  "h-wiki-fr-mar-e": {
+   "kind": "human",
+   "lang": "fr",
+   "genre": "encyclopedia",
+   "model": null,
+   "sim": 0.7974683544303798,
+   "verdict": "human"
+  },
+  "ai-fable-6": {
+   "kind": "ai",
+   "lang": "fr",
+   "genre": "letter",
+   "model": "claude-fable-5-1",
+   "sim": 0.9377811094452774,
+   "verdict": "ai"
+  },
+  "h-wiki-fr-fromage": {
+   "kind": "human",
+   "lang": "fr",
+   "genre": "encyclopedia",
+   "model": null,
+   "sim": 0.7813738441215323,
+   "verdict": "human"
+  },
+  "ai-fable-7": {
+   "kind": "ai",
+   "lang": "it",
+   "genre": "encyclopedia",
+   "model": "claude-fable-5-1",
+   "sim": 0.8967201674808095,
+   "verdict": "uncertain"
+  },
+  "h-wiki-fr-canal-du-midi": {
+   "kind": "human",
+   "lang": "fr",
+   "genre": "encyclopedia",
+   "model": null,
+   "sim": 0.885439763488544,
+   "verdict": "uncertain"
+  },
+  "ai-fable-8": {
+   "kind": "ai",
+   "lang": "fr",
+   "genre": "fiction",
+   "model": "claude-fable-5-1",
+   "sim": 0.8767241379310344,
+   "verdict": "uncertain"
+  },
+  "h-wiki-de-gletscher": {
+   "kind": "human",
+   "lang": "de",
+   "genre": "encyclopedia",
+   "model": null,
+   "sim": 0.8458382180539273,
+   "verdict": "uncertain"
+  },
+  "ai-gpt4omini-1": {
+   "kind": "ai",
+   "lang": "en",
+   "genre": "encyclopedia",
+   "model": "gpt-4o-mini",
+   "sim": 0.9044776119402985,
+   "verdict": "ai"
+  },
+  "h-wiki-de-buchdruck": {
+   "kind": "human",
+   "lang": "de",
+   "genre": "encyclopedia",
+   "model": null,
+   "sim": 0.8891947694425327,
+   "verdict": "uncertain"
+  },
+  "ai-gpt4omini-2": {
+   "kind": "ai",
+   "lang": "en",
+   "genre": "blog",
+   "model": "gpt-4o-mini",
+   "sim": 0.8780487804878049,
+   "verdict": "uncertain"
+  },
+  "h-gut-1260": {
+   "kind": "human",
+   "lang": "en",
+   "genre": "fiction",
+   "model": null,
+   "sim": 0.657035175879397,
+   "verdict": "human"
+  },
+  "ai-gpt4omini-3": {
+   "kind": "ai",
+   "lang": "en",
+   "genre": "fiction",
+   "model": "gpt-4o-mini",
+   "sim": 0.9895561357702349,
+   "verdict": "ai"
+  }
+ }
+}

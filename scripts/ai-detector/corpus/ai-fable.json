@@ -1,0 +1,74 @@
+[
+  {
+    "id": "ai-fable-1",
+    "lang": "en",
+    "kind": "ai",
+    "model": "claude-fable-5-1",
+    "genre": "encyclopedia",
+    "prompt": "Write a Wikipedia-style introduction about glaciers.",
+    "text": "A glacier is a persistent body of dense ice that forms where the accumulation of snow exceeds its melting and sublimation over many years. Under the weight of successive layers, snow compacts into firn and eventually into glacial ice, which deforms and flows slowly under its own mass. Glaciers are found on every continent, from the vast ice sheets of Antarctica and Greenland to small cirque glaciers in high mountain ranges. They are commonly classified by size, shape, and thermal regime, with major categories including ice sheets, ice caps, valley glaciers, and piedmont glaciers. Together, glaciers store roughly two-thirds of the planet's fresh water and play a central role in the global hydrological cycle, regulating river flow in many regions during dry seasons. As they advance and retreat, glaciers erode bedrock and deposit sediment, producing distinctive landforms such as U-shaped valleys, moraines, drumlins, and fjords. Because their mass balance responds directly to temperature and precipitation, glaciers serve as sensitive indicators of climate change. Most of the world's glaciers have been losing mass since the mid-nineteenth century, contributing to rising sea levels and altering water availability for communities that depend on meltwater."
+  },
+  {
+    "id": "ai-fable-2",
+    "lang": "en",
+    "kind": "ai",
+    "model": "claude-fable-5-1",
+    "genre": "blog",
+    "prompt": "Write a short blog post about the pros and cons of working from home.",
+    "text": "Working from home has gone from a rare perk to an everyday arrangement for millions of people, and opinions about it remain sharply divided. On the positive side, the benefits are hard to ignore. Cutting out the commute gives back hours every week, which can be spent on sleep, exercise, family, or simply starting the day less frustrated. Many people find they concentrate better without the background noise of an open-plan office, and the flexibility to shape a schedule around school runs or medical appointments makes daily life easier to manage. Employers, for their part, can hire from a wider geographic pool and spend less on office space. The drawbacks, however, are just as real. Isolation creeps in when casual conversations disappear, and it becomes harder to build the kind of trust that comes from sharing a room with colleagues. The line between work and personal time blurs, so that laptops stay open late into the evening. Newer employees often struggle to learn informally when nobody is around to ask. The most workable answer for many teams seems to be a hybrid model, which tries to keep the focus of home and the connection of the office."
+  },
+  {
+    "id": "ai-fable-3",
+    "lang": "en",
+    "kind": "ai",
+    "model": "claude-fable-5-1",
+    "genre": "fiction",
+    "prompt": "Write a short scene: an old fisherman goes out to sea at dawn.",
+    "text": "The harbor was still black when he untied the lines, the only sound the slap of water against the hull and the creak of rope pulling taut. He moved without hurry, the way he had moved for fifty years, checking the fuel, coiling the net, running a thumb along the edge of the gaff. His hands knew the boat better than his eyes did. When the engine caught, gulls lifted from the breakwater and settled again, unimpressed. He steered past the last marker and out into open water, where the swell came long and slow from the west. Behind him the town was a scatter of yellow windows; ahead, the horizon had begun to split into gray and paler gray. He cut the engine at the old ground, the one his father had shown him, and let the boat drift while he paid out the net hand over hand. Cold worked its way through his gloves. The sun came up the way it always did, without ceremony, laying a copper road across the water toward him. He poured coffee from the thermos, watched the floats bob, and waited, because waiting was most of what the sea had ever asked of him."
+  },
+  {
+    "id": "ai-fable-4",
+    "lang": "en",
+    "kind": "ai",
+    "model": "claude-fable-5-1",
+    "genre": "abstract",
+    "prompt": "Write the abstract of a research paper that proposes a new vision transformer for image classification.",
+    "text": "Vision transformers have achieved strong results on image classification, but their quadratic attention cost and weak inductive bias for locality limit their efficiency on high-resolution inputs and their data efficiency on smaller datasets. In this paper we propose a hierarchical vision transformer that replaces global self-attention with a learned mixture of local windowed attention and a small set of dynamically routed global tokens. Each stage selects, per image, which regions warrant global context, allowing the model to allocate computation to informative areas while processing background regions at reduced cost. We further introduce a convolutional token embedding with depthwise refinement between stages, which injects locality priors without the overhead of separate convolutional branches. The resulting architecture scales linearly with the number of tokens and can be trained from scratch without large-scale pretraining. On ImageNet-1K, our base model reaches higher top-1 accuracy than comparable transformer and hybrid baselines while requiring fewer floating-point operations per image. Transfer experiments on fine-grained and low-data benchmarks show consistent gains, and ablations confirm that the routed global tokens account for most of the improvement. Code and pretrained weights will be released to facilitate further research."
+  },
+  {
+    "id": "ai-fable-5",
+    "lang": "fr",
+    "kind": "ai",
+    "model": "claude-fable-5-1",
+    "genre": "encyclopedia",
+    "prompt": "Écris une introduction de type encyclopédique sur les marées.",
+    "text": "Les marées sont les variations périodiques du niveau des mers et des océans provoquées principalement par l'attraction gravitationnelle de la Lune et, dans une moindre mesure, du Soleil, combinée à la rotation de la Terre. En un point donné du littoral, le niveau de l'eau monte pendant la période dite de flux, atteint un maximum appelé pleine mer, puis redescend pendant le reflux jusqu'à la basse mer. Sur la plupart des côtes, ce cycle se répète environ deux fois par jour lunaire, soit toutes les douze heures et vingt-cinq minutes, mais certaines régions ne connaissent qu'une seule marée quotidienne. L'amplitude, appelée marnage, varie selon la position relative des astres : lorsque la Lune et le Soleil sont alignés avec la Terre, à la nouvelle et à la pleine lune, leurs effets s'additionnent et produisent les marées de vive-eau ; lorsqu'ils forment un angle droit, les marées de morte-eau sont plus faibles. La forme des bassins océaniques, la profondeur des fonds et la configuration des côtes modifient considérablement ce phénomène, ce qui explique des marnages allant de quelques centimètres en Méditerranée à plus de douze mètres dans certaines baies. La prévision des marées, fondée sur l'analyse harmonique de longues séries d'observations, est essentielle à la navigation, à la pêche et à l'aménagement du littoral."
+  },
+  {
+    "id": "ai-fable-6",
+    "lang": "fr",
+    "kind": "ai",
+    "model": "claude-fable-5-1",
+    "genre": "letter",
+    "prompt": "Écris une lettre à la mairie de ta commune pour demander une piste cyclable devant l'école.",
+    "text": "Madame, Monsieur, je me permets de vous écrire en tant que parent d'un enfant scolarisé à l'école de notre commune afin d'attirer votre attention sur la sécurité des trajets entre le domicile et l'école. Chaque matin et chaque soir, de nombreux élèves se rendent à l'école à vélo ou à trottinette, accompagnés ou non, et doivent pour cela emprunter la chaussée au milieu des voitures qui déposent leurs propres enfants, dans une circulation dense et souvent pressée. Aucun aménagement ne sépare aujourd'hui les cyclistes des véhicules motorisés sur le tronçon qui longe l'établissement, et plusieurs situations dangereuses ont déjà été observées aux heures d'entrée et de sortie. Je souhaiterais donc solliciter la création d'une piste cyclable sécurisée devant l'école, idéalement séparée physiquement de la route et complétée d'un espace de stationnement pour les vélos à proximité de l'entrée. Un tel aménagement encouragerait davantage de familles à renoncer à la voiture pour les courts trajets, réduirait l'encombrement devant le portail et contribuerait à la tranquillité du quartier. Je reste à votre disposition pour échanger sur ce projet et me tiens prêt à participer à toute concertation que vous jugeriez utile. Je vous prie d'agréer, Madame, Monsieur, l'expression de ma considération distinguée.\nUn parent d'élève"
+  },
+  {
+    "id": "ai-fable-7",
+    "lang": "it",
+    "kind": "ai",
+    "model": "claude-fable-5-1",
+    "genre": "encyclopedia",
+    "prompt": "Scrivi un breve testo enciclopedico sull'olio d'oliva.",
+    "text": "L'olio d'oliva è un grasso vegetale ottenuto dalla spremitura dei frutti dell'olivo, Olea europaea, un albero coltivato da millenni nel bacino del Mediterraneo. La sua produzione prevede la raccolta delle olive, la frangitura, la gramolatura della pasta ottenuta e infine l'estrazione dell'olio per pressione o per centrifugazione, seguita dalla separazione dall'acqua di vegetazione. La classificazione commerciale distingue l'olio extravergine, ricavato esclusivamente con procedimenti meccanici e con un'acidità libera non superiore allo 0,8 per cento, dall'olio vergine e dagli oli raffinati, sottoposti a trattamenti chimici o fisici per correggerne i difetti. Dal punto di vista nutrizionale, l'olio d'oliva è composto in prevalenza da acidi grassi monoinsaturi, in particolare acido oleico, e contiene composti fenolici, tocoferoli e altre sostanze antiossidanti a cui vengono attribuiti effetti benefici sul sistema cardiovascolare. È un elemento centrale della dieta mediterranea e viene utilizzato sia a crudo, come condimento, sia in cottura. I principali paesi produttori sono Spagna, Italia, Grecia, Tunisia e Turchia, ma la coltivazione si è estesa anche ad altre regioni dal clima temperato, come la California, l'Australia e il Sudamerica. Le caratteristiche organolettiche dell'olio dipendono dalla varietà delle olive, dal grado di maturazione, dal territorio e dalle tecniche di lavorazione."
+  },
+  {
+    "id": "ai-fable-8",
+    "lang": "fr",
+    "kind": "ai",
+    "model": "claude-fable-5-1",
+    "genre": "fiction",
+    "prompt": "Écris une courte scène : une boulangerie de village au petit matin.",
+    "text": "Il n'est pas encore six heures et la rue dort encore, mais derrière la vitrine embuée de la boulangerie, la lumière est allumée depuis longtemps. Dans le fournil, l'air est épais de chaleur et de farine. Le boulanger sort une première fournée de baguettes, les fait glisser sur la grille d'un geste sec, et la croûte se met à craquer doucement en refroidissant, comme si le pain respirait. Sa fille, encore mal réveillée, aligne les croissants sur les plaques et compte à voix basse. Dehors, le ciel passe du noir au gris, puis à un bleu pâle qui accroche les toits. Le premier client pousse la porte à six heures et quart, toujours le même, un vieil homme en casquette qui prend une demi-baguette bien cuite et repart sans un mot de plus que bonjour et merci. Puis viennent l'infirmière qui finit sa nuit, le maçon avec sa camionnette laissée en double file, deux gamins envoyés par leur mère avec des pièces serrées dans le poing. La clochette de la porte tinte, s'arrête, tinte encore. L'odeur du pain chaud s'échappe sur le trottoir à chaque passage et, peu à peu, le village se met à vivre autour d'elle."
+  }
+]
