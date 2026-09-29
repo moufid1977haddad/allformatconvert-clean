@@ -1,33 +1,30 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf } from '../../../lib/imageOutput';
+import { rasterFromRGBA } from '../../../lib/bigImage';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
 export default function ImageRotatePage() {
   const [srcType, setSrcType] = useState('image/png');
   const [image, setImage] = useState(null);
   const [angle, setAngle] = useState(90);
+  const [file, setFile] = useState(null);
+  const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const inputRef = useRef();
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setSrcType(f.type); setResult(null); setError(''); } };
-  const rotate = () => {
-    setError('');
-    const img = new Image();
-    img.onerror = () => setError('Could not load image file');
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const rad = angle * Math.PI / 180;
-      const sin = Math.abs(Math.sin(rad)), cos = Math.abs(Math.cos(rad));
-      canvas.width = img.height * sin + img.width * cos;
-      canvas.height = img.height * cos + img.width * sin;
-      const ctx = canvas.getContext('2d');
-      ctx.translate(canvas.width/2, canvas.height/2);
-      ctx.rotate(rad);
-      ctx.drawImage(img, -img.width/2, -img.height/2);
-      try { setResult(angle % 90 === 0 ? encodeLike(canvas, srcType) : checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
-    };
-    img.src = image;
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setFile(f); setSrcType(f.type); setResult(null); setError(''); } };
+  const rotate = async () => {
+    setError(''); setResult(null);
+    if (!file) return;
+    setBusy(true);
+    try {
+      const raster = await loadRaster(file);
+      const out = await rotateRaster(raster, angle);
+      setResult(resultOf(await (angle % 90 === 0 ? encodeRasterLike(out, file.type) : encodeRaster(out, 'image/png')), file.name, 'rotated'));
+    } catch (e) { setError(e?.message || 'Could not process this image.'); }
+    setBusy(false);
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -41,9 +38,9 @@ export default function ImageRotatePage() {
           </div>
           <div className="flex gap-2 justify-center">{[90,180,270].map(a => <button key={a} onClick={() => setAngle(a)} className={`px-4 py-2 rounded-lg font-semibold transition ${angle===a?'bg-indigo-600 text-white':'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>{a}°</button>)}</div>
           <div><label className="block text-sm text-neutral-500 mb-1">Custom angle: {angle}°</label><input type="range" min="0" max="360" value={angle} onChange={e => setAngle(parseInt(e.target.value))} className="w-full" /></div>
-          <button onClick={rotate} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Rotate</button>
+          <button onClick={rotate} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Rotate</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download={`rotated.${extOf(result)}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
       <SeoContent

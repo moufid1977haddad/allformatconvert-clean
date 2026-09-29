@@ -1,6 +1,8 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf } from '../../../lib/imageOutput';
+import { rasterFromRGBA } from '../../../lib/bigImage';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { supportsCanvasFilter, applyGaussianBlur } from '../../../lib/canvasFilters';
 import { checkedDataURL } from '../../../lib/mediaSupport';
@@ -8,31 +10,27 @@ export default function ImageBlurPage() {
   const [srcType, setSrcType] = useState('image/png');
   const [image, setImage] = useState(null);
   const [blur, setBlur] = useState(5);
+  const [file, setFile] = useState(null);
+  const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const inputRef = useRef();
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setSrcType(f.type); setResult(null); setError(''); } };
-  const apply = () => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width; canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      // Safari has no ctx.filter: it used to return the image unchanged (29/09).
-      if (supportsCanvasFilter()) {
-        ctx.filter = `blur(${blur}px)`;
-        ctx.drawImage(img, 0, 0);
-      } else {
-        ctx.drawImage(img, 0, 0);
-        ctx.putImageData(applyGaussianBlur(ctx.getImageData(0, 0, canvas.width, canvas.height), Number(blur)), 0, 0);
-      }
-      try { setResult(encodeLike(canvas, srcType)); } catch (e) { setError(e.message); }
-      setError('');
-    };
-    img.onerror = () => {
-      setError('Could not load this image. The file may be corrupted or in an unsupported format.');
-    };
-    img.src = image;
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setFile(f); setSrcType(f.type); setResult(null); setError(''); } };
+  const apply = async () => {
+    setError(''); setResult(null);
+    if (!file) return;
+    setBusy(true);
+    try {
+      const raster = await loadRaster(file);
+      // Blur reads neighbours: bands overlap by 3 sigma so their seams are invisible.
+      const out = await mapBands(raster, (ctx, band) => {
+        // Safari has no ctx.filter: it used to return the image unchanged (29/09).
+        if (supportsCanvasFilter()) { ctx.filter = `blur(${blur}px)`; ctx.drawImage(band.source, 0, 0); }
+        else { ctx.drawImage(band.source, 0, 0); ctx.putImageData(applyGaussianBlur(ctx.getImageData(0, 0, band.width, band.rows), Number(blur)), 0, 0); }
+      }, { margin: Math.ceil(Number(blur) * 3) + 2 });
+      setResult(resultOf(await encodeRasterLike(out, file.type), file.name, 'blurred'));
+    } catch (e) { setError(e?.message || 'Could not process this image.'); }
+    setBusy(false);
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -46,8 +44,8 @@ export default function ImageBlurPage() {
           </div>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <div><label className="block text-sm text-neutral-500 mb-1">Blur: {blur}px</label><input type="range" min="1" max="20" value={blur} onChange={e => setBlur(parseInt(e.target.value))} className="w-full" /></div>
-          <button onClick={apply} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Apply Blur</button>
-          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download={`blurred.${extOf(result)}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          <button onClick={apply} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Apply Blur</button>
+          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
       <SeoContent
@@ -61,7 +59,7 @@ export default function ImageBlurPage() {
         ]}
         faqs={[
           { q: "Is Image Blur really free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "What image formats does Image Blur support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP where the browser can save WebP (otherwise PNG)." },
+          { q: "What image formats does Image Blur support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP." },
           { q: "Will my uploaded images be stored or shared?", a: "No, your images are processed entirely in your browser and are never uploaded to a server." },
           { q: "Can I blur only specific parts of my image, like a face?", a: "No, the blur is applied uniformly across the whole image — there's no selection tool for blurring specific regions or faces." }
         ]}

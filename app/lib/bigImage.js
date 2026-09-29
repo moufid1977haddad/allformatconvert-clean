@@ -108,6 +108,8 @@ export async function decodeToRaster(blob, dims, { onProgress = () => {}, forceB
 // with a 4097 x 4097 canvas: on iOS its context is null or a pixel written to it reads back as 0.
 let bigCanvasProbe = null;
 export function canvasBeyondSafariCap() {
+  // Browser tests set __forceSafariCanvasCap to run the iPhone path in Firefox/Chromium/WebKit.
+  if (typeof self !== 'undefined' && self.__forceSafariCanvasCap === true) return Promise.resolve(false);
   if (!bigCanvasProbe) {
     bigCanvasProbe = (async () => {
       try {

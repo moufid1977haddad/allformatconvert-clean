@@ -1,31 +1,28 @@
 ﻿'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf } from '../../../lib/imageOutput';
+import { rasterFromRGBA } from '../../../lib/bigImage';
 import { canEncodeImageType, checkedDataURL, assertCanvasSize } from '../../../lib/mediaSupport';
 export default function PNGtoWebPPage() {
   const [image, setImage] = useState(null);
+  const [file, setFile] = useState(null);
+  const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
-  const [webpOk, setWebpOk] = useState(true);
   const inputRef = useRef();
-  // Safari cannot encode WebP from a canvas: it silently hands back a PNG. Detected
-  // up front so the visitor is told BEFORE converting, not when opening the file.
-  useEffect(() => { setWebpOk(canEncodeImageType('image/webp')); }, []);
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setResult(null); setError(''); } };
-  const convert = () => {
-    setError('');
-    const img = new Image();
-    img.onerror = () => setError('Could not load image file');
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      try {
-        assertCanvasSize(img.width, img.height);
-        canvas.width = img.width; canvas.height = img.height;
-        canvas.getContext('2d').drawImage(img, 0, 0);
-        setResult(checkedDataURL(canvas, 'image/webp'));
-      } catch (e) { setError(e.message); }
-    };
-    img.src = image;
+  // Safari has no WebP encoder of its own (it hands back a PNG): there libwebp in WebAssembly makes the file (30/09).
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setFile(f); setResult(null); setError(''); } };
+  const convert = async () => {
+    setError(''); setResult(null);
+    if (!file) return;
+    setBusy(true);
+    try {
+      const raster = await loadRaster(file);
+      const out = raster;
+      setResult(resultOf(await encodeRaster(out, 'image/webp', 80), file.name, ''));
+    } catch (e) { setError(e?.message || 'Could not process this image.'); }
+    setBusy(false);
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -37,15 +34,14 @@ export default function PNGtoWebPPage() {
             {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept=".png" className="hidden" onChange={handleFile} />
           </div>
-          <button onClick={convert} disabled={!image || !webpOk} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert</button>
-          {!webpOk && <p role="alert" className="text-red-500 text-center text-sm">This browser (Safari, including every browser on iPhone) cannot create WebP files. Open this tool in Chrome, Edge or Firefox to convert to WebP — nothing was converted and no file was produced.</p>}
+          <button onClick={convert} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="converted.webp" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
       <SeoContent
         title="PNG to WebP"
-        description="PNG to WebP converts a PNG image to WebP format entirely in your browser using the HTML canvas — your file is never uploaded to a server. Transparency is preserved, since WebP supports an alpha channel just like PNG."
+        description="PNG to WebP converts a PNG image to WebP format entirely in your browser — your file is never uploaded to a server (in Safari, which has no WebP encoder of its own, by libwebp compiled to WebAssembly, the encoder Squoosh uses). Transparency is preserved, since WebP supports an alpha channel just like PNG."
         howTo={[
           "Click the upload area and select a PNG file from your device.",
           "Click 'Convert' to render it to WebP.",
