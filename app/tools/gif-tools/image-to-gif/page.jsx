@@ -45,8 +45,11 @@ export default function ImageToGifPage() {
       const imgs = [];
       for (const image of images) imgs.push(await load(image.src));
       const canvas = document.createElement('canvas');
-      canvas.width = imgs[0].naturalWidth;
-      canvas.height = imgs[0].naturalHeight;
+      // Never above 1920 px on a side (ezgif's limit, as GIF Maker): a phone photo as the first frame made a 24-48 Mpx
+      // GIF, which iOS cannot even hold on a canvas (16.7 Mpx), and no GIF viewer needs (30/09).
+      const k0 = Math.min(1, 1920 / Math.max(imgs[0].naturalWidth, imgs[0].naturalHeight));
+      canvas.width = Math.max(1, Math.round(imgs[0].naturalWidth * k0));
+      canvas.height = Math.max(1, Math.round(imgs[0].naturalHeight * k0));
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
       const frames = imgs.map((im) => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -115,7 +118,7 @@ export default function ImageToGifPage() {
           { q: "Is my data private?", a: "Yes. Everything happens locally in your browser — nothing is uploaded to a server." }
         ]}
         tips={[
-          "The GIF takes the first image's size: put the image with the shape you want first, and choose \"Crop to fill\" if you don't want transparent borders.",
+          "The GIF takes the first image's shape and size (at most 1920 px on a side, like ezgif): put the image with the shape you want first, and choose \"Crop to fill\" if you don't want transparent borders.",
           "High-resolution photos and large batches take longer to quantize and encode; downscale first if the conversion feels slow.",
           "Expect some color banding on photos with smooth gradients or skin tones, since the 256-color palette is applied per frame without dithering.",
           "The finished GIF and its frame count are shown before you download, so you can re-run with a different delay if the timing feels off."
