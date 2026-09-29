@@ -8,6 +8,7 @@ import sharp from 'sharp';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { iosCanvasCapInit, applyIosCanvasCap, iosCapHits, iosCapLabel } from './lib/ios-canvas-cap.mjs';
 const origin = new URL(process.argv[2] || 'http://localhost:3100').origin;
 const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const dir = path.join(os.tmpdir(), 'editor-big'); fs.mkdirSync(dir, { recursive: true });
@@ -20,7 +21,7 @@ if (!fs.existsSync(src)) {
 const b = await engine.launch();
 async function run(ios) {
   const ctx = await b.newContext({ acceptDownloads: true });
-  if (ios) await ctx.addInitScript(() => { window.__forceSafariCanvasCap = true; });
+  if (ios) await ctx.addInitScript(iosCanvasCapInit);
   const p = await ctx.newPage();
   await p.goto(origin + '/tools/image-tools/image-editor', { waitUntil: 'networkidle' });
   await p.locator('input[type=file]').first().setInputFiles(src);
@@ -41,7 +42,7 @@ async function run(ios) {
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 const n = await run(false), i = await run(true);
 const mn = await sharp(n.out).metadata(), mi = await sharp(i.out).metadata();
-check('normal path: rotated full size, JPEG, named after the original', mn.format === 'jpeg' && mn.width === H && mn.height === W && n.name === 'IMG_EDIT-edited.jpg', `${mn.width}x${mn.height} ${n.name} preview ${n.preview}`);
+check('desktop reference (no iPhone limit): rotated full size, JPEG, named after the original', mn.format === 'jpeg' && mn.width === H && mn.height === W && n.name === 'IMG_EDIT-edited.jpg', `${mn.width}x${mn.height} ${n.name} preview ${n.preview}`);
 const A = await sharp(n.out).raw().toBuffer(), B = await sharp(i.out).raw().toBuffer();
 let se = 0; for (let k = 0; k < A.length; k++) se += (A[k] - B[k]) ** 2; const psnr = 10 * Math.log10(255 * 255 / (se / A.length));
 check('iPhone path: preview under 16.7 MP, download full size and the same picture', i.preview[0] * i.preview[1] <= 16777216 && mi.width === H && mi.height === W && psnr > 34, `preview ${i.preview}, ${mi.width}x${mi.height}, PSNR vs normal ${psnr.toFixed(1)} dB (two JPEG encoders on hard pixel blocks)`);

@@ -4,11 +4,13 @@
 // (rotation size, corner transparency, circular arc), exact means (pixelation by block average).
 // Usage: node scripts/browser-tests/image-audit-2.mjs <origin> [--browser=chromium|firefox|webkit] [--only=<check name>]
 import { chromium, firefox, webkit } from '@playwright/test';
+import { iosCanvasCapInit, applyIosCanvasCap, iosCapHits, iosCapLabel } from './lib/ios-canvas-cap.mjs';
 
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--'))).origin;
 const name = (process.argv.find((a) => a.startsWith('--browser=')) || '--browser=chromium').slice(10);
 const b = await ({ chromium, firefox, webkit })[name].launch();
 const ctx = await b.newContext();
+await applyIosCanvasCap(ctx); // P16: the iPhone's canvas limit, always (lib/ios-canvas-cap.mjs)
 if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((u) => u.hostname === 'vercel.live', (r) => r.abort());
 let fails = 0, passes = 0;
 const errors = [];

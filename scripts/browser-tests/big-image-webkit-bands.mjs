@@ -12,8 +12,10 @@ const src = fs.readFileSync(new URL('../../app/lib/bigImage.js', import.meta.url
 const w = 5712, h = 4284, raw = Buffer.alloc(w * h * 3);
 for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = (y * w + x) * 3; raw[i] = x & 255; raw[i + 1] = y & 255; raw[i + 2] = (x < w / 8 && y < h / 8) ? 255 : 0; }
 const jpg = await sharp(raw, { raw: { width: w, height: h, channels: 3 } }).jpeg({ quality: 95 }).withMetadata({ orientation: 6 }).toBuffer();
+import { iosCanvasCapInit, iosCapLabel } from './lib/ios-canvas-cap.mjs';
 const b = await engine.launch(); const page = await b.newPage();
-await page.goto('about:blank');
+await page.addInitScript(iosCanvasCapInit); // P16: the iPhone's canvas limit, always
+await page.goto('about:blank'); // (init scripts run on navigation)
 await page.addScriptTag({ content: src + '\nwindow.__big = { decodeToRaster, encodePngRGBA, bandDecodeWorks, CANVAS_MAX_PIXELS };' });
 const r = await page.evaluate(async (bytes) => {
   const blob = new Blob([new Uint8Array(bytes)], { type: 'image/jpeg' });
@@ -24,9 +26,10 @@ const r = await page.evaluate(async (bytes) => {
   const bands = await B.decodeToRaster(blob, dims, { forceBands: true });
   const t1 = performance.now();
   const full = await createImageBitmap(blob);
-  const c = document.createElement('canvas'); c.width = full.width; c.height = full.height;
-  const ctx = c.getContext('2d'); ctx.drawImage(full, 0, 0);
-  const ref = ctx.getImageData(0, 0, c.width, c.height).data;
+  // reference: the whole bitmap, copied through canvases under the limit (one canvas of the full size is refused here)
+  const ref = new Uint8ClampedArray(full.width * full.height * 4), rows = Math.floor(16777216 / full.width);
+  const c = document.createElement('canvas'); c.width = full.width; c.height = rows; const ctx = c.getContext('2d', { willReadFrequently: true });
+  for (let y = 0; y < full.height; y += rows) { const hh = Math.min(rows, full.height - y); ctx.clearRect(0, 0, c.width, rows); ctx.drawImage(full, 0, y, full.width, hh, 0, 0, full.width, hh); ref.set(ctx.getImageData(0, 0, full.width, hh).data, y * full.width * 4); }
   const a = bands.rgba(); let diff = 0, maxd = 0;
   for (let i = 0; i < ref.length; i++) { const d = Math.abs(ref[i] - a[i]); if (d) diff++; if (d > maxd) maxd = d; }
   const png = await B.encodePngRGBA(a, bands.width, bands.height);
@@ -36,5 +39,5 @@ const out = Buffer.from(r.png); delete r.png;
 const m = await sharp(out).metadata();
 const { data } = await sharp(out).raw().toBuffer({ resolveWithObject: true });
 const ok = r.probe && r.path === 'bands' && r.w === 4284 && r.h === 5712 && r.diff === 0 && m.format === 'png' && m.width === 4284 && data[(5 * 4284 + 4284 - 6) * 3 + 2] > 200;
-console.log(ok ? 'PASS' : 'FAIL', engine.name(), JSON.stringify(r), `png ${m.width}x${m.height}`, `marker (top-right after rotation) blue=${data[(5 * 4284 + 4284 - 6) * 3 + 2]}`);
+console.log(ok ? 'PASS' : 'FAIL', engine.name(), iosCapLabel(), JSON.stringify(r), `png ${m.width}x${m.height}`, `marker (top-right after rotation) blue=${data[(5 * 4284 + 4284 - 6) * 3 + 2]}`);
 await b.close(); process.exit(ok ? 0 : 1);

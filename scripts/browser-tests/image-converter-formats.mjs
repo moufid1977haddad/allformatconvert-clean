@@ -8,7 +8,10 @@ import fs from 'node:fs';
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const [entry, photo, transparent, big] = args; const origin = new URL(entry).origin;
 const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
-const b = await engine.launch(); const page = await (await b.newContext({ acceptDownloads: true })).newPage();
+const { applyIosCanvasCap } = await import('./lib/ios-canvas-cap.mjs');
+const b = await engine.launch(); const fctx = await b.newContext({ acceptDownloads: true });
+await applyIosCanvasCap(fctx); // P16: the iPhone's canvas limit, always
+const page = await fctx.newPage();
 if (entry.includes('_vercel_share')) await page.goto(entry);
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 async function psnr(srcPath, buf) {

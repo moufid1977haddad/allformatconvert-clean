@@ -5,6 +5,7 @@
 // Usage: node scripts/browser-tests/e2e-avif.mjs <siteUrl> <png file>
 import { chromium, firefox, webkit } from '@playwright/test';
 import fs from 'node:fs';
+import { iosCanvasCapInit, applyIosCanvasCap, iosCapHits, iosCapLabel } from './lib/ios-canvas-cap.mjs';
 
 const [site, png] = process.argv.slice(2);
 let failed = 0;
@@ -14,6 +15,7 @@ for (const [name, eng] of [['chromium', chromium], ['firefox', firefox], ['webki
   console.log(`\n===== ${name} =====`);
   const b = await eng.launch();
   const ctx = await b.newContext({ acceptDownloads: true });
+  await applyIosCanvasCap(ctx); // P16: the iPhone's canvas limit, always (lib/ios-canvas-cap.mjs)
   const page = await ctx.newPage();
   await page.goto(site + '/tools/image-tools/image-converter', { waitUntil: 'networkidle' });
   await page.setInputFiles('input[type=file]', png);

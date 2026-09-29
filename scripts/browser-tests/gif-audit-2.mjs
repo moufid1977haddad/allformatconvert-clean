@@ -13,11 +13,13 @@ import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import gifencLib from 'gifenc';
+import { iosCanvasCapInit, applyIosCanvasCap, iosCapHits, iosCapLabel } from './lib/ios-canvas-cap.mjs';
 
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--'))).origin;
 const name = (process.argv.find((a) => a.startsWith('--browser=')) || '--browser=chromium').slice(10);
 const b = await ({ chromium, firefox, webkit })[name].launch();
 const ctx = await b.newContext({ acceptDownloads: true });
+await applyIosCanvasCap(ctx); // P16: the iPhone's canvas limit, always (lib/ios-canvas-cap.mjs)
 if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((u) => u.hostname === 'vercel.live', (r) => r.abort());
 let fails = 0, passes = 0;
 const errors = [];

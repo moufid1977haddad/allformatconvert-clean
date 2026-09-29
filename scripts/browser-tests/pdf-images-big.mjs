@@ -9,6 +9,7 @@ import { PDFDocument } from 'pdf-lib';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { iosCanvasCapInit, applyIosCanvasCap, iosCapHits, iosCapLabel } from './lib/ios-canvas-cap.mjs';
 const origin = new URL(process.argv[2] || 'http://localhost:3100').origin;
 const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'pdfimg-'));
@@ -19,8 +20,8 @@ const webp = path.join(dir, 'IMG_A.webp'); fs.writeFileSync(webp, await sharp(ra
 const mirrored = path.join(dir, 'IMG_B.jpg'); fs.writeFileSync(mirrored, await sharp(raw, { raw: { width: W, height: H, channels: 3 } }).jpeg({ quality: 90 }).withMetadata({ orientation: 2 }).toBuffer());
 const b = await engine.launch();
 const ctx = await b.newContext({ acceptDownloads: true });
-// Chromium crops EXIF-rotated bands wrongly (bigImage.js), so it never takes the iPhone path: normal path there.
-if (engine !== chromium) await ctx.addInitScript(() => { window.__forceSafariCanvasCap = true; });
+await applyIosCanvasCap(ctx); // P16: the iPhone's canvas limit, always (lib/ios-canvas-cap.mjs)
+// P16: Chromium too (its wrong EXIF crop now falls back to one ImageBitmap copied band by band, lib/bigImage.js)
 const p = await ctx.newPage();
 await p.goto(origin + '/tools/pdf-tools/image-to-pdf', { waitUntil: 'networkidle' });
 await p.locator('input[type=file]').first().setInputFiles([webp, mirrored]);

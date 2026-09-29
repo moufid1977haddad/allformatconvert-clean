@@ -8,6 +8,7 @@ import sharp from 'sharp';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { iosCanvasCapInit, applyIosCanvasCap, iosCapHits, iosCapLabel } from './lib/ios-canvas-cap.mjs';
 const origin = new URL(process.argv[2] || 'http://localhost:3100').origin;
 const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dataurl-'));
@@ -16,6 +17,7 @@ const wav = path.resolve('docs/audit/fixtures-safari/safari-tone-12s.wav');
 const b = await engine.launch();
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 const page = async () => { const ctx = await b.newContext({ acceptDownloads: true }); const p = await ctx.newPage(); return p; };
+await applyIosCanvasCap(ctx); // P16: the iPhone's canvas limit, always (lib/ios-canvas-cap.mjs)
 const save = async (p, locator) => { const [d] = await Promise.all([p.waitForEvent('download'), locator.click()]); const f = path.join(dir, `${Date.now()}-${d.suggestedFilename()}`); await d.saveAs(f); return { f, name: d.suggestedFilename() }; };
 
 for (const [tool, ext, fmt] of [['pdf-to-jpg', 'jpg', 'jpeg'], ['pdf-to-image', 'png', 'png']]) {

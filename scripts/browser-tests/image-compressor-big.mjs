@@ -7,6 +7,7 @@ import sharp from 'sharp';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { iosCanvasCapInit, applyIosCanvasCap, iosCapHits, iosCapLabel } from './lib/ios-canvas-cap.mjs';
 const origin = new URL(process.argv[2] || 'http://localhost:3100').origin;
 const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
 const dir = path.join(os.tmpdir(), 'compressor-big'); fs.mkdirSync(dir, { recursive: true });
@@ -19,6 +20,7 @@ if (!fs.existsSync(src)) {
   fs.writeFileSync(src, await sharp(raw, { raw: { width: W, height: H, channels: 3 } }).jpeg({ quality: 97 }).withMetadata({ orientation: 6 }).toBuffer());
 }
 const b = await engine.launch(); const ctx = await b.newContext({ acceptDownloads: true });
+await applyIosCanvasCap(ctx); // P16: the iPhone's canvas limit, always (lib/ios-canvas-cap.mjs)
 if (process.argv.includes('--bands')) await ctx.addInitScript(() => { window.__forceBands = true; });
 const p = await ctx.newPage();
 await p.goto(origin + '/tools/image-tools/image-compressor', { waitUntil: 'networkidle' });

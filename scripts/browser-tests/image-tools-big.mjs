@@ -1,20 +1,24 @@
 // The 20 canvas image tools moved to app/lib/imageOutput.js (30/09, owner's iPhone): each result is a Blob link named
-// after the original (no data: URL), in the source's format, at full resolution -- and, with --ios, on the iPhone
-// path (no canvas over 16.7 MP: window.__forceSafariCanvasCap) on a 24.5 MP photo, whose result must match the
-// normal path's pixel for pixel (lossless outputs) or closely (lossy ones).
-// Usage: node scripts/browser-tests/image-tools-big.mjs <origin> [--browser=firefox|webkit] [--ios] [--only=tool,tool] [--small]
+// after the original (no data: URL), in the source's format, at full resolution.
+// P16 (30/09): the iPhone's canvas limit is simulated in EVERY run (lib/ios-canvas-cap.mjs: no canvas over 16.7 MP,
+// page and Workers) -- the checked result is always the iPhone path, on photos of 12, 24 and 48 MP (iPhone 12 MP,
+// 24 MP default since the iPhone 15, 48 MP ProRAW/max). A desktop run (no limit) is made too, only as the pixel
+// reference: lossless outputs must match it exactly, lossy ones are compared with the source.
+// Usage: node scripts/browser-tests/image-tools-big.mjs <origin> [--browser=firefox|webkit] [--mp=12,24,48] [--only=tool,tool] [--no-vercel-toolbar]
 import { chromium, firefox, webkit } from '@playwright/test';
 import sharp from 'sharp';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import { iosCanvasCapInit, IOS_CAP_OFF, iosCapLabel } from './lib/ios-canvas-cap.mjs';
 const origin = new URL(process.argv[2] || 'http://localhost:3100').origin;
 const arg = (k) => process.argv.find((a) => a.startsWith(`--${k}=`))?.split('=')[1];
 const engine = arg('browser') === 'firefox' ? firefox : arg('browser') === 'webkit' ? webkit : chromium;
-const IOS = process.argv.includes('--ios');
 const only = arg('only')?.split(',');
 const dir = path.join(os.tmpdir(), 'image-tools-big'); fs.mkdirSync(dir, { recursive: true });
-const [W, H] = process.argv.includes('--small') ? [900, 600] : [5712, 4284];
+const SIZES = { 12: [4032, 3024], 24: [5712, 4284], 48: [8064, 6048] };
+const MPS = (arg('mp') || '12,24,48').split(',');
+let W, H;
 async function fixture(ext) {
   const p = path.join(dir, `photo-${W}.${ext}`);
   if (fs.existsSync(p)) return p;
@@ -59,7 +63,7 @@ async function runTool(tool, button, file, ios) {
   const ctx = await b.newContext({ acceptDownloads: true });
   // Preview only: Vercel's comment toolbar (vercel.live) throws navigator.storage.persisted under WebKit -- not the site's code
   if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((u) => u.hostname === 'vercel.live', (r) => r.abort());
-  if (ios) await ctx.addInitScript(() => { window.__forceSafariCanvasCap = true; });
+  if (ios) await ctx.addInitScript(iosCanvasCapInit);
   const page = await ctx.newPage();
   const errs = []; page.on('pageerror', (e) => errs.push(e.message));
   await page.goto(`${origin}/tools/image-tools/${tool}`, { waitUntil: 'networkidle' });
@@ -80,8 +84,9 @@ async function runTool(tool, button, file, ios) {
   const href = await link.getAttribute('href');
   const [dl] = await Promise.all([page.waitForEvent('download'), link.click()]);
   const buf = fs.readFileSync(await dl.path());
+  const capHits = ios ? await page.evaluate(() => window.__iosCanvasCapLog || []) : [];
   await ctx.close();
-  return { buf, href, name: dl.suggestedFilename(), secs, errs };
+  return { buf, href, name: dl.suggestedFilename(), secs, errs, capHits };
 }
 async function psnr(a, bb) {
   const A = await sharp(a, { limitInputPixels: false }).flatten({ background: '#fff' }).raw().toBuffer({ resolveWithObject: true });
@@ -91,25 +96,31 @@ async function psnr(a, bb) {
   return se === 0 ? Infinity : 10 * Math.log10(255 * 255 / (se / A.data.length));
 }
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
-for (const [tool, button, inExt, fmt, size, lossless] of TOOLS) {
-  if (only && !only.includes(tool)) continue;
-  const file = await fixture(inExt);
-  const base = path.basename(file).replace(/\.[^.]+$/, '');
-  const r = await runTool(tool, button, file, false);
-  if (r.error) { check(`${tool}`, false, r.error); continue; }
-  const m = await sharp(r.buf, { limitInputPixels: false }).metadata();
-  const [ew, eh] = size(W, H);
-  const ext = { jpeg: 'jpg', png: 'png', webp: 'webp' }[fmt];
-  check(`${tool}`, r.href.startsWith('blob:') && m.format === fmt && m.width === ew && m.height === eh && r.name.startsWith(base) && r.name.endsWith(`.${ext}`) && !r.errs.length,
-    `${m.format} ${m.width}x${m.height} ${r.name} (${r.secs.toFixed(1)} s)${r.errs.length ? ' pageerror: ' + r.errs[0] : ''}`);
-  if (!IOS) continue;
-  const q = await runTool(tool, button, file, true);
-  if (q.error) { check(`${tool} [iPhone path]`, false, q.error); continue; }
-  const mq = await sharp(q.buf, { limitInputPixels: false }).metadata();
-  // lossy outputs: two different JPEG/WebP encoders (browser's, WebAssembly) -- each compared with the source instead
-  const lossy = fmt === 'jpeg' || fmt === 'webp';
-  const p = lossless === null ? null : lossy ? await psnr(file, q.buf) : await psnr(r.buf, q.buf); // WebP q80 on this synthetic chart: 34.7 dB
-  const ok = q.href.startsWith('blob:') && mq.format === fmt && mq.width === ew && mq.height === eh && (p === null || (lossless ? p >= 50 : p >= (fmt === 'webp' ? 33 : 35)));
-  check(`${tool} [iPhone path]`, ok, `${mq.format} ${mq.width}x${mq.height}, ${lossy ? 'vs source' : 'same as normal path'}: PSNR ${p === null ? 'n/a (random)' : p.toFixed(1)} dB (${q.secs.toFixed(1)} s)`);
+for (const mp of MPS) {
+  [W, H] = SIZES[mp];
+  for (const [tool, button, inExt, fmt, size, lossless] of TOOLS) {
+    if (only && !only.includes(tool)) continue;
+    const file = await fixture(inExt);
+    const base = path.basename(file).replace(/\.[^.]+$/, '');
+    const [ew, eh] = size(W, H);
+    const ext = { jpeg: 'jpg', png: 'png', webp: 'webp' }[fmt];
+    const q = await runTool(tool, button, file, !IOS_CAP_OFF);
+    const label = `${tool} ${mp} MP [${IOS_CAP_OFF ? 'desktop, NO iPhone limit' : 'iPhone limit'}]`;
+    if (q.error) { check(label, false, q.error); continue; }
+    const mq = await sharp(q.buf, { limitInputPixels: false }).metadata();
+    const shape = q.href.startsWith('blob:') && mq.format === fmt && mq.width === ew && mq.height === eh && q.name.startsWith(base) && q.name.endsWith(`.${ext}`) && !q.errs.length && !q.capHits.length;
+    // lossy outputs: two different JPEG/WebP encoders (browser's, WebAssembly) -- each compared with the source instead
+    const lossy = fmt === 'jpeg' || fmt === 'webp';
+    let p = null;
+    if (lossless !== null) {
+      if (lossy) p = await psnr(file, q.buf);
+      else { const r = await runTool(tool, button, file, false); p = r.error ? -2 : await psnr(r.buf, q.buf); } // desktop run: reference only
+    }
+    // JPEG: at least what libjpeg itself gives at the same quality (92) on this chart, minus 0.3 dB (a fixed 35 dB
+    // sat above libjpeg's own 34.91 dB on the 12 MP chart: P16)
+    const floor = fmt === 'jpeg' ? (await psnr(file, await sharp(file, { limitInputPixels: false }).jpeg({ quality: 92 }).toBuffer())) - 0.3 : 33;
+    const ok = shape && (p === null || (lossless ? p >= 50 : p >= floor));
+    check(label, ok, `${mq.format} ${mq.width}x${mq.height} ${q.name}, ${lossy ? 'vs source' : 'vs desktop path'}: PSNR ${p === null ? 'n/a (random)' : p === -2 ? 'desktop run failed' : p.toFixed(1)} dB (${q.secs.toFixed(1)} s)${q.errs.length ? ' pageerror: ' + q.errs[0] : ''}${q.capHits.length ? ' CANVAS OVER THE LIMIT: ' + q.capHits.slice(0, 3).join(', ') : ''}`);
+  }
 }
-await b.close(); console.log(fails ? `${fails} FAILED` : 'all passed', `(${engine.name()}${IOS ? ', iPhone path' : ''})`); process.exit(fails ? 1 : 0);
+await b.close(); console.log(fails ? `${fails} FAILED` : 'all passed', `(${engine.name()}, ${MPS.join('/')} MP, ${iosCapLabel()})`); process.exit(fails ? 1 : 0);
