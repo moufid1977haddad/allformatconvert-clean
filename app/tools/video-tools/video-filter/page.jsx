@@ -1,6 +1,7 @@
-﻿'use client';
+'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { recordWholePlayback } from '../../../lib/recordPlayback';
 import { supportsCanvasFilter } from '../../../lib/canvasFilters';
 import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import { videoReRecordSupport, finishRecording } from '../../../lib/mediaSupport';
@@ -108,13 +109,11 @@ export default function VideoFilterPage() {
       recorder.onerror = () => { setError('Recording failed in this browser.'); setStatus(''); };
       const drawFrame = () => {
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-        if (!videoRef.current.paused && !videoRef.current.ended) requestAnimationFrame(drawFrame);
       };
       videoRef.current.currentTime = 0;
       await videoRef.current.play();
-      recorder.start();
-      drawFrame();
-      setTimeout(() => { if (recorder.state !== 'inactive') recorder.stop(); videoRef.current.pause(); }, videoRef.current.duration * 1000);
+      // Recorded until the video's end, following pauses and stalls (lib/recordPlayback.js, 29/09).
+      recordWholePlayback(videoRef.current, recorder, drawFrame);
     } catch(e) { setError('Error: ' + e.message); setStatus(''); }
   };
 

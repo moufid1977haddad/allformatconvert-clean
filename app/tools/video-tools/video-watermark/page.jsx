@@ -329,6 +329,12 @@ export default function VideoWatermarkPage() {
         // reapplied after setting width/height.
         ctx.font = `bold ${fontSize}px sans-serif`;
         ctx.textBaseline = 'middle';
+        // A dark outline under the white letters (29/09): white alone vanished on white or bright footage, so
+        // the video came out looking unmarked. The outline keeps the mark readable on any background.
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = Math.round(fontSize * 0.12);
+        ctx.strokeStyle = `rgba(0, 0, 0, ${opacity * 0.85})`;
+        ctx.strokeText(text, padX, canvas.height / 2);
         ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
         ctx.fillText(text, padX, canvas.height / 2);
       } else {

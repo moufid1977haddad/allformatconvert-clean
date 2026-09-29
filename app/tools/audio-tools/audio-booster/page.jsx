@@ -12,6 +12,10 @@ export default function AudioBoosterPage() {
   const [file, setFile] = useState(null);
   const [volume, setVolume] = useState(2);
   const [format, setFormat] = useState('mp3');
+  // Limiter (29/09): a plain gain cut the waveform flat as soon as the boosted signal passed full scale (a 0.5
+  // sine boosted 4x: 67 % of the samples clipped). As mp3louder offers, a limiter now holds the peaks under
+  // 0.95 (ffmpeg's alimiter, automatic level off) -- on by default, can be turned off for the raw gain.
+  const [limiter, setLimiter] = useState(true);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
@@ -37,12 +41,13 @@ export default function AudioBoosterPage() {
       const { outputName, extraArgs, mime, ext } = buildOutputSpec(format);
       await ffmpeg.writeFile(inputName, await fetchFile(file));
       const base = file.name.replace(/\.[^.]+$/, '');
+      const af = limiter ? `volume=${volume},alimiter=limit=0.95:level=0` : `volume=${volume}`;
       if (opusOnService(format)) { // boosted here, losslessly; libopus on our service (lib/opusService.js)
-        await ffmpeg.exec(['-i', inputName, '-af', `volume=${volume}`, ...LOSSLESS_INTERMEDIATE.args, LOSSLESS_INTERMEDIATE.name]);
+        await ffmpeg.exec(['-i', inputName, '-af', af, ...LOSSLESS_INTERMEDIATE.args, LOSSLESS_INTERMEDIATE.name]);
         const opus = await encodeOpusOnService(await ffmpeg.readFile(LOSSLESS_INTERMEDIATE.name), 'boosted_' + base);
         setResult({ url: URL.createObjectURL(opus), name: 'boosted_' + base + '.opus' });
       } else {
-        await ffmpeg.exec(['-i', inputName, '-af', `volume=${volume}`, ...extraArgs, outputName]);
+        await ffmpeg.exec(['-i', inputName, '-af', af, ...extraArgs, outputName]);
         const data = await ffmpeg.readFile(outputName);
         const url = URL.createObjectURL(new Blob([data.buffer], { type: mime }));
         setResult({ url, name: 'boosted_' + base + '.' + ext });
@@ -76,6 +81,7 @@ export default function AudioBoosterPage() {
             <input type="range" min={1} max={5} step={0.5} value={volume} onChange={e => setVolume(Number(e.target.value))} className="w-full" />
             <div className="flex justify-between text-xs text-neutral-400 mt-1"><span>1x (normal)</span><span>5x (max)</span></div>
           </div>
+          <label className="flex items-center gap-2 text-sm text-neutral-700"><input type="checkbox" checked={limiter} onChange={e => { setLimiter(e.target.checked); setResult(null); }} />Prevent distortion (limiter: loud peaks are held just under full scale instead of being cut flat)</label>
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Output Format</label>
             <select value={format} onChange={e => setFormat(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
@@ -96,7 +102,7 @@ export default function AudioBoosterPage() {
       </div>
       <SeoContent
         title="Audio Booster"
-        description="Audio Booster amplifies an audio file's volume using a simple gain multiplier (1x–5x), processed in your browser via ffmpeg.wasm (WebAssembly) — nothing is uploaded, except for Opus, which our own server encodes with libopus and then deletes. Choose the output format that matches your source (or any other supported format) instead of always getting MP3 back."
+        description="Audio Booster amplifies an audio file's volume by a gain multiplier (1x–5x) followed by a limiter that keeps the loudest peaks just under full scale instead of cutting them flat (it can be turned off), processed in your browser via ffmpeg.wasm (WebAssembly) — nothing is uploaded, except for Opus, which our own server encodes with libopus and then deletes. Choose the output format that matches your source (or any other supported format) instead of always getting MP3 back."
         howTo={[
           "Click the upload area and select an audio file.",
           "Set your desired boost level using the slider (1x–5x).",
@@ -105,16 +111,16 @@ export default function AudioBoosterPage() {
           "Preview the result, then download the boosted file."
         ]}
         faqs={[
-          { q: "What does the boost actually do?", a: "It applies a straightforward volume/gain multiplier to the whole file via ffmpeg — it's not adaptive loudness normalization, so high boost levels can cause clipping or distortion." },
+          { q: "What does the boost actually do?", a: "It multiplies the volume of the whole file, then a limiter (ffmpeg's alimiter) turns down only the peaks that would go past full scale, so they are not cut flat. It is not loudness normalization: quiet passages get the full boost, loud ones are held back. Turn the limiter off to get the raw gain, clipping included." },
           { q: "What output format do I get?", a: "Your choice — MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, or AC3, picked from a dropdown before boosting." },
           { q: "Is Audio Booster free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Is my file uploaded anywhere?", a: "For every format except Opus, no: processing happens in your browser via ffmpeg.wasm. For Opus, the processed audio is sent to our own server (not a third party), encoded with the reference libopus encoder (the in-browser one is not as good), and deleted as soon as you have downloaded the result." }
         ]}
         tips={[
-          "Start around 1.5x–2x and listen for distortion before pushing toward the 5x maximum.",
+          "Start around 1.5x–2x; with the limiter on, higher boosts stay free of clipping but sound more compressed.",
           "Pick a lossless output (WAV, FLAC, AIFF, or ALAC) if your source was already lossless, to avoid stacking a lossy re-encode on top of the boost.",
           "The first boost after loading the page can take longer since your browser needs to download the ffmpeg.wasm engine.",
-          "Keep your original file — a volume boost can't be undone once clipping occurs."
+          "Keep your original file — a boost (and the limiter's peak reduction) can't be undone."
         ]}
       />
     </div>

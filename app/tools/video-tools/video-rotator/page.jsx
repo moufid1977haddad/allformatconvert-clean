@@ -1,6 +1,7 @@
-﻿'use client';
+'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { recordWholePlayback } from '../../../lib/recordPlayback';
 import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import { videoReRecordSupport, finishRecording } from '../../../lib/mediaSupport';
 import IosOriginalNote from '../../../components/IosOriginalNote';
@@ -94,13 +95,11 @@ export default function VideoRotatorPage() {
         ctx.rotate(angle * Math.PI / 180);
         ctx.drawImage(videoRef.current, -vw/2, -vh/2, vw, vh);
         ctx.restore();
-        if (!videoRef.current.paused && !videoRef.current.ended) requestAnimationFrame(drawFrame);
       };
       videoRef.current.currentTime = 0;
       await videoRef.current.play();
-      recorder.start();
-      drawFrame();
-      setTimeout(() => { if (recorder.state !== 'inactive') recorder.stop(); videoRef.current.pause(); }, videoRef.current.duration * 1000);
+      // Recorded until the video's end, following pauses and stalls (lib/recordPlayback.js, 29/09).
+      recordWholePlayback(videoRef.current, recorder, drawFrame);
     } catch(e) { setError('Error: ' + e.message); setStatus(''); }
   };
 
