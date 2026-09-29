@@ -121,6 +121,12 @@ if ff and ff != "ffmpeg" and os.path.exists(ff):
     dur = float(info_j["format"]["duration"])
     print("   parts:", [(round(float(streams(p)["format"]["duration"]), 3), [(x["codec_type"], x.get("duration")) for x in streams(p)["streams"]]) for p in parts])
     print("   joined:", [(x["codec_type"], x.get("duration"), x.get("nb_frames")) for x in info_j["streams"]])
+    # 30/09: each part's picture and sound last the same whole number of frames, so the join leaves no gap in the
+    # picture: the joined video lasts exactly its frames / 30 (it read 60 fps and 8.019 s for 8 s before)
+    same = all(abs(float(x["duration"]) - float(streams(p)["format"]["duration"])) < 0.0015 for p in parts for x in streams(p)["streams"])
+    vj = next(x for x in info_j["streams"] if x["codec_type"] == "video")
+    check(f"merge parts: picture and sound of each part equally long; joined video {vj['duration']} s = {vj['nb_frames']} frames / 30, {vj['r_frame_rate']}",
+          same and abs(float(vj["duration"]) - int(vj["nb_frames"]) / 30) < 0.001 and vj["r_frame_rate"] == "30/1")
     kinds = sorted(s["codec_type"] for s in info_j["streams"])
     check(f"merge by copy: {dur:.2f} s for 3.5 s, streams {kinds}, decodes with no error", abs(dur - 3.5) < 0.12 and kinds == ["audio", "video"] and dec.returncode == 0 and not dec.stderr.strip(), dec.stderr.strip()[:200])
     # a browser recording has no duration in its header (MediaRecorder WebM; ffmpeg's "-live 1" writes the same)

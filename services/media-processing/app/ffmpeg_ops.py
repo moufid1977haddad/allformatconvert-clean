@@ -476,9 +476,22 @@ def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_pa
                    "-loop", "0", "-f", "gif"]
             return gif_base + maps + clip + gif + [out_path], ext, mime
         clip = clip_options(params, info)
+        clip_v, clip_a = [], []
         if clip:
-            base = base[:base.index("-i")] + ["-ss", f"{clip[0]:.3f}"] + base[base.index("-i"):]
-            maps = maps + ["-t", f"{clip[1]:.3f}"]
+            # 30/09 (real Safari 17.6): a 1 s -> 5 s cut of a 30 fps video came back with 118 frames (3.933 s), sound
+            # 3.99 s. Cause, reproduced: "-ss" before "-i" is shifted by the container's start time -- in the piece the
+            # browser sends, the sound starts at 0.046 s and the video at 0.067 s (B-frames) -- so the seek landed 1-2
+            # frames late, the video then started after the sound, and "-t" cut the last frames. Now the cut is made
+            # on the file's own clock ("-copyts"): a coarse seek a few seconds before (speed only), then trim/atrim at
+            # the exact start and length. Video and sound both last exactly the length asked; the first frame is the
+            # first one at or after the start (2.5 ms of tolerance for millisecond-rounded timestamps).
+            s, d = clip
+            coarse = max(0.0, s - 5.0)
+            base = base[:base.index("-i")] + ["-copyts", "-ss", f"{coarse:.3f}"] + base[base.index("-i"):]
+            lo, hi = max(0.0, s - 0.0025), s + d - 0.0025
+            clip_v = [f"trim=start={lo:.4f}:end={hi:.4f}", "setpts=PTS-STARTPTS"]
+            if info.has_audio:
+                clip_a = ["-af", f"atrim=start={s:.4f}:end={s + d:.4f},asetpts=PTS-STARTPTS"]
         edit = edit_options(params)
         extra = []
         if edit:
@@ -496,7 +509,18 @@ def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_pa
                     at = base.index(in_path) + 1  # a second INPUT: before the output options (-map_metadata)
                     base = base[:at] + ["-f", "lavfi", "-t", f"{max(info.duration, 0.1):.3f}", "-i", "anullsrc=r=48000:cl=stereo"] + base[at:]
                     maps = ["-map", "0:v:0", "-map", "1:a:0"] + maps[4:]
-        args = base + maps + vf + builder(quality, ctx) + extra + [out_path]
+                # 30/09: the browser joins these clips by copy (concat demuxer), which starts each clip at the end of
+                # the previous one's LONGEST stream. The AAC sound ran a few ms past the picture, so each join left a
+                # gap in the video (8.019 s for 8 s, frame rate read as 60). Picture and sound now last exactly the
+                # same whole number of frames: both padded (last frame held, silence) then cut at that length.
+                rate = params.get("fps")
+                length = round(info.duration * rate) / rate if rate and info.duration else info.duration
+                if length:
+                    vf = ["-vf", ",".join(([vf[1]] if vf else []) + ["tpad=stop_mode=clone:stop=-1"])]
+                    extra += ["-af", "apad", "-t", f"{length:.6f}"]
+        if clip_v:
+            vf = ["-vf", ",".join(clip_v + ([vf[1]] if vf else []))]
+        args = base + maps + vf + clip_a + builder(quality, ctx) + extra + [out_path]
         # Optional exact bitrate (Audio Compressor sends the one its visitor picked, 64-320 kbit/s). Opus only,
         # the one target that tool sends here; absent = the quality level's bitrate, as before (additive).
         kbps = params.get("kbps")
