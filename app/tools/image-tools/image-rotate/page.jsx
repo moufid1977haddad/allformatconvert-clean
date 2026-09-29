@@ -2,13 +2,15 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { checkedDataURL } from '../../../lib/mediaSupport';
+import { encodeLike, extOf } from '../../../lib/imageOutput';
 export default function ImageRotatePage() {
+  const [srcType, setSrcType] = useState('image/png');
   const [image, setImage] = useState(null);
   const [angle, setAngle] = useState(90);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const inputRef = useRef();
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setResult(null); setError(''); } };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setSrcType(f.type); setResult(null); setError(''); } };
   const rotate = () => {
     setError('');
     const img = new Image();
@@ -23,7 +25,7 @@ export default function ImageRotatePage() {
       ctx.translate(canvas.width/2, canvas.height/2);
       ctx.rotate(rad);
       ctx.drawImage(img, -img.width/2, -img.height/2);
-      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
+      try { setResult(angle % 90 === 0 ? encodeLike(canvas, srcType) : checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
     };
     img.src = image;
   };
@@ -41,7 +43,7 @@ export default function ImageRotatePage() {
           <div><label className="block text-sm text-neutral-500 mb-1">Custom angle: {angle}°</label><input type="range" min="0" max="360" value={angle} onChange={e => setAngle(parseInt(e.target.value))} className="w-full" /></div>
           <button onClick={rotate} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Rotate</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="rotated.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download={`rotated.${extOf(result)}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
       <SeoContent
@@ -55,7 +57,7 @@ export default function ImageRotatePage() {
         ]}
         faqs={[
           { q: "Is Image Rotate really free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "What image formats does Image Rotate support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The output is always a PNG file." },
+          { q: "What image formats does Image Rotate support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. A rotation by 90, 180 or 270 degrees keeps your image's format (JPG stays JPG); any other angle gives a PNG, because the corners around the tilted image are transparent." },
           { q: "Will rotating my image reduce its quality?", a: "No, the pixels are redrawn at the same resolution with no compression applied." },
           { q: "Can I rotate multiple images at once?", a: "No, the tool processes one image at a time — there's no batch upload." }
         ]}

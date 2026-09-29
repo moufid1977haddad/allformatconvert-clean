@@ -1,7 +1,8 @@
-﻿'use client';
+'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { checkPromptLength } from '@/lib/quota/limits';
+import { readAiJson } from '../../../lib/aiClient';
 
 const tones = ['Professional', 'Friendly', 'Formal', 'Casual', 'Persuasive'];
 
@@ -29,7 +30,7 @@ export default function EmailGeneratorPage() {
           options: { tone },
         }),
       });
-      const data = await response.json();
+      const data = await readAiJson(response);
       if (data.text) setOutput(data.text);
       else setError(data.error || 'No response received');
     } catch(e) { setError('Error: ' + e.message); }

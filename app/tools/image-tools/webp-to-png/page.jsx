@@ -7,7 +7,17 @@ export default function WebPtoPNGPage() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const inputRef = useRef();
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setResult(null); setError(''); } };
+  const [note, setNote] = useState('');
+  // An animated WebP (ANIM chunk) is drawn as its first frame only: say so instead of
+  // handing back one frame as if it were the whole file (29/09).
+  const handleFile = async (e) => {
+    const f = e.target.files[0]; e.target.value = '';
+    if (!f) return;
+    setImage(URL.createObjectURL(f)); setResult(null); setError('');
+    const head = new Uint8Array(await f.slice(0, 64).arrayBuffer());
+    const animated = String.fromCharCode(...head.slice(12, 16)) === 'VP8X' && (head[20] & 0x02) !== 0;
+    setNote(animated ? 'This WebP is animated: the PNG will contain its first frame only (PNG has no animation). For every frame, convert it to GIF, or split it with an animation tool.' : '');
+  };
   const convert = () => {
     setError('');
     const img = new Image();
@@ -32,6 +42,7 @@ export default function WebPtoPNGPage() {
           </div>
           <button onClick={convert} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+          {note && <p className="text-amber-700 text-center text-sm">{note}</p>}
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="converted.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>

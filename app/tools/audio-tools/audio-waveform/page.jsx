@@ -46,8 +46,11 @@ export default function AudioWaveformPage() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     if (!buffer) return;
 
-    const data = buffer.getChannelData(0);
-    const totalLength = data.length;
+    // Every channel is taken (29/09): only the left one was drawn, so a sound present only on the right channel
+    // showed as a flat line. Each column spans the min and max of all channels, as Audacity's and wavesurfer's
+    // overview; positive values are drawn upward (they were drawn downward: the picture was upside down).
+    const channels = Array.from({ length: buffer.numberOfChannels }, (_, c) => buffer.getChannelData(c));
+    const totalLength = channels[0].length;
     const viewLength = Math.max(1, Math.floor(totalLength / view.zoom));
     const maxStart = Math.max(0, totalLength - viewLength);
     const start = Math.min(Math.max(0, Math.floor(view.start)), maxStart);
@@ -60,16 +63,18 @@ export default function AudioWaveformPage() {
     for (let i = 0; i < canvas.width; i++) {
       let min = 1, max = -1;
       const sampleStart = start + i * step;
-      for (let j = 0; j < step; j++) {
-        const idx = sampleStart + j;
-        if (idx >= totalLength) break;
-        const val = data[idx] || 0;
-        if (val < min) min = val;
-        if (val > max) max = val;
+      for (const data of channels) {
+        for (let j = 0; j < step; j++) {
+          const idx = sampleStart + j;
+          if (idx >= totalLength) break;
+          const val = data[idx] || 0;
+          if (val < min) min = val;
+          if (val > max) max = val;
+        }
       }
       if (min > max) { min = 0; max = 0; }
-      ctx.moveTo(i, (1 + min) * amp);
-      ctx.lineTo(i, (1 + max) * amp);
+      ctx.moveTo(i, (1 - max) * amp);
+      ctx.lineTo(i, (1 - min) * amp + 1);
     }
     ctx.stroke();
   }, [view]);

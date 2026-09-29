@@ -1,9 +1,11 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { encodeLike, extOf, pixelateImageData } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 
 export default function ImagePixelatorPage() {
+  const [srcType, setSrcType] = useState('image/png');
   const [image, setImage] = useState(null);
   const [pixelSize, setPixelSize] = useState(10);
   const [result, setResult] = useState(null);
@@ -14,7 +16,7 @@ export default function ImagePixelatorPage() {
     const f = e.target.files[0];
     e.target.value = '';
     if (!f) return;
-    setImage(URL.createObjectURL(f));
+    setImage(URL.createObjectURL(f)); setSrcType(f.type);
     setResult(null);
     setError('');
   };
@@ -29,14 +31,9 @@ export default function ImagePixelatorPage() {
       canvas.height = img.height;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0);
-      for (let y = 0; y < canvas.height; y += pixelSize) {
-        for (let x = 0; x < canvas.width; x += pixelSize) {
-          const data = ctx.getImageData(x, y, 1, 1).data;
-          ctx.fillStyle = `rgba(${data[0]},${data[1]},${data[2]},${data[3]/255})`;
-          ctx.fillRect(x, y, pixelSize, pixelSize);
-        }
-      }
-      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
+      // Block AVERAGE, as the page says (it used to copy each block's top-left pixel, 29/09).
+      ctx.putImageData(pixelateImageData(ctx.getImageData(0, 0, canvas.width, canvas.height), pixelSize), 0, 0);
+      try { setResult(encodeLike(canvas, srcType)); } catch (e) { setError(e.message); }
     };
     img.src = image;
   };
@@ -54,7 +51,7 @@ export default function ImagePixelatorPage() {
           <div><label className="block text-sm text-neutral-500 mb-1">Pixel Size: {pixelSize}px</label><input type="range" min="2" max="50" value={pixelSize} onChange={e => setPixelSize(parseInt(e.target.value))} className="w-full" /></div>
           <button onClick={apply} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Apply Pixelate</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="pixelated.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download={`pixelated.${extOf(result)}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
       <SeoContent
@@ -68,7 +65,7 @@ export default function ImagePixelatorPage() {
         ]}
         faqs={[
           { q: "Is Image Pixelator really free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "What image formats does Image Pixelator support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The output is always a PNG file." },
+          { q: "What image formats does Image Pixelator support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP where the browser can save WebP (otherwise PNG)." },
           { q: "Is my image data secure and private?", a: "Yes, all processing happens locally in your browser — your image is never uploaded to a server." },
           { q: "Can I pixelate only a specific area, like a face?", a: "No, the effect is applied uniformly across the whole image — there's no selection tool for pixelating a specific region." }
         ]}

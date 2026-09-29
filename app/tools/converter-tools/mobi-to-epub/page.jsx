@@ -105,17 +105,26 @@ async function embedResource(url, resources, kind) {
   if (resources.has(url)) return resources.get(url).path;
   const res = await fetch(url);
   const blob = await res.blob();
-  const bytes = new Uint8Array(await blob.arrayBuffer());
+  let bytes = new Uint8Array(await blob.arrayBuffer());
   const index = resources.size + 1;
   if (kind === 'style') {
     const path = `styles/style${index}.css`;
-    resources.set(url, { path, bytes, mime: 'text/css' });
+    resources.set(url, { path, bytes, mime: 'text/css' }); // reserved before the url() inside are embedded
+    // Images and fonts a stylesheet points to (url(blob:...)) are embedded, relative to styles/.
+    const css = new TextDecoder().decode(bytes);
+    if (css.includes('blob:')) resources.get(url).bytes = new TextEncoder().encode(await rewriteCssUrls(css, resources, '../'));
     return path;
   }
   const ext = IMAGE_EXT_BY_MIME[blob.type] || 'jpg';
   const path = `images/image${index}.${ext}`;
   resources.set(url, { path, bytes, mime: blob.type || 'image/jpeg' });
   return path;
+}
+
+const CSS_BLOB_URL = /url\(\s*(['"]?)(blob:[^'")\s]+)\1\s*\)/g;
+async function rewriteCssUrls(css, resources, prefix) {
+  for (const u of new Set([...css.matchAll(CSS_BLOB_URL)].map((m) => m[2]))) await embedResource(u, resources, 'image');
+  return css.replace(CSS_BLOB_URL, (_, q, u) => `url("${prefix}${resources.get(u).path}")`);
 }
 
 // Turns a chapter's processed HTML (already resource-linked to blob: URLs by
@@ -128,18 +137,28 @@ async function buildChapterDocument({ bodyHtml, cssHrefs, title, resources }) {
   const raw = `<!DOCTYPE html><html><head><meta charset="utf-8"/></head><body>${bodyHtml}</body></html>`;
   const doc = new DOMParser().parseFromString(raw, 'text/html');
 
+  // Chapters live in OEBPS/text/ and resources in OEBPS/images/ and OEBPS/styles/: references need "../"
+  // (29/09: they were written "images/x.jpg", i.e. OEBPS/text/images/x.jpg, so every picture and stylesheet of the
+  // EPUB was missing). SVG <image> and url(blob:) in style attributes are embedded too.
   const images = doc.body.querySelectorAll('img[src^="blob:"]');
   for (const img of images) {
     const path = await embedResource(img.getAttribute('src'), resources, 'image');
-    img.setAttribute('src', path);
+    img.setAttribute('src', '../' + path);
   }
+  for (const im of doc.body.querySelectorAll('image')) {
+    for (const attr of ['href', 'xlink:href']) {
+      const v = im.getAttribute(attr);
+      if (v && v.startsWith('blob:')) im.setAttribute(attr, '../' + await embedResource(v, resources, 'image'));
+    }
+  }
+  for (const el of doc.body.querySelectorAll('[style*="blob:"]')) el.setAttribute('style', await rewriteCssUrls(el.getAttribute('style'), resources, '../'));
 
   for (const cssUrl of cssHrefs) {
     const path = await embedResource(cssUrl, resources, 'style');
     const link = doc.createElement('link');
     link.setAttribute('rel', 'stylesheet');
     link.setAttribute('type', 'text/css');
-    link.setAttribute('href', path);
+    link.setAttribute('href', '../' + path);
     doc.head.appendChild(link);
   }
 
@@ -183,9 +202,9 @@ ${spine}
 </package>`;
 }
 
-function buildNcx({ title, identifier, spineIds }) {
+function buildNcx({ title, identifier, spineIds, titles = [] }) {
   const points = spineIds.map((id, i) => `    <navPoint id="navPoint-${i + 1}" playOrder="${i + 1}">
-      <navLabel><text>Chapter ${i + 1}</text></navLabel>
+      <navLabel><text>${escapeXml(titles[i] || `Chapter ${i + 1}`)}</text></navLabel>
       <content src="text/${id}.xhtml"/>
     </navPoint>`).join('\n');
 
@@ -202,8 +221,8 @@ ${points}
 </ncx>`;
 }
 
-function buildNav({ spineIds }) {
-  const items = spineIds.map((id, i) => `      <li><a href="text/${id}.xhtml">Chapter ${i + 1}</a></li>`).join('\n');
+function buildNav({ spineIds, titles = [] }) {
+  const items = spineIds.map((id, i) => `      <li><a href="text/${id}.xhtml">${escapeXml(titles[i] || `Chapter ${i + 1}`)}</a></li>`).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
 <html xmlns="${XHTML_NS}" xmlns:epub="http://www.idpf.org/2007/ops">
@@ -271,6 +290,16 @@ export default function MobiToEpubPage() {
       const manifestItems = [];
       const spineIds = [];
 
+      // Chapter titles from the book's own table of contents (29/09: every entry was "Chapter N", Calibre keeps them).
+      const labels = new Map();
+      const walk = (items) => (items || []).forEach((t) => {
+        const r = t.href && ebook.resolveHref ? ebook.resolveHref(t.href) : null;
+        if (r && r.id && t.label && !labels.has(r.id)) labels.set(r.id, t.label.trim());
+        walk(t.children);
+      });
+      try { walk(ebook.getToc ? ebook.getToc() : []); } catch { /* no usable table of contents: numbered titles */ }
+      const titles = [];
+
       for (let i = 0; i < spine.length; i++) {
         const chapter = ebook.loadChapter(spine[i].id);
         if (!chapter) continue;
@@ -278,9 +307,10 @@ export default function MobiToEpubPage() {
         const xhtml = await buildChapterDocument({
           bodyHtml: chapter.html,
           cssHrefs: (chapter.css || []).map(c => c.href),
-          title: `Chapter ${i + 1}`,
+          title: labels.get(spine[i].id) || `Chapter ${i + 1}`,
           resources
         });
+        titles.push(labels.get(spine[i].id) || `Chapter ${i + 1}`);
         manifestItems.push({ id: chapterId, href: `text/${chapterId}.xhtml`, mediaType: 'application/xhtml+xml' });
         spineIds.push(chapterId);
         resources.set(`__chapter_xhtml_${chapterId}`, { path: `text/${chapterId}.xhtml`, xhtml, isChapter: true });
@@ -316,8 +346,8 @@ export default function MobiToEpubPage() {
         if (isCover) coverId = id;
       }
 
-      zip.file('OEBPS/nav.xhtml', buildNav({ spineIds }));
-      zip.file('OEBPS/toc.ncx', buildNcx({ title: metadata.title, identifier, spineIds }));
+      zip.file('OEBPS/nav.xhtml', buildNav({ spineIds, titles }));
+      zip.file('OEBPS/toc.ncx', buildNcx({ title: metadata.title, identifier, spineIds, titles }));
       zip.file('OEBPS/content.opf', buildOpf({ metadata, manifestItems, spineIds, coverId, identifier }));
 
       const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/epub+zip' });
@@ -367,12 +397,12 @@ export default function MobiToEpubPage() {
           { q: "Is MOBI to EPUB free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "What file types can I upload?", a: ".mobi, .azw, .azw3, and .prc files. The parser automatically detects whether a file uses the older MOBI6 structure (used by .mobi, .azw, and .prc) or the newer KF8 structure used by most .azw3 files." },
           { q: "Is my file uploaded anywhere?", a: "No. All processing happens locally in your browser — your file is never uploaded to a server." },
-          { q: "Will chapter titles and in-book links from the original ebook be preserved?", a: "Chapter content, images, and the cover are preserved in reading order, but chapters are currently labeled generically (Chapter 1, Chapter 2, ...) rather than the book's original per-chapter titles, and internal cross-reference links (like footnotes) aren't guaranteed to remain clickable." }
+          { q: "Will chapter titles and in-book links from the original ebook be preserved?", a: "Chapter content, images, and the cover are preserved in reading order, and the table of contents uses the book's own chapter titles when the ebook has one (numbered titles otherwise). Internal cross-reference links (like footnotes) aren't guaranteed to remain clickable." }
         ]}
         tips={[
           "For DRM-protected Kindle purchases, remove the DRM first with a tool you're authorized to use — this converter only handles unencrypted files.",
           "Both .mobi/.azw/.prc (MOBI6) and .azw3 (KF8) files are supported, with the internal format detected automatically.",
-          "Chapters are labeled generically (Chapter 1, Chapter 2, ...) since per-chapter titles aren't exposed by the underlying parser.",
+          "Chapter titles come from the ebook's own table of contents; a book without one gets numbered titles (Chapter 1, Chapter 2, ...).",
           "Always open the resulting EPUB in your e-reader app to confirm it looks right before deleting your original file."
         ]}
       />

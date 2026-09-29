@@ -1,13 +1,15 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function ImageInverterPage() {
+  const [srcType, setSrcType] = useState('image/png');
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const inputRef = useRef();
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setResult(null); setError(''); } };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setSrcType(f.type); setResult(null); setError(''); } };
   const invert = () => {
     setError('');
     const img = new Image();
@@ -24,7 +26,7 @@ export default function ImageInverterPage() {
         data.data[i+2] = 255 - data.data[i+2];
       }
       ctx.putImageData(data, 0, 0);
-      try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }
+      try { setResult(encodeLike(canvas, srcType)); } catch (e) { setError(e.message); }
     };
     img.src = image;
   };
@@ -40,7 +42,7 @@ export default function ImageInverterPage() {
           </div>
           <button onClick={invert} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Invert Colors</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download="inverted.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download={`inverted.${extOf(result)}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
         </div>
       </div>
       <SeoContent
@@ -53,7 +55,7 @@ export default function ImageInverterPage() {
           "Click the download button to save your inverted PNG image."
         ]}
         faqs={[
-          { q: "What file formats does Image Inverter support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The output is always a PNG file." },
+          { q: "What file formats does Image Inverter support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP where the browser can save WebP (otherwise PNG)." },
           { q: "Is there a file size limit for uploading images?", a: "There's no fixed size limit — processing happens locally in your browser, so it's limited only by your device's available memory." },
           { q: "Do I need to create an account to use Image Inverter?", a: "No, it's completely free and requires no account or login." },
           { q: "Can I invert multiple images at once?", a: "No, the tool processes one image at a time — there's no batch upload." }

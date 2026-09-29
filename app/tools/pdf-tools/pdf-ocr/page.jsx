@@ -2,6 +2,8 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
+import { openablePdfBytes } from '../../../lib/pdfDecrypt';
+import { placeOnVisiblePage, visibleSize } from '../../../lib/pdfPlace';
 import ProgressBar from '../../../components/ProgressBar';
 import { reportToolError } from '../../../lib/reportError';
 
@@ -219,6 +221,7 @@ const matchLanguages = (q) => { const f = fold(q); return f ? LANGUAGES.filter((
 export default function Page() {
   const [file, setFile] = useState(null);
   const [lang, setLang] = useState('eng');
+  const [pdfUrl, setPdfUrl] = useState(null);
   const [langFilter, setLangFilter] = useState('');
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -243,7 +246,7 @@ export default function Page() {
   const handleFile = (e) => {
     const f = e.target.files[0];
     e.target.value = '';
-    setFile(f);
+    setFile(f); setPdfUrl(null);
     setOutput('');
     setError('');
   };
@@ -253,6 +256,7 @@ export default function Page() {
     setLoading(true);
     setError('');
     setOutput('');
+    setPdfUrl(null);
     setDownloadPct(0);
     setDownloadLabel('');
     setPagePct(0);
@@ -270,6 +274,11 @@ export default function Page() {
       const { createWorker } = await import('tesseract.js');
 
       const arrayBuffer = await file.arrayBuffer();
+      // Searchable PDF (29/09): as iLovePDF, Smallpdf and PDF24 do, the recognized text is also added to the
+      // original PDF as an invisible layer (Tesseract's text-only PDF, placed over each page as the reader sees it:
+      // crop box and rotation), so the file can be searched and its text selected while the pages stay untouched.
+      const { PDFDocument, degrees } = await import('pdf-lib');
+      const outDoc = await PDFDocument.load(await openablePdfBytes(new Uint8Array(arrayBuffer.slice(0))));
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       setTotalPages(pdf.numPages);
 
@@ -325,8 +334,21 @@ export default function Page() {
         canvas.height = viewport.height;
         const ctx = canvas.getContext('2d');
         await page.render({ canvasContext: ctx, viewport }).promise;
-        const { data: { text } } = await worker.recognize(canvas);
+        const { data: { text, pdf: layer } } = await worker.recognize(canvas, { pdfTitle: file.name, pdfTextOnly: true }, { text: true, pdf: true });
         fullText += `--- Page ${i} ---\n${text.trim()}\n\n`;
+        if (layer && text.trim()) {
+          const [embedded] = await outDoc.embedPdf(new Uint8Array(layer), [0]);
+          const target = outDoc.getPage(i - 1);
+          const box = target.getCropBox();
+          const rot = target.getRotation().angle;
+          const vis = visibleSize(box, rot);
+          const pos = placeOnVisiblePage(box, rot, 0, 0);
+          target.drawPage(embedded, { x: pos.x, y: pos.y, width: vis.width, height: vis.height, rotate: degrees(pos.rotate) });
+        }
+      }
+      if (fullText.replace(/--- Page \d+ ---/g, '').trim()) {
+        const bytes = await outDoc.save();
+        setPdfUrl(URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' })));
       }
 
       setOutput(fullText.trim() ? fullText.trim() : 'No text was recognized in this PDF.');
@@ -393,31 +415,33 @@ export default function Page() {
               <label className="block text-sm text-neutral-500">Recognized Text</label>
               <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={output} readOnly />
               <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Copy Text</button>
+              {pdfUrl && <a href={pdfUrl} download={file.name.replace(/\.pdf$/i, '') + '-searchable.pdf'} className="block w-full text-center bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl py-2 font-semibold transition">Download searchable PDF</a>}
             </div>
           )}
         </div>
       </div>
       <SeoContent
         title="PDF OCR"
-        description="PDF OCR renders each page of your PDF onto a canvas and runs real optical character recognition on it with Tesseract.js, entirely in your browser -- this is what lets it read scanned documents and photographed pages that have no underlying text layer at all, unlike our PDF Extract Text tool, which only reads a text layer that's already embedded in the file. Choose from any of Tesseract's 100+ supported languages, using the search box to quickly find the one you need. It works best on a straight, clean, high-contrast scan; a skewed, angled, or low-quality photo will produce visibly garbled text in places that needs proofreading -- OCR mistakes show up as recognizable garbage, not silently wrong words. The OCR engine and language data are downloaded once (browser-cached afterward) and your file is never uploaded to a server."
+        description="PDF OCR renders each page of your PDF onto a canvas and runs real optical character recognition on it with Tesseract.js, entirely in your browser -- this is what lets it read scanned documents and photographed pages that have no underlying text layer at all, unlike our PDF Extract Text tool, which only reads a text layer that's already embedded in the file. Choose from any of Tesseract's 100+ supported languages, using the search box to quickly find the one you need. You get the recognized text to copy, and a searchable PDF: your original pages, unchanged, with the recognized text added as an invisible layer so the file can be searched and its text selected. It works best on a straight, clean, high-contrast scan; a skewed, angled, or low-quality photo gives more mistakes. OCR mistakes are not always visible garbage: a digit or letter can be read as another plausible one (8 and 3, rn and m), so proofread numbers and names. The OCR engine and language data are downloaded once (browser-cached afterward) and your file is never uploaded to a server."
         howTo={[
           "Click the upload area and select a PDF file from your device.",
           "Choose a language from the dropdown (type to search if you know what you're looking for) — Tesseract supports 100+ languages.",
           "Click 'Run OCR'. The first run downloads the OCR engine and language data, then recognizes text page by page.",
           "Watch the progress bars for the download and for each page (\"Page X of Y\").",
-          "Read the result, grouped by page number, and click 'Copy Text' to copy it to your clipboard."
+          "Read the result, grouped by page number, click 'Copy Text' to copy it, or 'Download searchable PDF' to get your PDF with the text layer added."
         ]}
         faqs={[
           { q: "Does this actually perform OCR now?", a: "Yes. Every page is rendered to a canvas and recognized as an image using Tesseract.js -- it no longer just reads an existing text layer, so scanned and photographed pages work." },
           { q: "Which languages are supported?", a: "All 100+ languages that Tesseract itself supports, from Afrikaans to Yiddish. Use the search box above the Language dropdown to find one quickly; only the selected language's data is downloaded." },
-          { q: "How accurate is the text recognition?", a: "It's real OCR, not a flawless one -- expect a meaningful error rate (roughly 4-16% of characters, depending on scan quality), especially on skewed, angled, or low-contrast images. Errors are visibly garbled, not silently wrong, so proofread the output before relying on it." },
+          { q: "How accurate is the text recognition?", a: "It's real OCR, not a flawless one -- expect a meaningful error rate (roughly 4-16% of characters, depending on scan quality), especially on skewed, angled, or low-contrast images. Some errors are visibly garbled, others are plausible (a 3 read instead of an 8), so proofread numbers, names and amounts before relying on them." },
+          { q: "Can I get a searchable PDF?", a: "Yes — after recognition, 'Download searchable PDF' gives your original PDF with the recognized text added as an invisible layer on each page, placed as the page is displayed (crop and rotation included). The pages themselves are not re-compressed or changed." },
           { q: "Why is the first run slower than later ones?", a: "The first OCR run on a given language downloads the Tesseract engine and that language's training data. Your browser caches both, so later runs are faster." },
           { q: "Is there a file size limit?", a: "There's no fixed limit -- it's bound by your browser's available memory, and multi-page PDFs will simply take longer since each page is recognized in turn." },
           { q: "Do you store my uploaded files?", a: "No, everything happens locally in your browser. Your file is never uploaded to a server." }
         ]}
         tips={[
           "A straight, clean, high-contrast scan gives noticeably better results than a photo taken at an angle or in poor lighting.",
-          "If a page comes out garbled, try re-scanning it straighter or with better lighting rather than assuming the tool is broken -- that's how real OCR fails, visibly.",
+          "If a page comes out garbled, try re-scanning it straighter or with better lighting; check figures one by one even when the text looks right.",
           "Multi-page PDFs show a \"Page X of Y\" counter and a per-page progress bar so you can see how much is left.",
           "Always proofread OCR output before using it for anything important -- no OCR engine, including this one, is error-free."
         ]}

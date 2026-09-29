@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { sniffFormat } from '../../../lib/detectFileFormat';
 export default function ImageToBase64Page() {
   const [result, setResult] = useState('');
   const [fileName, setFileName] = useState('');
@@ -13,8 +14,22 @@ export default function ImageToBase64Page() {
     setError('');
     setResult('');
     setFileName(file.name);
+    // When the browser does not know the file's type (HEIC or AVIF on some systems, a file without
+    // extension), readAsDataURL writes "data:application/octet-stream", a URI no browser shows as an
+    // image (29/09). The real type is read from the file's first bytes.
+    const MIME = { png: 'image/png', jpg: 'image/jpeg', gif: 'image/gif', tiff: 'image/tiff', bmp: 'image/bmp', webp: 'image/webp', ico: 'image/x-icon', heic: 'image/heic', avif: 'image/avif' };
     const reader = new FileReader();
-    reader.onload = () => setResult(reader.result);
+    reader.onload = async () => {
+      let url = reader.result;
+      if (url.startsWith('data:application/octet-stream') || url.startsWith('data:;')) {
+        const head = new Uint8Array(await file.slice(0, 32).arrayBuffer());
+        const found = sniffFormat(head);
+        if (found && MIME[found.format]) url = url.replace(/^data:[^;,]*/, 'data:' + MIME[found.format]);
+        else if (/<svg[\s>]/i.test(await file.slice(0, 1024).text())) url = url.replace(/^data:[^;,]*/, 'data:image/svg+xml');
+        else { setError("This file's type could not be recognized as an image; the data URI below says application/octet-stream."); }
+      }
+      setResult(url);
+    };
     reader.onerror = () => setError('Could not read image file');
     reader.readAsDataURL(file);
   };

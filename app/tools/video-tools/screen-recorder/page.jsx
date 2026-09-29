@@ -1,5 +1,5 @@
-﻿'use client';
-import { useState, useRef } from 'react';
+'use client';
+import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { finishRecording } from '../../../lib/mediaSupport';
 export default function ScreenRecorderPage() {
@@ -11,6 +11,10 @@ export default function ScreenRecorderPage() {
   const chunks = useRef([]);
   const timer = useRef(null);
   const preview = useRef(null);
+  const streamRef = useRef(null);
+  // The preview <video> only mounts once `recording` is true, after the stream was obtained: the stream was
+  // assigned while the element did not exist yet, so the live preview stayed black (29/09). Attached here.
+  useEffect(() => { if (recording && preview.current && streamRef.current) preview.current.srcObject = streamRef.current; }, [recording]);
   // Extension of what the browser REALLY recorded (Chrome/Firefox: webm, Safari: mp4).
   const [ext, setExt] = useState('webm');
 
@@ -19,6 +23,7 @@ export default function ScreenRecorderPage() {
     let stream;
     try {
       stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      streamRef.current = stream;
       if (preview.current) preview.current.srcObject = stream;
       mediaRecorder.current = new MediaRecorder(stream);
       chunks.current = [];

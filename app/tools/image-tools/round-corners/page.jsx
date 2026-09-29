@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { roundedRectPath } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 
 export default function RoundCornersPage() {
@@ -29,17 +30,9 @@ export default function RoundCornersPage() {
       canvas.height = img.height;
       const ctx = canvas.getContext('2d');
       const r = (radius / 100) * Math.min(img.width, img.height) / 2;
-      ctx.beginPath();
-      ctx.moveTo(r, 0);
-      ctx.lineTo(img.width - r, 0);
-      ctx.quadraticCurveTo(img.width, 0, img.width, r);
-      ctx.lineTo(img.width, img.height - r);
-      ctx.quadraticCurveTo(img.width, img.height, img.width - r, img.height);
-      ctx.lineTo(r, img.height);
-      ctx.quadraticCurveTo(0, img.height, 0, img.height - r);
-      ctx.lineTo(0, r);
-      ctx.quadraticCurveTo(0, 0, r, 0);
-      ctx.closePath();
+      // True circular arcs (as CSS border-radius); the quadratic curves used before
+      // bulged about 6 % of the radius towards the corner (29/09).
+      roundedRectPath(ctx, 0, 0, img.width, img.height, r);
       ctx.clip();
       ctx.drawImage(img, 0, 0);
       try { setResult(checkedDataURL(canvas, 'image/png')); } catch (e) { setError(e.message); }

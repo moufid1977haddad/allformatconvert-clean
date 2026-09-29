@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 
@@ -29,16 +29,25 @@ export default function MarkdownToPdfPage() {
     try {
       const { marked } = await import('marked');
       const html = marked(mdContent);
-      const printWindow = window.open('', '_blank');
-      printWindow.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Markdown</title><style>body{font-family:Georgia,serif;margin:40px;line-height:1.8;color:#000;max-width:800px;margin:auto;}h1,h2,h3{color:#000;border-bottom:1px solid #ccc;padding-bottom:4px;}code{background:#f4f4f4;padding:2px 6px;border-radius:3px;font-family:monospace;}pre{background:#f4f4f4;padding:16px;border-radius:6px;}blockquote{border-left:4px solid #ccc;margin:0;padding-left:16px;color:#666;}table{border-collapse:collapse;width:100%;}td,th{border:1px solid #ccc;padding:8px;}</style></head><body>' + html + '</body></html>');
-      printWindow.document.close();
-      printWindow.focus();
-      setTimeout(() => {
-        printWindow.print();
+      // Printed from a sandboxed iframe (29/09): the page used to write marked's output -- which passes raw HTML
+      // through -- into a same-origin popup, so a .md file containing <script> or <img onerror> ran code on this
+      // site's origin; the popup was also blocked by Safari after the await above. In an iframe sandboxed WITHOUT
+      // allow-scripts nothing in the document can run, and print() is called from here (allow-same-origin lets this
+      // page reach it, allow-modals allows the print dialog).
+      const frame = document.createElement('iframe');
+      frame.setAttribute('sandbox', 'allow-same-origin allow-modals');
+      frame.setAttribute('aria-hidden', 'true');
+      frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+      frame.srcdoc = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Markdown</title><style>body{font-family:Georgia,serif;margin:40px;line-height:1.8;color:#000;max-width:800px;margin:auto;}h1,h2,h3{color:#000;border-bottom:1px solid #ccc;padding-bottom:4px;}code{background:#f4f4f4;padding:2px 6px;border-radius:3px;font-family:monospace;}pre{background:#f4f4f4;padding:16px;border-radius:6px;}blockquote{border-left:4px solid #ccc;margin:0;padding-left:16px;color:#666;}table{border-collapse:collapse;width:100%;}td,th{border:1px solid #ccc;padding:8px;}</style></head><body>' + html + '</body></html>';
+      frame.onload = () => {
+        frame.contentWindow.focus();
+        frame.contentWindow.print();
         setStatus('');
         setDone(true);
         setLoading(false);
-      }, 500);
+        setTimeout(() => frame.remove(), 60000);
+      };
+      document.body.appendChild(frame);
     } catch (err) {
       setStatus('Error: ' + err.message);
       setLoading(false);
@@ -77,7 +86,7 @@ export default function MarkdownToPdfPage() {
       </div>
       <SeoContent
         title="Markdown to PDF"
-        description="Markdown to PDF renders your Markdown as styled HTML in a new browser tab, entirely on your device — your content is never uploaded to a server. It doesn't generate a PDF file directly: instead, it opens your browser's print dialog, where you choose 'Save as PDF' to produce the actual file."
+        description="Markdown to PDF renders your Markdown as styled HTML, entirely on your device — your content is never uploaded to a server. It doesn't generate a PDF file directly: instead, it opens your browser's print dialog, where you choose 'Save as PDF' to produce the actual file. HTML written inside the Markdown is displayed but any script in it is blocked."
         howTo={[
           "Choose 'Upload File' to select a .md file, or 'Paste Text' to type or paste Markdown directly.",
           "Click 'Convert to PDF' — a new tab renders your Markdown and the browser's print dialog appears.",

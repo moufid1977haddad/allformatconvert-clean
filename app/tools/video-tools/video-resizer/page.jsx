@@ -1,6 +1,7 @@
-﻿'use client';
+'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { recordWholePlayback } from '../../../lib/recordPlayback';
 import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import { videoReRecordSupport, finishRecording } from '../../../lib/mediaSupport';
 import IosOriginalNote from '../../../components/IosOriginalNote';
@@ -98,13 +99,11 @@ export default function VideoResizerPage() {
         const dw = mode === 'stretch' || !Number.isFinite(k) ? width : v.videoWidth * k, dh = mode === 'stretch' || !Number.isFinite(k) ? height : v.videoHeight * k;
         ctx.fillStyle = '#000'; ctx.fillRect(0, 0, width, height);
         ctx.drawImage(v, (width - dw) / 2, (height - dh) / 2, dw, dh);
-        if (!v.paused && !v.ended) requestAnimationFrame(drawFrame);
       };
       videoRef.current.currentTime = 0;
       await videoRef.current.play();
-      recorder.start();
-      drawFrame();
-      setTimeout(() => { if (recorder.state !== 'inactive') recorder.stop(); videoRef.current.pause(); }, videoRef.current.duration * 1000);
+      // Recorded until the video's end, following pauses and stalls (lib/recordPlayback.js, 29/09).
+      recordWholePlayback(videoRef.current, recorder, drawFrame);
     } catch(e) { setError('Error: ' + e.message); setStatus(''); }
   };
 
