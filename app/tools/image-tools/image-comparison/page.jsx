@@ -1,6 +1,8 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { drawToRaster, encodeRaster } from '../../../lib/imageOutput';
+import { rasterFromRGBA } from '../../../lib/bigImage';
 
 export default function ImageComparisonPage() {
   const [image1, setImage1] = useState(null);
@@ -17,19 +19,19 @@ export default function ImageComparisonPage() {
       const load = (src) => new Promise((ok, ko) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ko(new Error('Could not read one of the images.')); im.src = src; });
       const [a, bImg] = await Promise.all([load(image1), load(image2)]);
       const w = a.naturalWidth, h = a.naturalHeight;
-      const c = document.createElement('canvas'); c.width = w; c.height = h;
-      const x = c.getContext('2d', { willReadFrequently: true });
-      x.drawImage(a, 0, 0); const A = x.getImageData(0, 0, w, h);
-      x.clearRect(0, 0, w, h); x.drawImage(bImg, 0, 0, w, h); const B = x.getImageData(0, 0, w, h);
-      const out = x.createImageData(w, h);
+      // 30/09: two phone photos of 24/48 MP exceed the one canvas iOS allows (16.7 MP): each is drawn in bands if
+      // needed (lib/imageOutput.js), compared on their pixels, and the difference image written as a Blob.
+      const A = (await drawToRaster(w, h, (ctx, y) => ctx.drawImage(a, 0, -y))).rgba();
+      const B = (await drawToRaster(w, h, (ctx, y) => ctx.drawImage(bImg, 0, -y, w, h))).rgba();
+      const out = new Uint8ClampedArray(w * h * 4);
       let n = 0;
-      for (let i = 0; i < A.data.length; i += 4) {
-        const d = Math.max(Math.abs(A.data[i] - B.data[i]), Math.abs(A.data[i + 1] - B.data[i + 1]), Math.abs(A.data[i + 2] - B.data[i + 2]), Math.abs(A.data[i + 3] - B.data[i + 3]));
-        if (d > 16) { n++; out.data[i] = 255; out.data[i + 1] = 0; out.data[i + 2] = 0; out.data[i + 3] = 255; }
-        else { const g = 0.2126 * A.data[i] + 0.7152 * A.data[i + 1] + 0.0722 * A.data[i + 2]; out.data[i] = out.data[i + 1] = out.data[i + 2] = 255 - (255 - g) * 0.3; out.data[i + 3] = 255; }
+      for (let i = 0; i < A.length; i += 4) {
+        const d = Math.max(Math.abs(A[i] - B[i]), Math.abs(A[i + 1] - B[i + 1]), Math.abs(A[i + 2] - B[i + 2]), Math.abs(A[i + 3] - B[i + 3]));
+        if (d > 16) { n++; out[i] = 255; out[i + 1] = 0; out[i + 2] = 0; out[i + 3] = 255; }
+        else { const g = 0.2126 * A[i] + 0.7152 * A[i + 1] + 0.0722 * A[i + 2]; out[i] = out[i + 1] = out[i + 2] = 255 - (255 - g) * 0.3; out[i + 3] = 255; }
       }
-      x.putImageData(out, 0, 0);
-      setDiff({ url: c.toDataURL('image/png'), changed: n, total: w * h, resized: bImg.naturalWidth !== w || bImg.naturalHeight !== h, w, h, w2: bImg.naturalWidth, h2: bImg.naturalHeight });
+      const blob = await encodeRaster(rasterFromRGBA(out, w, h), 'image/png');
+      setDiff({ url: URL.createObjectURL(blob), changed: n, total: w * h, resized: bImg.naturalWidth !== w || bImg.naturalHeight !== h, w, h, w2: bImg.naturalWidth, h2: bImg.naturalHeight });
     } catch (e) { setDiff(null); setError(e.message); }
   };
   const ref1 = useRef();

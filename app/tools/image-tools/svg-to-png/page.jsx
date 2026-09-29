@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { drawToRaster, encodeRaster, resultOf } from '../../../lib/imageOutput';
 import { checkedDataURL, canvasSizeProblem } from '../../../lib/mediaSupport';
 
 export default function SvgToPngPage() {
@@ -59,14 +60,11 @@ export default function SvgToPngPage() {
       const blob = new Blob([text], { type: 'image/svg+xml' });
       const url = URL.createObjectURL(blob);
       const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
+      img.onload = async () => {
+        // 30/09: a large size (over 16.7 MP) is drawn in bands on iPhone; the result is a Blob, not a data: URL.
         try {
-          setResult(checkedDataURL(canvas, 'image/png'));
+          const out = await drawToRaster(width, height, (ctx, y) => ctx.drawImage(img, 0, -y, width, height));
+          setResult(resultOf(await encodeRaster(out, 'image/png'), file.name, ''));
           setStatus('');
         } catch (e) { setResult(null); setStatus('Error: ' + e.message); }
         URL.revokeObjectURL(url);
@@ -101,7 +99,7 @@ export default function SvgToPngPage() {
           {result && (
             <div className="space-y-2">
               <img src={result} className="max-h-48 mx-auto rounded" />
-              <a href={result} download="converted.png" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download PNG</a>
+              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download PNG</a>
             </div>
           )}
         </div>
