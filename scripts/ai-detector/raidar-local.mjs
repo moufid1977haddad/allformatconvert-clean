@@ -22,7 +22,7 @@ const BUDGET_DOLLARS = 1;
 const outFile = path.join(here, 'results', 'raidar-www.json');
 const state = JSON.parse(fs.readFileSync(outFile, 'utf8'));
 const spent = () => state.calls.reduce((s, c) => s + (c.costDollars ?? ((c.inChars / 4 + 30) * 0.15e-6 + (c.outChars / 4) * 0.6e-6)), 0);
-const resolved = resolveTextTool({ tool: 'ai-detector' });
+const resolved = resolveTextTool({ tool: 'ai-chatbot' }); // same instruction the removed 'ai-detector' entry had (P17)
 if (!resolved.ok) throw new Error(resolved.error);
 const corpus = fs.readdirSync(path.join(here, 'corpus')).filter((f) => f.endsWith('.json'))
   .flatMap((f) => JSON.parse(fs.readFileSync(path.join(here, 'corpus', f), 'utf8')));

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "AI Detector — Detect AI Online Free" },
-  description: "AI Detector uses an AI language model to judge whether a piece of text was likely written by AI or by a human, based on writing patterns.",
+  description: "Free AI detector: was this text written by AI, a person, or both? Pangram's trained model, the fewest false accusations in an independent 2025 study. No signup.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/ai-detector" },
   openGraph: {
     title: "AI Detector — Detect AI Online Free",
-    description: "AI Detector uses an AI language model to judge whether a piece of text was likely written by AI or by a human, based on writing patterns.",
+    description: "Free AI detector: was this text written by AI, a person, or both? Pangram's trained model, the fewest false accusations in an independent 2025 study. No signup.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/ai-detector",
   },
 };

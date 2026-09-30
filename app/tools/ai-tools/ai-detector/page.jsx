@@ -2,13 +2,14 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { readAiJson } from '../../../lib/aiClient';
-import { countWords, AI_DETECT_MIN_WORDS, AI_DETECT_MAX_WORDS } from '@/lib/ai/pangram';
+import { countBillableWords, AI_DETECT_MIN_WORDS, AI_DETECT_MAX_WORDS, AI_DETECT_MAX_CHARS, AI_DETECT_FREE_WORDS_PER_DAY } from '@/lib/ai/pangram';
 
 // 30/09 (docs/audit/RAPPORT-ai-detector-30-09.md): the rewriting method (RAIDAR, lib/ai/raidar.js) called a human
 // arXiv abstract AI on www, and no free method measured on our 97-text corpus reached the market's level without
 // accusing human texts. Detection is now done by Pangram's trained classifier (/api/ai-detect), the detector with the
 // lowest false-positive rate in the independent study of Jabarian & Imas (University of Chicago / NBER w34223, 2025).
-// Limits are declared before the analysis: 40 to 1,000 words.
+// Limits are declared before the analysis: 40 to 1,000 words, and 2,000 free words a day per visitor (P17: Pangram's
+// own free allowance, the most generous per-day one among the trained detectors -- lib/quota/aiDetect.js).
 const VERDICT = {
   ai: { label: 'Likely written by AI', cls: 'bg-red-50 border-red-200 text-red-800' },
   mixed: { label: 'Mix of AI and human writing', cls: 'bg-amber-50 border-amber-200 text-amber-900' },
@@ -21,7 +22,8 @@ export default function AIDetectorPage() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const words = countWords(input);
+  const words = countBillableWords(input);
+  const chars = input.trim().length;
 
   const process = async () => {
     if (!input.trim()) return;
@@ -29,6 +31,7 @@ export default function AIDetectorPage() {
     setError('');
     if (words < AI_DETECT_MIN_WORDS) { setError(`Paste at least ${AI_DETECT_MIN_WORDS} words (this text has ${words}): on shorter texts no detector is reliable.`); return; }
     if (words > AI_DETECT_MAX_WORDS) { setError(`Up to ${AI_DETECT_MAX_WORDS} words per analysis (this text has ${words}): analyze it in parts.`); return; }
+    if (chars > AI_DETECT_MAX_CHARS) { setError(`Up to ${AI_DETECT_MAX_CHARS.toLocaleString('en-US')} characters per analysis (this text has ${chars.toLocaleString('en-US')}): analyze it in parts.`); return; }
     setLoading(true);
     try {
       const response = await fetch('/api/ai-detect', {
@@ -51,7 +54,7 @@ export default function AIDetectorPage() {
         <p className="text-neutral-500 text-center mb-8">Detect if text was written by AI</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste text to analyze..." value={input} onChange={e => setInput(e.target.value)} />
-          <p className={`text-xs -mt-2 ${words > AI_DETECT_MAX_WORDS ? 'text-red-600' : 'text-neutral-500'}`}>{words} word{words === 1 ? '' : 's'} · {AI_DETECT_MIN_WORDS} to {AI_DETECT_MAX_WORDS} words per analysis</p>
+          <p className={`text-xs -mt-2 ${words > AI_DETECT_MAX_WORDS ? 'text-red-600' : 'text-neutral-500'}`}>{words} word{words === 1 ? '' : 's'} · {AI_DETECT_MIN_WORDS} to {AI_DETECT_MAX_WORDS} words per analysis · {AI_DETECT_FREE_WORDS_PER_DAY.toLocaleString('en-US')} free words a day, no signup (each analysis counts as the next 100 words)</p>
           <button onClick={process} disabled={!input.trim() || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Processing...' : 'Detect AI Content'}
           </button>
@@ -77,10 +80,10 @@ export default function AIDetectorPage() {
           "Check the shares of AI-written, AI-assisted and human text."
         ]}
         faqs={[
-          { q: "Is AI Detector completely free to use?", a: "Yes, AI Detector is free to use with no signup or subscription required." },
+          { q: "Is AI Detector completely free to use?", a: "Yes: 2,000 words a day, free, with no signup or subscription — the same daily allowance as Pangram's own free account. Each analysis counts as the next 100 words (a 150-word text uses 200), and the count resets at midnight UTC." },
           { q: "How does it work?", a: "The text is analyzed by Pangram's detection model, a classifier trained on large amounts of human and AI writing. It splits the text into segments, labels each one AI-written, AI-assisted or human, and gives an overall verdict." },
           { q: "How accurate is the detection?", a: "In an independent study by the University of Chicago (Jabarian & Imas, 2025), Pangram's detector called essentially no human text AI and recognised 96–98 % of texts written by recent AI models, the best result among the detectors tested. Accuracy is lower on short texts and on texts rewritten by a person. No detector is 100 % reliable: treat the result as a clue, not proof." },
-          { q: "Why 40 to 1,000 words?", a: "Under 40 words, no detector is reliable. 1,000 words covers an essay page; analyze longer texts in parts." },
+          { q: "Why 40 to 1,000 words?", a: "Under 40 words, no detector is reliable. 1,000 words (12,000 characters) covers an essay page; analyze longer texts in parts. In Chinese, Japanese and Thai, each character counts as a word." },
           { q: "Is my submitted text stored or shared?", a: "Your text is sent to Pangram's API to be analyzed. It is not stored on our servers or used for any other purpose." }
         ]}
         tips={[

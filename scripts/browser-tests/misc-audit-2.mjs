@@ -174,6 +174,12 @@ await T('ai-detector', async () => {
   check('ai-detector: Pangram says mixed -> "Mix of AI and human writing"', (await page.locator('[data-verdict]').getAttribute('data-verdict')) === 'mixed');
   await play({ error: 'The AI detector is not available: its detection service is not configured.' }, 503);
   check('ai-detector: service not configured -> the route message, no verdict', /not available/.test(await page.locator('p.text-red-400').first().textContent().catch(() => '')) && await page.locator('[data-verdict]').count() === 0);
+  // P17: the detector's own limits (lib/quota/aiDetect.js) -- messages shown as the route words them.
+  await play({ error: "You have used today's 2000 free words. More tomorrow (the count resets at midnight UTC)." }, 429);
+  check('ai-detector: daily free words used -> the route message, no verdict', /used today's 2000 free words/.test(await page.locator('p.text-red-400').first().textContent().catch(() => '')) && await page.locator('[data-verdict]').count() === 0);
+  await play({ error: 'The AI detector has reached its monthly budget — a site-wide limit, not something on your end. It resets on November 1, 2026 (UTC).' }, 503);
+  check('ai-detector: monthly budget reached -> the route message, no verdict', /monthly budget — a site-wide limit/.test(await page.locator('p.text-red-400').first().textContent().catch(() => '')) && await page.locator('[data-verdict]').count() === 0);
+  check('ai-detector: the free allowance is declared before any analysis', /2,000 free words a day, no signup/.test(await page.locator('text=words per analysis').first().textContent()));
   let called = 0; await page.unroute('**/api/ai-detect'); await page.route('**/api/ai-detect', (route) => { called++; route.abort(); });
   await page.getByPlaceholder('Paste text to analyze...').fill('Too short to judge.');
   await page.getByRole('button', { name: 'Detect AI Content' }).click();
@@ -181,6 +187,12 @@ await T('ai-detector', async () => {
   await page.getByPlaceholder('Paste text to analyze...').fill('word '.repeat(1001));
   await page.getByRole('button', { name: 'Detect AI Content' }).click();
   check('ai-detector: over 1,000 words, refused before any call, limit declared under the box', /Up to 1000 words/.test(await page.locator('p.text-red-400').first().textContent().catch(() => '')) && called === 0 && /40 to 1000 words/.test(await page.locator('text=words per analysis').first().textContent()));
+  await page.getByPlaceholder('Paste text to analyze...').fill('Pneumonoultramicroscopicsilicovolcanoconiosis '.repeat(300));
+  await page.getByRole('button', { name: 'Detect AI Content' }).click();
+  check('ai-detector: very long words counted one per 8 characters (review P17), refused before any call', /Up to 1000 words per analysis \(this text has 1725\)/.test(await page.locator('p.text-red-400').first().textContent().catch(() => '')) && called === 0);
+  await page.getByPlaceholder('Paste text to analyze...').fill('这是一个测试'.repeat(200));
+  await page.getByRole('button', { name: 'Detect AI Content' }).click();
+  check('ai-detector: Chinese counted one word per character (1,200 > 1,000), refused before any call', /Up to 1000 words per analysis \(this text has 1200\)/.test(await page.locator('p.text-red-400').first().textContent().catch(() => '')) && called === 0);
 });
 
 console.log(`\n${name}: ${passes} passed, ${fails} failed`);
