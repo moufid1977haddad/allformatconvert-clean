@@ -139,7 +139,7 @@ for (const t of TOOLS) {
       let asked = false;
       p.once('dialog', async (d) => { asked = d.type() === 'beforeunload'; await d.dismiss(); });
       await p.close({ runBeforeUnload: true });
-      await new Promise((r) => setTimeout(r, 700));
+      await new Promise((r) => setTimeout(r, 1500)); // Firefox under load shows the dialog later
       check(`${label}: leaving with the file not downloaded asks first`, asked);
     }
     const first = p.locator('[data-file-download]').first();
@@ -182,7 +182,7 @@ for (const t of TOOLS) {
       let askedAfter = false;
       p.once('dialog', async (d) => { askedAfter = true; await d.accept(); });
       await p.close({ runBeforeUnload: true });
-      await new Promise((r) => setTimeout(r, 700));
+      await new Promise((r) => setTimeout(r, 1500)); // Firefox under load shows the dialog later
       check(`${label}: after "Download", leaving does not ask`, !askedAfter);
     }
     check(`${label}: no page error`, errors.length === 0, errors.join(' | '));

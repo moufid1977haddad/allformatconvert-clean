@@ -106,7 +106,8 @@ if (run('legal')) {
   const t = await p.locator('main').innerText();
   for (const w of ['Pangram', 'ConvertAPI', 'Video Rotator', 'Background Remover', 'Google Analytics', 'googtrans', 'Railway', 'Resend', 'Supabase']) check(`privacy names ${w}`, t.includes(w));
   check('privacy has no Advertising section while ads are off', !/\d+\. Advertising/.test(t));
-  check('privacy says it was updated on September 30, 2026', t.includes('Last updated: September 30, 2026'));
+  // Date bumped on 01/10 (P18: Markdown to PDF now uses our server, listed in the policy).
+  check('privacy says it was updated on October 1, 2026', t.includes('Last updated: October 1, 2026'));
   await p.close();
   const terms = await open('/terms');
   const tt = await terms.p.locator('main').innerText();
@@ -132,7 +133,7 @@ async function makePdf() {
 }
 async function signedPdf(p) {
   await p.getByRole('button', { name: 'Add Signature to PDF' }).click();
-  const a = p.getByRole('link', { name: 'Download Signed PDF' });
+  const a = p.locator('a[data-download][download="signed.pdf"]'); // P18: the site's download row (FileDownload)
   await a.waitFor({ timeout: 30000 });
   const href = await a.getAttribute('href');
   const bytes = await p.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href);

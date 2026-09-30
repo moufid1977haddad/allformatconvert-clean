@@ -50,10 +50,10 @@ Complète le tableau de `01-recherche-lancements.md` (remove.bg, CloudConvert, P
 **Tagline (44/60):**
 > 225 free tools. Most never upload your file.
 
-*(Validée par le propriétaire le 28/09 ; identique au slogan de l'accueil. « 225 » = compteur gardé par le build ; « most » = **176 sur 225**, recompté dans le code le 30/09 par `scripts/count-server-tools.mjs` — 49 outils utilisent un serveur dans au moins un cas ; le « ≈ 181 » du 28/09 est périmé, P15 a passé Video Rotator, Resizer, Filter et Merger sur le service.)*
+*(Validée par le propriétaire le 28/09 ; identique au slogan de l'accueil. « 225 » = compteur gardé par le build ; « most » = **174 sur 225**, recompté dans le code le 01/10 par `scripts/count-server-tools.mjs` — 51 outils utilisent un serveur dans au moins un cas (P18 : Markdown to PDF produit désormais un vrai PDF par notre Chromium, Video Tools › Video to GIF un vrai GIF par notre service) ; « about 170 » arrondi par défaut ; le « ≈ 181 » du 28/09 est périmé, P15 a passé Video Rotator, Resizer, Filter et Merger sur le service.)*
 
 **Description (227/260):**
-> 225 free tools for PDF, images, audio, video, archives and developers, no sign-up. About 175 run entirely in your browser: the file never leaves your device. Our main tools are tested against the market leader on the same file.
+> 225 free tools for PDF, images, audio, video, archives and developers, no sign-up. About 170 run entirely in your browser: the file never leaves your device. Our main tools are tested against the market leader on the same file.
 
 *(Longueur recomptée : 227 caractères. La page officielle A dit désormais 500 caractères au plus (relu le 30/09), le centre d'aide B 260 : rester sous 260 tient dans les deux.)*
 
@@ -77,7 +77,7 @@ Complète le tableau de `01-recherche-lancements.md` (remove.bg, CloudConvert, P
 > - **AI image upscaler**: closer to the real photo than iLoveIMG on our test (perceptual distance 0.107 vs 0.164), up to 6 megapixels — and on your own device when your browser supports WebGPU.
 > - **Barcodes**: 37 types, and every file is scanned back by an independent reader before you download it (102 of 102 in our test; barcode-maker.com: 65 of 68).
 >
-> About 175 of the 225 tools run entirely in your browser — you can check it yourself in the Network tab: nothing is uploaded. The others (video conversion, Office ↔ PDF, AI tools) need a server; their pages say so, and our privacy policy lists each one.
+> About 170 of the 225 tools run entirely in your browser — you can check it yourself in the Network tab: nothing is uploaded. The others (video conversion, Office ↔ PDF, AI tools) need a server; their pages say so, and our privacy policy lists each one.
 >
 > It's free and there's no sign-up. ⟦**Optional, your own words: what you plan next / how the site is funded.**⟧ I'd love to hear which tool you'd test against which site — and where we still fall short.
 
@@ -90,7 +90,7 @@ Images : `docs/lancement/galerie/`, **1270 × 760** (vignette 240 × 240, chaque
 
 | Ordre | Image | Légende (champ Product Hunt) | Source du chiffre |
 |---|---|---|---|
-| 1 | `01-hero.png` (accueil) | 225 free tools, no sign-up — about 175 run entirely in your browser. | compteur `/api/tool-counts` et recomptage du code, à la capture |
+| 1 | `01-hero.png` (accueil) | 225 free tools, no sign-up — about 170 run entirely in your browser. | compteur `/api/tool-counts` et recomptage du code, à la capture |
 | 2 | `02-never-upload.png` (Image Compressor, vraie compression) | Compress an image here and watch your Network tab: nothing is uploaded. | mesuré pendant la capture : 0 requête d'envoi |
 | 3 | `09-ai-detector.png` | An AI detector that flagged 0 of 57 human texts as AI, and recognised 40 of 40 AI texts. | `RAPPORT-p17-30-09.md` §1.3 |
 | 4 | `03-all-tools.png` (/tools) | 225 tools in 12 categories: PDF, image, video, audio, archives, developer, AI… | compteur lu à la capture |
