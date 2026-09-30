@@ -9,7 +9,7 @@
 
 | # | Qui | Quoi | Durée |
 |---|---|---|---|
-| 1 | Propriétaire → Claude | **Demander la mise en production de `prelancement-01-10`** (vitesse des pages, pages légales exactes, AdSense préparé mais éteint, 3 écarts de couverture fermés). Claude : préversion, bancs ×3 moteurs, fusion sans poussée forcée, vérification sur www | 10 min de présence · ≈ 1 h Claude |
+| 1 | Propriétaire → Claude | **Demander la mise en production de `prelancement-01-10`** (vitesse des pages, pages légales exactes, AdSense préparé mais éteint, 3 écarts de couverture fermés). Claude : préversion, bancs ×3 moteurs (, 238 pages), fusion sans poussée forcée, vérification sur www **et remesure Lighthouse sur www** (, avant sur www le 30/09 : accueil 61, pages outils 53-54 ; build local après : 86 et 82-83) | 10 min de présence · ≈ 1 h Claude |
 | 2 | Propriétaire | **Ce soir après 20 h 00 (00 h 00 UTC)** : `node scripts/ai-detector/www-check-p17.mjs` dans le dossier du dépôt → attendu « RESULT: both verdicts right » (≈ 0,25 $ de crédits Pangram). Code 2 = limite du jour pas encore remise à zéro, rien facturé : relancer plus tard | 2 min |
 | 3 | Propriétaire | **Changer le mot de passe** apparu en clair le 30/09 (P17 ②, `RAPPORT-p17-30-09.md` §5) | 5 min |
 | 4 | Propriétaire | **P1 — passe Safari réelle** : iPhone (liste de `RAPPORT-p16-photos-iphone-30-09.md` + Image Blur 24/48 Mpx, Video Rotator dans les deux modes, AI Detector) ; lire le résultat du banc du Mac de la nuit du 30/09 (`tests-safari-scripts`) | ≈ 2 h |
