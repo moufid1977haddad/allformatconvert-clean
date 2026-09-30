@@ -14,7 +14,8 @@ export default function StickyNotesPage() {
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      if (Array.isArray(saved)) setNotes(saved);
+      // A malformed note (edited storage, older version) is skipped instead of crashing the page (plan, bloquant 11).
+      if (Array.isArray(saved)) setNotes(saved.filter((n) => n && typeof n === 'object' && typeof n.text === 'string' && (typeof n.id === 'number' || typeof n.id === 'string')).map((n) => ({ ...n, color: typeof n.color === 'string' ? n.color : 'bg-yellow-300' })));
     } catch { /* ignore malformed storage */ }
     setLoaded(true);
   }, []);

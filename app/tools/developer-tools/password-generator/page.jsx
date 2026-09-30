@@ -9,16 +9,28 @@ export default function PasswordGeneratorPage() {
   const [symbols, setSymbols] = useState(true);
   const [password, setPassword] = useState('');
   const generate = () => {
-    let chars = '';
-    if (upper) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    if (lower) chars += 'abcdefghijklmnopqrstuvwxyz';
-    if (numbers) chars += '0123456789';
-    if (symbols) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?';
-    if (!chars) return;
+    const sets = [];
+    if (upper) sets.push('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+    if (lower) sets.push('abcdefghijklmnopqrstuvwxyz');
+    if (numbers) sets.push('0123456789');
+    if (symbols) sets.push('!@#$%^&*()_+-=[]{}|;:,.<>?');
+    if (!sets.length) return;
+    const chars = sets.join('');
     // crypto.getRandomValues is a CSPRNG, unlike Math.random(), which the Web Crypto
     // API docs explicitly warn is unsuitable for anything security-related.
-    const randomValues = crypto.getRandomValues(new Uint32Array(length));
-    setPassword(Array.from(randomValues, v => chars[v % chars.length]).join(''));
+    // Unbiased pick (rejection sampling: a plain `v % n` favours the first characters slightly).
+    const limit = Math.floor(0x100000000 / chars.length) * chars.length;
+    const pick = () => {
+      const buf = new Uint32Array(1);
+      do crypto.getRandomValues(buf); while (buf[0] >= limit);
+      return chars[buf[0] % chars.length];
+    };
+    // Every selected kind appears at least once, as with Bitwarden and 1Password (a site that requires a digit would
+    // otherwise reject some passwords). Drawn again until it does: every valid password stays equally likely.
+    let pw;
+    do pw = Array.from({ length }, pick).join('');
+    while (!sets.every((s) => [...pw].some((c) => s.includes(c))));
+    setPassword(pw);
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -26,7 +38,7 @@ export default function PasswordGeneratorPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Password Generator</h1>
         <p className="text-neutral-500 text-center mb-8">Generate secure passwords</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <div><label className="block text-sm text-neutral-500 mb-1">Length: {length}</label><input type="range" min="8" max="64" value={length} onChange={e => setLength(parseInt(e.target.value))} className="w-full" /></div>
+          <div><label className="block text-sm text-neutral-500 mb-1">Length: {length}</label><input aria-label="Length" type="range" min="8" max="64" value={length} onChange={e => setLength(parseInt(e.target.value))} className="w-full" /></div>
           <div className="grid grid-cols-2 gap-3">
             {[['Uppercase', upper, setUpper],['Lowercase', lower, setLower],['Numbers', numbers, setNumbers],['Symbols', symbols, setSymbols]].map(([label, val, set]) => (
               <label key={label} className="flex items-center gap-2 cursor-pointer bg-neutral-50 rounded-lg border border-neutral-200 p-3"><input type="checkbox" checked={val} onChange={e => set(e.target.checked)} className="w-4 h-4" /><span>{label}</span></label>

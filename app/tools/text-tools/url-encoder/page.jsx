@@ -6,10 +6,14 @@ export default function UrlEncoderPage() {
   const [text, setText] = useState('');
   const [result, setResult] = useState('');
   const [copyError, setCopyError] = useState(false);
+  // Form data and query strings write a space as "+" (application/x-www-form-urlencoded); decodeURIComponent alone
+  // leaves it as "+". On by default, like PHP's urldecode and the decoders that offer the choice; our Encode never
+  // outputs a raw "+" (it writes %2B), so a round trip is unchanged.
+  const [plusAsSpace, setPlusAsSpace] = useState(true);
   const encode = () => setResult(encodeURIComponent(text));
   const decode = () => {
     try {
-      setResult(decodeURIComponent(text));
+      setResult(decodeURIComponent(plusAsSpace ? text.replace(/\+/g, ' ') : text));
     } catch(e) {
       setResult('Invalid URL encoding');
     }
@@ -21,13 +25,14 @@ export default function UrlEncoderPage() {
         <p className="text-neutral-500 text-center mb-8">Encode and decode URLs</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste your URL or text here..." value={text} onChange={e => setText(e.target.value)} />
+          <label className="flex items-center gap-2 text-sm text-neutral-600 cursor-pointer"><input type="checkbox" checked={plusAsSpace} onChange={(e) => setPlusAsSpace(e.target.checked)} className="w-4 h-4" />Decode “+” as a space (form data and query strings)</label>
           <div className="grid grid-cols-2 gap-3">
             <button onClick={encode} disabled={!text} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Encode</button>
             <button onClick={decode} disabled={!text} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Decode</button>
           </div>
           {result && (
             <div className="space-y-2">
-              <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={result} readOnly />
+              <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={result} readOnly />
               <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
               {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
             </div>

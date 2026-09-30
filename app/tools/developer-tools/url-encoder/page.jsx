@@ -4,8 +4,12 @@ import SeoContent from '../../../components/SeoContent';
 export default function UrlEncoderDevPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
+  // Form data and query strings write a space as "+" (application/x-www-form-urlencoded); decodeURIComponent alone
+  // leaves it as "+". On by default, like PHP's urldecode and the decoders that offer the choice; our Encode never
+  // outputs a raw "+" (it writes %2B), so a round trip is unchanged.
+  const [plusAsSpace, setPlusAsSpace] = useState(true);
   const encode = () => { try { setOutput(encodeURIComponent(input)); } catch(e) { setOutput('Error'); } };
-  const decode = () => { try { setOutput(decodeURIComponent(input)); } catch(e) { setOutput('Invalid URL encoding'); } };
+  const decode = () => { try { setOutput(decodeURIComponent(plusAsSpace ? input.replace(/\+/g, ' ') : input)); } catch(e) { setOutput('Invalid URL encoding'); } };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
@@ -13,11 +17,12 @@ export default function UrlEncoderDevPage() {
         <p className="text-neutral-500 text-center mb-8">Encode and decode URLs</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" placeholder="Paste URL here..." value={input} onChange={e => setInput(e.target.value)} />
+          <label className="flex items-center gap-2 text-sm text-neutral-600 cursor-pointer"><input type="checkbox" checked={plusAsSpace} onChange={(e) => setPlusAsSpace(e.target.checked)} className="w-4 h-4" />Decode “+” as a space (form data and query strings)</label>
           <div className="grid grid-cols-2 gap-3">
             <button onClick={encode} disabled={!input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Encode</button>
             <button onClick={decode} disabled={!input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Decode</button>
           </div>
-          {output && <div className="space-y-2"><textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" value={output} readOnly /><button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button></div>}
+          {output && <div className="space-y-2"><textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" value={output} readOnly /><button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button></div>}
         </div>
       </div>
       <SeoContent
