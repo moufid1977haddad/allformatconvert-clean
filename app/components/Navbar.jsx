@@ -769,7 +769,9 @@ export default function Navbar() {
     loadGoogleTranslate(); // on demand (app/lib/googleTranslate.js); no-op once loaded
     const tryTranslate = (attempts) => {
       const select = document.querySelector('.goog-te-combo');
-      if (select) {
+      // Google fills its hidden list after creating it: wait until our language is in it (with the script now loaded
+      // on demand, WebKit found the list still empty and the choice was lost — banc prelancement-01-10, 30/09).
+      if (select && [...select.options].some((o) => o.value === lang.code)) {
         select.value = lang.code;
         select.dispatchEvent(new Event('change'));
       } else if (attempts > 0) {

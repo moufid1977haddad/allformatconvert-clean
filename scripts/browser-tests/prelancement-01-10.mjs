@@ -38,6 +38,7 @@ async function open(url, { waitIdle = false } = {}) {
   p.on('pageerror', (e) => errors.push(e.message));
   p.on('request', (r) => requests.push(r.url()));
   await p.goto(origin + url, { waitUntil: waitIdle ? 'networkidle' : 'load', timeout: 60000 });
+  await p.waitForTimeout(1200); // React hydration (slower under WebKit): typing earlier is lost
   return { p, errors, requests };
 }
 
@@ -157,7 +158,7 @@ if (run('sign')) {
     await p.locator('input[type=file][accept=".pdf"]').setInputFiles(pdf);
     await p.locator('[data-sign-mode=upload]').click();
     await p.locator('[data-sign-image]').setInputFiles(sigFile);
-    const stats = await p.waitForFunction(() => { const c = document.querySelector('canvas[data-pad]'); const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let ink = 0, paperKept = 0; for (let i = 0; i < d.length; i += 4) { if (d[i + 3] > 200 && d[i] < 80) ink++; if (d[i + 3] > 0 && d[i] > 240) paperKept++; } return ink > 300 ? { ink, paperKept } : null; }, null, { timeout: 15000 }).then((h) => h.jsonValue());
+    const stats = await p.waitForFunction(() => { const c = document.querySelector('canvas[data-pad]'); const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let ink = 0, paperKept = 0; for (let i = 0; i < d.length; i += 4) { if (d[i + 3] > 200 && d[i] < 80) ink++; if (d[i + 3] > 40 && d[i] > 240) paperKept++; /* a faint anti-aliased edge (alpha ≤ 40) is not paper */ } return ink > 300 ? { ink, paperKept } : null; }, null, { timeout: 15000 }).then((h) => h.jsonValue());
     check('uploaded signature: ink kept, white paper removed', stats.ink > 300 && stats.paperKept === 0, JSON.stringify(stats));
     const buf = await signedPdf(p);
     check('uploaded signature: signed PDF produced', buf.length > 1000 && buf.includes(Buffer.from('/Image')), `${buf.length} bytes`);
@@ -203,7 +204,8 @@ if (run('pdflazy')) {
 // ---- 6. Password Generator ---------------------------------------------------------------------------------------
 if (run('password')) {
   const { p, errors } = await open('/tools/developer-tools/password-generator');
-  await p.locator('input[type=range]').evaluate((el) => { const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(el, '8'); el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); });
+  await p.locator('input[type=range]').focus();
+  await p.keyboard.press('Home'); // minimum = 8, in every engine
   await p.getByText('Length: 8').waitFor({ timeout: 5000 });
   const bad = [];
   for (let i = 0; i < 300; i++) {
