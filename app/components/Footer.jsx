@@ -1,6 +1,7 @@
 ﻿import Link from 'next/link';
 import { getToolCounts } from '@/lib/toolCounts';
 import SiteName from './SiteName';
+import PrivacyChoicesLink from './PrivacyChoicesLink';
 
 export default function Footer() {
   const { total } = getToolCounts();
@@ -35,6 +36,7 @@ export default function Footer() {
               <li><Link href="/contact" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">Contact</Link></li>
               <li><Link href="/privacy" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">Privacy Policy</Link></li>
               <li><Link href="/terms" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">Terms of Service</Link></li>
+              <PrivacyChoicesLink className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium text-start" />
             </ul>
           </div>
           <div>

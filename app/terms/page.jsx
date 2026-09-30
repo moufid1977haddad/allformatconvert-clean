@@ -14,7 +14,7 @@ export default function TermsPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-2 text-neutral-800">Terms of Service</h1>
-        <p className="text-neutral-500 text-center mb-10">Last updated: August 6, 2026</p>
+        <p className="text-neutral-500 text-center mb-10">Last updated: September 30, 2026</p>
         <div className="space-y-6">
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
@@ -47,12 +47,12 @@ export default function TermsPage() {
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">5. Third-Party Services</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">Some features use third-party APIs including OpenAI. By using AI-powered tools, you agree to the respective terms of service of these providers. OnlineConverTools is not responsible for the performance or availability of third-party services.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">Some tools send your file or text to a specialised provider: ConvertAPI (some Word and PDF conversions), OpenAI (AI text, image and transcription tools) and Pangram Labs (AI Detector). Each tool concerned is named in our <a href="/privacy" className="text-indigo-600 hover:underline">Privacy Policy</a>. By using those tools, you also agree not to submit content that breaks these providers' usage policies. OnlineConverTools is not responsible for the performance or availability of third-party services.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">6. Advertising</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">OnlineConverTools may display advertisements provided by Google AdSense and other advertising networks. These advertisements help us keep the service free. By using our service, you consent to the display of such advertisements.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">OnlineConverTools may display advertisements provided by Google AdSense to keep the service free. Where the law requires your consent for advertising cookies (for example in the European Economic Area, the United Kingdom and Switzerland), personalised ads are shown only if you give it in the consent message, and you can change your choice at any time; see our <a href="/privacy" className="text-indigo-600 hover:underline">Privacy Policy</a>.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
