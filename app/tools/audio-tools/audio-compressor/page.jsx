@@ -102,7 +102,7 @@ export default function AudioCompressorPage() {
               {COMPRESSIBLE_AUDIO_FORMATS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
             </select>
           </div>
-          <button onClick={compress} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          <button onClick={compress} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Compressing...' : 'Compress Audio'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}

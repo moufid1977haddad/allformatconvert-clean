@@ -87,7 +87,7 @@ export default function VideoScreenshotPage() {
                   </div>
                 )}
               </div>
-              <button onClick={capture} className="w-full bg-indigo-600 hover:bg-indigo-500 rounded-xl py-3 font-semibold transition">Capture Screenshot</button>
+              <button onClick={capture} className="w-full bg-indigo-600 hover:bg-indigo-500 rounded-xl py-3 font-semibold transition text-white">Capture Screenshot</button>
               {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
             </div>
           )}

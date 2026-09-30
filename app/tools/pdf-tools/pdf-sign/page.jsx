@@ -357,7 +357,7 @@ export default function Page() {
                         style={{ left: `${place.fx * 100}%`, top: `${place.fy * 100}%`, width: `${place.fw * 100}%`, aspectRatio: `${ink.w} / ${ink.h}` }}>
                         <img src={ink.url} alt="Your signature" className="w-full h-full pointer-events-none" draggable={false} />
                         <span data-sign-resize aria-hidden onPointerDown={(e) => startMove(e, 'resize')} onPointerMove={onMove} onPointerUp={endMove} onPointerCancel={endMove}
-                          className="absolute -right-2.5 -bottom-2.5 w-5 h-5 rounded-full bg-indigo-600 border-2 border-white cursor-nwse-resize" />
+                          className="absolute -right-2.5 -bottom-2.5 w-5 h-5 rounded-full bg-indigo-600 border-2 border-white cursor-nwse-resize text-white" />
                       </div>
                     )}
                   </div>
@@ -365,7 +365,7 @@ export default function Page() {
               )}
             </div>
           )}
-          <button onClick={addSignature} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          <button onClick={addSignature} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Adding signature...' : 'Add Signature to PDF'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}

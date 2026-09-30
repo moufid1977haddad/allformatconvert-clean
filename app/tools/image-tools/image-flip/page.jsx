@@ -42,10 +42,10 @@ export default function ImageFlipPage() {
           </div>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <div className="grid grid-cols-2 gap-3">
-            <button onClick={() => flip(true)} disabled={!image || busy} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Flip Horizontal</button>
-            <button onClick={() => flip(false)} disabled={!image || busy} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Flip Vertical</button>
+            <button onClick={() => flip(true)} disabled={!image || busy} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Flip Horizontal</button>
+            <button onClick={() => flip(false)} disabled={!image || busy} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Flip Vertical</button>
           </div>
-          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download</a></div>}
         </div>
       </div>
       <SeoContent

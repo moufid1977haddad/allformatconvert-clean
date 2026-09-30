@@ -182,7 +182,7 @@ export default function ContactPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                        Your name <span className="text-red-500">*</span>
+                        Your name <span className="text-red-600">*</span>
                       </label>
                       <input
                         type="text"
@@ -196,7 +196,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                        Your email <span className="text-red-500">*</span>
+                        Your email <span className="text-red-600">*</span>
                       </label>
                       <input
                         type="email"
@@ -213,11 +213,12 @@ export default function ContactPage() {
                   {/* Subject */}
                   <div>
                     <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                      Subject <span className="text-red-500">*</span>
+                      Subject <span className="text-red-600">*</span>
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">📋</span>
                       <select
+                        aria-label="Subject"
                         name="subject"
                         required
                         value={form.subject}
@@ -238,7 +239,7 @@ export default function ContactPage() {
                   {/* Message */}
                   <div>
                     <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                      Message <span className="text-red-500">*</span>
+                      Message <span className="text-red-600">*</span>
                     </label>
                     <textarea
                       name="message"
@@ -322,9 +323,9 @@ export default function ContactPage() {
                     />
                     <label htmlFor="agree" className="text-sm text-neutral-600 dark:text-neutral-400 cursor-pointer leading-snug">
                       I accept the{' '}
-                      <a href="/terms" className="text-red-500 hover:underline font-medium">terms and conditions</a>
+                      <a href="/terms" className="text-red-600 underline hover:no-underline font-medium">terms and conditions</a>
                       {' '}and the{' '}
-                      <a href="/privacy" className="text-red-500 hover:underline font-medium">privacy policy</a>
+                      <a href="/privacy" className="text-red-600 underline hover:no-underline font-medium">privacy policy</a>
                     </label>
                   </div>
 

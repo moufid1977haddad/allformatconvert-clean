@@ -173,7 +173,7 @@ export default function PdfCompressPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">PDF Compression</h1>
         <p className="text-neutral-500 text-center mb-2">Reduce PDF file size while keeping it sharp</p>
-        <p className="text-neutral-500 text-xs text-center mb-8">Files up to {SERVER_MAX_LABEL} are compressed with our full engine (images, fonts and structure). Larger files, up to {browserMaxLabel}{isMobile ? ' on this device' : ''}, get a lighter in-browser optimisation (structure only).</p>
+        <p className="text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Files up to {SERVER_MAX_LABEL} are compressed with our full engine (images, fonts and structure). Larger files, up to {browserMaxLabel}{isMobile ? ' on this device' : ''}, get a lighter in-browser optimisation (structure only).</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => !loading && inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a PDF here'}</p>

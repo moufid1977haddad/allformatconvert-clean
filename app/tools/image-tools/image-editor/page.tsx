@@ -299,9 +299,9 @@ export default function ImageEditorPage() {
               </div>
 
               <div className="flex gap-2 pt-2">
-                <button onClick={applyEffects} className="flex-1 bg-indigo-600 hover:bg-indigo-500 rounded-xl py-3 font-semibold transition">Apply</button>
+                <button onClick={applyEffects} className="flex-1 bg-indigo-600 hover:bg-indigo-500 rounded-xl py-3 font-semibold transition text-white">Apply</button>
                 <button onClick={resetAll} className="flex-1 bg-neutral-800 text-neutral-100 hover:bg-neutral-700 rounded-xl py-3 font-semibold transition">Reset</button>
-                <button onClick={downloadImage} className="flex-1 bg-green-600 hover:bg-green-500 rounded-xl py-3 font-semibold transition">Download</button>
+                <button onClick={downloadImage} className="flex-1 bg-green-600 hover:bg-green-500 rounded-xl py-3 font-semibold transition text-white">Download</button>
               </div>
               {saveError && <p role="alert" className="text-red-500 text-center text-sm">{saveError}</p>}
             </>

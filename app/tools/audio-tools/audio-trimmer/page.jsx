@@ -180,7 +180,7 @@ export default function AudioTrimmerPage() {
               {(fadeIn > 0 || fadeOut > 0) && <p className="text-xs text-neutral-500">With a fade, the audio is re-encoded (same format at a high setting; WAV if this format cannot be written here). Without one, it is copied exactly.</p>}
             </>
           )}
-          <button onClick={trim} disabled={!file || loading || !(duration > 0)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          <button onClick={trim} disabled={!file || loading || !(duration > 0)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Trimming...' : 'Trim Audio'}
           </button>
           {error && <p className="text-red-600 text-center text-sm" role="alert">{error}</p>}

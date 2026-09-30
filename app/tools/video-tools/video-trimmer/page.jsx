@@ -269,7 +269,7 @@ export default function VideoTrimmerPage() {
           {status ? (
             <button onClick={cancel} className="w-full bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl py-3 font-semibold transition">Cancel</button>
           ) : (
-            <button onClick={trim} disabled={!file || duration === 0} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Trim Video ({(Math.round((end - start) * 10) / 10).toFixed(1)}s)</button>
+            <button onClick={trim} disabled={!file || duration === 0} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Trim Video ({(Math.round((end - start) * 10) / 10).toFixed(1)}s)</button>
           )}
           {result && (
             <div className="space-y-2">
@@ -277,7 +277,7 @@ export default function VideoTrimmerPage() {
               <p className="text-xs text-neutral-500 text-center">
                 {fmtMB(result.size)}{result.actual ? ` · ${fmtSecs(result.actual)} long (you asked for ${fmtSecs(result.asked)}${result.precise ? '; cut to the frame' : '; a fast cut starts on the keyframe at or before your start'})` : ''}
               </p>
-              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download {result.name.split('.').pop().toUpperCase()}</a>
+              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download {result.name.split('.').pop().toUpperCase()}</a>
             </div>
           )}
         </div>

@@ -99,9 +99,9 @@ export default function VideoToAudioPage() {
               <button onClick={cancel} className="w-full bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl py-3 font-semibold transition">Cancel</button>
             </div>
           ) : (
-            <button onClick={extract} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Extract Audio</button>
+            <button onClick={extract} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Extract Audio</button>
           )}
-          {result && <div className="space-y-2"><PlayablePreview src={result.url} name={result.name} /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download {result.name}</a></div>}
+          {result && <div className="space-y-2"><PlayablePreview src={result.url} name={result.name} /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download {result.name}</a></div>}
         </div>
       </div>
       <SeoContent

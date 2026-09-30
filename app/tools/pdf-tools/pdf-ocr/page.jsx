@@ -405,7 +405,7 @@ export default function Page() {
               )}
             </div>
           ) : (
-            <button onClick={ocr} disabled={!file || !filteredLanguages.some((l) => l.code === lang)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+            <button onClick={ocr} disabled={!file || !filteredLanguages.some((l) => l.code === lang)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
               Run OCR
             </button>
           )}

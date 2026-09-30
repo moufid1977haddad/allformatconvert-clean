@@ -76,7 +76,7 @@ export default function VideoToGifPage() {
             <div><label className="block text-sm text-neutral-500 mb-1">Duration: {duration}s</label><input aria-label="Duration: s" type="range" min="1" max="10" value={duration} onChange={e => setDuration(parseInt(e.target.value))} className="w-full" /></div>
           </div>
           {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
-          <button onClick={capture} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">{loading ? 'Capturing...' : 'Capture Frames'}</button>
+          <button onClick={capture} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">{loading ? 'Capturing...' : 'Capture Frames'}</button>
           {frames.length > 0 && (
             <div className="space-y-3">
               <p className="text-green-400 text-center">{frames.length} frames captured</p>

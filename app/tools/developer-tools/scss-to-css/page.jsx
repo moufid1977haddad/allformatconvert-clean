@@ -22,8 +22,8 @@ export default function ScssToCssPage() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <select value={style} onChange={e => setStyle(e.target.value)} className="bg-neutral-50 border border-neutral-200 rounded-xl px-3" aria-label="Output style"><option value="expanded">Expanded</option><option value="compressed">Compressed</option></select>
-            <button onClick={convert} disabled={!input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert</button>
-            <button onClick={() => navigator.clipboard.writeText(output)} disabled={!output} className="bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Copy</button>
+            <button onClick={convert} disabled={!input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert</button>
+            <button onClick={() => navigator.clipboard.writeText(output)} disabled={!output} className="bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Copy</button>
           </div>
         </div>
       </div>

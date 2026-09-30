@@ -32,6 +32,10 @@
    the test benches find error messages by `p.text-red-400`. Same layer and specificity as the utilities, so hover:
    and other variants still win. */
 @layer utilities {
+  /* Green buttons (Copy, Download): Tailwind v4's green-600 (#00a63e) gives white text only 3.2:1; one shade darker
+     (green-700, 5.0:1), and darker still on hover instead of lighter. */
+  .bg-green-600 { background-color: #15803d; }
+  .hover\:bg-green-500:hover { background-color: #166534; }
   /* light grey hints and counters (2.4-2.6:1): same grey as text-neutral-500 in light mode */
   :where(html:not(.dark)) .text-neutral-400 { color: #6b6b6b; }
   :where(html:not(.dark)) .text-red-400 { color: #dc2626; }

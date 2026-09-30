@@ -66,7 +66,7 @@ export default function FileBase64EncoderPage() {
                 <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-xs h-48 resize-none font-mono" value={big ? out.slice(0, PREVIEW_CHARS) : out} readOnly data-b64 />
                 {big && <p className="text-xs text-neutral-500">Preview of the first {PREVIEW_CHARS.toLocaleString()} characters; Copy and Download give the whole text.</p>}
                 <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => navigator.clipboard.writeText(out)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy Base64</button>
+                  <button onClick={() => navigator.clipboard.writeText(out)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy Base64</button>
                   <a href={txtUrl} download={(fileName || 'file') + '.base64.txt'} className="w-full text-center bg-neutral-200 hover:bg-neutral-300 rounded-xl py-2 font-semibold transition">Download .txt</a>
                 </div>
               </div>
