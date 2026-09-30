@@ -9,6 +9,7 @@ import { runMediaJob } from '../../../lib/mediaJob';
 import { reportToolError } from '../../../lib/reportError';
 import { formatBytes } from '../../../lib/formatBytes';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
+import { FileDownload } from '../../../components/FileDownload';
 
 // 30/09 (owner's iPhone): the merger played every clip in a <canvas> and recorded it with MediaRecorder -- in real
 // time, the videos opening full screen on iPhone, and a WebM (merged.webm) that Photos cannot open. Now, as ffmpeg
@@ -162,7 +163,7 @@ export default function VideoMergerPage() {
                 ? `Joined without re-encoding (the videos were alike): same quality, ${formatBytes(result.bytes)}. Nothing was uploaded.`
                 : `Clips matched to the first one on our video service, then joined: MP4, ${formatBytes(result.bytes)}.`}</p>
               <PlayablePreview src={result.url} name={result.name} kind="video" className="w-full rounded-xl max-h-72" />
-              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download MP4</a>
+              <FileDownload href={result.url} name={result.name} />
             </div>
           )}
         </div>

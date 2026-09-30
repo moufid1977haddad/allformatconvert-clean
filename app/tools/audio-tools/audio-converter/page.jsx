@@ -8,6 +8,7 @@ import { AUDIO_OUTPUT_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../
 import { reportToolError } from '../../../lib/reportError';
 import { runMediaJob, mediaServiceConfigured } from '../../../lib/mediaJob';
 import PlayablePreview from '../../../components/PlayablePreview';
+import { FileDownload } from '../../../components/FileDownload';
 
 export default function AudioConverterPage() {
   const [file, setFile] = useState(null);
@@ -130,7 +131,7 @@ export default function AudioConverterPage() {
           {result && (
             <div className="space-y-2">
               <PlayablePreview src={result.url} name={result.name} />
-              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download {result.name}</a>
+              <FileDownload href={result.url} name={result.name} />
             </div>
           )}
         </div>

@@ -8,6 +8,7 @@ import { reportToolError } from '../../../lib/reportError';
 import { opusOnService, encodeOpusOnService, LOSSLESS_INTERMEDIATE } from '../../../lib/opusService';
 import PlayablePreview from '../../../components/PlayablePreview';
 import { formatBytes } from '../../../lib/formatBytes';
+import { FileDownload } from '../../../components/FileDownload';
 
 // kb/s of the source's audio: the stream's own figure from ffmpeg ("Audio: aac …, 57 kb/s"), else the file's average.
 function sourceKbps(log, bytes) {
@@ -121,7 +122,7 @@ export default function AudioCompressorPage() {
                 </div>
               ) : null}
               <PlayablePreview src={result.url} name={result.name} />
-              <a href={result.url} download={result.name} className={result.larger ? 'block w-full text-center text-indigo-600 underline text-sm' : 'block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition'}>{result.larger ? `Download the ${result.newSize} MB version anyway` : 'Download'}</a>
+              <FileDownload href={result.url} name={result.name} />
             </div>
           )}
         </div>

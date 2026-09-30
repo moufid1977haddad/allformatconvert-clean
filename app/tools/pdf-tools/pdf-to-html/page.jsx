@@ -1,6 +1,8 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { loadPdfjs } from '../../../lib/pdfjs';
+import { FileDownload } from '../../../components/FileDownload';
 
 // Audit 2 (29/09): the PDF's text was pasted into the HTML unescaped -- "a < b" vanished, "&copy;" became (c), text
 // such as "<b>" turned into markup -- and every item was joined with a space on one line, so line breaks were lost
@@ -50,8 +52,7 @@ export default function PdfToHtmlPage() {
     setStatus('Converting...');
     setDownloadUrl(null);
     try {
-      const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
+      const pdfjsLib = await loadPdfjs();
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       let allHtml = '';
@@ -90,7 +91,7 @@ export default function PdfToHtmlPage() {
           {downloadUrl && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
               <div className="text-green-400 text-xl font-bold mb-3">Done!</div>
-              <a href={downloadUrl} download={file.name.replace(/\.pdf$/i, '.html')} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition text-white">Download HTML</a>
+              <FileDownload href={downloadUrl} name={file.name.replace(/\.pdf$/i, '.html')} />
             </div>
           )}
         </div>

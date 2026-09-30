@@ -9,6 +9,7 @@ import { rotateIsoBmff } from '../../../lib/mp4Rotate';
 import { runMediaJob } from '../../../lib/mediaJob';
 import { reportToolError } from '../../../lib/reportError';
 import { formatBytes } from '../../../lib/formatBytes';
+import { FileDownload } from '../../../components/FileDownload';
 
 // 30/09 (owner's iPhone): the rotator replayed the video in a <canvas> and recorded it with MediaRecorder -- in real
 // time, with the source playing full screen on iPhone, a WebM that Photos cannot open, heavier than the original.
@@ -118,7 +119,7 @@ export default function VideoRotatorPage() {
                 ? `Rotated instantly, without re-encoding: same quality and same size (${formatBytes(result.bytes)}), still ${result.ext.toUpperCase()}. Nothing was uploaded. (The old Windows Media Player ignores the rotation setting: choose "Compatible everywhere" for it.)`
                 : `Rotated on our video service: the picture itself is turned, MP4, ${formatBytes(result.bytes)} — upright in every player.`}</p>
               <PlayablePreview src={result.url} name={result.name} kind="video" className="w-full rounded-xl max-h-72" />
-              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download {result.ext.toUpperCase()}</a>
+              <FileDownload href={result.url} name={result.name} />
             </div>
           )}
         </div>

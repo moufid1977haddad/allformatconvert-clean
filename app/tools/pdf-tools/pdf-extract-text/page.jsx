@@ -1,8 +1,10 @@
 ﻿'use client';
-import { useState, useRef } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { itemsToText } from '../../../lib/pdfTextLayout';
 import { reportToolError } from '../../../lib/reportError';
+import { loadPdfjs } from '../../../lib/pdfjs';
+import { FileDownload } from '../../../components/FileDownload';
 
 export default function PdfExtractTextPage() {
   const [file, setFile] = useState(null);
@@ -25,8 +27,7 @@ export default function PdfExtractTextPage() {
     setText('');
     setStatus('Extracting...');
     try {
-      const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
+      const pdfjsLib = await loadPdfjs();
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       let fullText = '';
@@ -50,14 +51,7 @@ export default function PdfExtractTextPage() {
     setLoading(false);
   };
 
-  const download = () => {
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = file.name.replace(/\.pdf$/i, '.txt');
-    a.click();
-  };
+  const textBlob = useMemo(() => (text ? new Blob([text], { type: 'text/plain;charset=utf-8' }) : null), [text]);
 
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -76,10 +70,8 @@ export default function PdfExtractTextPage() {
           {text && (
             <div className="space-y-3">
               <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={text} readOnly />
-              <div className="flex gap-3">
-                <button onClick={() => navigator.clipboard.writeText(text)} className="flex-1 bg-neutral-200 hover:bg-neutral-200 rounded-xl py-2 font-semibold transition">Copy</button>
-                <button onClick={download} className="flex-1 bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download .txt</button>
-              </div>
+              <button onClick={() => navigator.clipboard.writeText(text)} className="w-full bg-neutral-200 hover:bg-neutral-300 rounded-xl py-2 font-semibold transition">Copy</button>
+              <FileDownload blob={textBlob} name={file.name.replace(/\.pdf$/i, '.txt')} />
             </div>
           )}
         </div>

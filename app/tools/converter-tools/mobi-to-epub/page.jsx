@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { FileDownload } from '../../../components/FileDownload';
 
 const XHTML_NS = 'http://www.w3.org/1999/xhtml';
 
@@ -378,7 +379,7 @@ export default function MobiToEpubPage() {
           {downloadUrl && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
               <div className="text-green-400 text-xl font-bold mb-3">Done!</div>
-              <a href={downloadUrl} download={file.name.replace(/\.(mobi|azw3?|prc)$/i, '') + '.epub'} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition text-white">Download EPUB</a>
+              <FileDownload href={downloadUrl} name={file.name.replace(/\.(mobi|azw3?|prc)$/i, '') + '.epub'} />
             </div>
           )}
         </div>

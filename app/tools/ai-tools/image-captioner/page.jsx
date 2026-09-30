@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { MAX_IMAGE_CAPTIONER_ORIGINAL_BYTES } from '@/lib/quota/limits';
 import { imageToVisionJpeg } from '../../../lib/imageForVision';
 import { formatBytes } from '../../../lib/formatBytes';
+import { TextDownload } from '../../../components/FileDownload';
 
 const MAX_MB = MAX_IMAGE_CAPTIONER_ORIGINAL_BYTES / (1024 * 1024);
 
@@ -71,6 +72,7 @@ export default function ImageCaptionerPage() {
             <div className="space-y-2">
               <label className="block text-sm text-neutral-500">Caption</label>
               <textarea aria-label="Caption" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none" value={output} readOnly />
+              <TextDownload text={output} name="caption.txt" />
               <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button>
             </div>
           )}

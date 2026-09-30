@@ -5,6 +5,7 @@ import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import ProgressBar from '../../../components/ProgressBar';
 import { reportToolError } from '../../../lib/reportError';
 import IosOriginalNote from '../../../components/IosOriginalNote';
+import { FileDownload } from '../../../components/FileDownload';
 
 const MAX_DURATION = 120;
 
@@ -514,7 +515,7 @@ export default function VideoWatermarkPage() {
           {result && (
             <div className="space-y-2">
               <video controls src={result.url} className="w-full rounded-xl" />
-              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download {result.name}</a>
+              <FileDownload href={result.url} name={result.name} />
             </div>
           )}
         </div>

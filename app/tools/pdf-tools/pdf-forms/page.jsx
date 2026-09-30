@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
+import { FileDownload } from '../../../components/FileDownload';
 
 // Audit 2 (29/09). Before: every field started empty and was written back empty, so the values already in a form were
 // wiped; checkboxes, radio buttons and dropdowns were shown as text boxes whose input was silently dropped; the form
@@ -143,7 +144,7 @@ export default function Page() {
             {loading ? 'Processing...' : 'Fill and Download PDF'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <a href={result} download="filled_form.pdf" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download Filled PDF</a>}
+          {result && <FileDownload href={result} name="filled_form.pdf" />}
         </div>
       </div>
       <SeoContent

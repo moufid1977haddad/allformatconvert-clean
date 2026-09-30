@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { addImagePage } from '../../../lib/pdfImages';
+import { FileDownload } from '../../../components/FileDownload';
 
 export default function Page() {
   const [files, setFiles] = useState([]);
@@ -51,7 +52,7 @@ export default function Page() {
             {loading ? 'Converting...' : 'Convert to PDF'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <a href={result} download={files[0] ? `${files[0].name.replace(/\.[^.]+$/, '')}${files.length > 1 ? `-and-${files.length - 1}-more` : ''}.pdf` : 'images.pdf'} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download PDF</a>}
+          {result && <FileDownload href={result} name={files[0] ? `${files[0].name.replace(/\.[^.]+$/, '')}${files.length > 1 ? `-and-${files.length - 1}-more` : ''}.pdf` : 'images.pdf'} />}
         </div>
       </div>
       <SeoContent

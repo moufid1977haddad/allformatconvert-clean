@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { readTar, TarFormatError } from '../../../lib/tarReader';
+import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 // 30/09 (real Safari 17.6 on the Mac): "t.tar.gz" could not be selected ("One or more files could not be selected")
 // while "t.tgz" could. Safari and the macOS/iOS pickers match a file by its LAST extension only ("gz"), so a
 // double extension such as ".tar.gz" in `accept` never matches. Single extensions + the MIME types the systems
@@ -56,12 +57,11 @@ export default function TarExtractorPage() {
           {files.length > 0 && (
             <div className="space-y-2">
               <p className="text-green-400 text-center">{files.length} file(s) extracted</p>
-              {files.map((f, i) => (
-                <div key={i} className="flex justify-between items-center bg-neutral-50 rounded-lg border border-neutral-200 p-3">
-                  <span className="text-sm truncate flex-1">{f.name}</span>
-                  <a href={f.url} download={f.name.split('/').pop()} className="text-indigo-400 hover:text-indigo-300 text-sm ml-2">Download</a>
-                </div>
-              ))}
+              <DownloadGroup zipName="extracted-files.zip">
+                {files.map((f, i) => (
+                  <FileDownload key={i} href={f.url} name={f.name.split('/').pop()} note={f.name.includes('/') ? f.name : undefined} />
+                ))}
+              </DownloadGroup>
             </div>
           )}
         </div>

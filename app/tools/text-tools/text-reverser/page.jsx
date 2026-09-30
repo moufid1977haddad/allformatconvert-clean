@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { reverseCharacters, reverseWords as reverseWordOrder, reverseLines as reverseLineOrder } from '../../../lib/textSegments';
+import { TextDownload } from '../../../components/FileDownload';
 
 export default function TextReverserPage() {
   const [text, setText] = useState('');
@@ -26,6 +27,7 @@ export default function TextReverserPage() {
           {result && (
             <div className="space-y-2">
               <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none" value={result} readOnly />
+              <TextDownload text={result} name="reversed.txt" />
               <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button>
               {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
             </div>

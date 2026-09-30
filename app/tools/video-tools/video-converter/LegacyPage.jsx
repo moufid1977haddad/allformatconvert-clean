@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import { videoReRecordSupport, captureMediaElementStream, finishRecording } from '../../../lib/mediaSupport';
 import IosOriginalNote from '../../../components/IosOriginalNote';
+import { FileDownload } from '../../../components/FileDownload';
 export default function LegacyVideoConverterPage() {
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState('');
@@ -74,7 +75,7 @@ export default function LegacyVideoConverterPage() {
           {status && <p className="text-yellow-400 text-center">{status}</p>}
           {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
           <button onClick={convert} disabled={!file || !!status || !support.ok} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert to WebM</button>
-          {result && <div className="space-y-2"><video controls src={result.url} className="w-full rounded-xl" /><a href={result.url} download={`converted.${result.ext}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download {result.ext.toUpperCase()}</a></div>}
+          {result && <div className="space-y-2"><video controls src={result.url} className="w-full rounded-xl" /><FileDownload href={result.url} name={`converted.${result.ext}`} /></div>}
         </div>
       </div>
       <SeoContent

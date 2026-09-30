@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { sentenceCase, titleCase, capitalizedCase, graphemes } from '../../../lib/textSegments';
+import { TextDownload } from '../../../components/FileDownload';
 
 export default function CaseConverterPage() {
   const [text, setText] = useState('');
@@ -30,6 +31,7 @@ export default function CaseConverterPage() {
           </div>
           <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(text).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button>
           {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
+          <TextDownload text={text} name="converted.txt" />
         </div>
       </div>
       <SeoContent

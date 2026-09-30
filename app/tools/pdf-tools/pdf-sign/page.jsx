@@ -6,6 +6,8 @@ import { checkedDataURL } from '../../../lib/mediaSupport';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 import { placeOnVisiblePage, visibleSize } from '../../../lib/pdfPlace';
 import { Dancing_Script } from 'next/font/google';
+import { loadPdfjs } from '../../../lib/pdfjs';
+import { FileDownload } from '../../../components/FileDownload';
 
 // 30/09 (known gap of 29/09): the signature can also be TYPED (handwriting font) or UPLOADED (photo or scan of a
 // signature, white background removed), as iLovePDF and Smallpdf offer (draw / type / upload). All three end up on the
@@ -190,8 +192,7 @@ export default function Page() {
     let cancelled = false;
     (async () => {
       try {
-        const pdfjsLib = await import('pdfjs-dist');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
+        const pdfjsLib = await loadPdfjs();
         const doc = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
         const n = previewPage === 0 ? doc.numPages : previewPage;
         if (!Number.isInteger(n) || n < 1 || n > doc.numPages) { if (!cancelled) setPreview(null); doc.destroy(); return; }
@@ -369,7 +370,7 @@ export default function Page() {
             {loading ? 'Adding signature...' : 'Add Signature to PDF'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <a href={result} download="signed.pdf" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download Signed PDF</a>}
+          {result && <FileDownload href={result} name="signed.pdf" />}
         </div>
       </div>
       <SeoContent

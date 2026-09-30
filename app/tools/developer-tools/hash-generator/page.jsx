@@ -6,6 +6,7 @@ import ProgressBar from '../../../components/ProgressBar';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { HASH_ALGORITHMS, DEFAULT_ALGORITHMS, TAG_NAME, byId, toHex, toBase64, parseExpected, sameBytes, algorithmsOfLength } from '../../../lib/hashAlgorithms';
 import { formatBytes } from '../../../lib/formatBytes';
+import { TextDownload } from '../../../components/FileDownload';
 
 const GROUPS = [...new Set(HASH_ALGORITHMS.map((a) => a.group))];
 const fmtSize = formatBytes;
@@ -135,11 +136,6 @@ export default function HashGeneratorPage() {
 
   // `sha256sum --tag` style lines: GNU sha256sum -c and BSD shasum -c both check them.
   const checksumLines = (entries) => entries.filter((e) => e.results).flatMap((e) => active.filter((id) => e.results[id]).map((id) => `${hmac ? 'HMAC-' : ''}${TAG_NAME[id]} (${e.name}) = ${toHex(e.results[id])}`)).join('\n') + '\n';
-  const downloadChecksums = () => {
-    const url = URL.createObjectURL(new Blob([checksumLines(fileResults)], { type: 'text/plain' }));
-    const a = document.createElement('a'); a.href = url; a.download = 'checksums.txt'; a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 10000);
-  };
 
   const resultRows = (results, tagPrefix) => {
     const matched = want && active.some((id) => results[id] && sameBytes(results[id], want));
@@ -276,9 +272,9 @@ export default function HashGeneratorPage() {
                     </div>
                   ))}
                   {!busy && fileResults.some((r) => r.results) && (
-                    <div className="grid sm:grid-cols-2 gap-2">
-                      <button onClick={() => copy(checksumLines(fileResults), 'all')} className="bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 rounded-xl py-2 text-sm font-semibold">{copied === 'all' ? 'Copied' : 'Copy all'}</button>
-                      <button onClick={downloadChecksums} className="bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 text-sm font-semibold">Download checksums.txt</button>
+                    <div className="space-y-2">
+                      <button onClick={() => copy(checksumLines(fileResults), 'all')} className="w-full bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 rounded-xl py-2 text-sm font-semibold">{copied === 'all' ? 'Copied' : 'Copy all'}</button>
+                      <TextDownload text={checksumLines(fileResults)} name="checksums.txt" />
                     </div>
                   )}
                 </div>

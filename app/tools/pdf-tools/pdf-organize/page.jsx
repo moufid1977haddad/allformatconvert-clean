@@ -4,6 +4,8 @@ import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 import { carryOver, carryOutline } from '../../../lib/pdfCarryOver';
+import { loadPdfjs } from '../../../lib/pdfjs';
+import { FileDownload } from '../../../components/FileDownload';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -23,8 +25,7 @@ export default function Page() {
     setNumPages(0);
     setOrder([]);
     try {
-      const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
+      const pdfjsLib = await loadPdfjs();
       const arrayBuffer = await f.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       const n = pdf.numPages;
@@ -104,7 +105,7 @@ export default function Page() {
             {loading ? 'Processing...' : 'Apply Changes'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <a href={result} download="organized.pdf" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download PDF</a>}
+          {result && <FileDownload href={result} name="organized.pdf" />}
         </div>
       </div>
       <SeoContent

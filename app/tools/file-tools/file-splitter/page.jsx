@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL, MAX_CHUNKS } from './config';
 import { formatBytes } from '../../../lib/formatBytes';
+import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 export default function FileSplitterPage() {
   const [file, setFile] = useState(null);
   const [chunkSize, setChunkSize] = useState(1);
@@ -79,12 +80,11 @@ export default function FileSplitterPage() {
           {chunks.length > 0 && (
             <div className="space-y-2">
               <p className="text-green-400 text-center">{chunks.length} part(s) created</p>
-              {chunks.map(c => (
-                <div key={c.index} className="flex justify-between items-center bg-neutral-50 rounded-lg border border-neutral-200 p-3">
-                  <span className="text-sm">Part {c.index} — {formatSize(c.size)}</span>
-                  <a href={c.url} download={file.name + '.part' + c.index} className="text-indigo-400 hover:text-indigo-300 text-sm">Download</a>
-                </div>
-              ))}
+              <DownloadGroup zipName={file.name + '-parts.zip'}>
+                {chunks.map(c => (
+                  <FileDownload key={c.index} href={c.url} name={file.name + '.part' + c.index} note={`part ${c.index}`} />
+                ))}
+              </DownloadGroup>
             </div>
           )}
         </div>

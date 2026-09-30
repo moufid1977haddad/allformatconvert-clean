@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import IosOriginalNote from '../../../components/IosOriginalNote';
 import { formatBytes } from '../../../lib/formatBytes';
 import { imageDims } from '../../../lib/bigImage';
+import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 
 const formatSize = formatBytes;
 const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/svg+xml': 'svg' };
@@ -143,22 +144,6 @@ export default function ImageCompressorPage() {
   };
 
   const done = items.filter((it) => it.status === 'done');
-  const downloadZip = async () => {
-    const JSZip = (await import('jszip')).default;
-    const zip = new JSZip();
-    const used = new Set();
-    for (const it of done) {
-      let name = it.name, n = 1;
-      while (used.has(name)) name = it.name.replace(/(\.[^.]+)$/, `-${++n}$1`);
-      used.add(name);
-      zip.file(name, it.blob);
-    }
-    const blob = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'compressed-images.zip';
-    a.click();
-  };
 
   const totalIn = done.reduce((s, it) => s + it.file.size, 0);
   const totalOut = done.reduce((s, it) => s + it.outSize, 0);
@@ -184,9 +169,11 @@ export default function ImageCompressorPage() {
             {busy ? 'Compressing…' : `Compress ${items.length > 1 ? `${items.length} images` : 'image'}`}
           </button>
           {items.length > 0 && (
+            <DownloadGroup zipName="compressed-images.zip">
             <ul className="divide-y divide-neutral-200">
               {items.map((it) => (
-                <li key={it.id} className="flex items-center gap-3 py-3">
+                <li key={it.id} className="py-3 space-y-2">
+                  <div className="flex items-center gap-3">
                   <img src={it.preview} alt="" className="w-14 h-14 object-cover rounded" />
                   <div className="flex-1 min-w-0 text-sm">
                     <p className="truncate font-medium text-neutral-800">{it.file.name}</p>
@@ -200,15 +187,16 @@ export default function ImageCompressorPage() {
                     {it.status === 'svgKept' && <p className="text-amber-800">This SVG could not be made smaller without changing how it looks, so we kept it as it is. Nothing to download — your file is already the best version.</p>}
                     {it.status === 'error' && <p className="text-red-600">{it.message}</p>}
                   </div>
-                  {it.status === 'done' && <a href={it.url} download={it.name} className="shrink-0 bg-green-600 hover:bg-green-500 text-white rounded-lg px-3 py-1.5 text-sm font-semibold">Download</a>}
+                  </div>
+                  {it.status === 'done' && <FileDownload href={it.url} blob={it.blob} name={it.name} />}
                 </li>
               ))}
             </ul>
+            </DownloadGroup>
           )}
           {done.length > 1 && !busy && (
             <div className="text-center space-y-2">
               <p className="text-sm text-neutral-600">{formatSize(totalIn)} → <span className="font-semibold text-indigo-600">{formatSize(totalOut)}</span> in total (−{Math.round((1 - totalOut / totalIn) * 100)}%)</p>
-              <button onClick={downloadZip} className="bg-green-600 hover:bg-green-500 text-white rounded-xl px-6 py-2 font-semibold transition">Download all (ZIP)</button>
             </div>
           )}
         </div>

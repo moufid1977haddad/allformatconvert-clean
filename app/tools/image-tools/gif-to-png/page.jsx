@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { drawToRaster, encodeRaster, resultOf } from '../../../lib/imageOutput';
 import { gifFrames } from '../../../lib/gifFrames';
 import { checkedDataURL } from '../../../lib/mediaSupport';
+import { FileDownload } from '../../../components/FileDownload';
 export default function GIFtoPNGPage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
@@ -63,9 +64,9 @@ export default function GIFtoPNGPage() {
           </div>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <button onClick={convert} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert</button>
-          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download</a></div>}
+          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
           {gifFile && <button onClick={extractAll} disabled={zipBusy} className="w-full bg-neutral-800 hover:bg-neutral-700 text-white disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">{zipBusy ? 'Extracting frames...' : 'Extract all frames (ZIP of PNGs)'}</button>}
-          {zip && <a href={zip.url} download="gif-frames.zip" className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download {zip.count} frame{zip.count === 1 ? '' : 's'} (ZIP)</a>}
+          {zip && <FileDownload href={zip.url} name="gif-frames.zip" />}
         </div>
       </div>
       <SeoContent

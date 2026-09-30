@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { finishRecording } from '../../../lib/mediaSupport';
 import { runMediaJob } from '../../../lib/mediaJob';
 import ProgressBar from '../../../components/ProgressBar';
+import { FileDownload } from '../../../components/FileDownload';
 
 // 30/09 (owner): recordings came out as WebM in Chrome, Edge and Firefox, which the iPhone and the Photos app cannot
 // open. Now MP4 (H.264 + AAC) is recorded directly wherever the browser can (Safari, Chrome and Edge 126+ --
@@ -119,7 +120,7 @@ export default function ScreenRecorderPage() {
           {videoUrl && (
             <div className="space-y-3">
               <video controls playsInline src={videoUrl} className="w-full rounded-xl" />
-              <a href={videoUrl} download={`screen-recording-${new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-')}.${ext}`} className="block w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-center text-white">Download Recording ({ext.toUpperCase()})</a>
+              <FileDownload href={videoUrl} name={`screen-recording-${new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-')}.${ext}`} />
               {ext !== 'mp4' && !converting && <button type="button" onClick={toMp4} className="w-full bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl py-2 font-semibold transition">Make an MP4 (plays on iPhone and everywhere)</button>}
               {converting && <ProgressBar pct={converting.pct} label={converting.label} />}
             </div>

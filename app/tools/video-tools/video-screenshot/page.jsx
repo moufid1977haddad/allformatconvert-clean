@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import { checkedDataURL, drawDecodedVideoFrame } from '../../../lib/mediaSupport';
 import IosOriginalNote from '../../../components/IosOriginalNote';
+import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 export default function VideoScreenshotPage() {
   const [file, setFile] = useState(null);
   const [screenshots, setScreenshots] = useState([]);
@@ -94,17 +95,16 @@ export default function VideoScreenshotPage() {
           {screenshots.length > 0 && (
             <div className="space-y-2">
               <p className="text-green-400 text-center">{screenshots.length} screenshot(s) captured</p>
-              <div className="grid grid-cols-2 gap-3">
-                {screenshots.map((s, i) => (
-                  <div key={i} className="space-y-1">
-                    <img src={s.url} className="w-full rounded" />
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-neutral-500">At {s.time}s</span>
-                      <a href={s.url} download={`${(file?.name || 'video').replace(/\.[^.]+$/, '')}-${s.time}s.${s.format || 'png'}`} className="text-xs text-indigo-400 hover:text-indigo-300">Download</a>
+              <DownloadGroup zipName={`${(file?.name || 'video').replace(/\.[^.]+$/, '')}-screenshots.zip`}>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {screenshots.map((s, i) => (
+                    <div key={i} className="space-y-1">
+                      <img src={s.url} className="w-full rounded" alt={`Screenshot at ${s.time}s`} />
+                      <FileDownload href={s.url} name={`${(file?.name || 'video').replace(/\.[^.]+$/, '')}-${s.time}s.${s.format || 'png'}`} note={`at ${s.time}s`} />
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </DownloadGroup>
             </div>
           )}
         </div>

@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { writeRgbaFrame, hasTransparency } from '../../../lib/gifEncode';
+import { FileDownload } from '../../../components/FileDownload';
 
 // Audit 2 (29/09): transparent PNGs came out on black (gifenc's default quantizer ignores alpha), and every image was
 // stretched to the size of the first. Now transparency is kept (1-bit, as GIF allows) and, as on ezgif and in our
@@ -96,7 +97,7 @@ export default function ImageToGifPage() {
             <div className="space-y-3 text-center">
               <p className="text-green-600 font-semibold">GIF created ({result.frameCount} frames)</p>
               <img src={result.url} className="max-w-full mx-auto rounded-xl border border-neutral-200" />
-              <a href={result.url} download="animated.gif" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download GIF</a>
+              <FileDownload href={result.url} name="animated.gif" />
             </div>
           )}
         </div>

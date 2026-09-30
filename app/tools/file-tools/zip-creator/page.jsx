@@ -5,6 +5,7 @@ import ProgressBar from '../../../components/ProgressBar';
 import { MAX_TOTAL_SIZE_BYTES, MAX_TOTAL_SIZE_LABEL, MOBILE_MAX_TOTAL_SIZE_BYTES, MOBILE_MAX_TOTAL_SIZE_LABEL } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { formatBytes } from '../../../lib/formatBytes';
+import { FileDownload } from '../../../components/FileDownload';
 
 export default function ZipCreatorPage() {
   const [files, setFiles] = useState([]);
@@ -136,7 +137,7 @@ export default function ZipCreatorPage() {
             <button onClick={createZip} disabled={files.length === 0} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Create ZIP</button>
           )}
           {status && !loading && <p className="text-center text-sm text-green-600">{status}</p>}
-          {downloadUrl && !loading && <a href={downloadUrl} download="archive.zip" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download ZIP</a>}
+          {downloadUrl && !loading && <FileDownload href={downloadUrl} name="archive.zip" />}
         </div>
       </div>
       <SeoContent

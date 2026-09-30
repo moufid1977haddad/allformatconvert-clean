@@ -6,6 +6,7 @@ import { AUDIO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
 import { reportToolError } from '../../../lib/reportError';
 import { ffmpegAudioDuration } from '../../../lib/audioDuration';
 import PlayablePreview from '../../../components/PlayablePreview';
+import { FileDownload } from '../../../components/FileDownload';
 
 // Start and end to a tenth of a second (typed, slid, or taken from the player) and fades in/out, as the reference
 // cutter offers (mp3cut.net, read 26/09/2026: fades, keyboard nudges). The duration used to be rounded down to whole
@@ -188,7 +189,7 @@ export default function AudioTrimmerPage() {
             <div className="space-y-2">
               <PlayablePreview src={result.url} name={result.name} />
               {result.changedFormat && <p className="text-xs text-amber-700">Saved as WAV: this format cannot be re-encoded with fades in the browser.</p>}
-              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download</a>
+              <FileDownload href={result.url} name={result.name} />
             </div>
           )}
         </div>

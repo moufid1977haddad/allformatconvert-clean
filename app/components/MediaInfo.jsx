@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { probeMedia, describeProbe } from '../lib/mediaProbe';
+import { TextDownload } from './FileDownload';
 
 // Technical report of one audio/video file (ffprobe in the browser): general, tags, each stream, chapters, cover.
 // Copy and download as JSON. Shared by Audio Metadata and Video Metadata.
@@ -27,7 +28,6 @@ export default function MediaInfo({ file }) {
 
   const { info, json, coverUrl } = state;
   const report = JSON.stringify(json, null, 2);
-  const download = () => { const u = URL.createObjectURL(new Blob([report], { type: 'application/json' })); const a = document.createElement('a'); a.href = u; a.download = file.name.replace(/\.[^.]+$/, '') + '-metadata.json'; a.click(); setTimeout(() => URL.revokeObjectURL(u), 60000); };
   const Rows = ({ rows }) => (
     <div className="space-y-1">
       {rows.map(([k, v], i) => (
@@ -45,10 +45,8 @@ export default function MediaInfo({ file }) {
       {info.tags.length > 0 && <section><h2 className="text-sm font-semibold text-neutral-700 mb-2">Tags</h2><Rows rows={info.tags} /></section>}
       {info.streams.map((s) => <section key={s.title}><h2 className="text-sm font-semibold text-neutral-700 mb-2">{s.title}</h2><Rows rows={s.rows} /></section>)}
       {info.chapters.length > 0 && <section><h2 className="text-sm font-semibold text-neutral-700 mb-2">Chapters</h2><Rows rows={info.chapters} /></section>}
-      <div className="grid grid-cols-2 gap-3">
-        <button type="button" onClick={() => navigator.clipboard.writeText(report)} className="bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl py-2 text-sm font-semibold">Copy full report (JSON)</button>
-        <button type="button" onClick={download} className="bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 text-sm font-semibold">Download report (JSON)</button>
-      </div>
+      <button type="button" onClick={() => navigator.clipboard.writeText(report)} className="w-full bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl py-2 text-sm font-semibold">Copy full report (JSON)</button>
+      <TextDownload text={report} name={file.name.replace(/\.[^.]+$/, '') + '-metadata.json'} type="application/json" />
     </div>
   );
 }

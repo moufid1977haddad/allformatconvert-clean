@@ -3,6 +3,8 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { checkPromptLength } from '@/lib/quota/limits';
+import { loadPdfjs } from '../../../lib/pdfjs';
+import { TextDownload } from '../../../components/FileDownload';
 
 const languages = ['English', 'French', 'Spanish', 'German', 'Arabic', 'Chinese', 'Japanese', 'Portuguese', 'Italian', 'Russian'];
 const MAX_PDF_TRANSLATE_PAGES = 5;
@@ -23,8 +25,7 @@ export default function Page() {
     setLoading(true);
     setError('');
     try {
-      const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
+      const pdfjsLib = await loadPdfjs();
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       let text = '';
@@ -77,6 +78,7 @@ export default function Page() {
             <div className="space-y-2">
               <label className="block text-sm text-neutral-500">Translation (first 5 pages)</label>
               <textarea aria-label="Translation (first 5 pages)" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={output} readOnly />
+              <TextDownload text={output} name="translation.txt" />
               <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Copy Translation</button>
             </div>
           )}

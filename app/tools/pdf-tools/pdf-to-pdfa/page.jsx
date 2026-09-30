@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { runStagedToolResult } from '../../../lib/mediaJob';
 import { checkPdfToolsSize, pdfToolsMaxLabel, shouldStage } from '../../../lib/officeUpload';
 import ProgressBar from '../../../components/ProgressBar';
+import { FileDownload } from '../../../components/FileDownload';
 
 // Real ceiling (hosting-platform payload gate), not the 50 MB the route itself would
 // accept -- see lib/quota/limits.js.
@@ -159,7 +160,7 @@ export default function PdfToPdfaPage() {
           {downloadUrl && !loading && (
             <div className="bg-neutral-50 dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6 text-center">
               <div className="text-green-500 text-xl font-bold mb-3">Done!</div>
-              <a href={downloadUrl} download={outName} className="inline-block bg-green-600 hover:bg-green-500 text-white rounded-xl px-6 py-2 font-semibold transition">Download</a>
+              <FileDownload href={downloadUrl} name={outName} />
             </div>
           )}
         </div>

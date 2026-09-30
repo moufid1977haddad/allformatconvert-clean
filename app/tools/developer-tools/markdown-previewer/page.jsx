@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { marked } from 'marked';
 import SeoContent from '../../../components/SeoContent';
+import { DownloadGroup, TextDownload } from '../../../components/FileDownload';
 
 export default function MarkdownPreviewerPage() {
   const [markdown, setMarkdown] = useState('# Hello World\n\nStart writing **markdown** here...');
@@ -26,6 +27,10 @@ export default function MarkdownPreviewerPage() {
           <div><label className="block text-sm text-neutral-500 mb-1">Markdown</label><textarea aria-label="Markdown" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-96 resize-none font-mono" value={markdown} onChange={e => setMarkdown(e.target.value)} /></div>
           <div><label className="block text-sm text-neutral-500 mb-1">Preview</label><div className="w-full bg-white rounded-xl p-4 h-96 overflow-y-auto text-neutral-900 text-sm" dangerouslySetInnerHTML={{__html: html}} /></div>
         </div>
+        <DownloadGroup zipName="document.zip" className="mt-4">
+          <TextDownload text={markdown} name="document.md" type="text/markdown;charset=utf-8" />
+          <TextDownload text={html} name="document.html" type="text/html;charset=utf-8" />
+        </DownloadGroup>
       </div>
       <SeoContent
         title="Markdown Previewer"

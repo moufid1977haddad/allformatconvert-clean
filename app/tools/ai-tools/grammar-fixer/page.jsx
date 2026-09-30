@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { checkPromptLength } from '@/lib/quota/limits';
 import { changes, applyChoices } from './diff';
+import { TextDownload } from '../../../components/FileDownload';
 
 // The corrected text used to replace the visitor's without showing what changed. Now every change is shown in
 // place (removed words struck through, added words underlined) and can be undone or restored one by one, as
@@ -104,6 +105,7 @@ export default function GrammarFixerPage() {
               </div>
               <label className="block text-sm text-neutral-500">Result</label>
               <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={result} readOnly aria-label="Result" />
+              <TextDownload text={result} name="corrected.txt" />
               <button onClick={copy} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">{copied ? 'Copied' : 'Copy'}</button>
             </div>
           )}

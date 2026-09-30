@@ -5,6 +5,7 @@ import SeoContent from '../../../components/SeoContent';
 import { TIFF_DECODE_TIMEOUT_MS, TIFF_DECODE_TIMEOUT_MESSAGE } from '../../../lib/tiffDecode';
 import { reportToolError, extOf } from '../../../lib/reportError';
 import { describeFormatMismatch } from '../../../lib/detectFileFormat';
+import { FileDownload } from '../../../components/FileDownload';
 
 const GENERIC_DECODE_ERROR = "This TIFF file couldn't be read. It may be corrupted, or use a rare TIFF variant this tool doesn't support. Try re-saving it with different settings (e.g. Deflate/ZIP compression) in an image editor, or try a different file.";
 const GENERIC_WORKER_ERROR = 'Something went wrong while converting this file. Please try again, or try a different file.';
@@ -154,7 +155,7 @@ export default function TiffToJpgPage() {
             </div>
           )}
           {error && <p className="text-red-400 text-center text-sm whitespace-pre-line">{error}</p>}
-          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download={file ? file.name.replace(/\.[^.]+$/, '') + '.jpg' : 'converted.jpg'} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download JPG</a></div>}
+          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><FileDownload href={result} name={file ? file.name.replace(/\.[^.]+$/, '') + '.jpg' : 'converted.jpg'} /></div>}
         </div>
       </div>
       <SeoContent

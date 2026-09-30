@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { formatBytes } from '../../../lib/formatBytes';
+import { FileDownload } from '../../../components/FileDownload';
 
 // Frames of different sizes used to be stretched to the first image's size (a portrait photo after a landscape one
 // came out squashed). Now, as on ezgif (read 26/09/2026: crop to a common size, alignment, reordering), each frame
@@ -141,7 +142,7 @@ export default function GifMakerPage() {
             <div className="text-center space-y-3">
               <p className="text-green-700" data-result>GIF created ({result.frameCount} frames, {result.W} × {result.H} px, {formatBytes(result.bytes)})</p>
               <img src={result.url} alt="The animated GIF" className="max-w-full mx-auto rounded-xl border border-neutral-200" />
-              <a href={result.url} download="animated.gif" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download GIF</a>
+              <FileDownload href={result.url} name="animated.gif" />
             </div>
           )}
         </div>

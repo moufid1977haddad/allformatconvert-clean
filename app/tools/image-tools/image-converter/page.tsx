@@ -10,6 +10,7 @@ import { reportToolError, extOf } from '../../../lib/reportError';
 import { canEncodeImageType, extFromMime } from '../../../lib/mediaSupport';
 import { imageDims } from '../../../lib/bigImage';
 import { formatBytes } from '../../../lib/formatBytes';
+import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 
 const GENERIC_CONVERSION_ERROR = 'Conversion failed. Please try again, or try a different file.';
 const GENERIC_HEIC_ERROR = 'Failed to decode this HEIC/HEIF file. It may be corrupted or use a variant this tool doesn\'t support.';
@@ -208,20 +209,6 @@ export default function ImageConverterPage() {
     worker.postMessage({ items: items.map(it => ({ ...it, forceBands })), format, quality, maxMegapixels, canvasCap: (window as any).__forceSafariCanvasCap === true });
   };
 
-  const downloadOne = (item: ConvertedFile) => {
-    const url = URL.createObjectURL(item.convertedBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    // Extension from the real type of the produced blob, never from the requested format.
-    a.download = item.originalName.replace(/\.[^.]+$/, '.' + extFromMime(item.convertedBlob.type, format));
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const downloadAll = () => {
-    converted.forEach(item => downloadOne(item));
-  };
-
   const removeFile = (idx: number) => {
     setFiles(prev => prev.filter((_, i) => i !== idx));
     setConverted([]);
@@ -357,41 +344,21 @@ export default function ImageConverterPage() {
           {/* Results */}
           {converted.length > 0 && (
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-bold text-neutral-800">Results</h3>
-                {converted.length > 1 && !processing && (
-                  <button
-                    onClick={downloadAll}
-                    className="bg-green-600 hover:bg-green-500 text-white text-sm font-semibold px-4 py-2 rounded-xl transition"
-                  >
-                    Download all
-                  </button>
-                )}
-              </div>
-              <div className="space-y-2">
+              <h3 className="font-bold text-neutral-800 mb-3">Results</h3>
+              {/* Each result through the site's download component; several -> "Download all (ZIP)" (the old
+                  "Download all" started one download per file, which iPhone Safari stops after the first). */}
+              <DownloadGroup zipName="converted-images.zip">
                 {converted.map((item, idx) => {
                   const gain = Math.round((1 - item.convertedSize / item.originalSize) * 100);
+                  // Extension from the real type of the produced blob, never from the requested format.
+                  const outName = item.originalName.replace(/\.[^.]+$/, '.' + extFromMime(item.convertedBlob.type, format));
+                  const change = gain > 0 ? ` (${gain}% smaller)` : gain < 0 ? ` (${Math.abs(gain)}% larger)` : '';
                   return (
-                    <div key={idx} className="flex items-center justify-between bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-xl px-4 py-3">
-                      <div>
-                        <p className="text-sm font-medium text-neutral-800 dark:text-neutral-200">{item.originalName.replace(/\.[^.]+$/, '.' + extFromMime(item.convertedBlob.type, format))}</p>
-                        {item.note && <p className="text-xs text-neutral-500">{item.note}</p>}
-                        <p className="text-xs text-neutral-500 mt-0.5">
-                          {formatSize(item.originalSize)} → {formatSize(item.convertedSize)}
-                          {gain > 0 && <span className="text-green-600 dark:text-green-400 ml-1">({gain}% smaller)</span>}
-                          {gain < 0 && <span className="text-orange-500 ml-1">({Math.abs(gain)}% larger)</span>}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => downloadOne(item)}
-                        className="bg-green-600 hover:bg-green-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition"
-                      >
-                        Download
-                      </button>
-                    </div>
+                    <FileDownload key={idx} blob={item.convertedBlob} name={outName}
+                      note={`was ${formatSize(item.originalSize)}${change}${item.note ? ` · ${item.note}` : ''}`} />
                   );
                 })}
-              </div>
+              </DownloadGroup>
             </div>
           )}
 

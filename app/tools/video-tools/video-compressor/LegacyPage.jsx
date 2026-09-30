@@ -5,6 +5,7 @@ import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import { videoReRecordSupport, captureMediaElementStream, finishRecording } from '../../../lib/mediaSupport';
 import IosOriginalNote from '../../../components/IosOriginalNote';
 import { formatBytes } from '../../../lib/formatBytes';
+import { FileDownload } from '../../../components/FileDownload';
 export default function LegacyVideoCompressorPage() {
   const [file, setFile] = useState(null);
   const [quality, setQuality] = useState(0.5);
@@ -109,7 +110,7 @@ export default function LegacyVideoCompressorPage() {
                 <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">{result.size <= result.original ? 'Saved' : 'Larger by — keep your original'}</div><div className={`font-bold ${result.size <= result.original ? 'text-green-600' : 'text-amber-700'}`}>{Math.abs(Math.round((1-result.size/result.original)*100))}%</div></div>
               </div>
               <video controls src={result.url} className="w-full rounded-xl" />
-              <a href={result.url} download={`compressed.${result.ext}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download</a>
+              <FileDownload href={result.url} name={`compressed.${result.ext}`} />
             </div>
           )}
         </div>

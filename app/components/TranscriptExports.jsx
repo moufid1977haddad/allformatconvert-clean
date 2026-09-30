@@ -1,18 +1,19 @@
 'use client';
 import { segmentsToSubtitles } from '../lib/subtitleTime';
-import { saveBlob } from '../lib/download';
+import { DownloadGroup, TextDownload } from './FileDownload';
 
-// Download buttons for a transcript: TXT always, SRT and VTT subtitles when the timed segments came back (30/09).
+// Download rows for a transcript: TXT always, SRT and VTT subtitles when the timed segments came back (30/09).
+// Through the site's one download component (P18): name, format, size, Download, Save / Share on iPhone/iPad.
 export default function TranscriptExports({ text, segments, baseName }) {
   const subs = segmentsToSubtitles(segments);
   const base = (baseName || 'transcript').replace(/\.[^.]+$/, '') || 'transcript';
-  const save = (content, ext, type) => saveBlob(new Blob([content], { type }), `${base}.${ext}`);
-  const btn = 'flex-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl py-2 text-sm font-semibold transition';
   return (
-    <div className="flex gap-2" data-transcript-exports>
-      <button type="button" className={btn} onClick={() => save(text, 'txt', 'text/plain;charset=utf-8')}>Download TXT</button>
-      {subs && <button type="button" className={btn} onClick={() => save(subs.srt, 'srt', 'application/x-subrip')}>Download SRT</button>}
-      {subs && <button type="button" className={btn} onClick={() => save(subs.vtt, 'vtt', 'text/vtt')}>Download VTT</button>}
+    <div data-transcript-exports>
+      <DownloadGroup zipName={`${base}-transcript.zip`}>
+        <TextDownload text={text} name={`${base}.txt`} />
+        {subs && <TextDownload text={subs.srt} name={`${base}.srt`} type="application/x-subrip" />}
+        {subs && <TextDownload text={subs.vtt} name={`${base}.vtt`} type="text/vtt" />}
+      </DownloadGroup>
     </div>
   );
 }

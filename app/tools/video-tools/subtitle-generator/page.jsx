@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { buildSubtitles } from '../../../lib/subtitleTime';
+import { DownloadGroup, TextDownload } from '../../../components/FileDownload';
 export default function SubtitleGeneratorPage() {
   const [file, setFile] = useState(null);
   const [subtitles, setSubtitles] = useState([{ start: '00:00:00', end: '00:00:05', text: '' }]);
@@ -25,13 +26,6 @@ export default function SubtitleGeneratorPage() {
     setVttContent(r.vtt);
   };
 
-  const download = (content, name, type) => {
-    const blob = new Blob([content], { type });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = name;
-    a.click();
-  };
 
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -60,10 +54,10 @@ export default function SubtitleGeneratorPage() {
           {srtContent && (
             <div className="space-y-2">
               <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" value={srtContent} readOnly />
-              <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => download(srtContent, 'subtitles.srt', 'application/x-subrip')} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download SRT</button>
-                <button onClick={() => download(vttContent, 'subtitles.vtt', 'text/vtt')} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download VTT</button>
-              </div>
+              <DownloadGroup zipName="subtitles.zip">
+                <TextDownload text={srtContent} name="subtitles.srt" type="application/x-subrip" />
+                <TextDownload text={vttContent} name="subtitles.vtt" type="text/vtt" />
+              </DownloadGroup>
             </div>
           )}
         </div>

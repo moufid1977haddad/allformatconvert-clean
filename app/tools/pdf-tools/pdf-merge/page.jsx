@@ -5,6 +5,7 @@ import ProgressBar from '../../../components/ProgressBar';
 import { MAX_TOTAL_PAGES, MAX_TOTAL_SIZE_BYTES, MAX_TOTAL_SIZE_LABEL, MOBILE_MAX_TOTAL_PAGES, MOBILE_MAX_TOTAL_SIZE_BYTES, MOBILE_MAX_TOTAL_SIZE_LABEL } from './config';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { formatBytes } from '../../../lib/formatBytes';
+import { FileDownload } from '../../../components/FileDownload';
 
 export default function PdfMergePage() {
   const [files, setFiles] = useState([]);
@@ -154,7 +155,7 @@ export default function PdfMergePage() {
           {downloadUrl && !loading && (
             <div className="bg-neutral-50 dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6 text-center">
               <div className="text-green-500 text-xl font-bold mb-3">Done!</div>
-              <a href={downloadUrl} download="merged.pdf" className="inline-block bg-green-600 hover:bg-green-500 text-white rounded-xl px-6 py-2 font-semibold transition">Download</a>
+              <FileDownload href={downloadUrl} name="merged.pdf" />
             </div>
           )}
         </div>
