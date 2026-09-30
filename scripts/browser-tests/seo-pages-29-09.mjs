@@ -53,6 +53,8 @@ const PAGES = [
 
 const b = await { chromium, firefox, webkit }[name].launch();
 const ctx = await b.newContext();
+// Previews only: Vercel's comment toolbar (vercel.live) throws navigator.storage.persisted under WebKit — not the site.
+if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((u) => u.hostname === 'vercel.live', (r) => r.abort());
 await ctx.addCookies([{ name: 'oct_automation', value: '1', url: origin }]);
 for (const pg of PAGES) {
   const url = origin + pg.path;

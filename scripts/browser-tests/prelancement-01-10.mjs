@@ -30,6 +30,8 @@ const b = await { chromium, firefox, webkit }[name].launch();
 const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
 await ctx.addCookies([{ name: 'oct_automation', value: '1', url: origin }]);
 await ctx.route(/google-analytics\.com\/g\/collect|analytics\.google\.com\/g\/collect/, (r) => r.abort());
+// Previews only: Vercel's comment toolbar (vercel.live) throws navigator.storage.persisted under WebKit — not the site.
+if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((u) => u.hostname === 'vercel.live', (r) => r.abort());
 
 async function open(url, { waitIdle = false } = {}) {
   const p = await ctx.newPage();
@@ -249,6 +251,9 @@ if (run('sticky')) {
   const k = 'sticky-notes'; // STORAGE_KEY of the page
   await p.evaluate((kk) => localStorage.setItem(kk, JSON.stringify([null, 5, { id: 1, text: { bad: true } }, { id: 2, text: 'kept note', color: 'bg-yellow-300' }, { id: 3, text: 'no colour' }])), k);
   await p.reload();
+  // WebKit rejects the link prefetches still in flight when the page reloads ("… due to access control checks", seen on
+  // www too, 01/10): those belong to the page being left. Only errors of the reloaded page count.
+  errors.length = 0;
   await p.waitForTimeout(800);
   const body = await p.locator('main').innerText();
   check('sticky notes: page renders despite malformed notes', (await p.locator('h1').count()) > 0 && body.includes('kept note') && body.includes('no colour'), body.slice(0, 200));
