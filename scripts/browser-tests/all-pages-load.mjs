@@ -1,10 +1,12 @@
 // Every tool page (every app/tools/<category>/<tool>/page.* on disk) and every category page, opened in one engine:
 // the page must answer 200, render its <h1>, and raise no uncaught JavaScript error. First pass for Safari
 // (WebKit), repeatable for Chromium and Firefox. It does not use the tools -- that is what the per-tool suites do.
-// Usage: node scripts/browser-tests/all-pages-load.mjs <origin> [--browser=webkit|chromium|firefox]
+// --safari16: the Safari 16.4 / iOS 16.4 simulation (APIs newer than Safari 16.4 removed in pages and Workers, P18).
+// Usage: node scripts/browser-tests/all-pages-load.mjs <origin> [--browser=webkit|chromium|firefox] [--safari16]
 import { chromium, firefox, webkit } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
+import { applySafari16Sim } from './lib/safari16-sim.mjs';
 
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--'))).origin;
 const browserName = (process.argv.find((a) => a.startsWith('--browser=')) || '--browser=webkit').slice(10);
@@ -21,6 +23,7 @@ const ctx = await b.newContext();
 // On a Vercel PREVIEW, Vercel injects its comment toolbar (vercel.live feedback.js); under WebKit it throws
 // "navigator.storage.persisted" on every page. Not the site's code (absent on www): --no-vercel-toolbar blocks only it.
 if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((url) => url.hostname === 'vercel.live', (r) => r.abort());
+if (process.argv.includes('--safari16')) await applySafari16Sim(ctx);
 const bad = [];
 let n = 0;
 for (const u of urls) {
@@ -40,5 +43,5 @@ for (const u of urls) {
 }
 await b.close();
 for (const x of bad) console.log('FAIL', JSON.stringify(x));
-console.log(`${n} pages opened in ${browserName}: ${n - bad.length} clean, ${bad.length} with a problem`);
+console.log(`${n} pages opened in ${browserName}${process.argv.includes('--safari16') ? ' (Safari 16.4 simulation)' : ''}: ${n - bad.length} clean, ${bad.length} with a problem`);
 process.exit(bad.length ? 1 : 0);

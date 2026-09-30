@@ -1,12 +1,12 @@
 // PDF to Excel when the PDF has no table (28/09): the sheet is built here from the PDF's text, as the reference
 // converters do for a text-only PDF — one sheet per page, one row per line of text, a new cell wherever the text
 // jumps across a wide gap (aligned columns stay columns). Free, in the browser, nothing sent anywhere.
+import { loadPdfjs } from './pdfjs';
 const ROW_TOLERANCE = 2.5; // points: items on the same baseline, within this, are one line
 
 /** @returns {Promise<{ blob: Blob, pages: number, rows: number }>} rows = 0 means the PDF has no text layer (a scan). */
 export async function pdfTextToXlsx(file) {
-  const pdfjsLib = await import('pdfjs-dist');
-  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
+  const pdfjsLib = await loadPdfjs();
   const XLSX = await import('xlsx');
   const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
   const wb = XLSX.utils.book_new();
