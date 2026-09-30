@@ -9,7 +9,7 @@ export default function TranscriptExports({ text, segments, baseName }) {
   const base = (baseName || 'transcript').replace(/\.[^.]+$/, '') || 'transcript';
   return (
     <div data-transcript-exports>
-      <DownloadGroup zipName={`${base}-transcript.zip`}>
+      <DownloadGroup zipName={`${base}-transcript.zip`} alternatives>
         <TextDownload text={text} name={`${base}.txt`} />
         {subs && <TextDownload text={subs.srt} name={`${base}.srt`} type="application/x-subrip" />}
         {subs && <TextDownload text={subs.vtt} name={`${base}.vtt`} type="text/vtt" />}

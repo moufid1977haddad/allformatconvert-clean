@@ -410,8 +410,8 @@ export default function BarcodeGeneratorPage() {
                 ? <span className="text-amber-700">Created, but not scanned back: no independent reader exists for {sym.label} in a browser. Test it with your scanner before printing a batch.</span>
                 : <span className="text-green-700">✓ Scanned back by an independent reader (zxing-cpp): {out.read.text}</span>}</p>
               <p className="text-center text-xs text-neutral-500">Image {out.w} × {out.h} px{ui.unit === 'px' ? '' : ` = ${((out.w * 25.4) / out.p.dpi).toFixed(1)} × ${((out.h * 25.4) / out.p.dpi).toFixed(1)} mm at ${out.p.dpi} dpi`}. Shown enlarged here. The SVG fills the window when you open it on its own, and keeps this exact print size on paper and in label or layout software, as do the PDF and EPS.</p>
-              <DownloadGroup zipName={`${out.name}.zip`}>
-                {FORMATS.map((f) => <FileDownload key={f.id} href={out.urls[f.id]} name={`${out.name}.${f.id}`} guard={false} linkProps={{ 'data-format': f.id }} />)}
+              <DownloadGroup zipName={`${out.name}.zip`} alternatives>
+                {FORMATS.map((f) => <FileDownload key={f.id} href={out.urls[f.id]} name={`${out.name}.${f.id}`} linkProps={{ 'data-format': f.id }} />)}
               </DownloadGroup>
               <button type="button" id="bc-to-labels" onClick={() => { setLines(text.trim() + (ui.caption ? `\t${ui.caption}` : '')); setSource('list'); setBatchFormat('labels'); setMode('batch'); }} className="block mx-auto text-sm text-indigo-600 underline">Print it on label sheets…</button>
             </>

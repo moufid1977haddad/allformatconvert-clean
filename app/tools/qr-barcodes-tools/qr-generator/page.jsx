@@ -162,10 +162,10 @@ export default function QrGeneratorPage() {
           {out && (
             <>
               <p className="text-center text-green-700 text-sm font-semibold">✓ Scanned back successfully (version {out.version}, error correction {effectiveEcl}).</p>
-              <DownloadGroup zipName="qrcode.zip">
-                <FileDownload href={out.png} name="qrcode.png" guard={false} />
-                <FileDownload href={out.svg} name="qrcode.svg" guard={false} />
-                <FileDownload href={out.pdf} name="qrcode.pdf" guard={false} />
+              <DownloadGroup zipName="qrcode.zip" alternatives>
+                <FileDownload href={out.png} name="qrcode.png" />
+                <FileDownload href={out.svg} name="qrcode.svg" />
+                <FileDownload href={out.pdf} name="qrcode.pdf" />
               </DownloadGroup>
             </>
           )}
