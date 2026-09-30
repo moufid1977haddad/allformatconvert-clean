@@ -4,7 +4,8 @@ import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { checkedDataURL, assertCanvasSize } from '../../../lib/mediaSupport';
 import { reportToolError } from '../../../lib/reportError';
-import { saveBlob } from '../../../lib/download';
+import { loadPdfjs } from '../../../lib/pdfjs';
+import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 const toBlobChecked = (c, type, q) => new Promise((ok, ko) => c.toBlob((b) => (b && b.size ? ok(b) : ko(new Error('This page could not be turned into an image on this device.'))), type, q));
 
 export default function Page() {
@@ -21,8 +22,7 @@ export default function Page() {
     setLoading(true);
     setError('');
     try {
-      const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
+      const pdfjsLib = await loadPdfjs();
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       const imgs = [];
@@ -47,14 +47,6 @@ export default function Page() {
     setLoading(false);
   };
 
-  // All pages in one ZIP (iLovePDF and Smallpdf offer the same "download all"), stored without recompression.
-  const downloadAll = async () => {
-    const { zipSync } = await import('fflate');
-    const files = {};
-    for (const im of images) files[im.name] = new Uint8Array(await im.blob.arrayBuffer());
-    await saveBlob(new Blob([zipSync(files, { level: 0 })], { type: 'application/zip' }), `${file ? file.name.replace(/\.pdf$/i, '') : 'document'}-pages.zip`);
-  };
-
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
@@ -72,13 +64,15 @@ export default function Page() {
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {images.length > 0 && (
             <div className="space-y-4">
-              {images.length > 1 && <button type="button" onClick={downloadAll} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download all pages (ZIP)</button>}
-              {images.map((img, i) => (
-                <div key={i} className="space-y-2">
-                  <img src={img.url} className="w-full rounded-xl border border-neutral-200" alt={`Page ${i+1}`} />
-                  <a href={img.url} download={img.name} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download Page {i+1}</a>
-                </div>
-              ))}
+              {/* All pages in one ZIP too (iLovePDF and Smallpdf offer the same "download all"). */}
+              <DownloadGroup zipName={`${file ? file.name.replace(/\.pdf$/i, '') : 'document'}-pages.zip`} className="space-y-4">
+                {images.map((img, i) => (
+                  <div key={i} className="space-y-2">
+                    <img src={img.url} className="w-full rounded-xl border border-neutral-200" alt={`Page ${i+1}`} />
+                    <FileDownload href={img.url} blob={img.blob} name={img.name} note={`page ${i + 1}`} />
+                  </div>
+                ))}
+              </DownloadGroup>
             </div>
           )}
         </div>
@@ -99,7 +93,7 @@ export default function Page() {
           { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser using the PDF.js library." }
         ]}
         tips={[
-          "Download each page separately, or all pages at once with \"Download all pages (ZIP)\".",
+          "Download each page separately, or all pages at once with \"Download all (ZIP)\".",
           "Images render at 2x scale for reasonably sharp text and detail, good for screen viewing; check the result yourself if you need print quality.",
           "For very long PDFs, converting many pages at once can take a moment and use noticeable browser memory.",
           "Everything happens locally, so there's no upload wait — the limiting factor is your device's available memory."

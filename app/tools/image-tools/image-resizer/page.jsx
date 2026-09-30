@@ -5,6 +5,7 @@ import { canvasSizeProblem } from '../../../lib/mediaSupport';
 import { CANVAS_MAX_PIXELS, canvasBeyondSafariCap, rasterFromCanvas, rasterFromRGBA } from '../../../lib/bigImage';
 import { encodeRasterLike, sourceTypeOf } from '../../../lib/imageOutput';
 import { formatBytes } from '../../../lib/formatBytes';
+import { FileDownload } from '../../../components/FileDownload';
 
 // Modelled on the reference site (iLoveIMG "Resize image"): by pixels with the aspect ratio locked by
 // default and "do not enlarge", or by percentage; the output keeps the source format (it used to always
@@ -146,7 +147,7 @@ export default function ImageResizerPage() {
             <div className="space-y-2">
               <img src={result.url} alt="Resized" className="max-h-48 mx-auto rounded" />
               <p className="text-center text-sm text-neutral-600">{result.w}×{result.h} px · {fmtSize(result.size)}{result.note ? ` · ${result.note}` : ''}</p>
-              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download</a>
+              <FileDownload href={result.url} name={result.name} />
             </div>
           )}
         </div>

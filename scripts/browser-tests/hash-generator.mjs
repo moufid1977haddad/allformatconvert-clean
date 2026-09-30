@@ -57,7 +57,7 @@ await page.getByRole('radio', { name: 'Files' }).click();
 const small = ['empty.bin', 'one.bin', 'r3.bin'].map((n) => path.join(dir, n));
 await page.locator('input[type=file]').setInputFiles(small);
 await page.getByRole('button', { name: /^Hash 3 files$/ }).click();
-await page.getByRole('button', { name: 'Download checksums.txt' }).waitFor({ timeout: 60000 });
+await page.locator('a[data-download][download="checksums.txt"]').waitFor({ timeout: 60000 });
 const cards = page.locator('div.border.rounded-xl.p-4');
 for (let i = 0; i < small.length; i++) {
   const got = await shown(cards.nth(i)), want = ref(small[i]), bad = diff(got, want, ALL);
@@ -65,7 +65,7 @@ for (let i = 0; i < small.length; i++) {
 }
 // 5. checksums.txt checked by GNU coreutils, which never saw the page's code
 {
-  const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Download checksums.txt' }).click()]);
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.locator('a[data-download][download="checksums.txt"]').click()]);
   const lines = fs.readFileSync(await dl.path(), 'utf8').trim().split('\n');
   for (const [tool, tag] of [['sha256sum', 'SHA256'], ['md5sum', 'MD5'], ['sha512sum', 'SHA512'], ['sha1sum', 'SHA1']]) {
     const f = path.join(dir, `check-${tag}.txt`); fs.writeFileSync(f, lines.filter((l) => l.startsWith(tag + ' (')).join('\n') + '\n');
@@ -92,7 +92,7 @@ for (let i = 0; i < small.length; i++) {
   await page.locator('input[type=file]').setInputFiles(big);
   const t0 = Date.now();
   await page.getByRole('button', { name: /^Hash 1 file$/ }).click();
-  await page.getByRole('button', { name: 'Download checksums.txt' }).waitFor({ timeout: 900000 });
+  await page.locator('a[data-download][download="checksums.txt"]').waitFor({ timeout: 900000 });
   const secs = (Date.now() - t0) / 1000;
   const got = await shown(cards.nth(0)), want = ref(big), ids = ['md5', 'sha1', 'sha256', 'sha512', 'crc32'], bad = diff(got, want, ids);
   const mib = fs.statSync(big).size / 1048576;

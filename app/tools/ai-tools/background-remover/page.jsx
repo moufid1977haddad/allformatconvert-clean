@@ -6,6 +6,7 @@ import { checkedDataURL, checkedBlob } from '../../../lib/mediaSupport';
 import { createPngWriter, forEachBand, imageDims } from '../../../lib/bigImage';
 import { derivedName } from '../../../lib/download';
 import { checkFileSize, MAX_REMOVEBG_ORIGINAL_BYTES } from '@/lib/quota/limits';
+import { FileDownload } from '../../../components/FileDownload';
 
 // Matches the model's own fixed internal input resolution (see
 // services/background-removal/app/infer.py, MODEL_INPUT_SIZE) -- IS-Net
@@ -191,7 +192,7 @@ export default function BackgroundRemoverPage() {
               <div className="rounded-xl overflow-hidden" style={{backgroundImage: 'linear-gradient(45deg, #ddd 25%, transparent 25%), linear-gradient(-45deg, #ddd 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ddd 75%), linear-gradient(-45deg, transparent 75%, #ddd 75%)', backgroundSize: '20px 20px', backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px'}}>
                 <img src={result.previewUrl} className="max-h-64 mx-auto" alt="result" />
               </div>
-              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download PNG</a>
+              <FileDownload href={result.url} name={result.name} />
             </div>
           )}
         </div>

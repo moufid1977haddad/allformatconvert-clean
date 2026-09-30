@@ -3,6 +3,8 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { checkPromptLength, MAX_PROMPT_CHARS } from '@/lib/quota/limits';
+import { loadPdfjs } from '../../../lib/pdfjs';
+import { TextDownload } from '../../../components/FileDownload';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -23,8 +25,7 @@ export default function Page() {
     try {
       // Extract the document's real text (the tool used to send the raw file
       // bytes, base64-encoded, so the model summarized binary noise).
-      const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
+      const pdfjsLib = await loadPdfjs();
       const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise.catch((e) => {
         throw e?.name === 'PasswordException' ? new Error('this PDF needs a password to open. Remove it first with PDF Unlock, then summarize the unlocked file.') : e;
       });
@@ -84,6 +85,7 @@ export default function Page() {
               {coverage && <p className="text-xs text-neutral-500">{coverage}</p>}
               <textarea aria-label="Summary" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={output} readOnly />
               <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Copy Summary</button>
+              <TextDownload text={output} name={(file?.name || 'document').replace(/\.pdf$/i, '') + '-summary.txt'} />
             </div>
           )}
         </div>

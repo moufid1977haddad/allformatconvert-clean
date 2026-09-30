@@ -3,7 +3,8 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { pixelateImageData, roundedRectPath, encodeRaster, encodeRasterLike, sourceTypeOf } from '../../../lib/imageOutput';
 import { CANVAS_MAX_PIXELS, canvasBeyondSafariCap, rasterFromCanvas, rasterFromRGBA } from '../../../lib/bigImage';
-import { saveBlob, derivedName } from '../../../lib/download';
+import { derivedName } from '../../../lib/download';
+import { FileDownload } from '../../../components/FileDownload';
 
 export default function ImageEditorPage() {
   const [image, setImage] = useState<string | null>(null);
@@ -12,6 +13,8 @@ export default function ImageEditorPage() {
   const [srcType, setSrcType] = useState('image/png');
   const [file, setFile] = useState<File | null>(null);
   const [saveError, setSaveError] = useState('');
+  // The full-size edited photo, made when the visitor asks (Save image) and offered through the site's download row.
+  const [exported, setExported] = useState<{ blob: Blob; name: string } | null>(null);
   const alertError = (m: string) => setSaveError(m);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -60,7 +63,7 @@ export default function ImageEditorPage() {
   // 30/09 (owner's iPhone): the editor drew the photo on ONE canvas at full size, which iOS refuses past 16.7 MP
   // (every 24/48 MP iPhone photo), and saved it as a data: link, which iOS does not save. The effects are now painted
   // by paint() on any horizontal band of the result at any scale k: the page shows a preview (scaled down when the
-  // photo is too big for one canvas here), and "Download" repaints the full-size photo band by band (lib/imageOutput.js
+  // photo is too big for one canvas here), and "Save image" repaints the full-size photo band by band (lib/imageOutput.js
   // pipeline), in the photo's own format, as a Blob named after it.
   const paint = useCallback((ctx: CanvasRenderingContext2D, img: HTMLImageElement, k: number, bandY: number, bandH: number) => {
     const rot = ((rotation % 360) + 360) % 360;
@@ -177,6 +180,9 @@ export default function ImageEditorPage() {
     paint(ctx, originalImage, k, 0, canvas.height);
   }, [originalImage, rotation, paint]);
 
+  // Any change to the edit makes the saved file out of date: it is taken off the page.
+  useEffect(() => { setExported(null); }, [paint, rotation, cornerRadius, originalImage]);
+
   const downloadImage = async () => {
     if (!originalImage || !canvasRef.current || !file) return;
     try {
@@ -202,7 +208,7 @@ export default function ImageEditorPage() {
       }
       // The photo's own format (JPG stays JPG), except when the corners were made transparent, which needs PNG.
       const blob = cornerRadius > 0 ? await encodeRaster(out, 'image/png') : await encodeRasterLike(out, sourceTypeOf(file));
-      await saveBlob(blob, derivedName(file.name, 'edited', blob.type === 'image/jpeg' ? 'jpg' : blob.type === 'image/webp' ? 'webp' : 'png'));
+      setExported({ blob, name: derivedName(file.name, 'edited', blob.type === 'image/jpeg' ? 'jpg' : blob.type === 'image/webp' ? 'webp' : 'png') });
     } catch (e: any) {
       alertError(e?.message || 'The image could not be saved.');
     }
@@ -301,9 +307,10 @@ export default function ImageEditorPage() {
               <div className="flex gap-2 pt-2">
                 <button onClick={applyEffects} className="flex-1 bg-indigo-600 hover:bg-indigo-500 rounded-xl py-3 font-semibold transition text-white">Apply</button>
                 <button onClick={resetAll} className="flex-1 bg-neutral-800 text-neutral-100 hover:bg-neutral-700 rounded-xl py-3 font-semibold transition">Reset</button>
-                <button onClick={downloadImage} className="flex-1 bg-green-600 hover:bg-green-500 rounded-xl py-3 font-semibold transition text-white">Download</button>
+                <button onClick={downloadImage} className="flex-1 bg-green-600 hover:bg-green-500 rounded-xl py-3 font-semibold transition text-white">Save image</button>
               </div>
               {saveError && <p role="alert" className="text-red-500 text-center text-sm">{saveError}</p>}
+              {exported && <FileDownload blob={exported.blob} name={exported.name} note="full size" />}
             </>
           )}
         </div>
@@ -315,7 +322,7 @@ export default function ImageEditorPage() {
           "Upload an image from your device to load it into the canvas editor.",
           "Use the Adjust, Transform, Effects, and Decorate tabs to tweak brightness, contrast, saturation, rotation, flips, pixelation, noise, vignette, borders, and text.",
           "Click \"Apply\" to render your changes onto the preview.",
-          "Click \"Download\" to save the edited image as a PNG once you're happy with the result."
+          "Click \"Save image\" once you're happy with the result, then \"Download\" (on an iPhone or iPad, \"Save / Share\" also offers Photos and Files)."
         ]}
         faqs={[
           { q: "Is Image Editor free to use?", a: "Yes, it's completely free with no signup and no limit on how many images you can edit." },

@@ -5,6 +5,7 @@ import SeoContent from '../../../components/SeoContent';
 import { transcribeAudio, checkAudioSize, audioMaxBytes, audioMaxLabel } from '../../../lib/officeUpload';
 import { encryptedMusicMessage } from '../../../lib/mediaSupport';
 import TranscriptExports from '../../../components/TranscriptExports';
+import { TextDownload } from '../../../components/FileDownload';
 
 export default function AudioToTextPage() {
   // Mode : 'mic' ou 'file'
@@ -51,13 +52,6 @@ export default function AudioToTextPage() {
     setMicStatus('');
   };
 
-  const downloadText = (text, filename) => {
-    const b = new Blob([text], { type: 'text/plain' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(b);
-    a.download = filename;
-    a.click();
-  };
 
   // ── File functions ──
   // Checked immediately on selection (not just before the network request)
@@ -137,20 +131,13 @@ export default function AudioToTextPage() {
                     value={micTranscript}
                     readOnly
                   />
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => navigator.clipboard.writeText(micTranscript)}
-                      className="bg-neutral-200 hover:bg-neutral-300 rounded-xl py-2 font-semibold transition text-neutral-800"
-                    >
-                      Copy
-                    </button>
-                    <button
-                      onClick={() => downloadText(micTranscript, 'transcript.txt')}
-                      className="bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition"
-                    >
-                      Download
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(micTranscript)}
+                    className="w-full bg-neutral-200 hover:bg-neutral-300 rounded-xl py-2 font-semibold transition text-neutral-800"
+                  >
+                    Copy
+                  </button>
+                  <TextDownload text={micTranscript} name="transcript.txt" />
                 </div>
               )}
               <p className="text-neutral-500 text-xs text-center">Works best in Google Chrome with microphone permission</p>
@@ -188,20 +175,12 @@ export default function AudioToTextPage() {
                     value={fileTranscript}
                     readOnly
                   />
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => navigator.clipboard.writeText(fileTranscript)}
-                      className="bg-neutral-200 hover:bg-neutral-300 rounded-xl py-2 font-semibold transition text-neutral-800"
-                    >
-                      Copy
-                    </button>
-                    <button
-                      onClick={() => downloadText(fileTranscript, 'transcript.txt')}
-                      className="bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition"
-                    >
-                      Download
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(fileTranscript)}
+                    className="w-full bg-neutral-200 hover:bg-neutral-300 rounded-xl py-2 font-semibold transition text-neutral-800"
+                  >
+                    Copy
+                  </button>
                   <TranscriptExports text={fileTranscript} segments={fileSegments} baseName={file?.name} />
                 </div>
               )}

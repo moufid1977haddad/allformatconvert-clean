@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { drawToRaster, encodeRaster, resultOf } from '../../../lib/imageOutput';
 import { checkedDataURL, canvasSizeProblem } from '../../../lib/mediaSupport';
+import { FileDownload } from '../../../components/FileDownload';
 
 export default function SvgToPngPage() {
   const [file, setFile] = useState(null);
@@ -99,7 +100,7 @@ export default function SvgToPngPage() {
           {result && (
             <div className="space-y-2">
               <img src={result} className="max-h-48 mx-auto rounded" />
-              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download PNG</a>
+              <FileDownload href={result.url} name={result.name} />
             </div>
           )}
         </div>

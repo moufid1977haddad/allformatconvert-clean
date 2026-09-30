@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { encryptBytes, decryptBytes } from '../../../lib/textCrypto';
+import { FileDownload } from '../../../components/FileDownload';
 export default function FileEncryptorPage() {
   const [file, setFile] = useState(null);
   const [password, setPassword] = useState('');
@@ -44,7 +45,7 @@ export default function FileEncryptorPage() {
           <div><label className="block text-sm text-neutral-500 mb-1">Password</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" placeholder="Enter password..." /></div>
           <button onClick={process} disabled={!file || !password || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">{loading ? 'Processing...' : mode === 'encrypt' ? 'Encrypt File' : 'Decrypt File'}</button>
           {note && <p className="text-amber-700 text-sm text-center">{note}</p>}
-          {downloadUrl && <a href={downloadUrl} download={mode === 'encrypt' ? file.name + '.encrypted' : (file.name.endsWith('.encrypted') ? file.name.slice(0, -10) : file.name + '.decrypted')} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download</a>}
+          {downloadUrl && <FileDownload href={downloadUrl} name={mode === 'encrypt' ? file.name + '.encrypted' : (file.name.endsWith('.encrypted') ? file.name.slice(0, -10) : file.name + '.decrypted')} />}
         </div>
       </div>
       <SeoContent

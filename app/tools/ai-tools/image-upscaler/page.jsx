@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { runStagedToolResult, mediaServiceConfigured, MediaJobError } from '../../../lib/mediaJob';
 import { webgpuAvailable, readImage, localOutputProblem, upscaleInBrowser, serverSecondsFor, serverNeedsParts, upscaleOnServerInParts } from '../../../lib/localUpscale';
 import { formatBytes } from '../../../lib/formatBytes';
+import { FileDownload } from '../../../components/FileDownload';
 
 // Input ceiling, the free offers' level (iLoveIMG 6 Mpx, Upscale.media 6.25 Mpx without an account; 28/09),
 // checked here BEFORE any work. The same on our server (UPSCALE_MAX_INPUT_PIXELS) and on this device.
@@ -181,7 +182,7 @@ export default function ImageUpscalerPage() {
               </label>
               <p className="text-center text-sm text-neutral-600">{dims.w}×{dims.h} → <span className="font-semibold text-indigo-600">{result.w}×{result.h}</span> · PNG, {formatBytes(result.size)}</p>
               <p className="text-center text-xs text-neutral-500" data-where={where}>{where === 'device' ? 'The AI ran right here, in your browser: your photo was not uploaded anywhere.' : 'The AI ran on our server: your photo was sent to it for this.'}</p>
-              <a href={result.url} download={`${baseName}-upscaled-${scale}x.png`} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download</a>
+              <FileDownload href={result.url} name={`${baseName}-upscaled-${scale}x.png`} />
             </div>
           )}
           <p className="text-xs text-neutral-500 text-center">AI model: <a href="https://github.com/Phhofm/models/releases/tag/4xNomos2_hq_mosr" className="underline" target="_blank" rel="noopener noreferrer">4xNomos2_hq_mosr</a> by Philip Hofmann, licensed <a href="https://creativecommons.org/licenses/by/4.0/" className="underline" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>.</p>

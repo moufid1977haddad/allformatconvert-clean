@@ -13,6 +13,7 @@ import { opusOnService, encodeOpusOnService } from '../../../lib/opusService';
 import { reportToolError } from '../../../lib/reportError';
 import PlayablePreview from '../../../components/PlayablePreview';
 import { formatBytes } from '../../../lib/formatBytes';
+import { FileDownload } from '../../../components/FileDownload';
 
 const LOSSLESS = MERGE_FORMATS.filter((f) => f.lossless);
 const COMPRESSED = MERGE_FORMATS.filter((f) => !f.lossless);
@@ -400,7 +401,7 @@ export default function AudioMergerPage() {
             <div className="space-y-2">
               <PlayablePreview src={result.url} name={result.name} />
               <p className="text-xs text-neutral-500 text-center">{result.label} · {fmtTime(result.secs)} · {fmtSize(result.size)}</p>
-              <a href={result.downloadUrl} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download {result.name}</a>
+              <FileDownload href={result.downloadUrl} name={result.name} />
             </div>
           )}
         </div>

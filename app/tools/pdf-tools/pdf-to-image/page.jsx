@@ -3,7 +3,8 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { checkedDataURL, assertCanvasSize } from '../../../lib/mediaSupport';
 import { reportToolError } from '../../../lib/reportError';
-import { saveBlob } from '../../../lib/download';
+import { loadPdfjs } from '../../../lib/pdfjs';
+import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 const toBlobChecked = (c, type, q) => new Promise((ok, ko) => c.toBlob((b) => (b && b.size ? ok(b) : ko(new Error('This page could not be turned into an image on this device.'))), type, q));
 
 export default function PdfToImagePage() {
@@ -27,8 +28,7 @@ export default function PdfToImagePage() {
     setImages([]);
     setStatus('Converting...');
     try {
-      const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
+      const pdfjsLib = await loadPdfjs();
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       const urls = [];
@@ -55,14 +55,6 @@ export default function PdfToImagePage() {
     setLoading(false);
   };
 
-  // All pages in one ZIP (iLovePDF and Smallpdf offer the same "download all"), stored without recompression.
-  const downloadAll = async () => {
-    const { zipSync } = await import('fflate');
-    const files = {};
-    for (const im of images) files[im.name] = new Uint8Array(await im.blob.arrayBuffer());
-    await saveBlob(new Blob([zipSync(files, { level: 0 })], { type: 'application/zip' }), `${file ? file.name.replace(/\.pdf$/i, '') : 'document'}-pages.zip`);
-  };
-
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
@@ -80,13 +72,15 @@ export default function PdfToImagePage() {
           {images.length > 0 && (
             <div className="space-y-4">
               <div className="text-green-400 text-xl font-bold text-center">Done! {images.length} page(s)</div>
-              {images.length > 1 && <button type="button" onClick={downloadAll} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download all pages (ZIP)</button>}
-              {images.map(({ url, page, name }) => (
-                <div key={page} className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 text-center">
-                  <img src={url} alt={'Page ' + page} className="max-w-full rounded mb-3" />
-                  <a href={url} download={name} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition text-white">Download Page {page}</a>
-                </div>
-              ))}
+              {/* All pages in one ZIP too (iLovePDF and Smallpdf offer the same "download all"). */}
+              <DownloadGroup zipName={`${file ? file.name.replace(/\.pdf$/i, '') : 'document'}-pages.zip`} className="space-y-4">
+                {images.map(({ url, blob, page, name }) => (
+                  <div key={page} className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 text-center">
+                    <img src={url} alt={'Page ' + page} className="max-w-full rounded mb-3" />
+                    <FileDownload href={url} blob={blob} name={name} note={`page ${page}`} />
+                  </div>
+                ))}
+              </DownloadGroup>
             </div>
           )}
         </div>

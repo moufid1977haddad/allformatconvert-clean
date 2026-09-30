@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { formatBytes } from '../../../lib/formatBytes';
+import { FileDownload } from '../../../components/FileDownload';
 export default function GifCompressorPage() {
   const [file, setFile] = useState(null);
   const [quality, setQuality] = useState(80);
@@ -59,7 +60,7 @@ export default function GifCompressorPage() {
                   <p>At this quality the result is {formatSize(result.newSize)}, not smaller than your {formatSize(result.originalSize)}: keep your original, or lower the quality and try again.</p>
                 </div>
               )}
-              <a href={result.url} download="compressed.gif" className={result.newSize >= result.originalSize ? 'block w-full text-center text-indigo-600 underline text-sm' : 'block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition'}>{result.newSize >= result.originalSize ? `Download the ${formatSize(result.newSize)} version anyway` : 'Download'}</a>
+              <FileDownload href={result.url} name="compressed.gif" />
             </div>
           )}
         </div>

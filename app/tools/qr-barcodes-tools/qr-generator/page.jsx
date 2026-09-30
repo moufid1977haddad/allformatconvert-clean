@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { QR_TYPES, buildPayload } from '../../../lib/qrPayload';
 import { qrMatrix, drawCanvas, toSvg, toPdf, readsBackAs, contrast } from '../../../lib/qrRender';
+import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 
 // Features from QRCode Monkey, the free reference (read 2026-09-23): content types, colours, logo, error
 // correction, up to 2000 px, PNG/SVG/PDF. What it does not do and this page does: every code is read back
@@ -161,11 +162,11 @@ export default function QrGeneratorPage() {
           {out && (
             <>
               <p className="text-center text-green-700 text-sm font-semibold">✓ Scanned back successfully (version {out.version}, error correction {effectiveEcl}).</p>
-              <div className="grid grid-cols-3 gap-2">
-                <a href={out.png} download="qrcode.png" className="block text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">PNG</a>
-                <a href={out.svg} download="qrcode.svg" className="block text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">SVG</a>
-                <a href={out.pdf} download="qrcode.pdf" className="block text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">PDF</a>
-              </div>
+              <DownloadGroup zipName="qrcode.zip">
+                <FileDownload href={out.png} name="qrcode.png" guard={false} />
+                <FileDownload href={out.svg} name="qrcode.svg" guard={false} />
+                <FileDownload href={out.pdf} name="qrcode.pdf" guard={false} />
+              </DownloadGroup>
             </>
           )}
         </div>

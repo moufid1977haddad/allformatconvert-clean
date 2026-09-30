@@ -6,6 +6,8 @@ import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 import { placeOnVisiblePage, visibleSize } from '../../../lib/pdfPlace';
 import ProgressBar from '../../../components/ProgressBar';
 import { reportToolError } from '../../../lib/reportError';
+import { loadPdfjs } from '../../../lib/pdfjs';
+import { FileDownload } from '../../../components/FileDownload';
 
 const LANGUAGES = [
   { code: 'afr', label: "Afrikaans" },
@@ -269,8 +271,7 @@ export default function Page() {
       // this tool never reads getTextContent()/the PDF's text layer, which is
       // exactly what lets it read scanned/image-only pages that have no text
       // layer at all (unlike PDF Extract Text, which only reads that layer).
-      const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
+      const pdfjsLib = await loadPdfjs();
       const { createWorker } = await import('tesseract.js');
 
       const arrayBuffer = await file.arrayBuffer();
@@ -415,7 +416,7 @@ export default function Page() {
               <label className="block text-sm text-neutral-500">Recognized Text</label>
               <textarea aria-label="Recognized Text" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={output} readOnly />
               <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Copy Text</button>
-              {pdfUrl && <a href={pdfUrl} download={file.name.replace(/\.pdf$/i, '') + '-searchable.pdf'} className="block w-full text-center bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl py-2 font-semibold transition">Download searchable PDF</a>}
+              {pdfUrl && <FileDownload href={pdfUrl} name={file.name.replace(/\.pdf$/i, '') + '-searchable.pdf'} />}
             </div>
           )}
         </div>

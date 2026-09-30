@@ -7,6 +7,7 @@ import { AUDIO_OUTPUT_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../
 import { reportToolError } from '../../../lib/reportError';
 import { opusOnService, encodeOpusOnService, LOSSLESS_INTERMEDIATE } from '../../../lib/opusService';
 import PlayablePreview from '../../../components/PlayablePreview';
+import { FileDownload } from '../../../components/FileDownload';
 
 export default function AudioBoosterPage() {
   const [file, setFile] = useState(null);
@@ -95,7 +96,7 @@ export default function AudioBoosterPage() {
           {result && (
             <div className="space-y-2">
               <PlayablePreview src={result.url} name={result.name} />
-              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download</a>
+              <FileDownload href={result.url} name={result.name} />
             </div>
           )}
         </div>

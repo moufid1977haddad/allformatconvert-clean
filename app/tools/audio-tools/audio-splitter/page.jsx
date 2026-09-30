@@ -8,6 +8,7 @@ import { reportToolError } from '../../../lib/reportError';
 import { opusOnService, encodeOpusOnService, LOSSLESS_INTERMEDIATE } from '../../../lib/opusService';
 import { ffmpegAudioDuration } from '../../../lib/audioDuration';
 import PlayablePreview from '../../../components/PlayablePreview';
+import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 
 const tenth = (x) => Math.round(x * 10) / 10;
 
@@ -157,13 +158,17 @@ export default function AudioSplitterPage() {
             {loading ? 'Splitting...' : 'Split Audio'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {results.map((r, i) => (
-            <div key={i} className="space-y-2">
-              <p className="text-sm font-medium text-neutral-700">Part {i+1}</p>
-              <PlayablePreview src={r.url} name={r.name} />
-              <a href={r.url} download={r.name} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download Part {i+1}</a>
-            </div>
-          ))}
+          {results.length > 0 && (
+            <DownloadGroup zipName={(file?.name || 'audio').replace(/\.[^.]+$/, '') + '-parts.zip'} className="space-y-4">
+              {results.map((r, i) => (
+                <div key={i} className="space-y-2">
+                  <p className="text-sm font-medium text-neutral-700">Part {i+1}</p>
+                  <PlayablePreview src={r.url} name={r.name} />
+                  <FileDownload href={r.url} name={r.name} note={`part ${i + 1}`} />
+                </div>
+              ))}
+            </DownloadGroup>
+          )}
         </div>
       </div>
       <SeoContent

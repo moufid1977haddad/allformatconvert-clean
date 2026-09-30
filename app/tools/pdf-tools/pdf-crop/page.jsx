@@ -4,6 +4,7 @@ import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 import { cropRect } from '../../../lib/pdfCropBox';
+import { FileDownload } from '../../../components/FileDownload';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -67,7 +68,7 @@ export default function Page() {
             {loading ? 'Cropping...' : 'Crop PDF'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <a href={result} download="cropped.pdf" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download Cropped PDF</a>}
+          {result && <FileDownload href={result} name="cropped.pdf" />}
         </div>
       </div>
       <SeoContent

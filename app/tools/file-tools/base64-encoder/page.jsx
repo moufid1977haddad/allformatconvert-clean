@@ -2,6 +2,7 @@
 import { useState, useRef, useMemo, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { detectSignature } from '../../../lib/fileSignature';
+import { FileDownload } from '../../../components/FileDownload';
 
 // Audit 2 (29/09): a file the browser has no type for (HEIC or AVIF on some systems, a file without extension) came
 // out as data:application/octet-stream, which no browser displays as an image -- the type is now read from the
@@ -67,7 +68,7 @@ export default function FileBase64EncoderPage() {
                 {big && <p className="text-xs text-neutral-500">Preview of the first {PREVIEW_CHARS.toLocaleString()} characters; Copy and Download give the whole text.</p>}
                 <div className="grid grid-cols-2 gap-2">
                   <button onClick={() => navigator.clipboard.writeText(out)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy Base64</button>
-                  <a href={txtUrl} download={(fileName || 'file') + '.base64.txt'} className="w-full text-center bg-neutral-200 hover:bg-neutral-300 rounded-xl py-2 font-semibold transition">Download .txt</a>
+                  <FileDownload href={txtUrl} name={(fileName || 'file') + '.base64.txt'} />
                 </div>
               </div>
             );

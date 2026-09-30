@@ -18,10 +18,11 @@ for (const [tool, prep] of [['/tools/ai-tools/audio-transcriber', null], ['/tool
   await p.locator('input[type=file]').last().setInputFiles(wav);
   const go = p.getByRole('button', { name: /^Transcribe/ });
   if (await go.count()) await go.first().click();
-  const srtBtn = p.getByRole('button', { name: 'Download SRT' });
-  await srtBtn.waitFor({ timeout: 30000 });
-  const get = async (name) => { const [d] = await Promise.all([p.waitForEvent('download'), p.getByRole('button', { name }).click()]); return { name: d.suggestedFilename(), text: fs.readFileSync(await d.path(), 'utf8') }; };
-  const srt = await get('Download SRT'), vtt = await get('Download VTT'), txt = await get('Download TXT');
+  // P18: one row per file (FileDownload), its link being the file's own Download link.
+  const link = (ext) => p.locator(`[data-transcript-exports] a[data-download][download$=".${ext}"]`);
+  await link('srt').waitFor({ timeout: 30000 });
+  const get = async (ext) => { const [d] = await Promise.all([p.waitForEvent('download'), link(ext).click()]); return { name: d.suggestedFilename(), text: fs.readFileSync(await d.path(), 'utf8') }; };
+  const srt = await get('srt'), vtt = await get('vtt'), txt = await get('txt');
   check(`${tool}: SRT`, srt.name === 'safari-tone-12s.srt' && srt.text.startsWith('1\n00:00:00,000 --> 00:00:02,480\nWelcome to the weekly meeting.\n') && srt.text.includes('3\n00:00:06,100 --> 00:01:05,250\nThank you.'), JSON.stringify(srt.text.slice(0, 90)));
   check(`${tool}: VTT`, vtt.name === 'safari-tone-12s.vtt' && vtt.text.startsWith('WEBVTT\n\n00:00:00.000 --> 00:00:02.480\n'), JSON.stringify(vtt.text.slice(0, 60)));
   check(`${tool}: TXT`, txt.name === 'safari-tone-12s.txt' && txt.text.startsWith('Welcome to the weekly meeting.'), txt.name);

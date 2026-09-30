@@ -1,6 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 
 const MAX_CHARS = 1000;
 const PER_DAY = 5; // lib/quota/imageGen.js IMAGE_GEN_PER_IP_PER_DAY
@@ -43,19 +44,25 @@ export default function ImageGeneratorPage() {
     }
   };
 
-  const downloadPng = async () => {
-    const bmp = await createImageBitmap(result.blob);
-    const c = document.createElement('canvas');
-    c.width = bmp.width; c.height = bmp.height;
-    c.getContext('2d').drawImage(bmp, 0, 0);
-    c.toBlob((b) => {
-      if (!b || b.type !== 'image/png') { setError('This browser could not convert the image to PNG — download the WebP instead.'); return; }
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(b);
-      a.download = 'ai-image.png';
-      a.click();
-    }, 'image/png');
-  };
+  // The same image as PNG, made as soon as the WebP arrives so it is offered as a file of its own (name, size).
+  const [png, setPng] = useState(null);
+  useEffect(() => {
+    setPng(null);
+    if (!result) return undefined;
+    let alive = true;
+    (async () => {
+      const bmp = await createImageBitmap(result.blob);
+      const c = document.createElement('canvas');
+      c.width = bmp.width; c.height = bmp.height;
+      c.getContext('2d').drawImage(bmp, 0, 0);
+      c.toBlob((b) => {
+        if (!alive) return;
+        if (!b || b.type !== 'image/png') { setError('This browser could not convert the image to PNG — download the WebP instead.'); return; }
+        setPng(b);
+      }, 'image/png');
+    })().catch(() => { if (alive) setError('This browser could not convert the image to PNG — download the WebP instead.'); });
+    return () => { alive = false; };
+  }, [result]);
 
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -89,10 +96,10 @@ export default function ImageGeneratorPage() {
           {result && (
             <div className="space-y-3">
               <img src={result.url} alt={result.prompt} className="w-full rounded-lg border border-neutral-200" />
-              <div className="flex gap-2">
-                <a href={result.url} download="ai-image.webp" className="flex-1 text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download WebP</a>
-                <button onClick={downloadPng} className="flex-1 bg-neutral-700 hover:bg-neutral-600 text-white rounded-xl py-2 font-semibold transition">Download PNG</button>
-              </div>
+              <DownloadGroup zipName="ai-image.zip">
+                <FileDownload href={result.url} name="ai-image.webp" />
+                {png && <FileDownload blob={png} name="ai-image.png" primary={false} guard={false} />}
+              </DownloadGroup>
             </div>
           )}
           <p className="text-xs text-neutral-500">Your description is sent to OpenAI (model gpt-image-2) to create the image; the image itself is not stored by us. Descriptions that break the provider's content policy are refused. {PER_DAY} images per day per visitor.</p>

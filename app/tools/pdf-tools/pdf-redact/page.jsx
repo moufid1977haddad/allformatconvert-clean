@@ -4,6 +4,8 @@ import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 import { matchSpans, annotationText, matchesText } from '../../../lib/pdfRedact';
+import { loadPdfjs } from '../../../lib/pdfjs';
+import { FileDownload } from '../../../components/FileDownload';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -24,8 +26,7 @@ export default function Page() {
     setResult(null);
     try {
       const { PDFDocument, degrees } = await import('pdf-lib');
-      const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
+      const pdfjsLib = await loadPdfjs();
       const arrayBuffer = await file.arrayBuffer();
       const srcDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer));
       const outDoc = await PDFDocument.create();
@@ -148,7 +149,7 @@ export default function Page() {
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {summary && <p className="text-neutral-700 text-center text-sm" data-summary>{summary}</p>}
-          {result && <a href={result} download="redacted.pdf" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download Redacted PDF</a>}
+          {result && <FileDownload href={result} name="redacted.pdf" />}
         </div>
       </div>
       <SeoContent

@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "Video to GIF — Extract a Series Online Free" },
-  description: "Video to GIF extracts a series of still frames from your video, entirely in your browser, with adjustable frame rate and duration.",
+  title: { absolute: "Video to GIF — Make an Animated GIF from a Video Online Free" },
+  description: "Video to GIF makes an animated GIF from any clip (MP4, iPhone MOV, WebM…): choose start, length, width and frame rate. Frames as PNG too.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-to-gif" },
   openGraph: {
-    title: "Video to GIF — Extract a Series Online Free",
-    description: "Video to GIF extracts a series of still frames from your video, entirely in your browser, with adjustable frame rate and duration.",
+    title: "Video to GIF — Make an Animated GIF from a Video Online Free",
+    description: "Video to GIF makes an animated GIF from any clip (MP4, iPhone MOV, WebM…): choose start, length, width and frame rate. Frames as PNG too.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-to-gif",
   },
 };

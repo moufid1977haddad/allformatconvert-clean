@@ -1,117 +1,130 @@
-﻿'use client';
-import { useState, useRef, useEffect } from 'react';
-import SeoContent from '../../../components/SeoContent';
-import { VIDEO_ACCEPT, assertVideoReadable, checkedDataURL } from '../../../lib/mediaSupport';
-import IosOriginalNote from '../../../components/IosOriginalNote';
-export default function VideoToGifPage() {
-  const [file, setFile] = useState(null);
+'use client';
+import { useEffect, useRef, useState } from 'react';
+import GifFromVideoTool from '../../../components/GifFromVideoTool';
+import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
+import { assertVideoReadable } from '../../../lib/mediaSupport';
+
+// Video Tools > Video to GIF (P18, 01/10). It used to capture still PNG frames and never made a GIF, although its name
+// says GIF. It now makes an animated GIF the way GIF Tools > Video to GIF does (the proven path: ffmpeg palettegen /
+// paletteuse on our media service, as ezgif), and keeps frame extraction as an option below — now with every frame
+// offered as a real PNG file, all of them in one ZIP too.
+
+const toBlob = (canvas) => new Promise((resolve, reject) => canvas.toBlob((b) => (b && b.size > 32 && b.type === 'image/png' ? resolve(b) : reject(new Error('Your browser could not produce this image — it is probably too large for this device.'))), 'image/png'));
+
+function FrameExtractor({ file, busy }) {
+  const [open, setOpen] = useState(false);
+  const [fps, setFps] = useState(5);
+  const [duration, setDuration] = useState(3);
+  const [start, setStart] = useState(0);
   const [frames, setFrames] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [fps, setFps] = useState(5);
-  const [duration, setDuration] = useState(3);
   const videoRef = useRef();
-  const inputRef = useRef();
-
-  const handleFile = (e) => {
-    const f = e.target.files[0];
-    if (!f) return;
-    e.target.value = '';
-    setFile(f);
-    setFrames([]);
-  };
+  const url = useRef(null);
 
   useEffect(() => {
-    // videoRef.current is only guaranteed to exist after this render commits
-    // (the <video> element only mounts once `file` is set), so the src must
-    // be assigned here rather than inline in handleFile — otherwise the very
-    // first file selection silently fails to load since the ref is still null.
-    if (file && videoRef.current) videoRef.current.src = URL.createObjectURL(file);
-  }, [file]);
+    setFrames([]); setError('');
+    if (url.current) URL.revokeObjectURL(url.current);
+    url.current = file ? URL.createObjectURL(file) : null;
+    if (videoRef.current) videoRef.current.src = url.current || '';
+    return undefined;
+  }, [file, open]);
+  useEffect(() => () => { frames.forEach((f) => URL.revokeObjectURL(f.url)); }, [frames]);
 
+  if (!file) return null;
   const capture = async () => {
-    if (!videoRef.current || !file) return;
-    setLoading(true);
-    setError('');
+    setLoading(true); setError(''); setFrames([]);
     try {
       const video = videoRef.current;
+      if (video.readyState < 1) await new Promise((r, j) => { video.onloadedmetadata = r; video.onerror = () => j(new Error("This video's frames could not be read in this browser.")); });
       assertVideoReadable(video);
       const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
-      const capturedFrames = [];
-      const totalFrames = fps * duration;
-      const interval = duration / totalFrames;
-      video.currentTime = 0;
-      for (let i = 0; i < totalFrames; i++) {
-        await new Promise(r => setTimeout(r, 100));
-        video.currentTime = i * interval;
-        await new Promise(r => { video.onseeked = r; setTimeout(r, 1500); });
+      const total = Math.max(1, Math.round(fps * duration));
+      const end = Number.isFinite(video.duration) ? video.duration : Infinity;
+      const out = [];
+      const base = (file.name || 'video').replace(/\.[^.]+$/, '');
+      for (let i = 0; i < total; i++) {
+        const t = start + i / fps;
+        if (t >= end) break;
+        video.currentTime = t;
+        await new Promise((r) => { video.onseeked = r; setTimeout(r, 1500); });
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        capturedFrames.push(checkedDataURL(canvas, 'image/png'));
+        const blob = await toBlob(canvas);
+        out.push({ blob, url: URL.createObjectURL(blob), name: `${base}-frame-${String(i + 1).padStart(3, '0')}.png`, t });
       }
-      setFrames(capturedFrames);
+      if (!out.length) throw new Error('The start time is after the end of the video.');
+      setFrames(out);
     } catch (e) {
-      setFrames([]);
       setError(e.message);
     }
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-neutral-100 p-6">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-2">Video to GIF</h1>
-        <p className="text-neutral-500 text-center mb-8">Extract frames from video as GIF preview</p>
-        <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <IosOriginalNote />
-          <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
-            <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />
+    <div className="border-t border-neutral-200 pt-4 space-y-3" data-frame-extractor>
+      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="text-sm font-semibold text-indigo-700 hover:underline">
+        {open ? '▾' : '▸'} Or extract frames as PNG images
+      </button>
+      {open && (
+        <div className="space-y-3">
+          <video ref={videoRef} muted playsInline preload="auto" className="hidden" />
+          <div className="grid grid-cols-3 gap-3">
+            <label className="text-sm text-neutral-600">Start (s)<input type="number" min="0" step="0.1" value={start} onChange={(e) => setStart(Math.max(0, Number(e.target.value) || 0))} className="w-full bg-white border border-neutral-200 rounded-lg px-3 py-2 text-sm" /></label>
+            <label className="text-sm text-neutral-600">Frames per second: {fps}<input aria-label="Frames per second" type="range" min="1" max="15" value={fps} onChange={(e) => setFps(parseInt(e.target.value, 10))} className="w-full" /></label>
+            <label className="text-sm text-neutral-600">Duration: {duration} s<input aria-label="Duration in seconds" type="range" min="1" max="10" value={duration} onChange={(e) => setDuration(parseInt(e.target.value, 10))} className="w-full" /></label>
           </div>
-          {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" />}
-          <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm text-neutral-500 mb-1">FPS: {fps}</label><input aria-label="FPS" type="range" min="1" max="15" value={fps} onChange={e => setFps(parseInt(e.target.value))} className="w-full" /></div>
-            <div><label className="block text-sm text-neutral-500 mb-1">Duration: {duration}s</label><input aria-label="Duration: s" type="range" min="1" max="10" value={duration} onChange={e => setDuration(parseInt(e.target.value))} className="w-full" /></div>
-          </div>
-          {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
-          <button onClick={capture} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">{loading ? 'Capturing...' : 'Capture Frames'}</button>
+          <button type="button" onClick={capture} disabled={loading || busy} className="w-full bg-neutral-800 hover:bg-neutral-700 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-2 font-semibold transition">
+            {loading ? 'Extracting frames…' : `Extract ${Math.round(fps * duration)} frames`}
+          </button>
+          {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
           {frames.length > 0 && (
-            <div className="space-y-3">
-              <p className="text-green-400 text-center">{frames.length} frames captured</p>
+            <DownloadGroup zipName={`${(file.name || 'video').replace(/\.[^.]+$/, '')}-frames.zip`}>
               <div className="grid grid-cols-5 gap-2">
-                {frames.map((f, i) => <img key={i} src={f} className="w-full rounded" />)}
+                {frames.map((f) => <img key={f.name} src={f.url} alt={`Frame at ${f.t.toFixed(2)} s`} className="w-full rounded" />)}
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                {frames.map((f, i) => <a key={i} href={f} download={"frame-" + i + ".png"} className="block text-center bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800 rounded-lg py-1 text-sm transition">Frame {i+1}</a>)}
+              <div className="max-h-96 overflow-y-auto space-y-2">
+                {frames.map((f) => <FileDownload key={f.name} href={f.url} blob={f.blob} name={f.name} note={`${f.t.toFixed(2)} s`} primary={false} />)}
               </div>
-            </div>
+            </DownloadGroup>
           )}
         </div>
-      </div>
-      <SeoContent
-        title="Video to GIF"
-        description="Video to GIF extracts a series of still frames from your video, entirely in your browser, with adjustable frame rate (1–15 FPS) and capture duration (1–10 seconds). Each frame downloads individually as a PNG. Note: it doesn't currently assemble the frames into a single animated GIF file, and there's no support for pasting a YouTube or other video URL — only local file uploads work."
-        howTo={[
-          "Click the upload area and select a video file from your device.",
-          "Set your desired FPS and capture duration using the sliders.",
-          "Click \"Capture Frames\" to extract evenly spaced still frames from the start of the video.",
-          "Download each frame individually as a PNG using the buttons below the grid."
-        ]}
-        faqs={[
-          { q: "Does this produce a single animated GIF file?", a: "Not currently — it captures a set of still frames (FPS × duration) that you download individually; combining them into an animated GIF requires a separate tool." },
-          { q: "Can I paste a YouTube link instead of uploading a file?", a: "No, only local video file uploads are supported." },
-          { q: "How many frames can I capture?", a: "Up to 15 FPS for up to 10 seconds, so as many as 150 frames." },
-          { q: "Is my file uploaded anywhere?", a: "No, everything runs locally in your browser." }
-        ]}
-        tips={[
-          "Combine the downloaded frames using a dedicated GIF-assembly tool if you need a true animated GIF file.",
-          "Frames are captured starting from the beginning of the video — trim your source video first if you need frames from later on.",
-          "A lower FPS (5–8) is usually enough once frames are assembled into a GIF elsewhere.",
-          "Higher FPS and longer duration settings capture more frames but take longer to process."
-        ]}
-      />
+      )}
     </div>
+  );
+}
+
+export default function VideoToGifPage() {
+  return (
+    <GifFromVideoTool
+      tool="video-to-gif"
+      title="Video to GIF"
+      subtitle="Turn a clip of any video into an animated GIF — or extract its frames as PNG images"
+      extra={({ file, busy }) => <FrameExtractor file={file} busy={busy} />}
+      seo={{
+        title: 'Video to GIF',
+        description: 'Video to GIF turns a clip of any video (MP4, MOV from an iPhone, WebM, MKV, AVI and more) into one animated GIF file. Pick where the clip starts, how long it lasts (up to 60 seconds), the width and the frame rate. It runs on our server with ffmpeg, building an optimised 256-colour palette for your clip, so it works in every browser including Safari and iPhone; vertical and square videos keep their shape. Need still images instead? Open "Or extract frames as PNG images" to capture up to 150 frames in your browser and download them one by one or as a ZIP.',
+        howTo: [
+          'Select a video file (up to 1 GB).',
+          'Set the start time and the length of the clip (up to 60 seconds), the width and the frames per second.',
+          'Click "Make GIF", preview the animation, then click "Download".',
+          'For still images, open "Or extract frames as PNG images", choose the start, frame rate and duration, then download the frames or all of them as a ZIP.',
+        ],
+        faqs: [
+          { q: 'Does this produce a single animated GIF file?', a: 'Yes — "Make GIF" returns one animated .gif file of your clip.' },
+          { q: 'Which video formats can I use?', a: 'MP4, MOV (including iPhone videos), WebM, MKV, AVI, WMV, FLV and most others ffmpeg can read.' },
+          { q: 'How long can the GIF be?', a: 'Up to 60 seconds, starting wherever you want in the video.' },
+          { q: 'Can I get the individual frames instead?', a: 'Yes: "Or extract frames as PNG images" captures up to 15 frames per second for up to 10 seconds, in your browser (nothing is uploaded for that), each as a PNG, or all in one ZIP.' },
+          { q: 'Is my video uploaded?', a: 'For the GIF, yes, to our own server (not a third party), and deleted as soon as you have downloaded the result. Frame extraction runs entirely in your browser.' },
+        ],
+        tips: [
+          '480 px and 10 fps is a good balance for sharing in chats and on social media.',
+          'For a reaction GIF, keep it short: 2 to 4 seconds.',
+          'Lower the width or the frame rate to make the GIF much lighter.',
+          'Play the video above to find the exact second where your clip should start.',
+        ],
+      }}
+    />
   );
 }

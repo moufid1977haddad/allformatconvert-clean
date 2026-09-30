@@ -8,6 +8,7 @@ import { reportToolError } from '../lib/reportError';
 import IosOriginalNote from './IosOriginalNote';
 import PlayablePreview from './PlayablePreview';
 import { formatBytes } from '../lib/formatBytes';
+import { FileDownload } from './FileDownload';
 
 // Shared UI of the tools that run on the media-processing service
 // (video-compressor, video-converter). The engine is the service; the browser
@@ -25,7 +26,7 @@ const STAGE_LABEL = {
   download: 'Downloading the result',
 };
 
-export default function MediaServiceTool({ op, title, subtitle, buttonLabel, controls, initialParams, buildParams, outName, seo, tool, previewStyle }) {
+export default function MediaServiceTool({ op, title, subtitle, buttonLabel, controls, initialParams, buildParams, outName, seo, tool, previewStyle, extra }) {
   const [file, setFile] = useState(null);
   const [params, setParams] = useState(initialParams);
   const [stage, setStage] = useState(null); // {stage, pct, position}
@@ -146,9 +147,11 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
               {result.isVideo && <PlayablePreview src={result.url} name={result.name} kind="video" className="w-full rounded-xl max-h-72" />}
               {result.isAudio && <PlayablePreview src={result.url} name={result.name} kind="audio" />}
               {result.isImage && <img src={result.url} alt="Result" className="mx-auto max-h-96 rounded-xl" />}
-              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download {result.ext.toUpperCase()}</a>
+              <FileDownload href={result.url} name={result.name} />
             </div>
           )}
+          {/* A second use of the same video, offered under the main one (Video to GIF: extract frames as images). */}
+          {extra && extra({ file, busy })}
         </div>
       </div>
       <SeoContent {...seo} />

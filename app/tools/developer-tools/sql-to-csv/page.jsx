@@ -3,6 +3,7 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { SEO } from './seo';
 import { sqlInsertsToCsv } from './sqlToCsv';
+import { TextDownload } from '../../../components/FileDownload';
 
 export default function SqlToCsvPage() {
   const [input, setInput] = useState('');
@@ -22,7 +23,8 @@ export default function SqlToCsvPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div><label className="block text-sm text-neutral-500 mb-1">SQL Input</label><textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" placeholder="INSERT INTO..." value={input} onChange={e => setInput(e.target.value)} /></div>
-            <div><label className="block text-sm text-neutral-500 mb-1">CSV Output</label><textarea aria-label="CSV Output" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" value={output} readOnly /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">CSV Output</label><textarea aria-label="CSV Output" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" value={output} readOnly />
+            <TextDownload text={output} name="data.csv" /></div>
           </div>
           {error && <p className="text-red-400 text-center">{error}</p>}
           <div className="grid grid-cols-2 gap-3">

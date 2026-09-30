@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run check-links && node scripts/check-accept-extensions.js && node scripts/fetch-upscale-model.mjs && next build",
+    "build": "npm run check-links && node scripts/check-accept-extensions.js && node scripts/check-downloads.js && node scripts/fetch-upscale-model.mjs && next build && node scripts/compat/check-syntax-es2022.mjs",
     "start": "next start",
     "lint": "eslint",
     "check-links": "node scripts/check-tool-links.js",

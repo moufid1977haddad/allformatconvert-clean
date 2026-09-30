@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf } from '../../../lib/imageOutput';
 import { rasterFromRGBA } from '../../../lib/bigImage';
 import { checkedDataURL } from '../../../lib/mediaSupport';
+import { FileDownload } from '../../../components/FileDownload';
 export default function WebPtoPNGPage() {
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
@@ -46,7 +47,7 @@ export default function WebPtoPNGPage() {
           <button onClick={convert} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {note && <p className="text-amber-700 text-center text-sm">{note}</p>}
-          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download</a></div>}
+          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
         </div>
       </div>
       <SeoContent

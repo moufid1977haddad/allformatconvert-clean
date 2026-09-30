@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { FileDownload } from '../../../components/FileDownload';
 
 const ALL_SIZES = [16, 32, 48, 256];
 
@@ -126,7 +127,7 @@ export default function PngToIcoPage() {
           {result && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center space-y-3">
               <div className="text-green-400 text-xl font-bold">Done!</div>
-              <a href={result} download="favicon.ico" className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition text-white">Download ICO</a>
+              <FileDownload href={result} name="favicon.ico" />
             </div>
           )}
         </div>

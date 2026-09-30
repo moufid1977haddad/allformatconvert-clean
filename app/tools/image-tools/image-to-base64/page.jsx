@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { sniffFormat } from '../../../lib/detectFileFormat';
+import { TextDownload } from '../../../components/FileDownload';
 export default function ImageToBase64Page() {
   const [result, setResult] = useState('');
   const [fileName, setFileName] = useState('');
@@ -44,7 +45,7 @@ export default function ImageToBase64Page() {
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={encode} />
           </div>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <div className="space-y-2"><textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-xs h-48 resize-none font-mono" value={result} readOnly /><button onClick={() => navigator.clipboard.writeText(result)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy Base64</button></div>}
+          {result && <div className="space-y-2"><textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-xs h-48 resize-none font-mono" value={result} readOnly /><button onClick={() => navigator.clipboard.writeText(result)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy Base64</button><TextDownload text={result} name={(fileName || 'image').replace(/\.[^.]+$/, '') + '.base64.txt'} /></div>}
         </div>
       </div>
       <SeoContent

@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { drawToRaster, encodeRaster } from '../../../lib/imageOutput';
 import { rasterFromRGBA } from '../../../lib/bigImage';
+import { FileDownload } from '../../../components/FileDownload';
 
 export default function ImageComparisonPage() {
   const [image1, setImage1] = useState(null);
@@ -63,7 +64,7 @@ export default function ImageComparisonPage() {
             <div className="space-y-2 text-center">
               <p className="text-sm text-neutral-700" data-diff-summary>{diff.changed === 0 ? 'The two images are identical (no pixel differs by more than 16/255).' : `${diff.changed.toLocaleString()} of ${diff.total.toLocaleString()} pixels differ (${(100 * diff.changed / diff.total).toFixed(2)} %), shown in red.`}{diff.resized ? ` Image 2 (${diff.w2}×${diff.h2}) was scaled to the size of image 1 (${diff.w}×${diff.h}) to compare them.` : ''}</p>
               <img src={diff.url} className="max-w-full mx-auto rounded border border-neutral-200" alt="Differences" />
-              <a href={diff.url} download="differences.png" className="inline-block text-sm text-indigo-600 underline">Download the difference image</a>
+              <FileDownload href={diff.url} name="differences.png" />
             </div>
           )}
           {image1 && image2 && mode === 'slider' && (

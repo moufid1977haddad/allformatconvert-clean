@@ -8,7 +8,7 @@ const WIDTHS = [240, 320, 400, 480, 540, 600, 640, 720, 800, 960, 1080];
 const FPS = [5, 8, 10, 12, 15, 20, 25, 30];
 export const GIF_MAX_SECONDS = 60;
 
-export default function GifFromVideoTool({ title, subtitle, seo, tool }) {
+export default function GifFromVideoTool({ title, subtitle, seo, tool, extra }) {
   return (
     <MediaServiceTool
       op="convert"
@@ -53,6 +53,7 @@ export default function GifFromVideoTool({ title, subtitle, seo, tool }) {
         );
       }}
       seo={seo}
+      extra={extra}
     />
   );
 }

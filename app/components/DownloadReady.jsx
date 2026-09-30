@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
-import { formatBytes } from '../lib/formatBytes';
+import { FileDownload } from './FileDownload';
 
 // A finished file, offered for download when the visitor wants it (28/09). No automatic download at the end of a
 // conversion: on an iPhone that saved without asking, or opened a PDF in place of the tool, losing its settings.
@@ -15,17 +15,14 @@ export function useDownloadable() {
   return [file, offer, clear];
 }
 
-const size = formatBytes;
-
-/** The Download button (and, for a PDF, a preview in a new tab: the tool page stays open). */
+/** The file's row (FileDownload: name, format, size, Download, Save / Share on iOS) and, for a PDF, a preview in a new
+ * tab (the tool page stays open). */
 export default function DownloadReady({ file, className = '' }) {
   if (!file) return null;
   const pdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
   return (
     <div className={`space-y-2 ${className}`} data-download-ready>
-      <a href={file.url} download={file.name} data-download className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-3 font-semibold transition break-all">
-        Download {file.name} ({size(file.bytes)})
-      </a>
+      <FileDownload href={file.url} name={file.name} />
       {pdf && <a href={file.url} target="_blank" rel="noopener" data-preview className="block text-center text-sm text-indigo-600 underline">Open the PDF in a new tab</a>}
     </div>
   );

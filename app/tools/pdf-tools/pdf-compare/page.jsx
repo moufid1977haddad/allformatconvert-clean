@@ -4,6 +4,7 @@ import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { itemsToText } from '../../../lib/pdfTextLayout';
 import { diffLines } from '../../../lib/codeTools';
+import { loadPdfjs } from '../../../lib/pdfjs';
 
 export default function Page() {
   const [file1, setFile1] = useState(null);
@@ -17,8 +18,7 @@ export default function Page() {
   const file2Ref = useRef();
 
   const extractText = async (file) => {
-    const pdfjsLib = await import('pdfjs-dist');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
+    const pdfjsLib = await loadPdfjs();
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     let text = '';

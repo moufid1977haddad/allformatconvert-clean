@@ -1,0 +1,639 @@
+[
+ {
+  "url": "https://www.onlineconvertools.com/tools/audio-tools/audio-converter",
+  "scores": {
+   "performance": 91,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 2931,
+  "fcp": 965,
+  "cls": 0,
+  "tbt": 234,
+  "si": 1385,
+  "tti": 4814,
+  "totalBytes": 642308,
+  "js": {
+   "bytes": 535392,
+   "n": 23
+  },
+  "font": {
+   "bytes": 64884,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179968,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 163 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.onlineconvertools.com/tools/developer-tools",
+  "scores": {
+   "performance": 89,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 2992,
+  "fcp": 1106,
+  "cls": 0,
+  "tbt": 280,
+  "si": 1106,
+  "tti": 5084,
+  "totalBytes": 682689,
+  "js": {
+   "bytes": 552318,
+   "n": 28
+  },
+  "font": {
+   "bytes": 64881,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 176 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "3.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.onlineconvertools.com/tools/developer-tools/json-formatter",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 2972,
+  "fcp": 955,
+  "cls": 0,
+  "tbt": 384,
+  "si": 1235,
+  "tti": 4773,
+  "totalBytes": 626401,
+  "js": {
+   "bytes": 524244,
+   "n": 22
+  },
+  "font": {
+   "bytes": 64901,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 166 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.onlineconvertools.com/tools/image-tools",
+  "scores": {
+   "performance": 88,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 2988,
+  "fcp": 1005,
+  "cls": 0,
+  "tbt": 307,
+  "si": 1214,
+  "tti": 5385,
+  "totalBytes": 728012,
+  "js": {
+   "bytes": 601002,
+   "n": 28
+  },
+  "font": {
+   "bytes": 64863,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "3.3 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.onlineconvertools.com/tools/image-tools/image-compressor",
+  "scores": {
+   "performance": 88,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 2963,
+  "fcp": 921,
+  "cls": 0,
+  "tbt": 309,
+  "si": 1476,
+  "tti": 4879,
+  "totalBytes": 634456,
+  "js": {
+   "bytes": 531905,
+   "n": 22
+  },
+  "font": {
+   "bytes": 64837,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 165 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.onlineconvertools.com/tools/image-tools/jpg-to-png",
+  "scores": {
+   "performance": 87,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 2943,
+  "fcp": 992,
+  "cls": 0,
+  "tbt": 342,
+  "si": 1277,
+  "tti": 4905,
+  "totalBytes": 634610,
+  "js": {
+   "bytes": 533001,
+   "n": 22
+  },
+  "font": {
+   "bytes": 64896,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 164 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.onlineconvertools.com/tools/math-tools/percentage-calculator",
+  "scores": {
+   "performance": 90,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 2944,
+  "fcp": 955,
+  "cls": 0,
+  "tbt": 257,
+  "si": 1208,
+  "tti": 4786,
+  "totalBytes": 629743,
+  "js": {
+   "bytes": 525601,
+   "n": 22
+  },
+  "font": {
+   "bytes": 64888,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 166 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.onlineconvertools.com/tools/pdf-tools",
+  "scores": {
+   "performance": 90,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 2942,
+  "fcp": 916,
+  "cls": 0,
+  "tbt": 245,
+  "si": 963,
+  "tti": 5285,
+  "totalBytes": 684076,
+  "js": {
+   "bytes": 556617,
+   "n": 28
+  },
+  "font": {
+   "bytes": 64888,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 176 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "3.2 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.onlineconvertools.com/tools/pdf-tools/pdf-compress",
+  "scores": {
+   "performance": 90,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 2951,
+  "fcp": 926,
+  "cls": 0.011,
+  "tbt": 264,
+  "si": 1301,
+  "tti": 4828,
+  "totalBytes": 633575,
+  "js": {
+   "bytes": 530714,
+   "n": 22
+  },
+  "font": {
+   "bytes": 64927,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179968,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 165 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.onlineconvertools.com/tools/pdf-tools/pdf-merge",
+  "scores": {
+   "performance": 90,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 2931,
+  "fcp": 977,
+  "cls": 0.018,
+  "tbt": 263,
+  "si": 1278,
+  "tti": 4807,
+  "totalBytes": 627780,
+  "js": {
+   "bytes": 525893,
+   "n": 22
+  },
+  "font": {
+   "bytes": 64887,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 166 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.onlineconvertools.com/tools/pdf-tools/word-to-pdf",
+  "scores": {
+   "performance": 89,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 2950,
+  "fcp": 921,
+  "cls": 0,
+  "tbt": 271,
+  "si": 1229,
+  "tti": 4893,
+  "totalBytes": 632077,
+  "js": {
+   "bytes": 529620,
+   "n": 22
+  },
+  "font": {
+   "bytes": 64881,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 166 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.onlineconvertools.com/tools/qr-barcodes-tools/qr-generator",
+  "scores": {
+   "performance": 90,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 2899,
+  "fcp": 947,
+  "cls": 0,
+  "tbt": 271,
+  "si": 1442,
+  "tti": 4814,
+  "totalBytes": 633104,
+  "js": {
+   "bytes": 530145,
+   "n": 22
+  },
+  "font": {
+   "bytes": 64894,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 166 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.onlineconvertools.com/tools/video-tools/video-compressor",
+  "scores": {
+   "performance": 88,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 2949,
+  "fcp": 987,
+  "cls": 0,
+  "tbt": 305,
+  "si": 1308,
+  "tti": 4884,
+  "totalBytes": 637364,
+  "js": {
+   "bytes": 535263,
+   "n": 22
+  },
+  "font": {
+   "bytes": 64873,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 166 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ }
+]

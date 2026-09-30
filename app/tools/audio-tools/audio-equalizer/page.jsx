@@ -5,6 +5,7 @@ import SeoContent from '../../../components/SeoContent';
 import { decodeAnyAudio } from '../../../lib/decodeAudio';
 import { AUDIO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
 import PlayablePreview from '../../../components/PlayablePreview';
+import { FileDownload } from '../../../components/FileDownload';
 
 export default function AudioEqualizerPage() {
   const [file, setFile] = useState(null);
@@ -172,7 +173,7 @@ export default function AudioEqualizerPage() {
           {exportUrl && (
             <div className="space-y-2">
               <PlayablePreview src={exportUrl} name="equalized.wav" />
-              <a href={exportUrl} download={'equalized_' + (file?.name.replace(/\.[^.]+$/, '') || 'audio') + '.wav'} className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download WAV</a>
+              <FileDownload href={exportUrl} name={'equalized_' + (file?.name.replace(/\.[^.]+$/, '') || 'audio') + '.wav'} />
             </div>
           )}
         </div>

@@ -1,0 +1,180 @@
+[
+ {
+  "url": "https://www.onlineconvertools.com/",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 2914,
+  "fcp": 939,
+  "cls": 0,
+  "tbt": 448,
+  "si": 1456,
+  "tti": 4642,
+  "totalBytes": 582753,
+  "js": {
+   "bytes": 476265,
+   "n": 19
+  },
+  "font": {
+   "bytes": 64882,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179968,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 139 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.9 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.ilovepdf.com/",
+  "scores": {
+   "performance": 79,
+   "accessibility": 93,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4501,
+  "fcp": 1229,
+  "cls": 0,
+  "tbt": 270,
+  "si": 1229,
+  "tti": 4522,
+  "totalBytes": 474067,
+  "js": {
+   "bytes": 270292,
+   "n": 4
+  },
+  "font": {
+   "bytes": 81165,
+   "n": 4
+  },
+  "image": {
+   "bytes": 49561,
+   "n": 18
+  },
+  "thirdParty": {
+   "bytes": 177791,
+   "n": 4
+  },
+  "failing": {
+   "accessibility": [
+    "color-contrast"
+   ],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {
+   "color-contrast": [
+    "div.block__body > div.row > div.col-md-7 > a.btn :: <a href=\"https://www.iloveimg.com/\" class=\"btn btn--secondary\"> :: contrast of 4.35 (foreground color: #e5322d, background color: #ffffff"
+   ]
+  },
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 130 KiB"
+   },
+   {
+    "id": "unused-css-rules",
+    "value": "Est savings of 32 KiB"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.ilovepdf.com/compress_pdf",
+  "scores": {
+   "performance": 69,
+   "accessibility": 83,
+   "best-practices": 77,
+   "seo": 100
+  },
+  "lcp": 4071,
+  "fcp": 1692,
+  "cls": 0,
+  "tbt": 660,
+  "si": 2576,
+  "tti": 8010,
+  "totalBytes": 953895,
+  "js": {
+   "bytes": 685531,
+   "n": 9
+  },
+  "font": {
+   "bytes": 82132,
+   "n": 4
+  },
+  "image": {
+   "bytes": 20376,
+   "n": 8
+  },
+  "thirdParty": {
+   "bytes": 490019,
+   "n": 29
+  },
+  "failing": {
+   "accessibility": [
+    "color-contrast",
+    "label",
+    "landmark-one-main"
+   ],
+   "best-practices": [
+    "third-party-cookies",
+    "inspector-issues"
+   ],
+   "seo": []
+  },
+  "nodes": {
+   "color-contrast": [
+    "div#workArea > div#uploader > a#pickfiles > span :: <span> :: contrast of 4.35 (foreground color: #ffffff, background color: #e5322d"
+   ],
+   "label": [
+    "div#workArea > div#uploader > div#html5_1k3pg6rrk1u8k16p114sp10gg1d9u4_container > input#html5_1k3pg6rrk1u8k16p114sp10gg1d9u4 :: <input id=\"html5_1k3pg6rrk1u8k16p114sp10gg1d9u4\" type=\"file\" style=\"font-size: 999px; opacity: 0; position: absolute; top: 0px; left: 0px;\" "
+   ],
+   "landmark-one-main": [
+    "html :: <html lang=\"en\" data-useragent=\"Mozilla/5.0 (Linux; Android 11; moto g power (2022)) AppleWebKit/537.36 (K…\">"
+   ]
+  },
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 467 KiB"
+   },
+   {
+    "id": "unused-css-rules",
+    "value": "Est savings of 73 KiB"
+   },
+   {
+    "id": "bootup-time",
+    "value": "1.4 s"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.2 s"
+   }
+  ],
+  "runtimeError": null
+ }
+]

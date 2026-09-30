@@ -5,6 +5,7 @@ import { SEO } from './seo';
 import { parseCsvRows, detectDelimiter, CSV_DELIMITERS } from '../../../lib/csvParser';
 import { detectEncoding } from '../../../lib/csvEncoding';
 import CsvReadOptions from '../../../components/CsvReadOptions';
+import { TextDownload } from '../../../components/FileDownload';
 
 // The shared, quote-aware parser (app/lib/csvParser.js) with the delimiter
 // detected like every other CSV tool -- before 28/09 this page split on ',' only,
@@ -62,14 +63,6 @@ export default function CsvToTsvPage() {
     setOutput(rows.map((row) => row.map(tsvField).join('\t')).join('\n'));
   };
 
-  const download = () => {
-    const url = URL.createObjectURL(new Blob([output], { type: 'text/tab-separated-values;charset=utf-8' }));
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = (fileName ? fileName.replace(/\.[^.]+$/, '') : 'converted') + '.tsv';
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  };
 
   const sel = 'bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-1.5';
   return (
@@ -97,11 +90,11 @@ export default function CsvToTsvPage() {
           </div>
           <CsvReadOptions showEncoding={!!fileBytes} encodingChoice={encodingChoice} detectedEncoding={detectedEncoding} onEncoding={changeEncoding} />
           {error && <p className="text-center text-sm text-red-600">{error}</p>}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <button onClick={convert} disabled={!input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert</button>
             <button onClick={() => navigator.clipboard.writeText(output)} disabled={!output} className="bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Copy</button>
-            <button onClick={download} disabled={!output} className="bg-neutral-700 hover:bg-neutral-600 text-white disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Download .tsv</button>
           </div>
+          <TextDownload text={output} name={(fileName ? fileName.replace(/\.[^.]+$/, '') : 'converted') + '.tsv'} type="text/tab-separated-values;charset=utf-8" />
         </div>
       </div>
       <SeoContent

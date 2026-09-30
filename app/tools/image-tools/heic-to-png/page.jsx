@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { reportToolError } from '../../../lib/reportError';
 import { imageDims } from '../../../lib/bigImage';
 import { loadRaster, encodeRaster } from '../../../lib/imageOutput';
+import { FileDownload } from '../../../components/FileDownload';
 
 export default function HeicToPngPage() {
   const [file, setFile] = useState(null);
@@ -59,7 +60,7 @@ export default function HeicToPngPage() {
           {result && (
             <div className="space-y-2">
               <img src={result} className="max-h-48 mx-auto rounded" />
-              <a href={result} download={file.name.replace(/\.hei[cf]$/i, '.png')} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download PNG</a>
+              <FileDownload href={result} name={file.name.replace(/\.hei[cf]$/i, '.png')} />
             </div>
           )}
         </div>

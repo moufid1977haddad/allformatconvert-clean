@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { finishRecording } from '../../../lib/mediaSupport';
+import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 
 export default function VoiceRecorderPage() {
   const [recording, setRecording] = useState(false);
@@ -60,12 +61,6 @@ export default function VoiceRecorderPage() {
     setRecording(false);
   };
 
-  const download = () => {
-    const a = document.createElement('a');
-    a.href = audioUrl;
-    a.download = `recording.${recExt}`;
-    a.click();
-  };
 
   const encodeWav = (audioBuffer) => {
     const numChannels = audioBuffer.numberOfChannels;
@@ -120,12 +115,6 @@ export default function VoiceRecorderPage() {
     setConverting(false);
   };
 
-  const downloadWav = () => {
-    const a = document.createElement('a');
-    a.href = wavUrl;
-    a.download = 'recording.wav';
-    a.click();
-  };
 
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -151,14 +140,14 @@ export default function VoiceRecorderPage() {
           {audioUrl && (
             <div className="space-y-3">
               <audio controls src={audioUrl} className="w-full" />
-              <div className="grid grid-cols-2 gap-3">
-                <button onClick={download} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download {recExt.toUpperCase()}</button>
+              <DownloadGroup zipName="recording.zip">
+                <FileDownload href={audioUrl} name={`recording.${recExt}`} />
+                {wavUrl && <FileDownload href={wavUrl} name="recording.wav" />}
+              </DownloadGroup>
+              {!wavUrl && (
                 <button onClick={exportWav} disabled={converting} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-2 font-semibold transition">
                   {converting ? 'Converting...' : 'Export as WAV'}
                 </button>
-              </div>
-              {wavUrl && (
-                <button onClick={downloadWav} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download WAV</button>
               )}
             </div>
           )}

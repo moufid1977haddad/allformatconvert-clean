@@ -6,6 +6,7 @@ import { MAX_PAGES, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL, MOBILE_MAX_PAGES, 
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { planSplit } from './splitPlan';
 import { formatBytes } from '../../../lib/formatBytes';
+import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 
 // iLovePDF's free modes (splitPlan.js): custom ranges, a file every N pages, every page, chosen pages.
 const MODES = [
@@ -130,18 +131,6 @@ export default function PdfSplitPage() {
     worker.postMessage({ type: 'split', files: plan.files, originalName: fileName });
   };
 
-  const downloadZip = async () => {
-    const JSZip = (await import('jszip')).default;
-    const zip = new JSZip();
-    downloads.forEach(({ name, blob }) => zip.file(name, blob));
-    // STORE: PDF streams are already compressed; deflating them again would only cost time.
-    const blob = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = fileName.replace(/.pdf$/i, '') + '_split.zip';
-    a.click();
-  };
-
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
@@ -201,14 +190,13 @@ export default function PdfSplitPage() {
           {downloads.length > 0 && !loading && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center space-y-3">
               <div className="text-green-600 text-xl font-bold">Done! {downloads.length} PDF{downloads.length > 1 ? 's' : ''}</div>
-              {downloads.length > 1 && (
-                <button onClick={downloadZip} className="w-full bg-green-600 hover:bg-green-500 rounded-xl px-6 py-3 font-semibold transition text-white">Download all ({downloads.length} PDFs, ZIP)</button>
-              )}
-              <div className="max-h-72 overflow-y-auto space-y-2">
-                {downloads.map(({ url, name, pages }, i) => (
-                  <a key={i} href={url} download={name} className="block bg-white border border-green-600 text-green-700 hover:bg-green-50 rounded-xl px-4 py-2 text-sm font-semibold transition break-all">{name} · {pages} page{pages > 1 ? 's' : ''}</a>
-                ))}
-              </div>
+              <DownloadGroup zipName={fileName.replace(/\.pdf$/i, '') + '_split.zip'}>
+                <div className="max-h-96 overflow-y-auto space-y-2">
+                  {downloads.map(({ url, blob, name, pages }, i) => (
+                    <FileDownload key={i} href={url} blob={blob} name={name} note={`${pages} page${pages > 1 ? 's' : ''}`} />
+                  ))}
+                </div>
+              </DownloadGroup>
             </div>
           )}
         </div>

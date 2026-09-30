@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { unlockPdfBytes } from '../../../lib/pdfUnlock';
+import { FileDownload } from '../../../components/FileDownload';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -62,7 +63,7 @@ export default function Page() {
             {loading ? 'Unlocking...' : 'Unlock PDF'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <a href={result} download="unlocked.pdf" className="block w-full text-center bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Download Unlocked PDF</a>}
+          {result && <FileDownload href={result} name="unlocked.pdf" />}
         </div>
       </div>
       <SeoContent

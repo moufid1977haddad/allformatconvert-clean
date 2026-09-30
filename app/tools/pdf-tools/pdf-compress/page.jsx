@@ -7,6 +7,7 @@ import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { runStagedToolResult, mediaServiceConfigured, MediaJobError } from '../../../lib/mediaJob';
 import { MAX_PDF_COMPRESS_STAGED_BYTES, OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
 import { formatBytes } from '../../../lib/formatBytes';
+import { FileDownload } from '../../../components/FileDownload';
 
 const MIB = 1024 * 1024;
 const SERVER_MAX_LABEL = `${Math.round(MAX_PDF_COMPRESS_STAGED_BYTES / MIB)} MB`;
@@ -223,7 +224,7 @@ export default function PdfCompressPage() {
                     .filter(Boolean).join(' · ')}
                 </p>
               )}
-              <a href={result.url} download={result.name.replace(/\.pdf$/i, '-compressed.pdf')} className="inline-block bg-green-600 hover:bg-green-500 text-white rounded-xl px-6 py-2 font-semibold transition">Download</a>
+              <FileDownload href={result.url} name={result.name.replace(/\.pdf$/i, '-compressed.pdf')} />
             </div>
           )}
         </div>

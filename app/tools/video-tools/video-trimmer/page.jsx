@@ -9,6 +9,7 @@ import { runMediaJob, mediaServiceConfigured } from '../../../lib/mediaJob';
 import IosOriginalNote from '../../../components/IosOriginalNote';
 import PlayablePreview from '../../../components/PlayablePreview';
 import { formatBytes } from '../../../lib/formatBytes';
+import { FileDownload } from '../../../components/FileDownload';
 
 // Precise cut, 28/09: re-encoding in ffmpeg.wasm measured ~3.7 s per second of 1080p in Chrome but ~29 s in
 // Firefox (292 s for 10 s). The reference way to cut fast AND exact (LosslessCut's "smart cut") re-encodes only
@@ -277,7 +278,7 @@ export default function VideoTrimmerPage() {
               <p className="text-xs text-neutral-500 text-center">
                 {fmtMB(result.size)}{result.actual ? ` · ${fmtSecs(result.actual)} long (you asked for ${fmtSecs(result.asked)}${result.precise ? '; cut to the frame' : '; a fast cut starts on the keyframe at or before your start'})` : ''}
               </p>
-              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download {result.name.split('.').pop().toUpperCase()}</a>
+              <FileDownload href={result.url} name={result.name} />
             </div>
           )}
         </div>

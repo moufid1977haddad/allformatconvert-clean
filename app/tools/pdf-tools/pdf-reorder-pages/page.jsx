@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
+import { FileDownload } from '../../../components/FileDownload';
 
 export default function PdfReorderPagesPage() {
   const [file, setFile] = useState(null);
@@ -85,7 +86,7 @@ export default function PdfReorderPagesPage() {
           {downloadUrl && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
               <div className="text-green-400 text-xl font-bold mb-3">Done!</div>
-              <a href={downloadUrl} download={file.name.replace(/\.pdf$/i, '-reordered.pdf')} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition text-white">Download</a>
+              <FileDownload href={downloadUrl} name={file.name.replace(/\.pdf$/i, '-reordered.pdf')} />
             </div>
           )}
         </div>
