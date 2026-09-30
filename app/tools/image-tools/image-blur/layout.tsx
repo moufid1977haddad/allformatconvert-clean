@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Image Blur — Apply a Uniform Blur Effect Across Your Online" },
-  description: "Image Blur applies a uniform blur effect across your image using the browser's built-in canvas filter, entirely on your device.",
+  description: "Blur an image online, free: a uniform Gaussian blur at full resolution, from 1 to 20 px, computed on your device (even 48 MP iPhone photos). Nothing is uploaded.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-blur" },
   openGraph: {
     title: "Image Blur — Apply a Uniform Blur Effect Across Your Online",
-    description: "Image Blur applies a uniform blur effect across your image using the browser's built-in canvas filter, entirely on your device.",
+    description: "Blur an image online, free: a uniform Gaussian blur at full resolution, from 1 to 20 px, computed on your device (even 48 MP iPhone photos). Nothing is uploaded.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-blur",
   },
 };

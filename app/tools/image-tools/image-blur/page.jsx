@@ -2,9 +2,11 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRasterLike, resultOf, sourceTypeOf } from '../../../lib/imageOutput';
-import { rasterFromRGBA } from '../../../lib/bigImage';
+import { rasterFromRGBA, canvasBeyondSafariCap, CANVAS_MAX_PIXELS } from '../../../lib/bigImage';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
-import { supportsCanvasFilter, applyGaussianBlur } from '../../../lib/canvasFilters';
+import { supportsCanvasFilter, gaussianBlurSupport } from '../../../lib/canvasFilters';
+import { applyGaussianBlurParallel } from '../../../lib/blurParallel';
+import { applyGaussianBlurGL } from '../../../lib/glBlur';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 export default function ImageBlurPage() {
   const [srcType, setSrcType] = useState('image/png');
@@ -22,12 +24,32 @@ export default function ImageBlurPage() {
     setBusy(true);
     try {
       const raster = await loadRaster(file);
-      // Blur reads neighbours: bands overlap by 3 sigma so their seams are invisible.
-      const out = await mapBands(raster, (ctx, band) => {
-        // Safari has no ctx.filter: it used to return the image unchanged (29/09).
-        if (supportsCanvasFilter()) { ctx.filter = `blur(${blur}px)`; ctx.drawImage(band.source, 0, 0); }
-        else { ctx.drawImage(band.source, 0, 0); ctx.putImageData(applyGaussianBlur(ctx.getImageData(0, 0, band.width, band.rows), Number(blur)), 0, 0); }
-      }, { margin: Math.ceil(Number(blur) * 3) + 2 });
+      // Blur reads neighbours: bands overlap so their seams are invisible (3 sigma for the browser's filter; the
+      // computed blur needs gaussianBlurSupport rows, fewer, and is then exact).
+      const native = supportsCanvasFilter();
+      const sigma = Number(blur);
+      let out;
+      // Same test as mapBands: does the whole image fit one canvas here?
+      const oneCanvas = !!raster.canvas && (raster.width * raster.height <= CANVAS_MAX_PIXELS || (await canvasBeyondSafariCap()));
+      if (!native && !oneCanvas) {
+        // Safari beyond one canvas (iPhone, over 16.7 MP): the pixels are blurred directly, in strips, without
+        // copying them through canvas bands (P17: that copying cost more than the blur itself).
+        const px = raster.imageData();
+        if (!applyGaussianBlurGL(px, sigma)) await applyGaussianBlurParallel(px, sigma);
+        out = rasterFromRGBA(px.data, raster.width, raster.height);
+      } else {
+        out = await mapBands(raster, async (ctx, band) => {
+          // Safari has no ctx.filter: it used to return the image unchanged (29/09).
+          if (native) { ctx.filter = `blur(${blur}px)`; ctx.drawImage(band.source, 0, 0); }
+          else {
+            // P17: on the graphics processor (the reference editors' way), else on all processor cores -- same blur.
+            ctx.drawImage(band.source, 0, 0);
+            const px = ctx.getImageData(0, 0, band.width, band.rows);
+            if (!applyGaussianBlurGL(px, sigma)) await applyGaussianBlurParallel(px, sigma);
+            ctx.putImageData(px, 0, 0);
+          }
+        }, { margin: Math.max(Math.ceil(sigma * 3) + 2, gaussianBlurSupport(sigma)) });
+      }
       setResult(resultOf(await encodeRasterLike(out, sourceTypeOf(file)), file.name, 'blurred'));
     } catch (e) { setError(e?.message || 'Could not process this image.'); }
     setBusy(false);
@@ -50,12 +72,12 @@ export default function ImageBlurPage() {
       </div>
       <SeoContent
         title="Image Blur"
-        description="Image Blur applies a uniform blur effect across your entire image using the browser's built-in canvas blur filter, with an adjustable intensity from 1 to 20 pixels. Everything happens locally on your device — your image is never uploaded to a server."
+        description="Image Blur applies a uniform Gaussian blur across your entire image, at full resolution, with an adjustable intensity from 1 to 20 pixels — with the browser's own blur filter where it has one, and otherwise (Safari, iPhone) computed on all your device's processor cores. Everything happens locally on your device — your image is never uploaded to a server."
         howTo={[
           "Click the upload area and select an image from your device.",
           "Adjust the blur slider (1–20px) to set the blur intensity.",
           "Click 'Apply Blur' to process the image.",
-          "Click the download button to save your blurred PNG image."
+          "Click the download button to save your blurred image, in the same format as the original."
         ]}
         faqs={[
           { q: "Is Image Blur really free to use?", a: "Yes, it's completely free with no registration required." },

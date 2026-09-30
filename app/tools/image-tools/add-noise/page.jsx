@@ -34,11 +34,15 @@ export default function AddNoisePage() {
       const out = await renderFull(raster, raster.width, raster.height, (ctx, drawSource, band) => {
         drawSource(ctx);
         const data = ctx.getImageData(0, 0, band.width, band.rows);
-        for (let i = 0; i < data.data.length; i += 4) {
-          const noise = (Math.random() - 0.5) * intensity * 2;
-          data.data[i] = Math.min(255, Math.max(0, data.data[i] + noise));
-          data.data[i+1] = Math.min(255, Math.max(0, data.data[i+1] + noise));
-          data.data[i+2] = Math.min(255, Math.max(0, data.data[i+2] + noise));
+        // P17: Math.random() per pixel took most of the time; xorshift32 (seeded from the system's generator) gives
+        // uniform whole-number noise in [-intensity, +intensity] -- the values the old version rounded to -- in
+        // integer arithmetic only. The clamped array keeps each value in 0-255 as Math.min/Math.max did.
+        const d = data.data, n = intensity * 2 + 1;
+        let s = crypto.getRandomValues(new Uint32Array(1))[0] | 1;
+        for (let i = 0; i < d.length; i += 4) {
+          s ^= s << 13; s ^= s >>> 17; s ^= s << 5;
+          const noise = (((s >>> 16) * n) >>> 16) - intensity;
+          d[i] = d[i] + noise; d[i + 1] = d[i + 1] + noise; d[i + 2] = d[i + 2] + noise;
         }
         ctx.putImageData(data, 0, 0);
       });

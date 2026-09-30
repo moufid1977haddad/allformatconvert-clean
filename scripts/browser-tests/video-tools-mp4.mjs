@@ -92,19 +92,36 @@ const run = (k) => !only || only.includes(k);
 
 try {
   if (run('rotator')) {
-    let r = await tool('/tools/video-tools/video-rotator', plain, async (p) => { await p.getByRole('button', { name: /^90°/ }).click(); await p.getByRole('button', { name: 'Rotate Video' }).click(); });
-    if (r.error) check('rotator MP4 90°', false, r.error); else {
+    // P17: MP4/MOV offer a choice, "Compatible everywhere" (default: turned picture, service) or "Instant, lossless"
+    // (rotation setting only). The old Windows Media Player ignores the setting (RAPPORT-p17-30-09.md).
+    const lossless = async (p) => { await p.getByRole('radio', { name: /Instant, lossless/ }).check(); };
+    const rotation = (p) => (probe(p).streams.find((x) => x.codec_type === 'video').side_data_list || []).map((d) => Number(d.rotation || 0)).filter(Boolean);
+    let r = await tool('/tools/video-tools/video-rotator', plain, async (p) => { await p.getByRole('button', { name: /^90°/ }).click(); await lossless(p); await p.getByRole('button', { name: 'Rotate Video' }).click(); });
+    if (r.error) check('rotator MP4 90° lossless', false, r.error); else {
       const a = fs.readFileSync(plain), o = fs.readFileSync(r.out); let diff = 0; for (let i = 0; i < a.length; i++) if (a[i] !== o[i]) diff++;
-      check('rotator MP4 90°: instant, lossless, nothing uploaded', r.uploads === 0 && o.length === a.length && diff > 0 && diff <= 36 && r.name === 'plain-rotated.mp4', `${r.secs.toFixed(1)} s, ${diff} bytes changed of ${a.length}, uploads ${r.uploads}, ${r.name}`);
+      check('rotator MP4 90° "Instant, lossless": instant, nothing uploaded, only the matrix changed', r.uploads === 0 && o.length === a.length && diff > 0 && diff <= 36 && r.name === 'plain-rotated.mp4', `${r.secs.toFixed(1)} s, ${diff} bytes changed of ${a.length}, uploads ${r.uploads}, ${r.name}`);
       checkTiming('rotator MP4 90° (lossless)', r.out, 30, 90, 3);
-      check('rotator MP4 90°: shown 360x640, marker top-right, sound kept', shown(r.out).join('x') === '360x640' && isRed(rgbAt(r.out, 0.9, 0.1)) && !isRed(rgbAt(r.out, 0.1, 0.1)) && codecs(r.out) === 'audio:aac,video:h264', `${shown(r.out).join('x')} ${codecs(r.out)}`);
+      check('rotator MP4 90° lossless: shown 360x640, marker top-right, sound kept', shown(r.out).join('x') === '360x640' && isRed(rgbAt(r.out, 0.9, 0.1)) && !isRed(rgbAt(r.out, 0.1, 0.1)) && codecs(r.out) === 'audio:aac,video:h264', `${shown(r.out).join('x')} ${codecs(r.out)}`);
     }
+    r = await tool('/tools/video-tools/video-rotator', plain, async (p) => {
+      await p.getByRole('button', { name: /^90°/ }).click();
+      if (!(await p.getByRole('radio', { name: /Compatible everywhere/ }).isChecked())) throw new Error('"Compatible everywhere" is not the default');
+      await p.getByRole('button', { name: 'Rotate Video' }).click();
+    });
+    if (r.error) check('rotator MP4 90° compatible', false, r.error);
+    else { check('rotator MP4 90° "Compatible everywhere" (default): service, picture turned 360x640 with NO rotation setting left, marker top-right, sound', r.uploads === 1 && r.name === 'plain-rotated.mp4' && !rotation(r.out).length && (() => { const s = probe(r.out).streams.find((x) => x.codec_type === 'video'); return `${s.width}x${s.height}` === '360x640'; })() && isRed(rgbAt(r.out, 0.9, 0.1)) && !isRed(rgbAt(r.out, 0.1, 0.1)) && codecs(r.out) === 'audio:aac,video:h264', `stored ${shown(r.out).join('x')}, rotation ${JSON.stringify(rotation(r.out))}, ${codecs(r.out)}, uploads ${r.uploads}, ${r.secs.toFixed(1)} s`); checkTiming('rotator MP4 90° (compatible)', r.out, 30, 90, 3); }
+    r = await tool('/tools/video-tools/video-rotator', phone, async (p) => { await p.getByRole('button', { name: /^90°/ }).click(); await lossless(p); await p.getByRole('button', { name: 'Rotate Video' }).click(); });
+    if (r.error) check('rotator iPhone MOV (already portrait) + 90° lossless', false, r.error);
+    else { check('rotator iPhone MOV (portrait) + 90° lossless -> 180°: MOV kept, 640x360 shown, marker bottom-right, nothing uploaded', r.uploads === 0 && r.name === 'IMG_0001-rotated.mov' && shown(r.out).join('x') === '640x360' && isRed(rgbAt(r.out, 0.9, 0.9)) && fs.statSync(r.out).size === fs.statSync(phone).size, `${shown(r.out).join('x')} ${r.name}`); checkTiming('rotator iPhone MOV (lossless)', r.out, 30, 90, 3); }
     r = await tool('/tools/video-tools/video-rotator', phone, async (p) => { await p.getByRole('button', { name: /^90°/ }).click(); await p.getByRole('button', { name: 'Rotate Video' }).click(); });
-    if (r.error) check('rotator iPhone MOV (already portrait) + 90°', false, r.error);
-    else { check('rotator iPhone MOV (portrait) + 90° -> 180°: MOV kept, 640x360 shown, marker bottom-right, nothing uploaded', r.uploads === 0 && r.name === 'IMG_0001-rotated.mov' && shown(r.out).join('x') === '640x360' && isRed(rgbAt(r.out, 0.9, 0.9)) && fs.statSync(r.out).size === fs.statSync(phone).size, `${shown(r.out).join('x')} ${r.name}`); checkTiming('rotator iPhone MOV', r.out, 30, 90, 3); }
-    r = await tool('/tools/video-tools/video-rotator', webm, async (p) => { await p.getByRole('button', { name: /^270°/ }).click(); await p.getByRole('button', { name: 'Rotate Video' }).click(); });
+    if (r.error) check('rotator iPhone MOV (portrait) + 90° compatible', false, r.error);
+    else { check('rotator iPhone MOV (portrait) + 90° "Compatible everywhere": the phone\'s own rotation applied first, picture stored 640x360, no rotation setting, marker bottom-right', r.uploads === 1 && r.name === 'IMG_0001-rotated.mp4' && !rotation(r.out).length && shown(r.out).join('x') === '640x360' && isRed(rgbAt(r.out, 0.9, 0.9)), `${shown(r.out).join('x')} rotation ${JSON.stringify(rotation(r.out))} ${r.name}`); checkTiming('rotator iPhone MOV (compatible)', r.out, 30, 90, 3); }
+    r = await tool('/tools/video-tools/video-rotator', webm, async (p) => {
+      if (await p.locator('[data-rotate-mode]').count()) throw new Error('a WebM offers no lossless choice, yet the choice is shown');
+      await p.getByRole('button', { name: /^270°/ }).click(); await p.getByRole('button', { name: 'Rotate Video' }).click();
+    });
     if (r.error) check('rotator WebM 270° (service)', false, r.error);
-    else { check('rotator WebM 270°: MP4 H.264/AAC from the service, 360x640, marker bottom-left', r.uploads === 1 && r.name === 'clip-rotated.mp4' && codecs(r.out) === 'audio:aac,video:h264' && shown(r.out).join('x') === '360x640' && isRed(rgbAt(r.out, 0.1, 0.9)), `${codecs(r.out)} ${shown(r.out).join('x')} ${r.secs.toFixed(1)} s`); checkTiming('rotator WebM (service)', r.out, 30, 90, 3); }
+    else { check('rotator WebM 270°: no choice shown, MP4 H.264/AAC from the service, 360x640, marker bottom-left', r.uploads === 1 && r.name === 'clip-rotated.mp4' && codecs(r.out) === 'audio:aac,video:h264' && shown(r.out).join('x') === '360x640' && isRed(rgbAt(r.out, 0.1, 0.9)), `${codecs(r.out)} ${shown(r.out).join('x')} ${r.secs.toFixed(1)} s`); checkTiming('rotator WebM (service)', r.out, 30, 90, 3); }
   }
   if (run('resizer')) {
     // The Safari case (30/09): "480p" on a vertical video must stay vertical, 480x854 -- not a landscape 854x480.
