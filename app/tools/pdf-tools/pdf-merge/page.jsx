@@ -117,7 +117,7 @@ export default function PdfMergePage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">Merge PDF</h1>
         <p className="text-neutral-500 text-center mb-2">Combine multiple PDF files into one — free, fast, no signup</p>
-        <p className="text-neutral-400 dark:text-neutral-500 text-xs text-center mb-8">Supports up to {maxPages.toLocaleString()} pages combined{isMobile ? ' on this device' : ''} (files up to {maxSizeLabel} total). Merging runs in the background — this tab stays responsive.</p>
+        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8">Supports up to {maxPages.toLocaleString()} pages combined{isMobile ? ' on this device' : ''} (files up to {maxSizeLabel} total). Merging runs in the background — this tab stays responsive.</p>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">Click to add PDF files</p>

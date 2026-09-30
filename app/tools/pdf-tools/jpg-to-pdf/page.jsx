@@ -1,7 +1,6 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { PDFDocument } from 'pdf-lib';
 import SeoContent from '../../../components/SeoContent';
 import { addImagePage } from '../../../lib/pdfImages';
 
@@ -19,6 +18,7 @@ export default function Page() {
     setLoading(true);
     setError('');
     try {
+      const { PDFDocument } = await import('pdf-lib'); // loaded when used, not with the page (30/09)
       const pdfDoc = await PDFDocument.create();
       for (const file of files) {
         // Upright (EXIF orientation) and never silently skipped (29/09).
@@ -39,7 +39,7 @@ export default function Page() {
         <p className="text-neutral-500 text-center mb-8">Convert JPG/PNG images to PDF</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {files.length > 0 ? <p className="text-neutral-700 font-medium">{files.length} image(s) selected</p> : <p className="text-neutral-400 text-sm">Click to upload JPG or PNG images</p>}
+            {files.length > 0 ? <p className="text-neutral-700 font-medium">{files.length} image(s) selected</p> : <p className="text-neutral-500 text-sm">Click to upload JPG or PNG images</p>}
           </div>
           <input ref={fileRef} type="file" accept="image/jpeg,image/png" multiple className="hidden" onChange={handleFiles} />
           {files.length > 0 && (

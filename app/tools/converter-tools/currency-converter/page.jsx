@@ -76,12 +76,12 @@ export default function CurrencyConverterPage() {
         <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div>
             <label className="block text-sm text-neutral-500 dark:text-neutral-400 mb-1">Amount</label>
-            <input type="number" value={amount} onChange={e => setAmount(parseFloat(e.target.value) || 0)} className="w-full bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-lg p-3 text-xl font-bold dark:text-white" />
+            <input aria-label="Amount" type="number" value={amount} onChange={e => setAmount(parseFloat(e.target.value) || 0)} className="w-full bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-lg p-3 text-xl font-bold dark:text-white" />
           </div>
           <div className="grid grid-cols-5 gap-2 items-end">
             <div className="col-span-2">
               <label className="block text-sm text-neutral-500 dark:text-neutral-400 mb-1">From</label>
-              <select value={from} onChange={e => setFrom(e.target.value)} className="w-full bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-lg p-3 dark:text-white">
+              <select aria-label="From" value={from} onChange={e => setFrom(e.target.value)} className="w-full bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-lg p-3 dark:text-white">
                 {codes.map(c => <option key={c} value={c}>{label(c)}</option>)}
               </select>
             </div>
@@ -90,21 +90,25 @@ export default function CurrencyConverterPage() {
             </div>
             <div className="col-span-2">
               <label className="block text-sm text-neutral-500 dark:text-neutral-400 mb-1">To</label>
-              <select value={to} onChange={e => setTo(e.target.value)} className="w-full bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-lg p-3 dark:text-white">
+              <select aria-label="To" value={to} onChange={e => setTo(e.target.value)} className="w-full bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-lg p-3 dark:text-white">
                 {codes.map(c => <option key={c} value={c}>{label(c)}</option>)}
               </select>
             </div>
           </div>
+          {/* The result box arrives after the rates are fetched: its place is kept, so nothing below it jumps (Lighthouse
+              CLS 0.12 on a phone before, 30/09/2026). */}
+          <div className="min-h-[11rem] flex flex-col justify-center">
           {loading && <p className="text-center text-neutral-500 dark:text-neutral-400">Loading rates...</p>}
-          {error && <p className="text-center text-yellow-400 text-sm">{error}</p>}
+          {error && <p className="text-center text-yellow-700 text-sm">{error}</p>}
           {rates && !loading && (
             <div className="bg-neutral-50 dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6 text-center">
               <div className="text-4xl font-bold text-indigo-400 break-words">{formatMoney(result, to)} {to}</div>
               <div className="text-neutral-500 dark:text-neutral-400 mt-2">{formatMoney(amount, from)} {from}{currencyName(from) ? ` (${currencyName(from)})` : ''} = {formatMoney(result, to)} {to}{currencyName(to) ? ` (${currencyName(to)})` : ''}</div>
               <div className="text-neutral-500 dark:text-neutral-400 text-sm mt-2">1 {from} = {formatRate(unitRate)} {to} · 1 {to} = {formatRate(1 / unitRate)} {from}</div>
-              <div className="text-neutral-400 text-xs mt-3">Rates published: {lastUpdate}{nextUpdate ? ` · next update: ${nextUpdate}` : ''} · <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer" className="underline">Rates By Exchange Rate API</a></div>
+              <div className="text-neutral-500 text-xs mt-3">Rates published: {lastUpdate}{nextUpdate ? ` · next update: ${nextUpdate}` : ''} · <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer" className="underline">Rates By Exchange Rate API</a></div>
             </div>
           )}
+          </div>
           <button onClick={loadRates} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl py-2 font-semibold transition">Refresh Rates</button>
         </div>
       </div>
@@ -121,7 +125,7 @@ export default function CurrencyConverterPage() {
           { q: "Is Currency Converter free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "How often are the exchange rates updated?", a: "Rates come from a free public exchange-rate API that's typically refreshed roughly once a day — not continuously throughout the day." },
           { q: "Which currencies are supported?", a: "166 currencies — every currency with a published daily rate, from USD, EUR, GBP and JPY to the Moroccan dirham, the Nigerian naira or the Vietnamese dong. The most used ones are listed first, then all the others alphabetically, each with its full name." },
-          { q: "Is my data private?", a: "The amount and currency codes you select are sent to a public third-party exchange-rate API to fetch rates; no personal or financial account information is involved." }
+          { q: "Is my data private?", a: "Yes. Your browser downloads the day's full rate table from the exchange-rate API (the same request for every visitor); the amount and the currencies you choose are never sent anywhere — the conversion is calculated in your browser." }
         ]}
         tips={[
           "Click \"Refresh Rates\" if you've had the page open a while, to make sure you're using the latest available rates.",

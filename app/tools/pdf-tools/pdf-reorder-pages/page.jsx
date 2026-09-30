@@ -1,6 +1,5 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
-import { PDFDocument } from 'pdf-lib';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 
@@ -23,6 +22,7 @@ export default function PdfReorderPagesPage() {
     setPageCount(0);
     try {
       const arrayBuffer = await f.arrayBuffer();
+      const { PDFDocument } = await import('pdf-lib'); // loaded when used, not with the page (30/09)
       const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer), { ignoreEncryption: true });
       const count = pdfDoc.getPageCount();
       setPageCount(count);
@@ -42,6 +42,7 @@ export default function PdfReorderPagesPage() {
     try {
       const newOrder = order.split(',').map(p => parseInt(p.trim()) - 1).filter(p => p >= 0);
       const arrayBuffer = await file.arrayBuffer();
+      const { PDFDocument } = await import('pdf-lib'); // loaded when used, not with the page (30/09)
       const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer), { ignoreEncryption: true });
       const newPdf = await PDFDocument.create();
       for (const pageIndex of newOrder) {
@@ -73,7 +74,7 @@ export default function PdfReorderPagesPage() {
           {pageCount > 0 && (
             <div>
               <label className="block text-sm text-neutral-500 mb-1">New page order (e.g. 3, 1, 2)</label>
-              <input type="text" value={order} onChange={e => setOrder(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" />
+              <input aria-label="New page order (e.g. 3, 1, 2)" type="text" value={order} onChange={e => setOrder(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" />
               <p className="text-xs text-neutral-500 mt-1">Total pages: {pageCount}</p>
             </div>
           )}

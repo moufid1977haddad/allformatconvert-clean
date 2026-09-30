@@ -45,7 +45,7 @@ export default function EmailGeneratorPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Tone</label>
-            <select value={tone} onChange={e => setTone(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2 text-sm">
+            <select aria-label="Tone" value={tone} onChange={e => setTone(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2 text-sm">
               {tones.map(t => <option key={t}>{t}</option>)}
             </select>
           </div>
@@ -57,7 +57,7 @@ export default function EmailGeneratorPage() {
           {output && (
             <div className="space-y-2">
               <label className="block text-sm text-neutral-500">Result</label>
-              <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={output} readOnly />
+              <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={output} readOnly />
               <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
             </div>
           )}

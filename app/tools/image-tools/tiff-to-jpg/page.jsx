@@ -138,7 +138,7 @@ export default function TiffToJpgPage() {
             {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500">Click or drop a TIFF file here</p>}
             <input ref={inputRef} type="file" accept=".tiff,.tif" className="hidden" onChange={handleFile} />
           </div>
-          <div><label className="block text-sm text-neutral-500 mb-1">Quality: {quality}%</label><input type="range" min="10" max="100" value={quality} onChange={e => setQuality(parseInt(e.target.value))} className="w-full" /></div>
+          <div><label className="block text-sm text-neutral-500 mb-1">Quality: {quality}%</label><input aria-label="Quality (%)" type="range" min="10" max="100" value={quality} onChange={e => setQuality(parseInt(e.target.value))} className="w-full" /></div>
           {loading ? (
             <div className="space-y-2">
               <button disabled className="w-full bg-neutral-200 text-gray-600 rounded-xl py-3 font-semibold">Converting…</button>

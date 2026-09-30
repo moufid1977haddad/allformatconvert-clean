@@ -55,13 +55,13 @@ export default function PdfToWordPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">PDF to Word</h1>
         <p className="text-neutral-500 text-center mb-2">Convert PDF files to an editable .docx document</p>
-        <p className="text-neutral-400 text-xs text-center mb-8">In our tests on PDFs exported from Word, headings, tables, columns and lists were kept. Scanned PDFs are not supported.</p>
+        <p className="text-neutral-500 text-xs text-center mb-8">In our tests on PDFs exported from Word, headings, tables, columns and lists were kept. Scanned PDFs are not supported.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a PDF here'}</p>
             <input ref={inputRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
           </div>
-          <p className="text-neutral-400 text-xs text-center -mt-2">Max {officeMaxLabel(MAX_PDF_TO_WORD_STAGED_BYTES)} per file</p>
+          <p className="text-neutral-500 text-xs text-center -mt-2">Max {officeMaxLabel(MAX_PDF_TO_WORD_STAGED_BYTES)} per file</p>
           <button onClick={convert} disabled={!file || loading || file.size > officeMaxBytes(MAX_PDF_TO_WORD_STAGED_BYTES)}className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">
             {loading && (
               <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden="true" />

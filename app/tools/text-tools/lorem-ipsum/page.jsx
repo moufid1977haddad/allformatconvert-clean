@@ -22,11 +22,11 @@ export default function LoremIpsumPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-neutral-500 mb-1">Amount</label>
-              <input type="number" min="1" max="100" value={count} onChange={e => setCount(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" />
+              <input aria-label="Amount" type="number" min="1" max="100" value={count} onChange={e => setCount(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" />
             </div>
             <div>
               <label className="block text-sm text-neutral-500 mb-1">Type</label>
-              <select value={type} onChange={e => setType(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3">
+              <select aria-label="Type" value={type} onChange={e => setType(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3">
                 <option value="paragraphs">Paragraphs</option>
                 <option value="sentences">Sentences</option>
                 <option value="words">Words</option>
@@ -36,7 +36,7 @@ export default function LoremIpsumPage() {
           <button onClick={generate} className="w-full bg-indigo-600 hover:bg-indigo-500 rounded-xl py-3 font-semibold transition">Generate</button>
           {hasResult && (result ? (
             <div className="space-y-2">
-              <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={result} readOnly />
+              <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={result} readOnly />
               <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
               {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
             </div>

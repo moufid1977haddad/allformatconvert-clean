@@ -61,13 +61,13 @@ export default function VideoCompressorPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Compression level</label>
-            <select disabled={disabled} value={params.level} onChange={(e) => setParams({ ...params, level: e.target.value })} className="w-full bg-white border border-neutral-200 rounded-lg px-3 py-2 text-sm">
+            <select aria-label="Compression level" disabled={disabled} value={params.level} onChange={(e) => setParams({ ...params, level: e.target.value })} className="w-full bg-white border border-neutral-200 rounded-lg px-3 py-2 text-sm">
               {LEVELS.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
             </select>
           </div>
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Resolution</label>
-            <select disabled={disabled} value={params.maxHeight} onChange={(e) => setParams({ ...params, maxHeight: e.target.value })} className="w-full bg-white border border-neutral-200 rounded-lg px-3 py-2 text-sm">
+            <select aria-label="Resolution" disabled={disabled} value={params.maxHeight} onChange={(e) => setParams({ ...params, maxHeight: e.target.value })} className="w-full bg-white border border-neutral-200 rounded-lg px-3 py-2 text-sm">
               {HEIGHTS.map((h) => <option key={h.value} value={h.value}>{h.label}</option>)}
             </select>
           </div>

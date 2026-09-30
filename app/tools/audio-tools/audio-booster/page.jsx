@@ -73,18 +73,18 @@ export default function AudioBoosterPage() {
         <p className="text-neutral-500 text-center mb-8">Boost and increase audio volume</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-400 text-sm">Click to upload an audio file</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload an audio file</p>}
           </div>
           <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Volume Boost: {volume}x</label>
-            <input type="range" min={1} max={5} step={0.5} value={volume} onChange={e => setVolume(Number(e.target.value))} className="w-full" />
+            <input aria-label="Volume Boost" type="range" min={1} max={5} step={0.5} value={volume} onChange={e => setVolume(Number(e.target.value))} className="w-full" />
             <div className="flex justify-between text-xs text-neutral-400 mt-1"><span>1x (normal)</span><span>5x (max)</span></div>
           </div>
           <label className="flex items-center gap-2 text-sm text-neutral-700"><input type="checkbox" checked={limiter} onChange={e => { setLimiter(e.target.checked); setResult(null); }} />Prevent distortion (limiter: loud peaks are held just under full scale instead of being cut flat)</label>
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Output Format</label>
-            <select value={format} onChange={e => setFormat(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
+            <select aria-label="Output Format" value={format} onChange={e => setFormat(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
               {AUDIO_OUTPUT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
             </select>
           </div>

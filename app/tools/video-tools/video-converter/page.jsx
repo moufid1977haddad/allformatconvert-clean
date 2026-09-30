@@ -71,7 +71,7 @@ export default function VideoConverterPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm text-neutral-500 mb-1">Convert to</label>
-              <select disabled={disabled} value={params.target} onChange={(e) => setParams({ ...params, target: e.target.value })} className={sel}>
+              <select aria-label="Convert to" disabled={disabled} value={params.target} onChange={(e) => setParams({ ...params, target: e.target.value })} className={sel}>
                 <optgroup label="Video">{VIDEO_TARGETS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</optgroup>
                 <optgroup label="Image">{OTHER_TARGETS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</optgroup>
                 <optgroup label="Audio only">{AUDIO_TARGETS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</optgroup>
@@ -79,13 +79,13 @@ export default function VideoConverterPage() {
             </div>
             <div>
               <label className="block text-sm text-neutral-500 mb-1">Quality</label>
-              <select disabled={disabled || params.target === 'gif' || params.target === 'wav' || params.target === 'flac'} value={params.quality} onChange={(e) => setParams({ ...params, quality: e.target.value })} className={sel}>
+              <select aria-label="Quality" disabled={disabled || params.target === 'gif' || params.target === 'wav' || params.target === 'flac'} value={params.quality} onChange={(e) => setParams({ ...params, quality: e.target.value })} className={sel}>
                 {QUALITIES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-sm text-neutral-500 mb-1">Resolution</label>
-              <select disabled={disabled || audio || params.target === 'gif'} value={params.maxHeight} onChange={(e) => setParams({ ...params, maxHeight: e.target.value })} className={sel}>
+              <select aria-label="Resolution" disabled={disabled || audio || params.target === 'gif'} value={params.maxHeight} onChange={(e) => setParams({ ...params, maxHeight: e.target.value })} className={sel}>
                 {HEIGHTS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>
             </div>

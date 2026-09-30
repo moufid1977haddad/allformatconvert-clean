@@ -59,13 +59,13 @@ export default function Page() {
         <p className="text-neutral-500 text-center mb-8">Translate PDF content to any language with AI</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-400 text-sm">Click to upload a PDF file</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload a PDF file</p>}
           </div>
-          <p className="text-neutral-400 text-xs text-center -mt-2">Max {MAX_PDF_TRANSLATE_PAGES} pages / {MAX_PDF_TRANSLATE_CHARS.toLocaleString()} characters translated — a hard cap to keep translation cost-effective and free for everyone.</p>
+          <p className="text-neutral-500 text-xs text-center -mt-2">Max {MAX_PDF_TRANSLATE_PAGES} pages / {MAX_PDF_TRANSLATE_CHARS.toLocaleString()} characters translated — a hard cap to keep translation cost-effective and free for everyone.</p>
           <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Target Language</label>
-            <select value={targetLang} onChange={e => setTargetLang(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
+            <select aria-label="Target Language" value={targetLang} onChange={e => setTargetLang(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
               {languages.map(l => <option key={l}>{l}</option>)}
             </select>
           </div>
@@ -76,7 +76,7 @@ export default function Page() {
           {output && (
             <div className="space-y-2">
               <label className="block text-sm text-neutral-500">Translation (first 5 pages)</label>
-              <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={output} readOnly />
+              <textarea aria-label="Translation (first 5 pages)" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={output} readOnly />
               <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Copy Translation</button>
             </div>
           )}

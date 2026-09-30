@@ -1,6 +1,5 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
-import { PDFDocument } from '@cantoo/pdf-lib';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 
@@ -27,6 +26,7 @@ export default function PdfProtectPage() {
     setDownloadUrl(null);
     try {
       const arrayBuffer = await file.arrayBuffer();
+      const { PDFDocument } = await import('@cantoo/pdf-lib'); // loaded when used, not with the page (30/09)
       const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer), { ignoreEncryption: true });
       pdfDoc.encrypt({
         userPassword: password,

@@ -134,7 +134,7 @@ export default function GifMakerPage() {
               </select></label>
           </div>
           {size && <p className="text-xs text-neutral-500" data-size>GIF size: {size.W} × {size.H} px{size.capped ? ` (reduced to ${MAX_SIDE} px on the longest side)` : ''}.{mixed ? ' Your images have different shapes: see "Frames of another shape".' : ''}</p>}
-          <div><label className="block text-sm text-neutral-500 mb-1">Frame Delay: {delay}ms</label><input type="range" min="50" max="1000" value={delay} onChange={e => { setDelay(parseInt(e.target.value)); setResult(null); }} className="w-full" /></div>
+          <div><label className="block text-sm text-neutral-500 mb-1">Frame Delay: {delay}ms</label><input aria-label="Frame Delay (ms)" type="range" min="50" max="1000" value={delay} onChange={e => { setDelay(parseInt(e.target.value)); setResult(null); }} className="w-full" /></div>
           <button onClick={createGif} disabled={images.length < 2 || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">{loading ? 'Creating...' : 'Create GIF'}</button>
           {error && <p className="text-red-600 text-sm text-center" role="alert">{error}</p>}
           {result && (

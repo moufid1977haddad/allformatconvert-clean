@@ -1,6 +1,5 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
-import { PDFDocument, degrees } from 'pdf-lib';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 
@@ -27,6 +26,7 @@ export default function PdfRotatePage() {
     setDownloadUrl(null);
     try {
       const arrayBuffer = await file.arrayBuffer();
+      const { PDFDocument, degrees } = await import('pdf-lib'); // loaded when used, not with the page (30/09)
       const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer), { ignoreEncryption: true });
       const pages = pdfDoc.getPages();
       pages.forEach(page => page.setRotation(degrees(rotation)));

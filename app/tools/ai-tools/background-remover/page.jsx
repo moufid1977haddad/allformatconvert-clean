@@ -171,9 +171,9 @@ export default function BackgroundRemoverPage() {
         <p className="text-neutral-500 text-center mb-8">Remove any background instantly with AI</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {preview ? <img src={preview} className="max-h-48 mx-auto rounded-lg" alt="original" /> : <div><p className="text-neutral-400 text-sm">Click to upload an image</p><p className="text-neutral-300 text-xs mt-1">JPG, PNG, WEBP supported</p></div>}
+            {preview ? <img src={preview} className="max-h-48 mx-auto rounded-lg" alt="original" /> : <div><p className="text-neutral-500 text-sm">Click to upload an image</p><p className="text-neutral-300 text-xs mt-1">JPG, PNG, WEBP supported</p></div>}
           </div>
-          <p className="text-neutral-400 text-xs text-center -mt-2">Max {(MAX_REMOVEBG_ORIGINAL_BYTES / (1024 * 1024)).toFixed(0)} MB per file — matches the largest limit offered by remove.bg, Pixian, and PhotoRoom; your photo is resized in the browser before upload and returned at its full original resolution.</p>
+          <p className="text-neutral-500 text-xs text-center -mt-2">Max {(MAX_REMOVEBG_ORIGINAL_BYTES / (1024 * 1024)).toFixed(0)} MB per file — matches the largest limit offered by remove.bg, Pixian, and PhotoRoom; your photo is resized in the browser before upload and returned at its full original resolution.</p>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           <button onClick={process} disabled={!preview || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Removing background…' : 'Remove Background'}

@@ -1,6 +1,5 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
-import { PDFDocument } from 'pdf-lib';
 import SeoContent from '../../../components/SeoContent';
 import { addImagePage } from '../../../lib/pdfImages';
 
@@ -29,6 +28,7 @@ export default function ImageToPdfPage() {
     setStatus('Converting...');
     setDownloadUrl(null);
     try {
+      const { PDFDocument } = await import('pdf-lib'); // loaded when used, not with the page (30/09)
       const pdfDoc = await PDFDocument.create();
       for (const file of files) {
         // Upright (EXIF orientation), any format the browser can display, and

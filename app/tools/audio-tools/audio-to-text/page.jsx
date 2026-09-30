@@ -132,7 +132,7 @@ export default function AudioToTextPage() {
               </div>
               {micTranscript && (
                 <div className="space-y-2">
-                  <textarea
+                  <textarea aria-label="Result"
                     className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none text-neutral-800"
                     value={micTranscript}
                     readOnly
@@ -153,7 +153,7 @@ export default function AudioToTextPage() {
                   </div>
                 </div>
               )}
-              <p className="text-neutral-400 text-xs text-center">Works best in Google Chrome with microphone permission</p>
+              <p className="text-neutral-500 text-xs text-center">Works best in Google Chrome with microphone permission</p>
             </>
           )}
 
@@ -166,10 +166,10 @@ export default function AudioToTextPage() {
               >
                 {file
                   ? <p className="text-neutral-700 font-medium">{file.name}</p>
-                  : <p className="text-neutral-400 text-sm">Click to upload an audio file (MP3, WAV, M4A...)</p>
+                  : <p className="text-neutral-500 text-sm">Click to upload an audio file (MP3, WAV, M4A...)</p>
                 }
               </div>
-              <p className="text-neutral-400 text-xs text-center -mt-2">Max {audioMaxLabel()} per file</p>
+              <p className="text-neutral-500 text-xs text-center -mt-2">Max {audioMaxLabel()} per file</p>
               <input ref={fileRef} type="file" accept="audio/*" className="hidden" onChange={handleFile} />
               {file && <audio controls src={URL.createObjectURL(file)} className="w-full" />}
               <button
@@ -183,7 +183,7 @@ export default function AudioToTextPage() {
               {fileTranscript && (
                 <div className="space-y-2">
                   <label className="block text-sm text-neutral-500">Transcript</label>
-                  <textarea
+                  <textarea aria-label="Transcript"
                     className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none text-neutral-800"
                     value={fileTranscript}
                     readOnly

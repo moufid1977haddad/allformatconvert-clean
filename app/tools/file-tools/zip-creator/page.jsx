@@ -92,7 +92,7 @@ export default function ZipCreatorPage() {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">ZIP Creator</h1>
         <p className="text-neutral-500 text-center mb-2">Create ZIP archive files in your browser</p>
-        <p className="text-neutral-400 text-xs text-center mb-8">Supports up to {maxTotalLabel} total{isMobile ? ' on this device' : ''}. Zipping runs in the background — this tab stays responsive.</p>
+        <p className="text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Supports up to {maxTotalLabel} total{isMobile ? ' on this device' : ''}. Zipping runs in the background — this tab stays responsive.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">Click to add files</p>

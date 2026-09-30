@@ -84,7 +84,7 @@ export default function CsvToTsvPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div><label className="block text-sm text-neutral-500 mb-1">CSV Input</label><textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" placeholder="Paste CSV here..." value={input} onChange={(e) => { const v = e.target.value; setInput(v); setFileName(''); setFileBytes(null); setDelimiterChoice('auto'); setDetectedDelimiter(detectDelimiter(v.slice(0, 8192))); }} /></div>
-            <div><label className="block text-sm text-neutral-500 mb-1">TSV Output</label><textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" value={output} readOnly /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">TSV Output</label><textarea aria-label="TSV Output" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" value={output} readOnly /></div>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
             <span className="flex items-center gap-2">

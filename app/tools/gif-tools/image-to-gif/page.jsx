@@ -90,7 +90,7 @@ export default function ImageToGifPage() {
           )}
           <label className="block text-sm"><span className="block text-neutral-500 mb-1">Images of another shape than the first</span>
             <select value={fit} onChange={e => { setFit(e.target.value); setResult(null); }} className="w-full border border-neutral-200 rounded-lg px-3 py-2">{FITS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></label>
-          <div><label className="block text-sm text-neutral-500 mb-1">Frame Delay: {delay}ms</label><input type="range" min="50" max="1000" value={delay} onChange={e => setDelay(parseInt(e.target.value))} className="w-full" /></div>
+          <div><label className="block text-sm text-neutral-500 mb-1">Frame Delay: {delay}ms</label><input aria-label="Frame Delay (ms)" type="range" min="50" max="1000" value={delay} onChange={e => setDelay(parseInt(e.target.value))} className="w-full" /></div>
           <button onClick={createGif} disabled={images.length < 2 || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">{loading ? 'Creating...' : 'Create GIF'}</button>
           {result && (
             <div className="space-y-3 text-center">

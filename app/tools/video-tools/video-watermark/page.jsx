@@ -443,7 +443,7 @@ export default function VideoWatermarkPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Video Watermark</h1>
         <p className="text-neutral-500 text-center mb-2">Burn a text or image watermark into your video and export a real watermarked video file</p>
         <p className="text-neutral-500 text-sm text-center mb-2">Works on videos up to <strong>2 minutes</strong> long. Watermarking runs entirely in your browser and takes roughly as long as the video itself (about 1 second of processing per second of video).</p>
-        <p className="text-neutral-400 text-xs text-center mb-8">Best supported formats: <strong>MP4 (H.264)</strong> and <strong>WebM</strong>. Formats like .avi, many .mov/.mkv files, or uncommon codecs often can&apos;t be decoded in-browser at all -- convert to MP4 first if your file is rejected.</p>
+        <p className="text-neutral-500 text-xs text-center mb-8">Best supported formats: <strong>MP4 (H.264)</strong> and <strong>WebM</strong>. Formats like .avi, many .mov/.mkv files, or uncommon codecs often can&apos;t be decoded in-browser at all -- convert to MP4 first if your file is rejected.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote />
           <div className={"border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center transition " + (loading ? 'opacity-50 pointer-events-none' : 'cursor-pointer hover:border-indigo-500')} onClick={() => !loading && inputRef.current.click()}>
@@ -451,7 +451,7 @@ export default function VideoWatermarkPage() {
             <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} disabled={loading} />
           </div>
           {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" />}
-          {file && !durationKnown && !durationError && <p className="text-neutral-400 text-center text-sm">Checking video length...</p>}
+          {file && !durationKnown && !durationError && <p className="text-neutral-500 text-center text-sm">Checking video length...</p>}
           {durationError && <p className="text-red-500 text-center text-sm">{durationError}</p>}
 
           <div>
@@ -472,7 +472,7 @@ export default function VideoWatermarkPage() {
           {watermarkType === 'text' ? (
             <div>
               <label className="block text-sm text-neutral-500 mb-1">Watermark Text</label>
-              <input type="text" value={text} onChange={(e) => setText(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" />
+              <input aria-label="Watermark Text" type="text" value={text} onChange={(e) => setText(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" />
             </div>
           ) : (
             <div>
@@ -486,7 +486,7 @@ export default function VideoWatermarkPage() {
 
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Opacity: {Math.round(opacity * 100)}%</label>
-            <input type="range" min="0.1" max="1" step="0.05" value={opacity} onChange={(e) => setOpacity(parseFloat(e.target.value))} className="w-full" />
+            <input aria-label="Opacity (%)" type="range" min="0.1" max="1" step="0.05" value={opacity} onChange={(e) => setOpacity(parseFloat(e.target.value))} className="w-full" />
           </div>
 
           <div>

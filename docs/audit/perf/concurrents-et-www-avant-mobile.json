@@ -1,0 +1,942 @@
+[
+ {
+  "url": "https://www.onlineconvertools.com/",
+  "scores": {
+   "performance": 61,
+   "accessibility": 94,
+   "best-practices": 96,
+   "seo": 100
+  },
+  "lcp": 6417,
+  "fcp": 3325,
+  "cls": 0,
+  "tbt": 386,
+  "si": 3325,
+  "tti": 6743,
+  "totalBytes": 839839,
+  "js": {
+   "bytes": 556455,
+   "n": 18
+  },
+  "font": {
+   "bytes": 231339,
+   "n": 4
+  },
+  "image": {
+   "bytes": 6528,
+   "n": 3
+  },
+  "thirdParty": {
+   "bytes": 299031,
+   "n": 10
+  },
+  "failing": {
+   "accessibility": [
+    "color-contrast",
+    "landmark-one-main"
+   ],
+   "best-practices": [
+    "inspector-issues"
+   ],
+   "seo": []
+  },
+  "nodes": {
+   "color-contrast": [
+    "div.dropzone > div > div.format-pills > span.format-pill :: <span class=\"format-pill\" style=\"background:#ffffff;border:1px solid #e2e8f0;color:#94a3b8\"> :: contrast of 2.56 (foreground color: #94a3b8, background color: #ffffff",
+    "div.min-h-screen > div.p-6 > div.max-w-5xl > p.text-neutral-500 :: <p class=\"text-neutral-500 dark:text-neutral-400 text-center mb-10\"> :: contrast of 4.34 (foreground color: #737373, background color: #f5f5f5",
+    "div.max-w-5xl > div.flex > a.bg-white > span.text-xs :: <span class=\"text-xs text-neutral-400 dark:text-neutral-500 bg-neutral-100 dark:bg-neut…\"> :: contrast of 2.36 (foreground color: #a1a1a1, background color: #f5f5f5",
+    "div.max-w-5xl > div.flex > a.bg-white > span.text-xs :: <span class=\"text-xs text-neutral-400 dark:text-neutral-500 bg-neutral-100 dark:bg-neut…\"> :: contrast of 2.36 (foreground color: #a1a1a1, background color: #f5f5f5",
+    "div.max-w-5xl > div.flex > a.bg-white > span.text-xs :: <span class=\"text-xs text-neutral-400 dark:text-neutral-500 bg-neutral-100 dark:bg-neut…\"> :: contrast of 2.36 (foreground color: #a1a1a1, background color: #f5f5f5",
+    "div.max-w-5xl > div.flex > a.bg-white > span.text-xs :: <span class=\"text-xs text-neutral-400 dark:text-neutral-500 bg-neutral-100 dark:bg-neut…\"> :: contrast of 2.36 (foreground color: #a1a1a1, background color: #f5f5f5"
+   ],
+   "landmark-one-main": [
+    "html :: <html lang=\"en-US\" style=\"height: 100%;\">"
+   ]
+  },
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 200 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "3.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.onlineconvertools.com/tools/image-tools/image-compressor",
+  "scores": {
+   "performance": 53,
+   "accessibility": 94,
+   "best-practices": 96,
+   "seo": 100
+  },
+  "lcp": 6454,
+  "fcp": 3211,
+  "cls": 0,
+  "tbt": 743,
+  "si": 3211,
+  "tti": 6899,
+  "totalBytes": 890014,
+  "js": {
+   "bytes": 610432,
+   "n": 20
+  },
+  "font": {
+   "bytes": 231320,
+   "n": 4
+  },
+  "image": {
+   "bytes": 6529,
+   "n": 3
+  },
+  "thirdParty": {
+   "bytes": 298045,
+   "n": 10
+  },
+  "failing": {
+   "accessibility": [
+    "color-contrast",
+    "landmark-one-main"
+   ],
+   "best-practices": [
+    "inspector-issues"
+   ],
+   "seo": []
+  },
+  "nodes": {
+   "color-contrast": [
+    "body.inter_5972bc34-module__OU16Qa__className > div.min-h-screen > div.max-w-2xl > p.text-neutral-500 :: <p class=\"text-neutral-500 text-center mb-8\"> :: contrast of 4.34 (foreground color: #737373, background color: #f5f5f5"
+   ],
+   "landmark-one-main": [
+    "html :: <html lang=\"en-US\" style=\"height: 100%;\">"
+   ]
+  },
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 226 KiB"
+   },
+   {
+    "id": "bootup-time",
+    "value": "1.5 s"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "3.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.onlineconvertools.com/tools/pdf-tools/pdf-compress",
+  "scores": {
+   "performance": 54,
+   "accessibility": 94,
+   "best-practices": 96,
+   "seo": 100
+  },
+  "lcp": 6628,
+  "fcp": 3231,
+  "cls": 0.011,
+  "tbt": 675,
+  "si": 3231,
+  "tti": 6933,
+  "totalBytes": 888873,
+  "js": {
+   "bytes": 609163,
+   "n": 20
+  },
+  "font": {
+   "bytes": 231346,
+   "n": 4
+  },
+  "image": {
+   "bytes": 6529,
+   "n": 3
+  },
+  "thirdParty": {
+   "bytes": 298048,
+   "n": 10
+  },
+  "failing": {
+   "accessibility": [
+    "color-contrast",
+    "landmark-one-main"
+   ],
+   "best-practices": [
+    "inspector-issues"
+   ],
+   "seo": []
+  },
+  "nodes": {
+   "color-contrast": [
+    "body.inter_5972bc34-module__OU16Qa__className > div.min-h-screen > div.max-w-2xl > p.text-neutral-500 :: <p class=\"text-neutral-500 text-center mb-2\"> :: contrast of 4.34 (foreground color: #737373, background color: #f5f5f5",
+    "body.inter_5972bc34-module__OU16Qa__className > div.min-h-screen > div.max-w-2xl > p.text-neutral-500 :: <p class=\"text-neutral-500 text-xs text-center mb-8\"> :: contrast of 4.34 (foreground color: #737373, background color: #f5f5f5"
+   ],
+   "landmark-one-main": [
+    "html :: <html lang=\"en-US\" style=\"height: 100%;\">"
+   ]
+  },
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 226 KiB"
+   },
+   {
+    "id": "bootup-time",
+    "value": "1.4 s"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "3.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.ilovepdf.com/",
+  "scores": {
+   "performance": 79,
+   "accessibility": 93,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4457,
+  "fcp": 1219,
+  "cls": 0,
+  "tbt": 271,
+  "si": 1219,
+  "tti": 4478,
+  "totalBytes": 475141,
+  "js": {
+   "bytes": 270008,
+   "n": 4
+  },
+  "font": {
+   "bytes": 81165,
+   "n": 4
+  },
+  "image": {
+   "bytes": 50706,
+   "n": 18
+  },
+  "thirdParty": {
+   "bytes": 177503,
+   "n": 4
+  },
+  "failing": {
+   "accessibility": [
+    "color-contrast"
+   ],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {
+   "color-contrast": [
+    "div.block__body > div.row > div.col-md-7 > a.btn :: <a href=\"https://www.iloveimg.com/\" class=\"btn btn--secondary\"> :: contrast of 4.35 (foreground color: #e5322d, background color: #ffffff"
+   ]
+  },
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 130 KiB"
+   },
+   {
+    "id": "unused-css-rules",
+    "value": "Est savings of 32 KiB"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.ilovepdf.com/compress_pdf",
+  "scores": {
+   "performance": 71,
+   "accessibility": 83,
+   "best-practices": 77,
+   "seo": 100
+  },
+  "lcp": 3998,
+  "fcp": 1430,
+  "cls": 0,
+  "tbt": 643,
+  "si": 2545,
+  "tti": 7299,
+  "totalBytes": 952590,
+  "js": {
+   "bytes": 684987,
+   "n": 9
+  },
+  "font": {
+   "bytes": 81165,
+   "n": 4
+  },
+  "image": {
+   "bytes": 20275,
+   "n": 8
+  },
+  "thirdParty": {
+   "bytes": 489628,
+   "n": 29
+  },
+  "failing": {
+   "accessibility": [
+    "color-contrast",
+    "label",
+    "landmark-one-main"
+   ],
+   "best-practices": [
+    "third-party-cookies",
+    "inspector-issues"
+   ],
+   "seo": []
+  },
+  "nodes": {
+   "color-contrast": [
+    "div#workArea > div#uploader > a#pickfiles > span :: <span> :: contrast of 4.35 (foreground color: #ffffff, background color: #e5322d"
+   ],
+   "label": [
+    "div#workArea > div#uploader > div#html5_1k3obcs6a15got2flcr1ta01vvk4_container > input#html5_1k3obcs6a15got2flcr1ta01vvk4 :: <input id=\"html5_1k3obcs6a15got2flcr1ta01vvk4\" type=\"file\" style=\"font-size: 999px; opacity: 0; position: absolute; top: 0px; left: 0px;\" mu"
+   ],
+   "landmark-one-main": [
+    "html :: <html lang=\"en\" data-useragent=\"Mozilla/5.0 (Linux; Android 11; moto g power (2022)) AppleWebKit/537.36 (K…\">"
+   ]
+  },
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 466 KiB"
+   },
+   {
+    "id": "unused-css-rules",
+    "value": "Est savings of 73 KiB"
+   },
+   {
+    "id": "bootup-time",
+    "value": "1.5 s"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.1 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.freeconvert.com/",
+  "scores": {
+   "performance": 47,
+   "accessibility": 89,
+   "best-practices": 54,
+   "seo": 100
+  },
+  "lcp": 3193,
+  "fcp": 1966,
+  "cls": 0.135,
+  "tbt": 6606,
+  "si": 11520,
+  "tti": 41792,
+  "totalBytes": 3122049,
+  "js": {
+   "bytes": 2363394,
+   "n": 129
+  },
+  "font": {
+   "bytes": 137704,
+   "n": 4
+  },
+  "image": {
+   "bytes": 98059,
+   "n": 212
+  },
+  "thirdParty": {
+   "bytes": 2115699,
+   "n": 643
+  },
+  "failing": {
+   "accessibility": [
+    "color-contrast",
+    "label",
+    "landmark-one-main"
+   ],
+   "best-practices": [
+    "deprecations",
+    "third-party-cookies",
+    "errors-in-console",
+    "inspector-issues"
+   ],
+   "seo": []
+  },
+  "nodes": {
+   "color-contrast": [
+    "div#FileInputDropdownHolder > div.file-input-dropdown__button > div#upload-file-button > span :: <span data-v-bfd7f29a=\"\"> :: contrast of 3.19 (foreground color: #f3f3f3, background color: #727cf5",
+    "span.msg > span > span > a :: <a href=\"/pricing\" data-v-cfb61030=\"\"> :: contrast of 3.07 (foreground color: #727cf5, background color: #efeef3",
+    "div.file-input > div.dropzone > span.msg > p.upload-copyright :: <p class=\"upload-copyright\" data-v-cfb61030=\"\"> :: contrast of 3.14 (foreground color: #7987a1, background color: #efeef3",
+    "div.dropzone > span.msg > p.upload-copyright > a :: <a href=\"/terms\" target=\"_blank\"> :: contrast of 3.14 (foreground color: #7987a1, background color: #efeef3",
+    "div.container > div.content-card > div.content-card__wrapper > a.content-card__button :: <a href=\"/security-and-compliance\" class=\"content-card__button outline\" data-v-da39cb90=\"\"> :: contrast of 3.54 (foreground color: #727cf5, background color: #ffffff",
+    "div.footer-bottom > div.drop > a.drop__trigger > span.drop__trigger__text :: <span class=\"drop__trigger__text\" data-v-14ab5a00=\"\"> :: contrast of 4.29 (foreground color: #89919d, background color: #1e2e47"
+   ],
+   "label": [
+    "div#FileInputDropdownHolder > div.file-input-dropdown__button > div#upload-file-button > input#file :: <input type=\"file\" id=\"file\" data-automation-id=\"DeviceUploaderInput\" multiple=\"multiple\" accept=\"\" class=\"device-uploader\" data-v-3ce7d028=",
+    "ul.file-input-dropdown__list > li.file-input-dropdown__list__item > div > input#file :: <input type=\"file\" id=\"file\" data-automation-id=\"DeviceUploaderInput\" multiple=\"multiple\" accept=\"\" class=\"device-uploader\" data-v-3ce7d028="
+   ],
+   "landmark-one-main": [
+    "html :: <html lang=\"en\" dir=\"ltr\">"
+   ]
+  },
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 577 KiB"
+   },
+   {
+    "id": "unminified-javascript",
+    "value": "Est savings of 2 KiB"
+   },
+   {
+    "id": "unused-css-rules",
+    "value": "Est savings of 14 KiB"
+   },
+   {
+    "id": "bootup-time",
+    "value": "12.9 s"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "19.0 s"
+   },
+   {
+    "id": "layout-shifts",
+    "value": "7 layout shifts found"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.freeconvert.com/image-compressor",
+  "scores": {
+   "performance": 41,
+   "accessibility": 89,
+   "best-practices": 54,
+   "seo": 100
+  },
+  "lcp": 4849,
+  "fcp": 1951,
+  "cls": 0.002,
+  "tbt": 5324,
+  "si": 15081,
+  "tti": 38974,
+  "totalBytes": 3139393,
+  "js": {
+   "bytes": 2394622,
+   "n": 125
+  },
+  "font": {
+   "bytes": 48499,
+   "n": 3
+  },
+  "image": {
+   "bytes": 271185,
+   "n": 190
+  },
+  "thirdParty": {
+   "bytes": 2116984,
+   "n": 542
+  },
+  "failing": {
+   "accessibility": [
+    "color-contrast",
+    "label",
+    "landmark-one-main"
+   ],
+   "best-practices": [
+    "deprecations",
+    "third-party-cookies",
+    "errors-in-console",
+    "inspector-issues"
+   ],
+   "seo": []
+  },
+  "nodes": {
+   "color-contrast": [
+    "div#FileInputDropdownHolder > div.file-input-dropdown__button > div#upload-file-button > span :: <span data-v-bfd7f29a=\"\"> :: contrast of 3.19 (foreground color: #f3f3f3, background color: #727cf5",
+    "span.msg > span > span > a :: <a href=\"/pricing\" data-v-cfb61030=\"\"> :: contrast of 3.07 (foreground color: #727cf5, background color: #efeef3",
+    "div.file-input > div.dropzone > span.msg > p.upload-copyright :: <p class=\"upload-copyright\" data-v-cfb61030=\"\"> :: contrast of 3.14 (foreground color: #7987a1, background color: #efeef3",
+    "div.dropzone > span.msg > p.upload-copyright > a :: <a href=\"/terms\" target=\"_blank\"> :: contrast of 3.14 (foreground color: #7987a1, background color: #efeef3",
+    "div.content-html > ol > li > a :: <a href=\"https://imageresizer.com/\" target=\"_blank\"> :: contrast of 3.54 (foreground color: #727cf5, background color: #ffffff",
+    "div.content-html > ol > li > a :: <a href=\"https://imageresizer.com/crop-image\" target=\"_blank\"> :: contrast of 3.54 (foreground color: #727cf5, background color: #ffffff"
+   ],
+   "label": [
+    "div#FileInputDropdownHolder > div.file-input-dropdown__button > div#upload-file-button > input#file :: <input type=\"file\" id=\"file\" data-automation-id=\"DeviceUploaderInput\" multiple=\"multiple\" accept=\".jpeg,.jpg,.png,.gif,.webp,.heic\" class=\"d",
+    "ul.file-input-dropdown__list > li.file-input-dropdown__list__item > div > input#file :: <input type=\"file\" id=\"file\" data-automation-id=\"DeviceUploaderInput\" multiple=\"multiple\" accept=\".jpeg,.jpg,.png,.gif,.webp,.heic\" class=\"d"
+   ],
+   "landmark-one-main": [
+    "html :: <html lang=\"en\" dir=\"ltr\">"
+   ]
+  },
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 592 KiB"
+   },
+   {
+    "id": "unminified-javascript",
+    "value": "Est savings of 2 KiB"
+   },
+   {
+    "id": "unused-css-rules",
+    "value": "Est savings of 15 KiB"
+   },
+   {
+    "id": "bootup-time",
+    "value": "11.9 s"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "17.3 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://www.freeconvert.com/compress-pdf",
+  "scores": {
+   "performance": 24,
+   "accessibility": 89,
+   "best-practices": 73,
+   "seo": 92
+  },
+  "lcp": 6995,
+  "fcp": 1995,
+  "cls": 0.227,
+  "tbt": 8816,
+  "si": 13492,
+  "tti": 42932,
+  "totalBytes": 3083097,
+  "js": {
+   "bytes": 2357188,
+   "n": 130
+  },
+  "font": {
+   "bytes": 137704,
+   "n": 4
+  },
+  "image": {
+   "bytes": 97724,
+   "n": 210
+  },
+  "thirdParty": {
+   "bytes": 2050279,
+   "n": 644
+  },
+  "failing": {
+   "accessibility": [
+    "color-contrast",
+    "label",
+    "landmark-one-main"
+   ],
+   "best-practices": [
+    "third-party-cookies",
+    "errors-in-console",
+    "inspector-issues"
+   ],
+   "seo": [
+    "crawlable-anchors"
+   ]
+  },
+  "nodes": {
+   "color-contrast": [
+    "div#FileInputDropdownHolder > div.file-input-dropdown__button > div#upload-file-button > span :: <span data-v-bfd7f29a=\"\"> :: contrast of 3.19 (foreground color: #f3f3f3, background color: #727cf5",
+    "span.msg > span > span > a :: <a href=\"/pricing\" data-v-cfb61030=\"\"> :: contrast of 3.07 (foreground color: #727cf5, background color: #efeef3",
+    "div.file-input > div.dropzone > span.msg > p.upload-copyright :: <p class=\"upload-copyright\" data-v-cfb61030=\"\"> :: contrast of 3.14 (foreground color: #7987a1, background color: #efeef3",
+    "div.dropzone > span.msg > p.upload-copyright > a :: <a href=\"/terms\" target=\"_blank\"> :: contrast of 3.14 (foreground color: #7987a1, background color: #efeef3",
+    "div.clearfix > div.control--theme > div.col-md-12 > small :: <small data-v-6df59758=\"\"> :: contrast of 2.55 (foreground color: #9fa2a9, background color: #ffffff",
+    "div.clearfix > div.control--theme > div.text-left > small.visible-in-mobile :: <small class=\"visible-in-mobile d-block\" data-v-76a72d5c=\"\"> :: contrast of 2.55 (foreground color: #9fa2a9, background color: #ffffff"
+   ],
+   "label": [
+    "div#FileInputDropdownHolder > div.file-input-dropdown__button > div#upload-file-button > input#file :: <input type=\"file\" id=\"file\" data-automation-id=\"DeviceUploaderInput\" multiple=\"multiple\" accept=\".pdf\" class=\"device-uploader\" data-v-3ce7d",
+    "ul.file-input-dropdown__list > li.file-input-dropdown__list__item > div > input#file :: <input type=\"file\" id=\"file\" data-automation-id=\"DeviceUploaderInput\" multiple=\"multiple\" accept=\".pdf\" class=\"device-uploader\" data-v-3ce7d"
+   ],
+   "landmark-one-main": [
+    "html :: <html lang=\"en\" dir=\"ltr\">"
+   ]
+  },
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 538 KiB"
+   },
+   {
+    "id": "unminified-javascript",
+    "value": "Est savings of 2 KiB"
+   },
+   {
+    "id": "unused-css-rules",
+    "value": "Est savings of 15 KiB"
+   },
+   {
+    "id": "bootup-time",
+    "value": "16.4 s"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "24.1 s"
+   },
+   {
+    "id": "layout-shifts",
+    "value": "6 layout shifts found"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://123apps.com/",
+  "scores": {
+   "performance": 72,
+   "accessibility": 60,
+   "best-practices": 65,
+   "seo": 82
+  },
+  "lcp": 2719,
+  "fcp": 1647,
+  "cls": 0.005,
+  "tbt": 1161,
+  "si": 2406,
+  "tti": 6372,
+  "totalBytes": 686255,
+  "js": {
+   "bytes": 554452,
+   "n": 9
+  },
+  "font": {
+   "bytes": 35592,
+   "n": 1
+  },
+  "image": {
+   "bytes": 14891,
+   "n": 5
+  },
+  "thirdParty": {
+   "bytes": 474986,
+   "n": 17
+  },
+  "failing": {
+   "accessibility": [
+    "button-name",
+    "link-name",
+    "meta-viewport",
+    "landmark-one-main"
+   ],
+   "best-practices": [
+    "paste-preventing-inputs",
+    "third-party-cookies",
+    "inspector-issues"
+   ],
+   "seo": [
+    "meta-description",
+    "crawlable-anchors"
+   ]
+  },
+  "nodes": {
+   "button-name": [
+    "body#body > div#header > button.burger :: <button type=\"button\" class=\"burger\">",
+    "div#header > div.buttons > div#usermenu > button#sign-in :: <button id=\"sign-in\" class=\"sign-in sm\" data-premium-trigger=\"sign_in\" data-toggle=\"modal\" data-target=\"#modal-login\">"
+   ],
+   "link-name": [
+    "body#body > div#header > div.logo-group > a.logo :: <a href=\"https://123apps.com/\" class=\"logo\">"
+   ],
+   "meta-viewport": [
+    "head > meta :: <meta name=\"viewport\" content=\"width=device-width, user-scalable=no\">"
+   ],
+   "landmark-one-main": [
+    "html :: <html lang=\"en\">"
+   ]
+  },
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 289 KiB"
+   },
+   {
+    "id": "unused-css-rules",
+    "value": "Est savings of 30 KiB"
+   },
+   {
+    "id": "bootup-time",
+    "value": "1.9 s"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.9 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://online-audio-converter.com/",
+  "scores": {
+   "performance": 42,
+   "accessibility": 77,
+   "best-practices": 62,
+   "seo": 82
+  },
+  "lcp": 6857,
+  "fcp": 2450,
+  "cls": 0.056,
+  "tbt": 2324,
+  "si": 4258,
+  "tti": 10751,
+  "totalBytes": 1156741,
+  "js": {
+   "bytes": 825486,
+   "n": 25
+  },
+  "font": {
+   "bytes": 35695,
+   "n": 1
+  },
+  "image": {
+   "bytes": 109106,
+   "n": 53
+  },
+  "thirdParty": {
+   "bytes": 824881,
+   "n": 58
+  },
+  "failing": {
+   "accessibility": [
+    "button-name",
+    "color-contrast",
+    "link-name",
+    "meta-viewport",
+    "landmark-one-main"
+   ],
+   "best-practices": [
+    "paste-preventing-inputs",
+    "third-party-cookies",
+    "errors-in-console",
+    "inspector-issues"
+   ],
+   "seo": [
+    "meta-description",
+    "crawlable-anchors"
+   ]
+  },
+  "nodes": {
+   "button-name": [
+    "body#body > div#header > button.burger :: <button type=\"button\" class=\"burger\">",
+    "div#header > div.buttons > div#usermenu > button#sign-in :: <button id=\"sign-in\" class=\"sign-in sm\" data-premium-trigger=\"sign_in\" data-toggle=\"modal\" data-target=\"#modal-login\">"
+   ],
+   "color-contrast": [
+    "td.col_1 > a.app_logo > div.title > div.row_2 :: <div class=\"row_2\"> :: contrast of 2.54 (foreground color: #a3a2a2, background color: #ffffff"
+   ],
+   "link-name": [
+    "body#body > div#header > div.logo-group > a.logo :: <a href=\"https://123apps.com/\" class=\"logo\" style=\"width: 106px; float: none;\">"
+   ],
+   "meta-viewport": [
+    "head > meta :: <meta name=\"viewport\" content=\"width=device-width, user-scalable=no\">"
+   ],
+   "landmark-one-main": [
+    "html :: <html lang=\"en\">"
+   ]
+  },
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 325 KiB"
+   },
+   {
+    "id": "unused-css-rules",
+    "value": "Est savings of 30 KiB"
+   },
+   {
+    "id": "bootup-time",
+    "value": "3.4 s"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "5.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://tinywow.com/",
+  "scores": {
+   "performance": 54,
+   "accessibility": 83,
+   "best-practices": 100,
+   "seo": 85
+  },
+  "lcp": 5532,
+  "fcp": 3417,
+  "cls": 0.014,
+  "tbt": 700,
+  "si": 4116,
+  "tti": 9404,
+  "totalBytes": 1885183,
+  "js": {
+   "bytes": 794091,
+   "n": 14
+  },
+  "font": {
+   "bytes": 237608,
+   "n": 6
+  },
+  "image": {
+   "bytes": 635010,
+   "n": 37
+  },
+  "thirdParty": {
+   "bytes": 717823,
+   "n": 19
+  },
+  "failing": {
+   "accessibility": [
+    "color-contrast",
+    "heading-order",
+    "link-in-text-block",
+    "link-name",
+    "meta-viewport"
+   ],
+   "best-practices": [],
+   "seo": [
+    "meta-description",
+    "link-text"
+   ]
+  },
+  "nodes": {
+   "color-contrast": [
+    "a.tools__content > div.tools__header > div.tools__tag > span :: <span> :: contrast of 2.82 (foreground color: #ffffff, background color: #6aa3aa",
+    "a.tools__content > div.tools__header > div.tools__tag > span :: <span> :: contrast of 2.81 (foreground color: #ffffff, background color: #9d8cf2",
+    "div.tools__item > div.tools__footer > div.d-flex > span.tools__span :: <span class=\"tools__span\"> :: contrast of 4.13 (foreground color: #707375, background color: #efedfd",
+    "div.tools__item > div.tools__footer > div.d-flex > a.tools__upcoming :: <a href=\"https://tinywow.com/pdf/create\" class=\"tools__upcoming\" tabindex=\"0\"> :: contrast of 4.31 (foreground color: #6f56ec, background color: #efedfd",
+    "a.tools__content > div.tools__body > div > p.tools__name :: <p class=\"tools__name\"> :: contrast of 3.14 (foreground color: #ffffff, background color: #f66213",
+    "a.tools__content > div.tools__body > div > span.tools__descr :: <span class=\"tools__descr\"> :: contrast of 3.14 (foreground color: #ffffff, background color: #f66213"
+   ],
+   "heading-order": [
+    "a.tools_box-full > div.tools_box > div > h4 :: <h4>",
+    "div.present-card > div.present-cart__content > a > h5.present-card__name :: <h5 class=\"present-card__name\">",
+    "div.col-lg-8 > div.row > div.col-lg-2 > h4 :: <h4>"
+   ],
+   "link-in-text-block": [
+    "div.row > div.col-md-7 > p > a.active :: <a href=\"https://jenni.ai/?via=tinywow\" class=\"active\">"
+   ],
+   "link-name": [
+    "div.slick-slide > div > div.present-card > a :: <a href=\"https://tinywow.com/pdf/create\" tabindex=\"0\">",
+    "div.present-card > div.present-cart__content > div.present-cart__actions > a :: <a href=\"https://tinywow.com/pdf/create\" tabindex=\"0\">"
+   ],
+   "meta-viewport": [
+    "head > meta :: <meta name=\"viewport\" content=\"width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1\">"
+   ]
+  },
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 327 KiB"
+   },
+   {
+    "id": "unused-css-rules",
+    "value": "Est savings of 96 KiB"
+   },
+   {
+    "id": "bootup-time",
+    "value": "1.7 s"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "4.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "https://tinywow.com/image/compress",
+  "error": "Runtime error encountered: The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and try again. (NO_FCP)\n"
+ },
+ {
+  "url": "https://tinywow.com/pdf/compress",
+  "scores": {
+   "performance": 45,
+   "accessibility": 86,
+   "best-practices": 100,
+   "seo": 92
+  },
+  "lcp": 12858,
+  "fcp": 3529,
+  "cls": 0.001,
+  "tbt": 1013,
+  "si": 3529,
+  "tti": 13387,
+  "totalBytes": 1788976,
+  "js": {
+   "bytes": 1303742,
+   "n": 24
+  },
+  "font": {
+   "bytes": 237608,
+   "n": 6
+  },
+  "image": {
+   "bytes": 29443,
+   "n": 22
+  },
+  "thirdParty": {
+   "bytes": 999451,
+   "n": 25
+  },
+  "failing": {
+   "accessibility": [
+    "color-contrast",
+    "heading-order",
+    "link-in-text-block",
+    "meta-viewport"
+   ],
+   "best-practices": [],
+   "seo": [
+    "meta-description"
+   ]
+  },
+  "nodes": {
+   "color-contrast": [
+    "div.row > div.col-12 > div > button.button :: <button data-v-2b60f3ec=\"\" class=\"button file-uploads file-uploads-html5 file-uploads-drop button null\"> :: contrast of 3.45 (foreground color: #ffffff, background color: #1a8fe3",
+    "div.rating_box > div.rating_wrap > h6 > span :: <span> :: contrast of 3.71 (foreground color: #828586, background color: #ffffff",
+    "div.container > div.row > div.col-lg-4 > p.mt_15 :: <p class=\"mt_15\"> :: contrast of 3.71 (foreground color: #828586, background color: #ffffff",
+    "div.col-lg-2 > ul > li > a :: <a href=\"https://tinywow.com\"> :: contrast of 3.71 (foreground color: #828586, background color: #ffffff",
+    "div.col-lg-2 > ul > li > a :: <a href=\"https://tinywow.com/privacy\"> :: contrast of 3.71 (foreground color: #828586, background color: #ffffff",
+    "div.col-lg-2 > ul > li > a :: <a href=\"https://tinywow.com/tos\"> :: contrast of 3.71 (foreground color: #828586, background color: #ffffff"
+   ],
+   "heading-order": [
+    "div.compress_area > div.container > div.rating_box > h5.mt_10 :: <h5 class=\"mt_10\">"
+   ],
+   "link-in-text-block": [
+    "div.row > div.col-md-7 > p > a.active :: <a href=\"https://jenni.ai/?via=tinywow\" class=\"active\">"
+   ],
+   "meta-viewport": [
+    "head > meta :: <meta name=\"viewport\" content=\"width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1\">"
+   ]
+  },
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 662 KiB"
+   },
+   {
+    "id": "unused-css-rules",
+    "value": "Est savings of 108 KiB"
+   },
+   {
+    "id": "bootup-time",
+    "value": "2.1 s"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "3.7 s"
+   }
+  ],
+  "runtimeError": null
+ }
+]

@@ -31,7 +31,7 @@ export default function AudioMetadataPage() {
         <p className="text-neutral-500 text-center mb-8">Codec, bitrate, sample rate, channels, tags and cover art of any audio file — read in your browser, nothing uploaded</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => inputEl && inputEl.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-400 text-sm">Click to upload an audio file</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload an audio file</p>}
           </div>
           <input ref={setInputEl} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
           {audioUrl && <audio src={audioUrl} controls className="w-full" />}

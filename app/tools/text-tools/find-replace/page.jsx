@@ -63,7 +63,7 @@ export default function FindReplacePage() {
               <p className="text-green-400 text-sm text-center">{count} replacement(s) made</p>
               {result ? (
                 <>
-                  <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-40 resize-none" value={result} readOnly />
+                  <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-40 resize-none" value={result} readOnly />
                   <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
                   {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
                 </>

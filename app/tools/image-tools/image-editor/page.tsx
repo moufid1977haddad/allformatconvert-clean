@@ -265,35 +265,35 @@ export default function ImageEditorPage() {
               <div className="space-y-3">
                 {activeTab === 'adjust' && (
                   <>
-                    <div><label className="block text-sm text-neutral-500 mb-1">Brightness ({brightness})</label><input type="range" min="-100" max="100" value={brightness} onChange={(e) => setBrightness(parseInt(e.target.value))} className="w-full" /></div>
-                    <div><label className="block text-sm text-neutral-500 mb-1">Contrast ({contrast})</label><input type="range" min="-100" max="100" value={contrast} onChange={(e) => setContrast(parseInt(e.target.value))} className="w-full" /></div>
-                    <div><label className="block text-sm text-neutral-500 mb-1">Saturation ({saturation})</label><input type="range" min="-100" max="100" value={saturation} onChange={(e) => setSaturation(parseInt(e.target.value))} className="w-full" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Brightness ({brightness})</label><input aria-label="Brightness" type="range" min="-100" max="100" value={brightness} onChange={(e) => setBrightness(parseInt(e.target.value))} className="w-full" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Contrast ({contrast})</label><input aria-label="Contrast" type="range" min="-100" max="100" value={contrast} onChange={(e) => setContrast(parseInt(e.target.value))} className="w-full" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Saturation ({saturation})</label><input aria-label="Saturation" type="range" min="-100" max="100" value={saturation} onChange={(e) => setSaturation(parseInt(e.target.value))} className="w-full" /></div>
                     <label className="flex items-center gap-2 text-sm text-neutral-700"><input type="checkbox" checked={grayscale} onChange={(e) => setGrayscale(e.target.checked)} />Grayscale</label>
                     <label className="flex items-center gap-2 text-sm text-neutral-700"><input type="checkbox" checked={invert} onChange={(e) => setInvert(e.target.checked)} />Invert Colors</label>
                   </>
                 )}
                 {activeTab === 'transform' && (
                   <>
-                    <div><label className="block text-sm text-neutral-500 mb-1">Rotation ({rotation}&deg;)</label><input type="range" min="0" max="360" step="90" value={rotation} onChange={(e) => setRotation(parseInt(e.target.value))} className="w-full" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Rotation ({rotation}&deg;)</label><input aria-label="Rotation" type="range" min="0" max="360" step="90" value={rotation} onChange={(e) => setRotation(parseInt(e.target.value))} className="w-full" /></div>
                     <label className="flex items-center gap-2 text-sm text-neutral-700"><input type="checkbox" checked={flipH} onChange={(e) => setFlipH(e.target.checked)} />Flip Horizontal</label>
                     <label className="flex items-center gap-2 text-sm text-neutral-700"><input type="checkbox" checked={flipV} onChange={(e) => setFlipV(e.target.checked)} />Flip Vertical</label>
-                    <div><label className="block text-sm text-neutral-500 mb-1">Pixelate ({pixelSize}px)</label><input type="range" min="0" max="20" value={pixelSize} onChange={(e) => setPixelSize(parseInt(e.target.value))} className="w-full" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Pixelate ({pixelSize}px)</label><input aria-label="Pixelate" type="range" min="0" max="20" value={pixelSize} onChange={(e) => setPixelSize(parseInt(e.target.value))} className="w-full" /></div>
                   </>
                 )}
                 {activeTab === 'effects' && (
                   <>
                     <div><label className="block text-sm text-neutral-500 mb-1">Noise / Grain ({noiseIntensity})</label><input type="range" min="0" max="50" value={noiseIntensity} onChange={(e) => setNoiseIntensity(parseInt(e.target.value))} className="w-full" /></div>
-                    <div><label className="block text-sm text-neutral-500 mb-1">Vignette ({vignetteStrength}%)</label><input type="range" min="0" max="100" value={vignetteStrength} onChange={(e) => setVignetteStrength(parseInt(e.target.value))} className="w-full" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Vignette ({vignetteStrength}%)</label><input aria-label="Vignette" type="range" min="0" max="100" value={vignetteStrength} onChange={(e) => setVignetteStrength(parseInt(e.target.value))} className="w-full" /></div>
                   </>
                 )}
                 {activeTab === 'decorate' && (
                   <>
-                    <div><label className="block text-sm text-neutral-500 mb-1">Corner Radius ({cornerRadius}px)</label><input type="range" min="0" max="100" value={cornerRadius} onChange={(e) => setCornerRadius(parseInt(e.target.value))} className="w-full" /></div>
-                    <div><label className="block text-sm text-neutral-500 mb-1">Border Width ({borderWidth}px)</label><input type="range" min="0" max="20" value={borderWidth} onChange={(e) => setBorderWidth(parseInt(e.target.value))} className="w-full" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Corner Radius ({cornerRadius}px)</label><input aria-label="Corner Radius" type="range" min="0" max="100" value={cornerRadius} onChange={(e) => setCornerRadius(parseInt(e.target.value))} className="w-full" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Border Width ({borderWidth}px)</label><input aria-label="Border Width" type="range" min="0" max="20" value={borderWidth} onChange={(e) => setBorderWidth(parseInt(e.target.value))} className="w-full" /></div>
                     <div><label className="block text-sm text-neutral-500 mb-1">Border Color</label><input type="color" value={borderColor} onChange={(e) => setBorderColor(e.target.value)} className="w-full h-10" /></div>
                     <div><label className="block text-sm text-neutral-500 mb-1">Text</label><input type="text" value={textOverlay} onChange={(e) => setTextOverlay(e.target.value)} placeholder="Your text" className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 text-neutral-800" /></div>
                     <div><label className="block text-sm text-neutral-500 mb-1">Text Color</label><input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="w-full h-10" /></div>
-                    <div><label className="block text-sm text-neutral-500 mb-1">Text Size ({textSize}px)</label><input type="range" min="12" max="72" value={textSize} onChange={(e) => setTextSize(parseInt(e.target.value))} className="w-full" /></div>
+                    <div><label className="block text-sm text-neutral-500 mb-1">Text Size ({textSize}px)</label><input aria-label="Text Size" type="range" min="12" max="72" value={textSize} onChange={(e) => setTextSize(parseInt(e.target.value))} className="w-full" /></div>
                   </>
                 )}
               </div>

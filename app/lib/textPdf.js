@@ -6,7 +6,7 @@
 // (Fontsource 5.2.8 on jsDelivr, pinned): only the slices holding the text's characters are downloaded (tens of KB). fontkit shapes each run (Arabic joining, Indic conjuncts) and pdf-lib embeds only the
 // glyphs used. Right-to-left paragraphs (Arabic, Hebrew) are right-aligned, their runs drawn from right to left.
 // Everything happens in the browser: the text is never uploaded.
-import { PDFDocument, rgb } from 'pdf-lib';
+// pdf-lib is loaded when a PDF is made, not with the page (30/09/2026, Lighthouse).
 
 // CJK: measured 30/09 with Poppler -- the CFF (.otf) Noto Sans CJK came out as empty boxes once pdf-lib subset it, and
 // the variable TrueType lost most glyphs; Google Fonts' static 400-weight slices (TrueType in WOFF2) embed cleanly.
@@ -104,6 +104,7 @@ export async function textToPdf(text, { fontSize = 12, onPhase } = {}) {
   // @pdf-lib/fontkit's build calls a global regeneratorRuntime (Babel generators) in its OpenType layout code.
   if (typeof globalThis.regeneratorRuntime === 'undefined') globalThis.regeneratorRuntime = (await import('regenerator-runtime')).default;
   const fontkit = (await import('@pdf-lib/fontkit')).default;
+  const { PDFDocument, rgb } = await import('pdf-lib');
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
   const clean = String(text).replace(/\r\n?/g, '\n').replace(/\t/g, '    ');

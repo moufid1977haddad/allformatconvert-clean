@@ -75,7 +75,7 @@ export default function PdfExtractTextPage() {
           {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
           {text && (
             <div className="space-y-3">
-              <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={text} readOnly />
+              <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={text} readOnly />
               <div className="flex gap-3">
                 <button onClick={() => navigator.clipboard.writeText(text)} className="flex-1 bg-neutral-200 hover:bg-neutral-200 rounded-xl py-2 font-semibold transition">Copy</button>
                 <button onClick={download} className="flex-1 bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download .txt</button>

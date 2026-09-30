@@ -1,6 +1,5 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
-import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 
@@ -28,6 +27,7 @@ export default function PdfWatermarkPage() {
     setDownloadUrl(null);
     try {
       const arrayBuffer = await file.arrayBuffer();
+      const { PDFDocument, rgb, StandardFonts, degrees } = await import('pdf-lib'); // loaded when used, not with the page (30/09)
       const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer), { ignoreEncryption: true });
       const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
       const pages = pdfDoc.getPages();
@@ -70,7 +70,7 @@ export default function PdfWatermarkPage() {
           </div>
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Opacity: {Math.round(opacity * 100)}%</label>
-            <input type="range" min="0.1" max="1" step="0.1" value={opacity} onChange={e => setOpacity(parseFloat(e.target.value))} className="w-full" />
+            <input aria-label="Opacity (%)" type="range" min="0.1" max="1" step="0.1" value={opacity} onChange={e => setOpacity(parseFloat(e.target.value))} className="w-full" />
           </div>
           <button onClick={addWatermark} disabled={!file || !text || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Processing...' : 'Add Watermark'}

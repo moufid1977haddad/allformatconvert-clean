@@ -58,7 +58,7 @@ export default function JsonToXmlPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div><label className="block text-sm text-neutral-500 mb-1">JSON Input</label><textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" placeholder="Paste JSON here..." value={input} onChange={e => setInput(e.target.value)} /></div>
-            <div><label className="block text-sm text-neutral-500 mb-1">XML Output</label><textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" value={output} readOnly /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">XML Output</label><textarea aria-label="XML Output" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" value={output} readOnly /></div>
           </div>
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}
           <div className="grid grid-cols-2 gap-3">

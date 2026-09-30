@@ -63,7 +63,7 @@ export default function FileBase64EncoderPage() {
                   {[[false, 'Data URL'], [true, 'Raw Base64']].map(([v, l]) => <button key={l} onClick={() => setRaw(v)} className={'px-3 py-1 rounded-lg font-semibold ' + (raw === v ? 'bg-indigo-600 text-white' : 'bg-neutral-200 text-neutral-800')}>{l}</button>)}
                   <span className="ml-auto self-center text-neutral-500" data-b64-length>{out.length.toLocaleString()} characters</span>
                 </div>
-                <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-xs h-48 resize-none font-mono" value={big ? out.slice(0, PREVIEW_CHARS) : out} readOnly data-b64 />
+                <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-xs h-48 resize-none font-mono" value={big ? out.slice(0, PREVIEW_CHARS) : out} readOnly data-b64 />
                 {big && <p className="text-xs text-neutral-500">Preview of the first {PREVIEW_CHARS.toLocaleString()} characters; Copy and Download give the whole text.</p>}
                 <div className="grid grid-cols-2 gap-2">
                   <button onClick={() => navigator.clipboard.writeText(out)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy Base64</button>

@@ -90,8 +90,8 @@ export default function SvgToPngPage() {
             <input ref={inputRef} type="file" accept=".svg" className="hidden" onChange={handleFile} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm text-neutral-500 mb-1">Width (px)</label><input type="number" value={width} onChange={e => changeWidth(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
-            <div><label className="block text-sm text-neutral-500 mb-1">Height (px)</label><input type="number" value={height} onChange={e => changeHeight(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">Width (px)</label><input aria-label="Width (px)" type="number" value={width} onChange={e => changeWidth(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">Height (px)</label><input aria-label="Height (px)" type="number" value={height} onChange={e => changeHeight(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
           </div>
           <label className="flex items-center gap-2 text-sm text-neutral-600"><input type="checkbox" checked={lock} onChange={e => setLock(e.target.checked)} /> Keep the SVG's proportions</label>
           <button onClick={convert} disabled={!file || !dimsValid} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert to PNG</button>

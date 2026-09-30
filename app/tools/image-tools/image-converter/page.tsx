@@ -235,7 +235,7 @@ export default function ImageConverterPage() {
 
         <h1 className="text-3xl font-bold text-center mb-2">Image Converter</h1>
         <p className="text-neutral-500 text-center mb-2">Convert images to PNG, JPG, WebP or AVIF — 100% local, nothing uploaded to any server.</p>
-        <p className="text-neutral-400 text-xs text-center mb-8">Each image up to {maxMegapixels} megapixels{isMobile ? ' on this device' : ''} (files up to {maxFileLabel}). Conversion runs in the background — this tab stays responsive.</p>
+        <p className="text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Each image up to {maxMegapixels} megapixels{isMobile ? ' on this device' : ''} (files up to {maxFileLabel}). Conversion runs in the background — this tab stays responsive.</p>
 
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
 
@@ -264,7 +264,7 @@ export default function ImageConverterPage() {
             />
             <Folder className="w-10 h-10 mb-3 mx-auto text-neutral-400" />
             <p className="text-neutral-700 font-semibold text-lg">Drop your images here</p>
-            <p className="text-neutral-400 text-sm mt-1">or click to browse — PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, HEIC/HEIF</p>
+            <p className="text-neutral-500 text-sm mt-1">or click to browse — PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, HEIC/HEIF</p>
           </div>
 
           {error && <p className="text-red-500 text-center text-sm whitespace-pre-line">{error}</p>}
@@ -295,6 +295,7 @@ export default function ImageConverterPage() {
                   <div>
                     <label className="text-xs text-neutral-500 block mb-1">Output format</label>
                     <select
+                      aria-label="Output format"
                       value={format}
                       onChange={(e) => setFormat(e.target.value)}
                       disabled={processing}
@@ -324,6 +325,7 @@ export default function ImageConverterPage() {
                   <div className="flex-1 min-w-[160px]">
                     <label className="text-xs text-neutral-500 block mb-1">Quality: <span className="font-semibold text-indigo-500">{quality}%</span></label>
                     <input
+                      aria-label="Quality (%)"
                       type="range"
                       min="10"
                       max="100"

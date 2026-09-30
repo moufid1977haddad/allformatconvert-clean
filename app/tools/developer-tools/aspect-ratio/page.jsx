@@ -30,8 +30,8 @@ export default function AspectRatioPage() {
         <p className="text-neutral-500 text-center mb-8">Calculate aspect ratios for any dimensions</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm text-neutral-500 mb-1">Width</label><input type="number" value={w} onChange={e => setW(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
-            <div><label className="block text-sm text-neutral-500 mb-1">Height</label><input type="number" value={h} onChange={e => setH(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">Width</label><input aria-label="Width" type="number" value={w} onChange={e => setW(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">Height</label><input aria-label="Height" type="number" value={h} onChange={e => setH(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
           </div>
           <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center space-y-2">
             <div className="text-4xl font-bold text-indigo-400">{ratio}</div>

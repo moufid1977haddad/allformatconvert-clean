@@ -85,7 +85,7 @@ export default function Page() {
         <p className="text-neutral-500 text-center mb-8">Reorder and remove PDF pages</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name} ({numPages} pages)</p> : <p className="text-neutral-400 text-sm">Click to upload a PDF file</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name} ({numPages} pages)</p> : <p className="text-neutral-500 text-sm">Click to upload a PDF file</p>}
           </div>
           <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
           {order.length > 0 && (

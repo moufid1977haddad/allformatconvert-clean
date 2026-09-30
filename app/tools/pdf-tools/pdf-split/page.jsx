@@ -147,7 +147,7 @@ export default function PdfSplitPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Split PDF</h1>
         <p className="text-neutral-500 text-center mb-2">Extract specific pages or ranges from your PDF</p>
-        <p className="text-neutral-400 text-xs text-center mb-8">Supports PDFs up to {maxPages.toLocaleString()} pages{isMobile ? ' on this device' : ''} (files up to {maxFileLabel}). Splitting runs in the background — this tab stays responsive.</p>
+        <p className="text-neutral-500 text-xs text-center mb-8">Supports PDFs up to {maxPages.toLocaleString()} pages{isMobile ? ' on this device' : ''} (files up to {maxFileLabel}). Splitting runs in the background — this tab stays responsive.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{fileName ? fileName + (pageCount > 0 ? ' (' + pageCount + ' pages)' : '') : 'Click or drop a PDF here'}</p>

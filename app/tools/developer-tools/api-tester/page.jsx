@@ -36,7 +36,7 @@ export default function ApiTesterPage() {
         <p className="text-neutral-500 text-center mb-8">Test REST API endpoints</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="flex gap-3">
-            <select value={method} onChange={e => setMethod(e.target.value)} className="bg-neutral-50 border border-neutral-200 rounded-lg p-3 font-semibold">
+            <select aria-label="HTTP method" value={method} onChange={e => setMethod(e.target.value)} className="bg-neutral-50 border border-neutral-200 rounded-lg p-3 font-semibold">
               {['GET','POST','PUT','DELETE','PATCH'].map(m => <option key={m}>{m}</option>)}
             </select>
             <input type="text" value={url} onChange={e => setUrl(e.target.value)} className="flex-1 bg-neutral-50 border border-neutral-200 rounded-lg p-3 font-mono" placeholder="https://api.example.com/endpoint" />

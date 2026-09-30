@@ -70,10 +70,10 @@ export default function ImageCropperPage() {
           </div>
           {image && (
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="block text-sm text-neutral-500 mb-1">X: {crop.x}px</label><input type="range" min="0" max={Math.max(imgDims.width, 1)} value={crop.x} onChange={e => setCrop(p => ({...p, x: parseInt(e.target.value)}))} className="w-full" /></div>
-              <div><label className="block text-sm text-neutral-500 mb-1">Y: {crop.y}px</label><input type="range" min="0" max={Math.max(imgDims.height, 1)} value={crop.y} onChange={e => setCrop(p => ({...p, y: parseInt(e.target.value)}))} className="w-full" /></div>
-              <div><label className="block text-sm text-neutral-500 mb-1">Width: {crop.w}px</label><input type="range" min="1" max={Math.max(imgDims.width, 1)} value={crop.w} onChange={e => setCrop(p => ({...p, w: parseInt(e.target.value)}))} className="w-full" /></div>
-              <div><label className="block text-sm text-neutral-500 mb-1">Height: {crop.h}px</label><input type="range" min="1" max={Math.max(imgDims.height, 1)} value={crop.h} onChange={e => setCrop(p => ({...p, h: parseInt(e.target.value)}))} className="w-full" /></div>
+              <div><label className="block text-sm text-neutral-500 mb-1">X: {crop.x}px</label><input aria-label="X (px)" type="range" min="0" max={Math.max(imgDims.width, 1)} value={crop.x} onChange={e => setCrop(p => ({...p, x: parseInt(e.target.value)}))} className="w-full" /></div>
+              <div><label className="block text-sm text-neutral-500 mb-1">Y: {crop.y}px</label><input aria-label="Y (px)" type="range" min="0" max={Math.max(imgDims.height, 1)} value={crop.y} onChange={e => setCrop(p => ({...p, y: parseInt(e.target.value)}))} className="w-full" /></div>
+              <div><label className="block text-sm text-neutral-500 mb-1">Width: {crop.w}px</label><input aria-label="Width (px)" type="range" min="1" max={Math.max(imgDims.width, 1)} value={crop.w} onChange={e => setCrop(p => ({...p, w: parseInt(e.target.value)}))} className="w-full" /></div>
+              <div><label className="block text-sm text-neutral-500 mb-1">Height: {crop.h}px</label><input aria-label="Height (px)" type="range" min="1" max={Math.max(imgDims.height, 1)} value={crop.h} onChange={e => setCrop(p => ({...p, h: parseInt(e.target.value)}))} className="w-full" /></div>
             </div>
           )}
           <button onClick={applyCrop} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Crop Image</button>

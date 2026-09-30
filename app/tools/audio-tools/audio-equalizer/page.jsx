@@ -151,7 +151,7 @@ export default function AudioEqualizerPage() {
         <p className="text-neutral-500 text-center mb-8">Adjust bass, mid, and treble frequencies</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-400 text-sm">Click to upload an audio file</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload an audio file</p>}
           </div>
           <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
           {audioUrl && <audio ref={audioElRef} src={audioUrl} controls onPlay={setupEQ} onError={() => setError('This browser cannot play this format, so there is no live preview; "Export as WAV" still applies the equalizer to the whole file.')} className="w-full" />}
@@ -159,7 +159,7 @@ export default function AudioEqualizerPage() {
             {[['bass', 'Bass', 200], ['mid', 'Mid', 1000], ['treble', 'Treble', 3000]].map(([key, label]) => (
               <div key={key} className="text-center">
                 <label className="block text-sm font-medium text-neutral-700 mb-2">{label}: {bands[key]} dB</label>
-                <input type="range" min={-12} max={12} value={bands[key]} onChange={e => updateBand(key, Number(e.target.value))} className="w-full" />
+                <input aria-label=": dB" type="range" min={-12} max={12} value={bands[key]} onChange={e => updateBand(key, Number(e.target.value))} className="w-full" />
                 <div className="flex justify-between text-xs text-neutral-400 mt-1"><span>-12</span><span>+12</span></div>
               </div>
             ))}
