@@ -1,23 +1,28 @@
 // Text to PDF, emoji and every common script (P18 step 4 bis, 01/10). As a visitor:
 //   1. the owner's sentence "Hello 👋🏽 world. Élodie à Montréal. বাংলা. 中文. العربية." -> the page says, BEFORE
-//      converting, that the text goes to our PDF service; the PDF offered is real, and its text read back (pdf.js)
+//      converting, that the text goes to our PDF service; the PDF offered is real, and its text read back (Poppler)
 //      holds every piece: the emoji with its skin tone, the accents, Bengali, Chinese, Arabic;
 //   2. a line of 24 scripts + colour emoji (flags, family, heart) -> all read back;
 //   3. a Latin / Cyrillic / Chinese text stays in the browser: no request to the PDF service, the PDF read back.
 // Needs the PDF service (Gotenberg): a preview or www.
 // Usage: node scripts/browser-tests/text-to-pdf-scripts.mjs <origin> [--browser=chromium|firefox|webkit] [--no-vercel-toolbar]
 import { chromium, firefox, webkit } from '@playwright/test';
+import { execFileSync } from 'node:child_process';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--'))).origin;
 const name = (process.argv.find((a) => a.startsWith('--browser=')) || '--browser=chromium').slice(10);
 let fails = 0;
 const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', `${name} ${n}`, ok ? '' : info); };
-const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+// Read back by Poppler's pdftotext, the reference extractor of the 30/09 measures: it follows the PDF's own text
+// information (ToUnicode, ActualText), so shaped Arabic, Indic clusters and emoji sequences come back as typed.
+// (pdf.js gives Arabic presentation forms in visual order and CJK radicals for some ideographs: a reader limit.)
 const textOf = async (bytes) => {
-  const d = await pdfjs.getDocument({ data: new Uint8Array(bytes), verbosity: 0 }).promise;
-  let t = '';
-  for (let i = 1; i <= d.numPages; i++) t += (await (await d.getPage(i)).getTextContent()).items.map((x) => x.str + (x.hasEOL ? '\n' : '')).join('') + '\n';
-  return t.normalize('NFC');
+  const f = path.join(os.tmpdir(), `t2p-${process.pid}-${Date.now()}.pdf`);
+  fs.writeFileSync(f, bytes);
+  try { return execFileSync('pdftotext', ['-enc', 'UTF-8', f, '-']).toString('utf8').normalize('NFC'); } finally { fs.rmSync(f, { force: true }); }
 };
 const b = await { chromium, firefox, webkit }[name].launch();
 const ctx = await b.newContext();
