@@ -1,6 +1,6 @@
 // Text to PDF in any script (30/09). A text mixing Latin with accents, Polish, Greek, Russian, Vietnamese, Arabic
-// (right to left, with digits), Hebrew, Hindi, Tamil, Thai, Chinese, Japanese and Korean; Bengali refused by name; a CRLF .txt; an
-// emoji refused by name. The PDF's text is extracted by Poppler (pdftotext) and must contain every line; page 1 is
+// (right to left, with digits), Hebrew, Hindi, Tamil, Thai, Chinese, Japanese and Korean; Bengali (P18: printed by our Chromium); a CRLF .txt; an
+// emoji: since P18 printed by our Chromium (see text-to-pdf-scripts.mjs). The PDF's text is extracted by Poppler (pdftotext) and must contain every line; page 1 is
 // rendered to PNG (pdftoppm) for a visual check.
 // Usage: node scripts/browser-tests/text-to-pdf-unicode.mjs <origin> [--browser=firefox|webkit] [--png=<out.png>]
 import { chromium, firefox, webkit } from '@playwright/test';
@@ -35,7 +35,7 @@ async function convert(text, file) {
   if (file) { await p.getByRole('button', { name: /Upload/ }).first().click(); await p.locator('input[type=file]').setInputFiles(file); }
   else await p.getByPlaceholder('Paste your text here...').fill(text);
   await p.getByRole('button', { name: /Convert to PDF/ }).click();
-  const link = p.getByRole('link', { name: 'Download PDF' });
+  const link = p.locator('[data-file-download] a[data-download]').first(); // P18: the site's download row
   const ok = await link.waitFor({ timeout: 180000 }).then(() => true, () => false);
   if (!ok) { const t = await p.locator('body').innerText(); await ctx.close(); return { error: (t.match(/Error:[^\n]*/) || ['no result'])[0] }; }
   const [d] = await Promise.all([p.waitForEvent('download'), link.click()]);
@@ -57,8 +57,11 @@ else {
 const crlf = path.join(dir, 'windows-notes.txt'); fs.writeFileSync(crlf, 'Ligne un\r\nЛиния два\r\n\tTabulation');
 const c = await convert(null, crlf);
 check('.txt with CRLF and a tab -> PDF named after it', !c.error && c.name === 'windows-notes.pdf', c.error || c.name);
-const bn = await convert('বাংলা: ওহে বিশ্ব');
-check('Bengali: refused with a clear message (conjuncts would be wrong), no PDF', !!bn.error && /Bengali/.test(bn.error), bn.error || 'a PDF was made');
-const e = await convert('Hello 👋 world');
-check('emoji: refused by name, no broken PDF', !!e.error && e.error.includes('👋'), e.error || 'a PDF was made');
+// P18 (01/10): Bengali and emoji are no longer refused — printed by our Chromium (text-to-pdf-scripts.mjs checks them
+// in depth). Needs the PDF service: skipped on a local build without it (--local).
+if (!process.argv.includes('--local')) for (const [label, t, want] of [['Bengali', 'বাংলা: ওহে বিশ্ব', 'ওহে বিশ্ব'], ['emoji', 'Hello 👋 world', '👋']]) {
+  const x = await convert(t);
+  const got = x.error ? '' : execFileSync('pdftotext', ['-enc', 'UTF-8', x.f, '-']).toString('utf8').normalize('NFC');
+  check(`${label}: a real PDF whose text reads back "${want}"`, got.includes(want), x.error || got.slice(0, 80));
+}
 await b.close(); console.log(fails ? `${fails} FAILED` : 'all passed', `(${engine.name()})`); process.exit(fails ? 1 : 0);

@@ -178,7 +178,10 @@ for (const t of TOOLS) {
           await dl.path();
         }
       }
-      await p.waitForTimeout(800); // the rows' "downloaded" state is set by React after the click
+      // The rows' "downloaded" state is set by React after the click: wait until every row says so (under CPU load a
+      // fixed delay was once too short on www, 01/10 — the site was right, the bench too quick).
+      await p.waitForFunction(() => [...document.querySelectorAll('[data-file-download]')].every((r) => r.innerText.includes('Downloaded')), null, { timeout: 10000 }).catch(() => {});
+      await p.waitForTimeout(300);
       let askedAfter = false;
       p.once('dialog', async (d) => { askedAfter = true; await d.accept(); });
       await p.close({ runBeforeUnload: true });

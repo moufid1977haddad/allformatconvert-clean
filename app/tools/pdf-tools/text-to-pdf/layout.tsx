@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Text to PDF — Convert Plain Text Online Free" },
-  description: "Text to PDF converts plain text into a PDF using the pdf-lib library entirely in your browser, with automatic word-wrapping.",
+  description: "Free Text to PDF: any language (Arabic, Hindi, Bengali, Chinese…) and emoji in colour, with selectable text, word-wrap and page breaks.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/text-to-pdf" },
   openGraph: {
     title: "Text to PDF — Convert Plain Text Online Free",
-    description: "Text to PDF converts plain text into a PDF using the pdf-lib library entirely in your browser, with automatic word-wrapping.",
+    description: "Free Text to PDF: any language (Arabic, Hindi, Bengali, Chinese…) and emoji in colour, with selectable text, word-wrap and page breaks.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/text-to-pdf",
   },
 };
