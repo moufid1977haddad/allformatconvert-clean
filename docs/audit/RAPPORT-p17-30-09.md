@@ -95,6 +95,8 @@ adresse. C'est la **preuve réelle, sur www, du refus par visiteur** (message cl
 n'a pas été effacé (écriture en base interdite). La préversion, au code identique à la production, a rendu LIGO
 « humain, 0 % d'IA » par la même page et la même route. **À refaire après minuit UTC** (voir « Tests à refaire »).
 
+**Rejoué le 30/09 à 03 h 51 UTC, à la demande du propriétaire :** même refus pour les deux textes (« You have used today's 2000 free words… »), le jour UTC n'ayant pas changé ; aucun appel à Pangram, 0 $. Toujours à faire à partir du 01/10 00 h 00 UTC.
+
 ### 1.6 Dépense Pangram
 
 | | Montant |
@@ -210,6 +212,7 @@ modes (rotation d'origine appliquée d'abord) ; WebM sans choix affiché.
 
 ## 5. Écarts à signaler
 
+- **Ligne parasite (enquête du 30/09, 03 h 50 UTC).** Longueur 19 caractères, lettres, chiffres et symboles ; apparue dans le fichier entre deux `git status` de la session, **après 01 h 35 min 30 s UTC** (fichier encore propre) et **avant 02 h 42 min 33 s UTC** (fichier modifié) ; aucune commande de la session n'a écrit ce fichier (écriture extérieure à la session) ; **révélée par `git diff docs/audit/tool_errors-purge-28-09.sql` à 02 h 42 min 40 s UTC**. Le propriétaire l'a retirée ensuite ; copie locale remise au propriétaire hors du dépôt (Bureau). Vérifié par git : `git status` propre sur ce fichier ; `git log --all -S` (4 derniers caractères, puis la ligne entière) : **0 commit** ; aucune remise (stash) ; dans aucune branche. Signalement d'origine :
 - **Une modification que je n'ai pas faite** est présente, non commitée, dans `docs/audit/tool_errors-purge-28-09.sql` : une ligne ajoutée à la fin qui ressemble à un **mot de passe** (compte Pangram ?). Je ne l'ai ni commitée, ni recopiée ici. **À faire par toi : retirer cette ligne et changer ce mot de passe** (il est en clair sur le disque et est apparu une fois dans la sortie d'une commande pendant la session).
 - La mesure du corpus sur la préversion a écrit dans les compteurs de production (même base Supabase : `aidetect_spend_micros` ≈ 9,45 $ sur la période `2026-09`, et le compteur du jour de mon adresse) — c'est le fonctionnement normal de la route, la dépense réelle y est comptée ; le compteur de l'adresse a ensuite bloqué la vérification sur www (§1.5).
 - Sur le bureau Windows : l'ancien Windows Media Player a ouvert son assistant de première configuration (fermé sans rien choisir), VLC s'est ouvert sur une boîte de mise à jour (fermé), le Lecteur multimédia a été ouvert puis fermé ; aucune capture exploitable (Windows garde le terminal au premier plan), d'où la lecture par les miniatures de l'Explorateur.
@@ -226,6 +229,6 @@ modes (rotation d'origine appliquée d'abord) ; WebM sans choix affiché.
 
 **(2) iPhone, par le propriétaire** : Image Blur avec une photo de 24 Mpx et une de 48 Mpx (temps, pas de rechargement de l'onglet, Download enregistre) ; Video Rotator d'une vidéo filmée en portrait : « Compatible everywhere » puis « Instant, lossless », les deux résultats ouverts dans Photos et envoyés par WhatsApp (droits ?) ; AI Detector un texte court.
 
-**(3) Sur www après minuit UTC (Claude, ≈ 0,25 $)** : `node scripts/ai-detector/www-check-p17.mjs` — LIGO 2016 doit être « humain », le texte d'IA « IA ».
+**(3) Sur www à partir du 01/10 00 h 00 UTC (Claude, ≈ 0,25 $ ; rejoué le 30/09 à 03 h 51 UTC : encore refusé par la limite du jour)** : `node scripts/ai-detector/www-check-p17.mjs` — LIGO 2016 doit être « humain », le texte d'IA « IA ».
 
 **(4) Facultatif, sur un PC Windows 10 avec l'ancien Windows Media Player** : ouvrir un résultat « Instant, lossless » (attendu : non tourné, comme la page l'annonce) et un « Compatible everywhere » (attendu : droit).
