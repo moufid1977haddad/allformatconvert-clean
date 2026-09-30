@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/quota/supabaseAdmin";
 import { GLOBAL_SPEND_CAP_MICROS, TOOL_ERROR_ALERT_THRESHOLD_PER_DAY } from "@/lib/quota/config";
 import { currentUtcMonthKey, currentUtcDayKey } from "@/lib/quota/period";
 import { checkStateTransition } from "@/lib/quota/alertState";
+import { AI_DETECT_MONTHLY_BUDGET_MICROS } from "@/lib/quota/aiDetect";
 
 export const maxDuration = 30;
 
@@ -105,6 +106,11 @@ async function buildDailyDigest() {
     .from("usage_counters").select("value")
     .eq("bucket_key", "global_spend_microusd").eq("period_key", monthKey).maybeSingle();
   if (spendErr) console.error("health-check digest: global_spend_microusd read failed (non-fatal):", spendErr.message);
+  // The AI Detector's own budget (lib/quota/aiDetect.js, P17), separate from the site-wide cap.
+  const { data: aiDetectRow, error: aiDetectErr } = await supabaseAdmin
+    .from("usage_counters").select("value")
+    .eq("bucket_key", "aidetect_spend_micros").eq("period_key", monthKey).maybeSingle();
+  if (aiDetectErr) console.error("health-check digest: aidetect_spend_micros read failed (non-fatal):", aiDetectErr.message);
 
   const { data: monthEvents, error: monthEventsErr } = await supabaseAdmin
     .from("usage_events").select("tool")
@@ -118,12 +124,14 @@ async function buildDailyDigest() {
   const topTools = Object.entries(toolCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
 
   const { data: todaysDenials, error: denialsErr } = await supabaseAdmin
-    .from("usage_events").select("outcome").gte("created_at", dayStart)
+    .from("usage_events").select("outcome, route").gte("created_at", dayStart)
     .in("outcome", ["denied_ip_hour", "denied_ip_day", "denied_global_spend", "denied_user_quota"]);
   if (denialsErr) console.error("health-check digest: today's denials read failed (non-fatal):", denialsErr.message);
   const denialCounts: Record<string, number> = {};
   for (const row of todaysDenials || []) {
-    denialCounts[row.outcome] = (denialCounts[row.outcome] || 0) + 1;
+    // The AI Detector logs its own budget's refusals as denied_global_spend (existing outcomes only): counted apart.
+    const key = row.route === "ai-detect" && row.outcome === "denied_global_spend" ? "ai_detect_budget" : row.outcome;
+    denialCounts[key] = (denialCounts[key] || 0) + 1;
   }
 
   const spendUsd = ((spendRow?.value || 0) / 1_000_000).toFixed(2);
@@ -132,12 +140,14 @@ async function buildDailyDigest() {
   const ipHourDenials = (denialCounts.denied_ip_hour || 0) + (denialCounts.denied_ip_day || 0);
   const capDenials = denialCounts.denied_global_spend || 0;
   const quotaDenials = denialCounts.denied_user_quota || 0;
+  const aiDetectUsd = ((aiDetectRow?.value || 0) / 1_000_000).toFixed(2);
+  const aiDetectCapUsd = (AI_DETECT_MONTHLY_BUDGET_MICROS / 1_000_000).toFixed(2);
 
   // A capped-out global spend is informational here, never a dependency
   // failure -- see spec §5, "Voluntary caps never read as outages." This
   // digest is a separate, unconditional daily message, not routed through
   // the per-dependency sendAlert(service, status) failure path above.
-  return `spend $${spendUsd}/$${capUsd}, top tools: ${topToolsStr}, refusals today: ip=${ipHourDenials} cap=${capDenials} quota=${quotaDenials}`;
+  return `spend $${spendUsd}/$${capUsd}, top tools: ${topToolsStr}, refusals today: ip=${ipHourDenials} cap=${capDenials} quota=${quotaDenials}; ai-detector $${aiDetectUsd}/$${aiDetectCapUsd} (budget refusals today: ${denialCounts.ai_detect_budget || 0})`;
 }
 
 // Distinguishes an isolated one-off failure from a tool that's

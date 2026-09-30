@@ -1,0 +1,74 @@
+[
+  {
+    "id": "ai-haiku-1",
+    "lang": "en",
+    "kind": "ai",
+    "model": "claude-haiku-4-5",
+    "genre": "encyclopedia",
+    "prompt": "Write a Wikipedia-style introduction about glaciers.",
+    "text": "Glaciers are large accumulations of crystalline ice that persist year-round in alpine and polar regions. They form through the gradual accumulation and compaction of snow over many years, eventually transforming into dense ice under its own weight. These massive formations play a critical role in Earth's hydrological cycle, storing approximately seventy percent of the planet's fresh water. The movement of glaciers, driven by gravity and internal pressure, creates distinctive landforms including U-shaped valleys, cirques, and moraines. Throughout geological history, glaciers have advanced and retreated in response to climate fluctuations, particularly during Pleistocene ice ages. Modern glaciers serve as sensitive indicators of climate change, with many retreating at accelerating rates as global temperatures rise. Their loss has profound implications for sea level rise and regional water availability. Glaciers also sustain unique ecosystems and have shaped human settlement patterns and cultural practices in alpine communities for millennia."
+  },
+  {
+    "id": "ai-haiku-2",
+    "lang": "en",
+    "kind": "ai",
+    "model": "claude-haiku-4-5",
+    "genre": "blog",
+    "prompt": "Write a short blog post about the pros and cons of working from home.",
+    "text": "Working from home has fundamentally transformed how many of us structure our professional lives, bringing both significant advantages and notable challenges. The flexibility to eliminate commutes saves countless hours weekly, allowing workers to reclaim time for personal priorities while potentially improving work-life balance. Reduced distractions in a home office can boost productivity for some, and the autonomy appeals to many professionals seeking greater control over their environment. However, the boundaries between work and personal life blur considerably when your bedroom becomes your conference room. Isolation from colleagues can diminish spontaneous collaboration and the informal knowledge-sharing that happens in shared spaces. For many, remote work paradoxically increases working hours, as the pressure to stay connected and responsive stretches beyond traditional office schedules. The success of working from home ultimately depends on individual circumstances, job requirements, and personal temperament. Some thrive in isolation while others struggle with loneliness and disconnection, suggesting that hybrid approaches may offer the most balanced solution."
+  },
+  {
+    "id": "ai-haiku-3",
+    "lang": "en",
+    "kind": "ai",
+    "model": "claude-haiku-4-5",
+    "genre": "fiction",
+    "prompt": "Write a short scene: an old fisherman goes out to sea at dawn.",
+    "text": "The fisherman pushed his small boat into the water before dawn, moving with practiced efficiency through the pre-dawn darkness. Salt spray caught his weathered face as he steered toward open water, following routes he had memorized across five decades. The sky was beginning to shift from black to deep blue, stars fading as invisible light crept along the horizon. His nets lay coiled in the bow, heavy with the promise of the day's work. He thought of little as he worked, his hands performing their familiar tasks while his mind settled into the rhythm of the sea. This was the only time the harbor belonged to him alone, before other boats emerged and the day transformed into commerce and noise. The water that morning was unusually calm, almost glassy, reflecting fragments of the emerging dawn. He cast his nets with a motion so ingrained it required no conscious thought, then waited, listening to the water lap against the hull, feeling the subtle shifts in wind and current that only years of presence could teach."
+  },
+  {
+    "id": "ai-haiku-4",
+    "lang": "en",
+    "kind": "ai",
+    "model": "claude-haiku-4-5",
+    "genre": "abstract",
+    "prompt": "Write the abstract of a research paper that proposes a new vision transformer for image classification.",
+    "text": "This paper presents a novel vision transformer architecture designed to improve computational efficiency and classification accuracy on large-scale image datasets. We introduce a hierarchical attention mechanism that adapts patch resolution dynamically based on image content, reducing computational overhead while preserving critical features. Our model employs a hybrid tokenization strategy that combines convolutional processing for fine-grained features with transformer attention for long-range dependencies. Evaluation on ImageNet and custom datasets demonstrates a fifteen percent improvement in classification accuracy compared to baseline vision transformers, while reducing inference latency by approximately thirty percent. The architecture demonstrates enhanced robustness to image corruptions and adversarial perturbations through our proposed regularization framework. We conduct comprehensive ablation studies to validate each component's contribution to overall performance. Additionally, we analyze attention patterns to provide interpretability insights into how the model processes visual information at different scales. Our findings suggest that multi-scale attention mechanisms can significantly improve vision transformer efficiency without sacrificing representational capacity for deployment in resource-constrained environments."
+  },
+  {
+    "id": "ai-haiku-5",
+    "lang": "fr",
+    "kind": "ai",
+    "model": "claude-haiku-4-5",
+    "genre": "encyclopedia",
+    "prompt": "Écris une introduction de type encyclopédique sur les marées.",
+    "text": "Les marées constituent un phénomène océanographique majeur résultant principalement de l'interaction gravitationnelle entre la Lune, le Soleil et la Terre. Le cycle des marées, d'une période d'environ douze heures et vingt-cinq minutes, régit le niveau des mers et océans avec une régularité remarquable. La Lune exerce une influence prédominante sur ce phénomène, son attraction gravitationnelle provoquant une accumulation d'eau côté Terre face au satellite naturel. Les marées jouent un rôle écologique crucial, façonnant les écosystèmes côtiers et fournissant un habitat essentiel à innombrables espèces marines et terrestres. Historiquement, les marées ont profondément influencé la navigation et le commerce maritime, nécessitant une compréhension précise pour la sécurité des navires. Les différences de marnage varient considérablement selon la géographie locale et la configuration du littoral, créant des zones de variation extrême dans certaines baies et estuaires. Les marées peuvent être prédites avec grande précision grâce aux modèles mathématiques développés depuis le dix-huitième siècle."
+  },
+  {
+    "id": "ai-haiku-6",
+    "lang": "fr",
+    "kind": "ai",
+    "model": "claude-haiku-4-5",
+    "genre": "letter",
+    "prompt": "Écris une lettre à la mairie de ta commune pour demander une piste cyclable devant l'école.",
+    "text": "Madame, Monsieur, Je vous écris pour exprimer les préoccupations croissantes des parents d'élèves concernant la sécurité des enfants sur le trajet scolaire. De nombreuses familles seraient intéressées par la possibilité de permettre à leurs enfants de se rendre à l'école à bicyclette, une option saine et écologique. Malheureusement, l'absence de piste cyclable devant l'établissement scolaire rend ce mode de transport dangereusement impraticable. Les enfants qui circulent à bicyclette sont exposés aux véhicules en circulation, créant une situation à risque particulièrement préoccupante aux heures de pointe matinales. Une piste cyclable dédiée offrirait une solution relativement peu coûteuse pour améliorer significativement la sécurité de nos enfants tout en réduisant le trafic automobile. De plus, encourager le cyclisme chez les jeunes favorise l'activité physique et l'autonomie. Nous demandons respectueusement à la municipalité d'étudier la faisabilité d'aménager une piste cyclable sécurisée avant l'accès principal de l'école. Nous serions heureux de collaborer avec vos services. Veuillez agréer nos salutations distinguées. Un parent d'élève"
+  },
+  {
+    "id": "ai-haiku-7",
+    "lang": "es",
+    "kind": "ai",
+    "model": "claude-haiku-4-5",
+    "genre": "blog",
+    "prompt": "Escribe una breve entrada de blog sobre los beneficios del café.",
+    "text": "El café es una de las bebidas más consumidas en el mundo, pero más allá de ser una rutina matutina, ofrece numerosos beneficios para la salud cuando se consume con moderación. Los estudios científicos han demostrado que la cafeína mejora la concentración y la claridad mental, permitiendo a los trabajadores y estudiantes enfocarse mejor en tareas complejas. Además, el café contiene antioxidantes potentes que protegen las células del daño oxidativo, contribuyendo a la salud general del cuerpo. Para los entusiastas del fitness, la cafeína actúa como estimulante natural del metabolismo, potenciando el rendimiento durante el ejercicio y favoreciendo la quema de calorías. Investigaciones recientes sugieren que el consumo regular de café puede estar asociado con una reducción en el riesgo de ciertos tipos de cáncer y enfermedades neurodegenerativas. Sin embargo, es importante mantener el consumo dentro de límites razonables, usualmente entre tres y cuatro tazas diarias para la mayoría de adultos. El café también fomenta la socialización y la conexión humana en nuestro acelerado mundo moderno."
+  },
+  {
+    "id": "ai-haiku-8",
+    "lang": "fr",
+    "kind": "ai",
+    "model": "claude-haiku-4-5",
+    "genre": "fiction",
+    "prompt": "Écris une courte scène : une boulangerie de village au petit matin.",
+    "text": "La boulangerie de village s'éveillait avant le lever du soleil, ses fourneaux rougissants depuis des heures. Le boulanger travaillait dans la semi-obscurité de la nuit finissante, ses mains guidées par la mémoire et l'habitude acquise sur quatre décennies. La pâte était déjà en fermentation depuis la veille, ses saveurs complexes développées lentement dans la fraîcheur de la nuit. Il façonnait chaque baguette avec une précision tranquille, ressentant à travers ses doigts la tension exacte de la pâte, la manière dont elle réagissait à son toucher. Le four exhalait une chaleur intense et constante, remplissant la petite boutique d'une odeur céleste. Graduellement, les pains doraient, développant leur croûte croustillante caractéristique. Vers cinq heures du matin, il arrangea les baguettes chaudes sur les étagères, juste à temps pour les premiers clients qui arrivaient, désirant leur pain encore tiède. C'était un échange silencieux et ancien, ce rituel quotidien."
+  }
+]

@@ -1,0 +1,60 @@
+{
+ "model": "Qwen/Qwen2.5-1.5B",
+ "rows": {
+  "h-arxiv-1602.03837": {
+   "exact_tokens": 1,
+   "of": 50,
+   "first_exact_run": 1
+  },
+  "h-arxiv-2010.11929": {
+   "exact_tokens": 1,
+   "of": 50,
+   "first_exact_run": 0
+  },
+  "h-arxiv-1912.01703": {
+   "exact_tokens": 1,
+   "of": 50,
+   "first_exact_run": 1
+  },
+  "h-arxiv-2106.09685": {
+   "exact_tokens": 1,
+   "of": 50,
+   "first_exact_run": 0
+  },
+  "h-arxiv-1905.11946": {
+   "exact_tokens": 2,
+   "of": 50,
+   "first_exact_run": 2
+  },
+  "h-wiki-en-photosynthesis": {
+   "exact_tokens": 1,
+   "of": 50,
+   "first_exact_run": 1
+  },
+  "h-wiki-en-glacier": {
+   "exact_tokens": 1,
+   "of": 50,
+   "first_exact_run": 1
+  },
+  "h-gut-768": {
+   "exact_tokens": 1,
+   "of": 50,
+   "first_exact_run": 0
+  },
+  "h-news-en-100-icebergs-heading-for-new-zealand": {
+   "exact_tokens": 1,
+   "of": 50,
+   "first_exact_run": 1
+  },
+  "ai-gpt4omini-4": {
+   "exact_tokens": 1,
+   "of": 50,
+   "first_exact_run": 1
+  },
+  "ai-opus-4": {
+   "exact_tokens": 1,
+   "of": 50,
+   "first_exact_run": 0
+  }
+ }
+}

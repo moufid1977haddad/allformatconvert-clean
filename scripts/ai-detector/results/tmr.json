@@ -1,0 +1,681 @@
+{
+ "ai-fable-1": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "encyclopedia",
+  "model": "claude-fable-5-1",
+  "p_ai": 0.9743077158927917
+ },
+ "ai-fable-2": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "blog",
+  "model": "claude-fable-5-1",
+  "p_ai": 0.7712329030036926
+ },
+ "ai-fable-3": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "fiction",
+  "model": "claude-fable-5-1",
+  "p_ai": 0.021906111389398575
+ },
+ "ai-fable-4": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "abstract",
+  "model": "claude-fable-5-1",
+  "p_ai": 0.03632362186908722
+ },
+ "ai-fable-5": {
+  "kind": "ai",
+  "lang": "fr",
+  "genre": "encyclopedia",
+  "model": "claude-fable-5-1",
+  "p_ai": 0.043385833501815796
+ },
+ "ai-fable-6": {
+  "kind": "ai",
+  "lang": "fr",
+  "genre": "letter",
+  "model": "claude-fable-5-1",
+  "p_ai": 0.05436492711305618
+ },
+ "ai-fable-7": {
+  "kind": "ai",
+  "lang": "it",
+  "genre": "encyclopedia",
+  "model": "claude-fable-5-1",
+  "p_ai": 0.02629309520125389
+ },
+ "ai-fable-8": {
+  "kind": "ai",
+  "lang": "fr",
+  "genre": "fiction",
+  "model": "claude-fable-5-1",
+  "p_ai": 0.04386729747056961
+ },
+ "ai-gpt4omini-1": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "encyclopedia",
+  "model": "gpt-4o-mini",
+  "p_ai": 0.986965537071228
+ },
+ "ai-gpt4omini-2": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "blog",
+  "model": "gpt-4o-mini",
+  "p_ai": 0.9878026843070984
+ },
+ "ai-gpt4omini-3": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "fiction",
+  "model": "gpt-4o-mini",
+  "p_ai": 0.9864505529403687
+ },
+ "ai-gpt4omini-4": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "abstract",
+  "model": "gpt-4o-mini",
+  "p_ai": 0.9869835376739502
+ },
+ "ai-gpt4omini-5": {
+  "kind": "ai",
+  "lang": "fr",
+  "genre": "encyclopedia",
+  "model": "gpt-4o-mini",
+  "p_ai": 0.048255499452352524
+ },
+ "ai-gpt4omini-6": {
+  "kind": "ai",
+  "lang": "fr",
+  "genre": "letter",
+  "model": "gpt-4o-mini",
+  "p_ai": 0.974344789981842
+ },
+ "ai-gpt4omini-7": {
+  "kind": "ai",
+  "lang": "it",
+  "genre": "fiction",
+  "model": "gpt-4o-mini",
+  "p_ai": 0.05100575461983681
+ },
+ "ai-gpt4omini-8": {
+  "kind": "ai",
+  "lang": "fr",
+  "genre": "fiction",
+  "model": "gpt-4o-mini",
+  "p_ai": 0.966389536857605
+ },
+ "ai-haiku-1": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "encyclopedia",
+  "model": "claude-haiku-4-5",
+  "p_ai": 0.9862523674964905
+ },
+ "ai-haiku-2": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "blog",
+  "model": "claude-haiku-4-5",
+  "p_ai": 0.9868004322052002
+ },
+ "ai-haiku-3": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "fiction",
+  "model": "claude-haiku-4-5",
+  "p_ai": 0.9761797189712524
+ },
+ "ai-haiku-4": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "abstract",
+  "model": "claude-haiku-4-5",
+  "p_ai": 0.9851168394088745
+ },
+ "ai-haiku-5": {
+  "kind": "ai",
+  "lang": "fr",
+  "genre": "encyclopedia",
+  "model": "claude-haiku-4-5",
+  "p_ai": 0.015019799582660198
+ },
+ "ai-haiku-6": {
+  "kind": "ai",
+  "lang": "fr",
+  "genre": "letter",
+  "model": "claude-haiku-4-5",
+  "p_ai": 0.059956144541502
+ },
+ "ai-haiku-7": {
+  "kind": "ai",
+  "lang": "es",
+  "genre": "blog",
+  "model": "claude-haiku-4-5",
+  "p_ai": 0.039146408438682556
+ },
+ "ai-haiku-8": {
+  "kind": "ai",
+  "lang": "fr",
+  "genre": "fiction",
+  "model": "claude-haiku-4-5",
+  "p_ai": 0.01911889761686325
+ },
+ "ai-opus-1": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "encyclopedia",
+  "model": "claude-opus-5-5",
+  "p_ai": 0.14185263216495514
+ },
+ "ai-opus-2": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "blog",
+  "model": "claude-opus-5-5",
+  "p_ai": 0.06940469145774841
+ },
+ "ai-opus-3": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "fiction",
+  "model": "claude-opus-5-5",
+  "p_ai": 0.03596649691462517
+ },
+ "ai-opus-4": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "abstract",
+  "model": "claude-opus-5-5",
+  "p_ai": 0.030524728819727898
+ },
+ "ai-opus-5": {
+  "kind": "ai",
+  "lang": "fr",
+  "genre": "encyclopedia",
+  "model": "claude-opus-5-5",
+  "p_ai": 0.01845593936741352
+ },
+ "ai-opus-6": {
+  "kind": "ai",
+  "lang": "fr",
+  "genre": "letter",
+  "model": "claude-opus-5-5",
+  "p_ai": 0.023453589528799057
+ },
+ "ai-opus-7": {
+  "kind": "ai",
+  "lang": "de",
+  "genre": "fiction",
+  "model": "claude-opus-5-5",
+  "p_ai": 0.04772279039025307
+ },
+ "ai-opus-8": {
+  "kind": "ai",
+  "lang": "fr",
+  "genre": "fiction",
+  "model": "claude-opus-5-5",
+  "p_ai": 0.06487005203962326
+ },
+ "ai-sonnet-1": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "encyclopedia",
+  "model": "claude-sonnet-5",
+  "p_ai": 0.9746529459953308
+ },
+ "ai-sonnet-2": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "blog",
+  "model": "claude-sonnet-5",
+  "p_ai": 0.9800189137458801
+ },
+ "ai-sonnet-3": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "fiction",
+  "model": "claude-sonnet-5",
+  "p_ai": 0.26000750064849854
+ },
+ "ai-sonnet-4": {
+  "kind": "ai",
+  "lang": "en",
+  "genre": "abstract",
+  "model": "claude-sonnet-5",
+  "p_ai": 0.9844418168067932
+ },
+ "ai-sonnet-5": {
+  "kind": "ai",
+  "lang": "fr",
+  "genre": "encyclopedia",
+  "model": "claude-sonnet-5",
+  "p_ai": 0.02962620183825493
+ },
+ "ai-sonnet-6": {
+  "kind": "ai",
+  "lang": "fr",
+  "genre": "letter",
+  "model": "claude-sonnet-5",
+  "p_ai": 0.0470600388944149
+ },
+ "ai-sonnet-7": {
+  "kind": "ai",
+  "lang": "de",
+  "genre": "encyclopedia",
+  "model": "claude-sonnet-5",
+  "p_ai": 0.03936969116330147
+ },
+ "ai-sonnet-8": {
+  "kind": "ai",
+  "lang": "fr",
+  "genre": "fiction",
+  "model": "claude-sonnet-5",
+  "p_ai": 0.04153352975845337
+ },
+ "h-wiki-en-glacier": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.030516447499394417
+ },
+ "h-wiki-en-photosynthesis": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.07625529170036316
+ },
+ "h-wiki-en-bicycle": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.11700194329023361
+ },
+ "h-wiki-en-chess": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.525757372379303
+ },
+ "h-wiki-en-printing-press": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.017148878425359726
+ },
+ "h-wiki-fr-mar-e": {
+  "kind": "human",
+  "lang": "fr",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.03667355328798294
+ },
+ "h-wiki-fr-fromage": {
+  "kind": "human",
+  "lang": "fr",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.2982051372528076
+ },
+ "h-wiki-fr-canal-du-midi": {
+  "kind": "human",
+  "lang": "fr",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.013630101457238197
+ },
+ "h-wiki-de-gletscher": {
+  "kind": "human",
+  "lang": "de",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.028643008321523666
+ },
+ "h-wiki-de-buchdruck": {
+  "kind": "human",
+  "lang": "de",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.030390053987503052
+ },
+ "h-gut-1260": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "fiction",
+  "model": null,
+  "p_ai": 0.13205347955226898
+ },
+ "h-gut-768": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "fiction",
+  "model": null,
+  "p_ai": 0.02854853682219982
+ },
+ "h-gut-98": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "fiction",
+  "model": null,
+  "p_ai": 0.025952644646167755
+ },
+ "h-gut-17989": {
+  "kind": "human",
+  "lang": "fr",
+  "genre": "fiction",
+  "model": null,
+  "p_ai": 0.025571973994374275
+ },
+ "h-gut-22367": {
+  "kind": "human",
+  "lang": "de",
+  "genre": "fiction",
+  "model": null,
+  "p_ai": 0.21640188992023468
+ },
+ "h-gut-2000": {
+  "kind": "human",
+  "lang": "es",
+  "genre": "fiction",
+  "model": null,
+  "p_ai": 0.06856503337621689
+ },
+ "h-arxiv-1602.03837": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "abstract",
+  "model": null,
+  "p_ai": 0.8832906484603882
+ },
+ "h-arxiv-2010.11929": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "abstract",
+  "model": null,
+  "p_ai": 0.05497739836573601
+ },
+ "h-arxiv-1912.01703": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "abstract",
+  "model": null,
+  "p_ai": 0.8587111234664917
+ },
+ "h-arxiv-2106.09685": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "abstract",
+  "model": null,
+  "p_ai": 0.07455801963806152
+ },
+ "h-arxiv-1905.11946": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "abstract",
+  "model": null,
+  "p_ai": 0.15631335973739624
+ },
+ "h-wiki-en-honey-bee": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.01861579716205597
+ },
+ "h-wiki-en-lighthouse": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.9828252196311951
+ },
+ "h-wiki-fr-volcan": {
+  "kind": "human",
+  "lang": "fr",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.024572858586907387
+ },
+ "h-wiki-fr-cath-drale-notre-dame-de-chartres": {
+  "kind": "human",
+  "lang": "fr",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.020146843045949936
+ },
+ "h-wiki-de-fahrrad": {
+  "kind": "human",
+  "lang": "de",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.02979719452559948
+ },
+ "h-wiki-es-volc-n": {
+  "kind": "human",
+  "lang": "es",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.02626998908817768
+ },
+ "h-wiki-es-imprenta": {
+  "kind": "human",
+  "lang": "es",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.014032875187695026
+ },
+ "h-wiki-es-caf-": {
+  "kind": "human",
+  "lang": "es",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.01566317118704319
+ },
+ "h-wiki-es-r-o-amazonas": {
+  "kind": "human",
+  "lang": "es",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.020076600834727287
+ },
+ "h-wiki-it-vulcano": {
+  "kind": "human",
+  "lang": "it",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.02760666236281395
+ },
+ "h-wiki-it-olio-di-oliva": {
+  "kind": "human",
+  "lang": "it",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.023476766422390938
+ },
+ "h-gut-4791": {
+  "kind": "human",
+  "lang": "fr",
+  "genre": "fiction",
+  "model": null,
+  "p_ai": 0.027345679700374603
+ },
+ "h-gut-45334": {
+  "kind": "human",
+  "lang": "it",
+  "genre": "fiction",
+  "model": null,
+  "p_ai": 0.053548578172922134
+ },
+ "h-gut-5021": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "fiction",
+  "model": null,
+  "p_ai": 0.019386915490031242
+ },
+ "h-wiki-en-coral-reef": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.08059940487146378
+ },
+ "h-wiki-fr-lavande": {
+  "kind": "human",
+  "lang": "fr",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.11605717986822128
+ },
+ "h-wiki-fr-pont-du-gard": {
+  "kind": "human",
+  "lang": "fr",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.016853777691721916
+ },
+ "h-wiki-de-rhein": {
+  "kind": "human",
+  "lang": "de",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.03424467891454697
+ },
+ "h-wiki-es-paella": {
+  "kind": "human",
+  "lang": "es",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.02399495616555214
+ },
+ "h-wiki-it-pizza": {
+  "kind": "human",
+  "lang": "it",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.019888127222657204
+ },
+ "h-wiki-it-colosseo": {
+  "kind": "human",
+  "lang": "it",
+  "genre": "encyclopedia",
+  "model": null,
+  "p_ai": 0.016723839566111565
+ },
+ "h-news-en-100-icebergs-heading-for-new-zealand": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "news",
+  "model": null,
+  "p_ai": 0.3928147256374359
+ },
+ "h-news-en-amazon-deforestation-accelerating": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "news",
+  "model": null,
+  "p_ai": 0.016093788668513298
+ },
+ "h-news-en-arctic-ice-cap-shrank-sharply-this-summe": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "news",
+  "model": null,
+  "p_ai": 0.25631386041641235
+ },
+ "h-news-en-annual-perseids-meteor-shower-visible-in": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "news",
+  "model": null,
+  "p_ai": 0.9511416554450989
+ },
+ "h-news-en-around-7-100-cheetahs-remain-say-experts": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "news",
+  "model": null,
+  "p_ai": 0.021290989592671394
+ },
+ "h-news-fr-afrique-d-clin-du-lac-tchad": {
+  "kind": "human",
+  "lang": "fr",
+  "genre": "news",
+  "model": null,
+  "p_ai": 0.0183003731071949
+ },
+ "h-news-fr-aoste-la-gestion-des-d-chets-co-te-de-pl": {
+  "kind": "human",
+  "lang": "fr",
+  "genre": "news",
+  "model": null,
+  "p_ai": 0.9358881711959839
+ },
+ "h-news-fr-chine-p-kin-en-alerte-rouge-pollution": {
+  "kind": "human",
+  "lang": "fr",
+  "genre": "news",
+  "model": null,
+  "p_ai": 0.018741527572274208
+ },
+ "h-news-fr-compostage-pour-montr-al": {
+  "kind": "human",
+  "lang": "fr",
+  "genre": "news",
+  "model": null,
+  "p_ai": 0.02141568623483181
+ },
+ "h-gut-16901": {
+  "kind": "human",
+  "lang": "fr",
+  "genre": "fiction",
+  "model": null,
+  "p_ai": 0.06099478900432587
+ },
+ "h-gut-62000": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "fiction",
+  "model": null,
+  "p_ai": 0.020989252254366875
+ },
+ "h-gut-52520": {
+  "kind": "human",
+  "lang": "fr",
+  "genre": "essay",
+  "model": null,
+  "p_ai": 0.04894373565912247
+ },
+ "h-gut-13704": {
+  "kind": "human",
+  "lang": "fr",
+  "genre": "fiction",
+  "model": null,
+  "p_ai": 0.022468673065304756
+ },
+ "h-gut-60183": {
+  "kind": "human",
+  "lang": "it",
+  "genre": "fiction",
+  "model": null,
+  "p_ai": 0.07122992724180222
+ },
+ "h-gut-51804": {
+  "kind": "human",
+  "lang": "en",
+  "genre": "fiction",
+  "model": null,
+  "p_ai": 0.019294248893857002
+ }
+}
