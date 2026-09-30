@@ -50,7 +50,7 @@ Complète le tableau de `01-recherche-lancements.md` (remove.bg, CloudConvert, P
 **Tagline (44/60):**
 > 225 free tools. Most never upload your file.
 
-*(Validée par le propriétaire le 28/09 ; identique au slogan de l'accueil. « 225 » = compteur gardé par le build ; « most » = **174 sur 225**, recompté dans le code le 01/10 par `scripts/count-server-tools.mjs` — 51 outils utilisent un serveur dans au moins un cas (P18 : Markdown to PDF produit désormais un vrai PDF par notre Chromium, Video Tools › Video to GIF un vrai GIF par notre service) ; « about 170 » arrondi par défaut ; le « ≈ 181 » du 28/09 est périmé, P15 a passé Video Rotator, Resizer, Filter et Merger sur le service.)*
+*(Validée par le propriétaire le 28/09 ; identique au slogan de l'accueil. « 225 » = compteur gardé par le build ; « most » = **173 sur 225**, recompté dans le code le 01/10 par `scripts/count-server-tools.mjs` — 52 outils utilisent un serveur dans au moins un cas (P18 : Markdown to PDF produit désormais un vrai PDF par notre Chromium, Video Tools › Video to GIF un vrai GIF par notre service, Text to PDF imprime les emoji et les écritures hors de ses polices par notre Chromium) ; « about 170 » arrondi par défaut ; le « ≈ 181 » du 28/09 est périmé, P15 a passé Video Rotator, Resizer, Filter et Merger sur le service.)*
 
 **Description (227/260):**
 > 225 free tools for PDF, images, audio, video, archives and developers, no sign-up. About 170 run entirely in your browser: the file never leaves your device. Our main tools are tested against the market leader on the same file.

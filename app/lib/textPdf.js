@@ -39,6 +39,52 @@ export function scriptOf(cp) {
 }
 
 
+// ---- Emoji and the other writing systems (P18, 01/10) ---------------------------------------------------------
+// The in-browser engine above draws Latin, Greek, Cyrillic, Arabic, Hebrew, Devanagari, Tamil, Thai and CJK; it
+// refused emoji and Bengali (fontkit does not form Bengali conjuncts). The reference converters print text with a
+// browser engine and font fallback (fpdf2's documentation: fallback fonts + HarfBuzz shaping; Chromium does both).
+// A text holding anything else is therefore printed by the site's own Chromium (Gotenberg, the renderer of HTML to
+// PDF), whose Noto fonts (SIL OFL) cover every common script and Noto Color Emoji: measured 01/10 on production —
+// emoji with skin tones, flags, family sequences in colour; Bengali, Gurmukhi, Gujarati, Telugu, Kannada, Malayalam,
+// Odia, Sinhala, Myanmar, Khmer, Lao, Ethiopic, Georgian, Armenian shaped; every character read back by Poppler.
+// Only the glyphs used go into the PDF; nothing is added to the page.
+
+// Code points the in-browser engine draws (its fonts' ranges, conservatively).
+function localCodePoint(cp) {
+  const s = scriptOf(cp);
+  if (s === 'bengali') return false;
+  if (s !== 'latin') return true; // Arabic, Hebrew, Devanagari, Tamil, Thai, CJK, neutral ASCII / general punctuation
+  return cp <= 0x052f || (cp >= 0x1e00 && cp <= 0x1fff) || (cp >= 0x2070 && cp <= 0x20cf) || (cp >= 0x2100 && cp <= 0x215f);
+}
+
+/** True when the text needs the browser-engine renderer (emoji, or a script the in-browser fonts don't draw). */
+export function needsRenderer(text) {
+  for (const ch of String(text)) {
+    const cp = ch.codePointAt(0);
+    if (cp === 0x200d || cp === 0xfe0f || cp === 0x20e3) return true; // emoji sequences
+    if (/\p{Emoji_Presentation}/u.test(ch)) return true; // 👋 🎉 ✅, skin tones, flags (©, ™ stay text: local)
+    if (!localCodePoint(cp)) return true;
+  }
+  return false;
+}
+
+/** The HTML page printed by the renderer: the same page as the in-browser engine (A4, 50 pt margins, 12 pt). */
+export function textToHtmlDocument(text, title = 'Document') {
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const clean = String(text).replace(/\r\n?/g, '\n').replace(/\t/g, '    ');
+  // Han characters in the Japanese or Korean design when the text is Japanese or Korean, else Chinese (Simplified).
+  const cjk = /[぀-ヿㇰ-ㇿ]/.test(clean) ? 'JP' : /[가-힯ᄀ-ᇿ㄰-㆏]/.test(clean) && !/[一-鿿]/.test(clean) ? 'KR' : 'SC';
+  const paragraphs = clean.split('\n').map((p) => `<p dir="auto">${p ? esc(p) : '&#8203;'}</p>`).join('\n');
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>
+@page { size: A4; margin: 50pt; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; font-family: 'Noto Sans', 'Noto Sans CJK ${cjk}', 'Noto Color Emoji', sans-serif; font-size: 12pt; line-height: 1.6; color: #000; }
+p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+</style></head><body>
+${paragraphs}
+</body></html>`;
+}
+
 // The slices of one CJK font: [{ url, ranges: [[from, to], …] }] from its @font-face rules.
 async function cjkSlices(lang) {
   const base = `${CJK_BASE}/${CJK_CSS[lang]}@${CJK_VERSION}`;
