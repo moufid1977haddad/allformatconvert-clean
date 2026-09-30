@@ -37,6 +37,26 @@ for (const how of ['fill', 'type', 'type-delay']) {
   check(`${how}: format under 2 s`, tFormat < 2000, `${tFormat} ms`);
   await p.close();
 }
+// P19 (01/10): a character typed WITHOUT its input event (what Safari's WebDriver sometimes does, React issue #10687)
+// must not be lost: Format reads the text the box shows. Before P19 the box was controlled by React: its state stayed
+// at "Élo" and the result lost "die" — the "Éloi" / "vill" of the owner's Mac bench.
+{
+  const p = await ctx.newPage();
+  await p.goto(origin + '/tools/developer-tools/code-formatter', { waitUntil: 'load' });
+  await p.waitForTimeout(1200);
+  const box = p.getByPlaceholder('Paste code here...');
+  const full = '{"name":"Élodie","city":"ville","n":1.10}';
+  await box.pressSequentially('{"name":"Élo');
+  await box.evaluate((el, v) => { // the rest lands in the box with no input event, as a dropped WebDriver event would
+    Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(el, v);
+  }, full);
+  await p.getByRole('button', { name: 'Format', exact: true }).click();
+  await p.waitForFunction(() => document.querySelector('textarea[aria-label="Output"]').value.includes('\n'), null, { timeout: 20000 }).catch(() => {});
+  const out = await p.locator('textarea[aria-label="Output"]').inputValue();
+  check('input event missing for the last characters: nothing lost ("Élodie", "ville")', out.includes('"name": "Élodie"') && out.includes('"city": "ville"') && out.includes('1.10'), JSON.stringify(out.slice(0, 80)));
+  check('the box still shows what was typed', (await box.inputValue()) === full, await box.inputValue());
+  await p.close();
+}
 await b.close();
 console.log(fails ? `${fails} FAIL (${name})` : `ALL PASS (${name})`);
 process.exit(fails ? 1 : 0);
