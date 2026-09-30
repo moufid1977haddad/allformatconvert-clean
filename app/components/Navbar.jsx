@@ -2,13 +2,24 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { supabase } from '@/lib/supabase';
-import { ToolIcon, toolBgColors, categoryColors } from '@/app/lib/toolIcons';
+import dynamic from 'next/dynamic';
+import { toolBgColors, categoryColors } from '@/app/lib/toolColors';
+import { loadGoogleTranslate } from '@/app/lib/googleTranslate';
 import SiteName from './SiteName';
 import {
   Search, FileText, Image as ImageIcon, Film, Headphones, Video, Type, Folder,
   QrCode, Repeat, Code, Calculator, Bot, Menu, X,
 } from 'lucide-react';
+
+// The ~150 tool icons only appear inside the mega-menus, which are not in the page until one opens: they load after
+// the first paint (prefetched when the browser is idle, below) instead of with every page (30/09/2026, Lighthouse).
+const ToolIcon = dynamic(() => import('@/app/lib/toolIcons').then((m) => m.ToolIcon), {
+  ssr: false,
+  loading: () => null,
+});
+// Supabase (the account menu) is likewise loaded after the first paint; a signed-in visitor sees their name a moment
+// later, as before (the session was already read asynchronously).
+const getSupabase = () => import('@/lib/supabase').then((m) => m.supabase);
 
 const categories = [
   { href: '/tools/pdf-tools', name: 'PDF Tools', label: 'PDF', icon: FileText },
@@ -718,18 +729,26 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-    return () => subscription.unsubscribe();
+    let subscription = null;
+    let cancelled = false;
+    getSupabase().then((supabase) => {
+      if (cancelled) return;
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (!cancelled) setUser(session?.user ?? null);
+      });
+      ({ data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUser(session?.user ?? null);
+      }));
+    }).catch((e) => { console.warn('[navbar] account state not loaded:', e); }); // the Sign In link stays shown
+    // Warm the mega-menu icons once the page is idle, so the first menu opened shows them at once.
+    const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 2000));
+    idle(() => { import('@/app/lib/toolIcons'); });
+    return () => { cancelled = true; if (subscription) subscription.unsubscribe(); };
   }, []);
 
   const handleSignOut = async () => {
     setUserMenuOpen(false);
-    await supabase.auth.signOut();
+    await (await getSupabase()).auth.signOut();
     router.push('/');
   };
 
@@ -747,16 +766,19 @@ export default function Navbar() {
     setCurrentLang(lang);
     setLangOpen(false);
     document.documentElement.dir = lang.code === 'ar' ? 'rtl' : 'ltr';
+    loadGoogleTranslate(); // on demand (app/lib/googleTranslate.js); no-op once loaded
     const tryTranslate = (attempts) => {
       const select = document.querySelector('.goog-te-combo');
-      if (select) {
+      // Google fills its hidden list after creating it: wait until our language is in it (with the script now loaded
+      // on demand, WebKit found the list still empty and the choice was lost — banc prelancement-01-10, 30/09).
+      if (select && [...select.options].some((o) => o.value === lang.code)) {
         select.value = lang.code;
         select.dispatchEvent(new Event('change'));
       } else if (attempts > 0) {
         setTimeout(() => tryTranslate(attempts - 1), 500);
       }
     };
-    tryTranslate(10);
+    tryTranslate(40); // up to 20 s: the script may still be downloading on a slow connection
   };
 
   return (
@@ -977,7 +999,7 @@ export default function Navbar() {
                   <div className="mt-1 pt-1 border-t border-neutral-200 dark:border-neutral-700">
                     <button
                       type="button"
-                      onClick={() => setMobileLangOpen(!mobileLangOpen)}
+                      onClick={() => { loadGoogleTranslate(); setMobileLangOpen(!mobileLangOpen); }}
                       aria-expanded={mobileLangOpen}
                       className="flex items-center gap-2 w-full px-2 py-2 text-sm font-bold text-black dark:text-white"
                     >
@@ -1109,7 +1131,7 @@ export default function Navbar() {
             {/* Language Selector */}
             <div className="relative notranslate hidden lg:block" ref={langRef}>
               <button
-                onClick={() => setLangOpen(!langOpen)}
+                onClick={() => { loadGoogleTranslate(); setLangOpen(!langOpen); }}
                 className="flex items-center gap-0.5 px-1.5 py-1 rounded-lg bg-[#eaf3fb] dark:bg-[#16283a] hover:opacity-80 transition text-[#185fa5] dark:text-[#85b7eb] text-xs font-bold"
               >
                 <span>{currentLang.short}</span>

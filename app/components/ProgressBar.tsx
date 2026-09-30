@@ -12,7 +12,7 @@ export default function ProgressBar({ pct, label }: { pct: number; label?: strin
       )}
       <div className="w-full h-2 rounded-full bg-neutral-200 dark:bg-neutral-700 overflow-hidden">
         <div
-          className="h-full bg-indigo-600 rounded-full transition-[width] duration-150 ease-out"
+          className="h-full bg-indigo-600 rounded-full transition-[width] duration-150 ease-out text-white"
           style={{ width: `${clamped}%` }}
           role="progressbar"
           aria-valuenow={clamped}

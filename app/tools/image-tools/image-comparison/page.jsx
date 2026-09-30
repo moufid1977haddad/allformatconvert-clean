@@ -77,7 +77,7 @@ export default function ImageComparisonPage() {
                   <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center text-neutral-900 font-bold shadow-lg">⇄</div>
                 </div>
               </div>
-              <div><label className="block text-sm text-neutral-500 mb-1">Slider: {sliderPos}%</label><input type="range" min="0" max="100" value={sliderPos} onChange={e => setSliderPos(parseInt(e.target.value))} className="w-full" /></div>
+              <div><label className="block text-sm text-neutral-500 mb-1">Slider: {sliderPos}%</label><input aria-label="Slider (%)" type="range" min="0" max="100" value={sliderPos} onChange={e => setSliderPos(parseInt(e.target.value))} className="w-full" /></div>
               <div className="flex justify-between text-sm text-neutral-500"><span>Before</span><span>After</span></div>
             </div>
           )}

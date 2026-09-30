@@ -284,7 +284,7 @@ export default function AudioMergerPage() {
           >
             {items.length > 0
               ? <p className="text-neutral-700 text-sm font-medium">{items.length} file{items.length > 1 ? 's' : ''} · click or drop here to add more</p>
-              : <p className="text-neutral-400 text-sm">Click or drop two or more audio files here</p>}
+              : <p className="text-neutral-500 text-sm">Click or drop two or more audio files here</p>}
           </div>
           <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} multiple className="hidden" onChange={handleFiles} />
           {items.length > 0 && (
@@ -391,7 +391,7 @@ export default function AudioMergerPage() {
               <button onClick={cancel} className="w-full bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl py-3 font-semibold transition">Cancel</button>
             </div>
           ) : (
-            <button onClick={merge} disabled={!ready} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+            <button onClick={merge} disabled={!ready} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
               {analysing ? 'Reading files…' : 'Merge Audio Files'}
             </button>
           )}

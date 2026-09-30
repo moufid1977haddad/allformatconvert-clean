@@ -111,7 +111,7 @@ export default function VideoRotatorPage() {
           {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
           {stage && canCancel
             ? <button type="button" onClick={() => abortRef.current?.abort()} className="w-full bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl py-3 font-semibold transition">Cancel</button>
-            : <button type="button" onClick={rotate} disabled={!file || !!stage} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Rotate Video</button>}
+            : <button type="button" onClick={rotate} disabled={!file || !!stage} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Rotate Video</button>}
           {result && (
             <div className="space-y-2">
               <p className="text-sm text-center text-green-700" data-result>{result.lossless

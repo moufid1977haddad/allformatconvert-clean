@@ -1,6 +1,5 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
-import { PDFDocument } from '@cantoo/pdf-lib';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 
@@ -27,6 +26,7 @@ export default function PdfProtectPage() {
     setDownloadUrl(null);
     try {
       const arrayBuffer = await file.arrayBuffer();
+      const { PDFDocument } = await import('@cantoo/pdf-lib'); // loaded when used, not with the page (30/09)
       const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer), { ignoreEncryption: true });
       pdfDoc.encrypt({
         userPassword: password,
@@ -62,14 +62,14 @@ export default function PdfProtectPage() {
             <label className="block text-sm text-neutral-500 mb-1">Password</label>
             <input type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" placeholder="Enter password" />
           </div>
-          <button onClick={protect} disabled={!file || !password || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          <button onClick={protect} disabled={!file || !password || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Processing...' : 'Protect PDF'}
           </button>
           {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
           {downloadUrl && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
               <div className="text-green-400 text-xl font-bold mb-3">Done!</div>
-              <a href={downloadUrl} download={file.name.replace(/\.pdf$/i, '-protected.pdf')} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition">Download</a>
+              <a href={downloadUrl} download={file.name.replace(/\.pdf$/i, '-protected.pdf')} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition text-white">Download</a>
             </div>
           )}
         </div>

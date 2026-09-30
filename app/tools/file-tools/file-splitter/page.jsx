@@ -64,17 +64,17 @@ export default function FileSplitterPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">File Splitter</h1>
         <p className="text-neutral-500 text-center mb-2">Split large files into smaller parts</p>
-        <p className="text-neutral-400 text-xs text-center mb-8">Supports files up to {MAX_FILE_SIZE_LABEL} and up to {MAX_CHUNKS.toLocaleString()} parts. Splitting is instant — chunks are lazy byte-range views, not copied into memory.</p>
+        <p className="text-neutral-500 text-xs text-center mb-8">Supports files up to {MAX_FILE_SIZE_LABEL} and up to {MAX_CHUNKS.toLocaleString()} parts. Splitting is instant — chunks are lazy byte-range views, not copied into memory.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a file here'}</p>
             <input ref={inputRef} type="file" className="hidden" onChange={handleFile} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm text-neutral-500 mb-1">Chunk Size</label><input type="number" min="1" value={chunkSize} onChange={e => setChunkSize(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
-            <div><label className="block text-sm text-neutral-500 mb-1">Unit</label><select value={unit} onChange={e => setUnit(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3"><option>B</option><option>KB</option><option>MB</option></select></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">Chunk Size</label><input aria-label="Chunk Size" type="number" min="1" value={chunkSize} onChange={e => setChunkSize(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">Unit</label><select aria-label="Unit" value={unit} onChange={e => setUnit(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3"><option>B</option><option>KB</option><option>MB</option></select></div>
           </div>
-          <button onClick={split} disabled={!file || loading || !chunkSizeValid} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">{loading ? 'Splitting...' : 'Split File'}</button>
+          <button onClick={split} disabled={!file || loading || !chunkSizeValid} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">{loading ? 'Splitting...' : 'Split File'}</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {chunks.length > 0 && (
             <div className="space-y-2">

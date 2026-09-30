@@ -100,7 +100,7 @@ export default function PdfRepairPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">PDF Repair</h1>
         <p className="text-neutral-500 text-center mb-2">Recover PDFs with damaged structure — broken cross-reference tables and similar corruption</p>
-        <p className="text-neutral-400 dark:text-neutral-500 text-xs text-center mb-8">
+        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8">
           Files up to {pdfToolsMaxLabel()} Your file is uploaded to our repair service for processing — see below for what that means.
         </p>
 

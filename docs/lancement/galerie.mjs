@@ -14,6 +14,7 @@
 import { chromium } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
+import { countServerTools } from '../../scripts/count-server-tools.mjs';
 
 const arg = process.argv[2];
 if (!arg) { console.error('usage: node docs/lancement/galerie.mjs <origin>  (e.g. http://localhost:3100)'); process.exit(1); }
@@ -32,11 +33,16 @@ const LABEL = { 'developer-tools': 'Developer', 'pdf-tools': 'PDF', 'image-tools
 const byCat = Object.entries(counts.counts).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${LABEL[k] || k} ${n}`).join(' · ');
 console.log(`tool count read from ${origin}/api/tool-counts: ${total} (${byCat})`);
 let privacy = null; // filled by the image-compressor slide
+// Tools that run entirely in the browser, recounted in the code at every run (scripts/count-server-tools.mjs).
+const tools = countServerTools();
+if (tools.total !== total) throw new Error(`tool pages on disk (${tools.total}) != live counter (${total}): build and code differ`);
+const localAbout = Math.floor(tools.local / 5) * 5; // "about 175" for 176: rounded DOWN, never above the count
+console.log(`recounted in the code: ${tools.local} of ${tools.total} tools entirely in the browser, ${tools.server.length} use a server in at least one case`);
 
 const SLIDES = [
   { file: '01-hero', path: '/', title: () => `${total} free tools. Most never upload your file.`,
-    sub: () => `PDF, image, audio, video, archives, developer tools — no sign-up. About 180 of the ${total} run entirely in your browser.`,
-    source: () => `${total} = live tool counter; about 180 = recount in the code on 28/09 (44 tools use a server in at least one case)`, report: 'docs/audit/RAPPORT-global-28-09.md, point 3' },
+    sub: () => `PDF, image, audio, video, archives, developer tools — no sign-up. About ${localAbout} of the ${total} run entirely in your browser.`,
+    source: () => `${total} = live tool counter; ${tools.local} = recount in the code during this capture (${tools.server.length} tools use a server in at least one case)`, report: 'scripts/count-server-tools.mjs' },
   { file: '02-never-upload', path: '/tools/image-tools/image-compressor',
     title: () => 'Your image never leaves your device',
     sub: () => `While this ${privacy.photoKb} KB image was compressed, the page sent ${privacy.withBody === 0 ? 'no data to any server — no upload request at all' : `${privacy.withBody} small requests, none holding the image`}. Check it yourself in your browser's Network tab.`,
@@ -76,6 +82,13 @@ const SLIDES = [
   { file: '08-barcode-generator', path: '/tools/qr-barcodes-tools/barcode-generator', title: () => '37 barcode types — every file re-read before you download it',
     sub: () => 'Tested on 17 codes: 102 of 102 of our files scanned back correctly; barcode-maker.com: 65 of 68.',
     source: () => 'every file decoded by an independent reader (zxing-cpp), Sep 2026', report: 'docs/audit/RAPPORT-amelioration-14.md' },
+  { file: '09-ai-detector', path: '/tools/ai-tools/ai-detector', title: () => 'An AI detector that did not accuse a single human text',
+    sub: () => '0 of 57 human texts flagged as AI, 40 of 40 AI texts recognised — 5 languages, 5 AI models. 2,000 free words a day, no sign-up.',
+    source: () => "97 texts through the site's own route, Pangram model, 30 Sep 2026", report: 'docs/audit/RAPPORT-p17-30-09.md §1.3' },
+  { file: '10-big-photos', path: '/tools/image-tools/image-blur', title: () => '48-megapixel phone photos, edited in the browser',
+    sub: () => 'Image Blur: a 12, 24 and 48 MP photo in 1.5, 2.3 and 4.7 s in Safari’s engine, with the iPhone’s memory limit applied. Nothing uploaded.',
+    source: () => "live site, WebKit with the iPhone canvas limit simulated, 30 Sep 2026", report: 'docs/audit/RAPPORT-p17-30-09.md §4',
+    prep: async (p) => { await p.locator('input[type=file]').first().setInputFiles(PHOTO); await p.waitForTimeout(2500); } },
 ];
 
 for (const f of fs.readdirSync(out)) if (/^\d\d-.*\.png$/.test(f)) fs.unlinkSync(path.join(out, f)); // no stale image from an older order

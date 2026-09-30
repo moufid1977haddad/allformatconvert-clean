@@ -52,14 +52,14 @@ export default function HeicToPngPage() {
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a HEIC file here'}</p>
             <input ref={inputRef} type="file" accept=".heic,.heif" className="hidden" onChange={handleFile} />
           </div>
-          <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Converting...' : 'Convert to PNG'}
           </button>
           {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
           {result && (
             <div className="space-y-2">
               <img src={result} className="max-h-48 mx-auto rounded" />
-              <a href={result} download={file.name.replace(/\.hei[cf]$/i, '.png')} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download PNG</a>
+              <a href={result} download={file.name.replace(/\.hei[cf]$/i, '.png')} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download PNG</a>
             </div>
           )}
         </div>

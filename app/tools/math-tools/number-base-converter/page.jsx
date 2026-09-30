@@ -28,7 +28,7 @@ export default function NumberBaseConverterPage() {
             </div>
             <div>
               <label className="block text-sm text-neutral-500 mb-1">From Base</label>
-              <select value={fromBase} onChange={e => setFromBase(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3">
+              <select aria-label="From Base" value={fromBase} onChange={e => setFromBase(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3">
                 <option value="2">Binary (2)</option>
                 <option value="8">Octal (8)</option>
                 <option value="10">Decimal (10)</option>

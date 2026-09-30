@@ -47,22 +47,22 @@ export default function SubtitleGeneratorPage() {
                   <button onClick={() => removeSubtitle(i)} className="text-red-400 hover:text-red-300 text-sm">Remove</button>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <div><label className="block text-xs text-neutral-500 mb-1">Start (HH:MM:SS.mmm)</label><input type="text" value={s.start} onChange={e => updateSubtitle(i,'start',e.target.value)} className="w-full bg-neutral-200 rounded-lg p-2 font-mono text-sm" /></div>
-                  <div><label className="block text-xs text-neutral-500 mb-1">End (HH:MM:SS.mmm)</label><input type="text" value={s.end} onChange={e => updateSubtitle(i,'end',e.target.value)} className="w-full bg-neutral-200 rounded-lg p-2 font-mono text-sm" /></div>
+                  <div><label className="block text-xs text-neutral-500 mb-1">Start (HH:MM:SS.mmm)</label><input aria-label="Start (HH:MM:SS.mmm)" type="text" value={s.start} onChange={e => updateSubtitle(i,'start',e.target.value)} className="w-full bg-neutral-200 rounded-lg p-2 font-mono text-sm" /></div>
+                  <div><label className="block text-xs text-neutral-500 mb-1">End (HH:MM:SS.mmm)</label><input aria-label="End (HH:MM:SS.mmm)" type="text" value={s.end} onChange={e => updateSubtitle(i,'end',e.target.value)} className="w-full bg-neutral-200 rounded-lg p-2 font-mono text-sm" /></div>
                 </div>
                 <input type="text" value={s.text} onChange={e => updateSubtitle(i,'text',e.target.value)} className="w-full bg-neutral-200 rounded-lg p-2 text-sm" placeholder="Subtitle text..." />
               </div>
             ))}
           </div>
           <button onClick={addSubtitle} className="w-full bg-neutral-200 hover:bg-neutral-200 rounded-xl py-2 font-semibold transition">Add Subtitle</button>
-          <button onClick={generate} className="w-full bg-indigo-600 hover:bg-indigo-500 rounded-xl py-3 font-semibold transition">Generate SRT</button>
+          <button onClick={generate} className="w-full bg-indigo-600 hover:bg-indigo-500 rounded-xl py-3 font-semibold transition text-white">Generate SRT</button>
           {error && <p role="alert" className="text-red-600 text-sm text-center">{error}</p>}
           {srtContent && (
             <div className="space-y-2">
-              <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" value={srtContent} readOnly />
+              <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" value={srtContent} readOnly />
               <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => download(srtContent, 'subtitles.srt', 'application/x-subrip')} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download SRT</button>
-                <button onClick={() => download(vttContent, 'subtitles.vtt', 'text/vtt')} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download VTT</button>
+                <button onClick={() => download(srtContent, 'subtitles.srt', 'application/x-subrip')} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download SRT</button>
+                <button onClick={() => download(vttContent, 'subtitles.vtt', 'text/vtt')} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download VTT</button>
               </div>
             </div>
           )}

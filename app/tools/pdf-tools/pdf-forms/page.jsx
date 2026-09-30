@@ -103,7 +103,7 @@ export default function Page() {
         <p className="text-neutral-500 text-center mb-8">Fill PDF form fields online</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-400 text-sm">Click to upload a PDF with form fields</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload a PDF with form fields</p>}
           </div>
           <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
           {fields.length > 0 && (
@@ -119,15 +119,15 @@ export default function Page() {
                     ) : (
                       <label className="block text-sm text-neutral-500 mb-1">{field.name}{field.readOnly ? ' (read-only)' : ''}</label>
                     )}
-                    {field.kind === 'TextField' && <input type="text" value={v} disabled={field.readOnly} onChange={e => set(e.target.value)} className={cls} />}
+                    {field.kind === 'TextField' && <input aria-label={field.name} type="text" value={v} disabled={field.readOnly} onChange={e => set(e.target.value)} className={cls} />}
                     {(field.kind === 'RadioGroup' || field.kind === 'Dropdown') && (
-                      <select value={v} disabled={field.readOnly} onChange={e => set(e.target.value)} className={cls}>
+                      <select aria-label={field.name} value={v} disabled={field.readOnly} onChange={e => set(e.target.value)} className={cls}>
                         <option value="">(none)</option>
                         {field.options.map(o => <option key={o} value={o}>{o}</option>)}
                       </select>
                     )}
                     {field.kind === 'OptionList' && (
-                      <select multiple value={v} disabled={field.readOnly} onChange={e => set(Array.from(e.target.selectedOptions, o => o.value))} className={cls}>
+                      <select aria-label={field.name} multiple value={v} disabled={field.readOnly} onChange={e => set(Array.from(e.target.selectedOptions, o => o.value))} className={cls}>
                         {field.options.map(o => <option key={o} value={o}>{o}</option>)}
                       </select>
                     )}
@@ -138,8 +138,8 @@ export default function Page() {
               <label className="flex items-center gap-2 text-sm text-neutral-700 pt-2"><input type="checkbox" checked={flatten} onChange={e => { setFlatten(e.target.checked); setResult(null); }} />Flatten the form (values become part of the page and can no longer be edited)</label>
             </div>
           )}
-          {fields.length === 0 && file && !loading && <p className="text-neutral-400 text-sm text-center">No form fields found in this PDF.</p>}
-          <button onClick={fillForm} disabled={!file || loading || fields.length === 0} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          {fields.length === 0 && file && !loading && <p className="text-neutral-500 text-sm text-center">No form fields found in this PDF.</p>}
+          <button onClick={fillForm} disabled={!file || loading || fields.length === 0} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Processing...' : 'Fill and Download PDF'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}

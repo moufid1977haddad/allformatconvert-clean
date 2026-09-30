@@ -59,19 +59,19 @@ export default function ImageCaptionerPage() {
         <p className="text-neutral-500 text-center mb-8">Generate captions for images with AI</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {preview ? <img src={preview} className="max-h-48 mx-auto rounded-lg" alt="preview" /> : <p className="text-neutral-400 text-sm">Click to upload an image</p>}
+            {preview ? <img src={preview} className="max-h-48 mx-auto rounded-lg" alt="preview" /> : <p className="text-neutral-500 text-sm">Click to upload an image</p>}
           </div>
-          <p className="text-neutral-400 text-xs text-center -mt-2">Max {MAX_MB} MB per image — it is reduced on your device before sending, so large photos work</p>
+          <p className="text-neutral-500 text-xs text-center -mt-2">Max {MAX_MB} MB per image — it is reduced on your device before sending, so large photos work</p>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
-          <button onClick={process} disabled={!preview || loading || (imageFile && imageFile.size > MAX_IMAGE_CAPTIONER_ORIGINAL_BYTES)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          <button onClick={process} disabled={!preview || loading || (imageFile && imageFile.size > MAX_IMAGE_CAPTIONER_ORIGINAL_BYTES)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Generating...' : 'Generate Caption'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {output && (
             <div className="space-y-2">
               <label className="block text-sm text-neutral-500">Caption</label>
-              <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none" value={output} readOnly />
-              <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
+              <textarea aria-label="Caption" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none" value={output} readOnly />
+              <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button>
             </div>
           )}
         </div>

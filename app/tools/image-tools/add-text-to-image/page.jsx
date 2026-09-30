@@ -59,17 +59,17 @@ export default function AddTextToImagePage() {
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          <div><label className="block text-sm text-neutral-500 mb-1">Text</label><input type="text" value={text} onChange={e => setText(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
+          <div><label className="block text-sm text-neutral-500 mb-1">Text</label><input aria-label="Text" type="text" value={text} onChange={e => setText(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm text-neutral-500 mb-1">Font Size: {fontSize}px</label><input type="range" min="10" max="200" value={fontSize} onChange={e => setFontSize(parseInt(e.target.value))} className="w-full" /></div>
-            <div><label className="block text-sm text-neutral-500 mb-1">Color</label><input type="color" value={color} onChange={e => setColor(e.target.value)} className="w-full h-10 rounded-lg cursor-pointer" /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">Font Size: {fontSize}px</label><input aria-label="Font Size (px)" type="range" min="10" max="200" value={fontSize} onChange={e => setFontSize(parseInt(e.target.value))} className="w-full" /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">Color</label><input aria-label="Color" type="color" value={color} onChange={e => setColor(e.target.value)} className="w-full h-10 rounded-lg cursor-pointer" /></div>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm text-neutral-500 mb-1">X Position: {posX}%</label><input type="range" min="0" max="100" value={posX} onChange={e => setPosX(parseInt(e.target.value))} className="w-full" /></div>
-            <div><label className="block text-sm text-neutral-500 mb-1">Y Position: {posY}%</label><input type="range" min="0" max="100" value={posY} onChange={e => setPosY(parseInt(e.target.value))} className="w-full" /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">X Position: {posX}%</label><input aria-label="X Position (%)" type="range" min="0" max="100" value={posX} onChange={e => setPosX(parseInt(e.target.value))} className="w-full" /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">Y Position: {posY}%</label><input aria-label="Y Position (%)" type="range" min="0" max="100" value={posY} onChange={e => setPosY(parseInt(e.target.value))} className="w-full" /></div>
           </div>
-          <button onClick={apply} disabled={!image || !text} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Apply Text</button>
-          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a></div>}
+          <button onClick={apply} disabled={!image || !text} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Apply Text</button>
+          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download</a></div>}
         </div>
       </div>
       <SeoContent

@@ -18,6 +18,35 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Secondary text (text-neutral-500: every tool's subtitle, hints, captions) was 4.34:1 on the page background
+   #f5f5f5, under the 4.5:1 WCAG AA minimum (Lighthouse "color-contrast" on every page, 30/09/2026). One step darker:
+   4.9:1 on #f5f5f5, 5.3:1 on white. neutral-500 is used for text and placeholders only on this site. */
+@theme {
+  --color-neutral-500: #6b6b6b;
+}
+
+/* The site began with a dark theme: errors (text-red-400, 119 places), results (text-indigo-400, text-green-400) and
+   warnings (text-yellow-400…) kept their "-400" shades, 1.9-2.9:1 on the light background — unreadable for many
+   visitors, under WCAG AA 4.5:1. In LIGHT mode they now use the darker shade of the same hue (4.8-6.3:1); dark mode is
+   unchanged (the -400 shades are right on a dark background). Kept as a colour rule rather than renaming the classes:
+   the test benches find error messages by `p.text-red-400`. Same layer and specificity as the utilities, so hover:
+   and other variants still win. */
+@layer utilities {
+  /* Green buttons (Copy, Download): Tailwind v4's green-600 (#00a63e) gives white text only 3.2:1; one shade darker
+     (green-700, 5.0:1), and darker still on hover instead of lighter. */
+  .bg-green-600 { background-color: #15803d; }
+  .hover\:bg-green-500:hover { background-color: #166534; }
+  /* light grey hints and counters (2.4-2.6:1): same grey as text-neutral-500 in light mode */
+  :where(html:not(.dark)) .text-neutral-400 { color: #6b6b6b; }
+  :where(html:not(.dark)) .text-red-400 { color: #dc2626; }
+  :where(html:not(.dark)) .text-indigo-400 { color: #4f46e5; }
+  :where(html:not(.dark)) .text-green-400 { color: #15803d; }
+  :where(html:not(.dark)) .text-yellow-400 { color: #a16207; }
+  :where(html:not(.dark)) .text-amber-400 { color: #b45309; }
+  :where(html:not(.dark)) .text-orange-400 { color: #c2410c; }
+  :where(html:not(.dark)) .text-emerald-400 { color: #047857; }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

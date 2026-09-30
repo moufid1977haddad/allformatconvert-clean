@@ -121,12 +121,12 @@ export default function PngToIcoPage() {
               ))}
             </div>
           </div>
-          <button onClick={convert} disabled={!file || sizes.length === 0} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert to ICO</button>
+          <button onClick={convert} disabled={!file || sizes.length === 0} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert to ICO</button>
           {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
           {result && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center space-y-3">
               <div className="text-green-400 text-xl font-bold">Done!</div>
-              <a href={result} download="favicon.ico" className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition">Download ICO</a>
+              <a href={result} download="favicon.ico" className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition text-white">Download ICO</a>
             </div>
           )}
         </div>

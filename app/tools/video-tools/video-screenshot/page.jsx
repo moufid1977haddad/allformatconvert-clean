@@ -75,7 +75,7 @@ export default function VideoScreenshotPage() {
               <div className="flex flex-wrap gap-4 items-center">
                 <div>
                   <label className="text-xs text-neutral-500 block mb-1">Format</label>
-                  <select value={format} onChange={e => setFormat(e.target.value)} className="bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm">
+                  <select aria-label="Format" value={format} onChange={e => setFormat(e.target.value)} className="bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm">
                     <option value="png">PNG</option>
                     <option value="jpg">JPG</option>
                   </select>
@@ -83,11 +83,11 @@ export default function VideoScreenshotPage() {
                 {format === 'jpg' && (
                   <div className="flex-1 min-w-[160px]">
                     <label className="text-xs text-neutral-500 block mb-1">Quality: {quality}%</label>
-                    <input type="range" min="10" max="100" value={quality} onChange={e => setQuality(parseInt(e.target.value))} className="w-full" />
+                    <input aria-label="Quality (%)" type="range" min="10" max="100" value={quality} onChange={e => setQuality(parseInt(e.target.value))} className="w-full" />
                   </div>
                 )}
               </div>
-              <button onClick={capture} className="w-full bg-indigo-600 hover:bg-indigo-500 rounded-xl py-3 font-semibold transition">Capture Screenshot</button>
+              <button onClick={capture} className="w-full bg-indigo-600 hover:bg-indigo-500 rounded-xl py-3 font-semibold transition text-white">Capture Screenshot</button>
               {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
             </div>
           )}

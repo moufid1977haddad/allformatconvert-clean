@@ -97,10 +97,10 @@ export default function LegacyVideoCompressorPage() {
           </div>
           {!support.ok && <p role="alert" className="text-red-500 text-center text-sm">{support.reason}</p>}
           {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" />}
-          <div><label className="block text-sm text-neutral-500 mb-1">Quality: {Math.round(quality*100)}%</label><input type="range" min="0.1" max="1" step="0.1" value={quality} onChange={e => setQuality(parseFloat(e.target.value))} className="w-full" /></div>
+          <div><label className="block text-sm text-neutral-500 mb-1">Quality: {Math.round(quality*100)}%</label><input aria-label="Quality" type="range" min="0.1" max="1" step="0.1" value={quality} onChange={e => setQuality(parseFloat(e.target.value))} className="w-full" /></div>
           {status && <p className="text-yellow-400 text-center">{status}</p>}
           {error && <p className="text-red-400 text-center">{error}</p>}
-          <button onClick={compress} disabled={!file || !!status || !support.ok} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Compress Video</button>
+          <button onClick={compress} disabled={!file || !!status || !support.ok} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Compress Video</button>
           {result && (
             <div className="space-y-3">
               <div className="grid grid-cols-3 gap-3 text-center">
@@ -109,7 +109,7 @@ export default function LegacyVideoCompressorPage() {
                 <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">{result.size <= result.original ? 'Saved' : 'Larger by — keep your original'}</div><div className={`font-bold ${result.size <= result.original ? 'text-green-600' : 'text-amber-700'}`}>{Math.abs(Math.round((1-result.size/result.original)*100))}%</div></div>
               </div>
               <video controls src={result.url} className="w-full rounded-xl" />
-              <a href={result.url} download={`compressed.${result.ext}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a>
+              <a href={result.url} download={`compressed.${result.ext}`} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download</a>
             </div>
           )}
         </div>

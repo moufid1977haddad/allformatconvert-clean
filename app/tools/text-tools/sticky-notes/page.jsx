@@ -14,7 +14,8 @@ export default function StickyNotesPage() {
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      if (Array.isArray(saved)) setNotes(saved);
+      // A malformed note (edited storage, older version) is skipped instead of crashing the page (plan, bloquant 11).
+      if (Array.isArray(saved)) setNotes(saved.filter((n) => n && typeof n === 'object' && typeof n.text === 'string' && (typeof n.id === 'number' || typeof n.id === 'string')).map((n) => ({ ...n, color: typeof n.color === 'string' ? n.color : 'bg-yellow-300' })));
     } catch { /* ignore malformed storage */ }
     setLoaded(true);
   }, []);
@@ -42,10 +43,10 @@ export default function StickyNotesPage() {
           <div className="flex gap-3 items-center">
             <div className="flex gap-2">
               {COLORS.map(c => (
-                <button key={c} onClick={() => setColor(c)} className={c + ' w-8 h-8 rounded-full ' + (color === c ? 'ring-2 ring-white' : '')} />
+                <button key={c} onClick={() => setColor(c)} aria-label={'Note colour: ' + c.replace('bg-', '').replace('-300', '')} aria-pressed={color === c} className={c + ' w-8 h-8 rounded-full ' + (color === c ? 'ring-2 ring-white' : '')} />
               ))}
             </div>
-            <button onClick={addNote} disabled={!text.trim()} className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-2 font-semibold transition">Add Note</button>
+            <button onClick={addNote} disabled={!text.trim()} className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-2 font-semibold transition text-white">Add Note</button>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

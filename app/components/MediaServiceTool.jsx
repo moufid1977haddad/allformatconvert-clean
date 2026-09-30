@@ -128,7 +128,7 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
           {busy ? (
             <button onClick={cancel} className="w-full bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl py-3 font-semibold transition">Cancel</button>
           ) : (
-            <button onClick={run} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">{buttonLabel}</button>
+            <button onClick={run} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">{buttonLabel}</button>
           )}
           {notSmaller && (
             <div role="status" className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-neutral-800 space-y-1">
@@ -146,7 +146,7 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
               {result.isVideo && <PlayablePreview src={result.url} name={result.name} kind="video" className="w-full rounded-xl max-h-72" />}
               {result.isAudio && <PlayablePreview src={result.url} name={result.name} kind="audio" />}
               {result.isImage && <img src={result.url} alt="Result" className="mx-auto max-h-96 rounded-xl" />}
-              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download {result.ext.toUpperCase()}</a>
+              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download {result.ext.toUpperCase()}</a>
             </div>
           )}
         </div>

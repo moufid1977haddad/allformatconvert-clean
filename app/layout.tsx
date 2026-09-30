@@ -6,10 +6,16 @@ import Footer from "./components/Footer";
 import NewVersionBanner from "./components/NewVersionBanner";
 import IosVideoFirstFrame from "./components/IosVideoFirstFrame";
 import IosDownloadBridge from "./components/IosDownloadBridge";
+import GoogleTranslateLoader from "./components/GoogleTranslateLoader";
+import AdsScripts from "./components/AdsScripts";
+import ToolFooterAd from "./components/AdSlot";
 import Script from "next/script";
 import { getToolCounts } from "@/lib/toolCounts";
 const inter = Inter({ subsets: ["latin"] });
-const notoSansArabic = Noto_Sans_Arabic({ subsets: ["arabic"], variable: "--font-arabic" });
+// Only used when Google Translate switches the page to Arabic (globals.css, html[dir="rtl"]): not preloaded, so the
+// 166 KB font is no longer fetched at high priority on every page for every visitor (Lighthouse, 30/09/2026). The
+// browser still downloads it the moment Arabic text needs it.
+const notoSansArabic = Noto_Sans_Arabic({ subsets: ["arabic"], variable: "--font-arabic", preload: false });
 const { total: totalTools } = getToolCounts();
 export const metadata: Metadata = {
   title: {
@@ -92,28 +98,23 @@ export default function RootLayout({
         `}} />
         <div id="google_translate_element" style={{ display: "none" }} />
         <Navbar />
-        {children}
+        {/* The page's own content, as the main landmark (screen readers jump to it; Lighthouse "landmark-one-main"). */}
+        <main id="main-content">{children}</main>
+        {/* AdSense: renders nothing while NEXT_PUBLIC_ADSENSE_CLIENT is absent (app/lib/ads.js). */}
+        <ToolFooterAd />
         <Footer />
-        <Script src="https://www.googletagmanager.com/gtag/js?id=G-7GFHW05JLH" strategy="afterInteractive" />
-        <Script id="google-analytics" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: `
+        <AdsScripts />
+        {/* Analytics loads once the page has finished loading and the browser is idle (lazyOnload): it no longer
+            competes with the tool's own code for the network and the main thread on a phone (≈ 180 KB, ≈ 0.3 s). */}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-7GFHW05JLH" strategy="lazyOnload" />
+        <Script id="google-analytics" strategy="lazyOnload" dangerouslySetInnerHTML={{ __html: `
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
           gtag('config', 'G-7GFHW05JLH');
         `}} />
-        <Script
-          src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-          strategy="afterInteractive"
-        />
-        <Script id="google-translate-init" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: `
-          function googleTranslateElementInit() {
-            new google.translate.TranslateElement({
-              pageLanguage: 'en',
-              includedLanguages: 'en,fr,es,zh-CN,ar,de,pt,ja,ru,it,ko,hi,tr',
-              autoDisplay: false,
-            }, 'google_translate_element');
-          }
-        `}} />
+        {/* Google Translate: loaded on demand (language menu) or when a translation is already active. */}
+        <GoogleTranslateLoader />
         <NewVersionBanner />
         <IosVideoFirstFrame />
         <IosDownloadBridge />

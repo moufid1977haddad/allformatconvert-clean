@@ -1,0 +1,11909 @@
+[
+ {
+  "url": "http://localhost:3100/",
+  "scores": {
+   "performance": 86,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3764,
+  "fcp": 1073,
+  "cls": 0,
+  "tbt": 207,
+  "si": 1312,
+  "tti": 5458,
+  "totalBytes": 580502,
+  "js": {
+   "bytes": 471613,
+   "n": 19
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 138 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools",
+  "scores": {
+   "performance": 86,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3422,
+  "fcp": 916,
+  "cls": 0,
+  "tbt": 270,
+  "si": 916,
+  "tti": 5772,
+  "totalBytes": 667666,
+  "js": {
+   "bytes": 547627,
+   "n": 26
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "3.0 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/about",
+  "scores": {
+   "performance": 90,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3289,
+  "fcp": 915,
+  "cls": 0,
+  "tbt": 180,
+  "si": 915,
+  "tti": 5155,
+  "totalBytes": 582910,
+  "js": {
+   "bytes": 472598,
+   "n": 19
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180934,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 139 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.2 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/privacy",
+  "scores": {
+   "performance": 87,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3446,
+  "fcp": 1064,
+  "cls": 0,
+  "tbt": 236,
+  "si": 1064,
+  "tti": 5361,
+  "totalBytes": 580625,
+  "js": {
+   "bytes": 471613,
+   "n": 19
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 137 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/terms",
+  "scores": {
+   "performance": 86,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3284,
+  "fcp": 914,
+  "cls": 0,
+  "tbt": 295,
+  "si": 914,
+  "tti": 5340,
+  "totalBytes": 575608,
+  "js": {
+   "bytes": 471613,
+   "n": 19
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 137 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/contact",
+  "scores": {
+   "performance": 89,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3427,
+  "fcp": 915,
+  "cls": 0,
+  "tbt": 187,
+  "si": 1038,
+  "tti": 5122,
+  "totalBytes": 579532,
+  "js": {
+   "bytes": 477011,
+   "n": 20
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 138 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.3 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/ai-tools",
+  "scores": {
+   "performance": 86,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3720,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 205,
+  "si": 912,
+  "tti": 5941,
+  "totalBytes": 713028,
+  "js": {
+   "bytes": 583178,
+   "n": 28
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180934,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 187 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/ai-tools/ai-chatbot",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3765,
+  "fcp": 914,
+  "cls": 0,
+  "tbt": 265,
+  "si": 1023,
+  "tti": 5616,
+  "totalBytes": 640562,
+  "js": {
+   "bytes": 537120,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/ai-tools/ai-detector",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3769,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 258,
+  "si": 998,
+  "tti": 5571,
+  "totalBytes": 640660,
+  "js": {
+   "bytes": 537072,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/ai-tools/ai-paraphraser",
+  "scores": {
+   "performance": 79,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4555,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 268,
+  "si": 1065,
+  "tti": 5506,
+  "totalBytes": 639813,
+  "js": {
+   "bytes": 536742,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/ai-tools/ai-translator",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3815,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 308,
+  "si": 1037,
+  "tti": 5624,
+  "totalBytes": 640183,
+  "js": {
+   "bytes": 536931,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/ai-tools/ai-writer",
+  "scores": {
+   "performance": 81,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3795,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 329,
+  "si": 995,
+  "tti": 5500,
+  "totalBytes": 639695,
+  "js": {
+   "bytes": 536709,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/ai-tools/audio-transcriber",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3774,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 235,
+  "si": 1095,
+  "tti": 5572,
+  "totalBytes": 646612,
+  "js": {
+   "bytes": 543377,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/ai-tools/background-remover",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3761,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 278,
+  "si": 1079,
+  "tti": 5599,
+  "totalBytes": 648246,
+  "js": {
+   "bytes": 544803,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/ai-tools/data-extractor",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3788,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 278,
+  "si": 976,
+  "tti": 5580,
+  "totalBytes": 639638,
+  "js": {
+   "bytes": 536680,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/ai-tools/email-generator",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3750,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 232,
+  "si": 977,
+  "tti": 5578,
+  "totalBytes": 639988,
+  "js": {
+   "bytes": 536820,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/ai-tools/grammar-fixer",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3806,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 326,
+  "si": 1042,
+  "tti": 5531,
+  "totalBytes": 641849,
+  "js": {
+   "bytes": 538343,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/ai-tools/image-captioner",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3785,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 310,
+  "si": 1098,
+  "tti": 5607,
+  "totalBytes": 640564,
+  "js": {
+   "bytes": 537371,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/ai-tools/image-generator",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3756,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 249,
+  "si": 963,
+  "tti": 5649,
+  "totalBytes": 640544,
+  "js": {
+   "bytes": 536736,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/ai-tools/image-upscaler",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3779,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 275,
+  "si": 1114,
+  "tti": 5609,
+  "totalBytes": 653937,
+  "js": {
+   "bytes": 549927,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/ai-tools/keyword-extractor",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3760,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 235,
+  "si": 971,
+  "tti": 5612,
+  "totalBytes": 639764,
+  "js": {
+   "bytes": 536748,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/ai-tools/sentiment-analyzer",
+  "scores": {
+   "performance": 78,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4560,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 289,
+  "si": 1052,
+  "tti": 5594,
+  "totalBytes": 640031,
+  "js": {
+   "bytes": 536823,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/ai-tools/text-summarizer",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3774,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 298,
+  "si": 1017,
+  "tti": 5610,
+  "totalBytes": 639880,
+  "js": {
+   "bytes": 536798,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/audio-tools",
+  "scores": {
+   "performance": 86,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3725,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 195,
+  "si": 910,
+  "tti": 6005,
+  "totalBytes": 740189,
+  "js": {
+   "bytes": 610755,
+   "n": 28
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 188 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/audio-tools/audio-booster",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3754,
+  "fcp": 914,
+  "cls": 0,
+  "tbt": 232,
+  "si": 1651,
+  "tti": 5688,
+  "totalBytes": 655793,
+  "js": {
+   "bytes": 547102,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/audio-tools/audio-compressor",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3807,
+  "fcp": 915,
+  "cls": 0,
+  "tbt": 277,
+  "si": 1049,
+  "tti": 5702,
+  "totalBytes": 656213,
+  "js": {
+   "bytes": 547717,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/audio-tools/audio-converter",
+  "scores": {
+   "performance": 77,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4710,
+  "fcp": 908,
+  "cls": 0,
+  "tbt": 281,
+  "si": 1219,
+  "tti": 5680,
+  "totalBytes": 655251,
+  "js": {
+   "bytes": 546890,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/audio-tools/audio-equalizer",
+  "scores": {
+   "performance": 79,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4669,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 239,
+  "si": 1484,
+  "tti": 5611,
+  "totalBytes": 651925,
+  "js": {
+   "bytes": 543679,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/audio-tools/audio-merger",
+  "scores": {
+   "performance": 86,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3756,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 184,
+  "si": 1064,
+  "tti": 5790,
+  "totalBytes": 664415,
+  "js": {
+   "bytes": 554948,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/audio-tools/audio-metadata",
+  "scores": {
+   "performance": 78,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4580,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 283,
+  "si": 1168,
+  "tti": 5606,
+  "totalBytes": 651620,
+  "js": {
+   "bytes": 543503,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/audio-tools/audio-splitter",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3816,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 322,
+  "si": 1154,
+  "tti": 5591,
+  "totalBytes": 656287,
+  "js": {
+   "bytes": 547884,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.9 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/audio-tools/audio-to-text",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3759,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 253,
+  "si": 999,
+  "tti": 5623,
+  "totalBytes": 647655,
+  "js": {
+   "bytes": 544197,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/audio-tools/audio-trimmer",
+  "scores": {
+   "performance": 78,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4548,
+  "fcp": 908,
+  "cls": 0,
+  "tbt": 287,
+  "si": 1183,
+  "tti": 5667,
+  "totalBytes": 653345,
+  "js": {
+   "bytes": 545294,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/audio-tools/audio-waveform",
+  "scores": {
+   "performance": 73,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4725,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 430,
+  "si": 1172,
+  "tti": 5724,
+  "totalBytes": 650375,
+  "js": {
+   "bytes": 542404,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/audio-tools/voice-recorder",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3753,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 226,
+  "si": 978,
+  "tti": 5643,
+  "totalBytes": 650173,
+  "js": {
+   "bytes": 542259,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/converter-tools",
+  "scores": {
+   "performance": 86,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3719,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 211,
+  "si": 942,
+  "tti": 5684,
+  "totalBytes": 676386,
+  "js": {
+   "bytes": 555695,
+   "n": 26
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180934,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 189 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/converter-tools/color-converter",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3797,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 287,
+  "si": 1017,
+  "tti": 5592,
+  "totalBytes": 640957,
+  "js": {
+   "bytes": 537067,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/converter-tools/currency-converter",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3817,
+  "fcp": 911,
+  "cls": 0.02,
+  "tbt": 296,
+  "si": 1045,
+  "tti": 5841,
+  "totalBytes": 643179,
+  "js": {
+   "bytes": 536959,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 182109,
+   "n": 4
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/converter-tools/mobi-to-epub",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3764,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 242,
+  "si": 1003,
+  "tti": 5596,
+  "totalBytes": 642921,
+  "js": {
+   "bytes": 539310,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/converter-tools/unit-converter",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3801,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 292,
+  "si": 1008,
+  "tti": 5602,
+  "totalBytes": 641492,
+  "js": {
+   "bytes": 537606,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179958,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3870,
+  "fcp": 1060,
+  "cls": 0,
+  "tbt": 194,
+  "si": 1060,
+  "tti": 5937,
+  "totalBytes": 698839,
+  "js": {
+   "bytes": 563804,
+   "n": 28
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 188 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "3.0 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/api-tester",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3825,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 311,
+  "si": 1043,
+  "tti": 5583,
+  "totalBytes": 639492,
+  "js": {
+   "bytes": 536197,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/aspect-ratio",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3838,
+  "fcp": 917,
+  "cls": 0.033,
+  "tbt": 289,
+  "si": 1088,
+  "tti": 5605,
+  "totalBytes": 639035,
+  "js": {
+   "bytes": 535723,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/base64-encoder",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3777,
+  "fcp": 914,
+  "cls": 0,
+  "tbt": 296,
+  "si": 1047,
+  "tti": 5623,
+  "totalBytes": 640588,
+  "js": {
+   "bytes": 536980,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/code-formatter",
+  "scores": {
+   "performance": 77,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4561,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 325,
+  "si": 1070,
+  "tti": 5502,
+  "totalBytes": 640445,
+  "js": {
+   "bytes": 537336,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/code-minifier",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3812,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 299,
+  "si": 1057,
+  "tti": 5587,
+  "totalBytes": 640501,
+  "js": {
+   "bytes": 537159,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/color-picker",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3764,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 269,
+  "si": 995,
+  "tti": 5630,
+  "totalBytes": 639005,
+  "js": {
+   "bytes": 535646,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/cron-expression",
+  "scores": {
+   "performance": 81,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4117,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 279,
+  "si": 1023,
+  "tti": 5851,
+  "totalBytes": 676553,
+  "js": {
+   "bytes": 572967,
+   "n": 24
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/cron-expression-builder",
+  "scores": {
+   "performance": 81,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4096,
+  "fcp": 912,
+  "cls": 0.033,
+  "tbt": 276,
+  "si": 1040,
+  "tti": 5800,
+  "totalBytes": 676826,
+  "js": {
+   "bytes": 573075,
+   "n": 24
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/css-formatter",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3821,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 309,
+  "si": 1027,
+  "tti": 5599,
+  "totalBytes": 639480,
+  "js": {
+   "bytes": 536405,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/csv-to-excel",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3753,
+  "fcp": 912,
+  "cls": 0.005,
+  "tbt": 221,
+  "si": 1114,
+  "tti": 5559,
+  "totalBytes": 646021,
+  "js": {
+   "bytes": 541489,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/csv-to-json",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3763,
+  "fcp": 914,
+  "cls": 0.004,
+  "tbt": 229,
+  "si": 1075,
+  "tti": 5580,
+  "totalBytes": 648852,
+  "js": {
+   "bytes": 542431,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/csv-to-sql",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3778,
+  "fcp": 913,
+  "cls": 0.004,
+  "tbt": 300,
+  "si": 1163,
+  "tti": 5634,
+  "totalBytes": 649544,
+  "js": {
+   "bytes": 542789,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/csv-to-tsv",
+  "scores": {
+   "performance": 80,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4513,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 235,
+  "si": 1142,
+  "tti": 5588,
+  "totalBytes": 644586,
+  "js": {
+   "bytes": 539476,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/diff-viewer",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3774,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 260,
+  "si": 1011,
+  "tti": 5588,
+  "totalBytes": 639395,
+  "js": {
+   "bytes": 536427,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/env-to-json",
+  "scores": {
+   "performance": 79,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4551,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 250,
+  "si": 1062,
+  "tti": 5533,
+  "totalBytes": 641172,
+  "js": {
+   "bytes": 537369,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/excel-to-csv",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3794,
+  "fcp": 910,
+  "cls": 0.014,
+  "tbt": 314,
+  "si": 1166,
+  "tti": 5600,
+  "totalBytes": 642093,
+  "js": {
+   "bytes": 538265,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 171 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/excel-to-json",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3766,
+  "fcp": 909,
+  "cls": 0.017,
+  "tbt": 222,
+  "si": 1075,
+  "tti": 5537,
+  "totalBytes": 641891,
+  "js": {
+   "bytes": 538188,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/hash-generator",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3772,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 222,
+  "si": 1070,
+  "tti": 5556,
+  "totalBytes": 701325,
+  "js": {
+   "bytes": 542194,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "3.0 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/hex-to-text",
+  "scores": {
+   "performance": 76,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4577,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 340,
+  "si": 1079,
+  "tti": 5512,
+  "totalBytes": 639711,
+  "js": {
+   "bytes": 536541,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/html-encoder",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3766,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 281,
+  "si": 1017,
+  "tti": 5610,
+  "totalBytes": 639717,
+  "js": {
+   "bytes": 536540,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/html-entity-decoder",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3820,
+  "fcp": 914,
+  "cls": 0,
+  "tbt": 273,
+  "si": 1037,
+  "tti": 5515,
+  "totalBytes": 639852,
+  "js": {
+   "bytes": 536577,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/html-formatter",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3758,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 237,
+  "si": 1014,
+  "tti": 5540,
+  "totalBytes": 639367,
+  "js": {
+   "bytes": 536335,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/javascript-formatter",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3815,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 311,
+  "si": 1051,
+  "tti": 5581,
+  "totalBytes": 639634,
+  "js": {
+   "bytes": 536438,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/js-minifier",
+  "scores": {
+   "performance": 79,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4555,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 269,
+  "si": 1067,
+  "tti": 5545,
+  "totalBytes": 640895,
+  "js": {
+   "bytes": 537577,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180934,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/json-formatter",
+  "scores": {
+   "performance": 77,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4561,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 323,
+  "si": 1069,
+  "tti": 5619,
+  "totalBytes": 639287,
+  "js": {
+   "bytes": 535902,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/json-minifier",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3820,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 300,
+  "si": 1018,
+  "tti": 5595,
+  "totalBytes": 639957,
+  "js": {
+   "bytes": 536578,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/json-to-csharp",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3796,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 295,
+  "si": 1022,
+  "tti": 5592,
+  "totalBytes": 639443,
+  "js": {
+   "bytes": 536164,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/json-to-csv",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3764,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 230,
+  "si": 986,
+  "tti": 5519,
+  "totalBytes": 640109,
+  "js": {
+   "bytes": 536724,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/json-to-go",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3785,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 294,
+  "si": 1006,
+  "tti": 5583,
+  "totalBytes": 640444,
+  "js": {
+   "bytes": 537175,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180934,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/json-to-php",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3783,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 276,
+  "si": 1043,
+  "tti": 5533,
+  "totalBytes": 642458,
+  "js": {
+   "bytes": 538758,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/json-to-python",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3756,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 257,
+  "si": 986,
+  "tti": 5590,
+  "totalBytes": 639495,
+  "js": {
+   "bytes": 536189,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/json-to-rust",
+  "scores": {
+   "performance": 79,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3827,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 383,
+  "si": 1114,
+  "tti": 5619,
+  "totalBytes": 639817,
+  "js": {
+   "bytes": 536326,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/json-to-toml",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3748,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 250,
+  "si": 1018,
+  "tti": 5548,
+  "totalBytes": 641650,
+  "js": {
+   "bytes": 537028,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/json-to-typescript",
+  "scores": {
+   "performance": 79,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4547,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 270,
+  "si": 1070,
+  "tti": 5501,
+  "totalBytes": 639684,
+  "js": {
+   "bytes": 536264,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/json-to-xml",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3759,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 252,
+  "si": 1038,
+  "tti": 5651,
+  "totalBytes": 639957,
+  "js": {
+   "bytes": 536687,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/json-to-yaml",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3770,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 264,
+  "si": 1029,
+  "tti": 5638,
+  "totalBytes": 653091,
+  "js": {
+   "bytes": 549769,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/jwt-decoder",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3820,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 324,
+  "si": 1024,
+  "tti": 5615,
+  "totalBytes": 639598,
+  "js": {
+   "bytes": 536285,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/markdown-editor",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3867,
+  "fcp": 908,
+  "cls": 0,
+  "tbt": 258,
+  "si": 1373,
+  "tti": 5595,
+  "totalBytes": 660871,
+  "js": {
+   "bytes": 557757,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/markdown-previewer",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3896,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 254,
+  "si": 1456,
+  "tti": 5596,
+  "totalBytes": 661774,
+  "js": {
+   "bytes": 558705,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180934,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/markdown-to-html",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3813,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 297,
+  "si": 1055,
+  "tti": 5588,
+  "totalBytes": 639332,
+  "js": {
+   "bytes": 536379,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/number-base-converter",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3791,
+  "fcp": 910,
+  "cls": 0.033,
+  "tbt": 301,
+  "si": 1041,
+  "tti": 5606,
+  "totalBytes": 639362,
+  "js": {
+   "bytes": 536090,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/password-generator",
+  "scores": {
+   "performance": 86,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3738,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 205,
+  "si": 1390,
+  "tti": 5552,
+  "totalBytes": 638999,
+  "js": {
+   "bytes": 535805,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/regex-tester",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3784,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 266,
+  "si": 989,
+  "tti": 5597,
+  "totalBytes": 639003,
+  "js": {
+   "bytes": 535725,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/scss-to-css",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3762,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 294,
+  "si": 1012,
+  "tti": 5551,
+  "totalBytes": 640693,
+  "js": {
+   "bytes": 537454,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180934,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/sql-formatter",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3792,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 283,
+  "si": 1006,
+  "tti": 5608,
+  "totalBytes": 640116,
+  "js": {
+   "bytes": 536669,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/sql-to-csv",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3755,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 271,
+  "si": 972,
+  "tti": 5515,
+  "totalBytes": 642488,
+  "js": {
+   "bytes": 537005,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/timestamp-converter",
+  "scores": {
+   "performance": 79,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4516,
+  "fcp": 908,
+  "cls": 0,
+  "tbt": 268,
+  "si": 1497,
+  "tti": 5525,
+  "totalBytes": 639849,
+  "js": {
+   "bytes": 536488,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/toml-to-json",
+  "scores": {
+   "performance": 76,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4579,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 344,
+  "si": 1121,
+  "tti": 5623,
+  "totalBytes": 643906,
+  "js": {
+   "bytes": 539302,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/tsv-to-csv",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3798,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 321,
+  "si": 1021,
+  "tti": 5598,
+  "totalBytes": 641312,
+  "js": {
+   "bytes": 536816,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180934,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/typescript-to-js",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3806,
+  "fcp": 910,
+  "cls": 0.033,
+  "tbt": 311,
+  "si": 1064,
+  "tti": 5602,
+  "totalBytes": 641112,
+  "js": {
+   "bytes": 537469,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 421,
+   "n": 1
+  },
+  "thirdParty": {
+   "bytes": 181355,
+   "n": 4
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/unicode-converter",
+  "scores": {
+   "performance": 79,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3858,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 397,
+  "si": 1251,
+  "tti": 5638,
+  "totalBytes": 638655,
+  "js": {
+   "bytes": 535534,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/url-encoder",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3792,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 274,
+  "si": 1024,
+  "tti": 5602,
+  "totalBytes": 639852,
+  "js": {
+   "bytes": 536607,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180934,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/url-parser",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3787,
+  "fcp": 914,
+  "cls": 0,
+  "tbt": 259,
+  "si": 1058,
+  "tti": 5583,
+  "totalBytes": 638694,
+  "js": {
+   "bytes": 535668,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/uuid-generator",
+  "scores": {
+   "performance": 77,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4558,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 306,
+  "si": 1080,
+  "tti": 5597,
+  "totalBytes": 638645,
+  "js": {
+   "bytes": 535585,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/xml-formatter",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3769,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 291,
+  "si": 1059,
+  "tti": 5582,
+  "totalBytes": 639376,
+  "js": {
+   "bytes": 536097,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.9 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/xml-to-json",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3783,
+  "fcp": 908,
+  "cls": 0,
+  "tbt": 240,
+  "si": 975,
+  "tti": 5590,
+  "totalBytes": 640296,
+  "js": {
+   "bytes": 536927,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180934,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/developer-tools/yaml-to-json",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3782,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 273,
+  "si": 964,
+  "tti": 5626,
+  "totalBytes": 653066,
+  "js": {
+   "bytes": 549766,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179958,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/file-tools",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3750,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 222,
+  "si": 911,
+  "tti": 5929,
+  "totalBytes": 694215,
+  "js": {
+   "bytes": 565353,
+   "n": 28
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 188 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/file-tools/base64-encoder",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3766,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 317,
+  "si": 1116,
+  "tti": 5599,
+  "totalBytes": 641098,
+  "js": {
+   "bytes": 538064,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/file-tools/file-comparator",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3767,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 311,
+  "si": 1063,
+  "tti": 5657,
+  "totalBytes": 639551,
+  "js": {
+   "bytes": 536280,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 59,
+   "n": 1
+  },
+  "thirdParty": {
+   "bytes": 180008,
+   "n": 4
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 173 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/file-tools/file-converter",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3800,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 306,
+  "si": 1085,
+  "tti": 5599,
+  "totalBytes": 639407,
+  "js": {
+   "bytes": 536076,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/file-tools/file-encryptor",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3821,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 301,
+  "si": 1158,
+  "tti": 5600,
+  "totalBytes": 640123,
+  "js": {
+   "bytes": 536809,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/file-tools/file-metadata",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4495,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 158,
+  "si": 1255,
+  "tti": 5557,
+  "totalBytes": 641374,
+  "js": {
+   "bytes": 538033,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/file-tools/file-splitter",
+  "scores": {
+   "performance": 77,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4560,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 324,
+  "si": 1168,
+  "tti": 5601,
+  "totalBytes": 640052,
+  "js": {
+   "bytes": 536515,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/file-tools/tar-extractor",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3788,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 307,
+  "si": 1122,
+  "tti": 5571,
+  "totalBytes": 640203,
+  "js": {
+   "bytes": 536865,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/file-tools/zip-creator",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3815,
+  "fcp": 910,
+  "cls": 0.003,
+  "tbt": 293,
+  "si": 1128,
+  "tti": 5583,
+  "totalBytes": 640975,
+  "js": {
+   "bytes": 537346,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 173 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/file-tools/zip-extractor",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3774,
+  "fcp": 910,
+  "cls": 0.005,
+  "tbt": 243,
+  "si": 1108,
+  "tti": 5565,
+  "totalBytes": 1433740,
+  "js": {
+   "bytes": 565828,
+   "n": 24
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/gif-tools",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3727,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 232,
+  "si": 936,
+  "tti": 5956,
+  "totalBytes": 711224,
+  "js": {
+   "bytes": 582489,
+   "n": 28
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 188 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/gif-tools/apng-to-gif",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3749,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 306,
+  "si": 1067,
+  "tti": 5639,
+  "totalBytes": 639967,
+  "js": {
+   "bytes": 536579,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/gif-tools/avi-to-gif",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4507,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 182,
+  "si": 1155,
+  "tti": 5542,
+  "totalBytes": 647879,
+  "js": {
+   "bytes": 544558,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.3 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/gif-tools/gif-compressor",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3723,
+  "fcp": 908,
+  "cls": 0,
+  "tbt": 225,
+  "si": 1467,
+  "tti": 5500,
+  "totalBytes": 639981,
+  "js": {
+   "bytes": 536530,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/gif-tools/gif-maker",
+  "scores": {
+   "performance": 86,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3740,
+  "fcp": 914,
+  "cls": 0,
+  "tbt": 206,
+  "si": 1451,
+  "tti": 5532,
+  "totalBytes": 643121,
+  "js": {
+   "bytes": 539154,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180934,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/gif-tools/gif-to-apng",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3778,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 302,
+  "si": 1069,
+  "tti": 5570,
+  "totalBytes": 640698,
+  "js": {
+   "bytes": 537358,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180934,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/gif-tools/gif-to-mp4",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3778,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 304,
+  "si": 1106,
+  "tti": 5566,
+  "totalBytes": 640960,
+  "js": {
+   "bytes": 537536,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/gif-tools/image-to-gif",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3747,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 246,
+  "si": 1397,
+  "tti": 5524,
+  "totalBytes": 640998,
+  "js": {
+   "bytes": 537292,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/gif-tools/mov-to-gif",
+  "scores": {
+   "performance": 81,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4521,
+  "fcp": 908,
+  "cls": 0,
+  "tbt": 208,
+  "si": 1102,
+  "tti": 5574,
+  "totalBytes": 647880,
+  "js": {
+   "bytes": 544553,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.3 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/gif-tools/mp4-to-gif",
+  "scores": {
+   "performance": 86,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3762,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 207,
+  "si": 1105,
+  "tti": 5577,
+  "totalBytes": 647865,
+  "js": {
+   "bytes": 544561,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/gif-tools/video-to-gif",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3782,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 235,
+  "si": 1078,
+  "tti": 5537,
+  "totalBytes": 648077,
+  "js": {
+   "bytes": 544620,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/gif-tools/webm-to-gif",
+  "scores": {
+   "performance": 87,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3754,
+  "fcp": 909,
+  "cls": 0.001,
+  "tbt": 167,
+  "si": 1084,
+  "tti": 5538,
+  "totalBytes": 647865,
+  "js": {
+   "bytes": 544549,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools",
+  "scores": {
+   "performance": 87,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3759,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 176,
+  "si": 909,
+  "tti": 6005,
+  "totalBytes": 741628,
+  "js": {
+   "bytes": 610468,
+   "n": 28
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179958,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 188 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.9 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/add-border-to-image",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3763,
+  "fcp": 916,
+  "cls": 0,
+  "tbt": 297,
+  "si": 1879,
+  "tti": 5631,
+  "totalBytes": 647919,
+  "js": {
+   "bytes": 544647,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/add-noise",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3771,
+  "fcp": 916,
+  "cls": 0,
+  "tbt": 222,
+  "si": 1554,
+  "tti": 5541,
+  "totalBytes": 647855,
+  "js": {
+   "bytes": 544662,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/add-text-to-image",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3747,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 280,
+  "si": 1601,
+  "tti": 5608,
+  "totalBytes": 648273,
+  "js": {
+   "bytes": 544843,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/add-vignette",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3742,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 285,
+  "si": 1506,
+  "tti": 5618,
+  "totalBytes": 647862,
+  "js": {
+   "bytes": 544649,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/bmp-to-png",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3788,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 286,
+  "si": 1108,
+  "tti": 5604,
+  "totalBytes": 647079,
+  "js": {
+   "bytes": 544241,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/brightness-contrast",
+  "scores": {
+   "performance": 81,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4494,
+  "fcp": 909,
+  "cls": 0.033,
+  "tbt": 199,
+  "si": 1559,
+  "tti": 5501,
+  "totalBytes": 648562,
+  "js": {
+   "bytes": 545409,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/duplicate-image-finder",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3785,
+  "fcp": 912,
+  "cls": 0.032,
+  "tbt": 318,
+  "si": 1122,
+  "tti": 5641,
+  "totalBytes": 639844,
+  "js": {
+   "bytes": 536483,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 255,
+   "n": 5
+  },
+  "thirdParty": {
+   "bytes": 180204,
+   "n": 8
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 173 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/gif-to-png",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3830,
+  "fcp": 914,
+  "cls": 0,
+  "tbt": 285,
+  "si": 1123,
+  "tti": 5598,
+  "totalBytes": 647952,
+  "js": {
+   "bytes": 545018,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/grayscale-converter",
+  "scores": {
+   "performance": 76,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4603,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 351,
+  "si": 1119,
+  "tti": 5587,
+  "totalBytes": 647679,
+  "js": {
+   "bytes": 544545,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/heic-to-jpg",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3754,
+  "fcp": 915,
+  "cls": 0,
+  "tbt": 226,
+  "si": 1612,
+  "tti": 5529,
+  "totalBytes": 648623,
+  "js": {
+   "bytes": 545467,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/heic-to-png",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3781,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 299,
+  "si": 1103,
+  "tti": 5642,
+  "totalBytes": 648099,
+  "js": {
+   "bytes": 545242,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/ico-to-png",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3804,
+  "fcp": 914,
+  "cls": 0,
+  "tbt": 276,
+  "si": 1097,
+  "tti": 5497,
+  "totalBytes": 647270,
+  "js": {
+   "bytes": 544332,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/image-blur",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3734,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 280,
+  "si": 1484,
+  "tti": 5597,
+  "totalBytes": 651424,
+  "js": {
+   "bytes": 548005,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/image-comparison",
+  "scores": {
+   "performance": 81,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3778,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 340,
+  "si": 1138,
+  "tti": 5514,
+  "totalBytes": 648436,
+  "js": {
+   "bytes": 545299,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/image-compressor",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3767,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 280,
+  "si": 1437,
+  "tti": 5638,
+  "totalBytes": 647218,
+  "js": {
+   "bytes": 543220,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/image-converter",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3762,
+  "fcp": 912,
+  "cls": 0.018,
+  "tbt": 214,
+  "si": 1069,
+  "tti": 5605,
+  "totalBytes": 653326,
+  "js": {
+   "bytes": 548827,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/image-cropper",
+  "scores": {
+   "performance": 76,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4535,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 342,
+  "si": 1197,
+  "tti": 5729,
+  "totalBytes": 647869,
+  "js": {
+   "bytes": 544860,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/image-editor",
+  "scores": {
+   "performance": 81,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3805,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 343,
+  "si": 1069,
+  "tti": 5646,
+  "totalBytes": 650634,
+  "js": {
+   "bytes": 547461,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180937,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 173 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/image-flip",
+  "scores": {
+   "performance": 80,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3818,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 355,
+  "si": 1046,
+  "tti": 5623,
+  "totalBytes": 648415,
+  "js": {
+   "bytes": 545404,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180938,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/image-inverter",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3796,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 287,
+  "si": 1074,
+  "tti": 5602,
+  "totalBytes": 648344,
+  "js": {
+   "bytes": 545409,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180934,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/image-metadata",
+  "scores": {
+   "performance": 81,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4504,
+  "fcp": 908,
+  "cls": 0.032,
+  "tbt": 216,
+  "si": 1324,
+  "tti": 5491,
+  "totalBytes": 639647,
+  "js": {
+   "bytes": 536582,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.3 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/image-pixelator",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3731,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 252,
+  "si": 1596,
+  "tti": 5624,
+  "totalBytes": 647723,
+  "js": {
+   "bytes": 544569,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/image-resizer",
+  "scores": {
+   "performance": 86,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3772,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 202,
+  "si": 1289,
+  "tti": 5532,
+  "totalBytes": 648739,
+  "js": {
+   "bytes": 545511,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/image-rotate",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3773,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 306,
+  "si": 1429,
+  "tti": 5513,
+  "totalBytes": 647802,
+  "js": {
+   "bytes": 544587,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/image-to-base64",
+  "scores": {
+   "performance": 78,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4529,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 287,
+  "si": 1154,
+  "tti": 5610,
+  "totalBytes": 639833,
+  "js": {
+   "bytes": 536909,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.3 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/jpg-to-png",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3788,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 296,
+  "si": 1125,
+  "tti": 5628,
+  "totalBytes": 647173,
+  "js": {
+   "bytes": 544285,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/jpg-to-webp",
+  "scores": {
+   "performance": 79,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3790,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 384,
+  "si": 1076,
+  "tti": 5637,
+  "totalBytes": 647278,
+  "js": {
+   "bytes": 544317,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/png-to-ico",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3764,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 290,
+  "si": 1076,
+  "tti": 5669,
+  "totalBytes": 640100,
+  "js": {
+   "bytes": 536578,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/png-to-jpg",
+  "scores": {
+   "performance": 79,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4507,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 277,
+  "si": 1137,
+  "tti": 5574,
+  "totalBytes": 647250,
+  "js": {
+   "bytes": 544318,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/png-to-webp",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3759,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 257,
+  "si": 1095,
+  "tti": 5608,
+  "totalBytes": 647330,
+  "js": {
+   "bytes": 544339,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/round-corners",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3734,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 278,
+  "si": 1491,
+  "tti": 5573,
+  "totalBytes": 647737,
+  "js": {
+   "bytes": 544561,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/sepia-filter",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3750,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 259,
+  "si": 1409,
+  "tti": 5601,
+  "totalBytes": 647670,
+  "js": {
+   "bytes": 544602,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/svg-to-png",
+  "scores": {
+   "performance": 78,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4519,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 282,
+  "si": 1152,
+  "tti": 5611,
+  "totalBytes": 649364,
+  "js": {
+   "bytes": 546027,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180934,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/tiff-to-jpg",
+  "scores": {
+   "performance": 73,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 5518,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 304,
+  "si": 1840,
+  "tti": 5627,
+  "totalBytes": 643819,
+  "js": {
+   "bytes": 540289,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/tiff-to-png",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3783,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 290,
+  "si": 1121,
+  "tti": 5622,
+  "totalBytes": 644332,
+  "js": {
+   "bytes": 541038,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180934,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/webp-to-jpg",
+  "scores": {
+   "performance": 81,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3782,
+  "fcp": 908,
+  "cls": 0,
+  "tbt": 342,
+  "si": 1080,
+  "tti": 5563,
+  "totalBytes": 647083,
+  "js": {
+   "bytes": 544232,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/image-tools/webp-to-png",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3760,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 277,
+  "si": 1241,
+  "tti": 5596,
+  "totalBytes": 647226,
+  "js": {
+   "bytes": 544407,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/math-tools",
+  "scores": {
+   "performance": 87,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3726,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 175,
+  "si": 912,
+  "tti": 5946,
+  "totalBytes": 690852,
+  "js": {
+   "bytes": 560808,
+   "n": 28
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 188 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/math-tools/fraction-calculator",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3757,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 297,
+  "si": 1038,
+  "tti": 5544,
+  "totalBytes": 640779,
+  "js": {
+   "bytes": 537497,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179949,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/math-tools/number-base-converter",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3764,
+  "fcp": 910,
+  "cls": 0.033,
+  "tbt": 268,
+  "si": 1007,
+  "tti": 5601,
+  "totalBytes": 640493,
+  "js": {
+   "bytes": 537197,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180934,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/math-tools/percentage-calculator",
+  "scores": {
+   "performance": 86,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3754,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 208,
+  "si": 927,
+  "tti": 5596,
+  "totalBytes": 642969,
+  "js": {
+   "bytes": 537223,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179969,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/math-tools/roman-numeral-converter",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3793,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 288,
+  "si": 1027,
+  "tti": 5597,
+  "totalBytes": 639511,
+  "js": {
+   "bytes": 536288,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/math-tools/scientific-calculator",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3773,
+  "fcp": 1219,
+  "cls": 0,
+  "tbt": 250,
+  "si": 1219,
+  "tti": 5745,
+  "totalBytes": 662087,
+  "js": {
+   "bytes": 539035,
+   "n": 22
+  },
+  "font": {
+   "bytes": 84406,
+   "n": 4
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180934,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/math-tools/statistics-calculator",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3763,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 234,
+  "si": 989,
+  "tti": 5574,
+  "totalBytes": 640492,
+  "js": {
+   "bytes": 537420,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools",
+  "scores": {
+   "performance": 86,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3775,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 189,
+  "si": 912,
+  "tti": 5927,
+  "totalBytes": 699566,
+  "js": {
+   "bytes": 567925,
+   "n": 28
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 188 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "3.1 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/epub-to-pdf",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3768,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 306,
+  "si": 1127,
+  "tti": 5605,
+  "totalBytes": 646255,
+  "js": {
+   "bytes": 542809,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/excel-to-pdf",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3804,
+  "fcp": 915,
+  "cls": 0,
+  "tbt": 257,
+  "si": 1114,
+  "tti": 5610,
+  "totalBytes": 644907,
+  "js": {
+   "bytes": 541117,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/html-to-pdf",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3766,
+  "fcp": 914,
+  "cls": 0,
+  "tbt": 253,
+  "si": 1120,
+  "tti": 5640,
+  "totalBytes": 644587,
+  "js": {
+   "bytes": 540965,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/image-to-pdf",
+  "scores": {
+   "performance": 80,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4510,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 246,
+  "si": 1159,
+  "tti": 5565,
+  "totalBytes": 645239,
+  "js": {
+   "bytes": 542102,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180938,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/jpg-to-pdf",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3787,
+  "fcp": 914,
+  "cls": 0,
+  "tbt": 279,
+  "si": 1077,
+  "tti": 5731,
+  "totalBytes": 652490,
+  "js": {
+   "bytes": 544742,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179968,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/markdown-to-pdf",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3752,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 237,
+  "si": 1105,
+  "tti": 5585,
+  "totalBytes": 639678,
+  "js": {
+   "bytes": 536403,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/mobi-to-pdf",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3794,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 276,
+  "si": 1113,
+  "tti": 5508,
+  "totalBytes": 646529,
+  "js": {
+   "bytes": 542846,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-ai-summary",
+  "scores": {
+   "performance": 81,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3822,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 338,
+  "si": 1173,
+  "tti": 5604,
+  "totalBytes": 648517,
+  "js": {
+   "bytes": 540882,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.9 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-compare",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3781,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 235,
+  "si": 1099,
+  "tti": 5723,
+  "totalBytes": 648936,
+  "js": {
+   "bytes": 541119,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-compress",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3783,
+  "fcp": 911,
+  "cls": 0.011,
+  "tbt": 313,
+  "si": 1116,
+  "tti": 5642,
+  "totalBytes": 647244,
+  "js": {
+   "bytes": 543125,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180938,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-crop",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3766,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 248,
+  "si": 1088,
+  "tti": 5622,
+  "totalBytes": 648847,
+  "js": {
+   "bytes": 540865,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-delete-pages",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3779,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 304,
+  "si": 1100,
+  "tti": 5614,
+  "totalBytes": 639570,
+  "js": {
+   "bytes": 536672,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-editor",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3816,
+  "fcp": 912,
+  "cls": 0.004,
+  "tbt": 268,
+  "si": 1164,
+  "tti": 5647,
+  "totalBytes": 652709,
+  "js": {
+   "bytes": 548857,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 173 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-extract-text",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3785,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 288,
+  "si": 1096,
+  "tti": 5540,
+  "totalBytes": 640361,
+  "js": {
+   "bytes": 537288,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-forms",
+  "scores": {
+   "performance": 76,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4720,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 312,
+  "si": 1085,
+  "tti": 5676,
+  "totalBytes": 649729,
+  "js": {
+   "bytes": 541581,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-merge",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3781,
+  "fcp": 911,
+  "cls": 0.018,
+  "tbt": 290,
+  "si": 1133,
+  "tti": 5600,
+  "totalBytes": 640584,
+  "js": {
+   "bytes": 537374,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-number-pages",
+  "scores": {
+   "performance": 76,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4572,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 332,
+  "si": 1089,
+  "tti": 5625,
+  "totalBytes": 640208,
+  "js": {
+   "bytes": 536890,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-ocr",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3776,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 232,
+  "si": 1108,
+  "tti": 5721,
+  "totalBytes": 659450,
+  "js": {
+   "bytes": 547900,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-organize",
+  "scores": {
+   "performance": 79,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4677,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 245,
+  "si": 1160,
+  "tti": 5685,
+  "totalBytes": 650206,
+  "js": {
+   "bytes": 542272,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-protect",
+  "scores": {
+   "performance": 80,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4523,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 245,
+  "si": 1146,
+  "tti": 5558,
+  "totalBytes": 641010,
+  "js": {
+   "bytes": 537724,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180943,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 173 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-redact",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3810,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 322,
+  "si": 1164,
+  "tti": 5582,
+  "totalBytes": 651153,
+  "js": {
+   "bytes": 542552,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-reorder-pages",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3791,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 321,
+  "si": 1053,
+  "tti": 5604,
+  "totalBytes": 639892,
+  "js": {
+   "bytes": 536805,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-repair",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4514,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 163,
+  "si": 1085,
+  "tti": 5578,
+  "totalBytes": 645092,
+  "js": {
+   "bytes": 541343,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179968,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.2 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-rotate",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3798,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 286,
+  "si": 1057,
+  "tti": 5595,
+  "totalBytes": 639675,
+  "js": {
+   "bytes": 536595,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179968,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-sign",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3764,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 249,
+  "si": 1147,
+  "tti": 5684,
+  "totalBytes": 657061,
+  "js": {
+   "bytes": 547320,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-split",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3780,
+  "fcp": 910,
+  "cls": 0.016,
+  "tbt": 286,
+  "si": 1098,
+  "tti": 5624,
+  "totalBytes": 643037,
+  "js": {
+   "bytes": 539380,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 173 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-to-excel",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3791,
+  "fcp": 914,
+  "cls": 0,
+  "tbt": 264,
+  "si": 1114,
+  "tti": 5526,
+  "totalBytes": 644755,
+  "js": {
+   "bytes": 541461,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-to-html",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3786,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 323,
+  "si": 1043,
+  "tti": 5598,
+  "totalBytes": 640917,
+  "js": {
+   "bytes": 537664,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180938,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-to-image",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3789,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 311,
+  "si": 1104,
+  "tti": 5564,
+  "totalBytes": 642735,
+  "js": {
+   "bytes": 539783,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-to-jpg",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3753,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 258,
+  "si": 1313,
+  "tti": 5700,
+  "totalBytes": 651088,
+  "js": {
+   "bytes": 543470,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-to-pdfa",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3760,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 275,
+  "si": 1085,
+  "tti": 5626,
+  "totalBytes": 645420,
+  "js": {
+   "bytes": 541553,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-to-ppt",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3800,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 315,
+  "si": 1109,
+  "tti": 5593,
+  "totalBytes": 643436,
+  "js": {
+   "bytes": 540404,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-to-word",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3760,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 288,
+  "si": 1055,
+  "tti": 5538,
+  "totalBytes": 644434,
+  "js": {
+   "bytes": 540822,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179968,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-translate",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3786,
+  "fcp": 915,
+  "cls": 0,
+  "tbt": 293,
+  "si": 1066,
+  "tti": 5733,
+  "totalBytes": 648992,
+  "js": {
+   "bytes": 540909,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-unlock",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3786,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 266,
+  "si": 1087,
+  "tti": 5702,
+  "totalBytes": 647964,
+  "js": {
+   "bytes": 540112,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/pdf-watermark",
+  "scores": {
+   "performance": 80,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4525,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 245,
+  "si": 1582,
+  "tti": 5531,
+  "totalBytes": 640155,
+  "js": {
+   "bytes": 536902,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/ppt-to-pdf",
+  "scores": {
+   "performance": 81,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4504,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 198,
+  "si": 1147,
+  "tti": 5584,
+  "totalBytes": 645613,
+  "js": {
+   "bytes": 541487,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179968,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.3 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/text-to-pdf",
+  "scores": {
+   "performance": 79,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4553,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 253,
+  "si": 1082,
+  "tti": 5590,
+  "totalBytes": 642607,
+  "js": {
+   "bytes": 538912,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/pdf-tools/word-to-pdf",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3763,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 301,
+  "si": 1026,
+  "tti": 5624,
+  "totalBytes": 644830,
+  "js": {
+   "bytes": 541109,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/qr-barcodes-tools",
+  "scores": {
+   "performance": 86,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3738,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 202,
+  "si": 912,
+  "tti": 5787,
+  "totalBytes": 691105,
+  "js": {
+   "bytes": 572165,
+   "n": 26
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 188 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/qr-barcodes-tools/barcode-generator",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4063,
+  "fcp": 1061,
+  "cls": 0,
+  "tbt": 201,
+  "si": 1061,
+  "tti": 5735,
+  "totalBytes": 663473,
+  "js": {
+   "bytes": 555784,
+   "n": 23
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/qr-barcodes-tools/qr-generator",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3732,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 233,
+  "si": 1340,
+  "tti": 5545,
+  "totalBytes": 645973,
+  "js": {
+   "bytes": 541550,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/qr-barcodes-tools/qr-scanner",
+  "scores": {
+   "performance": 86,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3747,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 207,
+  "si": 1033,
+  "tti": 5553,
+  "totalBytes": 641737,
+  "js": {
+   "bytes": 538125,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179968,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools",
+  "scores": {
+   "performance": 86,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3723,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 201,
+  "si": 913,
+  "tti": 5805,
+  "totalBytes": 691674,
+  "js": {
+   "bytes": 562157,
+   "n": 28
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 188 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools/ascii-art",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3759,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 228,
+  "si": 945,
+  "tti": 5517,
+  "totalBytes": 645488,
+  "js": {
+   "bytes": 542394,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools/case-converter",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3760,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 262,
+  "si": 996,
+  "tti": 5525,
+  "totalBytes": 641422,
+  "js": {
+   "bytes": 538165,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180938,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 173 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools/character-counter",
+  "scores": {
+   "performance": 80,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3779,
+  "fcp": 1214,
+  "cls": 0,
+  "tbt": 384,
+  "si": 1214,
+  "tti": 5676,
+  "totalBytes": 661681,
+  "js": {
+   "bytes": 539202,
+   "n": 22
+  },
+  "font": {
+   "bytes": 84106,
+   "n": 4
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180938,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.8 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools/duplicate-remover",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3770,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 333,
+  "si": 1103,
+  "tti": 5614,
+  "totalBytes": 641262,
+  "js": {
+   "bytes": 538256,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.9 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools/find-replace",
+  "scores": {
+   "performance": 80,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4554,
+  "fcp": 907,
+  "cls": 0,
+  "tbt": 247,
+  "si": 1076,
+  "tti": 5558,
+  "totalBytes": 640036,
+  "js": {
+   "bytes": 536777,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180938,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools/lorem-ipsum",
+  "scores": {
+   "performance": 78,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4545,
+  "fcp": 909,
+  "cls": 0.032,
+  "tbt": 289,
+  "si": 1070,
+  "tti": 5584,
+  "totalBytes": 640726,
+  "js": {
+   "bytes": 538055,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools/sticky-notes",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3790,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 294,
+  "si": 1037,
+  "tti": 5660,
+  "totalBytes": 639016,
+  "js": {
+   "bytes": 535781,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools/text-comparator",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3766,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 253,
+  "si": 963,
+  "tti": 5634,
+  "totalBytes": 639499,
+  "js": {
+   "bytes": 536531,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools/text-encryptor",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3766,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 213,
+  "si": 990,
+  "tti": 5548,
+  "totalBytes": 639879,
+  "js": {
+   "bytes": 536598,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools/text-repeater",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3749,
+  "fcp": 908,
+  "cls": 0,
+  "tbt": 227,
+  "si": 1011,
+  "tti": 5533,
+  "totalBytes": 639540,
+  "js": {
+   "bytes": 536512,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180938,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools/text-reverser",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3761,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 277,
+  "si": 959,
+  "tti": 5631,
+  "totalBytes": 639973,
+  "js": {
+   "bytes": 536987,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools/text-sorter",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3765,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 269,
+  "si": 1042,
+  "tti": 5598,
+  "totalBytes": 641166,
+  "js": {
+   "bytes": 538201,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools/text-to-list",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3790,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 309,
+  "si": 1042,
+  "tti": 5602,
+  "totalBytes": 638265,
+  "js": {
+   "bytes": 535393,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools/text-truncator",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3756,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 277,
+  "si": 991,
+  "tti": 5597,
+  "totalBytes": 641084,
+  "js": {
+   "bytes": 538138,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools/url-encoder",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3758,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 268,
+  "si": 1002,
+  "tti": 5594,
+  "totalBytes": 638879,
+  "js": {
+   "bytes": 535644,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools/whitespace-remover",
+  "scores": {
+   "performance": 84,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3763,
+  "fcp": 909,
+  "cls": 0,
+  "tbt": 266,
+  "si": 983,
+  "tti": 5568,
+  "totalBytes": 638646,
+  "js": {
+   "bytes": 535537,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179968,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/text-tools/word-counter",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3769,
+  "fcp": 912,
+  "cls": 0,
+  "tbt": 308,
+  "si": 1026,
+  "tti": 5628,
+  "totalBytes": 640690,
+  "js": {
+   "bytes": 537245,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 59,
+   "n": 1
+  },
+  "thirdParty": {
+   "bytes": 180009,
+   "n": 4
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 173 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/video-tools",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4015,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 190,
+  "si": 1020,
+  "tti": 6000,
+  "totalBytes": 726732,
+  "js": {
+   "bytes": 597231,
+   "n": 28
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180938,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 189 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/video-tools/media-player",
+  "scores": {
+   "performance": 78,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3804,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 433,
+  "si": 1125,
+  "tti": 5594,
+  "totalBytes": 642295,
+  "js": {
+   "bytes": 539276,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 180938,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 175 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/video-tools/screen-recorder",
+  "scores": {
+   "performance": 81,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3796,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 337,
+  "si": 1024,
+  "tti": 5633,
+  "totalBytes": 645271,
+  "js": {
+   "bytes": 541994,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/video-tools/subtitle-generator",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3761,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 282,
+  "si": 1019,
+  "tti": 5619,
+  "totalBytes": 640302,
+  "js": {
+   "bytes": 536802,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179968,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/video-tools/video-compressor",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3745,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 289,
+  "si": 1399,
+  "tti": 5605,
+  "totalBytes": 650209,
+  "js": {
+   "bytes": 546439,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179968,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/video-tools/video-converter",
+  "scores": {
+   "performance": 69,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 6234,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 358,
+  "si": 1401,
+  "tti": 6234,
+  "totalBytes": 649731,
+  "js": {
+   "bytes": 546599,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179968,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/video-tools/video-filter",
+  "scores": {
+   "performance": 87,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3780,
+  "fcp": 913,
+  "cls": 0,
+  "tbt": 179,
+  "si": 1037,
+  "tti": 5517,
+  "totalBytes": 647983,
+  "js": {
+   "bytes": 544497,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/video-tools/video-merger",
+  "scores": {
+   "performance": 80,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3814,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 363,
+  "si": 1097,
+  "tti": 5598,
+  "totalBytes": 648754,
+  "js": {
+   "bytes": 545120,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/video-tools/video-metadata",
+  "scores": {
+   "performance": 76,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4592,
+  "fcp": 910,
+  "cls": 0,
+  "tbt": 336,
+  "si": 1154,
+  "tti": 5616,
+  "totalBytes": 644021,
+  "js": {
+   "bytes": 540520,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/video-tools/video-resizer",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3783,
+  "fcp": 911,
+  "cls": 0.001,
+  "tbt": 213,
+  "si": 1049,
+  "tti": 5546,
+  "totalBytes": 648824,
+  "js": {
+   "bytes": 545144,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.6 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/video-tools/video-rotator",
+  "scores": {
+   "performance": 80,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4515,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 231,
+  "si": 1154,
+  "tti": 5561,
+  "totalBytes": 649265,
+  "js": {
+   "bytes": 545358,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/video-tools/video-screenshot",
+  "scores": {
+   "performance": 82,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3816,
+  "fcp": 912,
+  "cls": 0.005,
+  "tbt": 313,
+  "si": 1107,
+  "tti": 5580,
+  "totalBytes": 641732,
+  "js": {
+   "bytes": 538706,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.7 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/video-tools/video-to-audio",
+  "scores": {
+   "performance": 83,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3784,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 289,
+  "si": 1116,
+  "tti": 5555,
+  "totalBytes": 644484,
+  "js": {
+   "bytes": 541077,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/video-tools/video-to-gif",
+  "scores": {
+   "performance": 81,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4496,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 218,
+  "si": 1676,
+  "tti": 5523,
+  "totalBytes": 641840,
+  "js": {
+   "bytes": 538552,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179941,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 172 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.4 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/video-tools/video-trimmer",
+  "scores": {
+   "performance": 77,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 4558,
+  "fcp": 907,
+  "cls": 0.003,
+  "tbt": 308,
+  "si": 1152,
+  "tti": 5578,
+  "totalBytes": 650255,
+  "js": {
+   "bytes": 546367,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179950,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ },
+ {
+  "url": "http://localhost:3100/tools/video-tools/video-watermark",
+  "scores": {
+   "performance": 85,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "lcp": 3732,
+  "fcp": 911,
+  "cls": 0,
+  "tbt": 237,
+  "si": 1552,
+  "tti": 5516,
+  "totalBytes": 647126,
+  "js": {
+   "bytes": 542827,
+   "n": 22
+  },
+  "font": {
+   "bytes": 65062,
+   "n": 3
+  },
+  "image": {
+   "bytes": 0,
+   "n": 0
+  },
+  "thirdParty": {
+   "bytes": 179968,
+   "n": 3
+  },
+  "failing": {
+   "accessibility": [],
+   "best-practices": [],
+   "seo": []
+  },
+  "nodes": {},
+  "opportunities": [
+   {
+    "id": "unused-javascript",
+    "value": "Est savings of 174 KiB"
+   },
+   {
+    "id": "mainthread-work-breakdown",
+    "value": "2.5 s"
+   }
+  ],
+  "runtimeError": null
+ }
+]

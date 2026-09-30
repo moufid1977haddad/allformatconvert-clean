@@ -153,7 +153,7 @@ export default function AudioTrimmerPage() {
         <p className="text-neutral-500 text-center mb-8">Trim and cut audio to a tenth of a second, with fades</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-400 text-sm">Click to upload an audio file</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload an audio file</p>}
           </div>
           <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
           {audioUrl && !noPreview && <audio ref={audioRef} src={audioUrl} onLoadedMetadata={onLoaded} onError={() => probeWithFfmpeg(file, fileIdRef.current)} controls className="w-full" />}
@@ -180,7 +180,7 @@ export default function AudioTrimmerPage() {
               {(fadeIn > 0 || fadeOut > 0) && <p className="text-xs text-neutral-500">With a fade, the audio is re-encoded (same format at a high setting; WAV if this format cannot be written here). Without one, it is copied exactly.</p>}
             </>
           )}
-          <button onClick={trim} disabled={!file || loading || !(duration > 0)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          <button onClick={trim} disabled={!file || loading || !(duration > 0)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Trimming...' : 'Trim Audio'}
           </button>
           {error && <p className="text-red-600 text-center text-sm" role="alert">{error}</p>}

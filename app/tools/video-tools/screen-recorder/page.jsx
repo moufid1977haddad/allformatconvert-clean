@@ -109,7 +109,7 @@ export default function ScreenRecorderPage() {
             <div className="text-4xl font-mono">{fmt(duration)}</div>
             <div className="flex gap-4 justify-center">
               {!recording ? (
-                <button onClick={start} disabled={!supported} className="bg-red-600 hover:bg-red-500 rounded-xl px-8 py-3 font-semibold transition">Start Recording</button>
+                <button onClick={start} disabled={!supported} className="bg-red-600 hover:bg-red-500 rounded-xl px-8 py-3 font-semibold transition text-white">Start Recording</button>
               ) : (
                 <button onClick={stop} className="bg-neutral-200 hover:bg-neutral-200 rounded-xl px-8 py-3 font-semibold transition">Stop Recording</button>
               )}
@@ -119,7 +119,7 @@ export default function ScreenRecorderPage() {
           {videoUrl && (
             <div className="space-y-3">
               <video controls playsInline src={videoUrl} className="w-full rounded-xl" />
-              <a href={videoUrl} download={`screen-recording-${new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-')}.${ext}`} className="block w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-center">Download Recording ({ext.toUpperCase()})</a>
+              <a href={videoUrl} download={`screen-recording-${new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-')}.${ext}`} className="block w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-center text-white">Download Recording ({ext.toUpperCase()})</a>
               {ext !== 'mp4' && !converting && <button type="button" onClick={toMp4} className="w-full bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl py-2 font-semibold transition">Make an MP4 (plays on iPhone and everywhere)</button>}
               {converting && <ProgressBar pct={converting.pct} label={converting.label} />}
             </div>

@@ -247,7 +247,7 @@ export default function ZipExtractorPage() {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">ZIP Extractor</h1>
         <p className="text-neutral-500 text-center mb-2">Open ZIP, RAR, 7Z, TAR, GZ, ISO and 40+ other archive formats — password-protected and split archives included</p>
-        <p className="text-neutral-400 text-xs text-center mb-8">Extracted in your browser with 7-Zip and zip.js: the archive is never uploaded. Any archive size; each file up to {maxFileLabel}{isMobile ? ' on this device' : ''}.</p>
+        <p className="text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Extracted in your browser with 7-Zip and zip.js: the archive is never uploaded. Any archive size; each file up to {maxFileLabel}{isMobile ? ' on this device' : ''}.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div
             className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition ${dragging ? 'border-indigo-500 bg-indigo-50' : 'border-neutral-200 hover:border-indigo-500'}`}
@@ -257,7 +257,7 @@ export default function ZipExtractorPage() {
             onDrop={(e) => { e.preventDefault(); setDragging(false); if (!busy) choose(e.dataTransfer.files); }}
           >
             <p className="text-neutral-600">Drop an archive here, or click to choose</p>
-            <p className="text-neutral-400 text-xs mt-1">For a split archive (.part1.rar, .7z.001, .z01…), choose all of its parts together</p>
+            <p className="text-neutral-500 text-xs mt-1">For a split archive (.part1.rar, .7z.001, .z01…), choose all of its parts together</p>
             <input ref={inputRef} type="file" multiple className="hidden" onChange={(e) => { choose(e.target.files); e.target.value = ''; }} />
           </div>
 

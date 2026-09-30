@@ -1,6 +1,5 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
-import { PDFDocument } from 'pdf-lib';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 
@@ -23,6 +22,7 @@ export default function PdfDeletePagesPage() {
     setPageCount(0);
     try {
       const arrayBuffer = await f.arrayBuffer();
+      const { PDFDocument } = await import('pdf-lib'); // loaded when used, not with the page (30/09)
       const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer), { ignoreEncryption: true });
       setPageCount(pdfDoc.getPageCount());
     } catch (err) {
@@ -39,6 +39,7 @@ export default function PdfDeletePagesPage() {
     try {
       const pages = pagesToDelete.split(',').map(p => parseInt(p.trim()) - 1).filter(p => p >= 0);
       const arrayBuffer = await file.arrayBuffer();
+      const { PDFDocument } = await import('pdf-lib'); // loaded when used, not with the page (30/09)
       const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer), { ignoreEncryption: true });
       const sortedPages = [...new Set(pages)].sort((a, b) => b - a);
       sortedPages.forEach(p => { if (p < pdfDoc.getPageCount()) pdfDoc.removePage(p); });
@@ -69,14 +70,14 @@ export default function PdfDeletePagesPage() {
               <p className="text-xs text-neutral-500 mt-1">Total pages: {pageCount}</p>
             </div>
           )}
-          <button onClick={deletePages} disabled={!file || !pagesToDelete || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          <button onClick={deletePages} disabled={!file || !pagesToDelete || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Processing...' : 'Delete Pages'}
           </button>
           {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
           {downloadUrl && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
               <div className="text-green-400 text-xl font-bold mb-3">Done!</div>
-              <a href={downloadUrl} download={file.name.replace(/\.pdf$/i, '-edited.pdf')} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition">Download</a>
+              <a href={downloadUrl} download={file.name.replace(/\.pdf$/i, '-edited.pdf')} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition text-white">Download</a>
             </div>
           )}
         </div>

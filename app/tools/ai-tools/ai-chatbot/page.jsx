@@ -43,7 +43,7 @@ export default function AIChatbotPage() {
         <p className="text-neutral-500 text-center mb-8">Chat with an AI assistant</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="h-80 overflow-y-auto space-y-3 bg-neutral-50 rounded-xl p-4">
-            {messages.length === 0 && <p className="text-neutral-400 text-sm text-center mt-8">Start a conversation...</p>}
+            {messages.length === 0 && <p className="text-neutral-500 text-sm text-center mt-8">Start a conversation...</p>}
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-md whitespace-pre-wrap break-words rounded-xl px-4 py-2 text-sm ${msg.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-white border border-neutral-200 text-neutral-800'}`}>

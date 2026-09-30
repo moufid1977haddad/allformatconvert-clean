@@ -375,7 +375,7 @@ export default function Page() {
         <p className="text-neutral-500 text-center mb-8">Read text from scanned PDFs and photographed pages, powered by Tesseract.js, entirely in your browser</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-400 text-sm">Click to upload a PDF file</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload a PDF file</p>}
           </div>
           <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
           <div>
@@ -388,7 +388,7 @@ export default function Page() {
               placeholder="Search languages..."
               className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm mb-2"
             />
-            <select value={lang} onChange={(e) => setLang(e.target.value)} disabled={loading} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
+            <select aria-label="OCR language" value={lang} onChange={(e) => setLang(e.target.value)} disabled={loading} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
               {filteredLanguages.length ? filteredLanguages.map((l) => <option key={l.code} value={l.code}>{optionLabel(l)}</option>) : <option value="" disabled>No language matches — try the English name</option>}
             </select>
           </div>
@@ -405,7 +405,7 @@ export default function Page() {
               )}
             </div>
           ) : (
-            <button onClick={ocr} disabled={!file || !filteredLanguages.some((l) => l.code === lang)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+            <button onClick={ocr} disabled={!file || !filteredLanguages.some((l) => l.code === lang)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
               Run OCR
             </button>
           )}
@@ -413,7 +413,7 @@ export default function Page() {
           {output && (
             <div className="space-y-2">
               <label className="block text-sm text-neutral-500">Recognized Text</label>
-              <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={output} readOnly />
+              <textarea aria-label="Recognized Text" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={output} readOnly />
               <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Copy Text</button>
               {pdfUrl && <a href={pdfUrl} download={file.name.replace(/\.pdf$/i, '') + '-searchable.pdf'} className="block w-full text-center bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl py-2 font-semibold transition">Download searchable PDF</a>}
             </div>

@@ -23,7 +23,7 @@ export default function MarkdownEditorPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Markdown Editor</h1>
         <p className="text-neutral-500 text-center mb-8">Write and preview Markdown in real time</p>
         <div className="grid grid-cols-2 gap-4">
-          <div><label className="block text-sm text-neutral-500 mb-1">Markdown</label><textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-96 resize-none font-mono" value={markdown} onChange={e => setMarkdown(e.target.value)} /></div>
+          <div><label className="block text-sm text-neutral-500 mb-1">Markdown</label><textarea aria-label="Markdown" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-96 resize-none font-mono" value={markdown} onChange={e => setMarkdown(e.target.value)} /></div>
           <div><label className="block text-sm text-neutral-500 mb-1">Preview</label><div className="w-full bg-white rounded-xl p-4 h-96 overflow-y-auto text-neutral-900 prose prose-sm" dangerouslySetInnerHTML={{__html: html}} /></div>
         </div>
       </div>

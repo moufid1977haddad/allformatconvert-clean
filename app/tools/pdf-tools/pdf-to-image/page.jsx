@@ -73,7 +73,7 @@ export default function PdfToImagePage() {
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a PDF here'}</p>
             <input ref={inputRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
           </div>
-          <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Converting...' : 'Convert to Images'}
           </button>
           {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
@@ -84,7 +84,7 @@ export default function PdfToImagePage() {
               {images.map(({ url, page, name }) => (
                 <div key={page} className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 text-center">
                   <img src={url} alt={'Page ' + page} className="max-w-full rounded mb-3" />
-                  <a href={url} download={name} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition">Download Page {page}</a>
+                  <a href={url} download={name} className="inline-block bg-green-600 hover:bg-green-500 rounded-xl px-6 py-2 font-semibold transition text-white">Download Page {page}</a>
                 </div>
               ))}
             </div>

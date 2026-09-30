@@ -24,22 +24,22 @@ export default function TextTruncatorPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-neutral-500 mb-1">Limit</label>
-              <input type="number" min="1" value={limit} onChange={e => setLimit(e.target.value === '' ? NaN : Number(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" />
+              <input aria-label="Limit" type="number" min="1" value={limit} onChange={e => setLimit(e.target.value === '' ? NaN : Number(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" />
             </div>
             <div>
               <label className="block text-sm text-neutral-500 mb-1">Type</label>
-              <select value={type} onChange={e => setType(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3">
+              <select aria-label="Type" value={type} onChange={e => setType(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3">
                 <option value="characters">Characters</option>
                 <option value="words">Words</option>
               </select>
             </div>
           </div>
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-          <button onClick={truncate} disabled={!text} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Truncate</button>
+          <button onClick={truncate} disabled={!text} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Truncate</button>
           {result && (
             <div className="space-y-2">
-              <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={result} readOnly />
-              <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
+              <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={result} readOnly />
+              <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button>
               {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
             </div>
           )}

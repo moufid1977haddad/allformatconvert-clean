@@ -50,7 +50,7 @@ export default function DuplicateImageFinderPage() {
               {images.map((img, i) => <div key={i} className="relative"><img src={img.url} className="w-full h-16 object-cover rounded" /><p className="text-xs text-neutral-500 truncate">{img.name}</p></div>)}
             </div>
           )}
-          <button onClick={findDuplicates} disabled={images.length < 2 || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">{busy ? 'Comparing…' : 'Find Duplicates'}</button>
+          <button onClick={findDuplicates} disabled={images.length < 2 || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">{busy ? 'Comparing…' : 'Find Duplicates'}</button>
           {pairs && pairs.length === 0 && <p className="text-green-600 text-center">No duplicates or near-duplicates among these {images.length} images.</p>}
           {pairs && pairs.map((d, i) => <div key={i} className={'rounded-xl p-3 text-sm ' + (d.kind === 'exact' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-800')}><strong>{d.kind === 'exact' ? 'Identical files' : 'Same picture'}</strong>{d.kind === 'similar' ? ` (${64 - d.bits}/64 matching)` : ''}: {d.a} = {d.b}</div>)}
         </div>

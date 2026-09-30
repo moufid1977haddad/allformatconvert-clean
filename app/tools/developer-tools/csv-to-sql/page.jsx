@@ -187,11 +187,11 @@ export default function CsvToSqlPage() {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">CSV to SQL</h1>
         <p className="text-neutral-500 dark:text-neutral-400 text-center mb-2">Generate SQL INSERT statements from CSV</p>
-        <p className="text-neutral-400 dark:text-neutral-500 text-xs text-center mb-8">Uploaded files: up to {fileMaxRowsLabel} rows{isMobile ? ' on this device' : ''} (including the header row, files up to {MAX_FILE_SIZE_LABEL}). Pasted text: up to {PASTE_MAX_ROWS_LABEL} rows. Conversion runs in the background — this tab stays responsive.</p>
+        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Uploaded files: up to {fileMaxRowsLabel} rows{isMobile ? ' on this device' : ''} (including the header row, files up to {MAX_FILE_SIZE_LABEL}). Pasted text: up to {PASTE_MAX_ROWS_LABEL} rows. Conversion runs in the background — this tab stays responsive.</p>
         <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div>
             <label className="block text-sm text-neutral-500 dark:text-neutral-400 mb-1">Table Name</label>
-            <input type="text" value={tableName} onChange={e => setTableName(e.target.value)} disabled={converting} className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-lg p-3 font-mono text-neutral-800 dark:text-neutral-200" />
+            <input aria-label="Table Name" type="text" value={tableName} onChange={e => setTableName(e.target.value)} disabled={converting} className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-lg p-3 font-mono text-neutral-800 dark:text-neutral-200" />
           </div>
           <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-600 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500 dark:text-neutral-400 text-sm">{fileName || 'Click or drop a .csv file here'}</p>
@@ -219,7 +219,7 @@ export default function CsvToSqlPage() {
             </div>
             <div>
               <label className="block text-sm text-neutral-500 dark:text-neutral-400 mb-1">SQL Output</label>
-              <textarea className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-xl p-4 text-sm h-48 resize-none font-mono text-neutral-800 dark:text-neutral-200" value={output} readOnly />
+              <textarea aria-label="SQL Output" className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-xl p-4 text-sm h-48 resize-none font-mono text-neutral-800 dark:text-neutral-200" value={output} readOnly />
             </div>
           </div>
           {timeEstimate && !converting && !error && (

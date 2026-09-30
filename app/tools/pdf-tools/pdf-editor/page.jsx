@@ -364,7 +364,7 @@ export default function PdfEditorPage() {
       <div className="max-w-5xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">PDF Editor</h1>
         <p className="text-neutral-500 text-center mb-2">Reorder, rotate, delete, and extract pages — add text, images, and annotations</p>
-        <p className="text-neutral-400 dark:text-neutral-500 text-xs text-center mb-8">
+        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8">
           Supports up to {maxPages.toLocaleString()} pages{isMobile ? ' on this device' : ''} (files up to {maxSizeLabel}). Everything runs in your browser — this tool cannot rewrite existing text in a PDF.
         </p>
 
@@ -417,12 +417,12 @@ export default function PdfEditorPage() {
                 ))}
                 {tool === 'pen' && (
                   <>
-                    <input type="color" value={`#${penColor.map((c) => c.toString(16).padStart(2, '0')).join('')}`} onChange={(e) => setPenColor([1, 3, 5].map((i) => parseInt(e.target.value.slice(i, i + 2), 16)))} className="w-8 h-8 rounded" />
-                    <input type="range" min="1" max="10" value={penWidth} onChange={(e) => setPenWidth(Number(e.target.value))} className="w-24" />
+                    <input aria-label="Pen colour" type="color" value={`#${penColor.map((c) => c.toString(16).padStart(2, '0')).join('')}`} onChange={(e) => setPenColor([1, 3, 5].map((i) => parseInt(e.target.value.slice(i, i + 2), 16)))} className="w-8 h-8 rounded" />
+                    <input aria-label="Pen width" type="range" min="1" max="10" value={penWidth} onChange={(e) => setPenWidth(Number(e.target.value))} className="w-24" />
                   </>
                 )}
                 {tool === 'highlight' && (
-                  <input type="color" value={`#${highlightColor.map((c) => c.toString(16).padStart(2, '0')).join('')}`} onChange={(e) => setHighlightColor([1, 3, 5].map((i) => parseInt(e.target.value.slice(i, i + 2), 16)))} className="w-8 h-8 rounded" />
+                  <input aria-label="Highlight colour" type="color" value={`#${highlightColor.map((c) => c.toString(16).padStart(2, '0')).join('')}`} onChange={(e) => setHighlightColor([1, 3, 5].map((i) => parseInt(e.target.value.slice(i, i + 2), 16)))} className="w-8 h-8 rounded" />
                 )}
                 {movingItem && <span className="text-xs text-indigo-600 self-center">Click the page to place it there…</span>}
               </div>
@@ -445,9 +445,9 @@ export default function PdfEditorPage() {
                 <div className="space-y-2 border-t border-neutral-200 dark:border-neutral-700 pt-3">
                   {pageTextItems.map((t) => (
                     <div key={t.id} className="flex items-center gap-2">
-                      <input value={t.text} onChange={(e) => setTextItems((p) => p.map((x) => (x.id === t.id ? { ...x, text: e.target.value } : x)))} className="flex-1 text-sm border border-neutral-200 dark:border-neutral-700 dark:bg-neutral-800 rounded px-2 py-1" />
-                      <input type="number" min="6" max="72" value={t.fontSize} onChange={(e) => setTextItems((p) => p.map((x) => (x.id === t.id ? { ...x, fontSize: Number(e.target.value) } : x)))} className="w-16 text-sm border border-neutral-200 dark:border-neutral-700 dark:bg-neutral-800 rounded px-2 py-1" />
-                      <input type="color" value={`#${t.color.map((c) => c.toString(16).padStart(2, '0')).join('')}`} onChange={(e) => setTextItems((p) => p.map((x) => (x.id === t.id ? { ...x, color: [1, 3, 5].map((i) => parseInt(e.target.value.slice(i, i + 2), 16)) } : x)))} className="w-8 h-8 rounded" />
+                      <input aria-label="Text to add" value={t.text} onChange={(e) => setTextItems((p) => p.map((x) => (x.id === t.id ? { ...x, text: e.target.value } : x)))} className="flex-1 text-sm border border-neutral-200 dark:border-neutral-700 dark:bg-neutral-800 rounded px-2 py-1" />
+                      <input aria-label="Text size" type="number" min="6" max="72" value={t.fontSize} onChange={(e) => setTextItems((p) => p.map((x) => (x.id === t.id ? { ...x, fontSize: Number(e.target.value) } : x)))} className="w-16 text-sm border border-neutral-200 dark:border-neutral-700 dark:bg-neutral-800 rounded px-2 py-1" />
+                      <input aria-label="Text colour" type="color" value={`#${t.color.map((c) => c.toString(16).padStart(2, '0')).join('')}`} onChange={(e) => setTextItems((p) => p.map((x) => (x.id === t.id ? { ...x, color: [1, 3, 5].map((i) => parseInt(e.target.value.slice(i, i + 2), 16)) } : x)))} className="w-8 h-8 rounded" />
                       <button onClick={() => setMovingItem({ kind: 'text', id: t.id })} className="text-xs px-2 py-1 bg-neutral-200 dark:bg-neutral-700 rounded">Move</button>
                       <button onClick={() => setTextItems((p) => p.filter((x) => x.id !== t.id))} className="text-xs px-2 py-1 bg-red-100 dark:bg-red-950 text-red-600 rounded">✕</button>
                     </div>
@@ -456,7 +456,7 @@ export default function PdfEditorPage() {
                     <div key={img.id} className="flex items-center gap-2">
                       <span className="text-xs text-neutral-500 flex-1">Image</span>
                       <label className="text-xs text-neutral-500">Width</label>
-                      <input type="number" min="20" max="1000" value={Math.round(img.width)} onChange={(e) => { const w = Number(e.target.value); setImageItems((p) => p.map((x) => (x.id === img.id ? { ...x, width: w, height: w * x.aspect } : x))); }} className="w-20 text-sm border border-neutral-200 dark:border-neutral-700 dark:bg-neutral-800 rounded px-2 py-1" />
+                      <input aria-label="Width" type="number" min="20" max="1000" value={Math.round(img.width)} onChange={(e) => { const w = Number(e.target.value); setImageItems((p) => p.map((x) => (x.id === img.id ? { ...x, width: w, height: w * x.aspect } : x))); }} className="w-20 text-sm border border-neutral-200 dark:border-neutral-700 dark:bg-neutral-800 rounded px-2 py-1" />
                       <button onClick={() => setMovingItem({ kind: 'image', id: img.id })} className="text-xs px-2 py-1 bg-neutral-200 dark:bg-neutral-700 rounded">Move</button>
                       <button onClick={() => setImageItems((p) => p.filter((x) => x.id !== img.id))} className="text-xs px-2 py-1 bg-red-100 dark:bg-red-950 text-red-600 rounded">✕</button>
                     </div>

@@ -146,7 +146,7 @@ export default function ColorConverterPage() {
               </div>
             );
           })}
-          <button onClick={() => copy(hex)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy HEX</button>
+          <button onClick={() => copy(hex)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy HEX</button>
         </div>
       </div>
       <SeoContent

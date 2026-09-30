@@ -106,7 +106,7 @@ export default function PdfToPdfaPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">PDF to PDF/A</h1>
         <p className="text-neutral-500 text-center mb-2">Convert to PDF/A for long-term archiving, verified compliant by veraPDF</p>
-        <p className="text-neutral-400 dark:text-neutral-500 text-xs text-center mb-8">
+        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8">
           Files up to {pdfToolsMaxLabel()} Your file is uploaded to our conversion service for processing — see below for what that means.
         </p>
 
@@ -118,7 +118,7 @@ export default function PdfToPdfaPage() {
 
           <div className="flex items-center justify-center gap-2">
             <label className="text-sm text-neutral-500">PDF/A conformance:</label>
-            <select value={conformance} onChange={(e) => setConformance(e.target.value)} className="text-sm border border-neutral-200 dark:border-neutral-700 dark:bg-neutral-800 rounded-lg px-2 py-1">
+            <select aria-label="PDF/A conformance" value={conformance} onChange={(e) => setConformance(e.target.value)} className="text-sm border border-neutral-200 dark:border-neutral-700 dark:bg-neutral-800 rounded-lg px-2 py-1">
               {CONFORMANCE_LEVELS.map((lvl) => <option key={lvl} value={lvl}>PDF/A-{lvl}</option>)}
             </select>
           </div>

@@ -69,7 +69,7 @@ export default function GrammarFixerPage() {
         <p className="text-neutral-500 text-center mb-8">Fix grammar and spelling errors with AI, and see every change</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste text to fix grammar..." value={input} onChange={e => setInput(e.target.value)} aria-label="Text to fix" />
-          <button onClick={process} disabled={!input.trim() || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          <button onClick={process} disabled={!input.trim() || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Processing...' : 'Fix Grammar'}
           </button>
           {weak && (
@@ -104,7 +104,7 @@ export default function GrammarFixerPage() {
               </div>
               <label className="block text-sm text-neutral-500">Result</label>
               <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={result} readOnly aria-label="Result" />
-              <button onClick={copy} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">{copied ? 'Copied' : 'Copy'}</button>
+              <button onClick={copy} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">{copied ? 'Copied' : 'Copy'}</button>
             </div>
           )}
         </div>

@@ -62,13 +62,13 @@ export default function PptToPdfPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">PowerPoint to PDF</h1>
         <p className="text-neutral-500 text-center mb-2">Convert .pptx or .ppt files to PDF using LibreOffice</p>
-        <p className="text-neutral-400 text-xs text-center mb-8">In our tests, layout, images, gradients, tables and charts carried over. A text box narrower than its text can wrap and be partly hidden, and Wingdings and Webdings icon fonts can&apos;t legally be reproduced and will appear blank.</p>
+        <p className="text-neutral-500 text-xs text-center mb-8">In our tests, layout, images, gradients, tables and charts carried over. A text box narrower than its text can wrap and be partly hidden, and Wingdings and Webdings icon fonts can&apos;t legally be reproduced and will appear blank.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a .pptx or .ppt file here'}</p>
             <input ref={inputRef} type="file" accept=".pptx,.ppt" className="hidden" onChange={handleFile} />
           </div>
-          <p className="text-neutral-400 text-xs text-center -mt-2">Max {officeMaxLabel()} per file</p>
+          <p className="text-neutral-500 text-xs text-center -mt-2">Max {officeMaxLabel()} per file</p>
           <button onClick={convert} disabled={!file || loading || file.size > officeMaxBytes()} className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">
             {loading && (
               <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden="true" />

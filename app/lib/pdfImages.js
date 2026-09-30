@@ -11,7 +11,7 @@
 // re-encoding; the mirrored orientations (2, 4, 5, 7) and every other format
 // the browser can display (WebP, GIF, BMP, AVIF, HEIC in Safari…) are drawn
 // upright on a canvas first. Anything the browser cannot decode is reported.
-import { degrees } from 'pdf-lib';
+// pdf-lib is loaded when an image page is added, not with the tool page (30/09/2026, Lighthouse).
 import { imageDims, decodeToRaster, hasAlpha, encodePngRGBA, encodeJpegWasm } from './bigImage';
 
 const isJpeg = (b) => b[0] === 0xff && b[1] === 0xd8;
@@ -37,6 +37,7 @@ async function embedUpright(pdfDoc, file) {
 
 // Adds a page to pdfDoc; throws Error(`${file.name}: …`) when the file can't be used.
 export async function addImagePage(pdfDoc, file) {
+  const { degrees } = await import('pdf-lib');
   const bytes = new Uint8Array(await file.arrayBuffer());
   try {
     if (isJpeg(bytes)) {

@@ -143,7 +143,7 @@ export default function TiffToPngPage() {
               <button onClick={cancel} className="w-full bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl py-3 font-semibold transition">Cancel</button>
             </div>
           ) : (
-            <button onClick={convert} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert to PNG</button>
+            <button onClick={convert} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert to PNG</button>
           )}
           {mismatch && (
             <div className="text-center text-sm text-red-400">
@@ -152,7 +152,7 @@ export default function TiffToPngPage() {
             </div>
           )}
           {error && <p className="text-red-400 text-center text-sm whitespace-pre-line">{error}</p>}
-          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download={file ? file.name.replace(/\.[^.]+$/, '') + '.png' : 'converted.png'} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download PNG</a></div>}
+          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><a href={result} download={file ? file.name.replace(/\.[^.]+$/, '') + '.png' : 'converted.png'} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download PNG</a></div>}
         </div>
       </div>
       <SeoContent

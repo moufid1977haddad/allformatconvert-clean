@@ -170,7 +170,7 @@ export default function HashGeneratorPage() {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Hash Generator</h1>
         <p className="text-neutral-500 text-center mb-2">MD5, SHA-1, SHA-2, SHA-3, BLAKE2, BLAKE3, RIPEMD-160, CRC32 and xxHash — for text or files of any size</p>
-        <p className="text-neutral-400 text-xs text-center mb-8">Everything is computed in your browser: nothing is uploaded. No file size limit — large files are read in pieces.</p>
+        <p className="text-neutral-500 text-xs text-center mb-8">Everything is computed in your browser: nothing is uploaded. No file size limit — large files are read in pieces.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-5">
           <div role="radiogroup" aria-label="What to hash" className="grid grid-cols-2 gap-2">
             {[['text', 'Text'], ['files', 'Files']].map(([id, label]) => (
@@ -244,7 +244,7 @@ export default function HashGeneratorPage() {
                 onDrop={(e) => { e.preventDefault(); setDragging(false); if (!busy) addFiles(e.dataTransfer.files); }}
               >
                 <p className="text-neutral-600">Drop files here, or click to choose</p>
-                <p className="text-neutral-400 text-xs mt-1">Any type, any size, several at once</p>
+                <p className="text-neutral-500 text-xs mt-1">Any type, any size, several at once</p>
                 <input ref={inputRef} type="file" multiple className="hidden" onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }} />
               </div>
               {files.length > 0 && (

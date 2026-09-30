@@ -243,7 +243,7 @@ export default function VideoTrimmerPage() {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Video Trimmer</h1>
         <p className="text-neutral-500 text-center mb-2">Trim and cut video files — instantly and losslessly by default, or to the exact frame</p>
-        <p className="text-neutral-400 text-xs text-center mb-8">Files up to {maxMB} MB{isMobile ? ' on this device' : ''} · MP4, MOV, WebM, MKV and more · the fast cut never uploads your video</p>
+        <p className="text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Files up to {maxMB} MB{isMobile ? ' on this device' : ''} · MP4, MOV, WebM, MKV and more · the fast cut never uploads your video</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
@@ -254,8 +254,8 @@ export default function VideoTrimmerPage() {
           {file && noPreview && !error && <p role="status" className="text-sm text-neutral-600 text-center">{duration > 0 ? 'This browser cannot play this format, so there is no preview; cutting works the same.' : 'Reading the file…'}</p>}
           {duration > 0 && (
             <div className="grid grid-cols-2 gap-4">
-              <div><label className="block text-sm text-neutral-500 mb-1">Start: {start}s</label><input type="range" min="0" step="0.1" max={Math.max(0, duration - 0.1)} value={start} onChange={e => { const v = Math.round(parseFloat(e.target.value) * 10) / 10; setStart(v); if (v >= end) setEnd(Math.min(duration, v + 1)); }} className="w-full" /></div>
-              <div><label className="block text-sm text-neutral-500 mb-1">End: {end}s</label><input type="range" min="0.1" step="0.1" max={duration} value={end} onChange={e => { const v = Math.round(parseFloat(e.target.value) * 10) / 10; setEnd(v); if (v <= start) setStart(Math.max(0, v - 1)); }} className="w-full" /></div>
+              <div><label className="block text-sm text-neutral-500 mb-1">Start: {start}s</label><input aria-label="Start: s" type="range" min="0" step="0.1" max={Math.max(0, duration - 0.1)} value={start} onChange={e => { const v = Math.round(parseFloat(e.target.value) * 10) / 10; setStart(v); if (v >= end) setEnd(Math.min(duration, v + 1)); }} className="w-full" /></div>
+              <div><label className="block text-sm text-neutral-500 mb-1">End: {end}s</label><input aria-label="End: s" type="range" min="0.1" step="0.1" max={duration} value={end} onChange={e => { const v = Math.round(parseFloat(e.target.value) * 10) / 10; setEnd(v); if (v <= start) setStart(Math.max(0, v - 1)); }} className="w-full" /></div>
             </div>
           )}
           {duration > 0 && (
@@ -269,7 +269,7 @@ export default function VideoTrimmerPage() {
           {status ? (
             <button onClick={cancel} className="w-full bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl py-3 font-semibold transition">Cancel</button>
           ) : (
-            <button onClick={trim} disabled={!file || duration === 0} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Trim Video ({(Math.round((end - start) * 10) / 10).toFixed(1)}s)</button>
+            <button onClick={trim} disabled={!file || duration === 0} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Trim Video ({(Math.round((end - start) * 10) / 10).toFixed(1)}s)</button>
           )}
           {result && (
             <div className="space-y-2">
@@ -277,7 +277,7 @@ export default function VideoTrimmerPage() {
               <p className="text-xs text-neutral-500 text-center">
                 {fmtMB(result.size)}{result.actual ? ` · ${fmtSecs(result.actual)} long (you asked for ${fmtSecs(result.asked)}${result.precise ? '; cut to the frame' : '; a fast cut starts on the keyframe at or before your start'})` : ''}
               </p>
-              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download {result.name.split('.').pop().toUpperCase()}</a>
+              <a href={result.url} download={result.name} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download {result.name.split('.').pop().toUpperCase()}</a>
             </div>
           )}
         </div>

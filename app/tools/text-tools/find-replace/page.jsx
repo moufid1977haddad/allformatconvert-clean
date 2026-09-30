@@ -56,15 +56,15 @@ export default function FindReplacePage() {
             <input type="checkbox" checked={useRegex} onChange={e => setUseRegex(e.target.checked)} />
             Use regular expression
           </label>
-          <button onClick={doReplace} disabled={!text || !find} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Replace All</button>
+          <button onClick={doReplace} disabled={!text || !find} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Replace All</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {hasResult && (
             <div className="space-y-2">
               <p className="text-green-400 text-sm text-center">{count} replacement(s) made</p>
               {result ? (
                 <>
-                  <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-40 resize-none" value={result} readOnly />
-                  <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Copy</button>
+                  <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-40 resize-none" value={result} readOnly />
+                  <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button>
                   {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
                 </>
               ) : (

@@ -47,10 +47,10 @@ export default function FileConverterPage() {
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a text file here'}</p>
             <input ref={inputRef} type="file" accept=".txt,.csv,.json,.html,.md" className="hidden" onChange={handleFile} />
           </div>
-          <div><label className="block text-sm text-neutral-500 mb-1">Convert to</label><select value={format} onChange={e => setFormat(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3"><option value="txt">TXT</option><option value="json">JSON</option><option value="csv">CSV</option><option value="html">HTML</option></select></div>
-          <button onClick={convert} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Convert</button>
+          <div><label className="block text-sm text-neutral-500 mb-1">Convert to</label><select aria-label="Convert to" value={format} onChange={e => setFormat(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3"><option value="txt">TXT</option><option value="json">JSON</option><option value="csv">CSV</option><option value="html">HTML</option></select></div>
+          <button onClick={convert} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {downloadUrl && <a href={downloadUrl} download={file.name.replace(/\.[^.]+$/, '') + '.' + format} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition">Download</a>}
+          {downloadUrl && <a href={downloadUrl} download={file.name.replace(/\.[^.]+$/, '') + '.' + format} className="block w-full text-center bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Download</a>}
         </div>
       </div>
       <SeoContent

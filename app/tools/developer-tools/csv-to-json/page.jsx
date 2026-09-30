@@ -190,7 +190,7 @@ export default function CsvToJsonPage() {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">CSV to JSON</h1>
         <p className="text-neutral-500 dark:text-neutral-400 text-center mb-2">Convert CSV to JSON format</p>
-        <p className="text-neutral-400 dark:text-neutral-500 text-xs text-center mb-8">Uploaded files: up to {fileMaxRowsLabel} rows{isMobile ? ' on this device' : ''} (including the header row, files up to {MAX_FILE_SIZE_LABEL}). Pasted text: up to {PASTE_MAX_ROWS_LABEL} rows. Conversion runs in the background — this tab stays responsive.</p>
+        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Uploaded files: up to {fileMaxRowsLabel} rows{isMobile ? ' on this device' : ''} (including the header row, files up to {MAX_FILE_SIZE_LABEL}). Pasted text: up to {PASTE_MAX_ROWS_LABEL} rows. Conversion runs in the background — this tab stays responsive.</p>
         <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-600 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500 dark:text-neutral-400 text-sm">{fileName || 'Click or drop a .csv file here'}</p>
@@ -218,7 +218,7 @@ export default function CsvToJsonPage() {
             </div>
             <div>
               <label className="block text-sm text-neutral-500 dark:text-neutral-400 mb-1">JSON Output</label>
-              <textarea className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-xl p-4 text-sm h-64 resize-none font-mono text-neutral-800 dark:text-neutral-200" value={output} readOnly />
+              <textarea aria-label="JSON Output" className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-xl p-4 text-sm h-64 resize-none font-mono text-neutral-800 dark:text-neutral-200" value={output} readOnly />
             </div>
           </div>
           {timeEstimate && !converting && !error && (
