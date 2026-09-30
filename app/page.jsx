@@ -221,7 +221,7 @@ function FileDropZone({ dark, toolCounts }) {
           <p style={{ fontSize: '14px', color: dark ? '#94a3b8' : '#475569', marginTop: '18px', marginBottom: '8px' }}>
             or drop it here — we&apos;ll suggest the right tool for it
           </p>
-          <p style={{ fontSize: '11px', color: dark ? '#64748b' : '#94a3b8', marginBottom: '18px' }}>
+          <p style={{ fontSize: '11px', color: dark ? '#64748b' : '#64748b', marginBottom: '18px' }}>
             We only read the file type. Your file stays on your device.
           </p>
           <div className="format-pills">
@@ -236,7 +236,7 @@ function FileDropZone({ dark, toolCounts }) {
             ))}
             <span
               className="format-pill"
-              style={{ background: dark ? '#1c1c1e' : '#ffffff', border: dark ? '1px solid #334155' : '1px solid #e2e8f0', color: dark ? '#64748b' : '#94a3b8' }}
+              style={{ background: dark ? '#1c1c1e' : '#ffffff', border: dark ? '1px solid #334155' : '1px solid #e2e8f0', color: dark ? '#64748b' : '#64748b' }}
             >
               + 40 more
             </span>
@@ -288,7 +288,7 @@ function FileDropZone({ dark, toolCounts }) {
             Search our {ALL_TOOLS.length}+ tools instead:
           </p>
           <div style={{ position: 'relative', marginBottom: '10px' }}>
-            <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: dark ? '#64748b' : '#94a3b8' }} />
+            <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: dark ? '#64748b' : '#64748b' }} />
             <input
               autoFocus
               type="text"

@@ -47,12 +47,12 @@ export default function TermsPage() {
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">5. Third-Party Services</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">Some tools send your file or text to a specialised provider: ConvertAPI (some Word and PDF conversions), OpenAI (AI text, image and transcription tools) and Pangram Labs (AI Detector). Each tool concerned is named in our <a href="/privacy" className="text-indigo-600 hover:underline">Privacy Policy</a>. By using those tools, you also agree not to submit content that breaks these providers' usage policies. OnlineConverTools is not responsible for the performance or availability of third-party services.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">Some tools send your file or text to a specialised provider: ConvertAPI (some Word and PDF conversions), OpenAI (AI text, image and transcription tools) and Pangram Labs (AI Detector). Each tool concerned is named in our <a href="/privacy" className="text-indigo-600 underline hover:no-underline">Privacy Policy</a>. By using those tools, you also agree not to submit content that breaks these providers' usage policies. OnlineConverTools is not responsible for the performance or availability of third-party services.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">6. Advertising</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">OnlineConverTools may display advertisements provided by Google AdSense to keep the service free. Where the law requires your consent for advertising cookies (for example in the European Economic Area, the United Kingdom and Switzerland), personalised ads are shown only if you give it in the consent message, and you can change your choice at any time; see our <a href="/privacy" className="text-indigo-600 hover:underline">Privacy Policy</a>.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">OnlineConverTools may display advertisements provided by Google AdSense to keep the service free. Where the law requires your consent for advertising cookies (for example in the European Economic Area, the United Kingdom and Switzerland), personalised ads are shown only if you give it in the consent message, and you can change your choice at any time; see our <a href="/privacy" className="text-indigo-600 underline hover:no-underline">Privacy Policy</a>.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
@@ -83,8 +83,8 @@ export default function TermsPage() {
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">12. Contact Us</h2>
             <p className="text-neutral-600 text-sm leading-relaxed">If you have any questions about these Terms of Service, please contact us at:<br /><br />
-            <strong>Email:</strong> <a href="mailto:contact@onlineconvertools.com" className="text-indigo-600 hover:underline">contact@onlineconvertools.com</a><br />
-            <strong>Website:</strong> <a href="/contact" className="text-indigo-600 hover:underline">www.onlineconvertools.com/contact</a></p>
+            <strong>Email:</strong> <a href="mailto:contact@onlineconvertools.com" className="text-indigo-600 underline hover:no-underline">contact@onlineconvertools.com</a><br />
+            <strong>Website:</strong> <a href="/contact" className="text-indigo-600 underline hover:no-underline">www.onlineconvertools.com/contact</a></p>
           </div>
 
         </div>

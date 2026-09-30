@@ -18,7 +18,7 @@ const card = "bg-white border border-neutral-200 rounded-xl p-8";
 const h2 = "text-xl font-bold text-neutral-800 mb-3";
 const p = "text-neutral-600 text-sm leading-relaxed";
 const ul = "text-neutral-600 text-sm leading-relaxed space-y-2 list-disc pl-5";
-const a = "text-indigo-600 hover:underline";
+const a = "text-indigo-600 underline hover:no-underline"; // links in running text are underlined, not colour alone (WCAG 1.4.1)
 
 function Ext({ href, children }) {
   return <a href={href} className={a} target="_blank" rel="noopener noreferrer">{children}</a>;

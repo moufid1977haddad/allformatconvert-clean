@@ -32,6 +32,8 @@
    the test benches find error messages by `p.text-red-400`. Same layer and specificity as the utilities, so hover:
    and other variants still win. */
 @layer utilities {
+  /* light grey hints and counters (2.4-2.6:1): same grey as text-neutral-500 in light mode */
+  :where(html:not(.dark)) .text-neutral-400 { color: #6b6b6b; }
   :where(html:not(.dark)) .text-red-400 { color: #dc2626; }
   :where(html:not(.dark)) .text-indigo-400 { color: #4f46e5; }
   :where(html:not(.dark)) .text-green-400 { color: #15803d; }
