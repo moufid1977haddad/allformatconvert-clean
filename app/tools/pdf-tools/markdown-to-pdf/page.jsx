@@ -1,55 +1,86 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
+import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
+import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
+
+// A real PDF file (P18, 01/10). The tool used to open the browser's print dialog ("Save as PDF"): on an iPhone or an
+// iPad that is no file at all, and the page itself said "Use Save as PDF in the print dialog". The reference
+// converters (markdowntopdf.com, CloudConvert, the md-to-pdf engine of VS Code's "Markdown PDF") render the Markdown
+// as HTML and print it with a headless Chromium: a vector PDF, selectable text, working links. We do exactly that
+// with the site's own Chromium service (Gotenberg, as HTML to PDF). The Markdown is turned into HTML here
+// (CommonMark + GitHub tables, marked) and cleaned by DOMPurify first: no script from a .md file ever runs anywhere.
+const CSS = `
+@page { size: A4; margin: 18mm 16mm; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font-family: "Liberation Sans", "Noto Sans", Arial, Helvetica, sans-serif; font-size: 11pt; line-height: 1.55; color: #1f2328; margin: 0; }
+h1, h2, h3, h4, h5, h6 { line-height: 1.25; margin: 1.3em 0 0.5em; font-weight: 700; page-break-after: avoid; break-after: avoid; }
+h1 { font-size: 2em; border-bottom: 1px solid #d0d7de; padding-bottom: 0.3em; margin-top: 0; }
+h2 { font-size: 1.5em; border-bottom: 1px solid #d0d7de; padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; } h4 { font-size: 1em; } h5 { font-size: 0.875em; } h6 { font-size: 0.85em; color: #59636e; }
+p, ul, ol, table, pre, blockquote { margin: 0 0 0.9em; }
+a { color: #0969da; text-decoration: underline; }
+code, pre, kbd { font-family: "Liberation Mono", "DejaVu Sans Mono", "Noto Sans Mono", Consolas, monospace; font-size: 0.9em; }
+code { background: #eff1f3; padding: 0.15em 0.35em; border-radius: 4px; }
+pre { background: #f6f8fa; padding: 12px 14px; border-radius: 6px; white-space: pre-wrap; word-wrap: break-word; page-break-inside: avoid; }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid #d0d7de; padding: 0 1em; color: #59636e; }
+table { border-collapse: collapse; width: auto; max-width: 100%; page-break-inside: auto; }
+th, td { border: 1px solid #d0d7de; padding: 6px 12px; text-align: left; vertical-align: top; }
+th { background: #f6f8fa; font-weight: 700; }
+tr { page-break-inside: avoid; }
+img { max-width: 100%; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 1.5em 0; }
+ul.contains-task-list, li.task-list-item { list-style: none; }
+input[type=checkbox] { margin-right: 0.4em; }
+`;
+
+const escapeHtml = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/** The whole HTML document sent to the renderer. */
+async function markdownToHtmlDocument(md, title) {
+  const [{ marked }, { default: DOMPurify }] = await Promise.all([import('marked'), import('dompurify')]);
+  const body = DOMPurify.sanitize(marked.parse(md, { gfm: true, async: false }));
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title><style>${CSS}</style></head><body>${body}</body></html>`;
+}
 
 export default function MarkdownToPdfPage() {
   const [file, setFile] = useState(null);
   const [mdContent, setMdContent] = useState('');
   const [mode, setMode] = useState('file');
   const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
-  const [status, setStatus] = useState('');
+  const [stage, setStage] = useState(null);
+  const [error, setError] = useState('');
+  const [pdf, offer, clearPdf] = useDownloadable();
   const inputRef = useRef();
 
+  const reset = () => { clearPdf(); setError(''); };
   const handleFile = async (e) => {
     const f = e.target.files[0];
     e.target.value = '';
+    if (!f) return;
     setFile(f);
-    setDone(false);
-    setStatus('');
-    const text = await f.text();
-    setMdContent(text);
+    reset();
+    setMdContent(await f.text());
   };
 
+  const baseName = file?.name ? file.name.replace(/\.[^.]+$/, '') : 'document';
   const convert = async () => {
     if (!mdContent) return;
     setLoading(true);
-    setDone(false);
-    setStatus('Converting...');
+    reset();
     try {
-      const { marked } = await import('marked');
-      const html = marked(mdContent);
-      // Printed from a sandboxed iframe (29/09): the page used to write marked's output -- which passes raw HTML
-      // through -- into a same-origin popup, so a .md file containing <script> or <img onerror> ran code on this
-      // site's origin; the popup was also blocked by Safari after the await above. In an iframe sandboxed WITHOUT
-      // allow-scripts nothing in the document can run, and print() is called from here (allow-same-origin lets this
-      // page reach it, allow-modals allows the print dialog).
-      const frame = document.createElement('iframe');
-      frame.setAttribute('sandbox', 'allow-same-origin allow-modals');
-      frame.setAttribute('aria-hidden', 'true');
-      frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
-      frame.srcdoc = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Markdown</title><style>body{font-family:Georgia,serif;margin:40px;line-height:1.8;color:#000;max-width:800px;margin:auto;}h1,h2,h3{color:#000;border-bottom:1px solid #ccc;padding-bottom:4px;}code{background:#f4f4f4;padding:2px 6px;border-radius:3px;font-family:monospace;}pre{background:#f4f4f4;padding:16px;border-radius:6px;}blockquote{border-left:4px solid #ccc;margin:0;padding-left:16px;color:#666;}table{border-collapse:collapse;width:100%;}td,th{border:1px solid #ccc;padding:8px;}</style></head><body>' + html + '</body></html>';
-      frame.onload = () => {
-        frame.contentWindow.focus();
-        frame.contentWindow.print();
-        setStatus('');
-        setDone(true);
-        setLoading(false);
-        setTimeout(() => frame.remove(), 60000);
-      };
-      document.body.appendChild(frame);
+      const html = await markdownToHtmlDocument(mdContent, baseName);
+      const upload = new File([html], 'document.html', { type: 'text/html' });
+      const sizeCheck = checkOfficeSize(upload, MAX_HTML_STAGED_BYTES);
+      if (!sizeCheck.ok) throw new Error(sizeCheck.message);
+      setStage(null);
+      const result = await convertOffice({ file: upload, endpoint: '/api/convert-html-to-pdf', onStage: setStage });
+      offer(result.blob, `${baseName}.pdf`);
     } catch (err) {
-      setStatus('Error: ' + err.message);
+      setError(err.message || 'Something went wrong. Please try again.');
+    } finally {
       setLoading(false);
     }
   };
@@ -58,11 +89,11 @@ export default function MarkdownToPdfPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Markdown to PDF</h1>
-        <p className="text-neutral-500 text-center mb-8">Convert Markdown files or text to PDF</p>
+        <p className="text-neutral-500 text-center mb-8">Convert Markdown files or text to a PDF file</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="flex gap-2">
-            <button onClick={() => { setMode('file'); setMdContent(''); setFile(null); setDone(false); }} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'file' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>Upload File</button>
-            <button onClick={() => { setMode('paste'); setMdContent(''); setFile(null); setDone(false); }} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'paste' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>Paste Text</button>
+            <button onClick={() => { setMode('file'); setMdContent(''); setFile(null); reset(); }} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'file' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>Upload File</button>
+            <button onClick={() => { setMode('paste'); setMdContent(''); setFile(null); reset(); }} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'paste' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>Paste Text</button>
           </div>
           {mode === 'file' ? (
             <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
@@ -70,39 +101,40 @@ export default function MarkdownToPdfPage() {
               <input ref={inputRef} type="file" accept=".md,.markdown,.txt" className="hidden" onChange={handleFile} />
             </div>
           ) : (
-            <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm font-mono h-48 resize-none" placeholder="Paste your Markdown here..." value={mdContent} onChange={e => setMdContent(e.target.value)} />
+            <textarea aria-label="Markdown" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm font-mono h-48 resize-none" placeholder="Paste your Markdown here..." value={mdContent} onChange={(e) => { setMdContent(e.target.value); reset(); }} />
           )}
-          <button onClick={convert} disabled={!mdContent || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
-            {loading ? 'Converting...' : 'Convert to PDF'}
+          <p className="text-neutral-500 text-xs text-center -mt-2">Max {officeMaxLabel(MAX_HTML_STAGED_BYTES)} of Markdown</p>
+          <button onClick={convert} disabled={!mdContent || loading || new Blob([mdContent]).size > officeMaxBytes(MAX_HTML_STAGED_BYTES)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
+            {loading ? officeStageLabel(stage) : 'Convert to PDF'}
           </button>
-          {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
-          {done && (
+          {error && <p className="text-center text-red-600 text-sm" role="alert">{error}</p>}
+          {pdf && !error && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
-              <div className="text-green-400 text-xl font-bold mb-2">Done!</div>
-              <p className="text-neutral-500 text-sm">Use Save as PDF in the print dialog.</p>
+              <div className="text-green-700 text-xl font-bold mb-2">PDF ready</div>
+              <DownloadReady file={pdf} className="mt-3" />
             </div>
           )}
         </div>
       </div>
       <SeoContent
         title="Markdown to PDF"
-        description="Markdown to PDF renders your Markdown as styled HTML, entirely on your device — your content is never uploaded to a server. It doesn't generate a PDF file directly: instead, it opens your browser's print dialog, where you choose 'Save as PDF' to produce the actual file. HTML written inside the Markdown is displayed but any script in it is blocked."
+        description="Markdown to PDF turns a .md file or pasted Markdown into a real PDF file you download. Your Markdown is converted to HTML in your browser (CommonMark with GitHub tables, task lists and fenced code), any script or event handler is removed, and the page is then printed to PDF by a real browser engine (Chromium) on our conversion service — the same way the reference converters do it: the text stays selectable and searchable, and links stay clickable."
         howTo={[
           "Choose 'Upload File' to select a .md file, or 'Paste Text' to type or paste Markdown directly.",
-          "Click 'Convert to PDF' — a new tab renders your Markdown and the browser's print dialog appears.",
-          "In the print dialog, choose 'Save as PDF' (or your OS equivalent) as the destination.",
-          "Save the resulting PDF file to your device."
+          "Click 'Convert to PDF'. The Markdown is rendered and printed to an A4 PDF by our conversion service.",
+          "When 'PDF ready' appears, click 'Download' (on an iPhone or iPad, 'Save / Share' also sends it to Files, Mail or AirDrop).",
+          "Open the PDF to check it: headings, tables, code blocks and links are kept."
         ]}
         faqs={[
-          { q: "Is Markdown to PDF really free to use?", a: "Yes, it's completely free with no signup or usage limits." },
-          { q: "What markdown syntax is supported?", a: "Standard Markdown: headings, bold, italics, lists, links, code blocks, tables, blockquotes, and images." },
-          { q: "Is my markdown content stored or shared?", a: "No, your content is rendered entirely in your browser and is never uploaded to a server." },
-          { q: "Can I customize fonts, margins, or page size?", a: "Headings, code blocks, and blockquotes get a built-in style, but page size and margins come from your browser's print dialog, not from settings on this page." }
+          { q: "Is Markdown to PDF really free to use?", a: "Yes, it's completely free with no signup." },
+          { q: "What markdown syntax is supported?", a: "CommonMark plus GitHub Flavored Markdown: headings, bold, italics, strikethrough, lists and task lists, links, images, fenced code blocks, tables and blockquotes." },
+          { q: "Is my markdown content uploaded?", a: "Yes, once: the HTML made from your Markdown is sent to our conversion service to be printed to PDF by a real browser engine, then discarded. Scripts are removed before it leaves your browser." },
+          { q: "Do I get a real PDF file?", a: "Yes — a downloadable A4 PDF with selectable text and clickable links, not a print dialog." }
         ]}
         tips={[
           "Use proper heading hierarchy (# H1, ## H2, ### H3) since it maps directly to styled headings in the output.",
-          "Add alt text to images in your markdown for accessibility, even though it won't render visually.",
-          "Preview complex formatting by checking the rendered tab before saving as PDF, so you can catch syntax issues first.",
+          "Images must use full web addresses (https://…): a path to a file on your computer cannot be reached by the conversion service.",
+          "Very long tables break across pages with their rows kept whole.",
           "Keep your original .md file as your source of truth — the PDF is a rendered export, not something you can edit back."
         ]}
       />
