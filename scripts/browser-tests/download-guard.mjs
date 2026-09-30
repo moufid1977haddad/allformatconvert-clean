@@ -72,6 +72,11 @@ const TOOLS = [
   { slug: 'developer-tools/json-formatter', files: null, text: true, go: async (p) => { await p.getByPlaceholder('Paste JSON here...').fill('{"a":1,"b":[1,2]}'); await p.getByRole('button', { name: 'Format', exact: true }).click(); }, expect: [[/\.json$/, 'text']] },
   { slug: 'developer-tools/csv-to-tsv', files: null, text: true, go: async (p) => { await p.getByPlaceholder('Paste CSV here...').fill('a,b\n1,2\n'); await p.getByRole('button', { name: 'Convert', exact: true }).click(); }, expect: [[/\.tsv$/, 'text']] },
   { slug: 'qr-barcodes-tools/qr-generator', files: null, text: true, go: async (p) => { await p.locator('[id^="qr-"]').first().fill('https://www.onlineconvertools.com'); await p.getByRole('button', { name: 'Generate QR Code' }).click(); }, expect: [[/\.png$/, 'png'], [/\.svg$/, 'svg'], [/\.pdf$/, 'pdf']], zip: true },
+  // P19: PNG / SVG / PDF are three formats of ONE QR code — downloading one of them is enough, leaving then no longer asks
+  { slug: 'qr-barcodes-tools/qr-generator', label: 'qr-generator (one of its formats downloaded)', files: null, text: true, alternatives: true, go: async (p) => { await p.locator('[id^="qr-"]').first().fill('https://www.onlineconvertools.com'); await p.getByRole('button', { name: 'Generate QR Code' }).click(); }, expect: [[/\.png$/, 'png']] },
+  { slug: 'developer-tools/hash-generator', files: null, text: true, go: async (p) => { await p.getByRole('radio', { name: 'Files' }).click(); await p.locator('input[type=file]').first().setInputFiles([TXT, PNG]); await p.getByRole('button', { name: /^Hash 2 files/ }).click(); }, expect: [[/^checksums\.txt$/, 'text']] },
+  // P19: copying a text result counts as taking it (Copy button = navigator.clipboard.writeText)
+  { slug: 'developer-tools/json-formatter', label: 'json-formatter (result copied, not downloaded)', files: null, text: true, copy: (p) => p.getByRole('button', { name: 'Copy', exact: true }).click(), go: async (p) => { await p.getByPlaceholder('Paste JSON here...').fill('{"a":1,"b":[1,2]}'); await p.getByRole('button', { name: 'Format', exact: true }).click(); }, expect: [[/\.json$/, 'text']] },
   { slug: 'text-tools/case-converter', files: null, text: true, go: async (p) => { await p.getByPlaceholder('Type or paste your text here...').fill('hello world'); await p.getByRole('button', { name: 'UPPERCASE' }).click(); }, expect: [[/\.txt$/, 'text']] },
   { slug: 'converter-tools/mobi-to-epub', files: [MOBI], go: (p) => p.getByRole('button', { name: 'Convert to EPUB' }).click(), expect: [[/\.epub$/, 'epub']] },
   { slug: 'pdf-tools/markdown-to-pdf', service: true, files: null, go: async (p) => { await p.getByRole('button', { name: 'Paste Text' }).click(); await p.getByRole('textbox', { name: 'Markdown' }).fill('# Title\n\n| a | b |\n|---|---|\n| 1 | 2 |\n\n[link](https://example.com)\n\n```js\nconst x = 1;\n```\n'); await p.getByRole('button', { name: 'Convert to PDF' }).click(); }, expect: [[/\.pdf$/, 'pdf']], timeout: 120000 },
@@ -94,6 +99,40 @@ if (device) {
     navigator.share = async (data) => { window.__shared.push(...(data.files || []).map((f) => ({ name: f.name, size: f.size, type: f.type }))); };
     navigator.canShare = (data) => !!(data && data.files && data.files.length);
   });
+}
+
+if (name === 'chromium') await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin });
+
+// P19: a sample result shown at load (Markdown Editor's example) is not the visitor's file — leaving does not ask,
+// even after a click on the page; once they edit it, the result is theirs and leaving asks.
+if (!device && (!only.length || only.includes('markdown-editor'))) {
+  const p = await ctx.newPage();
+  try {
+    await p.goto(`${origin}/tools/developer-tools/markdown-editor`, { waitUntil: 'load', timeout: 60000 });
+    await p.locator('[data-file-download]').first().waitFor({ timeout: 30000 });
+    await p.waitForTimeout(800);
+    await p.locator('main h1, h1').first().click(); // a gesture (browsers show "Leave page?" only after one), but no change
+    let asked = false;
+    p.once('dialog', async (d) => { asked = true; await d.dismiss(); });
+    await p.close({ runBeforeUnload: true });
+    await new Promise((r) => setTimeout(r, 1500));
+    check('markdown-editor: the sample shown at load does not make leaving ask', !asked);
+    if (asked) await p.close().catch(() => {});
+  } catch (e) { check('markdown-editor: sample page', false, String(e.message).split('\n')[0]); }
+  const q = await ctx.newPage();
+  try {
+    await q.goto(`${origin}/tools/developer-tools/markdown-editor`, { waitUntil: 'load', timeout: 60000 });
+    await q.locator('[data-file-download]').first().waitFor({ timeout: 30000 });
+    await q.getByRole('textbox', { name: 'Markdown' }).click(); // a real gesture: Firefox asks only after one
+    await q.getByRole('textbox', { name: 'Markdown' }).fill('# My notes\n\nWritten by the visitor.');
+    await q.waitForTimeout(800);
+    let asked = false;
+    q.once('dialog', async (d) => { asked = d.type() === 'beforeunload'; await d.dismiss(); });
+    await q.close({ runBeforeUnload: true });
+    await new Promise((r) => setTimeout(r, 1500));
+    check('markdown-editor: after editing, leaving without downloading asks first', asked);
+  } catch (e) { check('markdown-editor: edited page', false, String(e.message).split('\n')[0]); }
+  await q.close().catch(() => {});
 }
 
 async function fileOf(p, row) {
@@ -133,8 +172,9 @@ for (const t of TOOLS) {
       check(`${label}: "${f.name}" — visible "Download" link, name, format and size shown`, f.visible && f.linkText === 'Download' && f.text.includes(f.name) && /\b\d+(\.\d)? (B|KB|MB|GB)\b/.test(f.text), `${f.linkText} | ${f.text.replace(/\s+/g, ' ')}`);
       check(`${label}: "${f.name}" is a real ${kind} file (${buf.length} bytes)`, MAGIC[kind](buf) && String(buf.length) === f.shownBytes, `first bytes ${buf.subarray(0, 8).toString('hex')}, shown ${f.shownBytes}`);
     }
-    // A file never downloaded: leaving asks first (desktop engines; text results never ask).
-    const guarded = !device && !t.text;
+    // A file never downloaded: leaving asks first (desktop engines). One rule for the whole site since P19 (01/10):
+    // text results (formatters, checksums) and generators (QR) too — they were exempt until then.
+    const guarded = !device;
     if (guarded) {
       let asked = false;
       p.once('dialog', async (d) => { asked = d.type() === 'beforeunload'; await d.dismiss(); });
@@ -171,8 +211,14 @@ for (const t of TOOLS) {
       const dl = await dlp;
       check(`${label}: Download saved as an attachment (/zipdl/, as iOS needs)`, !!dl && zipdl.length > 0 && dl.suggestedFilename() === files[0].name, `${dl ? dl.suggestedFilename() : 'no download'} ${zipdl[0] || 'no /zipdl/ request'}`);
     } else if (guarded) {
-      // Every file downloaded (the ZIP, or each row's Download) -> leaving no longer asks.
-      if (!savedAll) {
+      // Every file downloaded (the ZIP, or each row's Download) -> leaving no longer asks. Several formats of one
+      // result: downloading the first is enough. A text result copied: nothing downloaded at all.
+      if (t.copy) {
+        await t.copy(p);
+      } else if (t.alternatives) {
+        const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), first.locator('a[data-download]').click()]);
+        await dl.path();
+      } else if (!savedAll) {
         for (const a of await p.locator('[data-file-download] a[data-download]').all()) {
           const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), a.click()]);
           await dl.path();
@@ -180,13 +226,13 @@ for (const t of TOOLS) {
       }
       // The rows' "downloaded" state is set by React after the click: wait until every row says so (under CPU load a
       // fixed delay was once too short on www, 01/10 — the site was right, the bench too quick).
-      await p.waitForFunction(() => [...document.querySelectorAll('[data-file-download]')].every((r) => r.innerText.includes('Downloaded')), null, { timeout: 10000 }).catch(() => {});
+      await p.waitForFunction(() => [...document.querySelectorAll('[data-file-download]')].every((r) => /Downloaded|Copied/.test(r.innerText) || r.dataset.taken === '1'), null, { timeout: 10000 }).catch(() => {});
       await p.waitForTimeout(300);
       let askedAfter = false;
       p.once('dialog', async (d) => { askedAfter = true; await d.accept(); });
       await p.close({ runBeforeUnload: true });
       await new Promise((r) => setTimeout(r, 1500)); // Firefox under load shows the dialog later
-      check(`${label}: after "Download", leaving does not ask`, !askedAfter);
+      check(`${label}: after ${t.copy ? '"Copy"' : t.alternatives ? 'downloading ONE of its formats' : '"Download"'}, leaving does not ask`, !askedAfter);
     }
     check(`${label}: no page error`, errors.length === 0, errors.join(' | '));
   } catch (e) {

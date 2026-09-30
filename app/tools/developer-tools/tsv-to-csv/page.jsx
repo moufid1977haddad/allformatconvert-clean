@@ -51,7 +51,7 @@ export default function TsvToCsvPage() {
         tips={[
           "Values containing a comma, quote, or newline are quoted automatically in the output — no manual cleanup needed for those.",
           "There's no file size limit enforced by the tool, but very large pastes are limited by your browser's performance.",
-          "Copy the result right away, since there's no download button or saved history."
+          "Copy the result or download it as a file; nothing is saved on a server, and leaving the page before either asks first."
         ]}
       />
     </div>

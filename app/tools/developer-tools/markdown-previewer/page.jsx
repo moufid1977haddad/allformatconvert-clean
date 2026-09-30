@@ -27,29 +27,29 @@ export default function MarkdownPreviewerPage() {
           <div><label className="block text-sm text-neutral-500 mb-1">Markdown</label><textarea aria-label="Markdown" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-96 resize-none font-mono" value={markdown} onChange={e => setMarkdown(e.target.value)} /></div>
           <div><label className="block text-sm text-neutral-500 mb-1">Preview</label><div className="w-full bg-white rounded-xl p-4 h-96 overflow-y-auto text-neutral-900 text-sm" dangerouslySetInnerHTML={{__html: html}} /></div>
         </div>
-        <DownloadGroup zipName="document.zip" className="mt-4">
+        <DownloadGroup zipName="document.zip" alternatives className="mt-4">
           <TextDownload text={markdown} name="document.md" type="text/markdown;charset=utf-8" />
           <TextDownload text={html} name="document.html" type="text/html;charset=utf-8" />
         </DownloadGroup>
       </div>
       <SeoContent
         title="Markdown Previewer"
-        description={"Markdown Previewer renders Markdown live as you type with marked, a CommonMark and GitHub Flavored Markdown parser, entirely in your browser: headings, emphasis, links, images, block quotes, ordered and nested lists, task lists, tables, fenced code blocks, strikethrough and horizontal rules. HTML written inside the Markdown is rendered too, after DOMPurify removes anything that could run code (scripts, event handlers, javascript: links). There's no copy, export, or share feature; this is a live preview only."}
+        description={"Markdown Previewer renders Markdown live as you type with marked, a CommonMark and GitHub Flavored Markdown parser, entirely in your browser: headings, emphasis, links, images, block quotes, ordered and nested lists, task lists, tables, fenced code blocks, strikethrough and horizontal rules. HTML written inside the Markdown is rendered too, after DOMPurify removes anything that could run code (scripts, event handlers, javascript: links). Download your Markdown as a .md file or the rendered page as .html (or both in one ZIP); leaving the page with unsaved changes asks first."}
         howTo={[
           "Paste or type Markdown into the left text area.",
           "Watch the formatted preview update instantly on the right.",
           "Use any standard Markdown: # headings, **bold**, *italic*, [links](url), tables, ``` code blocks, - lists.",
-          "Select and copy text directly from the panes if you need to reuse it elsewhere."
+          "Download document.md or document.html (or both as a ZIP), or select and copy text from the panes."
         ]}
         faqs={[
           { q: "Is Markdown Previewer free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "What Markdown syntax does it support?", a: "CommonMark plus GitHub Flavored Markdown: headings, bold, italic, strikethrough, links, images, block quotes, ordered, bullet, nested and task lists, tables, inline code, fenced code blocks and horizontal rules." },
-          { q: "Can I export or share my preview?", a: "No — there's no copy, export, or share-link feature on this page. Select and copy text manually if you need it elsewhere." },
+          { q: "Can I export or share my preview?", a: "Yes — download your Markdown as document.md, the rendered page as document.html, or both in one ZIP. There is no share link: nothing is stored on a server." },
           { q: "Is my markdown uploaded to a server?", a: "No, rendering happens entirely in your browser." }
         ]}
         tips={[
           "HTML inside your Markdown is rendered, but scripts and event handlers are removed before display.",
-          "To keep your work, copy it elsewhere: this page has no export."
+          "Nothing is saved on a server: download your file before leaving — the page asks first if you haven't."
         ]}
       />
     </div>

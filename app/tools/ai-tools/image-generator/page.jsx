@@ -96,9 +96,9 @@ export default function ImageGeneratorPage() {
           {result && (
             <div className="space-y-3">
               <img src={result.url} alt={result.prompt} className="w-full rounded-lg border border-neutral-200" />
-              <DownloadGroup zipName="ai-image.zip">
+              <DownloadGroup zipName="ai-image.zip" alternatives>
                 <FileDownload href={result.url} name="ai-image.webp" />
-                {png && <FileDownload blob={png} name="ai-image.png" primary={false} guard={false} />}
+                {png && <FileDownload blob={png} name="ai-image.png" primary={false} />}
               </DownloadGroup>
             </div>
           )}

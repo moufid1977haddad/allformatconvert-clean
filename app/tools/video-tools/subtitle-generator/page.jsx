@@ -54,7 +54,7 @@ export default function SubtitleGeneratorPage() {
           {srtContent && (
             <div className="space-y-2">
               <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" value={srtContent} readOnly />
-              <DownloadGroup zipName="subtitles.zip">
+              <DownloadGroup zipName="subtitles.zip" alternatives>
                 <TextDownload text={srtContent} name="subtitles.srt" type="application/x-subrip" />
                 <TextDownload text={vttContent} name="subtitles.vtt" type="text/vtt" />
               </DownloadGroup>

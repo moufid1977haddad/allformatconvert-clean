@@ -76,7 +76,7 @@ export default function XmlToJsonPage() {
           "Attributes show up as '@_'-prefixed keys (e.g. '@_id') on the same object as that element's children or text.",
           "Repeated sibling elements with the same tag name are automatically grouped into a JSON array.",
           "Element text content appears under a '#text' key when the element also has attributes or child elements.",
-          "Copy the result right after conversion, since there's no download button or saved history."
+          "Copy the result or download it as a file; nothing is saved on a server, and leaving the page before either asks first."
         ]}
       />
     </div>

@@ -140,7 +140,7 @@ export default function VoiceRecorderPage() {
           {audioUrl && (
             <div className="space-y-3">
               <audio controls src={audioUrl} className="w-full" />
-              <DownloadGroup zipName="recording.zip">
+              <DownloadGroup zipName="recording.zip" alternatives>
                 <FileDownload href={audioUrl} name={`recording.${recExt}`} />
                 {wavUrl && <FileDownload href={wavUrl} name="recording.wav" />}
               </DownloadGroup>

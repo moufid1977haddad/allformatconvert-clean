@@ -126,7 +126,7 @@ export default function XmlFormatterPage() {
           "For strict validation of whether your XML is well-formed, use a dedicated XML validator, not this formatter.",
           "CDATA sections, XML comments, and quoted attribute values are scanned as protected content, so a '><' sequence inside any of them won't get split across lines.",
           "Indentation uses a fixed 2-space step per nesting level and isn't configurable.",
-          "Copy the result right after formatting, since there's no download button or saved history."
+          "Copy the result or download it as a file; nothing is saved on a server, and leaving the page before either asks first."
         ]}
       />
     </div>
