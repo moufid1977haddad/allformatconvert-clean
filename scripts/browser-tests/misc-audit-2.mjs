@@ -157,27 +157,30 @@ await T('ai-chatbot', async () => {
 });
 await T('ai-detector', async () => {
   await open('/tools/ai-tools/ai-detector');
-  await page.route('**/api/ai', (route) => route.fulfill({ status: 504, contentType: 'text/html', body: '<html><body>Gateway Timeout</body></html>' }));
-  // 30/09: at least 40 words (RAIDAR), and the page measures the model's rewrite (lib/ai/raidar.js)
+  // 30/09 (RAPPORT-ai-detector-30-09.md): detection by Pangram through /api/ai-detect; the route is played here (no cost)
+  await page.route('**/api/ai-detect', (route) => route.fulfill({ status: 504, contentType: 'text/html', body: '<html><body>Gateway Timeout</body></html>' }));
   const para = 'The quick brown fox jumps over the lazy dog while the farmer watches from the old wooden porch. '.repeat(3);
   await page.getByPlaceholder('Paste text to analyze...').fill(para);
   await page.getByRole('button', { name: 'Detect AI Content' }).click();
   await page.waitForTimeout(1500);
   const err = await page.locator('p.text-red-400').first().textContent().catch(() => '');
   check('ai tools: a gateway error page gives a readable message, not a JSON parse error', /did not answer correctly \(HTTP 504\)/.test(err) && !/Unexpected token/.test(err), err);
-  await page.unroute('**/api/ai');
-  await page.route('**/api/ai', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ text: 'Here is the polished text:\n' + para.replace('old wooden', 'wooden') }) }));
-  await page.getByRole('button', { name: 'Detect AI Content' }).click();
-  await page.waitForTimeout(1000);
-  check('ai-detector: a text the model barely changes -> "Likely written by AI", with the share changed and its caveat', (await page.locator('[data-verdict]').getAttribute('data-verdict')) === 'ai' && /changed <?\w*>?\s*\d+ %/.test(await page.locator('[data-verdict]').innerText()) && await page.locator('[data-caveat]').count() === 1);
-  await page.unroute('**/api/ai');
-  await page.route('**/api/ai', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ text: 'A nimble russet fox leaps above an idle hound as the rancher observes from a weathered veranda. Meanwhile, a quick fox vaults a sleepy dog; the grower looks on from the aged timber deck. Again the fox springs over the drowsy dog, watched by the farmer on his porch.' }) }));
-  await page.getByRole('button', { name: 'Detect AI Content' }).click();
-  await page.waitForTimeout(1000);
-  check('ai-detector: a text the model rewrites heavily -> "Likely written by a person"', (await page.locator('[data-verdict]').getAttribute('data-verdict')) === 'human');
+  const play = async (body, status = 200) => { await page.unroute('**/api/ai-detect'); await page.route('**/api/ai-detect', (route) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) })); await page.getByRole('button', { name: 'Detect AI Content' }).click(); await page.waitForTimeout(1000); };
+  await play({ verdict: 'ai', fractionAi: 0.93, fractionAiAssisted: 0.05, fractionHuman: 0.02, headline: 'AI Detected', words: 57 });
+  check('ai-detector: Pangram says AI -> "Likely written by AI", with the shares and the caveat', (await page.locator('[data-verdict]').getAttribute('data-verdict')) === 'ai' && /AI-written: 93 %.*AI-assisted: 5 %.*Human: 2 %/s.test(await page.locator('[data-shares]').innerText()) && await page.locator('[data-caveat]').count() === 1);
+  await play({ verdict: 'human', fractionAi: 0, fractionAiAssisted: 0, fractionHuman: 1, headline: 'Human', words: 57 });
+  check('ai-detector: Pangram says human -> "Likely written by a person"', (await page.locator('[data-verdict]').getAttribute('data-verdict')) === 'human');
+  await play({ verdict: 'mixed', fractionAi: 0.4, fractionAiAssisted: 0.1, fractionHuman: 0.5, headline: 'Mixed', words: 57 });
+  check('ai-detector: Pangram says mixed -> "Mix of AI and human writing"', (await page.locator('[data-verdict]').getAttribute('data-verdict')) === 'mixed');
+  await play({ error: 'The AI detector is not available: its detection service is not configured.' }, 503);
+  check('ai-detector: service not configured -> the route message, no verdict', /not available/.test(await page.locator('p.text-red-400').first().textContent().catch(() => '')) && await page.locator('[data-verdict]').count() === 0);
+  let called = 0; await page.unroute('**/api/ai-detect'); await page.route('**/api/ai-detect', (route) => { called++; route.abort(); });
   await page.getByPlaceholder('Paste text to analyze...').fill('Too short to judge.');
   await page.getByRole('button', { name: 'Detect AI Content' }).click();
   check('ai-detector: under 40 words, no verdict and a clear message', /at least 40 words/.test(await page.locator('p.text-red-400').first().textContent().catch(() => '')));
+  await page.getByPlaceholder('Paste text to analyze...').fill('word '.repeat(1001));
+  await page.getByRole('button', { name: 'Detect AI Content' }).click();
+  check('ai-detector: over 1,000 words, refused before any call, limit declared under the box', /Up to 1000 words/.test(await page.locator('p.text-red-400').first().textContent().catch(() => '')) && called === 0 && /40 to 1000 words/.test(await page.locator('text=words per analysis').first().textContent()));
 });
 
 console.log(`\n${name}: ${passes} passed, ${fails} failed`);

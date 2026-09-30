@@ -165,3 +165,20 @@ Chromium, Firefox et WebKit ; `converter-tests/16` 4/4 ; la route `/api/ai-detec
 2. Puis Claude : relier la page, mesurer le corpus avec Pangram (≈ 10 $), préversion, mise en production à ta demande.
 3. Facultatif : finir la mesure RAIDAR en local (clé dans `.env.local`, ≈ 0,02 $) et trancher la cause n° 3.
 4. Déployer le palliatif (seuil 0,93) **même sans Pangram**, à ta demande : il supprime le seul faux positif grave mesuré.
+
+## 7. Suite du 30/09 — clé Pangram posée par le propriétaire
+
+- `PANGRAM_API_KEY` lue dans Vercel **par son nom seulement** (`vercel env ls`) : type Secret, **Production et Preview**.
+  Elle n'est pas dans l'environnement local (valeur jamais lue).
+- **Page reliée à `/api/ai-detect`** (branche `ai-detector-30-09`, local) : verdict IA / humain / mixte, parts de
+  texte écrit par IA, assisté par IA, humain ; limites **déclarées sous la zone de texte avant l'analyse** (40 à
+  1 000 mots) et refus sans appel au-delà ; message de la route affiché tel quel (503 si le service manquait) ; la
+  mise en garde et la FAQ citent l'étude indépendante (Chicago, 2025) et disent que les autres langues sont moins
+  certaines — **aucune promesse de précision sur notre propre corpus tant que la mesure Pangram n'est pas faite**.
+- Vérifié en local : build vert ; `misc-audit-2 --only=ai-detector` **7/7 sous Chromium, Firefox et WebKit** (route
+  jouée par le banc : réponse IA, humaine, mixte, 503, page d'erreur HTML, < 40 mots, > 1 000 mots sans appel) ;
+  `converter-tests/15` 6/6, `16` 4/4.
+- **Pas encore fait, faute d'accord** : la mesure réelle du corpus avec Pangram (≈ 10 $ sur tes crédits Pangram) ne
+  peut se faire qu'à travers une préversion (la clé n'existe que dans Vercel), donc après **poussée de la branche** —
+  interdite sans ta demande. À ta demande : poussée, préversion, mesure des 97 textes par la route de la préversion
+  (`pangram-corpus` adapté à la route), comparaison au tableau du §1, puis mise en production.

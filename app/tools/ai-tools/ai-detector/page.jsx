@@ -1,47 +1,44 @@
 'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { checkPromptLength } from '@/lib/quota/limits';
 import { readAiJson } from '../../../lib/aiClient';
-import { POLISH_PROMPT, cleanRewrite, raidarSimilarity, raidarVerdict, MIN_WORDS, AI_AT, HUMAN_BELOW } from '@/lib/ai/raidar';
+import { countWords, AI_DETECT_MIN_WORDS, AI_DETECT_MAX_WORDS } from '@/lib/ai/pangram';
 
-// 30/09 (real calls on www): asked for its opinion, the model called an AI-written text "70 % human" in English and in
-// French. The method is now RAIDAR (Mao et al., ICLR 2024): the model is asked to polish the text, and the page measures
-// how much of it the model changed -- a model barely touches text written by a model and rewrites human text more.
-// Bands and their measured accuracy: lib/ai/raidar.js; calibration: scripts/browser-tests/ai-detector-calibration.mjs.
+// 30/09 (docs/audit/RAPPORT-ai-detector-30-09.md): the rewriting method (RAIDAR, lib/ai/raidar.js) called a human
+// arXiv abstract AI on www, and no free method measured on our 97-text corpus reached the market's level without
+// accusing human texts. Detection is now done by Pangram's trained classifier (/api/ai-detect), the detector with the
+// lowest false-positive rate in the independent study of Jabarian & Imas (University of Chicago / NBER w34223, 2025).
+// Limits are declared before the analysis: 40 to 1,000 words.
 const VERDICT = {
   ai: { label: 'Likely written by AI', cls: 'bg-red-50 border-red-200 text-red-800' },
+  mixed: { label: 'Mix of AI and human writing', cls: 'bg-amber-50 border-amber-200 text-amber-900' },
   human: { label: 'Likely written by a person', cls: 'bg-green-50 border-green-200 text-green-800' },
-  uncertain: { label: 'No clear verdict', cls: 'bg-amber-50 border-amber-200 text-amber-900' },
 };
+const pct = (x) => Math.round(x * 100);
 
 export default function AIDetectorPage() {
   const [input, setInput] = useState('');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const words = input.trim() ? input.trim().split(/\s+/).length : 0;
+  const words = countWords(input);
 
   const process = async () => {
     if (!input.trim()) return;
     setResult(null);
     setError('');
-    if (words < MIN_WORDS) { setError(`Paste at least ${MIN_WORDS} words (this text has ${words}): on shorter texts no detector is reliable.`); return; }
+    if (words < AI_DETECT_MIN_WORDS) { setError(`Paste at least ${AI_DETECT_MIN_WORDS} words (this text has ${words}): on shorter texts no detector is reliable.`); return; }
+    if (words > AI_DETECT_MAX_WORDS) { setError(`Up to ${AI_DETECT_MAX_WORDS} words per analysis (this text has ${words}): analyze it in parts.`); return; }
     setLoading(true);
     try {
-      const prompt = POLISH_PROMPT + input.trim();
-      const lengthCheck = checkPromptLength(prompt);
-      if (!lengthCheck.ok) { setError(lengthCheck.message); setLoading(false); return; }
-      const response = await fetch('/api/ai', {
+      const response = await fetch('/api/ai-detect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, tool: 'ai-detector' }),
+        body: JSON.stringify({ text: input.trim() }),
       });
       const data = await readAiJson(response);
-      if (!data.text) { setError(data.error || 'No response received'); setLoading(false); return; }
-      const rewrite = cleanRewrite(data.text);
-      const sim = raidarSimilarity(input, rewrite);
-      setResult({ sim, verdict: raidarVerdict(sim), changed: Math.round((1 - sim) * 100) });
+      if (!response.ok || !VERDICT[data.verdict]) { setError(data.error || 'No response received'); setLoading(false); return; }
+      setResult(data);
     } catch (e) { setError('Error: ' + e.message); }
     setLoading(false);
   };
@@ -54,7 +51,7 @@ export default function AIDetectorPage() {
         <p className="text-neutral-500 text-center mb-8">Detect if text was written by AI</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste text to analyze..." value={input} onChange={e => setInput(e.target.value)} />
-          <p className="text-xs text-neutral-500 -mt-2">{words} word{words === 1 ? '' : 's'} · at least {MIN_WORDS} needed</p>
+          <p className={`text-xs -mt-2 ${words > AI_DETECT_MAX_WORDS ? 'text-red-600' : 'text-neutral-500'}`}>{words} word{words === 1 ? '' : 's'} · {AI_DETECT_MIN_WORDS} to {AI_DETECT_MAX_WORDS} words per analysis</p>
           <button onClick={process} disabled={!input.trim() || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {loading ? 'Processing...' : 'Detect AI Content'}
           </button>
@@ -62,31 +59,33 @@ export default function AIDetectorPage() {
           {result && (
             <div className={`rounded-xl border p-4 space-y-2 ${v.cls}`} data-verdict={result.verdict}>
               <p className="text-lg font-bold">{v.label}</p>
-              <p className="text-sm">Asked to polish your text, an AI model changed <strong>{result.changed} %</strong> of it. AI models barely change text written by an AI model (in our measurements: {Math.round((1 - AI_AT) * 100)} % or less points to AI) and rewrite human writing more (over {Math.round((1 - HUMAN_BELOW) * 100)} % points to a person); in between, we give no verdict.</p>
+              <p className="text-sm" data-shares>
+                AI-written: <strong>{pct(result.fractionAi)} %</strong> · AI-assisted: <strong>{pct(result.fractionAiAssisted)} %</strong> · Human: <strong>{pct(result.fractionHuman)} %</strong> of the text
+              </p>
             </div>
           )}
-          {result && <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2" data-caveat>No AI detector is reliable enough to prove who wrote a text: measured on 37 texts in five languages from five AI models, this one called no human text AI, but recognised only 5 of 18 AI texts for sure (12 undecided, 1 missed). Famous or heavily edited texts (classics, encyclopedias, scientific abstracts) are often left undecided. Do not use it alone to accuse anyone.</p>}
+          {result && <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2" data-caveat>No AI detector can prove who wrote a text. This one uses Pangram&apos;s detection model, which in an independent study (University of Chicago, 2025) called essentially no human text AI and recognised 96–98 % of AI texts — in English; results on other languages and on texts edited after an AI wrote them are less certain. Do not use it alone to accuse anyone.</p>}
         </div>
       </div>
       <SeoContent
         title="AI Detector"
-        description="AI Detector estimates whether a text was written by AI or by a person with the rewriting method published at ICLR 2024 (RAIDAR): an AI model (OpenAI's GPT-4o mini) is asked to polish your text, and the tool measures how much of it the model changed. AI models barely change text that an AI wrote and rewrite human writing much more. You get a verdict — likely AI, likely a person, or no clear verdict — with the share of the text that was changed."
+        description="AI Detector estimates whether a text was written by AI, by a person, or by both, with Pangram's trained detection model — the detector that made the fewest false accusations in an independent 2025 study by the University of Chicago. You get a verdict and the share of the text that reads as AI-written, AI-assisted or human, for texts of 40 to 1,000 words in English, French and many other languages."
         howTo={[
-          "Paste the text you want to analyze (at least 40 words).",
-          "Click 'Detect AI Content': the text is sent to an AI model, which polishes it.",
-          "The tool measures how much of your text the model changed.",
-          "Read the verdict: likely AI, likely a person, or no clear verdict."
+          "Paste the text you want to analyze (40 to 1,000 words).",
+          "Click 'Detect AI Content': the text is sent to the detection model.",
+          "Read the verdict: likely AI, likely a person, or a mix of both.",
+          "Check the shares of AI-written, AI-assisted and human text."
         ]}
         faqs={[
           { q: "Is AI Detector completely free to use?", a: "Yes, AI Detector is free to use with no signup or subscription required." },
-          { q: "How does it work?", a: "It uses the rewriting method published by Mao et al. at ICLR 2024: an AI model asked to polish a text changes very little of a text an AI wrote, and much more of a human text. The tool measures the share of characters changed and turns it into a verdict, with a middle band where it gives none." },
-          { q: "How accurate is the detection?", a: "Measured by us on 37 texts of 80 to 240 words (English, French, German, Spanish, Italian; AI texts from five recent models): no human text was called AI; 5 of the 18 AI texts were recognised for sure, 12 got no verdict and 1 was missed. Famous or heavily edited texts (classic novels, encyclopedias, scientific abstracts) are often left without a verdict because AI models know them or barely change them. No detector is 100 % reliable: treat the result as a clue, not proof." },
-          { q: "Why at least 40 words?", a: "On a sentence or two, the share of the text a model changes varies too much to mean anything, for this method as for every detector." },
-          { q: "Is my submitted text stored or shared?", a: "Your text is sent to OpenAI's API to be polished. It is not stored on our servers or used for any other purpose." }
+          { q: "How does it work?", a: "The text is analyzed by Pangram's detection model, a classifier trained on large amounts of human and AI writing. It splits the text into segments, labels each one AI-written, AI-assisted or human, and gives an overall verdict." },
+          { q: "How accurate is the detection?", a: "In an independent study by the University of Chicago (Jabarian & Imas, 2025), Pangram's detector called essentially no human text AI and recognised 96–98 % of texts written by recent AI models, the best result among the detectors tested. Accuracy is lower on short texts and on texts rewritten by a person. No detector is 100 % reliable: treat the result as a clue, not proof." },
+          { q: "Why 40 to 1,000 words?", a: "Under 40 words, no detector is reliable. 1,000 words covers an essay page; analyze longer texts in parts." },
+          { q: "Is my submitted text stored or shared?", a: "Your text is sent to Pangram's API to be analyzed. It is not stored on our servers or used for any other purpose." }
         ]}
         tips={[
           "Paste whole paragraphs (100 words or more) for the clearest results.",
-          "Text that has been edited by a person after an AI wrote it tends to get no verdict.",
+          "A 'mix' verdict often means a human edited an AI draft, or the reverse.",
           "Treat the output as a clue, not proof — human review is still needed for high-stakes decisions.",
           "Try a text you wrote yourself to see how the tool responds."
         ]}
