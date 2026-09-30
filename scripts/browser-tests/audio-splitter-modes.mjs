@@ -2,7 +2,7 @@
 // 5.9 s of a 6 s file, a 0.1 s part 2), and two modes of the split tools of the market were added — equal parts
 // (NoteVibes, ChunkAudio) and a piece every N seconds (ChunkAudio). Each part is checked in the WAV that comes out:
 // its length in samples, and the parts put back together are the source, sample for sample.
-// Usage: node scripts/browser-tests/audio-splitter-modes.mjs <origin> [--browser=chromium|firefox|webkit]
+// Usage: node scripts/browser-tests/audio-splitter-modes.mjs <origin> [--browser=chromium|firefox|webkit] [--no-vercel-toolbar]
 import { chromium, firefox, webkit } from '@playwright/test';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -34,6 +34,7 @@ const SRC = path.join(dir, 'tone.wav'); fs.writeFileSync(SRC, wav(src));
 const b = await { chromium, firefox, webkit }[name].launch();
 const ctx = await b.newContext({ acceptDownloads: true });
 await ctx.addCookies([{ name: 'oct_automation', value: '1', url: origin }]);
+if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((u) => u.hostname === 'vercel.live', (r) => r.abort()); // previews: Vercel's comment bar throws under WebKit
 
 async function run(label, setup, expectSeconds) {
   const p = await ctx.newPage();
