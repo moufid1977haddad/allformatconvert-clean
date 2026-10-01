@@ -10,13 +10,7 @@
 // orientation from the file, full resolution. Runs in the converter's worker; returns plain RGBA memory, so a photo
 // over Safari's 16.7 MP canvas limit is never put on one canvas (app/lib/bigImage.js takes it from there).
 
-export const RAW_EXTENSIONS = [
-  'cr2', 'cr3', 'crw', 'nef', 'nrw', 'arw', 'srf', 'sr2', 'dng', 'orf', 'rw2', 'rwl', 'raf', 'pef', 'ptx', 'srw',
-  '3fr', 'fff', 'iiq', 'erf', 'kdc', 'dcr', 'k25', 'mrw', 'x3f', 'mef', 'mos',
-];
-export const RAW_ACCEPT = RAW_EXTENSIONS.map((e) => '.' + e).join(',');
-const extOf = (name) => (/\.([a-z0-9]+)$/i.exec(name || '') || [])[1]?.toLowerCase() || '';
-export const isRawFile = (f) => RAW_EXTENSIONS.includes(extOf(f.name));
+import { extOf } from './rawFormats';
 
 let modulePromise = null;
 function loadLibRaw() {
@@ -32,7 +26,7 @@ function loadLibRaw() {
 
 // LibRaw error codes (libraw/libraw_const.h) -> what the visitor is told.
 function explain(code, name) {
-  if (code === -2) return `"${name}" is not a camera RAW file this tool can read: LibRaw does not recognise its camera or format`;
+  if (code === -2) return `"${name}" is not a camera RAW file this tool can read: its camera or its compression is not supported by LibRaw`;
   if (code === -100007 || code === -100013) return `"${name}" needs more memory than this device gave the page. Close other tabs and try again, or convert it on a computer`;
   if (code === -100012) return `"${name}" is too large for the RAW decoder`;
   return `"${name}" looks damaged or incomplete: its RAW data could not be read`;

@@ -33,7 +33,8 @@ em++ $FLAGS obj/*.o -o "$ROOT/app/lib/libraw/libraw.mjs" \
 mv "$ROOT/app/lib/libraw/libraw.wasm" "$ROOT/public/wasm/libraw.wasm"
 # The page always hands the module its bytes (wasmBinary, fetched from /wasm/): drop the glue's fallback reference to a
 # libraw.wasm next to it, which a bundler would otherwise try to resolve as an asset.
-sed -i 's|new URL("libraw.wasm",import.meta.url).href|"libraw.wasm"|g; s|new URL("libraw.wasm",import.meta.url)|"libraw.wasm"|g' "$ROOT/app/lib/libraw/libraw.mjs"
-! grep -q 'new URL("libraw.wasm"' "$ROOT/app/lib/libraw/libraw.mjs" || { echo "glue still references libraw.wasm"; exit 1; }
+# Same for the script directory (only used to locate that file): Turbopack would try to resolve "." as a module.
+sed -i 's|new URL("libraw.wasm",import.meta.url).href|"libraw.wasm"|g; s|new URL("libraw.wasm",import.meta.url)|"libraw.wasm"|g; s|new URL(".",_scriptName).href|""|g' "$ROOT/app/lib/libraw/libraw.mjs"
+! grep -q 'new URL(' "$ROOT/app/lib/libraw/libraw.mjs" || { echo "glue still holds a new URL(...) a bundler would resolve"; exit 1; }
 ls -l "$ROOT/public/wasm/libraw.wasm" "$ROOT/app/lib/libraw/libraw.mjs"
 gzip -9 -c "$ROOT/public/wasm/libraw.wasm" | wc -c | sed 's/^/gzip bytes: /'
