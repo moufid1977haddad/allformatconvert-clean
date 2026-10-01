@@ -108,3 +108,16 @@ export async function mobiFileProblem(file) {
   if (h.slice(60, 68) === 'BOOKMOBI' || h.slice(60, 68) === 'TEXtREAd' || h.startsWith('TPZ')) return null;
   return 'This is not a MOBI / AZW ebook: it may be damaged, or another kind of file renamed. (Kindle books bought from Amazon are usually DRM-protected: no converter can read those.)';
 }
+
+/** A PDF that needs a password to open (an owner-only password is fine: it opens with an empty one), said at once
+ *  instead of after the visitor has done the work (P21: PDF Sign / Redact spoke only at the last click). */
+export async function pdfLockedProblem(file) {
+  const { openablePdfBytes, PdfNeedsPasswordError } = await import('./pdfDecrypt.js');
+  try {
+    await openablePdfBytes(new Uint8Array(await file.arrayBuffer()));
+    return null;
+  } catch (e) {
+    if (e instanceof PdfNeedsPasswordError) return e.message;
+    return null; // anything else is for the tool's own reader to report
+  }
+}

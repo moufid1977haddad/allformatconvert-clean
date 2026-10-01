@@ -1,5 +1,5 @@
 'use client';
-import { pdfFileProblem } from '../../../lib/fileChecks';
+import { pdfFileProblem, pdfLockedProblem } from '../../../lib/fileChecks';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
@@ -17,7 +17,7 @@ export default function Page() {
   const [summary, setSummary] = useState('');
   const fileRef = useRef();
 
-  const handleFile = async (e) => { const f = e.target.files[0]; e.target.value = ''; setResult(null); setSummary(''); setError(''); if (!f) return; const problem = await pdfFileProblem(f); if (problem) { setFile(null); setError(problem); return; } setFile(f); }; // P21: a bad file is said when it is chosen
+  const handleFile = async (e) => { const f = e.target.files[0]; e.target.value = ''; setResult(null); setSummary(''); setError(''); if (!f) return; const problem = (await pdfFileProblem(f)) || (await pdfLockedProblem(f)); if (problem) { setFile(null); setError(problem); return; } setFile(f); }; // P21: a bad file is said when it is chosen
 
   const redact = async () => {
     if (!file || !keyword.trim()) return;

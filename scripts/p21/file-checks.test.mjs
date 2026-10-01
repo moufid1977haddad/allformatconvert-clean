@@ -32,3 +32,14 @@ console.log('file-checks: all passed');
   assert.equal(await s(new File([Buffer.from('a\tb\n1\t2\n')], 'export.xls')), null);
   console.log('file-checks (review cases): all passed');
 }
+// PDF with a user password: said at selection; an ordinary PDF passes
+{
+  const fs = await import('node:fs');
+  const { pdfLockedProblem } = await import('../../app/lib/fileChecks.js');
+  const locked = fs.readFileSync(new URL('../converter-tests/fixtures/encrypted-user-password.pdf', import.meta.url));
+  assert.match(await pdfLockedProblem(new File([locked], 'l.pdf')) || '', /needs a password/);
+  const { PDFDocument } = await import('pdf-lib');
+  const d = await PDFDocument.create(); d.addPage();
+  assert.equal(await pdfLockedProblem(new File([await d.save()], 'ok.pdf')), null);
+  console.log('file-checks (locked PDF): all passed');
+}

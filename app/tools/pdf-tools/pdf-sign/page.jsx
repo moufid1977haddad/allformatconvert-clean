@@ -1,5 +1,5 @@
 'use client';
-import { pdfFileProblem } from '../../../lib/fileChecks';
+import { pdfFileProblem, pdfLockedProblem } from '../../../lib/fileChecks';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
@@ -306,7 +306,7 @@ export default function Page() {
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
             {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload a PDF file</p>}
           </div>
-          <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={async (e) => { const f = e.target.files[0]; e.target.value = ''; setResult(null); setError(''); if (!f) return; const problem = await pdfFileProblem(f); if (problem) { setFile(null); setError(problem); return; } setFile(f); }} />
+          <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={async (e) => { const f = e.target.files[0]; e.target.value = ''; setResult(null); setError(''); if (!f) return; const problem = (await pdfFileProblem(f)) || (await pdfLockedProblem(f)); if (problem) { setFile(null); setError(problem); return; } setFile(f); }} />
           <div>
             <div className="flex gap-2 mb-3" role="group" aria-label="How to add your signature">
               {[['draw', 'Draw'], ['type', 'Type'], ['upload', 'Upload image']].map(([m, l]) => (
