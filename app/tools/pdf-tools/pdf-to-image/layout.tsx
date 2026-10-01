@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF to Image — Render Every Page Online Free" },
-  description: "PDF to Image renders every page of your PDF onto a canvas at 2x scale and exports each as a separate PNG, in your browser.",
+  title: { absolute: "PDF to Image — PNG, JPG, WebP, TIFF, BMP, Online Free" },
+  description: "PDF to Image: pages as PNG, JPG, WebP, TIFF or BMP at 72, 150 or 300 dpi, or extract the pictures inside. Choose pages; in your browser, no upload.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-image" },
   openGraph: {
-    title: "PDF to Image — Render Every Page Online Free",
-    description: "PDF to Image renders every page of your PDF onto a canvas at 2x scale and exports each as a separate PNG, in your browser.",
+    title: "PDF to Image — PNG, JPG, WebP, TIFF, BMP, Online Free",
+    description: "PDF to Image: pages as PNG, JPG, WebP, TIFF or BMP at 72, 150 or 300 dpi, or extract the pictures inside. Choose pages; in your browser, no upload.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-image",
   },
 };

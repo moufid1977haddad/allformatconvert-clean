@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF to JPG — Render Every Page Online Free" },
-  description: "PDF to JPG renders every page onto a canvas at 2x scale and exports each as a separate JPG at a fixed quality, in your browser.",
+  title: { absolute: "PDF to JPG — Pages or Embedded Images, Online Free" },
+  description: "PDF to JPG: each page as a JPG at 72, 150 or 300 dpi, or the pictures inside the PDF extracted. Choose pages; in your browser, no upload.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-jpg" },
   openGraph: {
-    title: "PDF to JPG — Render Every Page Online Free",
-    description: "PDF to JPG renders every page onto a canvas at 2x scale and exports each as a separate JPG at a fixed quality, in your browser.",
+    title: "PDF to JPG — Pages or Embedded Images, Online Free",
+    description: "PDF to JPG: each page as a JPG at 72, 150 or 300 dpi, or the pictures inside the PDF extracted. Choose pages; in your browser, no upload.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-jpg",
   },
 };

@@ -1,103 +1,32 @@
-﻿'use client';
-import { useState, useRef } from 'react';
+'use client';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
-import { checkedDataURL, assertCanvasSize } from '../../../lib/mediaSupport';
-import { reportToolError } from '../../../lib/reportError';
-import { loadPdfjs } from '../../../lib/pdfjs';
-import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
-const toBlobChecked = (c, type, q) => new Promise((ok, ko) => c.toBlob((b) => (b && b.size ? ok(b) : ko(new Error('This page could not be turned into an image on this device.'))), type, q));
+import PdfToImages from '../../../components/PdfToImages';
 
+// P21 (02/10): pages AND embedded pictures, chosen pages, resolution and format — at the level of iLovePDF's "Page to
+// JPG / Extract images" and CloudConvert's DPI and page range (app/components/PdfToImages.jsx).
 export default function Page() {
-  const [file, setFile] = useState(null);
-  const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const fileRef = useRef();
-
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setImages([]); };
-
-  const convert = async () => {
-    if (!file) return;
-    setLoading(true);
-    setError('');
-    try {
-      const pdfjsLib = await loadPdfjs();
-      const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      const imgs = [];
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 2 });
-        const canvas = document.createElement('canvas');
-        assertCanvasSize(viewport.width, viewport.height);
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-        // 30/09: a Blob named after the PDF, not a data: URL (iOS saves nothing from a data: link).
-        const blob = await toBlobChecked(canvas, 'image/jpeg', 0.9);
-        canvas.width = 1;
-        imgs.push({ url: URL.createObjectURL(blob), blob, name: `${file.name.replace(/\.pdf$/i, '')}-page-${i}.jpg` });
-      }
-      setImages(imgs);
-    } catch(e) {
-      reportToolError({ tool: 'pdf-to-jpg', file, error: e });
-      setError('Conversion failed: ' + e.message);
-    }
-    setLoading(false);
-  };
-
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <Link href="/tools/pdf-tools" className="text-indigo-600 text-sm hover:underline mb-6 inline-block">Back to PDF Tools</Link>
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800">PDF to JPG</h1>
-        <p className="text-neutral-500 text-center mb-8">Convert PDF pages to JPG images</p>
-        <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload a PDF file</p>}
-          </div>
-          <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
-          <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
-            {loading ? 'Converting...' : 'Convert to JPG'}
-          </button>
-          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {images.length > 0 && (
-            <div className="space-y-4">
-              {/* All pages in one ZIP too (iLovePDF and Smallpdf offer the same "download all"). */}
-              <DownloadGroup zipName={`${file ? file.name.replace(/\.pdf$/i, '') : 'document'}-pages.zip`} className="space-y-4">
-                {images.map((img, i) => (
-                  <div key={i} className="space-y-2">
-                    <img src={img.url} className="w-full rounded-xl border border-neutral-200" alt={`Page ${i+1}`} />
-                    <FileDownload href={img.url} blob={img.blob} name={img.name} note={`page ${i + 1}`} />
-                  </div>
-                ))}
-              </DownloadGroup>
-            </div>
-          )}
-        </div>
+        <p className="text-neutral-500 text-center mb-8">Turn PDF pages into JPG images, or extract the pictures inside a PDF</p>
+        <PdfToImages tool="pdf-to-jpg" formats={['jpg']} defaultFormat="jpg" />
       </div>
       <SeoContent
         title="PDF to JPG"
-        description="PDF to JPG renders every page onto a canvas at 2x scale and exports each as a separate JPG at a fixed quality setting, using the PDF.js library entirely in your browser — your file is never uploaded to a server. There's no quality slider, no batch upload of multiple PDFs, and no single 'Download All' button — each page downloads individually."
-        howTo={[
-          "Click the upload area and select a single PDF file.",
-          "Click 'Convert to JPG' to render every page.",
-          "Preview each page's image as it appears below the button.",
-          "Click 'Download' under each image to save that page."
-        ]}
+        description={'PDF to JPG turns each page of your PDF into a JPG picture, or extracts the photos and images embedded in it, in your browser with PDF.js — the PDF is not uploaded. Choose Normal (150 dpi), High (300 dpi, for printing) or Screen (72 dpi), the JPG quality, and all pages or only some. Download each picture, or all of them in one ZIP.'}
+        howTo={['Click or drop a PDF on the upload area.', 'Choose "Pages to images" to turn each page into a picture, or "Extract images" to take out the photos and pictures inside the PDF.', 'Pick the format, the resolution (Normal 150 dpi, High 300 dpi for printing, or Screen 72 dpi) and, if you want, only some pages, like 1-3, 5.', 'Click "Convert pages" (or "Extract images"), then "Download" under each picture or "Download all" for one ZIP file.']}
         faqs={[
-          { q: "Is PDF to JPG really free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I convert multiple PDF files at once?", a: "No, only one PDF at a time — but every page inside it is converted." },
-          { q: "Can I adjust JPG quality or compression?", a: "No, every image is exported at a fixed quality setting; there's no quality slider." },
-          { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser using the PDF.js library." }
+          { q: 'Is PDF to JPG free?', a: 'Yes, free and with no sign-up. It runs in your browser, so there is no upload and no daily limit.' },
+          { q: 'What is the difference between the two modes?', a: '"Pages to images" makes one JPG per page, exactly as the page looks. "Extract images" takes out the pictures placed inside the PDF (photos, scans, logos) at their own resolution, one file per picture — text and drawings are not included.' },
+          { q: 'Which resolution should I choose?', a: 'Normal (150 dpi) is sharp on screens and keeps files small. High (300 dpi) is for printing. A page too large for your device to draw at once is rendered at the highest resolution that fits, and the page says so.' },
+          { q: 'Can I convert only some pages?', a: 'Yes: type pages and ranges such as 1-3, 5, 8- in the Pages box. Leave it empty for every page.' },
+          { q: 'My PDF has a password. What can I do?', a: 'A password-protected PDF cannot be read until it is unlocked. Use our PDF Unlock tool with the password, then convert the unlocked file.' },
+          { q: 'Is my PDF uploaded?', a: 'No. Pages are rendered and saved as JPG in your browser; your file is not sent to a server.' }
         ]}
-        tips={[
-          "Download each page separately, or all pages at once with \"Download all\" (one ZIP file).",
-          "Images render at 2x scale for reasonably sharp text and detail, good for screen viewing; check the result yourself if you need print quality.",
-          "For very long PDFs, converting many pages at once can take a moment and use noticeable browser memory.",
-          "Everything happens locally, so there's no upload wait — the limiting factor is your device's available memory."
-        ]}
+        tips={['Need lossless pictures, transparency or another format? Use PDF to Image: PNG, JPG, WebP, TIFF or BMP.', '"Extract images" gives the pictures at the resolution they were stored at, which can be higher than the page itself.', 'Very long PDFs: convert a range of pages at a time to keep your device responsive.']}
       />
     </div>
   );
