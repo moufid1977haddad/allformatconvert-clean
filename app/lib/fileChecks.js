@@ -2,13 +2,34 @@
 // under a CSV / Excel name must get a sentence, never a "result". The robustness bench
 // (scripts/browser-tests/p21-robustness.mjs) found CSV to JSON / SQL / TSV / Excel and Excel to CSV / JSON turning a
 // PNG named .csv, random bytes or an empty file into an output that looked like a conversion.
-import { sniffFormat } from './detectFileFormat';
+import { sniffFormat } from './detectFileFormat.js';
 
 const emptyMessage = (what) => `This file is empty (0 bytes), so there is nothing to convert. Choose the ${what} file again, or export it again from the program that made it.`;
 
-// Share of bytes that are control characters other than tab, line feed, carriage return and form feed — or NUL.
+// UTF-16 text (Excel's "Unicode Text", some CSV exports) has a NUL in every other byte: recognised by its BOM, or by
+// one byte in two being NUL while the other is printable, and then judged on its decoded characters.
+function utf16Kind(bytes) {
+  if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) return 'utf-16le';
+  if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) return 'utf-16be';
+  const n = Math.min(bytes.length, 4096) & ~1;
+  if (n < 8) return null;
+  let evenNul = 0, oddNul = 0;
+  for (let i = 0; i < n; i += 2) { if (bytes[i] === 0) evenNul++; if (bytes[i + 1] === 0) oddNul++; }
+  const half = n / 2;
+  if (oddNul > half * 0.4 && evenNul < half * 0.05) return 'utf-16le';
+  if (evenNul > half * 0.4 && oddNul < half * 0.05) return 'utf-16be';
+  return null;
+}
+// Share of characters that are control characters other than tab, line feed, carriage return and form feed — or NUL.
 function looksBinary(bytes) {
   if (!bytes.length) return false;
+  const u16 = utf16Kind(bytes);
+  if (u16) {
+    const text = new TextDecoder(u16).decode(bytes.subarray(0, bytes.length & ~1));
+    let bad = 0;
+    for (const ch of text) { const c = ch.codePointAt(0); if (c === 0 || (c < 32 && c !== 9 && c !== 10 && c !== 13 && c !== 12)) bad++; }
+    return bad / Math.max(1, text.length) > 0.02;
+  }
   let bad = 0;
   for (let i = 0; i < bytes.length; i++) {
     const c = bytes[i];
