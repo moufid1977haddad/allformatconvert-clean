@@ -30,6 +30,7 @@ async function psnr(a, b) {
   let se = 0; for (let i = 0; i < A.data.length; i++) { const d = A.data[i] - B.data[i]; se += d * d; }
   const mse = se / A.data.length; return mse === 0 ? Infinity : 10 * Math.log10(255 * 255 / mse);
 }
+if (!engine) { console.log(`SKIP ${name}: the image converters need OffscreenCanvas in their worker, absent from Playwright's WebKit (real Safari 16.4+ has it)`); process.exit(0); }
 const b = await engine.launch();
 async function runTool(slug, file, setup) {
   const ctx = await b.newContext({ acceptDownloads: true });
