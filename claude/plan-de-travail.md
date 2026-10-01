@@ -33,6 +33,11 @@
 | D3 | **Image Converter : fichiers RAW d'appareil photo** (CR2, CR3, NEF, ARW, DNG, ORF, RW2, RAF…), que prennent iLoveIMG, CloudConvert et Convertio. Seul moteur sérieux : LibRaw. Sa version WebAssembly publiée sur npm (`libraw-wasm`) est compilée avec les fils d'exécution : elle exige l'isolation inter-origines (qui casserait Analytics et Google Translate) et **bloque la construction Turbopack** (mesuré le 02/10). Un fork mono-fil existe mais a une semaine, 0 étoile, ~200 téléchargements : binaire non vérifiable, non retenu | **0 $** ; ≈ 2-3 h de Claude | **compiler nous-mêmes LibRaw officiel (LGPL-2.1/CDDL) en WebAssembly mono-fil** (emsdk, sources signées), puis brancher le décodeur déjà écrit et le banc `p21-psd.mjs` (vrais RAW de raw.pixls.us) — à faire dans une session dédiée ; PSD est déjà ajouté |
 | D2 | **Erreurs réelles des visiteurs (phase 2)** : `tool_errors` n'est lisible qu'avec la clé service (interdite à Claude) ; les journaux Vercel Hobby ne gardent qu'**1 heure** | 5 min ; Observability Plus de Vercel si l'on veut 7-30 jours de journaux (payant, non chiffré ici) | exécuter `docs/audit/p21-tool_errors-lecture.sql` dans Supabase → SQL Editor, télécharger les 2 résultats en CSV dans Téléchargements ; Claude reproduira et corrigera chaque cause |
 
+**Décisions prises par le propriétaire le 02/10 (prompt P22) :**
+- **D1 détourage — ne rien changer au modèle** (mesuré par P21). La vérification de la tasse sur le vrai iPhone dira s'il reste un cas à traiter.
+- **D3 RAW — accepté : compiler LibRaw nous-mêmes, 0 $** → fait par P22 (voir la section P22 ci-dessous et `docs/audit/RAPPORT-p22-raw-02-10.md`).
+- **D2 `tool_errors` — le propriétaire lance lui-même la requête de lecture** (`docs/audit/p21-tool_errors-lecture.sql`) le soir du 02/10 ; Claude reproduira et corrigera chaque cause à partir des CSV.
+
 > ## ═══ RÈGLE QUI PRIME SUR TOUT LE RESTE, posée fermement par le propriétaire le 23 septembre ═══
 >
 > **RECHERCHE AVANT TOUTE DÉCISION — sans exception, et quelle que soit la taille de la décision.**

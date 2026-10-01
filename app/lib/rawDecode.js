@@ -101,5 +101,9 @@ export async function decodeRaw(bytes, name, { checkSize = () => {}, onLong = ()
     throw e;
   } finally {
     try { m._lr_close(); if (ptr) m._free(ptr); } catch { /* module aborted: dropped above */ }
+    // WebAssembly memory never shrinks: after a big file (a 46 MP RAW grows it to ~650 MB) the module is let go, so the
+    // browser can take that memory back while the result is encoded -- it matters on iPhone and iPad. The next RAW
+    // loads it again (the file is in the HTTP cache).
+    if (m.HEAPU8.buffer.byteLength > 256 * 1024 * 1024) modulePromise = null;
   }
 }
