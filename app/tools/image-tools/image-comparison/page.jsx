@@ -18,7 +18,7 @@ export default function ImageComparisonPage() {
   const checkImage = (f, which) => {
     if (!f.size) { setError(`The ${which} file is empty (0 bytes).`); return; }
     const u = URL.createObjectURL(f), im = new Image();
-    im.onload = () => URL.revokeObjectURL(u);
+    im.onload = () => { URL.revokeObjectURL(u); if (im.naturalWidth * im.naturalHeight > 100_000_000) setError(`The ${which} image is ${im.naturalWidth} × ${im.naturalHeight} pixels: too large to compare here (100 megapixels at most). Make it smaller first with our Image Resizer.`); };
     im.onerror = () => { URL.revokeObjectURL(u); setError(`The ${which} file, "${f.name}", is not an image this browser can open. Choose a JPG, PNG, WebP or GIF image.`); };
     im.src = u;
   };

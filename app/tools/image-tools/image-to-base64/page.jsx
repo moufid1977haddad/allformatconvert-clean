@@ -1,4 +1,5 @@
 ﻿'use client';
+import { emptyFileProblem } from '../../../lib/fileChecks';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { sniffFormat } from '../../../lib/detectFileFormat';
@@ -14,6 +15,7 @@ export default function ImageToBase64Page() {
     if (!file) return;
     setError('');
     setResult('');
+    if (emptyFileProblem(file)) { setFileName(''); setError(emptyFileProblem(file, 'encode')); return; } // P21
     setFileName(file.name);
     // When the browser does not know the file's type (HEIC or AVIF on some systems, a file without
     // extension), readAsDataURL writes "data:application/octet-stream", a URI no browser shows as an
@@ -44,7 +46,7 @@ export default function ImageToBase64Page() {
             <p className="text-neutral-500">{fileName || 'Click or drop an image here'}</p>
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={encode} />
           </div>
-          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+          {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
           {result && <div className="space-y-2"><textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-xs h-48 resize-none font-mono" value={result} readOnly /><button onClick={() => navigator.clipboard.writeText(result)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy Base64</button><TextDownload text={result} name={(fileName || 'image').replace(/\.[^.]+$/, '') + '.base64.txt'} /></div>}
         </div>
       </div>
