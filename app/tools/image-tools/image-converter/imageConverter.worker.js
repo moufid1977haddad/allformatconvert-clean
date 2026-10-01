@@ -72,11 +72,12 @@ async function convertOne(item, format, quality, maxMegapixels) {
 
   if (item.raw) {
     // Camera RAW (P22): LibRaw in WebAssembly, before the TIFF sniff -- CR2, NEF, ARW, DNG, ORF... are TIFF inside,
-    // and the TIFF decoder would only find the small preview. Measured in Node on 26 MP files: 3 s (Bayer) to 21 s
-    // (Fujifilm X-Trans); the page is told to wait up to 3 s per raw megapixel.
+    // and the TIFF decoder would only find the small preview. The decode cannot report progress. Measured on the
+    // preview (whole conversion, 3 browsers busy at once): a 24 MP Bayer file 10 s in Chromium, 40 s in Firefox; a
+    // 46 MP one 26 s / 104 s; Fujifilm X-Trans (26 MP) 58 s in Chromium. The page waits up to 10 s per raw megapixel.
     const d = await decodeRaw(new Uint8Array(await blob.arrayBuffer()), name, {
       checkSize: tooBig,
-      onLong: (mp) => longWork(mp * 1e6, 3000),
+      onLong: (mp) => longWork(mp * 1e6, 10000),
     });
     if (d.width * d.height <= CANVAS_MAX_PIXELS) {
       const c = new OffscreenCanvas(d.width, d.height);
