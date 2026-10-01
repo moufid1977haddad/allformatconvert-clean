@@ -138,7 +138,11 @@ if (!device && (!only.length || only.includes('markdown-editor'))) {
 async function fileOf(p, row) {
   return p.evaluate(async (el) => {
     const a = el.querySelector('a[data-download]');
-    const buf = await (await fetch(a.href)).arrayBuffer();
+    // An iOS link prepared for the tap (/zipdl/f/, P21) is answered by the service worker from Cache Storage on
+    // navigation only: read the same cached response here.
+    const staged = /\/zipdl\/f\//.test(a.getAttribute('href') || '');
+    const res = staged ? await (await caches.open('ocv-downloads-v1')).match(a.href) : await fetch(a.href);
+    const buf = await res.arrayBuffer();
     const vis = (x) => { const r = x.getBoundingClientRect(); const s = getComputedStyle(x); return r.width > 20 && r.height > 12 && s.visibility !== 'hidden' && s.display !== 'none' && +s.opacity > 0.1; };
     return { name: el.dataset.name, shownBytes: el.dataset.bytes, text: el.innerText, linkText: a.innerText.trim(), visible: vis(a), bytes: Array.from(new Uint8Array(buf)) };
   }, row);
@@ -205,6 +209,13 @@ for (const t of TOOLS) {
         const f0 = files[0];
         check(`${label}: Share hands the real file to the share sheet`, shared.length === 1 && shared[0].name === f0.name && shared[0].size === f0.bytes.length, JSON.stringify(shared));
       }
+      // P21 (02/10): on iOS the Download link must already point at the file served as an attachment
+      // (/zipdl/f/<id>/<name>) BEFORE the tap. Reading the file and handing it to the worker after the tap took
+      // longer than the second iOS gives a tap for a phone-photo PDF (JPG to PDF), and Safari opened the PDF.
+      const link = first.locator('a[data-download]');
+      await link.and(p.locator('[data-staged="1"]')).waitFor({ timeout: 10000 }).catch(() => {});
+      const href = await link.getAttribute('href');
+      check(`${label}: Download link points at the prepared attachment before the tap (/zipdl/f/)`, /^\/zipdl\/f\/[0-9a-f]{32}\//.test(href || ''), href);
       zipdl.length = 0;
       const dlp = p.waitForEvent('download', { timeout: 30000 }).catch(() => null);
       await first.locator('a[data-download]').click();
