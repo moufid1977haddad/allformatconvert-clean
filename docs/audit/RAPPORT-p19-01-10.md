@@ -12,7 +12,7 @@ secret lu ni affiché. Aucun outil supprimé ni renommé. Dépense autorisée : 
 | 3 — Code Formatter | **aucune cause dans le code pour une frappe humaine** ; la seule voie de perte (événement `input` manquant, ce que fait le WebDriver de Safari) est **fermée** : champ non contrôlé. Rouge sur www avant, vert après |
 | Inventaire du non-poussé | **aucun commit local non poussé**, aucune remise ; `.serena/` et `pip.log` = fichiers d'outils locaux, non déployés, rien effacé |
 | Déploiement | repère `restauration-avant-p19-01-10` = `2ecb91a7` ; préversion `onlineconvertools-gregicef4` verte ; fusion **`f7569b1d`** (sans poussée forcée), production **`onlineconvertools-1boluf4vi`** ; **tout vert sur www, aucun retour arrière** |
-| AI Detector sur www | **non lancé** : 19 h 56 à la décision, avant 20 h 05 ; **0 $ dépensé** ; commande laissée en tête du tableau du plan |
+| AI Detector sur www | ✅ **lancé à 20 h 11 à la demande du propriétaire : les deux verdicts justes** (résumé LIGO 2016 = humain 100 %, texte d'IA = IA 100 %) ; ≈ 0,25 $ de crédits Pangram, la dépense notifiée |
 
 
 ## 0. Point de départ — passe Safari 17.6 réelle du MacBook après P18
@@ -171,10 +171,17 @@ Formatter), `373d9742` (bancs), fusion `f7569b1d`.
 
 ## 6. AI Detector sur www (Pangram)
 
-**Non lancée** : l'heure de ce poste était **19 h 56** au moment de décider (condition : passée à 20 h 05). **0 $
-dépensé.** La commande reste en ligne 2 du tableau de tête du plan : `node scripts/ai-detector/www-check-p17.mjs` (dans
-le dossier du dépôt, après 20 h 05 ; attendu « RESULT: both verdicts right » ; code 2 = limite du jour pas encore remise
-à zéro, rien facturé).
+**Première décision (19 h 56)** : non lancé, l'heure n'était pas passée à 20 h 05. **Puis, à la demande du propriétaire
+(« il est passé 20 h 05 »)**, lancé à **20 h 11** (00 h 11 UTC) : `node scripts/ai-detector/www-check-p17.mjs`, code de
+sortie 0.
+
+| Texte | Attendu | Obtenu |
+|---|---|---|
+| Résumé LIGO 2016 (humain ; dit « IA » par l'ancienne version RAIDAR avant P17) | humain | **humain** — AI-written 0 %, AI-assisted 0 %, Human 100 % (224 mots) |
+| `ai-opus-1` (texte d'IA) | IA | **IA** — AI-written 100 %, AI-assisted 0 %, Human 0 % (180 mots) |
+
+**RESULT: both verdicts right.** Dépense : ≈ 0,25 $ de crédits Pangram, celle notifiée et autorisée. La ligne 2 du
+tableau de tête du plan est close.
 
 ## 7. À repasser sur le Mac et l'iPhone
 
