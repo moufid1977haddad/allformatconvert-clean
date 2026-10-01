@@ -1,4 +1,5 @@
 'use client';
+import { sizeChangeText, whyLarger } from '../../../lib/sizeChange';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Lock, Zap, Package, Folder, Image as ImageIcon } from 'lucide-react';
 import SeoContent from '../../../components/SeoContent';
@@ -349,13 +350,16 @@ export default function ImageConverterPage() {
                   "Download all" started one download per file, which iPhone Safari stops after the first). */}
               <DownloadGroup zipName="converted-images.zip">
                 {converted.map((item, idx) => {
-                  const gain = Math.round((1 - item.convertedSize / item.originalSize) * 100);
                   // Extension from the real type of the produced blob, never from the requested format.
                   const outName = item.originalName.replace(/\.[^.]+$/, '.' + extFromMime(item.convertedBlob.type, format));
-                  const change = gain > 0 ? ` (${gain}% smaller)` : gain < 0 ? ` (${Math.abs(gain)}% larger)` : '';
+                  // A larger result is not a failure (P21): one line says why it grew and what to choose instead.
+                  const why = whyLarger({ from: item.originalName, to: outName, inBytes: item.originalSize, outBytes: item.convertedSize, kind: 'image' });
                   return (
-                    <FileDownload key={idx} blob={item.convertedBlob} name={outName}
-                      note={`was ${formatSize(item.originalSize)}${change}${item.note ? ` · ${item.note}` : ''}`} />
+                    <div key={idx} className="space-y-1">
+                      <FileDownload blob={item.convertedBlob} name={outName}
+                        note={`was ${formatSize(item.originalSize)}${sizeChangeText(item.originalSize, item.convertedSize)}${item.note ? ` · ${item.note}` : ''}`} />
+                      {why && <p data-size-why className="text-xs text-neutral-600 dark:text-neutral-400 px-1">{why}</p>}
+                    </div>
                   );
                 })}
               </DownloadGroup>
@@ -401,7 +405,7 @@ export default function ImageConverterPage() {
           "WebP usually gives the best balance of quality and file size for web use — a solid default choice.",
           "The quality slider only affects lossy formats (JPG, WebP and AVIF); PNG output is always lossless, so it won't change PNG file size.",
           "AVIF gives the smallest files of the four but takes a few seconds per photo, because it is encoded by a WebAssembly encoder; WebP is much faster.",
-          "Check the size comparison shown next to each result (green for smaller, orange for larger) before choosing which files to keep."
+          "Check the size shown under each result: when the new format is larger (PNG is lossless; HEIC and WebP pack more than JPG), a line says why and what to pick for a smaller file."
         ]}
       />
     </div>
