@@ -38,7 +38,7 @@ export default function WhitespaceRemoverPage() {
       </div>
       <SeoContent
         title="Whitespace Remover"
-        description="Whitespace Remover cleans up spacing in your text five ways — remove all extra spaces and blank lines, collapse repeated spaces only, trim the start or the end of each line, or join everything into one line — entirely in your browser. Only \"Join Into One Line\" removes line breaks."
+        description={"Whitespace Remover cleans up spacing in your text five ways — remove all extra spaces and blank lines, collapse repeated spaces only, trim the start or the end of each line, or join everything into one line — entirely in your browser. Only \"Join Into One Line\" removes line breaks."}
         howTo={[
           "Paste your text into the input field.",
           "Click \"Remove All Extra\" to collapse repeated spaces and tabs, trim each line and turn runs of blank lines into a single blank line — every line of text is kept.",

@@ -79,6 +79,7 @@ export default function FileDropBridge() {
     window.addEventListener('dragover', onDragOver);
     window.addEventListener('dragleave', onDragLeave);
     window.addEventListener('drop', onDrop);
+    window.__fileDropBridge = true; // ready (read by scripts/browser-tests/p20-01-10.mjs)
     return () => {
       window.removeEventListener('dragover', onDragOver);
       window.removeEventListener('dragleave', onDragLeave);
