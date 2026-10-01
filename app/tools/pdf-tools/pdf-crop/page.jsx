@@ -78,7 +78,7 @@ export default function Page() {
           "Click the upload area and select a PDF file from your device.",
           "Enter the top, bottom, left, and right margins (in points) to trim from each page, as the page appears on screen.",
           "Click 'Crop PDF' to apply those margins to every page.",
-          "Click 'Download Cropped PDF' to save the result."
+          "Click 'Download' next to cropped.pdf to save the result."
         ]}
         faqs={[
           { q: "Is PDF Crop free to use?", a: "Yes, it's completely free with no signup required." },

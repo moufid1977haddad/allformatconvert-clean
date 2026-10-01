@@ -380,7 +380,7 @@ export default function Page() {
           "Click the upload area and select a PDF file from your device.",
           "Draw your signature with your mouse or finger, type your name (handwriting font), or upload an image of your signature.",
           "Choose the page, then drag the signature where it goes on the page shown (or pick a corner), and click 'Add Signature to PDF'.",
-          "Click 'Download Signed PDF' to save the result."
+          "Click 'Download' next to signed.pdf to save the result."
         ]}
         faqs={[
           { q: "Is PDF Sign free to use?", a: "Yes, it's completely free with no signup required." },

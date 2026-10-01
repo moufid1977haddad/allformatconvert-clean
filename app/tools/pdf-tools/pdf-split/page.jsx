@@ -220,7 +220,7 @@ export default function PdfSplitPage() {
         tips={[
           "Write \"8-\" to go from page 8 to the end, and tick \"Merge\" to put several ranges or pages into a single PDF, in the order you typed them.",
           "Page numbers are 1-indexed and match the total page count shown after upload.",
-          "\"Every page\" on a long document creates many files: use \"Download all (ZIP)\" instead of clicking each link.",
+          "\"Every page\" on a long document creates many files: use \"Download all\" (one ZIP file) instead of clicking each \"Download\".",
           "The line under the options tells you how many PDFs will be created before you click Split.",
         ]}
       />

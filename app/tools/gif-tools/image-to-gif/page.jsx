@@ -112,7 +112,7 @@ export default function ImageToGifPage() {
           "Click \"Create GIF\", then preview and download the resulting animated GIF file."
         ]}
         faqs={[
-          { q: "Does this create a downloadable GIF file directly?", a: "Yes — click \"Create GIF\" and a \"Download GIF\" button appears with the finished, real animated GIF file." },
+          { q: "Does this create a downloadable GIF file directly?", a: "Yes — click \"Create GIF\" and a \"Download\" button appears with the finished, real animated GIF file." },
           { q: "What image formats can I upload?", a: "Any format your browser supports, including JPG, PNG, BMP, GIF, and WebP." },
           { q: "Will photos look as good as flat graphics or icons?", a: "Simple, flat-color images tend to look best. The underlying encoder doesn't apply dithering, so photos or gradients with fine color detail may show some visible color banding after being reduced to a 256-color palette." },
           { q: "Is Image to GIF free to use?", a: "Yes, it's completely free with no account creation or login required." },

@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 import NewVersionBanner from "./components/NewVersionBanner";
 import IosVideoFirstFrame from "./components/IosVideoFirstFrame";
 import IosDownloadBridge from "./components/IosDownloadBridge";
+import FileDropBridge from "./components/FileDropBridge";
 import GoogleTranslateLoader from "./components/GoogleTranslateLoader";
 import AdsScripts from "./components/AdsScripts";
 import ToolFooterAd from "./components/AdSlot";
@@ -118,6 +119,7 @@ export default function RootLayout({
         <NewVersionBanner />
         <IosVideoFirstFrame />
         <IosDownloadBridge />
+        <FileDropBridge />
       </body>
     </html>
   );

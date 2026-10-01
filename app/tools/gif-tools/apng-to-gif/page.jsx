@@ -65,7 +65,7 @@ export default function ApngToGifPage() {
           "Click the upload area and select a PNG or APNG file from your device.",
           "Click \"Convert to GIF\" to decode every frame and re-encode them as an animated GIF.",
           "Preview the resulting GIF and check the frame count.",
-          "Click \"Download GIF\" to save the result."
+          "Click \"Download\" next to the GIF to save the result."
         ]}
         faqs={[
           { q: "Does this tool produce a real animated GIF?", a: "Yes — every frame of the source APNG is decoded and re-encoded into the GIF, not just a single snapshot." },

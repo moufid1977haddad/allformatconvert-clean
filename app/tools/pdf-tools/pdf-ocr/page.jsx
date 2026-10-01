@@ -429,13 +429,13 @@ export default function Page() {
           "Choose a language from the dropdown (type to search if you know what you're looking for) — Tesseract supports 100+ languages.",
           "Click 'Run OCR'. The first run downloads the OCR engine and language data, then recognizes text page by page.",
           "Watch the progress bars for the download and for each page (\"Page X of Y\").",
-          "Read the result, grouped by page number, click 'Copy Text' to copy it, or 'Download searchable PDF' to get your PDF with the text layer added."
+          "Read the result, grouped by page number, click 'Copy Text' to copy it, or 'Download' next to the -searchable.pdf file to get your PDF with the text layer added."
         ]}
         faqs={[
           { q: "Does this actually perform OCR now?", a: "Yes. Every page is rendered to a canvas and recognized as an image using Tesseract.js -- it no longer just reads an existing text layer, so scanned and photographed pages work." },
           { q: "Which languages are supported?", a: "All 100+ languages that Tesseract itself supports, from Afrikaans to Yiddish. Use the search box above the Language dropdown to find one quickly; only the selected language's data is downloaded." },
           { q: "How accurate is the text recognition?", a: "It's real OCR, not a flawless one -- expect a meaningful error rate (roughly 4-16% of characters, depending on scan quality), especially on skewed, angled, or low-contrast images. Some errors are visibly garbled, others are plausible (a 3 read instead of an 8), so proofread numbers, names and amounts before relying on them." },
-          { q: "Can I get a searchable PDF?", a: "Yes — after recognition, 'Download searchable PDF' gives your original PDF with the recognized text added as an invisible layer on each page, placed as the page is displayed (crop and rotation included). The pages themselves are not re-compressed or changed." },
+          { q: "Can I get a searchable PDF?", a: "Yes — after recognition, the file ending in -searchable.pdf gives your original PDF with the recognized text added as an invisible layer on each page, placed as the page is displayed (crop and rotation included). The pages themselves are not re-compressed or changed." },
           { q: "Why is the first run slower than later ones?", a: "The first OCR run on a given language downloads the Tesseract engine and that language's training data. Your browser caches both, so later runs are faster." },
           { q: "Is there a file size limit?", a: "There's no fixed limit -- it's bound by your browser's available memory, and multi-page PDFs will simply take longer since each page is recognized in turn." },
           { q: "Do you store my uploaded files?", a: "No, everything happens locally in your browser. Your file is never uploaded to a server." }

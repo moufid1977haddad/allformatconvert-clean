@@ -73,7 +73,7 @@ export default function Page() {
           "Click the upload area and select a password-protected PDF file.",
           "Type the PDF's password into the field.",
           "Click 'Unlock PDF' to decrypt it.",
-          "Click 'Download Unlocked PDF' to save the password-free result."
+          "Click 'Download' next to unlocked.pdf to save the password-free result."
         ]}
         faqs={[
           { q: "Is PDF Unlock free to use?", a: "Yes, it's free with no signup required." },

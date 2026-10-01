@@ -84,7 +84,7 @@ export default function Page() {
           "Click the upload area and select a single PDF file.",
           "Click 'Convert to JPG' to render every page.",
           "Preview each page's image as it appears below the button.",
-          "Click 'Download Page N' under each image to save it."
+          "Click 'Download' under each image to save that page."
         ]}
         faqs={[
           { q: "Is PDF to JPG really free to use?", a: "Yes, it's completely free with no signup required." },
@@ -93,7 +93,7 @@ export default function Page() {
           { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser using the PDF.js library." }
         ]}
         tips={[
-          "Download each page separately, or all pages at once with \"Download all (ZIP)\".",
+          "Download each page separately, or all pages at once with \"Download all\" (one ZIP file).",
           "Images render at 2x scale for reasonably sharp text and detail, good for screen viewing; check the result yourself if you need print quality.",
           "For very long PDFs, converting many pages at once can take a moment and use noticeable browser memory.",
           "Everything happens locally, so there's no upload wait — the limiting factor is your device's available memory."

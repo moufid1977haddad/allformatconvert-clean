@@ -159,7 +159,7 @@ export default function Page() {
           "Click the upload area and select a PDF file from your device.",
           "Type the exact word or phrase to redact into the text field.",
           "Click 'Redact PDF' — pages containing a match are flattened to an image with the matched words permanently blacked out; the tool tells you how many occurrences it covered and on which pages.",
-          "Click 'Download Redacted PDF' to save the result."
+          "Click 'Download' next to redacted.pdf to save the result."
         ]}
         faqs={[
           { q: "Is PDF Redact free to use?", a: "Yes, it's completely free with no signup required." },

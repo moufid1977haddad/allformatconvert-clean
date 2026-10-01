@@ -86,7 +86,7 @@ export default function ImageToPdfPage() {
           "Click the upload area and select one or more JPG or PNG images from your device.",
           "Remove any image you don't want by clicking the ✕ next to it — files appear in the order you added them.",
           "Click 'Convert to PDF' to combine them into a single PDF.",
-          "Click 'Download PDF' to save the file."
+          "Click 'Download' to save the PDF."
         ]}
         faqs={[
           { q: "What image formats does Image to PDF support?", a: "JPG and PNG only — other formats you select, such as GIF or WebP, are silently skipped during conversion." },

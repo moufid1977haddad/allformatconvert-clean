@@ -51,6 +51,20 @@ export default function PdfMergePage() {
     });
   };
 
+  // Drag a row to a new place (computers; iLovePDF and Smallpdf reorder by dragging). The arrows stay for touch
+  // screens and the keyboard.
+  const dragFrom = useRef(null);
+  const [dragOver, setDragOver] = useState(null);
+  const moveTo = (from, to) => {
+    if (from === null || from === to) return;
+    setFiles(prev => {
+      const arr = [...prev];
+      const [moved] = arr.splice(from, 1);
+      arr.splice(to, 0, moved);
+      return arr;
+    });
+  };
+
   const moveDown = (index) => {
     setFiles(prev => {
       if (index === prev.length - 1) return prev;
@@ -127,12 +141,18 @@ export default function PdfMergePage() {
           {files.length > 0 && (
             <div className="space-y-2">
               {files.map((file, index) => (
-                <div key={index} className="flex items-center gap-2 bg-neutral-50 dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-3">
+                <div key={index} data-merge-row draggable={!loading}
+                  onDragStart={(e) => { dragFrom.current = index; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(index)); }}
+                  onDragOver={(e) => { if (dragFrom.current === null) return; e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOver(index); }}
+                  onDragLeave={() => setDragOver(o => (o === index ? null : o))}
+                  onDrop={(e) => { e.preventDefault(); moveTo(dragFrom.current, index); dragFrom.current = null; setDragOver(null); }}
+                  onDragEnd={() => { dragFrom.current = null; setDragOver(null); }}
+                  className={`flex items-center gap-2 bg-neutral-50 dark:bg-neutral-800 rounded-lg border p-3 ${loading ? '' : 'cursor-grab'} ${dragOver === index ? 'border-indigo-500' : 'border-neutral-200 dark:border-neutral-700'}`}>
                   <span className="text-neutral-500 text-sm w-6">{index + 1}.</span>
                   <span className="flex-1 text-sm truncate text-neutral-700 dark:text-neutral-200">{file.name}</span>
-                  <button onClick={() => moveUp(index)} disabled={loading} className="text-neutral-500 hover:text-indigo-500 px-2">↑</button>
-                  <button onClick={() => moveDown(index)} disabled={loading} className="text-neutral-500 hover:text-indigo-500 px-2">↓</button>
-                  <button onClick={() => removeFile(index)} disabled={loading} className="text-red-400 hover:text-red-600 px-2">✕</button>
+                  <button onClick={() => moveUp(index)} disabled={loading} aria-label={`Move ${file.name} up`} className="text-neutral-500 hover:text-indigo-500 px-2">↑</button>
+                  <button onClick={() => moveDown(index)} disabled={loading} aria-label={`Move ${file.name} down`} className="text-neutral-500 hover:text-indigo-500 px-2">↓</button>
+                  <button onClick={() => removeFile(index)} disabled={loading} aria-label={`Remove ${file.name}`} className="text-red-400 hover:text-red-600 px-2">✕</button>
                 </div>
               ))}
               <p className={`text-xs text-right ${overSizeLimit ? 'text-red-500' : 'text-neutral-400'}`}>{formatBytes(totalSize)} total</p>
@@ -165,7 +185,7 @@ export default function PdfMergePage() {
         description="Merge PDF is a free online tool that lets you combine multiple PDF files into a single document instantly. No software installation required, no signup, and your files are processed locally in your browser for maximum privacy — merging runs in a background Web Worker so the page stays responsive. Perfect for combining reports, contracts, invoices, and any other PDF documents."
         howTo={[
           "Click the upload area and select two or more PDF files from your device.",
-          "Reorder the files by clicking the up and down arrows next to each file.",
+          "Put the files in order: drag a file to its new place in the list, or use the ↑ and ↓ arrows next to it.",
           "Click the Merge PDFs button to combine all files into one.",
           "Download your merged PDF file once it's ready."
         ]}
@@ -176,7 +196,7 @@ export default function PdfMergePage() {
           { q: "Does merging PDFs reduce quality?", a: "No. The merged PDF retains the full quality of all original files including images, fonts, and formatting." }
         ]}
         tips={[
-          "Drag files in the list to reorder them before merging.",
+          "On a phone or tablet, use the ↑ and ↓ arrows to reorder the files; dragging a file works with a mouse.",
           "You can merge scanned PDFs, form PDFs, and regular text PDFs together.",
           "For large files, the merge may take a few seconds — the progress bar tracks each file as it's added.",
           "After merging, use our PDF Compress tool to reduce the file size if needed."

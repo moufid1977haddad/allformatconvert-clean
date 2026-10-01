@@ -134,7 +134,7 @@ export default function ScreenRecorderPage() {
           "Click \"Start Recording\" and choose which screen, window, or tab to share when your browser prompts you.",
           "Perform the actions you want to record while the live preview plays.",
           "Click \"Stop Recording\" when you're finished.",
-          "Preview the result, then click \"Download Recording\" to save it (MP4; in Firefox, WebM, with a button to make an MP4)."
+          "Preview the result, then click \"Download\" to save it (MP4; in Firefox, WebM, with a button to make an MP4)."
         ]}
         faqs={[
           { q: "What video format do recordings download as?", a: "MP4 (H.264 video, AAC sound) in Chrome, Edge and Safari, the format every phone and computer plays. Firefox can only record WebM: the page then offers to make an MP4 from it on our video service. The file extension always matches the real content." },

@@ -115,7 +115,7 @@ export default function Page() {
           "Click the upload area and select a PDF file — its pages appear in a numbered list.",
           "Use 'Up' and 'Down' next to each page to change its position, or 'Remove' to drop it.",
           "Click 'Apply Changes' to build the reordered PDF.",
-          "Click 'Download PDF' to save the result."
+          "Click 'Download' next to organized.pdf to save the result."
         ]}
         faqs={[
           { q: "Is PDF Organize free to use?", a: "Yes, it's completely free with no signup required." },

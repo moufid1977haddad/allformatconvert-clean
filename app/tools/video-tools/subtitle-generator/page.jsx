@@ -69,7 +69,7 @@ export default function SubtitleGeneratorPage() {
           "Click \"Add Subtitle\" to create a new subtitle row.",
           "Enter the start and end time (HH:MM:SS, with milliseconds if needed: 00:00:05.500) and the text for each row.",
           "Click \"Generate SRT\" to assemble your entries into standard SRT format.",
-          "Click \"Download SRT\" or \"Download VTT\" to save the file."
+          "Click \"Download\" next to subtitles.srt or subtitles.vtt to save the format you need."
         ]}
         faqs={[
           { q: "Does this transcribe audio or video automatically?", a: "No — this is a manual subtitle builder. You type each subtitle's timestamps and text yourself; nothing is auto-generated from a video file." },

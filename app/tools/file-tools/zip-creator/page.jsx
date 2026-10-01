@@ -148,7 +148,7 @@ export default function ZipCreatorPage() {
           "Remove any files you don't want by clicking \"Remove\" next to them.",
           "Pick a compression level (None, Fast, Normal, or Best).",
           "Click \"Create ZIP\" to bundle everything into a single archive locally.",
-          "Click \"Download ZIP\" to save the resulting archive.zip file."
+          "Click \"Download\" next to archive.zip to save the archive."
         ]}
         faqs={[
           { q: "Is ZIP Creator free to use?", a: "Yes, it's completely free with no signup required." },
