@@ -41,7 +41,9 @@ function buildStats(totalTools) {
   return [
     { value: totalTools, label: 'Free Tools', suffix: '',  icon: Wrench },
     { value: 12,  label: 'Categories',  suffix: '',  icon: LayoutGrid },
-    { value: 13,  label: 'Languages',   suffix: '',  icon: Languages },
+    // 13 = English + the 12 languages of the menu, machine-translated in the page by Google Translate
+    // (app/lib/googleTranslate.js): no translated URLs exist (P20, 01/10), so the label says how.
+    { value: 13,  label: 'Languages via Google Translate', suffix: '',  icon: Languages },
   ];
 }
 
