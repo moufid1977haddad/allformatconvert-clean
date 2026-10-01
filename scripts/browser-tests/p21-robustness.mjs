@@ -118,7 +118,7 @@ async function runCase({ t, c, file }) {
     const host = new URL(origin).host;
     await ctx.route((u) => u.host !== host, (r) => (['POST', 'PUT', 'PATCH'].includes(r.request().method()) && !realMedia ? r.abort() : r.continue())); // the page itself never posts to a paid provider (those calls are server-side, played above)
     const p = await ctx.newPage();
-    const errors = []; p.on('pageerror', (e) => errors.push(e.message.slice(0, 200)));
+    const errors = []; p.on('pageerror', (e) => { if (!/navigator\.storage\.persisted/.test(e.message)) errors.push(e.message.slice(0, 200)); }); // the Vercel preview toolbar under WebKit (absent on www), see all-pages-load.mjs
     let verdict = '', detail = '';
     try {
       await p.goto(`${origin}/tools/${t.slug}`, { waitUntil: 'load', timeout: 60000 });

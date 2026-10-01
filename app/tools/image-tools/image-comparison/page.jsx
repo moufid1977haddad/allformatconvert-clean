@@ -18,7 +18,8 @@ export default function ImageComparisonPage() {
   // nothing), and is not put on screen; a later pick wins over a slower earlier one (review, 02/10).
   const picks = useRef({ first: 0, second: 0 });
   const checkImage = (f, which, accept) => {
-    setError('');
+    // only this field's own message is cleared: picking the second image must not hide the first one's problem
+    setError((prev) => (prev.startsWith(`The ${which} `) ? '' : prev));
     const n = ++picks.current[which];
     if (!f.size) { setError(`The ${which} file is empty (0 bytes).`); return; }
     const u = URL.createObjectURL(f), im = new Image();
