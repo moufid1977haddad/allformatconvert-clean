@@ -128,7 +128,7 @@ for (const r of rows) {
 const privacy = fs.readFileSync(path.join(ROOT, 'app', 'privacy', 'page.jsx'), 'utf8').toLowerCase().replace(/&nbsp;/g, ' ');
 const NAME = { 'gif-tools/video-to-gif': 'video, mp4, mov, avi and webm to gif', 'gif-tools/mp4-to-gif': 'mp4', 'gif-tools/mov-to-gif': 'mov', 'gif-tools/avi-to-gif': 'avi', 'gif-tools/webm-to-gif': 'webm to gif',
   'ai-tools/image-upscaler': 'ai image upscaler', 'pdf-tools/pdf-ai-summary': 'pdf ai summary', 'pdf-tools/ppt-to-pdf': 'powerpoint to pdf', 'pdf-tools/pdf-to-ppt': 'pdf to powerpoint',
-  'video-tools/video-to-gif': 'video, mp4, mov, avi and webm to gif', 'ai-tools/ai-chatbot': 'ai chatbot', 'pdf-tools/pdf-to-pdfa': 'pdf to pdf/a' };
+  'video-tools/video-to-gif': 'video, mp4, mov, avi and webm to gif', 'ai-tools/ai-chatbot': 'ai chatbot', 'pdf-tools/pdf-to-pdfa': 'pdf to pdf/a', 'pdf-tools/pdf-merge': 'merge pdf' };
 for (const slug of serverSlugs) {
   const name = (NAME[slug] || slug.split('/')[1].replace(/-/g, ' ')).toLowerCase();
   if (!privacy.includes(name)) fail(slug, 'server tool not named in /privacy', name);
