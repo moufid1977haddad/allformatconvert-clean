@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "Whitespace Remover — Offer Four Ways Online Free" },
-  description: "Whitespace Remover offers four ways to clean up spacing in your text, entirely in your browser.",
+  title: { absolute: "Whitespace Remover — Remove Extra Spaces & Blank Lines Online Free" },
+  description: "Remove extra spaces, tabs and blank lines from text without merging your lines, or join it into one line — entirely in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/whitespace-remover" },
   openGraph: {
-    title: "Whitespace Remover — Offer Four Ways Online Free",
-    description: "Whitespace Remover offers four ways to clean up spacing in your text, entirely in your browser.",
+    title: "Whitespace Remover — Remove Extra Spaces & Blank Lines Online Free",
+    description: "Remove extra spaces, tabs and blank lines from text without merging your lines, or join it into one line — entirely in your browser.",
     url: "https://www.onlineconvertools.com/tools/text-tools/whitespace-remover",
   },
 };
