@@ -88,7 +88,7 @@ await T('pdf-to-html', async (p) => {
   const f = await offered(p, /\.html$/);
   check('pdf-to-html: an .html file with the PDF text', f.bytes.toString('utf8').includes('Beta line'));
 });
-for (const [slug, btn, re, magic] of [['pdf-to-image', 'Convert to Images', /\.png$/, [0x89, 0x50]], ['pdf-to-jpg', 'Convert to JPG', /\.jpe?g$/, [0xff, 0xd8]]]) {
+for (const [slug, btn, re, magic] of [['pdf-to-image', 'Convert pages', /\.png$/, [0x89, 0x50]], ['pdf-to-jpg', 'Convert pages', /\.jpe?g$/, [0xff, 0xd8]]]) {
   await T(slug, async (p) => {
     await pickPdf(p, A);
     await p.getByRole('button', { name: btn }).click();

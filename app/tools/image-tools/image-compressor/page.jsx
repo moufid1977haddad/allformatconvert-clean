@@ -7,7 +7,7 @@ import { imageDims } from '../../../lib/bigImage';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 
 const formatSize = formatBytes;
-const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/svg+xml': 'svg' };
+const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/svg+xml': 'svg', 'image/avif': 'avif' };
 const MAX_FILES = 20;
 // An optimised SVG is only offered if it DRAWS the same as the original: both are rendered at the same size
 // (1024 px), over white and over black (so transparency counts), and compared pixel by pixel. Calibrated in
@@ -152,12 +152,12 @@ export default function ImageCompressorPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Image Compressor</h1>
-        <p className="text-neutral-500 text-center mb-8">Compress JPG, PNG, WebP and SVG in your browser — the format is kept, your images never leave your device</p>
+        <p className="text-neutral-500 text-center mb-8">Compress JPG, PNG, WebP, AVIF and SVG in your browser — the format is kept, your images never leave your device</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote kind="photo" />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => !busy && inputRef.current.click()}>
             <p className="text-neutral-500">{items.length ? `${items.length} image${items.length > 1 ? 's' : ''} selected — click to choose others` : `Click to choose images (up to ${MAX_FILES})`}</p>
-            <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml,.svg,image/*" multiple className="hidden" onChange={handleFiles} disabled={busy} />
+            <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/avif,.avif,image/svg+xml,.svg,image/*" multiple className="hidden" onChange={handleFiles} disabled={busy} />
           </div>
           {error && <p className="text-red-600 text-center text-sm">{error}</p>}
           <div>
@@ -212,7 +212,7 @@ export default function ImageCompressorPage() {
         ]}
         faqs={[
           { q: "Is Image Compressor free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "Which formats does it compress?", a: "JPG, PNG, WebP and SVG, each kept in its own format. Other images your browser can open (BMP, static GIF, AVIF…) are converted to JPG, on a white background. For animated GIFs, use our GIF Compressor, which keeps the animation." },
+          { q: "Which formats does it compress?", a: "JPG, PNG, WebP, AVIF and SVG, each kept in its own format. Other images your browser can open (BMP, a still GIF…) are converted to JPG, on a white background, and the result says so. An animated GIF is not turned into a still picture: the page sends you to our GIF Compressor, which keeps the animation." },
           { q: "Will compression affect image quality?", a: "Below 100%, yes, a little: that is how the file gets smaller. At the default setting the difference is hard to see on a photo. For PNGs, 100% is fully lossless; if no palette can keep the quality you chose, the PNG is repacked losslessly instead." },
           { q: "Does it keep transparency?", a: "Yes for PNG and WebP. Transparent areas of other formats become white, since they are saved as JPG." },
           { q: "How are SVG files compressed?", a: "They stay vector: SVGO, the standard SVG optimiser, removes editor metadata, shortens numbers and ids and merges what can be merged — the same method the leading online compressor uses (in our test on the Tux SVG: 48.8 KB → 35.1 KB, identical to theirs within 4 bytes). Before offering the file, the tool draws both versions and compares them pixel by pixel; if they differ, it tries a more cautious setting, and if that still differs it keeps your original. The quality slider does not apply to SVG." },

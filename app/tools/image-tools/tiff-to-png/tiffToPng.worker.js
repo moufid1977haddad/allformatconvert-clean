@@ -34,7 +34,8 @@ self.onmessage = async (e) => {
     self.postMessage({ type: 'decoded', pixels: w * h });
     const rgba = new Uint8ClampedArray(decoded.rgba);
     let blob;
-    if (w * h <= CANVAS_MAX_PIXELS) {
+    // No OffscreenCanvas in this worker (some WebKit builds): the PNG is written from the pixels, as past 16.7 MP.
+    if (typeof OffscreenCanvas !== 'undefined' && w * h <= CANVAS_MAX_PIXELS) {
       const canvas = new OffscreenCanvas(w, h);
       canvas.getContext('2d').putImageData(new ImageData(rgba, w, h), 0, 0);
       blob = await canvas.convertToBlob({ type: 'image/png' });

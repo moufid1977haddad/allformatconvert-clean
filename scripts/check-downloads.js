@@ -12,7 +12,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..', 'app');
-const COMPONENT_USE = /<(FileDownload|DownloadGroup|TextDownload|DownloadReady|TranscriptExports|MediaInfo)\b|\bMediaServiceTool\b|\bGifFromVideoTool\b/;
+const COMPONENT_USE = /<(FileDownload|DownloadGroup|TextDownload|DownloadReady|TranscriptExports|MediaInfo|PdfToImages)\b|\bMediaServiceTool\b|\bGifFromVideoTool\b/;
 
 // Tools that make no file: their result is a figure, a verdict, a view or a live preview on the page.
 const NO_FILE = {

@@ -61,12 +61,12 @@ export default function WordToPdfPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Word to PDF</h1>
-        <p className="text-neutral-500 text-center mb-2">Convert .docx or .doc files to PDF</p>
+        <p className="text-neutral-500 text-center mb-2">Convert .docx, .doc, .odt, .rtf and other word-processor files to PDF</p>
         <p className="text-neutral-500 text-xs text-center mb-8">In our tests, .docx fonts, tables, columns, headers and footers matched two other online converters.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a .docx or .doc file here'}</p>
-            <input ref={inputRef} type="file" accept=".docx,.doc" className="hidden" onChange={handleFile} />
+            <p className="text-neutral-500">{file ? file.name : 'Click or drop a Word, OpenDocument or RTF file here'}</p>
+            <input ref={inputRef} type="file" accept=".docx,.doc,.odt,.ott,.rtf,.docm,.dotx,.dotm,.dot,.wpd" className="hidden" onChange={handleFile} />
           </div>
           <p className="text-neutral-500 text-xs text-center -mt-2">Max {officeMaxLabel()} per file</p>
           <button onClick={convert} disabled={!file || loading || file.size > officeMaxBytes()} className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">
@@ -95,13 +95,13 @@ export default function WordToPdfPage() {
         title="Word to PDF"
         description="Word to PDF converts your .docx or .doc file into a PDF. A .docx file is sent securely over HTTPS through our server to our conversion provider, ConvertAPI, with file storage turned off; an older .doc file is converted by our own LibreOffice server. Either way the file is deleted after conversion — we don't store or log it. We tested .docx files with Calibri, Cambria, Arial and Arial Narrow text, two-level numbered lists, a table with merged cells, an image with text wrapping, a two-column section, headers and footers with page numbers, footnotes and a watermark: every page matched the output of two other online converters, and the text stays fully selectable. Two disclosed limits: a Word-generated table of contents is not recalculated during conversion — it shows whatever was last cached in the .docx, not a freshly rebuilt table — and the older .doc format takes a different conversion path that we have not measured."
         howTo={[
-          "Click the upload area and select a .docx or .doc file from your device.",
+          "Click the upload area and select a Word file (.docx, .doc, .docm, .dotx, .dot), an OpenDocument text (.odt, .ott), an RTF, or a WordPerfect file (.wpd).",
           "Click 'Convert to PDF'. Your file is uploaded securely for conversion; once the PDF is ready, click 'Download'.",
           "Save the resulting PDF file to your device."
         ]}
         faqs={[
           { q: "Is Word to PDF completely free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What file formats does Word to PDF support?", a: "Both .docx and the older binary .doc format are supported — .docx files are converted by ConvertAPI, .doc files by our own LibreOffice server." },
+          { q: "What file formats does Word to PDF support?", a: ".docx (converted by ConvertAPI) and, converted by our own LibreOffice server: .doc, macro-enabled .docm, templates .dotx / .dotm / .dot, OpenDocument .odt / .ott, .rtf and WordPerfect .wpd (Microsoft Works .wps is not accepted: our converter cannot read it). We checked that each of these formats converts; the page-by-page fidelity measurement quoted on this page was made on .docx files." },
           { q: "Will my documents be uploaded to a server?", a: "Yes. A .docx file goes securely over HTTPS through our server to our conversion provider, ConvertAPI (file storage turned off); a .doc file goes to our own LibreOffice server. The file is deleted after conversion — we don't keep it." },
           { q: "Do I need to install any software to use Word to PDF?", a: "No, it works directly in your web browser." },
           { q: "Will the text in my PDF be selectable?", a: "Yes. Because conversion is done server-side rather than by rasterizing a screenshot, the resulting PDF has fully selectable, searchable text." },

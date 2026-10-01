@@ -13,6 +13,7 @@ import * as iq from 'image-q';
 import UPNG from 'upng-js';
 import { sniffFormat } from '../../../lib/detectFileFormat';
 import { decodeToRaster, simulateIosCanvasCap } from '../../../lib/bigImage';
+import { encodeAvif } from '../../../lib/avifEncode';
 
 const wasmCache = {};
 function wasm(name) {
@@ -221,6 +222,14 @@ self.onmessage = async (e) => {
     }
     const head = new Uint8Array(await file.slice(0, 32).arrayBuffer());
     const format = sniffFormat(head)?.format;
+    // P21: an animated GIF compressed here would keep only its first frame (it became a JPG without a word on the
+    // animation). iLoveIMG keeps the animation; so does our GIF Compressor.
+    if (format === 'gif') {
+      const all = new Uint8Array(await file.arrayBuffer());
+      let frames = 0;
+      for (let i = 0; i + 2 < all.length && frames < 2; i++) if (all[i] === 0x21 && all[i + 1] === 0xf9 && all[i + 2] === 0x04) frames++;
+      if (frames > 1) throw new Error('This GIF is animated: here only its first picture would be kept. Use our GIF Compressor, which keeps the animation and makes the GIF smaller.');
+    }
     progress(5);
     const img = await decode(file, dims, !!forceBands);
     let out, note = '';
@@ -232,7 +241,9 @@ self.onmessage = async (e) => {
       // An already well-compressed JPEG/WebP can come out larger at the chosen quality. Like the reference
       // site (which picked ~q69 on such a file and ~q78 on a fresh photo), step the quality down -- at most
       // twice, never below 50 -- and SAY so, rather than refusing or handing back a larger file.
-      const encodeAt = format === 'webp' ? (q) => encodeWebp(img, q) : (q) => encodeJpeg(format === 'jpg' ? img : onWhite(img), q);
+      // AVIF stays AVIF (P21; TinyPNG does the same), WebP stays WebP, everything else becomes a JPG (said below).
+      const encodeAt = format === 'avif' ? (q) => encodeAvif(img.data, img.width, img.height, q)
+        : format === 'webp' ? (q) => encodeWebp(img, q) : (q) => encodeJpeg(format === 'jpg' ? img : onWhite(img), q);
       let q = quality;
       out = await encodeAt(q);
       while (out.size >= file.size && q - 8 >= 50 && q > quality - 16) {
@@ -242,7 +253,7 @@ self.onmessage = async (e) => {
       }
       const notes = [];
       if (q !== quality && out.size < file.size) notes.push(`quality lowered to ${q}% — at ${quality}% it would not have been smaller`);
-      if (format !== 'jpg' && format !== 'webp') notes.push('converted to JPG');
+      if (format !== 'jpg' && format !== 'webp' && format !== 'avif') notes.push('converted to JPG');
       note = notes.join(' · ');
     }
     progress(100);

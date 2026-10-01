@@ -13,6 +13,7 @@
 // upright on a canvas first. Anything the browser cannot decode is reported.
 // pdf-lib is loaded when an image page is added, not with the tool page (30/09/2026, Lighthouse).
 import { imageDims, decodeToRaster, hasAlpha, encodePngRGBA, encodeJpegWasm } from './bigImage';
+import { checkedBlob } from './mediaSupport';
 
 const isJpeg = (b) => b[0] === 0xff && b[1] === 0xd8;
 const isPng = (b) => b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47;
@@ -26,7 +27,10 @@ export async function uprightImage(file) {
   const rgba = raster.rgba();
   if (hasAlpha(rgba)) return { kind: 'png', bytes: new Uint8Array(await (await encodePngRGBA(rgba, raster.width, raster.height)).arrayBuffer()) };
   let blob = null;
-  if (raster.canvas) blob = await new Promise((r) => raster.canvas.toBlob ? raster.canvas.toBlob(r, 'image/jpeg', 0.92) : raster.canvas.convertToBlob({ type: 'image/jpeg', quality: 0.92 }).then(r, () => r(null)));
+  // checkedBlob tries convertToBlob FIRST: Firefox's OffscreenCanvas still has an old toBlob() that returns a promise
+  // and never calls a callback — testing `canvas.toBlob ?` first made JPG to PDF and Image to PDF wait forever on any
+  // WebP, GIF, BMP or AVIF in Firefox (found by the P21 format bench, 02/10, also on www).
+  if (raster.canvas) blob = await checkedBlob(raster.canvas, 'image/jpeg', 0.92).catch(() => null);
   if (!blob || blob.type !== 'image/jpeg') blob = await encodeJpegWasm(rgba, raster.width, raster.height, 92);
   return { kind: 'jpg', bytes: new Uint8Array(await blob.arrayBuffer()) };
 }
@@ -35,10 +39,49 @@ async function embedUpright(pdfDoc, file) {
   return u.kind === 'png' ? pdfDoc.embedPng(u.bytes) : pdfDoc.embedJpg(u.bytes);
 }
 
+// P21 (02/10), format coverage: iLovePDF's and Smallpdf's JPG to PDF take BMP, GIF and TIFF too; an iPhone photo can
+// be HEIC. Those the browser cannot draw are first turned into a PNG with the site's own decoders: HEIC by heic2any
+// (only where the browser has no HEIC decoder: Chrome, Firefox), TIFF by the TIFF to PNG worker (every bit depth,
+// stopped after 20 s of silence like the TIFF tools).
+const isHeicName = (f) => /^image\/hei[cf]/.test(f.type) || /\.(heic|heif)$/i.test(f.name);
+const isTiffBytes = (b) => (b[0] === 0x49 && b[1] === 0x49 && b[2] === 0x2a) || (b[0] === 0x4d && b[1] === 0x4d && b[3] === 0x2a);
+async function decodableImage(file, bytes) {
+  if (isTiffBytes(bytes)) {
+    const worker = new Worker(new URL('../tools/image-tools/tiff-to-png/tiffToPng.worker.js', import.meta.url), { type: 'module' });
+    try {
+      const blob = await new Promise((resolve, reject) => {
+        let t = setTimeout(() => reject(new Error('this TIFF variant could not be decoded in time')), 20000);
+        worker.onmessage = ({ data }) => {
+          if (data.type === 'decoded') { clearTimeout(t); t = setTimeout(() => reject(new Error('encoding took too long')), 120000); }
+          else if (data.type === 'done') { clearTimeout(t); resolve(data.blob); }
+          else if (data.type === 'error') { clearTimeout(t); reject(new Error(data.notTiff ? 'not a real TIFF file' : 'this TIFF could not be decoded')); }
+        };
+        worker.onerror = () => { clearTimeout(t); reject(new Error('this TIFF could not be decoded')); };
+        const buf = bytes.slice().buffer;
+        worker.postMessage({ buffer: buf }, [buf]);
+      });
+      return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.png', { type: 'image/png' });
+    } finally { worker.terminate(); }
+  }
+  if (isHeicName(file) && !(await imageDims(file))) {
+    const heic2any = (await import('heic2any')).default;
+    const out = await heic2any({ blob: file, toType: 'image/png' });
+    return new File([Array.isArray(out) ? out[0] : out], file.name.replace(/\.[^.]+$/, '') + '.png', { type: 'image/png' });
+  }
+  return null;
+}
+
 // Adds a page to pdfDoc; throws Error(`${file.name}: …`) when the file can't be used.
-export async function addImagePage(pdfDoc, file) {
+export async function addImagePage(pdfDoc, original) {
   const { degrees } = await import('pdf-lib');
-  const bytes = new Uint8Array(await file.arrayBuffer());
+  let file = original;
+  let bytes = new Uint8Array(await file.arrayBuffer());
+  try {
+    const converted = await decodableImage(file, bytes);
+    if (converted) { file = converted; bytes = new Uint8Array(await file.arrayBuffer()); }
+  } catch (e) {
+    throw new Error(`${original.name}: this image could not be read (${e.message}).`);
+  }
   try {
     if (isJpeg(bytes)) {
       let orientation = 1;
@@ -62,6 +105,6 @@ export async function addImagePage(pdfDoc, file) {
     const png = isPng(bytes) ? await pdfDoc.embedPng(bytes) : await embedUpright(pdfDoc, file);
     pdfDoc.addPage([png.width, png.height]).drawImage(png, { x: 0, y: 0, width: png.width, height: png.height });
   } catch (e) {
-    throw new Error(`${file.name}: this image could not be read (${e.message}).`);
+    throw new Error(`${original.name}: this image could not be read (${e.message}).`);
   }
 }
