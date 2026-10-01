@@ -161,7 +161,7 @@ if (run('home')) {
   const text = await page.locator('body').innerText();
   check('home: no "No data stored"', !/No data stored/i.test(text));
   check('home: no "Always free"', !/Always free/i.test(text));
-  check('home: "Most tools run in your browser" and the deletion promise', /Most tools run in your browser/.test(text) && /Files sent to a server are deleted after processing/.test(text));
+  check('home: "Most tools run in your browser" and the deletion promise', /Most tools run in your browser/.test(text) && /Files sent to our servers are deleted after processing/.test(text));
   check('home: "Languages via Google Translate"', /Languages via Google Translate/i.test(text));
   if (!device) {
     await page.locator('header button', { hasText: /^EN/ }).first().click();
