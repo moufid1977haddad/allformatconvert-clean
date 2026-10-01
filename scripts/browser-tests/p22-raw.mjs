@@ -32,6 +32,8 @@ const root = path.resolve(import.meta.dirname, '../..');
 const ref = JSON.parse(fs.readFileSync(path.join(root, 'scripts/p22/raw-reference.json'), 'utf8'));
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'p22-raw-'));
 const label = `${name}${device ? '/' + device : ''}`;
+const webkitDirect = name === 'webkit';
+const within = (ms, what, pr) => Promise.race([pr, new Promise((_, no) => setTimeout(() => no(new Error(`${what}: no answer in ${ms / 1000} s`)), ms))]);
 let fails = 0, passes = 0;
 const check = (n, ok, info = '') => { if (ok) passes++; else fails++; console.log(ok ? 'PASS' : 'FAIL', `${label} ${n}`, info); };
 const sha = (b) => crypto.createHash('sha256').update(b).digest('hex');
@@ -40,8 +42,12 @@ const UA = {
   iphone: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Mobile/15E148 Safari/604.1',
   ipad: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Safari/605.1.15',
 };
-const b = await { chromium, firefox, webkit }[name].launch();
+// A fresh browser for every conversion: a Firefox that had converted ten big RAW files in a row stopped answering
+// (the same file passed on its own in 21 s) -- the bench must measure the site, not the test browser's fatigue.
+const engine = { chromium, firefox, webkit }[name];
+let b = await engine.launch();
 async function newPage() {
+  if (!webkitDirect) { await b.close().catch(() => {}); b = await engine.launch(); }
   const ctx = await b.newContext({ acceptDownloads: true, ...(device ? { userAgent: UA[device], hasTouch: true, viewport: device === 'iphone' ? { width: 390, height: 844 } : { width: 820, height: 1180 } } : {}) });
   await ctx.addCookies([{ name: 'oct_automation', value: '1', url: origin }]);
   if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((u) => u.hostname === 'vercel.live', (r) => r.abort());
@@ -103,8 +109,11 @@ async function convert(file, format) {
   // iPhone / iPad: the link is prepared for the tap (staged) shortly after the result shows (download-guard checks it)
   if (r === 'ok' && device) await p.locator('[data-file-download] [data-download][data-staged="1"]').first().waitFor({ timeout: 15000 }).catch(() => {});
   const out = { r, secs, errors, text, caps: await iosCapHits(p) };
-  if (r === 'ok') { if (format === 'bmp') out.bmp = await bmpPixelsHash(p); else out.bytes = await resultBytes(p); }
-  out.message = text.match(/failed to convert[\s\S]{0,400}/)?.[0] || '';
+  if (r === 'ok') {
+    try { if (format === 'bmp') out.bmp = await within(180000, 'reading the result', bmpPixelsHash(p)); else out.bytes = await within(300000, 'reading the result', resultBytes(p)); }
+    catch (err) { out.r = 'unreadable'; out.message = err.message; }
+  }
+  out.message ||= text.match(/failed to convert[\s\S]{0,400}/)?.[0] || '';
   await ctx.close();
   return out;
 }
@@ -133,7 +142,6 @@ async function decodeInWorker(p, file) {
   }, { glue, dec, bytes, fname: path.basename(file) });
 }
 
-const webkitDirect = name === 'webkit';
 const files = Object.entries(ref.files).filter(([n, e]) => !e.refused && (!only.length || only.some((o) => n.includes(o))));
 const cut = (src, frac, as) => { const d = fs.readFileSync(src); const o = path.join(tmp, as); fs.writeFileSync(o, d.subarray(0, Math.floor(d.length * frac))); return o; };
 let wp = null;
