@@ -10,7 +10,7 @@
    "height": 1920,
    "camera": "Canon EOS 5D Mark III",
    "rgbSha256": "47a98beaf63654552b7bf6ab27e75ea5215acbec71eff41e89889348d918d584",
-   "nodeSeconds": 1.52,
+   "nodeSeconds": 1.798,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -25,7 +25,7 @@
    "height": 3670,
    "camera": "Canon EOS R6",
    "rgbSha256": "0a37cc8804fe9f7a4f04d3ee6ff24322a8895a47db8ec1b7b66158ad55f38632",
-   "nodeSeconds": 4.447,
+   "nodeSeconds": 7.119,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -40,7 +40,7 @@
    "height": 3670,
    "camera": "Canon EOS R6",
    "rgbSha256": "a47c1ffc04004fbf6c678b9b2698a30a035acb1b6f60542a090269ab2ee20f91",
-   "nodeSeconds": 3.522,
+   "nodeSeconds": 8.202,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -55,7 +55,7 @@
    "height": 2056,
    "camera": "Canon EOS 10D",
    "rgbSha256": "c83fbbfee2ca6abe5746908da434b2d613d22723d427fd53062ecadfa05f91a1",
-   "nodeSeconds": 1.276,
+   "nodeSeconds": 3.532,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -70,7 +70,7 @@
    "height": 4032,
    "camera": "Nikon D750",
    "rgbSha256": "f341b6150a6bf239c7a1c4704165537cfa8688fd2999b352c8b89551d97e7d50",
-   "nodeSeconds": 4.637,
+   "nodeSeconds": 8.621,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -85,7 +85,7 @@
    "height": 5520,
    "camera": "Nikon D850",
    "rgbSha256": "6c383ae3545ee6ccad887a8c2f5ce83607b49decf02414dbd14d9d948c2b0122",
-   "nodeSeconds": 11.353,
+   "nodeSeconds": 26.874,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -100,7 +100,7 @@
    "height": 3024,
    "camera": "Nikon COOLPIX P7800",
    "rgbSha256": "8589dee7834222501e7e879d38afc628f259e7c2a8ecff37507eca117ccc9ae7",
-   "nodeSeconds": 1.893,
+   "nodeSeconds": 4.976,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -115,7 +115,7 @@
    "height": 4024,
    "camera": "Sony ILCE-7M3",
    "rgbSha256": "0ffb95bb3b9478e099199cd15155208e5ffdb39875bd0bb20109604e12aff4ca",
-   "nodeSeconds": 4.014,
+   "nodeSeconds": 7.513,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -130,7 +130,7 @@
    "height": 2608,
    "camera": "Sony DSC-R1",
    "rgbSha256": "768be8c08271dc734ddcc9c647c86f72cfea73b55774105628942884a976225d",
-   "nodeSeconds": 1.528,
+   "nodeSeconds": 4.239,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -145,7 +145,7 @@
    "height": 2460,
    "camera": "Sony DSC-F828",
    "rgbSha256": "4a8fa5ee31fa7b7c0785040ec582eea327af81213f1e9fca9611c2f2d9927a43",
-   "nodeSeconds": 1.929,
+   "nodeSeconds": 4.15,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -160,7 +160,7 @@
    "height": 4170,
    "camera": "Fujifilm X-T30 II",
    "rgbSha256": "2edf6717eefaefec6d207364cbb41e5c19d92559d9c8fbfc5fd413321138a33e",
-   "nodeSeconds": 20.974,
+   "nodeSeconds": 43.108,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -175,7 +175,7 @@
    "height": 3912,
    "camera": "Olympus E-M1MarkII",
    "rgbSha256": "b64806a25ae68d9f905cf6427f825acbbab0266a6e162d8caf480f77d3814e1a",
-   "nodeSeconds": 4.851,
+   "nodeSeconds": 11.495,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -190,7 +190,7 @@
    "height": 3472,
    "camera": "Panasonic DMC-GH4",
    "rgbSha256": "50ce774739a7ae1baeee981e67c1fb34c3978297b2f675e14fc281054cbb0c4d",
-   "nodeSeconds": 1.983,
+   "nodeSeconds": 5.458,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -205,7 +205,7 @@
    "height": 2538,
    "camera": "Leica D-LUX 4",
    "rgbSha256": "8156793ebd67d6a0b16500f563dd8c7e168dfac90fe2188fe8438dec194d65ac",
-   "nodeSeconds": 1.511,
+   "nodeSeconds": 3.086,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -220,7 +220,7 @@
    "height": 4016,
    "camera": "Pentax K-70",
    "rgbSha256": "c588f94e345d4429107bf620beff31ee41f9927b033a08c90db6afec07c425c9",
-   "nodeSeconds": 3.878,
+   "nodeSeconds": 8.16,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -235,7 +235,7 @@
    "height": 4024,
    "camera": "Pentax K-3 II",
    "rgbSha256": "891a6df88026c3f00d86d05ce2c1281a7eab98cd565a83dac7b3bc006e5bfc96",
-   "nodeSeconds": 4.351,
+   "nodeSeconds": 11.377,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -250,12 +250,38 @@
    "height": 4336,
    "camera": "Samsung NX500",
    "rgbSha256": "6c3d4a32648de11e2e59c69b2e7467131e033489db5c93dd4ba52676a624893a",
-   "nodeSeconds": 4.424,
+   "nodeSeconds": 11.813,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
     "max": 1
    }
+  },
+  "5G4A9394-compressed-lossless.DNG": {
+   "rel": "Adobe DNG Converter/Canon EOS 5D Mark III/5G4A9394-compressed-lossless.DNG",
+   "size": 23206642,
+   "sha256": "3118116735d4f6dd01fd9d6a80ee9aac52a2c2debdc6dcd112bd5e3059044a55",
+   "width": 5796,
+   "height": 3870,
+   "camera": "Canon EOS 5D Mark III",
+   "rgbSha256": "7f1b1c585bf9e4c1aabce4d34aa1b136b197a5833910f722475cd6a444640a22",
+   "nodeSeconds": 10.318,
+   "dcrawEmu": {
+    "mae": 0,
+    "over2": 0,
+    "max": 0
+   }
+  },
+  "5G4A9394-compressed-lossy.DNG": {
+   "rel": "Adobe DNG Converter/Canon EOS 5D Mark III/5G4A9394-compressed-lossy.DNG",
+   "size": 6193902,
+   "sha256": "159326856c29073e845c3c5a9ecf98c6474f43ca15798a88ad5e2baecd0664b7",
+   "width": 5760,
+   "height": 3840,
+   "camera": "Canon EOS 5D Mark III",
+   "rgbSha256": "6c8a97c5404451a51629ef848b444b942655ef7f3a502c8c9575e8c5c9840390",
+   "nodeSeconds": 4.288,
+   "dcrawEmu": "dcraw_emu cannot read it"
   },
   "IMG_1361.DNG": {
    "rel": "Apple/iPhone 12 Pro/IMG_1361.DNG",
@@ -265,7 +291,7 @@
    "height": 4032,
    "camera": "Apple iPhone13,3 back camera",
    "rgbSha256": "05c3ed092eb7ecefd881b4c410f9ea48a7c8759c97eb962a320113a893dc9f00",
-   "nodeSeconds": 1.589,
+   "nodeSeconds": 4.482,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -280,7 +306,7 @@
    "height": 3024,
    "camera": "Apple iPhone10,1 back camera",
    "rgbSha256": "445891cd5251cd689f568c13815c6c45babdc861ea8cdd6de232d17ec213b9ab",
-   "nodeSeconds": 1.995,
+   "nodeSeconds": 5.998,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -295,7 +321,7 @@
    "height": 4096,
    "camera": "Hasselblad CFV-16",
    "rgbSha256": "fb078395277fecb951de351719284b38fe4834bda4016670e76177408235c910",
-   "nodeSeconds": 2.998,
+   "nodeSeconds": 6.924,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -310,7 +336,7 @@
    "height": 4096,
    "camera": "Phase One P20+",
    "rgbSha256": "4a9a38cd8663ebdcfefd7216c24fd9aedb98600ef8cadbd0b238288848aff1aa",
-   "nodeSeconds": 3.276,
+   "nodeSeconds": 9.47,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -325,7 +351,7 @@
    "height": 4008,
    "camera": "Leaf Aptus 22",
    "rgbSha256": "0454a6ad7ff60dd5dfdefc83334871df5f03263680d4ba1f1ae31e8d301f7867",
-   "nodeSeconds": 4.121,
+   "nodeSeconds": 10.383,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -340,7 +366,7 @@
    "height": 4016,
    "camera": "Mamiya ZD",
    "rgbSha256": "d47a20775f399f38016cefb0aa6efc5ea148f2a3d406fc7ff7fa40736c02404f",
-   "nodeSeconds": 4.091,
+   "nodeSeconds": 10.282,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -355,7 +381,7 @@
    "height": 2024,
    "camera": "Epson R-D1",
    "rgbSha256": "8700167f05c74113504571cfdb5f87974b58f722a3f9746f8cca68ba07c6661c",
-   "nodeSeconds": 1.08,
+   "nodeSeconds": 2.791,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -370,7 +396,7 @@
    "height": 2454,
    "camera": "Kodak P880 ZOOM",
    "rgbSha256": "4b4c32517e250a58669b6c8502a914b5330e90fd7b4b2708561bb3b961bd5cee",
-   "nodeSeconds": 1.455,
+   "nodeSeconds": 2.883,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -385,7 +411,7 @@
    "height": 3012,
    "camera": "Kodak DCS Pro 14nx",
    "rgbSha256": "287d7e6daf5c4c9ee384e0e71086ccbe6bb39d3419aca320aa77b707e9ea172a",
-   "nodeSeconds": 2.386,
+   "nodeSeconds": 4.419,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,
@@ -400,7 +426,7 @@
    "height": 2456,
    "camera": "Minolta DiMAGE A2",
    "rgbSha256": "6cc313ecb32cf43999548cc3dae027214a18fa3069bef7aa38dd377d0a8f2d56",
-   "nodeSeconds": 1.369,
+   "nodeSeconds": 2.54,
    "dcrawEmu": {
     "mae": 0,
     "over2": 0,

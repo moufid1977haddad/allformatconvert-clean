@@ -22,6 +22,8 @@ export const RAW_FILES = [
   'Pentax/K-70/IMGP6854.PEF',
   'Pentax/K-3 II/IMGP0668.DNG',
   'Samsung/NX500/SAM_2927.SRW',
+  'Adobe DNG Converter/Canon EOS 5D Mark III/5G4A9394-compressed-lossless.DNG',
+  'Adobe DNG Converter/Canon EOS 5D Mark III/5G4A9394-compressed-lossy.DNG', // dcraw_emu (no libjpeg) can't: rawpy = ours
   'Apple/iPhone 12 Pro/IMG_1361.DNG',
   'Apple/iPhone 8/RAW_2018_11_07_14_43_14_820_noflash.dng',
   'Hasselblad/CFV/RAW_HASSELBLAD_CFV.3FR',

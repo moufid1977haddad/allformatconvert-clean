@@ -30,13 +30,24 @@
 | # | Quoi | Coût | Recommandation |
 |---|---|---|---|
 | D1 | **Détourage : morceaux de fond gardés par le modèle** (segmentation d'IS-Net ; le liseré et le halo sont corrigés par P21 dans le navigateur). Changer de modèle sur Railway a été **mesuré en local** : BiRefNet-lite pire (voile 4,4 % contre 3,2 %) ; BiRefNet complet très inégal (chat sur champ 17,7 % → 0 %, mais chat sur feuille 30 % → 133 %) et 31 s/image sur 8 cœurs, donc carte graphique nécessaire | carte graphique à la demande ≈ 0,001-0,003 $/image + compte chez un fournisseur (non choisi) ; ou 0 $ si on ne change rien | **ne rien changer maintenant** ; si le propriétaire peut confier la photo réelle de la tasse (sans donnée personnelle), la passer au banc `scripts/p21/bg-bench/` pour vérifier le cas exact |
-| D3 | **Image Converter : fichiers RAW d'appareil photo** (CR2, CR3, NEF, ARW, DNG, ORF, RW2, RAF…), que prennent iLoveIMG, CloudConvert et Convertio. Seul moteur sérieux : LibRaw. Sa version WebAssembly publiée sur npm (`libraw-wasm`) est compilée avec les fils d'exécution : elle exige l'isolation inter-origines (qui casserait Analytics et Google Translate) et **bloque la construction Turbopack** (mesuré le 02/10). Un fork mono-fil existe mais a une semaine, 0 étoile, ~200 téléchargements : binaire non vérifiable, non retenu | **0 $** ; ≈ 2-3 h de Claude | **compiler nous-mêmes LibRaw officiel (LGPL-2.1/CDDL) en WebAssembly mono-fil** (emsdk, sources signées), puis brancher le décodeur déjà écrit et le banc `p21-psd.mjs` (vrais RAW de raw.pixls.us) — à faire dans une session dédiée ; PSD est déjà ajouté |
+| D3 ✅ **FAIT par P22** (voir ci-dessous) | **Image Converter : fichiers RAW d'appareil photo** (CR2, CR3, NEF, ARW, DNG, ORF, RW2, RAF…), que prennent iLoveIMG, CloudConvert et Convertio. Seul moteur sérieux : LibRaw. Sa version WebAssembly publiée sur npm (`libraw-wasm`) est compilée avec les fils d'exécution : elle exige l'isolation inter-origines (qui casserait Analytics et Google Translate) et **bloque la construction Turbopack** (mesuré le 02/10). Un fork mono-fil existe mais a une semaine, 0 étoile, ~200 téléchargements : binaire non vérifiable, non retenu | **0 $** ; ≈ 2-3 h de Claude | **compiler nous-mêmes LibRaw officiel (LGPL-2.1/CDDL) en WebAssembly mono-fil** (emsdk, sources signées), puis brancher le décodeur déjà écrit et le banc `p21-psd.mjs` (vrais RAW de raw.pixls.us) — à faire dans une session dédiée ; PSD est déjà ajouté |
 | D2 | **Erreurs réelles des visiteurs (phase 2)** : `tool_errors` n'est lisible qu'avec la clé service (interdite à Claude) ; les journaux Vercel Hobby ne gardent qu'**1 heure** | 5 min ; Observability Plus de Vercel si l'on veut 7-30 jours de journaux (payant, non chiffré ici) | exécuter `docs/audit/p21-tool_errors-lecture.sql` dans Supabase → SQL Editor, télécharger les 2 résultats en CSV dans Téléchargements ; Claude reproduira et corrigera chaque cause |
 
 **Décisions prises par le propriétaire le 02/10 (prompt P22) :**
 - **D1 détourage — ne rien changer au modèle** (mesuré par P21). La vérification de la tasse sur le vrai iPhone dira s'il reste un cas à traiter.
 - **D3 RAW — accepté : compiler LibRaw nous-mêmes, 0 $** → fait par P22 (voir la section P22 ci-dessous et `docs/audit/RAPPORT-p22-raw-02-10.md`).
 - **D2 `tool_errors` — le propriétaire lance lui-même la requête de lecture** (`docs/audit/p21-tool_errors-lecture.sql`) le soir du 02/10 ; Claude reproduira et corrigera chaque cause à partir des CSV.
+
+## 📷 P22 — fichiers RAW dans Image Converter (02/10, `docs/audit/RAPPORT-p22-raw-02-10.md`)
+
+| Quoi | État |
+|---|---|
+| LibRaw 0.22.2 officiel compilé par nous en WebAssembly mono-fil (`scripts/libraw-wasm/`, sources vérifiées par comparaison libraw.org ↔ GitHub, SHA-256 inscrit) — 881 Ko, 354 Ko compressé, chargé au premier RAW | ✅ |
+| 23 formats vérifiés sur de vrais fichiers (raw.pixls.us) : pixels **identiques** au `dcraw_emu` officiel (écart moyen 0,0000) | ✅ |
+| Sigma X3F refusé avec une phrase (couleurs fausses mesurées) ; fichier tronqué ou faux : refusé, jamais une fausse image (162 coupes mesurées) | ✅ |
+| Licence CDDL-1.0 + sources servies (`/wasm/libraw-LICENSE.txt`, `/wasm/LibRaw-0.22.2.tar.gz`), FAQ et textes de la page | ✅ |
+| Préversion, bancs 3 moteurs + iPhone/iPad, production, vérification sur www | ⟦voir le rapport §10⟧ |
+| **Reste au propriétaire** : un vrai RAW de son appareil (ou d'un proche) sur iPhone/iPad dans Image Converter → JPG ; un ProRAW 48 Mpx d'iPhone 14/15/16 Pro (aucun sur raw.pixls.us : seuls des ProRAW 12 Mpx ont été testés). **Non mesuré faute d'échantillon** : un DNG compressé en JPEG XL (DNG 1.7) — LibRaw ne le lit qu'avec le DNG SDK d'Adobe, non compilé ici ; à vérifier avec un vrai fichier | ⏳ |
 
 > ## ═══ RÈGLE QUI PRIME SUR TOUT LE RESTE, posée fermement par le propriétaire le 23 septembre ═══
 >

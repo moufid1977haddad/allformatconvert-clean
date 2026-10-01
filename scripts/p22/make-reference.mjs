@@ -15,7 +15,8 @@ globalThis.fetch = async () => ({ ok: true, arrayBuffer: async () => fs.readFile
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'p22ref-'));
 fs.mkdirSync(path.join(tmp, 'libraw'));
 fs.copyFileSync(path.join(root, 'app/lib/libraw/libraw.mjs'), path.join(tmp, 'libraw/libraw.mjs'));
-fs.copyFileSync(path.join(root, 'app/lib/rawDecode.js'), path.join(tmp, 'rawDecode.mjs'));
+fs.copyFileSync(path.join(root, 'app/lib/rawFormats.js'), path.join(tmp, 'rawFormats.mjs'));
+fs.writeFileSync(path.join(tmp, 'rawDecode.mjs'), fs.readFileSync(path.join(root, 'app/lib/rawDecode.js'), 'utf8').replace("from './rawFormats'", "from './rawFormats.mjs'"));
 import { pathToFileURL } from 'node:url';
 const { decodeRaw } = await import(pathToFileURL(path.join(tmp, 'rawDecode.mjs')).href);
 
