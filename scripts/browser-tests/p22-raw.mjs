@@ -42,20 +42,25 @@ const UA = {
   iphone: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Mobile/15E148 Safari/604.1',
   ipad: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Safari/605.1.15',
 };
-// A fresh browser for every conversion: a Firefox that had converted ten big RAW files in a row stopped answering
-// (the same file passed on its own in 21 s) -- the bench must measure the site, not the test browser's fatigue.
+// A fresh browser every 5 conversions: a Firefox that had converted ten big RAW files in a row stopped answering (the
+// same file passed on its own in 21 s) -- the bench must measure the site, not the test browser's fatigue. Within a
+// group, one context (HTTP cache, service worker) and a new page per conversion.
 const engine = { chromium, firefox, webkit }[name];
-let b = await engine.launch();
+let b = null, ctx = null, uses = 0;
 async function newPage() {
-  if (!webkitDirect) { await b.close().catch(() => {}); b = await engine.launch(); }
-  const ctx = await b.newContext({ acceptDownloads: true, ...(device ? { userAgent: UA[device], hasTouch: true, viewport: device === 'iphone' ? { width: 390, height: 844 } : { width: 820, height: 1180 } } : {}) });
-  await ctx.addCookies([{ name: 'oct_automation', value: '1', url: origin }]);
-  if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((u) => u.hostname === 'vercel.live', (r) => r.abort());
-  if (device) await ctx.addInitScript(() => { Object.defineProperty(Navigator.prototype, 'maxTouchPoints', { get: () => 5, configurable: true }); });
-  await applyIosCanvasCap(ctx);
+  if (!ctx || (!webkitDirect && uses >= 5)) {
+    if (b) await b.close().catch(() => {});
+    b = await engine.launch(); uses = 0;
+    ctx = await b.newContext({ acceptDownloads: true, ...(device ? { userAgent: UA[device], hasTouch: true, viewport: device === 'iphone' ? { width: 390, height: 844 } : { width: 820, height: 1180 } } : {}) });
+    await ctx.addCookies([{ name: 'oct_automation', value: '1', url: origin }]);
+    if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((u) => u.hostname === 'vercel.live', (r) => r.abort());
+    if (device) await ctx.addInitScript(() => { Object.defineProperty(Navigator.prototype, 'maxTouchPoints', { get: () => 5, configurable: true }); });
+    await applyIosCanvasCap(ctx);
+  }
+  uses++;
   const p = await ctx.newPage();
   const errors = []; p.on('pageerror', (e) => errors.push(e.message));
-  return { ctx, p, errors };
+  return { p, errors };
 }
 
 // SHA-256 of the RGB pixels of a BMP result, computed in the page (a 46 MP BMP is 137 MB: not passed over).
@@ -93,7 +98,7 @@ async function resultBytes(p) {
 }
 
 async function convert(file, format) {
-  const { ctx, p, errors } = await newPage();
+  const { p, errors } = await newPage();
   await p.goto(`${origin}/tools/image-tools/image-converter`, { waitUntil: 'load' });
   await p.waitForTimeout(800);
   await p.locator('input[type=file]').first().setInputFiles(file);
@@ -114,7 +119,7 @@ async function convert(file, format) {
     catch (err) { out.r = 'unreadable'; out.message = err.message; }
   }
   out.message ||= text.match(/failed to convert[\s\S]{0,400}/)?.[0] || '';
-  await ctx.close();
+  await p.close();
   return out;
 }
 
@@ -207,7 +212,7 @@ if (!webkitDirect && (!only.length || only.includes('jpg'))) {
     check(`${path.basename(f)} refused with a clear sentence, no file`, out.r === 'error' && re.test(out.message), `${out.r} ${out.message.replace(/\s+/g, ' ').slice(0, 200)}`);
   }
 }
-await b.close();
+if (b) await b.close();
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log(`${fails ? `${fails} FAIL, ${passes} pass` : `ALL PASS: ${passes} checks`} (${label}; ${webkitDirect ? 'deployed wasm in a page Worker' : iosCapLabel()})`);
 process.exit(fails ? 1 : 0);
