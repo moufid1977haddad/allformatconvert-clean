@@ -58,6 +58,27 @@ for (const [fmt, exp] of Object.entries(EXPECT)) {
     errors.join(' | '));
   await ctx.close();
 }
+// Quality choice (P21): MP3 at 320 kbps and at the default (192) read back by ffprobe
+for (const [kbps, choose] of [[320, true], [192, false]]) {
+  if (only.length && !only.includes('mp3')) break;
+  const ctx = await b.newContext({ acceptDownloads: true });
+  if (process.argv.includes('--no-vercel-toolbar')) await ctx.route(/vercel\.live/, (r) => r.abort());
+  const p = await ctx.newPage();
+  await p.goto(`${origin}/tools/audio-tools/audio-converter`, { waitUntil: 'load' });
+  await p.waitForTimeout(1000);
+  await p.locator('input[type=file]').first().setInputFiles(wavPath);
+  await p.locator('select').first().selectOption('mp3');
+  if (choose) await p.getByLabel('Quality').selectOption(String(kbps));
+  await p.getByRole('button', { name: /^Convert/ }).click();
+  const row = p.locator('[data-file-download]').first();
+  await row.waitFor({ timeout: 180000 });
+  const [dl] = await Promise.all([p.waitForEvent('download'), row.locator('a[data-download]').click()]);
+  const out = path.join(tmp, `q${kbps}.mp3`); await dl.saveAs(out);
+  const info = JSON.parse(execFileSync(FFPROBE, ['-v', 'error', '-show_streams', '-of', 'json', out]).toString());
+  const br = Math.round(Number(info.streams[0].bit_rate) / 1000);
+  check(`MP3 quality ${choose ? 'chosen' : 'default'}: ${br} kbps (expected ${kbps})`, Math.abs(br - kbps) <= 2);
+  await ctx.close();
+}
 await b.close();
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);
 process.exit(fails ? 1 : 0);

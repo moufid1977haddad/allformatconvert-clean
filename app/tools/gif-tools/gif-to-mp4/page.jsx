@@ -1,4 +1,5 @@
 'use client';
+import { headerSize, sizeProblem } from '../../../lib/gifEncode';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { reportToolError } from '../../../lib/reportError';
@@ -16,6 +17,12 @@ export default function GifToMp4Page() {
     if (!file) return;
     setLoading(true);
     try {
+      // P21 (robustness): a GIF really, and of a size a video can hold — a 30 000 × 30 000 PNG renamed .gif was
+      // handed to the encoder and a "result" offered. Checked before ffmpeg (~30 MB) is loaded.
+      const head = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+      if (!file.size || !(head[0] === 0x47 && head[1] === 0x49 && head[2] === 0x46)) { const err = new Error('this is not a GIF file (or it is empty). Choose an animated GIF.'); err.visitor = true; throw err; }
+      const tooBig = sizeProblem(headerSize(head));
+      if (tooBig) { const err = new Error(tooBig); err.visitor = true; throw err; }
       const { FFmpeg } = await import('@ffmpeg/ffmpeg');
       const { fetchFile } = await import('@ffmpeg/util');
       const ffmpeg = new FFmpeg();
@@ -49,6 +56,8 @@ export default function GifToMp4Page() {
         'output.mp4'
       ]);
       const data = await ffmpeg.readFile('output.mp4');
+      // never offer an empty or broken file as a video: an MP4 starts with its "ftyp" box
+      if (!data || data.length < 100 || String.fromCharCode(...data.subarray(4, 8)) !== 'ftyp') throw new Error('the video could not be made from this GIF.');
       const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
       setResult(url);
     } catch(e) {
@@ -58,7 +67,7 @@ export default function GifToMp4Page() {
       // with zero way to diagnose what actually happened.
       console.error('Conversion failed:', e);
       const reason = (e && e.message) || (typeof e === 'string' ? e : null) || 'an unknown error -- check the browser console for details';
-      reportToolError({ tool: 'gif-to-mp4', file, error: e instanceof Error ? e : new Error(String(reason)) });
+      if (!(e && e.visitor)) reportToolError({ tool: 'gif-to-mp4', file, error: e instanceof Error ? e : new Error(String(reason)) }); // a wrong file is not a failure of the tool
       setError('Conversion failed: ' + reason);
     }
     setLoading(false);

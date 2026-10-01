@@ -12,10 +12,10 @@ ni affiché. Branche `p21-02-10`, repère **`restauration-avant-p21-02-10` = `23
 | 1 — Défauts vus sur le vrai iPhone | ✅ fait, voir §1 (mise en production : §8) |
 | 2 — Erreurs réelles des visiteurs | 🟠 bloquée par l'accès, voir §2 (requête prête pour le propriétaire) |
 | 3 — Couverture des formats | 🟡 en cours, voir §3 |
-| 4 — Qualité des 40 outils les plus recherchés | à faire |
-| 5 — Solidité | à faire |
-| 6 — Affichage iPhone / iPad | à faire |
-| 7 — Les 5 outils « coming soon » | à faire |
+| 4 — Qualité des 40 outils les plus recherchés | 🟡 en cours, voir §4 |
+| 5 — Solidité | 🟡 défauts corrigés, vérification en cours (§5) |
+| 6 — Affichage iPhone / iPad | 🟡 corrections faites, vérification en cours (§6) |
+| 7 — Les 5 outils « coming soon » | ✅ vérifiés (§7) — déjà en ligne depuis le 23/09 |
 
 ## 0. Noté au plan dès le début
 
@@ -181,6 +181,90 @@ manque.
 
 **Licences vérifiées avant intégration (interdit n° 14)** : ag-psd MIT ; documents de test LibreOffice MPL-2.0 ;
 libraw-wasm (ISC ; LibRaw LGPL-2.1 / CDDL-1.0) vérifiée puis **retirée** (voir ci-dessus).
+
+## 4. Phase 4 — qualité des résultats (outils les plus recherchés)
+
+**Déjà mesuré face au concurrent de référence (rapports précédents, toujours valables : moteurs inchangés)** :
+PDF Compress ≥ iLovePDF (−40,6 % contre −35,0 % à qualité supérieure, 23/09) ; Image Compressor = iLoveIMG (JPEG à
+0,05 dB près, PNG −2 à −20 %, 23/09) ; Image Upscaler > iLoveIMG (LPIPS 0,107 contre 0,164) ; PDF to Excel / PDF to
+PowerPoint = iLovePDF (même moteur, 23/09) ; Word / Excel / PowerPoint to PDF au niveau de FreeConvert et Online2PDF
+(0,1-0,24 % de pixels d'écart, 19/09) ; Background Remover dans la dispersion du marché (09/09) puis amélioré (§1b) ;
+vidéo (compression, conversion, coupe à l'image près, 20-30/09) ; Grammar Fixer 25/25 contre 15/25 pour LanguageTool ;
+AI Detector 0/57 faux positif ; Zip Extractor au-dessus d'ezyZip ; Hash Generator identique aux références.
+
+**Mesuré par P21** (`p21-quality-images.mjs`, photo réelle, référence libvips) :
+
+| Outil | Nous | Référence | Verdict |
+|---|---|---|---|
+| PNG to JPG | 437 Ko, **62,9 dB** (Chromium) ; 524 Ko, 52,3 dB (Firefox) | mozjpeg q90 : 340 Ko, 47,0 dB | qualité supérieure, fichier ≈ 30 % plus lourd (choix de qualité 92) |
+| WebP to JPG | 424 Ko, 45,8 dB | mozjpeg q90 : 316 Ko, 44,4 dB | au niveau |
+| JPG to PNG, WebP to PNG | **identiques au pixel** au décodage de référence | — | parfait |
+| Image Resizer −50 % | luminance **43,3 dB** de Lanczos-3, netteté 151 | Lanczos-3 : netteté 130 | au niveau (un peu plus net) |
+| Audio Converter, Video to Audio | **aucun choix de débit : MP3/AAC à 128 kbit/s** (ffmpeg par défaut) | 123apps : 64 à 320 kbit/s | **écart corrigé** : choix 128 / **192 (défaut)** / 256 / 320 kbit/s pour MP3, AAC, M4A, M4R, M4B, OGG, WMA, AC3, MP2 ; prouvé par ffprobe (320 → 320 kbit/s, défaut → 192) |
+
+## 5. Phase 5 — solidité
+
+Banc **`p21-robustness.mjs`** : chaque page d'outil qui prend un fichier (**132 outils**, lus dans le code) reçoit, comme
+un visiteur, un fichier **vide**, **corrompu** (512 octets aléatoires sous la bonne extension), **d'un autre type**
+(un PDF nommé .png, un PNG nommé .pdf/.mp4/.mp3…), un **PDF protégé par mot de passe**, une **image géante**
+(30 000 × 30 000 px, 900 Mpx, 1,8 Mo sur disque) et une **vidéo sans son** quand l'outil sort du son ; puis son bouton
+principal. Attendu : une phrase sur la page ; jamais d'erreur non rattrapée, de page blanche, de chargement sans fin
+ni de « résultat » tiré de rien. **Aucun appel payant** : toutes les routes `/api/` répondent le refus que donnent nos
+routes, et tout envoi vers un autre hôte est coupé (option `--real-media` pour notre seul service vidéo, sur une
+préversion).
+
+**Avant** (premier passage, www/local identiques pour ces outils) : 472 cas, **19 faux résultats, 3 plantages**, des
+outils muets. **Vrais défauts corrigés** :
+
+| Outil(s) | Défaut | Correction |
+|---|---|---|
+| CSV to JSON / SQL / TSV / Excel | un PNG renommé .csv, des octets aléatoires ou un fichier vide donnaient une « conversion » | `textFileProblem` (vide, binaire, autre format reconnu → phrase ; un classeur Excel renvoyé vers Excel to CSV) |
+| Excel to CSV / Excel to JSON | SheetJS lit n'importe quoi comme du texte : un fichier vide ou un PDF donnait un tableau | `spreadsheetProblem` (ZIP/OLE attendus ; CSV seulement là où l'outil le prend) |
+| EPUB to PDF | **plantage** : la bibliothèque rejetait une promesse interne et la page restait sur « Parsing EPUB file... » | en-tête ZIP vérifié avant, analyse bornée à 60 s |
+| MOBI to PDF | erreur technique brute (« Offset is outside the bounds of the DataView ») | en-tête Palm BOOKMOBI vérifié, phrase claire (DRM Kindle expliqué) |
+| APNG to GIF, GIF to APNG, Image to GIF, GIF Compressor | `alert()` bloquant ; APNG to GIF décodait une PNG de 900 Mpx sur la page (3,6 Go, onglet figé) | message dans la page ; taille lue dans l'en-tête avant tout décodage (16 Mpx par image au plus) ; images illisibles nommées |
+| GIF to MP4 | une PNG géante renommée .gif donnait un « MP4 » | en-tête GIF exigé, taille plafonnée, MP4 produit vérifié (`ftyp`) |
+| Base64 Encoder, File Converter, File Splitter, Tar Extractor, File Encryptor | fichier vide accepté (résultat vide ou rien) | phrase « This file is empty (0 bytes) » |
+| Vidéo et audio par le service (Video Compressor/Converter, GIF depuis vidéo…) | un fichier vide (0 o) était accepté et serait envoyé | refusé à la sélection |
+| PDF Redact, PDF Sign | un faux PDF accepté sans un mot jusqu'au dernier clic | `%PDF-` vérifié à la sélection |
+| HTML to PDF, Markdown to PDF | fichier vide ou binaire lu comme texte | `textFileProblem` |
+| Image Editor, Image Comparison | une image illisible, vide ou trop grande était ignorée en silence | phrase sous la zone d'envoi |
+
+Fausses alertes du premier banc, corrigées dans le banc : outils à onglets (Audio to Text, Hash Generator), à deux
+champs (File Comparator, Image Comparison), à mot de passe (File Encryptor), boutons « Add Noise / Add Border… », bouton
+principal choisi (le plus large, pas un onglet « Encrypt / Decrypt »). Image Metadata disait déjà honnêtement « This
+browser cannot display this image » ; Zip Creator archive légitimement un fichier vide.
+
+**Après** : voir §8 (balayage complet sur la construction corrigée, puis préversion).
+
+## 6. Phase 6 — affichage iPhone (375 px) et iPad (768 px)
+
+Banc `p21-layout.mjs` sur les **225 pages d'outils**, iPhone et iPad simulés (taille, agent, tactile) : défilement
+horizontal (largeur réelle de la page), cibles tactiles de l'outil ≥ 44 × 44 px (aide en bas de page exclue), zone
+d'envoi, texte coupé.
+- **www avant (iPhone)** : **88 pages en échec** — 85 avec des cibles trop petites (listes déroulantes 37 px, boutons
+  d'option 32-40 px, curseurs 16 px, « Copy » 30 × 16 px), **5 pages plus larges que l'écran** (API Tester 409 px,
+  CSV to SQL 520 px, Hash Generator, JSON to TOML, Timestamp Converter 443 px, puis Sticky Notes 409 px) : la page
+  entière était dézoomée sur iPhone.
+- **Causes et corrections** : ① une règle unique pour les écrans tactiles (`@media (pointer: coarse)`, zone de l'outil
+  seulement) : boutons, listes, champs, liens-boutons ≥ 44 px, curseurs et sélecteurs de couleur 44 px, cases à cocher
+  touchées par leur étiquette de 44 px — **aucun changement à la souris** ; ② les champs `flex-1` d'une rangée gardaient
+  leur largeur naturelle (`min-width: auto`) : règle `min-width: 0` (+ API Tester, Timestamp Converter) ; ③ le bloc
+  « Example » de l'aide (CSV to SQL, JSON to TOML…) : une longue ligne de code élargissait la grille → `min-w-0`, le
+  bloc défile à l'intérieur.
+- **Local après** : 448/450 puis vérification finale (§8).
+
+## 7. Phase 7 — les cinq outils « coming soon »
+
+**Constat : ils ne sont plus « coming soon »** — tous construits le 23/09 (aucun drapeau `comingSoon` dans le code,
+pages complètes) ; la consigne reposait sur un état ancien. Vérifiés (`p21-phase7.mjs`) :
+
+| Outil | Moteur | Concurrents | Vérification P21 |
+|---|---|---|---|
+| PDF Repair | notre service `pdf-tools` (qpdf / Ghostscript) | iLovePDF « Repair PDF » (même famille) | **réel** : PDF à table de références cassée → PDF qui s'ouvre, 4 pages sur 4 |
+| PDF to PDF/A | Ghostscript + **veraPDF** | iLovePDF : PDF/A-1b, 2b, 3b ; Smallpdf : PDF/A | **réel** : 1b, 2b, 3b déclarés dans le XMP, verdict veraPDF affiché (« Verified compliant ») — au-dessus (validation montrée) |
+| PDF to Excel / PDF to PowerPoint | ConvertAPI | iLovePDF (identique au 23/09) | parcours et fichier rendu intacts, fournisseur **simulé** (aucun appel payant) |
+| Image Generator | gpt-image-2 (OpenAI), budget propre | — | WebP + PNG proposés, fournisseur **simulé** |
 
 ## 8. Mises en production
 

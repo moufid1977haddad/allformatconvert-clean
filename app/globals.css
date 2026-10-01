@@ -154,3 +154,52 @@ html[dir="rtl"] p {
   outline-offset: 2px;
   background-color: rgb(99 102 241 / 0.06);
 }
+
+/* P21 (02/10) — touch targets of at least 44 × 44 px on phones and tablets (Apple's minimum), in the tool itself
+   (the help text below, [data-seo-content], keeps its inline links). Measured on www at 375 px: selects at 37 px,
+   option buttons at 32-40 px, sliders 16 px tall, "Copy" buttons 30 × 16 px across ~100 tool pages. One rule here
+   instead of a hundred page edits; only for coarse pointers, so mouse layouts are unchanged.
+   Checked by scripts/browser-tests/p21-layout.mjs (iPhone 375 px, iPad 768 px). */
+@media (pointer: coarse) {
+  main :is(button, select, [role="button"], a[class*="bg-"],
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]):not([type="color"])
+  ):not(.absolute):not([data-seo-content] *) {
+    min-height: 44px;
+  }
+  main :is(button, [role="button"], a[class*="bg-"]):not(.absolute):not([data-seo-content] *) {
+    min-width: 44px;
+  }
+  /* a small button laid over a thumbnail (remove ✕): it keeps its size so the picture stays visible, and touches
+     within 10 px of it still reach it (review, 02/10: a 44 px circle covered most of a 63 px thumbnail) */
+  main :is(button, [role="button"]).absolute:not([data-seo-content] *)::after {
+    content: "";
+    position: absolute;
+    inset: -10px;
+  }
+  /* sliders: the track keeps its look, the touch area becomes 44 px tall */
+  main input[type="range"]:not([data-seo-content] *) {
+    min-height: 44px;
+  }
+  main input[type="color"]:not([data-seo-content] *) {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  /* a checkbox or radio is touched through its label */
+  main label:has(input[type="checkbox"], input[type="radio"]):not([data-seo-content] *),
+  main :is(input[type="checkbox"], input[type="radio"]) + label:not([data-seo-content] *) {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+}
+
+/* P21 (02/10): a text, date or number field given flex-1 in a row keeps its own natural width by default
+   (min-width: auto) and pushed the whole page wider than a phone (API Tester 409 px, Timestamp Converter 443 px at
+   375 px). It may shrink; the row then fits the screen. */
+main :is(input, select, textarea).flex-1 {
+  min-width: 0;
+}
+/* A list whose longest option is long (Zip Creator's compression levels) is never wider than its column. */
+main select {
+  max-width: 100%;
+}

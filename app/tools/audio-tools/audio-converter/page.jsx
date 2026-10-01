@@ -4,7 +4,7 @@ import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { AUDIO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
 import ProgressBar from '../../../components/ProgressBar';
-import { AUDIO_OUTPUT_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
+import { AUDIO_OUTPUT_FORMATS, AUDIO_BITRATES, DEFAULT_AUDIO_KBPS, formatTakesBitrate, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
 import { reportToolError } from '../../../lib/reportError';
 import { runMediaJob, mediaServiceConfigured } from '../../../lib/mediaJob';
 import PlayablePreview from '../../../components/PlayablePreview';
@@ -13,6 +13,7 @@ import { FileDownload } from '../../../components/FileDownload';
 export default function AudioConverterPage() {
   const [file, setFile] = useState(null);
   const [format, setFormat] = useState('mp3');
+  const [kbps, setKbps] = useState(DEFAULT_AUDIO_KBPS);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState(null);
@@ -77,7 +78,7 @@ export default function AudioConverterPage() {
       });
       await ffmpeg.load();
       const inputName = 'input.' + sanitizedInputExt(file);
-      const { outputName, extraArgs, mime, ext } = buildOutputSpec(format);
+      const { outputName, extraArgs, mime, ext } = buildOutputSpec(format, kbps);
       await ffmpeg.writeFile(inputName, await fetchFile(file));
       await ffmpeg.exec(['-i', inputName, ...extraArgs, outputName]);
       const data = await ffmpeg.readFile(outputName);
@@ -116,6 +117,14 @@ export default function AudioConverterPage() {
             <select aria-label="Target Format" value={format} onChange={e => setFormat(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
               {AUDIO_OUTPUT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
             </select>
+            {formatTakesBitrate(format) && (
+              <div className="mt-3">
+                <label className="block text-sm text-neutral-500 mb-1">Quality</label>
+                <select aria-label="Quality" value={kbps} onChange={e => setKbps(Number(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
+                  {AUDIO_BITRATES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                </select>
+              </div>
+            )}
           </div>
           {loading ? (
             <div className="space-y-3">
@@ -156,6 +165,8 @@ export default function AudioConverterPage() {
         tips={[
           "The first conversion after loading the page takes longer since your browser needs to download the ffmpeg.wasm engine (roughly 25–30MB).",
           "FLAC, WAV, AIFF, and ALAC preserve full quality but produce larger files than MP3, AAC, WMA, or Opus.",
+          "For MP3, AAC, M4A, OGG and WMA, pick the quality: 192 kbps (the default) is transparent for most listening; 320 kbps is the most an MP3 can hold. A higher bitrate than your source cannot bring back detail it never had.",
+          "M4R is the iPhone ringtone format; iOS plays ringtones of up to 40 seconds, so trim a longer song first (Audio Trimmer).",
           "Opus is a strong choice for small file size at good quality if your target player supports it.",
           "This tool converts audio files only — it doesn't extract audio from video files."
         ]}

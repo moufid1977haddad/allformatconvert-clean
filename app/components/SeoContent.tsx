@@ -15,7 +15,7 @@ type SeoContentProps = {
 
 export default function SeoContent({ title, description, howTo, faqs, tips, example, related }: SeoContentProps) {
   return (
-    <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
+    <div data-seo-content className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
       <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
         <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About {title}</h2>
         <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">{description}</p>
@@ -24,12 +24,14 @@ export default function SeoContent({ title, description, howTo, faqs, tips, exam
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-2">Example</h2>
           <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">{example.caption}</p>
+          {/* min-w-0: a grid item is as wide as its widest line by default; a long code line widened the whole page
+              on a phone (CSV to SQL at 375 px: 520 px wide, P21). The block scrolls inside instead. */}
           <div className="grid gap-3 sm:grid-cols-2">
-            <div>
+            <div className="min-w-0">
               <p className="text-xs font-semibold text-neutral-600 dark:text-neutral-300 mb-1">{example.inputLabel}</p>
               <pre data-example="input" className="text-xs bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-3 overflow-x-auto whitespace-pre text-neutral-700 dark:text-neutral-200">{example.input}</pre>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs font-semibold text-neutral-600 dark:text-neutral-300 mb-1">{example.outputLabel}</p>
               <pre data-example="output" className="text-xs bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-3 overflow-x-auto whitespace-pre text-neutral-700 dark:text-neutral-200">{example.output}</pre>
             </div>

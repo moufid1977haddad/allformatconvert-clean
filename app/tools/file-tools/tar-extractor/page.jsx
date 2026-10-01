@@ -1,4 +1,5 @@
 ﻿'use client';
+import { emptyFileProblem } from '../../../lib/fileChecks';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { readTar, TarFormatError } from '../../../lib/tarReader';
@@ -19,6 +20,7 @@ export default function TarExtractorPage() {
     const file = e.target.files[0];
     e.target.value = '';
     if (!file) return;
+    if (emptyFileProblem(file)) { setFiles([]); setError(emptyFileProblem(file, 'extract')); return; } // P21
     setLoading(true);
     setError('');
     setFiles([]);

@@ -1,12 +1,13 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { writeRgbaFrame, hasTransparency } from '../../../lib/gifEncode';
+import { writeRgbaFrame, hasTransparency, headerSize, sizeProblem } from '../../../lib/gifEncode';
 import { FileDownload } from '../../../components/FileDownload';
 export default function ApngToGifPage() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const inputRef = useRef();
 
   const handleFile = (e) => {
@@ -19,12 +20,16 @@ export default function ApngToGifPage() {
 
   const convert = async () => {
     if (!file) return;
+    setError('');
     setLoading(true);
     try {
       const UPNGModule = await import('upng-js');
       const UPNG = UPNGModule.default || UPNGModule;
       const gifenc = await import('gifenc');
       const arrayBuffer = await file.arrayBuffer();
+      const tooBig = sizeProblem(headerSize(new Uint8Array(arrayBuffer, 0, Math.min(32, arrayBuffer.byteLength))));
+      if (tooBig) throw new Error(tooBig);
+      if (arrayBuffer.byteLength === 0 || !headerSize(new Uint8Array(arrayBuffer, 0, Math.min(32, arrayBuffer.byteLength)))) throw new Error('This is not a PNG / APNG file (or it is empty). Choose an animated PNG.');
       const img = UPNG.decode(arrayBuffer);
       const rgbaFrames = UPNG.toRGBA8(img).map((f) => new Uint8Array(f));
       // Transparency and play count are carried over (29/09): transparent pixels used to come out black, and an
@@ -40,7 +45,7 @@ export default function ApngToGifPage() {
       gif.finish();
       const blob = new Blob([gif.bytes()], { type: 'image/gif' });
       setResult({ url: URL.createObjectURL(blob), frameCount: rgbaFrames.length });
-    } catch(e) { alert('Error: ' + e.message); }
+    } catch(e) { setError((e && e.message) || 'This file could not be converted. It may be damaged.'); } // P21: a message on the page, not a blocking alert()
     setLoading(false);
   };
 
@@ -55,6 +60,7 @@ export default function ApngToGifPage() {
             <input ref={inputRef} type="file" accept="image/png,image/apng" className="hidden" onChange={handleFile} />
           </div>
           <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">{loading ? 'Converting...' : 'Convert to GIF'}</button>
+          {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
           {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><p className="text-green-600 text-center text-sm font-semibold">{result.frameCount} frame{result.frameCount === 1 ? '' : 's'}</p><FileDownload href={result.url} name="converted.gif" /></div>}
         </div>
       </div>

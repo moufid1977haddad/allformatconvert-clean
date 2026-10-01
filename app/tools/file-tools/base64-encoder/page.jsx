@@ -1,4 +1,5 @@
 'use client';
+import { emptyFileProblem } from '../../../lib/fileChecks';
 import { useState, useRef, useMemo, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { detectSignature } from '../../../lib/fileSignature';
@@ -23,6 +24,8 @@ export default function FileBase64EncoderPage() {
     const file = e.target.files[0];
     e.target.value = '';
     if (!file) return;
+    // P21: Base64 of an empty file is an empty text — said, not handed over as a result.
+    if (emptyFileProblem(file)) { setResult(''); setError(emptyFileProblem(file, 'encode')); return; }
     setLoading(true);
     setError('');
     setResult('');
@@ -55,7 +58,7 @@ export default function FileBase64EncoderPage() {
             <input ref={inputRef} type="file" className="hidden" onChange={encode} />
           </div>
           {loading && <p className="text-center text-neutral-500">Encoding...</p>}
-          {error && <p className="text-center text-red-400 text-sm">{error}</p>}
+          {error && <p role="alert" className="text-center text-red-600 text-sm">{error}</p>}
           {result && (() => {
             const big = out.length > PREVIEW_CHARS;
             return (

@@ -3,7 +3,7 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import ProgressBar from '../../../components/ProgressBar';
-import { AUDIO_OUTPUT_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
+import { AUDIO_OUTPUT_FORMATS, AUDIO_BITRATES, DEFAULT_AUDIO_KBPS, formatTakesBitrate, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
 import { reportToolError } from '../../../lib/reportError';
 import IosOriginalNote from '../../../components/IosOriginalNote';
 import PlayablePreview from '../../../components/PlayablePreview';
@@ -12,6 +12,7 @@ import { FileDownload } from '../../../components/FileDownload';
 export default function VideoToAudioPage() {
   const [file, setFile] = useState(null);
   const [format, setFormat] = useState('mp3');
+  const [kbps, setKbps] = useState(DEFAULT_AUDIO_KBPS);
   const [result, setResult] = useState(null);
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
@@ -53,7 +54,7 @@ export default function VideoToAudioPage() {
       await ffmpeg.load();
       setStatus('Extracting audio...');
       const inputName = 'input.' + sanitizedInputExt(file);
-      const { outputName, extraArgs, mime, ext } = buildOutputSpec(format);
+      const { outputName, extraArgs, mime, ext } = buildOutputSpec(format, kbps);
       await ffmpeg.writeFile(inputName, await fetchFile(file));
       // -vn drops the video stream entirely so ffmpeg only demuxes and
       // encodes audio -- no frame decode/encode cost, unlike a real video
@@ -92,6 +93,14 @@ export default function VideoToAudioPage() {
             <select aria-label="Target Format" value={format} onChange={e => setFormat(e.target.value)} disabled={loading} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
               {AUDIO_OUTPUT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
             </select>
+            {formatTakesBitrate(format) && (
+              <div className="mt-3">
+                <label className="block text-sm text-neutral-500 mb-1">Quality</label>
+                <select aria-label="Quality" value={kbps} onChange={e => setKbps(Number(e.target.value))} disabled={loading} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
+                  {AUDIO_BITRATES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                </select>
+              </div>
+            )}
           </div>
           {status && <p className="text-yellow-400 text-center text-sm">{status}</p>}
           {loading ? (

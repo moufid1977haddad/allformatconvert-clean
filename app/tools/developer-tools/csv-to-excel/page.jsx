@@ -1,4 +1,5 @@
 'use client';
+import { textFileProblem } from '../../../lib/fileChecks';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
@@ -95,7 +96,7 @@ export default function CsvToExcelPage() {
   const effectiveMaxRows = isMobile ? MOBILE_MAX_ROWS : MAX_ROWS;
   const effectiveMaxRowsLabel = isMobile ? MOBILE_MAX_ROWS_LABEL : MAX_ROWS_LABEL;
 
-  const handleFile = (e) => {
+  const handleFile = async (e) => {
     const f = e.target.files[0];
     e.target.value = '';
     if (!f) return;
@@ -108,6 +109,9 @@ export default function CsvToExcelPage() {
       setFileName('');
       return;
     }
+    // P21: an empty, binary or other-kind file gets a sentence, never a "conversion" (robustness bench).
+    const problem = await textFileProblem(f, 'CSV');
+    if (problem) { setError(problem); setFile(null); setFileName(''); return; }
     setFile(f);
     setFileName(f.name);
     setInput('');

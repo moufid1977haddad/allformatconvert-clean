@@ -1,4 +1,5 @@
 'use client';
+import { pdfFileProblem, pdfLockedProblem } from '../../../lib/fileChecks';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
@@ -16,7 +17,7 @@ export default function Page() {
   const [summary, setSummary] = useState('');
   const fileRef = useRef();
 
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setResult(null); setSummary(''); };
+  const handleFile = async (e) => { const f = e.target.files[0]; e.target.value = ''; setResult(null); setSummary(''); setError(''); if (!f) return; const problem = (await pdfFileProblem(f)) || (await pdfLockedProblem(f)); if (problem) { setFile(null); setError(problem); return; } setFile(f); }; // P21: a bad file is said when it is chosen
 
   const redact = async () => {
     if (!file || !keyword.trim()) return;
@@ -147,7 +148,7 @@ export default function Page() {
           <button onClick={redact} disabled={!file || !keyword.trim() || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Redacting...' : 'Redact PDF'}
           </button>
-          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+          {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
           {summary && <p className="text-neutral-700 text-center text-sm" data-summary>{summary}</p>}
           {result && <FileDownload href={result} name="redacted.pdf" />}
         </div>

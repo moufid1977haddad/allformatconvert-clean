@@ -28,6 +28,8 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'p21-robust-'));
 
 // Tools whose job is to accept any bytes: a result from corrupt / wrong input is right there.
+// Tools whose answer to any file is a report (properties, a verdict): their report is the right answer.
+const INFO_TOOLS = new Set(['file-metadata', 'file-comparator', 'image-metadata', 'audio-metadata', 'video-metadata']);
 const ANY_BYTES = new Set(['hash-generator', 'base64-encoder', 'file-splitter', 'file-merger', 'zip-creator', 'file-encryptor', 'file-metadata',
   'file-comparator', 'checksum-calculator', 'file-converter', 'image-to-base64', 'file-size-calculator', 'binary-viewer', 'hex-viewer']);
 
@@ -69,7 +71,7 @@ const realPdf = await (async () => { const d = await PDFDocument.create(); d.add
 const realPng = await sharp({ create: { width: 64, height: 64, channels: 3, background: '#4080c0' } }).png().toBuffer();
 const lockedPdf = fs.readFileSync(path.join(ROOT, 'scripts', 'converter-tests', 'fixtures', 'encrypted-user-password.pdf'));
 const giantPng = path.join(dir, 'giant.png');
-if (cases.includes('giant')) await sharp({ create: { width: 30000, height: 30000, channels: 1, background: 0 }, limitInputPixels: false }).png({ compressionLevel: 9 }).toFile(giantPng);
+if (cases.includes('giant')) await sharp({ create: { width: 30000, height: 30000, channels: 3, background: '#000' }, limitInputPixels: false }).greyscale().png({ compressionLevel: 9 }).toFile(giantPng);
 const silentMp4 = (() => { // a real MP4 without sound, from the repo's fixtures if one exists
   const cand = [path.join(ROOT, 'docs', 'audit', 'fixtures-safari'), path.join(ROOT, 'scripts', 'audit', 'fixtures', 'files')];
   for (const d of cand) if (fs.existsSync(d)) for (const f of fs.readdirSync(d)) if (/no-?audio|silent|noaudio/i.test(f) && /\.mp4$/i.test(f)) return path.join(d, f);
@@ -87,7 +89,10 @@ function fixture(c, t) {
   return p;
 }
 
-const MESSAGE = /could ?n[o']t|can ?n[o']t|cannot|unable|failed|invalid|damaged|corrupt|empty|0 bytes|not a (valid )?|isn'?t a|unsupported|not supported|doesn'?t|does not|no (audio|sound|pages?|pictures?|image)|too (large|big)|over the|limit|megapixel|password|protected|encrypted|error|unreadable|unrecognized|wrong|different format|only accepts|please (choose|select|use)|doesn't take|this tool (takes|needs|works)/i;
+// Good companions for the two-file tools
+const GOOD = { pdf: path.join(dir, 'good.pdf'), png: path.join(dir, 'good.png'), mp3: path.join(ROOT, 'docs', 'audit', 'fixtures-safari', 'safari-tone-B-3s.mp3'), mp4: path.join(ROOT, 'scripts', 'audit', 'fixtures', 'files', 'sample.mp4') };
+fs.writeFileSync(GOOD.pdf, realPdf); fs.writeFileSync(GOOD.png, realPng);
+const MESSAGE = /could ?n[o']t|can ?n[o']t|cannot|unable|failed|invalid|damaged|corrupt|empty|0 bytes|not an? (valid )?|isn'?t a|unsupported|not supported|doesn'?t|does not|no (audio|sound|pages?|pictures?|image)|too (large|big)|over the|limit|megapixel|password|protected|encrypted|error|unreadable|unrecognized|wrong|different format|only accepts|please (choose|select|use)|doesn't take|this tool (takes|needs|works)|not available/i;
 const BUSY = /…|\.\.\.|ing\b/;
 
 const b = await engine.launch();
@@ -95,47 +100,67 @@ const rows = [];
 let fails = 0, passes = 0;
 const tools = inventory().filter((t) => !only.length || only.includes(t.tool));
 console.log(`${tools.length} tools with a file input`);
-for (const t of tools) {
-  for (const c of cases) {
-    const file = fixture(c, t);
-    if (!file) continue;
+const jobs = [];
+for (const t of tools) for (const c of cases) { const file = fixture(c, t); if (file) jobs.push({ t, c, file }); }
+async function runCase({ t, c, file }) {
+  {
     const ctx = await b.newContext({ acceptDownloads: true });
     if (process.argv.includes('--no-vercel-toolbar')) await ctx.route(/vercel\.live/, (r) => r.abort());
     // NO PAID CALL, EVER: every /api/ route and the media service are played here. A page that sends the bad file to
     // the server gets the refusal our routes give ("422, this file could not be read") and must show it.
+    // --real-media (preview only): OUR media service is reached for real (ticket route + service host), to see its
+    // own refusal of a bad video reach the page; every other route stays played (paid providers never reached).
+    const realMedia = process.argv.includes('--real-media');
     await ctx.route('**/api/**', (r) => (r.request().url().includes('/api/report-error')
       ? r.fulfill({ status: 204, body: '' })
+      : realMedia && r.request().url().includes('/api/media/') ? r.continue()
       : r.fulfill({ status: 422, contentType: 'application/json', body: JSON.stringify({ error: 'This file could not be read. It may be damaged or not the right type.' }) })));
     const host = new URL(origin).host;
-    await ctx.route((u) => u.host !== host, (r) => (['POST', 'PUT', 'PATCH'].includes(r.request().method()) ? r.abort() : r.continue()));
+    await ctx.route((u) => u.host !== host, (r) => (['POST', 'PUT', 'PATCH'].includes(r.request().method()) && !realMedia ? r.abort() : r.continue())); // the page itself never posts to a paid provider (those calls are server-side, played above)
     const p = await ctx.newPage();
-    const errors = []; p.on('pageerror', (e) => errors.push(e.message.slice(0, 200)));
+    const errors = []; p.on('pageerror', (e) => { if (!/navigator\.storage\.persisted/.test(e.message)) errors.push(e.message.slice(0, 200)); }); // the Vercel preview toolbar under WebKit (absent on www), see all-pages-load.mjs
     let verdict = '', detail = '';
     try {
       await p.goto(`${origin}/tools/${t.slug}`, { waitUntil: 'load', timeout: 60000 });
       await p.waitForTimeout(800);
       const before = (await p.locator('main').first().innerText().catch(() => '')).length;
-      await p.locator('input[type=file]').first().setInputFiles(file);
+      // Tools that need two files (merge, compare): the bad file plus a good one of the same kind.
+      const needsTwo = /merg|compar|join|combin|duplicat/.test(t.tool);
+      const good = { pdf: GOOD.pdf, image: GOOD.png, audio: GOOD.mp3, video: GOOD.mp4, other: GOOD.pdf }[kindOf(t.accept, extFor(t.accept))];
+      // A tool with modes (Audio to Text: microphone / file; Hash Generator: text / file) shows its file field once
+      // the file mode is chosen.
+      const fileMode = p.locator('main').getByRole('button', { name: /upload .*file|^file$/i }).or(p.locator('main').getByRole('radio', { name: /file/i })).first();
+      if (await fileMode.count()) await fileMode.click({ timeout: 5000 }).catch(() => {});
+      const inputs = p.locator('main input[type=file]');
+      if ((await inputs.count()) >= 2 && good) { // two separate fields (File Comparator): the bad file and a good one
+        await inputs.nth(0).setInputFiles(file, { timeout: 10000 });
+        await inputs.nth(1).setInputFiles(good, { timeout: 10000 });
+      } else await p.locator('input[type=file]').first().setInputFiles(needsTwo && good ? [file, good] : file, { timeout: 10000 });
+      const pw = p.locator('main input[type=password]');
+      if (await pw.count()) for (let i = 0; i < await pw.count(); i++) await pw.nth(i).fill('robustness-Test-123').catch(() => {});
       await p.waitForTimeout(1500);
       const msgNow = async () => {
         const texts = await p.locator('[role=alert], [role=status], .text-red-400, .text-red-500, .text-red-600, .text-red-700, .text-amber-700, .text-amber-800, .text-amber-900, .text-yellow-400, [class*="bg-red"], [class*="bg-amber"]').allInnerTexts().catch(() => []);
-        return texts.map((x) => x.trim()).filter((x) => x && MESSAGE.test(x)).join(' | ');
+        return texts.map((x) => String(x || '').trim()).filter((x) => x && MESSAGE.test(x)).join(' | ');
       };
       let msg = await msgNow();
       if (!msg && !(await p.locator('[data-file-download]').count())) {
         // the tool's main action
-        const btns = p.locator('main button:visible, button:visible');
+        const btns = p.locator('main button:visible');
         const n = await btns.count();
+        // the tool's main action: among the matching, enabled buttons, the widest (the primary, full-width one) —
+        // not a mode tab such as "Encrypt" / "Decrypt"
+        let best = null, bestW = -1, bestTxt = '';
         for (let i = 0; i < n; i++) {
           const btn = btns.nth(i);
           const txt = ((await btn.innerText().catch(() => '')) || '').trim();
-          if (!txt || /^(✕|×|↑|↓|cancel|clear|reset|remove all|choose|browse|select|add|copy|paste|swap|menu|search|light|dark|language|log ?in|sign|subscribe)/i.test(txt) || /^[A-Z]{2}$/.test(txt)) continue;
-          if (!/convert|compress|merge|split|remove|extract|process|start|create|generate|resize|rotate|crop|apply|trim|encrypt|decrypt|unlock|protect|repair|scan|analy|run|make|translate|summar|transcribe|check|detect|compare|join|cut|boost|change|clean|optimi|fix|read|caption|upscale|enhance|blur|sharpen|flip|watermark|number|delete|organi|redact|ocr|edit|play|filter|mute|reverse|speed|loop|equaliz|normaliz|amplif|reduce|shrink|turn|export|save|unzip|open|view|decode|encode|hash|calculat|count|parse|format|validat|beautif|minif|go\b|submit|upload/i.test(txt)) continue;
+          if (!txt || /^(✕|×|↑|↓|cancel|clear|reset|remove all|choose|browse|select|add (more|files?|images?|pdfs?|photos?|videos?)b|copy|paste|swap|menu|search|light|dark|language|log ?in|sign|subscribe|use microphone|record)/i.test(txt) || /^[A-Z]{2}$/.test(txt)) continue;
+          if (!/^add|noise|border|vignette|sepia|grayscale|greyscale|invert|pixelat|bright|contrast|saturat|round|meme|collage|mirror|tint|convert|compress|merge|split|remove|extract|process|start|create|generate|resize|rotate|crop|apply|trim|encrypt|decrypt|unlock|protect|repair|scan|analy|run|make|translate|summar|transcribe|check|detect|compare|join|cut|boost|change|clean|optimi|fix|read|caption|upscale|enhance|blur|sharpen|flip|watermark|number|delete|organi|redact|ocr|edit|play|filter|mute|reverse|speed|loop|equaliz|normaliz|amplif|reduce|shrink|turn|export|save|unzip|open|view|decode|encode|hash|calculat|count|parse|format|validat|beautif|minif|go|submit|upload/i.test(txt)) continue;
           if (await btn.isDisabled().catch(() => true)) continue;
-          await btn.click({ timeout: 5000 }).catch(() => {});
-          detail = `clicked "${txt.slice(0, 40)}"`;
-          break;
+          const w = (await btn.boundingBox().catch(() => null))?.width || 0;
+          if (w > bestW) { best = btn; bestW = w; bestTxt = txt; }
         }
+        if (best) { await best.click({ timeout: 5000 }).catch(() => {}); detail = `clicked "${bestTxt.slice(0, 40)}"`; }
       }
       const t0 = Date.now();
       let results = 0;
@@ -149,13 +174,16 @@ for (const t of tools) {
       const busyBtn = (await p.locator('button:visible').allInnerTexts().catch(() => [])).find((x) => /…|\.\.\.$/.test(x.trim()) && /ing/i.test(x));
       if (errors.length) verdict = 'CRASH';
       else if (bodyLen < Math.min(200, before / 3)) verdict = 'BLANK';
-      else if (results && !(ANY_BYTES.has(t.tool) && c !== 'empty')) verdict = 'FAKE-RESULT';
+      // an archive may hold an empty file (Zip Creator): its result is right even for an empty one
+      // an archive may hold an empty file (Zip Creator), and an empty file has a well-known hash (Hash Generator)
+      else if (results && !(ANY_BYTES.has(t.tool) && (c !== 'empty' || t.tool === 'zip-creator' || t.tool === 'hash-generator'))) verdict = 'FAKE-RESULT';
       else if (results) verdict = 'OK-RESULT';
       else if (msg) verdict = 'OK-MESSAGE';
+      else if (INFO_TOOLS.has(t.tool) && /0 B|bytes|different|identical|Real format|Type|No embedded metadata|cannot display/i.test(await p.locator('main').innerText().catch(() => ''))) verdict = 'OK-REPORT';
       else if (busyBtn) verdict = 'STUCK';
       else verdict = 'SILENT';
       detail += ` ${msg.slice(0, 160)}${busyBtn ? ` busy:"${busyBtn}"` : ''}${errors.length ? ' err:' + errors[0] : ''}`;
-    } catch (e) { verdict = 'BENCH-ERROR'; detail = String(e).slice(0, 160); }
+    } catch (e) { verdict = 'BENCH-ERROR'; detail = String((e && e.stack) || e).slice(0, 400); }
     const ok = verdict.startsWith('OK');
     if (ok) passes++; else fails++;
     rows.push({ tool: t.slug, case: c, verdict, detail: detail.trim() });
@@ -163,6 +191,10 @@ for (const t of tools) {
     await ctx.close();
   }
 }
+// 4 pages at a time
+const POOL = Number(arg('pool') || 4);
+let next = 0;
+await Promise.all(Array.from({ length: POOL }, async () => { while (next < jobs.length) await runCase(jobs[next++]); }));
 await b.close();
 if (arg('json')) fs.writeFileSync(arg('json'), JSON.stringify(rows, null, 1));
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);

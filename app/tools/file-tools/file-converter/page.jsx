@@ -1,4 +1,5 @@
 ﻿'use client';
+import { emptyFileProblem } from '../../../lib/fileChecks';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { FileDownload } from '../../../components/FileDownload';
@@ -8,7 +9,7 @@ export default function FileConverterPage() {
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [error, setError] = useState('');
   const inputRef = useRef();
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setDownloadUrl(null); setError(''); };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setDownloadUrl(null); setError(''); if (f && emptyFileProblem(f)) { setFile(null); setError(emptyFileProblem(f, 'convert')); return; } setFile(f); }; // P21: empty file said
   const convert = async () => {
     if (!file) return;
     setError('');
@@ -50,7 +51,7 @@ export default function FileConverterPage() {
           </div>
           <div><label className="block text-sm text-neutral-500 mb-1">Convert to</label><select aria-label="Convert to" value={format} onChange={e => setFormat(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3"><option value="txt">TXT</option><option value="json">JSON</option><option value="csv">CSV</option><option value="html">HTML</option></select></div>
           <button onClick={convert} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert</button>
-          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+          {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
           {downloadUrl && <FileDownload href={downloadUrl} name={file.name.replace(/\.[^.]+$/, '') + '.' + format} />}
         </div>
       </div>

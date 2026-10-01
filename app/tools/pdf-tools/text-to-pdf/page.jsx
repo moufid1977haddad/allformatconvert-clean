@@ -1,4 +1,5 @@
 ﻿'use client';
+import { textFileProblem } from '../../../lib/fileChecks';
 import { useMemo, useState, useRef } from 'react';
 import { textToPdf, needsRenderer, textToHtmlDocument } from '../../../lib/textPdf';
 import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
@@ -20,6 +21,11 @@ export default function TextToPdfPage() {
   const handleFile = async (e) => {
     const f = e.target.files[0];
     e.target.value = '';
+    if (!f) return;
+    setDownloadUrl(null);
+    // P21 (robustness): an empty or non-text file (a PDF or an image renamed .txt) is said at once.
+    const problem = await textFileProblem(f, 'text');
+    if (problem) { setFile(null); setText(''); setStatus(problem); return; }
     setFile(f);
     const content = await f.text();
     setText(content);
@@ -75,7 +81,7 @@ export default function TextToPdfPage() {
           <button onClick={convert} disabled={!text || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Converting...' : 'Convert to PDF'}
           </button>
-          {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
+          {status && <p role="status" className="text-center text-neutral-700 text-sm">{status}</p>}
           {downloadUrl && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
               <div className="text-green-400 text-xl font-bold mb-3">Done!</div>

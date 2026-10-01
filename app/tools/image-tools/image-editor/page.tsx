@@ -13,6 +13,7 @@ export default function ImageEditorPage() {
   const [srcType, setSrcType] = useState('image/png');
   const [file, setFile] = useState<File | null>(null);
   const [saveError, setSaveError] = useState('');
+  const [loadError, setLoadError] = useState('');
   // The full-size edited photo, made when the visitor asks (Save image) and offered through the site's download row.
   const [exported, setExported] = useState<{ blob: Blob; name: string } | null>(null);
   const alertError = (m: string) => setSaveError(m);
@@ -39,16 +40,28 @@ export default function ImageEditorPage() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setSrcType(file.type);
-    setFile(file);
     setSaveError('');
+    setLoadError('');
+    e.target.value = '';
+    // P21 (robustness): an empty, damaged or unreadable file, or a picture too large to edit, was ignored without a
+    // word (the upload area simply stayed empty).
+    if (!file.size) { setLoadError('This file is empty (0 bytes). Choose the image again.'); return; }
     // An object URL, not a data: URL: a phone photo is not copied into a string of tens of MB.
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
+      if (img.naturalWidth * img.naturalHeight > 100_000_000) {
+        setLoadError(`This image is ${img.naturalWidth} × ${img.naturalHeight} pixels: too large to edit here (100 megapixels at most). Make it smaller first with our Image Resizer.`);
+        URL.revokeObjectURL(url);
+        return;
+      }
+      // the file and its type are taken only once the picture is known to be usable (review, 02/10)
+      setSrcType(file.type);
+      setFile(file);
       setOriginalImage(img);
       setImage(url);
     };
+    img.onerror = () => { URL.revokeObjectURL(url); setLoadError(`"${file.name}" is not an image this browser can open (it may be damaged, or another kind of file). Choose a JPG, PNG, WebP or GIF image.`); };
     img.src = url;
   };
 
@@ -253,6 +266,7 @@ export default function ImageEditorPage() {
             )}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
           </div>
+          {loadError && <p role="alert" className="text-red-600 text-center text-sm">{loadError}</p>}
 
           {image && (
             <>

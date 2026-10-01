@@ -8,11 +8,13 @@ export default function GifCompressorPage() {
   const [quality, setQuality] = useState(80);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const inputRef = useRef();
 
   const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setResult(null); };
 
   const compress = async () => {
+    setError('');
     if (!file) return;
     setLoading(true);
     try {
@@ -27,7 +29,7 @@ export default function GifCompressorPage() {
       });
       const outBlob = outFiles[0];
       setResult({ url: URL.createObjectURL(outBlob), originalSize: file.size, newSize: outBlob.size });
-    } catch(e) { alert('Error: ' + e.message); }
+    } catch(e) { setError((e && e.message) || 'This file could not be converted. It may be damaged.'); } // P21: a message on the page, not a blocking alert()
     setLoading(false);
   };
 
@@ -45,6 +47,7 @@ export default function GifCompressorPage() {
           </div>
           <div><label className="block text-sm text-neutral-500 mb-1">Quality: {quality}%</label><input aria-label="Quality (%)" type="range" min="10" max="100" value={quality} onChange={e => setQuality(parseInt(e.target.value))} className="w-full" /></div>
           <button onClick={compress} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">{loading ? 'Compressing...' : 'Compress'}</button>
+          {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
           {result && (
             <div className="space-y-3">
               <img src={result.url} className="max-h-48 mx-auto rounded border border-neutral-200" />

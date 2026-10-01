@@ -1,4 +1,5 @@
 ﻿'use client';
+import { headerSize, sizeProblem } from '../../../lib/gifEncode';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { gifFrames } from '../../../lib/gifFrames';
@@ -7,6 +8,7 @@ export default function GifToApngPage() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const inputRef = useRef();
 
   const handleFile = (e) => {
@@ -19,6 +21,7 @@ export default function GifToApngPage() {
 
   const convert = async () => {
     if (!file) return;
+    setError('');
     setLoading(true);
     try {
       const UPNGModule = await import('upng-js');
@@ -26,14 +29,19 @@ export default function GifToApngPage() {
       // Frames composited as a GIF decoder does (29/09): the old putImageData
       // pasting left holes wherever an optimised GIF uses transparency for
       // "unchanged", and ignored disposal 3.
-      const { width, height, frames } = await gifFrames(await file.arrayBuffer());
+      const buf = await file.arrayBuffer();
+      const head = new Uint8Array(buf, 0, Math.min(16, buf.byteLength));
+      if (!buf.byteLength || !(head[0] === 0x47 && head[1] === 0x49 && head[2] === 0x46)) throw new Error('This is not a GIF file (or it is empty). Choose an animated GIF.');
+      const tooBig = sizeProblem(headerSize(head));
+      if (tooBig) throw new Error(tooBig);
+      const { width, height, frames } = await gifFrames(buf);
       const rgbaFrames = frames.map((f) => f.imageData.data.buffer);
       const delays = frames.map((f) => f.delay);
 
       const pngBuffer = UPNG.encode(rgbaFrames, width, height, 0, delays);
       const blob = new Blob([pngBuffer], { type: 'image/png' });
       setResult({ url: URL.createObjectURL(blob), frameCount: rgbaFrames.length });
-    } catch(e) { alert('Error: ' + e.message); }
+    } catch(e) { setError((e && e.message) || 'This file could not be converted. It may be damaged.'); } // P21: a message on the page, not a blocking alert()
     setLoading(false);
   };
 
@@ -48,6 +56,7 @@ export default function GifToApngPage() {
             <input ref={inputRef} type="file" accept="image/gif" className="hidden" onChange={handleFile} />
           </div>
           <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">{loading ? 'Converting...' : 'Convert to APNG'}</button>
+          {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
           {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><p className="text-green-600 text-center text-sm font-semibold">{result.frameCount} frame{result.frameCount === 1 ? '' : 's'}</p><FileDownload href={result.url} name="converted.png" /></div>}
         </div>
       </div>

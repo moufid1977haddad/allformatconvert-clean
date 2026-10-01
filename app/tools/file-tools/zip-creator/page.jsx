@@ -110,14 +110,14 @@ export default function ZipCreatorPage() {
               <p className={`text-xs text-right ${overSizeLimit ? 'text-red-500' : 'text-neutral-400'}`}>{formatBytes(totalSize)} total</p>
             </div>
           )}
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <label htmlFor="compression-level" className="text-sm text-neutral-600">Compression level</label>
             <select
               id="compression-level"
               value={compressionLevel}
               onChange={(e) => setCompressionLevel(Number(e.target.value))}
               disabled={loading}
-              className="border border-neutral-200 rounded-lg px-3 py-2 text-sm bg-white disabled:bg-neutral-100"
+              className="min-w-0 max-w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm bg-white disabled:bg-neutral-100"
             >
               <option value={0}>None (store only, fastest)</option>
               <option value={1}>Fast (lower compression)</option>

@@ -1,4 +1,5 @@
 'use client';
+import { spreadsheetProblem } from '../../../lib/fileChecks';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import ProgressBar from '../../../components/ProgressBar';
@@ -70,7 +71,7 @@ export default function ExcelToJsonPage() {
   const maxFileBytes = isMobile ? MOBILE_MAX_FILE_SIZE_BYTES : MAX_FILE_SIZE_BYTES;
   const maxFileLabel = isMobile ? MOBILE_MAX_FILE_SIZE_LABEL : MAX_FILE_SIZE_LABEL;
 
-  const handleFile = (e) => {
+  const handleFile = async (e) => {
     const f = e.target.files[0];
     e.target.value = '';
     if (!f) return;
@@ -82,6 +83,9 @@ export default function ExcelToJsonPage() {
       setFileName('');
       return;
     }
+    // P21: an empty file, or something that is not a workbook, gets a sentence instead of a "result" read as text.
+    const problem = await spreadsheetProblem(f, { allowCsv: true });
+    if (problem) { setError(problem); setFileName(''); return; }
     setFileName(f.name);
     setSheetNames(null);
     setTimeEstimate(formatEstimate(estimateSeconds(f.size)));
