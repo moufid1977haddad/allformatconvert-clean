@@ -58,12 +58,21 @@ export function getAudioFormat(value) {
   return AUDIO_OUTPUT_FORMATS.find((f) => f.value === value) || AUDIO_OUTPUT_FORMATS[0];
 }
 
+// P21 (02/10): quality choice for the lossy formats. Without -b:a, ffmpeg encodes MP3 / AAC at 128 kbps; 123apps
+// offers 64 to 320 kbps ("Standard 128" by default), CloudConvert a bitrate field. Default here 192 kbps (above the
+// usual "standard"), up to 320. Lossless formats ignore it.
+export const AUDIO_BITRATES = [[128, 'Standard — 128 kbps'], [192, 'High — 192 kbps'], [256, 'Very high — 256 kbps'], [320, 'Best — 320 kbps']];
+export const DEFAULT_AUDIO_KBPS = 192;
+const BITRATE_FORMATS = new Set(['mp3', 'aac', 'm4a', 'm4r', 'm4b', 'ogg', 'wma', 'ac3', 'mp2']);
+export const formatTakesBitrate = (formatValue) => BITRATE_FORMATS.has(getAudioFormat(formatValue).value);
+
 // Builds the ffmpeg output filename + extra codec args + download MIME for
 // a chosen format value (see getAudioFormat's ALAC comment for why this
-// isn't just `output.${value}`).
-export function buildOutputSpec(formatValue) {
+// isn't just `output.${value}`). `kbps`: optional target bitrate for the lossy formats.
+export function buildOutputSpec(formatValue, kbps) {
   const fmt = getAudioFormat(formatValue);
-  return { outputName: 'output.' + fmt.ext, extraArgs: fmt.extraArgs || [], mime: fmt.mime, ext: fmt.ext };
+  const rate = kbps && BITRATE_FORMATS.has(fmt.value) ? ['-b:a', `${fmt.value === 'ac3' || fmt.value === 'mp2' ? Math.max(kbps, 192) : kbps}k`] : [];
+  return { outputName: 'output.' + fmt.ext, extraArgs: [...(fmt.extraArgs || []), ...rate], mime: fmt.mime, ext: fmt.ext };
 }
 
 // A real input file's own extension, sanitized to plain alphanumerics so it
