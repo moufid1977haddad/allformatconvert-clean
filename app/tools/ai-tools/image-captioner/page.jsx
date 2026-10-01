@@ -88,7 +88,7 @@ export default function ImageCaptionerPage() {
           "Copy the generated caption and use it for your website, social media, or accessibility needs."
         ]}
         faqs={[
-          { q: "Is Image Captioner really free to use?", a: "Yes, Image Captioner is free to use with no signup or subscription required." },
+          { q: "Is Image Captioner really free to use?", a: "Yes, Image Captioner is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
           { q: "What image formats are supported?", a: "It accepts common image formats including JPG, PNG, GIF, and WebP." },
           { q: "How accurate are the AI-generated captions?", a: "The vision model generally produces relevant, descriptive captions, but as with any AI output, you should review and edit the caption before relying on it for accessibility purposes." },
           { q: "Is my privacy protected when I upload images?", a: "Your image is sent to OpenAI's API to generate the caption. It is not stored on our servers, but it is processed by that third-party service to produce your result." }

@@ -65,7 +65,7 @@ export default function SentimentAnalyzerPage() {
           "Read the result, which includes the sentiment classification, a confidence estimate, and the reasoning behind it."
         ]}
         faqs={[
-          { q: "Is Sentiment Analyzer really free to use?", a: "Yes, Sentiment Analyzer is free to use with no signup or subscription required." },
+          { q: "Is Sentiment Analyzer really free to use?", a: "Yes, Sentiment Analyzer is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
           { q: "What languages does Sentiment Analyzer support?", a: "It works best with English, but the underlying AI model can generally handle many other languages as well, with results that may vary in accuracy." },
           { q: "How accurate is the sentiment analysis?", a: "There's no fixed accuracy figure — results depend on the AI model's interpretation of context, and it can misjudge sarcasm or ambiguous phrasing like any sentiment analysis tool." },
           { q: "Can I analyze multiple texts at once?", a: "No, the tool processes one text submission at a time — there's no bulk or batch processing option." }

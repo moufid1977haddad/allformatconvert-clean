@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Video Filter — Apply One Visual Effect (grayscale, Sepia," },
-  description: "Video Filter applies one visual effect — Grayscale, Sepia, Invert, Blur, Brightness, Contrast, or Saturate — to your video, in your browser.",
+  description: "Video Filter applies one visual effect — Grayscale, Sepia, Invert, Blur, Brightness, Contrast, or Saturate — to your video on our own server, in every browser including Safari and iPhone, and gives an MP4 with the original sound.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-filter" },
   openGraph: {
     title: "Video Filter — Apply One Visual Effect (grayscale, Sepia,",
-    description: "Video Filter applies one visual effect — Grayscale, Sepia, Invert, Blur, Brightness, Contrast, or Saturate — to your video, in your browser.",
+    description: "Video Filter applies one visual effect — Grayscale, Sepia, Invert, Blur, Brightness, Contrast, or Saturate — to your video on our own server, in every browser including Safari and iPhone, and gives an MP4 with the original sound.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-filter",
   },
 };

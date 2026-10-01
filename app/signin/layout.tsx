@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Sign In to OnlineConverTools" },
-  description: "Sign in to your OnlineConverTools account to access your free online file conversion and editing tools.",
+  description: "Sign in to your OnlineConverTools account. An account is optional: every tool works without one.",
   alternates: { canonical: "https://www.onlineconvertools.com/signin" },
   openGraph: {
     title: "Sign In to OnlineConverTools",
-    description: "Sign in to your OnlineConverTools account to access your free online file conversion and editing tools.",
+    description: "Sign in to your OnlineConverTools account. An account is optional: every tool works without one.",
     url: "https://www.onlineconvertools.com/signin",
   },
 };

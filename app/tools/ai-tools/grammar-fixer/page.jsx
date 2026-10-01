@@ -121,7 +121,7 @@ export default function GrammarFixerPage() {
           "Click any change to undo it (click again to restore it), or use Keep all / Undo all, then copy the result."
         ]}
         faqs={[
-          { q: "Is Grammar Fixer really free to use?", a: "Yes, Grammar Fixer is free to use with no signup or subscription required." },
+          { q: "Is Grammar Fixer really free to use?", a: "Yes, Grammar Fixer is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
           { q: "What types of errors does Grammar Fixer detect?", a: "It can catch spelling mistakes, punctuation errors, subject-verb agreement issues, and other common grammatical mistakes as part of rewriting your text." },
           { q: "Can I see what was changed?", a: "Yes. Every change is shown word by word in your text, and each one can be undone on its own; the text you copy includes only the changes you kept. Undoing them all gives back your original text exactly." },
           { q: "Is my text private when using Grammar Fixer?", a: "Your text is sent to OpenAI's API to generate the correction. It is not stored on our servers or shared for any purpose beyond producing your result." },

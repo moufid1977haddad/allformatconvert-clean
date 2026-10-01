@@ -94,7 +94,7 @@ export default function Page() {
           "Click 'Copy Translation' to copy the result — there's no PDF download."
         ]}
         faqs={[
-          { q: "Is PDF Translate free to use?", a: "Yes, it's free with no signup required." },
+          { q: "Is PDF Translate free to use?", a: "Yes, it's free with no signup required. Because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
           { q: "How many languages does it support?", a: "10: English, French, Spanish, German, Arabic, Chinese, Japanese, Portuguese, Italian, and Russian." },
           { q: "Will the formatting of my PDF be preserved?", a: "No — the output is plain translated text in a text box, not a formatted PDF. Images, layout, and structure aren't recreated." },
           { q: "How much of my PDF actually gets translated?", a: "Only the first 5 pages are extracted, and only the first 3,000 characters of that extracted text are sent for translation — longer documents get cut off." }

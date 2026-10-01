@@ -65,7 +65,7 @@ export default function AIParaphraserPage() {
           "Copy the paraphrased result and use it in your document or project."
         ]}
         faqs={[
-          { q: "Is AI Paraphraser really free to use?", a: "Yes, AI Paraphraser is free to use with no signup or subscription required." },
+          { q: "Is AI Paraphraser really free to use?", a: "Yes, AI Paraphraser is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
           { q: "Can I paraphrase long documents?", a: "The tool works best on paragraphs and shorter passages. Very long text may be truncated by the underlying AI model's response limit, so it's best to paraphrase one section at a time." },
           { q: "Will the paraphrased content be plagiarism-free?", a: "The AI generates a genuinely reworded version of your input, but no tool can guarantee a result is undetectable by plagiarism checkers — always review the output before using it." },
           { q: "Do I need to create an account to use this tool?", a: "No account is necessary; you can use AI Paraphraser immediately without registration." }

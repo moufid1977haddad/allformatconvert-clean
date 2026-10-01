@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Video Compressor — Compress Videos Online Free" },
-  description: "Video Compressor re-records your video at a lower bitrate using the browser's native MediaRecorder API, entirely client-side. Output is always WebM.",
+  description: "Video Compressor shrinks your video with the H.264 encoder on our own server, so it works in every browser including Safari and iPhone, and gives an MP4 that plays everywhere. Files up to 1 GB, deleted after download.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-compressor" },
   openGraph: {
     title: "Video Compressor — Compress Videos Online Free",
-    description: "Video Compressor re-records your video at a lower bitrate using the browser's native MediaRecorder API, entirely client-side. Output is always WebM.",
+    description: "Video Compressor shrinks your video with the H.264 encoder on our own server, so it works in every browser including Safari and iPhone, and gives an MP4 that plays everywhere. Files up to 1 GB, deleted after download.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-compressor",
   },
 };

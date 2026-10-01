@@ -163,7 +163,7 @@ export default function ColorConverterPage() {
           { q: "Is Color Converter free to use?", a: "Yes, it's completely free with no registration required." },
           { q: "Is the CMYK value ready for print?", a: "It is the standard formula (K = 1 − max(R, G, B)), the same as most online converters. Printers convert with a color profile for their ink and paper, so check a proof for brand colors." },
           { q: "Does it support RGBA, HSLA or named colors?", a: "Not currently — there is no alpha/transparency channel and named colors are not accepted." },
-          { q: "Is my data private?", a: "Yes, all color math happens locally in your browser — nothing is sent to a server." }
+          { q: "Is my data private?", a: "Yes, all color math happens locally in your browser — what you enter is never sent to a server." }
         ]}
         tips={[
           "Use the color picker swatch for quick visual selection instead of typing values manually.",

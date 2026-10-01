@@ -65,8 +65,8 @@ export default function DataExtractorPage() {
           "Copy the structured result and paste it into your spreadsheet or document."
         ]}
         faqs={[
-          { q: "Is Data Extractor really free to use?", a: "Yes, Data Extractor is free to use with no signup or subscription required." },
-          { q: "What input does Data Extractor accept?", a: "You paste plain text directly into the tool. There is no file upload — if your source is a PDF or webpage, copy the text from it first and paste it in." },
+          { q: "Is Data Extractor really free to use?", a: "Yes, Data Extractor is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
+          { q: "What input does Data Extractor accept?", a: "You paste plain text directly into the tool. There is no file picker — if your source is a PDF or webpage, copy the text from it first and paste it in. The text you paste is sent to OpenAI through our server to extract the data." },
           { q: "What format is the extracted data in?", a: "The AI returns the extracted data as readable text formatted as JSON or a table, which you can copy. There is no direct file download to CSV or Excel." },
           { q: "Can Data Extractor read scanned documents or images?", a: "No, this tool only processes text you paste in — it doesn't perform OCR on images or scanned documents." }
         ]}

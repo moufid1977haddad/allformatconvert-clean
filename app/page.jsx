@@ -442,7 +442,7 @@ export default function Home() {
             }}>
               <ShieldCheck size={16} style={{ flexShrink:0, marginTop:'2px', color: dark ? '#4ade80' : '#16a34a' }} />
               <span style={{ fontSize:'13px', color: dark ? '#86efac' : '#166534', lineHeight:'1.5' }}>
-                Most tools run right in your browser — nothing uploaded
+                Most tools run right in your browser — your file isn't uploaded
               </span>
             </div>
             <div style={{ display:'flex', flexWrap:'wrap', gap:'10px', marginBottom:'8px' }}>
@@ -565,7 +565,7 @@ export default function Home() {
       {/* ═══ FOOTER STRIP ═══ */}
       <section style={{ background: dark ? '#111111' : '#fff', padding:'14px 24px', textAlign:'center', borderTop: dark ? '1px solid #1e293b' : '1px solid #e2e8f0' }}>
         <p style={{ fontSize:'14px', color:'#4f46e5', display:'flex', flexWrap:'wrap', alignItems:'center', justifyContent:'center', gap:'6px' }}>
-          <Sparkles size={14} /> <strong style={{ color:'#4338ca' }}>No watermarks</strong> · <Laptop size={14} /> <strong style={{ color:'#4338ca' }}>Works in your browser</strong> · <Lock size={14} /> <strong style={{ color:'#4338ca' }}>No data stored</strong> · <DollarSign size={14} /> <strong style={{ color:'#4338ca' }}>Always free</strong>
+          <Sparkles size={14} /> <strong style={{ color:'#4338ca' }}>No watermarks</strong> · <Laptop size={14} /> <strong style={{ color:'#4338ca' }}>Most tools run in your browser</strong> · <Lock size={14} /> <Link href="/privacy" style={{ color:'#4338ca', fontWeight:700, textDecoration:'underline' }}>Files sent to a server are deleted after processing</Link> · <DollarSign size={14} /> <strong style={{ color:'#4338ca' }}>Free, no sign-up</strong>
         </p>
       </section>
 

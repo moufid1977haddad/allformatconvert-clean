@@ -129,7 +129,7 @@ export default function ScreenRecorderPage() {
       </div>
       <SeoContent
         title="Screen Recorder"
-        description="Screen Recorder captures your screen, window, or browser tab using the browser's built-in screen-sharing and MediaRecorder APIs — entirely client-side, with no software installation. Recordings are saved as MP4 (H.264 + AAC) in Chrome, Edge and Safari; Firefox can only record WebM, which one click turns into an MP4 on our video service."
+        description="Screen Recorder captures your screen, window, or browser tab using the browser's built-in screen-sharing and MediaRecorder APIs, in your browser, with no software installation (only Firefox's optional MP4 copy is made on our video service). Recordings are saved as MP4 (H.264 + AAC) in Chrome, Edge and Safari; Firefox can only record WebM, which one click turns into an MP4 on our video service."
         howTo={[
           "Click \"Start Recording\" and choose which screen, window, or tab to share when your browser prompts you.",
           "Perform the actions you want to record while the live preview plays.",
@@ -140,7 +140,7 @@ export default function ScreenRecorderPage() {
           { q: "What video format do recordings download as?", a: "MP4 (H.264 video, AAC sound) in Chrome, Edge and Safari, the format every phone and computer plays. Firefox can only record WebM: the page then offers to make an MP4 from it on our video service. The file extension always matches the real content." },
           { q: "Is Screen Recorder free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Does it record audio?", a: "It can capture audio from the screen or tab you're sharing if your browser and the shared source support it — it does not separately capture your microphone." },
-          { q: "Is my recording uploaded anywhere?", a: "No, recording happens entirely in your browser. Only if you click \"Make an MP4\" (Firefox) is the recording sent to our video service, which deletes it once the MP4 is made and downloaded." },
+          { q: "Is my recording uploaded anywhere?", a: "No: recording happens entirely in your browser, and only if you click \"Make an MP4\" (Firefox) is the recording sent to our video service, which deletes it once the MP4 is made and downloaded." },
           { q: "Can I record my screen on an iPhone or iPad?", a: "Not from a web page: Apple does not let browsers record the screen on iPhone and iPad. Use Screen Recording in Control Center instead." }
         ]}
         tips={[

@@ -66,7 +66,7 @@ export default function AudioTranscriberPage() {
           "Copy the transcript, or download it as a TXT file or as SRT / VTT subtitles with timings."
         ]}
         faqs={[
-          { q: "Is Audio Transcriber really free to use?", a: "Yes, Audio Transcriber is free to use with no signup or subscription required." },
+          { q: "Is Audio Transcriber really free to use?", a: "Yes, Audio Transcriber is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
           { q: "What audio formats does Audio Transcriber support?", a: "It accepts common audio formats such as MP3, WAV, and M4A, and most other formats your browser can select as an audio file." },
           { q: "How large can my audio file be?", a: `Uploads are limited to ${audioMaxLabel()} — the maximum the transcription engine (OpenAI Whisper) itself accepts. For longer recordings, split the audio into smaller segments and transcribe each one separately.` },
           { q: "Can I get subtitles (SRT or VTT)?", a: "Yes. Besides the plain text, you can download the transcript as SRT or WebVTT subtitles: each line comes with its start and end time, as detected by the speech recognition model, ready for YouTube, VLC or a video editor." },

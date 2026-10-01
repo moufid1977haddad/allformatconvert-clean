@@ -52,7 +52,7 @@ export default function WhitespaceRemoverPage() {
           { q: "Is Whitespace Remover free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "What's the difference between the buttons?", a: "\"Remove All Extra\" collapses repeated spaces and tabs, trims each line and removes extra blank lines. \"Remove Extra Spaces\" does the same inside lines but keeps every blank line. \"Remove Leading\"/\"Remove Trailing\" trim whitespace from the start or end of each line without touching spacing inside the line. \"Join Into One Line\" replaces every run of whitespace, line breaks included, with one space." },
           { q: "Does it handle non-breaking spaces?", a: "Yes — non-breaking and other Unicode spaces, common in text copied from web pages and PDFs, are collapsed like ordinary spaces." },
-          { q: "Is my data private?", a: "Yes, all processing happens locally in your browser — nothing is sent to a server." }
+          { q: "Is my data private?", a: "Yes, all processing happens locally in your browser — what you enter is never sent to a server." }
         ]}
         tips={[
           "Use \"Remove Extra Spaces\" instead of \"Remove All Extra\" when the number of blank lines matters (for example in code or a formatted list).",

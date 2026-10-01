@@ -41,7 +41,7 @@ export default function HtmlEntityDecoderPage() {
           { q: "What are HTML entities?", a: "Codes that represent characters with special meaning in HTML, such as &amp; for an ampersand, &lt; for a less-than sign, or &nbsp; for a non-breaking space." },
           { q: "Which entities does Decode understand?", a: "Every named HTML5 entity (like &nbsp;, &copy;, &euro;) and every numeric one, decimal (&#8364;) or hexadecimal (&#x20AC;), including emoji code points." },
           { q: "Are HTML tags in my text removed?", a: "No — only entities are decoded; tags such as <b> stay in the output exactly as written." },
-          { q: "Does it store or upload my data?", a: "No, encoding and decoding both happen entirely in your browser; nothing is sent to a server." }
+          { q: "Does it store or upload my data?", a: "No, encoding and decoding both happen entirely in your browser; what you enter is never sent to a server." }
         ]}
         tips={[
           "Encode then Decode round-trips back to your original text exactly.",

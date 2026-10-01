@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "MOBI to PDF — Properly Decodes Your Kindle Ebook's Internal" },
-  description: "MOBI to PDF decodes your Kindle ebook's internal text compression and structure right in your browser, then converts it to a real PDF.",
+  description: "MOBI to PDF decodes your Kindle ebook in your browser, then our own conversion service prints its text and images to a real PDF and deletes them right after.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/mobi-to-pdf" },
   openGraph: {
     title: "MOBI to PDF — Properly Decodes Your Kindle Ebook's Internal",
-    description: "MOBI to PDF decodes your Kindle ebook's internal text compression and structure right in your browser, then converts it to a real PDF.",
+    description: "MOBI to PDF decodes your Kindle ebook in your browser, then our own conversion service prints its text and images to a real PDF and deletes them right after.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/mobi-to-pdf",
   },
 };

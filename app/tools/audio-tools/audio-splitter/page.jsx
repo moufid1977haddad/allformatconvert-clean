@@ -228,7 +228,7 @@ export default function AudioSplitterPage() {
           "Click the upload area and select an audio file.",
           "Choose how to split: at one point (the middle by default: type it to a tenth of a second or use the slider), into equal parts, or every N seconds. The page lists where the parts start and end.",
           "Choose an output format for all the parts.",
-          "Click \"Split Audio\" to process it locally.",
+          "Click \"Split Audio\": the file is cut in your browser (Opus parts are encoded by our own server, then deleted).",
           "Preview and download each part, or all of them in one ZIP."
         ]}
         faqs={[

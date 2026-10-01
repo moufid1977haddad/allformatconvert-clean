@@ -75,7 +75,7 @@ export default function EmailGeneratorPage() {
           "Copy the generated email to your clipboard and paste it into your email client."
         ]}
         faqs={[
-          { q: "Is Email Generator really free to use?", a: "Yes, Email Generator is free to use with no signup or subscription required." },
+          { q: "Is Email Generator really free to use?", a: "Yes, Email Generator is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
           { q: "Can I use generated emails for business purposes?", a: "Yes, the emails generated are suitable for both personal and professional business communications." },
           { q: "Does Email Generator offer templates I can pick from?", a: "No, there's no template library — you describe the email you need in your own words and choose a tone, and the AI writes a full draft from that." },
           { q: "Do I need to create an account to use Email Generator?", a: "No account is necessary; you can start generating emails immediately." }

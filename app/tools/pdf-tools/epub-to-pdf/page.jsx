@@ -245,7 +245,7 @@ export default function EpubToPdfPage() {
       </div>
       <SeoContent
         title="EPUB to PDF"
-        description="EPUB to PDF parses your ebook's chapters, images, stylesheets, and cover right in your browser, using a dedicated EPUB parser rather than a naive zip-and-concatenate approach. The extracted content is assembled into a single clean HTML document, which is then uploaded to our conversion service for high-fidelity PDF rendering with a real browser engine — producing a properly paginated PDF with selectable text, rather than a rough print-dialog approximation."
+        description="EPUB to PDF parses your ebook's chapters, images, stylesheets, and cover right in your browser, using a dedicated EPUB parser rather than a naive zip-and-concatenate approach; only the extracted content is then sent to our conversion service. The extracted content is assembled into a single clean HTML document, which is then uploaded to our conversion service for high-fidelity PDF rendering with a real browser engine — producing a properly paginated PDF with selectable text, rather than a rough print-dialog approximation."
         howTo={[
           "Click the upload area and select an EPUB file.",
           "Click \"Convert to PDF\". The file is parsed locally, then the extracted content is uploaded for PDF rendering.",

@@ -65,9 +65,9 @@ export default function KeywordExtractorPage() {
           "Copy the numbered list of keywords to use in your SEO strategy or content planning."
         ]}
         faqs={[
-          { q: "Is Keyword Extractor really free to use?", a: "Yes, Keyword Extractor is free to use with no signup or subscription required." },
+          { q: "Is Keyword Extractor really free to use?", a: "Yes, Keyword Extractor is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
           { q: "How does the keyword extraction work?", a: "It sends your text to an AI language model, which analyzes the content and returns a numbered list of what it judges to be the most important keywords and phrases, with a short explanation for each." },
-          { q: "Can I extract keywords from PDFs or only text?", a: "Keyword Extractor only accepts pasted plain text — there's no file upload. You can copy text from a PDF or Word document and paste it into the tool." },
+          { q: "Can I extract keywords from PDFs or only text?", a: "Keyword Extractor only accepts pasted plain text — there's no file picker; the text you paste is sent to OpenAI through our server. You can copy text from a PDF or Word document and paste it into the tool." },
           { q: "How many keywords will be extracted from my content?", a: "The number varies based on content length and what the AI judges to be relevant; there's no fixed count." }
         ]}
         tips={[

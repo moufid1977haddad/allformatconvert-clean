@@ -117,6 +117,12 @@ export function toolPages() {
   return pages;
 }
 
+// Only the words of one file: { instr, rest }.
+export function readOwn(file) {
+  const { instr, rest } = split(parse(file));
+  return { instr, rest };
+}
+
 // The page's instruction texts, the rest of its text, and its code (page, sibling files, local imports 2 levels).
 export function readPage(file) {
   const sf = parse(file);

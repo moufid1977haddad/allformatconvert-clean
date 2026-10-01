@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "EPUB to PDF — Parse Your Ebook's Chapters, Images," },
-  description: "EPUB to PDF parses your ebook's chapters, images, stylesheets, and cover in your browser, using a dedicated EPUB parser.",
+  description: "EPUB to PDF reads your ebook's chapters, images, stylesheets and cover in your browser, then our own conversion service prints them to a real PDF and deletes them right after.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/epub-to-pdf" },
   openGraph: {
     title: "EPUB to PDF — Parse Your Ebook's Chapters, Images,",
-    description: "EPUB to PDF parses your ebook's chapters, images, stylesheets, and cover in your browser, using a dedicated EPUB parser.",
+    description: "EPUB to PDF reads your ebook's chapters, images, stylesheets and cover in your browser, then our own conversion service prints them to a real PDF and deletes them right after.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/epub-to-pdf",
   },
 };

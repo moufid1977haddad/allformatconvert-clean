@@ -56,7 +56,7 @@ export default function HtmlToPdfPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">HTML to PDF</h1>
-        <p className="text-neutral-500 text-center mb-8">Convert HTML files or code to PDF in your browser</p>
+        <p className="text-neutral-500 text-center mb-8">Convert HTML files or code to PDF with a real browser engine</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="flex gap-2">
             <button onClick={() => { setMode('file'); setHtmlContent(''); setFile(null); setDone(false); clearPdf(); setError(''); }} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'file' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>Upload File</button>

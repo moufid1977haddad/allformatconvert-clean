@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Audio Splitter — Cut an Audio File Online Free" },
-  description: "Audio Splitter cuts an audio file into two parts at a single point you choose, using ffmpeg.wasm entirely in your browser — nothing is uploaded to a server.",
+  description: "Audio Splitter cuts an audio file at the point you choose, into equal parts or every N seconds, using ffmpeg.wasm in your browser — nothing is uploaded, except for Opus output, which our own server encodes and then deletes.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/audio-tools/audio-splitter" },
   openGraph: {
     title: "Audio Splitter — Cut an Audio File Online Free",
-    description: "Audio Splitter cuts an audio file into two parts at a single point you choose, using ffmpeg.wasm entirely in your browser — nothing is uploaded to a server.",
+    description: "Audio Splitter cuts an audio file at the point you choose, into equal parts or every N seconds, using ffmpeg.wasm in your browser — nothing is uploaded, except for Opus output, which our own server encodes and then deletes.",
     url: "https://www.onlineconvertools.com/tools/audio-tools/audio-splitter",
   },
 };

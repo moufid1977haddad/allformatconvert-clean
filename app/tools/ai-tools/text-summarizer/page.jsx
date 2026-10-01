@@ -65,7 +65,7 @@ export default function TextSummarizerPage() {
           "Copy the summary to your clipboard for later use."
         ]}
         faqs={[
-          { q: "Is Text Summarizer really free to use?", a: "Yes, Text Summarizer is free to use with no signup or subscription required." },
+          { q: "Is Text Summarizer really free to use?", a: "Yes, Text Summarizer is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
           { q: "How long can the text I input be?", a: "There's no fixed word limit, but very long input may be truncated by the underlying AI model's limits. For very long documents, consider breaking them into smaller sections and summarizing each part separately." },
           { q: "What languages does Text Summarizer support?", a: "It works best with English content, though the underlying AI model can generally handle other languages with varying accuracy." },
           { q: "Will my text be saved or shared?", a: "Your text is sent to OpenAI's API to generate the summary. It is not stored on our servers or shared for any purpose beyond producing your result." }

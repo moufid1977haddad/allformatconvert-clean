@@ -48,7 +48,7 @@ export default function TextToListPage() {
           { q: "Is Text to List free to use?", a: "Yes, it's completely free with no signup and no limits." },
           { q: "Can I use custom separators?", a: "Not currently — the three available formats are bullet points (•), numbered lines, and a comma-separated list." },
           { q: "Can I download the result as a Word document or PDF?", a: "Not currently — the only output option is copying the formatted text to your clipboard." },
-          { q: "Is my data private?", a: "Yes, everything happens locally in your browser — nothing is sent to a server." }
+          { q: "Is my data private?", a: "Yes, everything happens locally in your browser — what you enter is never sent to a server." }
         ]}
         tips={[
           "Put one item per line before pasting for the cleanest conversion — the tool splits on line breaks.",
