@@ -41,11 +41,11 @@ export function writeRgbaFrame(gif, lib, rgba, w, h, { delay = 0, repeat, dispos
 // PNG (1.8 MB on disk) would otherwise be decoded whole on the page (3.6 GB) and freeze the tab.
 export function headerSize(bytes) {
   const b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) { // PNG: IHDR right after the signature
+  if (b.length >= 24 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) { // PNG: IHDR right after the signature
     const v = new DataView(b.buffer, b.byteOffset, b.byteLength);
     return { width: v.getUint32(16), height: v.getUint32(20) };
   }
-  if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46) return { width: b[6] | (b[7] << 8), height: b[8] | (b[9] << 8) }; // GIF
+  if (b.length >= 10 && b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46) return { width: b[6] | (b[7] << 8), height: b[8] | (b[9] << 8) }; // GIF
   return null;
 }
 // One frame at most this many pixels (the iPhone canvas limit, 16.7 MP): GIF / APNG animations are never larger.

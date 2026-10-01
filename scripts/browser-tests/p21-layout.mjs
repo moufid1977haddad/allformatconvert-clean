@@ -62,6 +62,9 @@ for (const dev of devices) {
             if (lab) { const lr = lab.getBoundingClientRect(); r = { width: Math.max(lr.right, r.right) - Math.min(lr.left, r.left), height: Math.max(lr.height, r.height) }; }
           }
           if (el.tagName === 'TEXTAREA') continue; // big by nature
+          // a button laid over a thumbnail gets an invisible ::after hit area instead of a bigger size (globals.css)
+          const after = getComputedStyle(el, '::after');
+          if (after.content !== 'none' && after.position === 'absolute') { const ext = -parseFloat(after.left || '0'); r = { width: r.width + 2 * ext, height: r.height + 2 * ext }; }
           if (Math.min(r.width, r.height) < 43.5) out.small.push(`${desc(el)} ${Math.round(r.width)}×${Math.round(r.height)}`);
         }
         const fileInput = main.querySelector('input[type=file]');

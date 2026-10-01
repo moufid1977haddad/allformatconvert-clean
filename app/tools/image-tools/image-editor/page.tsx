@@ -40,8 +40,6 @@ export default function ImageEditorPage() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setSrcType(file.type);
-    setFile(file);
     setSaveError('');
     setLoadError('');
     e.target.value = '';
@@ -57,6 +55,9 @@ export default function ImageEditorPage() {
         URL.revokeObjectURL(url);
         return;
       }
+      // the file and its type are taken only once the picture is known to be usable (review, 02/10)
+      setSrcType(file.type);
+      setFile(file);
       setOriginalImage(img);
       setImage(url);
     };

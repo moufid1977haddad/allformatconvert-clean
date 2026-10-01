@@ -399,11 +399,12 @@ export default function PdfEditorPage() {
                       </div>
                     </div>
                     <p className="text-[11px] text-center text-neutral-500 mt-1">Page {entry.originalIndex + 1}</p>
-                    <div className="flex justify-center gap-1 mt-1">
-                      <button onClick={(e) => { e.stopPropagation(); moveUp(i); }} className="text-xs px-1.5 py-0.5 bg-neutral-200 dark:bg-neutral-700 rounded">↑</button>
-                      <button onClick={(e) => { e.stopPropagation(); moveDown(i); }} className="text-xs px-1.5 py-0.5 bg-neutral-200 dark:bg-neutral-700 rounded">↓</button>
-                      <button onClick={(e) => { e.stopPropagation(); rotatePage(i); }} className="text-xs px-1.5 py-0.5 bg-neutral-200 dark:bg-neutral-700 rounded">⟳</button>
-                      <button onClick={(e) => { e.stopPropagation(); deletePage(i); }} className="text-xs px-1.5 py-0.5 bg-red-100 dark:bg-red-950 text-red-600 rounded">✕</button>
+                    {/* wraps on a narrow panel (touch: 44 px buttons) */}
+                    <div className="flex flex-wrap justify-center gap-1 mt-1">
+                      <button onClick={(e) => { e.stopPropagation(); moveUp(i); }} aria-label={`Move page ${entry.originalIndex + 1} up`} className="text-xs px-1.5 py-0.5 bg-neutral-200 dark:bg-neutral-700 rounded">↑</button>
+                      <button onClick={(e) => { e.stopPropagation(); moveDown(i); }} aria-label={`Move page ${entry.originalIndex + 1} down`} className="text-xs px-1.5 py-0.5 bg-neutral-200 dark:bg-neutral-700 rounded">↓</button>
+                      <button onClick={(e) => { e.stopPropagation(); rotatePage(i); }} aria-label={`Rotate page ${entry.originalIndex + 1}`} className="text-xs px-1.5 py-0.5 bg-neutral-200 dark:bg-neutral-700 rounded">⟳</button>
+                      <button onClick={(e) => { e.stopPropagation(); deletePage(i); }} aria-label={`Delete page ${entry.originalIndex + 1}`} className="text-xs px-1.5 py-0.5 bg-red-100 dark:bg-red-950 text-red-600 rounded">✕</button>
                     </div>
                   </div>
                 );

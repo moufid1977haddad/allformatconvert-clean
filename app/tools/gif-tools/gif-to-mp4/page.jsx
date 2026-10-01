@@ -17,6 +17,12 @@ export default function GifToMp4Page() {
     if (!file) return;
     setLoading(true);
     try {
+      // P21 (robustness): a GIF really, and of a size a video can hold — a 30 000 × 30 000 PNG renamed .gif was
+      // handed to the encoder and a "result" offered. Checked before ffmpeg (~30 MB) is loaded.
+      const head = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+      if (!file.size || !(head[0] === 0x47 && head[1] === 0x49 && head[2] === 0x46)) { const err = new Error('this is not a GIF file (or it is empty). Choose an animated GIF.'); err.visitor = true; throw err; }
+      const tooBig = sizeProblem(headerSize(head));
+      if (tooBig) { const err = new Error(tooBig); err.visitor = true; throw err; }
       const { FFmpeg } = await import('@ffmpeg/ffmpeg');
       const { fetchFile } = await import('@ffmpeg/util');
       const ffmpeg = new FFmpeg();
@@ -26,11 +32,6 @@ export default function GifToMp4Page() {
       ffmpeg.on('log', ({ message }) => console.log('[ffmpeg]', message));
       await ffmpeg.load();
       const bytes = await fetchFile(file);
-      // P21 (robustness): a GIF really, and of a size a video can hold — a 30 000 × 30 000 PNG renamed .gif was
-      // handed to the encoder and a "result" offered.
-      if (!bytes.length || !(bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46)) throw new Error('this is not a GIF file (or it is empty). Choose an animated GIF.');
-      const tooBig = sizeProblem(headerSize(bytes.subarray(0, 16)));
-      if (tooBig) throw new Error(tooBig);
       // ffmpeg.wasm writes a constant frame rate and gave the LAST frame one frame period only: a GIF of
       // 100/200/300 ms came out 0.4 s long instead of 0.6 s, and a final pause was lost (audit 2, 29/09).
       // The last frame is now held (tpad) and the video cut at the GIF's real length: the sum of its frame
@@ -66,7 +67,7 @@ export default function GifToMp4Page() {
       // with zero way to diagnose what actually happened.
       console.error('Conversion failed:', e);
       const reason = (e && e.message) || (typeof e === 'string' ? e : null) || 'an unknown error -- check the browser console for details';
-      reportToolError({ tool: 'gif-to-mp4', file, error: e instanceof Error ? e : new Error(String(reason)) });
+      if (!(e && e.visitor)) reportToolError({ tool: 'gif-to-mp4', file, error: e instanceof Error ? e : new Error(String(reason)) }); // a wrong file is not a failure of the tool
       setError('Conversion failed: ' + reason);
     }
     setLoading(false);

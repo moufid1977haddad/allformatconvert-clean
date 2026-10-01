@@ -43,7 +43,7 @@ export default function CsvToTsvPage() {
     if (f.size > MAX_FILE_BYTES) { setError(`This file is ${(f.size / 1048576).toFixed(0)} MB; this tool reads files up to 50 MB.`); return; }
     // P21: an empty, binary or other-kind file gets a sentence, never a "conversion" (robustness bench).
     const problem = await textFileProblem(f, 'CSV');
-    if (problem) { setError(problem); setFileName(''); setInput(''); return; }
+    if (problem) { setError(problem); setFileName(''); setInput(''); setFileBytes(null); return; }
     const bytes = new Uint8Array(await f.arrayBuffer());
     const { encoding } = detectEncoding(bytes.subarray(0, 512 * 1024));
     const text = decodeFile(bytes, encoding);

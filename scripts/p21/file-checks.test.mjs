@@ -21,3 +21,14 @@ assert.ok(await spreadsheetProblem(f(Buffer.alloc(0), 'a.xlsx')));
 assert.equal(await pdfFileProblem(f(Buffer.concat([Buffer.from('junk\n'), Buffer.from('%PDF-1.7\n')]), 'a.pdf')), null);
 assert.ok(await pdfFileProblem(f(png, 'a.pdf')));
 console.log('file-checks: all passed');
+// review 02/10: a CSV starting "BMW" / "BMI" is text, not a BMP; ".xls" files that are HTML / XML / tab text are let
+// through to the spreadsheet reader
+{
+  const { textFileProblem: t, spreadsheetProblem: s } = await import('../../app/lib/fileChecks.js');
+  assert.equal(await t(new File([Buffer.from('BMW,Série 3,2019\nAudi,A4,2020\n')], 'cars.csv')), null);
+  assert.equal(await t(new File([Buffer.from('BMI,age\n22.5,40\n')], 'bmi.csv')), null);
+  assert.equal(await s(new File([Buffer.from('<html><table><tr><td>1</td></tr></table></html>')], 'export.xls')), null);
+  assert.equal(await s(new File([Buffer.from('<?xml version="1.0"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"></Workbook>')], 'export.xls')), null);
+  assert.equal(await s(new File([Buffer.from('a\tb\n1\t2\n')], 'export.xls')), null);
+  console.log('file-checks (review cases): all passed');
+}

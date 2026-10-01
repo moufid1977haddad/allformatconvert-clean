@@ -108,9 +108,10 @@ export default function GifMakerPage() {
                 <div key={i} className="relative" data-frame={i}>
                   <img src={img.src} alt={`Frame ${i + 1}`} className="w-full h-20 object-contain bg-neutral-100 rounded" />
                   <button onClick={() => removeImage(i)} aria-label={`Remove frame ${i + 1}`} className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">x</button>
-                  <div className="flex items-center justify-between text-xs text-neutral-500">
+                  {/* wraps: on a phone the arrows are 44 px touch targets and the size label goes under them */}
+                  <div className="flex flex-wrap items-center justify-between text-xs text-neutral-500">
                     <button onClick={() => move(i, -1)} disabled={i === 0} aria-label={`Move frame ${i + 1} earlier`} className="px-1 disabled:opacity-30">◀</button>
-                    <span>{i + 1} · {img.w}×{img.h}</span>
+                    <span className="order-last basis-full text-center sm:order-none sm:basis-auto">{i + 1} · {img.w}×{img.h}</span>
                     <button onClick={() => move(i, 1)} disabled={i === images.length - 1} aria-label={`Move frame ${i + 1} later`} className="px-1 disabled:opacity-30">▶</button>
                   </div>
                 </div>

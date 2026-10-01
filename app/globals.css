@@ -163,11 +163,18 @@ html[dir="rtl"] p {
 @media (pointer: coarse) {
   main :is(button, select, [role="button"], a[class*="bg-"],
     input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]):not([type="color"])
-  ):not([data-seo-content] *) {
+  ):not(.absolute):not([data-seo-content] *) {
     min-height: 44px;
   }
-  main :is(button, [role="button"], a[class*="bg-"]):not([data-seo-content] *) {
+  main :is(button, [role="button"], a[class*="bg-"]):not(.absolute):not([data-seo-content] *) {
     min-width: 44px;
+  }
+  /* a small button laid over a thumbnail (remove ✕): it keeps its size so the picture stays visible, and touches
+     within 10 px of it still reach it (review, 02/10: a 44 px circle covered most of a 63 px thumbnail) */
+  main :is(button, [role="button"]).absolute:not([data-seo-content] *)::after {
+    content: "";
+    position: absolute;
+    inset: -10px;
   }
   /* sliders: the track keeps its look, the touch area becomes 44 px tall */
   main input[type="range"]:not([data-seo-content] *) {

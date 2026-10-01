@@ -39,11 +39,25 @@ function looksBinary(bytes) {
   return bad / bytes.length > 0.02;
 }
 
+// A recognised non-text format at the start of a "text" file. Two-byte signatures are not trusted on their own: a CSV
+// whose first cell is "BMW" or "BMI" starts with the BMP mark "BM" (review, 02/10) — a real BMP also has a DIB header
+// of a known size at offset 14.
+function otherFormat(head, size) {
+  const kind = sniffFormat(head);
+  if (!kind) return null;
+  if (kind.format === 'bmp') {
+    const dib = head.length >= 18 ? head[14] | (head[15] << 8) | (head[16] << 16) | (head[17] << 24) : 0;
+    const declared = head.length >= 6 ? head[2] | (head[3] << 8) | (head[4] << 16) | (head[5] << 24) : 0;
+    if (![12, 40, 52, 56, 108, 124].includes(dib) && declared !== size) return null;
+  }
+  return kind;
+}
+
 /** A text data file (CSV, TSV, TXT): null when it can be read as text, else a sentence for the visitor. */
 export async function textFileProblem(file, what = 'CSV') {
   if (!file || !file.size) return emptyMessage(what);
   const head = new Uint8Array(await file.slice(0, 8192).arrayBuffer());
-  const kind = sniffFormat(head);
+  const kind = otherFormat(head, file.size);
   if (kind) {
     const workbook = kind.format === 'zip' || (head[0] === 0xd0 && head[1] === 0xcf);
     return `This is not a ${what} text file: its content is ${kind.label}.${workbook ? ' For an Excel or OpenDocument workbook, use our Excel to CSV or Excel to JSON tool.' : ''}`;
@@ -63,8 +77,11 @@ export async function spreadsheetProblem(file, { allowCsv = false } = {}) {
   const ole = head[0] === 0xd0 && head[1] === 0xcf && head[2] === 0x11 && head[3] === 0xe0;
   if (zip || ole) return null; // XLSX / ODS (ZIP) or XLS (OLE2): the reader says if it is not a workbook after all
   const ext = (file.name.split('.').pop() || '').toLowerCase();
-  if ((allowCsv || ext === 'csv' || ext === 'txt') && !looksBinary(head) && !sniffFormat(head)) return null;
-  const kind = sniffFormat(head);
+  // Text is let through to the spreadsheet reader: banks and ERPs export ".xls" files that are really HTML tables,
+  // SpreadsheetML 2003 XML or tab-separated text, and Excel opens them (review, 02/10); so does the reader.
+  void allowCsv;
+  if (!looksBinary(head) && !otherFormat(head, file.size)) return null;
+  const kind = otherFormat(head, file.size);
   return `This is not an Excel or OpenDocument spreadsheet${kind ? `: its content is ${kind.label}` : ' (an .xlsx, .xls or .ods file)'}. It may be damaged, or another kind of file renamed .${ext}.`;
 }
 

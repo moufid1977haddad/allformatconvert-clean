@@ -14,12 +14,21 @@ export default function ImageComparisonPage() {
   const [error, setError] = useState('');
   // Pixel differences (as Diffchecker's image compare): image 2 is drawn at the size of image 1; a pixel differs
   // when one channel (or alpha) differs by more than 16/255, and is shown in red over a faded copy of image 1.
-  // P21 (robustness): an image that cannot be opened is said at once (the slider simply showed nothing).
-  const checkImage = (f, which) => {
+  // P21 (robustness): an image that cannot be opened, or is too large, is said at once (the slider simply showed
+  // nothing), and is not put on screen; a later pick wins over a slower earlier one (review, 02/10).
+  const picks = useRef({ first: 0, second: 0 });
+  const checkImage = (f, which, accept) => {
+    setError('');
+    const n = ++picks.current[which];
     if (!f.size) { setError(`The ${which} file is empty (0 bytes).`); return; }
     const u = URL.createObjectURL(f), im = new Image();
-    im.onload = () => { URL.revokeObjectURL(u); if (im.naturalWidth * im.naturalHeight > 100_000_000) setError(`The ${which} image is ${im.naturalWidth} × ${im.naturalHeight} pixels: too large to compare here (100 megapixels at most). Make it smaller first with our Image Resizer.`); };
-    im.onerror = () => { URL.revokeObjectURL(u); setError(`The ${which} file, "${f.name}", is not an image this browser can open. Choose a JPG, PNG, WebP or GIF image.`); };
+    im.onload = () => {
+      URL.revokeObjectURL(u);
+      if (n !== picks.current[which]) return;
+      if (im.naturalWidth * im.naturalHeight > 100_000_000) { setError(`The ${which} image is ${im.naturalWidth} × ${im.naturalHeight} pixels: too large to compare here (100 megapixels at most). Make it smaller first with our Image Resizer.`); return; }
+      accept();
+    };
+    im.onerror = () => { URL.revokeObjectURL(u); if (n === picks.current[which]) setError(`The ${which} file, "${f.name}", is not an image this browser can open. Choose a JPG, PNG, WebP or GIF image.`); };
     im.src = u;
   };
   const computeDiff = async () => {
@@ -55,11 +64,11 @@ export default function ImageComparisonPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="border-2 border-dashed border-neutral-200 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => ref1.current.click()}>
               {image1 ? <img src={image1} className="max-h-32 mx-auto rounded" /> : <p className="text-neutral-500 text-sm">Image 1 (Before)</p>}
-              <input ref={ref1} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files[0]; e.target.value = ''; if (f) checkImage(f, 'first'); if (f) { setImage1(URL.createObjectURL(f)); setDiff(null); } }} />
+              <input ref={ref1} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files[0]; e.target.value = ''; if (f) checkImage(f, 'first', () => { setImage1(URL.createObjectURL(f)); setDiff(null); }); }} />
             </div>
             <div className="border-2 border-dashed border-neutral-200 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => ref2.current.click()}>
               {image2 ? <img src={image2} className="max-h-32 mx-auto rounded" /> : <p className="text-neutral-500 text-sm">Image 2 (After)</p>}
-              <input ref={ref2} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files[0]; e.target.value = ''; if (f) checkImage(f, 'second'); if (f) { setImage2(URL.createObjectURL(f)); setDiff(null); } }} />
+              <input ref={ref2} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files[0]; e.target.value = ''; if (f) checkImage(f, 'second', () => { setImage2(URL.createObjectURL(f)); setDiff(null); }); }} />
             </div>
           </div>
           {image1 && image2 && (
