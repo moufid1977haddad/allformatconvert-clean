@@ -34,13 +34,24 @@ export const AUDIO_OUTPUT_FORMATS = [
   { value: 'aiff', label: 'AIFF', ext: 'aiff', mime: 'audio/aiff' },
   { value: 'alac', label: 'ALAC (Apple Lossless, .m4a)', ext: 'm4a', mime: 'audio/mp4', extraArgs: ['-c:a', 'alac'] },
   { value: 'ac3', label: 'AC3 (Dolby Digital)', ext: 'ac3', mime: 'audio/ac3' },
+  // P21 (02/10), format coverage (CloudConvert's audio converter offers M4R, M4B, MP2, AU, CAF, WV, MKA). Each one
+  // proven on a real file read back by ffprobe (scripts/browser-tests/p21-audio-formats.mjs). ffmpeg names no muxer
+  // after .m4r / .m4b: both are AAC in Apple's MP4 ("ipod" muxer), as iTunes writes them.
+  { value: 'm4r', label: 'M4R (iPhone ringtone, AAC)', ext: 'm4r', mime: 'application/octet-stream', // audio/mp4 and audio/x-m4r made Firefox save it as .m4a (measured 02/10)
+    extraArgs: ['-c:a', 'aac', '-f', 'ipod'] },
+  { value: 'm4b', label: 'M4B (audiobook, AAC)', ext: 'm4b', mime: 'audio/mp4', extraArgs: ['-c:a', 'aac', '-f', 'ipod'] },
+  { value: 'mp2', label: 'MP2 (MPEG Layer II)', ext: 'mp2', mime: 'audio/mpeg', extraArgs: ['-c:a', 'mp2'] },
+  { value: 'wv', label: 'WV (WavPack, lossless)', ext: 'wv', mime: 'audio/x-wavpack', extraArgs: ['-c:a', 'wavpack'] },
+  { value: 'caf', label: 'CAF (Apple Core Audio)', ext: 'caf', mime: 'audio/x-caf', extraArgs: ['-c:a', 'pcm_s16le'] },
+  { value: 'au', label: 'AU (Sun / NeXT)', ext: 'au', mime: 'audio/basic', extraArgs: ['-c:a', 'pcm_s16be'] },
+  { value: 'mka', label: 'MKA (Matroska audio, FLAC)', ext: 'mka', mime: 'audio/x-matroska', extraArgs: ['-c:a', 'flac'] },
 ];
 
 // Formats where a target bitrate (-b:a) is meaningful -- lossless codecs
 // (WAV/FLAC/AIFF/ALAC) ignore or reject a bitrate target, so Audio
 // Compressor's format choices are restricted to this subset.
 export const COMPRESSIBLE_AUDIO_FORMATS = AUDIO_OUTPUT_FORMATS.filter((f) =>
-  ['mp3', 'aac', 'm4a', 'ogg', 'opus', 'wma', 'ac3'].includes(f.value)
+  ['mp3', 'aac', 'm4a', 'ogg', 'opus', 'wma', 'ac3', 'm4b', 'mp2'].includes(f.value)
 );
 
 export function getAudioFormat(value) {
