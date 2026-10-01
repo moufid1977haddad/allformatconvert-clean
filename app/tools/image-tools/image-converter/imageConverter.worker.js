@@ -1,8 +1,9 @@
 import { MAX_MEGAPIXELS, NATIVE_WEBP_MAX_PIXELS } from './config';
-import { CANVAS_MAX_PIXELS, decodeToRaster, simulateIosCanvasCap, rasterFromCanvas, rasterFromRGBA, encodeJpegWasm, encodeWebpWasm, encodePngRGBA } from '../../../lib/bigImage';
+import { CANVAS_MAX_PIXELS, canvasBeyondSafariCap, decodeToRaster, simulateIosCanvasCap, rasterFromCanvas, rasterFromRGBA, encodeJpegWasm, encodeWebpWasm, encodePngRGBA } from '../../../lib/bigImage';
 import { decodeTiff } from '../../../lib/tiffDecode';
 import { sniffFormat, NATIVE_BITMAP_FORMATS } from '../../../lib/detectFileFormat';
 import { checkedBlob, flattenOntoWhite } from '../../../lib/mediaSupport';
+import { decodeRaw } from '../../../lib/rawDecode';
 
 // AVIF: no browser encodes it from a canvas (measured: Chrome 153, Chromium 151,
 // Firefox 153 all return a PNG), so it is encoded here by libavif compiled to
@@ -67,8 +68,26 @@ async function convertOne(item, format, quality, maxMegapixels) {
     if (mp > maxMegapixels) throw new LimitExceededError(`"${name}" is ${w} × ${h} pixels (${mp.toFixed(1)} megapixels), more than the ${maxMegapixels}-megapixel limit.`);
   };
   let raster;
+  let note = '';
 
-  if (detected?.format === 'tiff') {
+  if (item.raw) {
+    // Camera RAW (P22): LibRaw in WebAssembly, before the TIFF sniff -- CR2, NEF, ARW, DNG, ORF... are TIFF inside,
+    // and the TIFF decoder would only find the small preview. The decode cannot report progress. Measured on the
+    // preview (whole conversion, 3 browsers busy at once): a 24 MP Bayer file 10 s in Chromium, 40 s in Firefox; a
+    // 46 MP one 26 s / 104 s; Fujifilm X-Trans (26 MP) 58 s in Chromium. The page waits up to 10 s per raw megapixel.
+    const d = await decodeRaw(new Uint8Array(await blob.arrayBuffer()), name, {
+      checkSize: tooBig,
+      onLong: (mp) => longWork(mp * 1e6, 10000),
+    });
+    // One canvas when it can hold the photo (always under 16.7 MP; above, on desktop browsers -- probed): their own
+    // encoders are much faster (24 MP to JPG in Firefox: 108 s through WebAssembly, measured). iPhone / iPad: bands.
+    if (d.width * d.height <= CANVAS_MAX_PIXELS || await canvasBeyondSafariCap()) {
+      const c = new OffscreenCanvas(d.width, d.height);
+      c.getContext('2d').putImageData(new ImageData(d.rgba, d.width, d.height), 0, 0);
+      raster = rasterFromCanvas(c, d.width, d.height);
+    } else raster = rasterFromRGBA(d.rgba, d.width, d.height);
+    note = `RAW developed${d.camera ? ` (${d.camera})` : ''}: camera white balance, sRGB, full size`;
+  } else if (detected?.format === 'tiff') {
     let decoded;
     try {
       const buffer = await blob.arrayBuffer();
@@ -108,7 +127,6 @@ async function convertOne(item, format, quality, maxMegapixels) {
     }
     tooBig(raster.width, raster.height);
   }
-  const { width, height } = raster;
   self.postMessage({ type: 'decoded', index: item.index, path: raster.canvas ? 'canvas' : 'bands' });
 
   // Verified, never trusted: a browser that cannot encode the requested format
@@ -117,6 +135,12 @@ async function convertOne(item, format, quality, maxMegapixels) {
   // 'alive' keeps the page's silence watchdog from firing during a long (but progressing) encode.
   let last = 0;
   const alive = () => { const now = Date.now(); if (now - last > 1000) { last = now; self.postMessage({ type: 'alive' }); } };
+  const out = await encodeRaster(raster, format, quality, alive);
+  return note ? { ...out, note: out.note ? `${note} · ${out.note}` : note } : out;
+}
+
+async function encodeRaster(raster, format, quality, alive) {
+  const { width, height } = raster;
   if (EXTRA_FORMATS.includes(format)) { longWork(raster.pixels, 3000); return encodeExtra(format, raster, quality, alive); }
   if (format === 'avif') { longWork(raster.pixels, 20000); return { blob: await encodeAvif(raster.rgba(), width, height, quality), note: '' }; }
   if (format === 'webp') {

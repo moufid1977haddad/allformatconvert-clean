@@ -1,7 +1,7 @@
 // P21 phase 3 (02/10): Image Converter takes Photoshop PSD, like iLoveIMG / CloudConvert / Convertio. A PSD written
 // here with ag-psd (flattened image = known colours) converted to JPG by the real page: right size and colours; a PSD
-// without its flattened image → a sentence saying how to save it. (A RAW folder can be given as 2nd argument for the
-// day camera RAW is added — see the plan; not handled today.)
+// without its flattened image → a sentence saying how to save it. (A RAW folder can be given as 2nd argument; camera RAW
+// has its own bench since P22, with pixel-exact references: p22-raw.mjs.)
 // Usage: node scripts/browser-tests/p21-psd.mjs <origin> [--browser=…] [--no-vercel-toolbar]
 import { chromium, firefox, webkit } from '@playwright/test';
 import { writePsd } from 'ag-psd';

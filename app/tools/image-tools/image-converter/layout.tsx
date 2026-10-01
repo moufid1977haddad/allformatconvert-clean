@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Image Converter — Convert Images Between Png, Jpg, Webp" },
-  description: "Image Converter converts images to PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, ICO (favicon) or PDF entirely in your browser — nothing is ever uploaded to a server.",
+  description: "Image Converter converts images, camera RAW files (CR2, CR3, NEF, ARW, DNG…) included, to PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, ICO (favicon) or PDF entirely in your browser — nothing is ever uploaded to a server.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-converter" },
   openGraph: {
     title: "Image Converter — Convert Images Between Png, Jpg, Webp",
-    description: "Image Converter converts images to PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, ICO (favicon) or PDF entirely in your browser — nothing is ever uploaded to a server.",
+    description: "Image Converter converts images, camera RAW files (CR2, CR3, NEF, ARW, DNG…) included, to PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, ICO (favicon) or PDF entirely in your browser — nothing is ever uploaded to a server.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-converter",
   },
 };
