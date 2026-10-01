@@ -46,7 +46,8 @@
 | 23 formats vérifiés sur de vrais fichiers (raw.pixls.us) : pixels **identiques** au `dcraw_emu` officiel (écart moyen 0,0000) | ✅ |
 | Sigma X3F refusé avec une phrase (couleurs fausses mesurées) ; fichier tronqué ou faux : refusé, jamais une fausse image (162 coupes mesurées) | ✅ |
 | Licence CDDL-1.0 + sources servies (`/wasm/libraw-LICENSE.txt`, `/wasm/LibRaw-0.22.2.tar.gz`), FAQ et textes de la page | ✅ |
-| Préversion, bancs 3 moteurs + iPhone/iPad, production, vérification sur www | ⟦voir le rapport §10⟧ |
+| Préversion, bancs 3 moteurs + iPhone/iPad, production, vérification sur www | ✅ **en production `bf960651`** (`onlineconvertools-awc0el292`) ; www : RAW tout vert ×3 moteurs + iPhone/iPad, téléchargement, 238 pages ×3 — aucun retour arrière |
+| **Défauts préexistants trouvés par le banc de solidité complet** (mêmes échecs sur la production d'avant P22) : Duplicate Image Finder, Video Watermark, QR Generator « giant », Image Cropper et Video Merger sous Firefox — silencieux sur fichier vide/abîmé/faux | ⏳ chantier à ouvrir (rapport P22 §11) |
 | **Reste au propriétaire** : un vrai RAW de son appareil (ou d'un proche) sur iPhone/iPad dans Image Converter → JPG ; un ProRAW 48 Mpx d'iPhone 14/15/16 Pro (aucun sur raw.pixls.us : seuls des ProRAW 12 Mpx ont été testés). **Non mesuré faute d'échantillon** : un DNG compressé en JPEG XL (DNG 1.7) — LibRaw ne le lit qu'avec le DNG SDK d'Adobe, non compilé ici ; à vérifier avec un vrai fichier | ⏳ |
 
 > ## ═══ RÈGLE QUI PRIME SUR TOUT LE RESTE, posée fermement par le propriétaire le 23 septembre ═══
