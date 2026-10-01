@@ -20,7 +20,7 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { rawFile } from '../p22/raw-files.mjs';
-import { applyIosCanvasCap, iosCapHits, iosCapLabel } from './lib/ios-canvas-cap.mjs';
+import { applyIosCanvasCap, iosCapHits, iosCapLabel, IOS_CAP_OFF } from './lib/ios-canvas-cap.mjs';
 
 const arg = (k) => (process.argv.find((a) => a.startsWith(`--${k}=`)) || '').slice(k.length + 3);
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--'))).origin;
@@ -155,7 +155,7 @@ for (const [fname, e] of files) {
       r.ok ? `${r.width}×${r.height} ${r.camera} ${r.secs.toFixed(1)} s` : r.message);
     continue;
   }
-  const path_ = e.width * e.height > 16777216 ? 'bands' : 'canvas';
+  const path_ = e.width * e.height > 16777216 && !IOS_CAP_OFF ? 'bands' : 'canvas'; // --no-ios-cap: the desktop path, one big canvas
   for (const fmt of ['bmp', ...(['5G4A9396.CR2', '_DSC0009.ARW'].includes(fname) ? ['png'] : [])]) {
     const out = await convert(f, fmt);
     if (out.r !== 'ok') { check(`${fname} → ${fmt.toUpperCase()}`, false, `${out.r} ${out.message} ${out.errors.join(' | ')}`); continue; }

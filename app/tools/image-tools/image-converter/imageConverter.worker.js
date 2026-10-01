@@ -1,5 +1,5 @@
 import { MAX_MEGAPIXELS, NATIVE_WEBP_MAX_PIXELS } from './config';
-import { CANVAS_MAX_PIXELS, decodeToRaster, simulateIosCanvasCap, rasterFromCanvas, rasterFromRGBA, encodeJpegWasm, encodeWebpWasm, encodePngRGBA } from '../../../lib/bigImage';
+import { CANVAS_MAX_PIXELS, canvasBeyondSafariCap, decodeToRaster, simulateIosCanvasCap, rasterFromCanvas, rasterFromRGBA, encodeJpegWasm, encodeWebpWasm, encodePngRGBA } from '../../../lib/bigImage';
 import { decodeTiff } from '../../../lib/tiffDecode';
 import { sniffFormat, NATIVE_BITMAP_FORMATS } from '../../../lib/detectFileFormat';
 import { checkedBlob, flattenOntoWhite } from '../../../lib/mediaSupport';
@@ -79,7 +79,9 @@ async function convertOne(item, format, quality, maxMegapixels) {
       checkSize: tooBig,
       onLong: (mp) => longWork(mp * 1e6, 10000),
     });
-    if (d.width * d.height <= CANVAS_MAX_PIXELS) {
+    // One canvas when it can hold the photo (always under 16.7 MP; above, on desktop browsers -- probed): their own
+    // encoders are much faster (24 MP to JPG in Firefox: 108 s through WebAssembly, measured). iPhone / iPad: bands.
+    if (d.width * d.height <= CANVAS_MAX_PIXELS || await canvasBeyondSafariCap()) {
       const c = new OffscreenCanvas(d.width, d.height);
       c.getContext('2d').putImageData(new ImageData(d.rgba, d.width, d.height), 0, 0);
       raster = rasterFromCanvas(c, d.width, d.height);
