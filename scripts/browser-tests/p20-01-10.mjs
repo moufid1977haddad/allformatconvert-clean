@@ -32,7 +32,7 @@ if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((u) => u.hostn
 if (device) await ctx.addInitScript(() => { Object.defineProperty(Navigator.prototype, 'maxTouchPoints', { get: () => 5, configurable: true }); });
 const page = await ctx.newPage();
 const errors = [];
-page.on('pageerror', (e) => errors.push(String(e)));
+page.on('pageerror', (e) => errors.push(`${String(e)} [on ${new URL(page.url()).pathname}]`));
 const open = async (path) => { await page.goto(origin + path, { waitUntil: 'networkidle' }); };
 
 // ---- 1. Whitespace Remover -----------------------------------------------------------------------------------------
