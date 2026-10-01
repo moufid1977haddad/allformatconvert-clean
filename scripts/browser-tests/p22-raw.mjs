@@ -55,7 +55,11 @@ async function newPage() {
 // SHA-256 of the RGB pixels of a BMP result, computed in the page (a 46 MP BMP is 137 MB: not passed over).
 async function bmpPixelsHash(p) {
   return p.locator('[data-file-download] [data-download]').first().evaluate(async (a) => {
-    const b = new Uint8Array(await (await fetch(a.href)).arrayBuffer()), v = new DataView(b.buffer);
+    // An iPhone / iPad link prepared for the tap (/zipdl/f/, P21) is served by the site's service worker from Cache
+    // Storage (as download-guard reads it); elsewhere the link is the result's blob: URL.
+    const staged = /\/zipdl\/f\//.test(a.getAttribute('href') || '');
+    const res = staged ? await (await caches.open('ocv-downloads-v1')).match(a.href) : await fetch(a.href);
+    const b = new Uint8Array(await res.arrayBuffer()), v = new DataView(b.buffer);
     if (b[0] !== 0x42 || b[1] !== 0x4d || v.getUint16(28, true) !== 24) return { error: 'not a 24-bit BMP' };
     const w = v.getInt32(18, true), h = v.getInt32(22, true), off = v.getUint32(10, true), row = Math.ceil((w * 3) / 4) * 4;
     const rgb = new Uint8Array(w * h * 3);
@@ -71,7 +75,9 @@ async function bmpPixelsHash(p) {
 // Bytes of the first result, read in the page and passed over in slices.
 async function resultBytes(p) {
   const n = await p.locator('[data-file-download] [data-download]').first().evaluate(async (a) => {
-    window.__res = new Uint8Array(await (await fetch(a.href)).arrayBuffer()); return window.__res.length;
+    const staged = /\/zipdl\/f\//.test(a.getAttribute('href') || '');
+    const res = staged ? await (await caches.open('ocv-downloads-v1')).match(a.href) : await fetch(a.href);
+    window.__res = new Uint8Array(await res.arrayBuffer()); return window.__res.length;
   });
   const parts = [];
   for (let o = 0; o < n; o += 8e6) {
@@ -94,6 +100,8 @@ async function convert(file, format) {
   ]).catch(() => 'timeout');
   const secs = ((Date.now() - t0) / 1000).toFixed(1);
   const text = await p.locator('body').innerText();
+  // iPhone / iPad: the link is prepared for the tap (staged) shortly after the result shows (download-guard checks it)
+  if (r === 'ok' && device) await p.locator('[data-file-download] [data-download][data-staged="1"]').first().waitFor({ timeout: 15000 }).catch(() => {});
   const out = { r, secs, errors, text, caps: await iosCapHits(p) };
   if (r === 'ok') { if (format === 'bmp') out.bmp = await bmpPixelsHash(p); else out.bytes = await resultBytes(p); }
   out.message = text.match(/failed to convert[\s\S]{0,400}/)?.[0] || '';
