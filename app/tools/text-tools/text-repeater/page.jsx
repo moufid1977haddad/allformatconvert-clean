@@ -65,7 +65,7 @@ export default function TextRepeaterPage() {
           { q: "Is Text Repeater free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "How many times can I repeat text?", a: "From 1 up to 100 repetitions." },
           { q: "Can I use a custom separator?", a: "Not currently — choose from New Line, Space, Comma, or None; there's no field for a custom delimiter." },
-          { q: "Is my data private?", a: "Yes, everything is processed locally in your browser — nothing is sent to a server." }
+          { q: "Is my data private?", a: "Yes, everything is processed locally in your browser — what you enter is never sent to a server." }
         ]}
         tips={[
           "Use Text Repeater to quickly generate repetitive test data for development or QA work.",

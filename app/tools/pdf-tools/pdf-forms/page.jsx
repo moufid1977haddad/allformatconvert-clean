@@ -154,7 +154,7 @@ export default function Page() {
           "Click the upload area and select a PDF that already contains fillable form fields.",
           "Change the fields you need: type text, tick checkboxes, pick radio and dropdown options. Values already in the form are shown and kept.",
           "Tick 'Flatten the form' if the values must no longer be editable, then click 'Fill and Download PDF'.",
-          "Click 'Download Filled PDF' to save the result."
+          "Click 'Download' next to filled_form.pdf to save the result."
         ]}
         faqs={[
           { q: "Is PDF Forms free to use?", a: "Yes, it's completely free with no signup required." },

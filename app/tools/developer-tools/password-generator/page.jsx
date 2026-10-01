@@ -61,7 +61,7 @@ export default function PasswordGeneratorPage() {
           { q: "Is Password Generator free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "How secure are the generated passwords?", a: "Characters are chosen using crypto.getRandomValues(), the Web Crypto API's cryptographically secure random source — the right choice for security-sensitive randomness, unlike Math.random()." },
           { q: "Can I customize length and character types?", a: "Yes — length ranges from 8 to 64 characters, and you can toggle uppercase, lowercase, numbers, and symbols independently." },
-          { q: "Are generated passwords stored or logged?", a: "No, generation happens entirely in your browser and nothing is sent to or stored on a server." }
+          { q: "Are generated passwords stored or logged?", a: "No, generation happens entirely in your browser and the password is never sent to or stored on a server." }
         ]}
         tips={[
           "Use at least 16 characters with all four character types enabled for the strongest passwords on important accounts.",

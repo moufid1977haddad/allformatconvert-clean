@@ -47,7 +47,7 @@ export default function CaseConverterPage() {
           { q: "Is Case Converter free to use?", a: "Yes, it's completely free with no signup and no limit on conversions." },
           { q: "What case formats does this tool support?", a: "UPPERCASE, lowercase, Title Case (short words like \"of\" and \"the\" stay lower-case), Capitalized Case (every word capitalised), Sentence case, and aLtErNaTe (alternating) case. camelCase, PascalCase, snake_case, and kebab-case aren't currently included." },
           { q: "Can I convert multiple texts at once?", a: "No, one text block is converted at a time — repeat the process for additional texts." },
-          { q: "Is my data private?", a: "Yes, everything happens locally in your browser — nothing is sent to a server." }
+          { q: "Is my data private?", a: "Yes, everything happens locally in your browser — what you enter is never sent to a server." }
         ]}
         tips={[
           "Use Title Case for headlines and headings to keep formatting consistent.",

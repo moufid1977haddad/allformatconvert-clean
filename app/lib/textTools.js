@@ -112,3 +112,37 @@ export function literalReplaceAll(text, find, replacement) {
   const parts = text.split(find);
   return { text: parts.join(replacement), count: parts.length - 1 };
 }
+
+// Whitespace Remover (P20, 01/10). "Remove All Extra" used to collapse every
+// whitespace run, line breaks included, so a list or a poem came back as one
+// line. The market keeps line breaks in every "extra spaces" mode and names
+// the joining mode explicitly (charactercalculator.com "Remove all
+// whitespaces", convertiful.com "Flatten Text (Remove Line Breaks)",
+// removespaces.org and openl.io "preserves line breaks"). Horizontal
+// whitespace = anything \s matches except line breaks, so the non-breaking
+// spaces of text copied from web pages and PDFs are collapsed too.
+const HORIZONTAL_WS = /[^\S\r\n]+/g;
+const collapseLine = (line) => line.replace(HORIZONTAL_WS, ' ').trim();
+
+// Every line kept (blank lines too); repeated spaces/tabs inside a line become
+// one space; spaces at the start and end of each line go.
+export const removeExtraSpaces = (text) => splitLines(text).map(collapseLine).join('\n');
+
+// Same, plus the extra blank lines: a run of blank lines becomes one (the
+// paragraph break stays), blank lines before the first and after the last
+// line go. No line with content is ever removed or joined.
+export function removeAllExtraWhitespace(text) {
+  const out = [];
+  for (const line of splitLines(text).map(collapseLine)) {
+    if (line === '' && (out.length === 0 || out[out.length - 1] === '')) continue;
+    out.push(line);
+  }
+  while (out.length && out[out.length - 1] === '') out.pop();
+  return out.join('\n');
+}
+
+// The old "Remove All Extra", now under a name that says it: everything on one line.
+export const joinIntoOneLine = (text) => text.replace(/\s+/g, ' ').trim();
+
+export const removeLeadingWhitespace = (text) => splitLines(text).map((l) => l.trimStart()).join('\n');
+export const removeTrailingWhitespace = (text) => splitLines(text).map((l) => l.trimEnd()).join('\n');

@@ -259,7 +259,7 @@ export default function MobiToPdfPage() {
       </div>
       <SeoContent
         title="MOBI to PDF"
-        description="MOBI to PDF properly decodes your Kindle ebook's internal PalmDOC or Huffman/CDIC text compression and the newer KF8 structure used by .azw3 files, right in your browser, using the same parsing engine as MOBI to EPUB. The extracted chapters, images, and cover are assembled into a single clean HTML document, which is then uploaded to our conversion service for high-fidelity PDF rendering with a real browser engine — producing a properly paginated PDF with selectable text, rather than a rough print-dialog approximation."
+        description="MOBI to PDF properly decodes your Kindle ebook's internal PalmDOC or Huffman/CDIC text compression and the newer KF8 structure used by .azw3 files, right in your browser, using the same parsing engine as MOBI to EPUB; only the extracted text and images are then sent to our conversion service. The extracted chapters, images, and cover are assembled into a single clean HTML document, which is then uploaded to our conversion service for high-fidelity PDF rendering with a real browser engine — producing a properly paginated PDF with selectable text, rather than a rough print-dialog approximation."
         howTo={[
           "Click the upload area and select a .mobi, .azw, or .azw3 file.",
           "Click \"Convert to PDF\". The file is parsed locally, then the extracted content is uploaded for PDF rendering.",

@@ -42,7 +42,7 @@ export default function Base64EncoderPage() {
         faqs={[
           { q: "Is Base64 Encoder free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "What is Base64 encoding used for?", a: "Converting binary or text data into an ASCII string, making it safe to transmit across email, APIs, and web protocols that may not handle raw binary data well." },
-          { q: "Is this tool secure and private?", a: "Yes — encoding and decoding happen entirely in your browser; nothing is sent to a server." },
+          { q: "Is this tool secure and private?", a: "Yes — encoding and decoding happen entirely in your browser; what you enter is never sent to a server." },
           { q: "Can I encode any text, including emoji or non-Latin characters?", a: "Yes — text is converted to UTF-8 bytes first, so café, 日本語 or 😀 encode and decode back exactly, and the result matches what other tools and programming languages produce (for example Python's base64.b64encode(text.encode()))." },
           { q: "Does it decode URL-safe Base64 and Base64 without padding?", a: "Yes — - and _ are accepted in place of + and /, the = padding may be missing, and spaces or line breaks are ignored." },
           { q: "Can I encode large files?", a: "No — this tool works on pasted text; it doesn't take file uploads." }

@@ -148,3 +148,9 @@ html[dir="rtl"] h3,
 html[dir="rtl"] p {
   line-height: 1.9 !important;
 }
+/* A file dragged over an upload area (app/components/FileDropBridge.jsx). */
+[data-drop-over] {
+  outline: 2px dashed #6366f1;
+  outline-offset: 2px;
+  background-color: rgb(99 102 241 / 0.06);
+}

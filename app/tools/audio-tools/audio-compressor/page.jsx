@@ -134,7 +134,7 @@ export default function AudioCompressorPage() {
           "Click the upload area and select an audio file.",
           "Choose a target bitrate from the presets (64k–320k).",
           "Pick an output format — MP3 is the most universally compatible.",
-          "Click \"Compress Audio\" to re-encode the file locally.",
+          "Click \"Compress Audio\": the file is re-encoded in your browser (Opus by our own server, then deleted).",
           "Compare the before/after size and download the result."
         ]}
         faqs={[

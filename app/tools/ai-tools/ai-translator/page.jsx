@@ -75,7 +75,7 @@ export default function AITranslatorPage() {
           "Copy your translated text from the output box below."
         ]}
         faqs={[
-          { q: "Is AI Translator really free to use?", a: "Yes, AI Translator is free to use with no signup or subscription required." },
+          { q: "Is AI Translator really free to use?", a: "Yes, AI Translator is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
           { q: "How many languages does AI Translator support?", a: "You can translate into 10 target languages from the dropdown: English, French, Spanish, German, Italian, Portuguese, Arabic, Chinese, Japanese, and Russian. The source language is detected automatically." },
           { q: "Is my translated text kept private?", a: "Your text is sent to OpenAI's API to generate the translation. It is not stored on our servers or shared for any purpose beyond producing your translation." },
           { q: "Can AI Translator handle technical or specialized terminology?", a: "The underlying AI model generally handles technical and industry-specific vocabulary well, but for critical documents you should always have a translation reviewed by a fluent speaker." }

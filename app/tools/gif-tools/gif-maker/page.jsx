@@ -157,7 +157,7 @@ export default function GifMakerPage() {
           "Set your frame delay, click \"Create GIF\", then preview and download the animated GIF."
         ]}
         faqs={[
-          { q: "Can I download a finished GIF file directly?", a: "Yes — click \"Create GIF\" and a \"Download GIF\" button appears with the finished, real animated GIF file." },
+          { q: "Can I download a finished GIF file directly?", a: "Yes — click \"Create GIF\" and a \"Download\" button appears with the finished, real animated GIF file." },
           { q: "What if my images are not all the same size?", a: "By default each image is fitted inside the GIF without changing its proportions, and the space around it is filled with the background colour you choose. You can instead crop each image to fill the frame, or stretch it (which distorts it)." },
           { q: "What image formats can I use as frames?", a: "Any image format your browser supports, such as JPG, PNG, WebP, or GIF." },
           { q: "Will photos look as good as flat graphics or icons?", a: "Simple, flat-color images tend to look best. The underlying encoder doesn't apply dithering, so photos or gradients with fine color detail may show some visible color banding after being reduced to a 256-color palette." },

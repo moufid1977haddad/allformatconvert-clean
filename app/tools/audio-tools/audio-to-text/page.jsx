@@ -191,7 +191,7 @@ export default function AudioToTextPage() {
       </div>
       <SeoContent
         title="Audio to Text"
-        description="Audio to Text offers two ways to get a transcript: live microphone dictation using your browser's built-in Speech Recognition (works best in Chrome, entirely local), or file upload, which sends your audio to a server-side AI transcription API and returns the text."
+        description="Audio to Text offers two ways to get a transcript: live microphone dictation using your browser's built-in speech recognition (works best in Chrome; your browser sends the recording to its maker's speech service — Google in Chrome, Microsoft in Edge, Apple in Safari — not to us), or file upload, which sends your audio through our server to OpenAI's transcription API and returns the text."
         howTo={[
           "Choose \"Use Microphone\" for live dictation, or \"Upload Audio File\" to transcribe an existing recording.",
           "For mic mode, click \"Start Transcription\" and speak — text appears as you talk.",
@@ -199,11 +199,11 @@ export default function AudioToTextPage() {
           "Copy the transcript or download it as a .txt file."
         ]}
         faqs={[
-          { q: "Is my audio uploaded to a server?", a: "It depends on the mode: microphone dictation runs entirely in your browser via the Web Speech API and isn't uploaded anywhere. Uploaded audio files are sent to a server-side transcription API to generate the text." },
+          { q: "Is my audio uploaded to a server?", a: "Yes, in both modes, but not to the same place. Microphone dictation uses your browser's built-in speech recognition (Web Speech API): the browser itself sends the recording to its maker's speech service (Google in Chrome, Microsoft in Edge, Apple in Safari), and we never receive it. Uploaded audio files are sent through our server to OpenAI's transcription API to generate the text, then deleted." },
           { q: "Which browsers support microphone dictation?", a: "It relies on the Web Speech API, which works best in Google Chrome; other browsers may not support it." },
           { q: "What audio formats can I upload?", a: "Common formats like MP3, WAV, and M4A." },
           { q: "How large can an uploaded audio file be?", a: `File-upload transcription accepts up to ${audioMaxLabel()} per file — the maximum the transcription engine (OpenAI Whisper) itself accepts. Split a longer recording into smaller pieces and transcribe each separately if you hit the limit. Microphone dictation has no such limit since it doesn't call a paid API.` },
-          { q: "Is Audio to Text free to use?", a: "Yes, both the microphone and file-upload modes are free to use." }
+          { q: "Is Audio to Text free to use?", a: "Yes, both the microphone and file-upload modes are free to use. The file mode sends your audio to OpenAI, so it has an hourly and daily limit per connection; microphone dictation has none." }
         ]}
         tips={[
           "For live dictation, speak clearly at a steady pace and keep background noise low for the best accuracy.",

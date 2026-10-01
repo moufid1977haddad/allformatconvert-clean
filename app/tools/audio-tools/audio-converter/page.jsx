@@ -138,15 +138,15 @@ export default function AudioConverterPage() {
       </div>
       <SeoContent
         title="Audio Converter"
-        description="Audio Converter converts a single audio file between MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, and AC3 using ffmpeg.wasm, running in your browser — your file is not uploaded. The one exception is Opus: it is encoded on our own server with the reference libopus encoder (the in-browser one is not reliable), and the file is deleted as soon as you have downloaded the result."
+        description="Audio Converter converts a single audio file between MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, and AC3 using ffmpeg.wasm, running in your browser — your file is not uploaded, except for Opus output (below). The one exception is Opus: it is encoded on our own server with the reference libopus encoder (the in-browser one is not reliable), and the file is deleted as soon as you have downloaded the result."
         howTo={[
           "Click the upload area and select an audio file.",
           "Choose your target format from the dropdown.",
-          "Click \"Convert Audio\" to process the file locally.",
+          "Click \"Convert Audio\": the file is converted in your browser (Opus by our own server, then deleted).",
           "Preview and download the converted file."
         ]}
         faqs={[
-          { q: "Is Audio Converter free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can convert." },
+          { q: "Is Audio Converter free to use?", a: "Yes, it's completely free with no signup. Conversions done in your browser have no limit; Opus files are made on our server, which allows a set number of conversions per connection each day." },
           { q: "What formats are supported?", a: "MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, and AC3 as output targets, and any format ffmpeg can decode as input (which covers the vast majority of real-world audio files, including AMR)." },
           { q: "Can it convert to AMR?", a: "No — this tool can read AMR files as input, but the AMR encoder isn't available in the ffmpeg build used here, so AMR isn't offered as an output target." },
           { q: "What is ALAC output actually saved as?", a: "A .m4a file using the ALAC (Apple Lossless) codec instead of AAC — the same format iTunes/Apple Music uses for lossless downloads." },

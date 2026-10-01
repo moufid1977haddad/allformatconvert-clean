@@ -83,7 +83,7 @@ export default function PdfExtractTextPage() {
           "Click the upload area and select a PDF file from your device.",
           "Click 'Extract Text' to pull the text content from every page.",
           "Read the result in the text box, grouped and labeled by page number.",
-          "Click 'Copy' to copy it, or 'Download .txt' to save it as a text file."
+          "Click 'Copy' to copy it, or 'Download' to save it as a .txt file."
         ]}
         faqs={[
           { q: "Is PDF Extract Text completely free to use?", a: "Yes, it's completely free with no signup required." },

@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "Video Resizer — Redraw Your Video Online Free" },
-  description: "Video Resizer redraws your video at a new width and height on a canvas and records the result, entirely in your browser.",
+  title: { absolute: "Video Resizer — Resize a Video Online Free" },
+  description: "Video Resizer changes your video's width and height on our own server (fit with black bars, fill or stretch), in every browser including Safari and iPhone, and gives an MP4 with the original sound.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-resizer" },
   openGraph: {
-    title: "Video Resizer — Redraw Your Video Online Free",
-    description: "Video Resizer redraws your video at a new width and height on a canvas and records the result, entirely in your browser.",
+    title: "Video Resizer — Resize a Video Online Free",
+    description: "Video Resizer changes your video's width and height on our own server (fit with black bars, fill or stretch), in every browser including Safari and iPhone, and gives an MP4 with the original sound.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-resizer",
   },
 };

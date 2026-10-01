@@ -100,7 +100,7 @@ export default function Page() {
           "Click 'Copy Summary' to copy the result to your clipboard."
         ]}
         faqs={[
-          { q: "Is AI PDF Summary free to use?", a: "Yes, it's free with no signup required." },
+          { q: "Is AI PDF Summary free to use?", a: "Yes, it's free with no signup required. Because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
           { q: "Does it read my entire PDF?", a: "It reads the document's text up to 8,000 characters — the whole file for short documents, the first few pages for longer ones. The page says which, after each summary." },
           { q: "Is my file uploaded to a server?", a: "The PDF itself stays in your browser. Only the extracted text is sent to our server and forwarded to OpenAI's API to generate the summary." },
           { q: "Does it work on scanned PDFs?", a: "No. A scanned PDF contains images, not text; the page says so instead of summarizing nothing. Run it through PDF OCR first." }

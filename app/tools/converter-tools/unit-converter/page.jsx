@@ -142,7 +142,7 @@ export default function UnitConverterPage() {
           { q: "Is Unit Converter free to use?", a: "Yes, it's completely free with no signup and no limits." },
           { q: "What categories are supported?", a: "Length, Weight, Temperature, Speed, Area, Volume, Time, Data (bits and bytes, decimal kB/MB/GB and binary KiB/MiB/GiB), Pressure (Pa, bar, atm, psi, mmHg, inHg, torr), Energy (J, Wh, kWh, cal, kcal, BTU, eV, ft·lbf) and Power (W, kW, hp, metric hp, BTU/h, kcal/h)." },
           { q: "How accurate are the results?", a: "Factors are the exact definitions (NIST SP 811), and results show up to 12 significant digits, in scientific notation when very large or very small. Month and year are Gregorian averages (365.2425 days a year); calories are thermochemical (4.184 J) and BTU are International Table BTU." },
-          { q: "Is my data private?", a: "Yes, everything is calculated locally in your browser — nothing is sent to a server." }
+          { q: "Is my data private?", a: "Yes, everything is calculated locally in your browser — what you enter is never sent to a server." }
         ]}
         tips={[
           "Switch categories using the buttons at the top — your \"From\" and \"To\" units reset to that category's first two units.",

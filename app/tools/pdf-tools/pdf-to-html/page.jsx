@@ -102,7 +102,7 @@ export default function PdfToHtmlPage() {
         howTo={[
           "Click the upload area and select a PDF file from your device.",
           "Click 'Convert to HTML' to extract text from every page.",
-          "Click 'Download HTML' to save the generated .html file.",
+          "Click 'Download' to save the generated .html file.",
           "Open the file in a browser or code editor to view or edit it."
         ]}
         faqs={[

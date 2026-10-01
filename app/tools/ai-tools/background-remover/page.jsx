@@ -204,7 +204,7 @@ export default function BackgroundRemoverPage() {
           "Click the upload area and select a photo from your device.",
           "Click 'Remove Background' and wait a few seconds while the background is automatically detected and removed.",
           "Preview the result against the checkered transparency background.",
-          "Click 'Download PNG' to save your transparent image to your computer."
+          "Click 'Download' next to the PNG file to save your transparent image."
         ]}
         faqs={[
           { q: "Is Background Remover completely free to use?", a: "Yes, Background Remover is free to use with no account creation or watermarks on your downloaded image." },

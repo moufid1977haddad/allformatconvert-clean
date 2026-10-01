@@ -92,7 +92,7 @@ export default function PdfToImagePage() {
           "Click the upload area and select a single PDF file.",
           "Click 'Convert to Images' to render every page.",
           "Preview each page's image inline once rendering finishes.",
-          "Click 'Download Page N' under each image to save it individually."
+          "Click 'Download' under each image to save that page, or 'Download all' for one ZIP file."
         ]}
         faqs={[
           { q: "Is PDF to Image completely free to use?", a: "Yes, it's completely free with no signup required." },

@@ -54,7 +54,7 @@ export default function FileMetadataPage() {
       </div>
       <SeoContent
         title="File Metadata"
-        description="File Metadata is a free online tool that instantly reveals a file's basic properties — name, size, extension, the type its name suggests, its real format read from its first bytes, and last-modified date — read directly in your browser, and warns when the content does not match the extension (a program renamed photo.jpg, for example). Upload any file to see its details in seconds, with nothing ever sent to a server."
+        description="File Metadata is a free online tool that instantly reveals a file's basic properties — name, size, extension, the type its name suggests, its real format read from its first bytes, and last-modified date — read directly in your browser, and warns when the content does not match the extension (a program renamed photo.jpg, for example). Choose any file to see its details in seconds; the file is never sent to a server."
         howTo={[
           "Click the upload area and select any file from your device.",
           "The tool reads the file's properties immediately — no extra button to click.",

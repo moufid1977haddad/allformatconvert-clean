@@ -56,7 +56,7 @@ export default function HtmlToPdfPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">HTML to PDF</h1>
-        <p className="text-neutral-500 text-center mb-8">Convert HTML files or code to PDF in your browser</p>
+        <p className="text-neutral-500 text-center mb-8">Convert HTML files or code to PDF with a real browser engine</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="flex gap-2">
             <button onClick={() => { setMode('file'); setHtmlContent(''); setFile(null); setDone(false); clearPdf(); setError(''); }} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'file' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>Upload File</button>
@@ -95,7 +95,7 @@ export default function HtmlToPdfPage() {
           "Open the downloaded PDF to confirm it looks right."
         ]}
         faqs={[
-          { q: "Is HTML to PDF completely free to use?", a: "Yes, it's completely free with no signup or usage limits." },
+          { q: "Is HTML to PDF completely free to use?", a: "Yes, it's completely free with no signup. It runs on our server, which allows a set number of conversions per connection each hour and day." },
           { q: "Can I customize page size, margins, or headers/footers?", a: "Not in this tool directly — the PDF is rendered using the conversion service's default page settings, rather than options exposed on this page." },
           { q: "Will my HTML documents be uploaded to a server?", a: "Yes. Your HTML code or file is uploaded to our conversion service, purely to render the final PDF with a real browser engine, and it's discarded immediately afterward." },
           { q: "What HTML features are supported?", a: "Whatever a modern Chromium browser can render: CSS styling, images, tables, and most modern HTML5 elements. In our test the PDF matched Chrome's print output, except that fonts missing from our servers are replaced by similar ones." }

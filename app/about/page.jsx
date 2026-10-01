@@ -20,7 +20,7 @@ export default function AboutPage() {
           <p className="text-neutral-600 text-sm leading-relaxed">
             OnlineConverTools is a free, all-in-one platform offering {total} online tools for converting,
             compressing, and editing files — including PDFs, images, videos, audio, and more.
-            Most of them run entirely in your browser, so the file never leaves your device; the others — video conversion, Office ↔ PDF and the AI tools — need a server, and each one is named in our <Link href="/privacy" className="text-indigo-600 underline hover:no-underline">privacy policy</Link>.
+            Most of them run entirely in your browser, so the file never leaves your device; the others — among them video conversion, Office ↔ PDF, PDF compression and repair, Opus audio and the AI tools — need a server, and each one is named in our <Link href="/privacy" className="text-indigo-600 underline hover:no-underline">privacy policy</Link>.
           </p>
         </div>
 
@@ -28,7 +28,7 @@ export default function AboutPage() {
           <h2 className="text-xl font-bold text-neutral-800 mb-3">Our Mission</h2>
           <p className="text-neutral-600 text-sm leading-relaxed">
             We believe powerful tools should be free and accessible to everyone. No sign-up required,
-            no watermarks — just fast, reliable tools that work right in your browser.
+            no watermarks, nothing to install — just fast, reliable tools.
           </p>
         </div>
 

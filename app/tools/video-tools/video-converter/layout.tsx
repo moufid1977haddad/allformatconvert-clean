@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "Video Converter — Re-encode Your Video to Webm Online Free" },
-  description: "Video Converter re-encodes your video to WebM using the browser's native MediaRecorder API, entirely client-side.",
+  title: { absolute: "Video Converter — Convert Video to MP4, MOV, GIF, MP3 & More Online Free" },
+  description: "Video Converter turns almost any video into MP4, MOV, MKV, WebM, AVI, GIF and 22 video formats, or extracts the audio as MP3, WAV and more, on our own server. Any browser, files up to 1 GB, deleted after download.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-converter" },
   openGraph: {
-    title: "Video Converter — Re-encode Your Video to Webm Online Free",
-    description: "Video Converter re-encodes your video to WebM using the browser's native MediaRecorder API, entirely client-side.",
+    title: "Video Converter — Convert Video to MP4, MOV, GIF, MP3 & More Online Free",
+    description: "Video Converter turns almost any video into MP4, MOV, MKV, WebM, AVI, GIF and 22 video formats, or extracts the audio as MP3, WAV and more, on our own server. Any browser, files up to 1 GB, deleted after download.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-converter",
   },
 };

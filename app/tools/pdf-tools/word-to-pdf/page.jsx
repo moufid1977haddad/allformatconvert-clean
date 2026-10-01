@@ -93,7 +93,7 @@ export default function WordToPdfPage() {
       </div>
       <SeoContent
         title="Word to PDF"
-        description="Word to PDF converts your .docx or .doc file into a PDF using our conversion service. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. We tested .docx files with Calibri, Cambria, Arial and Arial Narrow text, two-level numbered lists, a table with merged cells, an image with text wrapping, a two-column section, headers and footers with page numbers, footnotes and a watermark: every page matched the output of two other online converters, and the text stays fully selectable. Two disclosed limits: a Word-generated table of contents is not recalculated during conversion — it shows whatever was last cached in the .docx, not a freshly rebuilt table — and the older .doc format takes a different conversion path that we have not measured."
+        description="Word to PDF converts your .docx or .doc file into a PDF. A .docx file is sent securely over HTTPS through our server to our conversion provider, ConvertAPI, with file storage turned off; an older .doc file is converted by our own LibreOffice server. Either way the file is deleted after conversion — we don't store or log it. We tested .docx files with Calibri, Cambria, Arial and Arial Narrow text, two-level numbered lists, a table with merged cells, an image with text wrapping, a two-column section, headers and footers with page numbers, footnotes and a watermark: every page matched the output of two other online converters, and the text stays fully selectable. Two disclosed limits: a Word-generated table of contents is not recalculated during conversion — it shows whatever was last cached in the .docx, not a freshly rebuilt table — and the older .doc format takes a different conversion path that we have not measured."
         howTo={[
           "Click the upload area and select a .docx or .doc file from your device.",
           "Click 'Convert to PDF'. Your file is uploaded securely for conversion; once the PDF is ready, click 'Download'.",
@@ -101,8 +101,8 @@ export default function WordToPdfPage() {
         ]}
         faqs={[
           { q: "Is Word to PDF completely free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What file formats does Word to PDF support?", a: "Both .docx and the older binary .doc format are supported — both are converted using our conversion service." },
-          { q: "Will my documents be uploaded to a server?", a: "Yes. Your file is uploaded securely over HTTPS to our conversion service to generate the PDF, and is deleted immediately after conversion — it isn't stored or kept." },
+          { q: "What file formats does Word to PDF support?", a: "Both .docx and the older binary .doc format are supported — .docx files are converted by ConvertAPI, .doc files by our own LibreOffice server." },
+          { q: "Will my documents be uploaded to a server?", a: "Yes. A .docx file goes securely over HTTPS through our server to our conversion provider, ConvertAPI (file storage turned off); a .doc file goes to our own LibreOffice server. The file is deleted after conversion — we don't keep it." },
           { q: "Do I need to install any software to use Word to PDF?", a: "No, it works directly in your web browser." },
           { q: "Will the text in my PDF be selectable?", a: "Yes. Because conversion is done server-side rather than by rasterizing a screenshot, the resulting PDF has fully selectable, searchable text." },
           { q: "Why does this look different from the previous in-browser converter?", a: "This tool now converts documents server-side instead of approximating the layout in your browser. The trade-off is that your file is uploaded; in return, fonts, spacing and page layout follow the original Word document, and the text is selectable." },
