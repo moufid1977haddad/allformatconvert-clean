@@ -1,7 +1,7 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { formatBytes } from '../lib/formatBytes';
-import { isIosDevice, saveBlob } from '../lib/download';
+import { attachmentPathActive, isIosDevice, saveBlob, stageAttachment, unstageAttachment } from '../lib/download';
 
 // THE download of the site (P18, 01/10). Every file a tool makes is offered through this component, so every tool
 // shows the same thing: the file's name, its format and size, a "Download" button — and, when a tool makes several
@@ -11,7 +11,14 @@ import { isIosDevice, saveBlob } from '../lib/download';
 // when touched — no button said "Download". The owner saw the same on other tools. Result links had grown tool by
 // tool (~110 of them, a dozen styles).
 //
-// iPhone / iPad: the Download link is saved as an attachment by IosDownloadBridge (app/lib/download.js), and a second
+// iPhone / iPad: the Download link points, as soon as the row appears, at a real address of the site that answers
+// with the file as an attachment (stageAttachment, app/lib/download.js) — touching it saves the file at once, as on
+// iLovePDF. Until P21 the file was read and handed over AFTER the tap: fine for Split PDF's small parts, but JPG to
+// PDF with a phone photo took longer than the second iOS gives a tap, and Safari opened the PDF (owner's iPhone,
+// 02/10). That link is a plain one, without the download attribute, exactly like iLovePDF's: a navigation always
+// goes through the service worker (a download-attribute link may be fetched by the browser's download manager
+// directly, bypassing it). Before the address is ready (a fraction of a second), IosDownloadBridge still handles
+// the tap. A second
 // button, "Save / Share", opens Apple's share sheet with the file itself (Save to Files, AirDrop, Mail, WhatsApp) —
 // navigator.share({ files }), available on iOS / iPadOS 15+. It needs the File ready BEFORE the tap (the tap's
 // permission does not survive an await), hence the file is read when the row appears.
@@ -127,6 +134,32 @@ export function FileDownload({ blob: blobProp, href, name, note, primary = true,
   }, [blobProp, url]);
 
   const file = useMemo(() => (blob ? new File([blob], name, { type: blob.type || 'application/octet-stream' }) : null), [blob, name]);
+
+  // iPhone / iPad: the file made ready at a real address before any tap (see the header). The address is used only
+  // while it belongs to the file and name on screen (never, even for a frame, an older result's), and is made again
+  // when the visitor comes back to the tab after the browser may have dropped it (older than 20 minutes).
+  const [staged, setStaged] = useState(null); // { blob, name, url }
+  const stagedAt = useRef(0);
+  useEffect(() => {
+    if (!blob || !attachmentPathActive()) return undefined;
+    let alive = true;
+    const made = [];
+    const stage = () => stageAttachment(blob, name).then((u) => {
+      if (!u) return;
+      made.push(u);
+      if (alive) { stagedAt.current = Date.now(); setStaged({ blob, name, url: u }); } else unstageAttachment(u);
+    }).catch(() => {});
+    stage();
+    const again = () => { if (document.visibilityState === 'visible' && stagedAt.current && Date.now() - stagedAt.current > 20 * 60 * 1000) stage(); };
+    document.addEventListener('visibilitychange', again);
+    return () => {
+      alive = false;
+      document.removeEventListener('visibilitychange', again);
+      const old = made.slice();
+      setTimeout(() => { for (const u of old) unstageAttachment(u); }, 60000);
+    };
+  }, [blob, name]);
+  const stagedUrl = staged && staged.blob === blob && staged.name === name ? staged.url : null;
   const [canShare, setCanShare] = useState(false); // decided in the browser (the server cannot know the device)
   useEffect(() => { setCanShare(file ? shareSupported(file) : false); }, [file]);
 
@@ -184,7 +217,7 @@ export function FileDownload({ blob: blobProp, href, name, note, primary = true,
         </div>
       </div>
       <div className="flex gap-2 shrink-0">
-        <a {...linkProps} href={url} download={name} data-download onClick={() => markSaved('downloaded')} aria-label={`Download ${name}`}
+        <a {...linkProps} href={stagedUrl || url} download={stagedUrl ? undefined : name} data-download data-staged={stagedUrl ? '1' : undefined} onClick={() => markSaved('downloaded')} aria-label={`Download ${name}`}
           className={`flex-1 sm:flex-none text-center rounded-lg px-4 py-2 font-semibold text-sm transition ${btn}`}>
           Download
         </a>

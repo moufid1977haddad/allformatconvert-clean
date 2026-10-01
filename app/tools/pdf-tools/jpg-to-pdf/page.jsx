@@ -27,7 +27,7 @@ export default function Page() {
       }
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-      setResult(URL.createObjectURL(blob));
+      setResult(blob);
     } catch(e) { setError('Conversion failed: ' + e.message); }
     setLoading(false);
   };
@@ -52,7 +52,7 @@ export default function Page() {
             {loading ? 'Converting...' : 'Convert to PDF'}
           </button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <FileDownload href={result} name={files[0] ? `${files[0].name.replace(/\.[^.]+$/, '')}${files.length > 1 ? `-and-${files.length - 1}-more` : ''}.pdf` : 'images.pdf'} />}
+          {result && <FileDownload blob={result} name={files[0] ? `${files[0].name.replace(/\.[^.]+$/, '')}${files.length > 1 ? `-and-${files.length - 1}-more` : ''}.pdf` : 'images.pdf'} />}
         </div>
       </div>
       <SeoContent

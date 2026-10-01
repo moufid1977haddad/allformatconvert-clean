@@ -8,16 +8,33 @@
 // Second use (30/09, iPhone): a file already made in the page (a Blob: PDF, video, image...) is served the way
 // iLovePDF and Smallpdf serve theirs -- as a response with "Content-Disposition: attachment" -- because iOS Safari
 // opens a blob: link to a PDF or a video in its viewer instead of saving it, and saves nothing from a data: link.
-// Message { type: 'file', id, name, blob }: the next request for /zipdl/<id>/... gets that blob, once.
+// Message { type: 'file', id, name, blob }: the next request for /zipdl/<id>/... gets that blob, once (pages of
+// before P21 still open in a tab).
+// Since P21 (02/10): the page puts the file in Cache Storage ahead of time and links to /zipdl/f/<id>/<name>; this
+// worker answers that address from the cache, as many times as it is asked, so the tap itself is a plain navigation
+// (iOS keeps a tap's permission to download for about one second only; the cache survives iOS stopping this worker).
+const STAGED_CACHE = 'ocv-downloads-v1';
 const pending = new Map();
 const files = new Map();
 const disposition = (name) => `attachment; filename="${name.replace(/[^\x20-\x7e]|["\\]/g, '_')}"; filename*=UTF-8''${encodeURIComponent(name)}`;
 
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+self.addEventListener('activate', (event) => event.waitUntil(Promise.all([self.clients.claim(), purgeStaged()])));
+// Files made ready more than 30 minutes ago are removed (the page also removes its own when it is left).
+async function purgeStaged() {
+  try {
+    const c = await caches.open(STAGED_CACHE);
+    for (const req of await c.keys()) {
+      const res = await c.match(req);
+      const at = Number(res && res.headers.get('X-Staged-At'));
+      if (!at || Date.now() - at > 30 * 60 * 1000) await c.delete(req);
+    }
+  } catch { /* storage unavailable */ }
+}
 
 self.addEventListener('message', (event) => {
   const data = event.data || {};
+  if (data.type === 'hello') { if (event.ports[0]) event.ports[0].postMessage({ type: 'hello', staged: true }); return; }
   if (data.type === 'file' && /^[A-Za-z0-9]{16,64}$/.test(String(data.id)) && data.blob instanceof Blob) {
     for (const [id, f] of files) if (Date.now() - f.created > 60000) files.delete(id);
     files.set(data.id, { name: String(data.name || 'download'), blob: data.blob, created: Date.now() });
@@ -31,6 +48,18 @@ self.addEventListener('message', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const staged = new URL(event.request.url).pathname.match(/^\/zipdl\/f\/([A-Za-z0-9]{16,64})\//);
+  if (staged) {
+    event.respondWith(caches.open(STAGED_CACHE).then(async (c) => {
+      const hit = await c.match(event.request, { ignoreSearch: true });
+      if (hit) return hit;
+      for (const req of await c.keys()) if (req.url.includes(`/zipdl/f/${staged[1]}/`)) return c.match(req);
+      // Gone (left too long, or evicted by the system): 204 keeps the visitor on the tool page with their result,
+      // where the row makes the file ready again (FileDownload), instead of replacing the page with an error.
+      return new Response(null, { status: 204 });
+    }));
+    return;
+  }
   const m = new URL(event.request.url).pathname.match(/^\/zipdl\/([A-Za-z0-9]{16,64})\//);
   if (!m) return;
   const file = files.get(m[1]);

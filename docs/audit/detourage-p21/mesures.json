@@ -1,0 +1,346 @@
+[
+ {
+  "case": "beer-mug__field",
+  "production": {
+   "bgLeakPct": 16.87,
+   "leakFromSolidPct": 1.8,
+   "alphaMAE": 6.67,
+   "veilPct": 2.65,
+   "holesPct": 3.11,
+   "edgeOnWhite": 24.16,
+   "edgeOnBlack": 20.38,
+   "ms": 847
+  },
+  "refined": {
+   "bgLeakPct": 12.39,
+   "leakFromSolidPct": 58,
+   "alphaMAE": 6.88,
+   "veilPct": 2.76,
+   "holesPct": 3.16,
+   "edgeOnWhite": 32.83,
+   "edgeOnBlack": 23.02,
+   "ms": 1774
+  },
+  "biref-raw": {
+   "bgLeakPct": 17.99,
+   "leakFromSolidPct": 2.2,
+   "alphaMAE": 3.73,
+   "veilPct": 2.66,
+   "holesPct": 0.52,
+   "edgeOnWhite": 19.36,
+   "edgeOnBlack": 15.01,
+   "ms": 776
+  },
+  "biref-refined": {
+   "bgLeakPct": 9.48,
+   "leakFromSolidPct": 76.8,
+   "alphaMAE": 3.53,
+   "veilPct": 2.52,
+   "holesPct": 0.46,
+   "edgeOnWhite": 28.23,
+   "edgeOnBlack": 15.34,
+   "ms": 1699
+  }
+ },
+ {
+  "case": "cup__field",
+  "production": {
+   "bgLeakPct": 12.23,
+   "leakFromSolidPct": 2.8,
+   "alphaMAE": 4.6,
+   "veilPct": 3.8,
+   "holesPct": 0.45,
+   "edgeOnWhite": 11.52,
+   "edgeOnBlack": 9.97,
+   "ms": 514
+  },
+  "refined": {
+   "bgLeakPct": 6.42,
+   "leakFromSolidPct": 73.9,
+   "alphaMAE": 4.4,
+   "veilPct": 3.58,
+   "holesPct": 0.37,
+   "edgeOnWhite": 12.48,
+   "edgeOnBlack": 16.58,
+   "ms": 1387
+  },
+  "biref-raw": {
+   "bgLeakPct": 10.57,
+   "leakFromSolidPct": 2.9,
+   "alphaMAE": 4.64,
+   "veilPct": 3.73,
+   "holesPct": 0.51,
+   "edgeOnWhite": 10.78,
+   "edgeOnBlack": 12.6,
+   "ms": 524
+  },
+  "biref-refined": {
+   "bgLeakPct": 6.37,
+   "leakFromSolidPct": 77.4,
+   "alphaMAE": 4.55,
+   "veilPct": 3.57,
+   "holesPct": 0.45,
+   "edgeOnWhite": 13.67,
+   "edgeOnBlack": 19.2,
+   "ms": 1428
+  }
+ },
+ {
+  "case": "china-cup__field",
+  "production": {
+   "bgLeakPct": 17.14,
+   "leakFromSolidPct": 1.1,
+   "alphaMAE": 6.39,
+   "veilPct": 4.05,
+   "holesPct": 0.39,
+   "edgeOnWhite": 19.63,
+   "edgeOnBlack": 10.95,
+   "ms": 998
+  },
+  "refined": {
+   "bgLeakPct": 11.56,
+   "leakFromSolidPct": 63.6,
+   "alphaMAE": 5.86,
+   "veilPct": 3.92,
+   "holesPct": 0.01,
+   "edgeOnWhite": 21.5,
+   "edgeOnBlack": 12,
+   "ms": 1980
+  },
+  "biref-raw": {
+   "bgLeakPct": 16.74,
+   "leakFromSolidPct": 1.7,
+   "alphaMAE": 6.28,
+   "veilPct": 4.02,
+   "holesPct": 0.38,
+   "edgeOnWhite": 17.86,
+   "edgeOnBlack": 11.72,
+   "ms": 985
+  },
+  "biref-refined": {
+   "bgLeakPct": 11.51,
+   "leakFromSolidPct": 65.6,
+   "alphaMAE": 5.91,
+   "veilPct": 3.93,
+   "holesPct": 0.01,
+   "edgeOnWhite": 21.46,
+   "edgeOnBlack": 13.96,
+   "ms": 1961
+  }
+ },
+ {
+  "case": "helmet__violet",
+  "production": {
+   "bgLeakPct": 16.51,
+   "leakFromSolidPct": 1.5,
+   "alphaMAE": 1.25,
+   "veilPct": 0.8,
+   "holesPct": 0.42,
+   "edgeOnWhite": 13.79,
+   "edgeOnBlack": 10.91,
+   "ms": 698
+  },
+  "refined": {
+   "bgLeakPct": 10.05,
+   "leakFromSolidPct": 90.5,
+   "alphaMAE": 1.12,
+   "veilPct": 0.73,
+   "holesPct": 0.24,
+   "edgeOnWhite": 14.47,
+   "edgeOnBlack": 12.02,
+   "ms": 1535
+  },
+  "biref-raw": {
+   "bgLeakPct": 8.66,
+   "leakFromSolidPct": 2.3,
+   "alphaMAE": 0.63,
+   "veilPct": 0.05,
+   "holesPct": 0.46,
+   "edgeOnWhite": 6.93,
+   "edgeOnBlack": 5.8,
+   "ms": 674
+  },
+  "biref-refined": {
+   "bgLeakPct": 2.21,
+   "leakFromSolidPct": 38.1,
+   "alphaMAE": 0.62,
+   "veilPct": 0.01,
+   "holesPct": 0.36,
+   "edgeOnWhite": 9.8,
+   "edgeOnBlack": 7.66,
+   "ms": 1539
+  }
+ },
+ {
+  "case": "helmet__leaf",
+  "production": {
+   "bgLeakPct": 27.55,
+   "leakFromSolidPct": 0.8,
+   "alphaMAE": 11.75,
+   "veilPct": 14.16,
+   "holesPct": 2.01,
+   "edgeOnWhite": 40.3,
+   "edgeOnBlack": 15.71,
+   "ms": 691
+  },
+  "refined": {
+   "bgLeakPct": 25.44,
+   "leakFromSolidPct": 53.8,
+   "alphaMAE": 11.23,
+   "veilPct": 13.17,
+   "holesPct": 2.13,
+   "edgeOnWhite": 41.28,
+   "edgeOnBlack": 18.34,
+   "ms": 1518
+  },
+  "biref-raw": {
+   "bgLeakPct": 36.27,
+   "leakFromSolidPct": 0.4,
+   "alphaMAE": 28.18,
+   "veilPct": 39.83,
+   "holesPct": 0.39,
+   "edgeOnWhite": 47.36,
+   "edgeOnBlack": 25.66,
+   "ms": 679
+  },
+  "biref-refined": {
+   "bgLeakPct": 34.8,
+   "leakFromSolidPct": 92,
+   "alphaMAE": 27.64,
+   "veilPct": 39.27,
+   "holesPct": 0.11,
+   "edgeOnWhite": 48.06,
+   "edgeOnBlack": 26.5,
+   "ms": 1523
+  }
+ },
+ {
+  "case": "cat-fur__field",
+  "production": {
+   "bgLeakPct": 1.63,
+   "leakFromSolidPct": 1.3,
+   "alphaMAE": 5.14,
+   "veilPct": 7.63,
+   "holesPct": 0.29,
+   "edgeOnWhite": 3.69,
+   "edgeOnBlack": 2.66,
+   "ms": 484
+  },
+  "refined": {
+   "bgLeakPct": 0.94,
+   "leakFromSolidPct": 80,
+   "alphaMAE": 4.99,
+   "veilPct": 7.25,
+   "holesPct": 0.05,
+   "edgeOnWhite": 4.14,
+   "edgeOnBlack": 2.62,
+   "ms": 1267
+  },
+  "biref-raw": {
+   "bgLeakPct": 1.16,
+   "leakFromSolidPct": 0.2,
+   "alphaMAE": 0.91,
+   "veilPct": 0,
+   "holesPct": 0.32,
+   "edgeOnWhite": 2.74,
+   "edgeOnBlack": 2.59,
+   "ms": 488
+  },
+  "biref-refined": {
+   "bgLeakPct": 0.48,
+   "leakFromSolidPct": 70.6,
+   "alphaMAE": 1.21,
+   "veilPct": 0,
+   "holesPct": 0.12,
+   "edgeOnWhite": 3.81,
+   "edgeOnBlack": 2.91,
+   "ms": 1262
+  }
+ },
+ {
+  "case": "cat-short__leaf",
+  "production": {
+   "bgLeakPct": 14.22,
+   "leakFromSolidPct": 0.6,
+   "alphaMAE": 15.58,
+   "veilPct": 30.33,
+   "holesPct": 0.44,
+   "edgeOnWhite": 16.21,
+   "edgeOnBlack": 11.81,
+   "ms": 571
+  },
+  "refined": {
+   "bgLeakPct": 9.44,
+   "leakFromSolidPct": 73.5,
+   "alphaMAE": 12.47,
+   "veilPct": 23.73,
+   "holesPct": 0.14,
+   "edgeOnWhite": 16.08,
+   "edgeOnBlack": 13.35,
+   "ms": 1383
+  },
+  "biref-raw": {
+   "bgLeakPct": 24.74,
+   "leakFromSolidPct": 0.1,
+   "alphaMAE": 65.45,
+   "veilPct": 133.26,
+   "holesPct": 0.34,
+   "edgeOnWhite": 37.11,
+   "edgeOnBlack": 25.24,
+   "ms": 548
+  },
+  "biref-refined": {
+   "bgLeakPct": 23.66,
+   "leakFromSolidPct": 96.2,
+   "alphaMAE": 65.21,
+   "veilPct": 132.8,
+   "holesPct": 0.02,
+   "edgeOnWhite": 37.97,
+   "edgeOnBlack": 25.98,
+   "ms": 1402
+  }
+ },
+ {
+  "case": "cat-short__field",
+  "production": {
+   "bgLeakPct": 7.67,
+   "leakFromSolidPct": 5.1,
+   "alphaMAE": 9.25,
+   "veilPct": 17.69,
+   "holesPct": 0.35,
+   "edgeOnWhite": 9.8,
+   "edgeOnBlack": 6.52,
+   "ms": 560
+  },
+  "refined": {
+   "bgLeakPct": 4.13,
+   "leakFromSolidPct": 78.9,
+   "alphaMAE": 9.02,
+   "veilPct": 17.27,
+   "holesPct": 0.04,
+   "edgeOnWhite": 10.52,
+   "edgeOnBlack": 7.6,
+   "ms": 1346
+  },
+  "biref-raw": {
+   "bgLeakPct": 4.86,
+   "leakFromSolidPct": 0.3,
+   "alphaMAE": 0.68,
+   "veilPct": 0,
+   "holesPct": 0.37,
+   "edgeOnWhite": 4.82,
+   "edgeOnBlack": 6.49,
+   "ms": 545
+  },
+  "biref-refined": {
+   "bgLeakPct": 0.68,
+   "leakFromSolidPct": 29.1,
+   "alphaMAE": 0.82,
+   "veilPct": 0,
+   "holesPct": 0.08,
+   "edgeOnWhite": 7.02,
+   "edgeOnBlack": 8.47,
+   "ms": 1366
+  }
+ }
+]

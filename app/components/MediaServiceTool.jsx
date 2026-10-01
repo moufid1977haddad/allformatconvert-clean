@@ -1,4 +1,5 @@
 'use client';
+import { whyLarger } from '../lib/sizeChange';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from './SeoContent';
 import ProgressBar from './ProgressBar';
@@ -142,8 +143,13 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">Before</div><div className="font-bold">{fmt(file.size)}</div></div>
                 <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">After ({result.ext.toUpperCase()})</div><div className="font-bold text-indigo-500">{fmt(result.bytes)}</div></div>
-                <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">{change >= 0 ? 'Saved' : 'Larger by'}</div><div className={`font-bold ${change >= 0 ? 'text-green-500' : 'text-orange-500'}`}>{Math.abs(change)}%</div></div>
+                <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">{change >= 0 ? 'Saved' : 'Larger by'}</div><div className={`font-bold ${change >= 0 ? 'text-green-500' : 'text-neutral-700 dark:text-neutral-300'}`}>{Math.abs(change)}%</div></div>
               </div>
+              {/* A larger result is not a failure (P21): one line says why it grew and what to do instead. */}
+              {(() => {
+                const why = whyLarger({ from: file.name, to: result.name, inBytes: file.size, outBytes: result.bytes, kind: /^audio\//.test(file.type) || result.isAudio ? 'audio' : /^image\//.test(file.type) ? 'image' : 'video' }); // the wording follows what the visitor sent (a video turned into a GIF is explained as video → GIF)
+                return why ? <p data-size-why className="text-xs text-neutral-600 dark:text-neutral-400 text-center">{why}</p> : null;
+              })()}
               {result.isVideo && <PlayablePreview src={result.url} name={result.name} kind="video" className="w-full rounded-xl max-h-72" />}
               {result.isAudio && <PlayablePreview src={result.url} name={result.name} kind="audio" />}
               {result.isImage && <img src={result.url} alt="Result" className="mx-auto max-h-96 rounded-xl" />}

@@ -50,13 +50,14 @@ for (const [label, file, W, H] of cases) {
   await p.locator('input[type=file]').first().setInputFiles(file);
   const t0 = Date.now();
   await p.getByRole('button', { name: /Remove Background/ }).click();
-  const dl = p.getByRole('link', { name: 'Download PNG' });
+  const dl = p.locator('a[data-download]').first(); // the site's download row (P18)
   const ok = await dl.waitFor({ timeout: 300000 }).then(() => true, () => false);
   if (!ok) { check(label, false, (await p.locator('.text-red-400').allInnerTexts()).join(' ')); await ctx.close(); continue; }
   const secs = (Date.now() - t0) / 1000;
   const href = await dl.getAttribute('href');
   const maxCanvas = await p.evaluate(() => window.__maxCanvas);
   const [d] = await Promise.all([p.waitForEvent('download'), dl.click()]);
+  const refineErrors = await p.evaluate(() => (window.__fileDownloads || []).length); void refineErrors;
   const buf = fs.readFileSync(await d.path());
   const img = sharp(buf, { limitInputPixels: false });
   const meta = await img.metadata();
@@ -66,7 +67,7 @@ for (const [label, file, W, H] of cases) {
   // centre colour = the photo's own: R 200, G ~ x/W*255, B ~ y/H*255 (as displayed, rotation applied)
   const src = await sharp(file, { limitInputPixels: false }).rotate().extract({ left: W >> 1, top: H >> 1, width: 1, height: 1 }).raw().toBuffer();
   const colourOk = Math.abs(c[0] - src[0]) < 6 && Math.abs(c[1] - src[1]) < 6 && Math.abs(c[2] - src[2]) < 6;
-  check(label, meta.width === W && meta.height === H && corner[3] === 0 && c[3] === 255 && colourOk && href.startsWith('blob:') && d.suggestedFilename() === path.basename(file).replace(/\.jpg$/, '-no-background.png') && maxCanvas <= 4_100_000,
+  check(label, meta.width === W && meta.height === H && corner[3] === 0 && c[3] === 255 && colourOk && (href.startsWith('blob:') || href.startsWith('/zipdl/f/')) && d.suggestedFilename() === path.basename(file).replace(/\.jpg$/, '-no-background.png') && maxCanvas <= 4_100_000,
     `${meta.width}x${meta.height} corner α ${corner[3]} centre ${c.join(',')} (src ${[...src].join(',')}), largest canvas ${(maxCanvas / 1e6).toFixed(2)} MP, ${d.suggestedFilename()}, ${(buf.length / 1e6).toFixed(1)} MB, ${secs.toFixed(1)} s`);
   await ctx.close();
 }
