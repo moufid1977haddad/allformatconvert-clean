@@ -2,7 +2,12 @@
 // (EXIF-rotated, as iPhone portrait shots are) and 48 MP, plus a big transparent PNG. Each download is reopened
 // with sharp: real format, size as displayed (rotation applied), pixels compared with the source (PSNR).
 // Desktop browsers use one canvas; --bands forces the iPhone path (band decode + WebAssembly encoders).
-// Usage: node scripts/browser-tests/big-image.mjs <origin> [--browser=firefox|webkit] [--only=fmt,fmt] [--sizes=12,24,48,20] [--bands]
+// P23 (02/10): brought up to date — the result is the shared FileDownload row ([data-file-download], read in the page,
+// staged /zipdl/ link on iPhone / iPad), the format is chosen by its label; --device=iphone|ipad gives the phone's
+// user agent and touch (so the 50 MP phone limit applies). This is also the bench of the only cause found in the
+// visitors' errors (tool_errors, D2): on 28/09 an iPhone's 12 MP photos were refused "more than the 12-megapixel
+// limit" (fixed by cd0c2ad9 on 29/09: 50 MP on a phone): the 12.2 MP case must convert with --device=iphone.
+// Usage: node scripts/browser-tests/big-image.mjs <origin> [--browser=firefox|webkit] [--only=fmt,fmt] [--sizes=12,24,48,20] [--bands] [--device=iphone|ipad]
 import { chromium, firefox, webkit } from '@playwright/test';
 import sharp from 'sharp';
 import { PDFDocument } from 'pdf-lib';
@@ -51,27 +56,50 @@ async function psnr(src, buf) {
   return 10 * Math.log10(255 * 255 / (se / A.data.length));
 }
 
+const device = arg('device');
+const UA = {
+  iphone: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Mobile/15E148 Safari/604.1',
+  ipad: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Safari/605.1.15',
+};
 const b = await engine.launch();
-const ctx = await b.newContext({ acceptDownloads: true });
+const ctx = await b.newContext({ acceptDownloads: true, ...(device ? { userAgent: UA[device], hasTouch: true, viewport: device === 'iphone' ? { width: 390, height: 844 } : { width: 820, height: 1180 } } : {}) });
+await ctx.addCookies([{ name: 'oct_automation', value: '1', url: origin }]);
+if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((u) => u.hostname === 'vercel.live', (r) => r.abort());
+if (device) await ctx.addInitScript(() => { Object.defineProperty(Navigator.prototype, 'maxTouchPoints', { get: () => 5, configurable: true }); });
 await applyIosCanvasCap(ctx); // P16: the iPhone's canvas limit, always (lib/ios-canvas-cap.mjs)
 // --bands: the iPhone path (no canvas over 16.7 MP) forced, in a browser that could have used one big canvas
 if (process.argv.includes('--bands')) await ctx.addInitScript(() => { window.__forceBands = true; });
-const page = await ctx.newPage();
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
+// Bytes of the first result, read in the page (blob: link, or the staged /zipdl/ link served from Cache Storage)
+async function resultBytes(p) {
+  const n = await p.locator('[data-file-download] [data-download]').first().evaluate(async (a) => {
+    const staged = /\/zipdl\/f\//.test(a.getAttribute('href') || '');
+    const res = staged ? await (await caches.open('ocv-downloads-v1')).match(a.href) : await fetch(a.href);
+    window.__res = new Uint8Array(await res.arrayBuffer()); return window.__res.length;
+  });
+  const parts = [];
+  for (let o = 0; o < n; o += 8e6) parts.push(Buffer.from(await p.evaluate(([o]) => { let s = ''; const u = window.__res.subarray(o, o + 8e6); for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s); }, [o]), 'base64'));
+  return Buffer.concat(parts);
+}
 async function convert(file, fmt) {
-  await page.goto(origin + '/tools/image-tools/image-converter', { waitUntil: 'networkidle' });
-  const decoded = page.waitForEvent('console', { predicate: () => false, timeout: 1 }).catch(() => {});
-  await page.locator('input[type=file]').setInputFiles(file);
-  await page.locator('select').filter({ has: page.locator('option[value="ico"]') }).selectOption(fmt);
-  const t0 = Date.now();
-  await page.getByRole('button', { name: /^Convert \d+ file/ }).click();
-  const btn = page.locator('div.bg-green-50 button', { hasText: 'Download' }).first();
-  const err = page.locator('p.text-red-500');
-  await Promise.race([btn.waitFor({ timeout: 600000 }), err.waitFor({ timeout: 600000 })]);
-  if (await err.count()) return { error: await err.innerText() };
-  const secs = (Date.now() - t0) / 1000;
-  const [dl] = await Promise.all([page.waitForEvent('download'), btn.click()]);
-  return { buf: fs.readFileSync(await dl.path()), name: dl.suggestedFilename(), secs };
+  const page = await ctx.newPage();
+  try {
+    await page.goto(origin + '/tools/image-tools/image-converter', { waitUntil: 'load' });
+    await page.waitForTimeout(800);
+    await page.locator('input[type=file]').first().setInputFiles(file);
+    await page.getByLabel('Output format').selectOption(fmt);
+    const t0 = Date.now();
+    await page.getByRole('button', { name: /^Convert \d+ file/ }).click();
+    const r = await Promise.race([
+      page.locator('[data-file-download]').first().waitFor({ timeout: 600000 }).then(() => 'ok'),
+      page.getByText(/failed to convert|megapixel limit/).first().waitFor({ timeout: 600000 }).then(() => 'error'),
+    ]).catch(() => 'timeout');
+    if (r !== 'ok') return { error: r === 'timeout' ? 'no result after 10 min' : (await page.locator('main').innerText()).match(/(failed to convert|megapixel limit)[\s\S]{0,300}/)?.[0].replace(/\n/g, ' | ') || 'error' };
+    const secs = (Date.now() - t0) / 1000;
+    if (device) await page.locator('[data-file-download] [data-download][data-staged="1"]').first().waitFor({ timeout: 15000 }).catch(() => {});
+    const name = await page.locator('[data-file-download]').first().getAttribute('data-name');
+    return { buf: await resultBytes(page), name, secs };
+  } finally { await page.close(); }
 }
 const fixtures = [];
 if (sizes.includes(12)) fixtures.push({ label: '12.2 MP iPhone', file: await photo(4032, 3024, 0, 'p12.jpg'), w: 4032, h: 3024 });
@@ -95,4 +123,4 @@ for (const f of fixtures) {
       `${m.format} ${m.width}x${m.height}, PSNR ${p.toFixed(1)} dB, ${(r.buf.length / 1e6).toFixed(1)} MB, ${r.secs.toFixed(1)} s, .${ext}`);
   }
 }
-await b.close(); console.log(fails ? `${fails} FAILED` : 'all passed', `(${engine.name()})`); process.exit(fails ? 1 : 0);
+await b.close(); console.log(fails ? `${fails} FAILED` : 'all passed', `(${engine.name()}${device ? ' ' + device : ''})`); process.exit(fails ? 1 : 0);

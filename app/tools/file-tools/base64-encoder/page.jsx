@@ -9,7 +9,9 @@ import { FileDownload } from '../../../components/FileDownload';
 // out as data:application/octet-stream, which no browser displays as an image -- the type is now read from the
 // content; the raw Base64 (without the data: prefix) can be chosen, as base64.guru offers; a very large result is
 // no longer pushed whole into the text box (the tab froze): a preview is shown and the full text downloads.
-const PREVIEW_CHARS = 1000000;
+// P23 (02/10): measured in WebKit (Safari's engine), a read-only text box takes 0.27 s for 100 000 characters, 6.9 s
+// for 1 000 000 (Chromium 0.28 s): the preview is 100 000 characters (scripts/p23/textarea-cost.mjs).
+const PREVIEW_CHARS = 100000;
 export default function FileBase64EncoderPage() {
   const [result, setResult] = useState('');
   const [fileName, setFileName] = useState('');

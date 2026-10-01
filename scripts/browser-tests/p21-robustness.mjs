@@ -92,9 +92,29 @@ function fixture(c, t) {
 // Good companions for the two-file tools
 const GOOD = { pdf: path.join(dir, 'good.pdf'), png: path.join(dir, 'good.png'), mp3: path.join(ROOT, 'docs', 'audit', 'fixtures-safari', 'safari-tone-B-3s.mp3'), mp4: path.join(ROOT, 'scripts', 'audit', 'fixtures', 'files', 'sample.mp4') };
 fs.writeFileSync(GOOD.pdf, realPdf); fs.writeFileSync(GOOD.png, realPng);
-const MESSAGE = /could ?n[o']t|can ?n[o']t|cannot|unable|failed|invalid|damaged|corrupt|empty|0 bytes|not an? (valid )?|isn'?t a|unsupported|not supported|doesn'?t|does not|no (audio|sound|pages?|pictures?|image)|too (large|big)|over the|limit|megapixel|password|protected|encrypted|error|unreadable|unrecognized|wrong|different format|only accepts|please (choose|select|use)|doesn't take|this tool (takes|needs|works)|not available/i;
+const MESSAGE = /could ?n[o']t|can ?n[o']t|can't|cannot|unable|failed|invalid|damaged|corrupt|empty|0 bytes|not an? (valid )?|isn'?t a|unsupported|not supported|doesn'?t|does not|no (audio|sound|pages?|pictures?|image)|too (large|big)|over the|limit|megapixel|password|protected|encrypted|error|unreadable|unrecognized|wrong|different format|only accepts|please (choose|select|use)|doesn't take|this tool (takes|needs|works)|not available/i;
 const BUSY = /…|\.\.\.|ing\b/;
+// P23: a raw JavaScript / browser error shown as is is not a sentence for a visitor (Video Merger under Firefox showed
+// 'can't access property "find", e.streams is undefined'; Image Cropper 'Passed-in image is "broken"').
+const RAW_ERROR = /can't access property|is undefined\b|is not a function|Cannot read propert|null is not an object|undefined is not an object|is not defined\b|Passed-in image|NS_ERROR|InvalidStateError|DataCloneError|Failed to execute|Unexpected token|out of bounds of the DataView/i;
 
+// P23 (02/10): a browser with enough memory (Firefox) really turns the 900 MP picture into a PDF. Counted right only
+// when the PDF opens, holds the whole 30 000 × 30 000 image, on a page of at most 14 400 points (Acrobat's limit).
+async function giantPdfIsReal(p) {
+  try {
+    const b64 = await p.locator('[data-file-download] [data-download]').first().evaluate(async (a) => {
+      const u = new Uint8Array(await (await fetch(a.href)).arrayBuffer()); if (u[0] !== 0x25 || u[1] !== 0x50) return null;
+      let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s);
+    });
+    if (!b64) return false;
+    const { PDFName, PDFRawStream } = await import('pdf-lib');
+    const d = await PDFDocument.load(Buffer.from(b64, 'base64'));
+    const { width, height } = d.getPage(0).getSize();
+    let full = false;
+    d.context.enumerateIndirectObjects().forEach(([, o]) => { if (o instanceof PDFRawStream && o.dict.get(PDFName.of('Subtype')) === PDFName.of('Image') && String(o.dict.get(PDFName.of('Width'))) === '30000' && String(o.dict.get(PDFName.of('Height'))) === '30000') full = true; });
+    return full && Math.max(width, height) <= 14400;
+  } catch { return false; }
+}
 const b = await engine.launch();
 const rows = [];
 let fails = 0, passes = 0;
@@ -129,7 +149,8 @@ async function runCase({ t, c, file }) {
       const good = { pdf: GOOD.pdf, image: GOOD.png, audio: GOOD.mp3, video: GOOD.mp4, other: GOOD.pdf }[kindOf(t.accept, extFor(t.accept))];
       // A tool with modes (Audio to Text: microphone / file; Hash Generator: text / file) shows its file field once
       // the file mode is chosen.
-      const fileMode = p.locator('main').getByRole('button', { name: /upload .*file|^file$/i }).or(p.locator('main').getByRole('radio', { name: /file/i })).first();
+      // Barcode Generator takes a file (CSV import) in its "Many" mode only (P23).
+      const fileMode = p.locator('main').getByRole('button', { name: /upload .*file|^file$/i }).or(p.locator('main').getByRole('radio', { name: /file|^many/i })).first();
       if (await fileMode.count()) await fileMode.click({ timeout: 5000 }).catch(() => {});
       const inputs = p.locator('main input[type=file]');
       if ((await inputs.count()) >= 2 && good) { // two separate fields (File Comparator): the bad file and a good one
@@ -176,8 +197,10 @@ async function runCase({ t, c, file }) {
       else if (bodyLen < Math.min(200, before / 3)) verdict = 'BLANK';
       // an archive may hold an empty file (Zip Creator): its result is right even for an empty one
       // an archive may hold an empty file (Zip Creator), and an empty file has a well-known hash (Hash Generator)
+      else if (results && c === 'giant' && await giantPdfIsReal(p)) verdict = 'OK-RESULT'; // P23: opened and checked, see below
       else if (results && !(ANY_BYTES.has(t.tool) && (c !== 'empty' || t.tool === 'zip-creator' || t.tool === 'hash-generator'))) verdict = 'FAKE-RESULT';
       else if (results) verdict = 'OK-RESULT';
+      else if (msg && RAW_ERROR.test(msg)) verdict = 'RAW-ERROR';
       else if (msg) verdict = 'OK-MESSAGE';
       else if (INFO_TOOLS.has(t.tool) && /0 B|bytes|different|identical|Real format|Type|No embedded metadata|cannot display/i.test(await p.locator('main').innerText().catch(() => ''))) verdict = 'OK-REPORT';
       else if (busyBtn) verdict = 'STUCK';

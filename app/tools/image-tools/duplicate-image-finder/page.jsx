@@ -2,18 +2,46 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { sha256Hex, dHash, findPairs } from '../../../lib/imageSimilarity';
+import { unreadableImageMessage, imageHeaderSize } from '../../../lib/fileChecks';
+import { CANVAS_MAX_AREA } from '../../../lib/mediaSupport';
+// Beyond a canvas's largest area (268 MP) a picture is never decoded here (a 30 000 × 30 000 PNG is 3.6 GB once open):
+// compared byte for byte only, and said so. Below it, a picture this browser cannot open is caught and said too.
+const HUGE = CANVAS_MAX_AREA;
 export default function DuplicateImageFinderPage() {
   const [images, setImages] = useState([]);
   const [pairs, setPairs] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  // P23: what is wrong with a file is said as soon as it is chosen (it was said only after "Find Duplicates", or
+  // never: an empty file had a "fingerprint" like any other). Empty files are left out; a picture this browser cannot
+  // open is still compared byte for byte.
+  const [notes, setNotes] = useState([]);
   const inputRef = useRef();
-  const handleFiles = (e) => {
-    const files = Array.from(e.target.files);
+  const genRef = useRef(0); // the latest selection: a slower, older one never overwrites it
+  const handleFiles = async (e) => {
+    const gen = ++genRef.current;
+    const all = Array.from(e.target.files);
     e.target.value = '';
     setPairs(null);
     setError('');
-    setImages(files.map((file) => ({ name: file.name, file, url: URL.createObjectURL(file) })));
+    const files = all.filter((f) => f.size > 0);
+    const found = all.filter((f) => !f.size).map((f) => `"${f.name}" is empty (0 bytes), so there is nothing to compare: it was left out.`);
+    const list = [];
+    for (const file of files) {
+      const size = await imageHeaderSize(file);
+      const huge = !!size && size.width * size.height > HUGE; // no thumbnail: a 900 MP picture would be decoded whole
+      if (huge) found.push(`"${file.name}": ${await unreadableImageMessage(file)} It is compared for exact copies only.`);
+      list.push({ name: file.name, file, url: huge ? null : URL.createObjectURL(file) });
+    }
+    if (gen !== genRef.current) return;
+    setNotes(found);
+    setImages(list);
+  };
+  const onThumbError = async (im) => {
+    const gen = genRef.current;
+    const why = await unreadableImageMessage(im.file);
+    if (gen !== genRef.current) return;
+    setNotes((n) => [...n, `"${im.name}": ${why} It is compared for exact copies only.`]);
   };
   const findDuplicates = async () => {
     setBusy(true);
@@ -24,11 +52,13 @@ export default function DuplicateImageFinderPage() {
       for (const im of images) {
         const sha = await sha256Hex(await im.file.arrayBuffer());
         let hash = null;
-        try { const bmp = await createImageBitmap(im.file); hash = dHash(bmp); bmp.close && bmp.close(); } catch { unreadable.push(im.name); }
+        const size = await imageHeaderSize(im.file);
+        if (size && size.width * size.height > HUGE) unreadable.push(im.name); // never decoded whole (900 MP = 3.6 GB)
+        else try { const bmp = await createImageBitmap(im.file); hash = dHash(bmp); bmp.close && bmp.close(); } catch { unreadable.push(im.name); }
         items.push({ name: im.name, sha, hash });
       }
       setPairs(findPairs(items));
-      if (unreadable.length) setError(`This browser cannot display ${unreadable.join(', ')}: compared for exact copies only.`);
+      if (unreadable.length) setError(`This browser cannot open ${unreadable.map((n) => `"${n}"`).join(', ')} as a picture: compared for exact copies only.`);
     } catch (err) {
       setError('Could not compare the images: ' + (err?.message || err));
     }
@@ -44,10 +74,12 @@ export default function DuplicateImageFinderPage() {
             <p className="text-neutral-500">{images.length > 0 ? images.length + ' images loaded' : 'Click to select multiple images'}</p>
             <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
           </div>
-          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+          {notes.map((n, i) => <p key={i} role="alert" className="text-red-400 text-center text-sm">{n}</p>)}
+          {error && <p role="alert" className="text-red-400 text-center text-sm">{error}</p>}
+          {images.length === 1 && <p className="text-neutral-500 text-center text-sm">Add at least one more image to compare.</p>}
           {images.length > 0 && (
             <div className="grid grid-cols-4 gap-2">
-              {images.map((img, i) => <div key={i} className="relative"><img src={img.url} className="w-full h-16 object-cover rounded" /><p className="text-xs text-neutral-500 truncate">{img.name}</p></div>)}
+              {images.map((img, i) => <div key={i} className="relative">{img.url ? <img src={img.url} onError={() => onThumbError(img)} className="w-full h-16 object-cover rounded" /> : <div className="w-full h-16 rounded bg-neutral-100" />}<p className="text-xs text-neutral-500 truncate">{img.name}</p></div>)}
             </div>
           )}
           <button onClick={findDuplicates} disabled={images.length < 2 || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">{busy ? 'Comparing…' : 'Find Duplicates'}</button>
