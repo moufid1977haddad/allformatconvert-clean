@@ -4,7 +4,8 @@
   fixtures with the main part's content type changed to the variant's (what Office writes for each);
 - OpenDocument (.odt .ott .ods .ots .odp .otp) and .rtf are written here by hand, valid per the specifications;
 - legacy binaries (.doc → .dot, .ppt → .pps/.pot), .xlsb, Works .wps and WordPerfect .wpd are LibreOffice's own
-  public test documents (github.com/LibreOffice/core, MPL-2.0), downloaded once.
+  public test documents (github.com/LibreOffice/core, MPL-2.0), downloaded once. (Works .wps was tried and removed:
+  this LibreOffice turns every Works file into the same blank page.)
 Each file carries a recognisable sentence, checked in the PDF by e2e-office-formats.mjs.
 Usage: python scripts/p21/office-fixtures.py  → docs/audit/fixtures-p21-office/
 """
@@ -83,7 +84,6 @@ for path, dst in [('sw/qa/extras/ww8export/data/bordercolours.doc', 'word.dot'),
                   ('sd/qa/unit/data/ppt/FillPatterns.ppt', 'slides.pps'),
                   ('sd/qa/unit/data/ppt/FillPatterns.ppt', 'slides.pot'),
                   ('sc/qa/unit/data/xlsb/universal-content.xlsb', 'sheet.xlsb'),
-                  ('writerperfect/qa/unit/data/writer/libwps/pass/Works_4.5.wps', 'works.wps'),
                   ('writerperfect/qa/unit/data/writer/libwpd/pass/WP6.wpd', 'wordperfect.wpd')]:
     dest = os.path.join(OUT, dst)
     if not os.path.exists(dest):

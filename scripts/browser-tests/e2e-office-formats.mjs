@@ -5,7 +5,7 @@
 // Usage: node scripts/browser-tests/e2e-office-formats.mjs <origin, e.g. the preview relay http://localhost:3200>
 import fs from 'node:fs';
 import path from 'node:path';
-import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
+import { getDocument, OPS } from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 const origin = new URL(process.argv[2] || 'http://localhost:3200').origin;
 const dir = path.join('docs', 'audit', 'fixtures-p21-office');
@@ -29,7 +29,11 @@ for (const f of fs.readdirSync(dir).filter((x) => /\.[a-z]+$/.test(x) && !x.ends
   let text = '';
   for (let i = 1; i <= Math.min(pdf.numPages, 3); i++) text += (await (await pdf.getPage(i)).getTextContent()).items.map((x) => x.str).join(' ');
   const ours = /^(text|sheet|slides)\.(odt|ott|ods|ots|odp|otp|rtf)$/.test(f);
-  check(`${f}: real PDF, ${pdf.numPages} page(s)${ours ? ', test sentence present' : ''}`, pdf.numPages >= 1 && (!ours || text.includes(SENT)) && text.trim().length > 0, `${secs} s, ${body.length} bytes, text: ${text.slice(0, 80)}`);
+  // A page with no text must still hold the document's drawing (a blank page is a false success: Works .wps gave
+  // one, 5 operators, and was removed); a spreadsheet cell may clip the sentence, so its start is enough there.
+  const ops = (await (await pdf.getPage(1)).getOperatorList()).fnArray.length;
+  const sentence = /^sheet\./.test(f) ? 'P21 format' : SENT;
+  check(`${f}: real PDF, ${pdf.numPages} page(s), ${ops} drawing operators${ours ? ', test sentence present' : ''}`, pdf.numPages >= 1 && (!ours || text.includes(sentence)) && (text.trim().length > 0 || ops > 100), `${secs} s, ${body.length} bytes, text: ${text.slice(0, 80)}`);
 }
 console.log(fails ? `${fails} FAIL, ${passes} pass` : `ALL PASS: ${passes} formats`);
 process.exit(fails ? 1 : 0);

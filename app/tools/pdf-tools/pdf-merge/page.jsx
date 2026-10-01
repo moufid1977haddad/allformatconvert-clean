@@ -13,7 +13,7 @@ import { convertOffice } from '../../../lib/officeUpload';
 // image files like JPG and PNG" and converts them first. Here: images become a page in the browser (pdfImages: HEIC,
 // WebP, GIF, BMP, TIFF, AVIF too, upright); Office documents go through the same conversion as Word / Excel /
 // PowerPoint to PDF (our server; .docx through ConvertAPI) and only those are uploaded — PDFs and images never are.
-const OFFICE_RE = /\.(docx?|docm|dotx?|dotm|odt|ott|rtf|wps|wpd|xlsx?|xlsm|xlsb|xltx?|xltm|ods|ots|csv|pptx?|pptm|ppsx?|ppsm|potx?|potm|odp|otp)$/i;
+const OFFICE_RE = /\.(docx?|docm|dotx?|dotm|odt|ott|rtf|wpd|xlsx?|xlsm|xlsb|xltx?|xltm|ods|ots|csv|pptx?|pptm|ppsx?|ppsm|potx?|potm|odp|otp)$/i;
 const isPdf = (f) => /\.pdf$/i.test(f.name) || f.type === 'application/pdf';
 const isOffice = (f) => OFFICE_RE.test(f.name);
 const MERGE_ACCEPT = '.pdf,application/pdf,image/*,.heic,.heif,.tif,.tiff,.doc,.docx,.docm,.dotx,.dot,.odt,.rtf,.xls,.xlsx,.xlsm,.xlsb,.ods,.csv,.ppt,.pptx,.pptm,.ppsx,.pps,.odp';

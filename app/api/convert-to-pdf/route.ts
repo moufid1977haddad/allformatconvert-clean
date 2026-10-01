@@ -29,7 +29,9 @@ const MAX_FILE_SIZE_BYTES = MAX_OFFICE_STAGED_BYTES;
 // P21 (02/10), format coverage: the OpenDocument, RTF, macro-enabled, template and slide-show variants that the same
 // LibreOffice reads (Gotenberg's LibreOffice route lists them all). Market: iLovePDF and Smallpdf take DOC/DOCX,
 // XLS/XLSX, PPT/PPTX only; CloudConvert converts ODT, RTF, ODS, ODP, PPS, XLSM... to PDF on separate pages.
-const WORD_EXTENSIONS = ["docx", "doc", "odt", "ott", "rtf", "docm", "dotx", "dotm", "dot", "wps", "wpd"];
+// Microsoft Works .wps is NOT here: this LibreOffice returned the same blank page for Works 2, 3, 4.5, 5 and 6 files
+// (measured 02/10) — accepting it would hand back an empty PDF as a success.
+const WORD_EXTENSIONS = ["docx", "doc", "odt", "ott", "rtf", "docm", "dotx", "dotm", "dot", "wpd"];
 const SHEET_EXTENSIONS = ["xlsx", "xls", "csv", "ods", "ots", "xlsm", "xlsb", "xltx", "xltm", "xlt"];
 const SLIDE_EXTENSIONS = ["pptx", "ppt", "odp", "otp", "pptm", "ppsx", "ppsm", "pps", "potx", "potm", "pot"];
 const ALLOWED_EXTENSIONS = new Set([...WORD_EXTENSIONS, ...SHEET_EXTENSIONS, ...SLIDE_EXTENSIONS]);
