@@ -26,7 +26,13 @@ function gotenbergTimeoutMs(bytes: number): number {
 // so this check is the real server-side ceiling for those files (docs/audit/RAPPORT-office-envoi-morceaux.md).
 const MAX_FILE_SIZE_BYTES = MAX_OFFICE_STAGED_BYTES;
 
-const ALLOWED_EXTENSIONS = new Set(["docx", "doc", "xlsx", "xls", "csv", "ods", "pptx", "ppt"]);
+// P21 (02/10), format coverage: the OpenDocument, RTF, macro-enabled, template and slide-show variants that the same
+// LibreOffice reads (Gotenberg's LibreOffice route lists them all). Market: iLovePDF and Smallpdf take DOC/DOCX,
+// XLS/XLSX, PPT/PPTX only; CloudConvert converts ODT, RTF, ODS, ODP, PPS, XLSM... to PDF on separate pages.
+const WORD_EXTENSIONS = ["docx", "doc", "odt", "ott", "rtf", "docm", "dotx", "dotm", "dot", "wps", "wpd"];
+const SHEET_EXTENSIONS = ["xlsx", "xls", "csv", "ods", "ots", "xlsm", "xlsb", "xltx", "xltm", "xlt"];
+const SLIDE_EXTENSIONS = ["pptx", "ppt", "odp", "otp", "pptm", "ppsx", "ppsm", "pps", "potx", "potm", "pot"];
+const ALLOWED_EXTENSIONS = new Set([...WORD_EXTENSIONS, ...SHEET_EXTENSIONS, ...SLIDE_EXTENSIONS]);
 
 // Every non-docx row stays "gotenberg" by design, not by omission -- this
 // table is the single place that answers "which engine handles this
@@ -42,6 +48,8 @@ const BACKEND_FOR_EXTENSION: Record<string, "convertapi" | "gotenberg"> = {
   ods: "gotenberg",
   pptx: "gotenberg",
   ppt: "gotenberg",
+  // P21: every added format is read by LibreOffice (ConvertAPI is used for .docx only).
+  ...Object.fromEntries([...ALLOWED_EXTENSIONS].filter((e) => !["docx", "doc", "xlsx", "xls", "csv", "ods", "pptx", "ppt"].includes(e)).map((e) => [e, "gotenberg" as const])),
 };
 
 // Rollback switch (spec §9): only the literal value "true" routes .docx to
@@ -128,7 +136,7 @@ async function convertFile(req: NextRequest, file: File, staged = false): Promis
   const extension = getExtension(file.name);
   if (!ALLOWED_EXTENSIONS.has(extension)) {
     return NextResponse.json(
-      { error: "Unsupported file type. Allowed: .docx, .doc, .xlsx, .xls, .csv, .ods, .pptx, .ppt" },
+      { error: `Unsupported file type. Allowed: ${[...ALLOWED_EXTENSIONS].map((e) => "." + e).join(", ")}` },
       { status: 400 }
     );
   }
@@ -136,7 +144,7 @@ async function convertFile(req: NextRequest, file: File, staged = false): Promis
   if (file.size === 0) {
     return NextResponse.json({ error: "The uploaded file is empty." }, { status: 400 });
   }
-  const isSheet = ["xlsx", "xls", "csv", "ods"].includes(extension);
+  const isSheet = SHEET_EXTENSIONS.includes(extension);
   const maxBytes = isSheet ? MAX_SPREADSHEET_STAGED_BYTES : MAX_FILE_SIZE_BYTES;
   if (file.size > maxBytes) {
     return NextResponse.json(

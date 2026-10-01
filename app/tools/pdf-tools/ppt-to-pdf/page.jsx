@@ -61,12 +61,12 @@ export default function PptToPdfPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">PowerPoint to PDF</h1>
-        <p className="text-neutral-500 text-center mb-2">Convert .pptx or .ppt files to PDF using LibreOffice</p>
+        <p className="text-neutral-500 text-center mb-2">Convert .pptx, .ppt, slide shows (.ppsx, .pps), templates and OpenDocument .odp to PDF using LibreOffice</p>
         <p className="text-neutral-500 text-xs text-center mb-8">In our tests, layout, images, gradients, tables and charts carried over. A text box narrower than its text can wrap and be partly hidden, and Wingdings and Webdings icon fonts can&apos;t legally be reproduced and will appear blank.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a .pptx or .ppt file here'}</p>
-            <input ref={inputRef} type="file" accept=".pptx,.ppt" className="hidden" onChange={handleFile} />
+            <p className="text-neutral-500">{file ? file.name : 'Click or drop a PowerPoint or OpenDocument presentation here'}</p>
+            <input ref={inputRef} type="file" accept=".pptx,.ppt,.odp,.otp,.pptm,.ppsx,.ppsm,.pps,.potx,.potm,.pot" className="hidden" onChange={handleFile} />
           </div>
           <p className="text-neutral-500 text-xs text-center -mt-2">Max {officeMaxLabel()} per file</p>
           <button onClick={convert} disabled={!file || loading || file.size > officeMaxBytes()} className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">
@@ -95,13 +95,13 @@ export default function PptToPdfPage() {
         title="PowerPoint to PDF"
         description="PowerPoint to PDF converts your .pptx or .ppt file into a PDF using LibreOffice. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. We tested .pptx files with custom slide backgrounds, two-level bullets, a full-bleed image, overlapping shapes and text boxes, a gradient fill, a table and a pie chart: all of them matched the output of two other online converters. Three disclosed limits. First, text boxes: PowerPoint lets the text of a box set to 'do not wrap' run past the edge of the box, while our converter (LibreOffice) wraps it at the edge. In our test a slide title in such a box, longer than the box, wrapped onto a second line and part of it was hidden behind an overlapping text box — this also happened when converting with the real Segoe UI font, so it is not a font problem. Second, fonts: a font not installed on our conversion servers is substituted with a similar typeface rather than left blank; Segoe UI, which is Windows-only, is replaced by Selawik, Microsoft's open replacement, whose letter widths matched Segoe UI in our measurement (its kerning is not identical). Third, and not a substitution: Wingdings and Webdings icon fonts can't legally be embedded in our conversion service (a font-licensing restriction, not a bug), so those specific characters come through as blank boxes if your presentation uses them. We measured .pptx only, not the older .ppt format."
         howTo={[
-          "Click the upload area and select a .pptx or .ppt file from your device.",
+          "Click the upload area and select a presentation: .pptx, .ppt, macro-enabled .pptm, slide shows .ppsx / .ppsm / .pps, templates .potx / .potm / .pot, or OpenDocument .odp / .otp.",
           "Click 'Convert to PDF'. Your file is uploaded securely for conversion; once the PDF is ready, click 'Download'.",
           "Save the resulting PDF file to your device."
         ]}
         faqs={[
           { q: "Is PowerPoint to PDF completely free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What file formats does PowerPoint to PDF support?", a: "Both .pptx and the older binary .ppt format are supported — both go through the same LibreOffice-based conversion service." },
+          { q: "What file formats does PowerPoint to PDF support?", a: ".pptx and the older .ppt, macro-enabled .pptm (macros are not run), slide shows .ppsx / .ppsm / .pps, templates .potx / .potm / .pot, and OpenDocument .odp / .otp — all through the same LibreOffice-based conversion service. We checked that each converts; the fidelity measurement quoted on this page was made on .pptx files." },
           { q: "Will my presentations be uploaded to a server?", a: "Yes. Your file is uploaded securely over HTTPS to our conversion service, which uses LibreOffice to generate the PDF, and is deleted immediately after conversion — it isn't stored or kept." },
           { q: "Do I need to install any software to use PowerPoint to PDF?", a: "No, it works directly in your web browser." },
           { q: "Will each slide become its own PDF page?", a: "Yes. Each slide in your presentation is rendered as one page in the resulting PDF, in its original order." },
