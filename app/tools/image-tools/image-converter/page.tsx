@@ -1,5 +1,6 @@
 'use client';
 import { sizeChangeText, whyLarger } from '../../../lib/sizeChange';
+import { decodeSpecialImage, isSpecialImage, SPECIAL_ACCEPT } from '../../../lib/specialImageDecode';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Lock, Zap, Package, Folder, Image as ImageIcon } from 'lucide-react';
 import SeoContent from '../../../components/SeoContent';
@@ -61,7 +62,7 @@ export default function ImageConverterPage() {
   const maxFileLabel = isMobile ? MOBILE_MAX_FILE_SIZE_LABEL : MAX_FILE_SIZE_LABEL;
 
   const isRecognizedImage = (f: File) =>
-    f.type.startsWith('image/') || /\.(heic|heif|tif|tiff)$/i.test(f.name);
+    f.type.startsWith('image/') || /\.(heic|heif|tif|tiff)$/i.test(f.name) || isSpecialImage(f);
 
   const addFiles = (incoming: File[]) => {
     const imageFiles = incoming.filter(isRecognizedImage);
@@ -117,7 +118,16 @@ export default function ImageConverterPage() {
     const items: { name: string; originalSize: number; blob: Blob; dims: { width: number; height: number } | null }[] = [];
     for (const file of files) {
       const dims = await imageDims(file);
-      if (isHeic(file) && !dims) {
+      if (isSpecialImage(file)) {
+        // P21: Photoshop PSD and SVG, decoded on the page (app/lib/specialImageDecode.js) into a lossless PNG first.
+        try {
+          const d = await decodeSpecialImage(file);
+          items.push({ name: file.name, originalSize: file.size, blob: d.blob, dims: { width: d.width, height: d.height } });
+        } catch (err: any) {
+          reportToolError({ tool: 'image-converter', file, error: err instanceof Error ? err : new Error(String(err)) });
+          failures.push(`${file.name}: ${String(err?.message || err)}.`);
+        }
+      } else if (isHeic(file) && !dims) {
         try {
           const heic2any = (await import('heic2any')).default;
           const decoded = await heic2any({ blob: file, toType: 'image/png' });
@@ -243,7 +253,7 @@ export default function ImageConverterPage() {
               ref={inputRef}
               type="file"
               multiple
-              accept="image/*,.heic,.heif,.tif,.tiff"
+              accept={`image/*,.heic,.heif,.tif,.tiff,${SPECIAL_ACCEPT}`}
               className="hidden"
               onChange={(e) => {
                 addFiles(Array.from(e.target.files || []));

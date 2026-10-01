@@ -23,6 +23,7 @@
     "@pdf-lib/fontkit": "^1.1.1",
     "@supabase/supabase-js": "^2.106.2",
     "@zip.js/zip.js": "^2.18.2",
+    "ag-psd": "^31.0.2",
     "bwip-js": "4.11.4",
     "client-zip": "^2.5.1",
     "cron-parser": "5.10.1",
