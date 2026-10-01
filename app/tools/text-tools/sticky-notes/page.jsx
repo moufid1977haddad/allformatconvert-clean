@@ -40,8 +40,9 @@ export default function StickyNotesPage() {
         <p className="text-neutral-500 text-center mb-8">Create and manage sticky notes</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4 mb-6">
           <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-24 resize-none" placeholder="Write your note here..." value={text} onChange={e => setText(e.target.value)} />
-          <div className="flex gap-3 items-center">
-            <div className="flex gap-2">
+          {/* wraps on a phone: the colour buttons are 44 px touch targets there (P21) */}
+          <div className="flex flex-wrap gap-3 items-center">
+            <div className="flex flex-wrap gap-2">
               {COLORS.map(c => (
                 <button key={c} onClick={() => setColor(c)} aria-label={'Note colour: ' + c.replace('bg-', '').replace('-300', '')} aria-pressed={color === c} className={c + ' w-8 h-8 rounded-full ' + (color === c ? 'ring-2 ring-white' : '')} />
               ))}

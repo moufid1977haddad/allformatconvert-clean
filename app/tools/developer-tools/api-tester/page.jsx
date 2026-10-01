@@ -39,7 +39,7 @@ export default function ApiTesterPage() {
             <select aria-label="HTTP method" value={method} onChange={e => setMethod(e.target.value)} className="bg-neutral-50 border border-neutral-200 rounded-lg p-3 font-semibold">
               {['GET','POST','PUT','DELETE','PATCH'].map(m => <option key={m}>{m}</option>)}
             </select>
-            <input type="text" value={url} onChange={e => setUrl(e.target.value)} className="flex-1 bg-neutral-50 border border-neutral-200 rounded-lg p-3 font-mono" placeholder="https://api.example.com/endpoint" />
+            <input type="text" value={url} onChange={e => setUrl(e.target.value)} className="flex-1 min-w-0 bg-neutral-50 border border-neutral-200 rounded-lg p-3 font-mono" placeholder="https://api.example.com/endpoint" />
           </div>
           <div><label className="block text-sm text-neutral-500 mb-1">Headers (JSON)</label><textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-3 text-sm h-16 resize-none font-mono" placeholder='{"Authorization": "Bearer token"}' value={headers} onChange={e => setHeaders(e.target.value)} /></div>
           {method !== 'GET' && <div><label className="block text-sm text-neutral-500 mb-1">Body</label><textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-3 text-sm h-32 resize-none font-mono" placeholder='{"key": "value"}' value={body} onChange={e => setBody(e.target.value)} /></div>}
