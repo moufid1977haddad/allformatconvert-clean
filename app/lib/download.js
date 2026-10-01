@@ -25,7 +25,10 @@ const SCOPE = '/zipdl/';
 // Files made ready for an iPhone / iPad download (P21, 02/10). Kept in Cache Storage rather than in the worker's
 // memory: iOS stops an idle service worker after a few seconds, and a file held in its memory would be lost.
 const CACHE = 'ocv-downloads-v1';
-const STAGED_MAX_AGE_MS = 60 * 60 * 1000;
+const STAGED_MAX_AGE_MS = 30 * 60 * 1000;
+// What this page made ready: removed when the page is left (a visitor's files are not kept in the browser's storage
+// after they leave), and anything older than STAGED_MAX_AGE_MS is purged on the next visit and by the worker.
+const stagedHere = new Set();
 
 // When the visitor last touched or clicked. WebKit keeps a tap's "user gesture" alive across awaits for about one
 // second only (UserGestureToken forwarding); a navigation started later is not the visitor's, and Safari then shows a
@@ -33,7 +36,7 @@ const STAGED_MAX_AGE_MS = 60 * 60 * 1000;
 // Split PDF's small parts were saved — until P21 the file was read and handed to the worker AFTER the tap.
 let lastGestureAt = -Infinity;
 if (typeof window !== 'undefined') {
-  for (const ev of ['pointerup', 'touchend', 'click', 'keydown']) {
+  for (const ev of ['pointerup', 'touchend', 'click']) { // a keyboard Enter on a link fires 'click' too
     window.addEventListener(ev, () => { lastGestureAt = performance.now(); }, { capture: true, passive: true });
   }
 }
@@ -97,7 +100,9 @@ async function purgeStaged() {
 
 // Registers the worker ahead of time (page load), so the download itself needs no waiting.
 export function prepareAttachmentDownloads() {
-  if (attachmentPathActive()) worker();
+  if (!attachmentPathActive()) return;
+  worker();
+  window.addEventListener('pagehide', () => { for (const u of stagedHere) unstageAttachment(u); stagedHere.clear(); });
 }
 
 export const attachmentDisposition = (name) => `attachment; filename="${String(name).replace(/[^\x20-\x7e]|["\\]/g, '_')}"; filename*=UTF-8''${encodeURIComponent(name)}`;
@@ -122,11 +127,13 @@ export async function stageAttachment(blob, name) {
     'Cache-Control': 'no-store',
     'X-Staged-At': String(Date.now()),
   } }));
+  stagedHere.add(url);
   return url;
 }
 /** Frees a file made ready by stageAttachment (the page no longer offers it). */
 export async function unstageAttachment(url) {
   if (!url || typeof caches === 'undefined') return;
+  stagedHere.delete(url);
   try { await (await caches.open(CACHE)).delete(url); } catch { /* already gone */ }
 }
 
@@ -143,11 +150,12 @@ function navigateTo(url) {
 // would no longer be the visitor's own, so a bar asks for one more tap on a real link — what Safari needs.
 function offerTap(url, name) {
   const old = document.getElementById('ocv-download-tap');
-  if (old) old.remove();
+  if (old) { unstageAttachment(old.getAttribute('data-url')); old.remove(); }
   const bar = document.createElement('div');
   bar.id = 'ocv-download-tap';
   bar.setAttribute('role', 'status');
   bar.setAttribute('data-download-tap', '');
+  bar.setAttribute('data-url', url);
   bar.style.cssText = 'position:fixed;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:2147483000;display:flex;gap:8px;align-items:center;background:#171717;color:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.35);font:600 14px/1.3 system-ui,-apple-system,sans-serif';
   const label = document.createElement('span');
   label.style.cssText = 'flex:1;min-width:0;overflow-wrap:anywhere';

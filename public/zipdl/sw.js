@@ -19,7 +19,18 @@ const files = new Map();
 const disposition = (name) => `attachment; filename="${name.replace(/[^\x20-\x7e]|["\\]/g, '_')}"; filename*=UTF-8''${encodeURIComponent(name)}`;
 
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+self.addEventListener('activate', (event) => event.waitUntil(Promise.all([self.clients.claim(), purgeStaged()])));
+// Files made ready more than 30 minutes ago are removed (the page also removes its own when it is left).
+async function purgeStaged() {
+  try {
+    const c = await caches.open(STAGED_CACHE);
+    for (const req of await c.keys()) {
+      const res = await c.match(req);
+      const at = Number(res && res.headers.get('X-Staged-At'));
+      if (!at || Date.now() - at > 30 * 60 * 1000) await c.delete(req);
+    }
+  } catch { /* storage unavailable */ }
+}
 
 self.addEventListener('message', (event) => {
   const data = event.data || {};
@@ -43,7 +54,9 @@ self.addEventListener('fetch', (event) => {
       const hit = await c.match(event.request, { ignoreSearch: true });
       if (hit) return hit;
       for (const req of await c.keys()) if (req.url.includes(`/zipdl/f/${staged[1]}/`)) return c.match(req);
-      return new Response('This download has expired. Please make the file again on the page.', { status: 404, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+      // Gone (left too long, or evicted by the system): 204 keeps the visitor on the tool page with their result,
+      // where the row makes the file ready again (FileDownload), instead of replacing the page with an error.
+      return new Response(null, { status: 204 });
     }));
     return;
   }

@@ -103,7 +103,7 @@ export function foregroundMeans(img, a, w, h, r1, r2) {
   return { Fmean: p2.Fmean, Bmean: p2.Bmean };
 }
 
-export const DEFAULTS = { guided: true, gfRadiusFrac: 0.0015, gfEps: 1e-4, curveLo: 0.3, curveHi: 0.7, decontaminate: true, r1Frac: 0.05, r2Frac: 0.006, bandFrac: 0.002, project: true };
+export const DEFAULTS = { guided: true, gfRadiusFrac: 0.0015, gfEps: 1e-4, curveLo: 0.1, curveHi: 0.9, decontaminate: true, r1Frac: 0.05, r2Frac: 0.006, bandFrac: 0.002, project: true };
 
 /**
  * Everything computed on the working copy. `rgba`: the photo at working resolution (Uint8ClampedArray, w×h);

@@ -57,7 +57,7 @@ const BAND_PIXELS = 4_000_000;
 const PREVIEW_PIXELS = 1_500_000;
 // P21 (02/10): the edges are refined before that (app/lib/mattingRefine.js, in a Worker, on a copy of at most 1 MP):
 // on the owner's iPhone a mug on blue-violet plastic kept a blue line along its edge and a light halo in its handle.
-// The refined alpha, the "mixing" alpha and the local subject / background colours are drawn stretched on each band,
+// The refined alpha (curve 0.1–0.9: soft detail such as fine hair is kept), the "mixing" alpha and the local subject / background colours are drawn stretched on each band,
 // and composeBand gives every edge pixel the subject's colour instead of the photo's mix (what remove.bg calls "edge
 // color corrections"). Measured on 28 real cut-outs laid on known backgrounds (docs/audit/RAPPORT-p21-nuit-jour-02-10.md):
 // background colour left in the edge 11.0 % → 4.8 %.
@@ -74,6 +74,8 @@ async function refineEdges(img, maskImg) {
   const mask = new Uint8Array(w * h); for (let i = 0; i < w * h; i++) mask[i] = m4[i * 4];
   const worker = new Worker(new URL('./refine.worker.js', import.meta.url), { type: 'module' });
   const res = await new Promise((resolve, reject) => {
+    // Never a spinner forever: past 30 s the cut-out is given without the refinement (caller's fallback).
+    setTimeout(() => reject(new Error('edge refinement took longer than 30 s')), 30000);
     worker.onmessage = ({ data }) => (data.ok ? resolve(data) : reject(new Error(data.message)));
     worker.onerror = (e) => reject(new Error(e.message || 'refinement failed'));
     worker.postMessage({ rgba, mask, w, h }, [rgba.buffer, mask.buffer]);

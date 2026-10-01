@@ -6,7 +6,7 @@
 // we keep the comparison, which is useful, but a larger result is never shown as an error: it is neutral, and one line
 // says why it grew and what to choose instead.
 
-const LOSSLESS = new Set(['png', 'bmp', 'tif', 'tiff', 'gif', 'ico', 'wav', 'flac', 'aif', 'aiff', 'alac', 'pcm']);
+const LOSSLESS = new Set(['png', 'bmp', 'tif', 'tiff', 'wav', 'flac', 'aif', 'aiff', 'alac', 'pcm']);
 const NAMES = { jpg: 'JPG', jpeg: 'JPG', png: 'PNG', webp: 'WebP', avif: 'AVIF', heic: 'HEIC', heif: 'HEIC', gif: 'GIF', bmp: 'BMP', tif: 'TIFF', tiff: 'TIFF', ico: 'ICO', svg: 'SVG',
   mp3: 'MP3', m4a: 'M4A', aac: 'AAC', ogg: 'OGG', opus: 'Opus', wav: 'WAV', flac: 'FLAC', aif: 'AIFF', aiff: 'AIFF', wma: 'WMA',
   mp4: 'MP4', mov: 'MOV', webm: 'WebM', mkv: 'MKV', avi: 'AVI', wmv: 'WMV', '3gp': '3GP' };
@@ -40,18 +40,31 @@ export function sizeChangeText(inBytes, outBytes) {
  * is not larger. `from` / `to`: a file name or MIME type each. `kind`: 'image' | 'audio' | 'video' (wording only).
  */
 export function whyLarger({ from, to, inBytes, outBytes, kind = 'image' }) {
-  if (!(outBytes > inBytes)) return null;
+  if (!(sizeGain(inBytes, outBytes) < 0)) return null; // "0% larger" never gets an explanation
   const a = formatKey(from), b = formatKey(to);
   const A = label(a), B = label(b);
   const smallerChoice = kind === 'image' ? 'JPG, WebP or AVIF' : kind === 'audio' ? 'MP3, M4A or Opus' : 'MP4 with a lower quality or resolution';
+  if (b === 'gif') {
+    return kind === 'image'
+      ? `GIF is an old format: even with only 256 colours it compresses photos far less than ${A}. For a smaller file, convert to JPG, WebP or AVIF.`
+      : 'Normal for GIF: it stores every frame as a separate picture with no video compression. For a smaller animation, lower the width or frame rate, or keep a video (MP4).';
+  }
+  if (b === 'ico') return 'Normal for ICO: one file holds the icon at several sizes. It is meant for website and app icons, not for saving space.';
+  if (b === 'pdf') return `The PDF holds your image unchanged (or as JPG/PNG) plus the page around it. To share the picture itself, keep the ${A}.`;
   if (LOSSLESS.has(b) && !LOSSLESS.has(a)) {
     return `Normal for ${B}: it is lossless and stores every ${kind === 'image' ? 'pixel' : 'sample'} exactly, while your ${A} was compressed. Nothing was lost; for a smaller file, convert to ${smallerChoice} instead.`;
+  }
+  if (LOSSLESS.has(b) && LOSSLESS.has(a)) {
+    return `Both formats are lossless, but ${B} packs the same ${kind === 'image' ? 'pixels' : 'sound'} less tightly than ${A}. Nothing was lost; keep the ${A} if size matters.`;
   }
   if (a && b && a !== b && (EFFICIENT[a] || 0) > (EFFICIENT[b] || 0)) {
     return `Normal: ${A} stores the same ${kind === 'image' ? 'picture' : kind} in fewer bytes than ${B}, so the ${B} copy is larger. ${B} opens everywhere; if size matters more, keep the ${A} or lower the quality.`;
   }
-  if (a && a === b) {
-    return `Your original was already more compressed than the setting you chose. Lower the quality, or keep your original.`;
+  if (kind === 'video') {
+    return 'The new file is encoded less compactly than your original (phone videos often use HEVC, which is about twice as efficient as the H.264 used for MP4). Choose H.265 or a lower quality or resolution for a smaller file, or keep your original.';
   }
-  return `The ${B} format holds this ${kind === 'image' ? 'image' : kind} less compactly than your ${A}. Lower the quality, or keep your original if you only need a smaller file.`;
+  if (a && a === b) {
+    return `Your original was already more compressed than this result. Keep your original if you only need a smaller file.`;
+  }
+  return `The ${B} format holds this ${kind === 'image' ? 'image' : kind} less compactly than your ${A}. Keep your original if you only need a smaller file.`;
 }

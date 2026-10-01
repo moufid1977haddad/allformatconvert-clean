@@ -147,7 +147,7 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
               </div>
               {/* A larger result is not a failure (P21): one line says why it grew and what to do instead. */}
               {(() => {
-                const why = whyLarger({ from: file.name, to: result.name, inBytes: file.size, outBytes: result.bytes, kind: result.isAudio ? 'audio' : result.isImage ? 'image' : 'video' });
+                const why = whyLarger({ from: file.name, to: result.name, inBytes: file.size, outBytes: result.bytes, kind: /^audio\//.test(file.type) || result.isAudio ? 'audio' : /^image\//.test(file.type) ? 'image' : 'video' }); // the wording follows what the visitor sent (a video turned into a GIF is explained as video → GIF)
                 return why ? <p data-size-why className="text-xs text-neutral-600 dark:text-neutral-400 text-center">{why}</p> : null;
               })()}
               {result.isVideo && <PlayablePreview src={result.url} name={result.name} kind="video" className="w-full rounded-xl max-h-72" />}

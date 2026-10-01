@@ -135,15 +135,31 @@ export function FileDownload({ blob: blobProp, href, name, note, primary = true,
 
   const file = useMemo(() => (blob ? new File([blob], name, { type: blob.type || 'application/octet-stream' }) : null), [blob, name]);
 
-  // iPhone / iPad: the file made ready at a real address before any tap (see the header).
-  const [stagedUrl, setStagedUrl] = useState(null);
+  // iPhone / iPad: the file made ready at a real address before any tap (see the header). The address is used only
+  // while it belongs to the file and name on screen (never, even for a frame, an older result's), and is made again
+  // when the visitor comes back to the tab after the browser may have dropped it (older than 20 minutes).
+  const [staged, setStaged] = useState(null); // { blob, name, url }
+  const stagedAt = useRef(0);
   useEffect(() => {
-    setStagedUrl(null);
     if (!blob || !attachmentPathActive()) return undefined;
-    let alive = true, made = null;
-    stageAttachment(blob, name).then((u) => { made = u; if (alive) setStagedUrl(u); else unstageAttachment(u); }).catch(() => {});
-    return () => { alive = false; if (made) { const u = made; setTimeout(() => unstageAttachment(u), 60000); } };
+    let alive = true;
+    const made = [];
+    const stage = () => stageAttachment(blob, name).then((u) => {
+      if (!u) return;
+      made.push(u);
+      if (alive) { stagedAt.current = Date.now(); setStaged({ blob, name, url: u }); } else unstageAttachment(u);
+    }).catch(() => {});
+    stage();
+    const again = () => { if (document.visibilityState === 'visible' && stagedAt.current && Date.now() - stagedAt.current > 20 * 60 * 1000) stage(); };
+    document.addEventListener('visibilitychange', again);
+    return () => {
+      alive = false;
+      document.removeEventListener('visibilitychange', again);
+      const old = made.slice();
+      setTimeout(() => { for (const u of old) unstageAttachment(u); }, 60000);
+    };
   }, [blob, name]);
+  const stagedUrl = staged && staged.blob === blob && staged.name === name ? staged.url : null;
   const [canShare, setCanShare] = useState(false); // decided in the browser (the server cannot know the device)
   useEffect(() => { setCanShare(file ? shareSupported(file) : false); }, [file]);
 
