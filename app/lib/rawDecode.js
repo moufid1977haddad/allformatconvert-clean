@@ -1,8 +1,8 @@
 // Camera RAW files (P22, 02/10): CR2, CR3, NEF, ARW, DNG, ORF, RW2, RAF, PEF, SRW...
 //
 // Market: iLoveIMG's "Convert to JPG" takes RAW; CloudConvert and Convertio convert CR2, CR3, NEF, ARW, DNG, ORF,
-// RW2, RAF and more. No browser decodes them. Engine: LibRaw 0.22.2 (the library behind darktable's and rawpy's
-// readers), compiled by us to single-threaded WebAssembly (scripts/libraw-wasm/; CDDL-1.0, sources offered at
+// RW2, RAF and more. No browser decodes them. Engine: LibRaw 0.22.2 (the RAW library of rawpy, digiKam, Shotwell
+// and many others), compiled by us to single-threaded WebAssembly (scripts/libraw-wasm/; CDDL-1.0, sources offered at
 // /wasm/libraw-LICENSE.txt). Single-threaded on purpose: the npm build uses threads, which need cross-origin isolation
 // and hang the Turbopack build (measured, plan D3). The 0.9 MB module (0.35 MB gzipped) is fetched on the first RAW.
 //
@@ -98,6 +98,7 @@ export async function decodeRaw(bytes, name, { checkSize = () => {}, onLong = ()
       modulePromise = null;
       throw new Error(explain(-100007, name));
     }
+    if (e instanceof RangeError) throw new Error(explain(-100007, name)); // the page's own memory (the RGBA copy)
     throw e;
   } finally {
     try { m._lr_close(); if (ptr) m._free(ptr); } catch { /* module aborted: dropped above */ }
