@@ -7,6 +7,8 @@ import { createPngWriter, forEachBand, imageDims } from '../../../lib/bigImage';
 import { derivedName } from '../../../lib/download';
 import { checkFileSize, MAX_REMOVEBG_ORIGINAL_BYTES } from '@/lib/quota/limits';
 import { FileDownload } from '../../../components/FileDownload';
+import { WORK_PIXELS, composeBand } from '../../../lib/mattingRefine';
+import { reportToolError } from '../../../lib/reportError';
 
 // Matches the model's own fixed internal input resolution (see
 // services/background-removal/app/infer.py, MODEL_INPUT_SIZE) -- IS-Net
@@ -53,7 +55,35 @@ function resizeForUpload(img) {
 // shows a small preview. No canvas ever exceeds 4 MP, no copy of the full image is kept besides the PNG itself.
 const BAND_PIXELS = 4_000_000;
 const PREVIEW_PIXELS = 1_500_000;
-async function recompositeAtFullResolution(file, dims, maskImg) {
+// P21 (02/10): the edges are refined before that (app/lib/mattingRefine.js, in a Worker, on a copy of at most 1 MP):
+// on the owner's iPhone a mug on blue-violet plastic kept a blue line along its edge and a light halo in its handle.
+// The refined alpha, the "mixing" alpha and the local subject / background colours are drawn stretched on each band,
+// and composeBand gives every edge pixel the subject's colour instead of the photo's mix (what remove.bg calls "edge
+// color corrections"). Measured on 28 real cut-outs laid on known backgrounds (docs/audit/RAPPORT-p21-nuit-jour-02-10.md):
+// background colour left in the edge 11.0 % → 4.8 %.
+async function refineEdges(img, maskImg) {
+  const k = Math.min(1, Math.sqrt(WORK_PIXELS / (img.naturalWidth * img.naturalHeight)));
+  const w = Math.max(1, Math.round(img.naturalWidth * k)), h = Math.max(1, Math.round(img.naturalHeight * k));
+  const draw = (src) => {
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const x = c.getContext('2d', { willReadFrequently: true }); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
+    x.drawImage(src, 0, 0, w, h);
+    const d = x.getImageData(0, 0, w, h).data; c.width = 1; return d;
+  };
+  const rgba = draw(img), m4 = draw(maskImg);
+  const mask = new Uint8Array(w * h); for (let i = 0; i < w * h; i++) mask[i] = m4[i * 4];
+  const worker = new Worker(new URL('./refine.worker.js', import.meta.url), { type: 'module' });
+  const res = await new Promise((resolve, reject) => {
+    worker.onmessage = ({ data }) => (data.ok ? resolve(data) : reject(new Error(data.message)));
+    worker.onerror = (e) => reject(new Error(e.message || 'refinement failed'));
+    worker.postMessage({ rgba, mask, w, h }, [rgba.buffer, mask.buffer]);
+  }).finally(() => worker.terminate());
+  const toCanvas = (data) => { const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').putImageData(new ImageData(data, w, h), 0, 0); return c; };
+  return { alpha: toCanvas(res.layers), fg: toCanvas(res.fg), bg: toCanvas(res.bg) };
+}
+
+// layers: { alpha, fg, bg } (canvases at working size, from refineEdges), or { alpha: maskImg } unrefined.
+async function recompositeAtFullResolution(file, dims, layers) {
   const { width: W, height: H } = dims;
   const png = createPngWriter(W, H, true);
   const k = Math.min(1, Math.sqrt(PREVIEW_PIXELS / (W * H)));
@@ -62,23 +92,34 @@ async function recompositeAtFullResolution(file, dims, maskImg) {
   const pctx = preview.getContext('2d');
   pctx.imageSmoothingEnabled = true; pctx.imageSmoothingQuality = 'high';
   const bandRows = Math.max(1, Math.floor(BAND_PIXELS / W));
-  const maskCanvas = document.createElement('canvas'), bandCanvas = document.createElement('canvas');
-  maskCanvas.width = bandCanvas.width = W; maskCanvas.height = bandCanvas.height = Math.min(H, bandRows);
-  const mctx = maskCanvas.getContext('2d', { willReadFrequently: true }), bctx = bandCanvas.getContext('2d');
-  mctx.imageSmoothingEnabled = true; mctx.imageSmoothingQuality = 'high';
+  const stretch = (src) => {
+    if (!src) return null;
+    const c = document.createElement('canvas'); c.width = W; c.height = Math.min(H, bandRows);
+    const x = c.getContext('2d', { willReadFrequently: true }); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
+    return { c, x, src };
+  };
+  const refined = !!layers.fg;
+  const parts = [stretch(layers.alpha), stretch(layers.fg), stretch(layers.bg)];
+  const bandCanvas = document.createElement('canvas');
+  bandCanvas.width = W; bandCanvas.height = Math.min(H, bandRows);
+  const bctx = bandCanvas.getContext('2d');
   await forEachBand(file, dims, BAND_PIXELS, async (rgba, y, rows) => {
-    // The mask's R channel (grayscale 'L' PNG) becomes the alpha: the same scaled drawing as on one big canvas,
-    // shifted to this band.
-    mctx.clearRect(0, 0, W, maskCanvas.height);
-    mctx.drawImage(maskImg, 0, -y, W, H);
-    const m = mctx.getImageData(0, 0, W, rows).data;
-    for (let i = 3; i < rgba.length; i += 4) rgba[i] = m[i - 3];
+    // Each layer: the same scaled drawing as on one big canvas, shifted to this band.
+    const [A, F, B] = parts.map((p) => {
+      if (!p) return null;
+      p.x.clearRect(0, 0, W, p.c.height);
+      p.x.drawImage(p.src, 0, -y, W, H);
+      return p.x.getImageData(0, 0, W, rows).data;
+    });
+    if (refined) composeBand(rgba, A, F, B);
+    else for (let i = 3; i < rgba.length; i += 4) rgba[i] = A[i - 3]; // the mask's R channel becomes the alpha
     bctx.clearRect(0, 0, W, bandCanvas.height);
     bctx.putImageData(new ImageData(rgba, W, rows), 0, 0);
     pctx.drawImage(bandCanvas, 0, 0, W, rows, 0, y * k, W * k, rows * k);
     await png.writeRows(rgba, rows);
   });
-  maskCanvas.width = bandCanvas.width = 1;
+  for (const p of parts) if (p) p.c.width = 1;
+  bandCanvas.width = 1;
   const blob = await png.finish();
   const previewBlob = await checkedBlob(preview, 'image/png');
   preview.width = 1;
@@ -159,7 +200,15 @@ export default function BackgroundRemoverPage() {
       }
 
       const maskImg = await loadImage('data:image/png;base64,' + data.mask);
-      setResult(await recompositeAtFullResolution(file, dims, maskImg));
+      let layers;
+      try { layers = await refineEdges(originalImg, maskImg); }
+      catch (err) {
+        // The cut-out is still right without the refinement (the mask as it came, as before 02/10): give it, and
+        // report the failure so it is seen and fixed.
+        reportToolError({ tool: 'background-remover', file, error: err });
+        layers = { alpha: maskImg };
+      }
+      setResult(await recompositeAtFullResolution(file, dims, layers));
       stopProgress(100);
     } catch(e) { setError('Error: ' + e.message); stopProgress(0); }
     setLoading(false);
