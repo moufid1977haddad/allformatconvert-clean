@@ -163,8 +163,16 @@ export default function EpubToPdfPage() {
 
     let ebook;
     try {
+      // P21 (robustness): the parser was handed an empty or non-EPUB file, threw inside a promise of its own and never
+      // answered ("Parsing EPUB file..." forever). An EPUB is a ZIP package: checked first, and the parsing bounded.
+      if (!file.size) throw new Error('This file is empty (0 bytes). Choose the EPUB again.');
+      const head = new Uint8Array(await file.slice(0, 4).arrayBuffer());
+      if (!(head[0] === 0x50 && head[1] === 0x4b && head[2] === 0x03 && head[3] === 0x04)) throw new Error('This is not an EPUB book: an EPUB is a ZIP package, and this file is not one. It may be damaged, or another kind of file renamed .epub.');
       const { initEpubFile } = await import('@lingo-reader/epub-parser');
-      ebook = await initEpubFile(file);
+      ebook = await Promise.race([
+        initEpubFile(file),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('This EPUB could not be read (its contents are damaged or not standard).')), 60000)),
+      ]);
 
       const metadata = ebook.getMetadata();
       const spine = ebook.getSpine();

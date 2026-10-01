@@ -1,4 +1,5 @@
 ﻿'use client';
+import { emptyFileProblem } from '../../../lib/fileChecks';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL, MAX_CHUNKS } from './config';
@@ -17,6 +18,7 @@ export default function FileSplitterPage() {
     e.target.value = '';
     setChunks([]);
     setError('');
+    if (f && emptyFileProblem(f)) { setFile(null); setError(emptyFileProblem(f, 'split')); return; } // P21
     if (f && f.size > MAX_FILE_SIZE_BYTES) {
       setError(`This file is ${formatBytes(f.size)}, which is over the ${MAX_FILE_SIZE_LABEL} limit.`);
       setFile(null);
@@ -76,7 +78,7 @@ export default function FileSplitterPage() {
             <div><label className="block text-sm text-neutral-500 mb-1">Unit</label><select aria-label="Unit" value={unit} onChange={e => setUnit(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3"><option>B</option><option>KB</option><option>MB</option></select></div>
           </div>
           <button onClick={split} disabled={!file || loading || !chunkSizeValid} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">{loading ? 'Splitting...' : 'Split File'}</button>
-          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+          {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
           {chunks.length > 0 && (
             <div className="space-y-2">
               <p className="text-green-400 text-center">{chunks.length} part(s) created</p>

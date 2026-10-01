@@ -1,4 +1,5 @@
 'use client';
+import { headerSize, sizeProblem } from '../../../lib/gifEncode';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { reportToolError } from '../../../lib/reportError';
@@ -25,6 +26,11 @@ export default function GifToMp4Page() {
       ffmpeg.on('log', ({ message }) => console.log('[ffmpeg]', message));
       await ffmpeg.load();
       const bytes = await fetchFile(file);
+      // P21 (robustness): a GIF really, and of a size a video can hold — a 30 000 × 30 000 PNG renamed .gif was
+      // handed to the encoder and a "result" offered.
+      if (!bytes.length || !(bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46)) throw new Error('this is not a GIF file (or it is empty). Choose an animated GIF.');
+      const tooBig = sizeProblem(headerSize(bytes.subarray(0, 16)));
+      if (tooBig) throw new Error(tooBig);
       // ffmpeg.wasm writes a constant frame rate and gave the LAST frame one frame period only: a GIF of
       // 100/200/300 ms came out 0.4 s long instead of 0.6 s, and a final pause was lost (audit 2, 29/09).
       // The last frame is now held (tpad) and the video cut at the GIF's real length: the sum of its frame
@@ -49,6 +55,8 @@ export default function GifToMp4Page() {
         'output.mp4'
       ]);
       const data = await ffmpeg.readFile('output.mp4');
+      // never offer an empty or broken file as a video: an MP4 starts with its "ftyp" box
+      if (!data || data.length < 100 || String.fromCharCode(...data.subarray(4, 8)) !== 'ftyp') throw new Error('the video could not be made from this GIF.');
       const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
       setResult(url);
     } catch(e) {

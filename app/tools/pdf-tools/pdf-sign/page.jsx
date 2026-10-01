@@ -1,4 +1,5 @@
 'use client';
+import { pdfFileProblem } from '../../../lib/fileChecks';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
@@ -305,7 +306,7 @@ export default function Page() {
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
             {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload a PDF file</p>}
           </div>
-          <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={e => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setResult(null); setError(''); }} />
+          <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={async (e) => { const f = e.target.files[0]; e.target.value = ''; setResult(null); setError(''); if (!f) return; const problem = await pdfFileProblem(f); if (problem) { setFile(null); setError(problem); return; } setFile(f); }} />
           <div>
             <div className="flex gap-2 mb-3" role="group" aria-label="How to add your signature">
               {[['draw', 'Draw'], ['type', 'Type'], ['upload', 'Upload image']].map(([m, l]) => (
@@ -369,7 +370,7 @@ export default function Page() {
           <button onClick={addSignature} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Adding signature...' : 'Add Signature to PDF'}
           </button>
-          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+          {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
           {result && <FileDownload href={result} name="signed.pdf" />}
         </div>
       </div>

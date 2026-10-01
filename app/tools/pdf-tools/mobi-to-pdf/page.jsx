@@ -1,4 +1,5 @@
 'use client';
+import { mobiFileProblem } from '../../../lib/fileChecks';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { buildChapterHtml, firstPageShowsCover } from '../../../lib/ebookHtml';
@@ -173,6 +174,10 @@ export default function MobiToPdfPage() {
 
     let ebook;
     try {
+      // P21 (robustness): a non-MOBI file reached the parser and its raw error ("Offset is outside the bounds of the
+      // DataView") was shown as is.
+      const problem = await mobiFileProblem(file);
+      if (problem) throw new Error(problem);
       const mobiParser = await import('@lingo-reader/mobi-parser');
       const arrayBuffer = await file.arrayBuffer();
       ebook = await initEbook(mobiParser, file);

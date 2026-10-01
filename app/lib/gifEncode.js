@@ -36,3 +36,24 @@ export function writeRgbaFrame(gif, lib, rgba, w, h, { delay = 0, repeat, dispos
   for (let p = 0; p < index.length; p++) if (rgba[p * 4 + 3] < 128) index[p] = transparentIndex;
   gif.writeFrame(index, w, h, { palette, transparent: true, transparentIndex, ...extra });
 }
+
+// P21 (02/10, robustness): the picture's size read from the file's own header, before any decoding — a 30 000 × 30 000
+// PNG (1.8 MB on disk) would otherwise be decoded whole on the page (3.6 GB) and freeze the tab.
+export function headerSize(bytes) {
+  const b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) { // PNG: IHDR right after the signature
+    const v = new DataView(b.buffer, b.byteOffset, b.byteLength);
+    return { width: v.getUint32(16), height: v.getUint32(20) };
+  }
+  if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46) return { width: b[6] | (b[7] << 8), height: b[8] | (b[9] << 8) }; // GIF
+  return null;
+}
+// One frame at most this many pixels (the iPhone canvas limit, 16.7 MP): GIF / APNG animations are never larger.
+export const MAX_ANIMATION_PIXELS = 16_777_216;
+export function sizeProblem(size) {
+  if (!size || !size.width || !size.height) return null;
+  const mp = (size.width * size.height) / 1e6;
+  return size.width * size.height > MAX_ANIMATION_PIXELS
+    ? `This image is ${size.width} × ${size.height} pixels (${mp.toFixed(0)} megapixels): too large for an animation (16 megapixels at most). Make it smaller first with our Image Resizer.`
+    : null;
+}

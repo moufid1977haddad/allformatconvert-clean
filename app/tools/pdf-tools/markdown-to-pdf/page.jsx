@@ -1,4 +1,5 @@
 'use client';
+import { textFileProblem } from '../../../lib/fileChecks';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
@@ -60,8 +61,11 @@ export default function MarkdownToPdfPage() {
     const f = e.target.files[0];
     e.target.value = '';
     if (!f) return;
-    setFile(f);
     reset();
+    // P21 (robustness): an empty file or a non-text file is said at once.
+    const problem = await textFileProblem(f, 'Markdown');
+    if (problem) { setFile(null); setMdContent(''); setError(problem); return; }
+    setFile(f);
     setMdContent(await f.text());
   };
 

@@ -1,4 +1,5 @@
 ﻿'use client';
+import { emptyFileProblem } from '../../../lib/fileChecks';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { encryptBytes, decryptBytes } from '../../../lib/textCrypto';
@@ -10,8 +11,9 @@ export default function FileEncryptorPage() {
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [mode, setMode] = useState('encrypt');
   const [note, setNote] = useState('');
+  const [error, setError] = useState('');
   const inputRef = useRef();
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setDownloadUrl(null); };
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setDownloadUrl(null); setError(''); if (f && emptyFileProblem(f)) { setFile(null); setError(emptyFileProblem(f, mode === 'encrypt' ? 'encrypt' : 'decrypt')); return; } setFile(f); }; // P21: empty file said
   const process = async () => {
     if (!file || !password) return;
     setLoading(true);
@@ -44,6 +46,7 @@ export default function FileEncryptorPage() {
           </div>
           <div><label className="block text-sm text-neutral-500 mb-1">Password</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" placeholder="Enter password..." /></div>
           <button onClick={process} disabled={!file || !password || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">{loading ? 'Processing...' : mode === 'encrypt' ? 'Encrypt File' : 'Decrypt File'}</button>
+          {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
           {note && <p className="text-amber-700 text-sm text-center">{note}</p>}
           {downloadUrl && <FileDownload href={downloadUrl} name={mode === 'encrypt' ? file.name + '.encrypted' : (file.name.endsWith('.encrypted') ? file.name.slice(0, -10) : file.name + '.decrypted')} />}
         </div>

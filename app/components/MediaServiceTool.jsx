@@ -1,5 +1,6 @@
 'use client';
 import { whyLarger } from '../lib/sizeChange';
+import { emptyFileProblem } from '../lib/fileChecks';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from './SeoContent';
 import ProgressBar from './ProgressBar';
@@ -57,6 +58,8 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
     setResult(null);
     setNotSmaller(null);
     setError('');
+    // P21 (robustness): an empty file is said at once, never uploaded to the service.
+    if (emptyFileProblem(f)) { setFile(null); setError(emptyFileProblem(f, 'convert')); return; }
     if (f.size > MAX_UPLOAD_MB * 1024 * 1024) {
       setFile(null);
       setError(`This file is ${fmt(f.size)}, over the ${MAX_UPLOAD_MB >= 1024 ? MAX_UPLOAD_MB / 1024 + ' GB' : MAX_UPLOAD_MB + ' MB'} limit.`);

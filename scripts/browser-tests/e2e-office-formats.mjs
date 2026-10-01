@@ -8,12 +8,13 @@ import path from 'node:path';
 import { getDocument, OPS } from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 const origin = new URL(process.argv[2] || 'http://localhost:3200').origin;
+const only = (process.argv.find((a) => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean); // e.g. text.odt,sheet.xlsm (fewer conversions: hourly limit)
 const dir = path.join('docs', 'audit', 'fixtures-p21-office');
 const SENT = 'quick brown fox';
 let fails = 0, passes = 0;
 const check = (n, ok, info = '') => { if (ok) passes++; else fails++; console.log(ok ? 'PASS' : 'FAIL', n, ok ? info : info); };
 
-for (const f of fs.readdirSync(dir).filter((x) => /\.[a-z]+$/.test(x) && !x.endsWith('.md')).sort()) {
+for (const f of fs.readdirSync(dir).filter((x) => /\.[a-z]+$/.test(x) && !x.endsWith('.md') && (!only.length || only.includes(x))).sort()) {
   const buf = fs.readFileSync(path.join(dir, f));
   const fd = new FormData();
   fd.append('file', new Blob([buf]), f);

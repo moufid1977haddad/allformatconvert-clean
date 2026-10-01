@@ -21,22 +21,37 @@ export default function ImageToGifPage() {
   const [fit, setFit] = useState('fit');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const inputRef = useRef();
 
   const handleFiles = (e) => {
     const files = Array.from(e.target.files);
     e.target.value = '';
+    setError('');
+    // P21 (robustness): each picture is opened first; an empty or unreadable one is named, never added silently.
     const readers = files.map(f => new Promise(resolve => {
+      if (!f.size) { resolve({ name: f.name, bad: 'empty (0 bytes)' }); return; }
       const reader = new FileReader();
-      reader.onload = () => resolve({ name: f.name, src: reader.result });
+      reader.onerror = () => resolve({ name: f.name, bad: 'could not be read' });
+      reader.onload = () => {
+        const im = new Image();
+        im.onload = () => resolve(im.naturalWidth * im.naturalHeight > 100_000_000 ? { name: f.name, bad: `too large (${im.naturalWidth} × ${im.naturalHeight} pixels)` } : { name: f.name, src: reader.result });
+        im.onerror = () => resolve({ name: f.name, bad: 'is not an image this browser can open' });
+        im.src = reader.result;
+      };
       reader.readAsDataURL(f);
     }));
-    Promise.all(readers).then(imgs => setImages(prev => [...prev, ...imgs]));
+    Promise.all(readers).then(imgs => {
+      const bad = imgs.filter((x) => x.bad);
+      if (bad.length) setError(bad.map((x) => `${x.name}: ${x.bad}.`).join(' ') + ' Choose JPG, PNG, WebP or GIF pictures.');
+      setImages(prev => [...prev, ...imgs.filter((x) => !x.bad)]);
+    });
   };
 
   const removeImage = (i) => setImages(prev => prev.filter((_, idx) => idx !== i));
 
   const createGif = async () => {
+    setError('');
     if (images.length < 2) return;
     setLoading(true);
     setResult(null);
@@ -64,7 +79,7 @@ export default function ImageToGifPage() {
       gif.finish();
       const blob = new Blob([gif.bytes()], { type: 'image/gif' });
       setResult({ url: URL.createObjectURL(blob), frameCount: images.length });
-    } catch(e) { alert('Error: ' + e.message); }
+    } catch(e) { setError((e && e.message) || 'This file could not be converted. It may be damaged.'); } // P21: a message on the page, not a blocking alert()
     setLoading(false);
   };
 
@@ -93,6 +108,7 @@ export default function ImageToGifPage() {
             <select value={fit} onChange={e => { setFit(e.target.value); setResult(null); }} className="w-full border border-neutral-200 rounded-lg px-3 py-2">{FITS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></label>
           <div><label className="block text-sm text-neutral-500 mb-1">Frame Delay: {delay}ms</label><input aria-label="Frame Delay (ms)" type="range" min="50" max="1000" value={delay} onChange={e => setDelay(parseInt(e.target.value))} className="w-full" /></div>
           <button onClick={createGif} disabled={images.length < 2 || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">{loading ? 'Creating...' : 'Create GIF'}</button>
+          {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
           {result && (
             <div className="space-y-3 text-center">
               <p className="text-green-600 font-semibold">GIF created ({result.frameCount} frames)</p>

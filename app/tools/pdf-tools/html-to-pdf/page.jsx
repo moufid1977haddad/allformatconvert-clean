@@ -1,4 +1,5 @@
 ﻿'use client';
+import { textFileProblem } from '../../../lib/fileChecks';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
@@ -19,9 +20,13 @@ export default function HtmlToPdfPage() {
   const handleFile = async (e) => {
     const f = e.target.files[0];
     e.target.value = '';
-    setFile(f);
+    if (!f) return;
     setDone(false);
     clearPdf();
+    // P21 (robustness): an empty file or a non-text file (a PDF or an image renamed .html) is said at once.
+    const problem = await textFileProblem(f, 'HTML');
+    if (problem) { setFile(null); setHtmlContent(''); setError(problem); return; }
+    setFile(f);
     // Checked on selection: the HTML is uploaded as-is, so its size is the upload size.
     const sizeCheck = checkOfficeSize(f, MAX_HTML_STAGED_BYTES);
     setError(sizeCheck.ok ? '' : sizeCheck.message);
