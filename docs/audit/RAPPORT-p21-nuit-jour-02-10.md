@@ -9,12 +9,12 @@ ni affiché. Branche `p21-02-10`, repère **`restauration-avant-p21-02-10` = `23
 
 | Phase | État |
 |---|---|
-| 1 — Défauts vus sur le vrai iPhone | ✅ fait, voir §1 (mise en production : §8) |
+| 1 — Défauts vus sur le vrai iPhone | ✅ en production (lot 1, `90f3c4d3`), voir §1 et §8 |
 | 2 — Erreurs réelles des visiteurs | 🟠 bloquée par l'accès, voir §2 (requête prête pour le propriétaire) |
-| 3 — Couverture des formats | 🟡 en cours, voir §3 |
-| 4 — Qualité des 40 outils les plus recherchés | 🟡 en cours, voir §4 |
-| 5 — Solidité | 🟡 défauts corrigés, vérification en cours (§5) |
-| 6 — Affichage iPhone / iPad | 🟡 corrections faites, vérification en cours (§6) |
+| 3 — Couverture des formats | ✅ en production (lot 2, `e9c438be`), voir §3 ; RAW → D3 |
+| 4 — Qualité des 40 outils les plus recherchés | ✅ en production (lot 3, `9dbb6c8b`), voir §4 |
+| 5 — Solidité | ✅ en production (lot 3), voir §5 |
+| 6 — Affichage iPhone / iPad | ✅ en production (lot 3), voir §6 |
 | 7 — Les 5 outils « coming soon » | ✅ vérifiés (§7) — déjà en ligne depuis le 23/09 |
 
 ## 0. Noté au plan dès le début
@@ -235,7 +235,27 @@ champs (File Comparator, Image Comparison), à mot de passe (File Encryptor), bo
 principal choisi (le plus large, pas un onglet « Encrypt / Decrypt »). Image Metadata disait déjà honnêtement « This
 browser cannot display this image » ; Zip Creator archive légitimement un fichier vide.
 
-**Après** : voir §8 (balayage complet sur la construction corrigée, puis préversion).
+**Après** (balayage complet sur la construction corrigée, Chromium) : **472 cas, 444 bons**. Les 28 restants :
+Image to Base64 vide et Image Comparison géante (corrigés ensuite, `916d1012`), Text to PDF vide (corrigé, `eabc5f3f`) ;
+le reste n'est pas un défaut — File Metadata / Image Metadata / Duplicate Image Finder / File Comparator / Hash
+Generator sont des outils de **constat** (un fichier vide ou illisible a des métadonnées et une empreinte, Duplicate
+Image Finder écrit « This browser cannot display c.png: compared for exact copies only ») ; PDF Redact / Sign sur PDF
+protégé : la phrase « needs a password… PDF Unlock » arrive au clic (vérifié à la main) ; Video Watermark : « Your
+browser can't play this video format/codec… » (le banc ne lisait pas ce bloc) ; QR Generator : « The logo is larger
+than 2 MB » ; Barcode Generator ne prend pas de fichier dans son mode principal (erreur du banc).
+
+**Revue indépendante** (lecture seule, demandée parce qu'un garde-fou peut **refuser un bon fichier** ou laisser un
+faux résultat) : 3 remarques graves, toutes corrigées et testées (`scripts/p21/file-checks.test.mjs`) — un CSV en
+**UTF-16** (export « Texte Unicode » d'Excel, que nos outils CSV lisent) était refusé comme binaire ; un CSV commençant
+par « BMW » / « BMI » était pris pour une image BMP (signature de 2 octets) ; un « .xls » qui est en réalité un tableau
+HTML, du XML SpreadsheetML 2003 ou du texte (exports de banques et d'ERP, qu'Excel ouvre) était refusé par Excel to
+CSV. Remarques moyennes/faibles aussi corrigées : la règle tactile grossissait les petits boutons posés sur les
+vignettes (✕ de 44 px sur une vignette de 63 px) → ils gardent leur taille avec une **zone tactile invisible** de
+10 px autour ; GIF Maker / PDF Editor : rangées de boutons qui passent à la ligne ; Image Editor ne garde plus le nom
+d'un fichier refusé ; Image Comparison n'affiche plus une image illisible et efface l'ancien message ; CSV to TSV
+oublie le fichier précédent ; GIF to MP4 vérifie le fichier **avant** de charger ffmpeg (30 Mo) et ne signale plus un
+mauvais fichier du visiteur comme une panne. Rien de grave trouvé ailleurs (PDF, MOBI/AZW3/Topaz, débits audio,
+appels asynchrones).
 
 ## 6. Phase 6 — affichage iPhone (375 px) et iPad (768 px)
 
@@ -286,6 +306,43 @@ pages complètes) ; la consigne reposait sur un état ancien. Vérifiés (`p21-p
   explication) ; `download-guard` 147 / 147 / 135, iPhone 193 / 179, iPad 179 : **ALL PASS** ; 238 pages : voir
   ci-dessous. **Aucun retour arrière.**
 
+### Lot 2 — phase 3 (02/10)
+- Préversion `preview/p21-phase3` → **`onlineconvertools-glp4ry3fy`** : 3 moteurs + iPhone / iPad, 238 pages ×3,
+  Office 23/23 (fichiers réels convertis par notre Gotenberg), `download-guard` : **tout vert**.
+- **Fusion** `--no-ff` → **`e9c438be`**, poussée normale ; production **`onlineconvertools-bxt8x3393`** Ready.
+  Retour arrière prêt : `onlineconvertools-h1uzcu8pb`.
+- **Sur www** : page PDF to JPG nouvelle servie (« Extract images ») ; Office : **5 formats nouveaux réellement
+  convertis** (.odt, .rtf, .xlsm, .ppsx, .dotx — pas les 23, pour rester sous la limite de 30 conversions par heure et
+  par connexion) ; Chromium : `p21-phase1`, PDF→images (12), JPG to PDF (6), PSD (3), Image Compressor (3), Merge PDF
+  images + Office (3), audio 7 formats nouveaux (7), `download-guard` 147, **238/238 pages** : **ALL PASS** ;
+  Firefox : mêmes bancs **ALL PASS** (`download-guard` 147, 238 pages) ; WebKit : PDF→images, Merge, audio,
+  `download-guard` 135, 238 pages **ALL PASS** (PSD et Image Compressor : SKIP, Playwright WebKit n'a pas
+  d'OffscreenCanvas — vrai Safari 16.4+ l'a) ; **WebKit iPhone 172, WebKit iPad 172, Chromium iPhone 186 : ALL PASS**.
+  **Aucun retour arrière.**
+
+### Lot 3 — phases 4, 5, 6 (02/10)
+- Préversion `preview/p21-lot2` → **`onlineconvertools-dluey8oda`** (`eabc5f3f`) : tests unitaires des garde-fous
+  (bons fichiers jamais refusés : UTF-8 ± BOM, UTF-16 LE/BE ± BOM, Windows-1252, Shift_JIS, TSV, .xls HTML/XML/texte,
+  CSV « BMW… » ; mauvais toujours refusés) ; Chromium / Firefox / WebKit : `p21-phase1`, qualité des images, phase 7,
+  PDF→images, JPG to PDF, Image Compressor, **audio 9 contrôles avec débit mesuré par ffprobe**, `download-guard`
+  147 / 147 / 135, **238 pages ×3**, affichage **450/450 Chromium** (iPhone + iPad), WebKit 449/450 (Zip Creator :
+  liste plus large que l'iPhone → corrigée `de33291e`, vérifiée), `download-guard` WebKit iPhone 179 / iPad 179 /
+  Chromium iPhone 193, simulation Safari 16.4 : **ALL PASS**.
+- Solidité (29 outils touchés, 3 moteurs, préversion finale `onlineconvertools-6sebbrd96`) : un **défaut introduit
+  par la revue** trouvé par le banc — dans Image Comparison, choisir la 2ᵉ image effaçait le message de la 1ʳᵉ → chaque
+  champ n'efface que le sien (`69636d29`) ; PDF Sign et PDF Redact ne parlaient d'un PDF à mot de passe qu'au dernier
+  clic → dit dès la sélection (`63c97616` ; un PDF protégé par le seul mot de passe propriétaire reste accepté, testé).
+  Après : **18/18 ×3 moteurs** sur ces outils, simulation Safari 16.4 Sign/Redact verte. L'erreur
+  `navigator.storage.persisted` sous WebKit vient de la barre Vercel des préversions (absente de www), ignorée par le
+  banc.
+- Repère **`restauration-avant-p21-lot3`** = `e9c438be` (poussé). **Fusion** `--no-ff` → **`9dbb6c8b`**, poussée
+  normale ; production **`onlineconvertools-bt00mpvwr`** Ready. Retour arrière prêt : `onlineconvertools-bxt8x3393`.
+- **Sur www** : choix « Quality » servi ; Chromium / Firefox / WebKit : `p21-phase1`, qualité des images (SKIP
+  WebKit, sans OffscreenCanvas dans Playwright), phase 7, **audio 9**, **solidité 98/98 ×3**, `download-guard`
+  147 / 147 / 135, **238 pages ×3** ; affichage **450/450 Chromium et 450/450 WebKit** (iPhone + iPad, avant : 88 pages
+  en échec sur iPhone) ; `download-guard` WebKit iPhone 172 / iPad 172 / Chromium iPhone 186 ; simulation Safari 16.4 :
+  **ALL PASS. Aucun retour arrière.**
+
 ## 9. À vérifier sur le vrai iPhone / Mac (propriétaire)
 
 1. **JPG to PDF** avec une photo de l'iPhone : « Download » → la feuille « Télécharger » d'iOS, fichier dans Fichiers ›
@@ -293,3 +350,17 @@ pages complètes) ; la consigne reposait sur un état ancien. Vérifiés (`p21-p
 2. **Background Remover** sur la même photo de tasse : plus de liseré bleu ni de halo dans l'anse ; si le morceau de
    fond en haut reste, c'est la segmentation (D1).
 3. **Image Converter** JPG → PNG : la ligne « Normal for PNG… » sous le résultat.
+4. **PDF to JPG** : bouton « Convert pages » (pages entières) et onglet « Extract images » (images d'origine) sur un
+   PDF de l'iPhone ; « Download all (ZIP) » enregistré dans Fichiers.
+5. **Word to PDF** avec un .odt ou un .rtf, **Merge PDF** avec un PDF + une photo + un .docx.
+6. **Audio Converter** : M4R (sonnerie) avec Quality 256 kbit/s, puis l'ouvrir dans Fichiers.
+7. Une page d'outil quelconque sur l'iPhone : boutons et listes faciles à toucher, rien ne déborde à droite ; sur
+   Image to GIF, la petite croix rouge sur une vignette se touche sans cacher l'image.
+8. **CSV to Excel** avec un fichier vide ou une photo renommée .csv : une phrase claire, pas de « résultat ».
+
+## 10. Ce qui reste au propriétaire
+
+- **D1** détourage (ne rien changer, mesuré), **D2** lecture `tool_errors` (requête prête,
+  `docs/audit/p21-tool_errors-lecture.sql`), **D3** RAW (LibRaw compilé par nous, 0 $, 2-3 h) : section « Décisions du
+  propriétaire — P21 » du plan.
+- Passe du vrai iPhone : tests 9 à 16 du bloquant 9, plus la liste du §9 ci-dessus.
