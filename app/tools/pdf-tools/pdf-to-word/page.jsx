@@ -81,7 +81,7 @@ export default function PdfToWordPage() {
       </div>
       <SeoContent
         title="PDF to Word"
-        description="PDF to Word converts your PDF into a real, editable .docx Word document using our conversion service. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. We tested two PDFs exported from Word (one with a table with merged cells, a two-column section, a numbered list, headers and footers, an image with text wrapping; one with footnotes and a watermark). We converted each back to PDF and compared it with the original: headings, table, columns, lists, header and footer, image, footnotes and watermark were all present and in place. We did not test PDFs from other sources (layout software, scans, forms), where results can differ."
+        description="PDF to Word converts your PDF into a real, editable .docx Word document using our conversion provider, ConvertAPI. Your file is sent securely over HTTPS through our server to ConvertAPI, with file storage turned off, and deleted after conversion — we don't store or log it. We tested two PDFs exported from Word (one with a table with merged cells, a two-column section, a numbered list, headers and footers, an image with text wrapping; one with footnotes and a watermark). We converted each back to PDF and compared it with the original: headings, table, columns, lists, header and footer, image, footnotes and watermark were all present and in place. We did not test PDFs from other sources (layout software, scans, forms), where results can differ."
         howTo={[
           "Click the upload area and select a PDF file from your device.",
           "Click 'Convert to .docx'. Your file is uploaded securely for conversion; once the Word document is ready, click 'Download'.",
@@ -90,7 +90,7 @@ export default function PdfToWordPage() {
         faqs={[
           { q: "Is PDF to Word completely free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "What file formats does PDF to Word support?", a: "Input must be a PDF. Output is .docx only — there's no legacy .doc output." },
-          { q: "Will my documents be uploaded to a server?", a: "Yes. Your file is uploaded securely over HTTPS to our conversion service to generate the Word document, and is deleted immediately after conversion — it isn't stored or kept." },
+          { q: "Will my documents be uploaded to a server?", a: "Yes. Your file is sent securely over HTTPS through our server to our conversion provider, ConvertAPI, with file storage turned off, and deleted after conversion — we don't keep it." },
           { q: "Will the converted document keep my PDF's formatting?", a: "In our tests on two PDFs exported from Word, yes: headings, a table with merged cells, columns, numbered lists, header and footer, an image and footnotes carried over. We did not test PDFs from other sources, so check the result on yours." },
           { q: "Can I convert scanned or image-based PDFs?", a: "No — conversion relies on the PDF already containing a text layer. A scanned page with no underlying text (i.e. no OCR has been run on it) won't produce editable text in the output." },
           { q: "Do I need to install any software to use PDF to Word?", a: "No, it works directly in your web browser." }

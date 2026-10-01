@@ -138,7 +138,7 @@ export default function AudioConverterPage() {
       </div>
       <SeoContent
         title="Audio Converter"
-        description="Audio Converter converts a single audio file between MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, and AC3 using ffmpeg.wasm, running in your browser — your file is not uploaded. The one exception is Opus: it is encoded on our own server with the reference libopus encoder (the in-browser one is not reliable), and the file is deleted as soon as you have downloaded the result."
+        description="Audio Converter converts a single audio file between MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, and AC3 using ffmpeg.wasm, running in your browser — your file is not uploaded, except for Opus output (below). The one exception is Opus: it is encoded on our own server with the reference libopus encoder (the in-browser one is not reliable), and the file is deleted as soon as you have downloaded the result."
         howTo={[
           "Click the upload area and select an audio file.",
           "Choose your target format from the dropdown.",

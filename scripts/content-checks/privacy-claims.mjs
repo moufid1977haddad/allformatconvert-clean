@@ -24,13 +24,16 @@ const verbose = process.argv.includes('--verbose');
 // What a tool calls when it sends data somewhere (app/lib/officeUpload.js, mediaJob.js, opusService.js, aiClient.js).
 // The Web Speech API is not local either: Chrome sends the recording to Google's speech service, Edge to Microsoft's,
 // Safari to Apple's, unless the page asks for on-device recognition (processLocally, Chrome 139+).
-export const SENDS_VIA_BROWSER = /(webkit)?SpeechRecognition/;
+export const SENDS_VIA_BROWSER = /\b(webkit)?SpeechRecognition\b/;
 export const SENDS = /\/api\/(ai|ai-detect|ai-image|ai-transcribe|ai-vision|convert-html-to-pdf|convert-to-pdf|image-upscale|media\/ticket|pdf-compress|pdf-repair|pdf-to-excel|pdf-to-pdfa|pdf-to-ppt|pdf-to-word|remove-bg)\b|\b(runMediaJob|runStaged\w*|convertOffice|transcribeAudio|encodeOpusOnService|readAiJson)\b|<(MediaServiceTool|GifFromVideoTool)\b/;
 
 // A sentence that says the work is local / nothing is sent or kept.
 const LOCAL = /\b(entirely (in|on) your (browser|device)|(right|all|directly) in your browser|in your browser|on your device|locally|client-side|nothing (is |gets )?(uploaded|sent|stored|transmitted)|never (leaves?|uploaded|sent|stored)|not (uploaded|sent)|no (file )?uploads?|no data stored|100 ?% (private|local)|completely private|(entirely|fully|all) local|stays? (in|on) your (browser|device))\b/i;
 // The same sentence names its exception, or is about the part that really is local.
-const QUALIFIED = /\b(except|exception|unless|only (if|when|for|the|your)|otherwise|but\b|while\b|then\b|when (your|you|the|it|that)|for (opus|the gif|the fast|a precise|every format except|that fast)|opus|webgpu|in (fast|default) mode|"instant, lossless"|instant, lossless|original (epub|mobi|pdf|file)|extracts?|extracted|the pdf itself|frame extraction|alike|not for|larger files|files over|reduced on your device|resized|before (sending|it is sent|upload)|sent (to|through)|uploaded (securely|to)|our (own )?(server|service|video service|conversion service)|openai|pangram|convertapi|instead of|no longer|server-side|our (own )?\w+ (server|service))\b/i;
+// Only an exception named in the sentence itself, or a sentence that itself says where the data goes. Words like
+// "but", "then", "while" or a format name are NOT enough (independent review, 01/10: a format list containing "Opus"
+// let "your file is not uploaded" pass).
+const QUALIFIED = /\b(except|exception|unless|only (if|when|for|the|your|a|its)|otherwise|when (your|you|the|it|that)|for (the gif|the fast|a precise|every format except|that fast)|in (fast|default) mode|"instant, lossless"|instant, lossless|original (epub|mobi|pdf|file)|the pdf itself|frame extraction|not for|files over|before (sending|it is sent|upload)|sent (to|through|by)|our (own )?(\w+ )?(server|service)s?|openai|pangram|convertapi|server-side|usually|(file|content|text|audio|image|video) (is|are) (uploaded|sent))\b/i;
 
 // Sentences that are true as written although the tool also uses a server: status lines shown only on the local path,
 // or statements about the part that is local. Page and start of the sentence, with the reason. Read on 01/10 (P20).
@@ -44,6 +47,11 @@ const ALLOW = [
   ['pdf-tools/pdf-to-excel', 'You still get a workbook', 'the no-table fallback really is built in the browser'],
   ['audio-tools/audio-merger', 'No limit is set by the tool', 'about the input files, which are decoded on the device even for Opus output'],
   ['video-tools/video-trimmer', 'Trimming runs in your browser', "about the fast cut's declared memory limit"],
+  ['video-tools/video-trimmer', 'MB on a phone, shown before you pick a file', "about the fast cut's declared memory limit"],
+  ['video-tools/video-merger', 'Videos that are alike', 'the condition is the start of the sentence; the next sentence says the others go to our video service'],
+  ['video-tools/video-resizer', 'It no longer has to play the whole video in your browser', 'says the opposite: the work left the browser'],
+  ['video-tools/video-to-gif', 'Yes: "Or extract frames as PNG images" captures', 'the PNG frame extraction really is local; the GIF answer is separate'],
+  ['video-tools/video-to-gif', 'Open "Or extract frames as PNG images"', 'same: frame extraction is local'],
 ];
 
 // Questions are not claims; "Is my file uploaded?" is answered by the next string.
@@ -84,6 +92,14 @@ for (const { slug, file } of pages) {
       if (LOCAL.test(s) && !QUALIFIED.test(s) && !ALLOW.some(([sl, start]) => sl === slug && s.startsWith(start))) fail(slug, 'server tool claims local processing', s);
     }
   }
+  // A server tool may not promise "no limits": every server path has an hourly and daily limit per connection.
+  for (const t of words) for (const s of sentences(t)) {
+    if (/\b(no (usage )?limits?|(or|and) usage limits?|unlimited|no limit on how many)\b/i.test(s) && !/\b(in your browser|except|unless|only)\b/i.test(s) && !ALLOW.some(([sl, start]) => sl === slug && s.startsWith(start))) fail(slug, 'server tool claims no limits', s);
+  }
+  // A provider is named: a tool whose route goes to ConvertAPI says so on its page (not "our conversion service").
+  if (/\/api\/(pdf-to-word|pdf-to-excel|pdf-to-ppt)\b/.test(direct) || (slug === 'pdf-tools/word-to-pdf')) {
+    if (!words.some((t) => /ConvertAPI/.test(t))) fail(slug, 'ConvertAPI not named on the page', '(no sentence names ConvertAPI)');
+  }
   void instr; void rest; void code;
 }
 
@@ -117,6 +133,10 @@ for (const slug of serverSlugs) {
   const name = (NAME[slug] || slug.split('/')[1].replace(/-/g, ' ')).toLowerCase();
   if (!privacy.includes(name)) fail(slug, 'server tool not named in /privacy', name);
 }
+
+// ---- 5: Google Translate sends the page's text (results included) to Google: /privacy and the menu say so ------
+if (!/sent to google to be translated/.test(privacy)) fail('app/privacy/page.jsx', 'Google Translate: the page text sent to Google is not disclosed', '');
+if (!/the page&apos;s text is sent to Google/.test(fs.readFileSync(path.join(ROOT, 'app', 'components', 'Navbar.jsx'), 'utf8'))) fail('app/components/Navbar.jsx', 'language menu does not say the text goes to Google', '');
 
 for (const f of failures) console.log(`FAIL ${f.where} — ${f.what}${verbose || f.what !== 'x' ? `\n    “${f.sentence.slice(0, 300)}”` : ''}`);
 console.log(`${serverSlugs.length} tools send data (read from the code); ${failures.length} failure(s)`);

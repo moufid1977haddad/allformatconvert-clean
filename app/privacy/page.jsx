@@ -48,7 +48,7 @@ export default function PrivacyPage() {
               <li><strong>Documents:</strong> Excel to PDF, PowerPoint to PDF, HTML to PDF, Markdown to PDF, Text to PDF when the text has emoji or a script beyond Latin, Greek, Cyrillic, Arabic, Hebrew, Devanagari, Tamil, Thai and Chinese / Japanese / Korean, EPUB to PDF, MOBI to PDF, Word to PDF for .doc files, PDF Repair, PDF to PDF/A, PDF Compress.</li>
               <li><strong>Video:</strong> Video Compressor, Video Converter, Video Filter, Video Resizer; Video Rotator in its default "Compatible everywhere" mode (the "Instant, lossless" mode stays in your browser); Video Merger when the clips differ in size or format; Video Trimmer in "Precise cut" mode for longer or larger clips; Screen Recorder only if you ask for an MP4 copy; Video, MP4, MOV, AVI and WebM to GIF.</li>
               <li><strong>Audio:</strong> Audio Converter, Audio Booster, Audio Splitter, Audio Compressor and Audio Merger when the output format is Opus.</li>
-              <li><strong>Images:</strong> Background Remover; AI Image Upscaler, except when your browser can run the model on your device (WebGPU), in which case nothing is sent.</li>
+              <li><strong>Images:</strong> Background Remover; AI Image Upscaler, except when the model runs on your device (a browser with WebGPU, an image without transparency, a result small enough for the browser) — the page always says which happened.</li>
               <li><strong>Large files on their way to a tool below:</strong> files over 4&nbsp;MB for the ConvertAPI and transcription tools transit through our own storage server, where they are deleted after processing.</li>
             </ul>
             <p className={`${p} mt-3 mb-3`}><strong>Sent to a specialised provider</strong>, through our server (see Section 5 for each provider's policy):</p>
@@ -77,7 +77,7 @@ export default function PrivacyPage() {
             <h2 className={h2}>{num()}. Cookies and local storage</h2>
             <ul className={ul}>
               <li><strong>Google Analytics</strong> (<code>_ga</code>, <code>_ga_&lt;id&gt;</code>): visit statistics, up to 2 years.</li>
-              <li><strong>Google Translate</strong> (<code>googtrans</code>): set only if you choose a language in the menu, to keep the page translated; Google's translation script is loaded only after that choice.</li>
+              <li><strong>Google Translate</strong> (<code>googtrans</code>): set only if you choose a language in the menu, to keep the page translated. Google's translation script is loaded when you open the language menu. While a translation is on, the text shown on the page — including results a tool displays — is sent to Google to be translated; files themselves are never sent.</li>
               {ads && <li><strong>Advertising</strong> (Google AdSense and its partners): see Section 6. In the European Economic Area, the United Kingdom and Switzerland, advertising cookies are used only if you agree in the consent message.</li>}
               <li><strong>Local storage in your browser</strong> (never sent to us): your light/dark mode choice, notes and settings you save in some tools, and — if you sign in — your session.</li>
             </ul>

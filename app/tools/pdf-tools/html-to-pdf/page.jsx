@@ -95,7 +95,7 @@ export default function HtmlToPdfPage() {
           "Open the downloaded PDF to confirm it looks right."
         ]}
         faqs={[
-          { q: "Is HTML to PDF completely free to use?", a: "Yes, it's completely free with no signup or usage limits." },
+          { q: "Is HTML to PDF completely free to use?", a: "Yes, it's completely free with no signup. It runs on our server, which allows a set number of conversions per connection each hour and day." },
           { q: "Can I customize page size, margins, or headers/footers?", a: "Not in this tool directly — the PDF is rendered using the conversion service's default page settings, rather than options exposed on this page." },
           { q: "Will my HTML documents be uploaded to a server?", a: "Yes. Your HTML code or file is uploaded to our conversion service, purely to render the final PDF with a real browser engine, and it's discarded immediately afterward." },
           { q: "What HTML features are supported?", a: "Whatever a modern Chromium browser can render: CSS styling, images, tables, and most modern HTML5 elements. In our test the PDF matched Chrome's print output, except that fonts missing from our servers are replaced by similar ones." }

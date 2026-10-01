@@ -173,7 +173,7 @@ export default function SignUpPage() {
         <div className="text-center mb-8">
           <Link href="/"><SiteName className="font-semibold text-2xl text-black dark:text-white" /></Link>
           <h1 className="text-2xl font-bold text-neutral-800 mt-4">Create an account</h1>
-          <p className="text-neutral-500 text-sm mt-1">Join thousands of users today</p>
+          <p className="text-neutral-500 text-sm mt-1">Optional — every tool works without an account</p>
         </div>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-8">
           {error && (

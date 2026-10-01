@@ -1023,7 +1023,7 @@ export default function Navbar() {
                             <span className="truncate">{lang.label}</span>
                           </button>
                         ))}
-                        <p className="col-span-2 px-2 pt-1 text-[11px] text-neutral-500 dark:text-neutral-400">Machine translation by Google</p>
+                        <p className="col-span-2 px-2 pt-1 text-[11px] text-neutral-500 dark:text-neutral-400">Machine translation by Google: the page&apos;s text is sent to Google</p>
                       </div>
                     )}
                   </div>
@@ -1152,7 +1152,7 @@ export default function Navbar() {
                       <span>{lang.label}</span>
                     </button>
                   ))}
-                  <p className="px-3 py-1.5 border-t border-neutral-200 dark:border-neutral-600 text-[11px] text-neutral-500 dark:text-neutral-400">Machine translation by Google</p>
+                  <p className="px-3 py-1.5 border-t border-neutral-200 dark:border-neutral-600 text-[11px] text-neutral-500 dark:text-neutral-400">Machine translation by Google: the page&apos;s text is sent to Google</p>
                 </div>
               )}
             </div>
