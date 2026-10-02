@@ -143,16 +143,35 @@ async function bombImageIsReal(p) {
     return px[0] > 200 && px[1] > 200 && px[2] > 200 && px[3] > 200;
   } catch { return false; }
 }
-const b = await engine.launch();
+// P23: on a preview, with another bench running, the whole test browser died twice (memory: giant / bomb cases four
+// at a time). The bench then stopped and measured nothing more. Now: the cases in flight when it died are logged, the
+// browser is relaunched, and those cases are played again one at a time at the end (their second verdict counts).
+let b = null;
+const inflight = new Set();
+let relaunching = null;
+async function launch() {
+  const br = await engine.launch();
+  br.on('disconnected', () => { if (inflight.size) console.log(`BROWSER-DIED (${name}) with in flight: ${[...inflight].join(', ')}`); });
+  return br;
+}
+async function liveBrowser() {
+  if (b && b.isConnected()) return b;
+  relaunching ??= launch().then((br) => { b = br; relaunching = null; return br; });
+  return relaunching;
+}
+b = await launch();
+const retry = [];
 const rows = [];
 let fails = 0, passes = 0;
 const tools = inventory().filter((t) => !only.length || only.includes(t.tool));
 console.log(`${tools.length} tools with a file input`);
 const jobs = [];
 for (const t of tools) for (const c of cases) { const file = fixture(c, t); if (file) jobs.push({ t, c, file }); }
-async function runCase({ t, c, file }) {
-  {
-    const ctx = await b.newContext({ acceptDownloads: true });
+async function runCase({ t, c, file }, final = false) {
+  const key = `${t.tool} [${c}]`;
+  inflight.add(key);
+  try {
+    const ctx = await (await liveBrowser()).newContext({ acceptDownloads: true });
     if (process.argv.includes('--no-vercel-toolbar')) await ctx.route(/vercel\.live/, (r) => r.abort());
     // NO PAID CALL, EVER: every /api/ route and the media service are played here. A page that sends the bad file to
     // the server gets the refusal our routes give ("422, this file could not be read") and must show it.
@@ -235,19 +254,26 @@ async function runCase({ t, c, file }) {
       else if (busyBtn) verdict = 'STUCK';
       else verdict = 'SILENT';
       detail += ` ${msg.slice(0, 160)}${busyBtn ? ` busy:"${busyBtn}"` : ''}${errors.length ? ' err:' + errors[0] : ''}`;
-    } catch (e) { verdict = 'BENCH-ERROR'; detail = String((e && e.stack) || e).slice(0, 400); }
+    } catch (e) { verdict = /has been closed|Target closed|disconnected|browser has crashed/i.test(String(e)) ? 'BROWSER-DIED' : 'BENCH-ERROR'; detail = String((e && e.stack) || e).slice(0, 400); }
+    if (verdict === 'BROWSER-DIED' && !final) { retry.push({ t, c, file }); await ctx.close().catch(() => {}); return; }
     const ok = verdict.startsWith('OK');
     if (ok) passes++; else fails++;
     rows.push({ tool: t.slug, case: c, verdict, detail: detail.trim() });
-    console.log(ok ? 'PASS' : 'FAIL', `${name} ${t.slug} [${c}] ${verdict}`, ok ? '' : detail.trim());
-    await ctx.close();
-  }
+    console.log(ok ? 'PASS' : 'FAIL', `${name} ${t.slug} [${c}] ${verdict}${final ? ' (played again alone)' : ''}`, ok ? '' : detail.trim());
+    await ctx.close().catch(() => {});
+  } catch (e) {
+    if (!final) { retry.push({ t, c, file }); return; }
+    fails++; rows.push({ tool: t.slug, case: c, verdict: 'BROWSER-DIED', detail: String(e).slice(0, 200) });
+    console.log('FAIL', `${name} ${t.slug} [${c}] BROWSER-DIED (played again alone)`, String(e).slice(0, 200));
+  } finally { inflight.delete(key); }
 }
 // 4 pages at a time
 const POOL = Number(arg('pool') || 4);
 let next = 0;
 await Promise.all(Array.from({ length: POOL }, async () => { while (next < jobs.length) await runCase(jobs[next++]); }));
-await b.close();
+if (retry.length) console.log(`${retry.length} case(s) interrupted by the browser's death: played again one at a time`);
+for (const j of retry) await runCase(j, true);
+await (await liveBrowser()).close();
 if (arg('json')) fs.writeFileSync(arg('json'), JSON.stringify(rows, null, 1));
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);
 process.exit(fails ? 1 : 0);

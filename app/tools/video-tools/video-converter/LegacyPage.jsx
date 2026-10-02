@@ -72,7 +72,7 @@ export default function LegacyVideoConverterPage() {
           </div>
           {!support.ok && <p role="alert" className="text-red-500 text-center text-sm">{support.reason}</p>}
           {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" />}
-          {status && <p className="text-yellow-400 text-center">{status}</p>}
+          {status && <p role="status" className="text-yellow-400 text-center">{status}</p>}
           {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
           <button onClick={convert} disabled={!file || !!status || !support.ok} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert to WebM</button>
           {result && <div className="space-y-2"><video controls src={result.url} className="w-full rounded-xl" /><FileDownload href={result.url} name={`converted.${result.ext}`} /></div>}

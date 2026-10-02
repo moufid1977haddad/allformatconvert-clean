@@ -102,7 +102,7 @@ export default function VideoToAudioPage() {
               </div>
             )}
           </div>
-          {status && <p className="text-yellow-400 text-center text-sm">{status}</p>}
+          {status && <p role="status" className="text-yellow-400 text-center text-sm">{status}</p>}
           {loading ? (
             <div className="space-y-3">
               <ProgressBar pct={progress} label="Extracting…" />

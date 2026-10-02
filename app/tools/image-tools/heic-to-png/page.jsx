@@ -56,7 +56,7 @@ export default function HeicToPngPage() {
           <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Converting...' : 'Convert to PNG'}
           </button>
-          {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
+          {status && <p role="status" className="text-center text-yellow-400 text-sm">{status}</p>}
           {result && (
             <div className="space-y-2">
               <img src={result} className="max-h-48 mx-auto rounded" />
