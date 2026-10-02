@@ -25,19 +25,19 @@ compte (plan **Hobby**) qui est suspendu.
 - P24 continue **en local** (aucun trafic Vercel) sur la branche `p24-couverture` ; rien n'est fusionné tant que le
   compte est bloqué (une fusion déclencherait une production refusée). Voir `docs/audit/RAPPORT-p24-couverture-03-10.md`.
 
-### 📋 État P24 (mis à jour au fil du travail — dernier point 03/10 vers 11 h, heure de la machine)
-- **Fait, commité et poussé sur `p24-couverture`** (rien en production : site en 402) : PDF (§1), image (§2), vidéo (§3),
-  audio (§4), GIF (§5), fichiers (§6), développeur / texte / unités / maths (§7), convertisseurs et autres (§8) — chaque
-  lot prouvé par un banc ×3 moteurs (`scripts/p24/*-lot.mjs`) ; relectures indépendantes, chaque grave corrigé
-  (PDF 2.0 RC4, MPF/Motion Photo, JWT alg toString, sous-titres GPS gardés par « supprimer les métadonnées »).
-- **Relevé n° 2 (≈ 120 outils jamais comparés) : fait**, lots 1 à 9 (`docs/audit/P24-releve-outils-restants.md`, toutes
-  les lignes closes ; rapport §9). Dernier lot : note « image animée » sur 15 filtres, PDF Split par signets,
-  corrections de la 2e relecture (lots 3-8).
-- **À vérifier sur la préversion (service vidéo absent en local)** : Vidéo → GIF — longueur raccourcie et dite quand elle
-  dépasse la fin, « joué une fois / 3 fois » et compression (gifsicle après le service) ; banc : `scripts/p24/adds-lot.mjs`.
-- **Reste au propriétaire** : (1) **débloquer Vercel** (Pro recommandé) ; (2) ensuite seulement, Claude met en
-  production catégorie par catégorie avec les conditions de P23 (étiquette de restauration, préversion, bancs ×3,
-  www, retour arrière prêt) ; (3) décisions E1-E7 ci-dessous.
+### 📋 État P24 — TERMINÉ le 03/10 à 12 h 45 (heure de la machine) ; rien en production (site en 402)
+- **Fait, commité et poussé sur `p24-couverture`** (branche partie de `restauration-avant-p24-03-10` = `43d2b0cb` ;
+  dernier commit de code `45831f1b`) : les 9 catégories (PDF, image, vidéo, audio, GIF, fichiers, développeur / texte /
+  unités / maths, convertisseurs) puis le relevé n° 2 des ≈ 120 outils jamais comparés (lots 1 à 9, liste
+  `docs/audit/P24-releve-outils-restants.md` entièrement close). Rapport : `docs/audit/RAPPORT-p24-couverture-03-10.md`
+  (§10 = bilan), seul fusionné dans master (documentation seulement).
+- **Contrôles finaux en local** (`bash scripts/p24/final-run.sh`) : tests Node verts ; bancs P24 ×3 moteurs verts ;
+  solidité de tous les outils **522/522 ×3**.
+- **Reste au propriétaire** : (1) **débloquer Vercel** (Pro recommandé) ; (2) ensuite seulement, demander dans le
+  terminal la mise en production de `p24-couverture`, catégorie par catégorie, avec les conditions de P23 (étiquette
+  de restauration, préversion, bancs ×3, www, retour arrière prêt) — **ne pas fusionner la branche avant** ;
+  (3) sur la préversion : Vidéo → GIF (longueur raccourcie et dite, « joué une fois / 3 fois », compression ; banc
+  `scripts/p24/adds-lot.mjs`, service vidéo absent en local) ; (4) décisions E1-E7 ci-dessous.
 
 ## 🚀 RESTE AVANT PRODUCT HUNT — établi le 30/09 → 01/10 (passe « prêt au lancement », `docs/audit/RAPPORT-prelancement-01-10.md` §1 : chaque ligne du plan classée, preuve à l'appui)
 

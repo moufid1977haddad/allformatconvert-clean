@@ -488,3 +488,30 @@ Bancs du lot 9 (construction finale du lot) : `adds-lot.mjs` 37/37 (Chromium) ·
 solidité des outils touchés 45/45 · 45/45 · 44/45 — le cas « image géante » de PNG to JPG, à 3 pages en parallèle
 sous WebKit, a dépassé le délai du banc ; relancé seul : 3 fois sur 3 vert (charge de la machine, pas l'outil) ;
 tests Node : décimales 14/14, signets 9/9, EXIF 4/4, Split, Merge, éditeur, JWT, caviardage, métadonnées verts.
+
+## 10. Bilan de fin de P24 (03/10, 12 h 45, heure de la machine)
+
+**Production : rien n'a été mis en production.** www répond toujours **402** (compte Vercel Hobby suspendu pour
+usage équitable, §0) ; aucune préversion ne peut être créée. Le code de P24 est entièrement sur la branche
+**`p24-couverture`** (poussée, partie de `restauration-avant-p24-03-10` = `43d2b0cb` ; dernier commit de code
+`45831f1b`) ; **seul ce rapport est fusionné dans master** (fusion « documentation seulement », comme P23), pour qu'un
+déblocage du compte ne mette pas en ligne du code qui n'a pas passé les conditions de P23 sur une préversion.
+
+**Fait** : les 9 catégories (§1 à §8) puis le relevé n° 2 des ≈ 120 outils jamais comparés (§9, lots 1 à 9, liste de
+travail entièrement close) ; chaque ajout prouvé par un vrai fichier rouvert ; relectures indépendantes de tous les lots, chaque grave
+corrigé et prouvé (PDF 2.0 RC4, MPF/Motion Photo, JWT `alg`, moyenne statistique, durées Excel, sous-titres GPS gardés,
+virgule décimale ODS).
+
+**Contrôles finaux** (construction finale `45831f1b`, `bash scripts/p24/final-run.sh`, en local) :
+- tests Node : décimales, JSON, JWT (26), éditeur PDF, Merge, Split, signets, caviardage, métadonnées, EXIF — tous verts ;
+- bancs P24 × 3 moteurs : adds 37 · 36 · 32, dev 46 ×3, image 12 ×3, GIF 3 ×3, audio-vidéo 7 · 7 · 5, PDF 23 ×3,
+  TIFF 2 ×3, JPEG 2000 ×3 — **tous verts** (WebKit de Playwright sous Windows ne décode ni vidéo ni micro : dit au banc) ;
+- solidité de tous les outils × 3 moteurs (`p21-robustness.mjs` : fichier vide, abîmé, d'un autre type, géant, bombe de
+  décompression, sur chaque outil) : **522 / 522 · 522 / 522 · 522 / 522** — tout vert, terminé à 12 h 44.
+
+**Reste au propriétaire** : (1) **débloquer Vercel** (Pro recommandé, §0) ; (2) ensuite seulement, mise en production de
+`p24-couverture` catégorie par catégorie avec les conditions de P23 (étiquette de restauration, préversion, bancs ×3,
+www, retour arrière prêt) — à demander à Claude dans le terminal ; (3) sur la préversion, vérifier Vidéo → GIF (longueur
+raccourcie et dite, « joué une fois / 3 fois », compression : le service vidéo n'existe pas en local) ; (4) décisions
+E1-E7 du plan (PDF to Word en DOC/RTF, PDF/A « a »/« u », traduction du document entier, HTML depuis une URL, options
+vidéo du service, phrase de passe EFF, historique des devises).
