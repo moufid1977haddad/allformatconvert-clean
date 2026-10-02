@@ -359,3 +359,19 @@ gardées) ; **QR Scanner** lit tous les codes d'une image avec zxing (QR, EAN-13
 jusqu'à 20 — prouvé sur une image QR + EAN-13) ; **Voice Recorder** : pause / reprise et export **MP3** (prouvé avec le
 micro simulé de Chromium et Firefox). Bancs : dev 46/46 ×3, adds-lot 3/3 (WebKit : 1/1, compresseur et micro non
 testables dans ce navigateur de test, dit), image 12/12 ×3, tiff 2/2 ×3, solidité 22/22 ×3, tests Node Merge/Split/SQL.
+
+**Ajouts (lot 4)**, chacun prouvé (`scripts/p24/adds-lot.mjs`) :
+- **Excel to PDF — « une page par feuille »** (champ Gotenberg `singlePageSheets`, transmis par notre route Vercel dans
+  les deux chemins, direct et « staged », liste blanche d'options) : une feuille de 40 colonnes passe de **5 pages à 1**,
+  mesuré contre notre vrai Gotenberg. Les options PowerPoint (notes, diapositives masquées) ne sont pas ouvertes : pas
+  prouvées faute de fichier de test.
+- **JPG to PDF / Image to PDF — format de page, orientation, marge** (iLovePDF, PDF24) : A4 / Letter / Legal / A5,
+  orientation automatique par image, marges 10 ou 20 mm, image centrée jamais rognée ni agrandie (prouvé : page
+  paysage pour l'image large, portrait pour l'image haute). La FAQ d'Image to PDF disait encore « JPG et PNG seulement,
+  le reste ignoré en silence » — faux depuis P21, corrigée.
+- **Image Resizer** : format de sortie (JPG, PNG, WebP) et qualité ; **Image Flip** « dans les deux sens » ; **Pixelator**
+  en % de l'image ; **Find & Replace** : ignorer la casse, mots entiers (lettres de toutes les écritures — un premier
+  essai écrivait `\p` dans un gabarit JavaScript et ne marchait pas : vu par le banc) ; **Diff Viewer** : mots changés
+  surlignés, ignorer la casse ; **Media Player** : vitesse 0,5×-2×, boucle, image dans l'image, enregistrer l'image
+  affichée, sous-titres .srt / .vtt.
+Bancs : adds-lot 9/9 (Chromium), 8/8 (Firefox), 6/6 (WebKit, 2 non testables dits), solidité 31/31 ×3.

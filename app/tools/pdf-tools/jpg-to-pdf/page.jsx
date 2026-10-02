@@ -4,9 +4,11 @@ import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { addImagePage } from '../../../lib/pdfImages';
 import { FileDownload } from '../../../components/FileDownload';
+import ImagePageLayout, { DEFAULT_IMAGE_LAYOUT } from '../../../components/ImagePageLayout';
 
 export default function Page() {
   const [files, setFiles] = useState([]);
+  const [layout, setLayout] = useState(DEFAULT_IMAGE_LAYOUT); // P24: page size, orientation, margin
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
@@ -23,7 +25,7 @@ export default function Page() {
       const pdfDoc = await PDFDocument.create();
       for (const file of files) {
         // Upright (EXIF orientation) and never silently skipped (29/09).
-        await addImagePage(pdfDoc, file);
+        await addImagePage(pdfDoc, file, layout);
       }
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
@@ -48,6 +50,7 @@ export default function Page() {
               {files.map((f, i) => <div key={i} className="text-xs text-neutral-600 bg-neutral-50 rounded p-2 truncate border border-neutral-200">{f.name}</div>)}
             </div>
           )}
+          <ImagePageLayout value={layout} onChange={setLayout} disabled={loading} />
           <button onClick={convert} disabled={!files.length || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Converting...' : 'Convert to PDF'}
           </button>
@@ -67,6 +70,7 @@ export default function Page() {
         faqs={[
           { q: "Is JPG to PDF really free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Can I convert multiple JPG images at once?", a: "Yes, you can select multiple images at once, and they're combined into one multi-page PDF." },
+          { q: "Can I choose the page size and margins?", a: "Yes. Keep \"Fit to each picture\" for pages the size of each picture, or choose A4, US Letter, US Legal or A5, with an automatic, portrait or landscape orientation and no, small (10 mm) or big (20 mm) margin. Each picture is scaled to fit inside the margins and centred, never cropped or stretched." },
           { q: "Will my files be uploaded to a server?", a: "No. Conversion happens entirely in your browser — your images are never uploaded anywhere." },
           { q: "What image formats besides JPG can be converted?", a: "PNG, HEIC / HEIF (iPhone photos), WebP, GIF (first frame), BMP, TIFF and AVIF. JPG photos are put in the PDF as they are, turned upright; the other formats are drawn upright first (JPEG for photos, PNG when the image has transparency). An image that cannot be read is named in a message — it is never skipped silently." }
         ]}

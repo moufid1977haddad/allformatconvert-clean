@@ -23,7 +23,9 @@ export default function ImageFlipPage() {
       const raster = await loadRaster(file);
       const W = raster.width, H = raster.height;
       const out = await renderFull(raster, W, H, (ctx, drawSource) => {
-        if (horizontal) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+        // P24 (03/10): 'both' = horizontal and vertical at once (pinetools: independently or combined), a 180° turn
+        if (horizontal === 'both') { ctx.translate(W, H); ctx.scale(-1, -1); }
+        else if (horizontal) { ctx.translate(W, 0); ctx.scale(-1, 1); }
         else { ctx.translate(0, H); ctx.scale(1, -1); }
         drawSource(ctx);
       });
@@ -45,6 +47,7 @@ export default function ImageFlipPage() {
           <div className="grid grid-cols-2 gap-3">
             <button onClick={() => flip(true)} disabled={!image || busy} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Flip Horizontal</button>
             <button onClick={() => flip(false)} disabled={!image || busy} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Flip Vertical</button>
+            <button onClick={() => flip('both')} disabled={!image || busy} className="col-span-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Flip Both Ways</button>
           </div>
           {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
         </div>

@@ -64,6 +64,86 @@ if (name !== 'webkit') { // Voice Recorder: pause / resume and an MP3 (the brows
   check('voice-recorder: Pause says paused, Resume continues, Export as MP3 gives a real MP3', /Paused/.test(pausedText) && isMp3, `${mp3.length} B`);
   await p.close();
 } else console.log('SKIP webkit voice-recorder: this test browser has no fake microphone');
+if (name === 'chromium') { // Excel to PDF: each sheet on one page (Gotenberg singlePageSheets) — one engine: the work is on the server
+  const XLSX = (await import('xlsx')).default || (await import('xlsx'));
+  const head = Array.from({ length: 40 }, (_, i) => `Column number ${i + 1}`);
+  const ws = XLSX.utils.aoa_to_sheet([head, ...Array.from({ length: 30 }, (_, r) => head.map((_, c) => `value ${r}-${c}`))]);
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Wide');
+  const xlsx = path.join(dir, 'wide.xlsx'); fs.writeFileSync(xlsx, XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }));
+  const { PDFDocument } = await import('pdf-lib');
+  const pages = async (onePage) => {
+    const p = await open('pdf-tools/excel-to-pdf');
+    await p.locator('input[type=file]').first().setInputFiles(xlsx);
+    if (onePage) await p.locator('#xl-one-page').check();
+    await p.getByRole('button', { name: /Convert/ }).first().click();
+    const a = p.locator('a[download]').first();
+    const ok = await a.waitFor({ timeout: 120000 }).then(() => true).catch(() => false);
+    const n = ok ? (await PDFDocument.load(await bytesOf(p, a))).getPageCount() : -1;
+    await p.close(); return n;
+  };
+  const normal = await pages(false), one = await pages(true);
+  check('excel-to-pdf: a 40-column sheet is cut over several pages, and on ONE page with "Fit each sheet on one page"', normal > 1 && one === 1, `${normal} pages → ${one}`);
+}
+{ // JPG to PDF: A4, automatic orientation, 20 mm margin
+  const wide = path.join(dir, 'wide.png'); await sharp({ create: { width: 800, height: 400, channels: 3, background: '#3366cc' } }).png().toFile(wide);
+  const tall = path.join(dir, 'tall.png'); await sharp({ create: { width: 300, height: 600, channels: 3, background: '#cc3333' } }).png().toFile(tall);
+  const p = await open('pdf-tools/jpg-to-pdf');
+  await p.locator('input[type=file]').first().setInputFiles([wide, tall]);
+  await p.locator('#pl-size').selectOption('a4'); await p.locator('#pl-margin').selectOption('20');
+  await p.getByRole('button', { name: /Convert/ }).first().click();
+  const a = p.locator('a[download]').first(); await a.waitFor({ timeout: 60000 });
+  const { PDFDocument } = await import('pdf-lib');
+  const pdf = await PDFDocument.load(await bytesOf(p, a));
+  const sz = pdf.getPages().map((pg) => `${Math.round(pg.getWidth())}×${Math.round(pg.getHeight())}`).join(',');
+  check('jpg-to-pdf: A4 pages, landscape for the wide picture, portrait for the tall one', sz === '842×595,595×842', sz);
+  await p.close();
+}
+{ // Image Resizer: save as WebP; Image Flip both ways; Pixelator in % of the picture
+  const src = path.join(dir, 'grad.png');
+  const g = Buffer.alloc(400 * 200 * 3); for (let y = 0; y < 200; y++) for (let x = 0; x < 400; x++) { const i = (y * 400 + x) * 3; g[i] = x * 255 / 400; g[i + 1] = y * 255 / 200; g[i + 2] = 60; }
+  await sharp(g, { raw: { width: 400, height: 200, channels: 3 } }).png().toFile(src);
+  if (name !== 'webkit' || true) {
+    const p = await open('image-tools/image-resizer');
+    await p.locator('input[type=file]').first().setInputFiles(src);
+    await p.waitForTimeout(500);
+    await p.getByRole('button', { name: /50%/ }).first().click().catch(() => {});
+    await p.locator('#rs-format').selectOption('image/webp');
+    await p.getByRole('button', { name: /^Resize/ }).first().click();
+    const a = p.locator('[data-file-download] a[data-download], a[download]').first();
+    const ok = await a.waitFor({ timeout: 60000 }).then(() => true).catch(() => false);
+    const out = ok ? await bytesOf(p, a) : Buffer.alloc(0);
+    const m = ok ? await sharp(out).metadata() : {};
+    check('image-resizer: saved as WebP when asked (a PNG source)', m.format === 'webp', `${m.format} ${m.width}×${m.height}`);
+    await p.close();
+  }
+  const f = await open('image-tools/image-flip');
+  await f.locator('input[type=file]').first().setInputFiles(src);
+  await f.getByRole('button', { name: 'Flip Both Ways' }).click();
+  const fa = f.locator('[data-file-download] a[data-download], a[download]').first(); await fa.waitFor({ timeout: 60000 });
+  const fb = await bytesOf(f, fa);
+  const px = async (buf, x, y) => [...await sharp(buf).removeAlpha().extract({ left: x, top: y, width: 1, height: 1 }).raw().toBuffer()];
+  const [tl, srcBr] = [await px(fb, 0, 0), await px(await fs.promises.readFile(src), 399, 199)];
+  check('image-flip: both ways = the bottom-right pixel comes to the top-left', Math.abs(tl[0] - srcBr[0]) < 4 && Math.abs(tl[1] - srcBr[1]) < 4, `${tl} vs ${srcBr}`);
+  await f.close();
+}
+{ // Find & Replace: whole words, ignore case; Diff Viewer: changed words marked
+  const p = await open('text-tools/find-replace');
+  await p.locator('textarea').first().fill('Cat cat catalog café');
+  const inputs = p.locator('main input[type=text]'); // not the site's search box in the header
+  await inputs.nth(0).fill('cat'); await inputs.nth(1).fill('dog');
+  await p.locator('#fr-case').check(); await p.locator('#fr-word').check();
+  await p.getByRole('button', { name: /Replace/ }).first().click();
+  const out = await p.getByLabel('Result').inputValue();
+  check('find-replace: whole words, ignoring case — "catalog" left alone', /dog dog catalog café/.test(out), out);
+  await p.close();
+  const d = await open('developer-tools/diff-viewer');
+  await d.locator('textarea').nth(0).fill('the quick brown fox'); await d.locator('textarea').nth(1).fill('the slow brown fox');
+  await d.getByRole('button', { name: /Compare/ }).first().click();
+  await d.locator('span.rounded').first().waitFor({ timeout: 15000 }).catch(() => {}); // the diff library loads on demand
+  const marked = await d.locator('span.rounded').allInnerTexts();
+  check('diff-viewer: only "quick" and "slow" are marked inside the changed line', marked.join('|') === 'quick|slow', marked.join('|'));
+  await d.close();
+}
 await b.close();
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);
 process.exitCode = fails ? 1 : 0;

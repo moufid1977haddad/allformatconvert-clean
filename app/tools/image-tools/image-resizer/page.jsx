@@ -27,6 +27,9 @@ export default function ImageResizerPage() {
   const [percent, setPercent] = useState(50);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  // P24 (03/10): output format and JPG / WebP quality (imgonline, iLoveIMG's converter): "same" keeps the former behaviour
+  const [outFormat, setOutFormat] = useState('same');
+  const [outQuality, setOutQuality] = useState(92);
   const inputRef = useRef();
 
   const handleFile = (e) => {
@@ -101,8 +104,9 @@ export default function ImageResizerPage() {
       // P24 review (03/10): an animated GIF came back as one still PNG with a note blaming the browser. Said for what it is.
       let animated = false;
       if (srcType === 'image/gif') { const all = new Uint8Array(await file.arrayBuffer()); let n = 0; for (let i = 0; i + 2 < all.length && n < 2; i++) if (all[i] === 0x21 && all[i + 1] === 0xf9 && all[i + 2] === 0x04) n++; animated = n > 1; }
-      const note = animated ? 'This GIF is animated: the resized PNG holds its first frame only. To resize the whole animation, use the size option of our GIF Compressor.' : MIME_BY_TYPE[srcType] ? '' : 'Saved as PNG: GIF and other formats cannot be written here, PNG keeps every pixel.';
-      const blob = await encodeRasterLike(out, MIME_BY_TYPE[srcType] || 'image/png');
+      const note = animated ? 'This GIF is animated: the resized PNG holds its first frame only. To resize the whole animation, use the size option of our GIF Compressor.' : MIME_BY_TYPE[srcType] || outFormat !== 'same' ? '' : 'Saved as PNG: GIF and other formats cannot be written here, PNG keeps every pixel.';
+      const chosen = outFormat === 'same' ? (MIME_BY_TYPE[srcType] || 'image/png') : outFormat;
+      const blob = await encodeRasterLike(out, chosen, Number(outQuality));
       const base = file.name.replace(/\.[^.]+$/, '') || 'image';
       setResult({ url: URL.createObjectURL(blob), size: blob.size, w: dims.w, h: dims.h, name: `${base}-${dims.w}x${dims.h}.${EXT[blob.type] || 'png'}`, note });
     } catch (e) {
@@ -144,6 +148,21 @@ export default function ImageResizerPage() {
           )}
           <label className="flex items-center gap-2 text-sm text-neutral-700"><input type="checkbox" checked={noEnlarge} onChange={(e) => setNoEnlarge(e.target.checked)} />Do not enlarge if the image is smaller</label>
           {dims && orig && <p className="text-sm text-neutral-600 text-center">{orig.w}×{orig.h} → <span className="font-semibold">{dims.w}×{dims.h}</span> px</p>}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-neutral-600">
+            <label>Save as
+              <select id="rs-format" value={outFormat} onChange={(e) => setOutFormat(e.target.value)} className="w-full border border-neutral-200 rounded-lg px-2 py-1.5 bg-white">
+                <option value="same">Same format as the original</option>
+                <option value="image/jpeg">JPG</option>
+                <option value="image/png">PNG</option>
+                <option value="image/webp">WebP</option>
+              </select>
+            </label>
+            {(outFormat === 'image/jpeg' || outFormat === 'image/webp' || (outFormat === 'same' && /jpe?g|webp/i.test(file?.type || ''))) && (
+              <label>Quality: {outQuality}
+                <input id="rs-quality" type="range" min="10" max="100" value={outQuality} onChange={(e) => setOutQuality(e.target.value)} className="w-full" />
+              </label>
+            )}
+          </div>
           <button onClick={resize} disabled={!image || !dims} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">Resize</button>
           {error && <p className="text-red-600 text-center text-sm">{error}</p>}
           {result && (

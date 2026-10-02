@@ -118,9 +118,10 @@ function backendFor(extension: string): "convertapi" | "gotenberg" {
 export async function POST(req: NextRequest) {
   // Staged path (files above the Vercel body ceiling): the browser already sent the file straight to the
   // media service and only posts a small JSON here; see lib/media/stagedRoute.ts.
-  if (isStagedRequest(req)) return respondStaged(req, "pdf", (file) => convertFile(req, file, true));
+  if (isStagedRequest(req)) return respondStaged(req, "pdf", (file, body) => convertFile(req, file, true, officeOptions((k) => body?.[k])));
 
   let file: File;
+  let options: OfficeOptions = {};
   try {
     const formData = await req.formData();
     const uploaded = formData.get("file");
@@ -128,13 +129,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file provided." }, { status: 400 });
     }
     file = uploaded;
+    options = officeOptions((k) => formData.get(k));
   } catch {
     return NextResponse.json({ error: "Invalid multipart/form-data request." }, { status: 400 });
   }
-  return convertFile(req, file);
+  return convertFile(req, file, false, options);
 }
 
-async function convertFile(req: NextRequest, file: File, staged = false): Promise<NextResponse> {
+// P24 (03/10): LibreOffice options Gotenberg takes, whitelisted — only these names and values are forwarded.
+// singlePageSheets: each spreadsheet sheet on ONE page (a wide sheet was cut over several pages; CloudConvert's
+// "fit to page"). Other LibreOffice options are added here only once proved on a real file.
+type OfficeOptions = Record<string, string>;
+function officeOptions(get: (k: string) => unknown): OfficeOptions {
+  const out: OfficeOptions = {};
+  for (const k of ["singlePageSheets"]) if (String(get(k) ?? "") === "true") out[k] = "true";
+  return out;
+}
+
+async function convertFile(req: NextRequest, file: File, staged = false, options: OfficeOptions = {}): Promise<NextResponse> {
   const extension = getExtension(file.name);
   if (!ALLOWED_EXTENSIONS.has(extension)) {
     return NextResponse.json(
@@ -159,7 +171,7 @@ async function convertFile(req: NextRequest, file: File, staged = false): Promis
   if (backend === "convertapi") {
     return handleConvertApi(req, file, staged);
   }
-  return handleGotenberg(req, file, extension, staged);
+  return handleGotenberg(req, file, extension, staged, options);
 }
 
 // .docx only, and only while CONVERTAPI_ENABLED === "true" -- see
@@ -270,7 +282,7 @@ async function handleConvertApi(req: NextRequest, file: File, staged: boolean): 
 
 // Every extension except .docx (plus .docx itself when CONVERTAPI_ENABLED
 // is not "true") -- unchanged from before this spec's implementation.
-async function handleGotenberg(req: NextRequest, file: File, extension: string, staged: boolean): Promise<NextResponse> {
+async function handleGotenberg(req: NextRequest, file: File, extension: string, staged: boolean, options: OfficeOptions = {}): Promise<NextResponse> {
   const gotenbergUrl = process.env.GOTENBERG_URL;
   const gotenbergUsername = process.env.GOTENBERG_USERNAME;
   const gotenbergPassword = process.env.GOTENBERG_PASSWORD;
@@ -310,6 +322,7 @@ async function handleGotenberg(req: NextRequest, file: File, extension: string, 
 
   const gotenbergForm = new FormData();
   gotenbergForm.append("files", fileToConvert, file.name);
+  for (const [k, v] of Object.entries(options)) gotenbergForm.append(k, v);
 
   const authHeader = "Basic " + Buffer.from(`${gotenbergUsername}:${gotenbergPassword}`).toString("base64");
 

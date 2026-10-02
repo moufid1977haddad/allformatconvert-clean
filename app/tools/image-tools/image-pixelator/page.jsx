@@ -11,6 +11,9 @@ export default function ImagePixelatorPage() {
   const [srcType, setSrcType] = useState('image/png');
   const [image, setImage] = useState(null);
   const [pixelSize, setPixelSize] = useState(10);
+  // P24 (03/10): the block size can follow the picture (a % of its shorter side): 50 px was little on a 48 MP photo
+  const [unit, setUnit] = useState('px');
+  const [percent, setPercent] = useState(2);
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
@@ -35,7 +38,8 @@ export default function ImagePixelatorPage() {
       // Block AVERAGE, as the page says (it used to copy each block's top-left pixel, 29/09). Done on the whole
       // image's pixels at once (blocks must not be cut by bands).
       const img = raster.imageData();
-      pixelateImageData(img, pixelSize);
+      const block = unit === '%' ? Math.max(2, Math.round(Math.min(img.width, img.height) * percent / 100)) : pixelSize;
+      pixelateImageData(img, block);
       let out;
       if (raster.canvas) { raster.canvas.getContext('2d').putImageData(new ImageData(img.data, img.width, img.height), 0, 0); out = raster; }
       else out = rasterFromRGBA(img.data, img.width, img.height);
@@ -54,7 +58,10 @@ export default function ImagePixelatorPage() {
             {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
+          <div className="flex gap-3 text-sm text-neutral-600"><label className="flex items-center gap-1"><input type="radio" name="px-unit" checked={unit === 'px'} onChange={() => setUnit('px')} /> In pixels</label><label className="flex items-center gap-1"><input id="px-percent-mode" type="radio" name="px-unit" checked={unit === '%'} onChange={() => setUnit('%')} /> % of the picture</label></div>
+          {unit === '%' ? <div><label className="block text-sm text-neutral-500 mb-1">Block size: {percent}% of the shorter side</label><input id="px-percent" aria-label="Block size (% of the picture)" type="range" min="1" max="20" value={percent} onChange={(e) => setPercent(Number(e.target.value))} className="w-full" /></div> : (
           <div><label className="block text-sm text-neutral-500 mb-1">Pixel Size: {pixelSize}px</label><input aria-label="Pixel Size (px)" type="range" min="2" max="50" value={pixelSize} onChange={e => setPixelSize(parseInt(e.target.value))} className="w-full" /></div>
+          )}
           <button onClick={apply} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Apply Pixelate</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
