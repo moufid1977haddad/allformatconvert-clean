@@ -181,6 +181,11 @@ else:
     check("fade in: the first 0.1 s is near silent, the middle is full", rms(o, 0, 0.1) < 0.15 * base_rms and abs(rms(o, 1.5, 1) / base_rms - 1) < 0.1, f"{rms(o, 0, 0.1) / base_rms:.3f}")
     check("fade out: the last 0.1 s is near silent", rms(o, 3.9, 0.1) < 0.15 * base_rms, f"{rms(o, 3.9, 0.1) / base_rms:.3f}")
     check("video fade: the first frame is black", max(pixel(o, 20, 20, 0)) < 30, pixel(o, 20, 20, 0))
+    for flip in ("v", "hv"):
+        o = run({"codec": "av1", "flip": flip}, f"av1-{flip}.mp4")
+        check(f"AV1 with a vertical mirror ({flip}) encodes (SVT-AV1 and vflip, found on the live service 03/10)", red(pixel(o, 20 if flip == "v" else 300, 220)))
+    o = run({"codec": "av1", "rotate": 180}, "av1-180.mp4")
+    check("AV1 with a 180° rotation encodes, red bottom right", red(pixel(o, 300, 220)))
     for codec, name, tag in (("h265", "hevc", "hvc1"), ("av1", "av1", None)):
         o = run({"codec": codec}, f"{codec}.mp4")
         v = [x for x in streams(o)["streams"] if x["codec_type"] == "video"][0]

@@ -645,6 +645,10 @@ def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_pa
                 clip_a = ["-af", ",".join(chain)]
         if codec in ("h265", "av1"):
             builder = _hevc if codec == "h265" else _av1
+        if codec == "av1" and vf and "vflip" in vf[1]:
+            # SVT-AV1 refuses the frames ffmpeg's vflip hands over (negative line stride: "Invalid argument", measured
+            # 03/10 on the live service); a same-size scale copies them into an ordinary buffer first.
+            vf = ["-vf", vf[1] + ",scale=iw:ih"]
         args = base + maps + vf + clip_a + builder(quality, ctx) + extra + [out_path]
         if codec == "h265" and target == "mov":
             args[args.index("-f", len(base)) + 1] = "mov"
