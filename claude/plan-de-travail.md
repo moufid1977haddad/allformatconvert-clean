@@ -54,13 +54,19 @@
 
 ## 📋 P25 — décisions E1 à E7 + remontée des erreurs (03/10, `docs/audit/RAPPORT-p25-decisions-03-10.md`)
 
+**P25 terminé le 03/10 : 5 lots en production, aucun retour arrière** (production `onlineconvertools-m16uybh8j` =
+`ffcb8764` ; repère de restauration `restauration-avant-p25-03-10` = `5cabf4f2`). Dépenses : ConvertAPI ≈ 0,03 $ (E1,
+sur 0,05 $ autorisés) ; Google (E3) 0 $ (pas de compte). **Reste au propriétaire** : E3 (compte Google Cloud, ci-dessous),
+et trois autorisations Railway à décider — `pdf-tools` pour E2 (2u/3u, 2a/3a), un point d'entrée LibreOffice pour le DOC
+(E1) et le drapeau `--chromium-deny-private-ips` de Gotenberg (E4 + fichiers HTML déposés).
+
 | # | État | Ce qui manque / ce que le propriétaire doit faire |
 |---|---|---|
 | E1 | RTF : ✅ **en production** (`2el17n5su` = `708a019b`, code `ae7719cb`) ; 3 vrais PDF → RTF rouverts dans Word et LibreOffice sur la préversion (≈ 0,03 $). **DOC : impossible chez ConvertAPI** (aucun de ses 332 convertisseurs n'écrit de .doc, OpenAPI lue le 03/10) | **DOC** : un point d'entrée LibreOffice (`--convert-to doc`) sur un service Railway (`pdf-tools` ou Gotenberg) — 0 $ de moteur, ≈ 2-3 h, **autorisation Railway**. **RTF au-delà de 4 Mo** : ajouter `rtf` (et `doc`) aux sorties du service média (`STAGE_OUTPUTS`, 2 lignes additives) — même autorisation |
 | E2 | Recherché et **mesuré** (veraPDF) ; non construit | **Recommandation : autoriser une modification additive de `pdf-tools` sur Railway** (0 $, ≈ 4-6 h) : 2u/3u pour presque tout PDF (Ghostscript + niveau U, validé veraPDF sur les fichiers mesurés), 2a/3a pour les PDF déjà balisés (chemin pikepdf qui garde la structure), abaissement dit sinon (comme `allow_downgrade` d'iLovePDF) ; 1a non atteint par les outils libres (commercial : Adobe Auto-Tag, Apryse — non recommandé) |
 | E3 | Code prêt, revu ×2, **en production désactivé** (`2el17n5su` ; aucune promesse sur la page, vérifié sur www) | **Le propriétaire crée** : un projet Google Cloud avec facturation ; active « Cloud Translation API » ; un compte de service avec le rôle « Cloud Translation API User » ; une clé JSON de ce compte ; dans Vercel, une variable **sensible** `GOOGLE_TRANSLATE_SERVICE_ACCOUNT` (Production et Preview) = le contenu JSON ; dans Google Cloud, une **alerte de budget à 30 $** et un **quota journalier** sur Cloud Translation (garde-fou dur). Puis Claude : test ≤ 2 $ sur préversion, texte SEO de la page, mise en production |
 | E4 | ✅ **en production** (`e61uoxp4x` = `d908d935`, code `94623a0c`) ; www vérifié (conversion réelle, 169.254.169.254 refusé) ; revue de sécurité ×2 | **À décider** : `--chromium-deny-private-ips` sur Gotenberg (un drapeau, 0 $) — ferme aussi le cas des **fichiers HTML déposés** qui peuvent faire charger au Chromium de Gotenberg une adresse interne de Railway (constat P25) et permettrait ensuite un mode « avec scripts » comme iLovePDF |
-| E5 | ⏳ **service en ligne** (Railway, `48be81c4` puis correctif AV1 `ea8858d8`) ; pages : préversion en cours | Version précédente du service = code `d914f612` (retour arrière : révoquer les fusions sur master) |
+| E5 | ✅ **en production** : service Railway (`48be81c4` + correctif AV1 `ea8858d8`, `/health` → `edits: 2`) puis pages (`m16uybh8j` = `ffcb8764`) ; miroir, recadrage libre, vitesse, volume, fondus, codec H.265/AV1, CRF ; boucle du GIF déjà livrée par P24 ; www vérifié | Version précédente du service = code `d914f612` (retour arrière : révoquer les fusions sur master) |
 | E6 | ✅ **en production** (`md3dfcxsk` = `5cbfc044`, code `a1aa8f83`) ; www vérifié | — |
 | E7 | ✅ **en production** (même déploiement) ; www vérifié | — |
 | Erreurs | ✅ **en production** : 203 outils directs + filet sur les 225 ; une erreur provoquée par le banc **écrite** dans `tool_errors` sur www (02/10 ≈ 21 h 54 UTC, outil json-formatter, 2 lignes à ignorer) | — |

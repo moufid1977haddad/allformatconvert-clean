@@ -9,11 +9,11 @@ léger sur www. Rapport complété après chaque lot.
 
 | # | Décision | État |
 |---|---|---|
-| E1 | PDF to Word en DOC et RTF | RTF : fait (voir §3). DOC : **impossible chez ConvertAPI** (aucun de ses 332 convertisseurs n'écrit de .doc, lu dans son OpenAPI le 03/10) — chiffré au plan |
+| E1 | PDF to Word en DOC et RTF | RTF : fait (§3). DOC : **impossible chez ConvertAPI** (aucun de ses 332 convertisseurs n'écrit de .doc, lu dans son OpenAPI le 03/10) — chiffré au plan |
 | E2 | PDF/A 1a, 2a, 2u, 3a, 3u | recherche et chiffrage (§6) : le service `pdf-tools` est sur Railway, que seule E5 autorise à modifier |
 | E3 | PDF Translate du document entier | code prêt, revu deux fois, **désactivé** tant que le propriétaire n'a pas créé le compte Google Cloud (§4) |
 | E4 | HTML to PDF depuis une URL | fait (§2), revue de sécurité indépendante ×2 |
-| E5 | Options vidéo (service ffmpeg sur Railway) | §5 |
+| E5 | Options vidéo (service ffmpeg sur Railway) | fait (§5) : service puis pages, correctif AV1 trouvé par le banc |
 | E6 | Phrase de passe EFF | fait (§1) |
 | E7 | Historique des devises | fait (§1) |
 | + | Remontée des erreurs de tous les outils | fait (§1) |
@@ -249,3 +249,43 @@ identiques). Fusion `ea8858d8` (22 h 42 UTC).
 — mode « Crop » : cadre déplaçable et redimensionnable au doigt ou à la souris sur l'image, formes libre, 1:1, 16:9,
 9:16, 4:5, 4:3, valeurs exactes en pixels ; Video Converter — « More options » pour MP4 (H.264/H.265/AV1), MOV, M4V :
 vitesse, miroir, volume, fondus, CRF exact ; Video Compressor — codec H.264 / H.265 / AV1 et CRF exact.
+
+**Pages, préversion `onlineconvertools-ozfam2my0` (commit `a03320df`, vrai service, relais CORS)** — `scripts/p25/lot5-video.mjs`,
+chaque vidéo téléchargée et mesurée par ffprobe : Rotator miroir seul (pixel rouge passé en haut à droite, nom
+`-mirrored`), Resizer recadrage 160×120 (taille, pixels, son gardé), Converter 2× (image et son 2 s, 30 i/s),
+Compressor H.265 (hevc `hvc1`), Converter AV1 + miroir haut-bas (après le correctif) : **Chromium 5/5, Firefox 5/5**
+(le WebKit de Playwright sous Windows ne décode pas la vidéo, comme dans P24) ; solidité des pages vidéo modifiées
+26/26 ×3 en local. Contrôle du service en ligne après le correctif : 8/8 (AV1 + miroir compris). Fusion `ffcb8764`
+(code du site = celui de la préversion testée, vérifié ; service identique à master) → production
+`onlineconvertools-m16uybh8j`. **www** : contrôle léger 29/29, RAW 7/7, miroir et recadrage réels sur www 2/2.
+
+## 7. Fin
+
+**Production : `onlineconvertools-m16uybh8j` = `ffcb8764`, 5 lots, aucun retour arrière.**
+
+| Lot | Contenu | Préversion | Fusion → production | www |
+|---|---|---|---|---|
+| 1 | E6, E7, remontée des erreurs | `akguf8bxu` : lot 1 12·8·8, solidité 522/522 | `a1aa8f83` → `md3dfcxsk` | 29/29, RAW 7/7, lot 1 12/12, erreur écrite |
+| 2 | E4 URL → PDF | `5738y6qeq` : 10·2·2, PDF de P24 23/23 | `94623a0c` → `e61uoxp4x` | 29/29, 7/7, conversion réelle, 169.254.169.254 refusé (422) |
+| 3 | E1 RTF, E3 (désactivé) | `oua5xpkfz` : RTF réels rouverts (Word, LibreOffice), ≈ 0,03 $ | `ae7719cb` → `2el17n5su` | 29/29, 7/7, RTF proposé, E3 non proposé |
+| 4 | E5 service (Railway) | — (service : tests locaux 342/342 identiques + réels) | `48be81c4`, correctif `ea8858d8` | service en ligne 8/8, Opus 4/4 |
+| 5 | E5 pages | `ozfam2my0` : 5/5 Chromium et Firefox | `ffcb8764` → `m16uybh8j` | 29/29, 7/7, miroir et recadrage 2/2 |
+
+**Dépenses** : ConvertAPI 3 conversions ≈ 0,03 $ (autorisé : 0,05 $) ; Google Cloud 0 $ (pas de compte) ; Vercel
+(Pro) : bancs lourds en local, une passe par préversion, contrôle léger sur www.
+**Revues indépendantes** : sécurité E4 ×2 (2 critiques, corrigés et testés), argent/quotas E3 ×2 (1 critique, 1 grave,
+corrigés et testés).
+**Branches** : `p25-etape-1`, `-2`, `-3`, `-5` supprimées après vérification que leur pointe est dans master ;
+`p25-decisions` gardée (= master pour le code). Processus arrêtés (serveur local, relais).
+
+**Reste au propriétaire** (plan, tableau P25) :
+1. **E3** — créer dans Google Cloud : un projet avec facturation, l'API « Cloud Translation » activée, un compte de
+   service au rôle « Cloud Translation API User », sa clé JSON ; dans Vercel, la variable **sensible**
+   `GOOGLE_TRANSLATE_SERVICE_ACCOUNT` (Production et Preview) = ce JSON ; dans Google Cloud, une alerte de budget à 30 $
+   et un quota journalier sur Cloud Translation. Ensuite Claude : test ≤ 2 $ sur préversion, texte de la page, production.
+2. **E2** — autoriser une modification additive de `pdf-tools` sur Railway (0 $, ≈ 4-6 h) : 2u/3u et 2a/3a (PDF balisés).
+3. **E1 DOC** et RTF > 4 Mo — autoriser un point d'entrée LibreOffice (DOC) et l'ajout de `rtf`/`doc` aux sorties du
+   service média (2 lignes).
+4. **E4** — décider `--chromium-deny-private-ips` sur Gotenberg (un drapeau, 0 $) : ferme le cas des fichiers HTML
+   déposés et permettrait un mode « avec scripts » comme iLovePDF.
+5. À la prochaine lecture de `tool_errors` : ignorer les 2 lignes `json-formatter` du 02/10 vers 21 h 54 UTC (banc).
