@@ -33,9 +33,9 @@ async function convert(url, setup = async () => {}) {
   await p.getByRole('button', { name: 'Convert to PDF' }).click();
   const done = await Promise.race([
     p.locator('[data-download-ready] a[data-download]').first().waitFor({ timeout: 120000 }).then(() => 'ok'),
-    p.getByRole('alert').first().waitFor({ timeout: 120000 }).then(() => 'error'),
+    p.locator('p[role=alert]').first().waitFor({ timeout: 120000 }).then(() => 'error'),
   ]).catch(() => 'timeout');
-  if (done !== 'ok') { const msg = await p.getByRole('alert').first().innerText().catch(() => done); await p.close(); return { error: msg }; }
+  if (done !== 'ok') { const msg = await p.locator('p[role=alert]').first().innerText().catch(() => done); await p.close(); return { error: msg }; }
   const dl = p.waitForEvent('download', { timeout: 30000 });
   await p.locator('[data-download-ready] a[data-download]').first().click();
   const d = await dl;
@@ -48,7 +48,7 @@ async function convert(url, setup = async () => {}) {
 
 if (want('example')) {
   const r = await convert('example.com');
-  check('example.com (typed without https://) → a PDF with its text, named after the site', !r.error && /Example Domain/.test(r.text) && r.name === 'example.com.pdf' && Math.round(r.w) === 595 && Math.round(r.h) === 842, r.error || `${r.pages} p ${Math.round(r.w)}x${Math.round(r.h)} ${r.name}`);
+  check('example.com (typed without https://) → a PDF with its text, named after the site', !r.error && /documentation examples/.test(r.text) && r.name === 'example.com.pdf' && Math.round(r.w) === 595 && Math.round(r.h) === 842, r.error || `${r.pages} p ${Math.round(r.w)}x${Math.round(r.h)} ${r.name}`);
 }
 if (want('wikipedia')) {
   const r = await convert('https://en.wikipedia.org/wiki/Portable_Document_Format');
