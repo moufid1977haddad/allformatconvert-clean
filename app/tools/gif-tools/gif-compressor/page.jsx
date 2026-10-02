@@ -7,6 +7,9 @@ import { imageHeaderSize, OPENABLE_PIXELS } from '../../../lib/fileChecks';
 export default function GifCompressorPage() {
   const [file, setFile] = useState(null);
   const [quality, setQuality] = useState(80);
+  // P24 (03/10): ezgif's GIF optimizer also reduces the colours and the size; gifsicle does both (--colors, --scale)
+  const [colors, setColors] = useState(256);
+  const [scale, setScale] = useState(100);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -33,7 +36,7 @@ export default function GifCompressorPage() {
       const lossy = Math.round((100 - quality) * 2);
       const outFiles = await gifsicle.run({
         input: [{ file, name: 'input.gif' }],
-        command: [`-O2 --lossy=${lossy} input.gif -o /out/output.gif`],
+        command: [`-O2 --lossy=${lossy}${colors < 256 ? ` --colors ${colors}` : ''}${scale < 100 ? ` --scale ${scale / 100}` : ''} input.gif -o /out/output.gif`],
       });
       const outBlob = outFiles && outFiles[0];
       if (!outBlob || !outBlob.size) throw new Error('This GIF could not be compressed: it may be damaged. Try opening it in a browser or image viewer to check.');
@@ -55,6 +58,12 @@ export default function GifCompressorPage() {
             <input ref={inputRef} type="file" accept=".gif" className="hidden" onChange={handleFile} />
           </div>
           <div><label className="block text-sm text-neutral-500 mb-1">Quality: {quality}%</label><input aria-label="Quality (%)" type="range" min="10" max="100" value={quality} onChange={e => setQuality(parseInt(e.target.value))} className="w-full" /></div>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <label className="block"><span className="block text-neutral-500 mb-1">Colours</span>
+              <select id="gc-colors" value={colors} onChange={e => { setColors(Number(e.target.value)); setResult(null); }} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2">{[256, 128, 64, 32, 16].map(n => <option key={n} value={n}>{n === 256 ? 'Keep (up to 256)' : n}</option>)}</select></label>
+            <label className="block"><span className="block text-neutral-500 mb-1">Size</span>
+              <select id="gc-scale" value={scale} onChange={e => { setScale(Number(e.target.value)); setResult(null); }} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2">{[100, 75, 50, 33, 25].map(n => <option key={n} value={n}>{n === 100 ? 'Keep' : n + '%'}</option>)}</select></label>
+          </div>
           <button onClick={compress} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">{loading ? 'Compressing...' : 'Compress'}</button>
           {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
           {result && (
@@ -82,12 +91,13 @@ export default function GifCompressorPage() {
         description="GIF Compressor shrinks your animated GIF's file size while keeping the animation intact, using gifsicle compiled to WebAssembly (gifsicle-wasm-browser) entirely in your browser — nothing is uploaded to a server. The quality slider controls gifsicle's lossy compression level: higher quality applies less lossy compression (relying mainly on lossless optimization), while lower quality allows more aggressive lossy compression for a smaller file."
         howTo={[
           "Click the upload area and select a GIF file.",
-          "Adjust the quality slider — lower values compress more aggressively but can introduce visible noise.",
+          "Adjust the quality slider — lower values compress more aggressively but can introduce visible noise — and optionally fewer colours or a smaller size.",
           "Click \"Compress\" to process the file locally.",
           "Review the before/after size comparison, preview the animated result, and download it."
         ]}
         faqs={[
           { q: "Does this reduce my GIF's file size while keeping it animated?", a: "Yes — it uses gifsicle's real GIF optimization and lossy compression, and the output stays a fully animated GIF." },
+          { q: "Can I reduce the colours or the size too?", a: "Yes: 'Colours' keeps 128, 64, 32 or 16 instead of up to 256 (flat graphics often look the same with far fewer), and 'Size' scales every frame to 75, 50, 33 or 25% — the two strongest ways to shrink a GIF after lossy compression." },
           { q: "How much can I expect to save?", a: "It depends heavily on the source GIF and the quality setting — simple, few-color animations may shrink only modestly since they're already efficient, while complex or noisy ones can shrink substantially at lower quality settings." },
           { q: "Will lower quality settings look noticeably worse?", a: "Yes, at more aggressive settings — gifsicle's lossy compression can introduce visible speckled noise, especially on flat-color areas. If that's noticeable, raise the quality slider and re-compress." },
           { q: "Is GIF Compressor free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can process." },
