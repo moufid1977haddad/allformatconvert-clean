@@ -68,17 +68,25 @@ export function needsRenderer(text) {
   return false;
 }
 
-/** The HTML page printed by the renderer: the same page as the in-browser engine (A4, 50 pt margins, 12 pt). */
-export function textToHtmlDocument(text, title = 'Document') {
+// P24 (03/10): page size, orientation, text size and margins chosen by the visitor (Smallpdf's TXT to PDF has none;
+// CloudConvert's page options apply to HTML). Sizes in points.
+export const PAGE_SIZES = { A4: [595, 842], Letter: [612, 792], Legal: [612, 1008], A5: [420, 595] };
+export function pageGeometry({ page = 'A4', landscape = false, margin = 50 } = {}) {
+  const [w, h] = PAGE_SIZES[page] || PAGE_SIZES.A4;
+  return landscape ? { W: h, H: w, margin } : { W: w, H: h, margin };
+}
+
+/** The HTML page printed by the renderer: the same page as the in-browser engine (same size, margins and text size). */
+export function textToHtmlDocument(text, title = 'Document', { page = 'A4', landscape = false, margin = 50, fontSize = 12 } = {}) {
   const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const clean = String(text).replace(/\r\n?/g, '\n').replace(/\t/g, '    ');
   // Han characters in the Japanese or Korean design when the text is Japanese or Korean, else Chinese (Simplified).
   const cjk = /[぀-ヿㇰ-ㇿ]/.test(clean) ? 'JP' : /[가-힯ᄀ-ᇿ㄰-㆏]/.test(clean) && !/[一-鿿]/.test(clean) ? 'KR' : 'SC';
   const paragraphs = clean.split('\n').map((p) => `<p dir="auto">${p ? esc(p) : '&#8203;'}</p>`).join('\n');
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>
-@page { size: A4; margin: 50pt; }
+@page { size: ${page in PAGE_SIZES ? page : 'A4'}${landscape ? ' landscape' : ''}; margin: ${Number(margin) || 50}pt; }
 html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-body { margin: 0; font-family: 'Noto Sans', 'Noto Sans CJK ${cjk}', 'Noto Color Emoji', sans-serif; font-size: 12pt; line-height: 1.6; color: #000; }
+body { margin: 0; font-family: 'Noto Sans', 'Noto Sans CJK ${cjk}', 'Noto Color Emoji', sans-serif; font-size: ${Number(fontSize) || 12}pt; line-height: 1.6; color: #000; }
 p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 </style></head><body>
 ${paragraphs}
@@ -146,7 +154,7 @@ function runsOf(text, cjk, has = () => true) {
  * @param {string} text  plain text (any script)
  * @returns {Promise<Uint8Array>} the PDF
  */
-export async function textToPdf(text, { fontSize = 12, onPhase } = {}) {
+export async function textToPdf(text, { fontSize = 12, page: pageSize = 'A4', landscape = false, margin = 50, onPhase } = {}) {
   // @pdf-lib/fontkit's build calls a global regeneratorRuntime (Babel generators) in its OpenType layout code.
   if (typeof globalThis.regeneratorRuntime === 'undefined') globalThis.regeneratorRuntime = (await import('regenerator-runtime')).default;
   const fontkit = (await import('@pdf-lib/fontkit')).default;
@@ -194,7 +202,8 @@ export async function textToPdf(text, { fontSize = 12, onPhase } = {}) {
     const list = [...missing].slice(0, 20).join(' ');
     throw new Error(`These characters have no glyph in the fonts used (emoji and some rare scripts are not supported): ${list}${missing.size > 20 ? ' …' : ''}. Remove or replace them and convert again.`);
   }
-  const W = 595, H = 842, margin = 50, maxWidth = W - margin * 2, lineHeight = fontSize * 1.6;
+  const { W, H } = pageGeometry({ page: pageSize, landscape, margin });
+  const maxWidth = W - margin * 2, lineHeight = fontSize * 1.6;
   const widthOf = (s) => runs(s).reduce((n, r) => n + fonts[r.key].widthOfTextAtSize(r.text, fontSize), 0);
   const seg = typeof Intl !== 'undefined' && Intl.Segmenter ? new Intl.Segmenter(undefined, { granularity: 'word' }) : null;
   const lines = [];

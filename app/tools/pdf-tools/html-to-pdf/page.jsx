@@ -1,10 +1,11 @@
 ﻿'use client';
-import { textFileProblem } from '../../../lib/fileChecks';
+import { textFileProblem, decodedText } from '../../../lib/fileChecks';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
+import PageSetup, { PAGE_SETUP_DEFAULT, withPageSetup } from '../../../components/PageSetup';
 
 export default function HtmlToPdfPage() {
   const [file, setFile] = useState(null);
@@ -14,6 +15,7 @@ export default function HtmlToPdfPage() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
   const [mode, setMode] = useState('file');
+  const [setup, setSetup] = useState(PAGE_SETUP_DEFAULT);
   const inputRef = useRef();
   const [pdf, offer, clearPdf] = useDownloadable();
 
@@ -30,13 +32,20 @@ export default function HtmlToPdfPage() {
     // Checked on selection: the HTML is uploaded as-is, so its size is the upload size.
     const sizeCheck = checkOfficeSize(f, MAX_HTML_STAGED_BYTES);
     setError(sizeCheck.ok ? '' : sizeCheck.message);
-    const text = await f.text();
+    // P24: decoded as written (UTF-16, Windows ANSI…); f.text() read everything as UTF-8
+    // a legacy page declaring its charset (<meta charset=windows-1252>, Shift_JIS…) is decoded with it; the upload is
+    // UTF-8, so the declaration is rewritten to utf-8 (review 03/10: it still said 1252 and Chromium showed "Ã©")
+    const head = new TextDecoder('latin1').decode(new Uint8Array(await f.slice(0, 4096).arrayBuffer()));
+    const declared = (/<meta[^>]+charset\s*=\s*["']?\s*([\w-]+)/i.exec(head) || [])[1];
+    let text;
+    try { text = declared && !/^utf-?8$/i.test(declared) ? new TextDecoder(declared).decode(await f.arrayBuffer()) : await decodedText(f); } catch { text = await decodedText(f); }
+    text = text.replace(/(<meta[^>]+charset\s*=\s*["']?\s*)[\w-]+/i, '$1utf-8');
     setHtmlContent(text);
   };
 
   const convert = async () => {
     if (!htmlContent) return;
-    const uploadBlob = new Blob([htmlContent], { type: 'text/html' });
+    const uploadBlob = new Blob([withPageSetup(htmlContent, setup)], { type: 'text/html' });
     const sizeCheck = checkOfficeSize(uploadBlob, MAX_HTML_STAGED_BYTES);
     if (!sizeCheck.ok) { setError(sizeCheck.message); return; }
     setLoading(true);
@@ -76,6 +85,7 @@ export default function HtmlToPdfPage() {
             <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm font-mono h-48 resize-none" placeholder="Paste your HTML code here..." value={htmlContent} onChange={(e) => { setHtmlContent(e.target.value); setDone(false); clearPdf(); }} />
           )}
           <p className="text-neutral-500 text-xs text-center -mt-2">Max {officeMaxLabel(MAX_HTML_STAGED_BYTES)} of HTML</p>
+          <PageSetup value={setup} onChange={setSetup} />
           <button onClick={convert} disabled={!htmlContent || loading || new Blob([htmlContent]).size > officeMaxBytes(MAX_HTML_STAGED_BYTES)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? officeStageLabel(stage) : 'Convert to PDF'}
           </button>
@@ -101,7 +111,7 @@ export default function HtmlToPdfPage() {
         ]}
         faqs={[
           { q: "Is HTML to PDF completely free to use?", a: "Yes, it's completely free with no signup. It runs on our server, which allows a set number of conversions per connection each hour and day." },
-          { q: "Can I customize page size, margins, or headers/footers?", a: "Not in this tool directly — the PDF is rendered using the conversion service's default page settings, rather than options exposed on this page." },
+          { q: "Can I customize page size, margins, or headers/footers?", a: "Page size (A4, Letter, Legal, A3, A5), orientation and margins: yes, with the three choices above the button — or leave them on 'As in the document' to keep the page's own CSS. Headers and footers: not offered." },
           { q: "Will my HTML documents be uploaded to a server?", a: "Yes. Your HTML code or file is uploaded to our conversion service, purely to render the final PDF with a real browser engine, and it's discarded immediately afterward." },
           { q: "What HTML features are supported?", a: "Whatever a modern Chromium browser can render: CSS styling, images, tables, and most modern HTML5 elements. In our test the PDF matched Chrome's print output, except that fonts missing from our servers are replaced by similar ones." }
         ]}

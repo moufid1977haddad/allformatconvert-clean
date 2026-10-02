@@ -4,13 +4,14 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
-import { matchSpans, annotationText, matchesText } from '../../../lib/pdfRedact';
+import { matchSpans, annotationText, patternSpans, annotationMatches, termsOf, PATTERNS } from '../../../lib/pdfRedact';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
 
 export default function Page() {
   const [file, setFile] = useState(null);
   const [keyword, setKeyword] = useState('');
+  const [kinds, setKinds] = useState([]); // P24: automatic patterns (e-mail, phone, card numbers)
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
@@ -20,7 +21,8 @@ export default function Page() {
   const handleFile = async (e) => { const f = e.target.files[0]; e.target.value = ''; setResult(null); setSummary(''); setError(''); if (!f) return; const problem = (await pdfFileProblem(f)) || (await pdfLockedProblem(f)); if (problem) { setFile(null); setError(problem); return; } setFile(f); }; // P21: a bad file is said when it is chosen
 
   const redact = async () => {
-    if (!file || !keyword.trim()) return;
+    const terms = termsOf(keyword);
+    if (!file || (!terms.length && !kinds.length)) return;
     setLoading(true);
     setError('');
     setSummary('');
@@ -41,10 +43,14 @@ export default function Page() {
         const page = await pdf.getPage(i + 1);
         const content = await page.getTextContent();
         const items = content.items.filter((it) => typeof it.str === 'string');
-        const spans = matchSpans(items.map((it) => it.str), keyword);
+        const strs = items.map((it) => it.str);
+        const spans = [
+          ...terms.flatMap((t, ti) => matchSpans(strs, t).map((sp) => ({ ...sp, m: `t${ti}:${sp.m}` }))),
+          ...patternSpans(strs, kinds, items.map((it) => !!it.hasEOL)),
+        ];
         // Form field values and comments are searched too: they are part of the page's annotations, which are
         // copied as they are on a page without a match in its text (29/09).
-        const annots = (await page.getAnnotations()).filter((an) => an.rect && matchesText(annotationText(an), keyword));
+        const annots = (await page.getAnnotations()).filter((an) => an.rect && annotationMatches(annotationText(an), terms, kinds));
 
         if (spans.length === 0 && annots.length === 0) {
           const [copied] = await outDoc.copyPages(srcDoc, [i]);
@@ -142,10 +148,17 @@ export default function Page() {
           </div>
           <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
           <div>
-            <label className="block text-sm text-neutral-500 mb-1">Text to redact</label>
-            <input type="text" value={keyword} onChange={e => setKeyword(e.target.value)} placeholder="Enter text to censor..." className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-400" />
+            <label className="block text-sm text-neutral-500 mb-1">Text to redact (one word or phrase per line)</label>
+            <textarea id="rd-terms" rows={3} value={keyword} onChange={e => setKeyword(e.target.value)} placeholder="Enter text to censor..." className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-400" />
           </div>
-          <button onClick={redact} disabled={!file || !keyword.trim() || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
+          <fieldset className="text-sm"><legend className="text-neutral-500 mb-1">Also find automatically</legend>
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              {Object.entries(PATTERNS).map(([k, p]) => (
+                <label key={k} className="flex items-center gap-2"><input type="checkbox" checked={kinds.includes(k)} onChange={e => setKinds(e.target.checked ? [...kinds, k] : kinds.filter((x) => x !== k))} /> {p.label}</label>
+              ))}
+            </div>
+          </fieldset>
+          <button onClick={redact} disabled={!file || (!keyword.trim() && !kinds.length) || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Redacting...' : 'Redact PDF'}
           </button>
           {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
@@ -155,10 +168,10 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Redact"
-        description="PDF Redact searches your PDF's text for a word or phrase using PDF.js — ignoring case, spaces and line breaks, so a phrase is found even when it wraps onto the next line or changes font mid-way — as well as form field values and comments. It then permanently destroys the matches rather than just covering them: any page containing a match is rendered to a flattened image with only the matched words blacked out in the pixels themselves (the rest of the line stays readable), and that image replaces the page's original content entirely — so there are no text objects left on that page to select, copy, or extract. Pages with no match are left untouched, keeping their original selectable, searchable text. Everything runs locally in your browser; your file is never uploaded to a server."
+        description="PDF Redact searches your PDF's text for the words or phrases you list (one per line) and, if you tick them, every e-mail address, phone number (9 to 15 digits) and card number (checked with the Luhn formula), using PDF.js — ignoring case, spaces and line breaks, so a phrase is found even when it wraps onto the next line or changes font mid-way — as well as form field values and comments. It then permanently destroys the matches rather than just covering them: any page containing a match is rendered to a flattened image with only the matched words blacked out in the pixels themselves (the rest of the line stays readable), and that image replaces the page's original content entirely — so there are no text objects left on that page to select, copy, or extract. Pages with no match are left untouched, keeping their original selectable, searchable text. Everything runs locally in your browser; your file is never uploaded to a server."
         howTo={[
           "Click the upload area and select a PDF file from your device.",
-          "Type the exact word or phrase to redact into the text field.",
+          "Type each word or phrase to redact on its own line, and/or tick e-mail addresses, phone numbers or card numbers.",
           "Click 'Redact PDF' — pages containing a match are flattened to an image with the matched words permanently blacked out; the tool tells you how many occurrences it covered and on which pages.",
           "Click 'Download' next to redacted.pdf to save the result."
         ]}
@@ -166,7 +179,8 @@ export default function Page() {
           { q: "Is PDF Redact free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Does this tool truly remove sensitive text from the PDF, or just cover it up?", a: "It truly removes it. Any page with a match is rendered to a flattened image with the matched text blacked out in the pixels, and that image replaces the page's content — the underlying text is gone, not just hidden, so it can't be recovered by selecting or extracting text from that page." },
           { q: "Does this affect other text on the same page that I didn't ask to redact?", a: "Yes — a matched page is flattened entirely, so all text on that page becomes a static image and loses selectability and searchability, not just the redacted word. Pages with no match are left as original, fully searchable text." },
-          { q: "Can I visually select an area to redact, or preview matches first?", a: "No — there's no click-to-select or highlighting interface. You type a word or phrase, every page containing a match is processed automatically, and the tool lists the pages it changed so you can check them." },
+          { q: "Can I visually select an area to redact, or preview matches first?", a: "No — there's no click-to-select or highlighting interface. You list words or phrases and tick automatic patterns; every page containing a match is processed automatically, and the tool lists the pages it changed so you can check them." },
+          { q: "What do the automatic patterns find?", a: "E-mail addresses; phone numbers of 9 to 15 digits written with spaces, dots, dashes, brackets or a +country code (dates like 2026-10-02 are left alone); card numbers of 13 to 19 digits that pass the Luhn check every real card number passes. A number of another kind with as many digits can be covered too: check the listed pages." },
           { q: "Are form fields and comments redacted?", a: "Yes — a form field value or a comment containing the phrase is blacked out too, and the page is flattened, so the field and its value no longer exist in the file." },
           { q: "Can it redact text in a scanned PDF?", a: "No — a scan is a picture with no text in it, so there is nothing to search. Run PDF OCR first, then redact the OCR'd file." },
           { q: "Is my file uploaded to a server?", a: "No, matching and redaction both happen locally in your browser." }

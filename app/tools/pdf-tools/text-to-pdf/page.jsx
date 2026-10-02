@@ -1,5 +1,5 @@
 ﻿'use client';
-import { textFileProblem } from '../../../lib/fileChecks';
+import { textFileProblem, decodedText } from '../../../lib/fileChecks';
 import { useMemo, useState, useRef } from 'react';
 import { textToPdf, needsRenderer, textToHtmlDocument } from '../../../lib/textPdf';
 import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
@@ -14,6 +14,7 @@ export default function TextToPdfPage() {
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState(null);
+  const [layout, setLayout] = useState({ page: 'A4', landscape: false, fontSize: 12, margin: 50 });
   const inputRef = useRef();
   // Emoji or a script the in-browser fonts don't draw (Bengali, Gurmukhi, Sinhala…): printed by our Chromium (lib/textPdf.js).
   const viaRenderer = useMemo(() => needsRenderer(text), [text]);
@@ -27,7 +28,8 @@ export default function TextToPdfPage() {
     const problem = await textFileProblem(f, 'text');
     if (problem) { setFile(null); setText(''); setStatus(problem); return; }
     setFile(f);
-    const content = await f.text();
+    // P24: decoded as written (Windows ANSI, UTF-16 "Unicode Text"…); f.text() read everything as UTF-8
+    const content = await decodedText(f);
     setText(content);
     setStatus('');
     setDownloadUrl(null);
@@ -42,14 +44,14 @@ export default function TextToPdfPage() {
       let blob;
       if (viaRenderer) {
         const title = file ? file.name.replace(/.[^.]+$/, '') : 'Document';
-        const upload = new File([textToHtmlDocument(text, title)], 'document.html', { type: 'text/html' });
+        const upload = new File([textToHtmlDocument(text, title, layout)], 'document.html', { type: 'text/html' });
         const sizeCheck = checkOfficeSize(upload, MAX_HTML_STAGED_BYTES);
         if (!sizeCheck.ok) throw new Error(sizeCheck.message);
         const result = await convertOffice({ file: upload, endpoint: '/api/convert-html-to-pdf', onStage: (st) => setStatus(officeStageLabel(st)) });
         blob = result.blob;
       } else {
         // Latin, Greek, Cyrillic, Arabic, Hebrew, Devanagari, Tamil, Thai, CJK (30/09): Noto fonts, in the browser.
-        blob = new Blob([await textToPdf(text, { onPhase: setStatus })], { type: 'application/pdf' });
+        blob = new Blob([await textToPdf(text, { ...layout, onPhase: setStatus })], { type: 'application/pdf' });
       }
       setDownloadUrl(URL.createObjectURL(blob));
       setStatus('');
@@ -78,6 +80,24 @@ export default function TextToPdfPage() {
             </div>
           )}
           {viaRenderer && <p className="text-xs text-neutral-600 text-center" data-renderer-note>Your text has emoji or a script drawn by our PDF service (a real browser engine with the Noto fonts): it is sent there to make the PDF, then deleted.</p>}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
+            <label className="block"><span className="block text-neutral-500 mb-1">Page size</span>
+              <select id="tp-page" value={layout.page} onChange={(e) => setLayout({ ...layout, page: e.target.value })} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2">
+                {['A4', 'Letter', 'Legal', 'A5'].map((v) => <option key={v} value={v}>{v}</option>)}
+              </select></label>
+            <label className="block"><span className="block text-neutral-500 mb-1">Orientation</span>
+              <select id="tp-orient" value={layout.landscape ? 'landscape' : 'portrait'} onChange={(e) => setLayout({ ...layout, landscape: e.target.value === 'landscape' })} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2">
+                <option value="portrait">Portrait</option><option value="landscape">Landscape</option>
+              </select></label>
+            <label className="block"><span className="block text-neutral-500 mb-1">Text size</span>
+              <select id="tp-size" value={layout.fontSize} onChange={(e) => setLayout({ ...layout, fontSize: Number(e.target.value) })} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2">
+                {[9, 10, 11, 12, 14, 16, 18, 24].map((v) => <option key={v} value={v}>{v} pt</option>)}
+              </select></label>
+            <label className="block"><span className="block text-neutral-500 mb-1">Margins</span>
+              <select id="tp-margin" value={layout.margin} onChange={(e) => setLayout({ ...layout, margin: Number(e.target.value) })} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2">
+                <option value={36}>Narrow</option><option value={50}>Normal</option><option value={72}>Wide</option>
+              </select></label>
+          </div>
           <button onClick={convert} disabled={!text || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Converting...' : 'Convert to PDF'}
           </button>
@@ -92,17 +112,18 @@ export default function TextToPdfPage() {
       </div>
       <SeoContent
         title="Text to PDF"
-        description="Text to PDF converts plain text — pasted directly or from an uploaded .txt file — into a real PDF with automatic word-wrapping and page breaks, in every common writing system and with emoji: Latin alphabets, Greek, Cyrillic, Vietnamese, Arabic and Hebrew (right to left), Hindi, Bengali, Punjabi, Gujarati, Tamil, Telugu, Kannada, Malayalam, Sinhala, Thai, Lao, Myanmar, Khmer, Amharic, Georgian, Armenian, Chinese, Japanese and Korean, with the free Noto fonts (SIL Open Font License). Text in Latin, Greek, Cyrillic, Arabic, Hebrew, Devanagari, Tamil, Thai or CJK is made entirely in your browser; emoji (in colour, skin tones and flags included) and the other scripts are printed by our own PDF service with a real browser engine, and the page says so before you convert. The text stays selectable and searchable in the PDF. Font size (12 pt), margins and page size (A4) are fixed."
+        description="Text to PDF converts plain text — pasted directly or from an uploaded .txt file — into a real PDF with automatic word-wrapping and page breaks, in every common writing system and with emoji: Latin alphabets, Greek, Cyrillic, Vietnamese, Arabic and Hebrew (right to left), Hindi, Bengali, Punjabi, Gujarati, Tamil, Telugu, Kannada, Malayalam, Sinhala, Thai, Lao, Myanmar, Khmer, Amharic, Georgian, Armenian, Chinese, Japanese and Korean, with the free Noto fonts (SIL Open Font License). Text in Latin, Greek, Cyrillic, Arabic, Hebrew, Devanagari, Tamil, Thai or CJK is made entirely in your browser; emoji (in colour, skin tones and flags included) and the other scripts are printed by our own PDF service with a real browser engine, and the page says so before you convert. The text stays selectable and searchable in the PDF. You choose the page size (A4, Letter, Legal, A5), the orientation, the text size and the margins."
         howTo={[
           "Choose 'Paste Text' to type or paste content, or 'Upload File' to select a .txt file.",
-          "Review the text — uploading a file auto-fills the text area with its content.",
+          "Review the text — uploading a file auto-fills the text area with its content (Windows and Unicode text files are read in their own encoding).",
+          "Optionally choose the page size (A4, Letter, Legal, A5), the orientation, the text size and the margins.",
           "Click 'Convert to PDF' to generate the document with automatic word wrap and page breaks.",
           "Click 'Download' to save the file (on an iPhone or iPad, 'Save / Share' also sends it to Files, Mail or AirDrop)."
         ]}
         faqs={[
           { q: "Is Text to PDF completely free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Which languages and alphabets work?", a: "All the common ones: Latin alphabets (every accent, Polish, Turkish, Vietnamese…), Greek, Cyrillic, Arabic and Hebrew (right to left), Hindi, Bengali, Punjabi, Gujarati, Odia, Tamil, Telugu, Kannada, Malayalam, Sinhala, Thai, Lao, Myanmar, Khmer, Amharic, Georgian, Armenian, Chinese, Japanese and Korean — and emoji, in colour. Each character is drawn with a matching Noto font and only the letters used are embedded, so the PDF stays small." },
-          { q: "Can I adjust font size, margins, or the document title?", a: "No — every PDF uses 12 pt Noto Sans, fixed margins and standard A4 pages; there's no title field or style settings." },
+          { q: "Can I adjust font size, margins, or the document title?", a: "Yes for the layout: page size A4, Letter, Legal or A5, portrait or landscape, text from 9 to 24 pt, narrow, normal or wide margins. There's no title field." },
           { q: "What file types can I upload?", a: "Only plain .txt files — the content is read as text and filled into the paste box." },
           { q: "Is my text uploaded to a server?", a: "Not for Latin, Greek, Cyrillic, Arabic, Hebrew, Devanagari, Tamil, Thai, Chinese, Japanese or Korean text: that PDF is made in your browser. Text with emoji or another script is printed by our own PDF service (not a third party) and deleted right after; the page tells you before you convert." }
         ]}
