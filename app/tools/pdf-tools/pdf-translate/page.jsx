@@ -1,11 +1,22 @@
 ﻿'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { checkPromptLength } from '@/lib/quota/limits';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
+import { convertOffice, officeStageLabel } from '../../../lib/officeUpload';
+import { GOOGLE_DOC_LANGUAGE_CODES } from '../../../lib/translateLanguages';
+
+// P25 (03/10, E3): the WHOLE document, layout kept (Google Cloud Translation), offered only when the server says the
+// service is configured (GET /api/pdf-translate-document): no promise on the page before it works.
+let languageNames = null;
+try { languageNames = new Intl.DisplayNames(['en'], { type: 'language' }); } catch { /* codes only */ }
+const docLanguages = GOOGLE_DOC_LANGUAGE_CODES
+  .map((code) => ({ code, name: (languageNames && languageNames.of(code === 'mni-Mtei' ? 'mni' : code)) || code }))
+  .sort((a, b) => a.name.localeCompare(b.name, 'en'));
 
 const languages = ['English', 'French', 'Spanish', 'German', 'Arabic', 'Chinese', 'Japanese', 'Portuguese', 'Italian', 'Russian'];
 const MAX_PDF_TRANSLATE_PAGES = 5;
@@ -18,6 +29,27 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useToolError('');
   const fileRef = useRef();
+  const [docMode, setDocMode] = useState(null); // null until the server answers; then { available, maxPages }
+  const [mode, setMode] = useState('text');
+  const [docTarget, setDocTarget] = useState('fr');
+  const [stage, setStage] = useState(null);
+  const [translated, offer, clearTranslated] = useDownloadable();
+  useEffect(() => {
+    let alive = true;
+    fetch('/api/pdf-translate-document').then((r) => r.json()).then((j) => { if (alive && j && j.available) { setDocMode(j); setMode('document'); } }).catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
+  const translateDocument = async () => {
+    if (!file) return;
+    setLoading(true); setError(''); clearTranslated(); setStage(null);
+    try {
+      const result = await convertOffice({ file, endpoint: '/api/pdf-translate-document', fields: { target: docTarget }, onStage: setStage, alwaysStage: true });
+      offer(result.blob, `${(file.name.replace(/\.[^.]+$/, '') || 'document')}-${docTarget}.pdf`);
+    } catch (e) {
+      setError(e.message || 'The translation failed. Please try again.');
+    } finally { setLoading(false); }
+  };
 
   const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setOutput(''); };
 
@@ -63,17 +95,35 @@ export default function Page() {
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
             {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload a PDF file</p>}
           </div>
+          {docMode && (
+            <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="What to translate">
+              {[['document', 'Whole PDF (layout kept)'], ['text', 'Text only']].map(([v, label]) => (
+                <button key={v} type="button" role="radio" aria-checked={mode === v} onClick={() => { setMode(v); setError(''); setOutput(''); clearTranslated(); }} className={`rounded-lg border p-2 text-sm font-semibold ${mode === v ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-neutral-50 border-neutral-200'}`}>{label}</button>
+              ))}
+            </div>
+          )}
+          {mode === 'document' && docMode ? (
+            <p className="text-neutral-500 text-xs text-center -mt-2">The whole PDF, up to {docMode.maxPages} pages, translated into a new PDF with the same layout, images and tables — into any of {docLanguages.length} languages. Free: {docMode.pagesPerDay} pages a day.</p>
+          ) : (
           <p className="text-neutral-500 text-xs text-center -mt-2">Max {MAX_PDF_TRANSLATE_PAGES} pages / {MAX_PDF_TRANSLATE_CHARS.toLocaleString()} characters translated — a hard cap to keep translation cost-effective and free for everyone.</p>
+          )}
           <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Target Language</label>
+            {mode === 'document' && docMode ? (
+              <select id="doc-target" aria-label="Target Language" value={docTarget} onChange={e => { setDocTarget(e.target.value); clearTranslated(); }} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
+                {docLanguages.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
+              </select>
+            ) : (
             <select aria-label="Target Language" value={targetLang} onChange={e => setTargetLang(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
               {languages.map(l => <option key={l}>{l}</option>)}
             </select>
+            )}
           </div>
-          <button onClick={translate} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
-            {loading ? 'Translating...' : 'Translate PDF'}
+          <button onClick={mode === 'document' && docMode ? translateDocument : translate} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
+            {loading ? (mode === 'document' && docMode ? officeStageLabel(stage) : 'Translating...') : 'Translate PDF'}
           </button>
+          {translated && mode === 'document' && <DownloadReady file={translated} className="mt-3" />}
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {output && (
             <div className="space-y-2">
@@ -87,20 +137,37 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Translate"
-        description="PDF Translate extracts text from the first 5 pages of your PDF in your browser using PDF.js, then sends up to the first 3,000 characters of that text to our server, which forwards it to OpenAI's API for translation. The result is plain translated text, not a new PDF — there's no reconstructed document with the original formatting, images, or layout."
-        howTo={[
+        description={docMode
+          ? `PDF Translate translates a whole PDF into a new PDF with the same layout, images and tables: the PDF is sent through our server to Google Cloud Translation, in any of ${docLanguages.length} languages, up to ${docMode.maxPages} pages per PDF and ${docMode.pagesPerDay} pages a day per visitor, free. A "Text only" mode also translates the text of the first 5 pages (3,000 characters) with OpenAI and shows it on the page.`
+          : "PDF Translate extracts text from the first 5 pages of your PDF in your browser using PDF.js, then sends up to the first 3,000 characters of that text to our server, which forwards it to OpenAI's API for translation. The result is plain translated text, not a new PDF — there's no reconstructed document with the original formatting, images, or layout."}
+        howTo={docMode ? [
+          "Click the upload area and select a PDF file from your device.",
+          "Keep 'Whole PDF (layout kept)' and choose the language to translate into.",
+          "Click 'Translate PDF': the PDF is uploaded and translated; click 'Download' to save the translated PDF.",
+          "Or choose 'Text only' to see the translated text of the first pages on the page."
+        ] : [
           "Click the upload area and select a PDF file from your device.",
           "Choose a target language from the dropdown (10 languages available).",
           "Click 'Translate PDF' to send the extracted text for translation.",
           "Click 'Copy Translation' to copy the result — there's no PDF download."
         ]}
         faqs={[
-          { q: "Is PDF Translate free to use?", a: "Yes, it's free with no signup required. Because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
-          { q: "How many languages does it support?", a: "10: English, French, Spanish, German, Arabic, Chinese, Japanese, Portuguese, Italian, and Russian." },
-          { q: "Will the formatting of my PDF be preserved?", a: "No — the output is plain translated text in a text box, not a formatted PDF. Images, layout, and structure aren't recreated." },
-          { q: "How much of my PDF actually gets translated?", a: "Only the first 5 pages are extracted, and only the first 3,000 characters of that extracted text are sent for translation — longer documents get cut off." }
+          { q: "Is PDF Translate free to use?", a: "Yes, it's free with no signup required. Because each request costs us at the translation provider, there are daily limits per connection." },
+          ...(docMode ? [
+            { q: "How many languages does it support?", a: `Whole PDF: ${docLanguages.length} languages. Text only: 10 (English, French, Spanish, German, Arabic, Chinese, Japanese, Portuguese, Italian, Russian).` },
+            { q: "Can it translate the whole PDF and keep the layout?", a: `Yes, with "Whole PDF (layout kept)": the PDF is sent to Google Cloud Translation, which returns a new PDF in the language you choose, with the same layout, images and tables. Up to ${docMode.maxPages} pages per PDF and ${docMode.pagesPerDay} pages a day per visitor, free; split a longer PDF with Split PDF. Scanned pages are translated too, with some loss of formatting.` },
+            { q: "Is my PDF sent to a server?", a: "In 'Whole PDF' mode, yes: the PDF goes through our server to Google Cloud Translation, which returns the translated PDF; we keep neither. In 'Text only' mode, only the extracted text of the first pages is sent (to OpenAI), not the file." },
+          ] : [
+            { q: "How many languages does it support?", a: "10: English, French, Spanish, German, Arabic, Chinese, Japanese, Portuguese, Italian, and Russian." },
+            { q: "Will the formatting of my PDF be preserved?", a: "No — the output is plain translated text in a text box, not a formatted PDF. Images, layout, and structure aren't recreated." },
+            { q: "How much of my PDF actually gets translated?", a: "Only the first 5 pages are extracted, and only the first 3,000 characters of that extracted text are sent for translation — longer documents get cut off." },
+          ]),
         ]}
-        tips={[
+        tips={docMode ? [
+          "A PDF over the page limit can be split with Split PDF and translated in parts.",
+          "Scanned PDFs are translated too, but their formatting may be simplified: run PDF OCR first for the best result.",
+          "Review important translations carefully, since automated translation can miss nuance, especially for legal or technical content."
+        ] : [
           "For long documents, only about the first 3,000 characters of extracted text (from up to the first 5 pages) get translated — split up longer PDFs if you need the rest covered.",
           "Only the extracted text is sent to our server for translation, not the original PDF file — but scanned pages without a text layer won't produce any translatable text.",
           "Review important translations carefully, since automated translation can miss nuance, especially for legal or technical content.",

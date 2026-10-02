@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { contentDisposition } from "@/lib/contentDisposition";
-import { convertPdfToDocx, ConvertApiError } from "@/lib/providers/convertApi";
+import { convertPdfToDocx, convertPdfToRtf, ConvertApiError } from "@/lib/providers/convertApi";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkFileSize, MAX_PDF_TO_WORD_STAGED_BYTES } from "@/lib/quota/limits";
 import { isStagedRequest, respondStaged, fileResponse } from "@/lib/media/stagedRoute";
@@ -85,11 +85,20 @@ export async function POST(req: NextRequest) {
   }
 
   // Staged path (files above the Vercel body ceiling) -- see lib/media/stagedRoute.ts.
-  if (isStagedRequest(req)) return respondStaged(req, "docx", (file) => convertPdf(req, file, true));
+  // P25 (E1): output format, DOCX (default) or RTF. The staged path (large PDFs) can only hand back a DOCX: the media
+  // service keeps outputs of a fixed list of types (pdf, docx, xlsx, pptx, png) and changing it is a Railway change.
+  if (isStagedRequest(req)) return respondStaged(req, "docx", (file, body) => {
+    if (body?.format === "rtf") return Promise.resolve(NextResponse.json({ error: "RTF is available for PDFs up to 4 MB. For a larger PDF, choose DOCX." }, { status: 400 }));
+    return convertPdf(req, file, true);
+  });
 
   let file: File;
+  let format: "docx" | "rtf" = "docx";
   try {
     const formData = await req.formData();
+    const f = formData.get("format");
+    if (f !== null && f !== "docx" && f !== "rtf") return NextResponse.json({ error: "Unknown output format." }, { status: 400 });
+    if (f === "rtf") format = "rtf";
     const uploaded = formData.get("file");
     if (!uploaded || !(uploaded instanceof File)) {
       return NextResponse.json({ error: "No file provided." }, { status: 400 });
@@ -98,10 +107,10 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: "Invalid multipart/form-data request." }, { status: 400 });
   }
-  return convertPdf(req, file);
+  return convertPdf(req, file, false, format);
 }
 
-async function convertPdf(req: NextRequest, file: File, staged = false): Promise<NextResponse> {
+async function convertPdf(req: NextRequest, file: File, staged = false, format: "docx" | "rtf" = "docx"): Promise<NextResponse> {
   const extension = getExtension(file.name);
   if (extension !== "pdf") {
     return NextResponse.json({ error: "Unsupported file type. Please upload a .pdf file." }, { status: 400 });
@@ -134,8 +143,10 @@ async function convertPdf(req: NextRequest, file: File, staged = false): Promise
   }
 
   try {
-    const { docxBuffer, costMicros } = await convertPdfToDocx(fileBuffer, file.name);
-    console.log(`[convertapi] pdf->docx cost_micros=${costMicros} input_mb=${Math.round(file.size / 1048576)}`);
+    const { docxBuffer, costMicros } = format === "rtf"
+      ? await convertPdfToRtf(fileBuffer, file.name).then((r) => ({ docxBuffer: r.buffer, costMicros: r.costMicros }))
+      : await convertPdfToDocx(fileBuffer, file.name);
+    console.log(`[convertapi] pdf->${format} cost_micros=${costMicros} input_mb=${Math.round(file.size / 1048576)}`);
     // Real reconciliation: actualCostMicros = response.ConversionCost *
     // CONVERTAPI_COST_MICROS, computed inside the adapter (only it knows
     // ConvertAPI's response shape) and returned here as the already-scaled
@@ -149,26 +160,29 @@ async function convertPdf(req: NextRequest, file: File, staged = false): Promise
     // "%PDF-" check convert-to-pdf/route.ts uses (that would be checking
     // for the wrong output format here, since this route converts the
     // other direction).
-    const isDocx = bytes.length >= 2 && bytes[0] === 0x50 && bytes[1] === 0x4b;
+    // An RTF file starts with "{\\rtf".
+    const isDocx = format === "rtf"
+      ? bytes.length >= 5 && String.fromCharCode(...bytes.slice(0, 5)) === "{\\rtf"
+      : bytes.length >= 2 && bytes[0] === 0x50 && bytes[1] === 0x4b;
     if (!isDocx) {
       // Mirrors the same defense-in-depth check handleConvertApi does for
       // its own output -- a 2xx from the provider isn't proof the bytes
       // are actually a valid docx, and streaming an invalid file to the
       // client with a .docx extension and no error would be worse than
       // refusing it here.
-      await alertServerError("pdf-to-word", "non_docx_response");
+      await alertServerError("pdf-to-word", format === "rtf" ? "non_rtf_response" : "non_docx_response");
       await insertToolError(buildServerToolError({
         tool: "pdf-to-word",
         file,
-        error: new Error("non_docx_response"),
+        error: new Error(format === "rtf" ? "non_rtf_response" : "non_docx_response"),
         userAgent: req.headers.get("user-agent"), headers: req.headers,
       }));
       return NextResponse.json({ error: "Conversion failed. Please try again." }, { status: 502 });
     }
 
-    const outName = file.name.replace(/\.[^.]+$/, "") + ".docx";
+    const outName = file.name.replace(/\.[^.]+$/, "") + (format === "rtf" ? ".rtf" : ".docx");
     return fileResponse(bytes, {
-      "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "Content-Type": format === "rtf" ? "application/rtf" : "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "Content-Disposition": contentDisposition(outName),
     }, staged);
   } catch (err) {
