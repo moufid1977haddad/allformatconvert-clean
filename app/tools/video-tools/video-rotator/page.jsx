@@ -30,6 +30,9 @@ export default function VideoRotatorPage() {
   const [file, setFile] = useState(null);
   const [angle, setAngle] = useState(90);
   const [mode, setMode] = useState('compatible');
+  // P25 (03/10, E5): mirror, as 123apps' and Clideo's rotate tools offer (flip horizontally / vertically), on our
+  // video service; it can be combined with a rotation or used alone ("No rotation").
+  const [flip, setFlip] = useState('');
   const [previewUrl, setPreviewUrl] = useState(null);
   const [result, setResult] = useState(null);
   const [stage, setStage] = useState(null);
@@ -54,6 +57,8 @@ export default function VideoRotatorPage() {
       setStage({ label: 'Rotating…' });
       // P24 review (03/10): "Instant, lossless" promises that nothing is uploaded — when it cannot be done (a WebM, or an
       // MP4 whose rotation field cannot be rewritten) the page now says so instead of sending the file to the service
+      if (!angle && !flip) throw new Error('Choose a rotation or a mirror first.');
+      if (flip && mode === 'lossless') throw new Error('"Instant, lossless" only changes the rotation setting; a mirror turns the picture itself. Choose "Compatible everywhere" to mirror the video. Nothing was uploaded.');
       if (mode === 'lossless' && !ISO_BMFF.test(file.name)) throw new Error('"Instant, lossless" works for MP4, MOV, M4V and 3GP only; this format has no rotation setting. Nothing was uploaded. Choose "Compatible everywhere" to turn it on our video service.');
       let fast = null;
       if (mode === 'lossless') {
@@ -72,7 +77,7 @@ export default function VideoRotatorPage() {
       }
       const ac = new AbortController(); abortRef.current = ac; setCanCancel(true);
       const out = await runMediaJob({
-        file, op: 'convert', signal: ac.signal, params: { target: 'mp4', quality: 'high', rotate: angle },
+        file, op: 'convert', signal: ac.signal, params: { target: 'mp4', quality: 'high', ...(angle ? { rotate: angle } : {}), ...(flip ? { flip } : {}) },
         onStage: (s) => setStage({
           label: s.stage === 'upload' ? 'Uploading to our video service' : s.stage === 'processing' ? 'Rotating on our video service' : s.stage === 'download' ? 'Downloading the result' : s.stage === 'busy' ? 'The video service is busy — waiting for a free slot…' : 'Preparing…',
           pct: typeof s.pct === 'number' ? Math.round(s.pct) : null,
@@ -80,7 +85,7 @@ export default function VideoRotatorPage() {
       });
       if (!out.blob || !out.bytes) throw new Error('The video service returned an empty file. Please try again.');
       const blob = new Blob([out.blob], { type: 'video/mp4' });
-      setResult({ url: URL.createObjectURL(blob), name: `${base(file.name)}-rotated.mp4`, bytes: out.bytes, lossless: false, ext: 'mp4' });
+      setResult({ url: URL.createObjectURL(blob), name: `${base(file.name)}-${angle ? 'rotated' : 'mirrored'}.mp4`, bytes: out.bytes, lossless: false, ext: 'mp4' });
     } catch (e) {
       if (e?.code !== 'cancelled') { reportToolError({ tool: 'video-rotator', file, error: e instanceof Error ? e : new Error(String(e)) }); setError(e?.message || 'The rotation failed.'); }
     } finally { abortRef.current = null; setCanCancel(false); setStage(null); }
@@ -90,7 +95,7 @@ export default function VideoRotatorPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Video Rotator</h1>
-        <p className="text-neutral-500 text-center mb-8">Rotate a video 90°, 180° or 270° — upright in every player, or instant and lossless for MP4 and MOV</p>
+        <p className="text-neutral-500 text-center mb-8">Rotate a video 90°, 180° or 270°, or mirror it — upright in every player, or instant and lossless for MP4 and MOV</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => !stage && inputRef.current.click()}>
@@ -99,10 +104,15 @@ export default function VideoRotatorPage() {
           </div>
           {previewUrl && (
             <div className="flex justify-center overflow-hidden rounded-xl bg-neutral-800 py-6">
-              <video src={previewUrl} controls playsInline muted className="max-h-64 transition-transform" style={{ transform: `rotate(${angle}deg)` }} aria-label="Preview of the rotation" />
+              <video src={previewUrl} controls playsInline muted className="max-h-64 transition-transform" style={{ transform: `rotate(${angle}deg)${flip.includes('h') ? ' scaleX(-1)' : ''}${flip.includes('v') ? ' scaleY(-1)' : ''}` }} aria-label="Preview of the rotation" />
             </div>
           )}
-          <div className="flex gap-2 justify-center">{[90, 180, 270].map((a) => <button key={a} type="button" disabled={!!stage} onClick={() => setAngle(a)} aria-pressed={angle === a} className={'px-4 py-2 rounded-lg font-semibold transition ' + (angle === a ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800')}>{a}°{a === 90 ? ' ↻' : a === 270 ? ' ↺' : ''}</button>)}</div>
+          <div className="flex gap-2 justify-center flex-wrap">{[0, 90, 180, 270].map((a) => <button key={a} type="button" disabled={!!stage} onClick={() => setAngle(a)} aria-pressed={angle === a} className={'px-4 py-2 rounded-lg font-semibold transition ' + (angle === a ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800')}>{a ? `${a}°` : 'No rotation'}{a === 90 ? ' ↻' : a === 270 ? ' ↺' : ''}</button>)}</div>
+          <div className="flex gap-2 justify-center flex-wrap text-sm" role="radiogroup" aria-label="Mirror">
+            {[['', 'No mirror'], ['h', 'Mirror ⇆ (left-right)'], ['v', 'Flip ⇅ (top-bottom)']].map(([v, l]) => (
+              <button key={v || 'none'} type="button" role="radio" aria-checked={flip === v} disabled={!!stage} onClick={() => { setFlip(v); if (v) setMode('compatible'); }} className={'px-3 py-1.5 rounded-lg font-semibold transition ' + (flip === v ? 'bg-indigo-600 text-white' : 'bg-neutral-100 text-neutral-800 hover:bg-neutral-200')}>{l}</button>
+            ))}
+          </div>
           {file && ISO_BMFF.test(file.name) && (
             <fieldset className="space-y-2" data-rotate-mode>
               <legend className="text-sm font-semibold text-neutral-700 mb-1">How to rotate</legend>
@@ -120,12 +130,12 @@ export default function VideoRotatorPage() {
           {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
           {stage && canCancel
             ? <button type="button" onClick={() => abortRef.current?.abort()} className="w-full bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl py-3 font-semibold transition">Cancel</button>
-            : <button type="button" onClick={rotate} disabled={!file || !!stage} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Rotate Video</button>}
+            : <button type="button" onClick={rotate} disabled={!file || !!stage || (!angle && !flip)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Rotate Video</button>}
           {result && (
             <div className="space-y-2">
               <p className="text-sm text-center text-green-700" data-result>{result.lossless
                 ? `Rotated instantly, without re-encoding: same quality and same size (${formatBytes(result.bytes)}), still ${result.ext.toUpperCase()}. Nothing was uploaded. (The old Windows Media Player ignores the rotation setting: choose "Compatible everywhere" for it.)`
-                : `Rotated on our video service: the picture itself is turned, MP4, ${formatBytes(result.bytes)} — upright in every player.`}</p>
+                : `Done on our video service: the picture itself is ${angle ? 'turned' : ''}${angle && flip ? ' and ' : ''}${flip ? 'mirrored' : ''}, MP4, ${formatBytes(result.bytes)} — the same in every player.`}</p>
               <PlayablePreview src={result.url} name={result.name} kind="video" className="w-full rounded-xl max-h-72" />
               <FileDownload href={result.url} name={result.name} />
             </div>
@@ -134,14 +144,15 @@ export default function VideoRotatorPage() {
       </div>
       <SeoContent
         title="Video Rotator"
-        description={"Video Rotator turns a video by 90°, 180° or 270°, two ways. \"Compatible everywhere\" turns the picture itself, at full resolution and in high quality, on our video service, and gives an MP4 that plays upright in every player — including the old Windows Media Player, which ignores rotation settings. For MP4, MOV (iPhone), M4V and 3GP, \"Instant, lossless\" does what a phone does: it rewrites the video's rotation setting in your browser, without re-encoding, so nothing is uploaded and the file keeps its size, quality and format. WebM, MKV and AVI have no rotation setting and are always turned on our service."}
+        description={"Video Rotator turns a video by 90°, 180° or 270°, and can mirror it (left-right, or top to bottom), alone or with a rotation, on our video service. Rotation works two ways. \"Compatible everywhere\" turns the picture itself, at full resolution and in high quality, on our video service, and gives an MP4 that plays upright in every player — including the old Windows Media Player, which ignores rotation settings. For MP4, MOV (iPhone), M4V and 3GP, \"Instant, lossless\" does what a phone does: it rewrites the video's rotation setting in your browser, without re-encoding, so nothing is uploaded and the file keeps its size, quality and format. WebM, MKV and AVI have no rotation setting and are always turned on our service."}
         howTo={[
           "Click the upload area and select a video file.",
-          "Click 90° (clockwise), 180° or 270° (counter-clockwise): the preview turns with it.",
+          "Click 90° (clockwise), 180° or 270° (counter-clockwise), and/or a mirror: the preview turns and flips with it.",
           "For an MP4 or MOV, choose \"Compatible everywhere\" (the picture is turned, for every player) or \"Instant, lossless\" (the rotation setting only), then click \"Rotate Video\".",
           "Play the result and download it."
         ]}
         faqs={[
+          { q: "Can I mirror (flip) a video?", a: "Yes: choose \"Mirror ⇆\" to swap left and right (a selfie video, a text that reads backwards) or \"Flip ⇅\" to swap top and bottom, alone (\"No rotation\") or with a rotation. The picture itself is mirrored on our video service, so it looks the same in every player; the result is an MP4." },
           { q: "Does rotating reduce quality?", a: "With \"Instant, lossless\" (MP4, MOV, M4V, 3GP), no: the picture is not re-encoded at all, only the rotation setting is changed (the way phones store portrait videos) — same quality, same file size. \"Compatible everywhere\" re-encodes the turned picture in high quality at its full resolution; WebM, MKV and AVI are always re-encoded, their format having no rotation setting." },
           { q: "Which option should I choose?", a: "\"Compatible everywhere\" if the video will be played on a computer you don't know, sent to someone, or opened in the old Windows Media Player, which ignores rotation settings and would show it unturned. \"Instant, lossless\" for your own viewing in Photos, QuickTime, Safari, Chrome, Firefox, VLC, Android or the Windows 11 Media Player, which all apply the setting — it is instant, keeps the exact quality and has no size limit." },
           { q: "Will the rotated video play on my iPhone and in Photos?", a: "Yes, with either option: Photos applies the rotation setting (it is the one the iPhone itself writes), and the \"Compatible everywhere\" MP4 is upright by itself." },

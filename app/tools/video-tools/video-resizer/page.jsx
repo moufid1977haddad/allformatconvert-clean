@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import MediaServiceTool from '../../../components/MediaServiceTool';
+import CropControls, { clampCrop } from './CropControls';
 
 // 30/09 (owner's iPhone): the resizer used to replay the video in a <canvas> and record it with MediaRecorder --
 // as long as the video lasts, with the source playing full screen on iPhone, and a WebM that the iPhone's Photos
@@ -35,10 +36,35 @@ function ResizerControls({ params, setParams, disabled, file }) {
   const src = useShownSize(file);
   // A vertical video starts on the vertical 720p (720×1280), not on a landscape size.
   useEffect(() => {
-    if (src && params.w === 1280 && params.h === 720 && src.h > src.w) setParams({ ...params, w: 720, h: 1280 });
+    if (!src) return;
+    const next = { ...params };
+    if (params.w === 1280 && params.h === 720 && src.h > src.w) { next.w = 720; next.h = 1280; }
+    // P25: the crop box starts on the middle 80 % of the picture
+    next.crop = clampCrop({ x: src.w * 0.1, y: src.h * 0.1, w: src.w * 0.8, h: src.h * 0.8 }, src, 'free');
+    next.ratio = 'free';
+    setParams(next);
   }, [src]); // eslint-disable-line react-hooks/exhaustive-deps
+  const tabs = (
+    <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Resize or crop">
+      {[['resize', 'Resize'], ['crop', 'Crop']].map(([v, l]) => (
+        <button key={v} type="button" role="radio" aria-checked={params.edit === v} disabled={disabled} onClick={() => setParams({ ...params, edit: v })}
+          className={`rounded-lg border p-2 font-semibold ${params.edit === v ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-neutral-50 border-neutral-200'}`}>{l}</button>
+      ))}
+    </div>
+  );
+  if (params.edit === 'crop') {
+    return (
+      <div className="space-y-3">
+        {tabs}
+        {params.crop
+          ? <CropControls file={file} src={src} crop={params.crop} ratio={params.ratio || 'free'} disabled={disabled} onChange={(crop, ratio) => setParams({ ...params, crop, ratio })} />
+          : <p className="text-sm text-neutral-500">Reading the video&apos;s size…</p>}
+      </div>
+    );
+  }
   return (
         <div className="space-y-3">
+          {tabs}
           {src && <p className="text-sm text-neutral-500">Your video: {src.w}×{src.h} ({src.h > src.w ? 'vertical' : src.h === src.w ? 'square' : 'horizontal'}). 480p, 720p and 1080p keep its orientation.</p>}
           <div className="grid grid-cols-2 gap-4">
             <label className="block text-sm text-neutral-500">Width
@@ -67,7 +93,7 @@ function ResizerControls({ params, setParams, disabled, file }) {
 
 const seo = {
   title: 'Video Resizer',
-  description: 'Video Resizer changes the width and height of a video on our ffmpeg server, so it works in any browser, including Safari on iPhone, and runs faster than the video plays. Keep the whole picture with black bars (Fit), crop the edges (Fill) or stretch it to the exact size. You get an H.264 + AAC MP4 with the original sound, the format every phone and computer plays.',
+  description: 'Video Resizer changes the width and height of a video, or crops it to any area you draw (free or 1:1, 16:9, 9:16, 4:5, 4:3), on our ffmpeg server, so it works in any browser, including Safari on iPhone, and runs faster than the video plays. Keep the whole picture with black bars (Fit), crop the edges (Fill) or stretch it to the exact size. You get an H.264 + AAC MP4 with the original sound, the format every phone and computer plays.',
   howTo: [
     'Select or drop a video file (MP4, MOV, MKV, WebM, AVI and more, up to 1 GB).',
     'Enter the new width and height, or click a preset (480p, 720p, 1080p, square, vertical). 480p, 720p and 1080p keep your video’s orientation: a vertical video becomes 480×854, 720×1280 or 1080×1920.',
@@ -76,6 +102,7 @@ const seo = {
   ],
   faqs: [
     { q: 'Does it preserve aspect ratio automatically?', a: 'Yes, by default: when the new size has another shape than your video, the whole picture is kept with black bars (Fit). You can also crop the edges instead (Fill), or stretch it to the exact size (Stretch).' },
+    { q: 'Can I crop a video?', a: 'Yes: choose "Crop", then move and resize the box over the picture (or type its position and size in pixels), freely or in a fixed shape (1:1, 16:9, 9:16, 4:5, 4:3). Everything outside the box is removed; the kept area keeps its full resolution, with the original sound, as an MP4.' },
     { q: 'Does the resized video have audio?', a: 'Yes — the original sound is kept (re-encoded in AAC, like the picture in H.264).' },
     { q: 'What output format do I get?', a: 'An MP4 (H.264 video, AAC audio), which plays on iPhone, Android, Mac, Windows and every browser. Width and height are rounded to even numbers, as H.264 requires.' },
     { q: 'Is my file uploaded anywhere?', a: 'Yes, to our own video service, because resizing a video needs a real video encoder. The original is deleted as soon as the resize ends, and the result right after your download (or after 15 minutes if you never download it).' },
@@ -95,11 +122,20 @@ export default function VideoResizerPage() {
       op="convert"
       tool="video-resizer"
       title="Video Resizer"
-      subtitle="Resize video dimensions — any browser, up to 1 GB, MP4 out"
+      subtitle="Resize or crop a video — any browser, up to 1 GB, MP4 out"
       buttonLabel="Resize Video"
-      initialParams={{ w: 1280, h: 720, mode: 'fit' }}
-      buildParams={(p) => ({ target: 'mp4', quality: 'high', fit: { w: even(p.w), h: even(p.h), mode: p.mode } })}
-      outName={(name, ext, p) => `${name.replace(/\.[^.]+$/, '')}-${even(p.w)}x${even(p.h)}.mp4`}
+      initialParams={{ w: 1280, h: 720, mode: 'fit', edit: 'resize', crop: null, ratio: 'free' }}
+      buildParams={(p) => {
+        if (p.edit === 'crop') {
+          if (!p.crop) throw new Error("The video's size could not be read here, so the crop box cannot be placed. Try another browser, or use Resize.");
+          const c = { x: 2 * Math.floor(p.crop.x / 2), y: 2 * Math.floor(p.crop.y / 2), w: Math.max(16, 2 * Math.floor(p.crop.w / 2)), h: Math.max(16, 2 * Math.floor(p.crop.h / 2)) };
+          return { target: 'mp4', quality: 'high', crop: c };
+        }
+        return { target: 'mp4', quality: 'high', fit: { w: even(p.w), h: even(p.h), mode: p.mode } };
+      }}
+      outName={(name, ext, p) => (p.edit === 'crop' && p.crop
+        ? `${name.replace(/\.[^.]+$/, '')}-cropped-${2 * Math.floor(p.crop.w / 2)}x${2 * Math.floor(p.crop.h / 2)}.mp4`
+        : `${name.replace(/\.[^.]+$/, '')}-${even(p.w)}x${even(p.h)}.mp4`)}
       controls={(props) => <ResizerControls {...props} />}
       seo={seo}
     />
