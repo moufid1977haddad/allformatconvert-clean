@@ -230,6 +230,15 @@ self.onmessage = async (e) => {
       for (let i = 0; i + 2 < all.length && frames < 2; i++) if (all[i] === 0x21 && all[i + 1] === 0xf9 && all[i + 2] === 0x04) frames++;
       if (frames > 1) throw new Error('This GIF is animated: here only its first picture would be kept. Use our GIF Compressor, which keeps the animation and makes the GIF smaller.');
     }
+    // P24 review (03/10): an animated PNG (APNG) or WebP became a still picture without a word; refused as the GIF is
+    if (format === 'png') {
+      const h = new Uint8Array(await file.slice(0, 65536).arrayBuffer());
+      const tag = (i) => String.fromCharCode(h[i], h[i + 1], h[i + 2], h[i + 3]);
+      for (let i = 8; i + 8 <= h.length;) { const len = (h[i] << 24 | h[i + 1] << 16 | h[i + 2] << 8 | h[i + 3]) >>> 0, t = tag(i + 4); if (t === 'acTL') throw new Error('This PNG is animated (APNG): here only its first picture would be kept. Convert it with APNG to GIF, then use our GIF Compressor, to keep the animation.'); if (t === 'IDAT' || t === 'IEND') break; i += 12 + len; }
+    }
+    if (format === 'webp' && String.fromCharCode(...head.slice(12, 16)) === 'VP8X' && (head[20] & 0x02)) {
+      throw new Error('This WebP is animated: here only its first picture would be kept. Convert it to GIF, then use our GIF Compressor, to keep the animation.');
+    }
     progress(5);
     const img = await decode(file, dims, !!forceBands);
     let out, note = '';

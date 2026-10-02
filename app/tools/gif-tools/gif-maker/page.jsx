@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
+import { gifFrames } from '../../../lib/gifFrames';
 
 // Frames of different sizes used to be stretched to the first image's size (a portrait photo after a landscape one
 // came out squashed). Now, as on ezgif (read 26/09/2026: crop to a common size, alignment, reordering), each frame
@@ -30,19 +31,37 @@ export default function GifMakerPage() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [framesNote, setFramesNote] = useState('');
   const inputRef = useRef();
 
   const handleFiles = (e) => {
     const files = Array.from(e.target.files);
     e.target.value = '';
-    const readers = files.map(f => new Promise(resolve => {
+    // P24 review (03/10): an animated GIF added here gave its first picture only, without a word. It is split into its
+    // frames (as ezgif's maker does), each one placed in the list in order; at most 300 frames per GIF.
+    const MAX_GIF_FRAMES = 300;
+    const notes = [];
+    const expand = async (f) => {
+      if (!/gif$/i.test(f.type) && !/\.gif$/i.test(f.name)) return null;
+      try {
+        const { width, height, frames } = await gifFrames(await f.arrayBuffer());
+        if (frames.length < 2) return null;
+        if (frames.length > MAX_GIF_FRAMES) notes.push(`${f.name}: ${frames.length} frames, only the first ${MAX_GIF_FRAMES} were added`);
+        else notes.push(`${f.name}: its ${frames.length} frames were added`);
+        const c = document.createElement('canvas'); c.width = width; c.height = height; const ctx = c.getContext('2d');
+        return frames.slice(0, MAX_GIF_FRAMES).map((fr, k) => { ctx.putImageData(fr.imageData, 0, 0); return { name: `${f.name} #${k + 1}`, src: c.toDataURL('image/png'), w: width, h: height }; });
+      } catch { return null; }
+    };
+    const readers = files.map(f => expand(f).then((many) => many || new Promise(resolve => {
       const reader = new FileReader();
       reader.onload = () => { const im = new Image(); im.onload = () => resolve({ name: f.name, src: reader.result, w: im.naturalWidth, h: im.naturalHeight }); im.onerror = () => resolve(null); im.src = reader.result; };
       reader.readAsDataURL(f);
-    }));
-    Promise.all(readers).then(imgs => {
+    })));
+    Promise.all(readers).then(lists => {
+      const imgs = lists.flat();
       const ok = imgs.filter(Boolean);
       if (ok.length < imgs.length) setError(`${imgs.length - ok.length} file(s) could not be read as images and were left out.`); else setError('');
+      setFramesNote(notes.join('; '));
       setImages(prev => [...prev, ...ok]); setResult(null);
     });
   };
@@ -139,6 +158,7 @@ export default function GifMakerPage() {
           <div><label className="block text-sm text-neutral-500 mb-1">Frame Delay: {delay}ms</label><input aria-label="Frame Delay (ms)" type="range" min="50" max="1000" value={delay} onChange={e => { setDelay(parseInt(e.target.value)); setResult(null); }} className="w-full" /></div>
           {images.length === 1 && <p className="text-neutral-500 text-center text-sm">Add at least one more image to make an animation.</p>}
           <button onClick={createGif} disabled={images.length < 2 || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">{loading ? 'Creating...' : 'Create GIF'}</button>
+          {framesNote && <p className="text-sm text-neutral-600 text-center" data-frames-note>{framesNote}</p>}
           {error && <p className="text-red-600 text-sm text-center" role="alert">{error}</p>}
           {result && (
             <div className="text-center space-y-3">

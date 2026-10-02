@@ -129,7 +129,7 @@ export default function VideoMergerPage() {
       if (code !== 0 || !data || !data.byteLength) throw new Error('The videos could not be joined. Please try again.');
       const blob = new Blob([data.buffer], { type: 'video/mp4' });
       const expected = sigs.reduce((n, s) => n + s.duration, 0);
-      setResult({ url: URL.createObjectURL(blob), name: `${files[0].name.replace(/\.[^.]+$/, '')}-merged.mp4`, bytes: blob.size, copied: alike, expected });
+      setResult({ url: URL.createObjectURL(blob), name: `${files[0].name.replace(/\.[^.]+$/, '')}-merged.mp4`, bytes: blob.size, copied: alike, expected, fpsCapped: !alike && sigs[0].fps > 60.5 ? Math.round(sigs[0].fps) : 0 });
     } catch (e) {
       if (e?.code !== 'cancelled') { reportToolError({ tool: 'video-merger', error: e instanceof Error ? e : new Error(String(e)) }); setError(e?.message || 'The videos could not be merged.'); }
     } finally {
@@ -173,7 +173,7 @@ export default function VideoMergerPage() {
             <div className="space-y-2">
               <p className="text-sm text-center text-green-700" data-result>{result.copied
                 ? `Joined without re-encoding (the videos were alike): same quality, ${formatBytes(result.bytes)}. Nothing was uploaded.`
-                : `Clips matched to the first one on our video service, then joined: MP4, ${formatBytes(result.bytes)}.`}</p>
+                : `Clips matched to the first one on our video service, then joined: MP4, ${formatBytes(result.bytes)}.${result.fpsCapped ? ` The first clip was filmed at ${result.fpsCapped} frames per second: the merged video plays at 60, the most our service writes (slow-motion footage plays at normal speed with fewer frames).` : ''}`}</p>
               <PlayablePreview src={result.url} name={result.name} kind="video" className="w-full rounded-xl max-h-72" />
               <FileDownload href={result.url} name={result.name} />
             </div>

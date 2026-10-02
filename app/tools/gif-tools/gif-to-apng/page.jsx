@@ -19,6 +19,35 @@ export default function GifToApngPage() {
     setResult(null);
   };
 
+  // P24 review (03/10): the GIF's own number of plays is kept — UPNG writes "loop forever", so a GIF made to play
+  // once looped endlessly. GIF: the NETSCAPE2.0 extension holds the repeat count (0 = forever); without it, the GIF
+  // plays once. APNG: acTL num_plays (0 = forever) = GIF repeat count + 1.
+  const gifLoopCount = (b) => {
+    for (let i = 0; i + 18 < b.length; i++) {
+      if (b[i] === 0x21 && b[i + 1] === 0xff && b[i + 2] === 0x0b && String.fromCharCode(...b.subarray(i + 3, i + 14)) === 'NETSCAPE2.0' && b[i + 14] === 3 && b[i + 15] === 1) {
+        const repeat = b[i + 16] | (b[i + 17] << 8);
+        return repeat === 0 ? 0 : repeat + 1;
+      }
+    }
+    return 1;
+  };
+  const withPlays = (png, plays) => {
+    const u = new Uint8Array(png), dv = new DataView(u.buffer);
+    for (let i = 8; i + 12 <= u.length;) {
+      const len = dv.getUint32(i), type = String.fromCharCode(u[i + 4], u[i + 5], u[i + 6], u[i + 7]);
+      if (type === 'acTL') {
+        dv.setUint32(i + 12, plays);
+        let c = ~0; // CRC-32 over type + data
+        for (let k = i + 4; k < i + 8 + len; k++) { c ^= u[k]; for (let j = 0; j < 8; j++) c = (c >>> 1) ^ (0xedb88320 & -(c & 1)); }
+        dv.setUint32(i + 8 + len, ~c >>> 0);
+        break;
+      }
+      if (type === 'IDAT') break;
+      i += 12 + len;
+    }
+    return u.buffer;
+  };
+
   const convert = async () => {
     if (!file) return;
     setError('');
@@ -38,7 +67,7 @@ export default function GifToApngPage() {
       const rgbaFrames = frames.map((f) => f.imageData.data.buffer);
       const delays = frames.map((f) => f.delay);
 
-      const pngBuffer = UPNG.encode(rgbaFrames, width, height, 0, delays);
+      const pngBuffer = withPlays(UPNG.encode(rgbaFrames, width, height, 0, delays), gifLoopCount(new Uint8Array(buf)));
       const blob = new Blob([pngBuffer], { type: 'image/png' });
       setResult({ url: URL.createObjectURL(blob), frameCount: rgbaFrames.length });
     } catch(e) { setError((e && e.message) || 'This file could not be converted. It may be damaged.'); } // P21: a message on the page, not a blocking alert()
@@ -80,7 +109,7 @@ export default function GifToApngPage() {
           "Frame delays from the original GIF are preserved, so playback speed should match the source animation.",
           "APNG supports full color and partial transparency, but this conversion only carries over what was already in the GIF — it won't add detail the source didn't have.",
           "Large or many-frame GIFs take longer to process since every frame is individually decoded and composited.",
-          "If the output looks visually wrong on a specific GIF, it may use the less common \"restore to previous\" frame disposal method, which isn't specially handled."
+          "The GIF's number of plays is kept: a GIF that loops forever gives an APNG that loops forever, one made to play once plays once."
         ]}
       />
     </div>

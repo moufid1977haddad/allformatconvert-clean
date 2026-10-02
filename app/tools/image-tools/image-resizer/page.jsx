@@ -98,7 +98,10 @@ export default function ImageResizerPage() {
       }
       // Same format as the original (WebP too on Safari: libwebp in WebAssembly); other formats as PNG.
       const srcType = sourceTypeOf(file);
-      const note = MIME_BY_TYPE[srcType] ? '' : 'Saved as PNG (the original format cannot be written by browsers).';
+      // P24 review (03/10): an animated GIF came back as one still PNG with a note blaming the browser. Said for what it is.
+      let animated = false;
+      if (srcType === 'image/gif') { const all = new Uint8Array(await file.arrayBuffer()); let n = 0; for (let i = 0; i + 2 < all.length && n < 2; i++) if (all[i] === 0x21 && all[i + 1] === 0xf9 && all[i + 2] === 0x04) n++; animated = n > 1; }
+      const note = animated ? 'This GIF is animated: the resized PNG holds its first frame only. To resize the whole animation, use the size option of our GIF Compressor.' : MIME_BY_TYPE[srcType] ? '' : 'Saved as PNG: GIF and other formats cannot be written here, PNG keeps every pixel.';
       const blob = await encodeRasterLike(out, MIME_BY_TYPE[srcType] || 'image/png');
       const base = file.name.replace(/\.[^.]+$/, '') || 'image';
       setResult({ url: URL.createObjectURL(blob), size: blob.size, w: dims.w, h: dims.h, name: `${base}-${dims.w}x${dims.h}.${EXT[blob.type] || 'png'}`, note });

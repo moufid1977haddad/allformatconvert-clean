@@ -299,3 +299,44 @@ notre code et les pages des concurrents ; la liste de travail complète est dans
 Bancs de ce lot : dev-lot **34/34 ×3**, tiff-lot 2/2 ×3, pdfjs-decoders ×3, tests Node des workers Editor/Merge/Split,
 solidité 41/41 ×3 sur les outils touchés ; solidité complète Chromium 522/522 (avant ce lot ; la passe finale ×3 est
 refaite sur la version finale).
+
+**Corrigés et prouvés (lot 2)** — chaque défaut vérifié avant (sauf mention), puis banc après :
+- **PDF** : EPUB/MOBI to PDF disent les chapitres illisibles sautés ; Compare ne présente plus deux PDF scannés comme
+  identiques ; Extract Text explique qu'un PDF scanné n'a pas de texte (renvoi vers OCR) ; Forms reconnaît un
+  formulaire **XFA** au lieu de « aucun champ » ; (Sign : relu, déjà juste).
+- **Image** : **flou** — le filtre du navigateur rendait les bords semi-transparents (mesuré : coin à 69/255 d'opacité
+  sous Chromium et Firefox, cadre blanchâtre en JPG) → calcul maison partout, un seul résultat sur les trois moteurs ;
+  **vignette** — le voile noircissait les zones transparentes d'un PNG → `source-atop` ; WebP animé dit dans WebP to JPG ;
+  **Image Compressor** refuse un APNG ou un WebP animé (rendus figés sans un mot) comme il refusait le GIF ; Resizer :
+  note exacte pour un GIF animé (renvoi vers l'option de taille du GIF Compressor).
+- **Vidéo / audio / GIF** : Vidéo → GIF (6 pages) lit la durée de la vidéo — un début après la fin est refusé, une
+  longueur qui dépasse est raccourcie **et dite**, 90 s n'est plus ramené à 60 en silence ; **Audio Equalizer** —
+  l'aperçu ignorait les réglages faits avant la première lecture et recréait un AudioContext à chaque lecture ;
+  **GIF to APNG** garde le nombre de lectures du GIF (un GIF « une fois » bouclait sans fin) ; **GIF Maker** découpe un
+  GIF animé en ses images (ezgif) au lieu d'en garder la première ; **Video Trimmer** garde toutes les pistes audio
+  (une seconde langue était perdue) ; **Video Merger** dit quand un premier clip à 120/240 i/s est ramené à 60.
+- **Développeur** : **Excel to CSV** — l'EAN-13 4006381333931 sortait « 4.00638E+12 », 1/3 « 0.333333333 », les dates en
+  m/j/aa → nombres à 15 chiffres comme Excel, dates ISO, système de dates 1904 respecté (Excel to JSON aussi) ;
+  **Excel to JSON** avec un .csv : « 007 » devenait 7, un identifiant de 20 chiffres arrondi, 01/02/2024 lu à
+  l'américaine → lu comme texte ; **CSV to Excel** : un .xls de 65 537 lignes était relu avec **2 lignes** → limites du
+  format dites avant l'écriture ; **CSV to SQL** — dialecte (standard, MySQL, SQL Server), noms entre guillemets,
+  antislash échappé pour MySQL, types mesurés (BIGINT, DECIMAL(p,s), VARCHAR(n)) et, trouvé en route, **les nombres ne
+  passent plus par un double** (un identifiant de 20 chiffres perdait ses derniers chiffres) ; **CSV to JSON** —
+  en-têtes en double, valeurs en trop gardées et dites ; **JSON → .env** sans perte (20 chiffres, 1.10) ; **JSON to
+  Go/Rust/C#** — `10.0` typé entier → décimal, entier au-delà de 64 bits signalé en tête du code ; **YAML** — clé de
+  fusion `<<` ; **TypeScript to JS** — import de type retiré comme tsc (échouait au chargement) ; **CSV to TSV** —
+  valeur commençant par un guillemet ; **XML Formatter** — balises d'une lettre ; **XML to JSON** — contenu mixte dit ;
+  **Text Sorter** — tri par nombre (−10, −2, 1.25, 1.3, 1.5) ; **File Converter** — encodage détecté (« caf\uFFFD »).
+
+Bancs du lot 2 : dev-lot **42/42 ×3**, gif-lot 3/3 ×3, image-lot **12/12 ×3** (dont flou et vignette mesurés au pixel),
+audio/vidéo, PDF et solidité des outils touchés ×3 (résultats ci-dessous à la passe finale).
+
+**Faibles corrigés aussi** : URL Encoder dit qu'un « + » est lu comme une espace (a+b@x.com) ; Unicode lit `\u{1F600}` et
+U+1F44D ; Text Repeater refuse un nombre vide ou hors 1-100 au lieu d'une sortie vide ; Duplicate Remover tient « é »
+composé et décomposé pour la même ligne ; **TAR** : un lien physique est extrait comme une copie (tar le fait), liens
+symboliques et fichiers épars listés au lieu d'être ignorés (archive écrite par le module tarfile de Python).
+**Premiers ajouts** : qualité JPG et couleur des zones transparentes dans PNG / WebP / TIFF to JPG (ezgif, FreeConvert) ;
+PDF Split « pages impaires / paires » (Sejda). Bancs : dev-lot **46/46 ×3**, image 12/12 ×3, tiff 2/2 ×3, solidité 22/22 ×3.
+
+**Restent du relevé n° 2** : note commune pour les 11 filtres d'image sur un GIF animé ; les ajouts plus longs (Excel « une
+page par feuille », Split par signets ou par taille, compresser à X Ko, métadonnées vidéo supprimables, enregistreur MP3…).

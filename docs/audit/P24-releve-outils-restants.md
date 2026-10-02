@@ -11,47 +11,47 @@ D'abord les **résultats faux silencieux** (règle : ils passent avant tout ajou
 - [x] Reorder Pages : « 3-5 » lu 3, mots et numéros hors document jetés, pages absentes perdues sans avertissement, liste invalide → PDF vide
 - [x] Merge / Split : signets et formulaires perdus sans un mot (`pdfCarryOver.js` non utilisé) ; champs de même nom en conflit dans Merge
 - [x] Image to PDF / JPG to PDF : TIFF multipage → 1re page seulement, sans le dire
-- [ ] EPUB / MOBI to PDF : chapitre illisible sauté sans le dire
-- [ ] Compare : deux PDF scannés (sans texte) annoncés identiques
-- [ ] Extract Text : PDF scanné → « Page N: » vides sans explication
-- [ ] Forms : XFA pur → « No form fields found » trompeur
-- [ ] Sign : la page dit « type it… or upload » puis « You can only draw » (texte périmé)
+- [x] EPUB / MOBI to PDF : chapitre illisible sauté sans le dire
+- [x] Compare : deux PDF scannés (sans texte) annoncés identiques
+- [x] Extract Text : PDF scanné → « Page N: » vides sans explication
+- [x] Forms : XFA pur → « No form fields found » trompeur
+- [x] (sans changement : le texte actuel est déjà cohérent, relu le 03/10) Sign : la page dit « type it… or upload » puis « You can only draw » (texte périmé)
 
 ### Image
-- [ ] Image Blur : avec `ctx.filter`, bords semi-transparents (cadre blanc en JPG), différent de Safari
-- [ ] Add Vignette : zones transparentes noircies (source-over)
-- [ ] WebP to JPG : WebP animé → 1re image sans le dire
-- [ ] Image Compressor : APNG et WebP animé rendus figés sans le dire
+- [x] Image Blur : avec `ctx.filter`, bords semi-transparents (cadre blanc en JPG), différent de Safari
+- [x] Add Vignette : zones transparentes noircies (source-over)
+- [x] WebP to JPG : WebP animé → 1re image sans le dire
+- [x] Image Compressor : APNG et WebP animé rendus figés sans le dire
 - [x] TIFF to JPG/PNG : orientation (tag 274) ignorée ; multipage → page 1 seulement sans le dire ; ICC ignoré (avertir)
-- [ ] Filtres en `image/*` et Resizer : GIF animé → PNG figé sans le dire (note trompeuse du Resizer)
+- [~] (Resizer fait ; les 11 filtres restent à faire : note commune à ajouter) Filtres en `image/*` et Resizer : GIF animé → PNG figé sans le dire (note trompeuse du Resizer)
 
 ### Vidéo / audio / GIF
 - [x] Video Rotator : « Instant, lossless » envoyait le fichier au service quand il échouait (WebM, matrice non réécrite)
 - [x] Screen Recorder : vidéo muette sans le dire quand le son n'est pas partagé (+ micro ajouté)
-- [ ] Vidéo → GIF (6 pages) : début + durée au-delà de la fin → GIF plus court sans un mot ; 90 s ramené à 60 en silence ; extracteur d'images : image précédente possible
-- [ ] Audio Equalizer : aperçu sans les réglages faits avant la 1re lecture ; un AudioContext de plus à chaque lecture
-- [ ] GIF to APNG : nombre de boucles du GIF non repris (boucle infinie) ; conseil SEO faux
-- [ ] GIF Maker / Image to GIF : GIF animé en entrée → 1re image sans le dire
-- [ ] Video Trimmer : pistes audio secondaires perdues sans le dire
-- [ ] Video Merger : 1er clip à 120/240 fps ramené à 60 sans le dire
+- [x] Vidéo → GIF (6 pages) : début + durée au-delà de la fin → GIF plus court sans un mot ; 90 s ramené à 60 en silence ; extracteur d'images : image précédente possible
+- [x] Audio Equalizer : aperçu sans les réglages faits avant la 1re lecture ; un AudioContext de plus à chaque lecture
+- [x] GIF to APNG : nombre de boucles du GIF non repris (boucle infinie) ; conseil SEO faux
+- [x] GIF Maker / Image to GIF : GIF animé en entrée → 1re image sans le dire
+- [x] Video Trimmer : pistes audio secondaires perdues sans le dire
+- [x] Video Merger : 1er clip à 120/240 fps ramené à 60 sans le dire
 
 ### Développeur / texte / fichiers
 - [x] Code Minifier HTML : espaces entre balises supprimées (« Helloworld »), valeurs d'attributs tassées
 - [x] SQL to CSV : `NOW()` tronquait la ligne ; deux tables mélangées ; NULL écrit « NULL »
-- [ ] CSV to Excel .xls : au-delà de 65 536 lignes, 2 lignes relues ; cellule > 32 767 caractères = erreur brute
-- [ ] Excel to CSV : EAN-13 en 4.00638E+12, 1/3 en 0.333333333, dates m/d/yy
-- [ ] CSV to SQL : antislash non échappé (MySQL), identifiants non cités, VARCHAR(255)/INTEGER/DECIMAL(18,6) trompeurs
-- [ ] ENV to JSON (sens JSON → .env) : grands entiers arrondis, 1.10 → 1.1
-- [ ] CSV to JSON : en-têtes en double écrasés, valeurs rognées, colonnes en trop jetées
-- [ ] Excel to JSON avec un .csv : 007 → 7, grands entiers arrondis, dates lues à l'américaine ; classeurs 1904
-- [ ] JSON to Go/Rust/C# : 10.0 typé entier ; > int64 en float ; union sans UnmarshalJSON
-- [ ] YAML to JSON : clé de fusion `<<` littérale
-- [ ] TypeScript to JS : imports de types conservés (échec au chargement en ESM)
-- [ ] CSV to TSV : valeur commençant par `"` non citée
-- [ ] XML Formatter : `<a>`, `<b>`, `<p>` n'indentent pas
-- [ ] XML to JSON : contenu mixte perdu (« Helloagain »), espaces rognés
-- [ ] Text Sorter : 1.5 / 1.25 / 1.3 et nombres négatifs mal triés (la FAQ promet « par valeur »)
-- [ ] File Converter : texte Windows-1252 décodé en UTF-8 (« caf� »)
+- [x] CSV to Excel .xls : au-delà de 65 536 lignes, 2 lignes relues ; cellule > 32 767 caractères = erreur brute
+- [x] Excel to CSV : EAN-13 en 4.00638E+12, 1/3 en 0.333333333, dates m/d/yy
+- [x] CSV to SQL : antislash non échappé (MySQL), identifiants non cités, VARCHAR(255)/INTEGER/DECIMAL(18,6) trompeurs
+- [x] ENV to JSON (sens JSON → .env) : grands entiers arrondis, 1.10 → 1.1
+- [x] CSV to JSON : en-têtes en double écrasés, valeurs rognées, colonnes en trop jetées
+- [x] Excel to JSON avec un .csv : 007 → 7, grands entiers arrondis, dates lues à l'américaine ; classeurs 1904
+- [x] JSON to Go/Rust/C# : 10.0 typé entier ; > int64 en float ; union sans UnmarshalJSON
+- [x] YAML to JSON : clé de fusion `<<` littérale
+- [x] TypeScript to JS : imports de types conservés (échec au chargement en ESM)
+- [x] CSV to TSV : valeur commençant par `"` non citée
+- [x] XML Formatter : `<a>`, `<b>`, `<p>` n'indentent pas
+- [x] XML to JSON : contenu mixte perdu (« Helloagain »), espaces rognés
+- [x] Text Sorter : 1.5 / 1.25 / 1.3 et nombres négatifs mal triés (la FAQ promet « par valeur »)
+- [x] File Converter : texte Windows-1252 décodé en UTF-8 (« caf� »)
 - [ ] Faibles : url-encoder (« + » lu espace par défaut), unicode `\u{…}`, text-repeater NaN, duplicate-remover NFC/NFD, tar liens physiques
 
 ## B. Ajouts faisables (gain / effort) — après les résultats faux

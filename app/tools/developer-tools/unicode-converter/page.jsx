@@ -6,7 +6,10 @@ export default function UnicodeConverterPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const toUnicode = () => setOutput(input.split('').map(c => '\\u' + c.charCodeAt(0).toString(16).padStart(4,'0')).join(''));
-  const fromUnicode = () => setOutput(input.replace(/\\u([0-9a-fA-F]{4})/g,(_,code) => String.fromCharCode(parseInt(code,16))));
+  // P24 review (03/10): the ES6 form \u{1F600} (and U+1F600) was left as it was, without a word
+  const fromUnicode = () => setOutput(input
+    .replace(/\\u\{([0-9a-fA-F]{1,6})\}|U\+([0-9a-fA-F]{4,6})\b/g, (m, a, b) => { const cp = parseInt(a || b, 16); return cp <= 0x10ffff ? String.fromCodePoint(cp) : m; })
+    .replace(/\\u([0-9a-fA-F]{4})/g, (_, code) => String.fromCharCode(parseInt(code, 16))));
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">

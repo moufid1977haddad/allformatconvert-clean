@@ -140,6 +140,7 @@ export default function EpubToPdfPage() {
   const [stage, setStage] = useState(null);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
+  const [skipped, setSkipped] = useState(0); // P24 review (03/10): chapters that could not be read are counted and said
   const inputRef = useRef();
   const [pdf, offer, clearPdf] = useDownloadable();
 
@@ -180,9 +181,10 @@ export default function EpubToPdfPage() {
 
       const cache = new Map();
       const chaptersHtml = [];
+      let skippedCount = 0;
       for (let i = 0; i < spine.length; i++) {
         const chapter = await ebook.loadChapter(spine[i].id);
-        if (!chapter) continue;
+        if (!chapter) { skippedCount++; continue; }
         chaptersHtml.push(await buildChapterHtml({
           bodyHtml: chapter.html,
           cssHrefs: (chapter.css || []).map(c => c.href),
@@ -212,6 +214,7 @@ export default function EpubToPdfPage() {
       const pdfBlob = result.blob;
       const filename = (file.name.replace(/\.epub$/i, '') || 'document') + '.pdf';
       offer(pdfBlob, filename);
+      setSkipped(skippedCount);
       setDone(true);
       setStatus('');
     } catch (err) {
@@ -243,6 +246,7 @@ export default function EpubToPdfPage() {
           {error && (
             <p className="text-center text-red-500 text-sm" role="alert">{error}</p>
           )}
+          {done && !error && skipped > 0 && <p className="text-sm text-amber-700 text-center" data-skipped>{skipped} chapter{skipped > 1 ? 's' : ''} of this book could not be read (damaged or in an unsupported form) and {skipped > 1 ? 'are' : 'is'} missing from the PDF.</p>}
           {done && !error && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
               <div className="text-green-500 text-xl font-bold mb-1">PDF ready</div>

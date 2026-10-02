@@ -14,6 +14,7 @@ const UNRECOGNIZED_FORMAT_ERROR = "This doesn't look like a valid TIFF file — 
 export default function TiffToJpgPage() {
   const [file, setFile] = useState(null);
   const [quality, setQuality] = useState(90);
+  const [background, setBackground] = useState('#ffffff'); // P24: colour of transparent areas in the JPG
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -131,7 +132,7 @@ export default function TiffToJpgPage() {
     };
 
     const buffer = await file.arrayBuffer();
-    worker.postMessage({ buffer, quality , page: Math.max(0, Math.min((pageInfo?.count || 1e6), page) - 1) }, [buffer]);
+    worker.postMessage({ buffer, quality, background, page: Math.max(0, Math.min((pageInfo?.count || 1e6), page) - 1) }, [buffer]);
   };
 
   return (
@@ -145,6 +146,7 @@ export default function TiffToJpgPage() {
             <input ref={inputRef} type="file" accept=".tiff,.tif" className="hidden" onChange={handleFile} />
           </div>
           <div><label className="block text-sm text-neutral-500 mb-1">Quality: {quality}%</label><input aria-label="Quality (%)" type="range" min="10" max="100" value={quality} onChange={e => setQuality(parseInt(e.target.value))} className="w-full" /></div>
+          <label className="flex items-center gap-2 text-sm text-neutral-600">Transparent areas become <input id="jpg-background" type="color" value={background} onChange={(e) => setBackground(e.target.value)} className="w-10 h-8" aria-label="Background colour" /></label>
           {loading ? (
             <div className="space-y-2">
               <button disabled className="w-full bg-neutral-200 text-gray-600 rounded-xl py-3 font-semibold">Converting…</button>

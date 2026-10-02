@@ -382,6 +382,82 @@ const main = (p) => p.locator('main').innerText();
   check('file-metadata: PDF title/author/pages, Word author/company, MP3 ID3 title/artist read from inside the files', /Annual budget/.test(a) && /Ann Smith/.test(a) && /Pages\s+2/.test(a) && /Bob Jones/.test(d) && /HR team/.test(d) && /Acme Ltd/.test(d) && /Morning Song/.test(m) && /Zoë/.test(m), (a + ' // ' + d + ' // ' + m).replace(/\n/g, ' ').slice(0, 220));
   await p.close();
 }
+{ // relevé n° 2 (03/10): developer converters that gave wrong results without a word
+  const conv = async (slug, input, outLabel, prep) => {
+    const p = await open(slug);
+    await p.locator('textarea').first().fill(input);
+    if (prep) await prep(p);
+    await p.getByRole('button', { name: 'Convert', exact: true }).click();
+    await p.waitForFunction((l) => document.querySelector(`textarea[aria-label="${l}"]`)?.value, outLabel, { timeout: 15000 }).catch(() => {});
+    const out = await p.getByLabel(outLabel).inputValue(); const text = await main(p); await p.close(); return { out, text };
+  };
+  const j = await conv('developer-tools/csv-to-json', 'name,name,age\nAnn,Smith,30,extra\n', 'JSON Output');
+  const jo = JSON.parse(j.out || '[]')[0] || {};
+  check('csv-to-json: duplicate header kept as name_2, extra value kept as column_4, both said', jo.name === 'Ann' && jo.name_2 === 'Smith' && jo.column_4 === 'extra' && /appears twice/.test(j.text), JSON.stringify(jo));
+  const BS = String.fromCharCode(92);
+  const q = await conv('developer-tools/csv-to-sql', `First Name,id\nAnn,12345678901234567890\nC:${BS}x,3000000000\n`, 'SQL Output', (p) => p.locator('#sql-dialect').selectOption('mysql'));
+  check('csv-to-sql (MySQL): quoted names, backslash escaped, 20-digit id exact', /`First Name`/.test(q.out) && q.out.includes(`'C:${BS}${BS}x'`) && /12345678901234567890/.test(q.out), q.out.split('\n').slice(-1)[0]);
+  const x = await conv('developer-tools/xml-to-json', '<r><p>Hello <b>world</b> again</p></r>', 'JSON Output');
+  check('xml-to-json: mixed text and tags said', /mix(es)? text and tags/.test(x.text), '');
+  const t = await conv('developer-tools/csv-to-tsv', 'a,b\n"""Hi"" she said",2\n', 'TSV Output');
+  check('csv-to-tsv: a value starting with a quote is wrapped (read back intact)', t.out.split('\n')[1] === '"""Hi"" she said"\t2', JSON.stringify(t.out));
+  const s = await conv('developer-tools/typescript-to-js', "import { User } from './types';\nimport { helper } from './util';\nexport const f = (u: User) => helper(u);", 'JavaScript Output');
+  check('typescript-to-js: a type-only import removed, a used one kept', !/types/.test(s.out) && /helper/.test(s.out), s.out.replace(/\n/g, ' '));
+}
+{ // Text Sorter by number; File Converter with a Windows-1252 file; Excel to CSV numbers in full
+  const p = await open('text-tools/text-sorter');
+  await p.locator('textarea').first().fill('1.5\n1.25\n-10\n1.3\n-2');
+  await p.getByRole('button', { name: 'Sort by Number (0-9)' }).click();
+  const r = await p.getByLabel('Result').inputValue();
+  check('text-sorter: by number -10, -2, 1.25, 1.3, 1.5', r === '-10\n-2\n1.25\n1.3\n1.5', JSON.stringify(r));
+  await p.close();
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'p24-dev2-'));
+  fs.writeFileSync(path.join(dir, 'cafe.txt'), Buffer.from([0x63, 0x61, 0x66, 0xe9, 0x20, 0x31, 0x80])); // "café 1€" in Windows-1252
+  const f = await open('file-tools/file-converter');
+  await f.locator('input[type=file]').first().setInputFiles(path.join(dir, 'cafe.txt'));
+  await f.getByLabel('Convert to').selectOption('json');
+  await f.getByRole('button', { name: 'Convert', exact: true }).click();
+  const a = f.locator('a[download]').first(); await a.waitFor({ timeout: 15000 });
+  const got = await f.evaluate(async (u) => (await fetch(u)).text(), await a.getAttribute('href'));
+  check('file-converter: a Windows-1252 text read as such ("café 1€", not "caf\uFFFD")', /café 1€/.test(got), got.replace(/\s+/g, ' '));
+  await f.close();
+  const XLSX = (await import('xlsx')).default || (await import('xlsx'));
+  const ws = XLSX.utils.aoa_to_sheet([['ean', 'third', 'when'], [4006381333931, 1 / 3, 45293]]); ws.C2.z = 'yyyy-mm-dd';
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'S');
+  fs.writeFileSync(path.join(dir, 'book.xlsx'), XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }));
+  const e = await open('developer-tools/excel-to-csv');
+  await e.locator('input[type=file]').first().setInputFiles(path.join(dir, 'book.xlsx'));
+  if (await e.getByRole('button', { name: /^Convert/ }).count()) await e.getByRole('button', { name: /^Convert/ }).first().click(); // this page converts on file choice
+  const ea = e.locator('a[download]').first(); await ea.waitFor({ timeout: 30000 });
+  const csv = await e.evaluate(async (u) => (await fetch(u)).text(), await ea.getAttribute('href'));
+  check('excel-to-csv: EAN-13 in full, 1/3 to 15 digits, date in ISO (it wrote 4.00638E+12, 0.333333333)', /4006381333931,0\.333333333333333,2024-01-02/.test(csv), csv.split('\n')[1]);
+  await e.close();
+}
+{ // relevé n° 2, weak points: Unicode \u{…}, repeat count, NFC duplicates, URL "+" note, TAR links
+  const u = await open('developer-tools/unicode-converter');
+  await u.locator('textarea').first().fill(String.raw`\u{1F600} \u0041 U+1F44D`);
+  await u.getByRole('button', { name: /From Unicode|Decode|Unicode to/i }).first().click();
+  const uo = await u.locator('textarea').nth(1).inputValue().catch(async () => (await main(u)));
+  check('unicode: \\u{1F600}, \\u0041 and U+1F44D decoded', /😀 A 👍/.test(uo), uo);
+  await u.close();
+  const r = await open('text-tools/text-repeater');
+  await r.locator('textarea').first().fill('ab'); await r.getByLabel('Repeat count').fill('');
+  await r.getByRole('button', { name: /Repeat/ }).first().click();
+  const rt = await main(r);
+  check('text-repeater: an empty count is said (it gave an empty result silently)', /whole number of repetitions from 1 to 100/.test(rt), '');
+  await r.close();
+  const d = await open('text-tools/duplicate-remover');
+  await d.locator('textarea').first().fill('caf\u00e9\ncafe\u0301\nx');
+  await d.getByRole('button', { name: /Remove/ }).first().click();
+  const dt = await main(d);
+  check('duplicate-remover: é composed and decomposed are one line', /\b1 line removed/.test(dt), dt.match(/[^\n]*(duplicate|removed)[^\n]*/i)?.[0] || '');
+  await d.close();
+  const e = await open('developer-tools/url-encoder');
+  await e.locator('textarea').first().fill('a+b%40x.com');
+  const en = await e.locator('[data-plus-note]').count();
+  check('url-encoder: a "+" in the input brings the note about plus signs', en === 1, '');
+  await e.close();
+}
 await b.close();
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);
 process.exit(fails ? 1 : 0);

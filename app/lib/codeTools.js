@@ -63,7 +63,7 @@ export async function diffLines(a, b, { ignoreWhitespace = false, ignoreCase = f
 
 export async function typescriptToJs(code, { jsx = false } = {}) {
   const { transform } = await import('sucrase');
-  return transform(code, { transforms: jsx ? ['typescript', 'jsx'] : ['typescript'], disableESTransforms: true, keepUnusedImports: true, jsxRuntime: 'preserve' }).code;
+  return transform(code, { transforms: jsx ? ['typescript', 'jsx'] : ['typescript'], disableESTransforms: true, keepUnusedImports: false, jsxRuntime: 'preserve' }).code; // P24: type-only imports removed as tsc does (they failed at load time in ESM); React, side-effect and used imports stay
 }
 
 export async function scssToCss(code, { syntax = 'scss', style = 'expanded' } = {}) {

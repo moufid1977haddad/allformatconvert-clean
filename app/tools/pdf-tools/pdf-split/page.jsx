@@ -14,6 +14,7 @@ const MODES = [
   { id: 'every', label: 'Every N pages' },
   { id: 'all', label: 'Every page' },
   { id: 'select', label: 'Select pages' },
+  { id: 'oddeven', label: 'Odd / even pages' },
 ];
 
 export default function PdfSplitPage() {
@@ -144,7 +145,7 @@ export default function PdfSplitPage() {
           </div>
           {pageCount > 0 && (
             <div className="space-y-3">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" role="radiogroup" aria-label="Split mode">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2" role="radiogroup" aria-label="Split mode">
                 {MODES.map((m) => (
                   <button key={m.id} type="button" role="radio" aria-checked={mode === m.id} onClick={() => setMode(m.id)} disabled={loading}
                     className={`rounded-lg py-2 text-sm font-medium transition ${mode === m.id ? 'bg-indigo-600 text-white' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'}`}>{m.label}</button>

@@ -125,18 +125,19 @@ export async function encodeRasterLike(raster, sourceType, quality = 92) {
   return encodeRaster(raster, type, quality);
 }
 
-export async function encodeRaster(raster, type, quality = 92) {
+// P24 (03/10): background — the colour transparent areas take in a JPEG (ezgif, FreeConvert let it be chosen; white before)
+export async function encodeRaster(raster, type, quality = 92, { background = '#ffffff' } = {}) {
   const { width: W, height: H } = raster;
   if (raster.canvas) {
     if (type === 'image/png') return checkedBlob(raster.canvas, type);
     if (type === 'image/jpeg') {
       const c = canvasOf(W, H), ctx = c.getContext('2d');
-      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.drawImage(raster.canvas, 0, 0);
+      ctx.fillStyle = background; ctx.fillRect(0, 0, W, H); ctx.drawImage(raster.canvas, 0, 0);
       return checkedBlob(c, type, quality / 100);
     }
     try { return await checkedBlob(raster.canvas, type, quality / 100); } catch { /* Safari: no WebP encoder */ }
   }
-  if (type === 'image/jpeg') return encodeJpegWasm(raster.rgba(), W, H, quality);
+  if (type === 'image/jpeg') return encodeJpegWasm(raster.rgba(), W, H, quality, background);
   if (type === 'image/webp') return encodeWebpWasm(raster.rgba(), W, H, quality);
   return encodePngRGBA(raster.rgba(), W, H);
 }

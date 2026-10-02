@@ -1,5 +1,6 @@
 import { MAX_ROWS } from './config';
 import { fixSupplementaryCharRefs } from '../../../lib/xlsxSupplementaryChars';
+import { datesToText, generalNumbersInFull, workbookIs1904 } from '../../../lib/sheetDates';
 
 class RowLimitExceededError extends Error {
   constructor(limit, actual) {
@@ -72,7 +73,8 @@ async function run({ file, maxRows }) {
   const XLSX = xlsxModule.default || xlsxModule;
   // Emoji written as &#128512; (openpyxl, pandas) would otherwise come out as
   // U+F600 -- see app/lib/xlsxSupplementaryChars.js (29/09).
-  const workbook = XLSX.read(fixSupplementaryCharRefs(bytes).bytes, { type: 'array' });
+  // cellNF keeps each cell's number format: dates become ISO dates and "General" numbers keep every digit (P24)
+  const workbook = XLSX.read(fixSupplementaryCharRefs(bytes).bytes, { type: 'array', cellNF: true });
 
   const sheetNames = workbook.SheetNames;
   // Sent as soon as the workbook structure is known -- well before the CSV
@@ -81,7 +83,8 @@ async function run({ file, maxRows }) {
   self.postMessage({ type: 'sheets', sheetNames });
 
   self.postMessage({ type: 'progress', pct: 85, phase: 'building' });
-  const csvBySheet = sheetNames.map((name) => XLSX.utils.sheet_to_csv(workbook.Sheets[name]));
+  const date1904 = workbookIs1904(workbook);
+  const csvBySheet = sheetNames.map((name) => { const ws = workbook.Sheets[name]; datesToText(ws, XLSX, date1904); generalNumbersInFull(ws); return XLSX.utils.sheet_to_csv(ws); });
   const rowCounts = csvBySheet.map((csv) => csv.split('\n').filter(Boolean).length);
   const totalRows = rowCounts.reduce((a, b) => a + b, 0);
   if (totalRows > limit) throw new RowLimitExceededError(limit, totalRows);

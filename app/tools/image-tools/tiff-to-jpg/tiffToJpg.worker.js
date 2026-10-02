@@ -1,9 +1,9 @@
-import { CANVAS_MAX_PIXELS, flattenedOnWhite, encodeJpegWasm } from '../../../lib/bigImage';
+import { CANVAS_MAX_PIXELS, flattenedOnWhite, encodeJpegWasm, hexToRgb } from '../../../lib/bigImage';
 import { decodeTiff } from '../../../lib/tiffDecode';
 import { sniffFormat } from '../../../lib/detectFileFormat';
 
 self.onmessage = async (e) => {
-  const { buffer, quality, page = 0 } = e.data;
+  const { buffer, quality, page = 0, background = '#ffffff' } = e.data;
   try {
     // Check the real header bytes before attempting any decode -- an
     // extension is just what the file is named, never proof of what it
@@ -33,7 +33,7 @@ self.onmessage = async (e) => {
     const { width: w, height: h } = decoded;
     // The decode is over: the 20 s silence watchdog (meant for a stuck decoder) must not cut a long encode.
     self.postMessage({ type: 'decoded', pixels: w * h });
-    const rgba = flattenedOnWhite(new Uint8ClampedArray(decoded.rgba));
+    const rgba = flattenedOnWhite(new Uint8ClampedArray(decoded.rgba), hexToRgb(background)); // P24: chosen background
     let blob;
     if (w * h <= CANVAS_MAX_PIXELS) {
       const canvas = new OffscreenCanvas(w, h);

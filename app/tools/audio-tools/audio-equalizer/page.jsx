@@ -36,8 +36,17 @@ export default function AudioEqualizerPage() {
     decodedBufferRef.current = null;
   };
 
+  // P24 review (03/10): the graph is built once per audio element, with the sliders' CURRENT values — it was rebuilt
+  // on every play with gains of 0 (settings made before the first play were not heard until a slider moved) and a new
+  // AudioContext each time (createMediaElementSource then threw on the second play).
+  const graphElRef = useRef(null);
+  const bandsRef = useRef(bands);
+  bandsRef.current = bands;
   const setupEQ = () => {
     if (!audioElRef.current) return;
+    if (graphElRef.current === audioElRef.current && audioCtxRef.current) { audioCtxRef.current.resume?.(); return; }
+    audioCtxRef.current?.close?.();
+    graphElRef.current = audioElRef.current;
     const ctx = new AudioContext();
     audioCtxRef.current = ctx;
     const source = ctx.createMediaElementSource(audioElRef.current);
@@ -50,6 +59,7 @@ export default function AudioEqualizerPage() {
     const treble = ctx.createBiquadFilter();
     treble.type = 'highshelf';
     treble.frequency.value = 3000;
+    bass.gain.value = bandsRef.current.bass; mid.gain.value = bandsRef.current.mid; treble.gain.value = bandsRef.current.treble;
     source.connect(bass).connect(mid).connect(treble).connect(ctx.destination);
     bassRef.current = bass;
     midRef.current = mid;

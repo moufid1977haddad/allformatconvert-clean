@@ -163,15 +163,16 @@ export function simulateIosCanvasCap() {
 
 export function hasAlpha(rgba) { for (let i = 3; i < rgba.length; i += 4) if (rgba[i] < 255) return true; return false; }
 
-export function flattenedOnWhite(rgba) {
+export function flattenedOnWhite(rgba, bg = [255, 255, 255]) {
   if (!hasAlpha(rgba)) return rgba;
   const d = new Uint8ClampedArray(rgba);
   for (let i = 0; i < d.length; i += 4) {
     const a = d[i + 3] / 255;
-    d[i] = d[i] * a + 255 * (1 - a); d[i + 1] = d[i + 1] * a + 255 * (1 - a); d[i + 2] = d[i + 2] * a + 255 * (1 - a); d[i + 3] = 255;
+    d[i] = d[i] * a + bg[0] * (1 - a); d[i + 1] = d[i + 1] * a + bg[1] * (1 - a); d[i + 2] = d[i + 2] * a + bg[2] * (1 - a); d[i + 3] = 255;
   }
   return d;
 }
+export const hexToRgb = (hex) => { const m = /^#?([0-9a-f]{6})$/i.exec(hex || ''); const n = m ? parseInt(m[1], 16) : 0xffffff; return [n >> 16, (n >> 8) & 255, n & 255]; };
 
 // ---- WebAssembly encoders (same builds and options as Image Compressor) -------------------------------------
 const wasmCache = {};
@@ -207,9 +208,9 @@ const WEBP_OPTIONS = {
 };
 
 // quality 0-100. Opaque output: transparency flattened onto white first.
-export async function encodeJpegWasm(rgba, width, height, quality) {
+export async function encodeJpegWasm(rgba, width, height, quality, background = '#ffffff') {
   const m = await moz();
-  const out = m.encode(flattenedOnWhite(rgba), width, height, { ...MOZ_OPTIONS, quality });
+  const out = m.encode(flattenedOnWhite(rgba, hexToRgb(background)), width, height, { ...MOZ_OPTIONS, quality });
   if (!out || out.length < 4 || out[0] !== 0xff || out[1] !== 0xd8) throw new Error('The JPEG encoder produced no valid file.');
   return new Blob([out], { type: 'image/jpeg' });
 }

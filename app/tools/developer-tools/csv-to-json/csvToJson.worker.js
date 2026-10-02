@@ -44,7 +44,19 @@ async function run({ file, text, maxRows, mode, delimiter, encoding, typeNumbers
 
   self.postMessage({ type: 'progress', pct: 90, phase: 'building' });
   if (rows.length === 0) throw new Error('Empty CSV');
-  const headers = rows[0].map((h) => h.trim());
+  // P24 review (03/10): two columns with the same header made one key — the first column's values were lost
+  // ({"name":"B"} from name,name / A,B); a header left empty, or values beyond the last header, were dropped. Every
+  // column now keeps its values: name, name_2…; column_N for an empty or missing header; and the page says so.
+  const notes = [];
+  const width = rows.reduce((m, r) => Math.max(m, r.length), 0);
+  const seen = new Map();
+  const headers = Array.from({ length: width }, (_, i) => {
+    let h = (rows[0][i] ?? '').trim() || `column_${i + 1}`;
+    if (seen.has(h)) { let k = seen.get(h) + 1; while (seen.has(`${h}_${k}`)) k++; seen.set(h, k); const n = `${h}_${k}`; notes.push(`"${h}" appears twice: the second column is "${n}"`); h = n; }
+    seen.set(h, seen.get(h) || 1);
+    return h;
+  });
+  if (width > rows[0].length) notes.push(`some rows have more values than the header row: the extra ones are in column_${rows[0].length + 1}${width > rows[0].length + 1 ? '…' : ''}`);
   // Numbers as numbers (csvjson.com's "parse numbers", on by default), read with
   // the file's own decimal separator: "12,5" in a ';' export is 12.5. Only whole
   // columns of numbers; identifiers with a leading zero stay text.
@@ -58,9 +70,9 @@ async function run({ file, text, maxRows, mode, delimiter, encoding, typeNumbers
 
   if (mode === 'file') {
     const blob = new Blob([jsonText], { type: 'application/json' });
-    self.postMessage({ type: 'done', mode, blob, rowCount: rows.length, decimalSep, numericCount: numeric.filter(Boolean).length });
+    self.postMessage({ type: 'done', mode, blob, rowCount: rows.length, decimalSep, numericCount: numeric.filter(Boolean).length, notes });
   } else {
-    self.postMessage({ type: 'done', mode, json: jsonText, rowCount: rows.length, decimalSep, numericCount: numeric.filter(Boolean).length });
+    self.postMessage({ type: 'done', mode, json: jsonText, rowCount: rows.length, decimalSep, numericCount: numeric.filter(Boolean).length, notes });
   }
 }
 

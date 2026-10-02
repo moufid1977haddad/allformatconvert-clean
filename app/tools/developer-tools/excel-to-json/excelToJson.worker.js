@@ -1,6 +1,6 @@
 import { fixSupplementaryCharRefs } from '../../../lib/xlsxSupplementaryChars';
 import { MAX_ROWS } from './config';
-import { datesToText } from '../../../lib/sheetDates';
+import { datesToText, workbookIs1904 } from '../../../lib/sheetDates';
 
 class RowLimitExceededError extends Error {
   constructor(limit, actual) {
@@ -46,7 +46,10 @@ async function run({ file, maxRows }) {
   const xlsxModule = await import('xlsx');
   const XLSX = xlsxModule.default || xlsxModule;
   // cellNF keeps each cell's number format, so date cells can be recognised.
-  const workbook = XLSX.read(fixSupplementaryCharRefs(bytes).bytes, { type: 'array', cellNF: true });
+  // P24 review (03/10): a .csv given here was typed by SheetJS ("007" → 7, a 20-digit id rounded, 01/02/2024 read as
+  // a US date): a text file is read as text (raw), as CSV to JSON does; a real workbook keeps its own cell types.
+  const isWorkbook = (bytes[0] === 0x50 && bytes[1] === 0x4b) || (bytes[0] === 0xd0 && bytes[1] === 0xcf) || /^\s*<\?xml|^\s*<(table|html|Workbook)/i.test(new TextDecoder().decode(bytes.subarray(0, 64)));
+  const workbook = XLSX.read(fixSupplementaryCharRefs(bytes).bytes, isWorkbook ? { type: 'array', cellNF: true } : { type: 'array', raw: true, cellDates: false });
 
   const sheetNames = workbook.SheetNames;
   // Sent as soon as the workbook structure is known -- well before the JSON
@@ -60,7 +63,7 @@ async function run({ file, maxRows }) {
   const result = {};
   let totalRows = sheetNames.length; // one header row implied per sheet
   sheetNames.forEach((name) => {
-    datesToText(workbook.Sheets[name], XLSX);
+    datesToText(workbook.Sheets[name], XLSX, workbookIs1904(workbook));
     // defval: a cell left empty still gets its key (null), so every row of a
     // sheet has the same properties -- they used to be silently omitted.
     const rows = XLSX.utils.sheet_to_json(workbook.Sheets[name], { defval: null });

@@ -68,6 +68,16 @@ async function run({ file, text, maxRows, bookType, delimiter, encoding, typeNum
       if (t !== '') rows[r][c] = parseLocaleNumber(t, decimalSep);
     }
   }
+  // P24 review (03/10): the limits of the formats, said before writing — a .xls of 65 537 rows was written and read back
+  // with 2 rows, and a cell over 32 767 characters failed with SheetJS's raw message
+  if (bookType === 'xls') {
+    const cols = rows.reduce((m, r) => Math.max(m, r.length), 0);
+    if (rows.length > 65536) throw new Error(`The old .xls format holds at most 65,536 rows; this CSV has ${rows.length.toLocaleString('en-US')}. Choose .xlsx (up to 1,048,576 rows).`);
+    if (cols > 256) throw new Error(`The old .xls format holds at most 256 columns; this CSV has ${cols}. Choose .xlsx (up to 16,384 columns).`);
+  }
+  for (let r = 0; r < rows.length; r++) for (let c = 0; c < rows[r].length; c++) {
+    if (typeof rows[r][c] === 'string' && rows[r][c].length > 32767) throw new Error(`Row ${r + 1}, column ${c + 1} holds ${rows[r][c].length.toLocaleString('en-US')} characters; an Excel cell holds at most 32,767.`);
+  }
   const ws = XLSX.utils.aoa_to_sheet(rows);
   XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
 
