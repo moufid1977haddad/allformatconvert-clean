@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { unreadableImageMessage } from '../../../lib/fileChecks';
 
 // Scans a QR code from an image (file, drop, paste) or, added 26/09/2026, live from the camera -- what the
 // reference scanners offer first (their page opens on the camera). The box used to say "drop" without handling it.
@@ -58,7 +59,7 @@ export default function QrScannerPage() {
       const d = ctx.getImageData(0, 0, c.width, c.height);
       const code = jsqrRef.current(d.data, d.width, d.height) || await decode(img, img.naturalWidth, img.naturalHeight);
       if (code) found(code.data); else setStatus('No QR code found in image');
-    } catch { setStatus('Could not load image file'); }
+    } catch { setStatus(await unreadableImageMessage(file)); } // P23: why, not just "could not load"
     URL.revokeObjectURL(url); setLoading(false);
   };
 

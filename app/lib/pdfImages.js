@@ -15,6 +15,7 @@
 import { imageDims, decodeToRaster, hasAlpha, encodePngRGBA, encodeJpegWasm } from './bigImage';
 import { checkedBlob } from './mediaSupport';
 import { imageHeaderSize } from './fileChecks';
+import { isMobileDevice } from './isMobileDevice';
 
 const isJpeg = (b) => b[0] === 0xff && b[1] === 0xd8;
 const isPng = (b) => b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47;
@@ -83,6 +84,18 @@ function fullPage(pdfDoc, img) {
   pdfDoc.addPage([w, h]).drawImage(img, { x: 0, y: 0, width: w, height: h });
 }
 
+// P23 (02/10): a picture that is not embedded as is (PNG, decoded by pdf-lib; WebP, GIF, BMP, HEIC, mirrored JPEG,
+// drawn upright) is decoded whole in this tab. A 30 000 × 30 000 PNG froze WebKit (Safari's engine) and took minutes in
+// Firefox: its size is read from the header first — at most a canvas's largest area (268 MP) on a computer, Image
+// Converter's 50 MP on a phone. A JPEG photo is embedded without being decoded: no bound for it.
+const MAX_DECODED_MP = () => (isMobileDevice() ? 50 : 268);
+async function assertDecodable(original, file) {
+  const size = await imageHeaderSize(file).catch(() => null);
+  const mp = size ? (size.width * size.height) / 1e6 : 0;
+  if (mp > MAX_DECODED_MP()) throw new SizeError(`${original.name}: this image is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round(mp)} megapixels), more than this browser can turn into a PDF page (${MAX_DECODED_MP()} megapixels at most${isMobileDevice() ? ' on a phone' : ''}). Use a smaller version of the image, or a JPEG.`);
+}
+class SizeError extends Error {}
+
 // Adds a page to pdfDoc; throws Error(`${file.name}: …`) when the file can't be used.
 export async function addImagePage(pdfDoc, original) {
   const { degrees } = await import('pdf-lib');
@@ -102,6 +115,7 @@ export async function addImagePage(pdfDoc, original) {
         orientation = (await exifr.orientation(bytes)) || 1;
       } catch { orientation = 1; } // no readable EXIF: stored as displayed
       if ([2, 4, 5, 7].includes(orientation)) {
+        await assertDecodable(original, file);
         fullPage(pdfDoc, await embedUpright(pdfDoc, file));
         return;
       }
@@ -114,9 +128,11 @@ export async function addImagePage(pdfDoc, original) {
       else pdfDoc.addPage([W, H]).drawImage(img, { x: 0, y: 0, width: W, height: H });
       return;
     }
+    await assertDecodable(original, file);
     const png = isPng(bytes) ? await pdfDoc.embedPng(bytes) : await embedUpright(pdfDoc, file);
     fullPage(pdfDoc, png);
   } catch (e) {
+    if (e instanceof SizeError) throw e;
     // P23: a 900 MP PNG ran the browser out of memory ("Array buffer allocation failed") and was reported as unreadable
     if (e instanceof RangeError || /allocation|out of memory|array length/i.test(String(e?.message))) {
       const size = await imageHeaderSize(original).catch(() => null);

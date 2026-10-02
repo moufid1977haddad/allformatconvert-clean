@@ -4,6 +4,8 @@ import SeoContent from '../../../components/SeoContent';
 import IosOriginalNote from '../../../components/IosOriginalNote';
 import { formatBytes } from '../../../lib/formatBytes';
 import { imageDims } from '../../../lib/bigImage';
+import { imageHeaderSize } from '../../../lib/fileChecks';
+import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 
 const formatSize = formatBytes;
@@ -92,7 +94,16 @@ export default function ImageCompressorPage() {
 
   const update = (id, patch) => setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)));
 
-  const runOne = (worker, it) => new Promise((resolve) => {
+  // P23 (02/10): a 20 000 × 20 000 PNG (400 MP, 49 KB on disk) kept "Compressing…" for ever (the PNG optimiser on 1.6 GB
+  // of pixels). The size is read from the header first: at most a canvas's largest area (268 MP — a 200 MP Galaxy photo
+  // still passes) on a computer, Image Converter's 50 MP on a phone.
+  const runOne = (worker, it) => new Promise(async (resolve) => {
+    const size = await imageHeaderSize(it.file);
+    const cap = isMobileDevice() ? 50 : 268, mp = size ? (size.width * size.height) / 1e6 : 0;
+    if (mp > cap) {
+      update(it.id, { status: 'error', message: `This image is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round(mp)} megapixels), more than the ${cap}-megapixel limit${cap === 50 ? ' on a phone' : ''}. Use a smaller version of the image.` });
+      return resolve();
+    }
     const onMessage = async (e) => {
       const m = e.data;
       if (m.id !== it.id) return;
