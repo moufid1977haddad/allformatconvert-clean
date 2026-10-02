@@ -14,12 +14,16 @@ const ALGS = {
 };
 export const SUPPORTED_ALGS = Object.keys(ALGS);
 
-const b64urlBytes = (s) => {
-  if (!/^[A-Za-z0-9_-]*$/.test(s)) throw new Error('The token contains characters that are not base64url.');
-  const bin = atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4));
-  return Uint8Array.from(bin, (c) => c.charCodeAt(0));
+const toB64url = (bytes) => { let bin = ''; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+const b64urlBytes = (s, what = 'The token') => {
+  if (!/^[A-Za-z0-9_-]*$/.test(s)) throw new Error(`${what} contains characters that are not base64url.`);
+  let bytes;
+  try { bytes = Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)), (c) => c.charCodeAt(0)); } catch { throw new Error(`${what} is not valid base64url (wrong length).`); }
+  // non-canonical spellings (unused trailing bits set) would make two strings the same bytes: refused (review 03/10)
+  if (toB64url(bytes) !== s) throw new Error(`${what} is not canonical base64url (its last character carries extra bits).`);
+  return bytes;
 };
-const b64Bytes = (s) => Uint8Array.from(atob(s.replace(/\s+/g, '')), (c) => c.charCodeAt(0));
+const b64Bytes = (s) => { try { return Uint8Array.from(atob(s.replace(/\s+/g, '')), (c) => c.charCodeAt(0)); } catch { throw new Error('The key is not valid base64.'); } };
 
 function pemBody(text) {
   const m = /-----BEGIN ([A-Z0-9 ]+)-----([\s\S]*?)-----END \1-----/.exec(text);
@@ -36,6 +40,13 @@ async function importKey(alg, spec, keyText, secretEncoding) {
   if (spec.kind === 'ed' && !(await ed25519Supported())) throw new Error('This browser cannot verify Ed25519 (EdDSA) signatures yet: WebCrypto Ed25519 is recent. Try a current Chrome, Edge, Firefox or Safari 17+.');
   if (!t) throw new Error(spec.kind === 'hmac' ? 'Enter the secret the token was signed with.' : 'Paste the public key (PEM or JWK) the token was signed with.');
   if (spec.kind === 'hmac') {
+    if (t.startsWith('{')) { // a JWK of type "oct" is a shared secret (its "k"), the only JWK an HS* token can use
+      let jwk; try { jwk = JSON.parse(t); } catch { throw new Error('The key looks like a JWK but is not valid JSON.'); }
+      if (jwk && jwk.kty === 'oct' && typeof jwk.k === 'string') {
+        if (jwk.alg && jwk.alg !== alg) throw new Error(`The key is marked for ${jwk.alg}; the token says ${alg}.`);
+        return crypto.subtle.importKey('raw', b64urlBytes(jwk.k, 'The key\'s "k"'), { name: 'HMAC', hash: spec.hash }, false, ['verify']);
+      }
+    }
     if (/-----BEGIN|^\s*\{/.test(t)) throw new Error(`${alg} is signed with a shared secret, not a public key: a token whose header says ${alg} must not be checked with an RSA or EC public key (that is the "algorithm confusion" attack).`);
     let raw;
     if (secretEncoding === 'base64') { try { raw = b64Bytes(t.replace(/-/g, '+').replace(/_/g, '/')); } catch { throw new Error('The secret is not valid base64.'); } } else raw = new TextEncoder().encode(keyText);
@@ -51,7 +62,8 @@ async function importKey(alg, spec, keyText, secretEncoding) {
     if (spec.kind === 'ec' && jwk.crv !== spec.curve) throw new Error(`${alg} uses the curve ${spec.curve}; this key is on ${jwk.crv}.`);
     if (spec.kind === 'ed' && jwk.crv !== 'Ed25519') throw new Error('EdDSA here means Ed25519; this key is not an Ed25519 key.');
     if (jwk.alg && jwk.alg !== alg && !(spec.kind === 'ed' && ['EdDSA', 'Ed25519'].includes(jwk.alg))) throw new Error(`The key is marked for ${jwk.alg}; the token says ${alg}.`);
-    const { d, p, q, dp, dq, qi, ...pub } = jwk; // only the public part is needed, a private key is never kept
+    if (jwk.use && jwk.use !== 'sig') throw new Error(`This key is marked "use": "${jwk.use}" (not for signatures).`);
+    const { d, p, q, dp, dq, qi, oth, ...pub } = jwk; // only the public part is needed, a private key is never kept
     delete pub.key_ops; delete pub.use; delete pub.alg; delete pub.ext;
     try { return await crypto.subtle.importKey('jwk', pub, params, false, ['verify']); } catch (e) { throw new Error(`This key cannot be used for ${alg}: ${e.message}`); }
   }
@@ -68,16 +80,25 @@ async function importKey(alg, spec, keyText, secretEncoding) {
 
 // -> { valid: boolean, alg } ; throws an Error with a sentence when the check cannot be made
 export async function verifyJwt(token, keyText, { secretEncoding = 'utf8' } = {}) {
-  const parts = token.trim().split('.');
+  // a token copied from an e-mail or a terminal may be cut by line breaks: they are removed, and said
+  const notes = [];
+  if (/\s/.test(token.trim())) notes.push('spaces and line breaks inside the token were removed');
+  const parts = token.replace(/\s+/g, '').split('.');
   if (parts.length !== 3) throw new Error('A signed JWT has three parts separated by dots.');
   let header;
-  try { header = JSON.parse(new TextDecoder().decode(b64urlBytes(parts[0]))); } catch { throw new Error('The header is not valid base64url JSON.'); }
-  const alg = header && header.alg;
-  if (alg === 'none' || alg === 'None' || alg === 'NONE') throw new Error('This token is not signed (alg "none"): there is nothing to verify, and it must not be trusted.');
+  try { header = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(b64urlBytes(parts[0], 'The header'))); } catch (e) { throw new Error(/base64url/.test(e.message) ? e.message : 'The header is not valid JSON.'); }
+  if (!header || typeof header !== 'object' || Array.isArray(header)) throw new Error('The header is not a JSON object.');
+  const alg = header.alg;
+  // only an own, string "alg" from the table: {"alg":"toString"} or {"alg":["HS256"]} used to reach the wrong code (review 03/10)
+  if (typeof alg !== 'string') throw new Error(alg === undefined ? 'The header has no "alg": the algorithm is unknown, nothing can be verified.' : 'The header\'s "alg" is not a string (RFC 7515 requires one).');
+  if (alg.trim().toLowerCase() === 'none') throw new Error('This token is not signed (alg "none"): there is nothing to verify, and it must not be trusted.');
+  if (!Object.hasOwn(ALGS, alg)) throw new Error(`Unsupported algorithm "${alg}". Supported: ${SUPPORTED_ALGS.join(', ')}.`);
   const spec = ALGS[alg];
-  if (!spec) throw new Error(`Unsupported algorithm "${alg}". Supported: ${SUPPORTED_ALGS.join(', ')}.`);
+  if (header.crit !== undefined) throw new Error(`This token marks extensions as critical ("crit": ${JSON.stringify(header.crit).slice(0, 60)}); RFC 7515 says a verifier that does not understand them must reject the token, and this tool does not.`);
+  if (header.b64 === false) throw new Error('This token uses an unencoded payload ("b64": false, RFC 7797), which this tool does not verify.');
+  try { JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(b64urlBytes(parts[1], 'The payload'))); } catch (e) { throw new Error(/base64url/.test(e.message) ? e.message : 'The payload is not valid JSON.'); }
   if (!crypto?.subtle) throw new Error('This browser has no WebCrypto: the signature cannot be checked here.');
-  const sig = b64urlBytes(parts[2]);
+  const sig = b64urlBytes(parts[2], 'The signature');
   const data = new TextEncoder().encode(parts[0] + '.' + parts[1]);
   const key = await importKey(alg, spec, keyText, secretEncoding);
   if (spec.kind === 'ec' && sig.length !== spec.sigLen) return { valid: false, alg, reason: `an ${alg} signature is ${spec.sigLen} bytes; this one is ${sig.length}` };
@@ -88,5 +109,21 @@ export async function verifyJwt(token, keyText, { secretEncoding = 'utf8' } = {}
     if (spec.kind === 'ed') throw new Error('This browser cannot verify Ed25519 signatures yet (WebCrypto Ed25519 is recent).');
     throw e;
   }
-  return { valid, alg };
+  const note = notes.length ? notes.join('; ') : undefined;
+  if (valid) return { valid, alg, note };
+  // a secret copied with a line break or spaces around it (from a .env file) is a common cause: checked and said
+  if (spec.kind === 'hmac' && secretEncoding === 'utf8' && keyText !== keyText.trim()) {
+    const trimmed = await crypto.subtle.importKey('raw', new TextEncoder().encode(keyText.trim()), { name: 'HMAC', hash: spec.hash }, false, ['verify']);
+    if (await crypto.subtle.verify(params, trimmed, sig, data)) return { valid: false, alg, note, reason: 'it matches the secret WITHOUT the spaces or line break at its start or end — the pasted secret has them; check how it was copied' };
+  }
+  // RSA-PSS: RFC 7518 requires a salt as long as the hash; some libraries sign with another length
+  if (spec.name === 'RSA-PSS') {
+    const modBytes = Math.ceil(key.algorithm.modulusLength / 8), hashLen = { 'SHA-256': 32, 'SHA-384': 48, 'SHA-512': 64 }[spec.hash];
+    for (const saltLength of [0, modBytes - hashLen - 2]) {
+      if (saltLength >= 0 && await crypto.subtle.verify({ name: 'RSA-PSS', saltLength }, key, sig, data).catch(() => false)) {
+        return { valid: false, alg, note, reason: `it was signed with this key but with a ${saltLength}-byte salt; RFC 7518 requires ${hashLen} bytes for ${alg}, and conforming libraries reject it` };
+      }
+    }
+  }
+  return { valid, alg, note };
 }

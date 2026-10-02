@@ -4,7 +4,8 @@ import { chromium, firefox, webkit } from '@playwright/test';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { generateKeyPairSync, createSign, createHmac, sign as edSign } from 'node:crypto';
+import { generateKeyPairSync, createSign, createHmac, sign as edSign, randomBytes } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--')) || 'http://localhost:3100').origin;
 const name = process.argv.find((a) => a.startsWith('--browser='))?.split('=')[1] || 'chromium';
 let fails = 0, passes = 0;
@@ -270,6 +271,34 @@ const main = (p) => p.locator('main').innerText();
     r1[0] === 'valid' && r2[0] === 'invalid' && r3[0] === 'valid' && r4[0] === 'valid' && r5[0] === 'invalid' && r6[0] === 'error' && /algorithm confusion/.test(r6[1]) && edOk,
     [r1, r2, r3, r4, r5, r6, r7].map((r) => r[0]).join(' ') + (r7[0] === 'error' ? ' (Ed25519: ' + r7[1].slice(0, 50) + ')' : ''));
   await p.close();
+}
+{ // ZIP Creator: AES-256 password, opened by an independent reader (Windows bsdtar / libarchive)
+  const BSDTAR = 'C:/Windows/System32/tar.exe';
+  if (!fs.existsSync(BSDTAR)) console.log('SKIP zip-creator AES: no bsdtar (Windows tar.exe) to open the archive independently');
+  else {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'p24-zip-'));
+    const txt = path.join(dir, 'notes été.txt'), bin = path.join(dir, 'data.bin');
+    fs.writeFileSync(txt, 'Bonjour — ünïcödé\n'.repeat(500)); fs.writeFileSync(bin, randomBytes(300000));
+    const p = await open('file-tools/zip-creator');
+    await p.locator('input[type=file]').first().setInputFiles([txt, bin]);
+    await p.locator('#zip-use-password').check();
+    await p.locator('#zip-password').fill('s3cret-pass 2026'); await p.locator('#zip-password2').fill('s3cret-pass 2026');
+    await p.getByRole('button', { name: 'Create ZIP' }).click();
+    const link = p.locator('a[download]').first(); await link.waitFor({ timeout: 60000 });
+    const [dl] = await Promise.all([p.waitForEvent('download'), link.click()]);
+    const zip = path.join(dir, 'archive.zip'); await dl.saveAs(zip);
+    const bytes = fs.readFileSync(zip), method = bytes.readUInt16LE(8);
+    const out = path.join(dir, 'out'); fs.mkdirSync(out);
+    const good = spawnSync(BSDTAR, ['-xf', zip, '-C', out, '--passphrase', 's3cret-pass 2026'], { encoding: 'utf8' });
+    const same = good.status === 0 && fs.readFileSync(path.join(out, 'data.bin')).equals(fs.readFileSync(bin)) && fs.readFileSync(path.join(out, 'notes été.txt')).equals(fs.readFileSync(txt));
+    const out2 = path.join(dir, 'out2'); fs.mkdirSync(out2);
+    const bad = spawnSync(BSDTAR, ['-xf', zip, '-C', out2, '--passphrase', 'wrong'], { encoding: 'utf8' });
+    const badOk = bad.status !== 0 || !fs.existsSync(path.join(out2, 'data.bin')) || !fs.readFileSync(path.join(out2, 'data.bin')).equals(fs.readFileSync(bin));
+    await p.locator('#zip-password2').fill('different');
+    const blocked = await p.getByRole('button', { name: 'Create ZIP' }).isDisabled();
+    check('zip-creator: AES-256 (method 99) archive opened by bsdtar with the password, byte-exact; wrong password refused; mismatched passwords block', method === 99 && same && badOk && blocked, `method ${method}, bsdtar ${good.status} ${(good.stderr || '').slice(0, 80)}, wrong → ${bad.status}`);
+    await p.close();
+  }
 }
 await b.close();
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);

@@ -204,5 +204,21 @@ apostrophes ; parts réellement égales et contrôle des tailles à la jonction 
   la note AA/AAA (vérifié contre WebAIM : #3b82f6 = 3,68:1, #767676 = 4,54:1).
 - **Unit Converter** : consommation (L/100 km, mpg US/UK, km/L — inverse, pas un facteur), 0 refusé.
 
-**Relevés mais non faits** : vérification de signature JWT, ZIP chiffré AES, métadonnées incorporées de File
-Metadata (effort moyen à fort) ; phrase de passe (demande une liste de mots tierce : décision E6 du plan).
+- **JWT Decoder** : vérification de la signature (jwt.io) — HS256/384/512 avec secret (texte, base64 ou JWK "oct"),
+  RS/PS/ES 256/384/512 et EdDSA avec clé publique PEM ou JWK, par le WebCrypto du navigateur. Tests contre
+  l'implémentation indépendante de node:crypto **26/26**, banc navigateur ×3. **Réviseur indépendant** (ce qui pourrait
+  dire « valide » à tort) : **1 grave corrigé** — un en-tête `{"alg":"toString"}` (ou `__proto__`, `constructor`)
+  atteignait la chaîne de prototypes de la table des algorithmes et une signature Ed25519 était déclarée valide
+  sans contrôle de type de clé ; `alg` sous forme de tableau était accepté. Corrigés aussi : `crit` et `b64:false`
+  refusés (RFC 7515/7797), payload non JSON refusé, base64url non canonique refusé, jeton coupé par des retours à la
+  ligne lu et signalé, secret collé avec un retour à la ligne final reconnu et dit, sel PSS non conforme reconnu et
+  dit, panneau décodé et verdict jamais périmés (compteur de requêtes), Ed25519 non pris en charge par le navigateur
+  dit comme tel (WebKit) au lieu d'accuser la clé.
+- **ZIP Creator** : protection par mot de passe en **AES-256** (WinZip AE-2, méthode 99), comme ezyZip et 7-Zip,
+  jamais l'ancien ZipCrypto ; archive ouverte **par bsdtar/libarchive** (lecteur indépendant de zip.js) à l'octet près,
+  mauvais mot de passe refusé ; mot de passe accentué : avertissement (zip.js et 7-Zip l'écrivent en UTF-8, d'autres
+  programmes le lisent dans la page de code locale — bsdtar sous Windows l'a refusé) ; sans mot de passe, JSZip
+  inchangé. Solidité ×3 6/6.
+
+**Relevés mais non faits** : métadonnées incorporées de File Metadata (effort fort : un lecteur par format) ;
+phrase de passe (demande une liste de mots tierce : décision E6 du plan).

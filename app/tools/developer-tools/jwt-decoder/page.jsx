@@ -1,5 +1,5 @@
 ﻿'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { reformatJson } from '../../../lib/jsonText';
 import { verifyJwt } from '../../../lib/jwtVerify';
@@ -14,10 +14,16 @@ export default function JwtDecoderPage() {
   const [checking, setChecking] = useState(false);
   // (decoded here: b64UrlDecodeUtf8 is declared further down, and a const cannot be used before its line)
   const alg = (() => { try { const h = token.trim().split('.')[0].replace(/-/g, '+').replace(/_/g, '/'); return JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(h + '==='.slice((h.length + 3) % 4)), (c) => c.charCodeAt(0)))).alg || ''; } catch { return ''; } })();
+  // a verdict is shown only for the token, key and encoding it was computed for (review 03/10: typing during a check
+  // could show the old token's verdict under the new one)
+  const reqRef = useRef(0);
+  const stale = () => { reqRef.current++; setVerdict(null); setChecking(false); };
   const verify = async () => {
+    const id = ++reqRef.current;
     setChecking(true); setVerdict(null);
-    try { setVerdict(await verifyJwt(token, key, { secretEncoding })); } catch (e) { setVerdict({ error: e.message || String(e) }); }
-    finally { setChecking(false); }
+    let v;
+    try { v = await verifyJwt(token, key, { secretEncoding }); } catch (e) { v = { error: e.message || String(e) }; }
+    if (id === reqRef.current) { setVerdict(v); setChecking(false); }
   };
   const b64UrlDecodeUtf8 = (str) => {
     const binary = atob(str.replace(/-/g,'+').replace(/_/g,'/'));
@@ -49,17 +55,17 @@ export default function JwtDecoderPage() {
         <h1 className="text-3xl font-bold text-center mb-2">JWT Decoder</h1>
         <p className="text-neutral-500 text-center mb-8">Decode and inspect JWT tokens</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none font-mono" placeholder="Paste JWT token here..." value={token} onChange={e => { setToken(e.target.value); setVerdict(null); }} />
+          <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none font-mono" placeholder="Paste JWT token here..." value={token} onChange={e => { setToken(e.target.value); stale(); setDecoded(null); setError(''); }} />
           <button onClick={decode} disabled={!token} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Decode</button>
           {error && <p className="text-red-400 text-center">{error}</p>}
           <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 space-y-2">
             <label htmlFor="jwt-key" className="block text-sm text-neutral-600 font-semibold">Verify the signature{alg ? ` (${alg})` : ''}</label>
-            <textarea id="jwt-key" value={key} onChange={(e) => { setKey(e.target.value); setVerdict(null); }} spellCheck={false} autoComplete="off"
+            <textarea id="jwt-key" value={key} onChange={(e) => { setKey(e.target.value); stale(); }} spellCheck={false} autoComplete="off"
               placeholder={/^HS/.test(alg) ? 'The shared secret' : 'The public key: -----BEGIN PUBLIC KEY----- … or a JWK {"kty": …}'}
               className="w-full bg-white border border-neutral-200 rounded-lg p-3 text-sm h-24 resize-none font-mono" />
             {/^HS/.test(alg) && (
               <label className="flex items-center gap-2 text-sm text-neutral-600">Secret is
-                <select id="jwt-secret-enc" value={secretEncoding} onChange={(e) => { setSecretEncoding(e.target.value); setVerdict(null); }} className="bg-white border border-neutral-200 rounded p-1">
+                <select id="jwt-secret-enc" value={secretEncoding} onChange={(e) => { setSecretEncoding(e.target.value); stale(); }} className="bg-white border border-neutral-200 rounded p-1">
                   <option value="utf8">text</option><option value="base64">base64 / base64url</option>
                 </select>
               </label>
@@ -68,8 +74,8 @@ export default function JwtDecoderPage() {
             {verdict && (verdict.error
               ? <p role="alert" className="text-sm text-amber-700" data-verdict="error">{verdict.error}</p>
               : verdict.valid
-                ? <p className="text-sm text-green-700 font-semibold" data-verdict="valid">Signature verified ({verdict.alg}): this token was signed with this key and has not been changed. Check exp / nbf below as well.</p>
-                : <p role="alert" className="text-sm text-red-600 font-semibold" data-verdict="invalid">Invalid signature ({verdict.alg}){verdict.reason ? `: ${verdict.reason}` : ''} — the token was changed, or signed with another key. Do not trust it.</p>)}
+                ? <p className="text-sm text-green-700 font-semibold" data-verdict="valid">Signature verified ({verdict.alg}): this token was signed with this key and has not been changed{verdict.note ? ` (${verdict.note})` : ''}. Check exp / nbf in the decoded payload as well.</p>
+                : <p role="alert" className="text-sm text-red-600 font-semibold" data-verdict="invalid">Invalid signature ({verdict.alg}){verdict.reason ? `: ${verdict.reason}` : ''} {verdict.reason ? '.' : ' — the token was changed, or signed with another key.'} Do not trust it.</p>)}
             <p className="text-xs text-neutral-500">Checked in your browser with WebCrypto; the key and the token are not sent anywhere. HS256/384/512, RS256/384/512, PS256/384/512, ES256/384/512 and EdDSA (Ed25519, in browsers that support it).</p>
           </div>
           {decoded && ['header','payload'].map(k => <div key={k} className="bg-neutral-50 rounded-xl border border-neutral-200 p-4"><div className="text-neutral-500 text-sm mb-2 uppercase">{k}</div><pre className="font-mono text-sm text-indigo-400 overflow-x-auto">{decoded[k]}</pre>{k === 'payload' && decoded.times.length > 0 && <ul className="mt-2 text-sm text-neutral-600">{decoded.times.map(t => <li key={t}>{t}</li>)}</ul>}</div>)}
