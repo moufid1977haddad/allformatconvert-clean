@@ -42,6 +42,7 @@ const LANES = {
     ['big-chromium-ipad-bands', B + 'big-image.mjs', origin, '--device=ipad', '--bands', '--sizes=12,48,20', '--only=jpg,png,pdf', T],
   ],
 };
+LANES.final = LANES.rest.filter(([n]) => /^(dg-|pages-)/.test(n));
 LANES.www = [...LANES.rest.filter(([n]) => /^(dg-|pages-chromium|pages-firefox|pages-webkit$|raw-chromium$|raw-webkit-iphone|big-chromium-iphone)/.test(n)), ...LANES.robust];
 const rows = [];
 for (const [name, ...args] of LANES[lane]) {
