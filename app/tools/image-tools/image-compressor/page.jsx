@@ -5,7 +5,6 @@ import IosOriginalNote from '../../../components/IosOriginalNote';
 import { formatBytes } from '../../../lib/formatBytes';
 import { imageDims } from '../../../lib/bigImage';
 import { imageHeaderSize } from '../../../lib/fileChecks';
-import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 
 const formatSize = formatBytes;
@@ -95,15 +94,20 @@ export default function ImageCompressorPage() {
   const update = (id, patch) => setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)));
 
   // P23 (02/10): a 20 000 × 20 000 PNG (400 MP, 49 KB on disk) kept "Compressing…" for ever (the PNG optimiser on 1.6 GB
-  // of pixels). The size is read from the header first: at most a canvas's largest area (268 MP — a 200 MP Galaxy photo
-  // still passes) on a computer, Image Converter's 50 MP on a phone.
-  const runOne = (worker, it) => new Promise(async (resolve) => {
-    const size = await imageHeaderSize(it.file);
-    const cap = isMobileDevice() ? 50 : 268, mp = size ? (size.width * size.height) / 1e6 : 0;
-    if (mp > cap) {
-      update(it.id, { status: 'error', message: `This image is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round(mp)} megapixels), more than the ${cap}-megapixel limit${cap === 50 ? ' on a phone' : ''}. Use a smaller version of the image.` });
-      return resolve();
+  // of pixels). The size is read from the header first: at most a canvas's largest area, 268 MP, on every device (a
+  // 200 MP Android photo or a 63 MP iPhone panorama still passes — a lower phone bound was not measured for this tool).
+  const UNREADABLE = 'This file could not be read: it may have been moved or changed since you chose it. Choose it again.';
+  const runOne = async (worker, it) => {
+    let size = null;
+    try { size = await imageHeaderSize(it.file); } catch { update(it.id, { status: 'error', message: UNREADABLE }); return; }
+    const mp = size ? (size.width * size.height) / 1e6 : 0;
+    if (mp > 268) {
+      update(it.id, { status: 'error', message: `This image is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round(mp)} megapixels), more than the 268-megapixel limit of a browser canvas. Use a smaller version of the image.` });
+      return;
     }
+    return runInWorker(worker, it);
+  };
+  const runInWorker = (worker, it) => new Promise((resolve) => {
     const onMessage = async (e) => {
       const m = e.data;
       if (m.id !== it.id) return;
@@ -139,7 +143,8 @@ export default function ImageCompressorPage() {
     worker.addEventListener('message', onMessage);
     update(it.id, { status: 'working', pct: 0 });
     // __forceBands: set only by the browser tests, to run the iPhone (band) decode in Firefox.
-    imageDims(it.file).then((dims) => worker.postMessage({ id: it.id, file: it.file, quality, dims, forceBands: !!window.__forceBands, canvasCap: window.__forceSafariCanvasCap === true }));
+    imageDims(it.file).then((dims) => worker.postMessage({ id: it.id, file: it.file, quality, dims, forceBands: !!window.__forceBands, canvasCap: window.__forceSafariCanvasCap === true }))
+      .catch(() => { worker.removeEventListener('message', onMessage); update(it.id, { status: 'error', message: UNREADABLE }); resolve(); });
   });
 
   const compressAll = async () => {
