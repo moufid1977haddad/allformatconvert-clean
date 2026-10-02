@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { checkPromptLength } from '@/lib/quota/limits';
 import { changes, applyChoices } from './diff';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 // The corrected text used to replace the visitor's without showing what changed. Now every change is shown in
 // place (removed words struck through, added words underlined) and can be undone or restored one by one, as
@@ -27,7 +28,7 @@ export default function GrammarFixerPage() {
   const [output, setOutput] = useState('');
   const [undone, setUndone] = useState(() => new Set());
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [copied, setCopied] = useState(false);
 
   const segs = useMemo(() => (output ? changes(sent, output) : []), [sent, output]);

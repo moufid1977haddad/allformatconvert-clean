@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -16,7 +17,7 @@ export default function FindReplacePage() {
   const [result, setResult] = useState('');
   const [hasResult, setHasResult] = useState(false);
   const [count, setCount] = useState(0);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [copyError, setCopyError] = useState(false);
 
   const doReplace = () => {

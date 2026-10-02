@@ -3,10 +3,11 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { jsonToPhpArray, jsonToPhpClass } from '../../../lib/jsonToPhp';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function JsonToPhpPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [mode, setMode] = useState('array');
   const convert = () => {
     try {

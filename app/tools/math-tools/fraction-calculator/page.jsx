@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { parseFraction, fractionOp, describeFraction, fractionSteps, mixedFraction } from '../../../lib/mathTools';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function FractionCalculatorPage() {
   const [n1, setN1] = useState('');
@@ -9,7 +10,7 @@ export default function FractionCalculatorPage() {
   const [n2, setN2] = useState('');
   const [d2, setD2] = useState('');
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [op, setOp] = useState('+');
   // P24 (03/10): optional whole-number parts (mixed numbers) and the working, as Calculator Soup shows them
   const [w1, setW1] = useState('');

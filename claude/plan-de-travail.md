@@ -89,6 +89,16 @@
 | E7 | **Currency Converter : historique et graphique des taux** (xe.com, Wise) : ExchangeRate-API ne donne l'historique qu'en offre payante ; Frankfurter (BCE, gratuit, 30 devises) le donne | 0 $ avec Frankfurter (30 devises seulement) ; ≈ 2 h | **plus tard** : utile mais secondaire, et un deuxième fournisseur à surveiller |
 | E4 | **HTML to PDF depuis une URL** (iLovePDF le fait) : Gotenberg sait (route url) mais une URL saisie par un visiteur expose aux requêtes vers notre réseau interne (SSRF) : liste d'interdiction d'adresses privées et délai à concevoir | 0 $ ; ≈ 2 h + revue de sécurité | oui après le lancement, avec revue de sécurité |
 
+**Décisions prises par le propriétaire le 03/10 (prompt P25, `docs/audit/RAPPORT-p25-decisions-03-10.md`) — toutes OUI, mises en production demandées, y compris en son absence :**
+- **E1** PDF to Word en DOC et RTF — oui ; dépense de test ≤ 0,05 $ (ConvertAPI sur préversion), prouvé sur de vrais PDF rouverts.
+- **E2** PDF/A 1a, 2a, 2u, 3a, 3u — oui ; recherche du moyen des concurrents d'abord ; chaque niveau annoncé **validé par veraPDF** ; s'il faut un moteur payant ou un nouveau service : chiffrer ici avec recommandation, ne pas le faire.
+- **E3** PDF Translate du document entier, mise en page gardée — oui ; meilleur rapport qualité/coût, quota gratuit par visiteur, **plafond global 30 $/mois** (modèle du budget AI Detector), réviseur indépendant ; test ≤ 2 $. Clé ou compte manquant : tout préparer, écrire ici ce que le propriétaire doit créer, aucune fausse promesse.
+- **E4** HTML to PDF depuis une URL — oui, avec protection SSRF (adresses privées, locales, de lien, de métadonnées interdites après résolution DNS et à chaque redirection ; délai et taille max) ; réviseur indépendant (sécurité).
+- **E5** options vidéo (miroir, vitesse, recadrage libre, volume et fondu, H.265/AV1, CRF, boucle du GIF) — oui ; **Railway autorisé pour E5 seulement**, « additif d'abord », version précédente notée, déploiement vérifié avant de brancher les pages ; aucune variable modifiée, aucune dépense.
+- **E6** Password Generator, phrase de passe EFF (7 776 mots, CC BY 3.0) — oui, attribution sur la page, tirage cryptographique sans biais.
+- **E7** Currency Converter, historique et graphique (Frankfurter, BCE) — oui, pour ses devises, annoncé honnêtement.
+- **En plus** : tous les outils branchés sur `reportToolError` (aucune donnée personnelle ni contenu de fichier, plafond), erreur provoquée par un banc vérifiée à l'arrivée.
+
 ## 🛡️ P23 — erreurs réelles des visiteurs + solidité (02/10, `docs/audit/RAPPORT-p23-02-10.md`)
 
 | Quoi | État |

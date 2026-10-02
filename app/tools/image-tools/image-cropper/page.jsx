@@ -6,13 +6,14 @@ import { checkedDataURL } from '../../../lib/mediaSupport';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { FileDownload } from '../../../components/FileDownload';
 import { emptyImageProblem, unreadableImageMessage } from '../../../lib/fileChecks';
+import { useToolError } from '../../../lib/useToolError';
 export default function ImageCropperPage() {
   const [srcType, setSrcType] = useState('image/png');
   const [file, setFile] = useState(null);
   const [image, setImage] = useState(null);
   const [imgDims, setImgDims] = useState({ width: 0, height: 0 });
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [crop, setCrop] = useState({ x: 0, y: 0, w: 100, h: 100 });
   // P24: aspect presets, as ezgif's crop (square, 4:3, 3:2, 16:9, 2:1…): the largest centred box of that shape
   const [ratio, setRatio] = useState('free');

@@ -8,6 +8,7 @@ import { ffmpegAudioDuration } from '../../../lib/audioDuration';
 import PlayablePreview from '../../../components/PlayablePreview';
 import { FileDownload } from '../../../components/FileDownload';
 import { execChecked } from '../../../lib/ffmpegRun';
+import { useToolError } from '../../../lib/useToolError';
 
 // Start and end to a tenth of a second (typed, slid, or taken from the player) and fades in/out, as the reference
 // cutter offers (mp3cut.net, read 26/09/2026: fades, keyboard nudges). The duration used to be rounded down to whole
@@ -32,7 +33,7 @@ export default function AudioTrimmerPage() {
   const [fadeOut, setFadeOut] = useState(0);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   // The browser's own player cannot read every format ffmpeg.wasm can (WMA, AC3, AMR… in every browser; more in
   // Safari): the duration then comes from ffmpeg.wasm itself, and the page says there is no preview (27-28/09/2026:
   // the controls never appeared and nothing was said).

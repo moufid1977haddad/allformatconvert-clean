@@ -12,6 +12,7 @@ import { formatBytes } from '../../../lib/formatBytes';
 import { uprightImage } from '../../../lib/pdfImages';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 const THUMB_SCALE = 0.22;
 const CANVAS_MAX_WIDTH = 640;
@@ -42,7 +43,7 @@ export default function PdfEditorPage() {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [status, setStatus] = useState('');
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [lastMode, setLastMode] = useState('edit');

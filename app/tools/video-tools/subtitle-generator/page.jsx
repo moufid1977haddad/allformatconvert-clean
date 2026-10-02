@@ -3,12 +3,13 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { buildSubtitles } from '../../../lib/subtitleTime';
 import { DownloadGroup, TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function SubtitleGeneratorPage() {
   const [file, setFile] = useState(null);
   const [subtitles, setSubtitles] = useState([{ start: '00:00:00', end: '00:00:05', text: '' }]);
   const [srtContent, setSrtContent] = useState('');
   const [vttContent, setVttContent] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
 
   const handleFile = (e) => { setFile(e.target.files[0]); };

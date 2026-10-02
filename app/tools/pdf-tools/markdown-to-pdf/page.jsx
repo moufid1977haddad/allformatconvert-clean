@@ -6,6 +6,7 @@ import DownloadReady, { useDownloadable } from '../../../components/DownloadRead
 import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import PageSetup, { PAGE_SETUP_DEFAULT, withPageSetup } from '../../../components/PageSetup';
+import { useToolError } from '../../../lib/useToolError';
 
 // A real PDF file (P18, 01/10). The tool used to open the browser's print dialog ("Save as PDF"): on an iPhone or an
 // iPad that is no file at all, and the page itself said "Use Save as PDF in the print dialog". The reference
@@ -54,7 +55,7 @@ export default function MarkdownToPdfPage() {
   const [setup, setSetup] = useState(PAGE_SETUP_DEFAULT);
   const [loading, setLoading] = useState(false);
   const [stage, setStage] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [pdf, offer, clearPdf] = useDownloadable();
   const inputRef = useRef();
 

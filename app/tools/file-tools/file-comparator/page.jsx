@@ -2,11 +2,12 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { formatBytes } from '../../../lib/formatBytes';
+import { useToolError } from '../../../lib/useToolError';
 export default function FileComparatorPage() {
   const [file1, setFile1] = useState(null);
   const [file2, setFile2] = useState(null);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
   const ref1 = useRef();

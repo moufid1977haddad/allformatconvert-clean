@@ -5,6 +5,7 @@ import { runStagedToolResult, mediaServiceConfigured, MediaJobError } from '../.
 import { webgpuAvailable, readImage, localOutputProblem, upscaleInBrowser, serverSecondsFor, serverNeedsParts, upscaleOnServerInParts } from '../../../lib/localUpscale';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 // Input ceiling, the free offers' level (iLoveIMG 6 Mpx, Upscale.media 6.25 Mpx without an account; 28/09),
 // checked here BEFORE any work. The same on our server (UPSCALE_MAX_INPUT_PIXELS) and on this device.
@@ -22,7 +23,7 @@ export default function ImageUpscalerPage() {
   const [phase, setPhase] = useState('');
   const [pct, setPct] = useState(0);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [split, setSplit] = useState(50);
   const [where, setWhere] = useState(''); // 'device' | 'server'
   const [offerServer, setOfferServer] = useState(0); // server seconds, offered when this device looks much slower

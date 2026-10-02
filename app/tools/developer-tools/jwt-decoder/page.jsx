@@ -3,10 +3,11 @@ import { useRef, useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { reformatJson } from '../../../lib/jsonText';
 import { verifyJwt } from '../../../lib/jwtVerify';
+import { useToolError } from '../../../lib/useToolError';
 export default function JwtDecoderPage() {
   const [token, setToken] = useState('');
   const [decoded, setDecoded] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   // P24 (03/10): signature verification, as jwt.io does it — locally, with WebCrypto (app/lib/jwtVerify.js)
   const [key, setKey] = useState('');
   const [secretEncoding, setSecretEncoding] = useState('utf8');

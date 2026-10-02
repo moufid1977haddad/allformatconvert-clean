@@ -5,13 +5,14 @@ import SeoContent from '../../../components/SeoContent';
 import { addImagePage } from '../../../lib/pdfImages';
 import { FileDownload } from '../../../components/FileDownload';
 import ImagePageLayout, { DEFAULT_IMAGE_LAYOUT } from '../../../components/ImagePageLayout';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function Page() {
   const [files, setFiles] = useState([]);
   const [layout, setLayout] = useState(DEFAULT_IMAGE_LAYOUT); // P24: page size, orientation, margin
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const fileRef = useRef();
 
   const handleFiles = (e) => { const newFiles = Array.from(e.target.files); e.target.value = ''; setFiles(newFiles); setResult(null); };

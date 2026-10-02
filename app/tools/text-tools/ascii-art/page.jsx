@@ -3,6 +3,7 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import figlet from 'figlet';
 import { TextDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 // Each font is loaded only when chosen (FIGlet fonts, figlet npm package, MIT).
 const FONTS = {
@@ -45,7 +46,7 @@ export default function AsciiArtPage() {
           {result && (
             <div className="space-y-2">
               <pre className="w-full bg-neutral-50 rounded-xl border border-neutral-200 p-4 text-xs font-mono overflow-x-auto">{result}</pre>
-              <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button>
+              <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => { setCopyError(true); reportShownMessage('Copy to the clipboard failed.'); }); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button>
               {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
               <TextDownload text={result} name="ascii-art.txt" />
             </div>

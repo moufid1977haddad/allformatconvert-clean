@@ -10,6 +10,7 @@ import { runMediaJob } from '../../../lib/mediaJob';
 import { reportToolError } from '../../../lib/reportError';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 // 30/09 (owner's iPhone): the rotator replayed the video in a <canvas> and recorded it with MediaRecorder -- in real
 // time, with the source playing full screen on iPhone, a WebM that Photos cannot open, heavier than the original.
@@ -32,7 +33,7 @@ export default function VideoRotatorPage() {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [result, setResult] = useState(null);
   const [stage, setStage] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [canCancel, setCanCancel] = useState(false);
   const inputRef = useRef();
   const abortRef = useRef(null);

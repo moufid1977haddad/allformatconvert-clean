@@ -9,6 +9,7 @@ import { reportToolError } from '../../../lib/reportError';
 import { runMediaJob, mediaServiceConfigured } from '../../../lib/mediaJob';
 import PlayablePreview from '../../../components/PlayablePreview';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function AudioConverterPage() {
   const [file, setFile] = useState(null);
@@ -19,7 +20,7 @@ export default function AudioConverterPage() {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const fileRef = useRef();
   const ffmpegRef = useRef(null);
 

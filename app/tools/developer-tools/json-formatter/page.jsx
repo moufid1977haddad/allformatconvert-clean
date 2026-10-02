@@ -3,10 +3,11 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { reformatJson, jsonErrorPosition, sortJsonKeys } from '../../../lib/jsonText';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function JsonFormatterPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   // Re-indents the original text (app/lib/jsonText.js) instead of JSON.stringify(JSON.parse(...)),
   // which silently turned 12345678901234567890 into 12345678901234567000 and 1.10 into 1.1.
   // P24 (03/10): indentation choice, keys sorted, and the error's line / column with the line shown (jsonformatter.org)

@@ -5,13 +5,14 @@ import { MAX_IMAGE_CAPTIONER_ORIGINAL_BYTES } from '@/lib/quota/limits';
 import { imageToVisionJpeg } from '../../../lib/imageForVision';
 import { formatBytes } from '../../../lib/formatBytes';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 const MAX_MB = MAX_IMAGE_CAPTIONER_ORIGINAL_BYTES / (1024 * 1024);
 
 export default function ImageCaptionerPage() {
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [preview, setPreview] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const fileRef = useRef();

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { lorem } from '../../../lib/textTools';
 import { TextDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 export default function LoremIpsumPage() {
   const [count, setCount] = useState(1);
@@ -11,7 +12,7 @@ export default function LoremIpsumPage() {
   const [hasResult, setHasResult] = useState(false);
   const [copyError, setCopyError] = useState(false);
   const generate = () => {
-    try { setResult(lorem(count, type)); } catch (e) { setResult(''); }
+    try { setResult(lorem(count, type)); } catch (e) { reportShownMessage(e); setResult(''); }
     setHasResult(true);
   };
   return (
@@ -39,7 +40,7 @@ export default function LoremIpsumPage() {
             <div className="space-y-2">
               <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={result} readOnly />
               <TextDownload text={result} name="lorem-ipsum.txt" />
-              <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button>
+              <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => { setCopyError(true); reportShownMessage('Copy to the clipboard failed.'); }); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button>
               {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
             </div>
           ) : (

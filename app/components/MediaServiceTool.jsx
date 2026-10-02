@@ -11,6 +11,7 @@ import IosOriginalNote from './IosOriginalNote';
 import PlayablePreview from './PlayablePreview';
 import { formatBytes } from '../lib/formatBytes';
 import { FileDownload } from './FileDownload';
+import { useToolError } from '../lib/useToolError';
 
 // Shared UI of the tools that run on the media-processing service
 // (video-compressor, video-converter). The engine is the service; the browser
@@ -34,7 +35,7 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
   const [stage, setStage] = useState(null); // {stage, pct, position}
   const [result, setResult] = useState(null);
   const [notSmaller, setNotSmaller] = useState(null); // compress: {inputBytes, outputBytes} when nothing smaller exists
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [previewUrl, setPreviewUrl] = useState(null);
   // P24 review (03/10): the media's duration, read locally, so a tool can check its times against it (a GIF asked from
   // 10 s for 5 s of a 12-s video came back 2 s long without a word). NaN when this browser cannot read it.

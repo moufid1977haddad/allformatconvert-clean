@@ -3,10 +3,11 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { dotenvToJson, jsonToDotenv } from '../../../lib/dotenv';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function EnvToJsonPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [note, setNote] = useState('');
   const [types, setTypes] = useState(false);
   const [expandVars, setExpandVars] = useState(false);

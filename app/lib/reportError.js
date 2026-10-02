@@ -15,6 +15,19 @@ import { isChunkLoadError, announceNewVersion } from './chunkError';
 
 const REPORT_ENDPOINT = '/api/report-error';
 const MAX_MESSAGE_LENGTH = 300;
+// P25 (03/10): every tool reports now, so a page that loops on an error must not flood tool_errors. In one tab, the
+// same (tool, type, message) is sent once and a tool sends at most MAX_REPORTS_PER_TOOL reports; the server adds its
+// own per-visitor and global daily caps (lib/quota/toolErrorRateLimit.js).
+const MAX_REPORTS_PER_TOOL = 5;
+const sentKeys = new Set();
+const sentPerTool = new Map();
+// When a tool reported a thrown failure itself, the message it shows for that same failure (useToolError) is not
+// sent again: one failure, one row.
+const lastFailureAt = new Map();
+export function failureReportedRecently(tool, ms) {
+  const t = lastFailureAt.get(tool);
+  return typeof t === 'number' && Date.now() - t < ms;
+}
 
 export function extOf(fileName) {
   if (!fileName || typeof fileName !== 'string') return null;
@@ -59,6 +72,10 @@ export function parseBrowserLabel(userAgent) {
 export function sanitizeErrorMessage(message, fileName) {
   if (typeof message !== 'string' || !message) return '';
   let out = message.slice(0, 2000); // cheap upfront cap before any regex work
+  // P25: URLs and e-mail addresses first, before the path sweep below turns "https://host/a/b" into "https:[path]".
+  out = out
+    .replace(/\b[a-z][a-z0-9+.-]{1,20}:\/\/[^\s"'<>]+/gi, '[url]')
+    .replace(/[^\s"'<>()@]{1,64}@[^\s"'<>()@]{1,255}\.[a-z]{2,}/gi, '[email]');
 
   if (fileName && typeof fileName === 'string') {
     const stem = fileName.replace(/\.[^./\\]+$/, '');
@@ -90,6 +107,14 @@ export function sanitizeErrorMessage(message, fileName) {
     .replace(/(^|[\s"'()<>])([^\s"'()<>]{1,200}\.[A-Za-z0-9]{2,5})(?=[\s"'()<>]|$)/g, (m, pre, token) =>
       pre + (/^(e\.g|i\.e|etc)\.[a-z]{1,3}$/i.test(token) ? token : '[file]')
     )
+    // P25 (03/10): every tool now reports the messages it shows, and some carry what the visitor typed or pasted
+    // (V8's JSON error quotes the text: `Unexpected token 'h', "hello" is not valid JSON`; a currency code, a regex,
+    // a URL to convert). Quoted spans, URLs, e-mail addresses and long digit runs are replaced as well -- over-redacting
+    // a diagnostic message is the safe direction. A quote opens only after a separator and closes before one, so a
+    // contraction ("isn't", "it's") is not mistaken for a quote. Placeholders already written are kept.
+    .replace(/(^|[\s(\[:,=])(["'`‘“«])([^\r\n]{0,200}?)(["'`’”»])(?=$|[\s).,:;\]!?])/g,
+      (m, pre, open, inner, close) => (/^\[(file|path|url|email|text|number)\]$/.test(inner) ? m : `${pre}${open}[text]${close}`))
+    .replace(/\d[\d\s.-]{5,}\d/g, (m) => (m.replace(/\D/g, '').length >= 7 ? '[number]' : m))
     .replace(/\s+/g, ' ')
     .trim();
 
@@ -103,9 +128,9 @@ export function sanitizeErrorMessage(message, fileName) {
 // error object -- is swallowed. Never call this with `await` expecting it
 // to matter; it deliberately returns undefined, not a promise.
 /**
- * @param {{ tool: string, source?: 'browser'|'server', file?: {name?: string, size?: number} | null, error?: Error | string | null | undefined, detectedExt?: string | null }} args
+ * @param {{ tool: string, source?: 'browser'|'server', file?: {name?: string, size?: number} | null, error?: Error | string | null | undefined, detectedExt?: string | null, errorType?: string }} args
  */
-export function reportToolError({ tool, source = 'browser', file = null, error, detectedExt = null }) {
+export function reportToolError({ tool, source = 'browser', file = null, error, detectedExt = null, errorType = null }) {
   try {
     // A code file of an older version of the site could not be loaded: the page is out of date, not the
     // tool broken -- offer a reload (NewVersionBanner) instead of filling tool_errors.
@@ -124,10 +149,15 @@ export function reportToolError({ tool, source = 'browser', file = null, error, 
       // docs/audit/RAPPORT-tiff-paint.md.
       detectedExt: typeof detectedExt === 'string' ? detectedExt.slice(0, 10) : null,
       sizeBucket: file && typeof file.size === 'number' ? sizeBucket(file.size) : null,
-      errorType: (error && typeof error.name === 'string' && error.name) || 'Error',
+      errorType: (typeof errorType === 'string' && /^[A-Za-z0-9_]{1,60}$/.test(errorType) && errorType) || (error && typeof error.name === 'string' && /^[A-Za-z0-9_]{1,60}$/.test(error.name) && error.name) || 'Error',
       errorMessage: sanitizeErrorMessage(message, file && file.name),
       browser: typeof navigator !== 'undefined' ? parseBrowserLabel(navigator.userAgent) : 'unknown',
     };
+    if (payload.errorType !== 'ToolMessage') lastFailureAt.set(payload.tool, Date.now());
+    const key = `${payload.tool}|${payload.errorType}|${payload.errorMessage}`;
+    if (sentKeys.has(key) || (sentPerTool.get(payload.tool) || 0) >= MAX_REPORTS_PER_TOOL) return;
+    sentKeys.add(key);
+    sentPerTool.set(payload.tool, (sentPerTool.get(payload.tool) || 0) + 1);
     const body = JSON.stringify(payload);
 
     if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {

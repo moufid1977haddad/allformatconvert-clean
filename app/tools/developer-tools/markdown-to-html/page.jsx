@@ -3,6 +3,7 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { markdownToHtml } from '../../../lib/codeTools';
 import { TextDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 export default function MarkdownToHtmlPage() {
   const [input, setInput] = useState('');
@@ -11,7 +12,7 @@ export default function MarkdownToHtmlPage() {
     try {
       const html = await markdownToHtml(input);
       setOutput('<!DOCTYPE html>\n<html>\n<head><meta charset="utf-8"></head>\n<body>\n' + html + '</body>\n</html>');
-    } catch (e) { setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
+    } catch (e) { reportShownMessage(e); setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

@@ -8,6 +8,7 @@ import { runStagedToolResult, mediaServiceConfigured, MediaJobError } from '../.
 import { MAX_PDF_COMPRESS_STAGED_BYTES, OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 const MIB = 1024 * 1024;
 const SERVER_MAX_LABEL = `${Math.round(MAX_PDF_COMPRESS_STAGED_BYTES / MIB)} MB`;
@@ -24,7 +25,7 @@ export default function PdfCompressPage() {
   const [file, setFile] = useState(null);
   const [level, setLevel] = useState('recommended');
   const [status, setStatus] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);

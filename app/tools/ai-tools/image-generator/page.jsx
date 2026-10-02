@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 const MAX_CHARS = 1000;
 const PER_DAY = 5; // lib/quota/imageGen.js IMAGE_GEN_PER_IP_PER_DAY
@@ -20,7 +21,7 @@ export default function ImageGeneratorPage() {
   const [prompt, setPrompt] = useState('');
   const [size, setSize] = useState('1024x1024');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [result, setResult] = useState(null);
 
   const generate = async () => {

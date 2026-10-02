@@ -7,6 +7,7 @@ import { parseCsvRows, detectDelimiter, CSV_DELIMITERS } from '../../../lib/csvP
 import { detectEncoding } from '../../../lib/csvEncoding';
 import CsvReadOptions from '../../../components/CsvReadOptions';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 // The shared, quote-aware parser (app/lib/csvParser.js) with the delimiter
 // detected like every other CSV tool -- before 28/09 this page split on ',' only,
@@ -32,7 +33,7 @@ export default function CsvToTsvPage() {
   const [detectedDelimiter, setDetectedDelimiter] = useState(',');
   const [encodingChoice, setEncodingChoice] = useState('auto');
   const [detectedEncoding, setDetectedEncoding] = useState('utf-8');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
 
   const decodeFile = (bytes, enc) => new TextDecoder(enc).decode(bytes);

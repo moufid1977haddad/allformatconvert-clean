@@ -5,12 +5,13 @@ import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRas
 import { rasterFromRGBA } from '../../../lib/bigImage';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function BMPtoPNGPage() {
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
   const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setFile(f); setResult(null); setError(''); } };
   const convert = async () => {

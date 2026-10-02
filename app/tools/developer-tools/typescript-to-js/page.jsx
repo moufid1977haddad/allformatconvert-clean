@@ -3,12 +3,13 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { typescriptToJs } from '../../../lib/codeTools';
 import { TextDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 export default function TypescriptToJsPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const convert = async () => {
-    try { setOutput(await typescriptToJs(input, { jsx: /<\/?[A-Za-z][^>]*>/.test(input) && /return\s*\(?\s*</.test(input) })); } catch (e) { setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
+    try { setOutput(await typescriptToJs(input, { jsx: /<\/?[A-Za-z][^>]*>/.test(input) && /return\s*\(?\s*</.test(input) })); } catch (e) { reportShownMessage(e); setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

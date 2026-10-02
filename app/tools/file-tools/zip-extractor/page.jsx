@@ -5,6 +5,7 @@ import ProgressBar from '../../../components/ProgressBar';
 import { reportToolError } from '../../../lib/reportError';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { BATCH_BYTES, MOBILE_BATCH_BYTES, MAX_FILE_BYTES, MAX_FILE_LABEL, MOBILE_MAX_FILE_BYTES, MOBILE_MAX_FILE_LABEL, ZIP_IN_MEMORY_MAX, ZIP_IN_MEMORY_LABEL } from './config';
+import { useToolError } from '../../../lib/useToolError';
 
 // Decimal units, like the caps shown on the page ("up to 1.9 GB" = 1 900 000 000 bytes): a file listed at 1.95 GB
 // is over it, not "1.82 GB" in binary units that would look under it.
@@ -43,7 +44,7 @@ export default function ZipExtractorPage() {
   const [pwRetry, setPwRetry] = useState(false);
   const [progress, setProgress] = useState(null); // { pct, label }
   const [rowBusy, setRowBusy] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [warning, setWarning] = useState('');
   const [status, setStatus] = useState('');
   const [dragging, setDragging] = useState(false);

@@ -5,6 +5,7 @@ import SeoContent from '../../../components/SeoContent';
 import { itemsToText } from '../../../lib/pdfTextLayout';
 import { diffLines } from '../../../lib/codeTools';
 import { loadPdfjs } from '../../../lib/pdfjs';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function Page() {
   const [file1, setFile1] = useState(null);
@@ -12,7 +13,7 @@ export default function Page() {
   const [text1, setText1] = useState('');
   const [text2, setText2] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [diff, setDiff] = useState(null);
   const file1Ref = useRef();
   const file2Ref = useRef();

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 // Audit 2 (29/09). Before: every field started empty and was written back empty, so the values already in a form were
 // wiped; checkboxes, radio buttons and dropdowns were shown as text boxes whose input was silently dropped; the form
@@ -30,7 +31,7 @@ export default function Page() {
   const [values, setValues] = useState({});
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [flatten, setFlatten] = useState(false);
   const [changed, setChanged] = useState({});
   const fileRef = useRef();

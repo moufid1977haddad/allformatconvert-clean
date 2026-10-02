@@ -8,6 +8,7 @@ import ProgressBar from '../../../components/ProgressBar';
 import { reportToolError } from '../../../lib/reportError';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 const LANGUAGES = [
   { code: 'afr', label: "Afrikaans" },
@@ -227,7 +228,7 @@ export default function Page() {
   const [langFilter, setLangFilter] = useState('');
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [downloadPct, setDownloadPct] = useState(0);
   const [downloadLabel, setDownloadLabel] = useState('');
   const [pagePct, setPagePct] = useState(0);

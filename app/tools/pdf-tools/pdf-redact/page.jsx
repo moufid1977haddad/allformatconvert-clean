@@ -7,6 +7,7 @@ import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 import { matchSpans, annotationText, patternSpans, annotationMatches, termsOf, PATTERNS } from '../../../lib/pdfRedact';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -14,7 +15,7 @@ export default function Page() {
   const [kinds, setKinds] = useState([]); // P24: automatic patterns (e-mail, phone, card numbers)
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [summary, setSummary] = useState('');
   const fileRef = useRef();
 

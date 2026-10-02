@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { FileDownload } from '../../../components/FileDownload';
 import { unreadableImageMessage } from '../../../lib/fileChecks';
+import { useToolError } from '../../../lib/useToolError';
 
 // P24 (03/10): Windows also uses 24, 64 and 128 px icons (CloudConvert and icoconvert offer them); the first four stay
 // selected by default, as before.
@@ -70,7 +71,7 @@ export default function PngToIcoPage() {
   const [status, setStatus] = useState('');
   // P23: an error was shown in light yellow (text-yellow-400: unreadable on white, no alert role), and as
   // "could not load image file" whatever the cause; now the exact sentence, in red, announced.
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
 
   const handleFile = (e) => {

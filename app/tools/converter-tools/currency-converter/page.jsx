@@ -1,6 +1,8 @@
 ﻿'use client';
 import { useState, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import RateHistory from './RateHistory';
+import { useToolError } from '../../../lib/useToolError';
 
 // Rates: ExchangeRate-API's documented no-key "Open Access" endpoint (v6) -- 166 currencies, refreshed daily,
 // commercial use allowed, attribution required (link below the result). Chosen 2026-09-23 after checking the
@@ -32,7 +34,7 @@ export default function CurrencyConverterPage() {
   const [to, setTo] = useState('EUR');
   const [rates, setRates] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [lastUpdate, setLastUpdate] = useState('');
   const [nextUpdate, setNextUpdate] = useState('');
 
@@ -122,10 +124,13 @@ export default function CurrencyConverterPage() {
           )}
           <button onClick={loadRates} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl py-2 font-semibold transition">Refresh Rates</button>
         </div>
+        <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 mt-6">
+          <RateHistory from={from} to={to} />
+        </div>
       </div>
       <SeoContent
         title="Currency Converter"
-        description="Currency Converter converts between 166 world currencies, each shown with its full name, using exchange rates fetched directly in your browser from ExchangeRate-API (exchangerate-api.com). The rates are refreshed once a day, not in real time: the result shows when they were published and when the next update is due."
+        description="Currency Converter converts between 166 world currencies, each shown with its full name, using exchange rates fetched directly in your browser from ExchangeRate-API (exchangerate-api.com). The rates are refreshed once a day, not in real time: the result shows when they were published and when the next update is due. A chart shows the rate history over 1 week to 10 years, with its high, low, average and change, from the daily reference rates of central banks (Frankfurter) — for 158 of the 166 currencies."
         howTo={[
           "Enter the amount you want to convert.",
           "Select your source currency from the \"From\" dropdown.",
@@ -136,7 +141,8 @@ export default function CurrencyConverterPage() {
           { q: "Is Currency Converter free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "How often are the exchange rates updated?", a: "Rates come from a free public exchange-rate API that's typically refreshed roughly once a day — not continuously throughout the day." },
           { q: "Which currencies are supported?", a: "166 currencies — every currency with a published daily rate, from USD, EUR, GBP and JPY to the Moroccan dirham, the Nigerian naira or the Vietnamese dong. The most used ones are listed first, then all the others alphabetically, each with its full name." },
-          { q: "Is my data private?", a: "Yes. Your browser downloads the day's full rate table from the exchange-rate API (the same request for every visitor); the amount and the currencies you choose are never sent anywhere — the conversion is calculated in your browser." }
+          { q: "Can I see the history of an exchange rate?", a: "Yes. Below the converter, a chart shows the rate between your two currencies over 1 week, 1 month, 6 months, 1 year, 5 years or 10 years, with its high, low, average and change over the period; hover or touch the chart to read the rate of a given day, or download it as CSV. The history comes from Frankfurter, which publishes the daily reference rates of central banks (the European Central Bank first). It covers 158 of the 166 currencies: BGN, CLF, FOK, HRK, KID, SLL, TVD and ZWL have no history there, and a few currencies start later (for example ZWG in 2024) — the page says so instead of drawing a partial chart without warning. These are daily reference rates, not intraday quotes, so they can differ slightly from the live rate shown above." },
+          { q: "Is my data private?", a: "Yes. Your browser downloads the day's full rate table from the exchange-rate API (the same request for every visitor); the amount and the currencies you choose are never sent anywhere — the conversion is calculated in your browser. For the history chart, your browser asks Frankfurter for the rates of the two currencies you chose (no amount is sent)." }
         ]}
         tips={[
           "Click \"Refresh Rates\" if you've had the page open a while, to make sure you're using the latest available rates.",

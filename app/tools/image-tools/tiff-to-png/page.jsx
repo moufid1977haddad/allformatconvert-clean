@@ -6,6 +6,7 @@ import { TIFF_DECODE_TIMEOUT_MS, TIFF_DECODE_TIMEOUT_MESSAGE } from '../../../li
 import { reportToolError, extOf } from '../../../lib/reportError';
 import { describeFormatMismatch } from '../../../lib/detectFileFormat';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 const GENERIC_DECODE_ERROR = "This TIFF file couldn't be read. It may be corrupted, or use a rare TIFF variant this tool doesn't support. Try re-saving it with different settings (e.g. Deflate/ZIP compression) in an image editor, or try a different file.";
 const GENERIC_WORKER_ERROR = 'Something went wrong while converting this file. Please try again, or try a different file.';
@@ -15,7 +16,7 @@ export default function TiffToPngPage() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [mismatch, setMismatch] = useState(null);
   // P24 review (03/10): a multi-page TIFF (fax, scan) is said, and any page can be converted; a colour profile is not
   // applied, and said

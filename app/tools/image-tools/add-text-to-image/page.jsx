@@ -7,6 +7,7 @@ import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
 import AnimatedImageNote from '../../../components/AnimatedImageNote';
+import { useToolError } from '../../../lib/useToolError';
 
 // P24 (03/10): iLoveIMG's text (watermark / meme) offers fonts, size, colour, shadow, opacity; ezgif adds outline and
 // rotation. Fonts are system stacks with fallbacks (a font missing on the device falls back to a similar one).
@@ -37,7 +38,7 @@ export default function AddTextToImagePage() {
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
 
   const handleFile = (e) => {

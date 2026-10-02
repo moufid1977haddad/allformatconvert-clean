@@ -6,6 +6,7 @@ import DownloadReady, { useDownloadable } from '../../../components/DownloadRead
 import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import PageSetup, { PAGE_SETUP_DEFAULT, withPageSetup } from '../../../components/PageSetup';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function HtmlToPdfPage() {
   const [file, setFile] = useState(null);
@@ -13,7 +14,7 @@ export default function HtmlToPdfPage() {
   const [loading, setLoading] = useState(false);
   const [stage, setStage] = useState(null);
   const [done, setDone] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [mode, setMode] = useState('file');
   const [setup, setSetup] = useState(PAGE_SETUP_DEFAULT);
   const inputRef = useRef();

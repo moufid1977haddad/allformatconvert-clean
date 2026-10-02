@@ -4,11 +4,12 @@ import SeoContent from '../../../components/SeoContent';
 import { SEO } from './seo';
 import { sqlInsertsToCsv } from './sqlToCsv';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function SqlToCsvPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [tables, setTables] = useState(null); // several tables in the dump: the visitor picks one (P24)
   const convert = (pick) => {
     try {

@@ -5,6 +5,7 @@ import SeoContent from '../../../components/SeoContent';
 import { decodeAnyAudio } from '../../../lib/decodeAudio';
 import { AUDIO_ACCEPT, checkedDataURL, encryptedMusicMessage } from '../../../lib/mediaSupport';
 import { saveBlob } from '../../../lib/download';
+import { useToolError } from '../../../lib/useToolError';
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 200;
@@ -12,7 +13,7 @@ const MAX_ZOOM = 200;
 export default function AudioWaveformPage() {
   const [file, setFile] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [view, setView] = useState({ zoom: 1, start: 0 });
   // P24 (03/10): image size, colours and a transparent background (ezgif's waveform: width, height, colours,
   // transparency); the exported PNG is drawn at the chosen size, not copied from the 800-px preview

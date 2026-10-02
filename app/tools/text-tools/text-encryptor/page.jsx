@@ -3,6 +3,7 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { encryptText, decryptText } from '../../../lib/textCrypto';
 import { TextDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 export default function TextEncryptorPage() {
   const [text, setText] = useState('');
@@ -12,14 +13,14 @@ export default function TextEncryptorPage() {
   const [copyError, setCopyError] = useState(false);
   const encrypt = async () => {
     try { setResult(await encryptText(text, key)); setNote(''); }
-    catch (e) { setResult(''); setNote(e.message); }
+    catch (e) { reportShownMessage(e); setResult(''); setNote(e.message); }
   };
   const decrypt = async () => {
     try {
       const r = await decryptText(text, key);
       setResult(r.text);
       setNote(r.legacy ? 'Decrypted from the old XOR format this tool used before 29 September 2026. That format is weak: encrypt the text again to protect it with AES-256.' : '');
-    } catch (e) { setResult(''); setNote(e.message); }
+    } catch (e) { reportShownMessage(e); setResult(''); setNote(e.message); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -41,7 +42,7 @@ export default function TextEncryptorPage() {
             <div className="space-y-2">
               <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none" value={result} readOnly />
               <TextDownload text={result} name="encrypted.txt" />
-              <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => setCopyError(true)); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button>
+              <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => { setCopyError(true); reportShownMessage('Copy to the clipboard failed.'); }); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button>
               {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
             </div>
           )}

@@ -66,4 +66,13 @@ assert.strictEqual(parseBrowserLabel('Mozilla/5.0 ... Firefox/131.0'), 'Firefox 
 assert.strictEqual(parseBrowserLabel('Mozilla/5.0 ... Edg/129.0.0.0'), 'Edge 129');
 assert.strictEqual(parseBrowserLabel('garbage'), 'unknown');
 
+// P25 (03/10): what a visitor typed must not travel inside a shown message.
+assert.strictEqual(sanitizeErrorMessage('Invalid JSON: Unexpected token \'h\', "hello my secret" is not valid JSON', null), "Invalid JSON: Unexpected token '[text]', \"[text]\" is not valid JSON");
+assert.strictEqual(sanitizeErrorMessage('Could not load https://intranet.example.com/a/b?token=abc', null), 'Could not load [url]');
+assert.strictEqual(sanitizeErrorMessage('No account for jane.doe@example.org here', null), 'No account for [email] here');
+assert.strictEqual(sanitizeErrorMessage('Card 4111 1111 1111 1111 refused, call +1 514-555-0199', null), 'Card [number] refused, call +[number]');
+assert.strictEqual(sanitizeErrorMessage("This file isn't a PDF and it's empty", null), "This file isn't a PDF and it's empty");
+assert.strictEqual(sanitizeErrorMessage('Line 12, column 8: error 404 at position 1234', null), 'Line 12, column 8: error 404 at position 1234');
+assert.strictEqual(sanitizeErrorMessage('The file “my notes” is empty', null), 'The file “[text]” is empty');
+
 console.log('All app/lib/reportError.js sanitizer checks passed.');

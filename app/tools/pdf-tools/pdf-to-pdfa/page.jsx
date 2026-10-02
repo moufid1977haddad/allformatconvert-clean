@@ -5,6 +5,7 @@ import { runStagedToolResult } from '../../../lib/mediaJob';
 import { checkPdfToolsSize, pdfToolsMaxLabel, shouldStage } from '../../../lib/officeUpload';
 import ProgressBar from '../../../components/ProgressBar';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 // Real ceiling (hosting-platform payload gate), not the 50 MB the route itself would
 // accept -- see lib/quota/limits.js.
@@ -15,7 +16,7 @@ export default function PdfToPdfaPage() {
   const [conformance, setConformance] = useState('2b');
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [result, setResult] = useState(null); // { compliant, conformance, verapdf }
   const [downloadUrl, setDownloadUrl] = useState(null);
   const inputRef = useRef();

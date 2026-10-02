@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 import { FileDownload } from '../../../components/FileDownload';
 import { parsePageRange } from '../../../lib/pageRange';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function PdfDeletePagesPage() {
   const [file, setFile] = useState(null);
@@ -12,7 +13,7 @@ export default function PdfDeletePagesPage() {
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
 
   const handleFile = async (e) => {

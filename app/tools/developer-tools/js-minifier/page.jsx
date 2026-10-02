@@ -3,12 +3,13 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { minifyJs } from '../../../lib/codeTools';
 import { TextDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 export default function JsMinifierPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const minify = async () => {
-    try { setOutput(await minifyJs(input)); } catch (e) { setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
+    try { setOutput(await minifyJs(input)); } catch (e) { reportShownMessage(e); setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

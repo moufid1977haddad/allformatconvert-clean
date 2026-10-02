@@ -10,6 +10,7 @@ import IosOriginalNote from '../../../components/IosOriginalNote';
 import PlayablePreview from '../../../components/PlayablePreview';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 // Precise cut, 28/09: re-encoding in ffmpeg.wasm measured ~3.7 s per second of 1080p in Chrome but ~29 s in
 // Firefox (292 s for 10 s). The reference way to cut fast AND exact (LosslessCut's "smart cut") re-encodes only
@@ -54,7 +55,7 @@ export default function VideoTrimmerPage() {
   const [end, setEnd] = useState(10);
   const [result, setResult] = useState(null);
   const [status, setStatus] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [isMobile, setIsMobile] = useState(false);
   const [noPreview, setNoPreview] = useState(false);
   // Fast (default): stream copy, lossless, starts on the keyframe at or before the start. Precise: re-encoded to

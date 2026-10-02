@@ -4,12 +4,13 @@ import SeoContent from '../../../components/SeoContent';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { MAX_SPREADSHEET_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function ExcelToPdfPage() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [stage, setStage] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   // P24 (03/10): each sheet on one page (Gotenberg singlePageSheets), for sheets wider than a page
   const [onePage, setOnePage] = useState(false);
   const [done, setDone] = useState(false);

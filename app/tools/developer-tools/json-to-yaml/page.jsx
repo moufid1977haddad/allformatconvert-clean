@@ -3,10 +3,11 @@ import { useState } from 'react';
 import { jsonToYaml } from '../../../lib/yamlJson';
 import SeoContent from '../../../components/SeoContent';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function JsonToYamlPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const convert = () => {
     try {
       setOutput(jsonToYaml(input));

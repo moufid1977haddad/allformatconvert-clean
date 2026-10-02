@@ -3,13 +3,14 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function PdfProtectPage() {
   const [file, setFile] = useState(null);
   const [password, setPassword] = useState('');
   const [ownerPassword, setOwnerPassword] = useState('');
   const [perm, setPerm] = useState({ printing: 'highResolution', copying: false, modifying: false, annotating: false, fillingForms: true, documentAssembly: false });
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState(null);

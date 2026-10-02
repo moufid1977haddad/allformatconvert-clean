@@ -4,10 +4,11 @@ import { parse } from 'smol-toml';
 import SeoContent from '../../../components/SeoContent';
 import { SEO } from './seo';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function TomlToJsonPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [notice, setNotice] = useState('');
   // P24 (03/10): a 64-bit integer (9007199254740993) was refused ("cannot be represented losslessly") and inf / nan became
   // null without a word. Integers are now read exactly (BigInt when needed) and written digit for digit; inf / nan,

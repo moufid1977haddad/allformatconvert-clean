@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import ToolTitleIcon from './ToolTitleIcon';
+import ToolErrorWatch from './ToolErrorWatch';
 import { getToolCounts } from "@/lib/toolCounts";
 
 const { total: totalTools } = getToolCounts();
@@ -22,6 +23,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <ToolTitleIcon />
+      <ToolErrorWatch />
       {children}
     </>
   );

@@ -6,6 +6,7 @@ import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 import { carryOver, carryOutline } from '../../../lib/pdfCarryOver';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -13,7 +14,7 @@ export default function Page() {
   const [order, setOrder] = useState([]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const fileRef = useRef();
 
   const handleFile = async (e) => {

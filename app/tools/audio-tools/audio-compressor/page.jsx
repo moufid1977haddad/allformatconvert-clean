@@ -10,6 +10,7 @@ import PlayablePreview from '../../../components/PlayablePreview';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
 import { execChecked } from '../../../lib/ffmpegRun';
+import { useToolError } from '../../../lib/useToolError';
 
 // kb/s of the source's audio: the stream's own figure from ffmpeg ("Audio: aac …, 57 kb/s"), else the file's average.
 function sourceKbps(log, bytes) {
@@ -29,7 +30,7 @@ export default function AudioCompressorPage() {
   const [sampleRate, setSampleRate] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const fileRef = useRef();
 
   const handleFile = (e) => { const f = e.target.files[0];

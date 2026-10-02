@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
 import { imageHeaderSize, OPENABLE_PIXELS } from '../../../lib/fileChecks';
+import { useToolError } from '../../../lib/useToolError';
 export default function GifCompressorPage() {
   const [file, setFile] = useState(null);
   const [quality, setQuality] = useState(80);
@@ -12,7 +13,7 @@ export default function GifCompressorPage() {
   const [scale, setScale] = useState(100);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
 
   const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setResult(null); };

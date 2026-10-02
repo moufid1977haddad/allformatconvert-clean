@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { parseBaseNumber, formatBaseNumber } from '../lib/exactNumbers';
+import { reportShownMessage } from '../lib/useToolError';
 
 // P24 (03/10): shared by the two Number Base Converter pages. Any base from 2 to 36 (RapidTables and base-convert.com
 // take them all; ours stopped at 2/8/10/16), a fractional part, and a target base of the visitor's choice besides the
@@ -27,7 +28,7 @@ export default function BaseConverter() {
   };
   const copy = (base) => {
     setCopyError(false);
-    navigator.clipboard.writeText(show(base).replace('…', '')).then(() => { setCopied(base); setTimeout(() => setCopied(''), 1500); }).catch(() => setCopyError(true));
+    navigator.clipboard.writeText(show(base).replace('…', '')).then(() => { setCopied(base); setTimeout(() => setCopied(''), 1500); }).catch(() => { setCopyError(true); reportShownMessage('Copy to the clipboard failed.'); });
   };
   const targets = COMMON.some(([b]) => b === toBase) ? COMMON : [...COMMON, [toBase, label(toBase)]];
 

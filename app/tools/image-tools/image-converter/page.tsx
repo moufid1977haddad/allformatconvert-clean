@@ -14,6 +14,7 @@ import { canEncodeImageType, extFromMime } from '../../../lib/mediaSupport';
 import { imageDims } from '../../../lib/bigImage';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 const GENERIC_CONVERSION_ERROR = 'Conversion failed. Please try again, or try a different file.';
 const GENERIC_HEIC_ERROR = 'Failed to decode this HEIC/HEIF file. It may be corrupted or use a variant this tool doesn\'t support.';
@@ -34,7 +35,7 @@ export default function ImageConverterPage() {
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [dragging, setDragging] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [isMobile, setIsMobile] = useState(false);
   // Which output formats THIS browser can really encode. Probed, not assumed: Safari cannot encode WebP from a
   // canvas (it returns a PNG), so there WebP comes from libwebp in WebAssembly, as AVIF does everywhere.

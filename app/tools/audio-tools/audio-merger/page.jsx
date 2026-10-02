@@ -15,6 +15,7 @@ import PlayablePreview from '../../../components/PlayablePreview';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
 import { execChecked } from '../../../lib/ffmpegRun';
+import { useToolError } from '../../../lib/useToolError';
 
 const LOSSLESS = MERGE_FORMATS.filter((f) => f.lossless);
 const COMPRESSED = MERGE_FORMATS.filter((f) => !f.lossless);
@@ -50,7 +51,7 @@ export default function AudioMergerPage() {
   const [progress, setProgress] = useState(0);
   const [stage, setStage] = useState('');
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const fileRef = useRef();
   const ffmpegRef = useRef(null); // { ffmpeg, written: Set of names already in ffmpeg.wasm }
   const progressRef = useRef(null);

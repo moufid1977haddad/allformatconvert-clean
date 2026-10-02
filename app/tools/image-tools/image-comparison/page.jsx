@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { drawToRaster, encodeRaster } from '../../../lib/imageOutput';
 import { rasterFromRGBA } from '../../../lib/bigImage';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function ImageComparisonPage() {
   const [image1, setImage1] = useState(null);
@@ -11,7 +12,7 @@ export default function ImageComparisonPage() {
   const [sliderPos, setSliderPos] = useState(50);
   const [mode, setMode] = useState('slider');
   const [diff, setDiff] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   // Pixel differences (as Diffchecker's image compare): image 2 is drawn at the size of image 1; a pixel differs
   // when one channel (or alpha) differs by more than 16/255, and is shown in red over a faded copy of image 1.
   // P21 (robustness): an image that cannot be opened, or is too large, is said at once (the slider simply showed

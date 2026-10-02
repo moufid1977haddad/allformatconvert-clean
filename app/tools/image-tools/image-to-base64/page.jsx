@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { sniffFormat } from '../../../lib/detectFileFormat';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 // P23 (02/10): a 2 MB photo gave 2.6 million characters pushed whole into the text box: WebKit (Safari's engine) froze
 // the page 84 s (Chromium 2.9 s). Measured: 100 000 characters take 0.27 s in WebKit, 1 000 000 take 6.9 s
 // (scripts/p23/textarea-cost.mjs). The box shows the first 100 000; Copy and Download give everything (base64.guru,
@@ -12,7 +13,7 @@ const PREVIEW_CHARS = 100000;
 export default function ImageToBase64Page() {
   const [result, setResult] = useState('');
   const [fileName, setFileName] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   // P24 (03/10): the forms base64.guru offers — data URI, plain Base64, an <img> tag, a CSS background, JSON
   const [fmt, setFmt] = useState('datauri');
   const b64 = result ? result.slice(result.indexOf(',') + 1) : '';

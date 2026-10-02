@@ -6,6 +6,7 @@ import { decodeAnyAudio } from '../../../lib/decodeAudio';
 import { AUDIO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
 import PlayablePreview from '../../../components/PlayablePreview';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function AudioEqualizerPage() {
   const [file, setFile] = useState(null);
@@ -14,7 +15,7 @@ export default function AudioEqualizerPage() {
   const [bands, setBands] = useState({ bass: 0, mid: 0, treble: 0 });
   const [exporting, setExporting] = useState(false);
   const [exportUrl, setExportUrl] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [note, setNote] = useState('');
   const fileRef = useRef();
   const audioCtxRef = useRef();

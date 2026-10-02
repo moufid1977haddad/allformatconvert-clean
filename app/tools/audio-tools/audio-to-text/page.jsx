@@ -6,6 +6,7 @@ import { transcribeAudio, checkAudioSize, audioMaxBytes, audioMaxLabel } from '.
 import { encryptedMusicMessage } from '../../../lib/mediaSupport';
 import TranscriptExports from '../../../components/TranscriptExports';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function AudioToTextPage() {
   // Mode : 'mic' ou 'file'
@@ -22,7 +23,7 @@ export default function AudioToTextPage() {
   const [fileTranscript, setFileTranscript] = useState('');
   const [fileSegments, setFileSegments] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const fileRef = useRef();
 
   // ── Mic functions ──

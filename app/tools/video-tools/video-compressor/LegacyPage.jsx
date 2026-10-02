@@ -6,12 +6,13 @@ import { videoReRecordSupport, captureMediaElementStream, finishRecording } from
 import IosOriginalNote from '../../../components/IosOriginalNote';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function LegacyVideoCompressorPage() {
   const [file, setFile] = useState(null);
   const [quality, setQuality] = useState(0.5);
   const [result, setResult] = useState(null);
   const [status, setStatus] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [support, setSupport] = useState({ ok: true, mime: null, ext: 'webm', reason: '' });
   const videoRef = useRef();
   const inputRef = useRef();

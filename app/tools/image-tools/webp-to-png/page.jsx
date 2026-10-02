@@ -5,12 +5,13 @@ import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRas
 import { rasterFromRGBA } from '../../../lib/bigImage';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function WebPtoPNGPage() {
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
   const [note, setNote] = useState('');
   // An animated WebP (ANIM chunk) is drawn as its first frame only: say so instead of
