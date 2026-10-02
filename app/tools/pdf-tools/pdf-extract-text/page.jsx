@@ -66,7 +66,7 @@ export default function PdfExtractTextPage() {
           <button onClick={extract} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Extracting...' : 'Extract Text'}
           </button>
-          {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
+          {status && <p role="status" className="text-center text-yellow-400 text-sm">{status}</p>}
           {text && (
             <div className="space-y-3">
               <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={text} readOnly />

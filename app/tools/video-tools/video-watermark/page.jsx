@@ -6,6 +6,7 @@ import ProgressBar from '../../../components/ProgressBar';
 import { reportToolError } from '../../../lib/reportError';
 import IosOriginalNote from '../../../components/IosOriginalNote';
 import { FileDownload } from '../../../components/FileDownload';
+import { videoFileProblem, unreadableVideoMessage } from '../../../lib/fileChecks';
 
 const MAX_DURATION = 120;
 
@@ -115,10 +116,17 @@ export default function VideoWatermarkPage() {
   const watermarkInputRef = useRef();
   const ffmpegRef = useRef(null);
 
-  const handleFile = (e) => {
+  const pickRef = useRef(null);
+  const handleFile = async (e) => {
     const f = e.target.files[0];
     e.target.value = '';
     if (!f) return;
+    // P23: an empty file or a picture / PDF renamed .mp4 is said at once (it was told "this isn't necessarily a broken
+    // file, your browser can't play this codec").
+    pickRef.current = f;
+    const problem = await videoFileProblem(f);
+    if (pickRef.current !== f) return; // another file was chosen meanwhile
+    if (problem) { setFile(null); setResult(null); setError(''); setDurationKnown(false); setDurationError(problem); return; }
     setFile(f);
     setDuration(0);
     setDurationKnown(false);
@@ -143,7 +151,8 @@ export default function VideoWatermarkPage() {
     if (!file || !videoRef.current) return;
 
     const video = videoRef.current;
-    video.src = URL.createObjectURL(file);
+    const src = URL.createObjectURL(file);
+    video.src = src;
 
     const finalize = (d) => {
       setDuration(d);
@@ -202,12 +211,16 @@ export default function VideoWatermarkPage() {
     // for. Reporting both as "couldn't determine length" wrongly implies
     // the file itself might be broken when it's actually a browser
     // container/codec support gap.
-    video.onerror = () => {
+    video.onerror = async () => {
       clearTimeout(giveUpTimer);
       setDurationKnown(false);
       const code = video.error && video.error.code;
-      if (code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || code === MediaError.MEDIA_ERR_DECODE) {
-        setDurationError("Your browser can't play this video format/codec, so it can't be watermarked here -- this isn't necessarily a broken file. Chrome reliably plays MP4 (H.264) and WebM (VP8/VP9); .avi, many .mov and .mkv files, and less common codecs often aren't decodable in-browser at all. Try converting it to MP4 first.");
+      // A file that does not even start like a video is damaged or not a video: said so, not blamed on the codec.
+      const damaged = await unreadableVideoMessage(file);
+      if (video.src !== src) return; // another video was chosen meanwhile
+      if (damaged) setDurationError(damaged);
+      else if (code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || code === MediaError.MEDIA_ERR_DECODE) {
+        setDurationError("This browser can't play this video's format or codec, so it can't be watermarked here -- the file itself may be fine. MP4 (H.264) and WebM play in every browser; .avi, many .mov and .mkv files and less common codecs often don't. Convert it to MP4 first with our Video Converter, then try again.");
       } else {
         setDurationError("This video failed to load, so its length can't be confirmed. Try a different file.");
       }
@@ -453,7 +466,7 @@ export default function VideoWatermarkPage() {
           </div>
           {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" />}
           {file && !durationKnown && !durationError && <p className="text-neutral-500 text-center text-sm">Checking video length...</p>}
-          {durationError && <p className="text-red-500 text-center text-sm">{durationError}</p>}
+          {durationError && <p role="alert" className="text-red-500 text-center text-sm">{durationError}</p>}
 
           <div>
             <label className="block text-sm text-neutral-500 mb-2">Watermark Type</label>

@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
+import { imageHeaderSize, OPENABLE_PIXELS } from '../../../lib/fileChecks';
 export default function GifCompressorPage() {
   const [file, setFile] = useState(null);
   const [quality, setQuality] = useState(80);
@@ -16,6 +17,13 @@ export default function GifCompressorPage() {
   const compress = async () => {
     setError('');
     if (!file) return;
+    // P23: an empty file, a file that is not a GIF, or a GIF whose frame is enormous (read from its header) is said
+    // before gifsicle runs; gifsicle giving nothing back showed the raw "Failed to execute 'createObjectURL'".
+    if (!file.size) { setError('This file is empty (0 bytes): there is no GIF in it. Choose the file again.'); return; }
+    const head = new Uint8Array(await file.slice(0, 6).arrayBuffer());
+    if (String.fromCharCode(...head.subarray(0, 4)) !== 'GIF8') { setError(`This is not a GIF file: it may be damaged, or another kind of picture renamed .${(file.name.split('.').pop() || '').toLowerCase()}. For a PNG, JPG or WebP, use our Image Compressor.`); return; }
+    const size = await imageHeaderSize(file);
+    if (size && size.width * size.height > OPENABLE_PIXELS) { setError(`This GIF is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round(size.width * size.height / 1e6)} megapixels): too large to compress in a browser.`); return; }
     setLoading(true);
     try {
       const gifsicle = (await import('gifsicle-wasm-browser')).default;
@@ -27,7 +35,8 @@ export default function GifCompressorPage() {
         input: [{ file, name: 'input.gif' }],
         command: [`-O2 --lossy=${lossy} input.gif -o /out/output.gif`],
       });
-      const outBlob = outFiles[0];
+      const outBlob = outFiles && outFiles[0];
+      if (!outBlob || !outBlob.size) throw new Error('This GIF could not be compressed: it may be damaged. Try opening it in a browser or image viewer to check.');
       setResult({ url: URL.createObjectURL(outBlob), originalSize: file.size, newSize: outBlob.size });
     } catch(e) { setError((e && e.message) || 'This file could not be converted. It may be damaged.'); } // P21: a message on the page, not a blocking alert()
     setLoading(false);

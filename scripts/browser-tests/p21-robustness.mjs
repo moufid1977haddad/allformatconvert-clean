@@ -4,7 +4,8 @@
 //   corrupt    512 random bytes with the tool's own extension
 //   wrong      a real file of another kind under the tool's extension (a PDF named .png, a PNG named .pdf/.mp4/.mp3…)
 //   locked     a password-protected PDF (PDF tools)
-//   giant      a real 30 000 × 30 000 PNG (900 megapixels, 1.8 MB on disk) (image tools)
+//   giant      a real 30 000 × 30 000 PNG (900 megapixels, 2.6 MB on disk) (image tools)
+//   bomb       a real 20 000 × 20 000 two-colour PNG (400 megapixels, 49 KB: under every size cap) (image tools, P23)
 //   silent     a real MP4 with no audio track (tools that take a video and give sound)
 // Expected everywhere: a clear sentence on the page; never an uncaught page error, a blank page, a spinner that never
 // ends, or a "result" made from nothing. Tools whose job is to take ANY bytes (hash, Base64, split, zip, encrypt…)
@@ -23,7 +24,7 @@ const arg = (k) => process.argv.find((a) => a.startsWith(`--${k}=`))?.split('=')
 const name = arg('browser') || 'chromium';
 const engine = { chromium, firefox, webkit }[name];
 const only = (arg('only') || '').split(',').filter(Boolean);
-const cases = (arg('cases') || 'empty,corrupt,wrong,locked,giant,silent').split(',');
+const cases = (arg('cases') || 'empty,corrupt,wrong,locked,giant,bomb,silent').split(',');
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1')), '..', '..');
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'p21-robust-'));
 
@@ -71,6 +72,8 @@ const realPdf = await (async () => { const d = await PDFDocument.create(); d.add
 const realPng = await sharp({ create: { width: 64, height: 64, channels: 3, background: '#4080c0' } }).png().toBuffer();
 const lockedPdf = fs.readFileSync(path.join(ROOT, 'scripts', 'converter-tests', 'fixtures', 'encrypted-user-password.pdf'));
 const giantPng = path.join(dir, 'giant.png');
+const bombPng = path.join(dir, 'bomb.png');
+if (cases.includes('bomb')) await sharp({ create: { width: 20000, height: 20000, channels: 3, background: '#fff' }, limitInputPixels: false }).greyscale().png({ compressionLevel: 9, palette: true, colours: 2 }).toFile(bombPng);
 if (cases.includes('giant')) await sharp({ create: { width: 30000, height: 30000, channels: 3, background: '#000' }, limitInputPixels: false }).greyscale().png({ compressionLevel: 9 }).toFile(giantPng);
 const silentMp4 = (() => { // a real MP4 without sound, from the repo's fixtures if one exists
   const cand = [path.join(ROOT, 'docs', 'audit', 'fixtures-safari'), path.join(ROOT, 'scripts', 'audit', 'fixtures', 'files')];
@@ -85,6 +88,7 @@ function fixture(c, t) {
   else if (c === 'wrong') fs.writeFileSync(p, kind === 'pdf' ? realPng : realPdf);
   else if (c === 'locked') { if (kind !== 'pdf') return null; fs.writeFileSync(p, lockedPdf); }
   else if (c === 'giant') { if (kind !== 'image' || ext === 'svg') return null; fs.copyFileSync(giantPng, p); }
+  else if (c === 'bomb') { if (kind !== 'image' || ext === 'svg') return null; fs.copyFileSync(bombPng, p); }
   else if (c === 'silent') { if (!(kind === 'video' && /audio|mp3|wav|sound|transcri/.test(t.tool)) || !silentMp4) return null; fs.copyFileSync(silentMp4, p); }
   return p;
 }
@@ -92,19 +96,82 @@ function fixture(c, t) {
 // Good companions for the two-file tools
 const GOOD = { pdf: path.join(dir, 'good.pdf'), png: path.join(dir, 'good.png'), mp3: path.join(ROOT, 'docs', 'audit', 'fixtures-safari', 'safari-tone-B-3s.mp3'), mp4: path.join(ROOT, 'scripts', 'audit', 'fixtures', 'files', 'sample.mp4') };
 fs.writeFileSync(GOOD.pdf, realPdf); fs.writeFileSync(GOOD.png, realPng);
-const MESSAGE = /could ?n[o']t|can ?n[o']t|cannot|unable|failed|invalid|damaged|corrupt|empty|0 bytes|not an? (valid )?|isn'?t a|unsupported|not supported|doesn'?t|does not|no (audio|sound|pages?|pictures?|image)|too (large|big)|over the|limit|megapixel|password|protected|encrypted|error|unreadable|unrecognized|wrong|different format|only accepts|please (choose|select|use)|doesn't take|this tool (takes|needs|works)|not available/i;
+const MESSAGE = /could ?n[o']t|can ?n[o']t|can't|cannot|unable|failed|invalid|damaged|corrupt|empty|0 bytes|not an? (valid )?|isn'?t a|unsupported|not supported|doesn'?t|does not|no (audio|sound|pages?|pictures?|image)|too (large|big)|larger than|no [\w ]{0,30} found|over the|limit|megapixel|password|protected|encrypted|error|unreadable|unrecognized|wrong|different format|only accepts|please (choose|select|use)|doesn't take|this tool (takes|needs|works)|not available/i;
 const BUSY = /…|\.\.\.|ing\b/;
+// P23: a raw JavaScript / browser error shown as is is not a sentence for a visitor (Video Merger under Firefox showed
+// 'can't access property "find", e.streams is undefined'; Image Cropper 'Passed-in image is "broken"').
+const RAW_ERROR = /can't access property|is undefined\b|is not a function|Cannot read propert|null is not an object|undefined is not an object|is not defined\b|Passed-in image|NS_ERROR|InvalidStateError|DataCloneError|Failed to execute|Unexpected token|out of bounds of the DataView/i;
 
-const b = await engine.launch();
+// P23 (02/10): a browser with enough memory (Firefox) really turns the 900 MP picture into a PDF. Counted right only
+// when the PDF opens, holds the whole 30 000 × 30 000 image, on a page of at most 14 400 points (Acrobat's limit).
+async function giantPdfIsReal(p, side = 30000) {
+  try {
+    const b64 = await p.locator('[data-file-download] [data-download]').first().evaluate(async (a) => {
+      const u = new Uint8Array(await (await fetch(a.href)).arrayBuffer()); if (u[0] !== 0x25 || u[1] !== 0x50) return null;
+      let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s);
+    });
+    if (!b64) return false;
+    const { PDFName, PDFRawStream } = await import('pdf-lib');
+    const d = await PDFDocument.load(Buffer.from(b64, 'base64'));
+    const { width, height } = d.getPage(0).getSize();
+    let full = false;
+    d.context.enumerateIndirectObjects().forEach(([, o]) => { if (o instanceof PDFRawStream && o.dict.get(PDFName.of('Subtype')) === PDFName.of('Image') && String(o.dict.get(PDFName.of('Width'))) === String(side) && String(o.dict.get(PDFName.of('Height'))) === String(side)) full = true; });
+    return full && Math.max(width, height) <= 14400;
+  } catch { return false; }
+}
+// P23: a picture made from the white 400 MP bomb (a crop, an icon, a resized copy, a GIF frame) is a real result when
+// it opens and its centre is white and opaque; a canvas that failed to decode gives transparent or black pixels.
+async function bombImageIsReal(p) {
+  try {
+    const b64 = await p.locator('[data-file-download] [data-download]').first().evaluate(async (a) => {
+      const staged = /\/zipdl\/f\//.test(a.getAttribute('href') || '');
+      const res = staged ? await (await caches.open('ocv-downloads-v1')).match(a.href) : await fetch(a.href);
+      const u = new Uint8Array(await res.arrayBuffer()); if (u.length > 64e6) return null;
+      let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s);
+    });
+    if (!b64) return false;
+    let buf = Buffer.from(b64, 'base64');
+    if (buf[0] === 0 && buf[1] === 0 && buf[2] === 1 && buf[3] === 0) { // ICO: its largest entry, PNG or BMP
+      const n = buf.readUInt16LE(4); let best = null;
+      for (let i = 0; i < n; i++) { const e = 6 + i * 16, w = buf[e] || 256, size = buf.readUInt32LE(e + 8), off = buf.readUInt32LE(e + 12); if (!best || w > best.w) best = { w, size, off }; }
+      buf = buf.subarray(best.off, best.off + best.size);
+      if (buf[0] !== 0x89) return false; // only PNG entries are checked here
+    }
+    const img = sharp(buf, { limitInputPixels: false });
+    const m = await img.metadata();
+    const px = await sharp(buf, { limitInputPixels: false }).ensureAlpha().extract({ left: Math.floor(m.width / 2), top: Math.floor(m.height / 2), width: 1, height: 1 }).raw().toBuffer();
+    return px[0] > 200 && px[1] > 200 && px[2] > 200 && px[3] > 200;
+  } catch { return false; }
+}
+// P23: on a preview, with another bench running, the whole test browser died twice (memory: giant / bomb cases four
+// at a time). The bench then stopped and measured nothing more. Now: the cases in flight when it died are logged, the
+// browser is relaunched, and those cases are played again one at a time at the end (their second verdict counts).
+let b = null;
+const inflight = new Set();
+let relaunching = null;
+async function launch() {
+  const br = await engine.launch();
+  br.on('disconnected', () => { if (inflight.size) console.log(`BROWSER-DIED (${name}) with in flight: ${[...inflight].join(', ')}`); });
+  return br;
+}
+async function liveBrowser() {
+  if (b && b.isConnected()) return b;
+  relaunching ??= launch().then((br) => { b = br; relaunching = null; return br; });
+  return relaunching;
+}
+b = await launch();
+const retry = [];
 const rows = [];
 let fails = 0, passes = 0;
 const tools = inventory().filter((t) => !only.length || only.includes(t.tool));
 console.log(`${tools.length} tools with a file input`);
 const jobs = [];
 for (const t of tools) for (const c of cases) { const file = fixture(c, t); if (file) jobs.push({ t, c, file }); }
-async function runCase({ t, c, file }) {
-  {
-    const ctx = await b.newContext({ acceptDownloads: true });
+async function runCase({ t, c, file }, final = false) {
+  const key = `${t.tool} [${c}]`;
+  inflight.add(key);
+  try {
+    const ctx = await (await liveBrowser()).newContext({ acceptDownloads: true });
     if (process.argv.includes('--no-vercel-toolbar')) await ctx.route(/vercel\.live/, (r) => r.abort());
     // NO PAID CALL, EVER: every /api/ route and the media service are played here. A page that sends the bad file to
     // the server gets the refusal our routes give ("422, this file could not be read") and must show it.
@@ -125,11 +192,12 @@ async function runCase({ t, c, file }) {
       await p.waitForTimeout(800);
       const before = (await p.locator('main').first().innerText().catch(() => '')).length;
       // Tools that need two files (merge, compare): the bad file plus a good one of the same kind.
-      const needsTwo = /merg|compar|join|combin|duplicat/.test(t.tool);
+      const needsTwo = /merg|compar|join|combin|duplicat|gif-maker/.test(t.tool);
       const good = { pdf: GOOD.pdf, image: GOOD.png, audio: GOOD.mp3, video: GOOD.mp4, other: GOOD.pdf }[kindOf(t.accept, extFor(t.accept))];
       // A tool with modes (Audio to Text: microphone / file; Hash Generator: text / file) shows its file field once
       // the file mode is chosen.
-      const fileMode = p.locator('main').getByRole('button', { name: /upload .*file|^file$/i }).or(p.locator('main').getByRole('radio', { name: /file/i })).first();
+      // Barcode Generator takes a file (CSV import) in its "Many" mode only (P23).
+      const fileMode = p.locator('main').getByRole('button', { name: /upload .*file|^file$/i }).or(p.locator('main').getByRole('radio', { name: /file|^many/i })).first();
       if (await fileMode.count()) await fileMode.click({ timeout: 5000 }).catch(() => {});
       const inputs = p.locator('main input[type=file]');
       if ((await inputs.count()) >= 2 && good) { // two separate fields (File Comparator): the bad file and a good one
@@ -154,7 +222,7 @@ async function runCase({ t, c, file }) {
         for (let i = 0; i < n; i++) {
           const btn = btns.nth(i);
           const txt = ((await btn.innerText().catch(() => '')) || '').trim();
-          if (!txt || /^(✕|×|↑|↓|cancel|clear|reset|remove all|choose|browse|select|add (more|files?|images?|pdfs?|photos?|videos?)b|copy|paste|swap|menu|search|light|dark|language|log ?in|sign|subscribe|use microphone|record)/i.test(txt) || /^[A-Z]{2}$/.test(txt)) continue;
+          if (!txt || /^(✕|×|↑|↓|cancel|clear|reset|remove all|choose|browse|select|add (more|files?|images?|pdfs?|photos?|videos?)b|copy|paste|swap|menu|search|light|dark|language|log ?in|sign|subscribe|use microphone|record|scan with camera|camera)/i.test(txt) || /^[A-Z]{2}$/.test(txt)) continue;
           if (!/^add|noise|border|vignette|sepia|grayscale|greyscale|invert|pixelat|bright|contrast|saturat|round|meme|collage|mirror|tint|convert|compress|merge|split|remove|extract|process|start|create|generate|resize|rotate|crop|apply|trim|encrypt|decrypt|unlock|protect|repair|scan|analy|run|make|translate|summar|transcribe|check|detect|compare|join|cut|boost|change|clean|optimi|fix|read|caption|upscale|enhance|blur|sharpen|flip|watermark|number|delete|organi|redact|ocr|edit|play|filter|mute|reverse|speed|loop|equaliz|normaliz|amplif|reduce|shrink|turn|export|save|unzip|open|view|decode|encode|hash|calculat|count|parse|format|validat|beautif|minif|go|submit|upload/i.test(txt)) continue;
           if (await btn.isDisabled().catch(() => true)) continue;
           const w = (await btn.boundingBox().catch(() => null))?.width || 0;
@@ -176,26 +244,36 @@ async function runCase({ t, c, file }) {
       else if (bodyLen < Math.min(200, before / 3)) verdict = 'BLANK';
       // an archive may hold an empty file (Zip Creator): its result is right even for an empty one
       // an archive may hold an empty file (Zip Creator), and an empty file has a well-known hash (Hash Generator)
+      else if (results && c === 'giant' && await giantPdfIsReal(p, 30000)) verdict = 'OK-RESULT';
+      else if (results && c === 'bomb' && (await giantPdfIsReal(p, 20000) || await bombImageIsReal(p))) verdict = 'OK-RESULT'; // P23: opened and checked, see below
       else if (results && !(ANY_BYTES.has(t.tool) && (c !== 'empty' || t.tool === 'zip-creator' || t.tool === 'hash-generator'))) verdict = 'FAKE-RESULT';
       else if (results) verdict = 'OK-RESULT';
+      else if (msg && RAW_ERROR.test(msg)) verdict = 'RAW-ERROR';
       else if (msg) verdict = 'OK-MESSAGE';
       else if (INFO_TOOLS.has(t.tool) && /0 B|bytes|different|identical|Real format|Type|No embedded metadata|cannot display/i.test(await p.locator('main').innerText().catch(() => ''))) verdict = 'OK-REPORT';
       else if (busyBtn) verdict = 'STUCK';
       else verdict = 'SILENT';
       detail += ` ${msg.slice(0, 160)}${busyBtn ? ` busy:"${busyBtn}"` : ''}${errors.length ? ' err:' + errors[0] : ''}`;
-    } catch (e) { verdict = 'BENCH-ERROR'; detail = String((e && e.stack) || e).slice(0, 400); }
+    } catch (e) { verdict = /has been closed|Target closed|disconnected|browser has crashed/i.test(String(e)) ? 'BROWSER-DIED' : 'BENCH-ERROR'; detail = String((e && e.stack) || e).slice(0, 400); }
+    if (verdict === 'BROWSER-DIED' && !final) { retry.push({ t, c, file }); await ctx.close().catch(() => {}); return; }
     const ok = verdict.startsWith('OK');
     if (ok) passes++; else fails++;
     rows.push({ tool: t.slug, case: c, verdict, detail: detail.trim() });
-    console.log(ok ? 'PASS' : 'FAIL', `${name} ${t.slug} [${c}] ${verdict}`, ok ? '' : detail.trim());
-    await ctx.close();
-  }
+    console.log(ok ? 'PASS' : 'FAIL', `${name} ${t.slug} [${c}] ${verdict}${final ? ' (played again alone)' : ''}`, ok ? '' : detail.trim());
+    await ctx.close().catch(() => {});
+  } catch (e) {
+    if (!final) { retry.push({ t, c, file }); return; }
+    fails++; rows.push({ tool: t.slug, case: c, verdict: 'BROWSER-DIED', detail: String(e).slice(0, 200) });
+    console.log('FAIL', `${name} ${t.slug} [${c}] BROWSER-DIED (played again alone)`, String(e).slice(0, 200));
+  } finally { inflight.delete(key); }
 }
 // 4 pages at a time
 const POOL = Number(arg('pool') || 4);
 let next = 0;
 await Promise.all(Array.from({ length: POOL }, async () => { while (next < jobs.length) await runCase(jobs[next++]); }));
-await b.close();
+if (retry.length) console.log(`${retry.length} case(s) interrupted by the browser's death: played again one at a time`);
+for (const j of retry) await runCase(j, true);
+await (await liveBrowser()).close();
 if (arg('json')) fs.writeFileSync(arg('json'), JSON.stringify(rows, null, 1));
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);
 process.exit(fails ? 1 : 0);

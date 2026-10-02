@@ -9,6 +9,7 @@ import { physical, renderCanvas, contrastError, normalizeRead, cleanError, autoQ
 import { TEMPLATES, ROLLS, PAPERS, sheetOf, rollOf, layoutError, labelPdf, MAX_LABELS, LABEL_INSET_MM } from './labels';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
+import { textFileProblem, decodedText } from '../../../lib/fileChecks';
 
 // References read on 26/09/2026 (docs/audit/RAPPORT-amelioration-14.md): TEC-IT (100+ types, drawn on its server,
 // 10 free codes, non-commercial use only, SVG for subscribers), barcode-maker.com (~35 types, PNG/JPG/GIF/SVG, batch
@@ -155,7 +156,10 @@ export default function BarcodeGeneratorPage() {
     const file = e.target.files?.[0]; e.target.value = '';
     if (!file) return;
     if (file.size > 5e6) { setError(`That file is over 5 MB: one run holds up to ${MAX_BATCH} codes.`); return; }
-    const rows = parseCsv(await file.text());
+    // P23: an empty, binary or other-format file (a picture renamed .csv) is refused with a sentence, never read as values
+    const problem = await textFileProblem(file, 'CSV / TSV');
+    if (problem) { setError(problem); return; }
+    const rows = parseCsv(await decodedText(file));
     if (!rows.length) { setError(`No values found in ${file.name}.`); return; }
     setSource('list'); setError('');
     setLines(rows.map((r) => (r[1] ? `${r[0]}\t${r[1]}` : r[0])).join('\n'));

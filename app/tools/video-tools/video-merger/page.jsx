@@ -10,6 +10,7 @@ import { reportToolError } from '../../../lib/reportError';
 import { formatBytes } from '../../../lib/formatBytes';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { FileDownload } from '../../../components/FileDownload';
+import { videoFileProblem, unreadableVideoMessage } from '../../../lib/fileChecks';
 
 // 30/09 (owner's iPhone): the merger played every clip in a <canvas> and recorded it with MediaRecorder -- in real
 // time, the videos opening full screen on iPhone, and a WebM (merged.webm) that Photos cannot open. Now, as ffmpeg
@@ -24,6 +25,8 @@ const COPYABLE_VIDEO = ['h264', 'hevc'];
 const COPYABLE_AUDIO = ['aac'];
 
 function signature(json) {
+  // ffprobe on a file it cannot read writes JSON without "streams" (Firefox: 'e.streams is undefined', P23)
+  if (!json || !Array.isArray(json.streams)) return null;
   const v = json.streams.find((s) => s.codec_type === 'video' && !(s.disposition && s.disposition.attached_pic));
   const a = json.streams.find((s) => s.codec_type === 'audio');
   if (!v) return null;
@@ -55,7 +58,13 @@ export default function VideoMergerPage() {
   const maxTotal = mobile ? 700e6 : 2e9;
   const total = files.reduce((n, f) => n + f.size, 0);
 
-  const handleFiles = (e) => { const add = Array.from(e.target.files || []); e.target.value = ''; setFiles((p) => [...p, ...add]); setResult(null); setError(''); };
+  // P23: an empty file or a picture / PDF renamed as a video is refused when it is added, with its name.
+  const handleFiles = async (e) => {
+    const picked = Array.from(e.target.files || []); e.target.value = '';
+    const add = [], refused = [];
+    for (const f of picked) { const why = await videoFileProblem(f); if (why) refused.push(`"${f.name}": ${why}`); else add.push(f); }
+    setFiles((p) => [...p, ...add]); setResult(null); setError(refused.join(' '));
+  };
   const move = (i, d) => setFiles((p) => { const q = [...p]; const j = i + d; if (j < 0 || j >= q.length) return p; [q[i], q[j]] = [q[j], q[i]]; return q; });
   const removeFile = (i) => setFiles((p) => p.filter((_, k) => k !== i));
 
@@ -81,7 +90,10 @@ export default function VideoMergerPage() {
         let json = null;
         try { json = JSON.parse(new TextDecoder().decode(await ffmpeg.readFile('/p.json'))); } catch { json = null; }
         const s = json && signature(json);
-        if (!s) throw new Error(`"${files[sigs.length].name}" has no video that can be read.`);
+        if (!s) {
+          const bad = files[sigs.length];
+          throw new Error(`"${bad.name}": ${(await unreadableVideoMessage(bad)) || 'this video could not be read. Play it in a video player to check, or export it again as MP4.'}`);
+        }
         sigs.push(s);
       }
       let parts = named.map((f) => `/in/${f.name}`);

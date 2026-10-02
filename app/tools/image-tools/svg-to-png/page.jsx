@@ -96,7 +96,7 @@ export default function SvgToPngPage() {
           </div>
           <label className="flex items-center gap-2 text-sm text-neutral-600"><input type="checkbox" checked={lock} onChange={e => setLock(e.target.checked)} /> Keep the SVG's proportions</label>
           <button onClick={convert} disabled={!file || !dimsValid} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert to PNG</button>
-          {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
+          {status && <p role="status" className="text-center text-yellow-400 text-sm">{status}</p>}
           {result && (
             <div className="space-y-2">
               <img src={result} className="max-h-48 mx-auto rounded" />

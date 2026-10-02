@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { QR_TYPES, buildPayload } from '../../../lib/qrPayload';
 import { qrMatrix, drawCanvas, toSvg, toPdf, readsBackAs, contrast } from '../../../lib/qrRender';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
+import { imageHeaderSize, OPENABLE_PIXELS } from '../../../lib/fileChecks';
 
 // Features from QRCode Monkey, the free reference (read 2026-09-23): content types, colours, logo, error
 // correction, up to 2000 px, PNG/SVG/PDF. What it does not do and this page does: every code is read back
@@ -49,7 +50,13 @@ export default function QrGeneratorPage() {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
+    if (!file.size) { setError('This logo file is empty (0 bytes). Choose the image again.'); return; }
     if (file.size > MAX_LOGO_BYTES) { setError('The logo is larger than 2 MB. Use a smaller image.'); return; }
+    // P23: a 30 000 × 30 000 PNG is 1.8 MB on disk; opened, it is 3.6 GB and the page went silent. The size is read
+    // from the header first (the same 100-megapixel bound as the image tools; a logo is drawn a few hundred pixels wide).
+    const dims = await imageHeaderSize(file);
+    if (dims && dims.width * dims.height > OPENABLE_PIXELS) { setError(`This logo is ${dims.width.toLocaleString('en-US')} × ${dims.height.toLocaleString('en-US')} pixels (${Math.round(dims.width * dims.height / 1e6)} megapixels): too large to open. Use a smaller version of the logo — it is drawn at most a few hundred pixels wide.`); return; }
+    try {
     const dataUrl = await new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = no; r.readAsDataURL(file); });
     const img = new Image();
     try { await new Promise((ok, no) => { img.onload = ok; img.onerror = no; img.src = dataUrl; }); } catch { setError('This logo could not be opened. Use a PNG, JPG, GIF, WebP or SVG image.'); return; }
@@ -58,8 +65,11 @@ export default function QrGeneratorPage() {
     const k = Math.min(1, 512 / Math.max(w, h));
     const c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
     c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-    const png = new Uint8Array(await (await new Promise((ok) => c.toBlob(ok, 'image/png'))).arrayBuffer());
+    const pngBlob = await new Promise((ok) => c.toBlob(ok, 'image/png'));
+    if (!pngBlob || !pngBlob.size) throw new Error('no png');
+    const png = new Uint8Array(await pngBlob.arrayBuffer());
     setLogo({ img, dataUrl, png, aspect: w / h, name: file.name });
+    } catch { setError('This logo could not be opened. Use a PNG, JPG, GIF, WebP or SVG image.'); }
   };
 
   const generate = async () => {

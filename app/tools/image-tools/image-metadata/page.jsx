@@ -34,6 +34,8 @@ export default function ImageMetadataPage() {
     };
     img.onerror = () => setMetadata({ name: file.name, size: formatBytes(file.size), type: file.type || 'unknown', note: 'This browser cannot display this image; embedded metadata is still read below.' });
     img.src = url;
+    // P23: an empty file made exifr throw a raw "undefined is not an object (evaluating 'this.dataView.getUint16')" (WebKit)
+    if (!file.size) { setEmbedded([]); setError('This file is empty (0 bytes): it holds no picture and no metadata.'); return; }
     try {
       const exifr = (await import('exifr')).default;
       const tags = await exifr.parse(file, { tiff: true, exif: true, gps: true, iptc: true, xmp: true, icc: true, interop: true, ifd1: false, mergeOutput: false, translateValues: true, reviveValues: true });
@@ -48,7 +50,7 @@ export default function ImageMetadataPage() {
       setEmbedded(groups);
     } catch (err) {
       setEmbedded([]);
-      if (!/Unknown file format|invalid|not supported/i.test(err?.message || '')) setError('Embedded metadata could not be read: ' + (err?.message || err));
+      if (!/Unknown file format|invalid|not supported/i.test(err?.message || '')) setError('The embedded metadata could not be read: the file may be damaged or cut short. Its size and type are shown above.');
     }
   };
   return (

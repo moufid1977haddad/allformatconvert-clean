@@ -14,6 +14,7 @@
 // pdf-lib is loaded when an image page is added, not with the tool page (30/09/2026, Lighthouse).
 import { imageDims, decodeToRaster, hasAlpha, encodePngRGBA, encodeJpegWasm } from './bigImage';
 import { checkedBlob } from './mediaSupport';
+import { imageHeaderSize } from './fileChecks';
 
 const isJpeg = (b) => b[0] === 0xff && b[1] === 0xd8;
 const isPng = (b) => b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47;
@@ -71,11 +72,36 @@ async function decodableImage(file, bytes) {
   return null;
 }
 
+// P23 (02/10): one pixel = one point, except that a PDF page is at most 14 400 points (200 inches) on a side — the
+// limit of Adobe Acrobat and of the PDF specification without UserUnit. A 30 000 px image (or an iPhone panorama of
+// 16 000 px and more) made a 30 000-point page that Acrobat does not open correctly; the page is now scaled to fit,
+// the image itself keeps every pixel. Measured by scripts/p23/jpg-to-pdf-giant.mjs.
+export const MAX_PAGE_POINTS = 14400;
+export const pageScale = (w, h) => Math.min(1, MAX_PAGE_POINTS / Math.max(w, h));
+function fullPage(pdfDoc, img) {
+  const k = pageScale(img.width, img.height), w = img.width * k, h = img.height * k;
+  pdfDoc.addPage([w, h]).drawImage(img, { x: 0, y: 0, width: w, height: h });
+}
+
+// P23 (02/10): a picture that is not embedded as is (PNG, decoded by pdf-lib; WebP, GIF, BMP, HEIC, mirrored JPEG,
+// drawn upright) is decoded whole in this tab. A 30 000 × 30 000 PNG froze WebKit (Safari's engine) and took minutes in
+// Firefox: its size is read from the header first — at most a canvas's largest area, 268 MP, on every device (a lower
+// phone bound was not measured here; a 63 MP iPhone panorama converted from HEIC must pass). A JPEG photo is embedded
+// without being decoded: no bound for it.
+const MAX_DECODED_MP = () => 268;
+async function assertDecodable(original, file) {
+  const size = await imageHeaderSize(file).catch(() => null);
+  const mp = size ? (size.width * size.height) / 1e6 : 0;
+  if (mp > MAX_DECODED_MP()) throw new SizeError(`${original.name}: this image is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round(mp)} megapixels), more than a browser can turn into a PDF page (${MAX_DECODED_MP()} megapixels at most). Use a smaller version of the image, or a JPEG.`);
+}
+class SizeError extends Error {}
+
 // Adds a page to pdfDoc; throws Error(`${file.name}: …`) when the file can't be used.
 export async function addImagePage(pdfDoc, original) {
   const { degrees } = await import('pdf-lib');
   let file = original;
   let bytes = new Uint8Array(await file.arrayBuffer());
+  if (isTiffBytes(bytes)) await assertDecodable(original, original);
   try {
     const converted = await decodableImage(file, bytes);
     if (converted) { file = converted; bytes = new Uint8Array(await file.arrayBuffer()); }
@@ -90,21 +116,29 @@ export async function addImagePage(pdfDoc, original) {
         orientation = (await exifr.orientation(bytes)) || 1;
       } catch { orientation = 1; } // no readable EXIF: stored as displayed
       if ([2, 4, 5, 7].includes(orientation)) {
-        const png = await embedUpright(pdfDoc, file);
-        pdfDoc.addPage([png.width, png.height]).drawImage(png, { x: 0, y: 0, width: png.width, height: png.height });
+        await assertDecodable(original, file);
+        fullPage(pdfDoc, await embedUpright(pdfDoc, file));
         return;
       }
       const img = await pdfDoc.embedJpg(bytes);
-      const { width: W, height: H } = img;
+      const { width: W0, height: H0 } = img;
+      const k = pageScale(W0, H0), W = W0 * k, H = H0 * k;
       if (orientation === 6) pdfDoc.addPage([H, W]).drawImage(img, { x: 0, y: W, width: W, height: H, rotate: degrees(-90) });
       else if (orientation === 8) pdfDoc.addPage([H, W]).drawImage(img, { x: H, y: 0, width: W, height: H, rotate: degrees(90) });
       else if (orientation === 3) pdfDoc.addPage([W, H]).drawImage(img, { x: W, y: H, width: W, height: H, rotate: degrees(180) });
       else pdfDoc.addPage([W, H]).drawImage(img, { x: 0, y: 0, width: W, height: H });
       return;
     }
+    await assertDecodable(original, file);
     const png = isPng(bytes) ? await pdfDoc.embedPng(bytes) : await embedUpright(pdfDoc, file);
-    pdfDoc.addPage([png.width, png.height]).drawImage(png, { x: 0, y: 0, width: png.width, height: png.height });
+    fullPage(pdfDoc, png);
   } catch (e) {
+    if (e instanceof SizeError) throw e;
+    // P23: a 900 MP PNG ran the browser out of memory ("Array buffer allocation failed") and was reported as unreadable
+    if (e instanceof RangeError || /allocation|out of memory|array length/i.test(String(e?.message))) {
+      const size = await imageHeaderSize(original).catch(() => null);
+      throw new Error(`${original.name}: this image is too large for this browser's memory${size ? ` (${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels, ${Math.round(size.width * size.height / 1e6)} megapixels)` : ''}. Use a smaller version of the image.`);
+    }
     throw new Error(`${original.name}: this image could not be read (${e.message}).`);
   }
 }

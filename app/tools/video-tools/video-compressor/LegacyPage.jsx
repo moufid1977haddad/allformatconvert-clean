@@ -99,7 +99,7 @@ export default function LegacyVideoCompressorPage() {
           {!support.ok && <p role="alert" className="text-red-500 text-center text-sm">{support.reason}</p>}
           {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" />}
           <div><label className="block text-sm text-neutral-500 mb-1">Quality: {Math.round(quality*100)}%</label><input aria-label="Quality" type="range" min="0.1" max="1" step="0.1" value={quality} onChange={e => setQuality(parseFloat(e.target.value))} className="w-full" /></div>
-          {status && <p className="text-yellow-400 text-center">{status}</p>}
+          {status && <p role="status" className="text-yellow-400 text-center">{status}</p>}
           {error && <p className="text-red-400 text-center">{error}</p>}
           <button onClick={compress} disabled={!file || !!status || !support.ok} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Compress Video</button>
           {result && (

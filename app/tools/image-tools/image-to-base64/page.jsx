@@ -4,6 +4,11 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { sniffFormat } from '../../../lib/detectFileFormat';
 import { TextDownload } from '../../../components/FileDownload';
+// P23 (02/10): a 2 MB photo gave 2.6 million characters pushed whole into the text box: WebKit (Safari's engine) froze
+// the page 84 s (Chromium 2.9 s). Measured: 100 000 characters take 0.27 s in WebKit, 1 000 000 take 6.9 s
+// (scripts/p23/textarea-cost.mjs). The box shows the first 100 000; Copy and Download give everything (base64.guru,
+// measured the same day, pushes the whole text into its box).
+const PREVIEW_CHARS = 100000;
 export default function ImageToBase64Page() {
   const [result, setResult] = useState('');
   const [fileName, setFileName] = useState('');
@@ -47,7 +52,7 @@ export default function ImageToBase64Page() {
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={encode} />
           </div>
           {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
-          {result && <div className="space-y-2"><textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-xs h-48 resize-none font-mono" value={result} readOnly /><button onClick={() => navigator.clipboard.writeText(result)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy Base64</button><TextDownload text={result} name={(fileName || 'image').replace(/\.[^.]+$/, '') + '.base64.txt'} /></div>}
+          {result && <div className="space-y-2"><textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-xs h-48 resize-none font-mono" value={result.length > PREVIEW_CHARS ? result.slice(0, PREVIEW_CHARS) : result} readOnly />{result.length > PREVIEW_CHARS && <p className="text-xs text-neutral-500">Preview of the first {PREVIEW_CHARS.toLocaleString('en-US')} of {result.length.toLocaleString('en-US')} characters, so the page stays responsive; Copy Base64 and Download give the whole data URI.</p>}<button onClick={() => navigator.clipboard.writeText(result)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy Base64</button><TextDownload text={result} name={(fileName || 'image').replace(/\.[^.]+$/, '') + '.base64.txt'} /></div>}
         </div>
       </div>
       <SeoContent

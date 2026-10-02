@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { unreadableImageMessage } from '../../../lib/fileChecks';
 
 // Scans a QR code from an image (file, drop, paste) or, added 26/09/2026, live from the camera -- what the
 // reference scanners offer first (their page opens on the camera). The box used to say "drop" without handling it.
@@ -45,21 +46,26 @@ export default function QrScannerPage() {
     if (!file.type.startsWith('image/')) { setStatus(`"${file.name}" is not an image.`); return; }
     stopCamera(); setLoading(true); setStatus('Scanning...'); setResult('');
     const url = URL.createObjectURL(file);
+    let opened = false; // the picture itself opened: a later failure is not the file's fault
     try {
       const img = new Image();
       await new Promise((ok, ko) => { img.onload = ok; img.onerror = ko; img.src = url; });
+      opened = true;
       // Full resolution first (small or distant codes), then downscaled.
       jsqrRef.current ??= (await import('jsqr')).default;
       // At most 12 Mpx (30/09): a 24/48 MP iPhone photo on one canvas fails on iOS (16.7 Mpx per canvas at most);
       // a QR code in such a photo stays several pixels per module at 12 Mpx.
-      const k = Math.min(1, Math.sqrt(12e6 / (img.naturalWidth * img.naturalHeight)));
-      const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(img.naturalWidth * k)); c.height = Math.max(1, Math.round(img.naturalHeight * k));
+      const iw = img.naturalWidth || 1024, ih = img.naturalHeight || 1024; // an SVG without width / height reports 0
+      const k = Math.min(1, Math.sqrt(12e6 / (iw * ih)));
+      const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(iw * k)); c.height = Math.max(1, Math.round(ih * k));
       const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, c.width, c.height);
       const d = ctx.getImageData(0, 0, c.width, c.height);
-      const code = jsqrRef.current(d.data, d.width, d.height) || await decode(img, img.naturalWidth, img.naturalHeight);
+      const code = jsqrRef.current(d.data, d.width, d.height) || await decode(img, iw, ih);
       if (code) found(code.data); else setStatus('No QR code found in image');
-    } catch { setStatus('Could not load image file'); }
-    URL.revokeObjectURL(url); setLoading(false);
+    } catch (e) {
+      // P23: why the picture did not open, or what failed after it did (not just "could not load")
+      setStatus(opened ? `Could not scan this image: ${e?.message || e}. Please try again.` : await unreadableImageMessage(file).catch(() => 'This image could not be opened.'));
+    } finally { URL.revokeObjectURL(url); setLoading(false); }
   };
 
   const startCamera = async (id = deviceId) => {

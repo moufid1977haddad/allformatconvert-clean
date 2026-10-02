@@ -87,7 +87,7 @@ export default function PdfToHtmlPage() {
           <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Converting...' : 'Convert to HTML'}
           </button>
-          {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
+          {status && <p role="status" className="text-center text-yellow-400 text-sm">{status}</p>}
           {downloadUrl && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
               <div className="text-green-400 text-xl font-bold mb-3">Done!</div>

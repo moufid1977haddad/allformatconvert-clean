@@ -9,6 +9,7 @@ import { checkedDataURL, canEncodeImageType, checkedBlob } from './mediaSupport'
 import { imageDims, decodeToRaster, rasterFromCanvas, rasterFromRGBA, canvasBeyondSafariCap, CANVAS_MAX_PIXELS,
   encodeJpegWasm, encodeWebpWasm, encodePngRGBA } from './bigImage';
 import { derivedName } from './download';
+import { imageHeaderSize, unreadableImageMessage } from './fileChecks';
 
 export function outputTypeFor(sourceType) {
   if (sourceType === 'image/jpeg' || sourceType === 'image/jpg') return 'image/jpeg';
@@ -70,12 +71,20 @@ export function roundedRectPath(ctx, x, y, w, h, r) {
 const canvasOf = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
 
 /** The file at full resolution, as displayed (EXIF orientation applied). */
+// P23 (02/10): a 20 000 × 20 000 PNG of 49 KB (400 MP) kept Add Noise or HEIC to PNG busy for ever, or gave nothing
+// back: the size is read from the header first, and above a canvas's largest area (268 MP) the tool says so before
+// decoding. An image this browser cannot open gets the exact reason (empty, another kind of file, HEIC/TIFF here…).
+export const RASTER_MAX_PIXELS = 268435456;
 export async function loadRaster(file) {
+  const size = await imageHeaderSize(file).catch(() => null);
+  if (size && size.width * size.height > RASTER_MAX_PIXELS) {
+    throw new Error(`This image is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round(size.width * size.height / 1e6)} megapixels): more than a browser can process (268 megapixels at most). Use a smaller version of the image.`);
+  }
   const dims = await imageDims(file);
   try {
     return await decodeToRaster(file, dims);
   } catch {
-    throw new Error('Could not load this image. The file may be corrupted or in a format your browser cannot open.');
+    throw new Error(dims ? 'Could not load this image. The file may be corrupted or in a format your browser cannot open.' : await unreadableImageMessage(file));
   }
 }
 

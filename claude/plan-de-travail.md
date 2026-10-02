@@ -31,12 +31,12 @@
 |---|---|---|---|
 | D1 | **Détourage : morceaux de fond gardés par le modèle** (segmentation d'IS-Net ; le liseré et le halo sont corrigés par P21 dans le navigateur). Changer de modèle sur Railway a été **mesuré en local** : BiRefNet-lite pire (voile 4,4 % contre 3,2 %) ; BiRefNet complet très inégal (chat sur champ 17,7 % → 0 %, mais chat sur feuille 30 % → 133 %) et 31 s/image sur 8 cœurs, donc carte graphique nécessaire | carte graphique à la demande ≈ 0,001-0,003 $/image + compte chez un fournisseur (non choisi) ; ou 0 $ si on ne change rien | **ne rien changer maintenant** ; si le propriétaire peut confier la photo réelle de la tasse (sans donnée personnelle), la passer au banc `scripts/p21/bg-bench/` pour vérifier le cas exact |
 | D3 ✅ **FAIT par P22** (voir ci-dessous) | **Image Converter : fichiers RAW d'appareil photo** (CR2, CR3, NEF, ARW, DNG, ORF, RW2, RAF…), que prennent iLoveIMG, CloudConvert et Convertio. Seul moteur sérieux : LibRaw. Sa version WebAssembly publiée sur npm (`libraw-wasm`) est compilée avec les fils d'exécution : elle exige l'isolation inter-origines (qui casserait Analytics et Google Translate) et **bloque la construction Turbopack** (mesuré le 02/10). Un fork mono-fil existe mais a une semaine, 0 étoile, ~200 téléchargements : binaire non vérifiable, non retenu | **0 $** ; ≈ 2-3 h de Claude | **compiler nous-mêmes LibRaw officiel (LGPL-2.1/CDDL) en WebAssembly mono-fil** (emsdk, sources signées), puis brancher le décodeur déjà écrit et le banc `p21-psd.mjs` (vrais RAW de raw.pixls.us) — à faire dans une session dédiée ; PSD est déjà ajouté |
-| D2 | **Erreurs réelles des visiteurs (phase 2)** : `tool_errors` n'est lisible qu'avec la clé service (interdite à Claude) ; les journaux Vercel Hobby ne gardent qu'**1 heure** | 5 min ; Observability Plus de Vercel si l'on veut 7-30 jours de journaux (payant, non chiffré ici) | exécuter `docs/audit/p21-tool_errors-lecture.sql` dans Supabase → SQL Editor, télécharger les 2 résultats en CSV dans Téléchargements ; Claude reproduira et corrigera chaque cause |
+| D2 ✅ **CLOS par P23 (02/10)** : 5 lignes depuis le 28/09, une seule cause (Image Converter refusait sur iPhone les photos de 12,19 Mpx « au-delà de 12 »), déjà corrigée par `cd0c2ad9` le 29/09, reproduite et couverte par `big-image.mjs --device=iphone` (`RAPPORT-p23-02-10.md` §1) | **Erreurs réelles des visiteurs (phase 2)** : `tool_errors` n'est lisible qu'avec la clé service (interdite à Claude) ; les journaux Vercel Hobby ne gardent qu'**1 heure** | 5 min ; Observability Plus de Vercel si l'on veut 7-30 jours de journaux (payant, non chiffré ici) | exécuter `docs/audit/p21-tool_errors-lecture.sql` dans Supabase → SQL Editor, télécharger les 2 résultats en CSV dans Téléchargements ; Claude reproduira et corrigera chaque cause |
 
 **Décisions prises par le propriétaire le 02/10 (prompt P22) :**
 - **D1 détourage — ne rien changer au modèle** (mesuré par P21). La vérification de la tasse sur le vrai iPhone dira s'il reste un cas à traiter.
 - **D3 RAW — accepté : compiler LibRaw nous-mêmes, 0 $** → fait par P22 (voir la section P22 ci-dessous et `docs/audit/RAPPORT-p22-raw-02-10.md`).
-- **D2 `tool_errors` — le propriétaire lance lui-même la requête de lecture** (`docs/audit/p21-tool_errors-lecture.sql`) le soir du 02/10 ; Claude reproduira et corrigera chaque cause à partir des CSV.
+- **D2 `tool_errors` — le propriétaire lance lui-même la requête de lecture** (`docs/audit/p21-tool_errors-lecture.sql`) le soir du 02/10 ; Claude reproduira et corrigera chaque cause à partir des CSV. → ✅ **fait par P23** : une seule cause, déjà corrigée, reproduite (`RAPPORT-p23-02-10.md` §1). À refaire après le lancement, quand il y aura du trafic (même requête).
 
 ## 📷 P22 — fichiers RAW dans Image Converter (02/10, `docs/audit/RAPPORT-p22-raw-02-10.md`)
 
@@ -47,8 +47,18 @@
 | Sigma X3F refusé avec une phrase (couleurs fausses mesurées) ; fichier tronqué ou faux : refusé, jamais une fausse image (162 coupes mesurées) | ✅ |
 | Licence CDDL-1.0 + sources servies (`/wasm/libraw-LICENSE.txt`, `/wasm/LibRaw-0.22.2.tar.gz`), FAQ et textes de la page | ✅ |
 | Préversion, bancs 3 moteurs + iPhone/iPad, production, vérification sur www | ✅ **en production `bf960651`** (`onlineconvertools-awc0el292`) ; www : RAW tout vert ×3 moteurs + iPhone/iPad, téléchargement, 238 pages ×3 — aucun retour arrière |
-| **Défauts préexistants trouvés par le banc de solidité complet** (mêmes échecs sur la production d'avant P22) : Duplicate Image Finder, Video Watermark, QR Generator « giant », Image Cropper et Video Merger sous Firefox — silencieux sur fichier vide/abîmé/faux | ⏳ chantier à ouvrir (rapport P22 §11) |
+| **Défauts préexistants trouvés par le banc de solidité complet** (mêmes échecs sur la production d'avant P22) : Duplicate Image Finder, Video Watermark, QR Generator « giant », Image Cropper et Video Merger sous Firefox — silencieux sur fichier vide/abîmé/faux | ✅ **corrigés par P23** (02/10), avec 8 autres trouvés en chemin (Image to Base64 figé 84 s sous Safari, JPG to PDF figé sur 900 Mpx, Image Compressor bloqué sur une image de 400 Mpx / 49 Ko…) ; banc de solidité vert sur les 3 moteurs (`RAPPORT-p23-02-10.md`) |
 | **Reste au propriétaire** : un vrai RAW de son appareil (ou d'un proche) sur iPhone/iPad dans Image Converter → JPG ; un ProRAW 48 Mpx d'iPhone 14/15/16 Pro (aucun sur raw.pixls.us : seuls des ProRAW 12 Mpx ont été testés). **Non mesuré faute d'échantillon** : un DNG compressé en JPEG XL (DNG 1.7) — LibRaw ne le lit qu'avec le DNG SDK d'Adobe, non compilé ici ; à vérifier avec un vrai fichier | ⏳ |
+
+## 🛡️ P23 — erreurs réelles des visiteurs + solidité (02/10, `docs/audit/RAPPORT-p23-02-10.md`)
+
+| Quoi | État |
+|---|---|
+| D2 : lecture des deux CSV `tool_errors` (5 lignes, 1 cause, déjà corrigée le 29/09, reproduite) | ✅ clos |
+| Solidité : les 6 outils de P22 + 8 défauts trouvés en chemin ; vérifications partagées `fileChecks.js` ; cas « bomb » (400 Mpx, 49 Ko) ajouté au banc ; banc résistant à la mort du navigateur ; réviseur indépendant ×2 (rien de grave) | ✅ |
+| `big-image.mjs` remis à jour (`--device=iphone|ipad`) | ✅ |
+| Préversion, bancs 3 moteurs + iPhone/iPad, production, vérification sur www | voir le rapport §4-5 |
+| **Reste** : messages des outils non branchés sur `reportToolError` (24 fichiers seulement remontent leurs erreurs) ; champs texte **modifiables** remplis par un gros fichier sur une seule ligne (non mesuré, les sorties à lignes courtes sont rapides) ; une borne « téléphone » mesurée pour Image Compressor / PDF (aujourd'hui 268 Mpx partout) | ⏳ à décider par Claude dans un prochain chantier, aucune urgence |
 
 > ## ═══ RÈGLE QUI PRIME SUR TOUT LE RESTE, posée fermement par le propriétaire le 23 septembre ═══
 >

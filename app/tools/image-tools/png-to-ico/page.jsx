@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { FileDownload } from '../../../components/FileDownload';
+import { unreadableImageMessage } from '../../../lib/fileChecks';
 
 const ALL_SIZES = [16, 32, 48, 256];
 
@@ -61,6 +62,9 @@ export default function PngToIcoPage() {
   const [sizes, setSizes] = useState(ALL_SIZES);
   const [result, setResult] = useState(null);
   const [status, setStatus] = useState('');
+  // P23: an error was shown in light yellow (text-yellow-400: unreadable on white, no alert role), and as
+  // "could not load image file" whatever the cause; now the exact sentence, in red, announced.
+  const [error, setError] = useState('');
   const inputRef = useRef();
 
   const handleFile = (e) => {
@@ -69,6 +73,8 @@ export default function PngToIcoPage() {
     setFile(f);
     setResult(null);
     setStatus('');
+    setError(f && !f.size ? 'This file is empty (0 bytes): there is no picture in it. Choose the image again.' : '');
+    if (f && !f.size) setFile(null);
   };
 
   const toggleSize = (s) => {
@@ -77,11 +83,13 @@ export default function PngToIcoPage() {
 
   const convert = () => {
     if (!file || sizes.length === 0) return;
+    setError('');
     setStatus('Converting...');
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = async () => {
       try {
+        if (!img.naturalWidth || !img.naturalHeight) throw new Error(await unreadableImageMessage(file));
         const entries = [];
         for (const s of sizes) {
           const blob = await pngBlobForSize(img, s);
@@ -92,14 +100,14 @@ export default function PngToIcoPage() {
         setResult(URL.createObjectURL(icoBlob));
         setStatus('');
       } catch (err) {
-        setStatus('Error: ' + err.message);
+        setStatus(''); setError(err?.message || 'The icon could not be made.');
       } finally {
         URL.revokeObjectURL(url);
       }
     };
-    img.onerror = () => {
-      setStatus('Error: could not load image file');
+    img.onerror = async () => {
       URL.revokeObjectURL(url);
+      setStatus(''); setError(await unreadableImageMessage(file));
     };
     img.src = url;
   };
@@ -123,7 +131,8 @@ export default function PngToIcoPage() {
             </div>
           </div>
           <button onClick={convert} disabled={!file || sizes.length === 0} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert to ICO</button>
-          {status && <p className="text-center text-yellow-400 text-sm">{status}</p>}
+          {status && <p className="text-center text-neutral-500 text-sm">{status}</p>}
+          {error && <p role="alert" className="text-center text-red-600 text-sm">{error}</p>}
           {result && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center space-y-3">
               <div className="text-green-400 text-xl font-bold">Done!</div>

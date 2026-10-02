@@ -5,6 +5,7 @@ import { drawToRaster, encodeRasterLike, resultOf, sourceTypeOf } from '../../..
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { FileDownload } from '../../../components/FileDownload';
+import { emptyImageProblem, unreadableImageMessage } from '../../../lib/fileChecks';
 export default function ImageCropperPage() {
   const [srcType, setSrcType] = useState('image/png');
   const [file, setFile] = useState(null);
@@ -15,12 +16,18 @@ export default function ImageCropperPage() {
   const [crop, setCrop] = useState({ x: 0, y: 0, w: 100, h: 100 });
   const inputRef = useRef();
   const imgRef = useRef();
+  const currentRef = useRef(null); // the file being shown: a slow message for an older one is dropped
   const handleFile = (e) => {
     const f = e.target.files[0];
     e.target.value = '';
     if (!f) return;
-    setImage(URL.createObjectURL(f)); setSrcType(f.type); setFile(f);
     setResult(null);
+    // P23: an empty file is said at once; an image this browser cannot open is said by onImageError below (it was
+    // blamed on the size, or shown as Firefox's raw 'Passed-in image is "broken"', at the Crop click).
+    const empty = emptyImageProblem(f);
+    if (empty) { currentRef.current = null; setImage(null); setFile(null); setError(empty); return; }
+    currentRef.current = f;
+    setImage(URL.createObjectURL(f)); setSrcType(f.type); setFile(f);
     setError('');
     setImgDims({ width: 0, height: 0 });
     setCrop({ x: 0, y: 0, w: 100, h: 100 });
@@ -35,6 +42,12 @@ export default function ImageCropperPage() {
       w: Math.max(1, Math.min(p.w, img.width)),
       h: Math.max(1, Math.min(p.h, img.height)),
     }));
+  };
+  const onImageError = async () => {
+    const f = file;
+    setImage(null); setFile(null);
+    const why = await unreadableImageMessage(f);
+    if (currentRef.current === f) setError(why);
   };
   const applyCrop = async () => {
     setError('');
@@ -66,7 +79,7 @@ export default function ImageCropperPage() {
         <p className="text-neutral-500 text-center mb-8">Crop images with custom dimensions</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            {image ? <img ref={imgRef} src={image} onLoad={onImageLoad} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
+            {image ? <img ref={imgRef} src={image} onLoad={onImageLoad} onError={onImageError} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
           {image && (
@@ -78,7 +91,7 @@ export default function ImageCropperPage() {
             </div>
           )}
           <button onClick={applyCrop} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Crop Image</button>
-          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+          {error && <p role="alert" className="text-red-400 text-center text-sm">{error}</p>}
           {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
         </div>
       </div>
