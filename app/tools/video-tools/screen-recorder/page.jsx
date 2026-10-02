@@ -36,6 +36,10 @@ export default function ScreenRecorderPage() {
   // P24 (03/10): the microphone, mixed with the screen's sound (123apps, ScreenPal have it), and a sentence when the
   // recording has no sound at all (the browser's "Share audio" box left unticked made a silent video without a word)
   const [withMic, setWithMic] = useState(false);
+  // P24 (03/10): pause / resume (123apps' recorder, ScreenPal): the same recording continues, the timer stops meanwhile
+  const [paused, setPaused] = useState(false);
+  const pauseRec = () => { if (mediaRecorder.current?.state === 'recording') { mediaRecorder.current.pause(); clearInterval(timer.current); setPaused(true); } };
+  const resumeRec = () => { if (mediaRecorder.current?.state === 'paused') { mediaRecorder.current.resume(); timer.current = setInterval(() => setDuration((d) => d + 1), 1000); setPaused(false); } };
   const [audioNote, setAudioNote] = useState('');
   const extraRef = useRef([]);
   useEffect(() => { setSupported(!!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) && typeof MediaRecorder !== 'undefined'); }, []);
@@ -101,6 +105,7 @@ export default function ScreenRecorderPage() {
   };
 
   const stop = () => {
+    setPaused(false);
     if (mediaRecorder.current && mediaRecorder.current.state !== 'inactive') mediaRecorder.current.stop();
     setRecording(false);
     clearInterval(timer.current);
@@ -137,7 +142,12 @@ export default function ScreenRecorderPage() {
               {!recording ? (
                 <button onClick={start} disabled={!supported} className="bg-red-600 hover:bg-red-500 rounded-xl px-8 py-3 font-semibold transition text-white">Start Recording</button>
               ) : (
-                <button onClick={stop} className="bg-neutral-200 hover:bg-neutral-200 rounded-xl px-8 py-3 font-semibold transition">Stop Recording</button>
+                <>
+                  {paused
+                    ? <button onClick={resumeRec} className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-6 py-3 font-semibold transition">Resume</button>
+                    : <button onClick={pauseRec} className="bg-neutral-100 hover:bg-neutral-200 rounded-xl px-6 py-3 font-semibold transition">Pause</button>}
+                  <button onClick={stop} className="bg-neutral-200 hover:bg-neutral-200 rounded-xl px-8 py-3 font-semibold transition">Stop Recording</button>
+                </>
               )}
             </div>
           </div>

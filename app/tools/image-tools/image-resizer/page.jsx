@@ -6,6 +6,7 @@ import { CANVAS_MAX_PIXELS, canvasBeyondSafariCap, rasterFromCanvas, rasterFromR
 import { encodeRasterLike, sourceTypeOf } from '../../../lib/imageOutput';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
+import { animationOf } from '../../../lib/animatedImage';
 
 // Modelled on the reference site (iLoveIMG "Resize image"): by pixels with the aspect ratio locked by
 // default and "do not enlarge", or by percentage; the output keeps the source format (it used to always
@@ -102,13 +103,14 @@ export default function ImageResizerPage() {
       // Same format as the original (WebP too on Safari: libwebp in WebAssembly); other formats as PNG.
       const srcType = sourceTypeOf(file);
       // P24 review (03/10): an animated GIF came back as one still PNG with a note blaming the browser. Said for what it is.
-      let animated = false;
-      if (srcType === 'image/gif') { const all = new Uint8Array(await file.arrayBuffer()); let n = 0; for (let i = 0; i + 2 < all.length && n < 2; i++) if (all[i] === 0x21 && all[i + 1] === 0xf9 && all[i + 2] === 0x04) n++; animated = n > 1; }
-      const note = animated ? 'This GIF is animated: the resized PNG holds its first frame only. To resize the whole animation, use the size option of our GIF Compressor.' : MIME_BY_TYPE[srcType] || outFormat !== 'same' ? '' : 'Saved as PNG: GIF and other formats cannot be written here, PNG keeps every pixel.';
+      const animated = await animationOf(file); // 'GIF' | 'APNG' | 'WebP' | null — parsed by structure (P24, 03/10)
+      const note = animated ? 'This ' + animated + ' is animated: the resized image holds its first frame only.' + (animated === 'GIF' ? ' To resize the whole animation, use the size option of our GIF Compressor.' : '') : MIME_BY_TYPE[srcType] || outFormat !== 'same' ? '' : 'Saved as PNG: GIF and other formats cannot be written here, PNG keeps every pixel.';
       const chosen = outFormat === 'same' ? (MIME_BY_TYPE[srcType] || 'image/png') : outFormat;
       const blob = await encodeRasterLike(out, chosen, Number(outQuality));
       const base = file.name.replace(/\.[^.]+$/, '') || 'image';
-      setResult({ url: URL.createObjectURL(blob), size: blob.size, w: dims.w, h: dims.h, name: `${base}-${dims.w}x${dims.h}.${EXT[blob.type] || 'png'}`, note });
+      // P24 review (03/10): a JPG has no transparency — transparent areas come out white, said
+      const alphaNote = blob.type === 'image/jpeg' && /png|webp|gif|avif|tiff|svg/i.test(srcType) ? ' JPG has no transparency: transparent areas, if any, are white.' : '';
+      setResult({ url: URL.createObjectURL(blob), size: blob.size, w: dims.w, h: dims.h, name: `${base}-${dims.w}x${dims.h}.${EXT[blob.type] || 'png'}`, note: (note + alphaNote).trim() });
     } catch (e) {
       setError(e.message || 'The image could not be resized.');
     }

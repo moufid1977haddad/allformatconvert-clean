@@ -71,6 +71,7 @@ export default function CsvToJsonPage() {
   const [fileName, setFileName] = useState('');
   const [output, setOutput] = useState('');
   const [status, setStatus] = useState('');
+  const [shape, setShape] = useState('objects'); // P24: objects / arrays / JSON Lines
   const [error, setError] = useState('');
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState('');
@@ -161,7 +162,7 @@ export default function CsvToJsonPage() {
         setConverting(false);
         workerRef.current = null;
         if (msg.mode === 'file') {
-          offer(msg.blob, 'converted.json');
+          offer(msg.blob, shape === 'jsonl' ? 'converted.jsonl' : 'converted.json');
           setStatus(`Converted ${msg.rowCount.toLocaleString()} rows.` + numbersNote(msg) + (msg.notes?.length ? ` Note: ${msg.notes.join('; ')}.` : ''));
         } else {
           setOutput(msg.json);
@@ -186,7 +187,7 @@ export default function CsvToJsonPage() {
     };
     const delimiter = delimiterChoice === 'auto' ? detectedDelimiter : delimiterChoice;
     const encoding = encodingChoice === 'auto' ? detectedEncoding : encodingChoice;
-    worker.postMessage(file ? { file, mode, maxRows, delimiter, encoding, typeNumbers } : { text: input, mode, maxRows, delimiter, typeNumbers });
+    worker.postMessage(file ? { file, mode, maxRows, delimiter, encoding, typeNumbers, shape } : { text: input, mode, maxRows, delimiter, typeNumbers, shape });
   };
 
   return (
@@ -255,6 +256,13 @@ export default function CsvToJsonPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
+          <label className="col-span-2 flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">Output
+            <select id="c2j-shape" value={shape} onChange={(e) => setShape(e.target.value)} disabled={converting} className="border border-neutral-200 rounded px-2 py-1 bg-white dark:bg-neutral-800">
+              <option value="objects">Array of objects (one per row)</option>
+              <option value="arrays">Array of arrays (header row first)</option>
+              <option value="jsonl">JSON Lines (one object per line)</option>
+            </select>
+          </label>
               <button onClick={convert} disabled={!file && !input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 dark:disabled:bg-neutral-700 disabled:text-gray-600 dark:disabled:text-neutral-500 text-white rounded-xl py-3 font-semibold transition">Convert</button>
               <button onClick={() => navigator.clipboard.writeText(output)} disabled={!output} className="bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 dark:disabled:bg-neutral-700 disabled:text-gray-600 dark:disabled:text-neutral-500 text-white rounded-xl py-3 font-semibold transition">Copy</button>
             </div>

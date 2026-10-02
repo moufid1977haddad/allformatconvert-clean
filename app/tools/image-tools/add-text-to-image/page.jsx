@@ -6,6 +6,7 @@ import { rasterFromRGBA } from '../../../lib/bigImage';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
+import AnimatedImageNote from '../../../components/AnimatedImageNote';
 
 // P24 (03/10): iLoveIMG's text (watermark / meme) offers fonts, size, colour, shadow, opacity; ezgif adds outline and
 // rotation. Fonts are system stacks with fallbacks (a font missing on the device falls back to a similar one).
@@ -90,6 +91,7 @@ export default function AddTextToImagePage() {
             {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
+          <AnimatedImageNote file={file} />
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <div><label className="block text-sm text-neutral-500 mb-1">Text (Enter for a new line)</label><textarea aria-label="Text" rows={2} value={text} onChange={e => setText(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
           <div className="grid grid-cols-2 gap-4">

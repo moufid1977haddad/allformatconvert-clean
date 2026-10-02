@@ -14,6 +14,9 @@ export default function AudioWaveformPage() {
   const [audioUrl, setAudioUrl] = useState(null);
   const [error, setError] = useState('');
   const [view, setView] = useState({ zoom: 1, start: 0 });
+  // P24 (03/10): image size, colours and a transparent background (ezgif's waveform: width, height, colours,
+  // transparency); the exported PNG is drawn at the chosen size, not copied from the 800-px preview
+  const [out, setOut] = useState({ w: 1920, h: 300, wave: '#6366f1', bg: '#f5f5f5', transparent: false });
   const canvasRef = useRef();
   const fileRef = useRef();
   const audioBufferRef = useRef(null);
@@ -38,13 +41,12 @@ export default function AudioWaveformPage() {
     }
   };
 
-  const drawWaveform = useCallback(() => {
-    const canvas = canvasRef.current;
+  // draws the visible part of the sound on any canvas (the preview, or the export at the chosen size)
+  const drawOn = useCallback((canvas, colours) => {
     const buffer = audioBufferRef.current;
-    if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#f5f5f5';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!colours.transparent) { ctx.fillStyle = colours.bg; ctx.fillRect(0, 0, canvas.width, canvas.height); }
     if (!buffer) return;
 
     // Every channel is taken (29/09): only the left one was drawn, so a sound present only on the right channel
@@ -55,18 +57,20 @@ export default function AudioWaveformPage() {
     const viewLength = Math.max(1, Math.floor(totalLength / view.zoom));
     const maxStart = Math.max(0, totalLength - viewLength);
     const start = Math.min(Math.max(0, Math.floor(view.start)), maxStart);
-    const step = Math.max(1, Math.floor(viewLength / canvas.width));
+    // P24 review (03/10): each column covers its exact share of the visible samples (fractional bounds). A whole-number
+    // step drew only 68 % of the view on a 3000-px export at zoom 20, and ran past it when zoomed further
+    const per = viewLength / canvas.width;
     const amp = canvas.height / 2;
 
-    ctx.strokeStyle = '#6366f1';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = colours.wave;
+    ctx.lineWidth = Math.max(1, Math.round(canvas.width / 1200));
     ctx.beginPath();
     for (let i = 0; i < canvas.width; i++) {
       let min = 1, max = -1;
-      const sampleStart = start + i * step;
+      const sampleStart = start + Math.floor(i * per);
+      const sampleEnd = Math.max(sampleStart + 1, start + Math.floor((i + 1) * per));
       for (const data of channels) {
-        for (let j = 0; j < step; j++) {
-          const idx = sampleStart + j;
+        for (let idx = sampleStart; idx < sampleEnd; idx++) {
           if (idx >= totalLength) break;
           const val = data[idx] || 0;
           if (val < min) min = val;
@@ -79,6 +83,7 @@ export default function AudioWaveformPage() {
     }
     ctx.stroke();
   }, [view]);
+  const drawWaveform = useCallback(() => { if (canvasRef.current) drawOn(canvasRef.current, out); }, [drawOn, out]);
 
   useEffect(() => {
     drawWaveform();
@@ -137,7 +142,8 @@ export default function AudioWaveformPage() {
     // Never hand over the empty placeholder canvas as if it were a waveform.
     if (!canvas || !audioBufferRef.current) { setError('Load an audio file first — there is no waveform to save yet.'); return; }
     // 30/09: a Blob, not a data: URL (iOS saves nothing from a data: link).
-    canvas.toBlob((blob) => {
+    const big = document.createElement('canvas'); big.width = out.w; big.height = out.h; drawOn(big, out);
+    big.toBlob((blob) => {
       if (!blob || !blob.size) { setError('The waveform image could not be made on this device.'); return; }
       saveBlob(blob, (file?.name.replace(/\.[^.]+$/, '') || 'waveform') + '-waveform.png');
     }, 'image/png');
@@ -160,16 +166,28 @@ export default function AudioWaveformPage() {
             width={800}
             height={200}
             className="w-full rounded-xl border border-neutral-200 cursor-grab active:cursor-grabbing"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={stopDrag}
-            onMouseLeave={stopDrag}
+            onPointerDown={handleMouseDown}
+            onPointerMove={handleMouseMove}
+            onPointerUp={stopDrag}
+            onPointerLeave={stopDrag}
+            style={{ touchAction: 'none' }}
           />
           <div className="flex items-center justify-between text-xs text-neutral-400">
-            <span>Scroll to zoom, drag to pan</span>
+            <span>Scroll (or + / −) to zoom, drag to pan — with a finger too</span>
             <span>Zoom: {view.zoom.toFixed(1)}x</span>
           </div>
           <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2 grid grid-cols-2 sm:grid-cols-5 gap-2 text-sm text-neutral-600" data-wave-options>
+              <label>Width<select id="wf-w" value={out.w} onChange={(e) => setOut({ ...out, w: Number(e.target.value) })} className="w-full border border-neutral-200 rounded px-1 py-1 bg-white">{[800, 1200, 1920, 3000].map((v) => <option key={v} value={v}>{v} px</option>)}</select></label>
+              <label>Height<select id="wf-h" value={out.h} onChange={(e) => setOut({ ...out, h: Number(e.target.value) })} className="w-full border border-neutral-200 rounded px-1 py-1 bg-white">{[150, 200, 300, 500, 800].map((v) => <option key={v} value={v}>{v} px</option>)}</select></label>
+              <label>Wave<input type="color" value={out.wave} onChange={(e) => setOut({ ...out, wave: e.target.value })} className="w-full h-8" aria-label="Wave colour" /></label>
+              <label>Background<input type="color" value={out.bg} onChange={(e) => setOut({ ...out, bg: e.target.value, transparent: false })} className="w-full h-8" aria-label="Background colour" /></label>
+              <label className="flex items-center gap-1 sm:pt-5"><input id="wf-transparent" type="checkbox" checked={out.transparent} onChange={(e) => setOut({ ...out, transparent: e.target.checked })} /> Transparent</label>
+            </div>
+            <div className="col-span-2 grid grid-cols-2 gap-3">
+              <button type="button" onClick={() => setView((v) => ({ ...v, zoom: Math.min(MAX_ZOOM, v.zoom * 1.5) }))} disabled={!file} className="w-full bg-neutral-100 hover:bg-neutral-200 disabled:opacity-50 rounded-xl py-2 font-semibold">Zoom in +</button>
+              <button type="button" onClick={() => setView((v) => ({ ...v, zoom: Math.max(MIN_ZOOM, v.zoom / 1.5) }))} disabled={!file} className="w-full bg-neutral-100 hover:bg-neutral-200 disabled:opacity-50 rounded-xl py-2 font-semibold">Zoom out −</button>
+            </div>
             <button onClick={resetZoom} disabled={!file} className="w-full bg-neutral-200 hover:bg-neutral-300 disabled:opacity-50 rounded-xl py-2 font-semibold transition">Reset Zoom</button>
             <button onClick={downloadPng} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-2 font-semibold transition">Download PNG</button>
           </div>
@@ -186,6 +204,7 @@ export default function AudioWaveformPage() {
           "Click \"Download PNG\" to save the current waveform view as an image, or \"Reset Zoom\" to return to the full view."
         ]}
         faqs={[
+          { q: "Can I choose the image size and colours?", a: "Yes: width from 800 to 3000 px, height from 150 to 800 px, the wave and background colours, or a transparent background. The PNG is drawn at that size — of the part shown, so zoom first to save a detail." },
           { q: "Can I zoom or pan the waveform?", a: "Yes — scroll over the canvas to zoom in or out (centered on your cursor), and click-and-drag to pan across the waveform. Use \"Reset Zoom\" to return to the full view." },
           { q: "Can I export or download the waveform image?", a: "Yes — click \"Download PNG\" to save the currently visible waveform (including your current zoom/pan) as a PNG image." },
           { q: "What audio formats are supported?", a: "MP3, WAV, FLAC, OGG, M4A and the others your browser decodes directly; formats it cannot decode (WMA, AC3, AMR…) are decoded in your browser by ffmpeg.wasm first. Nothing is uploaded." },

@@ -15,17 +15,17 @@ export default function TextComparatorPage() {
   // after it as different (29/09).
   const compare = async () => {
     const d = await diffLines(text1, text2, { ignoreWhitespace: ignoreWs, ignoreCase });
-    const { diffWordsWithSpace } = await import('diff');
+    const { diffWordsWithSpace, diffWords } = await import('diff');
     const rows = [];
     for (let i = 0; i < d.length;) {
-      if (d[i].type === 'same') { rows.push({ l1: d[i].line, l2: d[i].line, same: true }); i++; continue; }
+      if (d[i].type === 'same') { rows.push({ l1: d[i].line, l2: d[i].newLine ?? d[i].line, same: true }); i++; continue; } // each side as written
       const rem = [], add = [];
       while (i < d.length && d[i].type === 'removed') rem.push(d[i++].line);
       while (i < d.length && d[i].type === 'added') add.push(d[i++].line);
       for (let k = 0; k < Math.max(rem.length, add.length); k++) {
         const l1 = rem[k] ?? '', l2 = add[k] ?? '';
         // a changed pair: the words that differ are marked (a lone added or removed line is marked whole)
-        const words = l1 && l2 ? diffWordsWithSpace(l1, l2, { ignoreCase }) : null;
+        const words = l1 && l2 ? (ignoreWs ? diffWords : diffWordsWithSpace)(l1, l2, { ignoreCase }) : null;
         rows.push({ l1, l2, same: false, words });
       }
     }

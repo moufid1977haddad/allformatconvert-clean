@@ -93,15 +93,24 @@ function fullPage(pdfDoc, img, layout) {
 // P24 (03/10): a page size (A4, Letter), an orientation and a margin, as iLovePDF and PDF24 offer. The picture is
 // scaled to fit inside the margins, never cropped or stretched, and centred; a small picture is not enlarged.
 export const PAGE_SIZES_PT = { a4: [595.28, 841.89], letter: [612, 792], legal: [612, 1008], a5: [419.53, 595.28] };
-function placedPage(pdfDoc, img, { size, orientation = 'auto', marginMm = 0 }) {
+// `exif` is a JPEG's EXIF orientation 3, 6 or 8: the picture is embedded as it is and turned on the page (P24 review:
+// it was redrawn, a silent re-encoding of every portrait phone photo, against the FAQ's "put in the PDF as they are").
+function placedPage(pdfDoc, img, { size, orientation = 'auto', marginMm = 0 }, exif = 1, degrees = null) {
+  const turned = exif === 6 || exif === 8;
+  const dw0 = turned ? img.height : img.width, dh0 = turned ? img.width : img.height; // as displayed
   let [pw, ph] = PAGE_SIZES_PT[size] || PAGE_SIZES_PT.a4;
-  const landscape = orientation === 'landscape' || (orientation === 'auto' && img.width > img.height);
+  const landscape = orientation === 'landscape' || (orientation === 'auto' && dw0 > dh0);
   if (landscape) [pw, ph] = [ph, pw];
   const m = (Number(marginMm) || 0) * 72 / 25.4;
   const aw = Math.max(1, pw - 2 * m), ah = Math.max(1, ph - 2 * m);
-  const k = Math.min(1, aw / img.width, ah / img.height);
-  const w = img.width * k, h = img.height * k;
-  pdfDoc.addPage([pw, ph]).drawImage(img, { x: (pw - w) / 2, y: (ph - h) / 2, width: w, height: h });
+  const k = Math.min(1, aw / dw0, ah / dh0);
+  const w = dw0 * k, h = dh0 * k, bx = (pw - w) / 2, by = (ph - h) / 2; // the displayed box
+  const iw = img.width * k, ih = img.height * k; // the stored picture's drawn size
+  const page = pdfDoc.addPage([pw, ph]);
+  if (exif === 6) page.drawImage(img, { x: bx, y: by + h, width: iw, height: ih, rotate: degrees(-90) });
+  else if (exif === 8) page.drawImage(img, { x: bx + w, y: by, width: iw, height: ih, rotate: degrees(90) });
+  else if (exif === 3) page.drawImage(img, { x: bx + w, y: by + h, width: iw, height: ih, rotate: degrees(180) });
+  else page.drawImage(img, { x: bx, y: by, width: iw, height: ih });
 }
 
 // P23 (02/10): a picture that is not embedded as is (PNG, decoded by pdf-lib; WebP, GIF, BMP, HEIC, mirrored JPEG,
@@ -137,13 +146,13 @@ export async function addImagePage(pdfDoc, original, layout = null) {
         const exifr = (await import('exifr')).default;
         orientation = (await exifr.orientation(bytes)) || 1;
       } catch { orientation = 1; } // no readable EXIF: stored as displayed
-      if ([2, 4, 5, 7].includes(orientation) || (placed && orientation !== 1)) { // a page layout: drawn upright first
+      if ([2, 4, 5, 7].includes(orientation)) { // mirrored: drawn upright first
         await assertDecodable(original, file);
         fullPage(pdfDoc, await embedUpright(pdfDoc, file), layout);
         return;
       }
       const img = await pdfDoc.embedJpg(bytes);
-      if (placed) { fullPage(pdfDoc, img, layout); return; }
+      if (placed) { placedPage(pdfDoc, img, layout, [3, 6, 8].includes(orientation) ? orientation : 1, degrees); return; }
       const { width: W0, height: H0 } = img;
       const k = pageScale(W0, H0), W = W0 * k, H = H0 * k;
       if (orientation === 6) pdfDoc.addPage([H, W]).drawImage(img, { x: 0, y: W, width: W, height: H, rotate: degrees(-90) });

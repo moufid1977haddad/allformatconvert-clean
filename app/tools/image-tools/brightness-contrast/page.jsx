@@ -7,11 +7,13 @@ import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { supportsCanvasFilter, applyBrightnessContrast } from '../../../lib/canvasFilters';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
+import AnimatedImageNote from '../../../components/AnimatedImageNote';
 export default function BrightnessContrastPage() {
   const [srcType, setSrcType] = useState('image/png');
   const [image, setImage] = useState(null);
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
+  const [saturation, setSaturation] = useState(100); // P24 (03/10): saturation too, as ezgif's adjust tool
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
@@ -26,8 +28,17 @@ export default function BrightnessContrastPage() {
       const raster = await loadRaster(file);
       const out = await renderFull(raster, raster.width, raster.height, (ctx, drawSource, band) => {
         // Safari has no ctx.filter: it used to return the image unchanged (29/09).
-        if (supportsCanvasFilter()) { ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`; drawSource(ctx); }
-        else { drawSource(ctx); ctx.putImageData(applyBrightnessContrast(ctx.getImageData(0, 0, band.width, band.rows), brightness, contrast), 0, 0); }
+        if (supportsCanvasFilter()) { ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`; drawSource(ctx); }
+        else {
+          drawSource(ctx);
+          const img = applyBrightnessContrast(ctx.getImageData(0, 0, band.width, band.rows), brightness, contrast);
+          if (saturation !== 100) { // the CSS saturate() matrix (Filter Effects spec), same result as the browser filter
+            const k = saturation / 100, d = img.data;
+            const m = [0.213 + 0.787 * k, 0.715 - 0.715 * k, 0.072 - 0.072 * k, 0.213 - 0.213 * k, 0.715 + 0.285 * k, 0.072 - 0.072 * k, 0.213 - 0.213 * k, 0.715 - 0.715 * k, 0.072 + 0.928 * k];
+            for (let i = 0; i < d.length; i += 4) { const r = d[i], g = d[i + 1], b = d[i + 2]; d[i] = m[0] * r + m[1] * g + m[2] * b; d[i + 1] = m[3] * r + m[4] * g + m[5] * b; d[i + 2] = m[6] * r + m[7] * g + m[8] * b; }
+          }
+          ctx.putImageData(img, 0, 0);
+        }
       });
       setResult(resultOf(await encodeRasterLike(out, sourceTypeOf(file)), file.name, 'adjusted'));
     } catch (e) { setError(e?.message || 'Could not process this image.'); }
@@ -43,9 +54,11 @@ export default function BrightnessContrastPage() {
             {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
+          <AnimatedImageNote file={file} />
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <div><label className="block text-sm text-neutral-500 mb-1">Brightness: {brightness}%</label><input aria-label="Brightness (%)" type="range" min="0" max="200" value={brightness} onChange={e => setBrightness(parseInt(e.target.value))} className="w-full" /></div>
           <div><label className="block text-sm text-neutral-500 mb-1">Contrast: {contrast}%</label><input aria-label="Contrast (%)" type="range" min="0" max="200" value={contrast} onChange={e => setContrast(parseInt(e.target.value))} className="w-full" /></div>
+          <div><label className="block text-sm text-neutral-500 mb-1">Saturation: {saturation}%</label><input id="bc-saturation" aria-label="Saturation (%)" type="range" min="0" max="200" value={saturation} onChange={(e) => setSaturation(Number(e.target.value))} className="w-full" /></div>
           <button onClick={apply} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Apply</button>
           {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
         </div>

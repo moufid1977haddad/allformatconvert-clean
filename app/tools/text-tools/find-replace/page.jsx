@@ -25,8 +25,22 @@ export default function FindReplacePage() {
     let regex;
     try {
       const core = useRegex ? find : escapeRegex(find);
-      // whole word: not inside a longer word, letters of any script (Unicode), not only [A-Za-z0-9_]
-      regex = new RegExp(wholeWord ? `(?<![\\p{L}\\p{N}_])(?:${core})(?![\\p{L}\\p{N}_])` : core, 'g' + (ignoreCase ? 'i' : '') + (wholeWord ? 'u' : '')); // u only where \p{} needs it: it changes how some patterns read
+      // whole word: not inside a longer word, letters of any script (Unicode), not only [A-Za-z0-9_]. Marks (\p{M})
+      // count as part of a word: Hindi vowel signs, Arabic harakat, an accent typed as a separate character (P24 review)
+      const flags = 'g' + (ignoreCase ? 'i' : '');
+      if (!wholeWord) regex = new RegExp(core, flags);
+      else {
+        try { regex = new RegExp(`(?<![\\p{L}\\p{M}\\p{N}_])(?:${core})(?![\\p{L}\\p{M}\\p{N}_])`, flags + 'u'); }
+        catch (err) {
+          // a regex the u flag refuses (a\-b, \_id, x{ — valid without it): same boundary written as code-point
+          // ranges, letters and marks of the common scripts, so whole word does not break a pattern that works
+          if (!useRegex) throw err;
+          // \p{…} and \u{…} only mean something with u: without it they would silently search for "p{L}" (review)
+          if (/\\[pP]\{|\\u\{/.test(core)) throw new Error('\\p{…} and \\u{…} need the Unicode mode, which this pattern breaks elsewhere (escapes like \\- or \\_ outside brackets): remove those escapes.');
+          const W = '0-9A-Z_a-z\\u00AA\\u00B5\\u00BA\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u036F\\u0370-\\u03FF\\u0400-\\u052F\\u0531-\\u0587\\u0591-\\u05C7\\u05D0-\\u05EA\\u0610-\\u061A\\u0620-\\u065F\\u066E-\\u06D3\\u06D5-\\u06FF\\u0750-\\u077F\\u08A0-\\u08FF\\u0900-\\u0963\\u0966-\\u0DFF\\u0E00-\\u0E4E\\u0E80-\\u0EFF\\u0F00-\\u0FFF\\u1000-\\u109F\\u10A0-\\u10FF\\u1100-\\u11FF\\u1200-\\u139F\\u1780-\\u17D3\\u1E00-\\u1FFF\\u2C60-\\u2C7F\\u3040-\\u30FF\\u3400-\\u4DBF\\u4E00-\\u9FFF\\uA720-\\uA7FF\\uAC00-\\uD7A3';
+          regex = new RegExp(`(?<![${W}])(?:${core})(?![${W}])`, flags);
+        }
+      }
     } catch (e) {
       setError(e.message);
       setResult('');

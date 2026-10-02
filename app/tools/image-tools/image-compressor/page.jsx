@@ -144,7 +144,8 @@ export default function ImageCompressorPage() {
       resolve();
     };
     worker.addEventListener('message', onMessage);
-    update(it.id, { status: 'working', pct: 0 });
+    // the settings this image was made with: the messages below quote them, not the fields as they are now (P24 review)
+    update(it.id, { status: 'working', pct: 0, sentTargetKb: byTarget ? Number(targetKb) : null, sentQuality: quality });
     // __forceBands: set only by the browser tests, to run the iPhone (band) decode in Firefox.
     imageDims(it.file).then((dims) => worker.postMessage({ id: it.id, file: it.file, quality, dims, forceBands: !!window.__forceBands, canvasCap: window.__forceSafariCanvasCap === true, targetBytes: byTarget && Number(targetKb) > 0 ? Math.round(Number(targetKb) * 1024) : 0 }))
       .catch(() => { worker.removeEventListener('message', onMessage); update(it.id, { status: 'error', message: UNREADABLE }); resolve(); });
@@ -206,8 +207,8 @@ export default function ImageCompressorPage() {
                     {it.status === 'done' && (
                       <p className="text-neutral-600">{formatSize(it.file.size)} → <span className="font-semibold text-indigo-600">{formatSize(it.outSize)}</span> <span className="text-green-700 font-semibold">(−{Math.round((1 - it.outSize / it.file.size) * 100)}%)</span>{it.note ? <span className="text-neutral-500"> · {it.note}</span> : null}</p>
                     )}
-                    {it.status === 'notSmaller' && byTarget && it.file.size <= Number(targetKb) * 1024 && <p className="text-amber-800" data-under-target>This image is already {formatSize(it.file.size)}, under the {targetKb} KB asked: nothing to compress.</p>}
-                    {it.status === 'notSmaller' && !(byTarget && it.file.size <= Number(targetKb) * 1024) && <p className="text-amber-800">Already well compressed: at {quality}% the result would be {formatSize(it.outSize)}, not smaller than {formatSize(it.file.size)}. Nothing to download — lower the quality to shrink it further.</p>}
+                    {it.status === 'notSmaller' && it.sentTargetKb && it.file.size <= it.sentTargetKb * 1024 && <p className="text-amber-800" data-under-target>This image is already {formatSize(it.file.size)}, under the {it.sentTargetKb} KB asked: nothing to compress.</p>}
+                    {it.status === 'notSmaller' && !(it.sentTargetKb && it.file.size <= it.sentTargetKb * 1024) && <p className="text-amber-800">Already well compressed: at {it.sentQuality ?? quality}% the result would be {formatSize(it.outSize)}, not smaller than {formatSize(it.file.size)}. Nothing to download — lower the quality to shrink it further.</p>}
                     {it.status === 'svgMinimal' && <p className="text-amber-800">This SVG is already optimised: nothing could be removed from it. Nothing to download — your file is already the best version.</p>}
                     {it.status === 'svgKept' && <p className="text-amber-800">This SVG could not be made smaller without changing how it looks, so we kept it as it is. Nothing to download — your file is already the best version.</p>}
                     {it.status === 'error' && <p className="text-red-600">{it.message}</p>}

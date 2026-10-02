@@ -10,7 +10,7 @@ class RowLimitExceededError extends Error {
   }
 }
 
-async function run({ file, text, maxRows, mode, delimiter, encoding, typeNumbers = true }) {
+async function run({ file, text, maxRows, mode, delimiter, encoding, typeNumbers = true, shape = 'objects' }) {
   const limit = maxRows || MAX_ROWS;
   const rows = [];
   const parser = new IncrementalCsvParser((row) => {
@@ -63,8 +63,16 @@ async function run({ file, text, maxRows, mode, delimiter, encoding, typeNumbers
   const decimalSep = detectDecimalSeparator(rows.slice(1), delimiter || ',');
   const numeric = typeNumbers ? numericColumns(rows, decimalSep) : [];
   const cell = (v, i) => { const t = (v ?? '').trim(); if (!numeric[i] || t === '') return t; return parseLocaleNumber(t, decimalSep); };
-  const result = rows.slice(1).map((vals) => Object.fromEntries(headers.map((h, i) => [h, cell(vals[i], i)])));
-  const jsonText = JSON.stringify(result, null, 2);
+  // P24 (03/10): the shapes convertcsv.com offers — objects (default), arrays (header row first), JSON Lines (one
+  // object per line, for logs and big-data tools)
+  const asObject = (vals) => Object.fromEntries(headers.map((h, i) => [h, cell(vals[i], i)]));
+  const data = rows.slice(1);
+  // arrays: the header row exactly as in the file (a list has no keys to collide: nothing renamed, nothing to say)
+  if (shape === 'arrays') notes.length = 0;
+  const headerRow = Array.from({ length: width }, (_, i) => (rows[0][i] ?? '').trim());
+  const jsonText = shape === 'arrays' ? JSON.stringify([headerRow, ...data.map((vals) => headers.map((_, i) => cell(vals[i], i)))], null, 2)
+    : shape === 'jsonl' ? data.map((vals) => JSON.stringify(asObject(vals))).join('\n')
+    : JSON.stringify(data.map(asObject), null, 2);
 
   self.postMessage({ type: 'progress', pct: 97, phase: 'building' });
 

@@ -200,7 +200,7 @@ export default function QrScannerPage() {
           {others.length === 1 && <p className="text-xs text-neutral-500" data-codes>Read as {others[0].format}.</p>}
           {result && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 space-y-3" data-result>
-              <div className="text-green-700 text-xl font-bold text-center">QR Code Found!</div>
+              <div className="text-green-700 text-xl font-bold text-center">{others.some((c) => !/QR/i.test(c.format)) ? 'Code Found!' : 'QR Code Found!'}</div>
               <p className="text-center break-all" data-text>{result}</p>
               <div className={`grid gap-2 ${isLink ? 'grid-cols-2' : 'grid-cols-1'}`}>
                 <button onClick={() => navigator.clipboard.writeText(result)} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Copy</button>

@@ -2,6 +2,15 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { TextDownload } from '../../../components/FileDownload';
+// P24 (03/10): three ways to encode, as browserling offers — a component (a query value: & ? / # = encoded), a whole
+// URL (its structure : / ? # & = kept, spaces and accents encoded), and strict RFC 3986 (also ! ' ( ) *)
+const ENCODERS = {
+  component: (s) => encodeURIComponent(s),
+  // a whole URL: an escape already there (%20) is kept, not encoded again into %2520 (P24 review)
+  url: (s) => s.split(/(%[0-9A-Fa-f]{2})/).map((part, i) => (i % 2 ? part : encodeURI(part))).join(''),
+  rfc3986: (s) => encodeURIComponent(s).replace(/[!'()*]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase()),
+};
+
 export default function UrlEncoderDevPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -9,7 +18,8 @@ export default function UrlEncoderDevPage() {
   // leaves it as "+". On by default, like PHP's urldecode and the decoders that offer the choice; our Encode never
   // outputs a raw "+" (it writes %2B), so a round trip is unchanged.
   const [plusAsSpace, setPlusAsSpace] = useState(true);
-  const encode = () => { try { setOutput(encodeURIComponent(input)); } catch(e) { setOutput('Error'); } };
+  const [encMode, setEncMode] = useState('component');
+  const encode = () => { try { setOutput(ENCODERS[encMode](input)); } catch(e) { setOutput('This text has a broken character (a lone surrogate) that URLs cannot carry.'); } };
   const decode = () => { try { setOutput(decodeURIComponent(plusAsSpace ? input.replace(/\+/g, ' ') : input)); } catch(e) { setOutput('Invalid URL encoding'); } };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -20,6 +30,13 @@ export default function UrlEncoderDevPage() {
           <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" placeholder="Paste URL here..." value={input} onChange={e => setInput(e.target.value)} />
           <label className="flex items-center gap-2 text-sm text-neutral-600 cursor-pointer"><input type="checkbox" checked={plusAsSpace} onChange={(e) => setPlusAsSpace(e.target.checked)} className="w-4 h-4" />Decode “+” as a space (form data and query strings)</label>
           {plusAsSpace && input.includes('+') && <p className="text-xs text-amber-700" data-plus-note>Each “+” is read as a space here (form encoding). If your text has real plus signs — an e-mail like a+b@x.com, a phone number — untick this box.</p>}
+          <label className="flex items-center gap-2 text-sm text-neutral-600">Encode as
+            <select id="url-mode" value={encMode} onChange={(e) => setEncMode(e.target.value)} className="border border-neutral-200 rounded px-2 py-1 bg-white">
+              <option value="component">A value (query parameter, path segment)</option>
+              <option value="url">A whole URL (keeps : / ? # & =)</option>
+              <option value="rfc3986">Strict RFC 3986 (also ! ' ( ) *)</option>
+            </select>
+          </label>
           <div className="grid grid-cols-2 gap-3">
             <button onClick={encode} disabled={!input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Encode</button>
             <button onClick={decode} disabled={!input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Decode</button>
@@ -39,7 +56,7 @@ export default function UrlEncoderDevPage() {
         ]}
         faqs={[
           { q: "What is URL encoding?", a: "It converts characters that aren't safe in a URL (spaces, &, =, and others) into a %XX percent-encoded format." },
-          { q: "Can I encode a whole URL with this tool?", a: "Not safely — encoding a full URL will also encode its structural characters (like / and :), breaking it. Encode individual values (e.g. a query parameter) instead, then build the full URL around them." },
+          { q: "Can I encode a whole URL with this tool?", a: "Yes: choose 'A whole URL' — the characters that give a URL its structure (: / ? # & =) are kept, as are escapes already there (%20 stays %20), and spaces or accented letters are encoded. 'A value' (the default) encodes everything, for a single query parameter; 'Strict RFC 3986' also encodes ! ' ( ) *." },
           { q: "Can I decode with this tool?", a: "Yes — there's a 'Decode' button next to 'Encode' that reverses percent-encoding back to the original text." },
           { q: "Is my data uploaded to a server?", a: "No, encoding and decoding happen entirely in your browser." }
         ]}

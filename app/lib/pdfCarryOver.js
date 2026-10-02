@@ -65,7 +65,7 @@ export function outlineItems(lib, src, out, order, offset = 0) {
   const named = (name) => {
     const key = name instanceof PDFName ? name.decodeText() : name.decodeText();
     const old = src.catalog.lookupMaybe(N('Dests'), PDFDict);
-    if (old) { for (const [k, v] of old.entries()) if (String(k).slice(1) === key) return sctx.lookup(v); }
+    if (old) { for (const [k, v] of old.entries()) if (k.decodeText() === key) return sctx.lookup(v); }
     const tree = src.catalog.lookupMaybe(N('Names'), PDFDict)?.lookupMaybe(N('Dests'), PDFDict);
     const walk = (node, depth) => {
       if (!node || depth > 32) return undefined;
@@ -218,4 +218,66 @@ export function carryFormsMany(lib, sources, out) {
   if (needAppearances) form.set(PDFName.of('NeedAppearances'), lib.PDFBool.True); // only if a source asked for it
   out.catalog.set(PDFName.of('AcroForm'), ctx.register(form));
   return renamed;
+}
+
+// P24 (03/10): split by bookmarks (Sejda, PDF24). The bookmarks down to `maxDepth` (1 = top level) with the page each one
+// opens, 0-based, in reading order: [{ title, page, depth }]. A bookmark with no page (a link, a broken destination) is
+// skipped; its children are still read. Destinations: explicit arrays, named ones (old /Dests and the /Names tree), GoTo.
+export function bookmarkPages(lib, src, maxDepth = 1) {
+  const { PDFName, PDFDict, PDFArray, PDFRef, PDFString, PDFHexString, PDFNumber } = lib;
+  const N = (x) => PDFName.of(x);
+  const outlines = src.catalog.lookupMaybe(N('Outlines'), PDFDict);
+  if (!outlines) return [];
+  const ctx = src.context;
+  const pageIndex = new Map(src.getPages().map((p, i) => [p.ref.tag, i]));
+  const named = (name) => {
+    const key = name.decodeText();
+    const old = src.catalog.lookupMaybe(N('Dests'), PDFDict);
+    if (old) { for (const [k, v] of old.entries()) if (k.decodeText() === key) return ctx.lookup(v); }
+    const walk = (node, depth) => {
+      if (!node || depth > 32) return undefined;
+      const names = node.lookupMaybe(N('Names'), PDFArray);
+      if (names) for (let i = 0; i + 1 < names.size(); i += 2) {
+        const k = names.lookup(i);
+        if ((k instanceof PDFString || k instanceof PDFHexString) && k.decodeText() === key) return ctx.lookup(names.get(i + 1));
+      }
+      const kids = node.lookupMaybe(N('Kids'), PDFArray);
+      if (kids) for (let i = 0; i < kids.size(); i++) { const r = walk(kids.lookupMaybe(i, PDFDict), depth + 1); if (r) return r; }
+      return undefined;
+    };
+    return walk(src.catalog.lookupMaybe(N('Names'), PDFDict)?.lookupMaybe(N('Dests'), PDFDict), 0);
+  };
+  const pageOf = (item) => {
+    let d = item.lookup(N('Dest'));
+    if (d === undefined) {
+      const a = item.lookupMaybe(N('A'), PDFDict);
+      if (!a || String(a.get(N('S'))) !== '/GoTo') return undefined;
+      d = a.lookup(N('D'));
+    }
+    if (d instanceof PDFName || d instanceof PDFString || d instanceof PDFHexString) d = named(d);
+    if (d instanceof PDFDict) d = d.lookup(N('D'));
+    if (!(d instanceof PDFArray) || !d.size()) return undefined;
+    const p = d.get(0);
+    if (p instanceof PDFRef) return pageIndex.get(p.tag);
+    if (p instanceof PDFNumber) { const n = p.asNumber(); return Number.isInteger(n) && n >= 0 && n < pageIndex.size ? n : undefined; }
+    return undefined;
+  };
+  const out = [];
+  const seen = new Set();
+  const walk = (first, depth) => {
+    let ref = first;
+    while (ref instanceof PDFRef && !seen.has(ref.tag) && out.length < 5000) {
+      seen.add(ref.tag);
+      const item = ctx.lookup(ref);
+      if (!(item instanceof PDFDict)) break;
+      const page = pageOf(item);
+      const t = item.lookup(N('Title'));
+      const title = (t instanceof PDFString || t instanceof PDFHexString ? t.decodeText() : '').replace(/[\u0000-\u001f]/g, ' ').trim();
+      if (page !== undefined) out.push({ title: title || 'Untitled', page, depth });
+      if (depth < maxDepth) walk(item.get(N('First')), depth + 1);
+      ref = item.get(N('Next'));
+    }
+  };
+  walk(outlines.get(N('First')), 1);
+  return out;
 }

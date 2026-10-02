@@ -49,7 +49,7 @@ export default function GifMakerPage() {
         if (frames.length > MAX_GIF_FRAMES) notes.push(`${f.name}: ${frames.length} frames, only the first ${MAX_GIF_FRAMES} were added`);
         else notes.push(`${f.name}: its ${frames.length} frames were added`);
         const c = document.createElement('canvas'); c.width = width; c.height = height; const ctx = c.getContext('2d');
-        return frames.slice(0, MAX_GIF_FRAMES).map((fr, k) => { ctx.putImageData(fr.imageData, 0, 0); return { name: `${f.name} #${k + 1}`, src: c.toDataURL('image/png'), w: width, h: height }; });
+        return frames.slice(0, MAX_GIF_FRAMES).map((fr, k) => { ctx.putImageData(fr.imageData, 0, 0); return { name: `${f.name} #${k + 1}`, src: c.toDataURL('image/png'), w: width, h: height, delay: String(fr.delay) }; }); // each frame keeps its own duration (P24 review)
       } catch { return null; }
     };
     const readers = files.map(f => expand(f).then((many) => many || new Promise(resolve => {
@@ -99,7 +99,9 @@ export default function GifMakerPage() {
         const { data } = ctx.getImageData(0, 0, W, H);
         const palette = quantize(data, 256);
         const index = applyPalette(data, palette);
-        gif.writeFrame(index, W, H, { palette, delay, ...(n === 0 ? { repeat } : {}) });
+        // P24 (03/10): a frame can keep its own duration (ezgif's maker: delay per frame); else the common delay
+        const own = Number(image.delay);
+        gif.writeFrame(index, W, H, { palette, delay: own >= 20 ? own : delay, ...(n === 0 ? { repeat } : {}) });
       }
       gif.finish();
       const blob = new Blob([gif.bytes()], { type: 'image/gif' });
@@ -133,6 +135,9 @@ export default function GifMakerPage() {
                     <span className="order-last basis-full text-center sm:order-none sm:basis-auto">{i + 1} · {img.w}×{img.h}</span>
                     <button onClick={() => move(i, 1)} disabled={i === images.length - 1} aria-label={`Move frame ${i + 1} later`} className="px-1 disabled:opacity-30">▶</button>
                   </div>
+                  <input type="number" min="20" max="10000" step="10" placeholder={`${delay} ms`} value={img.delay ?? ''} aria-label={`Duration of frame ${i + 1} (ms)`} title="This frame's duration in ms (empty: the common delay)"
+                    onChange={(e) => { const v = e.target.value; setImages((prev) => prev.map((x, k) => (k === i ? { ...x, delay: v === '' ? undefined : v } : x))); setResult(null); }}
+                    className="w-full mt-1 border border-neutral-200 rounded px-1 py-0.5 text-xs text-center" />
                 </div>
               ))}
             </div>
@@ -179,6 +184,7 @@ export default function GifMakerPage() {
           "Set your frame delay, click \"Create GIF\", then preview and download the animated GIF."
         ]}
         faqs={[
+          { q: "Can each frame have its own duration, or use an animated GIF?", a: "Yes. Type a duration in milliseconds under a frame to keep it on screen longer or shorter than the common delay (empty: the common delay). An animated GIF added to the list is split into its frames, each placed in order." },
           { q: "Can I download a finished GIF file directly?", a: "Yes — click \"Create GIF\" and a \"Download\" button appears with the finished, real animated GIF file." },
           { q: "What if my images are not all the same size?", a: "By default each image is fitted inside the GIF without changing its proportions, and the space around it is filled with the background colour you choose. You can instead crop each image to fill the frame, or stretch it (which distorts it)." },
           { q: "What image formats can I use as frames?", a: "Any image format your browser supports, such as JPG, PNG, WebP, or GIF." },

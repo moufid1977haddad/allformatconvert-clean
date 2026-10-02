@@ -17,7 +17,18 @@ export default function GifFromVideoTool({ title, subtitle, seo, tool, extra }) 
       title={title}
       subtitle={subtitle}
       buttonLabel="Make GIF"
-      initialParams={{ start: '0', length: '5', width: '480', fps: '10' }}
+      initialParams={{ start: '0', length: '5', width: '480', fps: '10', loop: 'forever', squeeze: '0' }}
+      // P24 (03/10): how many times the GIF plays and a lighter file, as ezgif ("loop count") and FreeConvert ("loop
+      // count", "compression") offer — by gifsicle in the browser, on the GIF the service made (the service is unchanged)
+      postProcess={async (blob, p) => {
+        const loop = p.loop || 'forever', lossy = Number(p.squeeze) || 0;
+        if (loop === 'forever' && !lossy) return null;
+        const gifsicle = (await import('gifsicle-wasm-browser')).default;
+        const loopArg = loop === 'forever' ? '' : loop === '1' ? ' --no-loopcount' : ` --loopcount=${Number(loop) - 1}`;
+        const out = await gifsicle.run({ input: [{ file: new File([blob], 'input.gif', { type: 'image/gif' }), name: 'input.gif' }], command: [`-O2${lossy ? ` --lossy=${lossy}` : ''}${loopArg} input.gif -o /out/output.gif`] });
+        if (!out?.[0]?.size) throw new Error('The GIF could not be finished (loop count / compression).');
+        return out[0];
+      }}
       buildParams={(p, { duration } = {}) => {
         // P24 review (03/10): times are checked, never changed silently — 90 s became 60 s, 0.1 s became 0.2 s, and a
         // part running past the end of the video gave a shorter GIF without a word
@@ -38,7 +49,7 @@ export default function GifFromVideoTool({ title, subtitle, seo, tool, extra }) 
         const set = (k) => (e) => setParams({ ...params, [k]: e.target.value });
         return (
           <div className="space-y-2">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <label className="text-sm text-neutral-600">Start (seconds)
                 <input type="number" min="0" step="0.1" value={params.start} onChange={set('start')} disabled={disabled} className={field} />
               </label>
@@ -48,6 +59,21 @@ export default function GifFromVideoTool({ title, subtitle, seo, tool, extra }) 
               <label className="text-sm text-neutral-600">Width
                 <select value={params.width} onChange={set('width')} disabled={disabled} className={field}>
                   {WIDTHS.map((w) => <option key={w} value={w}>{w} px</option>)}
+                </select>
+              </label>
+              <label className="text-sm text-neutral-600">Plays
+                <select id="gif-loop" value={params.loop} onChange={set('loop')} disabled={disabled} className={field}>
+                  <option value="forever">Forever (loop)</option>
+                  <option value="1">Once</option>
+                  <option value="3">3 times</option>
+                  <option value="5">5 times</option>
+                </select>
+              </label>
+              <label className="text-sm text-neutral-600">Compression
+                <select id="gif-squeeze" value={params.squeeze} onChange={set('squeeze')} disabled={disabled} className={field}>
+                  <option value="0">None (best quality)</option>
+                  <option value="30">Light (smaller file)</option>
+                  <option value="80">Strong (smallest, some noise)</option>
                 </select>
               </label>
               <label className="text-sm text-neutral-600">Frames per second

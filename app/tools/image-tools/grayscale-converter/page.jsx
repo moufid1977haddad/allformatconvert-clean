@@ -6,6 +6,7 @@ import { rasterFromRGBA } from '../../../lib/bigImage';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
+import AnimatedImageNote from '../../../components/AnimatedImageNote';
 // P24 (03/10): pinetools offers several grey methods (luminosity, average, lightness, a single channel); a pure black and
 // white (threshold) is the other common need (scans, stencils). Rec. 709 stays the default (the CSS grayscale() filter).
 const METHODS = [
@@ -66,6 +67,7 @@ export default function GrayscaleConverterPage() {
             {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
+          <AnimatedImageNote file={file} />
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <div className="space-y-2 text-sm">
             <label className="block"><span className="block text-neutral-500 mb-1">Method</span>
