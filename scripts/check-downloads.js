@@ -36,7 +36,6 @@ const NO_FILE = {
   'file-tools/file-comparator': 'a comparison verdict',
   'file-tools/file-metadata': 'properties of a file',
   'image-tools/duplicate-image-finder': 'groups of similar images on the page',
-  'image-tools/image-metadata': 'properties of an image',
   'math-tools/fraction-calculator': 'a result',
   'math-tools/number-base-converter': 'a number',
   'math-tools/percentage-calculator': 'a result',

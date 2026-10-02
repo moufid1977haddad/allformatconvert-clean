@@ -4,9 +4,12 @@ import SeoContent from '../../../components/SeoContent';
 import { FileDownload } from '../../../components/FileDownload';
 import { unreadableImageMessage } from '../../../lib/fileChecks';
 
-const ALL_SIZES = [16, 32, 48, 256];
+// P24 (03/10): Windows also uses 24, 64 and 128 px icons (CloudConvert and icoconvert offer them); the first four stay
+// selected by default, as before.
+const ALL_SIZES = [16, 24, 32, 48, 64, 128, 256];
+const DEFAULT_SIZES = [16, 32, 48, 256];
 
-function pngBlobForSize(img, size) {
+function pngBlobForSize(img, size, fill = false) {
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
@@ -14,7 +17,9 @@ function pngBlobForSize(img, size) {
   ctx.clearRect(0, 0, size, size);
   // A non-square PNG used to be stretched into the square icon (29/09): it is
   // now scaled to fit and centred on a transparent square, proportions kept.
-  const scale = size / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height);
+  // fit: whole image, transparent margins; fill (P24): cropped to the square, centred, no margin
+  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+  const scale = size / (fill ? Math.min(iw, ih) : Math.max(iw, ih));
   const w = Math.round((img.naturalWidth || img.width) * scale);
   const h = Math.round((img.naturalHeight || img.height) * scale);
   ctx.imageSmoothingQuality = 'high';
@@ -59,7 +64,8 @@ function buildIco(entries) {
 
 export default function PngToIcoPage() {
   const [file, setFile] = useState(null);
-  const [sizes, setSizes] = useState(ALL_SIZES);
+  const [sizes, setSizes] = useState(DEFAULT_SIZES);
+  const [fill, setFill] = useState(false);
   const [result, setResult] = useState(null);
   const [status, setStatus] = useState('');
   // P23: an error was shown in light yellow (text-yellow-400: unreadable on white, no alert role), and as
@@ -92,7 +98,7 @@ export default function PngToIcoPage() {
         if (!img.naturalWidth || !img.naturalHeight) throw new Error(await unreadableImageMessage(file));
         const entries = [];
         for (const s of sizes) {
-          const blob = await pngBlobForSize(img, s);
+          const blob = await pngBlobForSize(img, s, fill);
           entries.push({ size: s, bytes: new Uint8Array(await blob.arrayBuffer()) });
         }
         const icoBytes = buildIco(entries);
@@ -130,6 +136,8 @@ export default function PngToIcoPage() {
               ))}
             </div>
           </div>
+          <label className="block text-sm"><span className="block text-neutral-500 mb-1">Image that is not square</span>
+            <select id="ico-fit" value={fill ? 'fill' : 'fit'} onChange={(e) => { setFill(e.target.value === 'fill'); setResult(null); }} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2"><option value="fit">Fit (whole image, transparent margins)</option><option value="fill">Fill (cropped to the square, centred)</option></select></label>
           <button onClick={convert} disabled={!file || sizes.length === 0} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert to ICO</button>
           {status && <p className="text-center text-neutral-500 text-sm">{status}</p>}
           {error && <p role="alert" className="text-center text-red-600 text-sm">{error}</p>}
@@ -146,7 +154,7 @@ export default function PngToIcoPage() {
         description="PNG to ICO builds a real, multi-resolution Windows ICO file from your PNG — with a proper ICONDIR/ICONDIRENTRY container around PNG-encoded frames at each selected size (16, 32, 48, and 256px by default) — entirely in your browser, with your file never uploaded to a server. The result is a genuine .ico binary, not a PNG simply renamed, so it works both as a browser favicon and in software (like Windows Explorer or app icon tooling) that expects the native ICO format."
         howTo={[
           "Click the upload area and select a PNG file from your device.",
-          "Choose which sizes to bundle into the ICO: 16x16, 32x32, 48x48, and/or 256x256 (all four are selected by default).",
+          "Choose which sizes to bundle into the ICO: 16x16, 24x24, 32x32, 48x48, 64x64, 128x128 and/or 256x256 (16, 32, 48 and 256 are selected by default).",
           "Click 'Convert to ICO' to build the multi-resolution icon file.",
           "Click the download button to save your favicon.ico file."
         ]}
@@ -157,7 +165,7 @@ export default function PngToIcoPage() {
           { q: "Can I convert multiple PNG files at once?", a: "No, only one file can be converted at a time." }
         ]}
         tips={[
-          "For best results, start with a PNG at least as large as your biggest selected size (256px if included); a non-square image is centred on a transparent square, never stretched.",
+          "For best results, start with a PNG at least as large as your biggest selected size (256px if included); a non-square image is either fitted on a transparent square or cropped to fill it (your choice), never stretched.",
           "Use a PNG with a transparent background if you want the icon to have transparency.",
           "Keep all four sizes selected for maximum compatibility — Windows uses different sizes for the taskbar, desktop, and Explorer views.",
           "Test the downloaded file in your browser's favicon slot, or by setting it as a desktop shortcut icon, to confirm it displays correctly."

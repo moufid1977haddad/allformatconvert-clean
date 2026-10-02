@@ -16,6 +16,9 @@ export default function DuplicateImageFinderPage() {
   // never: an empty file had a "fingerprint" like any other). Empty files are left out; a picture this browser cannot
   // open is still compared byte for byte.
   const [notes, setNotes] = useState([]);
+  // P24 (03/10): how close two pictures must be to count as the same one (imgonline shows a similarity %; dupeGuru has a
+  // filter hardness): strict 3, normal 6 (imagehash's usual), loose 10 of 64 hash bits may differ
+  const [maxBits, setMaxBits] = useState(6);
   const inputRef = useRef();
   const genRef = useRef(0); // the latest selection: a slower, older one never overwrites it
   const handleFiles = async (e) => {
@@ -57,7 +60,7 @@ export default function DuplicateImageFinderPage() {
         else try { const bmp = await createImageBitmap(im.file); hash = dHash(bmp); bmp.close && bmp.close(); } catch { unreadable.push(im.name); }
         items.push({ name: im.name, sha, hash });
       }
-      setPairs(findPairs(items));
+      setPairs(findPairs(items, maxBits));
       if (unreadable.length) setError(`This browser cannot open ${unreadable.map((n) => `"${n}"`).join(', ')} as a picture: compared for exact copies only.`);
     } catch (err) {
       setError('Could not compare the images: ' + (err?.message || err));
@@ -77,6 +80,8 @@ export default function DuplicateImageFinderPage() {
           {notes.map((n, i) => <p key={i} role="alert" className="text-red-400 text-center text-sm">{n}</p>)}
           {error && <p role="alert" className="text-red-400 text-center text-sm">{error}</p>}
           {images.length === 1 && <p className="text-neutral-500 text-center text-sm">Add at least one more image to compare.</p>}
+          <label className="block text-sm"><span className="block text-neutral-500 mb-1">Same picture when</span>
+            <select id="dup-strict" disabled={busy} value={maxBits} onChange={(e) => { setMaxBits(Number(e.target.value)); setPairs(null); }} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2"><option value={3}>Strict — nearly identical (61/64 matching or more)</option><option value={6}>Normal — resized or re-compressed copies (58/64)</option><option value={10}>Loose — also lightly edited copies (54/64; more false matches)</option></select></label>
           {images.length > 0 && (
             <div className="grid grid-cols-4 gap-2">
               {images.map((img, i) => <div key={i} className="relative">{img.url ? <img src={img.url} onError={() => onThumbError(img)} className="w-full h-16 object-cover rounded" /> : <div className="w-full h-16 rounded bg-neutral-100" />}<p className="text-xs text-neutral-500 truncate">{img.name}</p></div>)}
@@ -89,7 +94,7 @@ export default function DuplicateImageFinderPage() {
       </div>
       <SeoContent
         title={"Duplicate Image Finder"}
-        description={"Duplicate Image Finder compares a batch of images entirely in your browser — nothing is uploaded. It finds identical files (same SHA-256 fingerprint) and also the same picture saved differently — resized, re-compressed, converted from PNG to JPG — using a perceptual difference hash (dHash, the method of the imagehash library): two images are reported as the same picture when at most 6 of their 64 hash bits differ. Results appear only after you click Find Duplicates."}
+        description={"Duplicate Image Finder compares a batch of images entirely in your browser — nothing is uploaded. It finds identical files (same SHA-256 fingerprint) and also the same picture saved differently — resized, re-compressed, converted from PNG to JPG — using a perceptual difference hash (dHash, the method of the imagehash library): two images are reported as the same picture when at most 6 of their 64 hash bits differ (Normal), or 3 (Strict) or 10 (Loose), as you choose. Results appear only after you click Find Duplicates."}
         howTo={[
           "Click the upload area and select several images at once.",
           "Click 'Find Duplicates'.",

@@ -245,6 +245,8 @@ async function runCase({ t, c, file }, final = false) {
       // an archive may hold an empty file (Zip Creator): its result is right even for an empty one
       // an archive may hold an empty file (Zip Creator), and an empty file has a well-known hash (Hash Generator)
       else if (results && c === 'giant' && await giantPdfIsReal(p, 30000)) verdict = 'OK-RESULT';
+      // P24: removing metadata never decodes the pixels: a copy of a giant picture without its text chunks is right
+      else if (results && (c === 'giant' || c === 'bomb') && t.tool === 'image-metadata') verdict = 'OK-RESULT';
       else if (results && c === 'bomb' && (await giantPdfIsReal(p, 20000) || await bombImageIsReal(p))) verdict = 'OK-RESULT'; // P23: opened and checked, see below
       else if (results && !(ANY_BYTES.has(t.tool) && (c !== 'empty' || t.tool === 'zip-creator' || t.tool === 'hash-generator'))) verdict = 'FAKE-RESULT';
       else if (results) verdict = 'OK-RESULT';

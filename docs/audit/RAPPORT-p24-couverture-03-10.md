@@ -69,3 +69,44 @@ Banc : **23/23 ×3 moteurs en local** (`ed35d749`). **Préversion et production 
 ### 1.4 Laissé au propriétaire ou non faisable ici
 
 Voir le plan, « Décisions du propriétaire — P24 ».
+
+## 2. Image
+
+### 2.1 Relevé (02/10 : iLoveIMG, ezgif, pinetools, imgonline, CloudConvert)
+
+iLoveIMG n'a que 13 outils (Compress, Upscale, Remove background, Meme, Photo editor, Resize, Crop, Rotate, Convert
+to/from JPG, HTML to image, Watermark, Blur face), tous par lots. Écarts retenus, faisables dans le navigateur :
+qualité / sans perte du WebP (ezgif), suppression des métadonnées (imgonline, outil à part), fond d'une rotation libre
+(pinetools), proportions prédéfinies du recadrage (ezgif), tailles d'icône 24/64/128 et cadrage (CloudConvert),
+méthodes de gris et seuil noir et blanc (pinetools), fond et échelles du SVG (ezgif, CloudConvert), seuil des
+doublons (imgonline), polices / contour / ombre / opacité / rotation du texte (iLoveIMG, ezgif).
+
+### 2.2 Ajouts et défauts corrigés
+
+| Outil | Avant | Après |
+|---|---|---|
+| JPG / PNG to WebP | qualité fixe 80 | qualité 1-100, **sans perte** (libwebp lossless, exact pour une image opaque), poids avant → après |
+| Image Metadata | lecture seule | **« Remove metadata »** sans réencoder (pixels identiques au bit près) : EXIF, GPS, XMP, IPTC, commentaires, blocs fabricants, et **tout ce qui suit l'image** (images secondaires MPF avec leur propre GPS, vidéo des Motion Photos, carte de gain HDR, remorques) ; profil ICC et orientation gardés (JPEG, PNG, WebP) |
+| Image Rotate | angle libre → PNG transparent imposé | saisie exacte de l'angle ; fond transparent **ou couleur** (le JPG reste JPG) |
+| Image Cropper | curseurs en pixels de l'**aperçu** (~20 px réels par cran sur une photo de 4000 px), aucune proportion | **pixels réels**, proportions 1:1, 4:3, 3:2, 16:9, 9:16, 4:5, 2:1, cadre affiché sur l'aperçu |
+| PNG to ICO | 16/32/48/256 | + 24, 64, 128 ; image non carrée : ajustée ou **remplie** |
+| Grayscale | une méthode | Rec. 709, Rec. 601, moyenne, luminosité, un canal ; **noir et blanc pur** avec seuil |
+| SVG to PNG | fond transparent seulement | fond transparent ou couleur ; 512 / 1024 / 2048 px en un clic |
+| Add Text to Image | une ligne, Arial gras, 200 px au plus | plusieurs lignes, 6 polices (Impact pour les mèmes…), gras/italique, opacité, rotation, contour, ombre, jusqu'à 800 px |
+| Duplicate Image Finder | seuil fixe | Strict / Normal / Loose |
+
+Preuves : `scripts/p24/image-lot.mjs` **10/10 ×3 moteurs** (WebP sans perte = pixels du PNG ; qualité 20 < 95 ;
+GPS et appareil supprimés, pixels identiques, orientation 6 gardée ; rotation 30° coins rouges en JPG ; ICO exactement
+24 et 128 px, rempli ; « canal rouge » rouge pur → blanc ; noir et blanc = 0 et 255 seulement ; SVG 1024 × 512 fond
+blanc ; 16:9 sur 4000 × 3000 → 4000 × 2250 ; texte Impact 2 lignes avec contour) ; `strip-metadata.test.mjs` (JPEG
+progressif, image secondaire après l'image principale, PNG/WebP orientés) ; solidité des 10 outils **48/48 ×3**.
+
+**Réviseur indépendant** : 1 grave corrigé (les données après l'image — images MPF, Motion Photo — gardaient leur
+GPS alors que la page disait « supprimé ») ; moyens corrigés (orientation PNG/WebP, libellés « sans perte » et
+« fond » qui promettaient plus que vrai) ; faibles corrigés (ombre sur toutes les lignes, seuil pendant le calcul,
+WebP borné à sa taille RIFF, fin de JPEG). En chemin, j'ai trouvé et corrigé que la sortie perdait son marqueur de fin
+(FFD9) — attrapé par le test avant toute production.
+
+**Non fait (nouveaux outils, au propriétaire de décider s'il en veut)** : filigrane d'image, générateur de mèmes,
+collage, flou de visage (iLoveIMG les a ; tout est faisable dans le navigateur, mais ce sont de nouvelles pages). Traitement
+par lots (iLoveIMG traite tout par lots) : chantier transversal.
