@@ -340,3 +340,22 @@ PDF Split « pages impaires / paires » (Sejda). Bancs : dev-lot **46/46 ×3**, 
 
 **Restent du relevé n° 2** : note commune pour les 11 filtres d'image sur un GIF animé ; les ajouts plus longs (Excel « une
 page par feuille », Split par signets ou par taille, compresser à X Ko, métadonnées vidéo supprimables, enregistreur MP3…).
+**Relecture indépendante des lots 1 et 2 — 2 graves corrigés** :
+- **Statistiques** : le décalage introduit au lot 1 perdait les petites valeurs à côté d'énormes valeurs qui s'annulent
+  ([-1e17, 1e17, 3, 4] : moyenne 3,75 au lieu de 1,75, contredisant la somme affichée) → moyenne = somme compensée / n,
+  écarts recentrés sur leur propre moyenne (le cas 1e15 + petites différences reste exact ; Excel SKEW/KURT retrouvés).
+- **Excel to CSV / JSON** : une **durée** `[h]:mm:ss` (36 h) sortait « 1900-01-01T12:00:00 » → les durées et les formats
+  sans date gardent le texte qu'Excel affiche (36:00:00), comme le CSV d'Excel.
+- Moyens corrigés : JSON → Go/Rust/C# refusait `6.02e23` (réécriture invalide) ; SQL to CSV mélangeait une chaîne entre
+  guillemets doubles contenant « ( » ; Excel to CSV écrasait le texte formaté des nombres d'un .ods ; CSV to SQL comptait
+  NVARCHAR en caractères (un emoji en vaut 2 sous SQL Server) et annonçait Oracle à tort ; Merge réunit les polices de
+  formulaire (/DR) de tous les fichiers et ne force plus NeedAppearances ; JSON → .env refuse un nombre seul ; File
+  Converter garde l'UTF-8 quand seuls quelques octets sont invalides ; TAR : la dernière copie d'un nom et les noms de
+  lien longs GNU ; Compressor cherche l'animation APNG au-delà de 64 Ko ; TIFF : une vignette n'est plus comptée comme page.
+
+**Ajouts (lot 3)** : **Image Compressor — compresser à une taille cible** (« 100 KB ») pour JPG / WebP / AVIF, par
+dichotomie sur la qualité, image jamais réduite en silence (prouvé : 1200 × 900 demandé à 40 Ko → 39,6 Ko, dimensions
+gardées) ; **QR Scanner** lit tous les codes d'une image avec zxing (QR, EAN-13, UPC, Code 128, Data Matrix, PDF417…,
+jusqu'à 20 — prouvé sur une image QR + EAN-13) ; **Voice Recorder** : pause / reprise et export **MP3** (prouvé avec le
+micro simulé de Chromium et Firefox). Bancs : dev 46/46 ×3, adds-lot 3/3 (WebKit : 1/1, compresseur et micro non
+testables dans ce navigateur de test, dit), image 12/12 ×3, tiff 2/2 ×3, solidité 22/22 ×3, tests Node Merge/Split/SQL.

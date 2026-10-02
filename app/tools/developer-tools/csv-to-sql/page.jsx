@@ -197,7 +197,7 @@ export default function CsvToSqlPage() {
           <div>
             <label htmlFor="sql-dialect" className="block text-sm text-neutral-500 dark:text-neutral-400 mb-1">Database</label>
             <select id="sql-dialect" value={dialect} onChange={(e) => setDialect(e.target.value)} disabled={converting} className="w-full mb-3 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-lg p-2 dark:text-white">
-              <option value="standard">Standard SQL — PostgreSQL, SQLite, Oracle ("quoted" names)</option>
+              <option value="standard">Standard SQL — PostgreSQL, SQLite ("quoted" names)</option>
               <option value="mysql">MySQL / MariaDB (`backticks`, backslashes escaped)</option>
               <option value="sqlserver">SQL Server ([brackets], N'unicode' strings)</option>
             </select>

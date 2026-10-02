@@ -176,8 +176,11 @@ export function orientRGBA(rgba, w, h, o) {
 
 export async function decodeTiff(buffer, { page = 0 } = {}) {
   const UTIF = (await import('utif2')).default;
-  const all = UTIF.decode(buffer);
-  if (!all.length) throw new Error('No image data found in this TIFF file');
+  const decoded = UTIF.decode(buffer);
+  if (!decoded.length) throw new Error('No image data found in this TIFF file');
+  // review (03/10): a reduced-resolution copy (thumbnail, NewSubfileType bit 0) is not a page
+  const full = decoded.filter((d) => !(d.t254 && d.t254[0] & 1));
+  const all = full.length ? full : decoded;
   if (page < 0 || page >= all.length) throw new Error(`This TIFF has ${all.length} page${all.length > 1 ? 's' : ''}: page ${page + 1} does not exist.`);
   const ifds = [all[page]]; // the checks and the decode below work on the chosen page
   // UTIF.js only decodes chunky (interleaved) TIFFs correctly -- for a

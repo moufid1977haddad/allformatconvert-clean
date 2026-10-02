@@ -18,7 +18,10 @@ export default function FileConverterPage() {
       // P24 review (03/10): file.text() always decodes UTF-8 — a Windows-1252 text (Notepad, Excel) gave "caf�". The
       // encoding is detected as in the CSV tools (BOM, valid UTF-8, else the ANSI code page of the browser language).
       const bytes = new Uint8Array(await file.arrayBuffer());
-      const { encoding } = detectEncoding(bytes);
+      let { encoding } = detectEncoding(bytes);
+      // review (03/10): a UTF-8 file with a few bad bytes stays UTF-8 (a handful of \uFFFD), not re-read as Windows-1252
+      // throughout ("cafÃ©" everywhere)
+      if (encoding !== 'utf-8' && !/^utf-16/.test(encoding)) { const u = new TextDecoder('utf-8').decode(bytes); const bad = (u.match(/\uFFFD/g) || []).length, good = (u.match(/[\u0080-\uFFFC]/g) || []).length; if (good > bad * 20) encoding = 'utf-8'; }
       const text = new TextDecoder(encoding).decode(bytes).replace(/^﻿/, '');
       let content = text;
       let mimeType = 'text/plain';

@@ -83,11 +83,15 @@ export function statistics(numbers, { quartiles = 'inclusive' } = {}) {
   // stays exact enough for 1e15 + small differences; equal values give an exact 0 spread (0.1 × 3 gave skew -2.449).
   const ksum = (xs) => { let s = 0, c = 0; for (const x of xs) { const t = s + x; c += Math.abs(s) >= Math.abs(x) ? (s - t) + x : (x - t) + s; s = t; } return s + c; };
   const shift = sorted[Math.floor(n / 2)];
-  const meanShift = ksum(numbers.map((x) => x - shift)) / n; // mean - shift
+  // review (03/10): the mean is the compensated sum / n — the shifted form lost small values next to huge ones that
+  // cancel ([-1e17, 1e17, 3, 4] gave 3.75, not 1.75); deviations are re-centred on their own mean, which removes the
+  // rounding of the mean itself (1e15 + small differences stay exact)
   const sum = ksum(numbers);
-  const mean = shift + meanShift;
+  const mean = sum / n;
   const constant = sorted[0] === sorted[n - 1];
-  const dev = numbers.map((x) => (x - shift) - meanShift); // x - mean, without rounding mean first
+  const dev0 = numbers.map((x) => x - mean);
+  const dbar = ksum(dev0) / n;
+  const dev = dev0.map((d) => d - dbar);
   const median = n % 2 ? sorted[(n - 1) / 2] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
   const freq = new Map();
   for (const x of numbers) freq.set(x, (freq.get(x) || 0) + 1);

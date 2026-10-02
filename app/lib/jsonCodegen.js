@@ -35,7 +35,7 @@ function sampleForTypes(src) {
     const m = /^-?\d+(\.\d+)?([eE][-+]?\d+)?/.exec(src.slice(i, i + 400));
     if (m && (c === '-' || (c >= '0' && c <= '9'))) {
       let t = m[0];
-      if ((m[1] || m[2]) && Number.isInteger(Number(t))) t = String(Math.trunc(Number(t))) + '.5'; // stays a decimal type
+      if ((m[1] || m[2]) && Number.isInteger(Number(t))) t = '1.5'; // stays a decimal type (only types are generated; 6.02e23 gave "6.02e+23.5")
       else if (!m[1] && !m[2] && (BigInt(t) > 9223372036854775807n || BigInt(t) < -9223372036854775808n)) beyond++;
       out += t; i += m[0].length; continue;
     }

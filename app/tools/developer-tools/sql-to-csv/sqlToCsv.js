@@ -23,20 +23,21 @@ export function parseSqlParenList(input, start) {
   const items = [];
   let item = '';
   let inString = false;
+  let quote = "'"; // review (03/10): MySQL also quotes strings with "…" — a "(" inside one opened a level
   let depth = 0; // P24 review (03/10): NOW(), CONCAT('a', 'b') — a function's own brackets used to close the list
   while (i < n) {
     const c = input[i];
     if (inString) {
       // MySQL (mysqldump) escapes a quote as \' -- 'O\'Brien'. Standard SQL keeps a backslash literal, so 'C:\' closes
       // right after it: a \' followed by a comma or a closing parenthesis is read as that end of string.
-      if (c === '\\' && input[i + 1] === "'" && !/^\s*[,)]/.test(input.slice(i + 2))) { item += "\\'"; i += 2; continue; }
-      if (c === "'") {
-        if (input[i + 1] === "'") { item += "''"; i += 2; continue; }
+      if (c === '\\' && input[i + 1] === quote && !/^\s*[,)]/.test(input.slice(i + 2))) { item += '\\' + quote; i += 2; continue; }
+      if (c === quote) {
+        if (input[i + 1] === quote) { item += quote + quote; i += 2; continue; }
         inString = false; item += c; i++; continue;
       }
       item += c; i++; continue;
     }
-    if (c === "'") { inString = true; item += c; i++; continue; }
+    if (c === "'" || c === '"') { inString = true; quote = c; item += c; i++; continue; }
     if (c === '(') { depth++; item += c; i++; continue; }
     if (c === ')' && depth > 0) { depth--; item += c; i++; continue; }
     if (c === ',' && depth === 0) { items.push(item.trim()); item = ''; i++; continue; }
@@ -53,6 +54,7 @@ export function parseSqlParenList(input, start) {
 export function unquoteSqlValue(v) {
   const t = v.trim();
   if (/^NULL$/i.test(t)) return ''; // SQL NULL is an empty CSV field (convertcsv's default), not the word NULL
+  if (t.length >= 2 && t[0] === '"' && t[t.length - 1] === '"') return t.slice(1, -1).replace(/""/g, '"').replace(/\\"/g, '"'); // MySQL "…" strings (P24)
   if (t.length >= 2 && t[0] === "'" && t[t.length - 1] === "'") {
     return t.slice(1, -1).replace(/''/g, "'").replace(/\\'/g, "'");
   }

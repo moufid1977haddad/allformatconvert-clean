@@ -176,7 +176,8 @@ export function carryFormsMany(lib, sources, out) {
   const ctx = out.context;
   const pages = out.getPages();
   const roots = [], used = new Set(), renamed = [];
-  let form = null;
+  let form = null, needAppearances = false;
+  const fonts = ctx.obj({}); // review (03/10): the /DR fonts of every source, so each field's /DA font is found
   for (const { src, from, to } of sources) {
     const srcForm = src.catalog.lookupMaybe(PDFName.of('AcroForm'), PDFDict);
     if (!srcForm) continue;
@@ -201,15 +202,20 @@ export function carryFormsMany(lib, sources, out) {
         roots.push(ref);
       }
     }
+    const copier = lib.PDFObjectCopier.for(src.context, ctx);
     if (!form) {
-      const copier = lib.PDFObjectCopier.for(src.context, ctx);
       form = ctx.obj({});
-      for (const key of ['DA', 'DR', 'Q']) { const v = srcForm.get(PDFName.of(key)); if (v !== undefined) form.set(PDFName.of(key), copier.copy(v)); }
+      for (const key of ['DA', 'Q']) { const v = srcForm.get(PDFName.of(key)); if (v !== undefined) form.set(PDFName.of(key), copier.copy(v)); }
     }
+    const dr = srcForm.lookupMaybe(PDFName.of('DR'), PDFDict);
+    const srcFonts = dr && dr.lookupMaybe(PDFName.of('Font'), PDFDict);
+    if (srcFonts) for (const [k, v] of srcFonts.entries()) if (!fonts.get(k)) fonts.set(k, copier.copy(v));
+    if (String(srcForm.get(PDFName.of('NeedAppearances'))) === 'true') needAppearances = true;
   }
   if (!roots.length || !form) return renamed;
   form.set(PDFName.of('Fields'), ctx.obj(roots));
-  form.set(PDFName.of('NeedAppearances'), lib.PDFBool.True); // viewers redraw the fields with the merged resources
+  if (fonts.entries().length) form.set(PDFName.of('DR'), ctx.obj({ Font: fonts }));
+  if (needAppearances) form.set(PDFName.of('NeedAppearances'), lib.PDFBool.True); // only if a source asked for it
   out.catalog.set(PDFName.of('AcroForm'), ctx.register(form));
   return renamed;
 }

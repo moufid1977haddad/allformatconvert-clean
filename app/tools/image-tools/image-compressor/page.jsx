@@ -76,6 +76,9 @@ const DEFAULT_QUALITY = 78;
 export default function ImageCompressorPage() {
   const [items, setItems] = useState([]);
   const [quality, setQuality] = useState(DEFAULT_QUALITY);
+  // P24 (03/10): compress to a target size (KB) instead of a quality
+  const [byTarget, setByTarget] = useState(false);
+  const [targetKb, setTargetKb] = useState('100');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const inputRef = useRef();
@@ -143,7 +146,7 @@ export default function ImageCompressorPage() {
     worker.addEventListener('message', onMessage);
     update(it.id, { status: 'working', pct: 0 });
     // __forceBands: set only by the browser tests, to run the iPhone (band) decode in Firefox.
-    imageDims(it.file).then((dims) => worker.postMessage({ id: it.id, file: it.file, quality, dims, forceBands: !!window.__forceBands, canvasCap: window.__forceSafariCanvasCap === true }))
+    imageDims(it.file).then((dims) => worker.postMessage({ id: it.id, file: it.file, quality, dims, forceBands: !!window.__forceBands, canvasCap: window.__forceSafariCanvasCap === true, targetBytes: byTarget && Number(targetKb) > 0 ? Math.round(Number(targetKb) * 1024) : 0 }))
       .catch(() => { worker.removeEventListener('message', onMessage); update(it.id, { status: 'error', message: UNREADABLE }); resolve(); });
   });
 
@@ -177,7 +180,12 @@ export default function ImageCompressorPage() {
           </div>
           {error && <p className="text-red-600 text-center text-sm">{error}</p>}
           <div>
-            <label htmlFor="quality" className="block text-sm text-neutral-600 mb-1">Quality: {quality}%{quality === 100 ? ' (PNG: lossless)' : ''}</label>
+            <div className="flex flex-wrap items-center gap-3 mb-2 text-sm text-neutral-700">
+              <label className="flex items-center gap-1"><input type="radio" name="ic-mode" checked={!byTarget} onChange={() => setByTarget(false)} disabled={busy} /> By quality</label>
+              <label className="flex items-center gap-1"><input id="ic-target-mode" type="radio" name="ic-mode" checked={byTarget} onChange={() => setByTarget(true)} disabled={busy} /> To a size of</label>
+              <input id="ic-target-kb" type="number" min="5" step="5" value={targetKb} onChange={(e) => setTargetKb(e.target.value)} disabled={busy || !byTarget} className="w-24 border border-neutral-200 rounded px-2 py-1" aria-label="Target size in KB" /> KB
+            </div>
+            <label htmlFor="quality" className="block text-sm text-neutral-600 mb-1">Quality: {quality}%{quality === 100 ? ' (PNG: lossless)' : ''}{byTarget ? ' (used for PNG only)' : ''}</label>
             <input id="quality" type="range" min="10" max="100" value={quality} onChange={(e) => setQuality(parseInt(e.target.value, 10))} className="w-full" disabled={busy} />
             <p className="text-xs text-neutral-500 mt-1">Lower = smaller file. {DEFAULT_QUALITY}% is our recommended balance.</p>
           </div>
@@ -198,7 +206,8 @@ export default function ImageCompressorPage() {
                     {it.status === 'done' && (
                       <p className="text-neutral-600">{formatSize(it.file.size)} → <span className="font-semibold text-indigo-600">{formatSize(it.outSize)}</span> <span className="text-green-700 font-semibold">(−{Math.round((1 - it.outSize / it.file.size) * 100)}%)</span>{it.note ? <span className="text-neutral-500"> · {it.note}</span> : null}</p>
                     )}
-                    {it.status === 'notSmaller' && <p className="text-amber-800">Already well compressed: at {quality}% the result would be {formatSize(it.outSize)}, not smaller than {formatSize(it.file.size)}. Nothing to download — lower the quality to shrink it further.</p>}
+                    {it.status === 'notSmaller' && byTarget && it.file.size <= Number(targetKb) * 1024 && <p className="text-amber-800" data-under-target>This image is already {formatSize(it.file.size)}, under the {targetKb} KB asked: nothing to compress.</p>}
+                    {it.status === 'notSmaller' && !(byTarget && it.file.size <= Number(targetKb) * 1024) && <p className="text-amber-800">Already well compressed: at {quality}% the result would be {formatSize(it.outSize)}, not smaller than {formatSize(it.file.size)}. Nothing to download — lower the quality to shrink it further.</p>}
                     {it.status === 'svgMinimal' && <p className="text-amber-800">This SVG is already optimised: nothing could be removed from it. Nothing to download — your file is already the best version.</p>}
                     {it.status === 'svgKept' && <p className="text-amber-800">This SVG could not be made smaller without changing how it looks, so we kept it as it is. Nothing to download — your file is already the best version.</p>}
                     {it.status === 'error' && <p className="text-red-600">{it.message}</p>}
@@ -231,6 +240,7 @@ export default function ImageCompressorPage() {
           { q: "Which formats does it compress?", a: "JPG, PNG, WebP, AVIF and SVG, each kept in its own format. Other images your browser can open (BMP, a still GIF…) are converted to JPG, on a white background, and the result says so. An animated GIF is not turned into a still picture: the page sends you to our GIF Compressor, which keeps the animation." },
           { q: "Will compression affect image quality?", a: "Below 100%, yes, a little: that is how the file gets smaller. At the default setting the difference is hard to see on a photo. For PNGs, 100% is fully lossless; if no palette can keep the quality you chose, the PNG is repacked losslessly instead." },
           { q: "Does it keep transparency?", a: "Yes for PNG and WebP. Transparent areas of other formats become white, since they are saved as JPG." },
+          { q: "Can I compress an image to a given size, like 100 KB?", a: "Yes, for JPG, WebP and AVIF: choose 'To a size of' and type the size. The highest quality that fits is found automatically. The picture keeps its dimensions: if even the lowest quality is too big, the page says so and you can make it smaller first with Image Resizer. A PNG is compressed at the quality you set." },
           { q: "How are SVG files compressed?", a: "They stay vector: SVGO, the standard SVG optimiser, removes editor metadata, shortens numbers and ids and merges what can be merged — the same method the leading online compressor uses (in our test on the Tux SVG: 48.8 KB → 35.1 KB, identical to theirs within 4 bytes). Before offering the file, the tool draws both versions and compares them pixel by pixel; if they differ, it tries a more cautious setting, and if that still differs it keeps your original. The quality slider does not apply to SVG." },
           { q: "Can I compress multiple images at once?", a: `Yes, up to ${MAX_FILES} at a time, then download them one by one or together as a ZIP.` },
           { q: "Are my images uploaded?", a: "No. Everything runs in your browser, in a background worker; your images never leave your device." }

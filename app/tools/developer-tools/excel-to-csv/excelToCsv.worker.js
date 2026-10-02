@@ -84,7 +84,7 @@ async function run({ file, maxRows }) {
 
   self.postMessage({ type: 'progress', pct: 85, phase: 'building' });
   const date1904 = workbookIs1904(workbook);
-  const csvBySheet = sheetNames.map((name) => { const ws = workbook.Sheets[name]; datesToText(ws, XLSX, date1904); generalNumbersInFull(ws); return XLSX.utils.sheet_to_csv(ws); });
+  const csvBySheet = sheetNames.map((name) => { const ws = workbook.Sheets[name]; datesToText(ws, XLSX, date1904); generalNumbersInFull(ws, XLSX); return XLSX.utils.sheet_to_csv(ws); });
   const rowCounts = csvBySheet.map((csv) => csv.split('\n').filter(Boolean).length);
   const totalRows = rowCounts.reduce((a, b) => a + b, 0);
   if (totalRows > limit) throw new RowLimitExceededError(limit, totalRows);

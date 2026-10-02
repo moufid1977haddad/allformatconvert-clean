@@ -82,7 +82,8 @@ async function run({ file, text, maxRows, mode, tableName, delimiter, encoding, 
       if (!scale) return intDigits <= 9 ? 'INTEGER' : intDigits <= 18 ? 'BIGINT' : `DECIMAL(${Math.min(38, intDigits)}, 0)`;
       return intDigits + scale <= 38 ? `DECIMAL(${intDigits + scale}, ${scale})` : D.float;
     }
-    const longest = Math.max(1, ...dataRows.map((r) => [...(r[i] ?? '')].length));
+    // review (03/10): SQL Server's NVARCHAR(n) counts UTF-16 units (an emoji is 2), MySQL's VARCHAR(n) characters
+    const longest = Math.max(1, ...dataRows.map((r) => (dialect === 'sqlserver' ? (r[i] ?? '').length : [...(r[i] ?? '')].length)));
     return longest <= D.varcharMax ? `${D.varchar || 'VARCHAR'}(${longest})` : D.text;
   };
   const sqlValue = (v, i) => {

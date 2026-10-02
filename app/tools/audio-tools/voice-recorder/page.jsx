@@ -17,6 +17,29 @@ export default function VoiceRecorderPage() {
   // Extension of what the browser REALLY recorded (Chrome/Firefox: webm, Safari: mp4),
   // never assumed -- a Safari recording renamed .webm would not open.
   const [recExt, setRecExt] = useState('webm');
+  // P24 (03/10): pause / resume while recording, and an MP3 export (123apps' recorder gives MP3; MP3 plays everywhere)
+  const [paused, setPaused] = useState(false);
+  const [mp3Url, setMp3Url] = useState(null);
+  const [mp3Busy, setMp3Busy] = useState(false);
+  const pause = () => { if (mediaRecorder.current?.state === 'recording') { mediaRecorder.current.pause(); setPaused(true); } };
+  const resume = () => { if (mediaRecorder.current?.state === 'paused') { mediaRecorder.current.resume(); setPaused(false); } };
+  const exportMp3 = async () => {
+    if (!blobRef.current || mp3Busy) return;
+    setMp3Busy(true); setError('');
+    try {
+      const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+      const ffmpeg = new FFmpeg();
+      await ffmpeg.load();
+      await ffmpeg.writeFile('in.' + recExt, new Uint8Array(await blobRef.current.arrayBuffer()));
+      // 192 kbit/s like the site's audio tools; the exit code is checked (ffmpeg.exec does not throw)
+      if (await ffmpeg.exec(['-i', 'in.' + recExt, '-vn', '-c:a', 'libmp3lame', '-b:a', '192k', 'out.mp3']) !== 0) throw new Error('the MP3 encoder failed on this recording');
+      const data = await ffmpeg.readFile('out.mp3');
+      if (!data?.byteLength) throw new Error('the MP3 came out empty');
+      setMp3Url(URL.createObjectURL(new Blob([data.buffer], { type: 'audio/mpeg' })));
+      ffmpeg.terminate();
+    } catch (e) { setError('MP3 export failed: ' + (e?.message || e)); }
+    setMp3Busy(false);
+  };
 
   const start = async () => {
     // Say what is really wrong (28/09/2026: a browser without recording support was told "Microphone access denied:
@@ -45,8 +68,10 @@ export default function VoiceRecorderPage() {
       };
       mediaRecorder.current.start();
       setRecording(true);
+      setPaused(false);
       setAudioUrl(null);
       setWavUrl(null);
+      setMp3Url(null);
       setError('');
     } catch(e) {
       setError(e && e.name === 'NotAllowedError' ? 'Microphone access was refused. Allow the microphone for this site in your browser settings, then try again.'
@@ -59,6 +84,7 @@ export default function VoiceRecorderPage() {
     mediaRecorder.current.stop();
     mediaRecorder.current.stream.getTracks().forEach(t => t.stop());
     setRecording(false);
+    setPaused(false);
   };
 
 
@@ -128,13 +154,18 @@ export default function VoiceRecorderPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
             </svg>
           </div>
-          {recording && <p className="text-red-500 font-medium animate-pulse">Recording...</p>}
+          {recording && <p className={paused ? 'text-neutral-600 font-medium' : 'text-red-500 font-medium animate-pulse'}>{paused ? 'Paused — Resume to continue the same recording' : 'Recording...'}</p>}
           {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
           <div className="flex gap-3 justify-center">
             {!recording ? (
               <button onClick={start} className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-6 py-3 font-semibold transition">Start Recording</button>
             ) : (
-              <button onClick={stop} className="bg-red-500 hover:bg-red-400 text-white rounded-xl px-6 py-3 font-semibold transition">Stop Recording</button>
+              <>
+                {paused
+                  ? <button onClick={resume} className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-6 py-3 font-semibold transition">Resume</button>
+                  : <button onClick={pause} className="bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl px-6 py-3 font-semibold transition">Pause</button>}
+                <button onClick={stop} className="bg-red-500 hover:bg-red-400 text-white rounded-xl px-6 py-3 font-semibold transition">Stop Recording</button>
+              </>
             )}
           </div>
           {audioUrl && (
@@ -143,7 +174,13 @@ export default function VoiceRecorderPage() {
               <DownloadGroup zipName="recording.zip" alternatives>
                 <FileDownload href={audioUrl} name={`recording.${recExt}`} />
                 {wavUrl && <FileDownload href={wavUrl} name="recording.wav" />}
+                {mp3Url && <FileDownload href={mp3Url} name="recording.mp3" />}
               </DownloadGroup>
+              {!mp3Url && (
+                <button onClick={exportMp3} disabled={mp3Busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-2 font-semibold transition">
+                  {mp3Busy ? 'Making the MP3…' : 'Export as MP3'}
+                </button>
+              )}
               {!wavUrl && (
                 <button onClick={exportWav} disabled={converting} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-2 font-semibold transition">
                   {converting ? 'Converting...' : 'Export as WAV'}
@@ -163,10 +200,11 @@ export default function VoiceRecorderPage() {
           "Download the recording directly (WebM, or MP4 in Safari), or click \"Export as WAV\" to convert it and download a WAV file instead."
         ]}
         faqs={[
-          { q: "What audio format do recordings download as?", a: "Recordings are captured in your browser's native format: WebM in Chrome, Edge and Firefox, MP4 in Safari, and the file extension always matches. Click \"Export as WAV\" to decode and re-encode the recording as a standard WAV file, then download it separately." },
+          { q: "What audio format do recordings download as?", a: "Recordings are captured in your browser's native format: WebM in Chrome, Edge and Firefox, MP4 in Safari, and the file extension always matches. Click \"Export as MP3\" for an MP3 (192 kbit/s, plays everywhere) or \"Export as WAV\" for an uncompressed WAV, both made on your device." },
+          { q: "Can I pause a recording?", a: "Yes: Pause stops the recording without ending it, Resume continues the same recording, and Stop Recording finishes it." },
           { q: "Is Voice Recorder free to use?", a: "Yes, it's completely free with no signup and no limit on how many recordings you can make." },
           { q: "Do I need to install anything?", a: "No, it works directly in your browser as long as you grant microphone access." },
-          { q: "Is my recording private?", a: "Yes. Recording and WAV conversion both happen entirely on your device via the browser's MediaRecorder and Web Audio APIs — audio is never uploaded to a server unless you choose to share the downloaded file yourself." }
+          { q: "Is my recording private?", a: "Yes. Recording and the WAV and MP3 exports all happen entirely on your device via the browser's MediaRecorder and Web Audio APIs — audio is never uploaded to a server unless you choose to share the downloaded file yourself." }
         ]}
         tips={[
           "Record in a quiet space and keep the microphone 6–12 inches from your mouth for clearer audio.",

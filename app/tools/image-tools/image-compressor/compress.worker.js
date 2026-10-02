@@ -210,7 +210,7 @@ async function compressSvg(file, progress) {
 }
 
 self.onmessage = async (e) => {
-  const { id, file, quality, dims, forceBands, canvasCap } = e.data;
+  const { id, file, quality, dims, forceBands, canvasCap, targetBytes } = e.data;
   if (canvasCap) simulateIosCanvasCap(); // browser tests: the iPhone's canvas limit, here too
   const progress = (pct) => self.postMessage({ id, type: 'progress', pct });
   try {
@@ -232,7 +232,7 @@ self.onmessage = async (e) => {
     }
     // P24 review (03/10): an animated PNG (APNG) or WebP became a still picture without a word; refused as the GIF is
     if (format === 'png') {
-      const h = new Uint8Array(await file.slice(0, 65536).arrayBuffer());
+      const h = new Uint8Array(await file.slice(0, 4 * 1024 * 1024).arrayBuffer()); // a big iCCP or metadata can come first
       const tag = (i) => String.fromCharCode(h[i], h[i + 1], h[i + 2], h[i + 3]);
       for (let i = 8; i + 8 <= h.length;) { const len = (h[i] << 24 | h[i + 1] << 16 | h[i + 2] << 8 | h[i + 3]) >>> 0, t = tag(i + 4); if (t === 'acTL') throw new Error('This PNG is animated (APNG): here only its first picture would be kept. Convert it with APNG to GIF, then use our GIF Compressor, to keep the animation.'); if (t === 'IDAT' || t === 'IEND') break; i += 12 + len; }
     }
@@ -246,6 +246,7 @@ self.onmessage = async (e) => {
       const r = await encodePng(img, quality, progress);
       out = r.blob;
       note = r.colours ? `${r.colours}-colour palette, transparency kept` : 'lossless (no palette kept the quality)';
+      if (targetBytes > 0) note += ` · a target size applies to JPG, WebP and AVIF; this PNG was compressed at ${quality}% (${out.size <= targetBytes ? 'it fits' : `${Math.round(out.size / 1024)} KB, over the target`})`;
     } else {
       // An already well-compressed JPEG/WebP can come out larger at the chosen quality. Like the reference
       // site (which picked ~q69 on such a file and ~q78 on a fresh photo), step the quality down -- at most
@@ -254,14 +255,28 @@ self.onmessage = async (e) => {
       const encodeAt = format === 'avif' ? (q) => encodeAvif(img.data, img.width, img.height, q)
         : format === 'webp' ? (q) => encodeWebp(img, q) : (q) => encodeJpeg(format === 'jpg' ? img : onWhite(img), q);
       let q = quality;
-      out = await encodeAt(q);
-      while (out.size >= file.size && q - 8 >= 50 && q > quality - 16) {
-        q -= 8;
-        progress(50);
-        out = await encodeAt(q);
-      }
       const notes = [];
-      if (q !== quality && out.size < file.size) notes.push(`quality lowered to ${q}% — at ${quality}% it would not have been smaller`);
+      if (targetBytes > 0) {
+        // P24 (03/10): "compress to 100 KB" — the highest quality whose file fits, by bisection (8 encodes at most). The
+        // picture is never shrunk to get there: when even quality 10 is too big, the page says so.
+        let lo = 10, hi = 95, best = null;
+        for (let k = 0; k < 8 && lo <= hi; k++) {
+          const mid = Math.round((lo + hi) / 2);
+          progress(10 + k * 10);
+          const o = await encodeAt(mid);
+          if (o.size <= targetBytes) { best = { o, q: mid }; lo = mid + 1; } else hi = mid - 1;
+        }
+        if (best) { out = best.o; q = best.q; notes.push(`quality ${q}% — the highest that fits in ${Math.round(targetBytes / 1024)} KB`); }
+        else { out = await encodeAt(10); q = 10; notes.push(`even at quality 10% this picture is ${Math.round(out.size / 1024)} KB, over the ${Math.round(targetBytes / 1024)} KB asked: make it smaller first with Image Resizer`); }
+      } else {
+        out = await encodeAt(q);
+        while (out.size >= file.size && q - 8 >= 50 && q > quality - 16) {
+          q -= 8;
+          progress(50);
+          out = await encodeAt(q);
+        }
+        if (q !== quality && out.size < file.size) notes.push(`quality lowered to ${q}% — at ${quality}% it would not have been smaller`);
+      }
       if (format !== 'jpg' && format !== 'webp' && format !== 'avif') notes.push('converted to JPG');
       note = notes.join(' · ');
     }

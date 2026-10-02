@@ -23,6 +23,14 @@ export default function QrScannerPage() {
   const jsqrRef = useRef(null);
 
   const found = (text) => { setResult(text); setStatus(''); };
+  const [others, setOthers] = useState([]); // P24: the other codes zxing found in the same picture
+  const zxingRead = (imageData) => new Promise((resolve) => {
+    const w = new Worker(new URL('./scan.worker.js', import.meta.url), { type: 'module' });
+    const t = setTimeout(() => { w.terminate(); resolve(null); }, 20000);
+    w.onmessage = ({ data }) => { clearTimeout(t); w.terminate(); resolve(data.ok ? data.codes : null); };
+    w.onerror = () => { clearTimeout(t); w.terminate(); resolve(null); };
+    w.postMessage({ id: 1, image: imageData });
+  });
   const stopCamera = () => {
     clearTimeout(timerRef.current); timerRef.current = null;
     streamRef.current?.getTracks().forEach((t) => t.stop()); streamRef.current = null;
@@ -44,7 +52,7 @@ export default function QrScannerPage() {
   const scanFile = async (file) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) { setStatus(`"${file.name}" is not an image.`); return; }
-    stopCamera(); setLoading(true); setStatus('Scanning...'); setResult('');
+    stopCamera(); setLoading(true); setStatus('Scanning...'); setResult(''); setOthers([]);
     const url = URL.createObjectURL(file);
     let opened = false; // the picture itself opened: a later failure is not the file's fault
     try {
@@ -60,8 +68,13 @@ export default function QrScannerPage() {
       const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(iw * k)); c.height = Math.max(1, Math.round(ih * k));
       const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, c.width, c.height);
       const d = ctx.getImageData(0, 0, c.width, c.height);
-      const code = jsqrRef.current(d.data, d.width, d.height) || await decode(img, iw, ih);
-      if (code) found(code.data); else setStatus('No QR code found in image');
+      // zxing first: every format and every code in the picture; jsQR (QR only) if zxing finds nothing or cannot load
+      const codes = await zxingRead(d);
+      if (codes && codes.length) { found(codes[0].text); setOthers(codes); }
+      else {
+        const code = jsqrRef.current(d.data, d.width, d.height) || await decode(img, iw, ih);
+        if (code) found(code.data); else setStatus('No QR code or barcode found in this image');
+      }
     } catch (e) {
       // P23: why the picture did not open, or what failed after it did (not just "could not load")
       setStatus(opened ? `Could not scan this image: ${e?.message || e}. Please try again.` : await unreadableImageMessage(file).catch(() => 'This image could not be opened.'));
@@ -178,6 +191,13 @@ export default function QrScannerPage() {
             data-placeholder="Paste box — on a phone, long-press here and choose Paste"
           />
           {status && <p className="text-center text-amber-700 text-sm" role="status">{loading ? 'Scanning...' : status}</p>}
+          {others.length > 1 && (
+            <div className="text-sm text-left bg-neutral-50 border border-neutral-200 rounded-lg p-3" data-codes>
+              <div className="font-semibold text-neutral-700 mb-1">{others.length} codes found in this picture</div>
+              <ul className="space-y-1">{others.map((c, k) => <li key={k} className="break-all"><span className="text-neutral-500">{c.format}:</span> <button type="button" className="text-indigo-600 hover:underline text-left" onClick={() => found(c.text)}>{c.text}</button></li>)}</ul>
+            </div>
+          )}
+          {others.length === 1 && <p className="text-xs text-neutral-500" data-codes>Read as {others[0].format}.</p>}
           {result && (
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 space-y-3" data-result>
               <div className="text-green-700 text-xl font-bold text-center">QR Code Found!</div>
@@ -205,6 +225,7 @@ export default function QrScannerPage() {
           { q: "Can I scan with my phone's camera?", a: "Yes. Click \"Scan with camera\" and allow the camera; the rear camera is used when there is one, and you can switch cameras. Nothing is recorded or uploaded: each frame is read in your browser." },
           { q: "Do I need to install any software?", a: "No, QR Code Scanner is a web-based tool that works directly in your browser without any downloads or installations." },
           { q: "What kinds of QR codes can it read?", a: "Any standard QR code containing text or a URL — live from a camera, photos of printed codes, screenshots, and exported images, including light codes on a dark background." },
+          { q: "Can it read barcodes, or several codes in one picture?", a: "Yes, from an uploaded or pasted picture: EAN-13, EAN-8, UPC, Code 128, Code 39, ITF, Data Matrix, PDF417, Aztec and Micro QR as well as QR codes, up to 20 codes in one picture — each one listed with its format (zxing, the reference open-source decoder). The live camera reads QR codes." },
           { q: "Is my data private?", a: "Yes. The image or camera view is decoded entirely in your browser and is never uploaded to a server." }
         ]}
         tips={[
