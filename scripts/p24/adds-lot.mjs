@@ -263,6 +263,62 @@ if (name !== 'webkit') { // Video to GIF: refusals (local) and plays once / 3 ti
   check('gif-maker: frame 2 keeps its own 1000 ms, frame 1 the common delay (200 ms)', m.pages === 2 && m.delay?.[0] === 200 && m.delay?.[1] === 1000, JSON.stringify(m.delay));
   await p.close();
 }
+{ // lot 8: round corners in a colour keep a JPG; colour noise; saturation 0 = grey; waveform PNG at the chosen size; Extract Text pages
+  const photo = path.join(dir, 'p8.jpg');
+  await sharp({ create: { width: 300, height: 200, channels: 3, background: '#cc4422' } }).jpeg({ quality: 92 }).toFile(photo);
+  const rc = await open('image-tools/round-corners');
+  await rc.locator('input[type=file]').first().setInputFiles(photo);
+  await rc.locator('#rc-fill-colour').check();
+  await rc.getByRole('button', { name: /Apply|Round/ }).first().click();
+  const ra = rc.locator('[data-file-download] a[data-download], a[download]').first(); await ra.waitFor({ timeout: 60000 });
+  const rb = await bytesOf(rc, ra); const rm = await sharp(rb).metadata(); const corner = [...await sharp(rb).extract({ left: 0, top: 0, width: 1, height: 1 }).raw().toBuffer()];
+  check('round-corners: corners in a colour — the JPG stays a JPG, corner white', rm.format === 'jpeg' && corner[0] > 240 && corner[1] > 240, `${rm.format} ${corner}`);
+  await rc.close();
+  const nz = await open('image-tools/add-noise');
+  const grey = path.join(dir, 'grey.png'); await sharp({ create: { width: 64, height: 64, channels: 3, background: '#808080' } }).png().toFile(grey);
+  await nz.locator('input[type=file]').first().setInputFiles(grey);
+  await nz.locator('#noise-colour').check();
+  await nz.getByRole('button', { name: /Apply|Add/ }).first().click();
+  const na = nz.locator('[data-file-download] a[data-download], a[download]').first(); await na.waitFor({ timeout: 60000 });
+  const raw = await sharp(await bytesOf(nz, na)).removeAlpha().raw().toBuffer();
+  let coloured = 0; for (let i = 0; i < raw.length; i += 3) if (raw[i] !== raw[i + 1] || raw[i + 1] !== raw[i + 2]) coloured++;
+  check('add-noise: colour noise — most pixels no longer grey (R, G, B differ)', coloured > raw.length / 3 * 0.8, `${coloured} of ${raw.length / 3}`);
+  await nz.close();
+  const bc = await open('image-tools/brightness-contrast');
+  await bc.locator('input[type=file]').first().setInputFiles(photo);
+  await bc.locator('#bc-saturation').fill('0');
+  await bc.getByRole('button', { name: /Apply|Adjust/ }).first().click();
+  const ba = bc.locator('[data-file-download] a[data-download], a[download]').first(); await ba.waitFor({ timeout: 60000 });
+  const bp = [...await sharp(await bytesOf(bc, ba)).extract({ left: 150, top: 100, width: 1, height: 1 }).raw().toBuffer()];
+  check('brightness-contrast: saturation 0 gives grey', Math.abs(bp[0] - bp[1]) <= 3 && Math.abs(bp[1] - bp[2]) <= 3, String(bp));
+  await bc.close();
+  const FF = path.join(os.tmpdir(), 'ffmpeg-btbn/ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe');
+  if (name === 'webkit') console.log('SKIP webkit audio-waveform save: this engine takes the iPhone saving path (no download event in the test browser)');
+  else if (fs.existsSync(FF)) {
+    const wav = path.join(dir, 'tone.wav'); execFileSync(FF, ['-v', 'error', '-y', '-f', 'lavfi', '-i', 'sine=frequency=300', '-t', '1', wav]);
+    const wf = await open('audio-tools/audio-waveform');
+    await wf.locator('input[type=file]').first().setInputFiles(wav);
+    await wf.waitForTimeout(1500);
+    await wf.locator('#wf-w').selectOption('1200'); await wf.locator('#wf-h').selectOption('150'); await wf.locator('#wf-transparent').check();
+    const [dl] = await Promise.all([wf.waitForEvent('download', { timeout: 30000 }), wf.getByRole('button', { name: /PNG|Download/ }).last().click()]);
+    const png = path.join(dir, 'wave.png'); await dl.saveAs(png);
+    const wm = await sharp(png).metadata(); const c0 = [...await sharp(png).ensureAlpha().extract({ left: 0, top: 0, width: 1, height: 1 }).raw().toBuffer()];
+    check('audio-waveform: PNG at the chosen 1200 × 150, transparent background', wm.width === 1200 && wm.height === 150 && c0[3] === 0, `${wm.width}×${wm.height} alpha ${c0[3]}`);
+    await wf.close();
+  }
+  const { PDFDocument, StandardFonts } = await import('pdf-lib');
+  const pdf = await PDFDocument.create(); const font = await pdf.embedFont(StandardFonts.Helvetica);
+  for (let i = 1; i <= 4; i++) pdf.addPage([300, 300]).drawText(`Text of page ${i}`, { x: 30, y: 150, size: 14, font });
+  const pf = path.join(dir, 'four.pdf'); fs.writeFileSync(pf, await pdf.save());
+  const et = await open('pdf-tools/pdf-extract-text');
+  await et.locator('input[type=file]').first().setInputFiles(pf);
+  await et.locator('#et-range').fill('2-3'); await et.locator('#et-headings').uncheck();
+  await et.getByRole('button', { name: /Extract/ }).first().click();
+  await et.waitForFunction(() => document.querySelector('main textarea')?.value, null, { timeout: 30000 }).catch(() => {});
+  const txt = await et.locator('main textarea').first().inputValue();
+  check('pdf-extract-text: pages 2-3 only, without "Page N:" headings', /Text of page 2/.test(txt) && /Text of page 3/.test(txt) && !/page 1|page 4|Page \d+:/.test(txt), JSON.stringify(txt.slice(0, 60)));
+  await et.close();
+}
 await b.close();
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);
 process.exitCode = fails ? 1 : 0;

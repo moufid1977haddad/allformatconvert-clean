@@ -5,12 +5,16 @@ import { itemsToText } from '../../../lib/pdfTextLayout';
 import { reportToolError } from '../../../lib/reportError';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
+import { parsePageRange } from '../../../lib/pageRange';
 
 export default function PdfExtractTextPage() {
   const [file, setFile] = useState(null);
   const [text, setText] = useState('');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
+  // P24 (03/10): some pages only, and with or without the "Page N:" headings (iLovePDF, CloudConvert: pages)
+  const [range, setRange] = useState('');
+  const [headings, setHeadings] = useState(true);
   const inputRef = useRef();
 
   const handleFile = (e) => {
@@ -31,13 +35,14 @@ export default function PdfExtractTextPage() {
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       let fullText = '';
-      for (let i = 1; i <= pdf.numPages; i++) {
+      const pages = parsePageRange(range, pdf.numPages);
+      for (const i of pages) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
         // Line breaks and spaces from the text positions: the old one-space
         // join put a whole page on a single line (29/09).
         const pageText = itemsToText(textContent.items);
-        fullText += 'Page ' + i + ':\n' + pageText + '\n\n';
+        fullText += (headings ? 'Page ' + i + ':\n' : '') + pageText + '\n\n';
       }
       // P24 review (03/10): a scanned PDF gave 'Page 1:', 'Page 2:'… with nothing under them and no explanation
       if (!fullText.replace(/Page \d+:\n/g, '').trim()) { setText(''); setStatus('This PDF has no text layer: its pages are pictures (a scan). Use PDF OCR to read the text from the pictures.'); setLoading(false); return; }
@@ -65,6 +70,12 @@ export default function PdfExtractTextPage() {
             <p className="text-neutral-500">{file ? file.name : 'Click or drop a PDF here'}</p>
             <input ref={inputRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
           </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-neutral-600">
+            <label>Pages (empty: all)
+              <input id="et-range" type="text" value={range} onChange={(e) => setRange(e.target.value)} placeholder="e.g. 1-3, 5, 8-" className="w-full border border-neutral-200 rounded-lg px-2 py-1.5" />
+            </label>
+            <label className="flex items-center gap-2 sm:pt-5"><input id="et-headings" type="checkbox" checked={headings} onChange={(e) => setHeadings(e.target.checked)} /> Start each page with "Page N:"</label>
+          </div>
           <button onClick={extract} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Extracting...' : 'Extract Text'}
           </button>
@@ -90,6 +101,7 @@ export default function PdfExtractTextPage() {
         faqs={[
           { q: "Is PDF Extract Text completely free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "What file formats does it support?", a: "PDF files only." },
+          { q: "Can I extract only some pages?", a: "Yes: type them in Pages (for example 1-3, 5, 8-); leave it empty for the whole document. Untick \"Start each page with Page N:\" for plain text without page headings." },
           { q: "Is my uploaded PDF file secure and private?", a: "Yes — text extraction happens entirely in your browser using the PDF.js library, so your file is never uploaded to a server." },
           { q: "Can I extract text from scanned or image-based PDFs?", a: "No. This tool doesn't perform OCR — it only reads a PDF's existing text layer, so scanned pages without embedded text come out blank." }
         ]}

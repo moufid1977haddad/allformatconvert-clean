@@ -396,3 +396,11 @@ machine ; le banc le dit (SKIP) et la vérification est notée pour la préversi
 deux pages) — une valeur, une URL entière (garde : / ? # & =), RFC 3986 strict ; **Image to Base64** — URI data, Base64
 seul, balise `<img>`, fond CSS, JSON ; **GIF Maker** — une durée propre à chaque image (prouvé : 200 ms puis 1000 ms
 relus par sharp). Un ajout de FAQ mal placé (encodeur d'URL) a cassé la construction une fois : vu par le build, corrigé.
+
+**Ajouts (lot 8)**, prouvés (`adds-lot.mjs` 22/22 · 21/21 · 17/17, solidité 27/27 ×3) : **Round Corners** — coins d'une
+couleur au choix, un JPG reste alors un JPG (bien plus léger) ; **Add Noise** — bruit en couleur ; **Add Vignette** —
+taille du centre clair ; **Brightness / Contrast** — saturation (matrice CSS `saturate()` aussi en calcul de secours pour
+Safari) ; **Audio Waveform** — largeur, hauteur, couleurs, fond transparent, PNG dessiné à la taille choisie (prouvé
+1200 × 150 transparent), zoom au doigt et boutons + / − ; **Screen Recorder** — pause / reprise (non testable dans le
+navigateur de test : pas de capture d'écran simulée) ; **PDF Extract Text** — pages au choix et sans en-têtes
+« Page N: ». Sous WebKit, l'enregistrement du PNG de l'onde passe par le chemin iPhone (non testable ici, dit).

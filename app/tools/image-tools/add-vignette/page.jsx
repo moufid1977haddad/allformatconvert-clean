@@ -10,6 +10,7 @@ export default function AddVignettePage() {
   const [srcType, setSrcType] = useState('image/png');
   const [image, setImage] = useState(null);
   const [intensity, setIntensity] = useState(50);
+  const [size, setSize] = useState(0); // P24 (03/10): the clear centre's size, % of the radius (pinetools: "Size")
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
@@ -34,6 +35,7 @@ export default function AddVignettePage() {
         drawSource(ctx);
         const gradient = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W, H)/2);
         gradient.addColorStop(0, 'rgba(0,0,0,0)');
+        if (size > 0) gradient.addColorStop(Math.min(0.95, size / 100), 'rgba(0,0,0,0)');
         gradient.addColorStop(1, `rgba(0,0,0,${intensity/100})`);
         ctx.fillStyle = gradient;
         // P24 review (03/10): drawn only where the picture is (source-atop) — on a transparent PNG the dark veil used to
@@ -58,6 +60,7 @@ export default function AddVignettePage() {
           </div>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <div><label className="block text-sm text-neutral-500 mb-1">Intensity: {intensity}%</label><input aria-label="Intensity (%)" type="range" min="1" max="100" value={intensity} onChange={e => setIntensity(parseInt(e.target.value))} className="w-full" /></div>
+          <div><label className="block text-sm text-neutral-500 mb-1">Clear centre: {size}%</label><input id="vig-size" aria-label="Clear centre size (%)" type="range" min="0" max="90" value={size} onChange={(e) => setSize(Number(e.target.value))} className="w-full" /></div>
           <button onClick={apply} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Add Vignette</button>
           {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
         </div>

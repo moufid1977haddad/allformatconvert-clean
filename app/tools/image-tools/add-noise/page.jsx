@@ -11,6 +11,7 @@ export default function AddNoisePage() {
   const [srcType, setSrcType] = useState('image/png');
   const [image, setImage] = useState(null);
   const [intensity, setIntensity] = useState(30);
+  const [colour, setColour] = useState(false); // P24 (03/10): colour noise, as pinetools ("Monochromatic" off)
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
@@ -43,7 +44,12 @@ export default function AddNoisePage() {
         for (let i = 0; i < d.length; i += 4) {
           s ^= s << 13; s ^= s >>> 17; s ^= s << 5;
           const noise = (((s >>> 16) * n) >>> 16) - intensity;
-          d[i] = d[i] + noise; d[i + 1] = d[i + 1] + noise; d[i + 2] = d[i + 2] + noise;
+          if (!colour) { d[i] = d[i] + noise; d[i + 1] = d[i + 1] + noise; d[i + 2] = d[i + 2] + noise; }
+          else {
+            d[i] = d[i] + noise;
+            s ^= s << 13; s ^= s >>> 17; s ^= s << 5; d[i + 1] = d[i + 1] + ((((s >>> 16) * n) >>> 16) - intensity);
+            s ^= s << 13; s ^= s >>> 17; s ^= s << 5; d[i + 2] = d[i + 2] + ((((s >>> 16) * n) >>> 16) - intensity);
+          }
         }
         ctx.putImageData(data, 0, 0);
       });
@@ -64,6 +70,7 @@ export default function AddNoisePage() {
           </div>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <div><label className="block text-sm text-neutral-500 mb-1">Intensity: {intensity}</label><input aria-label="Intensity" type="range" min="1" max="100" value={intensity} onChange={e => setIntensity(parseInt(e.target.value))} className="w-full" /></div>
+          <label className="flex items-center gap-2 text-sm text-neutral-600"><input id="noise-colour" type="checkbox" checked={colour} onChange={(e) => setColour(e.target.checked)} /> Colour noise (each colour channel its own grain)</label>
           <button onClick={apply} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Add Noise</button>
           {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
         </div>
