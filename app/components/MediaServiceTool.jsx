@@ -28,7 +28,7 @@ const STAGE_LABEL = {
   download: 'Downloading the result',
 };
 
-export default function MediaServiceTool({ op, title, subtitle, buttonLabel, controls, initialParams, buildParams, outName, seo, tool, previewStyle, extra }) {
+export default function MediaServiceTool({ op, title, subtitle, buttonLabel, controls, initialParams, buildParams, outName, seo, tool, previewStyle, extra, postProcess }) {
   const [file, setFile] = useState(null);
   const [params, setParams] = useState(initialParams);
   const [stage, setStage] = useState(null); // {stage, pct, position}
@@ -99,6 +99,8 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
       }
       // A success is only announced for a real, non-empty file with a known extension.
       if (!out.bytes || !out.ext) throw new MediaJobError('The service returned an empty file.', 'empty');
+      // P24 (03/10): an optional local step after the service (Video to GIF: loop count and compression by gifsicle)
+      if (postProcess) { const p = await postProcess(out.blob, params); if (p && p.size) { out.blob = p; out.bytes = p.size; } }
       setResult({ url: URL.createObjectURL(out.blob), ext: out.ext, bytes: out.bytes, name: outName(file.name, out.ext, params), isVideo: out.blob.type.startsWith('video/'), isAudio: out.blob.type.startsWith('audio/'), isImage: out.blob.type.startsWith('image/') });
     } catch (e) {
       if (e.code !== 'cancelled') {

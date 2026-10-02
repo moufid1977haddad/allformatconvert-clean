@@ -310,7 +310,9 @@ refaite sur la version finale).
   **Image Compressor** refuse un APNG ou un WebP animé (rendus figés sans un mot) comme il refusait le GIF ; Resizer :
   note exacte pour un GIF animé (renvoi vers l'option de taille du GIF Compressor).
 - **Vidéo / audio / GIF** : Vidéo → GIF (6 pages) lit la durée de la vidéo — un début après la fin est refusé, une
-  longueur qui dépasse est raccourcie **et dite**, 90 s n'est plus ramené à 60 en silence ; **Audio Equalizer** —
+  longueur qui dépasse est raccourcie **et dite**, 90 s n'est plus ramené à 60 en silence (**rectifié au lot 6** : les deux
+  refus sont prouvés au banc sous Chromium et Firefox ; le raccourcissement dit passe par le service vidéo, absent de
+  cette machine — **à vérifier sur la préversion**) ; **Audio Equalizer** —
   l'aperçu ignorait les réglages faits avant la première lecture et recréait un AudioContext à chaque lecture ;
   **GIF to APNG** garde le nombre de lectures du GIF (un GIF « une fois » bouclait sans fin) ; **GIF Maker** découpe un
   GIF animé en ses images (ezgif) au lieu d'en garder la première ; **Video Trimmer** garde toutes les pistes audio
@@ -381,3 +383,9 @@ Bancs : adds-lot 9/9 (Chromium), 8/8 (Firefox), 6/6 (WebKit, 2 non testables dit
 (position minutée d'un téléphone) et, pour l'audio, pochette retirées et dit ; image et son copiés tels quels. Prouvé :
 un MP4 écrit par ffmpeg avec titre, position (+48.8584+002.2945) et date ressort sans aucun de ces tags, H.264 + AAC
 copiés, même durée (ffprobe) ; un MP3 sans titre ni artiste. adds-lot 11/11 · 10/10 · 8/8, solidité 6/6 ×3.
+
+**Ajout (lot 6)** : **Vidéo → GIF (6 pages) — nombre de lectures et compression** (ezgif « loop count », FreeConvert
+« compression ») : toujours / une fois / 3 / 5 fois, compression légère ou forte, par gifsicle dans le navigateur sur le
+GIF que le service a fait (service inchangé). **Non prouvé ici** : le service vidéo n'est pas configuré sur cette
+machine ; le banc le dit (SKIP) et la vérification est notée pour la préversion. Les options gifsicle employées
+(`--loopcount`, `--no-loopcount`, `--lossy`) sont les options standard, `--lossy` déjà prouvée dans GIF Compressor.

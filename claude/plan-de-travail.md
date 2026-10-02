@@ -32,6 +32,8 @@ compte (plan **Hobby**) qui est suspendu.
   (PDF 2.0 RC4, MPF/Motion Photo, JWT alg toString).
 - **En cours** : relevé des ≈ 120 outils qu'aucune passe n'a encore comparés aux concurrents (P21 n'a couvert que les
   outils prioritaires) — 4 agents de recherche en lecture seule, puis ajouts par catégorie.
+- **À vérifier sur la préversion (service vidéo absent en local)** : Vidéo → GIF — longueur raccourcie et dite quand elle
+  dépasse la fin, « joué une fois / 3 fois » et compression (gifsicle après le service) ; banc : `scripts/p24/adds-lot.mjs`.
 - **Reste au propriétaire** : (1) **débloquer Vercel** (Pro recommandé) ; (2) ensuite seulement, Claude met en
   production catégorie par catégorie avec les conditions de P23 (étiquette de restauration, préversion, bancs ×3,
   www, retour arrière prêt) ; (3) décisions E1-E7 ci-dessous.

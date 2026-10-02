@@ -178,6 +178,43 @@ if (name === 'chromium') { // Excel to PDF: each sheet on one page (Gotenberg si
     }
   }
 }
+if (name !== 'webkit') { // Video to GIF: refusals (local) and plays once / 3 times (gifsicle after the service); Playwright WebKit decodes no video
+  const FF = path.join(os.tmpdir(), 'ffmpeg-btbn/ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe');
+  if (!fs.existsSync(FF)) console.log('SKIP video-to-gif loops: no local ffmpeg to make the clip'); else {
+    const clip = path.join(dir, 'clip.mp4');
+    execFileSync(FF, ['-v', 'error', '-y', '-f', 'lavfi', '-i', 'testsrc2=size=320x240:rate=25', '-t', '2', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', clip]);
+    const loopOf = (g) => { const i = g.indexOf('NETSCAPE2.0'); return i < 0 ? 'none' : g.readUInt16LE(i + 13); };
+    const make = async (loop) => {
+      const p = await open('gif-tools/mp4-to-gif');
+      await p.locator('input[type=file]').first().setInputFiles(clip);
+      await p.locator('#gif-loop').selectOption(loop);
+      await p.getByRole('button', { name: 'Make GIF' }).click();
+      const a = p.locator('a[download$=".gif"], [data-file-download] a[data-download]').first();
+      const ok = await a.waitFor({ timeout: 180000 }).then(() => true).catch(() => false);
+      const g = ok ? await bytesOf(p, a) : Buffer.alloc(0);
+      const mt = ok ? '' : await p.locator('main').innerText();
+      const err = /video service is not available/i.test(mt) ? 'video service is not available' : mt.slice(0, 120);
+      await p.close(); return ok ? loopOf(g) : 'ERR ' + err;
+    };
+    // the refusals are decided before anything is sent: testable without the service
+    const refuse = async (start, length) => {
+      const p = await open('gif-tools/mp4-to-gif');
+      await p.locator('input[type=file]').first().setInputFiles(clip);
+      await p.waitForTimeout(1500); // the clip's duration is read locally
+      const nums = p.locator('main input[type=number]');
+      await nums.nth(0).fill(String(start)); await nums.nth(1).fill(String(length));
+      await p.getByRole('button', { name: 'Make GIF' }).click();
+      await p.waitForTimeout(1500);
+      const t = await p.locator('main').innerText(); await p.close(); return t;
+    };
+    const late = await refuse(10, 2), long = await refuse(0, 90);
+    check('video-to-gif: a start after the end of a 2-s clip is refused, and 90 s is refused (it became 60 s silently)', /lasts 2\.0 s: the start \(10 s\) is after its end/.test(late) && /at most 60 seconds/.test(long), '');
+    const once = await make('1');
+    if (/video service is not available/i.test(String(once))) console.log('SKIP video-to-gif loops: the video service is not configured on this machine (checked on the preview)');
+    else { const three = await make('3');
+    check('video-to-gif: "Once" has no loop extension, "3 times" repeats twice', once === 'none' && three === 2, `${once} / ${three}`); }
+  }
+}
 await b.close();
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);
 process.exitCode = fails ? 1 : 0;
