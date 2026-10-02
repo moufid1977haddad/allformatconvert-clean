@@ -39,9 +39,11 @@ export function officeStageLabel(stage) {
  * @returns {Promise<{blob: Blob, detectedFonts: string[]}>}
  * @throws {Error} with a message that is safe to show as is
  */
-export async function convertOffice({ file, endpoint, fields, onStage, signal }) {
+export async function convertOffice({ file, endpoint, fields, onStage, signal, alwaysStage = false }) {
   const stage = onStage || (() => {});
-  const staged = mediaServiceConfigured() && file.size > OFFICE_STAGED_THRESHOLD_BYTES;
+  // alwaysStage (P25, PDF Translate): the result can be much larger than the source (fonts of another script), so
+  // it is always deposited on the media service rather than returned in the response (~4.5 MB ceiling).
+  const staged = mediaServiceConfigured() && (alwaysStage || file.size > OFFICE_STAGED_THRESHOLD_BYTES);
 
   if (staged) {
     try {
