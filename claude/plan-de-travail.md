@@ -22,19 +22,13 @@
 3. Sur www, après fusion : **vérification légère seulement** — pages principales, un outil par catégorie, RAW, un
    téléchargement. Jamais un passage complet de solidité sur www.
 
-### 📋 État P24 — TERMINÉ le 03/10 à 12 h 45 (heure de la machine) ; rien en production (site en 402)
-- **Fait, commité et poussé sur `p24-couverture`** (branche partie de `restauration-avant-p24-03-10` = `43d2b0cb` ;
-  dernier commit de code `45831f1b`) : les 9 catégories (PDF, image, vidéo, audio, GIF, fichiers, développeur / texte /
-  unités / maths, convertisseurs) puis le relevé n° 2 des ≈ 120 outils jamais comparés (lots 1 à 9, liste
-  `docs/audit/P24-releve-outils-restants.md` entièrement close). Rapport : `docs/audit/RAPPORT-p24-couverture-03-10.md`
-  (§10 = bilan), seul fusionné dans master (documentation seulement).
-- **Contrôles finaux en local** (`bash scripts/p24/final-run.sh`) : tests Node verts ; bancs P24 ×3 moteurs verts ;
-  solidité de tous les outils **522/522 ×3**.
-- **Reste au propriétaire** : (1) **débloquer Vercel** (Pro recommandé) ; (2) ensuite seulement, demander dans le
-  terminal la mise en production de `p24-couverture`, catégorie par catégorie, avec les conditions de P23 (étiquette
-  de restauration, préversion, bancs ×3, www, retour arrière prêt) — **ne pas fusionner la branche avant** ;
-  (3) sur la préversion : Vidéo → GIF (longueur raccourcie et dite, « joué une fois / 3 fois », compression ; banc
-  `scripts/p24/adds-lot.mjs`, service vidéo absent en local) ; (4) décisions E1-E7 ci-dessous.
+### 📋 État P24 — TERMINÉ ET EN PRODUCTION (03/10 après-midi, production `r0igmm5wa` = `4048f934`)
+- Tout P24 est en ligne, mis en production en **6 étapes** (PDF, image, GIF, vidéo/audio/fichiers/dev/texte/maths,
+  relevé n° 2 lots 1-4, lots 5-9), chacune : préversion + bancs du commit + fusion vérifiée + contrôle léger sur www
+  (29/29) + RAW (7/7). **Aucun retour arrière.** Repère : `restauration-avant-p24-prod-03-10` = `70c35846`.
+  Vidéo → GIF vérifié sur la préversion avec le vrai service (durée raccourcie et annoncée, une fois / 3 fois,
+  compression). Détail : `docs/audit/RAPPORT-p24-couverture-03-10.md` §11.
+- **Reste au propriétaire** : décisions E1-E7 ci-dessous (non tranchées par Claude).
 
 ## 🚀 RESTE AVANT PRODUCT HUNT — établi le 30/09 → 01/10 (passe « prêt au lancement », `docs/audit/RAPPORT-prelancement-01-10.md` §1 : chaque ligne du plan classée, preuve à l'appui)
 
