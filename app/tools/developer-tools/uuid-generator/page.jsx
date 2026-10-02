@@ -33,6 +33,7 @@ export default function UuidGeneratorPage() {
   };
   const generate = () => {
     const n = Math.min(1000, Math.max(1, Math.round(Number(count)) || 1));
+    if (String(n) !== String(count).trim()) setCount(n); // the count actually made is shown, never changed silently
     const make = version === '7' ? v7 : version === 'nil' ? () => '00000000-0000-0000-0000-000000000000' : generateUuid;
     setUuids(Array.from({ length: version === 'nil' ? 1 : n }, () => format(make())));
   };
@@ -59,7 +60,7 @@ export default function UuidGeneratorPage() {
       </div>
       <SeoContent
         title="UUID Generator"
-        description="UUID Generator creates version 4 (random) or version 7 (time-ordered) UUIDs, up to 1000 at a time, lowercase or uppercase, with or without hyphens or braces, using the Web Crypto API's crypto.getRandomValues() for cryptographically strong randomness, entirely in your browser — nothing is uploaded to a server. It only generates version 4 UUIDs; there's no support for version 1 (timestamp-based), 3, or 5 (namespace-based) formats, and no format options like uppercase or no-hyphen output."
+        description="UUID Generator creates version 4 (random) or version 7 (time-ordered) UUIDs, up to 1000 at a time, lowercase or uppercase, with or without hyphens or braces, using the Web Crypto API's crypto.getRandomValues() for cryptographically strong randomness, entirely in your browser — nothing is uploaded to a server. Versions 1, 3 and 5 are not offered."
         howTo={[
           "Set how many UUIDs you want (1 to 1000) and choose v4 (random), v7 (time-ordered) or the nil UUID, and the format.",
           "Click 'Generate' to create that many random UUIDs.",

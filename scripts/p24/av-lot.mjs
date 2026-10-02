@@ -104,7 +104,8 @@ if (want('booster')) {
   const norm = await result(p);
   const s = norm.bytes && wavSamples(norm.bytes);
   const pk = s ? 20 * Math.log10(peak(s) / 32768) : 0;
-  check('audio-booster: normalize keeps the true peak at or under -1.5 dBFS and changes the level', !!s && pk <= -1.2 && Math.abs(rms(s) - a) / a > 0.05, `peak ${pk.toFixed(2)} dBFS, rms ${s ? rms(s).toFixed(0) : '-'} vs ${a?.toFixed(0)}`);
+  const nr = norm.bytes && wavInfo(norm.bytes), rr = ref.bytes && wavInfo(ref.bytes);
+  check('audio-booster: normalize keeps the true peak at or under -1.5 dBFS, changes the level, keeps the source sample rate (loudnorm works at 192 kHz)', !!s && pk <= -1.2 && Math.abs(rms(s) - a) / a > 0.05 && nr && rr && nr.rate === rr.rate, `peak ${pk.toFixed(2)} dBFS, rms ${s ? rms(s).toFixed(0) : '-'} vs ${a?.toFixed(0)}, ${nr?.rate} Hz vs ${rr?.rate} Hz`);
   await p.close();
 }
 

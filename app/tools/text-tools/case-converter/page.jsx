@@ -16,7 +16,7 @@ export default function CaseConverterPage() {
   // P24 (03/10): convertcase.net also writes the programming cases (camelCase, PascalCase, snake_case, kebab-case,
   // CONSTANT_CASE) and iNVERSE. Words are split on spaces, punctuation and case changes (myHTTPServer → my HTTP Server),
   // letters of every alphabet kept (café crème → café_crème); each line is converted on its own.
-  const wordsOf = (line) => line.replace(/([\p{Ll}\p{N}])(\p{Lu})/gu, '$1 $2').replace(/(\p{Lu}+)(\p{Lu}\p{Ll})/gu, '$1 $2').split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  const wordsOf = (line) => line.normalize('NFC').replace(/(\p{L})['’](\p{L})/gu, '$1$2').replace(/([\p{Ll}\p{N}]\p{M}*)(\p{Lu})/gu, '$1 $2').replace(/(\p{Lu}+)(\p{Lu}\p{M}*\p{Ll})/gu, '$1 $2').split(/[^\p{L}\p{M}\p{N}]+/u).filter(Boolean);
   const cap = (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
   const byLine = (f) => setText(text.split(/(\r?\n)/).map((part) => (/^\r?\n$/.test(part) ? part : f(wordsOf(part)))).join(''));
   const toCamel = () => byLine((w) => w.map((x, i) => (i ? cap(x) : x.toLowerCase())).join(''));
@@ -63,7 +63,7 @@ export default function CaseConverterPage() {
         ]}
         faqs={[
           { q: "Is Case Converter free to use?", a: "Yes, it's completely free with no signup and no limit on conversions." },
-          { q: "What case formats does this tool support?", a: "UPPERCASE, lowercase, Title Case (short words like \"of\" and \"the\" stay lower-case), Capitalized Case (every word capitalised), Sentence case, iNVERSE (each letter's case swapped), the programming cases camelCase, PascalCase, snake_case, kebab-case and CONSTANT_CASE, and aLtErNaTe (alternating) case. camelCase, PascalCase, snake_case, and kebab-case aren't currently included." },
+          { q: "What case formats does this tool support?", a: "UPPERCASE, lowercase, Title Case (short words like \"of\" and \"the\" stay lower-case), Capitalized Case (every word capitalised), Sentence case, iNVERSE (each letter's case swapped), the programming cases camelCase, PascalCase, snake_case, kebab-case and CONSTANT_CASE, and aLtErNaTe (alternating) case." },
           { q: "Can I convert multiple texts at once?", a: "No, one text block is converted at a time — repeat the process for additional texts." },
           { q: "Is my data private?", a: "Yes, everything happens locally in your browser — what you enter is never sent to a server." }
         ]}

@@ -345,7 +345,7 @@ export default function VideoWatermarkPage() {
       const ctx = canvas.getContext('2d');
       if (watermarkType === 'text') {
         // drawn large (then only ever scaled DOWN to the video): a short text drawn at 48 px and enlarged came out blurred
-        const fontSize = 192;
+        const fontSize = Math.max(24, Math.min(192, Math.floor(16000 / Math.max(1, text.length * 0.6)))); // a canvas stays under 16 000 px wide
         ctx.font = `bold ${fontSize}px sans-serif`;
         const padX = 16;
         const textWidth = Math.ceil(ctx.measureText(text).width);
@@ -383,8 +383,12 @@ export default function VideoWatermarkPage() {
       // canvas's own source size. This applies identically whether the
       // canvas came from the text path or the image path, since both
       // funnel into this same overlay pipeline.
-      const wmWidth = Math.round(videoWidth * (sizePct / 100 || WATERMARK_WIDTH_RATIO));
-      const wmHeight = Math.round(wmWidth * (canvas.height / canvas.width));
+      let wmWidth = Math.round(videoWidth * (sizePct / 100 || WATERMARK_WIDTH_RATIO));
+      let wmHeight = Math.round(wmWidth * (canvas.height / canvas.width));
+      // a tall logo at a large size would leave the frame: scaled down to fit (review 03/10); never 0 px high
+      const maxH = Math.max(2, videoHeight - 2 * Math.round(Math.min(videoWidth, videoHeight) * WATERMARK_MARGIN_RATIO));
+      if (wmHeight > maxH) { wmWidth = Math.round(wmWidth * maxH / wmHeight); wmHeight = maxH; }
+      wmWidth = Math.max(2, wmWidth); wmHeight = Math.max(2, wmHeight);
       const margin = Math.round(Math.min(videoWidth, videoHeight) * WATERMARK_MARGIN_RATIO);
       const { x, y } = computeOverlayXY(position, videoWidth, videoHeight, wmWidth, wmHeight, margin);
 

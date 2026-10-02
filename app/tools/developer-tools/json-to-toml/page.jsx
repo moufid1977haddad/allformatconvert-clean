@@ -20,7 +20,9 @@ export default function JsonToTomlPage() {
       const fix = (v, path) => {
         if (isLosslessNumber(v)) {
           if (v.isInteger) { const n = BigInt(v.source); if (n > LIMIT || n < -LIMIT - 1n) { tooBig.push(path || '(root)'); return v.source; } return n; }
-          return Number(v.source); // a TOML float is a double: the closest double is TOML's own value
+          const d = Number(v.source); // a TOML float is a double: the closest double is TOML's own value
+          if (!Number.isFinite(d) || (d === 0 && /[1-9]/.test(v.source.split(/e/i)[0]))) { tooBig.push(path || '(root)'); return v.source; } // 1e400 / 1e-400: beyond a double, kept as text
+          return d;
         }
         if (typeof v === 'number' && Number.isInteger(v) && !Number.isSafeInteger(v)) return BigInt(v);
         if (Array.isArray(v)) return v.map((x, i) => fix(x, `${path}[${i}]`));
@@ -51,7 +53,7 @@ export default function JsonToTomlPage() {
             <TextDownload text={output} name="data.toml" /></div>
           </div>
           {error && <p className="text-red-400 text-center">{error}</p>}
-          {tooBig.length > 0 && <p role="status" className="text-amber-800 bg-amber-50 rounded-lg p-2 text-center text-sm">TOML integers stop at 9,223,372,036,854,775,807: {tooBig.slice(0, 5).join(', ')}{tooBig.length > 5 ? '…' : ''} written as text (in quotes) to keep every digit.</p>}
+          {tooBig.length > 0 && <p role="status" className="text-amber-800 bg-amber-50 rounded-lg p-2 text-center text-sm">Beyond what TOML numbers hold (integers up to 9,223,372,036,854,775,807, floats up to about 1.8e308): {tooBig.slice(0, 5).join(', ')}{tooBig.length > 5 ? '…' : ''} written as text (in quotes) to keep every digit.</p>}
           <div className="grid grid-cols-2 gap-3">
             <button onClick={convert} disabled={!input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert</button>
             <button onClick={() => navigator.clipboard.writeText(output)} disabled={!output} className="bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Copy</button>

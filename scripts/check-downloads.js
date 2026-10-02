@@ -30,7 +30,6 @@ const NO_FILE = {
   'developer-tools/jwt-decoder': 'the decoded fields of a token',
   'developer-tools/number-base-converter': 'a number',
   'developer-tools/password-generator': 'a password to copy (never written to a file on purpose)',
-  'developer-tools/regex-tester': 'matches shown on the page',
   'developer-tools/timestamp-converter': 'a date',
   'developer-tools/url-parser': 'the parts of a URL',
   'file-tools/file-comparator': 'a comparison verdict',

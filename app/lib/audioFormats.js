@@ -74,7 +74,9 @@ export const formatTakesBitrate = (formatValue) => BITRATE_FORMATS.has(getAudioF
 // sentence before encoding (never resampled to something else silently).
 export const AUDIO_SAMPLE_RATES = [['', 'Keep the original'], [48000, '48 kHz (video)'], [44100, '44.1 kHz (CD)'], [32000, '32 kHz'], [22050, '22.05 kHz'], [16000, '16 kHz (speech)'], [8000, '8 kHz (telephone)']];
 export const AUDIO_CHANNELS = [['', 'Keep the original'], [1, 'Mono'], [2, 'Stereo']];
-const RATES_BY_FORMAT = { opus: [48000, 24000, 16000, 12000, 8000], ac3: [48000, 44100, 32000], mp2: [48000, 44100, 32000, 24000, 22050, 16000] };
+// mp2 is written at 192 kbps or more, which MPEG-2 (16-24 kHz) Layer II cannot hold; libvorbis has no setting for our
+// bitrates below 32 kHz (review 03/10): those rates are refused with the sentence below instead of failing obscurely.
+const RATES_BY_FORMAT = { opus: [48000, 24000, 16000, 12000, 8000], ac3: [48000, 44100, 32000], mp2: [48000, 44100, 32000], ogg: [48000, 44100, 32000] };
 export function buildOutputSpec(formatValue, kbps, { sampleRate, channels } = {}) {
   const fmt = getAudioFormat(formatValue);
   const rate = Number(sampleRate) || 0, ch = Number(channels) || 0;

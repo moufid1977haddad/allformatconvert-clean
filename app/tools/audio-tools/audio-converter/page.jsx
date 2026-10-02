@@ -80,9 +80,10 @@ export default function AudioConverterPage() {
       });
       await ffmpeg.load();
       const inputName = 'input.' + sanitizedInputExt(file);
-      const { outputName, extraArgs, mime, ext } = buildOutputSpec(format, kbps, { sampleRate, channels });
+      const { outputName, extraArgs, mime, ext } = buildOutputSpec(format, kbps, format === 'opus' ? {} : { sampleRate, channels });
       await ffmpeg.writeFile(inputName, await fetchFile(file));
-      await ffmpeg.exec(['-i', inputName, ...extraArgs, outputName]);
+      // P24: ffmpeg.exec resolves even when ffmpeg fails — its exit code is checked (a failed run must never look done)
+      if (await ffmpeg.exec(['-i', inputName, ...extraArgs, outputName]) !== 0) throw new Error('ffmpeg could not write this format with these settings. Try another output format, sample rate or quality.');
       const data = await ffmpeg.readFile(outputName);
       const url = URL.createObjectURL(new Blob([data.buffer], { type: mime }));
       setResult({ url, name: file.name.replace(/\.[^.]+$/, '') + '.' + ext });

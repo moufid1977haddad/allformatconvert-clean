@@ -43,10 +43,10 @@ export async function formatSql(sql, { language = 'sql', keywordCase = 'upper' }
 }
 
 // Line diff (Myers). Returns [{ type: 'same'|'added'|'removed', line, oldNum, newNum }].
-export async function diffLines(a, b, { ignoreWhitespace = false } = {}) {
+export async function diffLines(a, b, { ignoreWhitespace = false, ignoreCase = false } = {}) {
   const { diffLines: dl } = await import('diff');
   const norm = (s) => s.replace(/\r\n?/g, '\n');
-  const parts = dl(norm(a), norm(b), { ignoreWhitespace });
+  const parts = dl(norm(a), norm(b), { ignoreWhitespace, ignoreCase });
   const out = [];
   let o = 1;
   let n = 1;

@@ -28,6 +28,9 @@ export default function FileSplitterPage() {
     if (bases.length > 1) { setError(`These parts come from different files (${bases.slice(0, 3).map((b) => `"${b}"`).join(', ')}): choose the parts of one file only.`); return; }
     parsed.sort((a, b) => a.n - b.n);
     for (let i = 0; i < parsed.length; i++) if (parsed[i].n !== i + 1) { setError(`Part ${i + 1} is missing (or chosen twice): the file cannot be rebuilt without every part, in order.`); return; }
+    // parts of one split have one size (equal parts may differ by one byte), the last one may be smaller
+    const sizes = parsed.map((x) => x.f.size), top = Math.max(...sizes.slice(0, -1), 0);
+    if (sizes.slice(0, -1).some((s) => s < top - 1) || sizes[sizes.length - 1] > top + 1) { setError('These parts do not have the sizes of one split (one may come from another split of the same file): choose the parts of a single split.'); return; }
     const blob = new Blob(parsed.map((x) => x.f), { type: 'application/octet-stream' });
     setJoined({ url: URL.createObjectURL(blob), name: bases[0], count: parsed.length, size: blob.size });
   };
@@ -50,7 +53,7 @@ export default function FileSplitterPage() {
   const chunkSizeValid = Number.isFinite(chunkSize) && chunkSize > 0;
   const split = () => {
     if (!file) return;
-    if (!chunkSizeValid) { setError('Chunk size must be a positive number.'); return; }
+    if (by === 'size' && !chunkSizeValid) { setError('Chunk size must be a positive number.'); return; }
     setError('');
     setLoading(true);
     try {
@@ -59,6 +62,11 @@ export default function FileSplitterPage() {
       if (by === 'parts' && !(n >= 2)) { setError('Choose at least 2 parts.'); setLoading(false); return; }
       if (by === 'parts' && n > file.size) { setError(`This file is only ${file.size} bytes: it cannot be cut into ${n} parts.`); setLoading(false); return; }
       const bytesPerChunk = by === 'parts' ? Math.ceil(file.size / n) : chunkSize * sizes[unit];
+      if (by === 'parts') { // exactly n parts: the first size % n parts are one byte longer
+        const base = Math.floor(file.size / n), extra = file.size % n, list = []; let at = 0;
+        for (let k = 0; k < n; k++) { const len = base + (k < extra ? 1 : 0), chunk = file.slice(at, at + len); at += len; list.push({ url: URL.createObjectURL(chunk), size: chunk.size, index: k + 1 }); }
+        setChunks(list); setLoading(false); return;
+      }
       const expectedChunks = Math.ceil(file.size / bytesPerChunk);
       if (expectedChunks > MAX_CHUNKS) {
         setError(`That chunk size would produce ${expectedChunks.toLocaleString()} parts, over the ${MAX_CHUNKS.toLocaleString()}-part limit. Choose a larger chunk size.`);

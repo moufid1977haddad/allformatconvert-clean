@@ -23,15 +23,18 @@ export default function TsvToCsvPage() {
   // (as Excel writes it) may hold tabs, line breaks and doubled quotes; a quote inside an unquoted field (5" screen)
   // stays a character.
   const parseTsv = (text) => {
-    const rows = []; let row = [], field = '', i = 0, quoted = false, atStart = true;
+    const rows = []; let row = [], field = '', i = 0, quoted = false, atStart = true, fieldStart = 0;
+    // a quoted field that never closes, or whose closing quote is not followed by a tab / line end ("Hello," she said), was
+    // not quoted after all: read again from its start as plain text, quotes kept (review 03/10)
+    const plain = () => { quoted = false; let j = fieldStart; field = ''; while (j < t.length && t[j] !== '\t' && t[j] !== '\r' && t[j] !== '\n') field += t[j++]; i = j; };
     const t = text.replace(/^\uFEFF/, '');
     while (i < t.length) {
       const c = t[i];
       if (quoted) {
-        if (c === '"') { if (t[i + 1] === '"') { field += '"'; i += 2; continue; } quoted = false; i++; continue; }
-        field += c; i++; continue;
+        if (c === '"') { if (t[i + 1] === '"') { field += '"'; i += 2; continue; } if (i + 1 < t.length && !'\t\r\n'.includes(t[i + 1])) { plain(); continue; } quoted = false; i++; continue; }
+        field += c; i++; if (i >= t.length) plain(); continue;
       }
-      if (c === '"' && atStart) { quoted = true; atStart = false; i++; continue; }
+      if (c === '"' && atStart) { quoted = true; atStart = false; fieldStart = i; i++; continue; }
       if (c === '\t') { row.push(field); field = ''; atStart = true; i++; continue; }
       if (c === '\r' || c === '\n') { row.push(field); rows.push(row); row = []; field = ''; atStart = true; i += c === '\r' && t[i + 1] === '\n' ? 2 : 1; continue; }
       field += c; atStart = false; i++;

@@ -114,6 +114,65 @@ const main = (p) => p.locator('main').innerText();
   check('file-splitter: a missing part is said', /Part 2 is missing/.test(await main(p)));
   await p.close();
 }
+{ // Regex Tester: groups, replace, catastrophic backtracking stopped
+  const p = await open('developer-tools/regex-tester');
+  await p.getByLabel('Pattern', { exact: true }).fill('(?<year>\\d{4})-(\\d{2})');
+  await p.getByLabel('Test text').fill('Dates: 2026-10 and 1999-12.');
+  await p.locator('#rx-replace').check();
+  await p.getByLabel('Replacement', { exact: true }).fill('$2/$<year>');
+  await p.getByRole('button', { name: 'Test', exact: true }).click();
+  await p.locator('[data-match-count]').waitFor({ timeout: 10000 });
+  const t = await main(p); const rep = await p.getByLabel('Replacement result').inputValue();
+  check('regex: 2 matches with named and numbered groups, replace preview', /2 matches/.test(t) && /year: 2026/.test(t) && /\$2: 12/.test(t) && rep === 'Dates: 10/2026 and 12/1999.', rep);
+  await p.getByLabel('Pattern', { exact: true }).fill('(a+)+$');
+  await p.getByLabel('Test text').fill('a'.repeat(40) + 'b');
+  await p.getByRole('button', { name: 'Test', exact: true }).click();
+  const slow = await p.getByText(/takes too long/).waitFor({ timeout: 8000 }).then(() => true).catch(() => false);
+  check('regex: catastrophic backtracking stopped after 2 s with a sentence (the page stays responsive)', slow && (await p.evaluate(() => 1 + 1)) === 2);
+  await p.close();
+}
+{ // Text Comparator: changed words marked
+  const p = await open('text-tools/text-comparator');
+  await p.locator('textarea').nth(0).fill('the quick brown fox\nsame line');
+  await p.locator('textarea').nth(1).fill('the slow brown fox\nsame line');
+  await p.getByRole('button', { name: /Compare/ }).click();
+  await p.locator('main span.bg-red-300').first().waitFor({ timeout: 10000 }).catch(() => {});
+  const red = await p.locator('main span.bg-red-300').allInnerTexts(); const green = await p.locator('main span.bg-green-300').allInnerTexts();
+  check('text-comparator: "quick" marked removed, "slow" added, nothing else', red.join('|') === 'quick' && green.join('|') === 'slow', red + ' / ' + green);
+  await p.close();
+}
+{ // JSON Formatter: error line / column; sort keys losslessly
+  const p = await open('developer-tools/json-formatter');
+  await p.locator('textarea').first().fill('{\n  "a": 1,\n  "b": }');
+  await p.getByRole('button', { name: 'Format', exact: true }).click();
+  await p.getByText(/line 3, column 8/).first().waitFor({ timeout: 10000 }).catch(() => {});
+  const err = await main(p);
+  await p.locator('textarea').first().fill('{"b":12345678901234567890,"a":1.10}');
+  await p.locator('#jf-sort').check(); await p.locator('#jf-indent').selectOption('tab');
+  await p.getByRole('button', { name: 'Format', exact: true }).click();
+  await p.waitForFunction(() => document.querySelector('textarea[aria-label=Output]')?.value, null, { timeout: 10000 }).catch(() => {});
+  const out = await p.getByLabel('Output').inputValue();
+  check('json-formatter: error at line 3, column 8; keys sorted, tab indent, numbers untouched', /line 3, column 8/.test(err) && out === '{\n\t"a": 1.10,\n\t"b": 12345678901234567890\n}', JSON.stringify(out));
+  await p.close();
+}
+{ // Password Generator: no look-alikes, 20 at once, strength shown
+  const p = await open('developer-tools/password-generator');
+  await p.locator('#pw-ambiguous').check(); await p.locator('#pw-count').fill('20');
+  await p.getByRole('button', { name: 'Generate Password' }).click();
+  const all = (await p.getByLabel('Passwords').inputValue()).split('\n');
+  const bits = Number(await p.locator('[data-entropy]').getAttribute('data-entropy'));
+  check('password: 20 passwords of 16, none with 0 O 1 l I |, ~100 bits shown', all.length === 20 && all.every((x) => x.length === 16 && !/[0O1lI|]/.test(x)) && bits >= 90 && bits <= 105, `${all.length} ${bits}`);
+  await p.close();
+}
+{ // Unit Converter: new units
+  const p = await open('converter-tools/unit-converter');
+  await p.getByRole('button', { name: 'Weight', exact: true }).click();
+  await p.locator('#uc-from').selectOption('stone'); await p.locator('#uc-to').selectOption('kg');
+  await p.locator('main input').first().fill('1');
+  const t = await main(p);
+  check('unit-converter: 1 stone = 6.35029318 kg', /6\.35029318 kg/.test(t), '');
+  await p.close();
+}
 await b.close();
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);
 process.exit(fails ? 1 : 0);

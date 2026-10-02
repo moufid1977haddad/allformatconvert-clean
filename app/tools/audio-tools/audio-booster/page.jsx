@@ -37,7 +37,8 @@ export default function AudioBoosterPage() {
       // ffmpeg.wasm's own stderr/stdout -- this is where the real reason for
       // a failure lives. Without this, a failed exec() surfaces only as a
       // generic rejection with no way to diagnose what actually happened.
-      ffmpeg.on('log', ({ message }) => console.log('[ffmpeg]', message));
+      const logs = [];
+      ffmpeg.on('log', ({ message }) => { logs.push(message); console.log('[ffmpeg]', message); });
       await ffmpeg.load();
       const inputName = 'input.' + sanitizedInputExt(file);
       const { outputName, extraArgs, mime, ext } = buildOutputSpec(format);
@@ -45,14 +46,21 @@ export default function AudioBoosterPage() {
       const base = file.name.replace(/\.[^.]+$/, '');
       // P24 (03/10): FreeConvert sets any volume from 0 % (ours went 1× to 5× only) and normalising is the other common
       // need (podcasts, voice memos): EBU R128 loudness to -16 LUFS, true peak -1.5 dB (ffmpeg loudnorm)
+      // loudnorm works (and outputs) at 192 kHz: resampled back to the source's own rate, read from ffmpeg's report
+      if (normalize) await ffmpeg.exec(['-hide_banner', '-i', inputName]).catch(() => {});
+      const srcRate = Number((/, (\d{4,6}) Hz/.exec(logs.join('\n')) || [])[1]) || 48000;
+      // (an aresample filter after loudnorm fails channel negotiation in this ffmpeg build: the rate is set on the output)
+      const rateArgs = normalize ? ['-ar', String(srcRate)] : [];
       const af = normalize ? 'loudnorm=I=-16:TP=-1.5:LRA=11' : limiter && volume > 1 ? `volume=${volume},alimiter=limit=0.95:level=0` : `volume=${volume}`;
       if (opusOnService(format)) { // boosted here, losslessly; libopus on our service (lib/opusService.js)
-        await ffmpeg.exec(['-i', inputName, '-af', af, ...LOSSLESS_INTERMEDIATE.args, LOSSLESS_INTERMEDIATE.name]);
+        // ffmpeg.exec resolves even when ffmpeg fails: its exit code is checked, never a stale or empty file handed over
+        if (await ffmpeg.exec(['-i', inputName, '-af', af, ...rateArgs, ...LOSSLESS_INTERMEDIATE.args, LOSSLESS_INTERMEDIATE.name]) !== 0) throw new Error('The audio could not be processed. Please try another file or output format.');
         const opus = await encodeOpusOnService(await ffmpeg.readFile(LOSSLESS_INTERMEDIATE.name), 'boosted_' + base);
         setResult({ url: URL.createObjectURL(opus), name: 'boosted_' + base + '.opus' });
       } else {
-        await ffmpeg.exec(['-i', inputName, '-af', af, ...extraArgs, outputName]);
+        if (await ffmpeg.exec(['-i', inputName, '-af', af, ...rateArgs, ...extraArgs, outputName]) !== 0) throw new Error('The audio could not be processed. Please try another file or output format.');
         const data = await ffmpeg.readFile(outputName);
+        if (!data || !data.byteLength) throw new Error('The audio could not be processed: the result was empty.');
         const url = URL.createObjectURL(new Blob([data.buffer], { type: mime }));
         setResult({ url, name: 'boosted_' + base + '.' + ext });
       }
