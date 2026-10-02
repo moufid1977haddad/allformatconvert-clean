@@ -16,6 +16,18 @@ const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'p24-adds-'));
 const launchOpts = name === 'chromium' ? { args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'] } : name === 'firefox' ? { firefoxUserPrefs: { 'media.navigator.streams.fake': true, 'media.navigator.permission.disabled': true } } : {};
 const b = await { chromium, firefox, webkit }[name].launch(launchOpts);
 const ctx = await b.newContext({ acceptDownloads: true, permissions: name === 'chromium' ? ['microphone'] : [] });
+// On a preview (or its localhost relay) the real media service answers without CORS headers for that origin:
+// --cors-shim relays its calls through Playwright and adds that header, nothing else (as audio-merger-join.mjs).
+if (process.argv.includes('--cors-shim')) {
+  const SERVICE = 'https://media-processing-production-d2f4.up.railway.app';
+  await ctx.route(SERVICE + '/**', async (r) => {
+    const req = r.request();
+    const cors = { 'access-control-allow-origin': origin, 'access-control-allow-headers': 'Authorization, Content-Type, X-Chunk-Sha256', 'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS' };
+    if (req.method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
+    const resp = await r.fetch();
+    return r.fulfill({ response: resp, headers: { ...resp.headers(), ...cors } });
+  });
+}
 const open = async (slug) => { const p = await ctx.newPage(); await p.goto(`${origin}/tools/${slug}`, { waitUntil: 'load' }); await p.waitForTimeout(800); return p; };
 const bytesOf = (p, a) => a.evaluate(async (el) => { const u = new Uint8Array(await (await fetch(el.href)).arrayBuffer()); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s); }).then((s) => Buffer.from(s, 'base64'));
 
@@ -200,16 +212,22 @@ if (name !== 'webkit') { // Video to GIF: refusals (local) and plays once / 3 ti
     const clip = path.join(dir, 'clip.mp4');
     execFileSync(FF, ['-v', 'error', '-y', '-f', 'lavfi', '-i', 'testsrc2=size=320x240:rate=25', '-t', '2', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', clip]);
     const loopOf = (g) => { const i = g.indexOf('NETSCAPE2.0'); return i < 0 ? 'none' : g.readUInt16LE(i + 13); };
-    const make = async (loop) => {
+    const gifs = {}; // the GIF bytes of each run, for the length and compression checks on the preview
+    const make = async (loop, opts = {}) => {
       const p = await open('gif-tools/mp4-to-gif');
       await p.locator('input[type=file]').first().setInputFiles(clip);
+      await p.waitForTimeout(1500); // the clip's duration is read locally
       await p.locator('#gif-loop').selectOption(loop);
+      if (opts.squeeze) await p.locator('#gif-squeeze').selectOption(opts.squeeze);
+      if (opts.start !== undefined) { const nums = p.locator('main input[type=number]'); await nums.nth(0).fill(String(opts.start)); await nums.nth(1).fill(String(opts.length)); }
       await p.getByRole('button', { name: 'Make GIF' }).click();
       const a = p.locator('a[download$=".gif"], [data-file-download] a[data-download]').first();
       const ok = await a.waitFor({ timeout: 180000 }).then(() => true).catch(() => false);
       const g = ok ? await bytesOf(p, a) : Buffer.alloc(0);
       const mt = ok ? '' : await p.locator('main').innerText();
+      const note = await p.locator('[data-job-note]').innerText().catch(() => '');
       const err = /video service is not available/i.test(mt) ? 'video service is not available' : mt.slice(0, 120);
+      gifs[opts.key || loop] = { g, note };
       await p.close(); return ok ? loopOf(g) : 'ERR ' + err;
     };
     // the refusals are decided before anything is sent: testable without the service
@@ -228,7 +246,16 @@ if (name !== 'webkit') { // Video to GIF: refusals (local) and plays once / 3 ti
     const once = await make('1');
     if (/video service is not available/i.test(String(once))) console.log('SKIP video-to-gif loops: the video service is not configured on this machine (checked on the preview)');
     else { const three = await make('3');
-    check('video-to-gif: "Once" has no loop extension, "3 times" repeats twice', once === 'none' && three === 2, `${once} / ${three}`); }
+    check('video-to-gif: "Once" has no loop extension, "3 times" repeats twice', once === 'none' && three === 2, `${once} / ${three}`);
+    // length past the end: shortened AND said (1 s from 1.0 s on a 2-s clip asked for 5 s)
+    await make('forever', { start: 1, length: 5, key: 'short' });
+    const sm = gifs.short.g.length ? await sharp(gifs.short.g, { animated: true }).metadata() : null;
+    const total = sm ? (sm.delay || []).reduce((s, d) => s + d, 0) / 1000 : 0;
+    check('video-to-gif: 5 s asked from 1 s of a 2-s clip → a GIF of about 1 s, and the page says it', sm && total > 0.6 && total < 1.4 && /lasts 1 s, not 5 s/.test(gifs.short.note), `${total.toFixed(2)} s · "${gifs.short.note}"`);
+    // compression: "Strong" gives a smaller GIF than "None", same frame count
+    await make('forever', { squeeze: '0', key: 'plain' }); await make('forever', { squeeze: '80', key: 'strong' });
+    const [mp, ms] = await Promise.all([sharp(gifs.plain.g, { animated: true }).metadata(), sharp(gifs.strong.g, { animated: true }).metadata()]);
+    check('video-to-gif: "Strong" compression gives a smaller GIF with the same frames', gifs.strong.g.length < gifs.plain.g.length * 0.95 && mp.pages === ms.pages, `${gifs.plain.g.length} → ${gifs.strong.g.length} bytes, ${mp.pages}/${ms.pages} frames`); }
   }
 }
 { // Excel to CSV: semicolon + BOM; CSV to JSON: JSON Lines; URL Encoder: whole URL; Image to Base64: <img> tag
