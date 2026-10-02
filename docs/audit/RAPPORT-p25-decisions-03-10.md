@@ -124,11 +124,14 @@ internes demandent tous une clé ou un billet, mais la bonne fermeture est `--ch
   morceaux), qui ne garde que des sorties pdf/docx/xlsx/pptx/png ; y ajouter rtf/doc est une modification Railway non
   autorisée pour E1 (plan).
 - **Preuve (préversion `onlineconvertools-oua5xpkfz`, vrai ConvertAPI, 3 conversions ≈ 0,03 $ sur 0,05 $ autorisés)** :
-  un rapport d'une page (titre, accents, tableau) → `rapport.rtf` commençant par `{tf`, rouvert dans **Word** (1 tableau)
+  un rapport d'une page (titre, accents, tableau) → `rapport.rtf` commençant par `{
+tf`, rouvert dans **Word** (1 tableau)
   et **LibreOffice** (tous les mots, accents compris) ; une lettre de 3 pages → rouverte dans Word (3 pages, les 3 titres
   en vraie liste numérotée, la dernière clause présente) et LibreOffice (tout le texte). Constat en route : une ligne
   identique en tête de chaque page est prise pour un en-tête de page et placée dans l'en-tête du RTF (comme Word le fait
   d'un titre courant) — comportement du moteur, le même que pour le DOCX en production.
+- Fusion `ae7719cb` → production `onlineconvertools-2el17n5su` (`708a019b`) ; **www** : contrôle léger 29/29, RAW 7/7,
+  choix RTF présent, traduction du document entier non proposée (GET `available: false`, 20 pages/jour en production).
 - **DOC** : **ConvertAPI n'écrit le .doc dans aucun de ses 332 convertisseurs** (seul `doc/to/docx` existe ; lu dans
   `v2.convertapi.com/info/openapi` le 03/10) — le plan de P24 le supposait à tort. Le moyen de CloudConvert / iLovePDF
   pour le .doc : LibreOffice (`--convert-to doc`). Chez nous, le LibreOffice de Gotenberg ne sort que du PDF : il
@@ -226,6 +229,21 @@ compression H.265. Suites existantes : édition 34/34, coupe 23/23, GIF 7/7, dé
 
 Sur la caméra (le cas courant), même qualité pour 40 % (H.265) à 50 % (AV1) de poids en moins ; sur l'animation, H.265
 est plus léger ET meilleur, AV1 plus lourd mais bien meilleur — la page le dit ainsi, sans promesse générale.
+
+**Mise en ligne du service (règle « additif d'abord »)** : version précédente notée — `/health`
+`{stage: true, status: ok, targets: 34}` (pas de `edits`), code de master `d914f612` ; conversion MP4 par défaut
+H.264 4 s, compression par défaut « pas plus petit » (`scripts/p25/media-service-e5-live.mjs --before`). Fusion du
+seul commit du service `9ccf4656` → master `48be81c4` (22 h 25 UTC) ; Railway sert le nouveau code à 22 h 26 (`/health`
+→ `edits: 2`). **Contrôle en ligne** (billet du site, envoi par morceaux, comme un navigateur) : conversion et
+compression par défaut identiques à avant, miroir (pixels), vitesse 2× (2 s), H.265 (hevc), valeur de miroir inconnue
+refusée (« Unsupported mirror. » — seul le nouveau code le fait) : 7/7 ; Opus de 26/09 inchangé (92 / 50 / 207 kbit/s
+pour 128 / 64 / 256, MP3 + kbps refusé) : 4/4. **Retour arrière prêt** : révoquer la fusion sur master (Railway
+redéploie l'ancien code de lui-même).
+**Défaut trouvé par le banc des pages sur la préversion** : AV1 + miroir haut-bas → « could not be converted ».
+Cause reproduite en local : SVT-AV1 refuse les images que `vflip` d'ffmpeg lui passe (pas de ligne négatif,
+« Invalid argument ») ; même chose pour une rotation de 180° en AV1. Correctif : une mise à l'échelle à la même taille
+recopie les images, seulement quand AV1 et vflip sont tous deux demandés (342/342 commandes d'avant P25 toujours
+identiques). Fusion `ea8858d8` (22 h 42 UTC).
 
 **Pages** : Video Rotator — miroir gauche-droite / haut-bas, seul (« No rotation ») ou avec une rotation ; Video Resizer
 — mode « Crop » : cadre déplaçable et redimensionnable au doigt ou à la souris sur l'image, formes libre, 1:1, 16:9,
