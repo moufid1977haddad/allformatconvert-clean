@@ -20,6 +20,8 @@ export default function SvgToPngPage() {
   // svgtopng.com and CloudConvert keep the proportions.
   const [ratio, setRatio] = useState(1);
   const [lock, setLock] = useState(true);
+  // P24 (03/10): CloudConvert / ezgif let the background be set; an SVG without one gave only transparency here
+  const [bg, setBg] = useState('');
   const handleFile = async (e) => {
     const f = e.target.files[0];
     e.target.value = '';
@@ -64,7 +66,7 @@ export default function SvgToPngPage() {
       img.onload = async () => {
         // 30/09: a large size (over 16.7 MP) is drawn in bands on iPhone; the result is a Blob, not a data: URL.
         try {
-          const out = await drawToRaster(width, height, (ctx, y) => ctx.drawImage(img, 0, -y, width, height));
+          const out = await drawToRaster(width, height, (ctx, y) => { if (bg) { ctx.fillStyle = bg; ctx.fillRect(0, 0, width, ctx.canvas.height); } ctx.drawImage(img, 0, -y, width, height); });
           setResult(resultOf(await encodeRaster(out, 'image/png'), file.name, ''));
           setStatus('');
         } catch (e) { setResult(null); setStatus('Error: ' + e.message); }
@@ -95,6 +97,13 @@ export default function SvgToPngPage() {
             <div><label className="block text-sm text-neutral-500 mb-1">Height (px)</label><input aria-label="Height (px)" type="number" value={height} onChange={e => changeHeight(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
           </div>
           <label className="flex items-center gap-2 text-sm text-neutral-600"><input type="checkbox" checked={lock} onChange={e => setLock(e.target.checked)} /> Keep the SVG's proportions</label>
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            <span className="text-neutral-500">Background</span>
+            <label className="flex items-center gap-1"><input type="radio" name="svg-bg" checked={!bg} onChange={() => { setBg(''); setResult(null); }} /> Transparent</label>
+            <label className="flex items-center gap-1"><input type="radio" name="svg-bg" checked={!!bg} onChange={() => { setBg('#ffffff'); setResult(null); }} /> Colour</label>
+            {bg && <input id="svg-bg-color" type="color" value={bg} onChange={(e) => { setBg(e.target.value); setResult(null); }} aria-label="Background colour" />}
+            {[1, 2, 4].map((k) => <button key={k} type="button" onClick={() => { const w0 = Math.round(512 * k); setWidth(w0); setHeight(Math.round(w0 / ratio)); setResult(null); }} className="px-2 py-1 rounded bg-neutral-100 hover:bg-neutral-200">{512 * k} px wide</button>)}
+          </div>
           <button onClick={convert} disabled={!file || !dimsValid} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert to PNG</button>
           {status && <p role="status" className="text-center text-yellow-400 text-sm">{status}</p>}
           {result && (
@@ -116,9 +125,9 @@ export default function SvgToPngPage() {
         ]}
         faqs={[
           { q: "What is the maximum file size I can convert?", a: "There's no fixed size limit — processing happens locally, and SVG files are typically small text-based files anyway." },
-          { q: "Will the conversion maintain transparency?", a: "Yes, PNG supports transparency, and any transparent areas in your SVG carry over to the output." },
+          { q: "Will the conversion maintain transparency?", a: "Yes by default: transparent areas of your SVG stay transparent in the PNG. Choose 'Colour' under Background to fill them with a colour instead (white for a document, for example)." },
           { q: "Can I convert multiple SVG files at once?", a: "No, only one file can be converted at a time — there's no batch upload." },
-          { q: "Can I set a DPI or background color for the output?", a: "No, you only set pixel width and height — there's no DPI or background color option." }
+          { q: "Can I set a DPI or background color for the output?", a: "Background colour: yes. DPI: no — you set the size in pixels (or click 512, 1024 or 2048 px wide); for print, 300 dpi means 300 pixels per inch of the printed size." }
         ]}
         tips={[
           "Set the width and height to match the resolution you actually need — the SVG is rasterized fresh at those dimensions, so there's no quality loss from scaling up within reason.",

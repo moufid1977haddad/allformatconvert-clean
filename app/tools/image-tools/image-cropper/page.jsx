@@ -14,6 +14,16 @@ export default function ImageCropperPage() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [crop, setCrop] = useState({ x: 0, y: 0, w: 100, h: 100 });
+  // P24: aspect presets, as ezgif's crop (square, 4:3, 3:2, 16:9, 2:1…): the largest centred box of that shape
+  const [ratio, setRatio] = useState('free');
+  const RATIOS = [['free', 'Free'], ['1:1', '1:1 (square)'], ['4:3', '4:3'], ['3:2', '3:2'], ['16:9', '16:9'], ['9:16', '9:16 (story)'], ['4:5', '4:5 (portrait post)'], ['2:1', '2:1']];
+  const applyRatio = (r) => {
+    setRatio(r); setResult(null);
+    if (r === 'free' || !imgDims.width) return;
+    const [a, b] = r.split(':').map(Number), W = imgDims.width, H = imgDims.height;
+    const w = Math.min(W, Math.round(H * a / b)), h = Math.min(H, Math.round(w * b / a));
+    setCrop({ x: Math.round((W - w) / 2), y: Math.round((H - h) / 2), w, h });
+  };
   const inputRef = useRef();
   const imgRef = useRef();
   const currentRef = useRef(null); // the file being shown: a slow message for an older one is dropped
@@ -35,13 +45,13 @@ export default function ImageCropperPage() {
   const onImageLoad = () => {
     const img = imgRef.current;
     if (!img) return;
-    setImgDims({ width: img.width, height: img.height });
-    setCrop(p => ({
-      x: Math.max(0, Math.min(p.x, img.width)),
-      y: Math.max(0, Math.min(p.y, img.height)),
-      w: Math.max(1, Math.min(p.w, img.width)),
-      h: Math.max(1, Math.min(p.h, img.height)),
-    }));
+    // P24 (03/10): real pixels of the picture (iLoveIMG: W/H/X/Y in px). The sliders worked in the pixels of the small
+    // preview (about 192 px high): on a 4000 px photo each step was ~20 real pixels, and the sizes shown were not the
+    // picture's. The crop starts as the whole picture.
+    const W = img.naturalWidth, H = img.naturalHeight;
+    setImgDims({ width: W, height: H });
+    setCrop({ x: 0, y: 0, w: W, h: H });
+    setRatio('free');
   };
   const onImageError = async () => {
     const f = file;
@@ -54,12 +64,11 @@ export default function ImageCropperPage() {
     setResult(null);
     const img = imgRef.current;
     if (!img || !file) return;
-    const scaleX = img.naturalWidth / img.width;
-    const scaleY = img.naturalHeight / img.height;
-    const x = Math.max(0, Math.min(crop.x, img.width));
-    const y = Math.max(0, Math.min(crop.y, img.height));
-    const w = Math.max(0, Math.min(crop.w, img.width - x));
-    const h = Math.max(0, Math.min(crop.h, img.height - y));
+    const scaleX = 1, scaleY = 1; // crop values are real pixels (P24)
+    const x = Math.max(0, Math.min(crop.x, img.naturalWidth));
+    const y = Math.max(0, Math.min(crop.y, img.naturalHeight));
+    const w = Math.max(0, Math.min(crop.w, img.naturalWidth - x));
+    const h = Math.max(0, Math.min(crop.h, img.naturalHeight - y));
     if (w <= 0 || h <= 0) {
       setError('Crop area is outside the image bounds. Adjust X/Y/Width/Height.');
       return;
@@ -79,9 +88,16 @@ export default function ImageCropperPage() {
         <p className="text-neutral-500 text-center mb-8">Crop images with custom dimensions</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            {image ? <img ref={imgRef} src={image} onLoad={onImageLoad} onError={onImageError} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
+            {image ? <div className="relative inline-block"><img ref={imgRef} src={image} onLoad={onImageLoad} onError={onImageError} className="max-h-48 mx-auto rounded block" />{imgDims.width > 0 && <div aria-hidden="true" className="absolute border-2 border-indigo-500 bg-indigo-500/15 pointer-events-none" style={{ left: `${100 * crop.x / imgDims.width}%`, top: `${100 * crop.y / imgDims.height}%`, width: `${100 * Math.min(crop.w, imgDims.width - crop.x) / imgDims.width}%`, height: `${100 * Math.min(crop.h, imgDims.height - crop.y) / imgDims.height}%` }} />}</div> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
+          {image && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <label className="block"><span className="block text-neutral-500 mb-1">Aspect ratio</span>
+                <select id="crop-ratio" value={ratio} onChange={e => applyRatio(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2">{RATIOS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></label>
+              <p className="text-neutral-500 sm:self-end">Image: {imgDims.width} × {imgDims.height} px · Crop: {crop.w} × {crop.h} px</p>
+            </div>
+          )}
           {image && (
             <div className="grid grid-cols-2 gap-3">
               <div><label className="block text-sm text-neutral-500 mb-1">X: {crop.x}px</label><input aria-label="X (px)" type="range" min="0" max={Math.max(imgDims.width, 1)} value={crop.x} onChange={e => setCrop(p => ({...p, x: parseInt(e.target.value)}))} className="w-full" /></div>
@@ -97,22 +113,23 @@ export default function ImageCropperPage() {
       </div>
       <SeoContent
         title="Image Cropper"
-        description="Image Cropper lets you cut out a rectangular region of an image by entering exact X, Y, width, and height values in pixels — there's no drag-to-select handle on the image itself. Everything happens locally in your browser using the canvas element, and your image is never uploaded to a server."
+        description="Image Cropper lets you cut out a rectangular region of an image with X, Y, width and height in the picture's real pixels, or an aspect ratio preset (1:1, 4:3, 3:2, 16:9, 9:16, 4:5, 2:1); a box on the preview shows the area kept — there's no drag-to-select handle on the image itself. Everything happens locally in your browser using the canvas element, and your image is never uploaded to a server."
         howTo={[
           "Click the upload area and select an image from your device.",
-          "Set the X and Y position sliders to choose where the crop starts.",
+          "Optionally pick an aspect ratio (1:1, 4:3, 16:9…): the largest centred box of that shape is set.",
+          "Set the X and Y position sliders to choose where the crop starts; the box on the preview shows the area.",
           "Set the Width and Height sliders to define the crop size.",
           "Click 'Crop Image' and then the download button to save the result."
         ]}
         faqs={[
           { q: "What image formats does Image Cropper support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP." },
           { q: "Is Image Cropper really free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "Can I drag crop handles directly on the image?", a: "No, the crop area is set with numeric X/Y/width/height sliders rather than draggable handles on the image preview." },
+          { q: "Can I drag crop handles directly on the image?", a: "No — the area is set with the X/Y/width/height sliders (in real pixels) or an aspect ratio preset, and a box on the preview shows it as you go." },
           { q: "Will my uploaded images be saved or shared?", a: "No, your images are processed locally in your browser and are never uploaded to a server." }
         ]}
         tips={[
           "Watch the pixel values update live as you move each slider to fine-tune your crop area.",
-          "There's no aspect-ratio lock, so calculate width and height yourself if you need a specific ratio like 1:1 or 16:9.",
+          "Positions and sizes are the picture's real pixels; the preview box shows the area that will be kept.",
           "Preview the result after clicking Crop Image before downloading, in case you need to adjust the values.",
           "Crop one image at a time — there's no batch processing option."
         ]}

@@ -35,7 +35,7 @@ export function hamming(a, b) {
 export const SIMILAR_MAX_BITS = 6;
 
 // items: [{ name, sha, hash }] -> [{ kind: 'exact'|'similar', a, b, bits }]
-export function findPairs(items) {
+export function findPairs(items, maxBits = SIMILAR_MAX_BITS) {
   const out = [];
   for (let i = 0; i < items.length; i++) {
     for (let j = i + 1; j < items.length; j++) {
@@ -43,7 +43,7 @@ export function findPairs(items) {
       if (A.sha === B.sha) { out.push({ kind: 'exact', a: A.name, b: B.name, bits: 0 }); continue; }
       if (A.hash == null || B.hash == null) continue;
       const bits = hamming(A.hash, B.hash);
-      if (bits <= SIMILAR_MAX_BITS) out.push({ kind: 'similar', a: A.name, b: B.name, bits });
+      if (bits <= maxBits) out.push({ kind: 'similar', a: A.name, b: B.name, bits });
     }
   }
   return out;

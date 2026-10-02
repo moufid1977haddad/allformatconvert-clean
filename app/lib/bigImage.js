@@ -216,10 +216,11 @@ export async function encodeJpegWasm(rgba, width, height, quality) {
 
 // libwebp, the encoder Squoosh uses. WebP cannot exceed 16383 px on a side (format limit).
 export const WEBP_MAX_SIDE = 16383;
-export async function encodeWebpWasm(rgba, width, height, quality) {
+export async function encodeWebpWasm(rgba, width, height, quality, { lossless = false } = {}) {
   if (width > WEBP_MAX_SIDE || height > WEBP_MAX_SIDE) throw new Error(`WebP cannot be wider or taller than ${WEBP_MAX_SIDE} pixels (a limit of the format). Choose JPG, PNG or AVIF for this image.`);
   const m = await webpMod();
-  const out = m.encode(rgba, width, height, { ...WEBP_OPTIONS, quality });
+  // lossless (P24): libwebp's own lossless mode, every pixel kept (exact: colours under transparent pixels kept too)
+  const out = m.encode(rgba, width, height, lossless ? { ...WEBP_OPTIONS, lossless: 1, exact: 1, quality: 100, method: 4 } : { ...WEBP_OPTIONS, quality });
   if (!out || out.length < 12 || String.fromCharCode(...out.slice(8, 12)) !== 'WEBP') throw new Error('The WebP encoder produced no valid file.');
   return new Blob([out], { type: 'image/webp' });
 }
