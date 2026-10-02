@@ -4,6 +4,7 @@ import { chromium, firefox, webkit } from '@playwright/test';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { generateKeyPairSync, createSign, createHmac, sign as edSign } from 'node:crypto';
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--')) || 'http://localhost:3100').origin;
 const name = process.argv.find((a) => a.startsWith('--browser='))?.split('=')[1] || 'chromium';
 let fails = 0, passes = 0;
@@ -242,6 +243,32 @@ const main = (p) => p.locator('main').innerText();
   await p.locator('main input').first().fill('0');
   const z = await main(p);
   check('unit-converter: 30 mpg (US) = 7.84048611111 L/100 km; 0 refused', /^7\.840486111/.test(r) && /must be more than 0/.test(z), r);
+  await p.close();
+}
+{ // JWT: signature verification against tokens signed by Node's crypto
+  const b64u = (x) => Buffer.from(x).toString('base64url');
+  const body = (alg) => b64u(JSON.stringify({ alg, typ: 'JWT' })) + '.' + b64u(JSON.stringify({ sub: '1234567890', exp: 4102444800 }));
+  const rsa = generateKeyPairSync('rsa', { modulusLength: 2048 }), ec = generateKeyPairSync('ec', { namedCurve: 'P-256' }), ed = generateKeyPairSync('ed25519');
+  const rsPem = rsa.publicKey.export({ type: 'spki', format: 'pem' }), ecJwk = JSON.stringify(ec.publicKey.export({ format: 'jwk' }));
+  const rs = body('RS256') + '.' + b64u(createSign('SHA256').update(body('RS256')).sign(rsa.privateKey));
+  const es = body('ES256') + '.' + b64u(createSign('SHA256').update(body('ES256')).sign({ key: ec.privateKey, dsaEncoding: 'ieee-p1363' }));
+  const hs = body('HS256') + '.' + createHmac('sha256', 'a-string-secret-at-least-256-bits-long').update(body('HS256')).digest('base64url');
+  const eds = body('EdDSA') + '.' + b64u(edSign(null, Buffer.from(body('EdDSA')), ed.privateKey));
+  const tampered = rs.split('.').map((x, i) => (i === 1 ? b64u(JSON.stringify({ sub: 'admin', exp: 4102444800 })) : x)).join('.');
+  const confusion = body('HS256') + '.' + createHmac('sha256', rsPem).update(body('HS256')).digest('base64url');
+  const p = await open('developer-tools/jwt-decoder');
+  const run = async (tok, key) => {
+    await p.locator('textarea').first().fill(tok); await p.locator('#jwt-key').fill(key);
+    await p.getByRole('button', { name: 'Verify signature' }).click();
+    const v = p.locator('[data-verdict]'); await v.waitFor({ timeout: 10000 });
+    return [await v.getAttribute('data-verdict'), await v.innerText()];
+  };
+  const r1 = await run(rs, rsPem), r2 = await run(tampered, rsPem), r3 = await run(es, ecJwk), r4 = await run(hs, 'a-string-secret-at-least-256-bits-long');
+  const r5 = await run(hs, 'wrong'), r6 = await run(confusion, rsPem), r7 = await run(eds, ed.publicKey.export({ type: 'spki', format: 'pem' }));
+  const edOk = r7[0] === 'valid' || (r7[0] === 'error' && /cannot verify Ed25519/.test(r7[1]));
+  check('jwt: RS256 PEM valid, tampered invalid, ES256 JWK valid, HS256 right/wrong secret, alg confusion refused, EdDSA valid or said unsupported',
+    r1[0] === 'valid' && r2[0] === 'invalid' && r3[0] === 'valid' && r4[0] === 'valid' && r5[0] === 'invalid' && r6[0] === 'error' && /algorithm confusion/.test(r6[1]) && edOk,
+    [r1, r2, r3, r4, r5, r6, r7].map((r) => r[0]).join(' ') + (r7[0] === 'error' ? ' (Ed25519: ' + r7[1].slice(0, 50) + ')' : ''));
   await p.close();
 }
 await b.close();
