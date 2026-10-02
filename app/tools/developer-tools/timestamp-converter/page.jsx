@@ -17,16 +17,19 @@ export default function TimestampConverterPage() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [tz, setTz] = useState(LOCAL_TZ);
-  const show = (ms, unit, ambiguous = false) => { setResult({ ...describe(ms), unit, zone: describeZone(ms, tz), ago: relativeTime(ms), ambiguous }); setError(''); };
+  const [lastMs, setLastMs] = useState(null);
+  const show = (ms, unit, ambiguous = false, gapMinutes = 0, zone = tz) => { setLastMs(ms); setResult({ ...describe(ms), unit, zone: describeZone(ms, zone), ago: relativeTime(ms), ambiguous, gapMinutes }); setError(''); };
+  // a date before year 1 cannot go into <input type=datetime-local>: the field is left empty and the result says the year
+  const fieldValue = (ms, zone = tz) => { const v = toZoneValue(ms, zone); return v.startsWith('-') || v.startsWith('0000') ? '' : v; };
   const toDate = () => {
-    try { const { ms, unit } = parseTimestamp(timestamp); setDate(toZoneValue(ms, tz)); show(ms, unit); }
+    try { const { ms, unit } = parseTimestamp(timestamp); setDate(fieldValue(ms)); show(ms, unit); }
     catch (e) { setResult(null); setError(e.message); }
   };
   const toTimestamp = () => {
-    try { const { ms, ambiguous } = parseInZone(date, tz); setTimestamp(String(Math.floor(ms / 1000))); show(ms, 'seconds', ambiguous); }
+    try { const { ms, ambiguous, gapMinutes } = parseInZone(date, tz); setTimestamp(String(Math.floor(ms / 1000))); show(ms, 'seconds', ambiguous, gapMinutes); }
     catch (e) { setResult(null); setError(e.message); }
   };
-  const now = () => { const ms = Math.floor(Date.now() / 1000) * 1000; setTimestamp(String(ms / 1000)); setDate(toZoneValue(ms, tz)); show(ms, 'seconds'); };
+  const now = () => { const ms = Math.floor(Date.now() / 1000) * 1000; setTimestamp(String(ms / 1000)); setDate(fieldValue(ms)); show(ms, 'seconds'); };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
@@ -35,7 +38,7 @@ export default function TimestampConverterPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div>
             <label htmlFor="ts-zone" className="block text-sm text-neutral-500 mb-1">Time zone (for the date field and the result)</label>
-            <select id="ts-zone" value={tz} onChange={(e) => { setTz(e.target.value); setResult(null); }} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3">
+            <select id="ts-zone" value={tz} onChange={(e) => { const z = e.target.value; setTz(z); if (lastMs !== null) { setDate(fieldValue(lastMs, z)); show(lastMs, result?.unit || 'seconds', false, 0, z); } }} /* the same instant, shown in the new zone (review 03/10: the field kept the old wall time) */ className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3">
               <option value={LOCAL_TZ}>Your time zone ({LOCAL_TZ})</option>
               {LOCAL_TZ !== 'UTC' && <option value="UTC">UTC</option>}
               {ZONES.filter((z) => z !== LOCAL_TZ && z !== 'UTC').map((z) => <option key={z} value={z}>{z.replace(/_/g, ' ')}</option>)}
@@ -50,7 +53,7 @@ export default function TimestampConverterPage() {
             <div><span className="text-neutral-500">UTC: </span><span className="font-mono">{result.iso}</span></div>
             <div><span className="text-neutral-500">{tz === LOCAL_TZ ? 'Your time zone' : tz.replace(/_/g, ' ')}: </span><span data-zone>{result.zone}</span></div>
             <div><span className="text-neutral-500">Relative: </span><span data-ago>{result.ago}</span></div>
-            {result.ambiguous && <div className="text-amber-700">This time happens twice in this zone (clocks go back): the first one was used; the second is one hour later.</div>}
+            {result.ambiguous && <div className="text-amber-700">This time happens twice in this zone (clocks go back): the first one was used; the second is {result.gapMinutes === 60 ? 'one hour' : `${result.gapMinutes} minutes`} later.</div>}
             <div><span className="text-neutral-500">Seconds: </span><span className="font-mono">{result.seconds}</span> <span className="text-neutral-500 ml-3">Milliseconds: </span><span className="font-mono">{result.milliseconds}</span></div>
           </div>}
         </div>

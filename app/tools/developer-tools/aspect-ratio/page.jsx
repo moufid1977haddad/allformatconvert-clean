@@ -11,7 +11,7 @@ export default function AspectRatioPage() {
   // Previously an empty or invalid field silently counted as 1, and 1920.5
   // was truncated to 1920: the ratio shown was not the one typed (29/09).
   // Decimals are scaled to integers first, so 2.35:1 gives 47:20.
-  const parseVal = (v) => (/^\s*\d+(\.\d+)?\s*$/.test(v) && Number(v) > 0 ? v.trim() : null);
+  const parseVal = (v) => (/^\s*\d+(\.\d+)?\s*$/.test(v) && Number(v) > 0 ? v.trim() : /^\s*\d+(\.\d+)?e[+-]?\d+\s*$/i.test(v) && Number(v) > 0 && Number.isFinite(Number(v)) ? String(Number(v)) : null); // 1e3 too (type=number accepts it)
   const wStr = parseVal(w);
   const hStr = parseVal(h);
   let ratio = '—';
@@ -28,7 +28,8 @@ export default function AspectRatioPage() {
   const fit = (given, a, b) => { // the other side for a given side, at the ratio a:b
     const v = parseVal(given); if (!v || !wStr || !hStr) return null;
     const exact = Number(v) * b / a; const px = Math.round(exact);
-    return { exact: String(Number(exact.toFixed(6))), px, whole: Math.abs(exact - px) < 1e-9 };
+    const six = Number(exact.toFixed(6));
+    return { exact: (Math.abs(six - exact) > 1e-12 ? '≈ ' : 'exactly ') + String(six), px, whole: Math.abs(exact - px) < 1e-9 };
   };
   const fromW = fit(newW, Number(wStr), Number(hStr)), fromH = fit(newH, Number(hStr), Number(wStr));
   const presets = [['16:9','1920x1080'],['4:3','1024x768'],['1:1','1080x1080'],['21:9','2560x1080'],['9:16','1080x1920']];
@@ -50,12 +51,12 @@ export default function AspectRatioPage() {
             <div>
               <label htmlFor="ar-new-w" className="block text-sm text-neutral-500 mb-1">New width → height</label>
               <input id="ar-new-w" type="number" min="0" step="any" value={newW} onChange={(e) => setNewW(e.target.value)} placeholder="e.g. 1280" className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" />
-              <p className="text-sm text-neutral-700 mt-1" data-out="h">{fromW ? <>Height: <b>{fromW.px}</b>{!fromW.whole && <> (exactly {fromW.exact}, rounded)</>}</> : newW ? 'Enter a positive number' : ' '}</p>
+              <p className="text-sm text-neutral-700 mt-1" data-out="h">{fromW ? <>Height: <b>{fromW.px}</b>{!fromW.whole && <> ({fromW.exact}, rounded)</>}</> : newW ? 'Enter a positive number' : ' '}</p>
             </div>
             <div>
               <label htmlFor="ar-new-h" className="block text-sm text-neutral-500 mb-1">New height → width</label>
               <input id="ar-new-h" type="number" min="0" step="any" value={newH} onChange={(e) => setNewH(e.target.value)} placeholder="e.g. 720" className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" />
-              <p className="text-sm text-neutral-700 mt-1" data-out="w">{fromH ? <>Width: <b>{fromH.px}</b>{!fromH.whole && <> (exactly {fromH.exact}, rounded)</>}</> : newH ? 'Enter a positive number' : ' '}</p>
+              <p className="text-sm text-neutral-700 mt-1" data-out="w">{fromH ? <>Width: <b>{fromH.px}</b>{!fromH.whole && <> ({fromH.exact}, rounded)</>}</> : newH ? 'Enter a positive number' : ' '}</p>
             </div>
           </div>
           <div><label className="block text-sm text-neutral-500 mb-2">Common Presets</label><div className="grid grid-cols-3 gap-2">{presets.map(([r,d]) => <button key={r} onClick={() => { const [pw,ph] = d.split('x'); setW(pw); setH(ph); }} className="bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800 rounded-lg p-2 text-sm transition"><div className="font-semibold">{r}</div><div className="text-xs opacity-80">{d}</div></button>)}</div></div>

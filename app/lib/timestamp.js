@@ -84,17 +84,25 @@ export function parseInZone(value, timeZone) {
   if (!m) throw new Error('Pick a date and time first.');
   const want = { year: Number(m[1]), month: Number(m[2]), day: Number(m[3]), hour: Number(m[4]), minute: Number(m[5]), second: Number(m[6] || 0) };
   const wall = utcOf(want);
+  let target;
+  try { target = toZoneValue(wall, 'UTC'); } catch { throw new Error('This date is outside the range a calendar date can represent (year ±275 760).'); }
   // the instants this wall time could be: wall minus each offset the zone has around it
-  const candidates = [...new Set([offsetMs(wall - 86400000, timeZone), offsetMs(wall, timeZone), offsetMs(wall + 86400000, timeZone)])]
-    .map((off) => wall - off).filter((t) => toZoneValue(t, timeZone) === toZoneValue(wall, 'UTC')).sort((a, b) => a - b);
-  if (!candidates.length) throw new Error(`${value.replace('T', ' ')} does not exist in ${timeZone}: the clocks skip that hour (daylight saving time starts).`);
-  return { ms: candidates[0], ambiguous: candidates.length > 1 };
+  // probes a day either side (within the Date range: 275760-09-13 would overflow it); review 03/10
+  const probe = (t) => { try { return offsetMs(t, timeZone); } catch { return null; } };
+  const candidates = [...new Set([probe(wall - 86400000), probe(wall), probe(wall + 86400000)].filter((o) => o !== null))]
+    .map((off) => wall - off).filter((t) => { try { return toZoneValue(t, timeZone) === target; } catch { return false; } }).sort((a, b) => a - b);
+  if (!candidates.length) throw new Error(`${value.replace('T', ' ')} does not exist in ${timeZone}: the clocks skip that time there (daylight saving time starting, or a change of time zone).`);
+  // how much later the second occurrence is (one hour in most zones, 30 minutes at Lord Howe)
+  return { ms: candidates[0], ambiguous: candidates.length > 1, gapMinutes: candidates.length > 1 ? Math.round((candidates[candidates.length - 1] - candidates[0]) / 60000) : 0 };
 }
 
 export function describeZone(ms, timeZone) {
-  const off = offsetMs(ms, timeZone) / 60000, a = Math.abs(off);
-  const text = new Date(ms).toLocaleString('en-GB', { timeZone, dateStyle: 'full', timeStyle: 'medium' });
-  return `${text} (UTC${off < 0 ? '−' : '+'}${pad(Math.floor(a / 60))}:${pad(a % 60)})`;
+  // whole seconds: historical local mean times have them (Paris 1900: +00:09:21); review 03/10
+  const off = Math.round(offsetMs(ms, timeZone) / 1000), a = Math.abs(off);
+  const hms = `${pad(Math.floor(a / 3600))}:${pad(Math.floor(a / 60) % 60)}${a % 60 ? ':' + pad(a % 60) : ''}`;
+  const bc = partsIn(ms, timeZone).year <= 0; // the era is written out, else 4 BC read as AD 4
+  const text = new Date(ms).toLocaleString('en-GB', bc ? { timeZone, era: 'short', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' } : { timeZone, dateStyle: 'full', timeStyle: 'medium' });
+  return `${text} (UTC${off < 0 ? '−' : '+'}${hms})`;
 }
 
 export function relativeTime(ms, now = Date.now()) {

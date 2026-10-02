@@ -39,7 +39,7 @@ export default function KeywordDensity({ text }) {
             <tr key={k} className="border-t border-neutral-100"><td className="py-1 break-all">{k}</td><td className="py-1 text-right font-mono">{n}</td><td className="py-1 text-right font-mono">{(100 * n / rows.total).toFixed(1)} %</td></tr>
           ))}</tbody>
         </table>
-      ) : <p className="text-sm text-neutral-500">No {size}-word phrase appears more than once.</p>}
+      ) : <p className="text-sm text-neutral-500">{size === 1 ? 'Every word is a common English word, left out of the list.' : `No ${size}-word phrase appears more than once.`}</p>}
       <p className="text-xs text-neutral-500">Density = times ÷ all {rows.total} words.</p>
     </div>
   );

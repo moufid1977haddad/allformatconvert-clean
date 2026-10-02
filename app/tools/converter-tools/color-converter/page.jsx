@@ -104,8 +104,11 @@ export default function ColorConverterPage() {
   const hex = rgbToHex(rgb);
   const hexA = hex + alphaHex(alpha);
   const rgbCss = alpha < 1 ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alphaText(alpha)})` : `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-  const onWhite = contrast(rgb, { r: 255, g: 255, b: 255 }), onBlack = contrast(rgb, { r: 0, g: 0, b: 0 });
+  // the colour as seen over each background (a transparent colour is not as dark as its opaque one): review 03/10
+  const over = (bg) => ({ r: Math.round(alpha * rgb.r + (1 - alpha) * bg), g: Math.round(alpha * rgb.g + (1 - alpha) * bg), b: Math.round(alpha * rgb.b + (1 - alpha) * bg) });
+  const onWhite = contrast(over(255), { r: 255, g: 255, b: 255 }), onBlack = contrast(over(0), { r: 0, g: 0, b: 0 });
   const grade = (x) => (x >= 7 ? 'AAA' : x >= 4.5 ? 'AA' : x >= 3 ? 'AA large text only' : 'fails');
+  const ratio = (x) => (Math.floor(x * 100) / 100).toFixed(2); // truncated as WebAIM does: 4.4989 never shows as 4.50
   const input = 'w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center';
 
   return (
@@ -165,10 +168,10 @@ export default function ColorConverterPage() {
             );
           })}
           <div className="grid grid-cols-2 gap-2 text-sm" data-contrast>
-            <div className="rounded-lg p-3 border border-neutral-200" style={{ background: '#fff', color: hex }}><b>Text on white</b><div className="text-neutral-700">{onWhite.toFixed(2)}:1 — {grade(onWhite)}</div></div>
-            <div className="rounded-lg p-3 border border-neutral-200" style={{ background: '#000', color: hex }}><b>Text on black</b><div className="text-neutral-200">{onBlack.toFixed(2)}:1 — {grade(onBlack)}</div></div>
+            <div className="rounded-lg p-3 border border-neutral-200" style={{ background: '#fff', color: hexA }}><b>Text on white</b><div className="text-neutral-700">{ratio(onWhite)}:1 — {grade(onWhite)}</div></div>
+            <div className="rounded-lg p-3 border border-neutral-200" style={{ background: '#000', color: hexA }}><b>Text on black</b><div className="text-neutral-200">{ratio(onBlack)}:1 — {grade(onBlack)}</div></div>
           </div>
-          <p className="text-xs text-neutral-500">WCAG 2 contrast of the opaque colour: 4.5:1 is the AA minimum for body text, 3:1 for large text, 7:1 is AAA.</p>
+          <p className="text-xs text-neutral-500">WCAG 2 contrast of the colour as it appears on each background (transparency included): 4.5:1 is the AA minimum for body text, 3:1 for large text, 7:1 is AAA.</p>
           <button onClick={() => copy(hexA)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy HEX</button>
         </div>
       </div>

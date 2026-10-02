@@ -16,7 +16,7 @@ export function formatSignificant(value, digits = 10) {
 const DIGITS = { 2: /^[01]+$/, 8: /^[0-7]+$/, 10: /^[0-9]+$/, 16: /^[0-9a-f]+$/i };
 const PREFIX = { 2: '0b', 8: '0o', 16: '0x' };
 const ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz';
-const digitValue = (c, base) => { const v = ALPHABET.indexOf(c.toLowerCase()); return v >= 0 && v < base ? v : -1; };
+const digitValue = (c, base) => { if (!/^[0-9a-zA-Z]$/.test(c)) return -1; const v = ALPHABET.indexOf(c.toLowerCase()); return v < base ? v : -1; }; // ASCII only: 'K' (U+212A, Kelvin) is not k
 
 // P24 (03/10): any base from 2 to 36 and a fractional part, as RapidTables and base-convert.com take them. Exact: the
 // value is a fraction of BigInts (no float ever), and a fractional part that does not end in the target base is shown

@@ -12,7 +12,7 @@ export default function NumberBaseConverterDevPage() {
       </div>
       <SeoContent
         title="Number Base Converter"
-        description="Number Base Converter shows a number in binary, octal, decimal, hexadecimal and any base from 2 to 36 you choose, live as you type, with fractional parts and numbers of any size converted exactly, entirely in your browser — nothing is uploaded to a server. There's no separate 'target base' selector or Convert button: pick the base your input is written in, and all four results update instantly. It handles whole numbers, including negative ones, but not fractional or decimal-point values."
+        description="Number Base Converter shows a number in binary, octal, decimal, hexadecimal and any base from 2 to 36 you choose, live as you type, with fractional parts and numbers of any size converted exactly, entirely in your browser — nothing is uploaded to a server. Pick the base your input is written in, and the results update instantly; negative numbers and fractional parts are handled."
         howTo={[
           "Type a number into the Value field.",
           "Select the base your input is written in from the 'From Base' dropdown (2 to 36).",

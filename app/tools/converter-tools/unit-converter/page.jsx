@@ -71,7 +71,7 @@ export default function UnitConverterPage() {
     else if (/^[-+]?[1-9]\d{0,2},\d{3}$/.test(t)) return { value: NaN, ambiguous: t }; // 1,000: a thousand or one? (0,001 is not; a dot is the decimal point on this English page)
     else if (/^[-+]?\d{1,3}(,\d{3}){2,}$/.test(t)) t = t.replace(/,/g, ''); // 1,000,000: thousands
     else if ((t.match(/,/g) || []).length === 1) t = t.replace(',', '.');
-    return { value: Number(t) };
+    return { value: /^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i.test(t) ? Number(t) : NaN }; // decimal only: Number('0x10') is 16
   })();
   const value = parsed.value;
   const invalid = !Number.isFinite(value);
@@ -152,7 +152,7 @@ export default function UnitConverterPage() {
             <div className="text-4xl font-extrabold text-indigo-500 break-all" data-result>{convert()} {to}</div>
             {parsed.ambiguous && <p role="alert" className="text-amber-800 text-sm">Is {parsed.ambiguous} one thousand or one? Write {parsed.ambiguous.replace(',', '')} for a thousand, or {parsed.ambiguous.replace(',', '.').replace(/0+$/, '').replace(/\.$/, '')} for one.</p>}
             <div className="text-neutral-500 mt-2">{invalid ? '—' : show(value)} {from} = {convert()} {to}</div>
-            {category !== 'Temperature' && <div className="text-xs text-neutral-500 mt-1" data-factor>1 {from} = {show(raw(1, from, to))} {to}</div>}
+            {category !== 'Temperature' && category !== 'Fuel economy' && <div className="text-xs text-neutral-500 mt-1" data-factor>1 {from} = {show(raw(1, from, to))} {to}</div>}
           </div>
 
         </div>

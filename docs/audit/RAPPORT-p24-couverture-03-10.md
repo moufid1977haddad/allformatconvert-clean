@@ -201,7 +201,7 @@ apostrophes ; parts réellement égales et contrôle des tailles à la jonction 
   crontab écartée et dite, expression Quartz à 6-7 champs expliquée au lieu d'être rangée dans les mauvaises cases ;
   la FAQ de Cron Expression disait « ni validation ni prochaines exécutions » alors que la page affiche les deux.
 - **Color Converter** : transparence (#RGBA, #RRGGBBAA, curseur, rgba()/hsla()), contraste WCAG sur blanc et noir avec
-  la note AA/AAA (vérifié contre WebAIM : #3b82f6 = 3,68:1, #767676 = 4,54:1).
+  la note AA/AAA (formule WCAG 2 : #3b82f6 = 3,6779 → affiché 3,67, #767676 = 4,5418 → 4,54 ; ratio tronqué, jamais arrondi au-dessus d'un seuil — la première version arrondissait, 4,4989 s'affichait « 4,50 » à côté de « AA large seulement »).
 - **Unit Converter** : consommation (L/100 km, mpg US/UK, km/L — inverse, pas un facteur), 0 refusé.
 
 - **JWT Decoder** : vérification de la signature (jwt.io) — HS256/384/512 avec secret (texte, base64 ou JWK "oct"),
@@ -220,5 +220,33 @@ apostrophes ; parts réellement égales et contrôle des tailles à la jonction 
   programmes le lisent dans la page de code locale — bsdtar sous Windows l'a refusé) ; sans mot de passe, JSZip
   inchangé. Solidité ×3 6/6.
 
+**Deuxième relecture indépendante du troisième lot** : rien de grave dans un cas courant ; corrigés — décalages
+historiques affichés en minutes décimales (Paris 1900 « +00:9.35 », vrai +00:09:21) ; années av. J.-C. sans ère ;
+« la seconde occurrence est une heure plus tard » faux à Lord Howe (30 min) ; contraste d'une couleur transparente
+calculé comme opaque (noir à 0 % donnait 21:1 AAA) → couleur composée sur chaque fond ; ratio arrondi qui contredisait
+le verdict (4,4989 affiché « 4,50 ») → tronqué ; ligne « 1 L/100 km = 235 mpg » présentée comme un facteur alors que
+la relation est inverse → retirée ; « 0x10 » lu 16 ; changement de fuseau qui relisait l'ancienne heure murale ; dates
+aux limites de `Date` ; textes restés faux.
+
 **Relevés mais non faits** : métadonnées incorporées de File Metadata (effort fort : un lecteur par format) ;
 phrase de passe (demande une liste de mots tierce : décision E6 du plan).
+
+## 8. Convertisseurs et autres (maths, devises, livres numériques)
+
+Outils que ni P21 ni les sections précédentes n'avaient traités (`dev-lot.mjs` **31/31 ×3 moteurs**, tests maths 7/7) :
+- **Statistics Calculator** (calculator.net, Calculator Soup) : moyennes géométrique et harmonique, écart interquartile,
+  erreur type, coefficient de variation, asymétrie et aplatissement **aux formules d'Excel** (SKEW 0,818487553357,
+  KURT 0,940625 sur 2 4 4 4 5 5 7 9 — valeurs de référence d'Excel), méthode de quartiles exclusive (QUARTILE.EXC :
+  1..11 → 3 et 9), valeurs aberrantes (1,5 × IQR) ; chaque mesure non définie affiche « — » avec sa raison.
+- **Scientific Calculator** (calculator.net, Desmos) : sin⁻¹ cos⁻¹ tan⁻¹ (le moteur les connaissait, sans touche), x²,
+  n!, 1/x, |x|, **Ans** à pleine précision, historique des 10 derniers calculs. **Défaut trouvé par le banc** : Entrée
+  calculait deux fois (le champ et un écouteur global) — invisible avant, mais avec Ans, `Ans*2` aurait affiché le
+  quadruple sans un mot ; corrigé avant toute mise en ligne, et le banc lit désormais l'affichage du résultat lui-même.
+  Message d'infini juste (171! n'est pas une division par zéro).
+- **Fraction Calculator** (Calculator Soup) : nombres mixtes (partie entière), étapes (plus petit dénominateur commun,
+  inverse pour ÷, simplification), **décimale périodique exacte** (1/6 = 0.1(6), 22/7 = 3.(142857)) au lieu d'un arrondi
+  à 12 chiffres ; l'ancien calcul `Number(a)/Number(b)` donnait NaN au-delà de 1e308 (deux nombres de 400 chiffres).
+- **Currency Converter** (xe.com) : le même montant dans les 19 devises les plus utilisées ; l'historique des taux
+  demanderait un autre service (décision E7).
+- **MOBI to EPUB** : déjà à parité avec CloudConvert / Calibre en ligne pour ce sens (MOBI6, KF8/AZW3, PRC,
+  Huffman/CDIC, couverture, table des matières) ; aucun changement.

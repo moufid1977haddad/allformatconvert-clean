@@ -192,7 +192,7 @@ const main = (p) => p.locator('main').innerText();
   const p = await open('developer-tools/aspect-ratio');
   await p.locator('#ar-new-w').fill('1280'); await p.locator('#ar-new-h').fill('100');
   const h = await p.locator('[data-out="h"]').innerText(), w = await p.locator('[data-out="w"]').innerText();
-  check('aspect-ratio: 16:9 at 1280 wide → 720; 100 high → 178 (exactly 177.777778)', /Height: 720$/.test(h.trim()) && /Width: 178 \(exactly 177\.777778, rounded\)/.test(w), h + ' | ' + w);
+  check('aspect-ratio: 16:9 at 1280 wide → 720; 100 high → 178 (≈ 177.777778)', /Height: 720$/.test(h.trim()) && /Width: 178 \(≈ 177\.777778, rounded\)/.test(w), h + ' | ' + w);
   await p.close();
 }
 { // Timestamp: chosen zone, skipped hour refused
@@ -231,8 +231,9 @@ const main = (p) => p.locator('main').innerText();
   const p = await open('converter-tools/color-converter');
   await p.locator('#cc-hex').fill('#3b82f680');
   const rgb = await p.locator('[data-css="rgb"]').innerText(), hsl = await p.locator('[data-css="hsl"]').innerText();
-  const c = await p.locator('[data-contrast]').innerText();
-  check('color: #3b82f680 → rgba(59, 130, 246, 0.502), hsla; contrast on white 3.68:1 (AA large only)', rgb === 'rgba(59, 130, 246, 0.502)' && /^hsla\(/.test(hsl) && /3\.68:1 — AA large text only/.test(c), rgb + ' ' + c.replace(/\n/g, ' '));
+  await p.locator('#cc-hex').fill('#3b82f6'); const c = await p.locator('[data-contrast]').innerText();
+  await p.locator('#cc-hex').fill('#00000000'); const invisible = await p.locator('[data-contrast]').innerText();
+  check('color: #3b82f680 → rgba(59, 130, 246, 0.502), hsla; contrast on white 3.67:1 (3.6779 truncated, AA large only); black at 0 % = 1.00:1', rgb === 'rgba(59, 130, 246, 0.502)' && /^hsla\(/.test(hsl) && /3\.67:1 — AA large text only/.test(c) && /1\.00:1 — fails/.test(invisible), rgb + ' ' + c.replace(/\n/g, ' ') + ' | ' + invisible.replace(/\n/g, ' '));
   await p.close();
 }
 { // Unit converter: fuel economy
@@ -299,6 +300,50 @@ const main = (p) => p.locator('main').innerText();
     check('zip-creator: AES-256 (method 99) archive opened by bsdtar with the password, byte-exact; wrong password refused; mismatched passwords block', method === 99 && same && badOk && blocked, `method ${method}, bsdtar ${good.status} ${(good.stderr || '').slice(0, 80)}, wrong → ${bad.status}`);
     await p.close();
   }
+}
+{ // Statistics: Excel SKEW / KURT, QUARTILE.EXC
+  const p = await open('math-tools/statistics-calculator');
+  await p.locator('textarea').fill('2 4 4 4 5 5 7 9');
+  await p.getByRole('button', { name: 'Calculate', exact: true }).click();
+  const t = await main(p);
+  await p.locator('textarea').fill('1 2 3 4 5 6 7 8 9 10 11'); await p.locator('#st-quartiles').selectOption('exclusive');
+  await p.getByRole('button', { name: 'Calculate', exact: true }).click();
+  const e = await main(p);
+  check('statistics: skewness 0.818487553357 and kurtosis 0.940625 (Excel); QUARTILE.EXC of 1..11 = 3 and 9', /Skewness \(Excel SKEW\)\s+0\.818487553357/.test(t) && /Excess kurtosis \(Excel KURT\)\s+0\.940625/.test(t) && /\bQ1\s+3\b/.test(e) && /\bQ3\s+9\b/.test(e), '');
+  await p.close();
+}
+{ // Scientific calculator: factorial, Ans, inverse trig in degrees, history
+  const p = await open('math-tools/scientific-calculator');
+  const input = p.getByPlaceholder('Type or click buttons...');
+  const calc = async (x) => { await input.fill(x); await input.press('Enter'); await p.waitForTimeout(400); };
+  const shown = async () => (await p.locator('div.text-2xl.font-mono').innerText()).trim(); // the result itself, not the history
+  await calc('5!'); const a = await shown();
+  await calc('Ans*2'); const b2 = await shown();
+  await p.getByRole('button', { name: 'Degrees' }).dispatchEvent('mousedown');
+  await calc('asin(0.5)'); const c = await main(p);
+  const hist = await p.locator('[data-history] li').count();
+  check('scientific: 5! = 120, Ans*2 = 240, sin⁻¹(0.5) = 30° , 3 lines of history', a === '120' && b2 === '240' && /= 30 \(deg\)/.test(c) && hist === 3, `${a} ${b2} history ${hist}`);
+  await p.close();
+}
+{ // Fraction: mixed number, exact repeating decimal, steps
+  const p = await open('math-tools/fraction-calculator');
+  await p.getByLabel('Whole number 1 (optional)').fill('-1');
+  const ins = p.locator('main input[inputmode=decimal]');
+  await ins.nth(0).fill('1'); await ins.nth(1).fill('2'); await ins.nth(2).fill('1'); await ins.nth(3).fill('3');
+  await p.getByRole('button', { name: '+', exact: true }).click();
+  await p.getByRole('button', { name: 'Calculate', exact: true }).click();
+  const dec = await p.locator('[data-decimal]').innerText(), steps = await p.locator('[data-steps] li').allInnerTexts();
+  check('fraction: -1 1/2 + 1/3 = -7/6 = -1.1(6), steps with the common denominator 6', /-7\/6/.test(await main(p)) && dec === '= -1.1(6)' && steps.some((s) => /Least common denominator of 2 and 3: 6/.test(s)), dec + ' | ' + steps.join(' / '));
+  await p.close();
+}
+{ // Currency: the same amount in other currencies (rates mocked: no call to the real service)
+  const p = await ctx.newPage();
+  await p.route(/open\.er-api\.com/, (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ result: 'success', time_last_update_unix: 1759363200, rates: { USD: 1, EUR: 0.9, GBP: 0.8, JPY: 150 } }) }));
+  await p.goto(`${origin}/tools/converter-tools/currency-converter`, { waitUntil: 'load' }); await p.waitForTimeout(800);
+  await p.locator('[data-multi] summary').click();
+  const rows = await p.locator('[data-multi] tr').allInnerTexts();
+  check('currency: 100 USD listed as 90.00 EUR, 80.00 GBP, 15,000 JPY', rows.some((r) => /EUR[\s\S]*90\.00 EUR/.test(r)) && rows.some((r) => /GBP[\s\S]*80\.00 GBP/.test(r)) && rows.some((r) => /JPY[\s\S]*15,000 JPY/.test(r)), rows.join(' / ').slice(0, 200));
+  await p.close();
 }
 await b.close();
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);

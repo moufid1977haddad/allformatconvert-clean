@@ -68,7 +68,7 @@ export default function BaseConverter() {
         ))}
       </div>
       {parsed && targets.some(([b]) => show(b).endsWith('…')) && (
-        <p className="text-xs text-neutral-500">A result ending in “…” does not end in that base (like 1/3 in decimal): 40 digits after the point are shown, not rounded. Copy gives those digits.</p>
+        <p className="text-xs text-neutral-500">A result ending in “…” has more than 40 digits after the point in that base (it may never end, like 1/3 in decimal): the first 40 are shown, cut, not rounded; Copy gives those 40 digits.</p>
       )}
       {copyError && <p className="text-red-600 text-center text-sm">Copy failed</p>}
     </div>
