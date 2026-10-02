@@ -71,7 +71,8 @@ def _job_or_404(jid):
 def health():
     # `targets` = number of output formats this build offers: lets a deployment be checked for
     # running THIS code (an old version keeps answering /health after a failed deploy).
-    return jsonify(status="ok", targets=len(ffmpeg_ops.TARGETS), stage=True), 200
+    # `edits`: 2 since P25 (mirror, crop, speed, volume, fades, codec, CRF) -- absent on older builds.
+    return jsonify(status="ok", targets=len(ffmpeg_ops.TARGETS), stage=True, edits=2), 200
 
 
 @app.route("/v1/jobs", methods=["POST"])

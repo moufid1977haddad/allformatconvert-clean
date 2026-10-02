@@ -325,7 +325,9 @@ def _process(job: Job):
         # instead of hiding it: a compression returns no file (notSmaller); a conversion is delivered
         # and flagged (larger).
         target = job.params.get("target")
-        if job.op == "compress":
+        if job.params.get("crf") is not None:
+            plan = [job.params]  # P25: an exact CRF is the visitor's own choice -- encoded once, never re-tuned
+        elif job.op == "compress":
             level = job.params.get("level", "balanced")
             i = ffmpeg_ops.COMPRESS_LEVELS.index(level)
             plan = [dict(job.params, level=lv) for lv in ffmpeg_ops.COMPRESS_LEVELS[i:i + 2]]
@@ -377,10 +379,10 @@ def _process(job: Job):
                 os.remove(out)
                 continue  # try the next, stronger step
             if too_big:
-                if job.op == "compress":
+                if job.op == "compress" and job.params.get("crf") is None:
                     job.not_smaller = True
-                elif target in ffmpeg_ops.LADDER_TARGETS:
-                    job.larger = True
+                elif job.op == "compress" or target in ffmpeg_ops.LADDER_TARGETS:
+                    job.larger = True  # P25: a compression at the visitor's own CRF is delivered, said larger
             job.out_ext, job.out_mime, job.out_size = ext, mime, size
             job.progress = 100.0
             job.status = "done"
