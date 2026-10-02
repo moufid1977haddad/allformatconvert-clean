@@ -3,29 +3,8 @@
 // as iLovePDF's HTML to PDF offers them (A3/A4/A5/Letter, portrait/landscape, no / small / big margins; read 02/10).
 // The choice becomes a CSS @page rule placed last in the document; /api/convert-html-to-pdf asks Gotenberg to prefer
 // the CSS page size (preferCssPageSize).
-export const PAGE_SETUP_DEFAULT = { size: 'auto', landscape: false, margin: 'auto' };
-const SIZES = [['auto', 'As in the document'], ['A4', 'A4'], ['Letter', 'Letter'], ['Legal', 'Legal'], ['A3', 'A3'], ['A5', 'A5']];
-const MARGINS = [['auto', 'As in the document'], ['0', 'None'], ['10mm', 'Small (10 mm)'], ['20mm', 'Normal (20 mm)'], ['30mm', 'Big (30 mm)']];
-
-/** The @page rule for a choice, or '' when everything is left to the document. */
-export function pageSetupCss({ size, landscape, margin }) {
-  const parts = [];
-  if (size !== 'auto') parts.push(`size: ${size}${landscape ? ' landscape' : ''};`);
-  else if (landscape) parts.push('size: landscape;');
-  if (margin !== 'auto') parts.push(`margin: ${margin};`);
-  return parts.length ? `@page { ${parts.join(' ')} }` : '';
-}
-
-/** The HTML with the rule added last in <head> (a later @page rule wins), or at the start when there is no <head>. */
-export function withPageSetup(html, setup) {
-  const css = pageSetupCss(setup);
-  if (!css) return html;
-  const tag = `<style data-page-setup>${css}</style>`;
-  if (/<\/head>/i.test(html)) return html.replace(/<\/head>/i, `${tag}</head>`);
-  // no <head>: after the doctype / <html> tag, never before the doctype (that would switch the page to quirks mode)
-  const m = /^\s*(<!doctype[^>]*>)?\s*(<html[^>]*>)?/i.exec(html);
-  return html.slice(0, m[0].length) + tag + html.slice(m[0].length);
-}
+import { PAGE_SETUP_DEFAULT, SIZES, MARGINS, pageSetupCss, withPageSetup } from '../lib/pageSetup';
+export { PAGE_SETUP_DEFAULT, pageSetupCss, withPageSetup };
 
 export default function PageSetup({ value, onChange }) {
   const set = (k) => (e) => onChange({ ...value, [k]: k === 'landscape' ? e.target.value === 'landscape' : e.target.value });
