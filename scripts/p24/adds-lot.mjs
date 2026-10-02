@@ -7,6 +7,7 @@ import QRCode from 'qrcode';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--')) || 'http://localhost:3100').origin;
 const name = process.argv.find((a) => a.startsWith('--browser='))?.split('=')[1] || 'chromium';
 let fails = 0, passes = 0;
@@ -143,6 +144,39 @@ if (name === 'chromium') { // Excel to PDF: each sheet on one page (Gotenberg si
   const marked = await d.locator('span.rounded').allInnerTexts();
   check('diff-viewer: only "quick" and "slow" are marked inside the changed line', marked.join('|') === 'quick|slow', marked.join('|'));
   await d.close();
+}
+{ // Video / Audio Metadata: remove the metadata without re-encoding (local ffmpeg makes the files, ffprobe checks them)
+  const FF = path.join(os.tmpdir(), 'ffmpeg-btbn/ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe'), FP = FF.replace(/ffmpeg\.exe$/, 'ffprobe.exe');
+  if (!fs.existsSync(FF)) console.log('SKIP metadata stripper: no local ffmpeg to make and check the files');
+  else {
+    const vid = path.join(dir, 'tagged.mp4'), aud = path.join(dir, 'tagged.mp3');
+    execFileSync(FF, ['-v', 'error', '-y', '-f', 'lavfi', '-i', 'testsrc2=size=320x240:rate=25', '-f', 'lavfi', '-i', 'sine=frequency=440', '-t', '2', '-c:v', 'libx264', '-c:a', 'aac', '-metadata', 'title=Secret holiday', '-metadata', 'location=+48.8584+002.2945/', '-metadata', 'creation_time=2024-07-14T10:00:00Z', '-movflags', '+use_metadata_tags', vid]);
+    execFileSync(FF, ['-v', 'error', '-y', '-f', 'lavfi', '-i', 'sine=frequency=440', '-t', '2', '-c:a', 'libmp3lame', '-metadata', 'title=Private memo', '-metadata', 'artist=Ann Smith', aud]);
+    const probe = (f) => JSON.parse(execFileSync(FP, ['-v', 'error', '-print_format', 'json', '-show_format', '-show_streams', f]).toString());
+    const strip = async (slug, file) => {
+      const p = await open(slug);
+      await p.locator('input[type=file]').first().setInputFiles(file);
+      await p.getByRole('button', { name: /Remove the metadata/ }).click();
+      const a = p.locator('[data-metadata-stripper] a[data-download], [data-metadata-stripper] a[download]').first();
+      const ok = await a.waitFor({ timeout: 120000 }).then(() => true).catch(() => false);
+      const out = path.join(dir, 'clean-' + path.basename(file));
+      if (ok) fs.writeFileSync(out, await bytesOf(p, a));
+      const err = ok ? '' : (await p.locator('[data-metadata-stripper]').innerText()).slice(0, 160);
+      await p.close(); return ok ? out : err;
+    };
+    const v = await strip('video-tools/video-metadata', vid);
+    if (!v.endsWith('.mp4')) check('video-metadata: metadata removed', false, v); else {
+      const before = probe(vid), after = probe(v);
+      const tags = JSON.stringify(after.format.tags || {}) + JSON.stringify(after.streams.map((s) => s.tags || {}));
+      const sameStreams = after.streams.map((s) => s.codec_name).join() === before.streams.map((s) => s.codec_name).join() && Math.abs(Number(after.format.duration) - Number(before.format.duration)) < 0.1;
+      check('video-metadata: title, location and date removed; H.264 + AAC copied, same duration', !/Secret|48\.8584|2024-07-14/.test(tags) && /Secret/.test(JSON.stringify(before.format.tags)) && sameStreams, tags.slice(0, 120));
+    }
+    const au = await strip('audio-tools/audio-metadata', aud);
+    if (!au.endsWith('.mp3')) check('audio-metadata: tags removed', false, au); else {
+      const after = probe(au);
+      check('audio-metadata: title and artist removed, MP3 sound copied', !/Private memo|Ann Smith/.test(JSON.stringify(after.format.tags || {})) && after.streams[0].codec_name === 'mp3', JSON.stringify(after.format.tags || {}));
+    }
+  }
 }
 await b.close();
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);

@@ -375,3 +375,9 @@ testables dans ce navigateur de test, dit), image 12/12 ×3, tiff 2/2 ×3, solid
   surlignés, ignorer la casse ; **Media Player** : vitesse 0,5×-2×, boucle, image dans l'image, enregistrer l'image
   affichée, sous-titres .srt / .vtt.
 Bancs : adds-lot 9/9 (Chromium), 8/8 (Firefox), 6/6 (WebKit, 2 non testables dits), solidité 31/31 ×3.
+
+**Ajout (lot 5)** : **Video Metadata / Audio Metadata — supprimer les métadonnées sans réencodage** (metadata2go
+« Metadata Remover ») : position GPS, dates, appareil, titre / artiste / commentaire, chapitres ; pistes de données
+(position minutée d'un téléphone) et, pour l'audio, pochette retirées et dit ; image et son copiés tels quels. Prouvé :
+un MP4 écrit par ffmpeg avec titre, position (+48.8584+002.2945) et date ressort sans aucun de ces tags, H.264 + AAC
+copiés, même durée (ffprobe) ; un MP3 sans titre ni artiste. adds-lot 11/11 · 10/10 · 8/8, solidité 6/6 ×3.

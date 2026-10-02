@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import MediaInfo from '../../../components/MediaInfo';
+import MetadataStripper from '../../../components/MetadataStripper';
 import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import IosOriginalNote from '../../../components/IosOriginalNote';
 
@@ -37,6 +38,7 @@ export default function VideoMetadataPage() {
           </div>
           {videoUrl && <video src={videoUrl} controls playsInline className="w-full rounded-xl bg-neutral-800" />}
           <MediaInfo file={file} />
+          <MetadataStripper file={file} kind="video" />
         </div>
       </div>
       <SeoContent
@@ -53,6 +55,7 @@ export default function VideoMetadataPage() {
           { q: "What video formats are supported?", a: "Everything ffmpeg can read, including formats your browser cannot play (AVI, WMV, FLV…): for those there is no preview player, but the report is complete." },
           { q: "Can I download a metadata report?", a: "Yes: copy it or download it as a JSON file — ffprobe's complete output, every field included." },
           { q: "Is there a size limit?", a: "No: the file is read from your disk in pieces, never copied whole into memory." },
+          { q: "Can I remove the location and other metadata from a video?", a: "Yes: 'Remove the metadata' writes a copy without its location (the GPS position an iPhone or Android phone records), dates, device, title and comment tags and chapters. The picture and sound are copied as they are — no re-encoding, no quality lost — and the copy is made in your browser." },
           { q: "Is my file uploaded anywhere?", a: "No. ffprobe (part of ffmpeg, compiled to WebAssembly) runs in your browser; your file never leaves your device." }
         ]}
         tips={[

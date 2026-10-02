@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import MediaInfo from '../../../components/MediaInfo';
+import MetadataStripper from '../../../components/MetadataStripper';
 import { AUDIO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
 
 // 28/09/2026: the page used to list only name, size, MIME type, date and the player's duration (nothing for a
@@ -37,6 +38,7 @@ export default function AudioMetadataPage() {
           {audioUrl && <audio src={audioUrl} controls className="w-full" />}
           {file && encryptedMusicMessage(file.name) && <p role="alert" className="text-sm text-red-600 text-center">{encryptedMusicMessage(file.name)}</p>}
           <MediaInfo file={file} />
+          <MetadataStripper file={file} kind="audio" />
         </div>
       </div>
       <SeoContent
@@ -50,7 +52,7 @@ export default function AudioMetadataPage() {
         ]}
         faqs={[
           { q: "What information does it show?", a: "Container, duration, overall bitrate, and for each stream the codec, profile, sample rate, channels and layout, bit depth, sample format and bitrate; the embedded tags (title, artist, album, year, genre, track, comment, encoder…), chapters, and the cover picture." },
-          { q: "Can I edit the tags?", a: "Not here — this tool reads them. It shows every tag stored in the file, exactly as written." },
+          { q: "Can I edit or remove the tags?", a: "Editing, not yet. Removing, yes: 'Remove the metadata' writes a copy without its tags (title, artist, album, comment, encoder), chapters and cover picture, the sound copied as it is — no re-encoding, no quality lost — in your browser." },
           { q: "What audio formats are supported?", a: "Everything ffmpeg can read, including formats your browser cannot play (WMA, AC3, AMR…): for those there is no preview player, but the report is complete." },
           { q: "Is there a size limit?", a: "No: the file is read from your disk in pieces, never copied whole into memory." },
           { q: "Is my file uploaded anywhere?", a: "No. ffprobe (part of ffmpeg, compiled to WebAssembly) runs in your browser; your file never leaves your device." }
