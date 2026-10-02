@@ -21,6 +21,11 @@ const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'p25-video-'));
 const src = path.join(dir, 'clip.mp4');
 execFileSync(FF, ['-y', '-v', 'error', '-f', 'lavfi', '-i', 'color=c=0x0000FF:s=320x240:r=30:d=4', '-f', 'lavfi', '-i', 'sine=f=440:d=4:sample_rate=48000',
   '-vf', 'drawbox=x=0:y=0:w=160:h=120:color=red:t=fill', '-af', 'volume=0.25', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-shortest', src]);
+// A detailed, high-bitrate clip for the compressor (a flat one is already smaller than any compression: the page then
+// says "not smaller", honestly)
+const rich = path.join(dir, 'rich.mp4');
+execFileSync(FF, ['-y', '-v', 'error', '-f', 'lavfi', '-i', 'testsrc2=s=640x360:r=30:d=4,noise=alls=6:allf=t', '-f', 'lavfi', '-i', 'sine=f=440:d=4',
+  '-c:v', 'libx264', '-crf', '12', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-shortest', rich]);
 const probe = (f) => JSON.parse(execFileSync(FP, ['-v', 'error', '-show_streams', '-show_format', '-of', 'json', f], { encoding: 'utf8' }));
 const vstream = (f) => probe(f).streams.find((s) => s.codec_type === 'video');
 const astream = (f) => probe(f).streams.find((s) => s.codec_type === 'audio');
@@ -40,11 +45,11 @@ if (process.argv.includes('--cors-shim')) {
     return r.fulfill({ response: resp, headers: { ...resp.headers(), ...cors } });
   });
 }
-async function run(slug, setup, button, label) {
+async function run(slug, setup, button, label, file = src) {
   const p = await ctx.newPage();
   await p.goto(`${origin}/tools/video-tools/${slug}`, { waitUntil: 'load' });
   await p.waitForTimeout(800);
-  await p.locator('input[type=file]').first().setInputFiles(src);
+  await p.locator('input[type=file]').first().setInputFiles(file);
   await p.waitForTimeout(1200);
   await setup(p);
   await p.getByRole('button', { name: button }).first().click();
@@ -80,7 +85,7 @@ if (want('speed')) {
   if (r) { const v = vstream(r.out), a = astream(r.out); check('converter: 2× → video and sound 2 s, 30 fps', Math.abs(Number(v.duration) - 2) < 0.15 && Math.abs(Number(a.duration) - 2) < 0.15 && Math.abs(eval(v.avg_frame_rate) - 30) < 1, `v ${v.duration} a ${a.duration} ${v.avg_frame_rate}`); }
 }
 if (want('codec')) {
-  const r = await run('video-compressor', async (p) => { await p.locator('#vcomp-codec').selectOption('h265'); }, 'Compress Video', 'compressor: H.265');
+  const r = await run('video-compressor', async (p) => { await p.locator('#vcomp-codec').selectOption('h265'); }, 'Compress Video', 'compressor: H.265', rich);
   if (r) { const v = vstream(r.out); check('compressor: H.265 chosen → HEVC (hvc1), named -h265-compressed', v.codec_name === 'hevc' && v.codec_tag_string === 'hvc1' && /-h265-compressed\.mp4$/.test(r.name), `${v.codec_name} ${v.codec_tag_string} ${r.name}`); }
   const r2 = await run('video-converter', async (p) => { await p.getByLabel('Convert to').selectOption('av1'); await p.locator('[data-advanced] summary').click(); await p.locator('#vc-flip').selectOption('v'); }, 'Convert', 'converter: AV1 + vertical mirror');
   if (r2) { const v = vstream(r2.out); check('converter: AV1 + top-bottom mirror → AV1, red at the bottom left, named -av1', v.codec_name === 'av1' && red(pixel(r2.out, 20, 220)) && /-av1\.mp4$/.test(r2.name), `${v.codec_name} ${r2.name}`); }

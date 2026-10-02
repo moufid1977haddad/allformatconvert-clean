@@ -71,6 +71,8 @@ if (!before) {
   check('speed 2x: 2 s long', s.status === 'done' && Math.abs(Number(probe(s.file).format.duration) - 2) < 0.15, s.error || '');
   const h = await job('convert', { target: 'mp4', quality: 'medium', codec: 'h265' });
   check('codec H.265: hevc', h.status === 'done' && v(h.file).codec_name === 'hevc', h.error || '');
+  const av = await job('convert', { target: 'mp4', quality: 'medium', codec: 'av1', flip: 'v' });
+  check('AV1 + top-bottom mirror encodes (fix of 03/10: SVT-AV1 and vflip)', av.status === 'done' && v(av.file).codec_name === 'av1' && pixel(av.file, 20, 220)[0] > 180, av.error || '');
   const bad = await job('convert', { target: 'mp4', quality: 'medium', flip: 'x' });
   check('an unknown mirror is refused (only the new code does this)', bad.status === 'error' && /mirror/i.test(bad.error || ''), bad.error || bad.status);
 }
