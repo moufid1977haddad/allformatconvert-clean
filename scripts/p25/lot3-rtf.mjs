@@ -22,12 +22,15 @@ await ctx.route(/vercel\.live/, (r) => r.abort());
 const maker = await chromium.launch(); const mp = await maker.newPage();
 await mp.setContent('<html lang="fr"><body style="font-family:Arial;margin:2cm"><h1>Rapport trimestriel</h1><p>Le chiffre d\'affaires a progressé de 12 % — café, naïve, Straße.</p><table border="1"><tr><th>Région</th><th>Ventes</th></tr><tr><td>Europe</td><td>4,2 M</td></tr><tr><td>Amériques</td><td>6,8 M</td></tr></table></body></html>');
 const pdf1 = path.join(dir, 'rapport.pdf'); await mp.pdf({ path: pdf1, format: 'A4' });
-await mp.setContent(`<html><body style="font-family:Georgia;margin:2.5cm">${Array.from({ length: 3 }, (_, i) => `<h2>Section ${i + 1}</h2>` + '<p>Dear customer, this letter confirms the terms agreed on the phone. '.repeat(1) + 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '.repeat(40) + '</p><div style="page-break-after:always"></div>').join('')}</body></html>`);
+// 3 pages with different openings (an identical line at the top of every page is taken for a page header by the
+// converter, measured 03/10: it goes to the RTF's header, as Word itself does with a running head)
+const topics = ['Delivery terms and the schedule agreed', 'Payment, invoices and late fees', 'Warranty, returns and contact details'];
+await mp.setContent(`<html><body style="font-family:Georgia;margin:2.5cm">${topics.map((t, i) => `<h2>${i + 1}. ${t}</h2><p>` + Array.from({ length: 30 }, (_, k) => `Clause ${i + 1}.${k + 1} describes ${t.toLowerCase().split(' ')[0]} in detail for this agreement.`).join(' ') + '</p><div style="page-break-after:always"></div>').join('')}</body></html>`);
 const pdf2 = path.join(dir, 'letter.pdf'); await mp.pdf({ path: pdf2, format: 'Letter' });
 await maker.close();
 
 const wordText = (file) => execFileSync('powershell', ['-NoProfile', '-Command',
-  `$w = New-Object -ComObject Word.Application; $w.Visible = $false; try { $d = $w.Documents.Open('${file.replace(/'/g, "''")}', $false, $true); "TABLES=" + $d.Tables.Count; $d.Content.Text; $d.Close($false) } finally { $w.Quit() }`], { encoding: 'utf8' });
+  `[Console]::OutputEncoding = [Text.Encoding]::UTF8; $w = New-Object -ComObject Word.Application; $w.Visible = $false; try { $d = $w.Documents.Open('${file.replace(/'/g, "''")}', $false, $true); "TABLES=" + $d.Tables.Count; $d.Content.Text; $d.Close($false) } finally { $w.Quit() }`], { encoding: 'utf8' });
 const loText = (file) => {
   const out = path.join(dir, 'lo'); fs.mkdirSync(out, { recursive: true });
   execFileSync('C:/Program Files/LibreOffice/program/soffice.exe', ['--headless', '--convert-to', 'txt:Text (encoded):UTF8', '--outdir', out, file], { stdio: 'ignore' });
@@ -45,7 +48,8 @@ const loText = (file) => {
   await p.close();
 }
 if (paid) {
-  for (const [pdf, expect] of [[pdf1, ['Rapport trimestriel', 'naïve', 'Straße', 'Amériques']], [pdf2, ['Section 3', 'Dear customer', 'Lorem ipsum']]]) {
+  const cases = [[pdf1, ['Rapport trimestriel', 'naïve', 'Straße', 'Amériques']], [pdf2, ['1. Delivery terms', '2. Payment, invoices', '3. Warranty, returns', 'Clause 3.30']]];
+  for (const [pdf, expect] of (process.argv.includes('--only-letter') ? cases.slice(1) : cases)) {
     const p = await ctx.newPage();
     await p.goto(`${origin}/tools/pdf-tools/pdf-to-word`, { waitUntil: 'load' });
     await p.locator('input[type=file]').setInputFiles(pdf);
@@ -57,8 +61,9 @@ if (paid) {
     const dl = p.waitForEvent('download'); await link.click(); const d = await dl;
     const out = path.join(dir, d.suggestedFilename()); await d.saveAs(out);
     const head = fs.readFileSync(out).subarray(0, 5).toString('latin1');
+    // Word makes "1. …" a real numbered list: the number is not part of its text
     const w = wordText(out); const lo = loText(out);
-    const missingW = expect.filter((x) => !w.includes(x)); const missingL = expect.filter((x) => !lo.includes(x));
+    const missingW = expect.filter((x) => !w.includes(x.replace(/^\d+\. /, ''))); const missingL = expect.filter((x) => !lo.includes(x));
     check(`RTF of ${path.basename(pdf)}: named .rtf, starts {\\rtf, reopened in Word and LibreOffice with its text${pdf === pdf1 ? ' and its table' : ''}`,
       /\.rtf$/.test(d.suggestedFilename()) && head === '{\\rtf' && !missingW.length && !missingL.length && (pdf !== pdf1 || /TABLES=[1-9]/.test(w)),
       `${d.suggestedFilename()} ${fs.statSync(out).size} B; Word missing [${missingW}] ${w.match(/TABLES=\d+/)}; LibreOffice missing [${missingL}]`);
