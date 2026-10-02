@@ -109,6 +109,17 @@ export default function CurrencyConverterPage() {
             </div>
           )}
           </div>
+          {/* P24 (03/10): the same amount in the most used currencies at once, as xe.com lists it */}
+          {rates && !loading && Number.isFinite(amount) && (
+            <details className="text-sm" data-multi>
+              <summary className="cursor-pointer text-neutral-600 dark:text-neutral-300">{formatMoney(amount, from)} {from} in other currencies</summary>
+              <table className="w-full mt-2"><tbody>
+                {POPULAR.filter((c) => c !== from && c in rates).map((c) => (
+                  <tr key={c} className="border-t border-neutral-100 dark:border-neutral-700"><td className="py-1 text-neutral-600 dark:text-neutral-300">{label(c)}</td><td className="py-1 text-right font-mono dark:text-white">{formatMoney(amount * rates[c] / rates[from], c)} {c}</td></tr>
+                ))}
+              </tbody></table>
+            </details>
+          )}
           <button onClick={loadRates} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl py-2 font-semibold transition">Refresh Rates</button>
         </div>
       </div>

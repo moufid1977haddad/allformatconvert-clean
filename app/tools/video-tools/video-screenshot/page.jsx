@@ -51,8 +51,15 @@ export default function VideoScreenshotPage() {
         ctx.drawImage(frame, 0, 0);
       }
       // 30/09: a Blob, not a data: URL (iOS saves nothing from a data: link); checked like the data URL was.
-      const blob = await new Promise((ok) => canvas.toBlob(ok, format === 'jpg' ? 'image/jpeg' : 'image/png', format === 'jpg' ? quality / 100 : undefined));
-      if (!blob || !blob.size || blob.type !== (format === 'jpg' ? 'image/jpeg' : 'image/png')) throw new Error('This browser could not save the frame as ' + format.toUpperCase() + '.');
+      // P24 (03/10): WebP too (CloudConvert / ezgif offer it); Safari has no WebP encoder of its own: libwebp in WebAssembly
+      const type = format === 'jpg' ? 'image/jpeg' : format === 'webp' ? 'image/webp' : 'image/png';
+      let blob = await new Promise((ok) => canvas.toBlob(ok, type, format === 'png' ? undefined : quality / 100));
+      if (format === 'webp' && (!blob || blob.type !== 'image/webp')) {
+        const { encodeWebpWasm } = await import('../../../lib/bigImage');
+        const data = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+        blob = await encodeWebpWasm(data, canvas.width, canvas.height, quality);
+      }
+      if (!blob || !blob.size || blob.type !== type) throw new Error('This browser could not save the frame as ' + format.toUpperCase() + '.');
       url = URL.createObjectURL(blob);
     } catch (e) { setError(e.message); return; }
     const time = videoRef.current.currentTime.toFixed(2);
@@ -79,9 +86,14 @@ export default function VideoScreenshotPage() {
                   <select aria-label="Format" value={format} onChange={e => setFormat(e.target.value)} className="bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm">
                     <option value="png">PNG</option>
                     <option value="jpg">JPG</option>
+                    <option value="webp">WebP</option>
                   </select>
                 </div>
-                {format === 'jpg' && (
+                <div>
+                  <label className="text-xs text-neutral-500 block mb-1">Go to (seconds)</label>
+                  <input id="shot-time" type="number" min="0" step="0.04" placeholder="e.g. 12.5" onChange={e => { const v = Number(e.target.value); const vid = videoRef.current; if (vid && Number.isFinite(v) && v >= 0) { vid.pause(); vid.currentTime = Math.min(v, Number.isFinite(vid.duration) ? vid.duration : v); } }} className="w-28 bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm" />
+                </div>
+                {format !== 'png' && (
                   <div className="flex-1 min-w-[160px]">
                     <label className="text-xs text-neutral-500 block mb-1">Quality: {quality}%</label>
                     <input aria-label="Quality (%)" type="range" min="10" max="100" value={quality} onChange={e => setQuality(parseInt(e.target.value))} className="w-full" />
@@ -111,7 +123,7 @@ export default function VideoScreenshotPage() {
       </div>
       <SeoContent
         title="Video Screenshot"
-        description="Video Screenshot captures the current frame of a video as a PNG or JPG image, entirely in your browser — pause or seek to the moment you want, choose your format and (for JPG) quality, then capture as many stills as you need."
+        description="Video Screenshot captures the current frame of a video as a PNG, JPG or WebP image, entirely in your browser — pause or seek to the moment you want, choose your format and (for JPG) quality, then capture as many stills as you need."
         howTo={[
           "Click the upload area and select a video file.",
           "Use the player controls to pause on the exact frame you want.",
@@ -120,7 +132,7 @@ export default function VideoScreenshotPage() {
           "Click \"Download\" under any captured image to save it."
         ]}
         faqs={[
-          { q: "What image formats do screenshots download as?", a: "PNG (lossless) or JPG (with an adjustable quality slider) — pick whichever you need before capturing." },
+          { q: "What image formats do screenshots download as?", a: "PNG (lossless), JPG or WebP (both with an adjustable quality slider) — pick whichever you need before capturing. Type a time in 'Go to (seconds)' to jump to an exact moment." },
           { q: "Can I capture multiple frames?", a: "Yes, click \"Capture Screenshot\" as many times as you like at different points in the video, even mixing PNG and JPG captures." },
           { q: "Is Video Screenshot free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Is my file uploaded anywhere?", a: "No, capturing happens entirely in your browser using canvas — your video is never uploaded to a server." }

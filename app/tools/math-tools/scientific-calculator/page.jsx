@@ -10,12 +10,18 @@ export default function ScientificCalculatorPage() {
   const inputRef = useRef(null);
 
   const [angle, setAngle] = useState('rad');
+  // P24 (03/10): Ans (full precision) and a history of the last 10 calculations, as calculator.net and Desmos keep them
+  const [ans, setAns] = useState(0);
+  const [history, setHistory] = useState([]);
   // mathjs replaces eval(): results keep 12 significant digits (1/3e12 was
   // shown as 0), 2π and 2(3) multiply, and sqrt(-1) / log(0) get their own
   // message instead of "Cannot divide by zero" (29/09).
   const run = async (expr) => {
-    try { setResult(await evaluateExpression(expr, { angle })); }
-    catch (e) { setResult(e.message); }
+    try {
+      const { text, value } = await evaluateExpression(expr, { angle, ans, raw: true });
+      setResult(text); setAns(value);
+      setHistory((h) => [{ expr, text, angle }, ...h].slice(0, 10));
+    } catch (e) { setResult(e.message); }
   };
   const insertAtCursor = (before, after = '') => {
     const input = inputRef.current;
@@ -43,8 +49,11 @@ export default function ScientificCalculatorPage() {
       setTimeout(() => { input.focus(); input.setSelectionRange(start - 1, start - 1); }, 0);
       return;
     }
-    const funcs = ['sin(', 'cos(', 'tan(', 'log(', 'ln(', 'sqrt('];
+    const funcs = ['sin(', 'cos(', 'tan(', 'log(', 'ln(', 'sqrt(', 'asin(', 'acos(', 'atan('];
     if (funcs.includes(val)) { insertAtCursor(val, ')'); return; }
+    if (val === 'x²') { insertAtCursor('^2'); return; }
+    if (val === '1/x') { insertAtCursor('1/(', ')'); return; }
+    if (val === '|x|') { insertAtCursor('abs(', ')'); return; }
     insertAtCursor(val);
   };
 
@@ -57,20 +66,23 @@ export default function ScientificCalculatorPage() {
 
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); run(expression); }
+      // the field has its own Enter handler: running here too evaluated twice (Ans*2 gave Ans*4), review 03/10
+      if (e.key === 'Enter' && e.target !== inputRef.current) { e.preventDefault(); run(expression); }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [expression, angle]);
+  }, [expression, angle, ans]);
 
   const getLabel = (btn) => {
-    const m = { 'sin(': 'sin()', 'cos(': 'cos()', 'tan(': 'tan()', 'log(': 'log()', 'ln(': 'ln()', 'sqrt(': 'sqrt()' };
+    const m = { 'sin(': 'sin()', 'cos(': 'cos()', 'tan(': 'tan()', 'log(': 'log()', 'ln(': 'ln()', 'sqrt(': 'sqrt()', 'asin(': 'sin⁻¹', 'acos(': 'cos⁻¹', 'atan(': 'tan⁻¹' };
     return m[btn] || btn;
   };
 
   const buttons = [
     ['sin(', 'cos(', 'tan(', 'log('],
     ['ln(', 'sqrt(', 'π', 'e'],
+    ['asin(', 'acos(', 'atan(', 'x²'],
+    ['!', '1/x', '|x|', 'Ans'],
     ['(', ')', '^', '⌫'],
     ['7', '8', '9', '/'],
     ['4', '5', '6', '*'],
@@ -127,6 +139,16 @@ export default function ScientificCalculatorPage() {
               ))}
             </div>
           ))}
+          {history.length > 0 && (
+            <div className="border-t border-neutral-200 dark:border-neutral-700 pt-2" data-history>
+              <div className="text-xs text-neutral-500 mb-1">History (click to reuse)</div>
+              <ul className="space-y-1 text-sm font-mono">
+                {history.map((h, i) => (
+                  <li key={i}><button type="button" onMouseDown={(e) => { e.preventDefault(); setExpression(h.expr); }} className="w-full text-right text-neutral-600 dark:text-neutral-300 hover:text-indigo-600 break-all">{h.expr} = <b>{h.text}</b>{h.angle === 'deg' && /sin|cos|tan/.test(h.expr) ? ' (deg)' : ''}</button></li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
       <SeoContent
@@ -143,7 +165,8 @@ export default function ScientificCalculatorPage() {
           { q: "Does it work in degrees?", a: "Yes — switch to Degrees and sin(30) gives 0.5, cos(90) gives 0 and tan(90) is reported as undefined." },
           { q: "What is the difference between log and ln?", a: "log is the base-10 logarithm (log(1000) = 3); ln is the natural logarithm (ln(e) = 1)." },
           { q: "How precise are the results?", a: "Results are computed in double precision and shown to 12 significant digits; very large or very small results use scientific notation instead of being rounded to 0." },
-          { q: "Can I type 2π or 3(4+1)?", a: "Yes — implicit multiplication is supported, as on a handheld scientific calculator." }
+          { q: "Can I type 2π or 3(4+1)?", a: "Yes — implicit multiplication is supported, as on a handheld scientific calculator." },
+          { q: "Does it have inverse trigonometry, factorials and an Ans key?", a: "Yes: sin⁻¹, cos⁻¹ and tan⁻¹ (in the angle unit you chose), x², n! (5! = 120), 1/x, |x|, and Ans, the previous result at full precision. The last 10 calculations are listed under the keypad; click one to reuse it." }
         ]}
         tips={[
           "Use ^ for powers (2^10) and ! for factorials (5!).",

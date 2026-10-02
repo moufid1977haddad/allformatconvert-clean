@@ -60,3 +60,56 @@ export function parseDatetimeLocal(value) {
   d.setFullYear(Number(m[1])); // new Date(y, …) maps years 0-99 to 1900-1999
   return d.getTime();
 }
+
+// P24 (03/10): any IANA time zone, both ways, and the relative time — what epochconverter.com offers besides UTC and
+// local. A wall-clock time that does not exist in the zone (the hour skipped when clocks go forward) is refused, where
+// new Date(y, m, d, h) moved it an hour on without a word; one that happens twice (clocks go back) is read as the
+// first and said.
+const partsIn = (ms, timeZone) => {
+  const f = new Intl.DateTimeFormat('en-US', { timeZone, hourCycle: 'h23', era: 'short', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const p = Object.fromEntries(f.formatToParts(new Date(ms)).map((x) => [x.type, x.value]));
+  const y = Number(p.year);
+  return { year: p.era === 'BC' || p.era === 'B' ? 1 - y : y, month: Number(p.month), day: Number(p.day), hour: Number(p.hour) % 24, minute: Number(p.minute), second: Number(p.second) };
+};
+const utcOf = (q) => { const d = new Date(Date.UTC(2000, q.month - 1, q.day, q.hour, q.minute, q.second)); d.setUTCFullYear(q.year); return d.getTime(); };
+export const offsetMs = (ms, timeZone) => { const whole = ms - (((ms % 1000) + 1000) % 1000); return utcOf(partsIn(whole, timeZone)) - whole; };
+
+export function toZoneValue(ms, timeZone) {
+  const q = partsIn(ms, timeZone);
+  return `${q.year < 0 ? '-' + pad(-q.year, 4) : pad(q.year, 4)}-${pad(q.month)}-${pad(q.day)}T${pad(q.hour)}:${pad(q.minute)}:${pad(q.second)}`;
+}
+
+export function parseInZone(value, timeZone) {
+  const m = /^(\d{4,})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(value);
+  if (!m) throw new Error('Pick a date and time first.');
+  const want = { year: Number(m[1]), month: Number(m[2]), day: Number(m[3]), hour: Number(m[4]), minute: Number(m[5]), second: Number(m[6] || 0) };
+  const wall = utcOf(want);
+  let target;
+  try { target = toZoneValue(wall, 'UTC'); } catch { throw new Error('This date is outside the range a calendar date can represent (year ±275 760).'); }
+  // the instants this wall time could be: wall minus each offset the zone has around it
+  // probes a day either side (within the Date range: 275760-09-13 would overflow it); review 03/10
+  const probe = (t) => { try { return offsetMs(t, timeZone); } catch { return null; } };
+  const candidates = [...new Set([probe(wall - 86400000), probe(wall), probe(wall + 86400000)].filter((o) => o !== null))]
+    .map((off) => wall - off).filter((t) => { try { return toZoneValue(t, timeZone) === target; } catch { return false; } }).sort((a, b) => a - b);
+  if (!candidates.length) throw new Error(`${value.replace('T', ' ')} does not exist in ${timeZone}: the clocks skip that time there (daylight saving time starting, or a change of time zone).`);
+  // how much later the second occurrence is (one hour in most zones, 30 minutes at Lord Howe)
+  return { ms: candidates[0], ambiguous: candidates.length > 1, gapMinutes: candidates.length > 1 ? Math.round((candidates[candidates.length - 1] - candidates[0]) / 60000) : 0 };
+}
+
+export function describeZone(ms, timeZone) {
+  // whole seconds: historical local mean times have them (Paris 1900: +00:09:21); review 03/10
+  const off = Math.round(offsetMs(ms, timeZone) / 1000), a = Math.abs(off);
+  const hms = `${pad(Math.floor(a / 3600))}:${pad(Math.floor(a / 60) % 60)}${a % 60 ? ':' + pad(a % 60) : ''}`;
+  const bc = partsIn(ms, timeZone).year <= 0; // the era is written out, else 4 BC read as AD 4
+  const text = new Date(ms).toLocaleString('en-GB', bc ? { timeZone, era: 'short', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' } : { timeZone, dateStyle: 'full', timeStyle: 'medium' });
+  return `${text} (UTC${off < 0 ? '−' : '+'}${hms})`;
+}
+
+export function relativeTime(ms, now = Date.now()) {
+  const s = Math.round((ms - now) / 1000), a = Math.abs(s);
+  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+  for (const [unit, size] of [['year', 31556952], ['month', 2629746], ['week', 604800], ['day', 86400], ['hour', 3600], ['minute', 60]]) {
+    if (a >= size) return rtf.format(Math.trunc(s / size), unit);
+  }
+  return rtf.format(s, 'second');
+}

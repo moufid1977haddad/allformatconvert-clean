@@ -19,7 +19,7 @@ const MAX_DURATION = 120;
 // percentage of frame size too (3% of the shorter dimension), not a fixed
 // pixel count, so they scale correctly from a 240p clip to 4K instead of
 // looking cavernous or nonexistent at the extremes.
-const WATERMARK_WIDTH_RATIO = 0.15;
+const WATERMARK_WIDTH_RATIO = 0.15; // default; P24 (03/10): the visitor chooses 5-60 %
 const WATERMARK_MARGIN_RATIO = 0.03;
 
 // Pixel offsets for the 5 position presets, computed directly in JS now
@@ -37,6 +37,15 @@ const computeOverlayXY = (position, videoWidth, videoHeight, wmWidth, wmHeight, 
       return { x: margin, y: videoHeight - wmHeight - margin };
     case 'bottom-right':
       return { x: videoWidth - wmWidth - margin, y: videoHeight - wmHeight - margin };
+    // P24 (03/10): the middle of each edge too (a 3 × 3 grid, as image watermark tools offer)
+    case 'top-center':
+      return { x: Math.round((videoWidth - wmWidth) / 2), y: margin };
+    case 'bottom-center':
+      return { x: Math.round((videoWidth - wmWidth) / 2), y: videoHeight - wmHeight - margin };
+    case 'middle-left':
+      return { x: margin, y: Math.round((videoHeight - wmHeight) / 2) };
+    case 'middle-right':
+      return { x: videoWidth - wmWidth - margin, y: Math.round((videoHeight - wmHeight) / 2) };
     case 'center':
     default:
       return { x: Math.round((videoWidth - wmWidth) / 2), y: Math.round((videoHeight - wmHeight) / 2) };
@@ -106,6 +115,8 @@ export default function VideoWatermarkPage() {
   const [watermarkImage, setWatermarkImage] = useState(null);
   const [opacity, setOpacity] = useState(0.7);
   const [position, setPosition] = useState('bottom-right');
+  const [sizePct, setSizePct] = useState(15);
+  const [textColor, setTextColor] = useState('#ffffff');
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [eta, setEta] = useState(null);
@@ -333,7 +344,8 @@ export default function VideoWatermarkPage() {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       if (watermarkType === 'text') {
-        const fontSize = 48;
+        // drawn large (then only ever scaled DOWN to the video): a short text drawn at 48 px and enlarged came out blurred
+        const fontSize = Math.max(24, Math.min(192, Math.floor(16000 / Math.max(1, text.length * 0.6)))); // a canvas stays under 16 000 px wide
         ctx.font = `bold ${fontSize}px sans-serif`;
         const padX = 16;
         const textWidth = Math.ceil(ctx.measureText(text).width);
@@ -349,7 +361,8 @@ export default function VideoWatermarkPage() {
         ctx.lineWidth = Math.round(fontSize * 0.12);
         ctx.strokeStyle = `rgba(0, 0, 0, ${opacity * 0.85})`;
         ctx.strokeText(text, padX, canvas.height / 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+        ctx.globalAlpha = opacity;
+        ctx.fillStyle = textColor;
         ctx.fillText(text, padX, canvas.height / 2);
       } else {
         const img = await loadImageElement(watermarkImage);
@@ -370,8 +383,12 @@ export default function VideoWatermarkPage() {
       // canvas's own source size. This applies identically whether the
       // canvas came from the text path or the image path, since both
       // funnel into this same overlay pipeline.
-      const wmWidth = Math.round(videoWidth * WATERMARK_WIDTH_RATIO);
-      const wmHeight = Math.round(wmWidth * (canvas.height / canvas.width));
+      let wmWidth = Math.round(videoWidth * (sizePct / 100 || WATERMARK_WIDTH_RATIO));
+      let wmHeight = Math.round(wmWidth * (canvas.height / canvas.width));
+      // a tall logo at a large size would leave the frame: scaled down to fit (review 03/10); never 0 px high
+      const maxH = Math.max(2, videoHeight - 2 * Math.round(Math.min(videoWidth, videoHeight) * WATERMARK_MARGIN_RATIO));
+      if (wmHeight > maxH) { wmWidth = Math.round(wmWidth * maxH / wmHeight); wmHeight = maxH; }
+      wmWidth = Math.max(2, wmWidth); wmHeight = Math.max(2, wmHeight);
       const margin = Math.round(Math.min(videoWidth, videoHeight) * WATERMARK_MARGIN_RATIO);
       const { x, y } = computeOverlayXY(position, videoWidth, videoHeight, wmWidth, wmHeight, margin);
 
@@ -498,6 +515,11 @@ export default function VideoWatermarkPage() {
             </div>
           )}
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <label className="block"><span className="block text-neutral-500 mb-1">Size: {sizePct}% of the video width</span>
+              <input id="vwm-size" aria-label="Size (% of the video width)" type="range" min="5" max="60" value={sizePct} onChange={(e) => setSizePct(Number(e.target.value))} className="w-full" /></label>
+            {watermarkType === 'text' && <label className="flex items-center gap-2"><span className="text-neutral-500">Text colour</span><input id="vwm-color" type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} /></label>}
+          </div>
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Opacity: {Math.round(opacity * 100)}%</label>
             <input aria-label="Opacity (%)" type="range" min="0.1" max="1" step="0.05" value={opacity} onChange={(e) => setOpacity(parseFloat(e.target.value))} className="w-full" />
@@ -506,7 +528,7 @@ export default function VideoWatermarkPage() {
           <div>
             <label className="block text-sm text-neutral-500 mb-2">Position</label>
             <div className="grid grid-cols-3 gap-2">
-              {['top-left', 'top-right', 'center', 'bottom-left', 'bottom-right'].map((p) => (
+              {['top-left', 'top-center', 'top-right', 'middle-left', 'center', 'middle-right', 'bottom-left', 'bottom-center', 'bottom-right'].map((p) => (
                 <button key={p} onClick={() => setPosition(p)} className={"py-2 rounded-lg text-sm font-semibold transition " + (position === p ? 'bg-indigo-600 text-white' : 'bg-neutral-100 text-neutral-800 hover:bg-neutral-200')}>{p}</button>
               ))}
             </div>
@@ -539,13 +561,13 @@ export default function VideoWatermarkPage() {
         howTo={[
           "Click the upload area and select a video file (2 minutes or shorter).",
           "Choose Text or Image as your watermark type, and enter your text or upload a logo/image.",
-          "Adjust the opacity slider and pick a position from the 5 corner/center presets.",
+          "Adjust the size, the opacity slider and (for text) the colour, and pick one of the 9 positions.",
           "Click \"Add Watermark\" and watch the progress bar and time estimate while it encodes.",
           "Preview and download the resulting watermarked .mp4 file."
         ]}
         faqs={[
           { q: "Does this produce a full watermarked video now?", a: "Yes -- it exports a real .mp4 file with the watermark burned into every frame and the original audio preserved, not a single still image." },
-          { q: "Can I use an image or logo as the watermark?", a: "Yes. Switch the Watermark Type toggle to Image and upload a PNG or JPG; it's composited at its natural size with the opacity you choose." },
+          { q: "Can I use an image or logo as the watermark?", a: "Yes. Switch the Watermark Type toggle to Image and upload a PNG or JPG; it's scaled to the size you choose (5 to 60% of the video width, 15% by default) with the opacity you choose. A text watermark can take any colour; it keeps a thin dark outline so it stays readable on bright footage." },
           { q: "Why is there a 2-minute limit?", a: "Watermarking runs entirely in your browser via ffmpeg.wasm, which encodes at roughly real-time speed (about 1 second of processing per second of video). Longer clips would take too long or risk freezing the tab." },
           { q: "Is audio preserved?", a: "Yes, if your video has an audio track it's kept and re-encoded to AAC alongside the watermarked video. Silent or audio-free videos (screen recordings, muted exports) work fine too -- the output is just video-only." },
           { q: "Why was my video rejected before I even clicked Convert?", a: "Two different reasons produce two different messages. If your browser can't decode the file at all (common for .avi, some .mov/.mkv, or uncommon codecs), you'll see a message saying so -- that's a browser support gap, not proof your file is broken. If the browser can play the file but can't determine its length, you'll see a different message asking for a re-export. MP4 (H.264) and WebM are the safest formats to use here." },

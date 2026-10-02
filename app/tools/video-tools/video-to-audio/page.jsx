@@ -59,7 +59,7 @@ export default function VideoToAudioPage() {
       // -vn drops the video stream entirely so ffmpeg only demuxes and
       // encodes audio -- no frame decode/encode cost, unlike a real video
       // transcode.
-      await ffmpeg.exec(['-i', inputName, '-vn', ...extraArgs, outputName]);
+      if (await ffmpeg.exec(['-i', inputName, '-vn', ...extraArgs, outputName]) !== 0) throw new Error('ffmpeg could not write this format with these settings. Try another output format, sample rate or quality.'); // P24: exit code checked
       const data = await ffmpeg.readFile(outputName);
       const url = URL.createObjectURL(new Blob([data.buffer], { type: mime }));
       setResult({ url, name: file.name.replace(/\.[^.]+$/, '') + '.' + ext });

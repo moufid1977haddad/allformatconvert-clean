@@ -27,7 +27,7 @@ const fmt12 = (x) => {
 let mathPromise;
 const loadMath = () => (mathPromise ||= import('mathjs').then((m) => m.create(m.all, { number: 'number', predictable: true })));
 
-export async function evaluateExpression(expr, { angle = 'rad' } = {}) {
+export async function evaluateExpression(expr, { angle = 'rad', ans = 0, raw = false } = {}) {
   const math = await loadMath();
   let e = expr
     .replace(/π/g, 'pi')
@@ -49,6 +49,7 @@ export async function evaluateExpression(expr, { angle = 'rad' } = {}) {
     asin: (x) => Math.asin(x) / toRad,
     acos: (x) => Math.acos(x) / toRad,
     atan: (x) => Math.atan(x) / toRad,
+    Ans: ans, // P24 (03/10): the previous result at full precision, as calculator.net's Ans key
   };
   let r;
   try {
@@ -59,8 +60,8 @@ export async function evaluateExpression(expr, { angle = 'rad' } = {}) {
   if (typeof r === 'function' || r === undefined) throw new Error('Incomplete expression.');
   if (typeof r !== 'number') r = Number(r);
   if (Number.isNaN(r)) throw new Error('The result is not a real number (for example the square root or logarithm of a negative number).');
-  if (!Number.isFinite(r)) throw new Error('The result is infinite (division by zero, or log of 0).');
-  return fmt12(r);
+  if (!Number.isFinite(r)) throw new Error('The result is infinite or too large to show (division by zero, log of 0, or beyond about 1.8e308, like 171!).');
+  return raw ? { text: fmt12(r), value: r } : fmt12(r);
 }
 
 // ---------- statistics ----------
@@ -71,7 +72,7 @@ export function parseNumberList(input) {
   return tokens.map(Number);
 }
 
-export function statistics(numbers) {
+export function statistics(numbers, { quartiles = 'inclusive' } = {}) {
   const n = numbers.length;
   if (n === 0) throw new Error('Enter at least one number.');
   const sorted = [...numbers].sort((a, b) => a - b);
@@ -87,11 +88,28 @@ export function statistics(numbers) {
   const sampleVar = n > 1 ? ss / (n - 1) : null;
   // Quartiles by the same method as Excel QUARTILE.INC / calculator.net's default.
   const q = (p) => { const h = (n - 1) * p; const lo = Math.floor(h); return sorted[lo] + (h - lo) * ((sorted[lo + 1] ?? sorted[lo]) - sorted[lo]); };
+  // P24 (03/10): Excel QUARTILE.EXC (Minitab, SPSS, TI-83's "(n+1)p"), undefined when (n+1)p falls outside 1..n
+  const qExc = (p) => { const h = (n + 1) * p; if (h < 1 || h > n) return null; const lo = Math.floor(h); return sorted[lo - 1] + (h - lo) * ((sorted[lo] ?? sorted[lo - 1]) - sorted[lo - 1]); };
+  const [q1, q3] = quartiles === 'exclusive' ? [qExc(0.25), qExc(0.75)] : [q(0.25), q(0.75)];
+  const iqr = q1 === null || q3 === null ? null : q3 - q1;
+  // P24 (03/10): what calculator.net and Calculator Soup add — each one only where it is defined, never a made-up value
+  const sampleSd = sampleVar === null ? null : Math.sqrt(sampleVar);
+  const allPositive = numbers.every((x) => x > 0);
+  const geometricMean = allPositive ? Math.exp(numbers.reduce((a, x) => a + Math.log(x), 0) / n) : null;
+  const harmonicMean = allPositive ? n / numbers.reduce((a, x) => a + 1 / x, 0) : null;
+  const standardError = sampleSd === null ? null : sampleSd / Math.sqrt(n);
+  const coefficientOfVariation = sampleSd === null || mean === 0 ? null : sampleSd / Math.abs(mean);
+  // Excel SKEW (adjusted Fisher-Pearson, n >= 3) and KURT (excess kurtosis, n >= 4); undefined when all values are equal
+  const z = (k) => numbers.reduce((a, x) => a + ((x - mean) / sampleSd) ** k, 0);
+  const skewness = n >= 3 && sampleSd > 0 ? (n / ((n - 1) * (n - 2))) * z(3) : null;
+  const kurtosis = n >= 4 && sampleSd > 0 ? ((n * (n + 1)) / ((n - 1) * (n - 2) * (n - 3))) * z(4) - (3 * (n - 1) ** 2) / ((n - 2) * (n - 3)) : null;
+  const outliers = iqr === null ? [] : sorted.filter((x) => x < q1 - 1.5 * iqr || x > q3 + 1.5 * iqr);
   return {
-    count: n, sum, mean, median, mode, min: sorted[0], max: sorted[n - 1], range: sorted[n - 1] - sorted[0],
+    count: n, sum, mean, median, mode, modeCount: maxF, min: sorted[0], max: sorted[n - 1], range: sorted[n - 1] - sorted[0],
     populationVariance: popVar, populationStdDev: Math.sqrt(popVar),
-    sampleVariance: sampleVar, sampleStdDev: sampleVar === null ? null : Math.sqrt(sampleVar),
-    q1: q(0.25), q3: q(0.75),
+    sampleVariance: sampleVar, sampleStdDev: sampleSd,
+    q1, q3, iqr, geometricMean, harmonicMean, standardError, coefficientOfVariation, skewness, kurtosis, outliers,
+    sumOfSquares: ss, allPositive,
   };
 }
 export const formatStat = (x) => (x === null ? '—' : fmt12(x));
@@ -149,7 +167,53 @@ export function describeFraction(f) {
     const str = scaled.toString().padStart(p + 1, '0');
     decimal = (neg ? '-' : '') + (p ? str.slice(0, -p) + '.' + str.slice(-p) : str);
   } else {
-    decimal = (neg ? '-' : '') + fmt12(Number(abs) / Number(f.den)) + ' (rounded)';
+    // P24 (03/10): exact long division in BigInt — the repeating part in brackets (1/6 = 0.1(6)), as Calculator Soup
+    // writes it; Number(abs) / Number(den) gave NaN beyond 1e308 (two 400-digit numbers)
+    decimal = (neg ? '-' : '') + repeatingDecimal(abs, f.den);
   }
   return { fraction: f.den === 1n ? String(f.num) : `${f.num}/${f.den}`, mixed, decimal };
+}
+
+// a / b (a >= 0, b > 0, not terminating) as "int.pre(period)", or, when the period is longer than `max` digits, the
+// first `max` digits followed by "…" (cut, not rounded)
+export function repeatingDecimal(a, b, max = 100) {
+  const int = a / b; let r = a % b; const seen = new Map(); let digits = '';
+  while (r !== 0n && !seen.has(r) && digits.length < max) { seen.set(r, digits.length); r *= 10n; digits += (r / b).toString(); r %= b; }
+  if (r === 0n) return `${int}.${digits}`;
+  if (seen.has(r)) { const k = seen.get(r); return `${int}.${digits.slice(0, k)}(${digits.slice(k)})`; }
+  return `${int}.${digits}… (the repeating part is longer than ${max} digits)`;
+}
+
+// P24 (03/10): the working, as Calculator Soup shows it
+export function fractionSteps(a, b, op) {
+  const s = (f) => (f.den === 1n ? String(f.num) : `${f.num}/${f.den}`);
+  const lcm = (x, y) => (x / bgcd(x, y)) * y;
+  const steps = [];
+  if (op === '+' || op === '-') {
+    const L = lcm(a.den, b.den), ka = L / a.den, kb = L / b.den, n = op === '+' ? a.num * ka + b.num * kb : a.num * ka - b.num * kb;
+    if (a.den !== b.den) steps.push(`Least common denominator of ${a.den} and ${b.den}: ${L}`, `${s(a)} = ${a.num * ka}/${L} and ${s(b)} = ${b.num * kb}/${L}`);
+    steps.push(`${a.num * ka}/${L} ${op} ${b.num * kb}/${L} = ${n}/${L}`);
+    const g = bgcd(n, L) || 1n; if (g > 1n) steps.push(`Simplify by ${g}: ${n / g}/${L / g}`);
+  } else if (op === '*') {
+    const n = a.num * b.num, d = a.den * b.den; steps.push(`Multiply across: (${a.num} × ${b.num}) / (${a.den} × ${b.den}) = ${n}/${d}`);
+    const g = bgcd(n, d) || 1n; if (g > 1n) steps.push(`Simplify by ${g}: ${n / g}/${d / g}`);
+  } else {
+    if (b.num === 0n) return steps;
+    const r = norm(b.den, b.num); steps.push(`Dividing by ${s(b)} is multiplying by its reciprocal ${s(r)}`);
+    const n = a.num * r.num, d = a.den * r.den; steps.push(`(${a.num} × ${r.num}) / (${a.den} × ${r.den}) = ${n}/${d}`);
+    const g = bgcd(n, d) || 1n; if (g > 1n) steps.push(`Simplify by ${g}: ${n / g}/${d / g}`);
+  }
+  return steps;
+}
+
+// P24 (03/10): an optional whole part, as the mixed-number fields of Calculator Soup: -1 and 1/2 is -(1 + 1/2)
+export function mixedFraction(whole, frac) {
+  const w = whole.trim();
+  if (!w) return frac;
+  const W = parseFraction(w);
+  if (W.den !== 1n) throw new Error(`"${w}": the whole-number part must be a whole number.`);
+  if (frac.num < 0n) throw new Error('With a whole-number part, put the minus sign on the whole number only (-1 1/2).');
+  const negative = w.startsWith('-');
+  const sum = norm((negative ? -W.num : W.num) * frac.den + frac.num, frac.den);
+  return negative ? { num: -sum.num, den: sum.den } : sum;
 }

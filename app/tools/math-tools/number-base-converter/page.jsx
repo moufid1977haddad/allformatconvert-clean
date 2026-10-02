@@ -1,75 +1,36 @@
-﻿'use client';
-import { useState } from 'react';
+'use client';
 import SeoContent from '../../../components/SeoContent';
-import { parseInBase } from '../../../lib/exactNumbers';
+import BaseConverter from '../../../components/BaseConverter';
 
 export default function NumberBaseConverterPage() {
-  const [value, setValue] = useState('');
-  const [fromBase, setFromBase] = useState('10');
-  const [copyError, setCopyError] = useState(false);
-
-  // Exact (BigInt) and strict: parseInt() used to read "1012" in binary as 5, "12abc" as 12,
-  // and lose every integer above 2^53 (app/lib/exactNumbers.js).
-  const convert = (base) => {
-    const n = parseInBase(value, parseInt(fromBase));
-    return n === null ? 'Invalid' : n.toString(parseInt(base));
-  };
-
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Number Base Converter</h1>
-        <p className="text-neutral-500 text-center mb-8">Convert between binary, decimal, octal and hex</p>
-        <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-neutral-500 mb-1">Input Value</label>
-              <input type="text" value={value} onChange={e => setValue(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3 font-mono" placeholder="Enter value..." />
-            </div>
-            <div>
-              <label className="block text-sm text-neutral-500 mb-1">From Base</label>
-              <select aria-label="From Base" value={fromBase} onChange={e => setFromBase(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3">
-                <option value="2">Binary (2)</option>
-                <option value="8">Octal (8)</option>
-                <option value="10">Decimal (10)</option>
-                <option value="16">Hexadecimal (16)</option>
-              </select>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            {[['2','Binary'],['8','Octal'],['10','Decimal'],['16','Hexadecimal']].map(([base, label]) => (
-              <div key={base} className="bg-neutral-50 rounded-xl border border-neutral-200 p-4">
-                <div className="text-neutral-500 text-sm mb-1">{label}</div>
-                <div className="font-mono text-indigo-400 text-lg font-bold break-all">{value ? convert(base).toUpperCase() : '—'}</div>
-                {value && convert(base) !== 'Invalid' && (
-                  <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(convert(base)).catch(() => setCopyError(true)); }} className="text-xs text-neutral-500 hover:text-neutral-300 mt-1">Copy</button>
-                )}
-              </div>
-            ))}
-          </div>
-          {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
-        </div>
+        <p className="text-neutral-500 text-center mb-8">Convert between binary, octal, decimal, hex and any base from 2 to 36</p>
+        <BaseConverter />
       </div>
       <SeoContent
         title="Number Base Converter"
-        description="Number Base Converter instantly converts a number between binary, octal, decimal, and hexadecimal, showing all four results side by side as you type — entirely in your browser."
+        description="Number Base Converter instantly converts a number between binary, octal, decimal, hexadecimal and any base from 2 to 36, fractional parts and numbers of any size included, exactly, as you type — entirely in your browser."
         howTo={[
           "Enter your number in the input field.",
-          "Select the base your number is currently in (Binary, Octal, Decimal, or Hexadecimal).",
-          "View the converted value in all four bases at once, updated instantly.",
+          "Select the base your number is currently in (2 to 36).",
+          "View the value in binary, octal, decimal and hexadecimal, plus the base chosen in 'Also convert to', updated instantly.",
           "Click \"Copy\" next to any result to copy it to your clipboard."
         ]}
         faqs={[
-          { q: "What number bases does this converter support?", a: "Binary (base 2), Octal (base 8), Decimal (base 10), and Hexadecimal (base 16) — that's the full set; other custom bases aren't supported." },
+          { q: "What number bases does this converter support?", a: "Every base from 2 to 36 (digits 0-9 then A-Z), as input and as output; binary, octal, decimal and hexadecimal are always shown, plus the base you pick in 'Also convert to'." },
+          { q: "Can I convert fractional numbers like 10.5?", a: "Yes, exactly. When the fraction does not end in the target base (0.1 decimal in binary), 40 digits are shown followed by '…' rather than a rounded value." },
           { q: "Is Number Base Converter free to use?", a: "Yes, it's completely free with no registration and no usage limits." },
           { q: "Can I convert negative numbers?", a: "Yes, negative numbers are converted using a standard sign-based representation (not two's complement), so a negative decimal converts to a negative value in the target base." },
-          { q: "Do I need to pick a target base to convert to?", a: "No — all four base results are shown side by side simultaneously; there's no separate \"convert to\" selector." }
+          { q: "Do I need to pick a target base to convert to?", a: "No — binary, octal, decimal and hexadecimal are always shown; 'Also convert to' adds one more base of your choice." }
         ]}
         tips={[
-          "Double-check your \"From Base\" selection before typing — an incorrect source base will silently produce a wrong (but validly formatted) result.",
+          "Double-check your \"From Base\" selection before typing — 10 read as hexadecimal is sixteen.",
           "Use the Hexadecimal result directly for CSS/HTML color codes or memory addresses.",
-          "If a result shows \"Invalid,\" your input contains a digit that isn't valid for the selected source base (e.g., an \"8\" in binary).",
-          "Click \"Copy\" on any of the four result cards to grab that specific base's value."
+          "If your input contains a digit that isn't valid for the selected source base (e.g., an \"8\" in binary), a message lists the digits that base uses.",
+          "Click \"Copy\" on any result card to grab that base's value."
         ]}
       />
     </div>

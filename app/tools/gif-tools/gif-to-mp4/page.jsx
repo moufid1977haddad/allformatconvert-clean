@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { reportToolError } from '../../../lib/reportError';
 import { FileDownload } from '../../../components/FileDownload';
+import { execChecked } from '../../../lib/ffmpegRun';
 export default function GifToMp4Page() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
@@ -44,7 +45,7 @@ export default function GifToMp4Page() {
       await ffmpeg.writeFile('input.gif', bytes);
       // libx264 requires even width/height; GIFs often aren't, so scale down
       // to the nearest even dimension if needed.
-      await ffmpeg.exec([
+      await execChecked(ffmpeg, [
         '-i', 'input.gif',
         '-movflags', 'faststart',
         '-pix_fmt', 'yuv420p',

@@ -17,6 +17,7 @@ export default function AudioBoosterPage() {
   // sine boosted 4x: 67 % of the samples clipped). As mp3louder offers, a limiter now holds the peaks under
   // 0.95 (ffmpeg's alimiter, automatic level off) -- on by default, can be turned off for the raw gain.
   const [limiter, setLimiter] = useState(true);
+  const [normalize, setNormalize] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
@@ -36,20 +37,30 @@ export default function AudioBoosterPage() {
       // ffmpeg.wasm's own stderr/stdout -- this is where the real reason for
       // a failure lives. Without this, a failed exec() surfaces only as a
       // generic rejection with no way to diagnose what actually happened.
-      ffmpeg.on('log', ({ message }) => console.log('[ffmpeg]', message));
+      const logs = [];
+      ffmpeg.on('log', ({ message }) => { logs.push(message); console.log('[ffmpeg]', message); });
       await ffmpeg.load();
       const inputName = 'input.' + sanitizedInputExt(file);
       const { outputName, extraArgs, mime, ext } = buildOutputSpec(format);
       await ffmpeg.writeFile(inputName, await fetchFile(file));
       const base = file.name.replace(/\.[^.]+$/, '');
-      const af = limiter ? `volume=${volume},alimiter=limit=0.95:level=0` : `volume=${volume}`;
+      // P24 (03/10): FreeConvert sets any volume from 0 % (ours went 1× to 5× only) and normalising is the other common
+      // need (podcasts, voice memos): EBU R128 loudness to -16 LUFS, true peak -1.5 dB (ffmpeg loudnorm)
+      // loudnorm works (and outputs) at 192 kHz: resampled back to the source's own rate, read from ffmpeg's report
+      if (normalize) await ffmpeg.exec(['-hide_banner', '-i', inputName]).catch(() => {});
+      const srcRate = Number((/, (\d{4,6}) Hz/.exec(logs.join('\n')) || [])[1]) || 48000;
+      // (an aresample filter after loudnorm fails channel negotiation in this ffmpeg build: the rate is set on the output)
+      const rateArgs = normalize ? ['-ar', String(srcRate)] : [];
+      const af = normalize ? 'loudnorm=I=-16:TP=-1.5:LRA=11' : limiter && volume > 1 ? `volume=${volume},alimiter=limit=0.95:level=0` : `volume=${volume}`;
       if (opusOnService(format)) { // boosted here, losslessly; libopus on our service (lib/opusService.js)
-        await ffmpeg.exec(['-i', inputName, '-af', af, ...LOSSLESS_INTERMEDIATE.args, LOSSLESS_INTERMEDIATE.name]);
+        // ffmpeg.exec resolves even when ffmpeg fails: its exit code is checked, never a stale or empty file handed over
+        if (await ffmpeg.exec(['-i', inputName, '-af', af, ...rateArgs, ...LOSSLESS_INTERMEDIATE.args, LOSSLESS_INTERMEDIATE.name]) !== 0) throw new Error('The audio could not be processed. Please try another file or output format.');
         const opus = await encodeOpusOnService(await ffmpeg.readFile(LOSSLESS_INTERMEDIATE.name), 'boosted_' + base);
         setResult({ url: URL.createObjectURL(opus), name: 'boosted_' + base + '.opus' });
       } else {
-        await ffmpeg.exec(['-i', inputName, '-af', af, ...extraArgs, outputName]);
+        if (await ffmpeg.exec(['-i', inputName, '-af', af, ...rateArgs, ...extraArgs, outputName]) !== 0) throw new Error('The audio could not be processed. Please try another file or output format.');
         const data = await ffmpeg.readFile(outputName);
+        if (!data || !data.byteLength) throw new Error('The audio could not be processed: the result was empty.');
         const url = URL.createObjectURL(new Blob([data.buffer], { type: mime }));
         setResult({ url, name: 'boosted_' + base + '.' + ext });
       }
@@ -79,9 +90,10 @@ export default function AudioBoosterPage() {
           <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Volume Boost: {volume}x</label>
-            <input aria-label="Volume Boost" type="range" min={1} max={5} step={0.5} value={volume} onChange={e => setVolume(Number(e.target.value))} className="w-full" />
-            <div className="flex justify-between text-xs text-neutral-400 mt-1"><span>1x (normal)</span><span>5x (max)</span></div>
+            <input aria-label="Volume Boost" type="range" min={0.25} max={5} step={0.25} value={volume} disabled={normalize} onChange={e => setVolume(Number(e.target.value))} className="w-full" />
+            <div className="flex justify-between text-xs text-neutral-400 mt-1"><span>0.25x (quieter)</span><span>1x (normal)</span><span>5x (max)</span></div>
           </div>
+          <label className="flex items-center gap-2 text-sm text-neutral-700"><input id="ab-normalize" type="checkbox" checked={normalize} onChange={e => { setNormalize(e.target.checked); setResult(null); }} />Normalize instead (even loudness at -16 LUFS, the podcast and streaming standard)</label>
           <label className="flex items-center gap-2 text-sm text-neutral-700"><input type="checkbox" checked={limiter} onChange={e => { setLimiter(e.target.checked); setResult(null); }} />Prevent distortion (limiter: loud peaks are held just under full scale instead of being cut flat)</label>
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Output Format</label>
@@ -103,7 +115,7 @@ export default function AudioBoosterPage() {
       </div>
       <SeoContent
         title="Audio Booster"
-        description="Audio Booster amplifies an audio file's volume by a gain multiplier (1x–5x) followed by a limiter that keeps the loudest peaks just under full scale instead of cutting them flat (it can be turned off), processed in your browser via ffmpeg.wasm (WebAssembly) — nothing is uploaded, except for Opus, which our own server encodes with libopus and then deletes. Choose the output format that matches your source (or any other supported format) instead of always getting MP3 back."
+        description="Audio Booster changes an audio file's volume by a gain multiplier (0.25x to make it quieter, up to 5x louder), or normalizes its loudness to -16 LUFS (the podcast and streaming standard), followed by a limiter that keeps the loudest peaks just under full scale instead of cutting them flat (it can be turned off), processed in your browser via ffmpeg.wasm (WebAssembly) — nothing is uploaded, except for Opus, which our own server encodes with libopus and then deletes. Choose the output format that matches your source (or any other supported format) instead of always getting MP3 back."
         howTo={[
           "Click the upload area and select an audio file.",
           "Set your desired boost level using the slider (1x–5x).",

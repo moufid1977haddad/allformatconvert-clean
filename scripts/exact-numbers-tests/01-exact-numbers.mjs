@@ -2,7 +2,7 @@
 // on 2026-09-22 (docs/audit/RAPPORT-outils-mis-en-avant.md).
 // Run: node scripts/exact-numbers-tests/01-exact-numbers.mjs
 import assert from 'node:assert/strict';
-const { formatSignificant, parseInBase, toRoman, fromRoman } = await import(new URL('../../app/lib/exactNumbers.js', import.meta.url));
+const { formatSignificant, parseInBase, toRoman, fromRoman, parseBaseNumber, formatBaseNumber } = await import(new URL('../../app/lib/exactNumbers.js', import.meta.url));
 
 let passed = 0;
 const test = (name, fn) => { try { fn(); passed++; console.log('  PASS', name); } catch (e) { console.error('  FAIL', name, '\n', e); process.exitCode = 1; } };
@@ -17,4 +17,8 @@ test('prefixes and sign', () => { assert.equal(parseInBase('0xFF', 16), 255n); a
 test('roman: canonical round trip', () => { assert.equal(toRoman(1994), 'MCMXCIV'); assert.equal(fromRoman('mcmxciv'), 1994); assert.equal(fromRoman('MMMCMXCIX'), 3999); });
 test('roman: non-canonical refused', () => { for (const s of ['IM', 'VX', 'IIII', 'MMMM', 'ABC', 'IC', 'XM']) assert.equal(fromRoman(s), null, s); });
 test('roman: out of range refused', () => { assert.equal(toRoman(4000), ''); assert.equal(toRoman(0), ''); });
+// P24 (03/10): any base 2-36 and exact fractions
+const conv = (t, a, b) => { const x = parseBaseNumber(t, a); return x && formatBaseNumber(x, b); };
+test('bases 2-36: exact integers and fractions', () => { assert.equal(conv('zz.i', 36, 10), '1295.5'); assert.equal(conv('255.25', 10, 16), 'ff.4'); assert.equal(conv('-0b101.1', 2, 10), '-5.5'); assert.equal(conv('18446744073709551615', 10, 16), 'ffffffffffffffff'); assert.equal(conv('0.5', 10, 3), '0.' + '1'.repeat(40) + '…'); assert.equal(conv('0.1', 10, 2), '0.' + '0001100110011001100110011001100110011001' + '…'); assert.equal(conv('-0', 10, 2), '0'); });
+test('bases 2-36: invalid refused', () => { for (const [t, b] of [['12', 2], ['1.2.3', 10], ['', 10], ['.', 10], ['z', 35], ['1', 1], ['1', 37], ['--1', 10]]) assert.equal(parseBaseNumber(t, b), null, t + ' base ' + b); });
 console.log(`${passed} passed`);

@@ -4,11 +4,14 @@ import SeoContent from '../../../components/SeoContent';
 export default function AspectRatioPage() {
   const [w, setW] = useState('1920');
   const [h, setH] = useState('1080');
+  // P24 (03/10): the missing dimension at this ratio, as aspectratiocalculator.com and calculatorsoup.com give it
+  const [newW, setNewW] = useState('');
+  const [newH, setNewH] = useState('');
   const gcd = (a,b) => b === 0 ? a : gcd(b, a%b);
   // Previously an empty or invalid field silently counted as 1, and 1920.5
   // was truncated to 1920: the ratio shown was not the one typed (29/09).
   // Decimals are scaled to integers first, so 2.35:1 gives 47:20.
-  const parseVal = (v) => (/^\s*\d+(\.\d+)?\s*$/.test(v) && Number(v) > 0 ? v.trim() : null);
+  const parseVal = (v) => (/^\s*\d+(\.\d+)?\s*$/.test(v) && Number(v) > 0 ? v.trim() : /^\s*\d+(\.\d+)?e[+-]?\d+\s*$/i.test(v) && Number(v) > 0 && Number.isFinite(Number(v)) ? String(Number(v)) : null); // 1e3 too (type=number accepts it)
   const wStr = parseVal(w);
   const hStr = parseVal(h);
   let ratio = '—';
@@ -22,6 +25,13 @@ export default function AspectRatioPage() {
     ratio = `${wNum / g}:${hNum / g}`;
     decimal = String(Number((wNum / hNum).toFixed(4)));
   }
+  const fit = (given, a, b) => { // the other side for a given side, at the ratio a:b
+    const v = parseVal(given); if (!v || !wStr || !hStr) return null;
+    const exact = Number(v) * b / a; const px = Math.round(exact);
+    const six = Number(exact.toFixed(6));
+    return { exact: (Math.abs(six - exact) > 1e-12 ? '≈ ' : 'exactly ') + String(six), px, whole: Math.abs(exact - px) < 1e-9 };
+  };
+  const fromW = fit(newW, Number(wStr), Number(hStr)), fromH = fit(newH, Number(hStr), Number(wStr));
   const presets = [['16:9','1920x1080'],['4:3','1024x768'],['1:1','1080x1080'],['21:9','2560x1080'],['9:16','1080x1920']];
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -37,12 +47,24 @@ export default function AspectRatioPage() {
             <div className="text-4xl font-bold text-indigo-400">{ratio}</div>
             <div className="text-neutral-500">Decimal: {decimal}</div>
           </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" data-resize>
+            <div>
+              <label htmlFor="ar-new-w" className="block text-sm text-neutral-500 mb-1">New width → height</label>
+              <input id="ar-new-w" type="number" min="0" step="any" value={newW} onChange={(e) => setNewW(e.target.value)} placeholder="e.g. 1280" className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" />
+              <p className="text-sm text-neutral-700 mt-1" data-out="h">{fromW ? <>Height: <b>{fromW.px}</b>{!fromW.whole && <> ({fromW.exact}, rounded)</>}</> : newW ? 'Enter a positive number' : ' '}</p>
+            </div>
+            <div>
+              <label htmlFor="ar-new-h" className="block text-sm text-neutral-500 mb-1">New height → width</label>
+              <input id="ar-new-h" type="number" min="0" step="any" value={newH} onChange={(e) => setNewH(e.target.value)} placeholder="e.g. 720" className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" />
+              <p className="text-sm text-neutral-700 mt-1" data-out="w">{fromH ? <>Width: <b>{fromH.px}</b>{!fromH.whole && <> ({fromH.exact}, rounded)</>}</> : newH ? 'Enter a positive number' : ' '}</p>
+            </div>
+          </div>
           <div><label className="block text-sm text-neutral-500 mb-2">Common Presets</label><div className="grid grid-cols-3 gap-2">{presets.map(([r,d]) => <button key={r} onClick={() => { const [pw,ph] = d.split('x'); setW(pw); setH(ph); }} className="bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800 rounded-lg p-2 text-sm transition"><div className="font-semibold">{r}</div><div className="text-xs opacity-80">{d}</div></button>)}</div></div>
         </div>
       </div>
       <SeoContent
         title="Aspect Ratio Calculator"
-        description="Aspect Ratio Calculator computes the simplified ratio and decimal value for any width and height you enter, live in your browser as you type. There's no output-format picker or dimension-scaling feature — it always shows both the ratio and the decimal value together."
+        description="Aspect Ratio Calculator computes the simplified ratio and decimal value for any width and height you enter, live in your browser as you type. It shows both the ratio and the decimal value together, and gives the missing height for a new width (or the width for a new height) at the same ratio."
         howTo={[
           "Type a width and height into the two fields.",
           "Read the simplified ratio (e.g. 16:9) and decimal value shown below.",
@@ -53,7 +75,7 @@ export default function AspectRatioPage() {
           { q: "What is an aspect ratio?", a: "The proportional relationship between an image's width and height, expressed as two numbers separated by a colon (e.g., 16:9)." },
           { q: "Is Aspect Ratio Calculator free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Can I choose between decimal, fractional, or ratio output?", a: "No — both the simplified ratio and the decimal value are always shown together; there's no separate output-format selector." },
-          { q: "Does it scale dimensions to match a target ratio?", a: "No — it only simplifies whatever width and height you enter; it doesn't calculate a new width or height to match a target ratio." }
+          { q: "Does it calculate a missing width or height?", a: "Yes. Type a new width to get the height at the same ratio, or a new height to get the width. When the exact value is not a whole number of pixels, it is shown next to the rounded one." }
         ]}
         tips={[
           "Click a preset to quickly load common ratios like 16:9 or 1:1 instead of typing dimensions by hand.",

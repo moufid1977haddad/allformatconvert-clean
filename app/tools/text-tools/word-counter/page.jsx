@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { countWords, countSentences, graphemes } from '../../../lib/textSegments';
+import KeywordDensity from '../../../components/KeywordDensity';
 
 export default function WordCounterPage() {
   const [text, setText] = useState('');
@@ -14,6 +15,7 @@ export default function WordCounterPage() {
   const sentences = countSentences(text);
   const paragraphs = text.trim() === '' ? 0 : text.split(/\n+/).filter(p => p.trim()).length;
   const readingTime = Math.ceil(words / 200);
+  const speakingTime = Math.ceil(words / 130); // P24: speaking time at 130 words a minute, as wordcounter.net shows it
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
@@ -29,6 +31,8 @@ export default function WordCounterPage() {
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 text-center"><div className="text-3xl font-bold text-indigo-400">{paragraphs}</div><div className="text-neutral-400 text-sm mt-1">Paragraphs</div></div>
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 text-center"><div className="text-3xl font-bold text-indigo-400">{readingTime}</div><div className="text-neutral-400 text-sm mt-1">Min Read</div></div>
           </div>
+          <p className="text-sm text-neutral-600 text-center" data-speaking>About {speakingTime} min to say aloud (130 words a minute); reading time at 200 words a minute.</p>
+          <KeywordDensity text={text} />
           <button onClick={() => setText('')} className="w-full bg-neutral-200 hover:bg-neutral-200 rounded-xl py-2 font-semibold transition">Clear</button>
         </div>
       </div>
@@ -46,7 +50,7 @@ export default function WordCounterPage() {
           { q: "Is my data saved?", a: "No, everything is processed locally in your browser — your text is never sent to a server." },
           { q: "Can I use it for academic essays?", a: "Yes, it's well suited for checking word count requirements for assignments and applications." },
           { q: "How are words and characters counted?", a: "The way a reader counts them, using your browser's Unicode text segmentation: an emoji — even one with a skin tone, or a family emoji made of several code points — is one character; Chinese, Japanese and Thai, written without spaces, are split into real words instead of counting a whole sentence as one word; and abbreviations like \"Mr.\" or numbers like \"3.50\" do not end a sentence." },
-          { q: "Does it provide keyword density analysis?", a: "No — it covers word count, character count, sentence count, paragraph count, and reading time only." }
+          { q: "Does it provide keyword density analysis?", a: "Yes. Below the counts, the most frequent words — or two- and three-word phrases — are listed with how many times they appear and their share of all words. Common English words such as the, and, of can be left out of the list." }
         ]}
         tips={[
           "Use the \"Min Read\" estimate (based on 200 words per minute) to gauge how long your content will take readers to get through.",

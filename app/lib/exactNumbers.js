@@ -15,6 +15,34 @@ export function formatSignificant(value, digits = 10) {
 
 const DIGITS = { 2: /^[01]+$/, 8: /^[0-7]+$/, 10: /^[0-9]+$/, 16: /^[0-9a-f]+$/i };
 const PREFIX = { 2: '0b', 8: '0o', 16: '0x' };
+const ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz';
+const digitValue = (c, base) => { if (!/^[0-9a-zA-Z]$/.test(c)) return -1; const v = ALPHABET.indexOf(c.toLowerCase()); return v < base ? v : -1; }; // ASCII only: 'K' (U+212A, Kelvin) is not k
+
+// P24 (03/10): any base from 2 to 36 and a fractional part, as RapidTables and base-convert.com take them. Exact: the
+// value is a fraction of BigInts (no float ever), and a fractional part that does not end in the target base is shown
+// to `maxFrac` digits followed by "…" — never rounded as if it were exact (0.1 decimal = 0.000110011… binary).
+export function parseBaseNumber(text, base) {
+  if (!Number.isInteger(base) || base < 2 || base > 36) return null;
+  let s = String(text).trim().replace(/[_\s]/g, '');
+  let negative = false;
+  if (s.startsWith('-')) { negative = true; s = s.slice(1); } else if (s.startsWith('+')) s = s.slice(1);
+  if (PREFIX[base] && s.toLowerCase().startsWith(PREFIX[base])) s = s.slice(2);
+  const parts = s.split('.');
+  if (parts.length > 2 || (!parts[0] && !parts[1])) return null;
+  const B = BigInt(base);
+  let num = 0n, den = 1n;
+  for (const c of parts[0] + (parts[1] || '')) { const v = digitValue(c, base); if (v < 0) return null; num = num * B + BigInt(v); }
+  for (let k = 0; k < (parts[1] || '').length; k++) den *= B;
+  return { negative: negative && num !== 0n, num, den };
+}
+
+export function formatBaseNumber(x, base, maxFrac = 40) {
+  const B = BigInt(base);
+  const int = x.num / x.den;
+  let rem = x.num % x.den, frac = '';
+  while (rem !== 0n && frac.length < maxFrac) { rem *= B; frac += ALPHABET[Number(rem / x.den)]; rem %= x.den; }
+  return (x.negative ? '-' : '') + int.toString(base) + (frac ? '.' + frac : '') + (rem !== 0n ? '…' : '');
+}
 
 // Exact integer in the given base (arbitrary size), or null when the text is not
 // a valid number in that base. Accepts an optional sign and the base's own 0b/0o/0x prefix.

@@ -52,7 +52,7 @@ test('statistics: sample and population SD, median, quartiles, mode', () => {
 test('fractions: exact, normalised, mixed numbers, decimals, big values', () => {
   const f = (s) => m.parseFraction(s);
   const d = (x) => m.describeFraction(x);
-  assert.deepEqual(d(m.fractionOp(f('1/2'), f('1/3'), '+')), { fraction: '5/6', mixed: '5/6', decimal: '0.833333333333 (rounded)' });
+  assert.deepEqual(d(m.fractionOp(f('1/2'), f('1/3'), '+')), { fraction: '5/6', mixed: '5/6', decimal: '0.8(3)' });
   assert.deepEqual(d(m.fractionOp(f('1 1/2'), f('3/4'), '*')), { fraction: '9/8', mixed: '1 1/8', decimal: '1.125' });
   assert.deepEqual(d(f('1/-2')), { fraction: '-1/2', mixed: '-1/2', decimal: '-0.5' });
   assert.deepEqual(d(f('1.5')), { fraction: '3/2', mixed: '1 1/2', decimal: '1.5' });

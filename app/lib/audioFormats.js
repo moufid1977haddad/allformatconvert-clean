@@ -69,10 +69,22 @@ export const formatTakesBitrate = (formatValue) => BITRATE_FORMATS.has(getAudioF
 // Builds the ffmpeg output filename + extra codec args + download MIME for
 // a chosen format value (see getAudioFormat's ALAC comment for why this
 // isn't just `output.${value}`). `kbps`: optional target bitrate for the lossy formats.
-export function buildOutputSpec(formatValue, kbps) {
+// P24 (03/10): sample rate and channels, as 123apps' audio converter ("sample rate", "channels") and FreeConvert
+// (44.1 / 48 kHz) offer. Each format only takes the rates its encoder can write; another choice is refused with a
+// sentence before encoding (never resampled to something else silently).
+export const AUDIO_SAMPLE_RATES = [['', 'Keep the original'], [48000, '48 kHz (video)'], [44100, '44.1 kHz (CD)'], [32000, '32 kHz'], [22050, '22.05 kHz'], [16000, '16 kHz (speech)'], [8000, '8 kHz (telephone)']];
+export const AUDIO_CHANNELS = [['', 'Keep the original'], [1, 'Mono'], [2, 'Stereo']];
+// mp2 is written at 192 kbps or more, which MPEG-2 (16-24 kHz) Layer II cannot hold; libvorbis has no setting for our
+// bitrates below 32 kHz (review 03/10): those rates are refused with the sentence below instead of failing obscurely.
+const RATES_BY_FORMAT = { opus: [48000, 24000, 16000, 12000, 8000], ac3: [48000, 44100, 32000], mp2: [48000, 44100, 32000], ogg: [48000, 44100, 32000] };
+export function buildOutputSpec(formatValue, kbps, { sampleRate, channels } = {}) {
   const fmt = getAudioFormat(formatValue);
-  const rate = kbps && BITRATE_FORMATS.has(fmt.value) ? ['-b:a', `${fmt.value === 'ac3' || fmt.value === 'mp2' ? Math.max(kbps, 192) : kbps}k`] : [];
-  return { outputName: 'output.' + fmt.ext, extraArgs: [...(fmt.extraArgs || []), ...rate], mime: fmt.mime, ext: fmt.ext };
+  const rate = Number(sampleRate) || 0, ch = Number(channels) || 0;
+  const allowed = RATES_BY_FORMAT[fmt.value];
+  if (rate && allowed && !allowed.includes(rate)) throw new Error(`${fmt.label} cannot be written at ${rate / 1000} kHz. Choose ${allowed.map((r) => r / 1000 + ' kHz').join(', ')}, or keep the original rate.`);
+  const resample = [...(rate ? ['-ar', String(rate)] : []), ...(ch ? ['-ac', String(ch)] : [])];
+  const bitrateArgs = kbps && BITRATE_FORMATS.has(fmt.value) ? ['-b:a', `${fmt.value === 'ac3' || fmt.value === 'mp2' ? Math.max(kbps, 192) : kbps}k`] : [];
+  return { outputName: 'output.' + fmt.ext, extraArgs: [...(fmt.extraArgs || []), ...bitrateArgs, ...resample], mime: fmt.mime, ext: fmt.ext };
 }
 
 // A real input file's own extension, sanitized to plain alphanumerics so it
