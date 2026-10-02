@@ -7,6 +7,7 @@ import { reportToolError } from '../../../lib/reportError';
 import { ffmpegAudioDuration } from '../../../lib/audioDuration';
 import PlayablePreview from '../../../components/PlayablePreview';
 import { FileDownload } from '../../../components/FileDownload';
+import { execChecked } from '../../../lib/ffmpegRun';
 
 // Start and end to a tenth of a second (typed, slid, or taken from the player) and fades in/out, as the reference
 // cutter offers (mp3cut.net, read 26/09/2026: fades, keyboard nudges). The duration used to be rounded down to whole
@@ -128,7 +129,7 @@ export default function AudioTrimmerPage() {
       const outExt = !exact ? sourceExt : pcm ? sourceExt : REENCODE[sourceExt] ? sourceExt : 'wav';
       const outputName = 'output.' + outExt;
       const af = [`atrim=start=${start}:end=${end}`, 'asetpts=PTS-STARTPTS', fadeIn > 0 && `afade=t=in:st=0:d=${fadeIn}`, fadeOut > 0 && `afade=t=out:st=${tenth(len - fadeOut)}:d=${fadeOut}`].filter(Boolean).join(',');
-      await ffmpeg.exec(exact
+      await execChecked(ffmpeg, exact
         ? ['-i', inputName, '-af', af, ...(pcm ? ['-c:a', pcm] : REENCODE[outExt]), '-vn', outputName]
         : ['-i', inputName, '-ss', String(start), '-to', String(end), '-c', 'copy', outputName]);
       const data = await ffmpeg.readFile(outputName);

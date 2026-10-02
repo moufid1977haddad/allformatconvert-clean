@@ -347,7 +347,7 @@ quart, pint, cup, cuillères, gallon/pint/fl oz UK, ft³, in³, cm³, Rankine.
 **Deuxième relecture indépendante** (lots vidéo/audio/dev) : rien de grave ; corrigés — la normalisation sortait en
 **192 kHz** (sortie interne de loudnorm ; et un filtre aresample ajouté ensuite échouait **sans rien dire**, la page
 n'affichait aucune erreur : `ffmpeg.exec` ne lève pas, il rend un code) → fréquence de la source par `-ar`, et **code
-de retour de ffmpeg vérifié** dans Audio Booster, Converter, Compressor et Video to Audio ; MP2 et OGG refusent les
+de retour de ffmpeg vérifié** dans Audio Booster, Converter, Compressor, Video to Audio, puis (`app/lib/ffmpegRun.js`) Splitter, Trimmer, GIF to MP4 et l'étape de mesure du Merger — bancs fonctionnels repassés : Splitter 22/22 ×3, Trimmer ×3, Merger ordre/fondu tout vert sous Chromium et Firefox (sous WebKit, seule la lecture dans le navigateur de test échoue, il ne décode pas l'audio ; durée et courbe vérifiées par ffprobe ; sélecteur du banc mis à jour après FileDownload) ; MP2 et OGG refusent les
 basses fréquences que leurs encodeurs ne savent pas écrire ; TSV : un guillemet non fermé n'avale plus la suite ;
 filigrane borné à la hauteur de la vidéo et texte très long dessiné plus petit ; casses : accents décomposés (NFD) et
 apostrophes ; parts réellement égales et contrôle des tailles à la jonction ; « 0,001 » n'est plus déclaré ambigu,

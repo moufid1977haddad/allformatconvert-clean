@@ -9,6 +9,7 @@ import { opusOnService, encodeOpusOnService, LOSSLESS_INTERMEDIATE } from '../..
 import PlayablePreview from '../../../components/PlayablePreview';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
+import { execChecked } from '../../../lib/ffmpegRun';
 
 // kb/s of the source's audio: the stream's own figure from ffmpeg ("Audio: aac …, 57 kb/s"), else the file's average.
 function sourceKbps(log, bytes) {
@@ -58,10 +59,10 @@ export default function AudioCompressorPage() {
       const kbps = srcKbps ? Math.min(Number(bitrate), Math.max(8, Math.floor(srcKbps))) : Number(bitrate);
       let blob;
       if (opusOnService(format)) { // decoded here to lossless FLAC; libopus at the chosen bitrate on our service (lib/opusService.js)
-        await ffmpeg.exec(['-i', inputName, ...LOSSLESS_INTERMEDIATE.args, LOSSLESS_INTERMEDIATE.name]);
+        await execChecked(ffmpeg, ['-i', inputName, ...LOSSLESS_INTERMEDIATE.args, LOSSLESS_INTERMEDIATE.name]);
         blob = await encodeOpusOnService(await ffmpeg.readFile(LOSSLESS_INTERMEDIATE.name), 'compressed', { kbps });
       } else {
-        if (await ffmpeg.exec(['-i', inputName, '-b:a', kbps + 'k', ...extraArgs, outputName]) !== 0) throw new Error('ffmpeg could not write this format with these settings. Try another output format, sample rate or quality.'); // P24: exit code checked
+        if (await execChecked(ffmpeg, ['-i', inputName, '-b:a', kbps + 'k', ...extraArgs, outputName]) !== 0) throw new Error('ffmpeg could not write this format with these settings. Try another output format, sample rate or quality.'); // P24: exit code checked
         const data = await ffmpeg.readFile(outputName);
         blob = new Blob([data.buffer], { type: mime });
       }

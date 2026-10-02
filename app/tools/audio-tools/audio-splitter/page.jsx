@@ -9,6 +9,7 @@ import { opusOnService, encodeOpusOnService, LOSSLESS_INTERMEDIATE } from '../..
 import { ffmpegAudioDuration } from '../../../lib/audioDuration';
 import PlayablePreview from '../../../components/PlayablePreview';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
+import { execChecked } from '../../../lib/ffmpegRun';
 
 const tenth = (x) => Math.round(x * 10) / 10;
 const MAX_PARTS = 100;
@@ -132,11 +133,11 @@ export default function AudioSplitterPage() {
       const out = [];
       for (const [i, cut] of cuts.entries()) {
         if (opusOnService(format)) { // cut here, losslessly; each part encoded with libopus on our service (lib/opusService.js)
-          await ffmpeg.exec(['-i', inputName, '-af', cut, '-vn', ...LOSSLESS_INTERMEDIATE.args, LOSSLESS_INTERMEDIATE.name]);
+          await execChecked(ffmpeg, ['-i', inputName, '-af', cut, '-vn', ...LOSSLESS_INTERMEDIATE.args, LOSSLESS_INTERMEDIATE.name]);
           out.push({ url: URL.createObjectURL(await encodeOpusOnService(await ffmpeg.readFile(LOSSLESS_INTERMEDIATE.name), partName(i))), name: partName(i) + '.opus' });
         } else {
           const tmp = `part${i + 1}.${ext}`;
-          await ffmpeg.exec(['-i', inputName, '-af', cut, '-vn', ...extraArgs, tmp]);
+          await execChecked(ffmpeg, ['-i', inputName, '-af', cut, '-vn', ...extraArgs, tmp]);
           const data = await ffmpeg.readFile(tmp);
           await ffmpeg.deleteFile(tmp); // 100 parts of a long file would otherwise stay twice in memory
           out.push({ url: URL.createObjectURL(new Blob([data.buffer], { type: mime })), name: `${partName(i)}.${ext}` });

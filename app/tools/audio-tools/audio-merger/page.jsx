@@ -14,6 +14,7 @@ import { reportToolError } from '../../../lib/reportError';
 import PlayablePreview from '../../../components/PlayablePreview';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
+import { execChecked } from '../../../lib/ffmpegRun';
 
 const LOSSLESS = MERGE_FORMATS.filter((f) => f.lossless);
 const COMPRESSED = MERGE_FORMATS.filter((f) => !f.lossless);
@@ -195,7 +196,7 @@ export default function AudioMergerPage() {
         setStage('Measuring the last file…');
         const c = planLastCount(probes, names, planFormat);
         logRef.current = [];
-        await ffmpeg.exec(c.args);
+        await execChecked(ffmpeg, c.args);
         const lastSamples = parseSampleCount(logRef.current.join('\n'), c.channels);
         logRef.current = null;
         if (!lastSamples) throw new Error('The length of the last file could not be measured for the fade-out.');

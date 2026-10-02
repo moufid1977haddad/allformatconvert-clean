@@ -71,7 +71,7 @@ async function mergeAndSave(p, tag) {
     const ended = await new Promise((r) => { a.onended = () => r(true); setTimeout(() => r(false), 30000); a.play().catch(() => r(false)); });
     return { dur: +dur.toFixed(3), ended, t: +a.currentTime.toFixed(3) };
   });
-  const shown = await p.locator('a[download]').first().evaluate((a) => a.previousElementSibling?.innerText || '');
+  const shown = await p.locator('main').innerText();
   const [d] = await Promise.all([p.waitForEvent('download'), p.locator('a[download]').first().click()]);
   const out = path.join(tmp, `${tag}-${d.suggestedFilename()}`); await d.saveAs(out);
   return { out, play, shown };
@@ -202,7 +202,7 @@ const cases = {
       await p.waitForTimeout(250);
     }
     const mid = [...seen].filter((v) => v > 0 && v < 100);
-    const shown = await p.locator('a[download]').first().evaluate((a) => a.previousElementSibling?.innerText || '');
+    const shown = await p.locator('main').innerText();
     return { ok: mid.length >= 3 && /19:55/.test(shown), info: { progressValues: [...seen].sort((a, b) => a - b), shown } };
   },
 };
