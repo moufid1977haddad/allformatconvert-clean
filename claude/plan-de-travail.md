@@ -3,6 +3,28 @@
 > **📍 EMPLACEMENT DE CE DOCUMENT — lire en premier.**
 > Jusqu'au 19 septembre 2026, ce document vivait **uniquement dans le Projet claude.ai**, invisible depuis le dépôt. Claude Code a donc travaillé des semaines sans la RÈGLE ZÉRO, sans les interdits permanents et sans la liste des pièges — et a redécouvert à ses frais des choses déjà écrites ici. **Il vit désormais dans le dépôt, à `claude/plan-de-travail.md`, et c'est la seule copie qui fait foi.** À lire au début de chaque chantier.
 
+## 🚨 INCIDENT 03/10 vers 01 h (heure de la machine, nuit du 02 au 03/10) — SITE HORS LIGNE, DÉCISION DU PROPRIÉTAIRE REQUISE
+
+**www.onlineconvertools.com et onlineconvertools.com répondent HTTP 402.** L'API Vercel répond : « Your Team exceeded our
+fair use limits and has been blocked (402) ». Toute nouvelle préversion ou production est refusée ; la production en
+place (`onlineconvertools-jg0rho9ri`, P23, vérifiée verte) n'est plus servie. Ce n'est pas un défaut du code : c'est le
+compte (plan **Hobby**) qui est suspendu.
+
+- **Limites Hobby** (docs Vercel, lues le 03/10) : par mois, 100 Go de Fast Data Transfer, 10 Go de Fast Origin
+  Transfer, 1 M d'invocations, 4 h de CPU actif. **Cause probable, à confirmer dans le tableau de bord (Usage)** : les
+  bancs de P21 → P23 sur www et sur les préversions (des milliers de pages d'outils chargées, chacune tirant plusieurs
+  Mo de WebAssembly : ffmpeg ≈ 30 Mo, LibRaw, encodeurs). Claude n'a pas accès au tableau d'usage (`vercel usage` : 404).
+- **Ce que seul le propriétaire peut faire** : (a) **passer l'équipe en Pro** (20 $/mois, crédit d'usage inclus, CDN à
+  tarif fixe ; de toute façon exigé dès que le site affiche de la publicité AdSense : Hobby interdit tout usage
+  commercial) ; ou (b) réduire l'usage puis rétablir le projet dans le tableau de bord ; ou (c) écrire au support Vercel.
+  **Recommandation de Claude : (a)**, avant toute autre chose — puis, pour les bancs, ne plus les faire tourner sur www
+  qu'en version courte (voir la règle ci-dessous).
+- **Règle pour la suite (Claude)** : bancs lourds (solidité complète, RAW, pages) **en local et sur une seule
+  préversion** ; sur www, uniquement le contrôle court (pages + téléchargement Chromium) ; jamais plusieurs passages
+  complets de 500 cas sur www.
+- P24 continue **en local** (aucun trafic Vercel) sur la branche `p24-couverture` ; rien n'est fusionné tant que le
+  compte est bloqué (une fusion déclencherait une production refusée). Voir `docs/audit/RAPPORT-p24-couverture-03-10.md`.
+
 ## 🚀 RESTE AVANT PRODUCT HUNT — établi le 30/09 → 01/10 (passe « prêt au lancement », `docs/audit/RAPPORT-prelancement-01-10.md` §1 : chaque ligne du plan classée, preuve à l'appui)
 
 **Dans l'ordre.** Aucune date n'est proposée (règle absolue) : la date se fixe à l'étape 8, pas avant.

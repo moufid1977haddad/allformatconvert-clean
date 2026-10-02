@@ -8,6 +8,15 @@ Méthode, par catégorie : nos formats et options lus dans le code ; ceux des de
 par un vrai fichier et un résultat rouvert et vérifié** (pdf.js, pdf-lib, sharp, ffprobe) ; défauts de qualité
 corrigés ; ce qui demanderait un service, Railway ou une dépense → plan, « Décisions du propriétaire — P24 ».
 
+## 0. INCIDENT — site hors ligne (HTTP 402), compte Vercel suspendu
+
+Vers 01 h (heure de la machine), la préversion du lot PDF n'apparaissait pas ; sa création par l'API a répondu
+**« Your Team exceeded our fair use limits and has been blocked (402) »**, et **www répond 402**. Le compte Hobby est
+suspendu pour dépassement des limites d'usage équitable (100 Go de transfert, 10 Go d'origine, 4 h de CPU par mois).
+Cause probable : les bancs des chantiers P21 → P23, très lourds sur www et les préversions. **Seul le propriétaire peut
+débloquer** (passage en Pro recommandé, voir le plan en tête). Claude a arrêté tout processus, envoyé une notification
+au terminal, et poursuit P24 **en local seulement** ; aucune fusion dans master tant que le compte est bloqué.
+
 ## 1. PDF
 
 ### 1.1 Relevé (02/10)
@@ -47,6 +56,15 @@ page affichée à 90° ; « DRAFT » centré ; texte chinois en mosaïque sous l
 page à 90° tournée → 180° ; « 2-3 » supprime 2 et 3 ; PDF 1.3 → `/V 4 … AESV2`, mot de passe exigé ; e-mail coupé
 entre deux morceaux de texte, téléphone et terme → page aplatie, plus rien d'extractible, 3 occurrences comptées ;
 .txt ANSI « Café crème » lu juste, Letter paysage 792 × 612.
+
+**Réviseur indépendant** (lecture seule) : 3 défauts graves trouvés et corrigés avant toute production — un PDF 2.0
+chiffré en RC4 40 bits malgré l'annonce « AES-128 » (la bibliothèque ne reconnaît que les versions 1.4 à 1.7 : en-tête
+relevé sauf 1.6/1.7 exactement, et vérification V = 4 avant de l'écrire) ; « 1 - 3 » avec espaces voulait dire toutes
+les pages ; un numéro de carte ou de téléphone collé à d'autres chiffres (carte + CVV, deux numéros de suite) n'était
+pas masqué → toute la suite de chiffres est masquée dès qu'elle contient un vrai numéro. Moyens / faibles corrigés :
+texte non latin des numéros (supprimé → dessiné), HTML à charset déclaré, avertissement « sous le contenu », page
+blanche à la taille affichée, style @page jamais avant le doctype, « To page » à 0, e-mails à apostrophe ou accents.
+Banc : **23/23 ×3 moteurs en local** (`ed35d749`). **Préversion et production impossibles** (compte bloqué).
 
 ### 1.4 Laissé au propriétaire ou non faisable ici
 
