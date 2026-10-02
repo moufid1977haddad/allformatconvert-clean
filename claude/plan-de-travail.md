@@ -3,27 +3,24 @@
 > **📍 EMPLACEMENT DE CE DOCUMENT — lire en premier.**
 > Jusqu'au 19 septembre 2026, ce document vivait **uniquement dans le Projet claude.ai**, invisible depuis le dépôt. Claude Code a donc travaillé des semaines sans la RÈGLE ZÉRO, sans les interdits permanents et sans la liste des pièges — et a redécouvert à ses frais des choses déjà écrites ici. **Il vit désormais dans le dépôt, à `claude/plan-de-travail.md`, et c'est la seule copie qui fait foi.** À lire au début de chaque chantier.
 
-## 🚨 INCIDENT 03/10 vers 01 h (heure de la machine, nuit du 02 au 03/10) — SITE HORS LIGNE, DÉCISION DU PROPRIÉTAIRE REQUISE
+## ✅ INCIDENT 402 DU 03/10 — CLOS (compte passé en Pro par le propriétaire, plafond de dépense 50 $/mois)
 
-**www.onlineconvertools.com et onlineconvertools.com répondent HTTP 402.** L'API Vercel répond : « Your Team exceeded our
-fair use limits and has been blocked (402) ». Toute nouvelle préversion ou production est refusée ; la production en
-place (`onlineconvertools-jg0rho9ri`, P23, vérifiée verte) n'est plus servie. Ce n'est pas un défaut du code : c'est le
-compte (plan **Hobby**) qui est suspendu.
+**Constat chiffré** (API d'usage Vercel `/v2/usage?type=requests`, lue le 03/10, cycle du 03/09 au 02/10, heure de la machine) :
+- **Limite dépassée : les requêtes Edge** — Hobby en permet **1 million par mois** ; le cycle en compte **2 980 834**, et le
+  million a été franchi le **29/09**. Transfert sortant du cycle : **20,5 Go** (sous les 100 Go de Fast Data Transfer, mais
+  au-dessus des 10 Go de Fast Origin Transfer si ce compteur est celui de l'origine — l'API ne le précise pas).
+  Invocations de fonctions (2 504) et durée (4,5 Go-h) : très loin des limites.
+- **Notre part : ≈ 96 %.** Avant le 26/09, le site faisait ≈ 3 560 requêtes et 27 Mo par jour ; du 26/09 au 02/10 :
+  2 899 025 requêtes et 19,9 Go — dont **2 874 127 requêtes (96,4 % du cycle) et 19,7 Go (96 %) au-dessus de ce niveau**,
+  soit les bancs de P17 → P23 sur www et sur les préversions (le site n'est pas lancé : pas d'autre source de trafic).
 
-- **Limites Hobby** (docs Vercel, lues le 03/10) : par mois, 100 Go de Fast Data Transfer, 10 Go de Fast Origin
-  Transfer, 1 M d'invocations, 4 h de CPU actif. **Cause probable, à confirmer dans le tableau de bord (Usage)** : les
-  bancs de P21 → P23 sur www et sur les préversions (des milliers de pages d'outils chargées, chacune tirant plusieurs
-  Mo de WebAssembly : ffmpeg ≈ 30 Mo, LibRaw, encodeurs). Claude n'a pas accès au tableau d'usage (`vercel usage` : 404).
-- **Ce que seul le propriétaire peut faire** : (a) **passer l'équipe en Pro** (20 $/mois, crédit d'usage inclus, CDN à
-  tarif fixe ; de toute façon exigé dès que le site affiche de la publicité AdSense : Hobby interdit tout usage
-  commercial) ; ou (b) réduire l'usage puis rétablir le projet dans le tableau de bord ; ou (c) écrire au support Vercel.
-  **Recommandation de Claude : (a)**, avant toute autre chose — puis, pour les bancs, ne plus les faire tourner sur www
-  qu'en version courte (voir la règle ci-dessous).
-- **Règle pour la suite (Claude)** : bancs lourds (solidité complète, RAW, pages) **en local et sur une seule
-  préversion** ; sur www, uniquement le contrôle court (pages + téléchargement Chromium) ; jamais plusieurs passages
-  complets de 500 cas sur www.
-- P24 continue **en local** (aucun trafic Vercel) sur la branche `p24-couverture` ; rien n'est fusionné tant que le
-  compte est bloqué (une fusion déclencherait une production refusée). Voir `docs/audit/RAPPORT-p24-couverture-03-10.md`.
+**RÈGLE PERMANENTE — usage Vercel (03/10, tous les chantiers suivants)** :
+1. Les bancs lourds (solidité complète, téléchargements, gros fichiers, RAW, toutes les pages) tournent **en local** sur la
+   construction de production (`next build` + `next start`).
+2. **Une seule fois** sur la préversion, avant la fusion (ce qui demande la vraie plate-forme : routes de service,
+   téléchargements par étapes, service vidéo).
+3. Sur www, après fusion : **vérification légère seulement** — pages principales, un outil par catégorie, RAW, un
+   téléchargement. Jamais un passage complet de solidité sur www.
 
 ### 📋 État P24 — TERMINÉ le 03/10 à 12 h 45 (heure de la machine) ; rien en production (site en 402)
 - **Fait, commité et poussé sur `p24-couverture`** (branche partie de `restauration-avant-p24-03-10` = `43d2b0cb` ;
