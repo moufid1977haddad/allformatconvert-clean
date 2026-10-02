@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import CronPaste from '../../../components/CronPaste';
 export default function CronExpressionPage() {
   const [minute, setMinute] = useState('*');
   const [hour, setHour] = useState('*');
@@ -24,6 +25,7 @@ export default function CronExpressionPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Cron Expression</h1>
         <p className="text-neutral-500 text-center mb-8">Build and validate cron expressions</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
+          <CronPaste onFields={(f) => applyPreset(f.join(' '))} />
           <div className="grid grid-cols-5 gap-2">
             {[['Minute',minute,setMinute],['Hour',hour,setHour],['Day',day,setDay],['Month',month,setMonth],['Weekday',weekday,setWeekday]].map(([label,val,set]) => <div key={label}><label className="block text-xs text-neutral-500 mb-1">{label}</label><input aria-label={label} type="text" value={val} onChange={e => set(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2 font-mono text-center" /></div>)}
           </div>
@@ -53,8 +55,8 @@ export default function CronExpressionPage() {
         faqs={[
           { q: "What is a cron expression?", a: "A string of five space-separated fields — minute, hour, day of month, month, and day of week — that defines when a scheduled task should run." },
           { q: "Is Cron Expression free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it validate my expression or show upcoming run times?", a: "No — there's no syntax checking or 'next run' preview. Whatever you type in each field is joined directly into the output, so double-check the syntax yourself." },
-          { q: "Can I paste an existing cron expression to see what it means in plain English?", a: "No, there's no parser that decodes an expression back into a description — you can only build one field by field, or use a preset." }
+          { q: "Does it validate my expression or show upcoming run times?", a: "Yes. Under the expression it says in plain English when it runs and lists the next five runs in your time zone; an invalid field is reported instead." },
+          { q: "Can I paste an existing cron expression to see what it means in plain English?", a: "Yes. Paste it in 'Paste a whole expression': it is split into the five fields and described. Macros such as @daily are expanded, the command of a crontab line is left out, and a 6- or 7-field Quartz expression is explained rather than misread." }
         ]}
         tips={[
           "Presets fill in all five fields at once for common schedules like 'every hour' or 'every month' — a fast starting point you can then tweak.",

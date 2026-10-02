@@ -173,6 +173,77 @@ const main = (p) => p.locator('main').innerText();
   check('unit-converter: 1 stone = 6.35029318 kg', /6\.35029318 kg/.test(t), '');
   await p.close();
 }
+{ // Number base: any base, exact fractions
+  for (const path of ['developer-tools/number-base-converter', 'math-tools/number-base-converter']) {
+    const p = await open(path);
+    await p.locator('#nb-value').fill('0.1');
+    const bin = await p.locator('[data-base="2"] [data-result]').innerText();
+    await p.locator('#nb-from').selectOption('36'); await p.locator('#nb-value').fill('zz.i');
+    const dec = await p.locator('[data-base="10"] [data-result]').innerText();
+    await p.locator('#nb-to').selectOption('3'); const b3 = await p.locator('[data-base="3"] [data-result]').innerText();
+    await p.locator('#nb-value').fill('z!'); const err = await p.locator('main [role=alert]').innerText().catch(() => '');
+    check(`${path}: 0.1 → 0.000110011…, ZZ.I (base 36) → 1295.5, base 3 shown, bad digit refused`, bin.startsWith('0.0001100110011') && bin.endsWith('…') && dec === '1295.5' && b3 === '1202222.' + '1'.repeat(40) + '…' && /Not a number in base 36/.test(err), `${bin} ${dec} ${b3}`);
+    await p.close();
+  }
+}
+{ // Aspect ratio: missing dimension
+  const p = await open('developer-tools/aspect-ratio');
+  await p.locator('#ar-new-w').fill('1280'); await p.locator('#ar-new-h').fill('100');
+  const h = await p.locator('[data-out="h"]').innerText(), w = await p.locator('[data-out="w"]').innerText();
+  check('aspect-ratio: 16:9 at 1280 wide → 720; 100 high → 178 (exactly 177.777778)', /Height: 720$/.test(h.trim()) && /Width: 178 \(exactly 177\.777778, rounded\)/.test(w), h + ' | ' + w);
+  await p.close();
+}
+{ // Timestamp: chosen zone, skipped hour refused
+  const p = await open('developer-tools/timestamp-converter');
+  await p.locator('#ts-zone').selectOption('Asia/Kolkata');
+  await p.getByRole('textbox').first().fill('0');
+  await p.getByRole('button', { name: 'Convert' }).first().click();
+  const z = await p.locator('[data-zone]').innerText(), date = await p.getByLabel('Date and Time').inputValue();
+  await p.locator('#ts-zone').selectOption('Europe/Paris');
+  await p.getByLabel('Date and Time').fill('2024-03-31T02:30');
+  await p.getByRole('button', { name: 'Convert' }).nth(1).click();
+  const gap = await main(p);
+  check('timestamp: 0 in Kolkata = 05:30 (UTC+05:30); 02:30 on 31/03/2024 in Paris refused (skipped hour)', /05:30:00 \(UTC\+05:30\)/.test(z) && /^1970-01-01T05:30(:00)?$/.test(date) && /does not exist in Europe\/Paris/.test(gap), z + ' ' + date);
+  await p.close();
+}
+{ // Word counter: density
+  const p = await open('text-tools/word-counter');
+  await p.locator('textarea').fill('The cat saw the cat. A cat and a dog. The dog ran.');
+  const rows = await p.locator('[data-density] tbody tr').allInnerTexts();
+  await p.getByRole('button', { name: '2 words' }).click();
+  const two = await p.locator('[data-density]').innerText();
+  check('word-counter: "cat" 3 × 23.1 % of 13 words, stop words left out; no 2-word phrase repeated → sentence', /^cat\s+3\s+23\.1 %/.test(rows[0]) && !rows.some((r) => /^the\b/.test(r)) && /No 2-word phrase appears more than once/.test(two), rows.slice(0, 3).join(' / '));
+  await p.close();
+}
+{ // Cron: paste
+  const p = await open('developer-tools/cron-expression-builder');
+  await p.locator('#cron-paste').fill('30 4 * * 1-5 /usr/bin/backup.sh');
+  const vals = await Promise.all(['Minute', 'Hour', 'Day', 'Month', 'Weekday'].map((l) => p.getByLabel(l, { exact: true }).inputValue()));
+  const note = await p.locator('[data-cron-note]').innerText();
+  await p.locator('#cron-paste').fill('0 15 10 ? * MON-FRI');
+  const q = await p.locator('[data-cron-note]').innerText();
+  check('cron: crontab line split into 5 fields, command left out and said; Quartz explained', vals.join(' ') === '30 4 * * 1-5' && /command/.test(note) && /6 fields/.test(q), vals.join(' '));
+  await p.close();
+}
+{ // Color: alpha + contrast
+  const p = await open('converter-tools/color-converter');
+  await p.locator('#cc-hex').fill('#3b82f680');
+  const rgb = await p.locator('[data-css="rgb"]').innerText(), hsl = await p.locator('[data-css="hsl"]').innerText();
+  const c = await p.locator('[data-contrast]').innerText();
+  check('color: #3b82f680 → rgba(59, 130, 246, 0.502), hsla; contrast on white 3.68:1 (AA large only)', rgb === 'rgba(59, 130, 246, 0.502)' && /^hsla\(/.test(hsl) && /3\.68:1 — AA large text only/.test(c), rgb + ' ' + c.replace(/\n/g, ' '));
+  await p.close();
+}
+{ // Unit converter: fuel economy
+  const p = await open('converter-tools/unit-converter');
+  await p.getByRole('button', { name: 'Fuel economy', exact: true }).click();
+  await p.locator('#uc-from').selectOption('mpg (US)'); await p.locator('#uc-to').selectOption('L/100 km');
+  await p.locator('main input').first().fill('30');
+  const r = await p.locator('[data-result]').innerText();
+  await p.locator('main input').first().fill('0');
+  const z = await main(p);
+  check('unit-converter: 30 mpg (US) = 7.84048611111 L/100 km; 0 refused', /^7\.840486111/.test(r) && /must be more than 0/.test(z), r);
+  await p.close();
+}
 await b.close();
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);
 process.exit(fails ? 1 : 0);

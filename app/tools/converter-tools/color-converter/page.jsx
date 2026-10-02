@@ -11,9 +11,17 @@ const hexToRgb = (hex) => {
   const s = hex.trim().replace(/^#/, '');
   if (/^[a-f\d]{3}$/i.test(s)) return { r: parseInt(s[0] + s[0], 16), g: parseInt(s[1] + s[1], 16), b: parseInt(s[2] + s[2], 16) };
   if (/^[a-f\d]{6}$/i.test(s)) return { r: parseInt(s.slice(0, 2), 16), g: parseInt(s.slice(2, 4), 16), b: parseInt(s.slice(4, 6), 16) };
+  // P24 (03/10): CSS Color 4 hex with alpha, #RGBA and #RRGGBBAA (ColorHexa, RapidTables)
+  if (/^[a-f\d]{4}$/i.test(s)) return { ...hexToRgb(s.slice(0, 3)), a: parseInt(s[3] + s[3], 16) / 255 };
+  if (/^[a-f\d]{8}$/i.test(s)) return { ...hexToRgb(s.slice(0, 6)), a: parseInt(s.slice(6), 16) / 255 };
   return null;
 };
 const rgbToHex = ({ r, g, b }) => '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+const alphaHex = (a) => (a < 1 ? Math.round(a * 255).toString(16).padStart(2, '0') : '');
+const alphaText = (a) => String(Math.round(a * 1000) / 1000);
+// WCAG 2 relative luminance and contrast ratio (of the opaque colour)
+const luminance = ({ r, g, b }) => { const f = (x) => { x /= 255; return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+const contrast = (a, b) => { const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
 
 const rgbToHsl = ({ r, g, b }) => {
   r /= 255; g /= 255; b /= 255;
@@ -63,7 +71,7 @@ const cmykToRgb = ({ c, m, y, k }) => {
 };
 
 const SPACES = [
-  { id: 'hsl', label: 'HSL', keys: [['h', 'H', 360], ['s', 'S%', 100], ['l', 'L%', 100]], from: rgbToHsl, to: hslToRgb, css: (v) => `hsl(${v.h}, ${v.s}%, ${v.l}%)` },
+  { id: 'hsl', label: 'HSL', keys: [['h', 'H', 360], ['s', 'S%', 100], ['l', 'L%', 100]], from: rgbToHsl, to: hslToRgb, css: (v, a = 1) => (a < 1 ? `hsla(${v.h}, ${v.s}%, ${v.l}%, ${alphaText(a)})` : `hsl(${v.h}, ${v.s}%, ${v.l}%)`) },
   { id: 'hsv', label: 'HSV / HSB', keys: [['h', 'H', 360], ['s', 'S%', 100], ['v', 'V%', 100]], from: rgbToHsv, to: hsvToRgb, css: (v) => `hsv(${v.h}, ${v.s}%, ${v.v}%)` },
   { id: 'cmyk', label: 'CMYK', keys: [['c', 'C%', 100], ['m', 'M%', 100], ['y', 'Y%', 100], ['k', 'K%', 100]], from: rgbToCmyk, to: cmykToRgb, css: (v) => `cmyk(${v.c}%, ${v.m}%, ${v.y}%, ${v.k}%)` },
 ];
@@ -72,15 +80,17 @@ export default function ColorConverterPage() {
   const [rgb, setRgb] = useState({ r: 59, g: 130, b: 246 });
   const [hexText, setHexText] = useState('#3b82f6');
   const [hexError, setHexError] = useState('');
+  const [alpha, setAlpha] = useState(1);
   // What the visitor is typing in one space is kept as typed (else 100% cyan would snap back while editing).
   const [editing, setEditing] = useState(null); // { id, values }
 
-  const setFromRgb = (c) => { setRgb(c); setHexText(rgbToHex(c)); setHexError(''); };
+  const setFromRgb = (c, a = alpha) => { setRgb(c); setHexText(rgbToHex(c) + alphaHex(a)); setHexError(''); };
+  const handleAlpha = (val) => { const a = Math.max(0, Math.min(100, Number(val) || 0)) / 100; setAlpha(a); setFromRgb(rgb, a); };
   const handleHex = (val) => {
     setHexText(val); setEditing(null);
     const c = hexToRgb(val);
-    if (c) { setRgb(c); setHexError(''); }
-    else setHexError(val.trim() ? `"${val.trim()}" is not a HEX colour: use 3 or 6 digits 0-9 / A-F, like #3b82f6 or #fff. The fields below still show ${rgbToHex(rgb)}.` : 'Type a HEX colour, like #3b82f6.');
+    if (c) { const { a, ...opaque } = c; setRgb(opaque); setAlpha(a ?? 1); setHexError(''); }
+    else setHexError(val.trim() ? `"${val.trim()}" is not a HEX colour: use 3, 4, 6 or 8 digits 0-9 / A-F, like #3b82f6, #fff or #3b82f680 (with transparency). The fields below still show ${rgbToHex(rgb)}.` : 'Type a HEX colour, like #3b82f6.');
   };
   const handleRgb = (key, val) => { setEditing(null); setFromRgb({ ...rgb, [key]: Math.max(0, Math.min(255, parseInt(val) || 0)) }); };
   const handleSpace = (sp, key, max, val) => {
@@ -92,6 +102,10 @@ export default function ColorConverterPage() {
 
   const copy = (text) => navigator.clipboard.writeText(text);
   const hex = rgbToHex(rgb);
+  const hexA = hex + alphaHex(alpha);
+  const rgbCss = alpha < 1 ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alphaText(alpha)})` : `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+  const onWhite = contrast(rgb, { r: 255, g: 255, b: 255 }), onBlack = contrast(rgb, { r: 0, g: 0, b: 0 });
+  const grade = (x) => (x >= 7 ? 'AAA' : x >= 4.5 ? 'AA' : x >= 3 ? 'AA large text only' : 'fails');
   const input = 'w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center';
 
   return (
@@ -101,15 +115,19 @@ export default function ColorConverterPage() {
         <p className="text-neutral-500 text-center mb-8">Convert between HEX, RGB, HSL, HSV and CMYK</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="flex justify-center">
-            <div className="w-32 h-32 rounded-xl border-4 border-neutral-200" style={{ backgroundColor: hex }} data-swatch={hex} />
+            <div className="w-32 h-32 rounded-xl border-4 border-neutral-200" style={{ backgroundImage: `linear-gradient(${hexA}, ${hexA}), repeating-conic-gradient(#ccc 0 25%, #fff 0 50%)`, backgroundSize: '100% 100%, 16px 16px' }} data-swatch={hexA} />
           </div>
           <div>
             <label htmlFor="cc-hex" className="block text-sm text-neutral-500 mb-1">HEX</label>
             <div className="flex gap-2">
-              <input type="color" value={hex} onChange={e => handleHex(e.target.value)} aria-label="Colour picker" className="w-12 h-12 rounded-lg cursor-pointer bg-neutral-50 border border-neutral-200" />
+              <input type="color" value={hex} onChange={e => { setEditing(null); setFromRgb(hexToRgb(e.target.value)); }} aria-label="Colour picker" className="w-12 h-12 rounded-lg cursor-pointer bg-neutral-50 border border-neutral-200" />
               <input id="cc-hex" type="text" value={hexText} onChange={e => handleHex(e.target.value)} aria-invalid={!!hexError} className="flex-1 bg-neutral-50 border border-neutral-200 rounded-lg p-3 font-mono" />
             </div>
             {hexError && <p className="text-sm text-red-600 mt-1" role="alert">{hexError}</p>}
+          </div>
+          <div>
+            <label htmlFor="cc-alpha" className="block text-sm text-neutral-500 mb-1">Opacity (alpha): {Math.round(alpha * 100)} %</label>
+            <input id="cc-alpha" type="range" min="0" max="100" value={Math.round(alpha * 100)} onChange={(e) => handleAlpha(e.target.value)} className="w-full" />
           </div>
           <div>
             <label className="block text-sm text-neutral-500 mb-1">RGB</label>
@@ -122,8 +140,8 @@ export default function ColorConverterPage() {
               ))}
             </div>
             <div className="flex items-center justify-center gap-2 mt-2">
-              <p className="text-neutral-500 text-sm font-mono" data-css="rgb">rgb({rgb.r}, {rgb.g}, {rgb.b})</p>
-              <button onClick={() => copy(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`)} className="text-xs text-indigo-500 hover:text-indigo-400">Copy</button>
+              <p className="text-neutral-500 text-sm font-mono" data-css="rgb">{rgbCss}</p>
+              <button onClick={() => copy(rgbCss)} className="text-xs text-indigo-500 hover:text-indigo-400">Copy</button>
             </div>
           </div>
           {SPACES.map(sp => {
@@ -140,13 +158,18 @@ export default function ColorConverterPage() {
                   ))}
                 </div>
                 <div className="flex items-center justify-center gap-2 mt-2">
-                  <p className="text-neutral-500 text-sm font-mono" data-css={sp.id}>{sp.css(v)}</p>
-                  <button onClick={() => copy(sp.css(v))} className="text-xs text-indigo-500 hover:text-indigo-400">Copy</button>
+                  <p className="text-neutral-500 text-sm font-mono" data-css={sp.id}>{sp.css(v, alpha)}</p>
+                  <button onClick={() => copy(sp.css(v, alpha))} className="text-xs text-indigo-500 hover:text-indigo-400">Copy</button>
                 </div>
               </div>
             );
           })}
-          <button onClick={() => copy(hex)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy HEX</button>
+          <div className="grid grid-cols-2 gap-2 text-sm" data-contrast>
+            <div className="rounded-lg p-3 border border-neutral-200" style={{ background: '#fff', color: hex }}><b>Text on white</b><div className="text-neutral-700">{onWhite.toFixed(2)}:1 — {grade(onWhite)}</div></div>
+            <div className="rounded-lg p-3 border border-neutral-200" style={{ background: '#000', color: hex }}><b>Text on black</b><div className="text-neutral-200">{onBlack.toFixed(2)}:1 — {grade(onBlack)}</div></div>
+          </div>
+          <p className="text-xs text-neutral-500">WCAG 2 contrast of the opaque colour: 4.5:1 is the AA minimum for body text, 3:1 for large text, 7:1 is AAA.</p>
+          <button onClick={() => copy(hexA)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy HEX</button>
         </div>
       </div>
       <SeoContent
@@ -159,10 +182,11 @@ export default function ColorConverterPage() {
           "If a HEX code is not valid, the page says so and keeps showing the last valid color."
         ]}
         faqs={[
-          { q: "What color formats does Color Converter support?", a: "HEX (3 or 6 digits), RGB, HSL, HSV/HSB and CMYK are all directly editable, and each has its own copy button." },
+          { q: "What color formats does Color Converter support?", a: "HEX (3, 4, 6 or 8 digits — the 4th and 8th carry transparency), RGB, HSL, HSV/HSB and CMYK are all directly editable, and each has its own copy button." },
           { q: "Is Color Converter free to use?", a: "Yes, it's completely free with no registration required." },
           { q: "Is the CMYK value ready for print?", a: "It is the standard formula (K = 1 − max(R, G, B)), the same as most online converters. Printers convert with a color profile for their ink and paper, so check a proof for brand colors." },
-          { q: "Does it support RGBA, HSLA or named colors?", a: "Not currently — there is no alpha/transparency channel and named colors are not accepted." },
+          { q: "Does it support RGBA, HSLA or named colors?", a: "RGBA and HSLA yes: set the opacity slider, or type an 8-digit HEX such as #3b82f680, and the rgba(), hsla() and HEX values carry the transparency. Named colors (like rebeccapurple) are not accepted." },
+          { q: "Does it check contrast?", a: "Yes: it shows the WCAG 2 contrast ratio of the colour as text on white and on black, with the AA / AAA grade (4.5:1 for body text, 3:1 for large text, 7:1 for AAA)." },
           { q: "Is my data private?", a: "Yes, all color math happens locally in your browser — what you enter is never sent to a server." }
         ]}
         tips={[

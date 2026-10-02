@@ -155,3 +155,11 @@ export const reverseWords = (text) => text.split('\n').map((line) => {
   return lead + words.map((w, i) => w + (gaps[i] || '')).join('') + trail;
 }).join('\n');
 export const reverseLines = (text) => text.split('\n').reverse().join('\n');
+
+// P24 (03/10): the words themselves, segmented exactly as countWords counts them, so a keyword density table adds up
+// to the word count shown (wordcounter.net's "Keyword Density").
+export function wordList(text) {
+  if (!text.trim()) return [];
+  if (hasSegmenter) return Array.from(seg('word').segment(text)).filter((s) => s.isWordLike || /[\p{L}\p{N}]/u.test(s.segment)).map((s) => s.segment);
+  return text.match(/[\p{L}\p{N}]+(?:['’.-][\p{L}\p{N}]+)*/gu) || [];
+}

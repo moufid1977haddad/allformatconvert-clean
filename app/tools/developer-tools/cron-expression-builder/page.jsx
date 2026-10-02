@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import CronPaste from '../../../components/CronPaste';
 export default function CronExpressionBuilderPage() {
   const [minute, setMinute] = useState('*');
   const [hour, setHour] = useState('*');
@@ -24,6 +25,7 @@ export default function CronExpressionBuilderPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Cron Expression Builder</h1>
         <p className="text-neutral-500 text-center mb-8">Build and validate cron expressions</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
+          <CronPaste onFields={(f) => apply(f.join(' '))} />
           <div className="grid grid-cols-5 gap-2">
             {[['Minute',minute,setMinute],['Hour',hour,setHour],['Day',day,setDay],['Month',month,setMonth],['Weekday',weekday,setWeekday]].map(([label,val,set]) => (
               <div key={label}><label className="block text-xs text-neutral-500 mb-1">{label}</label><input aria-label={label} type="text" value={val} onChange={e => set(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2 font-mono text-center text-sm" /></div>
@@ -55,7 +57,7 @@ export default function CronExpressionBuilderPage() {
         faqs={[
           { q: "What is a cron expression?", a: "A string of five space-separated fields — minute, hour, day of month, month, and day of week — that defines when a scheduled task should run." },
           { q: "Is Cron Expression Builder free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I paste an existing cron expression to validate it?", a: "You can paste text into any single field, but it won't be split across the five boxes or checked for correctness — only clicking a preset fills in all five fields at once. There's no plain-English breakdown of an expression." },
+          { q: "Can I paste an existing cron expression to validate it?", a: "Yes. Paste it in 'Paste a whole expression': it is split into the five boxes, checked, described in plain English, and its next runs are listed. Macros such as @daily are expanded and a crontab line's command is left out." },
           { q: "What operating systems support cron expressions?", a: "Cron expressions are used by Linux, macOS, Unix, and many scheduling libraries across languages like Python, Java, Node.js, and PHP." }
         ]}
         tips={[
