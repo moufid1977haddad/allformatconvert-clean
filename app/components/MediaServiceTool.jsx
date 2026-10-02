@@ -36,16 +36,26 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
   const [notSmaller, setNotSmaller] = useState(null); // compress: {inputBytes, outputBytes} when nothing smaller exists
   const [error, setError] = useState('');
   const [previewUrl, setPreviewUrl] = useState(null);
+  // P24 review (03/10): the media's duration, read locally, so a tool can check its times against it (a GIF asked from
+  // 10 s for 5 s of a 12-s video came back 2 s long without a word). NaN when this browser cannot read it.
+  const [duration, setDuration] = useState(NaN);
+  const [jobNote, setJobNote] = useState('');
   const inputRef = useRef();
   const abortRef = useRef(null);
   const busy = stage !== null;
 
   useEffect(() => () => { abortRef.current?.abort(); }, []);
   useEffect(() => {
-    if (!file) { setPreviewUrl(null); return; }
+    if (!file) { setPreviewUrl(null); setDuration(NaN); return; }
     const u = URL.createObjectURL(file);
     setPreviewUrl(u);
-    return () => URL.revokeObjectURL(u);
+    setDuration(NaN);
+    const v = document.createElement(file.type.startsWith('audio/') ? 'audio' : 'video');
+    v.preload = 'auto'; // Firefox reads no metadata of an off-page element with "metadata"
+    v.muted = true;
+    v.onloadedmetadata = () => { if (Number.isFinite(v.duration) && v.duration > 0) setDuration(v.duration); };
+    v.src = u;
+    return () => { v.removeAttribute('src'); v.load(); URL.revokeObjectURL(u); };
   }, [file]);
 
   const pick = (e) => {
@@ -58,6 +68,7 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
     setResult(null);
     setNotSmaller(null);
     setError('');
+    setJobNote('');
     // P21 (robustness): an empty file is said at once, never uploaded to the service.
     if (emptyFileProblem(f)) { setFile(null); setError(emptyFileProblem(f, 'convert')); return; }
     if (f.size > MAX_UPLOAD_MB * 1024 * 1024) {
@@ -77,7 +88,10 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
     abortRef.current = ac;
     setStage({ stage: 'ticket' });
     try {
-      const out = await runMediaJob({ file, op, params: buildParams(params), onStage: setStage, signal: ac.signal });
+      const built = buildParams(params, { duration });
+      const { _note, ...jobParams } = built || {};
+      setJobNote(_note || '');
+      const out = await runMediaJob({ file, op, params: jobParams, onStage: setStage, signal: ac.signal });
       if (out.notSmaller) {
         // Not an error and not a success: the honest answer for a video that is already well compressed.
         setNotSmaller({ inputBytes: out.inputBytes, outputBytes: out.outputBytes });
@@ -143,6 +157,7 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
           )}
           {result && (
             <div className="space-y-3">
+              {jobNote && <p className="text-sm text-amber-700" data-job-note>{jobNote}</p>}
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">Before</div><div className="font-bold">{fmt(file.size)}</div></div>
                 <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3"><div className="text-neutral-500 text-xs">After ({result.ext.toUpperCase()})</div><div className="font-bold text-indigo-500">{fmt(result.bytes)}</div></div>

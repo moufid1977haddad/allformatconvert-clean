@@ -49,19 +49,25 @@ const isTiffBytes = (b) => (b[0] === 0x49 && b[1] === 0x49 && b[2] === 0x2a) || 
 async function decodableImage(file, bytes) {
   if (isTiffBytes(bytes)) {
     const worker = new Worker(new URL('../tools/image-tools/tiff-to-png/tiffToPng.worker.js', import.meta.url), { type: 'module' });
+    // P24 review (03/10): every page of a multi-page TIFF (fax, scan) becomes a PDF page; only the first one did, silently
+    const decodePage = (page) => new Promise((resolve, reject) => {
+      let t = setTimeout(() => reject(new Error('this TIFF variant could not be decoded in time')), 20000);
+      worker.onmessage = ({ data }) => {
+        if (data.type === 'decoded') { clearTimeout(t); t = setTimeout(() => reject(new Error('encoding took too long')), 120000); }
+        else if (data.type === 'done') { clearTimeout(t); resolve(data); }
+        else if (data.type === 'error') { clearTimeout(t); reject(new Error(data.notTiff ? 'not a real TIFF file' : 'this TIFF could not be decoded')); }
+      };
+      worker.onerror = () => { clearTimeout(t); reject(new Error('this TIFF could not be decoded')); };
+      const buf = bytes.slice().buffer;
+      worker.postMessage({ buffer: buf, page }, [buf]);
+    });
     try {
-      const blob = await new Promise((resolve, reject) => {
-        let t = setTimeout(() => reject(new Error('this TIFF variant could not be decoded in time')), 20000);
-        worker.onmessage = ({ data }) => {
-          if (data.type === 'decoded') { clearTimeout(t); t = setTimeout(() => reject(new Error('encoding took too long')), 120000); }
-          else if (data.type === 'done') { clearTimeout(t); resolve(data.blob); }
-          else if (data.type === 'error') { clearTimeout(t); reject(new Error(data.notTiff ? 'not a real TIFF file' : 'this TIFF could not be decoded')); }
-        };
-        worker.onerror = () => { clearTimeout(t); reject(new Error('this TIFF could not be decoded')); };
-        const buf = bytes.slice().buffer;
-        worker.postMessage({ buffer: buf }, [buf]);
-      });
-      return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.png', { type: 'image/png' });
+      const base = file.name.replace(/\.[^.]+$/, '');
+      const first = await decodePage(0);
+      const out = new File([first.blob], base + '.png', { type: 'image/png' });
+      out.morePages = [];
+      for (let k = 1; k < (first.pageCount || 1); k++) out.morePages.push(new File([(await decodePage(k)).blob], `${base}-p${k + 1}.png`, { type: 'image/png' }));
+      return out;
     } finally { worker.terminate(); }
   }
   if (isHeicName(file) && !(await imageDims(file))) {
@@ -78,9 +84,24 @@ async function decodableImage(file, bytes) {
 // the image itself keeps every pixel. Measured by scripts/p23/jpg-to-pdf-giant.mjs.
 export const MAX_PAGE_POINTS = 14400;
 export const pageScale = (w, h) => Math.min(1, MAX_PAGE_POINTS / Math.max(w, h));
-function fullPage(pdfDoc, img) {
+function fullPage(pdfDoc, img, layout) {
+  if (layout && layout.size && layout.size !== 'fit') return placedPage(pdfDoc, img, layout);
   const k = pageScale(img.width, img.height), w = img.width * k, h = img.height * k;
   pdfDoc.addPage([w, h]).drawImage(img, { x: 0, y: 0, width: w, height: h });
+}
+
+// P24 (03/10): a page size (A4, Letter), an orientation and a margin, as iLovePDF and PDF24 offer. The picture is
+// scaled to fit inside the margins, never cropped or stretched, and centred; a small picture is not enlarged.
+export const PAGE_SIZES_PT = { a4: [595.28, 841.89], letter: [612, 792], legal: [612, 1008], a5: [419.53, 595.28] };
+function placedPage(pdfDoc, img, { size, orientation = 'auto', marginMm = 0 }) {
+  let [pw, ph] = PAGE_SIZES_PT[size] || PAGE_SIZES_PT.a4;
+  const landscape = orientation === 'landscape' || (orientation === 'auto' && img.width > img.height);
+  if (landscape) [pw, ph] = [ph, pw];
+  const m = (Number(marginMm) || 0) * 72 / 25.4;
+  const aw = Math.max(1, pw - 2 * m), ah = Math.max(1, ph - 2 * m);
+  const k = Math.min(1, aw / img.width, ah / img.height);
+  const w = img.width * k, h = img.height * k;
+  pdfDoc.addPage([pw, ph]).drawImage(img, { x: (pw - w) / 2, y: (ph - h) / 2, width: w, height: h });
 }
 
 // P23 (02/10): a picture that is not embedded as is (PNG, decoded by pdf-lib; WebP, GIF, BMP, HEIC, mirrored JPEG,
@@ -97,7 +118,8 @@ async function assertDecodable(original, file) {
 class SizeError extends Error {}
 
 // Adds a page to pdfDoc; throws Error(`${file.name}: …`) when the file can't be used.
-export async function addImagePage(pdfDoc, original) {
+export async function addImagePage(pdfDoc, original, layout = null) {
+  const placed = !!(layout && layout.size && layout.size !== 'fit');
   const { degrees } = await import('pdf-lib');
   let file = original;
   let bytes = new Uint8Array(await file.arrayBuffer());
@@ -115,12 +137,13 @@ export async function addImagePage(pdfDoc, original) {
         const exifr = (await import('exifr')).default;
         orientation = (await exifr.orientation(bytes)) || 1;
       } catch { orientation = 1; } // no readable EXIF: stored as displayed
-      if ([2, 4, 5, 7].includes(orientation)) {
+      if ([2, 4, 5, 7].includes(orientation) || (placed && orientation !== 1)) { // a page layout: drawn upright first
         await assertDecodable(original, file);
-        fullPage(pdfDoc, await embedUpright(pdfDoc, file));
+        fullPage(pdfDoc, await embedUpright(pdfDoc, file), layout);
         return;
       }
       const img = await pdfDoc.embedJpg(bytes);
+      if (placed) { fullPage(pdfDoc, img, layout); return; }
       const { width: W0, height: H0 } = img;
       const k = pageScale(W0, H0), W = W0 * k, H = H0 * k;
       if (orientation === 6) pdfDoc.addPage([H, W]).drawImage(img, { x: 0, y: W, width: W, height: H, rotate: degrees(-90) });
@@ -131,7 +154,8 @@ export async function addImagePage(pdfDoc, original) {
     }
     await assertDecodable(original, file);
     const png = isPng(bytes) ? await pdfDoc.embedPng(bytes) : await embedUpright(pdfDoc, file);
-    fullPage(pdfDoc, png);
+    fullPage(pdfDoc, png, layout);
+    for (const more of file.morePages || []) fullPage(pdfDoc, await pdfDoc.embedPng(new Uint8Array(await more.arrayBuffer())), layout);
   } catch (e) {
     if (e instanceof SizeError) throw e;
     // P23: a 900 MP PNG ran the browser out of memory ("Array buffer allocation failed") and was reported as unreadable

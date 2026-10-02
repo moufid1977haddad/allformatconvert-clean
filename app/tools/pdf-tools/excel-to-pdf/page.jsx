@@ -10,6 +10,8 @@ export default function ExcelToPdfPage() {
   const [loading, setLoading] = useState(false);
   const [stage, setStage] = useState(null);
   const [error, setError] = useState('');
+  // P24 (03/10): each sheet on one page (Gotenberg singlePageSheets), for sheets wider than a page
+  const [onePage, setOnePage] = useState(false);
   const [done, setDone] = useState(false);
   const [detectedFonts, setDetectedFonts] = useState([]);
   const inputRef = useRef();
@@ -39,7 +41,7 @@ export default function ExcelToPdfPage() {
 
     try {
       setStage(null);
-      const result = await convertOffice({ file: file, endpoint: '/api/convert-to-pdf', onStage: setStage });
+      const result = await convertOffice({ file: file, endpoint: '/api/convert-to-pdf', onStage: setStage, fields: onePage ? { singlePageSheets: 'true' } : {} });
       setDetectedFonts(result.detectedFonts);
       const blob = result.blob;
       const filename = (file.name.replace(/\.[^.]+$/, '') || 'spreadsheet') + '.pdf';
@@ -70,6 +72,7 @@ export default function ExcelToPdfPage() {
             <input ref={inputRef} type="file" accept=".xlsx,.xls,.csv,.ods,.ots,.xlsm,.xlsb,.xltx,.xltm,.xlt" className="hidden" onChange={handleFile} />
           </div>
           <p className="text-neutral-500 text-xs text-center -mt-2">Max {officeMaxLabel(MAX_SPREADSHEET_STAGED_BYTES)} per file</p>
+          <label className="flex items-center gap-2 text-sm text-neutral-700"><input id="xl-one-page" type="checkbox" checked={onePage} onChange={(e) => setOnePage(e.target.checked)} disabled={loading} /> Fit each sheet on one page (a wide sheet is not cut over several pages)</label>
           <button onClick={convert} disabled={!file || loading || file.size > officeMaxBytes(MAX_SPREADSHEET_STAGED_BYTES)} className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">
             {loading && (
               <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden="true" />
@@ -106,7 +109,7 @@ export default function ExcelToPdfPage() {
           { q: "Will my files be uploaded to a server?", a: "Yes. Your file is uploaded securely over HTTPS to our conversion service, which uses LibreOffice to generate the PDF, and is deleted immediately after conversion — it isn't stored or kept." },
           { q: "Can I convert multiple Excel files at once?", a: "No, only one file can be converted at a time." },
           { q: "Will formulas and formatting carry over?", a: "In our tests on .xlsx files, formula results (including cross-sheet lookups), number formats, merged cells, cell borders and color-scale conditional formatting carried over. We did not test macros or very complex conditional formatting, and we measured .xlsx only, not .xls, .csv or .ods." },
-          { q: "Why is my wide spreadsheet split across several pages?", a: "A sheet wider than one page, with no print area or scaling set, is split into pages by groups of columns. Setting the sheet to fit on one page wide in Excel (Page Layout > Scale to Fit) before uploading keeps it together — a sheet set to fit on one page stayed on one page in our test." },
+          { q: "Why is my wide spreadsheet split across several pages?", a: "A sheet wider than one page, with no print area or scaling set, is split into pages by groups of columns. Tick \"Fit each sheet on one page\" to get each sheet on a single page instead, or set the sheet to fit on one page in Excel (Page Layout > Scale to Fit) before uploading." },
         ]}
         tips={[
           "Every sheet in your workbook is converted in its original order, each starting on its own page(s).",

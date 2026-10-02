@@ -31,6 +31,34 @@ if (!ok) check('gif-compressor: result', false, (await p.locator('main').innerTe
   const first = await sharp(out).raw().toBuffer(); const colours = new Set(); for (let i = 0; i < first.length; i += m.channels || 3) colours.add(`${first[i]},${first[i + 1]},${first[i + 2]}`);
   check('gif-compressor: 16 colours and 50% → 100 px wide, still 6 frames, at most 16 colours', m.width === 100 && m.pages === 6 && colours.size <= 16, `${m.width}px ${m.pages} frames ${colours.size} colours ${out.length} B`);
 }
+// P24 review (03/10): GIF to APNG keeps the number of plays; GIF Maker splits an animated GIF into its frames
+const once = path.join(dir, 'once.gif');
+await sharp(raw, { raw: { width: w, height: h * n, channels: 3, pageHeight: h } }).gif({ delay: Array(n).fill(100), loop: 1 }).toFile(once); // plays once
+{
+  const q = await ctx.newPage();
+  await q.goto(`${origin}/tools/gif-tools/gif-to-apng`, { waitUntil: 'load' }); await q.waitForTimeout(800);
+  const plays = async (file) => {
+    await q.locator('input[type=file]').first().setInputFiles(file);
+    await q.getByRole('button', { name: /Convert/ }).first().click();
+    const a = q.locator('a[download]').first(); await a.waitFor({ timeout: 60000 });
+    const href = await a.getAttribute('href');
+    const bytes = Buffer.from(await q.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href));
+    const i = bytes.indexOf('acTL'); const v = i > 0 ? bytes.readUInt32BE(i + 8) : -1;
+    await q.reload(); await q.waitForTimeout(600);
+    return v;
+  };
+  const forever = await plays(anim), one = await plays(once);
+  check('gif-to-apng: a looping GIF loops forever (num_plays 0), a GIF made to play once plays once (1)', forever === 0 && one === 1, `${forever} / ${one}`);
+  await q.close();
+}
+{
+  const q = await ctx.newPage();
+  await q.goto(`${origin}/tools/gif-tools/gif-maker`, { waitUntil: 'load' }); await q.waitForTimeout(800);
+  await q.locator('input[type=file]').first().setInputFiles(anim);
+  const note = await q.locator('[data-frames-note]').innerText({ timeout: 20000 }).catch(() => '');
+  check('gif-maker: an animated GIF added gives its 6 frames (said)', /6 frames were added/.test(note), note);
+  await q.close();
+}
 await b.close();
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);
 process.exit(fails ? 1 : 0);

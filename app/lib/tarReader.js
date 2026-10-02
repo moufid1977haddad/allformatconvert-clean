@@ -65,10 +65,12 @@ export class TarFormatError extends Error {}
 // Returns [{ name, data: Uint8Array }] for every regular file, in archive order.
 export function readTar(bytes) {
   const files = [];
+  const skipped = []; // entries that are not plain files and could not be extracted: listed for the page
   let offset = 0;
   let global = {};
   let pending = {};
   let longName = null;
+  let longLink = null;
   while (offset + 512 <= bytes.length) {
     if (isZeroBlock(bytes, offset)) break;
     if (!checksumOk(bytes, offset)) {
@@ -93,7 +95,7 @@ export function readTar(bytes) {
     if (type === 'x') { pending = parsePax(data); continue; }
     if (type === 'g') { global = { ...global, ...parsePax(data) }; continue; }
     if (type === 'L') { longName = field(data, 0, data.length); continue; }
-    if (type === 'K') continue;
+    if (type === 'K') { longLink = field(data, 0, data.length); continue; } // GNU long link name
 
     if (longName) name = longName;
     if (meta.path) name = meta.path;
@@ -102,7 +104,16 @@ export function readTar(bytes) {
     // '0' and NUL are regular files ('7' is a contiguous file, same thing).
     if ((type === '0' || type === '\0' || type === '7') && !name.endsWith('/')) {
       files.push({ name: name.replace(/^\.\//, ''), data });
-    }
+    } else if (type === '1') {
+      // P24 review (03/10): a hard link is a second name for a file stored earlier — tar extracts it as a copy; it
+      // was dropped without a word
+      const target = (meta.linkpath || longLink || field(bytes, offset - Math.ceil(size / 512) * 512 - 512 + 157, 100)).replace(/^\.\//, '');
+      const src = [...files].reverse().find((f) => f.name === target); // the last copy of a name, as tar extracts it
+      if (src) files.push({ name: name.replace(/^\.\//, ''), data: src.data });
+      else skipped.push(`${name} (link to ${target}, not in the archive)`);
+    } else if (type === '2') skipped.push(`${name} (symbolic link to ${meta.linkpath || field(bytes, offset - Math.ceil(size / 512) * 512 - 512 + 157, 100)})`);
+    else if (type === 'S') skipped.push(`${name} (GNU sparse file, not supported here)`);
   }
+  files.skipped = skipped;
   return files;
 }

@@ -24,7 +24,7 @@ export function fileResponse(bytes: Uint8Array | ArrayBuffer, headers: Record<st
 export async function respondStaged(
   req: NextRequest,
   outExt: "pdf" | "docx" | "xlsx" | "pptx",
-  produce: (file: File) => Promise<NextResponse>,
+  produce: (file: File, body: any) => Promise<NextResponse>, // body: the JSON the browser posted (its option fields too)
   errorShape: (message: string) => Record<string, unknown> = (message) => ({ error: message }),
 ): Promise<NextResponse> {
   let body: any = null;
@@ -45,7 +45,7 @@ export async function respondStaged(
   let res: NextResponse;
   const stopPing = keepStagedAlive(h);
   try {
-    res = await produce(new File([src.blob], h.filename || "document"));
+    res = await produce(new File([src.blob], h.filename || "document"), body);
   } catch (err) {
     await discard(h);
     throw err;

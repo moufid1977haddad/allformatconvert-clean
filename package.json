@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "npm run check-links && node scripts/check-accept-extensions.js && node scripts/check-downloads.js && node scripts/content-checks/instructions.mjs && node scripts/content-checks/privacy-claims.mjs && node scripts/fetch-upscale-model.mjs && next build && node scripts/compat/check-syntax-es2022.mjs",
+    "dev": "node scripts/copy-pdfjs-assets.mjs && next dev",
+    "build": "npm run check-links && node scripts/check-accept-extensions.js && node scripts/check-downloads.js && node scripts/content-checks/instructions.mjs && node scripts/content-checks/privacy-claims.mjs && node scripts/fetch-upscale-model.mjs && node scripts/copy-pdfjs-assets.mjs && next build && node scripts/compat/check-syntax-es2022.mjs",
     "start": "next start",
     "lint": "eslint",
     "check-links": "node scripts/check-tool-links.js",

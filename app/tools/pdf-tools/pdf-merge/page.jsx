@@ -27,6 +27,7 @@ export default function PdfMergePage() {
   const [phase, setPhase] = useState('');
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [bookmarkPerFile, setBookmarkPerFile] = useState(true); // P24: one bookmark per merged file (Sejda, PDF24)
   const inputRef = useRef();
   const workerRef = useRef(null);
 
@@ -148,7 +149,7 @@ export default function PdfMergePage() {
         setLoading(false);
         workerRef.current = null;
         setDownloadUrl(URL.createObjectURL(msg.blob));
-        setStatus(`Merged ${msg.pageCount.toLocaleString()} pages.`);
+        setStatus(`Merged ${msg.pageCount.toLocaleString()} pages.${msg.renamed?.length ? ` ${msg.renamed.length} form field${msg.renamed.length > 1 ? 's were' : ' was'} renamed because two files used the same name (${msg.renamed.slice(0, 3).map(([a, b]) => `${a} → ${b}`).join(', ')}${msg.renamed.length > 3 ? '…' : ''}), so each keeps its own value.` : ''}`);
       } else if (msg.type === 'limit') {
         setLoading(false);
         workerRef.current = null;
@@ -164,7 +165,7 @@ export default function PdfMergePage() {
       workerRef.current = null;
       setError('Error: ' + (err?.message || 'unknown worker error'));
     };
-    worker.postMessage({ files: ready, maxPages });
+    worker.postMessage({ files: ready, maxPages, bookmarkPerFile });
   };
 
   return (
@@ -207,9 +208,12 @@ export default function PdfMergePage() {
               <button onClick={cancel} className="w-full bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-800 dark:text-neutral-200 rounded-xl py-3 font-semibold transition">Cancel</button>
             </div>
           ) : (
+            <>
+            <label className="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-200"><input id="merge-bookmarks" type="checkbox" checked={bookmarkPerFile} onChange={(e) => setBookmarkPerFile(e.target.checked)} disabled={loading} /> Add a bookmark for each file (its own bookmarks are kept under it)</label>
             <button onClick={merge} disabled={files.length < 2} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 text-white rounded-xl py-3 font-semibold transition">
               Merge PDFs
             </button>
+            </>
           )}
           {status && !loading && <p className="text-center text-green-600 dark:text-green-400 text-sm">{status}</p>}
           {files.some(isOffice) && <p className="text-center text-neutral-500 text-xs">Word, Excel and PowerPoint files are converted to PDF on our server first (deleted after conversion; .docx through ConvertAPI). PDFs and images are not sent to our server: only those Office files are.</p>}

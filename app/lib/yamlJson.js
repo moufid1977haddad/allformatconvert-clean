@@ -65,7 +65,8 @@ const exactInt = new yaml.Type('tag:yaml.org,2002:int', {
 
 // Core schema (no timestamp/binary/set conversions), with exact integers.
 const SCHEMA = yaml.FAILSAFE_SCHEMA.extend({
-  implicit: [yaml.types.null, yaml.types.bool, exactInt, yaml.types.float],
+  // P24 review (03/10): the merge key (<<: *base, docker-compose, GitLab CI) was kept as a literal "<<" key
+  implicit: [yaml.types.null, yaml.types.bool, exactInt, yaml.types.float, yaml.types.merge],
   explicit: [],
 });
 

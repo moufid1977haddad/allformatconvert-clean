@@ -23,20 +23,24 @@ export function parseSqlParenList(input, start) {
   const items = [];
   let item = '';
   let inString = false;
+  let quote = "'"; // review (03/10): MySQL also quotes strings with "…" — a "(" inside one opened a level
+  let depth = 0; // P24 review (03/10): NOW(), CONCAT('a', 'b') — a function's own brackets used to close the list
   while (i < n) {
     const c = input[i];
     if (inString) {
       // MySQL (mysqldump) escapes a quote as \' -- 'O\'Brien'. Standard SQL keeps a backslash literal, so 'C:\' closes
       // right after it: a \' followed by a comma or a closing parenthesis is read as that end of string.
-      if (c === '\\' && input[i + 1] === "'" && !/^\s*[,)]/.test(input.slice(i + 2))) { item += "\\'"; i += 2; continue; }
-      if (c === "'") {
-        if (input[i + 1] === "'") { item += "''"; i += 2; continue; }
+      if (c === '\\' && input[i + 1] === quote && !/^\s*[,)]/.test(input.slice(i + 2))) { item += '\\' + quote; i += 2; continue; }
+      if (c === quote) {
+        if (input[i + 1] === quote) { item += quote + quote; i += 2; continue; }
         inString = false; item += c; i++; continue;
       }
       item += c; i++; continue;
     }
-    if (c === "'") { inString = true; item += c; i++; continue; }
-    if (c === ',') { items.push(item.trim()); item = ''; i++; continue; }
+    if (c === "'" || c === '"') { inString = true; quote = c; item += c; i++; continue; }
+    if (c === '(') { depth++; item += c; i++; continue; }
+    if (c === ')' && depth > 0) { depth--; item += c; i++; continue; }
+    if (c === ',' && depth === 0) { items.push(item.trim()); item = ''; i++; continue; }
     if (c === ')') { items.push(item.trim()); return { items, end: i + 1 }; }
     item += c; i++;
   }
@@ -49,6 +53,8 @@ export function parseSqlParenList(input, start) {
 // backslash sequences are kept as written: their meaning differs between MySQL and standard SQL.
 export function unquoteSqlValue(v) {
   const t = v.trim();
+  if (/^NULL$/i.test(t)) return ''; // SQL NULL is an empty CSV field (convertcsv's default), not the word NULL
+  if (t.length >= 2 && t[0] === '"' && t[t.length - 1] === '"') return t.slice(1, -1).replace(/""/g, '"').replace(/\\"/g, '"'); // MySQL "…" strings (P24)
   if (t.length >= 2 && t[0] === "'" && t[t.length - 1] === "'") {
     return t.slice(1, -1).replace(/''/g, "'").replace(/\\'/g, "'");
   }
@@ -61,13 +67,21 @@ const IDENT = '(?:[`"\\[]?[\\w$]+[`"\\]]?)';
 const INSERT_RE = new RegExp(`INSERT\\s+(?:IGNORE\\s+)?INTO\\s+(${IDENT}(?:\\.${IDENT})?)\\s*(\\(|VALUES\\s*\\()`, 'gi');
 
 /** @returns {string} CSV text (header row first) @throws {Error} when no INSERT statement is found */
-export function sqlInsertsToCsv(input) {
+export function sqlInsertsToCsv(input, { table = null } = {}) {
   const rows = [];
   let headers = null;
+  // P24 review (03/10): a dump with INSERTs into several tables put the second table's rows under the first one's
+  // header. One CSV holds one table: the tables are listed and one is chosen (`table`).
+  const tables = [];
+  { INSERT_RE.lastIndex = 0; let m; while ((m = INSERT_RE.exec(input)) !== null) { const t = unquoteIdent(m[1].split('.').pop()); if (!tables.includes(t)) tables.push(t); } }
+  if (tables.length > 1 && !table) { const e = new Error(`This SQL inserts into ${tables.length} tables (${tables.join(', ')}); a CSV holds one table. Choose the table to convert.`); e.tables = tables; throw e; }
+  const only = table || tables[0];
+  let headerCols = null;
   INSERT_RE.lastIndex = 0;
   let match;
   while ((match = INSERT_RE.exec(input)) !== null) {
     const openAt = match.index + match[0].length - 1; // the '(' that ends the match
+    if (unquoteIdent(match[1].split('.').pop()) !== only) { INSERT_RE.lastIndex = openAt + 1; continue; }
     let cols = null;
     let valuesAt = openAt;
     if (match[2] === '(') { // a column list first, then VALUES (
@@ -79,7 +93,10 @@ export function sqlInsertsToCsv(input) {
     let vals = parseSqlParenList(input, valuesAt);
     if (!headers) {
       headers = cols ? cols.items.map(unquoteIdent) : vals.items.map((_, k) => `column_${k + 1}`);
+      headerCols = cols ? headers.join('\u0000') : null;
       rows.push(headers.map(csvField).join(','));
+    } else if (cols && headerCols !== null && cols.items.map(unquoteIdent).join('\u0000') !== headerCols) {
+      throw new Error(`The INSERT statements for ${only} list their columns in different orders or sets (${cols.items.map(unquoteIdent).join(', ')} vs ${headers.join(', ')}): the rows would not line up.`);
     }
     rows.push(vals.items.map(unquoteSqlValue).map(csvField).join(','));
     // Every further tuple of the same statement: VALUES (...), (...), (...);

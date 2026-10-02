@@ -10,6 +10,9 @@ export default function FindReplacePage() {
   const [find, setFind] = useState('');
   const [replace, setReplace] = useState('');
   const [useRegex, setUseRegex] = useState(false);
+  // P24 (03/10): ignore case and whole words (textfixer, every editor's Find & Replace)
+  const [ignoreCase, setIgnoreCase] = useState(false);
+  const [wholeWord, setWholeWord] = useState(false);
   const [result, setResult] = useState('');
   const [hasResult, setHasResult] = useState(false);
   const [count, setCount] = useState(0);
@@ -21,7 +24,9 @@ export default function FindReplacePage() {
     setError('');
     let regex;
     try {
-      regex = new RegExp(useRegex ? find : escapeRegex(find), 'g');
+      const core = useRegex ? find : escapeRegex(find);
+      // whole word: not inside a longer word, letters of any script (Unicode), not only [A-Za-z0-9_]
+      regex = new RegExp(wholeWord ? `(?<![\\p{L}\\p{N}_])(?:${core})(?![\\p{L}\\p{N}_])` : core, 'g' + (ignoreCase ? 'i' : '') + (wholeWord ? 'u' : '')); // u only where \p{} needs it: it changes how some patterns read
     } catch (e) {
       setError(e.message);
       setResult('');
@@ -57,6 +62,10 @@ export default function FindReplacePage() {
             <input type="checkbox" checked={useRegex} onChange={e => setUseRegex(e.target.checked)} />
             Use regular expression
           </label>
+          <div className="flex flex-wrap gap-4 text-sm text-neutral-600">
+            <label className="flex items-center gap-2"><input id="fr-case" type="checkbox" checked={ignoreCase} onChange={(e) => setIgnoreCase(e.target.checked)} /> Ignore case</label>
+            <label className="flex items-center gap-2"><input id="fr-word" type="checkbox" checked={wholeWord} onChange={(e) => setWholeWord(e.target.checked)} /> Whole words only</label>
+          </div>
           <button onClick={doReplace} disabled={!text || !find} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Replace All</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {hasResult && (

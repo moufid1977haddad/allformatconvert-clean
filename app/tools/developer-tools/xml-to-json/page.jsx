@@ -6,6 +6,7 @@ export default function XmlToJsonPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
+  const [note, setNote] = useState('');
   const [converting, setConverting] = useState(false);
   const convert = async () => {
     setConverting(true);
@@ -32,6 +33,12 @@ export default function XmlToJsonPage() {
       const parsed = parser.parse(input);
       setOutput(JSON.stringify(parsed, null, 2));
       setError('');
+      // P24 review (03/10): text mixed with tags (<p>Hello <b>world</b> again</p>) has no JSON form: its text parts are
+      // joined ("Helloagain") and their place among the tags is lost. Said, with the elements concerned.
+      const mixed = new Set();
+      const walk = (v, name) => { if (Array.isArray(v)) return v.forEach((x) => walk(x, name)); if (!v || typeof v !== 'object') return; const keys = Object.keys(v); if (keys.includes('#text') && keys.some((k) => k !== '#text' && !k.startsWith('@_'))) mixed.add(name); for (const k of keys) if (!k.startsWith('@_') && k !== '#text') walk(v[k], k); };
+      walk(parsed, '(root)');
+      setNote(mixed.size ? `<${[...mixed].slice(0, 3).join('>, <')}>${mixed.size > 3 ? ', …' : ''} mix${mixed.size > 1 ? '' : 'es'} text and tags: JSON keeps the text parts joined in "#text", without their place among the tags (and without the spaces around them).` : '');
     } catch (e) {
       setError('Invalid XML' + (e?.message ? `: ${e.message}` : ''));
       setOutput('');
@@ -50,6 +57,7 @@ export default function XmlToJsonPage() {
             <TextDownload text={output} name="data.json" /></div>
           </div>
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+          {note && !error && <p className="text-amber-700 text-sm" data-xml-note>{note}</p>}
           <div className="grid grid-cols-2 gap-3">
             <button onClick={convert} disabled={!input || converting} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">{converting ? 'Converting…' : 'Convert'}</button>
             <button onClick={() => navigator.clipboard.writeText(output)} disabled={!output} className="bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Copy</button>

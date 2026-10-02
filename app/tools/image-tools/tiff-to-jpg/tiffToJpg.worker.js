@@ -1,9 +1,9 @@
-import { CANVAS_MAX_PIXELS, flattenedOnWhite, encodeJpegWasm } from '../../../lib/bigImage';
+import { CANVAS_MAX_PIXELS, flattenedOnWhite, encodeJpegWasm, hexToRgb } from '../../../lib/bigImage';
 import { decodeTiff } from '../../../lib/tiffDecode';
 import { sniffFormat } from '../../../lib/detectFileFormat';
 
 self.onmessage = async (e) => {
-  const { buffer, quality } = e.data;
+  const { buffer, quality, page = 0, background = '#ffffff' } = e.data;
   try {
     // Check the real header bytes before attempting any decode -- an
     // extension is just what the file is named, never proof of what it
@@ -20,7 +20,7 @@ self.onmessage = async (e) => {
       throw err;
     }
 
-    const decoded = await decodeTiff(buffer);
+    const decoded = await decodeTiff(buffer, { page });
     // Defense in depth: even a file that starts with a valid TIFF magic
     // number can fail to yield usable dimensions (a malformed or
     // truncated IFD). Never let undefined/NaN reach OffscreenCanvas.
@@ -33,14 +33,14 @@ self.onmessage = async (e) => {
     const { width: w, height: h } = decoded;
     // The decode is over: the 20 s silence watchdog (meant for a stuck decoder) must not cut a long encode.
     self.postMessage({ type: 'decoded', pixels: w * h });
-    const rgba = flattenedOnWhite(new Uint8ClampedArray(decoded.rgba));
+    const rgba = flattenedOnWhite(new Uint8ClampedArray(decoded.rgba), hexToRgb(background)); // P24: chosen background
     let blob;
     if (w * h <= CANVAS_MAX_PIXELS) {
       const canvas = new OffscreenCanvas(w, h);
       canvas.getContext('2d').putImageData(new ImageData(rgba, w, h), 0, 0);
       blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: quality / 100 });
     } else blob = await encodeJpegWasm(rgba, w, h, quality);
-    self.postMessage({ type: 'done', blob });
+    self.postMessage({ type: 'done', blob, pageCount: decoded.pageCount, page: decoded.page, hasIcc: decoded.hasIcc }); // P24: pages and colour profile reported
   } catch (err) {
     self.postMessage({
       type: 'error',

@@ -47,7 +47,6 @@ const NO_FILE = {
   'text-tools/sticky-notes': 'notes kept in the browser',
   'text-tools/text-comparator': 'the differences, shown on the page',
   'text-tools/word-counter': 'counts',
-  'video-tools/media-player': 'playback',
 };
 // Own download code kept on purpose (reason given in the file itself).
 const OWN_DOWNLOAD_OK = {

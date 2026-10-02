@@ -16,9 +16,25 @@
 
 import { installPolyfills } from './polyfills';
 
+// P24 (03/10): where PDF.js finds its run-time files (copied to public/ by scripts/copy-pdfjs-assets.mjs). Without
+// wasmUrl, a JPEG 2000, JBIG2 or CCITT fax picture — the formats of scanned documents — was skipped with a console
+// warning and the page rendered WHITE (PDF to JPG, Redact, OCR…; measured: scripts/p24/pdfjs-decoders.mjs). Without
+// cMapUrl, the text of a Chinese, Japanese or Korean PDF whose fonts are not embedded came out empty or wrong.
+// Every getDocument of the site goes through here, so they are given once, for all tools.
+function withAssets(pdfjsLib) {
+  const base = `/pdfjs/${pdfjsLib.version}/`;
+  const assets = { wasmUrl: base + 'wasm/', cMapUrl: base + 'cmaps/', cMapPacked: true, iccUrl: base + 'iccs/', standardFontDataUrl: base + 'standard_fonts/' };
+  const getDocument = (src) => {
+    const params = src instanceof Uint8Array || src instanceof ArrayBuffer ? { data: src } : typeof src === 'string' || src instanceof URL ? { url: src } : { ...src };
+    return pdfjsLib.getDocument({ ...assets, ...params });
+  };
+  // a plain copy of the exports (a bundled module's exports are read-only: a Proxy may not return another getDocument)
+  return { ...pdfjsLib, getDocument };
+}
+
 export async function loadPdfjs() {
   installPolyfills(); // also run by instrumentation-client.js; idempotent
   const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
   pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/legacy/build/pdf.worker.mjs', import.meta.url).toString();
-  return pdfjsLib;
+  return withAssets(pdfjsLib);
 }

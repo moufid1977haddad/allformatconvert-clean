@@ -36,7 +36,11 @@ export default function AddVignettePage() {
         gradient.addColorStop(0, 'rgba(0,0,0,0)');
         gradient.addColorStop(1, `rgba(0,0,0,${intensity/100})`);
         ctx.fillStyle = gradient;
+        // P24 review (03/10): drawn only where the picture is (source-atop) — on a transparent PNG the dark veil used to
+        // cover the empty areas too (a logo got a black halo)
+        ctx.globalCompositeOperation = 'source-atop';
         ctx.fillRect(0, 0, W, H);
+        ctx.globalCompositeOperation = 'source-over';
       });
       setResult(resultOf(await encodeRasterLike(out, sourceTypeOf(file)), file.name, 'vignette'));
     } catch (e) { setError(e?.message || 'Could not process this image.'); }

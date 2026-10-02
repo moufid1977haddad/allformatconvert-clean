@@ -112,17 +112,25 @@ async function run({ file, pageOrder, overlays, mode, selectedIndices, maxPages 
     throw new LimitExceededError(`This document has more than ${limit.toLocaleString()} pages, over what this editor reliably handles in a browser tab.`);
   }
 
+  // P24 review (03/10): the font and the images are embedded in the document that is SAVED. They were embedded in the
+  // source document and drawn on the copied pages, so the saved PDF pointed at objects it does not hold: added text
+  // and images were broken (their resource references landed on unrelated content streams).
+  const outDoc = await PDFDocument.create();
   // Embed each unique added image once, even if placed on multiple pages.
   const embeddedImages = new Map();
   const imageItems = overlays.filter((o) => o.type === 'image');
   for (const item of imageItems) {
     if (embeddedImages.has(item.id)) continue;
-    const embedded = item.format === 'png' ? await srcDoc.embedPng(item.bytes) : await srcDoc.embedJpg(item.bytes);
+    const embedded = item.format === 'png' ? await outDoc.embedPng(item.bytes) : await outDoc.embedJpg(item.bytes);
     embeddedImages.set(item.id, embedded);
   }
 
-  const font = await srcDoc.embedFont(StandardFonts.Helvetica);
-  const outDoc = await PDFDocument.create();
+  const font = await outDoc.embedFont(StandardFonts.Helvetica);
+  // a character Helvetica (WinAnsi) cannot write is said before anything is built, not a raw pdf-lib error
+  for (const item of overlays) {
+    if (item.type !== 'text') continue;
+    try { font.encodeText(item.text); } catch { throw new Error(`The added text "${item.text.slice(0, 40)}" has characters the editor's font cannot write (it covers Latin letters, digits and common punctuation). Remove those characters to save.`); }
+  }
 
   const overlaysByOriginalIndex = new Map();
   for (const item of overlays) {

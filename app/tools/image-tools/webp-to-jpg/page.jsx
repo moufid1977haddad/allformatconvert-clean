@@ -11,8 +11,20 @@ export default function WebPtoJPGPage() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  // P24 (03/10): JPG quality and the colour transparent areas become (ezgif: quality factor and background colour)
+  const [quality, setQuality] = useState(92);
+  const [background, setBackground] = useState('#ffffff');
   const inputRef = useRef();
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setFile(f); setResult(null); setError(''); } };
+  const [note, setNote] = useState('');
+  // P24 review (03/10): an animated WebP is drawn as its first frame — said, as WebP to PNG already did
+  const handleFile = async (e) => {
+    const f = e.target.files[0]; e.target.value = '';
+    if (!f) return;
+    setImage(URL.createObjectURL(f)); setFile(f); setResult(null); setError('');
+    const head = new Uint8Array(await f.slice(0, 64).arrayBuffer());
+    const animated = String.fromCharCode(...head.slice(12, 16)) === 'VP8X' && (head[20] & 0x02) !== 0;
+    setNote(animated ? 'This WebP is animated: the JPG will contain its first frame only (JPG has no animation). For every frame, convert it to GIF.' : '');
+  };
   const convert = async () => {
     setError(''); setResult(null);
     if (!file) return;
@@ -20,7 +32,7 @@ export default function WebPtoJPGPage() {
     try {
       const raster = await loadRaster(file);
       const out = raster;
-      setResult(resultOf(await encodeRaster(out, 'image/jpeg'), file.name, ''));
+      setResult(resultOf(await encodeRaster(out, 'image/jpeg', Number(quality), { background }), file.name, ''));
     } catch (e) { setError(e?.message || 'Could not process this image.'); }
     setBusy(false);
   };
@@ -34,7 +46,16 @@ export default function WebPtoJPGPage() {
             {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept=".webp" className="hidden" onChange={handleFile} />
           </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <label className="text-neutral-600">JPG quality: {quality}
+              <input id="jpg-quality" type="range" min="10" max="100" value={quality} onChange={(e) => setQuality(e.target.value)} className="w-full" />
+            </label>
+            <label className="text-neutral-600 flex items-center gap-2">Transparent areas become
+              <input id="jpg-background" type="color" value={background} onChange={(e) => setBackground(e.target.value)} className="w-10 h-8" aria-label="Background colour" />
+            </label>
+          </div>
           <button onClick={convert} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert</button>
+          {note && <p className="text-amber-700 text-center text-sm" data-webp-note>{note}</p>}
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
         </div>

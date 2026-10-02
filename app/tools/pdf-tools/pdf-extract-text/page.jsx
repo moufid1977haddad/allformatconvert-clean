@@ -39,6 +39,8 @@ export default function PdfExtractTextPage() {
         const pageText = itemsToText(textContent.items);
         fullText += 'Page ' + i + ':\n' + pageText + '\n\n';
       }
+      // P24 review (03/10): a scanned PDF gave 'Page 1:', 'Page 2:'… with nothing under them and no explanation
+      if (!fullText.replace(/Page \d+:\n/g, '').trim()) { setText(''); setStatus('This PDF has no text layer: its pages are pictures (a scan). Use PDF OCR to read the text from the pictures.'); setLoading(false); return; }
       setText(fullText);
       setStatus('');
     } catch (err) {

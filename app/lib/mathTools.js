@@ -35,7 +35,9 @@ export async function evaluateExpression(expr, { angle = 'rad', ans = 0, raw = f
     .replace(/÷/g, '/')
     .replace(/√\(/g, 'sqrt(')
     .replace(/\blog\(/g, 'log10(')
-    .replace(/\bln\(/g, 'log(');
+    .replace(/\bln\(/g, 'log(')
+    .replace(/(?<=[\d.)]|\bpi|\be|Ans)\s*(?=Ans\b)/g, '*') // 2Ans is fine already; πAns, AnsAns, )Ans
+    .replace(/\bAns(?=\s*[\d.(]|\s*pi\b|\s*e\b|Ans)/g, 'Ans*'); // Ans2, Ans(2), Ansπ
   const toRad = angle === 'deg' ? Math.PI / 180 : 1;
   const snap = (v) => (Math.abs(v) < 1e-14 ? 0 : v);
   const scope = {
@@ -55,6 +57,7 @@ export async function evaluateExpression(expr, { angle = 'rad', ans = 0, raw = f
   try {
     r = math.evaluate(e, scope);
   } catch (err) {
+    if (/must be non-negative/i.test(err.message)) throw new Error('This is not defined for negative numbers (for example the factorial of a negative number).');
     throw new Error(err.message.startsWith('tan is') ? err.message : `Cannot read this expression: ${err.message}`);
   }
   if (typeof r === 'function' || r === undefined) throw new Error('Incomplete expression.');
@@ -76,14 +79,26 @@ export function statistics(numbers, { quartiles = 'inclusive' } = {}) {
   const n = numbers.length;
   if (n === 0) throw new Error('Enter at least one number.');
   const sorted = [...numbers].sort((a, b) => a - b);
-  const sum = numbers.reduce((a, b) => a + b, 0);
+  // P24 review (03/10): sums are compensated (Neumaier) and taken around a value of the data (shifted), so the mean
+  // stays exact enough for 1e15 + small differences; equal values give an exact 0 spread (0.1 × 3 gave skew -2.449).
+  const ksum = (xs) => { let s = 0, c = 0; for (const x of xs) { const t = s + x; c += Math.abs(s) >= Math.abs(x) ? (s - t) + x : (x - t) + s; s = t; } return s + c; };
+  const shift = sorted[Math.floor(n / 2)];
+  // review (03/10): the mean is the compensated sum / n — the shifted form lost small values next to huge ones that
+  // cancel ([-1e17, 1e17, 3, 4] gave 3.75, not 1.75); deviations are re-centred on their own mean, which removes the
+  // rounding of the mean itself (1e15 + small differences stay exact)
+  const sum = ksum(numbers);
   const mean = sum / n;
+  const constant = sorted[0] === sorted[n - 1];
+  const dev0 = numbers.map((x) => x - mean);
+  const dbar = ksum(dev0) / n;
+  const dev = dev0.map((d) => d - dbar);
   const median = n % 2 ? sorted[(n - 1) / 2] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
   const freq = new Map();
   for (const x of numbers) freq.set(x, (freq.get(x) || 0) + 1);
   const maxF = Math.max(...freq.values());
   const mode = maxF === 1 ? [] : [...freq.keys()].filter((k) => freq.get(k) === maxF).sort((a, b) => a - b);
-  const ss = numbers.reduce((acc, x) => acc + (x - mean) ** 2, 0);
+  // corrected two-pass sum of squares: Σd² − (Σd)²/n removes what the rounding of the mean leaves
+  const ss = constant ? 0 : Math.max(0, ksum(dev.map((d) => d * d)) - ksum(dev) ** 2 / n);
   const popVar = ss / n;
   const sampleVar = n > 1 ? ss / (n - 1) : null;
   // Quartiles by the same method as Excel QUARTILE.INC / calculator.net's default.
@@ -95,14 +110,18 @@ export function statistics(numbers, { quartiles = 'inclusive' } = {}) {
   // P24 (03/10): what calculator.net and Calculator Soup add — each one only where it is defined, never a made-up value
   const sampleSd = sampleVar === null ? null : Math.sqrt(sampleVar);
   const allPositive = numbers.every((x) => x > 0);
-  const geometricMean = allPositive ? Math.exp(numbers.reduce((a, x) => a + Math.log(x), 0) / n) : null;
-  const harmonicMean = allPositive ? n / numbers.reduce((a, x) => a + 1 / x, 0) : null;
-  const standardError = sampleSd === null ? null : sampleSd / Math.sqrt(n);
-  const coefficientOfVariation = sampleSd === null || mean === 0 ? null : sampleSd / Math.abs(mean);
+  // relative to a value of the data, so 1e15-sized or tiny values keep their precision
+  // log(x/shift) by log1p when x is close to shift (exact for 1e15 + k), by a difference of logs when the range is huge
+  const logRatio = (x) => { const r = (x - shift) / shift; return Number.isFinite(r) && r > -1 && Math.abs(r) < 1 ? Math.log1p(r) : Math.log(x) - Math.log(shift); };
+  const geometricMean = allPositive ? (constant ? shift : shift * Math.exp(ksum(numbers.map(logRatio)) / n)) : null;
+  const lo = sorted[0], hSum = allPositive ? ksum(numbers.map((x) => lo / x)) : 0; // min/x <= 1: never overflows
+  const harmonicMean = allPositive && hSum > 0 ? (constant ? shift : lo * n / hSum) : null;
+  const standardError = sampleSd === null ? null : constant ? 0 : sampleSd / Math.sqrt(n);
+  const coefficientOfVariation = sampleSd === null || mean === 0 ? null : constant ? 0 : sampleSd / Math.abs(mean);
   // Excel SKEW (adjusted Fisher-Pearson, n >= 3) and KURT (excess kurtosis, n >= 4); undefined when all values are equal
-  const z = (k) => numbers.reduce((a, x) => a + ((x - mean) / sampleSd) ** k, 0);
-  const skewness = n >= 3 && sampleSd > 0 ? (n / ((n - 1) * (n - 2))) * z(3) : null;
-  const kurtosis = n >= 4 && sampleSd > 0 ? ((n * (n + 1)) / ((n - 1) * (n - 2) * (n - 3))) * z(4) - (3 * (n - 1) ** 2) / ((n - 2) * (n - 3)) : null;
+  const z = (k) => ksum(dev.map((d) => (d / sampleSd) ** k));
+  const skewness = n >= 3 && !constant && sampleSd > 0 ? (n / ((n - 1) * (n - 2))) * z(3) : null;
+  const kurtosis = n >= 4 && !constant && sampleSd > 0 ? ((n * (n + 1)) / ((n - 1) * (n - 2) * (n - 3))) * z(4) - (3 * (n - 1) ** 2) / ((n - 2) * (n - 3)) : null;
   const outliers = iqr === null ? [] : sorted.filter((x) => x < q1 - 1.5 * iqr || x > q3 + 1.5 * iqr);
   return {
     count: n, sum, mean, median, mode, modeCount: maxF, min: sorted[0], max: sorted[n - 1], range: sorted[n - 1] - sorted[0],
@@ -157,7 +176,7 @@ export function describeFraction(f) {
   const whole = abs / f.den;
   const rest = abs % f.den;
   const mixed = f.den === 1n ? String(f.num) : whole === 0n ? `${neg ? '-' : ''}${rest}/${f.den}` : `${neg ? '-' : ''}${whole} ${rest}/${f.den}`;
-  // Exact decimal when the denominator has only 2s and 5s, else 12 digits.
+  // Exact decimal when the denominator has only 2s and 5s, else the repeating form (repeatingDecimal).
   let d = f.den; while (d % 2n === 0n) d /= 2n; while (d % 5n === 0n) d /= 5n;
   let decimal;
   if (d === 1n) {
@@ -177,22 +196,27 @@ export function describeFraction(f) {
 // a / b (a >= 0, b > 0, not terminating) as "int.pre(period)", or, when the period is longer than `max` digits, the
 // first `max` digits followed by "…" (cut, not rounded)
 export function repeatingDecimal(a, b, max = 100) {
+  // the digits before the repeat (one per factor 2 or 5 of b) do not count against the limit: 1/(3·2^120) has a
+  // 1-digit period after 120 digits (review 03/10)
+  let pre = 0, t2 = b, t5 = b, k2 = 0, k5 = 0; while (t2 % 2n === 0n) { t2 /= 2n; k2++; } while (t5 % 5n === 0n) { t5 /= 5n; k5++; } pre = Math.max(k2, k5);
+  max += pre;
   const int = a / b; let r = a % b; const seen = new Map(); let digits = '';
   while (r !== 0n && !seen.has(r) && digits.length < max) { seen.set(r, digits.length); r *= 10n; digits += (r / b).toString(); r %= b; }
   if (r === 0n) return `${int}.${digits}`;
   if (seen.has(r)) { const k = seen.get(r); return `${int}.${digits.slice(0, k)}(${digits.slice(k)})`; }
-  return `${int}.${digits}… (the repeating part is longer than ${max} digits)`;
+  return `${int}.${digits}… (the repeating part is longer than ${max - pre} digits)`;
 }
 
 // P24 (03/10): the working, as Calculator Soup shows it
 export function fractionSteps(a, b, op) {
   const s = (f) => (f.den === 1n ? String(f.num) : `${f.num}/${f.den}`);
+  const p = (n, d) => (n < 0n ? `(${n}/${d})` : `${n}/${d}`); // -2/6 written (−2/6) after an operator
   const lcm = (x, y) => (x / bgcd(x, y)) * y;
   const steps = [];
   if (op === '+' || op === '-') {
     const L = lcm(a.den, b.den), ka = L / a.den, kb = L / b.den, n = op === '+' ? a.num * ka + b.num * kb : a.num * ka - b.num * kb;
     if (a.den !== b.den) steps.push(`Least common denominator of ${a.den} and ${b.den}: ${L}`, `${s(a)} = ${a.num * ka}/${L} and ${s(b)} = ${b.num * kb}/${L}`);
-    steps.push(`${a.num * ka}/${L} ${op} ${b.num * kb}/${L} = ${n}/${L}`);
+    steps.push(`${a.num * ka}/${L} ${op} ${p(b.num * kb, L)} = ${n}/${L}`);
     const g = bgcd(n, L) || 1n; if (g > 1n) steps.push(`Simplify by ${g}: ${n / g}/${L / g}`);
   } else if (op === '*') {
     const n = a.num * b.num, d = a.den * b.den; steps.push(`Multiply across: (${a.num} × ${b.num}) / (${a.den} × ${b.den}) = ${n}/${d}`);

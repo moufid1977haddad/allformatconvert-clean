@@ -162,10 +162,10 @@ export default function CsvToJsonPage() {
         workerRef.current = null;
         if (msg.mode === 'file') {
           offer(msg.blob, 'converted.json');
-          setStatus(`Converted ${msg.rowCount.toLocaleString()} rows.` + numbersNote(msg));
+          setStatus(`Converted ${msg.rowCount.toLocaleString()} rows.` + numbersNote(msg) + (msg.notes?.length ? ` Note: ${msg.notes.join('; ')}.` : ''));
         } else {
           setOutput(msg.json);
-          setStatus(`Converted! ${msg.rowCount.toLocaleString()} rows.` + numbersNote(msg));
+          setStatus(`Converted! ${msg.rowCount.toLocaleString()} rows.` + numbersNote(msg) + (msg.notes?.length ? ` Note: ${msg.notes.join('; ')}.` : ''));
         }
       } else if (msg.type === 'row_limit') {
         setConverting(false);

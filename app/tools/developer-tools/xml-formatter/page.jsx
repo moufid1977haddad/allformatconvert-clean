@@ -82,7 +82,9 @@ export default function XmlFormatterPage() {
       const formatted = splitXmlTags(input).split('\n').map(line => {
         if (line.match(/^<\//)) indent = Math.max(0, indent-1);
         const result = '  '.repeat(indent) + line.trim();
-        if (line.match(/^<[^/!?][^>]*[^/]>$/)) indent++;
+        // P24 review (03/10): one-letter tags (<a>, <b>, <p>) did not open a level while their closing tag removed one
+        const t = line.trim();
+        if (/^<[^/!?][^>]*>$/.test(t) && !t.endsWith('/>')) indent++;
         return result;
       }).join('\n');
       setOutput(formatted);

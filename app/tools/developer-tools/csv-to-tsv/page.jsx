@@ -19,7 +19,9 @@ const MAX_FILE_BYTES = 50 * 1024 * 1024;
 // value is written as it is -- quotes included -- except one that contains a tab
 // or a line break, which would split a column or a row. That one is wrapped in
 // quotes (inner quotes doubled), which is how Excel and LibreOffice read it back.
-const tsvField = (v) => (/[\t\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+// P24 review (03/10): a value that STARTS with a quote ("Hi" she said) is wrapped too — Excel and LibreOffice read a
+// leading quote as an opening one and returned Hi she said.
+const tsvField = (v) => (/[\t\n\r]/.test(v) || v.startsWith('"') ? `"${v.replace(/"/g, '""')}"` : v);
 
 export default function CsvToTsvPage() {
   const [input, setInput] = useState('');

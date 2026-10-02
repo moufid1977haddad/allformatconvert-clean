@@ -12,6 +12,7 @@ export default function TextSorterPage() {
   const sortAZ = () => { setResult(sortLines(text, 'az')); setHasResult(true); };
   const sortZA = () => { setResult(sortLines(text, 'za')); setHasResult(true); };
   const sortByLength = () => { setResult(sortLines(text, 'length')); setHasResult(true); };
+  const sortByNumber = (desc) => { setResult(sortLines(text, desc ? 'number-desc' : 'number')); setHasResult(true); };
   const shuffle = () => {
     const lines = splitLines(text);
     const rnd = new Uint32Array(lines.length);
@@ -35,6 +36,8 @@ export default function TextSorterPage() {
             <button onClick={sortZA} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition text-white">Sort Z-A</button>
             <button onClick={sortByLength} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition text-white">Sort by Length</button>
             <button onClick={shuffle} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition text-white">Shuffle</button>
+            <button onClick={() => sortByNumber(false)} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition text-white">Sort by Number (0-9)</button>
+            <button onClick={() => sortByNumber(true)} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition text-white">Sort by Number (9-0)</button>
           </div>
           {hasResult && (result ? (
             <div className="space-y-2">
@@ -60,7 +63,7 @@ export default function TextSorterPage() {
         faqs={[
           { q: "Is Text Sorter free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Is sorting case-sensitive?", a: "No — Apple and apple sort together, as in a dictionary; when two lines differ only by case or accents, the order is still stable and predictable." },
-          { q: "How are numbers sorted?", a: "By value when they appear at the same place in the line: file2 comes before file10." },
+          { q: "How are numbers sorted?", a: "Sort A-Z compares numbers inside text naturally (file2 before file10). For lists of numbers, Sort by Number reads the number each line starts with — negative numbers and decimals included (-10, -2, 1.25, 1.3, 1.5) — and puts lines without a number after them." },
           { q: "Is the shuffle really random?", a: "Yes — it uses the browser's cryptographic random generator with an unbiased Fisher-Yates shuffle." },
           { q: "Is my text uploaded to a server?", a: "No — everything happens in your browser." }
         ]}

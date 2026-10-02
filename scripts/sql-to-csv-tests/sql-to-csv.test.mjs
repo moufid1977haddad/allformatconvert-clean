@@ -18,8 +18,9 @@ test('double-quoted, bracketed and schema-qualified names; INSERT IGNORE', () =>
 test('no column list: generic headers', () => {
   assert.equal(sqlInsertsToCsv("INSERT INTO t VALUES (1,'a'),(2,'b');"), 'column_1,column_2\n1,a\n2,b');
 });
-test('commas and parentheses inside quoted values; NULL kept as written', () => {
-  assert.equal(sqlInsertsToCsv("INSERT INTO t (a,b) VALUES ('Smith (Jr), II', NULL), ('x', 'y');"), 'a,b\n"Smith (Jr), II",NULL\nx,y');
+// P24 (03/10): SQL NULL is now an empty CSV field (convertcsv's default), no longer the word NULL
+test('commas and parentheses inside quoted values; NULL is an empty field', () => {
+  assert.equal(sqlInsertsToCsv("INSERT INTO t (a,b) VALUES ('Smith (Jr), II', NULL), ('x', 'y');"), 'a,b\n"Smith (Jr), II",\nx,y');
 });
 test('a separate tuple-looking text after the statement is not swallowed', () => {
   assert.equal(sqlInsertsToCsv("INSERT INTO t (a) VALUES (1);\nSELECT (2);"), 'a\n1');

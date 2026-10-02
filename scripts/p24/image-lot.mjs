@@ -176,6 +176,27 @@ if (want('text')) {
   await p.close();
 }
 
+if (want('blur')) { // relevé n° 2: the browser filter made the edges half transparent (whitish frame in a JPG)
+  const red = await save('red.jpg', sharp({ create: { width: 200, height: 150, channels: 3, background: { r: 220, g: 20, b: 20 } } }).jpeg({ quality: 95 }).toBuffer());
+  const p = await open('image-blur');
+  await p.locator('input[type=file]').first().setInputFiles(red);
+  await p.locator('input[type=range]').first().fill('10');
+  await p.getByRole('button', { name: /Apply|Blur/ }).first().click();
+  const r = await result(p);
+  const corner = r.bytes ? await px(r.bytes, 0, 0) : [], edge = r.bytes ? await px(r.bytes, 100, 0) : [];
+  check('image-blur: a plain red picture stays red to its corners (no whitish frame)', corner[0] > 190 && corner[1] < 60 && edge[0] > 190 && edge[1] < 60, `corner ${corner} edge ${edge}`);
+  await p.close();
+}
+if (want('vignette')) { // relevé n° 2: the dark veil covered the transparent areas of a PNG
+  const logo = await save('logo.png', sharp({ create: { width: 200, height: 200, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } }).composite([{ input: { create: { width: 80, height: 80, channels: 4, background: { r: 30, g: 120, b: 220, alpha: 1 } } }, left: 60, top: 60 }]).png().toBuffer());
+  const p = await open('add-vignette');
+  await p.locator('input[type=file]').first().setInputFiles(logo);
+  await p.getByRole('button', { name: /Apply|Add/ }).first().click();
+  const r = await result(p);
+  const corner = r.bytes ? await px(r.bytes, 2, 2) : [], center = r.bytes ? await px(r.bytes, 100, 100) : [];
+  check('add-vignette: transparent corners stay transparent, the logo stays opaque', corner[3] === 0 && center[3] === 255, `corner ${corner} center ${center}`);
+  await p.close();
+}
 await b.close();
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);
 process.exit(fails ? 1 : 0);

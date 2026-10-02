@@ -20,19 +20,28 @@ export default function ScientificCalculatorPage() {
     try {
       const { text, value } = await evaluateExpression(expr, { angle, ans, raw: true });
       setResult(text); setAns(value);
-      setHistory((h) => [{ expr, text, angle }, ...h].slice(0, 10));
+      setHistory((h) => [{ expr: /\bAns\b/.test(expr) ? expr.replace(/\bAns\b/g, `(${ans})`) : expr, text, angle }, ...h].slice(0, 10));
     } catch (e) { setResult(e.message); }
   };
-  const insertAtCursor = (before, after = '') => {
+  // a function key wraps the selection, or (wrapLast) the number / bracket just typed: 4 then 1/x is 1/(4), not 41/(…)
+  // (review 03/10); x² on a typed negative number squares the number: -3 then x² is (-3)^2
+  const insertAtCursor = (before, after = '', wrapLast = false) => {
     const input = inputRef.current;
     if (!input) return;
-    const start = input.selectionStart;
+    let start = input.selectionStart;
     const end = input.selectionEnd;
-    const newVal = expression.slice(0, start) + before + after + expression.slice(end);
+    let inner = expression.slice(start, end);
+    if (!inner && wrapLast) {
+      const m = /(?:(?<=^|[(+\-*/^])-)?(?:\d+\.?\d*(?:e[-+]?\d+)?|\.\d+|π|Ans|\([^()]*\))$/.exec(expression.slice(0, start));
+      if (m) { inner = m[0]; start -= m[0].length; }
+    }
+    const wrapped = inner ? before + inner + after : before + after;
+    const newVal = expression.slice(0, start) + wrapped + expression.slice(end);
+    const caret = inner ? start + wrapped.length : start + before.length;
     setExpression(newVal);
     setTimeout(() => {
       input.focus();
-      input.setSelectionRange(start + before.length, start + before.length);
+      input.setSelectionRange(caret, caret);
     }, 0);
   };
 
@@ -51,9 +60,10 @@ export default function ScientificCalculatorPage() {
     }
     const funcs = ['sin(', 'cos(', 'tan(', 'log(', 'ln(', 'sqrt(', 'asin(', 'acos(', 'atan('];
     if (funcs.includes(val)) { insertAtCursor(val, ')'); return; }
-    if (val === 'x²') { insertAtCursor('^2'); return; }
-    if (val === '1/x') { insertAtCursor('1/(', ')'); return; }
-    if (val === '|x|') { insertAtCursor('abs(', ')'); return; }
+    if (val === 'x²') { insertAtCursor('(', ')^2', true); return; }
+    if (val === '1/x') { insertAtCursor('1/(', ')', true); return; }
+    if (val === '|x|') { insertAtCursor('abs(', ')', true); return; }
+    if (val === 'Ans') { insertAtCursor('Ans'); return; }
     insertAtCursor(val);
   };
 
@@ -144,7 +154,7 @@ export default function ScientificCalculatorPage() {
               <div className="text-xs text-neutral-500 mb-1">History (click to reuse)</div>
               <ul className="space-y-1 text-sm font-mono">
                 {history.map((h, i) => (
-                  <li key={i}><button type="button" onMouseDown={(e) => { e.preventDefault(); setExpression(h.expr); }} className="w-full text-right text-neutral-600 dark:text-neutral-300 hover:text-indigo-600 break-all">{h.expr} = <b>{h.text}</b>{h.angle === 'deg' && /sin|cos|tan/.test(h.expr) ? ' (deg)' : ''}</button></li>
+                  <li key={i}><button type="button" onMouseDown={(e) => { e.preventDefault(); setExpression(h.expr); if (/sin|cos|tan/.test(h.expr)) setAngle(h.angle); }} className="w-full text-right text-neutral-600 dark:text-neutral-300 hover:text-indigo-600 break-all">{h.expr} = <b>{h.text}</b>{/sin|cos|tan/.test(h.expr) ? ` (${h.angle})` : ''}</button></li>
                 ))}
               </ul>
             </div>

@@ -10,10 +10,15 @@ export default function TextRepeaterPage() {
   const [result, setResult] = useState('');
   const [hasResult, setHasResult] = useState(false);
   const [copyError, setCopyError] = useState(false);
+  const [repeatError, setRepeatError] = useState('');
 
   const repeat = () => {
     const sep = separator === 'newline' ? '\n' : separator === 'comma' ? ', ' : separator === 'space' ? ' ' : '';
-    setResult(Array.from({length: count}, () => text).join(sep));
+    // P24 review (03/10): an empty or out-of-range count gave an empty result without a word, or more than the 100 said
+    const n = Number(count);
+    if (!Number.isInteger(n) || n < 1 || n > 100) { setResult(''); setHasResult(false); setRepeatError('Enter a whole number of repetitions from 1 to 100.'); return; }
+    setRepeatError('');
+    setResult(Array.from({length: n}, () => text).join(sep));
     setHasResult(true);
   };
 
@@ -27,7 +32,7 @@ export default function TextRepeaterPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-neutral-500 mb-1">Repeat count</label>
-              <input aria-label="Repeat count" type="number" min="1" max="100" value={count} onChange={e => setCount(parseInt(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" />
+              <input aria-label="Repeat count" type="number" min="1" max="100" value={count} onChange={e => setCount(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" />
             </div>
             <div>
               <label className="block text-sm text-neutral-500 mb-1">Separator</label>
@@ -40,6 +45,7 @@ export default function TextRepeaterPage() {
             </div>
           </div>
           <button onClick={repeat} disabled={!text} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Repeat</button>
+          {repeatError && <p role="alert" className="text-sm text-red-600 text-center">{repeatError}</p>}
           {hasResult && (result ? (
             <div className="space-y-2">
               <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={result} readOnly />

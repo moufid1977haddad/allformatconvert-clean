@@ -11,6 +11,9 @@ export default function PNGtoJPGPage() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  // P24 (03/10): JPG quality and the colour transparent areas become (ezgif: quality factor and background colour)
+  const [quality, setQuality] = useState(92);
+  const [background, setBackground] = useState('#ffffff');
   const inputRef = useRef();
   const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setFile(f); setResult(null); setError(''); } };
   const convert = async () => {
@@ -20,7 +23,7 @@ export default function PNGtoJPGPage() {
     try {
       const raster = await loadRaster(file);
       const out = raster;
-      setResult(resultOf(await encodeRaster(out, 'image/jpeg'), file.name, ''));
+      setResult(resultOf(await encodeRaster(out, 'image/jpeg', Number(quality), { background }), file.name, ''));
     } catch (e) { setError(e?.message || 'Could not process this image.'); }
     setBusy(false);
   };
@@ -33,6 +36,14 @@ export default function PNGtoJPGPage() {
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept=".png" className="hidden" onChange={handleFile} />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <label className="text-neutral-600">JPG quality: {quality}
+              <input id="jpg-quality" type="range" min="10" max="100" value={quality} onChange={(e) => setQuality(e.target.value)} className="w-full" />
+            </label>
+            <label className="text-neutral-600 flex items-center gap-2">Transparent areas become
+              <input id="jpg-background" type="color" value={background} onChange={(e) => setBackground(e.target.value)} className="w-10 h-8" aria-label="Background colour" />
+            </label>
           </div>
           <button onClick={convert} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert</button>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}

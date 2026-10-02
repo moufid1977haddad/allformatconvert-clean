@@ -3,6 +3,7 @@ import { emptyFileProblem } from '../../../lib/fileChecks';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { FileDownload } from '../../../components/FileDownload';
+import { detectEncoding } from '../../../lib/csvEncoding';
 export default function FileConverterPage() {
   const [file, setFile] = useState(null);
   const [format, setFormat] = useState('txt');
@@ -14,7 +15,14 @@ export default function FileConverterPage() {
     if (!file) return;
     setError('');
     try {
-      const text = await file.text();
+      // P24 review (03/10): file.text() always decodes UTF-8 — a Windows-1252 text (Notepad, Excel) gave "caf�". The
+      // encoding is detected as in the CSV tools (BOM, valid UTF-8, else the ANSI code page of the browser language).
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      let { encoding } = detectEncoding(bytes);
+      // review (03/10): a UTF-8 file with a few bad bytes stays UTF-8 (a handful of \uFFFD), not re-read as Windows-1252
+      // throughout ("cafÃ©" everywhere)
+      if (encoding !== 'utf-8' && !/^utf-16/.test(encoding)) { const u = new TextDecoder('utf-8').decode(bytes); const bad = (u.match(/\uFFFD/g) || []).length, good = (u.match(/[\u0080-\uFFFC]/g) || []).length; if (good > bad * 20) encoding = 'utf-8'; }
+      const text = new TextDecoder(encoding).decode(bytes).replace(/^﻿/, '');
       let content = text;
       let mimeType = 'text/plain';
       if (format === 'json') { try { content = JSON.stringify({ content: text }, null, 2); mimeType = 'application/json'; } catch(e) {} }

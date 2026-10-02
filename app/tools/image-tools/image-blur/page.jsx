@@ -27,7 +27,11 @@ export default function ImageBlurPage() {
       const raster = await loadRaster(file);
       // Blur reads neighbours: bands overlap so their seams are invisible (3 sigma for the browser's filter; the
       // computed blur needs gaussianBlurSupport rows, fewer, and is then exact).
-      const native = supportsCanvasFilter();
+      // P24 review (03/10): the browser's blur filter treats the outside of the picture as transparent — the edges came out
+      // half transparent (a whitish frame once flattened to JPG) on Chrome and Firefox, while Safari's computed blur repeats
+      // the edge pixels. The computed blur (graphics processor, else all cores) is used everywhere: one result in every
+      // browser, no frame.
+      const native = false && supportsCanvasFilter();
       const sigma = Number(blur);
       let out;
       // Same test as mapBands: does the whole image fit one canvas here?

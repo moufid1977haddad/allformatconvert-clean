@@ -51,7 +51,7 @@ export default function StatisticsCalculatorPage() {
                 ['Q3', result.q3 === null ? '— (too few values for this method)' : formatStat(result.q3)],
                 ['Interquartile range (IQR)', formatStat(result.iqr)],
                 ['Standard error of the mean', formatStat(result.standardError)],
-                ['Coefficient of variation', result.coefficientOfVariation === null ? '—' : `${formatStat(result.coefficientOfVariation * 100)} %`],
+                ['Coefficient of variation (sample s ÷ |mean|)', result.coefficientOfVariation === null ? '—' : `${formatStat(result.coefficientOfVariation * 100)} %`],
                 ['Skewness (Excel SKEW)', result.skewness === null ? '— (needs 3+ values, not all equal)' : formatStat(result.skewness)],
                 ['Excess kurtosis (Excel KURT)', result.kurtosis === null ? '— (needs 4+ values, not all equal)' : formatStat(result.kurtosis)],
                 ['Sum of squares (Σ(x − mean)²)', formatStat(result.sumOfSquares)],

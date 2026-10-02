@@ -25,6 +25,7 @@ function readField(field, lib) {
 
 export default function Page() {
   const [file, setFile] = useState(null);
+  const [xfa, setXfa] = useState(false);
   const [fields, setFields] = useState([]);
   const [values, setValues] = useState({});
   const [loading, setLoading] = useState(false);
@@ -42,6 +43,7 @@ export default function Page() {
     setError('');
     setChanged({});
     setFields([]);
+    setXfa(false);
     setValues({});
     setLoading(true);
     try {
@@ -50,6 +52,9 @@ export default function Page() {
       const pdfDoc = await lib.PDFDocument.load(await openablePdfBytes(arrayBuffer));
       const fieldList = pdfDoc.getForm().getFields().map((x) => readField(x, lib));
       setFields(fieldList);
+      // P24 review (03/10): an XFA form (Adobe LiveCycle) keeps its fields outside the AcroForm: "No form fields found" was wrong
+      const af = pdfDoc.catalog.lookupMaybe(lib.PDFName.of('AcroForm'), lib.PDFDict);
+      setXfa(!fieldList.length && !!(af && af.get(lib.PDFName.of('XFA'))));
       const vals = {};
       fieldList.forEach(x => { vals[x.name] = x.value; });
       setValues(vals);
@@ -57,6 +62,7 @@ export default function Page() {
     } catch(e) {
       setError('Could not read form fields: ' + e.message);
       setFields([]);
+    setXfa(false);
       setValues({});
     }
     setLoading(false);
@@ -139,7 +145,7 @@ export default function Page() {
               <label className="flex items-center gap-2 text-sm text-neutral-700 pt-2"><input type="checkbox" checked={flatten} onChange={e => { setFlatten(e.target.checked); setResult(null); }} />Flatten the form (values become part of the page and can no longer be edited)</label>
             </div>
           )}
-          {fields.length === 0 && file && !loading && <p className="text-neutral-500 text-sm text-center">No form fields found in this PDF.</p>}
+          {fields.length === 0 && file && !loading && <p className="text-neutral-500 text-sm text-center" data-no-fields>{xfa ? 'This PDF is an XFA form (made with Adobe LiveCycle / Designer): its fields are not standard PDF fields, and only Adobe Acrobat or Reader can fill them. Open it there, or ask the sender for a standard PDF form.' : 'No form fields found in this PDF.'}</p>}
           <button onClick={fillForm} disabled={!file || loading || fields.length === 0} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Processing...' : 'Fill and Download PDF'}
           </button>

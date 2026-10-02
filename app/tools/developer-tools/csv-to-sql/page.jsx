@@ -66,6 +66,7 @@ export default function CsvToSqlPage() {
   const [input, setInput] = useState('');
   const [fileName, setFileName] = useState('');
   const [tableName, setTableName] = useState('my_table');
+  const [dialect, setDialect] = useState('standard'); // P24: quoting and escaping of the target database
   const [output, setOutput] = useState('');
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
@@ -183,7 +184,7 @@ export default function CsvToSqlPage() {
     };
     const delimiter = delimiterChoice === 'auto' ? detectedDelimiter : delimiterChoice;
     const encoding = encodingChoice === 'auto' ? detectedEncoding : encodingChoice;
-    worker.postMessage(file ? { file, mode, maxRows, tableName, delimiter, encoding, typeNumbers } : { text: input, mode, maxRows, tableName, delimiter, typeNumbers });
+    worker.postMessage(file ? { file, mode, maxRows, tableName, delimiter, encoding, typeNumbers, dialect } : { text: input, mode, maxRows, tableName, delimiter, typeNumbers, dialect });
   };
 
   return (
@@ -194,6 +195,12 @@ export default function CsvToSqlPage() {
         <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Uploaded files: up to {fileMaxRowsLabel} rows{isMobile ? ' on this device' : ''} (including the header row, files up to {MAX_FILE_SIZE_LABEL}). Pasted text: up to {PASTE_MAX_ROWS_LABEL} rows. Conversion runs in the background — this tab stays responsive.</p>
         <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div>
+            <label htmlFor="sql-dialect" className="block text-sm text-neutral-500 dark:text-neutral-400 mb-1">Database</label>
+            <select id="sql-dialect" value={dialect} onChange={(e) => setDialect(e.target.value)} disabled={converting} className="w-full mb-3 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-lg p-2 dark:text-white">
+              <option value="standard">Standard SQL — PostgreSQL, SQLite ("quoted" names)</option>
+              <option value="mysql">MySQL / MariaDB (`backticks`, backslashes escaped)</option>
+              <option value="sqlserver">SQL Server ([brackets], N'unicode' strings)</option>
+            </select>
             <label className="block text-sm text-neutral-500 dark:text-neutral-400 mb-1">Table Name</label>
             <input aria-label="Table Name" type="text" value={tableName} onChange={e => setTableName(e.target.value)} disabled={converting} className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-lg p-3 font-mono text-neutral-800 dark:text-neutral-200" />
           </div>

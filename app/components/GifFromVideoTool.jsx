@@ -18,13 +18,20 @@ export default function GifFromVideoTool({ title, subtitle, seo, tool, extra }) 
       subtitle={subtitle}
       buttonLabel="Make GIF"
       initialParams={{ start: '0', length: '5', width: '480', fps: '10' }}
-      buildParams={(p) => ({
-        target: 'gif',
-        gifStart: Math.max(0, Number(p.start) || 0),
-        gifDuration: Math.min(GIF_MAX_SECONDS, Math.max(0.2, Number(p.length) || 5)),
-        gifWidth: Number(p.width),
-        gifFps: Number(p.fps),
-      })}
+      buildParams={(p, { duration } = {}) => {
+        // P24 review (03/10): times are checked, never changed silently — 90 s became 60 s, 0.1 s became 0.2 s, and a
+        // part running past the end of the video gave a shorter GIF without a word
+        const start = Number(p.start), length = Number(p.length);
+        if (!Number.isFinite(start) || start < 0) throw new Error('Start must be a number of seconds, 0 or more.');
+        if (!Number.isFinite(length) || length < 0.2) throw new Error('Length must be at least 0.2 seconds.');
+        if (length > GIF_MAX_SECONDS) throw new Error(`A GIF here lasts at most ${GIF_MAX_SECONDS} seconds; choose a shorter length (or several GIFs).`);
+        let len = length, _note = '';
+        if (Number.isFinite(duration)) {
+          if (start >= duration) throw new Error(`This video lasts ${duration.toFixed(1)} s: the start (${start} s) is after its end.`);
+          if (start + length > duration + 0.05) { len = Math.max(0.2, Math.floor((duration - start) * 10) / 10); _note = `The video ends ${len} s after the start: the GIF lasts ${len} s, not ${length} s.`; }
+        }
+        return { target: 'gif', gifStart: start, gifDuration: len, gifWidth: Number(p.width), gifFps: Number(p.fps), _note };
+      }}
       outName={(name) => name.replace(/\.[^.]+$/, '') + '.gif'}
       controls={({ params, setParams, disabled }) => {
         const field = 'w-full bg-white border border-neutral-200 rounded-lg px-3 py-2 text-sm';

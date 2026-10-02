@@ -12,6 +12,7 @@ import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 const TAR_ACCEPT = '.tar,.tgz,.gz,.taz,application/x-tar,application/x-gtar,application/gzip,application/x-gzip,application/x-compressed-tar';
 
 export default function TarExtractorPage() {
+  const [skippedNote, setSkippedNote] = useState(''); // P24: links and sparse files that are not extracted are listed
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -39,6 +40,7 @@ export default function TarExtractorPage() {
       }
       if (entries.length === 0) setError('This archive contains no files (only folders or links).');
       setFiles(entries.map(({ name, data }) => ({ name, url: URL.createObjectURL(new Blob([data])), size: data.length })));
+      setSkippedNote(entries.skipped?.length ? `Not extracted (${entries.skipped.length}): ${entries.skipped.slice(0, 5).join('; ')}${entries.skipped.length > 5 ? '…' : ''}.` : '');
     } catch (err) {
       setError(err instanceof TarFormatError ? err.message : 'This file could not be read as a TAR archive: ' + (err?.message || String(err)));
     }
@@ -56,6 +58,7 @@ export default function TarExtractorPage() {
           </div>
           {loading && <p className="text-center text-neutral-500">Extracting...</p>}
           {error && <p role="alert" className="text-center text-red-500 text-sm">{error}</p>}
+          {skippedNote && <p className="text-center text-amber-700 text-sm" data-tar-skipped>{skippedNote}</p>}
           {files.length > 0 && (
             <div className="space-y-2">
               <p className="text-green-400 text-center">{files.length} file(s) extracted</p>

@@ -41,7 +41,8 @@ export function removeDuplicateLines(text, { caseSensitive = true, trim = false,
   const out = [];
   let removed = 0;
   for (const line of splitLines(text)) {
-    let key = trim ? line.trim() : line;
+    // P24 review (03/10): "é" typed as one character or as e + accent (macOS, copied text) is the same line
+    let key = (trim ? line.trim() : line).normalize('NFC');
     if (!caseSensitive) key = key.toLocaleLowerCase();
     if (removeEmpty && line.trim() === '') { removed++; continue; }
     if (seen.has(key)) { removed++; continue; }
@@ -62,6 +63,16 @@ export function sortLines(text, mode) {
   if (mode === 'az') return lines.sort(compare).join('\n');
   if (mode === 'za') return lines.sort((a, b) => compare(b, a)).join('\n');
   if (mode === 'length') return lines.sort((a, b) => graphemes(a).length - graphemes(b).length || compare(a, b)).join('\n');
+  // P24 review (03/10): natural order compares digit runs, not values: 1.5 / 1.25 / 1.3 gave 1.3, 1.5, 1.25 and -10 / -2
+  // gave -2, -10. "By number" reads the number each line starts with (sign, decimals, exponent); lines without one
+  // follow, in A-Z order.
+  if (mode === 'number' || mode === 'number-desc') {
+    const lead = (s) => { const m = /^\s*([-+−]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?)/.exec(s); return m ? Number(m[1].replace('−', '-')) : NaN; };
+    const nums = lines.filter((l) => Number.isFinite(lead(l))), rest = lines.filter((l) => !Number.isFinite(lead(l)));
+    const dir = mode === 'number' ? 1 : -1;
+    nums.sort((a, b) => dir * (lead(a) - lead(b)) || compare(a, b));
+    return [...nums, ...rest.sort(compare)].join('\n');
+  }
   throw new Error(`Unknown sort mode ${mode}`);
 }
 

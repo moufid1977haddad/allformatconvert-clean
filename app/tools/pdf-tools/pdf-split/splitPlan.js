@@ -40,6 +40,13 @@ export function planSplit({ mode, spec, every, merge }, total) {
       const pages = Array.from({ length: Math.min(n, total - s) }, (_, i) => s + i);
       groups.push({ label: span(pages), pages });
     }
+  } else if (mode === 'oddeven') {
+    // P24 (03/10): odd pages in one PDF, even pages in another (Sejda; printing a booklet on one-sided printers)
+    if (total === 1) return { error: 'This PDF has only one page: there are no even pages.' };
+    groups = [
+      { label: 'odd', pages: Array.from({ length: Math.ceil(total / 2) }, (_, i) => i * 2) },
+      { label: 'even', pages: Array.from({ length: Math.floor(total / 2) }, (_, i) => i * 2 + 1) },
+    ];
   } else if (mode === 'all') {
     if (total === 1) return { error: 'This PDF has only one page: there is nothing to split.' };
     groups = Array.from({ length: total }, (_, i) => ({ label: String(i + 1), pages: [i] }));

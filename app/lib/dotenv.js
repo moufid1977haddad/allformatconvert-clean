@@ -1,3 +1,4 @@
+import { parseJsonLossless, isLosslessNumber } from './jsonLossless.js';
 // .env <-> JSON (29/09).
 //
 // Measured before: "export KEY=1" produced the key "export KEY"; a quoted
@@ -79,9 +80,15 @@ export function dotenvToJson(src, { types = false, expandVars = false, indent = 
   return { json: JSON.stringify(obj, null, indent), ignored, count: entries.length };
 }
 
+// P24 review (03/10): JSON → .env read the JSON with JSON.parse — {"ID":12345678901234567890} became
+// ID=12345678901234567000 and 1.10 became 1.1. Numbers keep the text they were written with.
+const losslessJson = (v) => (isLosslessNumber(v) ? v.source : Array.isArray(v) ? '[' + v.map(losslessJson).join(',') + ']'
+  : v && typeof v === 'object' ? '{' + Object.keys(v).map((k) => JSON.stringify(k) + ':' + losslessJson(v[k])).join(',') + '}' : JSON.stringify(v));
+
 function envValue(v) {
   if (v === null) return '';
-  if (typeof v === 'object') v = JSON.stringify(v);
+  if (isLosslessNumber(v)) v = v.source;
+  else if (typeof v === 'object') v = losslessJson(v);
   const s = String(v);
   if (s === '') return '';
   // Unquoted is only safe for text dotenv reads back unchanged.
@@ -93,8 +100,8 @@ function envValue(v) {
 }
 
 export function jsonToDotenv(text) {
-  const obj = JSON.parse(text.replace(/^﻿/, ''));
-  if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) throw new Error('The JSON must be an object of KEY: value pairs.');
+  const obj = parseJsonLossless(text.replace(/^﻿/, ''));
+  if (obj === null || typeof obj !== 'object' || Array.isArray(obj) || isLosslessNumber(obj)) throw new Error('The JSON must be an object of KEY: value pairs.');
   const lines = [];
   for (const [k, v] of Object.entries(obj)) {
     if (!/^[\w.-]+$/.test(k)) throw new Error(`"${k}" is not a valid .env variable name (letters, digits, _ . - only).`);

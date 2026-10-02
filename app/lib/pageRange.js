@@ -17,3 +17,22 @@ export function parsePageRange(text, n) {
   }
   return [...pages].sort((x, y) => x - y);
 }
+
+// P24 review (03/10): the same reading, keeping the ORDER written ("3, 1-2" = 3, 1, 2; "5-3" = 5, 4, 3) and repeats,
+// for Reorder Pages, which read "3-5" as 3 (parseInt) and dropped words and pages past the end without a word.
+export function parsePageOrder(text, n) {
+  const t = String(text || '').trim().replace(/\s*[-–]\s*/g, '-');
+  if (!t) throw new Error('Write the new order of the pages, like 3, 1, 2 or 5-1.');
+  const out = [];
+  for (const part of t.split(/[,;\s]+/).filter(Boolean)) {
+    const m = /^(\d+)-(\d+)$/.exec(part) || /^(\d+)$/.exec(part);
+    if (!m) throw new Error(`"${part}" is not a page or a range. Write pages like 3, 1, 2 or 5-1.`);
+    const a = Number(m[1]), b = m.length === 3 ? Number(m[2]) : a;
+    for (const p of [a, b]) {
+      if (p < 1) throw new Error(`"${part}": pages start at 1.`);
+      if (p > n) throw new Error(`This PDF has ${n} page${n > 1 ? 's' : ''}: page ${p} does not exist.`);
+    }
+    if (a <= b) for (let p = a; p <= b; p++) out.push(p); else for (let p = a; p >= b; p--) out.push(p);
+  }
+  return out;
+}

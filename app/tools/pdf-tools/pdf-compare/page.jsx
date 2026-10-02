@@ -68,6 +68,7 @@ export default function Page() {
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {diff && (
             <div className="space-y-1">
+              {(() => { /* P24 review (03/10): two scanned PDFs (pictures, no text) were announced as having no differences */ const t1 = diff.some((d) => d.type !== 'added' && d.line.trim()), t2 = diff.some((d) => d.type !== 'removed' && d.line.trim()); return !t1 || !t2 ? <p role="alert" className="text-sm text-amber-700 text-center" data-no-text>{!t1 && !t2 ? 'Neither PDF has text to compare: scanned pages are pictures. Make them searchable with PDF OCR first, then compare.' : `${!t1 ? file1.name : file2.name} has no text (scanned pages are pictures): use PDF OCR on it first.`}</p> : null; })()}
               <p className="text-sm text-neutral-600 text-center">{diff.filter(d => d.type === 'removed').length} line(s) only in {file1.name} (red) · {diff.filter(d => d.type === 'added').length} line(s) only in {file2.name} (green)</p>
               <div className="font-mono text-xs max-h-96 overflow-y-auto border border-neutral-200 rounded-xl">
                 {diff.map((d, i) => (

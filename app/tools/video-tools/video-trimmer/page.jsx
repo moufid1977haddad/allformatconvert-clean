@@ -176,7 +176,7 @@ export default function VideoTrimmerPage() {
           await ffmpeg.ffprobe(['-v', 'error', '-select_streams', 'v:0', '-read_intervals', `${start}%+#1`, '-skip_frame', 'nokey', '-show_entries', 'frame=pts_time', '-of', 'csv=p=0', inputName, '-o', '/k.txt']);
           const k = firstNumber(await ffmpeg.readFile('/k.txt'));
           if (k !== null && k <= start + 0.001) {
-            const pc = await ffmpeg.exec(['-ss', String(k), '-i', inputName, '-t', String(Math.round((end - k + 1) * 1000) / 1000), '-map', '0:v:0', '-map', '0:a:0?', '-sn', '-dn', '-c', 'copy', '-avoid_negative_ts', 'make_zero', 'piece.mkv']);
+            const pc = await ffmpeg.exec(['-ss', String(k), '-i', inputName, '-t', String(Math.round((end - k + 1) * 1000) / 1000), '-map', '0:v:0', '-map', '0:a?', '-sn', '-dn', '-c', 'copy', '-avoid_negative_ts', 'make_zero', 'piece.mkv']);
             await ffmpeg.ffprobe(['-v', 'error', '-select_streams', 'v:0', '-read_intervals', '%+#1', '-show_entries', 'frame=pts_time', '-of', 'csv=p=0', 'piece.mkv', '-o', '/p.txt']);
             const p0 = firstNumber(await ffmpeg.readFile('/p.txt'));
             const bytes = pc === 0 ? await ffmpeg.readFile('piece.mkv') : null;
@@ -211,8 +211,10 @@ export default function VideoTrimmerPage() {
       // at the exact start and length -- video and sound both last exactly `len` (same as our ffmpeg service).
       const lo = Math.max(0, start - 0.0025).toFixed(4), hi = (start + len - 0.0025).toFixed(4);
       const code = await ffmpeg.exec(precise
-        ? ['-copyts', '-ss', Math.max(0, start - 5).toFixed(3), '-i', inputName, '-map', '0:v:0', '-map', '0:a:0?', '-sn', '-dn', '-vf', `trim=start=${lo}:end=${hi},setpts=PTS-STARTPTS,scale=trunc(iw/2)*2:trunc(ih/2)*2`, '-af', `atrim=start=${start.toFixed(4)}:end=${(start + len).toFixed(4)},asetpts=PTS-STARTPTS`, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', outputName]
-        : ['-ss', String(start), '-i', inputName, '-t', String(len), '-c', 'copy', '-avoid_negative_ts', 'make_zero', outputName]);
+        ? ['-copyts', '-ss', Math.max(0, start - 5).toFixed(3), '-i', inputName, '-map', '0:v:0', '-map', '0:a?', '-sn', '-dn', '-vf', `trim=start=${lo}:end=${hi},setpts=PTS-STARTPTS,scale=trunc(iw/2)*2:trunc(ih/2)*2`, '-af', `atrim=start=${start.toFixed(4)}:end=${(start + len).toFixed(4)},asetpts=PTS-STARTPTS`, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', outputName]
+        // P24 review (03/10): every audio track is kept (a film with two languages lost the second one without a word),
+        // and subtitles where the container takes them as they are (MKV, WebM)
+        : ['-ss', String(start), '-i', inputName, '-t', String(len), '-map', '0:v?', '-map', '0:a?', ...(/\.(mkv|webm)$/i.test(inputName) ? ['-map', '0:s?'] : []), '-dn', '-c', 'copy', '-avoid_negative_ts', 'make_zero', outputName]);
       if (cancelledRef.current) return;
 
       // A resolved exec() is not proof of success: only a non-empty output file is.

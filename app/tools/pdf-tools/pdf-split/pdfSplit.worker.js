@@ -1,5 +1,6 @@
 import { MAX_PAGES } from './config';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
+import { carryOver, carryOutline } from '../../../lib/pdfCarryOver';
 
 class LimitExceededError extends Error {
   constructor(message) {
@@ -31,7 +32,8 @@ async function handleLoad({ file, maxPages }) {
 // files: [{ label, pages: [0-based indices] }], already validated by splitPlan.js in the page.
 async function handleSplit({ files, originalName }) {
   if (!loadedDoc) throw new Error('No PDF loaded.');
-  const { PDFDocument } = await import('pdf-lib');
+  const lib = await import('pdf-lib');
+  const { PDFDocument } = lib;
   const { partName } = await import('./splitPlan');
   const pdfDoc = loadedDoc;
   const totalPages = pdfDoc.getPageCount();
@@ -42,6 +44,10 @@ async function handleSplit({ files, originalName }) {
     const newPdf = await PDFDocument.create();
     const copied = await newPdf.copyPages(pdfDoc, pages);
     copied.forEach((p) => newPdf.addPage(p));
+    // P24 (03/10): each part keeps its form fields, title / author and the bookmarks of its pages (lost before, without
+    // a word), as Organize does (lib/pdfCarryOver.js)
+    carryOver(lib, pdfDoc, newPdf);
+    carryOutline(lib, pdfDoc, newPdf, pages.map((x) => x + 1));
     const bytes = await newPdf.save();
     // Never hand over a part that does not hold the pages it is named after.
     if (newPdf.getPageCount() !== pages.length) throw new Error(`Part ${label} came out with ${newPdf.getPageCount()} pages instead of ${pages.length}.`);

@@ -5,7 +5,20 @@ import { MAX_ROWS } from './config';
 // Standard SQL string-literal escaping: a single quote inside a value must be
 // doubled, otherwise it closes the literal early and corrupts (or injects
 // into) the surrounding statement.
-const escapeSqlString = (v) => v.replace(/'/g, "''");
+// P24 review (03/10): the SQL of the chosen database (convertcsv.com offers the same choice). Before: identifiers were
+// never quoted ("First Name" or "order" gave invalid SQL), a backslash was not escaped for MySQL ('C:\temp\new' stored
+// wrong, 'abc\' broke the statement), VARCHAR(255) truncated longer text in non-strict MySQL, INTEGER overflowed past
+// 2^31, DECIMAL(18,6) rounded 0.1234567, and every number went through a double: a 20-digit id lost its last digits.
+const DIALECTS = {
+  standard: { q: (s) => '"' + s.replace(/"/g, '""') + '"', str: (v) => "'" + v.replace(/'/g, "''") + "'", text: 'TEXT', varcharMax: 10485760, float: 'DOUBLE PRECISION' },
+  mysql: { q: (s) => '`' + s.replace(/`/g, '``') + '`', str: (v) => "'" + v.replace(/\\/g, '\\\\').replace(/'/g, "''") + "'", text: 'LONGTEXT', varcharMax: 16383, float: 'DOUBLE' },
+  sqlserver: { q: (s) => '[' + s.replace(/]/g, ']]') + ']', str: (v) => "N'" + v.replace(/'/g, "''") + "'", text: 'NVARCHAR(MAX)', varcharMax: 4000, float: 'FLOAT', varchar: 'NVARCHAR' },
+};
+// the number exactly as written (separators removed), never through a double
+const numberText = (t, decimalSep) => {
+  const s = (decimalSep === ',' ? t.replace(/[\s.\u00a0\u202f']/g, '').replace(',', '.') : t.replace(/[\s,\u00a0\u202f']/g, '')).replace(/^\+/, '');
+  return /^-?\d+(\.\d+)?([eE][-+]?\d+)?$/.test(s) ? s : null;
+};
 
 class RowLimitExceededError extends Error {
   constructor(limit) {
@@ -15,7 +28,8 @@ class RowLimitExceededError extends Error {
   }
 }
 
-async function run({ file, text, maxRows, mode, tableName, delimiter, encoding, typeNumbers = true }) {
+async function run({ file, text, maxRows, mode, tableName, delimiter, encoding, typeNumbers = true, dialect = 'standard' }) {
+  const D = DIALECTS[dialect] || DIALECTS.standard;
   const limit = maxRows || MAX_ROWS;
   const rows = [];
   const parser = new IncrementalCsvParser((row) => {
@@ -56,14 +70,29 @@ async function run({ file, text, maxRows, mode, tableName, delimiter, encoding, 
   // values written with a '.' whatever the file's decimal separator ("12,5" -> 12.5).
   const decimalSep = detectDecimalSeparator(dataRows, delimiter || ',');
   const numeric = typeNumbers ? numericColumns([headers, ...dataRows], decimalSep) : [];
-  const isInt = headers.map((_, i) => !!numeric[i] && dataRows.every((r) => !r[i] || Number.isInteger(parseLocaleNumber(r[i], decimalSep))));
-  const colType = (i) => (numeric[i] ? (isInt[i] ? 'INTEGER' : 'DECIMAL(18,6)') : 'VARCHAR(255)');
-  const sqlValue = (v, i) => {
-    if (numeric[i]) return v === '' || v === undefined ? 'NULL' : String(parseLocaleNumber(v, decimalSep));
-    return "'" + escapeSqlString(v ?? '') + "'";
+  const texts = headers.map((_, i) => (numeric[i] ? dataRows.map((r) => (r[i] ? numberText(r[i], decimalSep) : null)) : null));
+  // a column is numeric only if every value reads exactly as a number
+  headers.forEach((_, i) => { if (numeric[i] && texts[i].some((t, r) => dataRows[r][i] && t === null)) numeric[i] = false; });
+  const colType = (i) => {
+    if (numeric[i]) {
+      const vals = texts[i].filter(Boolean);
+      if (vals.some((t) => /[eE]/.test(t))) return D.float;
+      const scale = Math.max(0, ...vals.map((t) => (t.split('.')[1] || '').length));
+      const intDigits = Math.max(1, ...vals.map((t) => t.replace('-', '').split('.')[0].replace(/^0+(?=\d)/, '').length));
+      if (!scale) return intDigits <= 9 ? 'INTEGER' : intDigits <= 18 ? 'BIGINT' : `DECIMAL(${Math.min(38, intDigits)}, 0)`;
+      return intDigits + scale <= 38 ? `DECIMAL(${intDigits + scale}, ${scale})` : D.float;
+    }
+    // review (03/10): SQL Server's NVARCHAR(n) counts UTF-16 units (an emoji is 2), MySQL's VARCHAR(n) characters
+    const longest = Math.max(1, ...dataRows.map((r) => (dialect === 'sqlserver' ? (r[i] ?? '').length : [...(r[i] ?? '')].length)));
+    return longest <= D.varcharMax ? `${D.varchar || 'VARCHAR'}(${longest})` : D.text;
   };
-  const create = 'CREATE TABLE ' + table + ' (\n' + headers.map((h, i) => '  ' + h + ' ' + colType(i)).join(',\n') + '\n);\n\n';
-  const inserts = dataRows.map((row) => 'INSERT INTO ' + table + ' (' + headers.join(', ') + ') VALUES (' + row.map((v, i) => sqlValue(v, i)).join(', ') + ');').join('\n');
+  const sqlValue = (v, i) => {
+    if (numeric[i]) return v === '' || v === undefined ? 'NULL' : numberText(v, decimalSep);
+    return D.str(v ?? '');
+  };
+  const t = D.q(table), cols = headers.map((h) => D.q(h)).join(', ');
+  const create = 'CREATE TABLE ' + t + ' (\n' + headers.map((h, i) => '  ' + D.q(h) + ' ' + colType(i)).join(',\n') + '\n);\n\n';
+  const inserts = dataRows.map((row) => 'INSERT INTO ' + t + ' (' + cols + ') VALUES (' + headers.map((_, i) => sqlValue(row[i], i)).join(', ') + ');').join('\n');
   const sqlText = create + inserts;
 
   self.postMessage({ type: 'progress', pct: 97, phase: 'building' });
