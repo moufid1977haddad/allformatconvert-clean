@@ -123,6 +123,12 @@ internes demandent tous une clé ou un billet, mais la bonne fermeture est `--ch
   **Limite dite sur la page** : RTF pour les PDF jusqu'à 4 Mo. Au-delà, le PDF passe par le service média (envoi par
   morceaux), qui ne garde que des sorties pdf/docx/xlsx/pptx/png ; y ajouter rtf/doc est une modification Railway non
   autorisée pour E1 (plan).
+- **Preuve (préversion `onlineconvertools-oua5xpkfz`, vrai ConvertAPI, 3 conversions ≈ 0,03 $ sur 0,05 $ autorisés)** :
+  un rapport d'une page (titre, accents, tableau) → `rapport.rtf` commençant par `{tf`, rouvert dans **Word** (1 tableau)
+  et **LibreOffice** (tous les mots, accents compris) ; une lettre de 3 pages → rouverte dans Word (3 pages, les 3 titres
+  en vraie liste numérotée, la dernière clause présente) et LibreOffice (tout le texte). Constat en route : une ligne
+  identique en tête de chaque page est prise pour un en-tête de page et placée dans l'en-tête du RTF (comme Word le fait
+  d'un titre courant) — comportement du moteur, le même que pour le DOCX en production.
 - **DOC** : **ConvertAPI n'écrit le .doc dans aucun de ses 332 convertisseurs** (seul `doc/to/docx` existe ; lu dans
   `v2.convertapi.com/info/openapi` le 03/10) — le plan de P24 le supposait à tort. Le moyen de CloudConvert / iLovePDF
   pour le .doc : LibreOffice (`--convert-to doc`). Chez nous, le LibreOffice de Gotenberg ne sort que du PDF : il
@@ -143,7 +149,8 @@ internes demandent tous une clé ou un billet, mais la bonne fermeture est `--ch
 0,10 $/page pour couvrir une page dense comptée double, alerte à 50/80/100 %), `app/api/pdf-translate-document`
 (GET : disponible ou non ; POST direct et par morceaux), page : le mode « Whole PDF (layout kept) » n'apparaît que si
 le serveur dit disponible — **aucune promesse sur la page avant**. Tests `scripts/p25/pdf-translate.test.mjs` 26/26
-(compteurs en mémoire, faux Google qui vérifie la signature du jeton et la requête).
+(compteurs en mémoire, faux Google qui vérifie la signature du jeton et la requête). Sur la préversion : GET répond
+`available: false` et la page n'offre que le mode texte, comme avant.
 
 **Revue indépendante (argent et quotas), deux passages.** Premier : 1 **critique vérifié par expérience** — le nombre
 de pages se falsifie (pdf-lib lit les objets dans l'ordre du fichier sans suivre la table xref : un fichier forgé
