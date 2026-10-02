@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendAlert } from "@/lib/alert";
 import { supabaseAdmin } from "@/lib/quota/supabaseAdmin";
-import { GLOBAL_SPEND_CAP_MICROS, TOOL_ERROR_ALERT_THRESHOLD_PER_DAY } from "@/lib/quota/config";
+import { GLOBAL_SPEND_CAP_MICROS, TOOL_ERROR_ALERT_THRESHOLD_PER_DAY, TOOL_MESSAGE_ALERT_THRESHOLD_PER_DAY } from "@/lib/quota/config";
 import { currentUtcMonthKey, currentUtcDayKey } from "@/lib/quota/period";
 import { checkStateTransition } from "@/lib/quota/alertState";
 import { AI_DETECT_MONTHLY_BUDGET_MICROS } from "@/lib/quota/aiDetect";
@@ -161,16 +161,20 @@ async function buildDailyDigest() {
 async function checkToolErrorRates() {
   const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
   const { data, error } = await supabaseAdmin
-    .from("tool_errors").select("tool").gte("created_at", since);
+    .from("tool_errors").select("tool, error_type").gte("created_at", since);
   if (error) {
     console.error("health-check: tool_errors read failed (non-fatal):", error.message);
     return;
   }
 
+  // P25 (03/10): messages a tool shows (error_type "ToolMessage", often a visitor's own mistake) are counted apart
+  // from thrown failures and flagged at their own, higher bar; either one over its bar puts the tool in "problem".
   const counts: Record<string, number> = {};
+  const shown: Record<string, number> = {};
   for (const row of data || []) {
     if (!row.tool) continue;
-    counts[row.tool] = (counts[row.tool] || 0) + 1;
+    if (row.error_type === "ToolMessage") { shown[row.tool] = (shown[row.tool] || 0) + 1; if (!(row.tool in counts)) counts[row.tool] = 0; }
+    else counts[row.tool] = (counts[row.tool] || 0) + 1;
   }
 
   // Every tool that was over threshold on a PRIOR run and has since fallen
@@ -186,12 +190,13 @@ async function checkToolErrorRates() {
   }
 
   for (const [tool, count] of Object.entries(counts)) {
-    const isProblem = count >= TOOL_ERROR_ALERT_THRESHOLD_PER_DAY;
+    const messages = shown[tool] || 0;
+    const isProblem = count >= TOOL_ERROR_ALERT_THRESHOLD_PER_DAY || messages >= TOOL_MESSAGE_ALERT_THRESHOLD_PER_DAY;
     const transition = await checkStateTransition(`tool-error-rate:${tool}`, isProblem);
     if (transition.alert) {
       await sendAlert(
         "tool-error-rate",
-        transition.recovered ? `recovered: ${tool}` : `${tool}: ${count} failures in the last 24h (threshold ${TOOL_ERROR_ALERT_THRESHOLD_PER_DAY})`
+        transition.recovered ? `recovered: ${tool}` : `${tool}: ${count} failures and ${messages} error messages shown in the last 24h (thresholds ${TOOL_ERROR_ALERT_THRESHOLD_PER_DAY} and ${TOOL_MESSAGE_ALERT_THRESHOLD_PER_DAY})`
       );
     }
   }

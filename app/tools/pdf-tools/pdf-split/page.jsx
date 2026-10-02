@@ -7,6 +7,7 @@ import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { planSplit } from './splitPlan';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 // iLovePDF's free modes (splitPlan.js): custom ranges, a file every N pages, every page, chosen pages.
 const MODES = [
@@ -28,7 +29,7 @@ export default function PdfSplitPage() {
   const [bookmarks, setBookmarks] = useState([]);
   const [level, setLevel] = useState(1);
   const [status, setStatus] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [downloads, setDownloads] = useState([]);

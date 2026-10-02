@@ -2,12 +2,13 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { parseNumberList, statistics, formatStat } from '../../../lib/mathTools';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function StatisticsCalculatorPage() {
   const [input, setInput] = useState('');
   const [result, setResult] = useState(null);
 
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [method, setMethod] = useState('inclusive');
   const calculate = (m = method) => {
     try { setResult(statistics(parseNumberList(input), { quartiles: m })); setError(''); }

@@ -4,12 +4,13 @@ import SeoContent from '../../../components/SeoContent';
 import { transcribeAudio, checkAudioSize, audioMaxLabel } from '../../../lib/officeUpload';
 import { encryptedMusicMessage } from '../../../lib/mediaSupport';
 import TranscriptExports from '../../../components/TranscriptExports';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function AudioTranscriberPage() {
   const [output, setOutput] = useState('');
   const [segments, setSegments] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [fileName, setFileName] = useState('');
   const fileRef = useRef();
 

@@ -7,6 +7,7 @@ import { roundedRectPath } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
 import AnimatedImageNote from '../../../components/AnimatedImageNote';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function RoundCornersPage() {
   const [image, setImage] = useState(null);
@@ -17,7 +18,7 @@ export default function RoundCornersPage() {
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
 
   const handleFile = (e) => {

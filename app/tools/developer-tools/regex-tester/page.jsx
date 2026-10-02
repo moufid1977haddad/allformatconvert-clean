@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { TextDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 // P24 (03/10), against regex101 (the reference): matches highlighted in the text with their positions, numbered and
 // named capture groups, a replace preview ($1, $<name>, $&), and the match run in a Worker stopped after 2 s — a pattern
@@ -37,8 +38,8 @@ export default function RegexTesterPage() {
     workerUrl.current ??= URL.createObjectURL(new Blob([WORKER], { type: 'text/javascript' }));
     const w = new Worker(workerUrl.current);
     setBusy(true);
-    const timer = setTimeout(() => { w.terminate(); setBusy(false); setRes({ error: 'This pattern takes too long on this text (more than 2 seconds): it is probably backtracking catastrophically, e.g. nested quantifiers like (a+)+. Simplify the pattern.' }); }, 2000);
-    w.onmessage = (e) => { clearTimeout(timer); w.terminate(); setBusy(false); setRes(e.data.ok ? e.data : { error: e.data.error }); };
+    const timer = setTimeout(() => { w.terminate(); setBusy(false); reportShownMessage('pattern timeout (2 s)'); setRes({ error: 'This pattern takes too long on this text (more than 2 seconds): it is probably backtracking catastrophically, e.g. nested quantifiers like (a+)+. Simplify the pattern.' }); }, 2000);
+    w.onmessage = (e) => { clearTimeout(timer); w.terminate(); setBusy(false); if (!e.data.ok) reportShownMessage(e.data.error); setRes(e.data.ok ? e.data : { error: e.data.error }); };
     w.postMessage({ pattern, flags, text, replacement, doReplace });
   };
 

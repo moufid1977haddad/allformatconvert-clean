@@ -6,12 +6,13 @@ import { MAX_TOTAL_SIZE_BYTES, MAX_TOTAL_SIZE_LABEL, MOBILE_MAX_TOTAL_SIZE_BYTES
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function ZipCreatorPage() {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [status, setStatus] = useState('');
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [isMobile, setIsMobile] = useState(false);

@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { FileDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 const XHTML_NS = 'http://www.w3.org/1999/xhtml';
 
@@ -355,6 +356,7 @@ export default function MobiToEpubPage() {
       setDownloadUrl(URL.createObjectURL(blob));
       setStatus('');
     } catch (err) {
+      reportShownMessage(err);
       setStatus('Error: ' + err.message);
     } finally {
       if (ebook) ebook.destroy();

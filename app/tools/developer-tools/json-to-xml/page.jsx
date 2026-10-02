@@ -3,6 +3,7 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { parseJsonLossless, losslessToText } from '../../../lib/jsonLossless';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 // XML 1.0 element names: a letter or _ first, then letters, digits, _ . - (and
 // : for a namespace prefix). Keys starting with @_ become attributes and #text
 // is element text (fast-xml-parser's conventions), so they are allowed.
@@ -26,7 +27,7 @@ function findInvalidXmlName(v, path) {
 export default function JsonToXmlPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const convert = async () => {
     try {
       // Numbers keep their exact text (12345678901234567890 was written as

@@ -3,13 +3,14 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { truncate as truncateText } from '../../../lib/textTools';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function TextTruncatorPage() {
   const [text, setText] = useState('');
   const [limit, setLimit] = useState(100);
   const [type, setType] = useState('characters');
   const [result, setResult] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [copyError, setCopyError] = useState(false);
   const truncate = () => {
     try { setResult(truncateText(text, limit, type)); setError(''); }

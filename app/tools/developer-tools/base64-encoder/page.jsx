@@ -3,6 +3,7 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { base64Encode, base64Decode } from '../../../lib/textCodecs';
 import { TextDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 export default function Base64EncoderPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -12,7 +13,7 @@ export default function Base64EncoderPage() {
     try {
       const { text, bytes } = base64Decode(input);
       setOutput(text !== null ? text : `This Base64 decodes to ${bytes.length} bytes of binary data, not UTF-8 text (for example an image or a compressed file), so it can't be shown as text.`);
-    } catch(e) { setOutput(e.message); }
+    } catch (e) { reportShownMessage(e); setOutput(e.message); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

@@ -7,6 +7,7 @@ import DownloadReady, { useDownloadable } from '../../../components/DownloadRead
 import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import { formatBytes } from '../../../lib/formatBytes';
+import { useToolError } from '../../../lib/useToolError';
 
 const escapeHtml = (str) => String(str)
   .replace(/&/g, '&amp;')
@@ -149,7 +150,7 @@ export default function MobiToPdfPage() {
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [stage, setStage] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [done, setDone] = useState(false);
   const [skipped, setSkipped] = useState(0); // P24 review (03/10): chapters that could not be read are counted and said
   const inputRef = useRef();

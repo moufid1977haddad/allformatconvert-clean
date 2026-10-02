@@ -6,13 +6,14 @@ import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 import { cropRect } from '../../../lib/pdfCropBox';
 import { FileDownload } from '../../../components/FileDownload';
 import { parsePageRange } from '../../../lib/pageRange';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function Page() {
   const [file, setFile] = useState(null);
   const [margins, setMargins] = useState({ top: 0, bottom: 0, left: 0, right: 0 });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [range, setRange] = useState('');
   const fileRef = useRef();
 

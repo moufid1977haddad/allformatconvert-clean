@@ -7,6 +7,7 @@ import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { HASH_ALGORITHMS, DEFAULT_ALGORITHMS, TAG_NAME, byId, toHex, toBase64, parseExpected, sameBytes, algorithmsOfLength } from '../../../lib/hashAlgorithms';
 import { formatBytes } from '../../../lib/formatBytes';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 const GROUPS = [...new Set(HASH_ALGORITHMS.map((a) => a.group))];
 const fmtSize = formatBytes;
@@ -68,7 +69,7 @@ export default function HashGeneratorPage() {
   const [fileRun, setFileRun] = useState({ sig: '', items: [] }); // items: { name, size, results, secs } | { name, size, error }
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(null); // { name, index, count, pct }
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [dragging, setDragging] = useState(false);
   const [copied, setCopied] = useState('');
   const inputRef = useRef(null);

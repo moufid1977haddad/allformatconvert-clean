@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { TextDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 // P24 (03/10): three ways to encode, as browserling offers — a component (a query value: & ? / # = encoded), a whole
 // URL (its structure : / ? # & = kept, spaces and accents encoded), and strict RFC 3986 (also ! ' ( ) *)
 const ENCODERS = {
@@ -19,8 +20,8 @@ export default function UrlEncoderDevPage() {
   // outputs a raw "+" (it writes %2B), so a round trip is unchanged.
   const [plusAsSpace, setPlusAsSpace] = useState(true);
   const [encMode, setEncMode] = useState('component');
-  const encode = () => { try { setOutput(ENCODERS[encMode](input)); } catch(e) { setOutput('This text has a broken character (a lone surrogate) that URLs cannot carry.'); } };
-  const decode = () => { try { setOutput(decodeURIComponent(plusAsSpace ? input.replace(/\+/g, ' ') : input)); } catch(e) { setOutput('Invalid URL encoding'); } };
+  const encode = () => { try { setOutput(ENCODERS[encMode](input)); } catch (e) { reportShownMessage(e); setOutput('This text has a broken character (a lone surrogate) that URLs cannot carry.'); } };
+  const decode = () => { try { setOutput(decodeURIComponent(plusAsSpace ? input.replace(/\+/g, ' ') : input)); } catch (e) { reportShownMessage(e); setOutput('Invalid URL encoding'); } };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">

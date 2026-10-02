@@ -4,13 +4,14 @@ import SeoContent from '../../../components/SeoContent';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { MAX_PDF_TO_WORD_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
+import { useToolError } from '../../../lib/useToolError';
 
 // Same pipeline as PDF to Word (ConvertAPI, staged upload for large files) -- lib/pdfToOfficeRoute.ts.
 export default function PdfToPptPage() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [stage, setStage] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [done, setDone] = useState(false);
   const inputRef = useRef();
   const [converted, offer, clearConverted] = useDownloadable();

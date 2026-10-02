@@ -11,6 +11,7 @@ import { sniffCsvFile } from '../../../lib/csvEncoding';
 import CsvReadOptions, { numbersNote } from '../../../components/CsvReadOptions';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { formatBytes } from '../../../lib/formatBytes';
+import { useToolError } from '../../../lib/useToolError';
 
 // Only the first 8KB is needed to see several rows -- detectDelimiter only
 // looks at the first 10 non-empty logical lines anyway, so sampling more of
@@ -69,7 +70,7 @@ export default function CsvToSqlPage() {
   const [dialect, setDialect] = useState('standard'); // P24: quoting and escaping of the target database
   const [output, setOutput] = useState('');
   const [status, setStatus] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState('');
   const [converting, setConverting] = useState(false);

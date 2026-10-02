@@ -3,12 +3,13 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { checkPromptLength, MAX_PROMPT_CHARS } from '@/lib/quota/limits';
 import { readAiJson, chatPrompt } from '../../../lib/aiClient';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function AIChatbotPage() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
 
   const process = async () => {
     if (!input.trim()) return;

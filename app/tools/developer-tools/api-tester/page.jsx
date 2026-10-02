@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { reformatJson } from '../../../lib/jsonText';
+import { reportShownMessage } from '../../../lib/useToolError';
 export default function ApiTesterPage() {
   const [url, setUrl] = useState('');
   const [method, setMethod] = useState('GET');
@@ -26,7 +27,7 @@ export default function ApiTesterPage() {
       let data;
       try { data = reformatJson(text, 2); } catch { data = text; }
       setResponse({ status: res.status, statusText: res.statusText, data });
-    } catch(e) { setResponse({ error: e.message }); }
+    } catch (e) { reportShownMessage(e); setResponse({ error: e.message }); }
     setLoading(false);
   };
   return (

@@ -19,7 +19,6 @@ const NO_FILE = {
   'ai-tools/ai-chatbot': 'a conversation',
   'ai-tools/ai-detector': 'a verdict (AI / human shares)',
   'converter-tools/color-converter': 'colour values to copy',
-  'converter-tools/currency-converter': 'an amount',
   'converter-tools/unit-converter': 'a value',
   'developer-tools/api-tester': 'an HTTP response shown on the page',
   'developer-tools/aspect-ratio': 'dimensions',

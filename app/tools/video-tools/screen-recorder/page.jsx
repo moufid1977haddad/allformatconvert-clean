@@ -5,6 +5,7 @@ import { finishRecording } from '../../../lib/mediaSupport';
 import { runMediaJob } from '../../../lib/mediaJob';
 import ProgressBar from '../../../components/ProgressBar';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 // 30/09 (owner): recordings came out as WebM in Chrome, Edge and Firefox, which the iPhone and the Photos app cannot
 // open. Now MP4 (H.264 + AAC) is recorded directly wherever the browser can (Safari, Chrome and Edge 126+ --
@@ -19,7 +20,7 @@ export default function ScreenRecorderPage() {
   const [recording, setRecording] = useState(false);
   const [videoUrl, setVideoUrl] = useState(null);
   const [duration, setDuration] = useState(0);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const mediaRecorder = useRef(null);
   const chunks = useRef([]);
   const timer = useRef(null);

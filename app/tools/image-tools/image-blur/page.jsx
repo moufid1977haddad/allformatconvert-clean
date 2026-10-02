@@ -10,6 +10,7 @@ import { applyGaussianBlurGL } from '../../../lib/glBlur';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
 import AnimatedImageNote from '../../../components/AnimatedImageNote';
+import { useToolError } from '../../../lib/useToolError';
 export default function ImageBlurPage() {
   const [srcType, setSrcType] = useState('image/png');
   const [image, setImage] = useState(null);
@@ -17,7 +18,7 @@ export default function ImageBlurPage() {
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
   const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setFile(f); setSrcType(f.type); setResult(null); setError(''); } };
   const apply = async () => {

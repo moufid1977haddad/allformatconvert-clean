@@ -5,6 +5,7 @@ import SeoContent from '../../../components/SeoContent';
 import { checkPromptLength } from '@/lib/quota/limits';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 const languages = ['English', 'French', 'Spanish', 'German', 'Arabic', 'Chinese', 'Japanese', 'Portuguese', 'Italian', 'Russian'];
 const MAX_PDF_TRANSLATE_PAGES = 5;
@@ -15,7 +16,7 @@ export default function Page() {
   const [targetLang, setTargetLang] = useState('French');
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const fileRef = useRef();
 
   const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setOutput(''); };

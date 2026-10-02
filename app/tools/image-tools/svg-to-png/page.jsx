@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { drawToRaster, encodeRaster, resultOf } from '../../../lib/imageOutput';
 import { checkedDataURL, canvasSizeProblem } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 export default function SvgToPngPage() {
   const [file, setFile] = useState(null);
@@ -69,7 +70,7 @@ export default function SvgToPngPage() {
           const out = await drawToRaster(width, height, (ctx, y) => { if (bg) { ctx.fillStyle = bg; ctx.fillRect(0, 0, width, ctx.canvas.height); } ctx.drawImage(img, 0, -y, width, height); });
           setResult(resultOf(await encodeRaster(out, 'image/png'), file.name, ''));
           setStatus('');
-        } catch (e) { setResult(null); setStatus('Error: ' + e.message); }
+        } catch (e) { reportShownMessage(e); setResult(null); setStatus('Error: ' + e.message); }
         URL.revokeObjectURL(url);
       };
       img.onerror = () => {
@@ -78,6 +79,7 @@ export default function SvgToPngPage() {
       };
       img.src = url;
     } catch (err) {
+      reportShownMessage(err);
       setStatus('Error: ' + err.message);
     }
   };

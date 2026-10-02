@@ -5,6 +5,7 @@ import { beautify } from '../../../lib/codeTools';
 import { reformatJson } from '../../../lib/jsonText';
 import { stripBom } from '../../../lib/jsonLossless';
 import { TextDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 export default function CodeFormatterPage() {
   const [input, setInput] = useState('');
@@ -24,7 +25,7 @@ export default function CodeFormatterPage() {
       // JSON: re-indented from the original text, so 64-bit ids and 1.10 are
       // not rounded (JSON.stringify(JSON.parse()) did that, 29/09).
       setOutput(lang === 'json' ? reformatJson(stripBom(input), 2) : await beautify(input, lang));
-    } catch (e) { setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
+    } catch (e) { reportShownMessage(e); setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

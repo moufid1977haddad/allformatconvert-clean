@@ -5,12 +5,13 @@ import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRas
 import { rasterFromRGBA } from '../../../lib/bigImage';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function WebPtoJPGPage() {
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   // P24 (03/10): JPG quality and the colour transparent areas become (ezgif: quality factor and background colour)
   const [quality, setQuality] = useState(92);
   const [background, setBackground] = useState('#ffffff');

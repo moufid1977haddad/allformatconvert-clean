@@ -4,11 +4,12 @@ import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { finishRecording } from '../../../lib/mediaSupport';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function VoiceRecorderPage() {
   const [recording, setRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [converting, setConverting] = useState(false);
   const [wavUrl, setWavUrl] = useState(null);
   const mediaRecorder = useRef(null);

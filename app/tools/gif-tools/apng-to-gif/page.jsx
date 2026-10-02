@@ -3,11 +3,12 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { writeRgbaFrame, hasTransparency, headerSize, sizeProblem } from '../../../lib/gifEncode';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function ApngToGifPage() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
 
   const handleFile = (e) => {

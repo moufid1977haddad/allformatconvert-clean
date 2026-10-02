@@ -4,12 +4,13 @@ import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 import { FileDownload } from '../../../components/FileDownload';
 import { parsePageRange } from '../../../lib/pageRange';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function PdfRotatePage() {
   const [file, setFile] = useState(null);
   const [rotation, setRotation] = useState(90);
   const [range, setRange] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState(null);

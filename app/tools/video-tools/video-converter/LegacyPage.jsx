@@ -5,11 +5,12 @@ import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import { videoReRecordSupport, captureMediaElementStream, finishRecording } from '../../../lib/mediaSupport';
 import IosOriginalNote from '../../../components/IosOriginalNote';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function LegacyVideoConverterPage() {
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState('');
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [support, setSupport] = useState({ ok: true, mime: null, ext: 'webm', reason: '' });
   const inputRef = useRef();
   const videoRef = useRef();

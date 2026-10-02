@@ -4,10 +4,11 @@ import SeoContent from '../../../components/SeoContent';
 import { reformatJson } from '../../../lib/jsonText';
 import { stripBom } from '../../../lib/jsonLossless';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function JsonMinifierPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const minify = () => { try { setOutput(reformatJson(stripBom(input), 0)); setError(''); } catch(e) { setError('Invalid JSON: ' + e.message); } };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

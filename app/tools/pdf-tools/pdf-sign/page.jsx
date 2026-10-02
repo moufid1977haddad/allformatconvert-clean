@@ -9,6 +9,7 @@ import { placeOnVisiblePage, visibleSize } from '../../../lib/pdfPlace';
 import { Dancing_Script } from 'next/font/google';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 // 30/09 (known gap of 29/09): the signature can also be TYPED (handwriting font) or UPLOADED (photo or scan of a
 // signature, white background removed), as iLovePDF and Smallpdf offer (draw / type / upload). All three end up on the
@@ -31,7 +32,7 @@ export default function Page() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [drawing, setDrawing] = useState(false);
   const [where, setWhere] = useState('last');
   const [pageNo, setPageNo] = useState('1');

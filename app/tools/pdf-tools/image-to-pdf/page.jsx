@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { addImagePage } from '../../../lib/pdfImages';
 import { FileDownload } from '../../../components/FileDownload';
 import ImagePageLayout, { DEFAULT_IMAGE_LAYOUT } from '../../../components/ImagePageLayout';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 export default function ImageToPdfPage() {
   const [files, setFiles] = useState([]);
@@ -43,6 +44,7 @@ export default function ImageToPdfPage() {
       setDownloadUrl(URL.createObjectURL(blob));
       setStatus('');
     } catch (err) {
+      reportShownMessage(err);
       setStatus('Error: ' + err.message);
     }
     setLoading(false);

@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { sha256Hex, dHash, findPairs } from '../../../lib/imageSimilarity';
 import { unreadableImageMessage, imageHeaderSize } from '../../../lib/fileChecks';
 import { CANVAS_MAX_AREA } from '../../../lib/mediaSupport';
+import { useToolError } from '../../../lib/useToolError';
 // Beyond a canvas's largest area (268 MP) a picture is never decoded here (a 30 000 × 30 000 PNG is 3.6 GB once open):
 // compared byte for byte only, and said so. Below it, a picture this browser cannot open is caught and said too.
 const HUGE = CANVAS_MAX_AREA;
@@ -11,7 +12,7 @@ export default function DuplicateImageFinderPage() {
   const [images, setImages] = useState([]);
   const [pairs, setPairs] = useState(null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   // P23: what is wrong with a file is said as soon as it is chosen (it was said only after "Find Duplicates", or
   // never: an empty file had a "fingerprint" like any other). Empty files are left out; a picture this browser cannot
   // open is still compared byte for byte.

@@ -7,6 +7,7 @@ import { encodeRasterLike, sourceTypeOf } from '../../../lib/imageOutput';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
 import { animationOf } from '../../../lib/animatedImage';
+import { useToolError } from '../../../lib/useToolError';
 
 // Modelled on the reference site (iLoveIMG "Resize image"): by pixels with the aspect ratio locked by
 // default and "do not enlarge", or by percentage; the output keeps the source format (it used to always
@@ -27,7 +28,7 @@ export default function ImageResizerPage() {
   const [noEnlarge, setNoEnlarge] = useState(true);
   const [percent, setPercent] = useState(50);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   // P24 (03/10): output format and JPG / WebP quality (imgonline, iLoveIMG's converter): "same" keeps the former behaviour
   const [outFormat, setOutFormat] = useState('same');
   const [outQuality, setOutQuality] = useState(92);

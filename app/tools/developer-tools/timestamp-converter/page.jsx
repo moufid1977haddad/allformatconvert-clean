@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { parseTimestamp, describe, toZoneValue, parseInZone, describeZone, relativeTime } from '../../../lib/timestamp';
+import { useToolError } from '../../../lib/useToolError';
 
 // P24 (03/10): a time zone of the visitor's choice for both directions (epochconverter.com), and the relative time.
 // The visitor's own zone also goes through parseInZone: an hour skipped by daylight saving time is refused instead of
@@ -15,7 +16,7 @@ export default function TimestampConverterPage() {
   const [timestamp, setTimestamp] = useState('');
   const [date, setDate] = useState('');
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [tz, setTz] = useState(LOCAL_TZ);
   const [lastMs, setLastMs] = useState(null);
   const show = (ms, unit, ambiguous = false, gapMinutes = 0, zone = tz) => { setLastMs(ms); setResult({ ...describe(ms), unit, zone: describeZone(ms, zone), ago: relativeTime(ms), ambiguous, gapMinutes }); setError(''); };

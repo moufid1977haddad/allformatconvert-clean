@@ -3,12 +3,13 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { textToHex, hexToText } from '../../../lib/textCodecs';
 import { TextDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 export default function HexToTextPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const toHex = () => setOutput(textToHex(input));
   const fromHex = () => {
-    try { setOutput(hexToText(input)); } catch(e) { setOutput(e.message); }
+    try { setOutput(hexToText(input)); } catch (e) { reportShownMessage(e); setOutput(e.message); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

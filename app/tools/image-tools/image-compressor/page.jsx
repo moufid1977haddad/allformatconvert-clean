@@ -6,6 +6,7 @@ import { formatBytes } from '../../../lib/formatBytes';
 import { imageDims } from '../../../lib/bigImage';
 import { imageHeaderSize } from '../../../lib/fileChecks';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 const formatSize = formatBytes;
 const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/svg+xml': 'svg', 'image/avif': 'avif' };
@@ -80,7 +81,7 @@ export default function ImageCompressorPage() {
   const [byTarget, setByTarget] = useState(false);
   const [targetKb, setTargetKb] = useState('100');
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
   const workerRef = useRef(null);
 

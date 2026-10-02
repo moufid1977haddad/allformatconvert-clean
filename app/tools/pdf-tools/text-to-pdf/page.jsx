@@ -6,6 +6,7 @@ import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeStageLabel } from '../../../lib/officeUpload';
 import SeoContent from '../../../components/SeoContent';
 import { FileDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 export default function TextToPdfPage() {
   const [text, setText] = useState('');
@@ -56,6 +57,7 @@ export default function TextToPdfPage() {
       setDownloadUrl(URL.createObjectURL(blob));
       setStatus('');
     } catch (err) {
+      reportShownMessage(err);
       setStatus('Error: ' + err.message);
     }
     setLoading(false);

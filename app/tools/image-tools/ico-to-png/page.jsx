@@ -5,10 +5,11 @@ import { drawToRaster, encodeRaster, resultOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { icoEntries, singleEntryIco } from '../../../lib/icoEntries';
+import { useToolError } from '../../../lib/useToolError';
 export default function ICOtoPNGPage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
   const [file, setFile] = useState(null);
   const [sizes, setSizes] = useState(null); // P24 (03/10): every image of the icon, as ezgif and Convertio give

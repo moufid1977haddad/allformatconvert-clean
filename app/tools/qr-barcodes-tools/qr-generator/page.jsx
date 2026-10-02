@@ -5,6 +5,7 @@ import { QR_TYPES, buildPayload } from '../../../lib/qrPayload';
 import { qrMatrix, drawCanvas, toSvg, toPdf, readsBackAs, contrast } from '../../../lib/qrRender';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { imageHeaderSize, OPENABLE_PIXELS } from '../../../lib/fileChecks';
+import { useToolError } from '../../../lib/useToolError';
 
 // Features from QRCode Monkey, the free reference (read 2026-09-23): content types, colours, logo, error
 // correction, up to 2000 px, PNG/SVG/PDF. What it does not do and this page does: every code is read back
@@ -37,7 +38,7 @@ export default function QrGeneratorPage() {
   const [ecl, setEcl] = useState('M');
   const [logo, setLogo] = useState(null); // { img, dataUrl, png, aspect, name }
   const [out, setOut] = useState(null);   // { png, svg, pdf, version }
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [busy, setBusy] = useState(false);
   const canvasRef = useRef(null);
   const logoInput = useRef(null);

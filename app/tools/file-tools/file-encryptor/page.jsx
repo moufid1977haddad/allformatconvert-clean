@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { encryptBytes, decryptBytes } from '../../../lib/textCrypto';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function FileEncryptorPage() {
   const [file, setFile] = useState(null);
   const [password, setPassword] = useState('');
@@ -11,7 +12,7 @@ export default function FileEncryptorPage() {
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [mode, setMode] = useState('encrypt');
   const [note, setNote] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
   const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setDownloadUrl(null); setError(''); if (f && emptyFileProblem(f)) { setFile(null); setError(emptyFileProblem(f, mode === 'encrypt' ? 'encrypt' : 'decrypt')); return; } setFile(f); }; // P21: empty file said
   const process = async () => {

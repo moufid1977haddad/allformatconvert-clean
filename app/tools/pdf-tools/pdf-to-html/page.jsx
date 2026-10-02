@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 // Audit 2 (29/09): the PDF's text was pasted into the HTML unescaped -- "a < b" vanished, "&copy;" became (c), text
 // such as "<b>" turned into markup -- and every item was joined with a space on one line, so line breaks were lost
@@ -69,6 +70,7 @@ export default function PdfToHtmlPage() {
       setDownloadUrl(URL.createObjectURL(blob));
       setStatus(empty.length ? `No text found on page${empty.length > 1 ? 's' : ''} ${empty.join(', ')} (a scan or an image has no text layer: run PDF OCR first).` : '');
     } catch (err) {
+      reportShownMessage(err);
       setStatus('Error: ' + err.message);
     }
     setLoading(false);

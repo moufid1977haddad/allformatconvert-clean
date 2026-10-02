@@ -5,12 +5,13 @@ import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRas
 import { rasterFromRGBA, encodeWebpWasm } from '../../../lib/bigImage';
 import { canEncodeImageType, checkedDataURL, assertCanvasSize } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function JPGtoWebPPage() {
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   // P24 (03/10): ezgif's WebP converter offers a quality from 0 to 100 and lossless; ours was fixed at 80
   const [quality, setQuality] = useState(80);
   const [lossless, setLossless] = useState(false);

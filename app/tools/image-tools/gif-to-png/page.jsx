@@ -5,10 +5,11 @@ import { drawToRaster, encodeRaster, resultOf } from '../../../lib/imageOutput';
 import { gifFrames } from '../../../lib/gifFrames';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function GIFtoPNGPage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
   const [gifFile, setGifFile] = useState(null);
   const [zip, setZip] = useState(null);

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { readAiJson } from '../../../lib/aiClient';
 import { countBillableWords, AI_DETECT_MIN_WORDS, AI_DETECT_MAX_WORDS, AI_DETECT_MAX_CHARS, AI_DETECT_FREE_WORDS_PER_DAY } from '@/lib/ai/pangram';
+import { useToolError } from '../../../lib/useToolError';
 
 // 30/09 (docs/audit/RAPPORT-ai-detector-30-09.md): the rewriting method (RAIDAR, lib/ai/raidar.js) called a human
 // arXiv abstract AI on www, and no free method measured on our 97-text corpus reached the market's level without
@@ -21,7 +22,7 @@ export default function AIDetectorPage() {
   const [input, setInput] = useState('');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const words = countBillableWords(input);
   const chars = input.trim().length;
 

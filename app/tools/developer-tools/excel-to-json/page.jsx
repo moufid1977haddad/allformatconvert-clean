@@ -7,6 +7,7 @@ import { MAX_ROWS, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL, MOBILE_MAX_ROWS, MO
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { formatBytes } from '../../../lib/formatBytes';
+import { useToolError } from '../../../lib/useToolError';
 
 const MAX_ROWS_LABEL = MAX_ROWS.toLocaleString();
 const MOBILE_MAX_ROWS_LABEL = MOBILE_MAX_ROWS.toLocaleString();
@@ -51,7 +52,7 @@ function formatEstimate(seconds) {
 export default function ExcelToJsonPage() {
   const [fileName, setFileName] = useState('');
   const [status, setStatus] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState('');
   const [converting, setConverting] = useState(false);

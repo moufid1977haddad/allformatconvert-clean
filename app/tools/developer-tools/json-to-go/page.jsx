@@ -3,10 +3,11 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { jsonToCode } from '../../../lib/jsonCodegen';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function JsonToGoPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const convert = async () => {
     try {
       setOutput(await jsonToCode(input, 'go'));

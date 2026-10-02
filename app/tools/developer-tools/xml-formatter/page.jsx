@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 // Splits adjacent tags ('><') onto separate lines like a plain
 // `replace(/></g, '>\n<')` would, but scans <!--...--> comments and
@@ -66,7 +67,7 @@ function splitXmlTags(input) {
 export default function XmlFormatterPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const format = async () => {
     try {
       // Invalid XML used to be "formatted" anyway, hiding the error (29/09):

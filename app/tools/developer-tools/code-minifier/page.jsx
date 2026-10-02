@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { minifyJs, minifyCss, typescriptToJs } from '../../../lib/codeTools';
 import { minify as minifyHtmlDoc } from '../../../lib/htmlMinify';
 import { TextDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 export default function CodeMinifierPage() {
   const [input, setInput] = useState('');
@@ -17,7 +18,7 @@ export default function CodeMinifierPage() {
       else if (lang === 'css') result = await minifyCss(input);
       else result = minifyHtmlDoc(input);
       setOutput(result);
-    } catch (e) { setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
+    } catch (e) { reportShownMessage(e); setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

@@ -5,12 +5,13 @@ import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import { checkedDataURL, drawDecodedVideoFrame } from '../../../lib/mediaSupport';
 import IosOriginalNote from '../../../components/IosOriginalNote';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function VideoScreenshotPage() {
   const [file, setFile] = useState(null);
   const [screenshots, setScreenshots] = useState([]);
   const [format, setFormat] = useState('png');
   const [quality, setQuality] = useState(90);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const videoRef = useRef();
   const inputRef = useRef();
 

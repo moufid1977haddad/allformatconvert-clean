@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { toRoman, fromRoman } from '../../../lib/exactNumbers';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 // Strict conversions (app/lib/exactNumbers.js): only canonical numerals are accepted, so
 // "IM", "VX" or "MMMM" are refused instead of being shown as 999, 5 or 4000.
@@ -54,7 +55,7 @@ export default function RomanNumeralConverterPage() {
               <div className="text-neutral-500 mt-2">{number} = {roman}</div>
             </div>
           )}
-          <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(roman).catch(() => setCopyError(true)); }} disabled={!roman || romanInvalid} className="w-full bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-2 font-semibold transition text-white">Copy Roman Numeral</button>
+          <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(roman).catch(() => { setCopyError(true); reportShownMessage('Copy to the clipboard failed.'); }); }} disabled={!roman || romanInvalid} className="w-full bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-2 font-semibold transition text-white">Copy Roman Numeral</button>
           {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}
         </div>
       </div>

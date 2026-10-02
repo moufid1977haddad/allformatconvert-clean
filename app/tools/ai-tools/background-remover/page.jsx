@@ -9,6 +9,7 @@ import { checkFileSize, MAX_REMOVEBG_ORIGINAL_BYTES } from '@/lib/quota/limits';
 import { FileDownload } from '../../../components/FileDownload';
 import { WORK_PIXELS, composeBand } from '../../../lib/mattingRefine';
 import { reportToolError } from '../../../lib/reportError';
+import { useToolError } from '../../../lib/useToolError';
 
 // Matches the model's own fixed internal input resolution (see
 // services/background-removal/app/infer.py, MODEL_INPUT_SIZE) -- IS-Net
@@ -134,7 +135,7 @@ export default function BackgroundRemoverPage() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const fileRef = useRef();
   const progressTimerRef = useRef(null);
 

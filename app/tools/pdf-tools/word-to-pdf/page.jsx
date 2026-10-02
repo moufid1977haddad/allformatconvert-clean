@@ -3,12 +3,13 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function WordToPdfPage() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [stage, setStage] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [done, setDone] = useState(false);
   const [detectedFonts, setDetectedFonts] = useState([]);
   const inputRef = useRef();

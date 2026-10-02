@@ -5,13 +5,14 @@ import SeoContent from '../../../components/SeoContent';
 import { checkPromptLength, MAX_PROMPT_CHARS } from '@/lib/quota/limits';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function Page() {
   const [file, setFile] = useState(null);
   const [output, setOutput] = useState('');
   const [coverage, setCoverage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const fileRef = useRef();
 
   const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setOutput(''); setCoverage(''); };

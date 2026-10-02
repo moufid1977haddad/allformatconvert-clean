@@ -4,6 +4,7 @@ import { useState, useRef, useMemo, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { detectSignature } from '../../../lib/fileSignature';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 // Audit 2 (29/09): a file the browser has no type for (HEIC or AVIF on some systems, a file without extension) came
 // out as data:application/octet-stream, which no browser displays as an image -- the type is now read from the
@@ -16,7 +17,7 @@ export default function FileBase64EncoderPage() {
   const [result, setResult] = useState('');
   const [fileName, setFileName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [raw, setRaw] = useState(false);
   const out = useMemo(() => (raw ? result.slice(result.indexOf(',') + 1) : result), [result, raw]);
   const txtUrl = useMemo(() => (out ? URL.createObjectURL(new Blob([out], { type: 'text/plain' })) : null), [out]);

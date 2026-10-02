@@ -5,10 +5,11 @@ import { parseJsonLossless, isLosslessNumber } from '../../../lib/jsonLossless';
 import SeoContent from '../../../components/SeoContent';
 import { SEO } from './seo';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function JsonToTomlPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [tooBig, setTooBig] = useState([]);
   const convert = () => {
     let obj;

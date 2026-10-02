@@ -10,6 +10,7 @@ import { ffmpegAudioDuration } from '../../../lib/audioDuration';
 import PlayablePreview from '../../../components/PlayablePreview';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { execChecked } from '../../../lib/ffmpegRun';
+import { useToolError } from '../../../lib/useToolError';
 
 const tenth = (x) => Math.round(x * 10) / 10;
 const MAX_PARTS = 100;
@@ -40,7 +41,7 @@ export default function AudioSplitterPage() {
   const [format, setFormat] = useState('mp3');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [audioUrl, setAudioUrl] = useState(null);
   // The browser's player cannot read every format (WMA, AC3… everywhere; more in Safari): ffmpeg.wasm reads the
   // length instead and the page says there is no preview (28/09/2026: the split control never appeared).

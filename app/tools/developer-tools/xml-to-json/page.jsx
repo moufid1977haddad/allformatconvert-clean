@@ -2,10 +2,11 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function XmlToJsonPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [note, setNote] = useState('');
   const [converting, setConverting] = useState(false);
   const convert = async () => {

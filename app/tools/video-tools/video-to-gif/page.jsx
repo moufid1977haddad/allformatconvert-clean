@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import GifFromVideoTool from '../../../components/GifFromVideoTool';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { assertVideoReadable } from '../../../lib/mediaSupport';
+import { useToolError } from '../../../lib/useToolError';
 
 // Video Tools > Video to GIF (P18, 01/10). It used to capture still PNG frames and never made a GIF, although its name
 // says GIF. It now makes an animated GIF the way GIF Tools > Video to GIF does (the proven path: ffmpeg palettegen /
@@ -18,7 +19,7 @@ function FrameExtractor({ file, busy }) {
   const [start, setStart] = useState(0);
   const [frames, setFrames] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const videoRef = useRef();
   const url = useRef(null);
 

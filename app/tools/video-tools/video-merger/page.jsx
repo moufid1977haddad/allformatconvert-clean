@@ -11,6 +11,7 @@ import { formatBytes } from '../../../lib/formatBytes';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { FileDownload } from '../../../components/FileDownload';
 import { videoFileProblem, unreadableVideoMessage } from '../../../lib/fileChecks';
+import { useToolError } from '../../../lib/useToolError';
 
 // 30/09 (owner's iPhone): the merger played every clip in a <canvas> and recorded it with MediaRecorder -- in real
 // time, the videos opening full screen on iPhone, and a WebM (merged.webm) that Photos cannot open. Now, as ffmpeg
@@ -48,7 +49,7 @@ export default function VideoMergerPage() {
   const [files, setFiles] = useState([]);
   const [result, setResult] = useState(null);
   const [stage, setStage] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [mobile, setMobile] = useState(false);
   const inputRef = useRef();
   const abortRef = useRef(null);

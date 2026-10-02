@@ -7,6 +7,7 @@ import { encodeRaster } from '../lib/imageOutput';
 import { encodeExtra } from '../tools/image-tools/image-converter/extraFormats';
 import { FileDownload, DownloadGroup } from './FileDownload';
 import { parsePageRange } from '../lib/pageRange';
+import { useToolError } from '../lib/useToolError';
 
 // PDF → images, shared by PDF to Image and PDF to JPG (P21, 02/10).
 // Market (02/10): iLovePDF "PDF to JPG" offers "Page to JPG" and "Extract images", quality Normal (recommended) / High;
@@ -61,7 +62,7 @@ export default function PdfToImages({ tool, formats = PDF_IMAGE_FORMATS.map((f) 
   const [results, setResults] = useState([]);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [notice, setNotice] = useState('');
   const inputRef = useRef();
   const base = file ? file.name.replace(/\.pdf$/i, '') : 'document';

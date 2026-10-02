@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { FileDownload } from './FileDownload';
+import { useToolError } from '../lib/useToolError';
 
 // P24 (03/10): removes the metadata of a video or audio file without re-encoding — the GPS position, date and device
 // an iPhone writes into its videos, the title / artist / comment tags, chapters — as metadata2go's "Metadata
@@ -14,7 +15,7 @@ const MIME_BY_EXT = { mp4: 'video/mp4', m4v: 'video/mp4', mov: 'video/quicktime'
 
 export default function MetadataStripper({ file, kind = 'video' }) {
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [result, setResult] = useState(null);
   const [warning, setWarning] = useState('');
   useEffect(() => { setResult(null); setError(''); setWarning(''); }, [file]);

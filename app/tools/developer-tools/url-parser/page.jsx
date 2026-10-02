@@ -1,10 +1,11 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import { useToolError } from '../../../lib/useToolError';
 export default function UrlParserPage() {
   const [url, setUrl] = useState('');
   const [parsed, setParsed] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const parse = () => {
     try {
       const u = new URL(url);

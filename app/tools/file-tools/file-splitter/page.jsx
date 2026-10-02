@@ -5,6 +5,7 @@ import SeoContent from '../../../components/SeoContent';
 import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL, MAX_CHUNKS } from './config';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 export default function FileSplitterPage() {
   const [file, setFile] = useState(null);
   const [chunkSize, setChunkSize] = useState(1);
@@ -35,7 +36,7 @@ export default function FileSplitterPage() {
     setJoined({ url: URL.createObjectURL(blob), name: bases[0], count: parsed.length, size: blob.size });
   };
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
   const handleFile = (e) => {
     const f = e.target.files[0];

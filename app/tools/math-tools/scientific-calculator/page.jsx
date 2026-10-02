@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { evaluateExpression } from '../../../lib/mathTools';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 export default function ScientificCalculatorPage() {
   const [expression, setExpression] = useState('');
@@ -21,7 +22,7 @@ export default function ScientificCalculatorPage() {
       const { text, value } = await evaluateExpression(expr, { angle, ans, raw: true });
       setResult(text); setAns(value);
       setHistory((h) => [{ expr: /\bAns\b/.test(expr) ? expr.replace(/\bAns\b/g, `(${ans})`) : expr, text, angle }, ...h].slice(0, 10));
-    } catch (e) { setResult(e.message); }
+    } catch (e) { reportShownMessage(e); setResult(e.message); }
   };
   // a function key wraps the selection, or (wrapLast) the number / bracket just typed: 4 then 1/x is 1/(4), not 41/(…)
   // (review 03/10); x² on a typed negative number squares the number: -3 then x² is (-3)^2

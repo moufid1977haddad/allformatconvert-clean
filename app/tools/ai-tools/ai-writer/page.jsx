@@ -4,12 +4,13 @@ import SeoContent from '../../../components/SeoContent';
 import { checkPromptLength } from '@/lib/quota/limits';
 import { readAiJson } from '../../../lib/aiClient';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function AIWriterPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
 
   const process = async () => {
     if (!input.trim()) return;

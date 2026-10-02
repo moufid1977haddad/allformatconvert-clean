@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
 import { gifFrames } from '../../../lib/gifFrames';
+import { useToolError } from '../../../lib/useToolError';
 
 // Frames of different sizes used to be stretched to the first image's size (a portrait photo after a landscape one
 // came out squashed). Now, as on ezgif (read 26/09/2026: crop to a common size, alignment, reordering), each frame
@@ -29,7 +30,7 @@ export default function GifMakerPage() {
   const [custom, setCustom] = useState({ w: 480, h: 480 });
   const [loops, setLoops] = useState('0'); // 0 = forever
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [loading, setLoading] = useState(false);
   const [framesNote, setFramesNote] = useState('');
   const inputRef = useRef();

@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { writeRgbaFrame, hasTransparency } from '../../../lib/gifEncode';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 // Audit 2 (29/09): transparent PNGs came out on black (gifenc's default quantizer ignores alpha), and every image was
 // stretched to the size of the first. Now transparency is kept (1-bit, as GIF allows) and, as on ezgif and in our
@@ -21,7 +22,7 @@ export default function ImageToGifPage() {
   const [fit, setFit] = useState('fit');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
 
   const handleFiles = (e) => {

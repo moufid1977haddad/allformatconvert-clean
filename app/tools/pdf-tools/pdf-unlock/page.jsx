@@ -4,13 +4,14 @@ import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { unlockPdfBytes } from '../../../lib/pdfUnlock';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function Page() {
   const [file, setFile] = useState(null);
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const fileRef = useRef();
 
   const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setResult(null); };

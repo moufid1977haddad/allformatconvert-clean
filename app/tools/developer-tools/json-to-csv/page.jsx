@@ -4,11 +4,12 @@ import SeoContent from '../../../components/SeoContent';
 
 import { jsonToCsv } from '../../../lib/jsonToCsv';
 import { TextDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function JsonToCsvPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const convert = () => {
     try {
       setOutput(jsonToCsv(input));

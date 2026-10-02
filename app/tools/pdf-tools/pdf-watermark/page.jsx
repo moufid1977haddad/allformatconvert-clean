@@ -6,6 +6,7 @@ import { pdfFileProblem, emptyImageProblem, unreadableImageMessage } from '../..
 import { placeOnVisiblePage, visibleSize } from '../../../lib/pdfPlace';
 import { FileDownload } from '../../../components/FileDownload';
 import { textAsPng, fontCanWrite } from '../../../lib/pdfTextImage';
+import { useToolError } from '../../../lib/useToolError';
 
 // P24 (03/10), coverage against iLovePDF's watermark (read 02/10: text or image, position grid plus mosaic,
 // transparency, rotation 45/90/180/270, over or below the content, page range) — Smallpdf: text only.
@@ -34,7 +35,7 @@ export default function PdfWatermarkPage() {
   const [fromPage, setFromPage] = useState(1);
   const [toPage, setToPage] = useState('');
   const [status, setStatus] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState(null);
   const inputRef = useRef();

@@ -3,12 +3,13 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { beautify } from '../../../lib/codeTools';
 import { TextDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 export default function HtmlFormatterPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const format = async () => {
-    try { setOutput(await beautify(input, 'html')); } catch (e) { setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
+    try { setOutput(await beautify(input, 'html')); } catch (e) { reportShownMessage(e); setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

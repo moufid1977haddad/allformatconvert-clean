@@ -8,6 +8,7 @@ import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
 import { addImagePage } from '../../../lib/pdfImages';
 import { convertOffice } from '../../../lib/officeUpload';
+import { useToolError } from '../../../lib/useToolError';
 
 // P21 (02/10), format coverage: Smallpdf's Merge PDF "combine[s] PDF documents with other PDFs, Word, Excel, and
 // image files like JPG and PNG" and converts them first. Here: images become a page in the browser (pdfImages: HEIC,
@@ -21,7 +22,7 @@ const MERGE_ACCEPT = '.pdf,application/pdf,image/*,.heic,.heif,.tif,.tiff,.doc,.
 export default function PdfMergePage() {
   const [files, setFiles] = useState([]);
   const [status, setStatus] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState('');

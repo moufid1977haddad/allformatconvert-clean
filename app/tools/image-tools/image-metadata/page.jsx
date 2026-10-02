@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { formatBytes } from '../../../lib/formatBytes';
 import { stripMetadata } from '../../../lib/stripMetadata';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 // The page promised "View image metadata and EXIF data" but read only the
 // browser's file properties (29/09). exifr (MIT, used by metadata viewers)
 // reads EXIF, GPS, IPTC, XMP and ICC from JPEG, HEIC, TIFF, PNG, WebP and AVIF.
@@ -19,7 +20,7 @@ export default function ImageMetadataPage() {
   const [metadata, setMetadata] = useState(null);
   const [embedded, setEmbedded] = useState(null);
   const [preview, setPreview] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   // P24 (03/10): remove the metadata too (imgonline has a separate EXIF remover; iLoveIMG none), without re-encoding
   const [source, setSource] = useState(null);
   const [clean, setClean] = useState(null);

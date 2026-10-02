@@ -7,6 +7,7 @@ import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
 import AnimatedImageNote from '../../../components/AnimatedImageNote';
+import { useToolError } from '../../../lib/useToolError';
 // P24 (03/10): pinetools offers several grey methods (luminosity, average, lightness, a single channel); a pure black and
 // white (threshold) is the other common need (scans, stencils). Rec. 709 stays the default (the CSS grayscale() filter).
 const METHODS = [
@@ -29,7 +30,7 @@ export default function GrayscaleConverterPage() {
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [method, setMethod] = useState('rec709');
   const [bw, setBw] = useState(false);
   const [threshold, setThreshold] = useState(128);

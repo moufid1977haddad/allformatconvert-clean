@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { unreadableImageMessage } from '../../../lib/fileChecks';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 // Scans a QR code from an image (file, drop, paste) or, added 26/09/2026, live from the camera -- what the
 // reference scanners offer first (their page opens on the camera). The box used to say "drop" without handling it.
@@ -76,6 +77,7 @@ export default function QrScannerPage() {
         if (code) found(code.data); else setStatus('No QR code or barcode found in this image');
       }
     } catch (e) {
+      reportShownMessage(e);
       // P23: why the picture did not open, or what failed after it did (not just "could not load")
       setStatus(opened ? `Could not scan this image: ${e?.message || e}. Please try again.` : await unreadableImageMessage(file).catch(() => 'This image could not be opened.'));
     } finally { URL.revokeObjectURL(url); setLoading(false); }
@@ -102,6 +104,7 @@ export default function QrScannerPage() {
       };
       tick();
     } catch (e) {
+      reportShownMessage(e);
       stopCamera();
       const n = e?.name;
       setStatus(n === 'NotAllowedError' ? 'Camera access was refused. Allow the camera for this site in your browser settings, or upload a photo of the code.'
@@ -135,6 +138,7 @@ export default function QrScannerPage() {
       }
       setStatus('The clipboard holds no image. Copy the QR code image first (in Photos: Share, then Copy), then tap Paste image again.');
     } catch (e) {
+      reportShownMessage(e);
       setStatus(e?.name === 'NotAllowedError' ? 'Pasting was not allowed. Tap Paste image again and choose Paste when your browser asks, or long-press the paste box below.' : 'The clipboard could not be read. Long-press the paste box below and choose Paste, or upload the image.');
     }
   };

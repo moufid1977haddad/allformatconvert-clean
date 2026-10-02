@@ -5,6 +5,7 @@ import { pixelateImageData, roundedRectPath, encodeRaster, encodeRasterLike, sou
 import { CANVAS_MAX_PIXELS, canvasBeyondSafariCap, rasterFromCanvas, rasterFromRGBA } from '../../../lib/bigImage';
 import { derivedName } from '../../../lib/download';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function ImageEditorPage() {
   const [image, setImage] = useState<string | null>(null);
@@ -12,8 +13,8 @@ export default function ImageEditorPage() {
   const [activeTab, setActiveTab] = useState('adjust');
   const [srcType, setSrcType] = useState('image/png');
   const [file, setFile] = useState<File | null>(null);
-  const [saveError, setSaveError] = useState('');
-  const [loadError, setLoadError] = useState('');
+  const [saveError, setSaveError] = useToolError('');
+  const [loadError, setLoadError] = useToolError('');
   // The full-size edited photo, made when the visitor asks (Save image) and offered through the site's download row.
   const [exported, setExported] = useState<{ blob: Blob; name: string } | null>(null);
   const alertError = (m: string) => setSaveError(m);

@@ -6,6 +6,7 @@ import { pdfFileProblem } from '../../../lib/fileChecks';
 import { placeOnVisiblePage, visibleSize } from '../../../lib/pdfPlace';
 import { FileDownload } from '../../../components/FileDownload';
 import { textAsPng, fontCanWrite } from '../../../lib/pdfTextImage';
+import { useToolError } from '../../../lib/useToolError';
 
 // P24 (03/10), coverage against iLovePDF's "Add page numbers" (read 02/10: position, margin, facing pages, skip the
 // cover, page range, first number, text templates "{n}", "Page {n}", "Page {n} of {p}", font size and colour).
@@ -37,7 +38,7 @@ export default function PdfNumberPagesPage() {
   const [color, setColor] = useState('#000000');
   const [facing, setFacing] = useState(false);
   const [status, setStatus] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState(null);
   const inputRef = useRef();

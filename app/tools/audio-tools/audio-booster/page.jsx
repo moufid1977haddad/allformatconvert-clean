@@ -8,6 +8,7 @@ import { reportToolError } from '../../../lib/reportError';
 import { opusOnService, encodeOpusOnService, LOSSLESS_INTERMEDIATE } from '../../../lib/opusService';
 import PlayablePreview from '../../../components/PlayablePreview';
 import { FileDownload } from '../../../components/FileDownload';
+import { useToolError } from '../../../lib/useToolError';
 
 export default function AudioBoosterPage() {
   const [file, setFile] = useState(null);
@@ -20,7 +21,7 @@ export default function AudioBoosterPage() {
   const [normalize, setNormalize] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const fileRef = useRef();
 
   const handleFile = (e) => { const f = e.target.files[0];

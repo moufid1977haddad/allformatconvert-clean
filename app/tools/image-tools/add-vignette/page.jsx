@@ -7,6 +7,7 @@ import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
 import AnimatedImageNote from '../../../components/AnimatedImageNote';
+import { useToolError } from '../../../lib/useToolError';
 export default function AddVignettePage() {
   const [srcType, setSrcType] = useState('image/png');
   const [image, setImage] = useState(null);
@@ -15,7 +16,7 @@ export default function AddVignettePage() {
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const inputRef = useRef();
   const handleFile = (e) => {
     const f = e.target.files[0];

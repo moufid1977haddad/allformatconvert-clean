@@ -3,13 +3,14 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { formatSql } from '../../../lib/codeTools';
 import { TextDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 export default function SqlFormatterPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [dialect, setDialect] = useState('sql');
   const format = async () => {
-    try { setOutput(await formatSql(input, { language: dialect })); } catch (e) { setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
+    try { setOutput(await formatSql(input, { language: dialect })); } catch (e) { reportShownMessage(e); setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

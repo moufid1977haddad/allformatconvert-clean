@@ -10,6 +10,7 @@ import { TEMPLATES, ROLLS, PAPERS, sheetOf, rollOf, layoutError, labelPdf, MAX_L
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { textFileProblem, decodedText } from '../../../lib/fileChecks';
+import { useToolError } from '../../../lib/useToolError';
 
 // References read on 26/09/2026 (docs/audit/RAPPORT-amelioration-14.md): TEC-IT (100+ types, drawn on its server,
 // 10 free codes, non-commercial use only, SVG for subscribers), barcode-maker.com (~35 types, PNG/JPG/GIF/SVG, batch
@@ -59,7 +60,7 @@ export default function BarcodeGeneratorPage() {
     dmShape: 'square', pdfColumns: '', pdfEc: '', aztecEc: 23, caption: '',
   });
   const [out, setOut] = useState(null); // single: { urls, read, size, name }
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const [busy, setBusy] = useState(false);
   // batch
   const [source, setSource] = useState('list'); // list | sequence

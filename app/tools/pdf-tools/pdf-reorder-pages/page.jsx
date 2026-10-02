@@ -5,6 +5,7 @@ import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 import { FileDownload } from '../../../components/FileDownload';
 import { parsePageOrder } from '../../../lib/pageRange';
 import { carryOver, carryOutline } from '../../../lib/pdfCarryOver';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 export default function PdfReorderPagesPage() {
   const [file, setFile] = useState(null);
@@ -35,6 +36,7 @@ export default function PdfReorderPagesPage() {
       setPageCount(count);
       setOrder(Array.from({ length: count }, (_, i) => i + 1).join(', '));
     } catch (err) {
+      reportShownMessage(err);
       setStatus('Error: ' + err.message);
       setPageCount(0);
       setOrder('');
@@ -65,6 +67,7 @@ export default function PdfReorderPagesPage() {
       setDownloadUrl(URL.createObjectURL(blob));
       setStatus('');
     } catch (err) {
+      reportShownMessage(err);
       setStatus('Error: ' + err.message);
     }
     setLoading(false);

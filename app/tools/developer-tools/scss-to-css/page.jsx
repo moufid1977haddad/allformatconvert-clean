@@ -3,13 +3,14 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { scssToCss } from '../../../lib/codeTools';
 import { TextDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 export default function ScssToCssPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [style, setStyle] = useState('expanded');
   const convert = async () => {
-    try { setOutput(await scssToCss(input, { style })); } catch (e) { setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
+    try { setOutput(await scssToCss(input, { style })); } catch (e) { reportShownMessage(e); setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

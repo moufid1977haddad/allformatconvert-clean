@@ -3,15 +3,16 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { beautify, minifyCss } from '../../../lib/codeTools';
 import { TextDownload } from '../../../components/FileDownload';
+import { reportShownMessage } from '../../../lib/useToolError';
 
 export default function CssFormatterPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const format = async () => {
-    try { setOutput(await beautify(input, 'css')); } catch (e) { setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
+    try { setOutput(await beautify(input, 'css')); } catch (e) { reportShownMessage(e); setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
   };
   const minify = async () => {
-    try { setOutput(await minifyCss(input)); } catch (e) { setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
+    try { setOutput(await minifyCss(input)); } catch (e) { reportShownMessage(e); setOutput('Error: ' + (e && e.message ? e.message : String(e))); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">

@@ -7,6 +7,7 @@ import { reportToolError } from '../../../lib/reportError';
 import IosOriginalNote from '../../../components/IosOriginalNote';
 import { FileDownload } from '../../../components/FileDownload';
 import { videoFileProblem, unreadableVideoMessage } from '../../../lib/fileChecks';
+import { useToolError } from '../../../lib/useToolError';
 
 const MAX_DURATION = 120;
 
@@ -121,7 +122,7 @@ export default function VideoWatermarkPage() {
   const [progress, setProgress] = useState(0);
   const [eta, setEta] = useState(null);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useToolError('');
   const videoRef = useRef();
   const inputRef = useRef();
   const watermarkInputRef = useRef();
