@@ -4,7 +4,7 @@ import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { AUDIO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
 import ProgressBar from '../../../components/ProgressBar';
-import { AUDIO_OUTPUT_FORMATS, AUDIO_BITRATES, DEFAULT_AUDIO_KBPS, formatTakesBitrate, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
+import { AUDIO_OUTPUT_FORMATS, AUDIO_BITRATES, DEFAULT_AUDIO_KBPS, formatTakesBitrate, buildOutputSpec, sanitizedInputExt, AUDIO_SAMPLE_RATES, AUDIO_CHANNELS } from '../../../lib/audioFormats';
 import { reportToolError } from '../../../lib/reportError';
 import { runMediaJob, mediaServiceConfigured } from '../../../lib/mediaJob';
 import PlayablePreview from '../../../components/PlayablePreview';
@@ -14,6 +14,8 @@ export default function AudioConverterPage() {
   const [file, setFile] = useState(null);
   const [format, setFormat] = useState('mp3');
   const [kbps, setKbps] = useState(DEFAULT_AUDIO_KBPS);
+  const [sampleRate, setSampleRate] = useState('');
+  const [channels, setChannels] = useState('');
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState(null);
@@ -78,7 +80,7 @@ export default function AudioConverterPage() {
       });
       await ffmpeg.load();
       const inputName = 'input.' + sanitizedInputExt(file);
-      const { outputName, extraArgs, mime, ext } = buildOutputSpec(format, kbps);
+      const { outputName, extraArgs, mime, ext } = buildOutputSpec(format, kbps, { sampleRate, channels });
       await ffmpeg.writeFile(inputName, await fetchFile(file));
       await ffmpeg.exec(['-i', inputName, ...extraArgs, outputName]);
       const data = await ffmpeg.readFile(outputName);
@@ -123,6 +125,14 @@ export default function AudioConverterPage() {
                 <select aria-label="Quality" value={kbps} onChange={e => setKbps(Number(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
                   {AUDIO_BITRATES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                 </select>
+              </div>
+            )}
+            {format !== 'opus' && (
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <label className="block"><span className="block text-sm text-neutral-500 mb-1">Sample rate</span>
+                  <select id="ac-rate" value={sampleRate} onChange={e => setSampleRate(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm">{AUDIO_SAMPLE_RATES.map(([v, l]) => <option key={l} value={v}>{l}</option>)}</select></label>
+                <label className="block"><span className="block text-sm text-neutral-500 mb-1">Channels</span>
+                  <select id="ac-channels" value={channels} onChange={e => setChannels(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm">{AUDIO_CHANNELS.map(([v, l]) => <option key={l} value={v}>{l}</option>)}</select></label>
               </div>
             )}
           </div>

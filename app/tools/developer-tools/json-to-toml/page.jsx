@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { stringify } from 'smol-toml';
+import { parseJsonLossless, isLosslessNumber } from '../../../lib/jsonLossless';
 import SeoContent from '../../../components/SeoContent';
 import { SEO } from './seo';
 import { TextDownload } from '../../../components/FileDownload';
@@ -8,10 +9,26 @@ export default function JsonToTomlPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
+  const [tooBig, setTooBig] = useState([]);
   const convert = () => {
     let obj;
     try {
-      obj = JSON.parse(input);
+      // P24 (03/10): read without JSON.parse's rounding ({"id":12345678901234567890} came out as 12345678901234567168.0):
+      // an integer is written digit for digit when TOML (64-bit) can hold it, else as a string, and said
+      const tooBig = [];
+      const LIMIT = 9223372036854775807n;
+      const fix = (v, path) => {
+        if (isLosslessNumber(v)) {
+          if (v.isInteger) { const n = BigInt(v.source); if (n > LIMIT || n < -LIMIT - 1n) { tooBig.push(path || '(root)'); return v.source; } return n; }
+          return Number(v.source); // a TOML float is a double: the closest double is TOML's own value
+        }
+        if (typeof v === 'number' && Number.isInteger(v) && !Number.isSafeInteger(v)) return BigInt(v);
+        if (Array.isArray(v)) return v.map((x, i) => fix(x, `${path}[${i}]`));
+        if (v && typeof v === 'object') { const o = {}; for (const k of Object.keys(v)) o[k] = fix(v[k], path ? `${path}.${k}` : k); return o; }
+        return v;
+      };
+      obj = fix(parseJsonLossless(input), '');
+      setTooBig(tooBig);
     } catch(e) { setError('Invalid JSON'); return; }
     if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) {
       setError('TOML documents are key/value tables at the top level -- wrap your JSON in an object (e.g. { "items": ... }) before converting.');
@@ -34,6 +51,7 @@ export default function JsonToTomlPage() {
             <TextDownload text={output} name="data.toml" /></div>
           </div>
           {error && <p className="text-red-400 text-center">{error}</p>}
+          {tooBig.length > 0 && <p role="status" className="text-amber-800 bg-amber-50 rounded-lg p-2 text-center text-sm">TOML integers stop at 9,223,372,036,854,775,807: {tooBig.slice(0, 5).join(', ')}{tooBig.length > 5 ? '…' : ''} written as text (in quotes) to keep every digit.</p>}
           <div className="grid grid-cols-2 gap-3">
             <button onClick={convert} disabled={!input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert</button>
             <button onClick={() => navigator.clipboard.writeText(output)} disabled={!output} className="bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Copy</button>

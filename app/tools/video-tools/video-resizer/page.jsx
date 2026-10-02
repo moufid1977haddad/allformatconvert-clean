@@ -12,7 +12,8 @@ const even = (n) => Math.max(16, Math.min(7680, 2 * Math.round((Number(n) || 0) 
 // 30/09 (real Safari on the Mac): "480p" turned a vertical 1080×1920 phone video into a landscape 854×480. 480p,
 // 720p and 1080p name the SHORT side (as YouTube, Clideo and HandBrake use them): a vertical video gets 480×854.
 // `oriented` presets follow the video's shape; Square and Vertical are exact sizes.
-const PRESETS = [['480p', 854, 480, true], ['720p', 1280, 720, true], ['1080p', 1920, 1080, true], ['Square 1080', 1080, 1080, false], ['Vertical 1080×1920', 1080, 1920, false]];
+// P24 (03/10): Kapwing's resizer offers social formats (9:16, 4:5, 1:1, 16:9) and 4K; the service's fit takes up to 7680 px
+const PRESETS = [['480p', 854, 480, true], ['720p', 1280, 720, true], ['1080p', 1920, 1080, true], ['4K (2160p)', 3840, 2160, true], ['Square 1080', 1080, 1080, false], ['Vertical 1080×1920', 1080, 1920, false], ['Portrait post 4:5 (1080×1350)', 1080, 1350, false], ['Story 720×1280', 720, 1280, false], ['4:3 (1440×1080)', 1440, 1080, false]];
 const sized = (w, h, oriented, src) => (oriented && src && src.h > src.w ? [h, w] : [w, h]);
 
 // The size the video is SHOWN at (the browser applies a phone's rotation), or null when this browser cannot read it.

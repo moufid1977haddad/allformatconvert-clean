@@ -18,7 +18,28 @@ function csvField(v) {
 export default function TsvToCsvPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const convert = () => setOutput(input.split('\n').map(line => line.split('\t').map(csvField).join(',')).join('\n'));
+  // P24 (03/10): Windows line ends gave every last column a stray quoted carriage return ("b\r"), and a quoted cell on
+  // several lines (Excel's TSV export) was cut into rows. Now: CRLF / CR line ends, and a field quoted at its start
+  // (as Excel writes it) may hold tabs, line breaks and doubled quotes; a quote inside an unquoted field (5" screen)
+  // stays a character.
+  const parseTsv = (text) => {
+    const rows = []; let row = [], field = '', i = 0, quoted = false, atStart = true;
+    const t = text.replace(/^\uFEFF/, '');
+    while (i < t.length) {
+      const c = t[i];
+      if (quoted) {
+        if (c === '"') { if (t[i + 1] === '"') { field += '"'; i += 2; continue; } quoted = false; i++; continue; }
+        field += c; i++; continue;
+      }
+      if (c === '"' && atStart) { quoted = true; atStart = false; i++; continue; }
+      if (c === '\t') { row.push(field); field = ''; atStart = true; i++; continue; }
+      if (c === '\r' || c === '\n') { row.push(field); rows.push(row); row = []; field = ''; atStart = true; i += c === '\r' && t[i + 1] === '\n' ? 2 : 1; continue; }
+      field += c; atStart = false; i++;
+    }
+    if (field !== '' || row.length) { row.push(field); rows.push(row); }
+    return rows;
+  };
+  const convert = () => setOutput(parseTsv(input).map(r => r.map(csvField).join(',')).join('\r\n'));
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-4xl mx-auto">

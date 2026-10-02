@@ -3,7 +3,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { AUDIO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
-import { COMPRESSIBLE_AUDIO_FORMATS, buildOutputSpec, sanitizedInputExt } from '../../../lib/audioFormats';
+import { COMPRESSIBLE_AUDIO_FORMATS, buildOutputSpec, sanitizedInputExt, AUDIO_SAMPLE_RATES } from '../../../lib/audioFormats';
 import { reportToolError } from '../../../lib/reportError';
 import { opusOnService, encodeOpusOnService, LOSSLESS_INTERMEDIATE } from '../../../lib/opusService';
 import PlayablePreview from '../../../components/PlayablePreview';
@@ -23,6 +23,9 @@ export default function AudioCompressorPage() {
   const [file, setFile] = useState(null);
   const [bitrate, setBitrate] = useState('128');
   const [format, setFormat] = useState('mp3');
+  // P24 (03/10): mono and a lower sample rate, the two other ways to shrink speech (123apps: channels, sample rate)
+  const [mono, setMono] = useState(false);
+  const [sampleRate, setSampleRate] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
@@ -46,7 +49,7 @@ export default function AudioCompressorPage() {
       ffmpeg.on('log', ({ message }) => { logs.push(message); console.log('[ffmpeg]', message); });
       await ffmpeg.load();
       const inputName = 'input.' + sanitizedInputExt(file);
-      const { outputName, extraArgs, mime, ext } = buildOutputSpec(format);
+      const { outputName, extraArgs, mime, ext } = buildOutputSpec(format, undefined, opusOnService(format) ? {} : { sampleRate, channels: mono ? 1 : '' });
       await ffmpeg.writeFile(inputName, await fetchFile(file));
       // The source's real bitrate (28/09, owner: a 0.05 MB iPhone memo "compressed" at 128 kbps came out twice as big):
       // never encode above it. ffmpeg reports the audio stream's own kb/s; else size × 8 / duration.
@@ -97,6 +100,13 @@ export default function AudioCompressorPage() {
               ))}
             </div>
           </div>
+          {!opusOnService(format) && (
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <label className="flex items-center gap-2"><input id="acp-mono" type="checkbox" checked={mono} onChange={e => setMono(e.target.checked)} /> Mono (half the data for speech)</label>
+              <label className="block"><span className="block text-neutral-500 mb-1">Sample rate</span>
+                <select id="acp-rate" value={sampleRate} onChange={e => setSampleRate(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2">{AUDIO_SAMPLE_RATES.map(([v, l]) => <option key={l} value={v}>{l}</option>)}</select></label>
+            </div>
+          )}
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Output Format</label>
             <select aria-label="Output Format" value={format} onChange={e => setFormat(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">

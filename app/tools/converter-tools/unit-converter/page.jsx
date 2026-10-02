@@ -48,7 +48,19 @@ export default function UnitConverterPage() {
   const [to, setTo] = useState('ft');
   // Kept as typed: a number field turned "" or "-" into 0 and showed a result for it.
   const [text, setText] = useState('1');
-  const value = text.trim() === '' ? NaN : Number(text.trim().replace(',', '.'));
+  // P24 (03/10): "1,000" was read as 1 (the comma made a decimal point): a pasted thousands separator gave a result 1000×
+  // too small. Spaces between thousands are ignored; with both "," and "." the last one is the decimal mark; a single
+  // comma followed by exactly three digits could mean either, so the page asks instead of guessing.
+  const parsed = (() => {
+    let t = text.trim().replace(/[\s\u00a0\u202f]/g, '');
+    if (!t) return { value: NaN };
+    if (t.includes(',') && t.includes('.')) t = t.lastIndexOf(',') > t.lastIndexOf('.') ? t.replace(/\./g, '').replace(',', '.') : t.replace(/,/g, '');
+    else if (/^[-+]?\d{1,3},\d{3}$/.test(t)) return { value: NaN, ambiguous: t };
+    else if (/^[-+]?\d{1,3}(,\d{3}){2,}$/.test(t)) t = t.replace(/,/g, ''); // 1,000,000: thousands
+    else if ((t.match(/,/g) || []).length === 1) t = t.replace(',', '.');
+    return { value: Number(t) };
+  })();
+  const value = parsed.value;
   const invalid = !Number.isFinite(value);
 
   const units = Object.keys(CONVERSIONS[category]);
@@ -123,6 +135,7 @@ export default function UnitConverterPage() {
           {/* Result */}
           <div className="bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 rounded-xl p-6 text-center">
             <div className="text-4xl font-extrabold text-indigo-500 break-all" data-result>{convert()} {to}</div>
+            {parsed.ambiguous && <p role="alert" className="text-amber-800 text-sm">Is {parsed.ambiguous} one thousand or one? Write {parsed.ambiguous.replace(',', '')} for a thousand, or {parsed.ambiguous.replace(',', '.').replace(/0+$/, '').replace(/\.$/, '')} for one.</p>}
             <div className="text-neutral-500 mt-2">{invalid ? '—' : show(value)} {from} = {convert()} {to}</div>
             {category !== 'Temperature' && <div className="text-xs text-neutral-500 mt-1" data-factor>1 {from} = {show(raw(1, from, to))} {to}</div>}
           </div>

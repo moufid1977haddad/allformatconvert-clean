@@ -10,15 +10,22 @@ export default function RomanNumeralConverterPage() {
   const [roman, setRoman] = useState('');
   const [copyError, setCopyError] = useState(false);
 
+  // P24 (03/10): parseInt read "12.7" as 12 → XII and "1e3" as 1 → I, without a word. Only a whole number 1-3999 converts;
+  // anything else gets a sentence.
+  const [numberError, setNumberError] = useState('');
   const handleNumber = (val) => {
     setNumber(val);
-    const n = parseInt(val);
-    if (n > 0 && n <= 3999) setRoman(toRoman(n));
-    else setRoman('');
+    const t = String(val).trim();
+    if (!t) { setRoman(''); setNumberError(''); return; }
+    if (!/^\d+$/.test(t)) { setRoman(''); setNumberError('Type a whole number (no decimals, no exponent): Roman numerals have no fractions.'); return; }
+    const n = Number(t);
+    if (n >= 1 && n <= 3999) { setRoman(toRoman(n)); setNumberError(''); }
+    else { setRoman(''); setNumberError('Standard Roman numerals go from 1 (I) to 3999 (MMMCMXCIX).'); }
   };
 
   const handleRoman = (val) => {
     setRoman(val.toUpperCase());
+    setNumberError('');
     const result = fromRoman(val);
     setNumber(result ? result.toString() : '');
   };
@@ -32,7 +39,8 @@ export default function RomanNumeralConverterPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Number (1-3999)</label>
-            <input type="number" min="1" max="3999" value={number} onChange={e => handleNumber(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3 text-xl font-bold" placeholder="Enter number..." />
+            <input type="text" inputMode="numeric" aria-label="Number (1-3999)" value={number} onChange={e => handleNumber(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3 text-xl font-bold" placeholder="Enter number..." />
+            {numberError && <p role="alert" className="text-red-600 text-sm mt-1">{numberError}</p>}
           </div>
           <div className="text-center text-neutral-500 font-bold">⇅</div>
           <div>

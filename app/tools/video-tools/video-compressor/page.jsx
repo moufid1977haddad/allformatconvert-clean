@@ -16,10 +16,13 @@ const LEVELS = [
 ];
 const HEIGHTS = [
   { value: '', label: 'Keep original resolution' },
+  // P24 (03/10): 4K and 1440p sources can be kept sharp at a lower size; the service accepts 144-4320 px
+  { value: '1440', label: 'Limit to 1440p' },
   { value: '1080', label: 'Limit to 1080p' },
   { value: '720', label: 'Limit to 720p' },
   { value: '480', label: 'Limit to 480p' },
   { value: '360', label: 'Limit to 360p' },
+  { value: '240', label: 'Limit to 240p' },
 ];
 
 const seo = {

@@ -20,7 +20,8 @@ const AUDIO_TARGETS = [
 // Formats whose file extension does not say which codec is inside: the name says it.
 const NAME_TAG = { h265: '-h265', av1: '-av1', xvid: '-xvid', mts: '', asf: '' };
 const QUALITIES = [['high', 'High quality'], ['medium', 'Balanced'], ['low', 'Small file']];
-const HEIGHTS = [['', 'Keep original resolution'], ['1080', 'Limit to 1080p'], ['720', 'Limit to 720p'], ['480', 'Limit to 480p'], ['360', 'Limit to 360p']];
+// P24 (03/10): 123apps' converter offers a full resolution menu; the service accepts any limit from 144 to 4320 px
+const HEIGHTS = [['', 'Keep original resolution'], ['2160', 'Limit to 2160p (4K)'], ['1440', 'Limit to 1440p'], ['1080', 'Limit to 1080p'], ['720', 'Limit to 720p'], ['480', 'Limit to 480p'], ['360', 'Limit to 360p'], ['240', 'Limit to 240p'], ['144', 'Limit to 144p']];
 
 const seo = {
   title: 'Video Converter',

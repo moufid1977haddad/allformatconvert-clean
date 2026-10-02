@@ -110,3 +110,64 @@ WebP borné à sa taille RIFF, fin de JPEG). En chemin, j'ai trouvé et corrigé
 **Non fait (nouveaux outils, au propriétaire de décider s'il en veut)** : filigrane d'image, générateur de mèmes,
 collage, flou de visage (iLoveIMG les a ; tout est faisable dans le navigateur, mais ce sont de nouvelles pages). Traitement
 par lots (iLoveIMG traite tout par lots) : chantier transversal.
+
+## 3. Vidéo
+
+Le service ffmpeg (Railway, interdit de modification) accepte, d'après son code (`services/media-processing/app/ffmpeg_ops.py`) :
+`convert` (36 cibles, qualité, hauteur max 144-4320, GIF début/durée/largeur/fps, découpe, et pour MP4/MOV/M4V rotation,
+taille `fit`, filtre, fps), `compress` (3 niveaux, hauteur max). Rien de plus (pas de miroir, vitesse, volume, fondu,
+codec au choix, CRF) : ces écarts vont au plan (Décisions P24, E5).
+
+| Outil | Ajout (P24) | Preuve |
+|---|---|---|
+| Video Converter | hauteur max 2160 / 1440 / 1080 / 720 / 480 / 360 / 240 / 144 (123apps : menu complet) | valeurs acceptées par le service (code) — **non exécuté de bout en bout** (service) |
+| Video Compressor | + 1440p et 240p | idem |
+| Video Resizer | préréglages 4K, 4:5 (1080 × 1350), story 720 × 1280, 4:3 (1440 × 1080) (Kapwing) | idem |
+| Video to GIF (et MP4/MOV/AVI/WebM to GIF) | largeurs 160 et 360 px (déjà acceptées par le service, absentes de la page) | idem |
+| Video Screenshot | **WebP** (libwebp WebAssembly sous Safari), **instant exact** à saisir | `av-lot.mjs` : WebP à 1,50 s |
+| Video Watermark | taille 5-60 % de la largeur, couleur du texte, **9 positions** ; **texte net** (dessiné à 192 px puis réduit — il était dessiné à 48 px puis agrandi, flou en 1080p/4K) | `av-lot.mjs` : texte rouge, demi-largeur, au centre, lu sur une image capturée de la vidéo produite (Chromium, Firefox) |
+
+## 4. Audio
+
+| Outil | Ajout (P24) | Preuve (`av-lot.mjs`) |
+|---|---|---|
+| Audio Converter | fréquence d'échantillonnage (48 / 44,1 / 32 / 22,05 / 16 / 8 kHz) et canaux (mono / stéréo), 123apps et FreeConvert ; une fréquence qu'un format ne sait pas écrire (AC3 à 16 kHz) est refusée par une phrase, jamais rééchantillonnée en silence | WAV 16 kHz mono ; AC3 16 kHz refusé |
+| Audio Compressor | mono et fréquence plus basse | MP3 mono 22,05 kHz |
+| Audio Booster | volume **0,25× à 5×** (il ne savait que monter) ; **normalisation** EBU R128 à -16 LUFS, crête vraie -1,5 dB | 0,5× → RMS divisé par 2 ; normalisé : crête ≤ -1,5 dBFS |
+
+Bancs : Chromium 7/7, Firefox 7/7, WebKit 5/5 + 2 non mesurables (**le WebKit de Playwright pour Windows ne décode aucune
+vidéo**, ni H.264 ni WebM ; le vrai Safari si — à vérifier par le propriétaire). Solidité des outils modifiés 38/38 ×3.
+
+## 5. GIF
+
+GIF Compressor : réduction des couleurs (128 → 16) et de la taille (75 → 25 %) par gifsicle, comme l'optimiseur d'ezgif.
+Video to GIF avait déjà les options d'ezgif (début, durée, largeur, fps). Preuve `gif-lot.mjs` : un GIF de 6 images,
+16 couleurs et 50 % → 100 px, 6 images, ≤ 16 couleurs, ×3 moteurs ; solidité 5/5 ×3.
+
+## 6. Documents et fichiers
+
+File Splitter : découpage **en N parts égales** et mode **« Join parts »** (aucun outil du site ne recollait les morceaux ;
+la FAQ renvoyait à « copy /b ») — tri par numéro, morceau manquant ou fichier différent signalés. Preuve : 3 parts
+égales, recollées (choisies dans le désordre) à l'identique ; morceau manquant dit.
+
+## 7. Développeur, texte, unités, maths — d'abord les résultats FAUX corrigés
+
+| Outil | Résultat faux (avant) | Correction |
+|---|---|---|
+| TOML to JSON | `a = 9007199254740993` refusé (« cannot be represented losslessly ») ; `inf` / `nan` devenaient `null` sans un mot | entiers lus exactement (BigInt) et écrits chiffre par chiffre ; inf/nan → null **et dit** |
+| JSON to TOML | `{"id":12345678901234567890}` → `12345678901234567168.0` | lecture sans perte ; un entier hors de la plage 64 bits de TOML écrit en texte **et dit** |
+| TSV to CSV | fins de ligne Windows : un `\r` entre guillemets dans chaque dernière colonne ; cellule Excel sur plusieurs lignes coupée | analyse RFC 4180 (guillemet ouvrant seulement en début de champ), CRLF |
+| Unit Converter | « 1,000 » lu comme 1 (résultat 1000× trop petit) | espaces de milliers, « 1.234,5 », et la question « mille ou un ? » pour le cas ambigu |
+| Roman Numerals | « 12.7 » → XII, « 1e3 » → I | entier 1-3999 seulement, sinon une phrase |
+| Percentage Calculator | variation de -10 à -5 affichée -50 % | division par |X| (+50 %) |
+
+Ajouts : UUID **v7** (RFC 9562, ordonné dans le temps), UUID nul, majuscules / sans tirets / {accolades}, jusqu'à 1000 ;
+Case Converter **camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE, iNVERSE** (mots coupés aussi aux
+changements de casse, accents gardés) ; Percentage Calculator : « X est Y % de combien », augmenter/diminuer de Y %,
+écart en pourcentage. Preuve `dev-lot.mjs` **11/11 ×3 moteurs**.
+
+**Relevés mais non faits cette nuit** (faisables, effort moyen) : Regex Tester (groupes, remplacement), comparaison de
+textes mot à mot, vérification de signature JWT, fuseaux horaires du convertisseur d'horodatage, densité de mots,
+expression cron collée d'un bloc, JSON Formatter (indentation, tri), mots de passe (exclure les caractères ambigus,
+phrase de passe), bases 2-36, ratio (dimension manquante), couleurs (alpha, contraste), unités supplémentaires (nm,
+stone, hectare, gallon UK, mpg), ZIP chiffré AES, métadonnées incorporées de File Metadata.

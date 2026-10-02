@@ -4,7 +4,8 @@ import MediaServiceTool from './MediaServiceTool';
 // Video -> animated GIF on the media-processing service (ffmpeg palettegen/paletteuse, Lanczos scaling,
 // proportions always kept). Options modelled on the reference site (ezgif): start, length, width, frame rate.
 // The service validates every value again (services/media-processing/app/ffmpeg_ops.py, gif_options).
-const WIDTHS = [240, 320, 400, 480, 540, 600, 640, 720, 800, 960, 1080];
+// P24 (03/10): 160 and 360 px too — our service already accepts them (services/media-processing GIF_WIDTHS)
+const WIDTHS = [160, 240, 320, 360, 400, 480, 540, 600, 640, 720, 800, 960, 1080];
 const FPS = [5, 8, 10, 12, 15, 20, 25, 30];
 export const GIF_MAX_SECONDS = 60;
 
