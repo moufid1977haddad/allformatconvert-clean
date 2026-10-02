@@ -3,6 +3,42 @@
 > **📍 EMPLACEMENT DE CE DOCUMENT — lire en premier.**
 > Jusqu'au 19 septembre 2026, ce document vivait **uniquement dans le Projet claude.ai**, invisible depuis le dépôt. Claude Code a donc travaillé des semaines sans la RÈGLE ZÉRO, sans les interdits permanents et sans la liste des pièges — et a redécouvert à ses frais des choses déjà écrites ici. **Il vit désormais dans le dépôt, à `claude/plan-de-travail.md`, et c'est la seule copie qui fait foi.** À lire au début de chaque chantier.
 
+## 🚨 INCIDENT 03/10 vers 01 h (heure de la machine, nuit du 02 au 03/10) — SITE HORS LIGNE, DÉCISION DU PROPRIÉTAIRE REQUISE
+
+**www.onlineconvertools.com et onlineconvertools.com répondent HTTP 402.** L'API Vercel répond : « Your Team exceeded our
+fair use limits and has been blocked (402) ». Toute nouvelle préversion ou production est refusée ; la production en
+place (`onlineconvertools-jg0rho9ri`, P23, vérifiée verte) n'est plus servie. Ce n'est pas un défaut du code : c'est le
+compte (plan **Hobby**) qui est suspendu.
+
+- **Limites Hobby** (docs Vercel, lues le 03/10) : par mois, 100 Go de Fast Data Transfer, 10 Go de Fast Origin
+  Transfer, 1 M d'invocations, 4 h de CPU actif. **Cause probable, à confirmer dans le tableau de bord (Usage)** : les
+  bancs de P21 → P23 sur www et sur les préversions (des milliers de pages d'outils chargées, chacune tirant plusieurs
+  Mo de WebAssembly : ffmpeg ≈ 30 Mo, LibRaw, encodeurs). Claude n'a pas accès au tableau d'usage (`vercel usage` : 404).
+- **Ce que seul le propriétaire peut faire** : (a) **passer l'équipe en Pro** (20 $/mois, crédit d'usage inclus, CDN à
+  tarif fixe ; de toute façon exigé dès que le site affiche de la publicité AdSense : Hobby interdit tout usage
+  commercial) ; ou (b) réduire l'usage puis rétablir le projet dans le tableau de bord ; ou (c) écrire au support Vercel.
+  **Recommandation de Claude : (a)**, avant toute autre chose — puis, pour les bancs, ne plus les faire tourner sur www
+  qu'en version courte (voir la règle ci-dessous).
+- **Règle pour la suite (Claude)** : bancs lourds (solidité complète, RAW, pages) **en local et sur une seule
+  préversion** ; sur www, uniquement le contrôle court (pages + téléchargement Chromium) ; jamais plusieurs passages
+  complets de 500 cas sur www.
+- P24 continue **en local** (aucun trafic Vercel) sur la branche `p24-couverture` ; rien n'est fusionné tant que le
+  compte est bloqué (une fusion déclencherait une production refusée). Voir `docs/audit/RAPPORT-p24-couverture-03-10.md`.
+
+### 📋 État P24 — TERMINÉ le 03/10 à 12 h 45 (heure de la machine) ; rien en production (site en 402)
+- **Fait, commité et poussé sur `p24-couverture`** (branche partie de `restauration-avant-p24-03-10` = `43d2b0cb` ;
+  dernier commit de code `45831f1b`) : les 9 catégories (PDF, image, vidéo, audio, GIF, fichiers, développeur / texte /
+  unités / maths, convertisseurs) puis le relevé n° 2 des ≈ 120 outils jamais comparés (lots 1 à 9, liste
+  `docs/audit/P24-releve-outils-restants.md` entièrement close). Rapport : `docs/audit/RAPPORT-p24-couverture-03-10.md`
+  (§10 = bilan), seul fusionné dans master (documentation seulement).
+- **Contrôles finaux en local** (`bash scripts/p24/final-run.sh`) : tests Node verts ; bancs P24 ×3 moteurs verts ;
+  solidité de tous les outils **522/522 ×3**.
+- **Reste au propriétaire** : (1) **débloquer Vercel** (Pro recommandé) ; (2) ensuite seulement, demander dans le
+  terminal la mise en production de `p24-couverture`, catégorie par catégorie, avec les conditions de P23 (étiquette
+  de restauration, préversion, bancs ×3, www, retour arrière prêt) — **ne pas fusionner la branche avant** ;
+  (3) sur la préversion : Vidéo → GIF (longueur raccourcie et dite, « joué une fois / 3 fois », compression ; banc
+  `scripts/p24/adds-lot.mjs`, service vidéo absent en local) ; (4) décisions E1-E7 ci-dessous.
+
 ## 🚀 RESTE AVANT PRODUCT HUNT — établi le 30/09 → 01/10 (passe « prêt au lancement », `docs/audit/RAPPORT-prelancement-01-10.md` §1 : chaque ligne du plan classée, preuve à l'appui)
 
 **Dans l'ordre.** Aucune date n'est proposée (règle absolue) : la date se fixe à l'étape 8, pas avant.
@@ -49,6 +85,18 @@
 | Préversion, bancs 3 moteurs + iPhone/iPad, production, vérification sur www | ✅ **en production `bf960651`** (`onlineconvertools-awc0el292`) ; www : RAW tout vert ×3 moteurs + iPhone/iPad, téléchargement, 238 pages ×3 — aucun retour arrière |
 | **Défauts préexistants trouvés par le banc de solidité complet** (mêmes échecs sur la production d'avant P22) : Duplicate Image Finder, Video Watermark, QR Generator « giant », Image Cropper et Video Merger sous Firefox — silencieux sur fichier vide/abîmé/faux | ✅ **corrigés par P23** (02/10), avec 8 autres trouvés en chemin (Image to Base64 figé 84 s sous Safari, JPG to PDF figé sur 900 Mpx, Image Compressor bloqué sur une image de 400 Mpx / 49 Ko…) ; banc de solidité vert sur les 3 moteurs (`RAPPORT-p23-02-10.md`) |
 | **Reste au propriétaire** : un vrai RAW de son appareil (ou d'un proche) sur iPhone/iPad dans Image Converter → JPG ; un ProRAW 48 Mpx d'iPhone 14/15/16 Pro (aucun sur raw.pixls.us : seuls des ProRAW 12 Mpx ont été testés). **Non mesuré faute d'échantillon** : un DNG compressé en JPEG XL (DNG 1.7) — LibRaw ne le lit qu'avec le DNG SDK d'Adobe, non compilé ici ; à vérifier avec un vrai fichier | ⏳ |
+
+## 🧑‍⚖️ Décisions du propriétaire — P24 (03/10, `docs/audit/RAPPORT-p24-couverture-03-10.md`)
+
+| # | Quoi | Coût | Recommandation de Claude |
+|---|---|---|---|
+| E1 | **PDF to Word en DOC / RTF** (CloudConvert les offre ; iLovePDF : format non vérifié) : ConvertAPI sait le faire, même prix par conversion, mais le prouver demande de vrais appels payants (interdits cette nuit) | ≈ 0,01-0,05 $ de test ; aucun coût fixe | **oui, plus tard** : quelques appels de test sur préversion, puis l'ajouter |
+| E2 | **PDF/A 1a, 2a, 2u, 3a, 3u** (iLovePDF les offre ; CloudConvert : 1b/2b/3b comme nous) : les niveaux « a » exigent un PDF balisé (structure), que Ghostscript ne crée pas ; « u » demande un texte Unicode garanti | nouveau moteur (veraPDF ne corrige pas ; il faudrait un outil de balisage) | **ne rien faire** : nos 1b/2b/3b égalent CloudConvert |
+| E3 | **PDF Translate du document entier** (iLovePDF : 50+ langues, mise en page gardée) : aujourd'hui 5 pages / 3 000 caractères, texte seul, OpenAI payant | ≈ 0,002 $ par page avec gpt-4o-mini, plafonds à revoir | décision de budget ; garder tel quel avant le lancement |
+| E5 | **Vidéo : miroir, vitesse, recadrage libre, volume / fondu, choix du codec (H.265/AV1) et du CRF, boucle d'un GIF** (123apps, Clideo, FreeConvert les offrent) : le service ffmpeg sur Railway ne les accepte pas aujourd'hui (paramètres à ajouter à `ffmpeg_ops.py`) | 0 $ de plus en fonctionnement ; ≈ 2-3 h ; modification de Railway (interdite sans le propriétaire) | **oui, après le lancement**, selon la règle « additif d'abord » (service rétrocompatible sur master, puis pages) |
+| E6 | **Password Generator : phrase de passe** (Bitwarden, 1Password la proposent) : demande la liste de mots de l'EFF (7 776 mots, ≈ 60 Ko, licence CC BY 3.0, attribution sur la page) ajoutée au dépôt | 0 $ ; ≈ 1 h | **oui** si l'attribution EFF sur la page vous convient |
+| E7 | **Currency Converter : historique et graphique des taux** (xe.com, Wise) : ExchangeRate-API ne donne l'historique qu'en offre payante ; Frankfurter (BCE, gratuit, 30 devises) le donne | 0 $ avec Frankfurter (30 devises seulement) ; ≈ 2 h | **plus tard** : utile mais secondaire, et un deuxième fournisseur à surveiller |
+| E4 | **HTML to PDF depuis une URL** (iLovePDF le fait) : Gotenberg sait (route url) mais une URL saisie par un visiteur expose aux requêtes vers notre réseau interne (SSRF) : liste d'interdiction d'adresses privées et délai à concevoir | 0 $ ; ≈ 2 h + revue de sécurité | oui après le lancement, avec revue de sécurité |
 
 ## 🛡️ P23 — erreurs réelles des visiteurs + solidité (02/10, `docs/audit/RAPPORT-p23-02-10.md`)
 
