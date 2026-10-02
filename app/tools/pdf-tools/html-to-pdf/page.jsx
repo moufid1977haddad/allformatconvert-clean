@@ -33,7 +33,13 @@ export default function HtmlToPdfPage() {
     const sizeCheck = checkOfficeSize(f, MAX_HTML_STAGED_BYTES);
     setError(sizeCheck.ok ? '' : sizeCheck.message);
     // P24: decoded as written (UTF-16, Windows ANSI…); f.text() read everything as UTF-8
-    const text = await decodedText(f);
+    // a legacy page declaring its charset (<meta charset=windows-1252>, Shift_JIS…) is decoded with it; the upload is
+    // UTF-8, so the declaration is rewritten to utf-8 (review 03/10: it still said 1252 and Chromium showed "Ã©")
+    const head = new TextDecoder('latin1').decode(new Uint8Array(await f.slice(0, 4096).arrayBuffer()));
+    const declared = (/<meta[^>]+charset\s*=\s*["']?\s*([\w-]+)/i.exec(head) || [])[1];
+    let text;
+    try { text = declared && !/^utf-?8$/i.test(declared) ? new TextDecoder(declared).decode(await f.arrayBuffer()) : await decodedText(f); } catch { text = await decodedText(f); }
+    text = text.replace(/(<meta[^>]+charset\s*=\s*["']?\s*)[\w-]+/i, '$1utf-8');
     setHtmlContent(text);
   };
 

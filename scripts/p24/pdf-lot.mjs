@@ -35,6 +35,7 @@ async function makePdf(file, pages, { version } = {}) {
 const plain5 = await makePdf('five.pdf', [1, 2, 3, 4, 5].map((i) => ({ text: `Body of page ${i}` })));
 const mixed = await makePdf('mixed.pdf', [{ text: 'Cover page' }, { text: 'Rotated page', rotate: 90 }, { text: 'Cropped page', crop: [100, 100, 400, 600] }]);
 const old13 = await makePdf('old13.pdf', [{ text: 'Old PDF 1.3' }], { version: [1, 3] });
+const v20 = await makePdf('v20.pdf', [{ text: 'PDF 2.0 file' }], { version: [2, 0] });
 const contact = await makePdf('contact.pdf', [{ texts: [['Write to jane.doe', 72, 700], ['@example.com today', 177, 700], ['Call +1 514 555 0199 now', 72, 650], ['Keep this line', 72, 600]] }, { text: 'Nothing to hide here' }]);
 
 // ---- reading results -----------------------------------------------------------------------------------------------
@@ -97,6 +98,17 @@ if (want('number-pages')) {
   await p.getByRole('button', { name: 'Add Page Numbers' }).click();
   const r2 = await result(p, 15000);
   check('number-pages: a custom text without {n} is refused with a sentence', /must contain \{n\}/.test(r2.alert || ''), r2.alert);
+  // review 03/10: Cyrillic was dropped without a word — now drawn as an image
+  await p.locator('#pn-custom').fill('Страница {n}');
+  await p.locator('#pn-skip').uncheck();
+  await p.getByRole('button', { name: 'Add Page Numbers' }).click();
+  await p.waitForTimeout(300);
+  const r3 = await result(p);
+  if (!r3.bytes) check('number-pages: Cyrillic', false, r3.alert); else {
+    const d = await PDFDocument.load(r3.bytes); let images = 0;
+    d.context.enumerateIndirectObjects().forEach(([, o]) => { if (o instanceof PDFRawStream && o.dict.get(PDFName.of('Subtype')) === PDFName.of('Image') && o.dict.get(PDFName.of('SMask'))) images++; }); // the picture, not its transparency mask
+    check('number-pages: a Cyrillic text is drawn (one image per page), not dropped', images === 3, `images ${images}`);
+  }
   await p.close();
 }
 
@@ -139,7 +151,7 @@ if (want('rotate')) {
   const p = await open('pdf-rotate');
   await p.locator('input[type=file]').first().setInputFiles(mixed);
   await p.getByRole('button', { name: '90° clockwise' }).click();
-  await p.locator('#rot-pages').fill('2');
+  await p.locator('#rot-pages').fill(' 2 - 2 ');
   await p.getByRole('button', { name: 'Rotate PDF' }).click();
   const r = await result(p);
   if (!r.bytes) check('rotate: result', false, r.alert); else {
@@ -204,6 +216,12 @@ if (want('protect')) {
     const opened = await textItems(r.bytes, 'open-Secret-1').then((pg) => textOf(pg[0])).catch((e) => 'ERR ' + e.message);
     check('protect: needs the password, opens with it', needs && /Old PDF 1.3/.test(opened), opened);
   }
+  // review 03/10: a PDF 2.0 fell to RC4 40-bit
+  await p.locator('input[type=file]').first().setInputFiles(v20);
+  await p.getByRole('button', { name: 'Protect PDF' }).click();
+  await p.waitForTimeout(300);
+  const rv = await result(p);
+  check('protect: a PDF 2.0 is encrypted with AES-128 too', !!rv.bytes && /\/V 4/.test(rv.bytes.toString('latin1')) && /AESV2/.test(rv.bytes.toString('latin1')), rv.alert || '');
   await p.locator('summary').click();
   await p.locator('#pp-owner').fill('open-Secret-1');
   await p.getByRole('button', { name: 'Protect PDF' }).click();

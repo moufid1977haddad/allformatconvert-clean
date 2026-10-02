@@ -80,7 +80,7 @@ export default function Page() {
           last = page;
         } else {
           // a blank page the size of the page before it (as displayed), else A4
-          const { width, height } = last ? last.getSize() : { width: 595.28, height: 841.89 };
+          const { width, height } = last ? last.getCropBox() : { width: 595.28, height: 841.89 };
           const blank = newDoc.addPage([width, height]);
           if (last && last.getRotation().angle) blank.setRotation(last.getRotation());
           if (p.rot) blank.setRotation(degrees((blank.getRotation().angle + p.rot) % 360));

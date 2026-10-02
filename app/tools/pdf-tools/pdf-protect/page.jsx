@@ -36,12 +36,14 @@ export default function PdfProtectPage() {
       // P24 (03/10): @cantoo/pdf-lib picks the cipher from the file's header version — a PDF 1.3 was encrypted with
       // RC4 40-bit (broken in minutes), 1.4-1.5 with RC4 128. The header is raised to 1.7 first: AES-128 for every file
       // (Smallpdf: AES 128-bit). Its AES-256 is revision 5, deprecated for a fast password check: not used.
-      const v = Number(pdfDoc.context.header.getVersionString());
-      if (!(v >= 1.6)) pdfDoc.context.header = PDFHeader.forVersion(1, 7);
+      // the library recognises only '1.4' to '1.7' (and '1.7ext3'): anything else, a PDF 2.0 included, got RC4 40-bit
+      if (!['1.6', '1.7'].includes(pdfDoc.context.header.getVersionString())) pdfDoc.context.header = PDFHeader.forVersion(1, 7);
       // The owner (permissions) password was "password + _owner": anyone who could open the file could lift every
       // restriction. Now the visitor's own, or 32 random characters nobody knows.
       const owner = ownerPassword || Array.from(crypto.getRandomValues(new Uint8Array(24)), (b) => b.toString(36).padStart(2, '0')).join('');
       pdfDoc.encrypt({ userPassword: password, ownerPassword: owner, permissions: { ...perm, contentAccessibility: true } });
+      const enc = pdfDoc.context.security && pdfDoc.context.security.encryption;
+      if (!enc || enc.V !== 4) throw new Error('This PDF could not be encrypted with AES: nothing was saved. Please report this file to us.');
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setDownloadUrl(URL.createObjectURL(blob));

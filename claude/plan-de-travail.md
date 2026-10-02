@@ -50,6 +50,15 @@
 | **Défauts préexistants trouvés par le banc de solidité complet** (mêmes échecs sur la production d'avant P22) : Duplicate Image Finder, Video Watermark, QR Generator « giant », Image Cropper et Video Merger sous Firefox — silencieux sur fichier vide/abîmé/faux | ✅ **corrigés par P23** (02/10), avec 8 autres trouvés en chemin (Image to Base64 figé 84 s sous Safari, JPG to PDF figé sur 900 Mpx, Image Compressor bloqué sur une image de 400 Mpx / 49 Ko…) ; banc de solidité vert sur les 3 moteurs (`RAPPORT-p23-02-10.md`) |
 | **Reste au propriétaire** : un vrai RAW de son appareil (ou d'un proche) sur iPhone/iPad dans Image Converter → JPG ; un ProRAW 48 Mpx d'iPhone 14/15/16 Pro (aucun sur raw.pixls.us : seuls des ProRAW 12 Mpx ont été testés). **Non mesuré faute d'échantillon** : un DNG compressé en JPEG XL (DNG 1.7) — LibRaw ne le lit qu'avec le DNG SDK d'Adobe, non compilé ici ; à vérifier avec un vrai fichier | ⏳ |
 
+## 🧑‍⚖️ Décisions du propriétaire — P24 (03/10, `docs/audit/RAPPORT-p24-couverture-03-10.md`)
+
+| # | Quoi | Coût | Recommandation de Claude |
+|---|---|---|---|
+| E1 | **PDF to Word en DOC / RTF** (CloudConvert les offre ; iLovePDF : format non vérifié) : ConvertAPI sait le faire, même prix par conversion, mais le prouver demande de vrais appels payants (interdits cette nuit) | ≈ 0,01-0,05 $ de test ; aucun coût fixe | **oui, plus tard** : quelques appels de test sur préversion, puis l'ajouter |
+| E2 | **PDF/A 1a, 2a, 2u, 3a, 3u** (iLovePDF les offre ; CloudConvert : 1b/2b/3b comme nous) : les niveaux « a » exigent un PDF balisé (structure), que Ghostscript ne crée pas ; « u » demande un texte Unicode garanti | nouveau moteur (veraPDF ne corrige pas ; il faudrait un outil de balisage) | **ne rien faire** : nos 1b/2b/3b égalent CloudConvert |
+| E3 | **PDF Translate du document entier** (iLovePDF : 50+ langues, mise en page gardée) : aujourd'hui 5 pages / 3 000 caractères, texte seul, OpenAI payant | ≈ 0,002 $ par page avec gpt-4o-mini, plafonds à revoir | décision de budget ; garder tel quel avant le lancement |
+| E4 | **HTML to PDF depuis une URL** (iLovePDF le fait) : Gotenberg sait (route url) mais une URL saisie par un visiteur expose aux requêtes vers notre réseau interne (SSRF) : liste d'interdiction d'adresses privées et délai à concevoir | 0 $ ; ≈ 2 h + revue de sécurité | oui après le lancement, avec revue de sécurité |
+
 ## 🛡️ P23 — erreurs réelles des visiteurs + solidité (02/10, `docs/audit/RAPPORT-p23-02-10.md`)
 
 | Quoi | État |

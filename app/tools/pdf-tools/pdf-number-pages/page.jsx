@@ -5,6 +5,7 @@ import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 import { pdfFileProblem } from '../../../lib/fileChecks';
 import { placeOnVisiblePage, visibleSize } from '../../../lib/pdfPlace';
 import { FileDownload } from '../../../components/FileDownload';
+import { textAsPng, fontCanWrite } from '../../../lib/pdfTextImage';
 
 // P24 (03/10), coverage against iLovePDF's "Add page numbers" (read 02/10: position, margin, facing pages, skip the
 // cover, page range, first number, text templates "{n}", "Page {n}", "Page {n} of {p}", font size and colour).
@@ -63,7 +64,8 @@ export default function PdfNumberPagesPage() {
       const pages = pdfDoc.getPages();
       const total = pages.length;
       const start = Math.max(skipCover ? 2 : 1, Math.round(Number(fromPage)) || 1);
-      const end = Math.min(total, toPage === '' ? total : Math.round(Number(toPage)) || total);
+      const end = toPage === '' ? total : Math.min(total, Math.round(Number(toPage)));
+      if (!(end >= 1)) throw new Error('"To page" must be a page number (1 or more), or empty for the last page.');
       if (start > end) throw new Error(`There is no page to number between page ${start} and page ${end} (this PDF has ${total} page${total > 1 ? 's' : ''}).`);
       const first = Math.round(Number(firstNumber));
       if (!Number.isFinite(first)) throw new Error('The first number must be a whole number.');
@@ -74,19 +76,22 @@ export default function PdfNumberPagesPage() {
       for (let i = start - 1; i < end; i++) {
         const page = pages[i];
         const n = first + (i - (start - 1));
-        // Helvetica (WinAnsi) has no glyph for some characters a custom text may hold: they are left out, not crashed on
-        const text = template.replaceAll('{n}', String(n)).replaceAll('{p}', String(last)).replace(/[^\x20-\x7e -ÿ]/g, '');
+        const text = template.replaceAll('{n}', String(n)).replaceAll('{p}', String(last));
+        // Helvetica writes WinAnsi (Latin-1, €, ’, –…); any other script is drawn by the browser as an image (review 03/10:
+        // Cyrillic letters were dropped without a word)
+        const asImage = !fontCanWrite(font, text) ? await textAsPng(text, size, color) : null;
         const box = page.getCropBox();
         const rotation = page.getRotation().angle;
         const { width, height } = visibleSize(box, rotation);
-        const textWidth = font.widthOfTextAtSize(text, size);
+        const textWidth = asImage ? asImage.width : font.widthOfTextAtSize(text, size);
         let [v, h] = position.split('-'); // 'bottom-center' → v = 'bottom', h = 'center'
         // On facing pages (a printed book), left and right swap on the even page numbers
         if (facing && n % 2 === 0) h = h === 'left' ? 'right' : h === 'right' ? 'left' : h;
         const vx = h === 'left' ? m : h === 'right' ? width - textWidth - m : (width - textWidth) / 2;
         const vy = v === 'top' ? height - m - size : m;
         const at = placeOnVisiblePage(box, rotation, vx, vy);
-        page.drawText(text, { x: at.x, y: at.y, size, font, color: rgb(r, g, b), rotate: degrees(at.rotate) });
+        if (asImage) { const img = await pdfDoc.embedPng(asImage.bytes); const below = placeOnVisiblePage(box, rotation, vx, vy - asImage.baseline); page.drawImage(img, { x: below.x, y: below.y, width: asImage.width, height: asImage.height, rotate: degrees(below.rotate) }); }
+        else page.drawText(text, { x: at.x, y: at.y, size, font, color: rgb(r, g, b), rotate: degrees(at.rotate) });
       }
       const blob = new Blob([await pdfDoc.save()], { type: 'application/pdf' });
       setDownloadUrl(URL.createObjectURL(blob));

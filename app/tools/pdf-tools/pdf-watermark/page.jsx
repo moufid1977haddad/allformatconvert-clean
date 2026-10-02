@@ -5,6 +5,7 @@ import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 import { pdfFileProblem, emptyImageProblem, unreadableImageMessage } from '../../../lib/fileChecks';
 import { placeOnVisiblePage, visibleSize } from '../../../lib/pdfPlace';
 import { FileDownload } from '../../../components/FileDownload';
+import { textAsPng, fontCanWrite } from '../../../lib/pdfTextImage';
 
 // P24 (03/10), coverage against iLovePDF's watermark (read 02/10: text or image, position grid plus mosaic,
 // transparency, rotation 45/90/180/270, over or below the content, page range) — Smallpdf: text only.
@@ -15,22 +16,6 @@ import { FileDownload } from '../../../components/FileDownload';
 const POSITIONS = ['top-left', 'top-center', 'top-right', 'middle-left', 'center', 'middle-right', 'bottom-left', 'bottom-center', 'bottom-right'];
 const ROTATIONS = [[0, 'None'], [45, '45°'], [90, '90°'], [180, '180°'], [270, '270°']];
 const hexToRgb = (hex) => { const n = parseInt(hex.slice(1), 16); return [(n >> 16) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]; };
-const latin1 = (s) => /^[\x20-\x7e -ÿ]*$/.test(s);
-
-// A text Helvetica cannot write, drawn by the browser (its own fonts cover every script) into a PNG, 4× for print.
-async function textAsPng(text, sizePt, color, bold) {
-  const k = 4, c = document.createElement('canvas'), ctx = c.getContext('2d');
-  const font = `${bold ? 'bold ' : ''}${sizePt * k}px system-ui, "Segoe UI", "Noto Sans", sans-serif`;
-  ctx.font = font;
-  const m = ctx.measureText(text);
-  const w = Math.ceil(m.width) + 2 * k, h = Math.ceil((m.actualBoundingBoxAscent || sizePt * k * 0.8) + (m.actualBoundingBoxDescent || sizePt * k * 0.2)) + 2 * k;
-  c.width = w; c.height = h;
-  ctx.font = font; ctx.fillStyle = color; ctx.textBaseline = 'alphabetic';
-  ctx.fillText(text, k, k + (m.actualBoundingBoxAscent || sizePt * k * 0.8));
-  const blob = await new Promise((ok) => c.toBlob(ok, 'image/png'));
-  if (!blob) throw new Error('This browser could not draw the watermark text.');
-  return { bytes: new Uint8Array(await blob.arrayBuffer()), width: w / k, height: h / k };
-}
 
 export default function PdfWatermarkPage() {
   const [file, setFile] = useState(null);
@@ -88,10 +73,12 @@ export default function PdfWatermarkPage() {
       const pages = pdfDoc.getPages();
       const total = pages.length;
       const start = Math.max(1, Math.round(Number(fromPage)) || 1);
-      const end = Math.min(total, toPage === '' ? total : Math.round(Number(toPage)) || total);
+      const end = toPage === '' ? total : Math.min(total, Math.round(Number(toPage)));
+      if (!(end >= 1)) throw new Error('"To page" must be a page number (1 or more), or empty for the last page.');
       if (start > end) throw new Error(`There is no page to watermark between page ${start} and page ${end} (this PDF has ${total} page${total > 1 ? 's' : ''}).`);
       const [r, g, b] = hexToRgb(color);
-      const font = kind === 'text' && latin1(text) ? await pdfDoc.embedFont(bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica) : null;
+      let font = kind === 'text' ? await pdfDoc.embedFont(bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica) : null;
+      if (font && !fontCanWrite(font, text)) font = null; // written by the browser as an image instead
       let embedded = null;
       if (kind === 'image') embedded = image.png ? await pdfDoc.embedPng(image.bytes) : await pdfDoc.embedJpg(image.bytes);
       const pngCache = new Map(); // text drawn as an image, one per font size
@@ -143,7 +130,7 @@ export default function PdfWatermarkPage() {
       }
       const blob = new Blob([await pdfDoc.save()], { type: 'application/pdf' });
       setDownloadUrl(URL.createObjectURL(blob));
-      setStatus(`Watermarked pages ${start} to ${end}.`);
+      setStatus(`Watermarked pages ${start} to ${end}.${layer === 'below' ? ' Below the content: on a scanned page or a page with a full background it is hidden — use "Over the content" there.' : ''}`);
     } catch (err) {
       setStatus(''); setError(err?.message || 'The watermark could not be added.');
     }
@@ -184,7 +171,7 @@ export default function PdfWatermarkPage() {
                 {image && <span className="ml-2 text-neutral-600 truncate">{image.name}</span>}
                 <input ref={imageRef} type="file" accept="image/png,image/jpeg" className="hidden" onChange={handleImage} />
               </div>
-              <label className="block"><span className="block text-neutral-500 mb-1">Image width: {imageScale}% of the page</span>
+              <label className="block"><span className="block text-neutral-500 mb-1">Image width: {mosaic ? Math.min(imageScale, 25) : imageScale}% of the page{mosaic && imageScale > 25 ? ' (25% at most in a mosaic)' : ''}</span>
                 <input id="wm-scale" aria-label="Image width (%)" type="range" min="5" max="100" value={imageScale} onChange={e => setImageScale(Number(e.target.value))} className="w-full" /></label>
             </div>
           )}

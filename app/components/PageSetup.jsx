@@ -21,7 +21,10 @@ export function withPageSetup(html, setup) {
   const css = pageSetupCss(setup);
   if (!css) return html;
   const tag = `<style data-page-setup>${css}</style>`;
-  return /<\/head>/i.test(html) ? html.replace(/<\/head>/i, `${tag}</head>`) : tag + html;
+  if (/<\/head>/i.test(html)) return html.replace(/<\/head>/i, `${tag}</head>`);
+  // no <head>: after the doctype / <html> tag, never before the doctype (that would switch the page to quirks mode)
+  const m = /^\s*(<!doctype[^>]*>)?\s*(<html[^>]*>)?/i.exec(html);
+  return html.slice(0, m[0].length) + tag + html.slice(m[0].length);
 }
 
 export default function PageSetup({ value, onChange }) {

@@ -2,12 +2,13 @@
 // Shared by PDF to Images (P21) and, since P24 (03/10), PDF Rotate, Delete Pages and Crop: Delete Pages read "2-4" as
 // parseInt("2-4") = 2 and removed page 2 only, without a word; other words and pages past the end were dropped silently.
 export function parsePageRange(text, n) {
-  const t = String(text || '').trim();
+  // spaces around a dash belong to the range: "1 - 3" was split into "1", "-", "3" and the lone "-" meant every page
+  const t = String(text || '').trim().replace(/\s*[-–]\s*/g, '-');
   if (!t) return Array.from({ length: n }, (_, i) => i + 1);
   const pages = new Set();
   for (const part of t.split(/[,;\s]+/).filter(Boolean)) {
     const m = /^(\d*)\s*[-–]\s*(\d*)$/.exec(part) || /^(\d+)$/.exec(part);
-    if (!m) throw new Error(`"${part}" is not a page or a range. Write pages like 1-3, 5, 8-.`);
+    if (!m || part === '-') throw new Error(`"${part}" is not a page or a range. Write pages like 1-3, 5, 8-.`);
     let a, b;
     if (m.length === 2) { a = b = Number(m[1]); } else { a = m[1] ? Number(m[1]) : 1; b = m[2] ? Number(m[2]) : n; }
     if (a < 1 || b < a) throw new Error(`"${part}" is not a valid range.`);

@@ -44,12 +44,13 @@ export const matchesText = (text, keyword) => !!norm(keyword) && norm(text).incl
 // becoming a line break no pattern crosses; every match is mapped back to the characters it covers in each item.
 const LUHN = (digits) => { let s = 0; for (let i = 0; i < digits.length; i++) { let d = +digits[digits.length - 1 - i]; if (i % 2) { d *= 2; if (d > 9) d -= 9; } s += d; } return s % 10 === 0; };
 export const PATTERNS = {
-  email: { label: 'E-mail addresses', re: /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g, ok: () => true },
+  email: { label: 'E-mail addresses', re: /[\p{L}\p{N}._%+'’-]+@[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)*\.\p{L}{2,}/gu, ok: () => true },
   // 9 to 15 digits with the usual separators (+1 514 555 0199, (514) 555-0199, 06 12 34 56 78); not an ISO date
-  phone: { label: 'Phone numbers', re: /(?<!\d[ \t.-]?)(?:\+\d{1,3}[ \t.-]?)?(?:\(\d{1,4}\)[ \t.-]?)?\d[\d \t.-]{5,18}\d(?![ \t.-]?\d)/g, ok: (m) => { const n = m.replace(/\D/g, '').length; return n >= 9 && n <= 15 && !/^\d{4}-\d{2}-\d{2}$/.test(m.trim()); } },
+  phone: { label: 'Phone numbers', re: /(?<!\d[ \t.-]?)(?:\+\d{1,3}[ \t.-]?)?(?:\(\d{1,4}\)[ \t.-]?)?\d[\d \t.-]{5,}\d/g, ok: (m) => { const n = m.replace(/\D/g, '').length; return n >= 9 && n <= 15 && !/^\d{4}-\d{2}-\d{2}$/.test(m.trim()); } },
   // 13 to 19 digits, grouped by spaces or dashes, passing the Luhn check (every real card number does)
-  // never a piece of a longer number: no digit right before or after
-  card: { label: 'Card numbers', re: /(?<!\d[ -]?)\d(?:[ -]?\d){12,18}(?![ -]?\d)/g, ok: (m) => LUHN(m.replace(/\D/g, '')) },
+  // the whole run of digits is taken (never a piece of a longer number); a run holding several numbers is cut by
+  // digitRuns below
+  card: { label: 'Card numbers', re: /(?<!\d[ -]?)\d(?:[ -]?\d){12,}/g, ok: (m) => { const d = m.replace(/\D/g, ''); return d.length >= 13 && d.length <= 19 && LUHN(d); } },
 };
 
 // strs: the items' strings, in order; kinds: keys of PATTERNS; eols[k]: item k ends a line. Same output as matchSpans.
@@ -65,18 +66,37 @@ export function patternSpans(strs, kinds, eols = []) {
     const { re, ok } = PATTERNS[kind];
     re.lastIndex = 0;
     for (let m; (m = re.exec(hay));) {
-      if (!ok(m[0])) { re.lastIndex = m.index + 1; continue; }
+      // a run that holds a real number next to other digits (card + CVV or expiry, two phone numbers in a row) is
+      // redacted WHOLE: cutting it into the "right" numbers can guess wrong and leave one readable (review 03/10)
+      const found = ok(m[0]) || digitRuns(m[0], m.index, ok).length ? [[m.index, m.index + m[0].length]] : [];
+      for (const [a0, a1] of found) {
       const byItem = new Map();
-      for (let q = m.index; q < m.index + m[0].length; q++) {
+      for (let q = a0; q < a1; q++) {
         if (!at[q]) continue;
         const [k, c] = at[q];
         const s = byItem.get(k);
         if (s) { s.c0 = Math.min(s.c0, c); s.c1 = Math.max(s.c1, c + 1); } else byItem.set(k, { k, c0: c, c1: c + 1 });
       }
-      for (const v of byItem.values()) spans.push({ ...v, m: `${kind}:${m.index}` });
+      for (const v of byItem.values()) spans.push({ ...v, m: `${kind}:${a0}` });
+      }
     }
   }
   return spans;
+}
+
+// Runs of contiguous digit groups inside `s` (at offset `base` in the page text) that pass `ok`, longest first, never
+// overlapping: [[start, end], …] in page-text offsets.
+function digitRuns(s, base, ok) {
+  const groups = [...s.matchAll(/\+?\(?\d+\)?/g)].map((g) => [g.index, g.index + g[0].length]);
+  const out = [], used = new Array(groups.length).fill(false);
+  for (let len = groups.length; len >= 1; len--) {
+    for (let i = 0; i + len <= groups.length; i++) {
+      if (used.slice(i, i + len).some(Boolean)) continue;
+      const a = groups[i][0], z = groups[i + len - 1][1];
+      if (ok(s.slice(a, z))) { out.push([base + a, base + z]); for (let k = i; k < i + len; k++) used[k] = true; }
+    }
+  }
+  return out;
 }
 
 /** "a\nb, c" typed by the visitor → the terms (one per line; a line is one term, commas included). */
