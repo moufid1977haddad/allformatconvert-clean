@@ -24,6 +24,10 @@ COMPRESS_CRF = {"light": 27, "balanced": 30, "strong": 34}
 # Ladder used when a compressed result is not smaller than its source: the next,
 # stronger level is tried once before the service says so honestly.
 COMPRESS_LEVELS = ("light", "balanced", "strong")
+# P25 (E5): the same three levels in H.265 (x265 veryfast) and AV1 (SVT-AV1), each set to the VMAF of the x264 level
+# on camera footage (measured 03/10, docs/audit/RAPPORT-p25-decisions-03-10.md §5): H.265 about 40 % and AV1 about
+# 50 % smaller than H.264 at the same VMAF; on animation H.265 is smaller and better, AV1 larger but far better.
+COMPRESS_CRF_BY_CODEC = {"h265": {"light": 27, "balanced": 30, "strong": 34}, "av1": {"light": 42, "balanced": 48, "strong": 55}}
 
 # --- size policy (measured 2026-09-20, docs/audit/RAPPORT-video-qualite.md) -----------
 # A converted/compressed video must not come out heavier than its source. A bitrate
@@ -228,12 +232,14 @@ BLOCKED_DEMUXERS = {"hls", "applehttp", "concat", "ffconcat", "dash", "sdp", "rt
 _VIDEO_RE = re.compile(r"Stream #\d+:\d+.*?: Video: (\w+).*?, (\d{2,5})x(\d{2,5})")
 _AUDIO_RE = re.compile(r"Stream #\d+:\d+.*?: Audio:")
 _BITRATE_RE = re.compile(r"bitrate:\s*(\d+)\s*kb/s")
+_FPS_RE = re.compile(r"Stream #\d+:\d+.*?: Video: .*?, (\d+(?:\.\d+)?) fps")
 
 
 class ProbeResult:
-    def __init__(self, duration, has_video, has_audio, width, height, total_kbps=0):
+    def __init__(self, duration, has_video, has_audio, width, height, total_kbps=0, fps=0.0):
         self.duration, self.has_video, self.has_audio, self.width, self.height = duration, has_video, has_audio, width, height
         self.total_kbps = total_kbps
+        self.fps = fps  # 0 when unknown (P25: keeps a sped-up video at its own frame rate)
 
 
 _OUT_TIME_RE = re.compile(r"out_time_us=(\d+)")
@@ -285,7 +291,9 @@ def probe(path: str):
     if not v and not has_audio:
         return None
     br = _BITRATE_RE.search(err)
-    return ProbeResult(duration, bool(v), has_audio, int(v.group(2)) if v else 0, int(v.group(3)) if v else 0, int(br.group(1)) if br else 0)
+    fr = _FPS_RE.search(err)
+    return ProbeResult(duration, bool(v), has_audio, int(v.group(2)) if v else 0, int(v.group(3)) if v else 0, int(br.group(1)) if br else 0,
+                       float(fr.group(1)) if fr else 0.0)
 
 
 # GIF options (video-to-gif, mp4-to-gif pages; video-converter sends none and keeps the defaults below).
@@ -359,6 +367,32 @@ VIDEO_FILTERS = {
 ROTATIONS = {90: "transpose=clock", 180: "hflip,vflip", 270: "transpose=cclock"}
 EDIT_TARGETS = ("mp4", "mov", "m4v")
 
+# P25 (03/10, owner's decision E5): the edits 123apps, Clideo, Kapwing and FreeConvert offer and the service did not --
+# mirror, free crop, speed, volume and fades, the codec (H.265 / AV1) and an exact CRF. All optional and absent by
+# default (additive): a request without them builds the same command as before, byte for byte.
+FLIPS = {"h": "hflip", "v": "vflip", "hv": "hflip,vflip"}
+# 123apps / Clideo speed steps; the sound follows without changing pitch (atempo takes 0.5-2 per stage).
+SPEEDS = {0.25: ["atempo=0.5", "atempo=0.5"], 0.5: ["atempo=0.5"], 0.75: ["atempo=0.75"], 1.25: ["atempo=1.25"],
+          1.5: ["atempo=1.5"], 2: ["atempo=2"], 3: ["atempo=2", "atempo=1.5"], 4: ["atempo=2", "atempo=2"]}
+MAX_VOLUME = 3.0   # 300 %, FreeConvert's ceiling is 200 %; 0 = silent
+MAX_FADE_SECONDS = 10.0
+CODECS = ("h264", "h265", "av1")
+CRF_RANGE = {"h264": (0, 51), "h265": (0, 51), "av1": (0, 63)}
+
+
+class Edit:
+    """A validated edit: video filters, audio filters and the speed (which changes the output's length)."""
+
+    def __init__(self, vf, for_concat, af=None, speed=1.0, fade=None):
+        self.vf, self.for_concat, self.af, self.speed, self.fade = vf, for_concat, af or [], speed, fade
+
+    def __iter__(self):  # (vf, for_concat), as the edit was returned before P25
+        return iter((self.vf, self.for_concat))
+
+
+def _num(v):
+    return isinstance(v, (int, float)) and not isinstance(v, bool)
+
 
 def edit_options(params: dict):
     """Validated video edit: (filters for -vf, for_concat) or None. Raises ValueError (user-safe message).
@@ -368,9 +402,26 @@ def edit_options(params: dict):
     forConcat: every clip of a merge normalised so the browser can join them WITHOUT re-encoding: 48 kHz stereo
     audio always present (silence added when the clip has none) and x264 "stitchable" headers."""
     rotate, fit, flt, fps, concat = (params.get(k) for k in ("rotate", "fit", "filter", "fps", "forConcat"))
-    if rotate is None and fit is None and flt is None and fps is None and concat is None:
+    flip, crop, speed, volume, fade_in, fade_out, fade_video = (params.get(k) for k in ("flip", "crop", "speed", "volume", "fadeIn", "fadeOut", "fadeVideo"))
+    if all(v is None for v in (rotate, fit, flt, fps, concat, flip, crop, speed, volume, fade_in, fade_out, fade_video)):
         return None
-    vf = []
+    vf, af = [], []
+    if crop is not None:
+        # in the picture as it is shown (after the source's own rotation), before the mirror, the rotation and the size;
+        # clamped by ffmpeg to the picture, so a box drawn on a preview a few pixels off never fails the job
+        if not isinstance(crop, dict):
+            raise ValueError("Invalid crop.")
+        x, y, w, h = (crop.get(k) for k in ("x", "y", "w", "h"))
+        for v in (x, y, w, h):
+            if isinstance(v, bool) or not isinstance(v, int) or not 0 <= v <= 7680:
+                raise ValueError("Invalid crop.")
+        if w < 16 or h < 16 or w % 2 or h % 2:
+            raise ValueError("The cropped area must be at least 16 x 16 pixels, with even sides.")
+        vf.append(f"crop=w='min({w},iw)':h='min({h},ih)':x='min({x},iw-ow)':y='min({y},ih-oh)'")
+    if flip is not None:
+        if not isinstance(flip, str) or flip not in FLIPS:
+            raise ValueError("Unsupported mirror.")
+        vf.append(FLIPS[flip])
     if rotate is not None:
         if isinstance(rotate, bool) or not isinstance(rotate, int) or rotate not in ROTATIONS:
             raise ValueError("Unsupported rotation.")
@@ -402,11 +453,43 @@ def edit_options(params: dict):
         vf.append(f"fps={round(float(fps), 3)}")
     if concat is not None and not isinstance(concat, bool):
         raise ValueError("Invalid option.")
-    return vf, bool(concat)
+    rate = 1.0
+    if speed is not None:
+        if not _num(speed) or float(speed) not in SPEEDS:
+            raise ValueError("Unsupported speed.")
+        rate = float(speed)
+        vf.append(f"setpts=PTS/{rate}")
+        af += SPEEDS[rate]
+    if volume is not None:
+        if not _num(volume) or not 0 <= volume <= MAX_VOLUME:
+            raise ValueError("Unsupported volume.")
+        af.append(f"volume={round(float(volume), 3)}")
+    fade = None
+    if fade_in is not None or fade_out is not None or fade_video is not None:
+        for v in (fade_in, fade_out):
+            if v is not None and (not _num(v) or not 0 <= v <= MAX_FADE_SECONDS):
+                raise ValueError(f"A fade lasts up to {int(MAX_FADE_SECONDS)} seconds.")
+        if fade_video is not None and not isinstance(fade_video, bool):
+            raise ValueError("Invalid option.")
+        fade = (float(fade_in or 0), float(fade_out or 0), bool(fade_video))
+    if concat and (rate != 1.0 or af or fade):
+        raise ValueError("Speed, volume and fades are not available when joining videos.")
+    return Edit(vf, bool(concat), af, rate, fade)
+
+
+def _speed(params: dict) -> float:
+    s = params.get("speed")
+    return float(s) if _num(s) and float(s) in SPEEDS else 1.0
 
 
 def effective_duration(op: str, params: dict, info: ProbeResult) -> float:
     """Length of what ffmpeg will actually encode -- the progress bar's 100 %."""
+    if op == "convert" and params.get("target") != "gif" and _speed(params) != 1.0:
+        return _effective_unsped(op, params, info) / _speed(params)
+    return _effective_unsped(op, params, info)
+
+
+def _effective_unsped(op: str, params: dict, info: ProbeResult) -> float:
     if op == "convert" and params.get("target") != "gif":
         try:
             clip = clip_options(params, info)
@@ -438,6 +521,14 @@ def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_pa
             "-protocol_whitelist", "file", "-i", in_path, "-map_metadata", "-1"]
     ctx = Ctx(info, input_bytes, crf_offset)
 
+    codec, crf = params.get("codec"), params.get("crf")
+    if codec is not None and (not isinstance(codec, str) or codec not in CODECS):
+        raise ValueError("Unsupported codec.")
+    if crf is not None:
+        lo, hi = CRF_RANGE[codec or "h264"]
+        if isinstance(crf, bool) or not isinstance(crf, int) or not lo <= crf <= hi:
+            raise ValueError(f"The quality value (CRF) must be a whole number from {lo} to {hi}.")
+
     if op == "compress":
         if not info.has_video:
             raise ValueError("This file has no video track to compress.")
@@ -447,8 +538,16 @@ def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_pa
         vf = []
         if max_h:
             vf = ["-vf", f"scale=-2:'min({max_h},ih)'"]
+        if codec in ("h265", "av1"):
+            # P25 (E5): H.265 / AV1 compression, same three levels, CRF of the same visual step (COMPRESS_CRF_BY_CODEC)
+            value = crf if crf is not None else COMPRESS_CRF_BY_CODEC[codec][level]
+            venc = (["-c:v", "libx265", "-preset", "veryfast", "-crf", str(value), "-tag:v", "hvc1", "-x265-params", "log-level=error"] if codec == "h265"
+                    else ["-c:v", "libsvtav1", "-preset", str(AV1_PRESET_SHORT if ctx.work <= AV1_SHORT_MAX_WORK else AV1_PRESET_LONG), "-crf", str(value)])
+            args = base + ["-map", "0:v:0", "-map", "0:a:0?"] + vf + venc + [
+                "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "96k", "-movflags", "+faststart", "-f", "mp4", out_path]
+            return args, "mp4", "video/mp4"
         args = base + ["-map", "0:v:0", "-map", "0:a:0?"] + vf + [
-            "-c:v", "libx264", "-preset", x264_preset(ctx), "-crf", str(COMPRESS_CRF[level]), "-pix_fmt", "yuv420p",
+            "-c:v", "libx264", "-preset", x264_preset(ctx), "-crf", str(crf if crf is not None else COMPRESS_CRF[level]), "-pix_fmt", "yuv420p",
             "-c:a", "aac", "-b:a", "96k", "-movflags", "+faststart", "-f", "mp4", out_path]
         return args, "mp4", "video/mp4"
 
@@ -493,6 +592,10 @@ def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_pa
             if info.has_audio:
                 clip_a = ["-af", f"atrim=start={s:.4f}:end={s + d:.4f},asetpts=PTS-STARTPTS"]
         edit = edit_options(params)
+        if (codec is not None or crf is not None) and target not in EDIT_TARGETS:
+            raise ValueError("The codec and the quality value are chosen for MP4 or MOV only.")
+        if codec == "av1" and target == "mov":
+            raise ValueError("AV1 is written in MP4 only.")
         extra = []
         if edit:
             if target not in EDIT_TARGETS:
@@ -520,7 +623,33 @@ def build_command(op: str, params: dict, info: ProbeResult, in_path: str, out_pa
                     extra += ["-af", "apad", "-t", f"{length:.6f}"]
         if clip_v:
             vf = ["-vf", ",".join(clip_v + ([vf[1]] if vf else []))]
+        if edit and (edit.af or edit.fade):
+            # Speed, volume and fades (P25): appended after the cut, on the OUTPUT's own timeline.
+            length = effective_duration(op, params, info)
+            if edit.fade:
+                fi, fo, fv = edit.fade
+                if fi + fo > length > 0:
+                    raise ValueError("The fades are longer than the video.")
+                a_f = ([f"afade=t=in:st=0:d={fi:.3f}"] if fi else []) + ([f"afade=t=out:st={max(0.0, length - fo):.3f}:d={fo:.3f}"] if fo else [])
+                v_f = (([f"fade=t=in:st=0:d={fi:.3f}"] if fi else []) + ([f"fade=t=out:st={max(0.0, length - fo):.3f}:d={fo:.3f}"] if fo else [])) if fv else []
+            else:
+                a_f, v_f = [], []
+            if edit.speed != 1 and info.fps:
+                # the source's frame rate is kept: a 4x video does not carry 4x the frames, a slow-motion one is not
+                # left at a half rate that some players stutter on (frames repeated, as 123apps and Clideo deliver)
+                v_f = [f"fps={round(min(info.fps, 120.0), 3)}"] + v_f
+            if v_f:
+                vf = ["-vf", ",".join(([vf[1]] if vf else []) + v_f)]
+            if info.has_audio and (edit.af or a_f):
+                chain = ([clip_a[1]] if clip_a else []) + edit.af + a_f
+                clip_a = ["-af", ",".join(chain)]
+        if codec in ("h265", "av1"):
+            builder = _hevc if codec == "h265" else _av1
         args = base + maps + vf + clip_a + builder(quality, ctx) + extra + [out_path]
+        if codec == "h265" and target == "mov":
+            args[args.index("-f", len(base)) + 1] = "mov"
+        if crf is not None:
+            args[args.index("-crf") + 1] = str(crf)
         # Optional exact bitrate (Audio Compressor sends the one its visitor picked, 64-320 kbit/s). Opus only,
         # the one target that tool sends here; absent = the quality level's bitrate, as before (additive).
         kbps = params.get("kbps")
