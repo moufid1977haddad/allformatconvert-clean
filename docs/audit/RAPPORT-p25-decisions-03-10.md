@@ -59,7 +59,10 @@ WebKit 45/46 (le cas connu de P24 : le moteur de Safari résout `(a+)+$` en moin
 Chromium **522/522**, WebKit **522/522**, Firefox 518/522 puis **13/13** en relançant les 4 outils seuls (ils avaient
 tourné pendant les encodages x265 des mesures du §5 : le processeur saturé, pas l'outil).
 **Préversion** `onlineconvertools-akguf8bxu` (commit `81767c7b`) : lot 1 ×3 moteurs 12 · 8 · 8, solidité de tous les
-outils (une fois, Chromium) **522/522**. Fusion `a1aa8f83` (code = `81767c7b`, vérifié).
+outils (une fois, Chromium) **522/522**. Fusion `a1aa8f83` (code = `81767c7b`, vérifié) → production
+`onlineconvertools-md3dfcxsk` (`5cbfc044`). **www** : contrôle léger 29/29, RAW 7/7, lot 1 Chromium 12/12 dont l'erreur
+provoquée **écrite** dans `tool_errors` (`X-Tool-Error-Recorded: yes` ; 2 lignes, outil json-formatter, vers 21 h 54 UTC
+le 02/10 à l'horloge de la machine — à ignorer à la prochaine lecture de la table). Retour arrière prêt : `r0igmm5wa`.
 
 ## 2. Lot 2 — E4, HTML to PDF depuis une URL
 
@@ -96,6 +99,11 @@ parallèles, la limite par adresse IPv6 contournable, le délai global non tenu,
 délai unique, IPv6 par /56 + plafond global). Second passage : aucun critique ni grave ; deux moyens corrigés (la mise
 en page ajoutée après le contrôle → désormais dans l'arbre contrôlé ; le jeu de caractères repoussé au-delà de 1 Ko par
 des commentaires → commentaires de tête retirés, `<meta charset>` en premier).
+Bancs (`scripts/p25/lot2-url-pdf.mjs`, PDF téléchargés et relus par pdf.js) : en local et sur la préversion
+`onlineconvertools-5738y6qeq` (vrai Vercel, vrai Gotenberg) — example.com et Wikipedia (11 pages, images intégrées),
+une longue page Letter paysage, et **7 refus** dans le navigateur (127.0.0.1, 169.254.169.254, 10.0.0.1, redirection
+publique vers 127.0.0.1, nom public qui pointe sur 127.0.0.1, file://, port 8080) : Chromium 10/10, Firefox et WebKit
+2/2 ; banc PDF de P24 23/23 (la mise en page commune a été déplacée) sur la préversion, ×3 en local.
 Tests : `scripts/p25/safe-fetch.test.mjs` 56/56 (dont un serveur local refusé par adresse et par un nom public qui
 pointe sur 127.0.0.1, une redirection publique vers 169.254.169.254 refusée), `scripts/p25/snapshot.test.mjs` 19/19
 (dont les attaques de la revue, et l'analyse CSS < 1,5 s sur 5 Mo hostiles). Vraies pages instantanées : Wikipedia

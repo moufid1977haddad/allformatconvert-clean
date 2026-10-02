@@ -59,11 +59,11 @@
 | E1 | RTF : ⏳ mise en production en cours (lot 3). **DOC : impossible chez ConvertAPI** (aucun de ses 332 convertisseurs n'écrit de .doc, OpenAPI lue le 03/10) | **DOC** : un point d'entrée LibreOffice (`--convert-to doc`) sur un service Railway (`pdf-tools` ou Gotenberg) — 0 $ de moteur, ≈ 2-3 h, **autorisation Railway**. **RTF au-delà de 4 Mo** : ajouter `rtf` (et `doc`) aux sorties du service média (`STAGE_OUTPUTS`, 2 lignes additives) — même autorisation |
 | E2 | Recherché et **mesuré** (veraPDF) ; non construit | **Recommandation : autoriser une modification additive de `pdf-tools` sur Railway** (0 $, ≈ 4-6 h) : 2u/3u pour presque tout PDF (Ghostscript + niveau U, validé veraPDF sur les fichiers mesurés), 2a/3a pour les PDF déjà balisés (chemin pikepdf qui garde la structure), abaissement dit sinon (comme `allow_downgrade` d'iLovePDF) ; 1a non atteint par les outils libres (commercial : Adobe Auto-Tag, Apryse — non recommandé) |
 | E3 | Code prêt, revu ×2, **désactivé** (aucune promesse sur la page) | **Le propriétaire crée** : un projet Google Cloud avec facturation ; active « Cloud Translation API » ; un compte de service avec le rôle « Cloud Translation API User » ; une clé JSON de ce compte ; dans Vercel, une variable **sensible** `GOOGLE_TRANSLATE_SERVICE_ACCOUNT` (Production et Preview) = le contenu JSON ; dans Google Cloud, une **alerte de budget à 30 $** et un **quota journalier** sur Cloud Translation (garde-fou dur). Puis Claude : test ≤ 2 $ sur préversion, texte SEO de la page, mise en production |
-| E4 | ⏳ mise en production en cours (lot 2) ; revue de sécurité ×2 | **À décider** : `--chromium-deny-private-ips` sur Gotenberg (un drapeau, 0 $) — ferme aussi le cas des **fichiers HTML déposés** qui peuvent faire charger au Chromium de Gotenberg une adresse interne de Railway (constat P25) et permettrait ensuite un mode « avec scripts » comme iLovePDF |
+| E4 | ⏳ préversion `5738y6qeq` verte, fusionné (lot 2), production en cours ; revue de sécurité ×2 | **À décider** : `--chromium-deny-private-ips` sur Gotenberg (un drapeau, 0 $) — ferme aussi le cas des **fichiers HTML déposés** qui peuvent faire charger au Chromium de Gotenberg une adresse interne de Railway (constat P25) et permettrait ensuite un mode « avec scripts » comme iLovePDF |
 | E5 | ⏳ service puis pages (lots 4-5) | — |
-| E6 | ⏳ fusionné dans master (`a1aa8f83`), production en cours | — |
-| E7 | ⏳ fusionné dans master (`a1aa8f83`), production en cours | — |
-| Erreurs | ⏳ lot 1 : 203 outils directs + filet sur les 225 | — |
+| E6 | ✅ **en production** (`md3dfcxsk` = `5cbfc044`, code `a1aa8f83`) ; www vérifié | — |
+| E7 | ✅ **en production** (même déploiement) ; www vérifié | — |
+| Erreurs | ✅ **en production** : 203 outils directs + filet sur les 225 ; une erreur provoquée par le banc **écrite** dans `tool_errors` sur www (02/10 ≈ 21 h 54 UTC, outil json-formatter, 2 lignes à ignorer) | — |
 
 ## 🧑‍⚖️ Décisions du propriétaire — P21 (02/10, `docs/audit/RAPPORT-p21-nuit-jour-02-10.md`)
 
