@@ -1,10 +1,11 @@
 'use client';
-import { textFileProblem } from '../../../lib/fileChecks';
+import { textFileProblem, decodedText } from '../../../lib/fileChecks';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
+import PageSetup, { PAGE_SETUP_DEFAULT, withPageSetup } from '../../../components/PageSetup';
 
 // A real PDF file (P18, 01/10). The tool used to open the browser's print dialog ("Save as PDF"): on an iPhone or an
 // iPad that is no file at all, and the page itself said "Use Save as PDF in the print dialog". The reference
@@ -50,6 +51,7 @@ export default function MarkdownToPdfPage() {
   const [file, setFile] = useState(null);
   const [mdContent, setMdContent] = useState('');
   const [mode, setMode] = useState('file');
+  const [setup, setSetup] = useState(PAGE_SETUP_DEFAULT);
   const [loading, setLoading] = useState(false);
   const [stage, setStage] = useState(null);
   const [error, setError] = useState('');
@@ -66,7 +68,7 @@ export default function MarkdownToPdfPage() {
     const problem = await textFileProblem(f, 'Markdown');
     if (problem) { setFile(null); setMdContent(''); setError(problem); return; }
     setFile(f);
-    setMdContent(await f.text());
+    setMdContent(await decodedText(f)); // P24: decoded as written, not always as UTF-8
   };
 
   const baseName = file?.name ? file.name.replace(/\.[^.]+$/, '') : 'document';
@@ -75,7 +77,7 @@ export default function MarkdownToPdfPage() {
     setLoading(true);
     reset();
     try {
-      const html = await markdownToHtmlDocument(mdContent, baseName);
+      const html = withPageSetup(await markdownToHtmlDocument(mdContent, baseName), setup);
       const upload = new File([html], 'document.html', { type: 'text/html' });
       const sizeCheck = checkOfficeSize(upload, MAX_HTML_STAGED_BYTES);
       if (!sizeCheck.ok) throw new Error(sizeCheck.message);
@@ -108,6 +110,7 @@ export default function MarkdownToPdfPage() {
             <textarea aria-label="Markdown" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm font-mono h-48 resize-none" placeholder="Paste your Markdown here..." value={mdContent} onChange={(e) => { setMdContent(e.target.value); reset(); }} />
           )}
           <p className="text-neutral-500 text-xs text-center -mt-2">Max {officeMaxLabel(MAX_HTML_STAGED_BYTES)} of Markdown</p>
+          <PageSetup value={setup} onChange={setSetup} />
           <button onClick={convert} disabled={!mdContent || loading || new Blob([mdContent]).size > officeMaxBytes(MAX_HTML_STAGED_BYTES)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? officeStageLabel(stage) : 'Convert to PDF'}
           </button>
@@ -125,7 +128,7 @@ export default function MarkdownToPdfPage() {
         description="Markdown to PDF turns a .md file or pasted Markdown into a real PDF file you download. Your Markdown is converted to HTML in your browser (CommonMark with GitHub tables, task lists and fenced code), any script or event handler is removed, and the page is then printed to PDF by a real browser engine (Chromium) on our conversion service — the same way the reference converters do it: the text stays selectable and searchable, and links stay clickable."
         howTo={[
           "Choose 'Upload File' to select a .md file, or 'Paste Text' to type or paste Markdown directly.",
-          "Click 'Convert to PDF'. The Markdown is rendered and printed to an A4 PDF by our conversion service.",
+          "Click 'Convert to PDF'. The Markdown is rendered and printed to a PDF (A4 unless you choose another page size, orientation or margins) by our conversion service.",
           "When 'PDF ready' appears, click 'Download' (on an iPhone or iPad, 'Save / Share' also sends it to Files, Mail or AirDrop).",
           "Open the PDF to check it: headings, tables, code blocks and links are kept."
         ]}

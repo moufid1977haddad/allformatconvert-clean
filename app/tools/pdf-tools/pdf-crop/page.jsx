@@ -5,6 +5,7 @@ import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
 import { cropRect } from '../../../lib/pdfCropBox';
 import { FileDownload } from '../../../components/FileDownload';
+import { parsePageRange } from '../../../lib/pageRange';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -12,6 +13,7 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [range, setRange] = useState('');
   const fileRef = useRef();
 
   const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; setFile(f); setResult(null); setError(''); };
@@ -32,7 +34,10 @@ export default function Page() {
         m[side] = v;
       }
       const pages = pdfDoc.getPages();
+      // P24: on the chosen pages (iLovePDF / Smallpdf: current page or all)
+      const chosen = new Set(parsePageRange(range, pages.length));
       pages.forEach((page, n) => {
+        if (!chosen.has(n + 1)) return;
         const box = page.getCropBox();
         const next = cropRect(box, page.getRotation().angle, m);
         if (!next) throw new Error(`these margins are larger than page ${n + 1} (${Math.round(box.width)} x ${Math.round(box.height)} pt): nothing would be left of it.`);
@@ -64,6 +69,8 @@ export default function Page() {
               </div>
             ))}
           </div>
+          <label className="block text-sm"><span className="block text-neutral-500 mb-1">Pages (empty = all; e.g. 1-3, 5)</span>
+            <input id="crop-pages" type="text" value={range} onChange={e => { setRange(e.target.value); setResult(null); }} placeholder="all pages" className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm" /></label>
           <button onClick={crop} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Cropping...' : 'Crop PDF'}
           </button>
@@ -73,17 +80,17 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Crop"
-        description="PDF Crop trims each page's crop box by the top, bottom, left, and right margins you enter, using the pdf-lib library entirely in your browser — your file is never uploaded to a server. Margins are measured on the page as you see it: from its current visible area (a page cropped before is cropped further, not reset) and, on pages displayed rotated, from the edges you see on screen. The same margins are applied to every page; there's no interactive drag-to-select tool or visual preview."
+        description="PDF Crop trims each page's crop box by the top, bottom, left, and right margins you enter, using the pdf-lib library entirely in your browser — your file is never uploaded to a server. Margins are measured on the page as you see it: from its current visible area (a page cropped before is cropped further, not reset) and, on pages displayed rotated, from the edges you see on screen. The same margins are applied to every page or to the pages you list; there's no interactive drag-to-select tool or visual preview."
         howTo={[
           "Click the upload area and select a PDF file from your device.",
           "Enter the top, bottom, left, and right margins (in points) to trim from each page, as the page appears on screen.",
-          "Click 'Crop PDF' to apply those margins to every page.",
+          "Leave 'Pages' empty for every page, or list pages like 1-3, 5; then click 'Crop PDF'.",
           "Click 'Download' next to cropped.pdf to save the result."
         ]}
         faqs={[
           { q: "Is PDF Crop free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Can I preview or drag to select the crop area?", a: "No — there's no visual crop preview or draggable handles. You enter numeric margins in points for each side." },
-          { q: "Can I crop each page differently?", a: "No, the same margin values are applied to every page in the document." },
+          { q: "Can I crop each page differently?", a: "List the pages in 'Pages' to crop only those; run the tool again on the result for other pages with other margins." },
           { q: "Is my file uploaded to a server?", a: "No. Cropping happens entirely in your browser using the pdf-lib library." }
         ]}
         tips={[

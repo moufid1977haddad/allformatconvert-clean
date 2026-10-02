@@ -58,6 +58,9 @@ async function convertHtml(req: NextRequest, file: File, staged = false): Promis
   // Gotenberg's chromium/convert/html route requires the HTML entry point to
   // be named exactly "index.html", regardless of the client-side filename.
   gotenbergForm.append("files", file, "index.html");
+  // P24 (03/10): the page size and margins the tools write in a CSS @page rule (Text, HTML and Markdown to PDF:
+  // A4, Letter, landscape…) are honoured; a document without one keeps Gotenberg's default paper.
+  gotenbergForm.append("preferCssPageSize", "true");
 
   const authHeader = "Basic " + Buffer.from(`${gotenbergUsername}:${gotenbergPassword}`).toString("base64");
 

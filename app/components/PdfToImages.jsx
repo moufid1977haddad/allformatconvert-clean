@@ -6,6 +6,7 @@ import { rasterFromCanvas, rasterFromRGBA, CANVAS_MAX_PIXELS } from '../lib/bigI
 import { encodeRaster } from '../lib/imageOutput';
 import { encodeExtra } from '../tools/image-tools/image-converter/extraFormats';
 import { FileDownload, DownloadGroup } from './FileDownload';
+import { parsePageRange } from '../lib/pageRange';
 
 // PDF → images, shared by PDF to Image and PDF to JPG (P21, 02/10).
 // Market (02/10): iLovePDF "PDF to JPG" offers "Page to JPG" and "Extract images", quality Normal (recommended) / High;
@@ -24,22 +25,7 @@ export const PDF_IMAGE_FORMATS = [
 ];
 const DPIS = [[150, 'Normal — 150 dpi (recommended)'], [300, 'High — 300 dpi (print)'], [72, 'Screen — 72 dpi (smallest)']];
 
-/** "1-3, 5, 8-" → sorted page numbers within 1..n; throws a sentence the visitor can act on. */
-export function parsePageRange(text, n) {
-  const t = String(text || '').trim();
-  if (!t) return Array.from({ length: n }, (_, i) => i + 1);
-  const pages = new Set();
-  for (const part of t.split(/[,;\s]+/).filter(Boolean)) {
-    const m = /^(\d*)\s*-\s*(\d*)$/.exec(part) || /^(\d+)$/.exec(part);
-    if (!m) throw new Error(`"${part}" is not a page or a range. Write pages like 1-3, 5, 8-.`);
-    let a, b;
-    if (m.length === 2) { a = b = Number(m[1]); } else { a = m[1] ? Number(m[1]) : 1; b = m[2] ? Number(m[2]) : n; }
-    if (a < 1 || b < a) throw new Error(`"${part}" is not a valid range.`);
-    if (a > n) throw new Error(`This PDF has ${n} page${n > 1 ? 's' : ''}: page ${a} does not exist.`);
-    for (let p = a; p <= Math.min(b, n); p++) pages.add(p);
-  }
-  return [...pages].sort((x, y) => x - y);
-}
+export { parsePageRange } from '../lib/pageRange';
 
 async function encode(raster, format, quality) {
   if (format === 'tiff' || format === 'bmp') return (await encodeExtra(format, raster, quality / 100)).blob;
