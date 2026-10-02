@@ -515,3 +515,46 @@ www, retour arrière prêt) — à demander à Claude dans le terminal ; (3) sur
 raccourcie et dite, « joué une fois / 3 fois », compression : le service vidéo n'existe pas en local) ; (4) décisions
 E1-E7 du plan (PDF to Word en DOC/RTF, PDF/A « a »/« u », traduction du document entier, HTML depuis une URL, options
 vidéo du service, phrase de passe EFF, historique des devises).
+
+## 11. Mise en production (03/10 après-midi, à la demande du propriétaire)
+
+**Préalable.** Le propriétaire a passé l'équipe Vercel en **Pro** (plafond de dépense 50 $/mois). www répond **200**,
+plus aucun blocage sur l'équipe. **Usage de la nuit** (API d'usage Vercel, cycle du 03/09 au 02/10) : la limite dépassée
+est celle des **requêtes Edge** — 2 980 834 pour 1 million permis en Hobby, franchie le 29/09 ; transfert sortant 20,5 Go
+(sous les 100 Go de Fast Data Transfer ; au-dessus des 10 Go de Fast Origin Transfer si ce compteur est celui de
+l'origine, ce que l'API ne précise pas). **≈ 96 % viennent de nos bancs** (2 874 127 requêtes et 19,7 Go au-dessus du
+niveau habituel de ≈ 3 560 requêtes par jour, du 26/09 au 02/10). Constat et **règle permanente d'usage** écrits au plan :
+bancs lourds en local sur la construction de production, une seule fois sur la préversion avant fusion, et sur www un
+contrôle léger seulement.
+
+**Méthode (conditions de P23).** Repère de restauration `restauration-avant-p24-prod-03-10` = `70c35846` (www servait
+alors `jg0rho9ri`, `19af4a2b`). Six étapes, chacune un **préfixe** de l'historique de `p24-couverture` (aucun commit
+réécrit) : préversion créée par l'API Vercel sur le commit de l'étape, bancs **de ce commit** sur la préversion à travers
+le relais local (jeton gardé en mémoire, rien d'écrit ni d'affiché), fusion dans master **sans poussée forcée** avec
+contrôle que le code de master est exactement celui de la préversion testée, puis sur www le contrôle léger
+(`scripts/p24/www-light.mjs` : 16 pages principales, un outil par catégorie, un vrai téléchargement — 29 points) et le
+contrôle RAW (un fichier CRW, `p22-raw.mjs`). Retour arrière par promotion de l'ancien déploiement prêt à chaque étape :
+**jamais nécessaire**.
+
+| Étape | Commit testé | Préversion | Bancs sur la préversion | Fusion → production | www |
+|---|---|---|---|---|---|
+| 1 PDF | `ed35d749` | `r61fh9uce` | PDF 23/23 Chromium, Firefox ; WebKit : 2 écarts du banc de l'étape (ancienne version), le banc final passe sur la même préversion | `80ec597d` → `8m4s2d4js` | léger 29/29, RAW 7/7 |
+| 2 Image | `2a73da19` | `ooaigpoqz` | image 10/10 ×3 | `966026fa` → `jkai1lugy` | 29/29, 7/7 |
+| 3 GIF | `f2d8f647` | `5g2jrvkca` | GIF 1/1 ×3 | `471017b6` → `9glfr4596` | 29/29, 7/7 |
+| 4 Vidéo, audio, fichiers, dev, texte, maths | `b15d69cf` | `5o8xq2rg6` | audio-vidéo 7 · 7 · 5 ; dev 31/31 Chromium, Firefox, 30/31 WebKit (*) | `7c8140f4` → `6d6qi3gg3` | 29/29, 7/7 |
+| 5 Relevé n° 2, lots 1-4 | `2b7079e7` | `3ncmg8bxl` | PDF 23 ×3, image 12 ×3, TIFF 2 ×3, JPEG 2000 ×3, ajouts 9 · 8 · 6, dev 46 ×3 (**), GIF 3 ×3, audio-vidéo 7 · 7 · 5 | `22521e2a` → `8l8ul4nzu` | 29/29, 7/7 |
+| 6 Relevé n° 2, lots 5-9 | `94246aa6` | `ourld5vfv` | ajouts 40 · 39 · 32, audio-vidéo 7 · 7 · 5, **solidité de tous les outils 522/522** (passage unique sur la préversion) | `4048f934` → `r0igmm5wa` | 29/29, 7/7 |
+
+(*) Regex Tester sous WebKit : le cas « retour arrière catastrophique » `(a+)+$` est résolu par le moteur de Safari en
+moins de 1,5 s avec la bonne réponse (« No match ») ; la page reste réactive, l'arrêt à 2 s n'est simplement pas atteint.
+(**) Une fois 45/46 sous Chromium avec deux bancs en parallèle (calculatrice scientifique, délai) ; relancé : 46/46.
+
+**Vidéo → GIF sur la préversion, avec le vrai service vidéo** (Chromium et Firefox ; le WebKit de Playwright ne lit pas
+de vidéo) : « Once » sans extension de boucle, « 3 times » répétée 2 fois ; 5 s demandées à partir de 1 s d'un clip de
+2 s → **GIF de 1,00 s, et la page le dit** (« The video ends 1 s after the start: the GIF lasts 1 s, not 5 s. ») ;
+compression « Strong » → 242 117 → 170 121 octets, mêmes 20 images.
+
+**Fin.** Production : `r0igmm5wa` (`4048f934`), tout P24 en ligne. Branches de préversion `p24-etape-1` à `-6`
+supprimées après vérification que leur pointe est dans master ; relais et serveurs arrêtés. Usage Vercel de cette
+mise en production : ≈ 118 000 requêtes et 0,75 Go ; **facturé 0 $** (2,22 $ d'usage absorbés par le crédit inclus
+dans Pro). E1 à E7 : non tranchés, laissés au propriétaire.
