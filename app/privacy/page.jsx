@@ -32,7 +32,7 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-2 text-neutral-800">Privacy Policy</h1>
-        <p className="text-neutral-500 text-center mb-10">Last updated: October 1, 2026</p>
+        <p className="text-neutral-500 text-center mb-10">Last updated: October 3, 2026</p>
         <div className="space-y-6">
 
           <div className={card}>
@@ -56,9 +56,10 @@ export default function PrivacyPage() {
               <li><strong>ConvertAPI</strong> (Lithuania): Word to PDF for .docx files (also when added to Merge PDF), PDF to Word, PDF to Excel, PDF to PowerPoint. Files are sent with storage disabled and are not kept by ConvertAPI.</li>
               <li><strong>OpenAI</strong> (USA): the text you enter in AI Chatbot, AI Writer, AI Paraphraser, AI Translator, Grammar Fixer, Text Summarizer, Keyword Extractor, Sentiment Analyzer, Data Extractor and Email Generator; the text of your PDF in PDF AI Summary and PDF Translate; your image in Image Captioner; your description in Image Generator; your audio in Audio Transcriber and Audio to Text.</li>
               <li><strong>Pangram Labs</strong> (USA): the text you paste into AI Detector.</li>
+              <li><strong>Google Cloud Translation</strong> (USA): your PDF in PDF Translate, when you choose "Whole PDF (layout kept)" (offered only when that mode is shown on the page). Google returns the translated PDF and does not keep the file.</li>
             </ul>
             <p className={`${p} mt-3`}><strong>Sent by your browser, not by us:</strong> in Audio to Text's microphone mode, speech recognition is done by your browser, which sends the recording to its maker's speech service (Google in Chrome, Microsoft in Edge, Apple in Safari) under that company's privacy policy. We never receive the recording, only the text your browser returns to the page.</p>
-            <p className={`${p} mt-3`}>We never sell your files or text, never use them to train any model, and never look at them. On our servers, the file you send is deleted as soon as processing ends, and the result right after you download it (or automatically after a short time if you never do); nothing about a file — name, content or metadata — is written to our logs. Two tools contact other services at your request only: Currency Converter downloads exchange rates (open.er-api.com) without sending anything about you, and API Tester sends the request you write to the address you type.</p>
+            <p className={`${p} mt-3`}>We never sell your files or text, never use them to train any model, and never look at them. On our servers, the file you send is deleted as soon as processing ends, and the result right after you download it (or automatically after a short time if you never do); nothing about a file — name, content or metadata — is written to our logs. Three tools contact other services at your request only: Currency Converter downloads exchange rates (open.er-api.com) and the rate history of the two currencies you choose (api.frankfurter.dev) without sending anything about you; API Tester sends the request you write to the address you type; and HTML to PDF, when you give it a web address, has our server fetch that public page (and its images, styles and fonts) to convert it — addresses of private networks are refused.</p>
           </div>
 
           <div className={card}>
@@ -67,7 +68,7 @@ export default function PrivacyPage() {
               <li><strong>Visit statistics:</strong> we use Google Analytics to count visits and see which pages are used (pages viewed, approximate location from your IP address, browser and device type, time of visit). Google Analytics sets cookies (Section 4).</li>
               <li><strong>Server logs:</strong> our hosting provider (Vercel) keeps technical logs of requests, including IP addresses, for security and operation.</li>
               <li><strong>Usage metrics and abuse limits:</strong> to stay within our providers' budgets and prevent abuse, we record which paid or server tool was used, when, and an estimated processing cost. For per-visitor limits we record a one-way cryptographic hash of your IP address, never the address itself. We never record file contents or the text you submit.</li>
-              <li><strong>Failure reports:</strong> when a tool fails, we record an anonymous report so we can fix it: the tool's name, the file extension, a coarse size range (e.g. "1-10MB"), the error type and a cleaned error message, a coarse browser name and version (e.g. "Chrome 129"), and the time. Never your file, its content, its real name, or your IP address. Nothing is sent when a tool succeeds.</li>
+              <li><strong>Failure reports:</strong> when a tool fails or shows an error message, we record an anonymous report so we can fix it: the tool's name, the file extension, a coarse size range (e.g. "1-10MB"), the error type and a cleaned error message (file names, paths, quoted text, web addresses, e-mail addresses and long numbers are removed from it), a coarse browser name and version (e.g. "Chrome 129"), and the time. Never your file, its content, its real name, the text you typed, or your IP address. Nothing is sent when a tool succeeds.</li>
               <li><strong>Contact form:</strong> your name, email address and message, stored in our database and emailed to us (through our email provider, Resend). If you attach images (PNG, JPEG, GIF or WebP, up to 3 files and 4&nbsp;MB), they are only included in that email — never stored in our database or any file storage.</li>
               <li><strong>Account (optional):</strong> if you create an account, your name and email address, managed by our authentication provider (Supabase). No tool requires an account.</li>
             </ul>
@@ -92,6 +93,7 @@ export default function PrivacyPage() {
               <li><strong>ConvertAPI</strong>: <Ext href="https://www.convertapi.com/privacy-policy">ConvertAPI Privacy Policy</Ext>.</li>
               <li><strong>OpenAI</strong>: <Ext href="https://openai.com/policies/privacy-policy">OpenAI Privacy Policy</Ext>. Data sent through OpenAI's API is not used to train their models.</li>
               <li><strong>Pangram Labs</strong>: <Ext href="https://www.pangram.com/privacy-policy">Pangram Privacy Policy</Ext>.</li>
+              <li><strong>Google Cloud Translation</strong>: <Ext href="https://cloud.google.com/translate/data-usage">Cloud Translation data usage</Ext>.</li>
               <li><strong>Supabase</strong> (database and accounts): <Ext href="https://supabase.com/privacy">Supabase Privacy Policy</Ext>.</li>
               <li><strong>Resend</strong> (email): <Ext href="https://resend.com/legal/privacy-policy">Resend Privacy Policy</Ext>.</li>
               <li><strong>Google</strong> (Analytics, Translate{ads ? ', AdSense' : ''}): <Ext href="https://policies.google.com/privacy">Google Privacy Policy</Ext> and <Ext href="https://policies.google.com/technologies/partner-sites">how Google uses information from sites that use its services</Ext>.</li>

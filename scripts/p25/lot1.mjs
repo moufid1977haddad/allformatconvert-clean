@@ -63,7 +63,8 @@ if (want('currency')) {
   const note = await p.locator('[data-history] p.text-xs').innerText().catch(() => '');
   check('currency: 10 years, monthly points', /monthly reference rates/.test(note), note.slice(0, 80));
   // Hover shows a dated rate
-  const box = await p.locator('[data-history] svg').boundingBox();
+  await p.locator('[data-history="ok"] svg').waitFor({ timeout: 20000 }).catch(() => {});
+  const box = (await p.locator('[data-history] svg').boundingBox()) || { x: 0, y: 0, width: 0, height: 0 };
   await p.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.5);
   const hover = (await p.locator('[data-hover]').textContent().catch(() => '')) || '';
   check('currency: hovering the chart reads a dated rate', /\d{4}: [\d.,]+$/.test(hover), hover);
