@@ -1,0 +1,36 @@
+// P24 (03/10): PDF Split's worker run in Node (bundled by esbuild); each part read back by pdf.js. Before: the parts
+// had no bookmarks and the form fields stopped working, without a word.
+import { execFileSync } from 'node:child_process';
+import { createRequire } from 'node:module';
+import os from 'node:os';
+import path from 'node:path';
+import fs from 'node:fs';
+import { pathToFileURL } from 'node:url';
+const root = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1')), '../..');
+const require = createRequire(path.join(root, 'package.json'));
+const out = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'p24-split-')), 'worker.mjs');
+execFileSync('npx', ['-y', 'esbuild', JSON.stringify(path.join(root, 'app/tools/pdf-tools/pdf-split/pdfSplit.worker.js')), '--bundle', '--format=esm', '--platform=neutral', '--main-fields=module,main', `--outfile=${JSON.stringify(out)}`, '--log-level=error'], { shell: true, cwd: root });
+const { PDFDocument, PDFName, PDFHexString } = require('pdf-lib');
+const msgs = [];
+globalThis.self = { postMessage: (m) => msgs.push(m) };
+await import(pathToFileURL(out).href);
+const handler = self.onmessage, sink = self;
+const run = async (data, want) => { msgs.length = 0; globalThis.self = sink; await handler({ data }); for (let i = 0; i < 80 && !msgs.some((m) => [want, 'error', 'limit'].includes(m.type)); i++) await new Promise((r) => setTimeout(r, 100)); return msgs.find((m) => [want, 'error', 'limit'].includes(m.type)); };
+const doc = await PDFDocument.create();
+for (let i = 0; i < 4; i++) doc.addPage([300, 300]);
+doc.setTitle('Quarterly report');
+const f = doc.getForm().createTextField('signer'); f.setText('Ann'); f.addToPage(doc.getPage(0), { x: 20, y: 200, width: 150, height: 24 });
+const ctx = doc.context, items = doc.getPages().map((p, i) => ctx.obj({ Title: PDFHexString.fromText(`Chapter ${i + 1}`), Dest: [p.ref, PDFName.of('Fit')] }));
+const refs = items.map((d) => ctx.register(d)); const rootRef = ctx.register(ctx.obj({ Type: 'Outlines', First: refs[0], Last: refs[3], Count: 4 }));
+items.forEach((d, i) => { d.set(PDFName.of('Parent'), rootRef); if (i) d.set(PDFName.of('Prev'), refs[i - 1]); if (i < 3) d.set(PDFName.of('Next'), refs[i + 1]); });
+doc.catalog.set(PDFName.of('Outlines'), rootRef);
+const file = new File([await doc.save()], 'report.pdf');
+await run({ type: 'load', file, maxPages: 1000 }, 'loaded');
+const done = await run({ type: 'split', files: [{ label: '1-2', pages: [0, 1] }, { label: '3-4', pages: [2, 3] }], originalName: 'report.pdf' }, 'done');
+const pdfjs = await import(pathToFileURL(path.join(root, 'node_modules/pdfjs-dist/legacy/build/pdf.mjs')).href);
+const read = async (r) => { const d = await pdfjs.getDocument({ data: new Uint8Array(await r.blob.arrayBuffer()) }).promise; const fo = await d.getFieldObjects(); const meta = await d.getMetadata(); return { pages: d.numPages, outline: (await d.getOutline() || []).map((o) => o.title).join(','), fields: Object.keys(fo || {}).join(','), value: fo?.signer?.find((o) => o.value !== undefined)?.value, title: meta.info.Title }; };
+const [a, b] = [await read(done.results[0]), await read(done.results[1])];
+const ok = a.pages === 2 && a.outline === 'Chapter 1,Chapter 2' && a.fields === 'signer' && a.value === 'Ann' && a.title === 'Quarterly report' && b.outline === 'Chapter 3,Chapter 4' && b.fields === '' && b.title === 'Quarterly report';
+console.log(ok ? 'PASS' : 'FAIL', 'each part keeps its bookmarks, its form field (with its value) and the title', JSON.stringify(a), JSON.stringify(b));
+console.log(ok ? 'pdf-split-worker: all passed' : 'pdf-split-worker: FAILED');
+process.exitCode = ok ? 0 : 1;

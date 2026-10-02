@@ -3,7 +3,7 @@ import { decodeTiff } from '../../../lib/tiffDecode';
 import { sniffFormat } from '../../../lib/detectFileFormat';
 
 self.onmessage = async (e) => {
-  const { buffer } = e.data;
+  const { buffer, page = 0 } = e.data;
   try {
     // Check the real header bytes before attempting any decode -- an
     // extension is just what the file is named, never proof of what it
@@ -20,7 +20,7 @@ self.onmessage = async (e) => {
       throw err;
     }
 
-    const decoded = await decodeTiff(buffer);
+    const decoded = await decodeTiff(buffer, { page });
     // Defense in depth: even a file that starts with a valid TIFF magic
     // number can fail to yield usable dimensions (a malformed or
     // truncated IFD). Never let undefined/NaN reach OffscreenCanvas.
@@ -40,7 +40,7 @@ self.onmessage = async (e) => {
       canvas.getContext('2d').putImageData(new ImageData(rgba, w, h), 0, 0);
       blob = await canvas.convertToBlob({ type: 'image/png' });
     } else blob = await encodePngRGBA(rgba, w, h);
-    self.postMessage({ type: 'done', blob });
+    self.postMessage({ type: 'done', blob, pageCount: decoded.pageCount, page: decoded.page, hasIcc: decoded.hasIcc }); // P24: pages and colour profile reported
   } catch (err) {
     self.postMessage({
       type: 'error',

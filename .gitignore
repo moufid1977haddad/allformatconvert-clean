@@ -68,3 +68,6 @@ Claude outputs/
 
 # AI upscaler model for the in-browser path: fetched and verified at build (scripts/fetch-upscale-model.mjs)
 public/models/
+
+# PDF.js run-time files, copied at build (scripts/copy-pdfjs-assets.mjs)
+public/pdfjs/

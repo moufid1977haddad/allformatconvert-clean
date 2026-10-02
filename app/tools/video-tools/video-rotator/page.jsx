@@ -51,7 +51,14 @@ export default function VideoRotatorPage() {
     setError(''); setResult(null);
     try {
       setStage({ label: 'Rotating…' });
-      const fast = mode === 'lossless' && ISO_BMFF.test(file.name) ? await rotateIsoBmff(file, angle).catch(() => null) : null;
+      // P24 review (03/10): "Instant, lossless" promises that nothing is uploaded — when it cannot be done (a WebM, or an
+      // MP4 whose rotation field cannot be rewritten) the page now says so instead of sending the file to the service
+      if (mode === 'lossless' && !ISO_BMFF.test(file.name)) throw new Error('"Instant, lossless" works for MP4, MOV, M4V and 3GP only; this format has no rotation setting. Nothing was uploaded. Choose "Compatible everywhere" to turn it on our video service.');
+      let fast = null;
+      if (mode === 'lossless') {
+        try { fast = await rotateIsoBmff(file, angle); } catch (e) { fast = null; var why = e?.message; }
+        if (!fast) throw new Error(`"Instant, lossless" could not change the rotation setting of this file${why ? ` (${why})` : ''}. Nothing was uploaded. Choose "Compatible everywhere" to turn the picture itself on our video service.`);
+      }
       if (fast) {
         const ext = (file.name.match(/\.([a-z0-9]+)$/i)?.[1] || 'mp4').toLowerCase();
         setResult({ url: URL.createObjectURL(fast.blob), name: `${base(file.name)}-rotated.${ext}`, bytes: fast.blob.size, lossless: true, ext });

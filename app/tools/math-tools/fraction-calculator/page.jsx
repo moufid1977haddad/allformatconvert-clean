@@ -21,10 +21,12 @@ export default function FractionCalculatorPage() {
     try {
       // Each field accepts an integer or a decimal; numerator/denominator are
       // combined exactly (BigInt), so 1.5/2 = 3/4 and huge values keep every digit.
-      const f1 = mixedFraction(w1, fractionOp(parseFraction(n1), parseFraction(d1), '/'));
-      const f2 = mixedFraction(w2, fractionOp(parseFraction(n2), parseFraction(d2), '/'));
+      const operand = (w, n, d) => (w.trim() && !n.trim() && !d.trim() ? { num: 0n, den: 1n } : fractionOp(parseFraction(n), parseFraction(d), '/'));
+      const f1 = mixedFraction(w1, operand(w1, n1, d1));
+      const f2 = mixedFraction(w2, operand(w2, n2, d2));
       setResult(describeFraction(fractionOp(f1, f2, op)));
-      setSteps(fractionSteps(f1, f2, op));
+      const mixedStep = (w, f) => (w.trim() ? [`${w.trim()} and the fraction = ${f.den === 1n ? f.num : `${f.num}/${f.den}`} as an improper fraction`] : []);
+      setSteps([...mixedStep(w1, f1), ...mixedStep(w2, f2), ...fractionSteps(f1, f2, op)]);
     } catch (e) {
       setResult(null); setSteps([]);
       setError(e.message);
@@ -80,7 +82,7 @@ export default function FractionCalculatorPage() {
           {/* Calculate button */}
           <button
             onClick={calculate}
-            disabled={!n1 || !d1 || !n2 || !d2}
+            disabled={!((n1 && d1) || (w1 && !n1 && !d1)) || !((n2 && d2) || (w2 && !n2 && !d2))}
             className="w-full mt-6 bg-indigo-500 hover:bg-indigo-400 disabled:bg-indigo-200 dark:disabled:bg-neutral-800 disabled:text-indigo-400 dark:disabled:text-neutral-500 disabled:cursor-not-allowed text-white rounded-xl py-3.5 font-bold transition"
           >
             Calculate
@@ -109,7 +111,7 @@ export default function FractionCalculatorPage() {
       </div>
       <SeoContent
         title={"Fraction Calculator"}
-        description={"Fraction Calculator adds, subtracts, multiplies and divides two fractions and simplifies the result, entirely in your browser. Arithmetic is exact at any size (no rounding, even with 20-digit numerators), signs are normalised (1/-2 is shown as -1/2), and the result is given as a simplified fraction, a mixed number (1 1/8) and a decimal — exact when the decimal terminates, otherwise rounded to 12 significant digits and marked as such. Each box also accepts a decimal such as 1.5; anything that isn't a number is reported, never read as a different value."}
+        description={"Fraction Calculator adds, subtracts, multiplies and divides two fractions and simplifies the result, entirely in your browser. Arithmetic is exact at any size (no rounding, even with 20-digit numerators), signs are normalised (1/-2 is shown as -1/2), and the result is given as a simplified fraction, a mixed number (1 1/8) and a decimal — exact when the decimal terminates, otherwise written exactly with its repeating digits in brackets (1/6 = 0.1(6)). Each box also accepts a decimal such as 1.5; anything that isn't a number is reported, never read as a different value."}
         howTo={[
           "Enter the numerator and denominator of each fraction (decimals such as 0.5 are accepted); for a mixed number such as 1 1/2, type the whole number in the small box on the left.",
           "Choose +, -, × or ÷.",

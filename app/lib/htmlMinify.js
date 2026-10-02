@@ -37,6 +37,18 @@ function findRawTagEnd(input, contentStart, tagName) {
 // loop, so nothing inside a tag is ever mistaken for a comment delimiter.
 // <script>, <style>, <pre>, and <textarea> content is likewise copied
 // through untouched rather than whitespace-collapsed.
+function collapseOutsideQuotes(tag) {
+  let s = '', q = null;
+  for (let p = 0; p < tag.length; p++) {
+    const ch = tag[p];
+    if (q) { s += ch; if (ch === q) q = null; continue; }
+    if (ch === '"' || ch === "'") { q = ch; s += ch; continue; }
+    if (/\s/.test(ch)) { if (!s.endsWith(' ')) s += ' '; continue; }
+    s += ch;
+  }
+  return s.replace(/ (\/?>)$/, '$1');
+}
+
 function minifyHtml(input) {
   let out = '';
   let i = 0;
@@ -66,14 +78,16 @@ function minifyHtml(input) {
     const isTagStart = c === '<' && nextChar !== undefined
       && (/[a-zA-Z]/.test(nextChar) || nextChar === '/' || nextChar === '!' || nextChar === '?');
 
+    // P24 review (03/10): a run of whitespace becomes ONE space, never none — "<b>Hello</b> <i>world</i>" read
+    // "Helloworld" once the space between two tags was dropped (inline elements render that space)
     if (!isTagStart) {
-      if (pendingSpace) { if (!(c === '<' && out.endsWith('>'))) out += ' '; pendingSpace = false; }
+      if (pendingSpace) { if (out) out += ' '; pendingSpace = false; }
       out += c;
       i++;
       continue;
     }
 
-    if (pendingSpace) { if (!out.endsWith('>')) out += ' '; pendingSpace = false; }
+    if (pendingSpace) { if (out) out += ' '; pendingSpace = false; }
 
     const isClose = nextChar === '/';
     const nameStart = isClose ? i + 2 : i + 1;
@@ -98,7 +112,7 @@ function minifyHtml(input) {
       k++;
     }
 
-    out += input.slice(i, k).replace(/\s+/g, ' ');
+    out += collapseOutsideQuotes(input.slice(i, k)); // value="a   b" keeps its spaces
     i = k;
 
     if (!isClose && HTML_RAW_TAGS.has(tagName)) {

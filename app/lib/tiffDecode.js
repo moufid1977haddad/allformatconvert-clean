@@ -149,10 +149,37 @@ function cmykToRGBA8(ifd) {
   return img;
 }
 
-export async function decodeTiff(buffer) {
+// P24 review (03/10): the Orientation tag (274) is applied — a TIFF from a scanner or a camera stored sideways came out
+// lying down — and every page of a multi-page TIFF (faxes, scans) can be decoded: only the first one was, without a
+// word. A colour profile (tag 34675) is reported, since it is not applied (no ICC engine here).
+export function orientRGBA(rgba, w, h, o) {
+  if (!o || o === 1 || o > 8) return { rgba, width: w, height: h };
+  const swap = o >= 5, W = swap ? h : w, H = swap ? w : h;
+  const src = new Uint32Array(rgba.buffer, rgba.byteOffset, w * h), dst = new Uint32Array(W * H);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      let dx, dy;
+      switch (o) {
+        case 2: dx = w - 1 - x; dy = y; break;
+        case 3: dx = w - 1 - x; dy = h - 1 - y; break;
+        case 4: dx = x; dy = h - 1 - y; break;
+        case 5: dx = y; dy = x; break;
+        case 6: dx = h - 1 - y; dy = x; break;
+        case 7: dx = h - 1 - y; dy = w - 1 - x; break;
+        default: dx = y; dy = w - 1 - x; // 8
+      }
+      dst[dy * W + dx] = src[y * w + x];
+    }
+  }
+  return { rgba: new Uint8Array(dst.buffer), width: W, height: H };
+}
+
+export async function decodeTiff(buffer, { page = 0 } = {}) {
   const UTIF = (await import('utif2')).default;
-  const ifds = UTIF.decode(buffer);
-  if (!ifds.length) throw new Error('No image data found in this TIFF file');
+  const all = UTIF.decode(buffer);
+  if (!all.length) throw new Error('No image data found in this TIFF file');
+  if (page < 0 || page >= all.length) throw new Error(`This TIFF has ${all.length} page${all.length > 1 ? 's' : ''}: page ${page + 1} does not exist.`);
+  const ifds = [all[page]]; // the checks and the decode below work on the chosen page
   // UTIF.js only decodes chunky (interleaved) TIFFs correctly -- for a
   // planar one (PlanarConfiguration=2, color planes stored separately) it
   // still "succeeds" but silently produces corrupted, striped pixel data,
@@ -178,8 +205,9 @@ export async function decodeTiff(buffer) {
   }
   UTIF.decodeImage(buffer, ifds[0]);
   try { normalizeHighBitDepth(ifds[0]); } catch { /* fall back to UTIF2's native (pre-existing) handling for this bit depth if our repacking hits a layout it doesn't understand */ }
-  const rgba = intp === 5 ? cmykToRGBA8(ifds[0]) : UTIF.toRGBA8(ifds[0]);
-  return { width: ifds[0].width, height: ifds[0].height, rgba };
+  const rgba8 = intp === 5 ? cmykToRGBA8(ifds[0]) : UTIF.toRGBA8(ifds[0]);
+  const oriented = orientRGBA(new Uint8Array(rgba8.buffer || rgba8, rgba8.byteOffset || 0, ifds[0].width * ifds[0].height * 4), ifds[0].width, ifds[0].height, ifds[0].t274 ? ifds[0].t274[0] : 1);
+  return { width: oriented.width, height: oriented.height, rgba: oriented.rgba, pageCount: all.length, page, hasIcc: !!ifds[0].t34675, orientation: ifds[0].t274 ? ifds[0].t274[0] : 1 };
 }
 
 // UTIF2 can loop indefinitely while decoding certain non-standard

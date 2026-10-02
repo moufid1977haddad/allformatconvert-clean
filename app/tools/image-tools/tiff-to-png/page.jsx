@@ -17,6 +17,10 @@ export default function TiffToPngPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [mismatch, setMismatch] = useState(null);
+  // P24 review (03/10): a multi-page TIFF (fax, scan) is said, and any page can be converted; a colour profile is not
+  // applied, and said
+  const [page, setPage] = useState(1);
+  const [pageInfo, setPageInfo] = useState(null);
   const inputRef = useRef();
   const workerRef = useRef(null);
   const timeoutRef = useRef(null);
@@ -40,7 +44,7 @@ export default function TiffToPngPage() {
     const f = e.target.files[0];
     e.target.value = '';
     if (!f) return;
-    setFile(f);
+    setFile(f); setPage(1); setPageInfo(null);
     setResult(null);
     setError('');
     setMismatch(null);
@@ -90,6 +94,7 @@ export default function TiffToPngPage() {
         const url = URL.createObjectURL(msg.blob);
         resultUrlRef.current = url;
         setResult(url);
+        setPageInfo({ count: msg.pageCount || 1, page: (msg.page || 0) + 1, icc: !!msg.hasIcc });
         setLoading(false);
       } else if (msg.type === 'error') {
         stopWorker();
@@ -125,7 +130,7 @@ export default function TiffToPngPage() {
     };
 
     const buffer = await file.arrayBuffer();
-    worker.postMessage({ buffer }, [buffer]);
+    worker.postMessage({ buffer , page: Math.max(0, Math.min((pageInfo?.count || 1e6), page) - 1) }, [buffer]);
   };
 
   return (
@@ -153,6 +158,13 @@ export default function TiffToPngPage() {
             </div>
           )}
           {error && <p className="text-red-400 text-center text-sm whitespace-pre-line">{error}</p>}
+          {result && pageInfo && pageInfo.count > 1 && (
+            <div className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-3" data-tiff-pages>
+              This TIFF has {pageInfo.count} pages: page {pageInfo.page} was converted.{' '}
+              <label>Page <input type="number" min="1" max={pageInfo.count} value={page} onChange={(e) => setPage(Math.max(1, Math.min(pageInfo.count, Number(e.target.value) || 1)))} className="w-16 border border-amber-300 rounded px-1" aria-label="Page to convert" /></label> — then convert again.
+            </div>
+          )}
+          {result && pageInfo?.icc && <p className="text-xs text-neutral-500" data-tiff-icc>This TIFF carries a colour profile (for example Adobe RGB), which is not applied here: colours may look less saturated than in a colour-managed viewer.</p>}
           {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><FileDownload href={result} name={file ? file.name.replace(/\.[^.]+$/, '') + '.png' : 'converted.png'} /></div>}
         </div>
       </div>

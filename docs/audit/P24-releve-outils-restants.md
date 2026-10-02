@@ -6,11 +6,11 @@ D'abord les **résultats faux silencieux** (règle : ils passent avant tout ajou
 ## A. Résultats faux ou promesses rompues sans le dire
 
 ### PDF
-- [ ] pdf.js sans `wasmUrl` / `cMapUrl` / `iccUrl` / `standardFontDataUrl` : pages scannées CCITT/JBIG2/JPEG 2000 peut-être rendues blanches (PDF to JPG/Image, Redact, OCR), texte CJK vide (Extract, Compare, HTML) — à prouver sur de vrais scans
-- [ ] PDF Editor : police et images intégrées au document source, dessinées sur la sortie → texte et images ajoutés cassés (prouvé par l'agent)
-- [ ] Reorder Pages : « 3-5 » lu 3, mots et numéros hors document jetés, pages absentes perdues sans avertissement, liste invalide → PDF vide
-- [ ] Merge / Split : signets et formulaires perdus sans un mot (`pdfCarryOver.js` non utilisé) ; champs de même nom en conflit dans Merge
-- [ ] Image to PDF / JPG to PDF : TIFF multipage → 1re page seulement, sans le dire
+- [x] pdf.js sans `wasmUrl` / `cMapUrl` / `iccUrl` / `standardFontDataUrl` : pages scannées CCITT/JBIG2/JPEG 2000 peut-être rendues blanches (PDF to JPG/Image, Redact, OCR), texte CJK vide (Extract, Compare, HTML) — à prouver sur de vrais scans
+- [x] PDF Editor : police et images intégrées au document source, dessinées sur la sortie → texte et images ajoutés cassés (prouvé par l'agent)
+- [x] Reorder Pages : « 3-5 » lu 3, mots et numéros hors document jetés, pages absentes perdues sans avertissement, liste invalide → PDF vide
+- [x] Merge / Split : signets et formulaires perdus sans un mot (`pdfCarryOver.js` non utilisé) ; champs de même nom en conflit dans Merge
+- [x] Image to PDF / JPG to PDF : TIFF multipage → 1re page seulement, sans le dire
 - [ ] EPUB / MOBI to PDF : chapitre illisible sauté sans le dire
 - [ ] Compare : deux PDF scannés (sans texte) annoncés identiques
 - [ ] Extract Text : PDF scanné → « Page N: » vides sans explication
@@ -22,7 +22,7 @@ D'abord les **résultats faux silencieux** (règle : ils passent avant tout ajou
 - [ ] Add Vignette : zones transparentes noircies (source-over)
 - [ ] WebP to JPG : WebP animé → 1re image sans le dire
 - [ ] Image Compressor : APNG et WebP animé rendus figés sans le dire
-- [ ] TIFF to JPG/PNG : orientation (tag 274) ignorée ; multipage → page 1 seulement sans le dire ; ICC ignoré (avertir)
+- [x] TIFF to JPG/PNG : orientation (tag 274) ignorée ; multipage → page 1 seulement sans le dire ; ICC ignoré (avertir)
 - [ ] Filtres en `image/*` et Resizer : GIF animé → PNG figé sans le dire (note trompeuse du Resizer)
 
 ### Vidéo / audio / GIF

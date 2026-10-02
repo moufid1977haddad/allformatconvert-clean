@@ -250,3 +250,52 @@ Outils que ni P21 ni les sections précédentes n'avaient traités (`dev-lot.mjs
   demanderait un autre service (décision E7).
 - **MOBI to EPUB** : déjà à parité avec CloudConvert / Calibre en ligne pour ce sens (MOBI6, KF8/AZW3, PRC,
   Huffman/CDIC, couverture, table des matières) ; aucun changement.
+
+## 9. Les ≈ 120 outils qu'aucune passe n'avait comparés (relevé n° 2, 03/10)
+
+Quatre agents de recherche **en lecture seule** (PDF ; image ; vidéo/audio/GIF ; développeur/texte/fichiers/QR) ont lu
+notre code et les pages des concurrents ; la liste de travail complète est dans `docs/audit/P24-releve-outils-restants.md`
+(cochée au fil des corrections). Règle suivie : **d'abord les résultats faux silencieux**, chacun prouvé avant et après.
+
+**Corrigés et prouvés (lot 1)** :
+- **pdf.js sans ses décodeurs** (le plus large) : aucune page du site ne donnait à PDF.js l'adresse de ses modules
+  WebAssembly — une image **JPEG 2000, JBIG2 ou CCITT** (pages scannées) était sautée et la page sortait **blanche**,
+  avec un simple avertissement en console (prouvé : `scripts/p24/pdfjs-decoders.mjs`, écart de couleur 0,0 avant,
+  109 après, ×3 moteurs ; sous WebKit le décodeur de secours en JavaScript prend le relais). Les cmaps (texte chinois,
+  japonais, coréen non intégré), profils ICC et polices standard sont servis aussi : `scripts/copy-pdfjs-assets.mjs`
+  (au build, `public/pdfjs/<version>/`, non commité), passés une fois pour tous les outils par `app/lib/pdfjs.js`.
+  Un premier essai par `Proxy` cassait tous les outils PDF (exports du bundle en lecture seule) : vu par le banc,
+  remplacé par une copie simple ; pdf-lot 23/23, PDF to Images 12/12 et simulation Safari 16.4 repassés ×3.
+- **PDF Editor** : la police et les images ajoutées étaient intégrées au document source et dessinées sur les pages
+  du document enregistré — **l'image ajoutée n'était jamais affichée** (prouvé : 0 image peinte avant, 1 après, lu par
+  pdf.js ; `scripts/p24/pdf-editor-worker.test.mjs`) ; un texte non latin donne une phrase au lieu de l'erreur brute.
+- **Merge** : formulaires et signets perdus sans un mot → un signet par fichier (Sejda, PDF24) avec ses propres signets
+  dessous, champs réunis dans un formulaire qui fonctionne, champs de même nom renommés (`name_2`) et dit
+  (`scripts/p24/pdf-merge-worker.test.mjs`). **Split** : chaque morceau garde ses champs, son titre et ses signets
+  (`pdf-split-worker.test.mjs`). **Reorder Pages** : « 3-5 » était lu 3, les mots et numéros hors document jetés, les
+  pages absentes perdues sans avertissement → ordre lu tel qu'écrit (5-1 inverse), erreurs dites, pages laissées de côté
+  listées avant l'enregistrement, Inverser / Impaires puis paires, formulaires et signets gardés.
+- **TIFF** (TIFF to JPG, TIFF to PNG, Image Converter, JPG/Image to PDF) : l'orientation (tag 274) est appliquée
+  (une image couchée sortait couchée) ; un TIFF de plusieurs pages était réduit à sa première **sans le dire** → TIFF to
+  JPG/PNG le disent et convertissent la page choisie, JPG/Image to PDF ajoutent **toutes** les pages ; un profil
+  couleur non appliqué est signalé (`scripts/p24/tiff-lot.mjs` ×3 : TIFF de 2 pages écrit par le banc).
+- **Video Rotator** : en « Instant, lossless » (promesse : rien n'est envoyé), un WebM ou un MP4 dont la matrice ne
+  pouvait pas être réécrite **partait au service sans un mot** → phrase « rien n'a été envoyé », choix laissé.
+- **Screen Recorder** : vidéo **muette** sans le dire quand le son n'était pas partagé → phrase ; et le **micro**
+  (123apps, ScreenPal), mélangé au son de l'écran.
+- **Code Minifier (HTML)** : l'espace entre deux balises était supprimée (« <b>Hello</b> <i>world</i> » lu
+  « Helloworld ») et les valeurs d'attributs tassées → une espace gardée, guillemets intacts.
+- **SQL to CSV** : `NOW()` fermait la liste (ligne tronquée) ; deux tables mélangées sous un seul en-tête ; NULL écrit
+  « NULL » → parenthèses comptées, choix de la table, NULL vide, listes de colonnes divergentes refusées.
+- **Statistics Calculator** (relecture indépendante, **1 grave**) : des valeurs décimales toutes égales (0,1 ; 0,1 ; 0,1)
+  affichaient une asymétrie de −2,449 (moyenne flottante inexacte) et, au-delà de 2^53 de somme (1e15 + petites
+  différences), moyenne, variance, asymétrie, aplatissement faux → sommes compensées et décalées, variance à deux
+  passes corrigée, moyennes géométrique et harmonique stables (1e300…1e-300). **Calculatrice** : Ans collé (Ans2, πAns),
+  1/x et |x| appliqués au nombre tapé (4 puis 1/x = 0,25, pas 41/(…)), (−3)², messages de domaine. **Fractions** :
+  nombre entier seul accepté, période après une longue avant-période.
+- **File Metadata** : les métadonnées **contenues** dans le fichier (metadata2go) : EXIF/GPS d'une photo, propriétés
+  PDF, Word/Excel/PowerPoint/OpenDocument (auteur, modifié par, société…), contenu d'un ZIP, tags ID3 d'un MP3.
+
+Bancs de ce lot : dev-lot **34/34 ×3**, tiff-lot 2/2 ×3, pdfjs-decoders ×3, tests Node des workers Editor/Merge/Split,
+solidité 41/41 ×3 sur les outils touchés ; solidité complète Chromium 522/522 (avant ce lot ; la passe finale ×3 est
+refaite sur la version finale).

@@ -9,11 +9,12 @@ export default function SqlToCsvPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
-  const convert = () => {
+  const [tables, setTables] = useState(null); // several tables in the dump: the visitor picks one (P24)
+  const convert = (pick) => {
     try {
-      setOutput(sqlInsertsToCsv(input));
-      setError('');
-    } catch(e) { setOutput(''); setError(e.message); }
+      setOutput(sqlInsertsToCsv(input, { table: pick || null }));
+      setError(''); if (!pick) setTables(null);
+    } catch(e) { setOutput(''); setError(e.message); setTables(e.tables || null); }
   };
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
@@ -27,8 +28,9 @@ export default function SqlToCsvPage() {
             <TextDownload text={output} name="data.csv" /></div>
           </div>
           {error && <p className="text-red-400 text-center">{error}</p>}
+          {tables && <div className="flex flex-wrap gap-2 justify-center" data-tables>{tables.map((t) => <button key={t} type="button" onClick={() => convert(t)} className="px-3 py-1 rounded-lg border border-neutral-300 bg-white text-sm">Convert table {t}</button>)}</div>}
           <div className="grid grid-cols-2 gap-3">
-            <button onClick={convert} disabled={!input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert</button>
+            <button onClick={() => convert()} disabled={!input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert</button>
             <button onClick={() => navigator.clipboard.writeText(output)} disabled={!output} className="bg-green-600 hover:bg-green-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Copy</button>
           </div>
         </div>

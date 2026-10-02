@@ -79,6 +79,7 @@ export default function PdfToImages({ tool, formats = PDF_IMAGE_FORMATS.map((f) 
       try { pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise; }
       catch (e) {
         if (e && e.name === 'PasswordException') throw new Error('This PDF is protected by a password. Remove the password with our PDF Unlock tool (you need to know it), then convert the unlocked file.');
+        console.warn('[pdf-to-images] getDocument failed:', e?.name, e?.message); // the reason, for support; the visitor gets the sentence
         throw new Error('This file could not be read as a PDF. It may be damaged, or not a PDF despite its name.');
       }
       const pages = parsePageRange(range, pdf.numPages);

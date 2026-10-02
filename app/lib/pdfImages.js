@@ -49,19 +49,25 @@ const isTiffBytes = (b) => (b[0] === 0x49 && b[1] === 0x49 && b[2] === 0x2a) || 
 async function decodableImage(file, bytes) {
   if (isTiffBytes(bytes)) {
     const worker = new Worker(new URL('../tools/image-tools/tiff-to-png/tiffToPng.worker.js', import.meta.url), { type: 'module' });
+    // P24 review (03/10): every page of a multi-page TIFF (fax, scan) becomes a PDF page; only the first one did, silently
+    const decodePage = (page) => new Promise((resolve, reject) => {
+      let t = setTimeout(() => reject(new Error('this TIFF variant could not be decoded in time')), 20000);
+      worker.onmessage = ({ data }) => {
+        if (data.type === 'decoded') { clearTimeout(t); t = setTimeout(() => reject(new Error('encoding took too long')), 120000); }
+        else if (data.type === 'done') { clearTimeout(t); resolve(data); }
+        else if (data.type === 'error') { clearTimeout(t); reject(new Error(data.notTiff ? 'not a real TIFF file' : 'this TIFF could not be decoded')); }
+      };
+      worker.onerror = () => { clearTimeout(t); reject(new Error('this TIFF could not be decoded')); };
+      const buf = bytes.slice().buffer;
+      worker.postMessage({ buffer: buf, page }, [buf]);
+    });
     try {
-      const blob = await new Promise((resolve, reject) => {
-        let t = setTimeout(() => reject(new Error('this TIFF variant could not be decoded in time')), 20000);
-        worker.onmessage = ({ data }) => {
-          if (data.type === 'decoded') { clearTimeout(t); t = setTimeout(() => reject(new Error('encoding took too long')), 120000); }
-          else if (data.type === 'done') { clearTimeout(t); resolve(data.blob); }
-          else if (data.type === 'error') { clearTimeout(t); reject(new Error(data.notTiff ? 'not a real TIFF file' : 'this TIFF could not be decoded')); }
-        };
-        worker.onerror = () => { clearTimeout(t); reject(new Error('this TIFF could not be decoded')); };
-        const buf = bytes.slice().buffer;
-        worker.postMessage({ buffer: buf }, [buf]);
-      });
-      return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.png', { type: 'image/png' });
+      const base = file.name.replace(/\.[^.]+$/, '');
+      const first = await decodePage(0);
+      const out = new File([first.blob], base + '.png', { type: 'image/png' });
+      out.morePages = [];
+      for (let k = 1; k < (first.pageCount || 1); k++) out.morePages.push(new File([(await decodePage(k)).blob], `${base}-p${k + 1}.png`, { type: 'image/png' }));
+      return out;
     } finally { worker.terminate(); }
   }
   if (isHeicName(file) && !(await imageDims(file))) {
@@ -132,6 +138,7 @@ export async function addImagePage(pdfDoc, original) {
     await assertDecodable(original, file);
     const png = isPng(bytes) ? await pdfDoc.embedPng(bytes) : await embedUpright(pdfDoc, file);
     fullPage(pdfDoc, png);
+    for (const more of file.morePages || []) fullPage(pdfDoc, await pdfDoc.embedPng(new Uint8Array(await more.arrayBuffer())));
   } catch (e) {
     if (e instanceof SizeError) throw e;
     // P23: a 900 MP PNG ran the browser out of memory ("Array buffer allocation failed") and was reported as unreadable

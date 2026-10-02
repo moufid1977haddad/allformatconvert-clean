@@ -345,6 +345,43 @@ const main = (p) => p.locator('main').innerText();
   check('currency: 100 USD listed as 90.00 EUR, 80.00 GBP, 15,000 JPY', rows.some((r) => /EUR[\s\S]*90\.00 EUR/.test(r)) && rows.some((r) => /GBP[\s\S]*80\.00 GBP/.test(r)) && rows.some((r) => /JPY[\s\S]*15,000 JPY/.test(r)), rows.join(' / ').slice(0, 200));
   await p.close();
 }
+{ // review 03/10: constant decimals give no skewness; 1/x by the keys applies to the typed number; Ans then a digit
+  const p = await open('math-tools/statistics-calculator');
+  await p.locator('textarea').fill('0.1 0.1 0.1');
+  await p.getByRole('button', { name: 'Calculate', exact: true }).click();
+  const t = await main(p);
+  check('statistics: 0.1 ×3 → skewness —, variance 0 (it showed -2.449)', /Skewness \(Excel SKEW\)\s+— \(needs 3\+ values, not all equal\)/.test(t) && /Sample variance \(s²\)\s+0\b/.test(t), '');
+  await p.close();
+  const q = await open('math-tools/scientific-calculator');
+  const key = (k) => q.getByRole('button', { name: k, exact: true }).dispatchEvent('mousedown');
+  const shown = async () => (await q.locator('div.text-2xl.font-mono').innerText()).trim();
+  await key('4'); await key('1/x'); await key('='); await q.waitForTimeout(400); const r1 = await shown();
+  await key('C'); await key('Ans'); await key('2'); await key('='); await q.waitForTimeout(400); const r2 = await shown();
+  check('scientific: 4 then 1/x = 0.25 (not 41/(…)); Ans then 2 = 0.5 (Ans × 2)', r1 === '0.25' && r2 === '0.5', `${r1} ${r2}`);
+  await q.close();
+}
+{ // File Metadata: what the file carries inside (PDF properties, Office properties, MP3 ID3 tags)
+  const { PDFDocument } = await import('pdf-lib');
+  const JSZip = (await import('jszip')).default;
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'p24-meta-'));
+  const pdf = await PDFDocument.create(); pdf.addPage(); pdf.addPage(); pdf.setTitle('Annual budget'); pdf.setAuthor('Ann Smith'); pdf.setProducer('Bench producer');
+  fs.writeFileSync(path.join(dir, 'budget.pdf'), await pdf.save({ updateFieldAppearances: false }));
+  const zip = new JSZip();
+  zip.file('[Content_Types].xml', '<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>');
+  zip.file('docProps/core.xml', '<?xml version="1.0"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/"><dc:title>Offer letter</dc:title><dc:creator>Bob Jones</dc:creator><cp:lastModifiedBy>HR team</cp:lastModifiedBy></cp:coreProperties>');
+  zip.file('docProps/app.xml', '<?xml version="1.0"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"><Application>Microsoft Office Word</Application><Company>Acme Ltd</Company></Properties>');
+  zip.file('word/document.xml', '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"/>');
+  fs.writeFileSync(path.join(dir, 'offer.docx'), await zip.generateAsync({ type: 'nodebuffer' }));
+  const frame = (id, text) => { const body = Buffer.concat([Buffer.from([3]), Buffer.from(text, 'utf8')]); const h = Buffer.alloc(10); h.write(id, 0); h.writeUInt32BE(body.length, 4); return Buffer.concat([h, body]); };
+  const frames = Buffer.concat([frame('TIT2', 'Morning Song'), frame('TPE1', 'Zoë')]);
+  const id3 = Buffer.alloc(10); id3.write('ID3', 0); id3[3] = 3; const sz = frames.length; id3[6] = (sz >> 21) & 0x7f; id3[7] = (sz >> 14) & 0x7f; id3[8] = (sz >> 7) & 0x7f; id3[9] = sz & 0x7f;
+  fs.writeFileSync(path.join(dir, 'song.mp3'), Buffer.concat([id3, frames, Buffer.from([0xff, 0xfb, 0x90, 0x00]), Buffer.alloc(400)]));
+  const p = await open('file-tools/file-metadata');
+  const read = async (f) => { await p.locator('input[type=file]').first().setInputFiles(path.join(dir, f)); await p.locator('[data-embedded]').first().waitFor({ timeout: 15000 }).catch(() => {}); await p.waitForTimeout(300); return p.locator('[data-embedded]').allInnerTexts().then((a) => a.join(' | ')); };
+  const a = await read('budget.pdf'), d = await read('offer.docx'), m = await read('song.mp3');
+  check('file-metadata: PDF title/author/pages, Word author/company, MP3 ID3 title/artist read from inside the files', /Annual budget/.test(a) && /Ann Smith/.test(a) && /Pages\s+2/.test(a) && /Bob Jones/.test(d) && /HR team/.test(d) && /Acme Ltd/.test(d) && /Morning Song/.test(m) && /Zoë/.test(m), (a + ' // ' + d + ' // ' + m).replace(/\n/g, ' ').slice(0, 220));
+  await p.close();
+}
 await b.close();
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);
 process.exit(fails ? 1 : 0);

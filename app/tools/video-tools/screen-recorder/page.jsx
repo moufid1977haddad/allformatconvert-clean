@@ -33,13 +33,36 @@ export default function ScreenRecorderPage() {
   const [blobRef, setBlobRef] = useState(null);
   const [converting, setConverting] = useState(null);
   const [supported, setSupported] = useState(true);
+  // P24 (03/10): the microphone, mixed with the screen's sound (123apps, ScreenPal have it), and a sentence when the
+  // recording has no sound at all (the browser's "Share audio" box left unticked made a silent video without a word)
+  const [withMic, setWithMic] = useState(false);
+  const [audioNote, setAudioNote] = useState('');
+  const extraRef = useRef([]);
   useEffect(() => { setSupported(!!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) && typeof MediaRecorder !== 'undefined'); }, []);
 
   const start = async () => {
     setError('');
     let stream;
     try {
-      stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      setAudioNote('');
+      const display = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      stream = display;
+      let mic = null;
+      if (withMic) {
+        try { mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+        catch { setAudioNote('The microphone was not allowed: recording without it.'); }
+      }
+      extraRef.current = mic ? [mic] : [];
+      const sources = [display, mic].filter((s) => s && s.getAudioTracks().length);
+      if (sources.length > 1) { // two sound sources: mixed into one track (MediaRecorder records one audio track)
+        const ctx = new AudioContext(); const dest = ctx.createMediaStreamDestination();
+        for (const s of sources) ctx.createMediaStreamSource(s).connect(dest);
+        extraRef.current.push({ getTracks: () => [], close: () => ctx.close() });
+        stream = new MediaStream([...display.getVideoTracks(), ...dest.stream.getAudioTracks()]);
+      } else if (sources.length === 1 && sources[0] === mic) {
+        stream = new MediaStream([...display.getVideoTracks(), ...mic.getAudioTracks()]);
+      }
+      if (!stream.getAudioTracks().length) setAudioNote('This recording has no sound: the screen was shared without audio (tick "Share audio" in the browser\'s sharing dialog — only a tab or the whole screen on Chrome and Edge can share sound), and the microphone is off.');
       streamRef.current = stream;
       if (preview.current) preview.current.srcObject = stream;
       const type = recorderType();
@@ -56,7 +79,8 @@ export default function ScreenRecorderPage() {
           setError(err.message);
         }
         if (preview.current) preview.current.srcObject = null;
-        stream.getTracks().forEach(t => t.stop());
+        display.getTracks().forEach(t => t.stop());
+        for (const x of extraRef.current) { x.getTracks().forEach((t) => t.stop()); x.close?.(); }
       };
       stream.getVideoTracks()[0].onended = () => stop();
       mediaRecorder.current.start(1000);
@@ -68,6 +92,7 @@ export default function ScreenRecorderPage() {
       // construction/start throwing after the user granted screen access) so the
       // browser's sharing indicator doesn't stay on with no way to turn it off.
       if (stream) stream.getTracks().forEach(t => t.stop());
+      for (const x of extraRef.current) { x.getTracks().forEach((t) => t.stop()); x.close?.(); }
       if (preview.current) preview.current.srcObject = null;
       setRecording(false);
       clearInterval(timer.current);
@@ -116,6 +141,12 @@ export default function ScreenRecorderPage() {
               )}
             </div>
           </div>
+          {!recording && (
+            <label className="flex items-center justify-center gap-2 text-sm text-neutral-700">
+              <input id="sr-mic" type="checkbox" checked={withMic} onChange={(e) => setWithMic(e.target.checked)} /> Add my microphone (mixed with the screen's sound)
+            </label>
+          )}
+          {audioNote && <p role="status" className="text-amber-700 text-center text-sm" data-audio-note>{audioNote}</p>}
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {videoUrl && (
             <div className="space-y-3">
@@ -139,7 +170,7 @@ export default function ScreenRecorderPage() {
         faqs={[
           { q: "What video format do recordings download as?", a: "MP4 (H.264 video, AAC sound) in Chrome, Edge and Safari, the format every phone and computer plays. Firefox can only record WebM: the page then offers to make an MP4 from it on our video service. The file extension always matches the real content." },
           { q: "Is Screen Recorder free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it record audio?", a: "It can capture audio from the screen or tab you're sharing if your browser and the shared source support it — it does not separately capture your microphone." },
+          { q: "Does it record audio?", a: "Yes: the sound of the screen or tab you share (tick 'Share audio' in the browser's dialog; Chrome and Edge can share a tab's or the whole screen's sound), and your microphone if you tick 'Add my microphone' — both are mixed into one track. If the recording has no sound at all, the page says so." },
           { q: "Is my recording uploaded anywhere?", a: "No: recording happens entirely in your browser, and only if you click \"Make an MP4\" (Firefox) is the recording sent to our video service, which deletes it once the MP4 is made and downloaded." },
           { q: "Can I record my screen on an iPhone or iPad?", a: "Not from a web page: Apple does not let browsers record the screen on iPhone and iPad. Use Screen Recording in Control Center instead." }
         ]}
