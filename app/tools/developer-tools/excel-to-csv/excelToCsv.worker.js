@@ -61,7 +61,7 @@ async function readFileWithProgress(file) {
   return merged;
 }
 
-async function run({ file, maxRows }) {
+async function run({ file, maxRows, delimiter = ',', bom = false }) {
   const limit = maxRows || MAX_ROWS;
   const bytes = await readFileWithProgress(file);
 
@@ -84,7 +84,8 @@ async function run({ file, maxRows }) {
 
   self.postMessage({ type: 'progress', pct: 85, phase: 'building' });
   const date1904 = workbookIs1904(workbook);
-  const csvBySheet = sheetNames.map((name) => { const ws = workbook.Sheets[name]; datesToText(ws, XLSX, date1904); generalNumbersInFull(ws, XLSX); return XLSX.utils.sheet_to_csv(ws); });
+  const csvBySheet = sheetNames.map((name) => { const ws = workbook.Sheets[name]; datesToText(ws, XLSX, date1904); generalNumbersInFull(ws, XLSX); return (bom ? '\uFEFF' : '') + XLSX.utils.sheet_to_csv(ws, { FS: delimiter === 'tab' ? '\t' : delimiter }); });
+  // P24 (03/10): separator (comma, semicolon for European Excel, tab) and a UTF-8 BOM so Excel reopens accents right
   const rowCounts = csvBySheet.map((csv) => csv.split('\n').filter(Boolean).length);
   const totalRows = rowCounts.reduce((a, b) => a + b, 0);
   if (totalRows > limit) throw new RowLimitExceededError(limit, totalRows);

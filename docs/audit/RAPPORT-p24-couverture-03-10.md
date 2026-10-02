@@ -389,3 +389,10 @@ copiés, même durée (ffprobe) ; un MP3 sans titre ni artiste. adds-lot 11/11 �
 GIF que le service a fait (service inchangé). **Non prouvé ici** : le service vidéo n'est pas configuré sur cette
 machine ; le banc le dit (SKIP) et la vérification est notée pour la préversion. Les options gifsicle employées
 (`--loopcount`, `--no-loopcount`, `--lossy`) sont les options standard, `--lossy` déjà prouvée dans GIF Compressor.
+
+**Ajouts (lot 7)**, prouvés (`adds-lot.mjs` 17/17 · 16/16 · 13/13, solidité 16/16 ×3) : **Excel to CSV** — séparateur
+(virgule, point-virgule pour l'Excel européen, tabulation, barre) et BOM UTF-8 (Excel rouvre alors les accents) ;
+**CSV to JSON** — liste d'objets, liste de lignes (en-tête d'abord), **JSON Lines** (fichier .jsonl) ; **URL Encoder** (les
+deux pages) — une valeur, une URL entière (garde : / ? # & =), RFC 3986 strict ; **Image to Base64** — URI data, Base64
+seul, balise `<img>`, fond CSS, JSON ; **GIF Maker** — une durée propre à chaque image (prouvé : 200 ms puis 1000 ms
+relus par sharp). Un ajout de FAQ mal placé (encodeur d'URL) a cassé la construction une fois : vu par le build, corrigé.

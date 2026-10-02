@@ -215,6 +215,54 @@ if (name !== 'webkit') { // Video to GIF: refusals (local) and plays once / 3 ti
     check('video-to-gif: "Once" has no loop extension, "3 times" repeats twice', once === 'none' && three === 2, `${once} / ${three}`); }
   }
 }
+{ // Excel to CSV: semicolon + BOM; CSV to JSON: JSON Lines; URL Encoder: whole URL; Image to Base64: <img> tag
+  const XLSX = (await import('xlsx')).default || (await import('xlsx'));
+  const ws = XLSX.utils.aoa_to_sheet([['name', 'city'], ['Zoë', 'Zürich']]);
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'S');
+  const xl = path.join(dir, 'people.xlsx'); fs.writeFileSync(xl, XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }));
+  const e = await open('developer-tools/excel-to-csv');
+  await e.locator('#x2c-delimiter').selectOption(';'); await e.locator('#x2c-bom').check();
+  await e.locator('input[type=file]').first().setInputFiles(xl);
+  const ea = e.locator('a[download]').first(); await ea.waitFor({ timeout: 30000 });
+  const csv = await bytesOf(e, ea);
+  check('excel-to-csv: semicolon separator and UTF-8 BOM when asked', csv[0] === 0xef && csv[1] === 0xbb && csv[2] === 0xbf && csv.toString('utf8').includes('Zoë;Zürich'), JSON.stringify(csv.toString('utf8').slice(0, 40)));
+  await e.close();
+  const j = await open('developer-tools/csv-to-json');
+  await j.locator('textarea').first().fill('a,b\n1,x\n2,y\n');
+  await j.locator('#c2j-shape').selectOption('jsonl');
+  await j.getByRole('button', { name: 'Convert', exact: true }).click();
+  await j.waitForFunction(() => document.querySelector('textarea[aria-label="JSON Output"]')?.value, null, { timeout: 15000 }).catch(() => {});
+  const jl = await j.getByLabel('JSON Output').inputValue();
+  check('csv-to-json: JSON Lines — one object per line', jl === '{"a":1,"b":"x"}\n{"a":2,"b":"y"}', JSON.stringify(jl));
+  await j.close();
+  const u = await open('developer-tools/url-encoder');
+  await u.locator('textarea').first().fill('https://x.com/a b?q=café');
+  await u.locator('#url-mode').selectOption('url');
+  await u.getByRole('button', { name: /^Encode/ }).first().click();
+  const uo = await u.locator('textarea').nth(1).inputValue();
+  check('url-encoder: "a whole URL" keeps : / ? = and encodes the space and é', uo === 'https://x.com/a%20b?q=caf%C3%A9', uo);
+  await u.close();
+  const g = await open('image-tools/image-to-base64');
+  const tiny = path.join(dir, 'tiny.png'); await sharp({ create: { width: 2, height: 2, channels: 3, background: '#ff0000' } }).png().toFile(tiny);
+  await g.locator('input[type=file]').first().setInputFiles(tiny);
+  await g.locator('#b64-format').selectOption('img', { timeout: 15000 });
+  const tag = await g.getByLabel('Result').inputValue();
+  check('image-to-base64: <img> tag output', /^<img src="data:image\/png;base64,[A-Za-z0-9+/=]+" alt="">$/.test(tag), tag.slice(0, 50));
+  await g.close();
+}
+{ // GIF Maker: one frame with its own duration
+  const f1 = path.join(dir, 'f1.png'), f2 = path.join(dir, 'f2.png');
+  await sharp({ create: { width: 40, height: 40, channels: 3, background: '#ff0000' } }).png().toFile(f1);
+  await sharp({ create: { width: 40, height: 40, channels: 3, background: '#0000ff' } }).png().toFile(f2);
+  const p = await open('gif-tools/gif-maker');
+  await p.locator('input[type=file]').first().setInputFiles([f1, f2]);
+  await p.getByLabel('Duration of frame 2 (ms)').fill('1000');
+  await p.getByRole('button', { name: /Create GIF/ }).click();
+  const a = p.locator('a[download$=".gif"], [data-file-download] a[data-download]').first(); await a.waitFor({ timeout: 60000 });
+  const m = await sharp(await bytesOf(p, a), { animated: true }).metadata();
+  check('gif-maker: frame 2 keeps its own 1000 ms, frame 1 the common delay (200 ms)', m.pages === 2 && m.delay?.[0] === 200 && m.delay?.[1] === 1000, JSON.stringify(m.delay));
+  await p.close();
+}
 await b.close();
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);
 process.exitCode = fails ? 1 : 0;

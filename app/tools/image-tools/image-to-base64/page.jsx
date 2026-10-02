@@ -13,6 +13,11 @@ export default function ImageToBase64Page() {
   const [result, setResult] = useState('');
   const [fileName, setFileName] = useState('');
   const [error, setError] = useState('');
+  // P24 (03/10): the forms base64.guru offers — data URI, plain Base64, an <img> tag, a CSS background, JSON
+  const [fmt, setFmt] = useState('datauri');
+  const b64 = result ? result.slice(result.indexOf(',') + 1) : '';
+  const mime = result ? result.slice(5, result.indexOf(';')) : '';
+  const out = !result ? '' : fmt === 'raw' ? b64 : fmt === 'img' ? '<img src="' + result + '" alt="">' : fmt === 'css' ? 'background-image: url("' + result + '");' : fmt === 'json' ? JSON.stringify({ name: fileName, mime, base64: b64 }) : result;
   const inputRef = useRef();
   const encode = (e) => {
     const file = e.target.files[0];
@@ -52,7 +57,7 @@ export default function ImageToBase64Page() {
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={encode} />
           </div>
           {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
-          {result && <div className="space-y-2"><textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-xs h-48 resize-none font-mono" value={result.length > PREVIEW_CHARS ? result.slice(0, PREVIEW_CHARS) : result} readOnly />{result.length > PREVIEW_CHARS && <p className="text-xs text-neutral-500">Preview of the first {PREVIEW_CHARS.toLocaleString('en-US')} of {result.length.toLocaleString('en-US')} characters, so the page stays responsive; Copy Base64 and Download give the whole data URI.</p>}<button onClick={() => navigator.clipboard.writeText(result)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy Base64</button><TextDownload text={result} name={(fileName || 'image').replace(/\.[^.]+$/, '') + '.base64.txt'} /></div>}
+          {result && <div className="space-y-2"><label className="flex items-center gap-2 text-sm text-neutral-600">Output<select id="b64-format" value={fmt} onChange={(e) => setFmt(e.target.value)} className="border border-neutral-200 rounded px-2 py-1 bg-white"><option value="datauri">Data URI (data:image/…;base64,…)</option><option value="raw">Plain Base64</option><option value="img">HTML &lt;img&gt; tag</option><option value="css">CSS background-image</option><option value="json">JSON</option></select></label><textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-xs h-48 resize-none font-mono" value={out.length > PREVIEW_CHARS ? out.slice(0, PREVIEW_CHARS) : out} readOnly />{out.length > PREVIEW_CHARS && <p className="text-xs text-neutral-500">Preview of the first {PREVIEW_CHARS.toLocaleString('en-US')} of {out.length.toLocaleString('en-US')} characters, so the page stays responsive; Copy Base64 and Download give the whole text.</p>}<button onClick={() => navigator.clipboard.writeText(out)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy Base64</button><TextDownload text={out} name={(fileName || 'image').replace(/\.[^.]+$/, '') + '.base64.txt'} /></div>}
         </div>
       </div>
       <SeoContent

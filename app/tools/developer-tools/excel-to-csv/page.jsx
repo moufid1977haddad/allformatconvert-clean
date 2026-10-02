@@ -58,6 +58,9 @@ export default function ExcelToCsvPage() {
   const [isMobile, setIsMobile] = useState(false);
   const [timeEstimate, setTimeEstimate] = useState('');
   const [sheetNames, setSheetNames] = useState(null);
+  // P24 (03/10): separator and BOM, as convertcsv.com offers (a ";" CSV is what Excel expects in most of Europe)
+  const [delimiter, setDelimiter] = useState(',');
+  const [bom, setBom] = useState(false);
   const inputRef = useRef();
   const workerRef = useRef(null);
   const [result, offer, clearResult] = useDownloadable();
@@ -150,7 +153,7 @@ export default function ExcelToCsvPage() {
       workerRef.current = null;
       setError('Conversion failed: ' + (err?.message || 'unknown worker error'));
     };
-    worker.postMessage({ file: f, maxRows });
+    worker.postMessage({ file: f, maxRows, delimiter, bom });
   };
 
   return (
@@ -160,6 +163,14 @@ export default function ExcelToCsvPage() {
         <p className="text-neutral-500 dark:text-neutral-400 text-center mb-2">Convert Excel files to CSV</p>
         <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Supports workbooks up to {maxRowsLabel} rows{isMobile ? ' on this device' : ''} (including the header row, files up to {maxFileLabel}). Conversion runs in the background — this tab stays responsive.</p>
         <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-600 dark:text-neutral-300">
+            <label className="flex items-center gap-2">Separator
+              <select id="x2c-delimiter" value={delimiter} onChange={(e) => setDelimiter(e.target.value)} disabled={converting} className="border border-neutral-200 rounded px-2 py-1 bg-white dark:bg-neutral-800">
+                <option value=",">Comma ,</option><option value=";">Semicolon ; (Excel in most of Europe)</option><option value="tab">Tab</option><option value="|">Pipe |</option>
+              </select>
+            </label>
+            <label className="flex items-center gap-2"><input id="x2c-bom" type="checkbox" checked={bom} onChange={(e) => setBom(e.target.checked)} disabled={converting} /> Add a UTF-8 BOM (Excel then reads accents correctly)</label>
+          </div>
           <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-600 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500 dark:text-neutral-400 text-sm">{fileName || 'Click or drop an Excel or ODS file here'}</p>
             <input ref={inputRef} type="file" accept=".xlsx,.xls,.ods" className="hidden" onChange={handleFile} />
