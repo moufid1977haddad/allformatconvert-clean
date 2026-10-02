@@ -6,6 +6,7 @@ import { rasterFromRGBA } from '../../../lib/bigImage';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
+import AnimatedImageNote from '../../../components/AnimatedImageNote';
 export default function AddVignettePage() {
   const [srcType, setSrcType] = useState('image/png');
   const [image, setImage] = useState(null);
@@ -58,6 +59,7 @@ export default function AddVignettePage() {
             {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
+          <AnimatedImageNote file={file} />
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <div><label className="block text-sm text-neutral-500 mb-1">Intensity: {intensity}%</label><input aria-label="Intensity (%)" type="range" min="1" max="100" value={intensity} onChange={e => setIntensity(parseInt(e.target.value))} className="w-full" /></div>
           <div><label className="block text-sm text-neutral-500 mb-1">Clear centre: {size}%</label><input id="vig-size" aria-label="Clear centre size (%)" type="range" min="0" max="90" value={size} onChange={(e) => setSize(Number(e.target.value))} className="w-full" /></div>

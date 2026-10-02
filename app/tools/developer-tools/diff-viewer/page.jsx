@@ -12,14 +12,14 @@ export default function DiffViewerPage() {
   const [ignoreCase, setIgnoreCase] = useState(false);
   const compare = async () => {
     const d = await diffLines(text1, text2, { ignoreWhitespace: ignoreWs, ignoreCase });
-    const { diffWordsWithSpace } = await import('diff');
+    const { diffWordsWithSpace, diffWords } = await import('diff');
     for (let i = 0; i < d.length;) {
       if (d[i].type === 'same') { i++; continue; }
       const rem = [], add = [];
       while (i < d.length && d[i].type === 'removed') rem.push(d[i++]);
       while (i < d.length && d[i].type === 'added') add.push(d[i++]);
       for (let k = 0; k < Math.min(rem.length, add.length); k++) {
-        const words = diffWordsWithSpace(rem[k].line, add[k].line, { ignoreCase });
+        const words = (ignoreWs ? diffWords : diffWordsWithSpace)(rem[k].line, add[k].line, { ignoreCase }); // diffWords leaves spacing out
         rem[k].parts = words.filter((w) => !w.added);
         add[k].parts = words.filter((w) => !w.removed);
       }

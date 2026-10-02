@@ -43,19 +43,23 @@ export async function formatSql(sql, { language = 'sql', keywordCase = 'upper' }
 }
 
 // Line diff (Myers). Returns [{ type: 'same'|'added'|'removed', line, oldNum, newNum }].
+// P24 review (03/10): the lines are compared in a normalised form and shown as written. jsdiff's own ignoreWhitespace only
+// ignores spaces at the ends of a line (a doubled space inside counted as a change, against the pages' "Ignore whitespace"),
+// and an unchanged line showed the new version's text under the old line number when Ignore case was on.
 export async function diffLines(a, b, { ignoreWhitespace = false, ignoreCase = false } = {}) {
-  const { diffLines: dl } = await import('diff');
-  const norm = (s) => s.replace(/\r\n?/g, '\n');
-  const parts = dl(norm(a), norm(b), { ignoreWhitespace, ignoreCase });
+  const { diffArrays } = await import('diff');
+  const split = (s) => { const t = s.replace(/\r\n?/g, '\n'); return t === '' ? [] : t.replace(/\n$/, '').split('\n'); };
+  const A = split(a), B = split(b);
+  const key = (l) => { let k = ignoreWhitespace ? l.trim().replace(/\s+/g, ' ') : l; if (ignoreCase) k = k.toLowerCase(); return k; };
+  const parts = diffArrays(A.map(key), B.map(key));
   const out = [];
   let o = 1;
   let n = 1;
   for (const p of parts) {
-    const lines = p.value.replace(/\n$/, '').split('\n');
-    for (const line of lines) {
-      if (p.added) out.push({ type: 'added', line, newNum: n++ });
-      else if (p.removed) out.push({ type: 'removed', line, oldNum: o++ });
-      else out.push({ type: 'same', line, oldNum: o++, newNum: n++ });
+    for (let k = 0; k < p.count; k++) {
+      if (p.added) { out.push({ type: 'added', line: B[n - 1], newNum: n }); n++; }
+      else if (p.removed) { out.push({ type: 'removed', line: A[o - 1], oldNum: o }); o++; }
+      else { out.push({ type: 'same', line: A[o - 1], newLine: B[n - 1], oldNum: o, newNum: n }); o++; n++; }
     }
   }
   return out;

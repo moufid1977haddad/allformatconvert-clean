@@ -110,6 +110,7 @@ export default function ExcelToPdfPage() {
           { q: "Can I convert multiple Excel files at once?", a: "No, only one file can be converted at a time." },
           { q: "Will formulas and formatting carry over?", a: "In our tests on .xlsx files, formula results (including cross-sheet lookups), number formats, merged cells, cell borders and color-scale conditional formatting carried over. We did not test macros or very complex conditional formatting, and we measured .xlsx only, not .xls, .csv or .ods." },
           { q: "Why is my wide spreadsheet split across several pages?", a: "A sheet wider than one page, with no print area or scaling set, is split into pages by groups of columns. Tick \"Fit each sheet on one page\" to get each sheet on a single page instead, or set the sheet to fit on one page in Excel (Page Layout > Scale to Fit) before uploading." },
+          { q: "What about a very long sheet on one page?", a: "It is shrunk to fit one tall page, never cut: tested up to 30,000 rows, every row is in the PDF — but the text gets very small, so for long lists the normal page-by-page layout reads better." },
         ]}
         tips={[
           "Every sheet in your workbook is converted in its original order, each starting on its own page(s).",

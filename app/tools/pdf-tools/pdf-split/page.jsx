@@ -15,6 +15,7 @@ const MODES = [
   { id: 'all', label: 'Every page' },
   { id: 'select', label: 'Select pages' },
   { id: 'oddeven', label: 'Odd / even pages' },
+  { id: 'bookmarks', label: 'By bookmarks' },
 ];
 
 export default function PdfSplitPage() {
@@ -24,6 +25,8 @@ export default function PdfSplitPage() {
   const [mode, setMode] = useState('ranges');
   const [every, setEvery] = useState(1);
   const [merge, setMerge] = useState(false);
+  const [bookmarks, setBookmarks] = useState([]);
+  const [level, setLevel] = useState(1);
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -39,7 +42,7 @@ export default function PdfSplitPage() {
   }, []);
 
   const maxPages = isMobile ? MOBILE_MAX_PAGES : MAX_PAGES;
-  const plan = useMemo(() => (pageCount > 0 ? planSplit({ mode, spec: ranges, every, merge }, pageCount) : null), [mode, ranges, every, merge, pageCount]);
+  const plan = useMemo(() => (pageCount > 0 ? planSplit({ mode, spec: ranges, every, merge, bookmarks, level }, pageCount) : null), [mode, ranges, every, merge, bookmarks, level, pageCount]);
   const needsSpec = mode === 'ranges' || mode === 'select';
   const maxFileBytes = isMobile ? MOBILE_MAX_FILE_SIZE_BYTES : MAX_FILE_SIZE_BYTES;
   const maxFileLabel = isMobile ? MOBILE_MAX_FILE_SIZE_LABEL : MAX_FILE_SIZE_LABEL;
@@ -60,6 +63,7 @@ export default function PdfSplitPage() {
     setDownloads([]);
     setRanges('');
     setPageCount(0);
+    setBookmarks([]);
     setFileName(f.name);
 
     if (f.size > maxFileBytes) {
@@ -74,6 +78,7 @@ export default function PdfSplitPage() {
       const msg = ev.data;
       if (msg.type === 'loaded') {
         setPageCount(msg.pageCount);
+        setBookmarks(msg.bookmarks || []);
         setLoading(false);
       } else if (msg.type === 'limit') {
         setError(`${msg.message} In-browser splitting becomes unreliable beyond that point — split the file into smaller pieces first (e.g. with a desktop PDF tool) and try again.`);
@@ -145,7 +150,7 @@ export default function PdfSplitPage() {
           </div>
           {pageCount > 0 && (
             <div className="space-y-3">
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2" role="radiogroup" aria-label="Split mode">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2" role="radiogroup" aria-label="Split mode">
                 {MODES.map((m) => (
                   <button key={m.id} type="button" role="radio" aria-checked={mode === m.id} onClick={() => setMode(m.id)} disabled={loading}
                     className={`rounded-lg py-2 text-sm font-medium transition ${mode === m.id ? 'bg-indigo-600 text-white' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'}`}>{m.label}</button>
@@ -155,6 +160,16 @@ export default function PdfSplitPage() {
                 <div>
                   <label htmlFor="split-spec" className="block text-sm text-neutral-500 mb-1">{mode === 'ranges' ? 'Page ranges — each becomes its own PDF (e.g. 1-3, 4-6, 8-)' : 'Pages to extract (e.g. 2, 5, 9-12)'}</label>
                   <input id="split-spec" type="text" value={ranges} onChange={e => setRanges(e.target.value)} disabled={loading} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" placeholder={mode === 'ranges' ? '1-3, 4-6, 8-' : '2, 5, 9-12'} />
+                </div>
+              )}
+              {mode === 'bookmarks' && (
+                <div className="text-sm text-neutral-600 space-y-1">
+                  <label className="flex items-center gap-2">Split at
+                    <select id="split-level" value={level} onChange={(e) => setLevel(Number(e.target.value))} disabled={loading} className="border border-neutral-200 rounded px-2 py-1 bg-white">
+                      <option value={1}>top-level bookmarks (chapters)</option><option value={2}>two levels (chapters and sections)</option>
+                    </select>
+                  </label>
+                  {plan?.files && <ol className="text-xs text-neutral-500 max-h-40 overflow-auto list-none" data-bookmark-plan>{plan.files.map((f, k) => <li key={k}>{f.label} — page{f.pages.length > 1 ? 's' : ''} {f.pages[0] + 1}{f.pages.length > 1 ? '–' + (f.pages[f.pages.length - 1] + 1) : ''}</li>)}</ol>}
                 </div>
               )}
               {mode === 'every' && (
@@ -207,11 +222,12 @@ export default function PdfSplitPage() {
         description="PDF Split cuts a PDF the ways the leading online splitter does for free: custom ranges (each its own PDF, or all merged into one), a new file every N pages, every page as its own PDF, or chosen pages — with a ZIP of all the parts. It uses the pdf-lib library entirely in your browser, so your file is never uploaded, and runs in a Web Worker so the page stays responsive on large files. A range that does not exist in your PDF is refused with the reason, before anything is created."
         howTo={[
           "Click the upload area and select a PDF file — the total page count appears once it's read.",
-          "Pick a mode — Custom ranges, Every N pages, Every page or Select pages — and type the ranges or the number of pages per file; the tool says how many PDFs will be created.",
+          "Pick a mode — Custom ranges, Every N pages, Every page, Select pages, Odd / even pages or By bookmarks — and type the ranges or the number of pages per file; the tool says how many PDFs will be created.",
           "Click 'Split PDF' to generate the files.",
           "Download each part, or all of them at once as a ZIP."
         ]}
         faqs={[
+          { q: "Can I split a PDF by its bookmarks (chapters)?", a: "Yes: choose By bookmarks. Each top-level bookmark starts a new PDF that runs to the page before the next one, or choose two levels to cut at sections too; the list shows each part and its pages before you split. Pages before the first bookmark get their own file, so no page is lost, and each part is named after its bookmark." },
           { q: "Is PDF Split free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "Can I click page thumbnails to select what to split?", a: "Not yet — pages are chosen by number (for example 2, 5, 9-12). The page count is shown as soon as the file is read, and the tool tells you before splitting if a page does not exist." },
           { q: "Can I split a PDF into equal-sized parts automatically?", a: "Yes: choose \"Every N pages\" to get a new PDF every N pages (the last one holds what is left), or \"Every page\" to get one PDF per page." },

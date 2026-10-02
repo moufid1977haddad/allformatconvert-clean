@@ -67,7 +67,10 @@ async function run({ file, text, maxRows, mode, delimiter, encoding, typeNumbers
   // object per line, for logs and big-data tools)
   const asObject = (vals) => Object.fromEntries(headers.map((h, i) => [h, cell(vals[i], i)]));
   const data = rows.slice(1);
-  const jsonText = shape === 'arrays' ? JSON.stringify([headers, ...data.map((vals) => headers.map((_, i) => cell(vals[i], i)))], null, 2)
+  // arrays: the header row exactly as in the file (a list has no keys to collide: nothing renamed, nothing to say)
+  if (shape === 'arrays') notes.length = 0;
+  const headerRow = Array.from({ length: width }, (_, i) => (rows[0][i] ?? '').trim());
+  const jsonText = shape === 'arrays' ? JSON.stringify([headerRow, ...data.map((vals) => headers.map((_, i) => cell(vals[i], i)))], null, 2)
     : shape === 'jsonl' ? data.map((vals) => JSON.stringify(asObject(vals))).join('\n')
     : JSON.stringify(data.map(asObject), null, 2);
 

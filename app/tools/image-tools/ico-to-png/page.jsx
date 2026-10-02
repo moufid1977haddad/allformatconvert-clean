@@ -3,14 +3,40 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { drawToRaster, encodeRaster, resultOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
-import { FileDownload } from '../../../components/FileDownload';
+import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
+import { icoEntries, singleEntryIco } from '../../../lib/icoEntries';
 export default function ICOtoPNGPage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const inputRef = useRef();
   const [file, setFile] = useState(null);
-  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setFile(f); setResult(null); setError(''); } };
+  const [sizes, setSizes] = useState(null); // P24 (03/10): every image of the icon, as ezgif and Convertio give
+  const handleFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) { setImage(URL.createObjectURL(f)); setFile(f); setResult(null); setSizes(null); setError(''); } };
+  const decodeBlob = (blob) => new Promise((resolve, reject) => {
+    const u = URL.createObjectURL(blob); const im = new Image();
+    im.onload = async () => {
+      try { const out = await drawToRaster(im.naturalWidth, im.naturalHeight, (ctx, y) => ctx.drawImage(im, 0, -y)); resolve(await encodeRaster(out, 'image/png')); }
+      catch (err) { reject(err); } finally { URL.revokeObjectURL(u); }
+    };
+    im.onerror = () => { URL.revokeObjectURL(u); reject(new Error('unreadable')); };
+    im.src = u;
+  });
+  const extractAll = async () => {
+    setError(''); setSizes(null);
+    try {
+      const { entries, count } = icoEntries(new Uint8Array(await file.arrayBuffer()));
+      const base = (file.name || 'icon').replace(/\.[^.]+$/, '');
+      const list = [];
+      for (const en of entries) {
+        let blob = null;
+        try { blob = en.png ? new Blob([en.data], { type: 'image/png' }) : await decodeBlob(singleEntryIco(en)); } catch { blob = null; }
+        list.push({ ...en, blob, url: blob ? URL.createObjectURL(blob) : null, name: `${base}-${en.width}x${en.height}${en.bitCount ? '-' + en.bitCount + 'bit' : ''}${entries.filter((x) => x.width === en.width && x.height === en.height).length > 1 ? '-' + (en.index + 1) : ''}.png` });
+      }
+      const bad = list.filter((x) => !x.blob).length + (count - entries.length);
+      setSizes({ list: list.filter((x) => x.blob), bad, count });
+    } catch (err) { setError(err.message); }
+  };
   const convert = () => {
     const img = new Image();
     img.onload = async () => {
@@ -39,6 +65,17 @@ export default function ICOtoPNGPage() {
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <button onClick={convert} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert</button>
           {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
+          <button type="button" onClick={extractAll} disabled={!file} className="w-full bg-neutral-100 hover:bg-neutral-200 disabled:opacity-50 rounded-xl py-2 font-semibold transition" data-ico-all>Every size in this icon</button>
+          {sizes && (
+            <div className="space-y-2" data-ico-sizes>
+              <p className="text-sm text-neutral-600">{sizes.list.length} image{sizes.list.length > 1 ? 's' : ''} in this icon{sizes.bad ? ` — ${sizes.bad} could not be read and ${sizes.bad > 1 ? 'are' : 'is'} left out` : ''}. PNG images inside the icon are given as they are, byte for byte.</p>
+              <DownloadGroup zipName={(file?.name || 'icon').replace(/\.[^.]+$/, '') + '-sizes.zip'}>
+                <div className="space-y-2">
+                  {sizes.list.map((x) => <FileDownload key={x.index} href={x.url} blob={x.blob} name={x.name} note={`${x.width} × ${x.height}${x.bitCount ? ', ' + x.bitCount + '-bit' : ''}`} />)}
+                </div>
+              </DownloadGroup>
+            </div>
+          )}
         </div>
       </div>
       <SeoContent
@@ -54,6 +91,7 @@ export default function ICOtoPNGPage() {
           { q: "Is ICO to PNG completely free to use?", a: "Yes, it's 100% free with no registration required." },
           { q: "What is the maximum file size I can upload?", a: "There's no fixed size limit — processing happens locally, and ICO files are typically small anyway." },
           { q: "Will the conversion affect image quality?", a: "No, the pixels are copied as-is. PNG also supports transparency, so any transparent areas in your ICO are preserved." },
+          { q: "My icon holds several sizes: which one do I get?", a: "Convert gives the largest one, the image a browser shows. Every size in this icon gives each image it holds (16 × 16, 32 × 32, 48 × 48, 256 × 256…) as its own PNG, or all of them in one ZIP; PNG images stored inside the icon are given byte for byte." },
           { q: "Do I need to install any software?", a: "No, it works entirely in your browser with no downloads, and your file never leaves your device." }
         ]}
         tips={[

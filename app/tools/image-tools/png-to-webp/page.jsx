@@ -5,6 +5,7 @@ import { loadRaster, mapBands, renderFull, rotateRaster, encodeRaster, encodeRas
 import { rasterFromRGBA, encodeWebpWasm } from '../../../lib/bigImage';
 import { canEncodeImageType, checkedDataURL, assertCanvasSize } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
+import AnimatedImageNote from '../../../components/AnimatedImageNote';
 export default function PNGtoWebPPage() {
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
@@ -45,6 +46,7 @@ export default function PNGtoWebPPage() {
               <input id="webp-quality" aria-label="Quality" type="range" min="1" max="100" value={quality} onChange={(e) => { setQuality(Number(e.target.value)); setResult(null); }} className="w-full" /></label>}
           </div>
           <button onClick={convert} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert</button>
+          <AnimatedImageNote file={file} />
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {result && <div className="space-y-2"><p className="text-center text-sm text-neutral-600">{(file.size / 1024).toFixed(0)} KB → {(result.bytes / 1024).toFixed(0)} KB</p><img src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
         </div>

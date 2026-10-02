@@ -25,13 +25,14 @@ compte (plan **Hobby**) qui est suspendu.
 - P24 continue **en local** (aucun trafic Vercel) sur la branche `p24-couverture` ; rien n'est fusionné tant que le
   compte est bloqué (une fusion déclencherait une production refusée). Voir `docs/audit/RAPPORT-p24-couverture-03-10.md`.
 
-### 📋 État P24 (mis à jour au fil de la nuit — dernier point 03/10 vers 05 h 30, heure de la machine)
+### 📋 État P24 (mis à jour au fil du travail — dernier point 03/10 vers 11 h, heure de la machine)
 - **Fait, commité et poussé sur `p24-couverture`** (rien en production : site en 402) : PDF (§1), image (§2), vidéo (§3),
   audio (§4), GIF (§5), fichiers (§6), développeur / texte / unités / maths (§7), convertisseurs et autres (§8) — chaque
   lot prouvé par un banc ×3 moteurs (`scripts/p24/*-lot.mjs`) ; relectures indépendantes, chaque grave corrigé
-  (PDF 2.0 RC4, MPF/Motion Photo, JWT alg toString).
-- **En cours** : relevé des ≈ 120 outils qu'aucune passe n'a encore comparés aux concurrents (P21 n'a couvert que les
-  outils prioritaires) — 4 agents de recherche en lecture seule, puis ajouts par catégorie.
+  (PDF 2.0 RC4, MPF/Motion Photo, JWT alg toString, sous-titres GPS gardés par « supprimer les métadonnées »).
+- **Relevé n° 2 (≈ 120 outils jamais comparés) : fait**, lots 1 à 9 (`docs/audit/P24-releve-outils-restants.md`, toutes
+  les lignes closes ; rapport §9). Dernier lot : note « image animée » sur 15 filtres, PDF Split par signets,
+  corrections de la 2e relecture (lots 3-8).
 - **À vérifier sur la préversion (service vidéo absent en local)** : Vidéo → GIF — longueur raccourcie et dite quand elle
   dépasse la fin, « joué une fois / 3 fois » et compression (gifsicle après le service) ; banc : `scripts/p24/adds-lot.mjs`.
 - **Reste au propriétaire** : (1) **débloquer Vercel** (Pro recommandé) ; (2) ensuite seulement, Claude met en

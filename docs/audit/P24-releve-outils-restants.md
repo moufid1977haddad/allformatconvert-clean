@@ -23,7 +23,7 @@ D'abord les **résultats faux silencieux** (règle : ils passent avant tout ajou
 - [x] WebP to JPG : WebP animé → 1re image sans le dire
 - [x] Image Compressor : APNG et WebP animé rendus figés sans le dire
 - [x] TIFF to JPG/PNG : orientation (tag 274) ignorée ; multipage → page 1 seulement sans le dire ; ICC ignoré (avertir)
-- [~] (Resizer fait ; les 11 filtres restent à faire : note commune à ajouter) Filtres en `image/*` et Resizer : GIF animé → PNG figé sans le dire (note trompeuse du Resizer)
+- [x] (lot 9 : note commune sur 15 pages + Resizer, analyse par structure) Filtres en `image/*` et Resizer : GIF animé → PNG figé sans le dire (note trompeuse du Resizer)
 
 ### Vidéo / audio / GIF
 - [x] Video Rotator : « Instant, lossless » envoyait le fichier au service quand il échouait (WebM, matrice non réécrite)
@@ -52,7 +52,7 @@ D'abord les **résultats faux silencieux** (règle : ils passent avant tout ajou
 - [x] XML to JSON : contenu mixte perdu (« Helloagain »), espaces rognés
 - [x] Text Sorter : 1.5 / 1.25 / 1.3 et nombres négatifs mal triés (la FAQ promet « par valeur »)
 - [x] File Converter : texte Windows-1252 décodé en UTF-8 (« caf� »)
-- [ ] Faibles : url-encoder (« + » lu espace par défaut), unicode `\u{…}`, text-repeater NaN, duplicate-remover NFC/NFD, tar liens physiques
+- [x] (lot 2, c45d77b4) Faibles : url-encoder (« + » lu espace par défaut), unicode `\u{…}`, text-repeater NaN, duplicate-remover NFC/NFD, tar liens physiques
 
 ## B. Ajouts faisables (gain / effort) — après les résultats faux
 PDF : Excel « une page par feuille », options Gotenberg (pages, PDF/A, notes PowerPoint), Split paires/impaires/par taille/par signets,

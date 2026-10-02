@@ -61,6 +61,7 @@ export default function ExcelToCsvPage() {
   // P24 (03/10): separator and BOM, as convertcsv.com offers (a ";" CSV is what Excel expects in most of Europe)
   const [delimiter, setDelimiter] = useState(',');
   const [bom, setBom] = useState(false);
+  const [decimalComma, setDecimalComma] = useState(false); // P24 review: numbers as 3,14 for a European Excel
   const inputRef = useRef();
   const workerRef = useRef(null);
   const [result, offer, clearResult] = useDownloadable();
@@ -153,7 +154,7 @@ export default function ExcelToCsvPage() {
       workerRef.current = null;
       setError('Conversion failed: ' + (err?.message || 'unknown worker error'));
     };
-    worker.postMessage({ file: f, maxRows, delimiter, bom });
+    worker.postMessage({ file: f, maxRows, delimiter, bom, decimalComma });
   };
 
   return (
@@ -169,6 +170,7 @@ export default function ExcelToCsvPage() {
                 <option value=",">Comma ,</option><option value=";">Semicolon ; (Excel in most of Europe)</option><option value="tab">Tab</option><option value="|">Pipe |</option>
               </select>
             </label>
+            <label className="flex items-center gap-2"><input id="x2c-decimal" type="checkbox" checked={decimalComma} onChange={(e) => setDecimalComma(e.target.checked)} disabled={converting} /> Decimal comma (3,14 — with the semicolon, for Excel in Europe)</label>
             <label className="flex items-center gap-2"><input id="x2c-bom" type="checkbox" checked={bom} onChange={(e) => setBom(e.target.checked)} disabled={converting} /> Add a UTF-8 BOM (Excel then reads accents correctly)</label>
           </div>
           <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-600 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>

@@ -7,6 +7,7 @@ import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { supportsCanvasFilter, applyBrightnessContrast } from '../../../lib/canvasFilters';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
+import AnimatedImageNote from '../../../components/AnimatedImageNote';
 export default function BrightnessContrastPage() {
   const [srcType, setSrcType] = useState('image/png');
   const [image, setImage] = useState(null);
@@ -53,6 +54,7 @@ export default function BrightnessContrastPage() {
             {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
+          <AnimatedImageNote file={file} />
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <div><label className="block text-sm text-neutral-500 mb-1">Brightness: {brightness}%</label><input aria-label="Brightness (%)" type="range" min="0" max="200" value={brightness} onChange={e => setBrightness(parseInt(e.target.value))} className="w-full" /></div>
           <div><label className="block text-sm text-neutral-500 mb-1">Contrast: {contrast}%</label><input aria-label="Contrast (%)" type="range" min="0" max="200" value={contrast} onChange={e => setContrast(parseInt(e.target.value))} className="w-full" /></div>

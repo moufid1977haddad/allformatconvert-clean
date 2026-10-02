@@ -49,7 +49,7 @@ export default function GifMakerPage() {
         if (frames.length > MAX_GIF_FRAMES) notes.push(`${f.name}: ${frames.length} frames, only the first ${MAX_GIF_FRAMES} were added`);
         else notes.push(`${f.name}: its ${frames.length} frames were added`);
         const c = document.createElement('canvas'); c.width = width; c.height = height; const ctx = c.getContext('2d');
-        return frames.slice(0, MAX_GIF_FRAMES).map((fr, k) => { ctx.putImageData(fr.imageData, 0, 0); return { name: `${f.name} #${k + 1}`, src: c.toDataURL('image/png'), w: width, h: height }; });
+        return frames.slice(0, MAX_GIF_FRAMES).map((fr, k) => { ctx.putImageData(fr.imageData, 0, 0); return { name: `${f.name} #${k + 1}`, src: c.toDataURL('image/png'), w: width, h: height, delay: String(fr.delay) }; }); // each frame keeps its own duration (P24 review)
       } catch { return null; }
     };
     const readers = files.map(f => expand(f).then((many) => many || new Promise(resolve => {

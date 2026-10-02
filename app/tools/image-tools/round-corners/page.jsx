@@ -6,6 +6,7 @@ import { rasterFromRGBA } from '../../../lib/bigImage';
 import { roundedRectPath } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
+import AnimatedImageNote from '../../../components/AnimatedImageNote';
 
 export default function RoundCornersPage() {
   const [image, setImage] = useState(null);
@@ -70,13 +71,14 @@ export default function RoundCornersPage() {
             <span className="text-xs text-neutral-500">(a JPG then stays a JPG)</span>
           </div>
           <button onClick={apply} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Apply Round Corners</button>
+          <AnimatedImageNote file={file} />
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
         </div>
       </div>
       <SeoContent
         title="Round Corners"
-        description="Round Corners clips your image to a rounded-rectangle shape at a radius you choose, entirely in your browser using the canvas element — your image is never uploaded to a server. The clipped-away areas become transparent (or a colour you choose), so the output is always a PNG."
+        description="Round Corners clips your image to a rounded-rectangle shape at a radius you choose, entirely in your browser using the canvas element — your image is never uploaded to a server. The clipped-away corners become transparent in a PNG, or take a colour you choose — then a JPG stays a JPG."
         howTo={[
           "Click the upload area and select an image from your device.",
           "Adjust the corner radius slider (1–50%) to set how rounded the corners are.",

@@ -61,7 +61,39 @@ async function readFileWithProgress(file) {
   return merged;
 }
 
-async function run({ file, maxRows, delimiter = ',', bom = false }) {
+// P24 review (03/10): with the semicolon separator, a European Excel reads "3.14" as text or a date — numbers can be
+// written with a decimal comma (and a point between thousands when the cell's format has one): "1,234.56" → "1.234,56".
+// Only number cells; dates are already text here (datesToText), and text cells are left as typed.
+// P24 review (03/10): only text the format itself produced is rewritten — an ODS cell carries no format code and its
+// text is already in the file's language ("3,14", "1 234,50 €"): swapping it gave "3.14". Points and commas written as
+// literals in the format ("kg.", a CPF mask 000"."000"."000"-"00) are kept: they stand in for private-use characters
+// while the number's own separators are swapped.
+const LIT_POINT = '\uE000', LIT_COMMA = '\uE001';
+function protectLiterals(fmt) {
+  let out = '', quoted = false;
+  for (let i = 0; i < fmt.length; i++) {
+    const ch = fmt[i];
+    if (ch === '"') { quoted = !quoted; out += ch; continue; }
+    if (!quoted && ch === '\\' && i + 1 < fmt.length) { const n = fmt[++i]; out += '\\' + (n === '.' ? LIT_POINT : n === ',' ? LIT_COMMA : n); continue; }
+    out += quoted && ch === '.' ? LIT_POINT : quoted && ch === ',' ? LIT_COMMA : ch;
+  }
+  return out;
+}
+function decimalCommas(ws, XLSX) {
+  for (const addr of Object.keys(ws)) {
+    if (addr[0] === '!') continue;
+    const c = ws[addr];
+    if (c.t !== 'n' || !Number.isFinite(c.v)) continue;
+    const fmt = c.z || 'General';
+    let w;
+    if (fmt === 'General' && c.w === String(Number(c.v.toPrecision(15)))) w = c.w; // written in full by generalNumbersInFull
+    else if (c.w !== undefined && /^-?\d+(\.\d+)?(E[+-]?\d+)?$/i.test(c.w) && Number(c.w) === c.v) w = c.w; // a plain point-decimal number
+    else if (c.w !== undefined && c.w !== XLSX.SSF.format(fmt, c.v)) continue; // localised text (ODS): kept as written
+    else { try { w = XLSX.SSF.format(protectLiterals(String(fmt)), c.v); } catch { continue; } }
+    c.w = String(w).replace(/[.,]/g, (ch) => (ch === '.' ? ',' : '.')).split(LIT_POINT).join('.').split(LIT_COMMA).join(',');
+  }
+}
+async function run({ file, maxRows, delimiter = ',', bom = false, decimalComma = false }) {
   const limit = maxRows || MAX_ROWS;
   const bytes = await readFileWithProgress(file);
 
@@ -84,7 +116,7 @@ async function run({ file, maxRows, delimiter = ',', bom = false }) {
 
   self.postMessage({ type: 'progress', pct: 85, phase: 'building' });
   const date1904 = workbookIs1904(workbook);
-  const csvBySheet = sheetNames.map((name) => { const ws = workbook.Sheets[name]; datesToText(ws, XLSX, date1904); generalNumbersInFull(ws, XLSX); return (bom ? '\uFEFF' : '') + XLSX.utils.sheet_to_csv(ws, { FS: delimiter === 'tab' ? '\t' : delimiter }); });
+  const csvBySheet = sheetNames.map((name) => { const ws = workbook.Sheets[name]; datesToText(ws, XLSX, date1904); generalNumbersInFull(ws, XLSX); if (decimalComma) decimalCommas(ws, XLSX); return (bom ? '\uFEFF' : '') + XLSX.utils.sheet_to_csv(ws, { FS: delimiter === 'tab' ? '\t' : delimiter }); });
   // P24 (03/10): separator (comma, semicolon for European Excel, tab) and a UTF-8 BOM so Excel reopens accents right
   const rowCounts = csvBySheet.map((csv) => csv.split('\n').filter(Boolean).length);
   const totalRows = rowCounts.reduce((a, b) => a + b, 0);

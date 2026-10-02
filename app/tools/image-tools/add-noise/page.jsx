@@ -6,6 +6,7 @@ import { rasterFromRGBA } from '../../../lib/bigImage';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
+import AnimatedImageNote from '../../../components/AnimatedImageNote';
 
 export default function AddNoisePage() {
   const [srcType, setSrcType] = useState('image/png');
@@ -68,6 +69,7 @@ export default function AddNoisePage() {
             {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
+          <AnimatedImageNote file={file} />
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <div><label className="block text-sm text-neutral-500 mb-1">Intensity: {intensity}</label><input aria-label="Intensity" type="range" min="1" max="100" value={intensity} onChange={e => setIntensity(parseInt(e.target.value))} className="w-full" /></div>
           <label className="flex items-center gap-2 text-sm text-neutral-600"><input id="noise-colour" type="checkbox" checked={colour} onChange={(e) => setColour(e.target.checked)} /> Colour noise (each colour channel its own grain)</label>

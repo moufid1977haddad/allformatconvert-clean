@@ -7,7 +7,8 @@ import { TextDownload } from '../../../components/FileDownload';
 // URL (its structure : / ? # & = kept, spaces and accents encoded), and strict RFC 3986 (also ! ' ( ) *)
 const ENCODERS = {
   component: (s) => encodeURIComponent(s),
-  url: (s) => encodeURI(s),
+  // a whole URL: an escape already there (%20) is kept, not encoded again into %2520 (P24 review)
+  url: (s) => s.split(/(%[0-9A-Fa-f]{2})/).map((part, i) => (i % 2 ? part : encodeURI(part))).join(''),
   rfc3986: (s) => encodeURIComponent(s).replace(/[!'()*]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase()),
 };
 
@@ -71,7 +72,7 @@ export default function UrlEncoderPage() {
           { q: "What is URL encoding and why do I need it?", a: "URL encoding converts special characters into a format safe for transmission in URLs. Characters like spaces, ampersands, and slashes are replaced with percent signs followed by hexadecimal values." },
           { q: "Is URL Encoder free to use?", a: "Yes, it's completely free with no signup and no limits." },
           { q: "Can I decode URLs too?", a: "Yes, the \"Decode\" button converts percent-encoded text back to its readable form; invalid encoded input shows an error message instead of crashing." },
-          { q: "Which characters get encoded?", a: "Spaces, accented letters, symbols, and reserved characters like &, ?, #, and / are encoded. Letters, numbers, hyphens, underscores, periods, and tildes are left unchanged, matching the standard encodeURIComponent behavior. With 'A whole URL', the characters that give a URL its structure (: / ? # & =) are kept; 'Strict RFC 3986' also encodes ! ' ( ) *." }
+          { q: "Which characters get encoded?", a: "Spaces, accented letters, symbols, and reserved characters like &, ?, #, and / are encoded. Letters, numbers, hyphens, underscores, periods, and tildes are left unchanged, matching the standard encodeURIComponent behavior. With 'A whole URL', the characters that give a URL its structure (: / ? # & =) are kept, as are escapes already there (%20 stays %20); 'Strict RFC 3986' also encodes ! ' ( ) *." }
         ]}
         tips={[
           "Encode query parameter values individually before building a URL, so characters like & or = inside a value don't break the URL structure.",

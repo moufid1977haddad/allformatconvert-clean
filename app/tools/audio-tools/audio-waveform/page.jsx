@@ -57,7 +57,9 @@ export default function AudioWaveformPage() {
     const viewLength = Math.max(1, Math.floor(totalLength / view.zoom));
     const maxStart = Math.max(0, totalLength - viewLength);
     const start = Math.min(Math.max(0, Math.floor(view.start)), maxStart);
-    const step = Math.max(1, Math.floor(viewLength / canvas.width));
+    // P24 review (03/10): each column covers its exact share of the visible samples (fractional bounds). A whole-number
+    // step drew only 68 % of the view on a 3000-px export at zoom 20, and ran past it when zoomed further
+    const per = viewLength / canvas.width;
     const amp = canvas.height / 2;
 
     ctx.strokeStyle = colours.wave;
@@ -65,10 +67,10 @@ export default function AudioWaveformPage() {
     ctx.beginPath();
     for (let i = 0; i < canvas.width; i++) {
       let min = 1, max = -1;
-      const sampleStart = start + i * step;
+      const sampleStart = start + Math.floor(i * per);
+      const sampleEnd = Math.max(sampleStart + 1, start + Math.floor((i + 1) * per));
       for (const data of channels) {
-        for (let j = 0; j < step; j++) {
-          const idx = sampleStart + j;
+        for (let idx = sampleStart; idx < sampleEnd; idx++) {
           if (idx >= totalLength) break;
           const val = data[idx] || 0;
           if (val < min) min = val;

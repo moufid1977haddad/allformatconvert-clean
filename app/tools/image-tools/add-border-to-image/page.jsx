@@ -6,6 +6,7 @@ import { rasterFromRGBA } from '../../../lib/bigImage';
 import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
+import AnimatedImageNote from '../../../components/AnimatedImageNote';
 
 export default function AddBorderToImagePage() {
   const [srcType, setSrcType] = useState('image/png');
@@ -57,6 +58,7 @@ export default function AddBorderToImagePage() {
             {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
+          <AnimatedImageNote file={file} />
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <div><label className="block text-sm text-neutral-500 mb-1">Border Width: {borderWidth}px</label><input aria-label="Border Width (px)" type="range" min="1" max="100" value={borderWidth} onChange={e => setBorderWidth(parseInt(e.target.value))} className="w-full" /></div>
           <div><label className="block text-sm text-neutral-500 mb-1">Border Color</label><input aria-label="Border Color" type="color" value={borderColor} onChange={e => setBorderColor(e.target.value)} className="w-full h-10 rounded-lg cursor-pointer" /></div>

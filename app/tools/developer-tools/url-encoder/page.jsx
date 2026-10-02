@@ -6,7 +6,8 @@ import { TextDownload } from '../../../components/FileDownload';
 // URL (its structure : / ? # & = kept, spaces and accents encoded), and strict RFC 3986 (also ! ' ( ) *)
 const ENCODERS = {
   component: (s) => encodeURIComponent(s),
-  url: (s) => encodeURI(s),
+  // a whole URL: an escape already there (%20) is kept, not encoded again into %2520 (P24 review)
+  url: (s) => s.split(/(%[0-9A-Fa-f]{2})/).map((part, i) => (i % 2 ? part : encodeURI(part))).join(''),
   rfc3986: (s) => encodeURIComponent(s).replace(/[!'()*]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase()),
 };
 
@@ -55,7 +56,7 @@ export default function UrlEncoderDevPage() {
         ]}
         faqs={[
           { q: "What is URL encoding?", a: "It converts characters that aren't safe in a URL (spaces, &, =, and others) into a %XX percent-encoded format." },
-          { q: "Can I encode a whole URL with this tool?", a: "Not safely — encoding a full URL will also encode its structural characters (like / and :), breaking it. Encode individual values (e.g. a query parameter) instead, then build the full URL around them." },
+          { q: "Can I encode a whole URL with this tool?", a: "Yes: choose 'A whole URL' — the characters that give a URL its structure (: / ? # & =) are kept, as are escapes already there (%20 stays %20), and spaces or accented letters are encoded. 'A value' (the default) encodes everything, for a single query parameter; 'Strict RFC 3986' also encodes ! ' ( ) *." },
           { q: "Can I decode with this tool?", a: "Yes — there's a 'Decode' button next to 'Encode' that reverses percent-encoding back to the original text." },
           { q: "Is my data uploaded to a server?", a: "No, encoding and decoding happen entirely in your browser." }
         ]}

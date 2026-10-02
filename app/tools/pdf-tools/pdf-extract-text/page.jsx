@@ -35,7 +35,8 @@ export default function PdfExtractTextPage() {
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       let fullText = '';
-      const pages = parsePageRange(range, pdf.numPages);
+      let pages;
+      try { pages = parsePageRange(range, pdf.numPages); } catch (e) { setStatus(e.message); setLoading(false); return; } // the visitor's typing, not a file error: not reported
       for (const i of pages) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
@@ -45,7 +46,7 @@ export default function PdfExtractTextPage() {
         fullText += (headings ? 'Page ' + i + ':\n' : '') + pageText + '\n\n';
       }
       // P24 review (03/10): a scanned PDF gave 'Page 1:', 'Page 2:'… with nothing under them and no explanation
-      if (!fullText.replace(/Page \d+:\n/g, '').trim()) { setText(''); setStatus('This PDF has no text layer: its pages are pictures (a scan). Use PDF OCR to read the text from the pictures.'); setLoading(false); return; }
+      if (!fullText.replace(/Page \d+:\n/g, '').trim()) { setText(''); setStatus((range.trim() ? 'These pages have no text layer: they are pictures (a scan).' : 'This PDF has no text layer: its pages are pictures (a scan).') + ' Use PDF OCR to read the text from the pictures.'); setLoading(false); return; }
       setText(fullText);
       setStatus('');
     } catch (err) {

@@ -22,12 +22,15 @@ export default function Page() {
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     let text = '';
+    const pageOfLine = []; // P24 (03/10): the page each line comes from, shown next to it (Draftable, PDF24 Compare)
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
-      text += itemsToText(content.items) + '\n';
+      const pageText = itemsToText(content.items);
+      text += pageText + '\n';
+      for (let k = pageText.split('\n').length; k > 0; k--) pageOfLine.push(i);
     }
-    return text;
+    return { text, pageOfLine };
   };
 
   const compare = async () => {
@@ -35,12 +38,28 @@ export default function Page() {
     setLoading(true);
     setError('');
     try {
-      const [t1, t2] = await Promise.all([extractText(file1), extractText(file2)]);
+      const [r1, r2] = await Promise.all([extractText(file1), extractText(file2)]);
+      const t1 = r1.text, t2 = r2.text;
       setText1(t1);
       setText2(t2);
       // Line-by-line differences (Myers, as Diffchecker): the page used to show
       // the two texts side by side with nothing marked (29/09).
-      setDiff(await diffLines(t1, t2, { ignoreWhitespace: true }));
+      const d = await diffLines(t1, t2, { ignoreWhitespace: true });
+      // P24 (03/10): the page of each line, and inside a changed line the words that differ (as Diff Viewer does)
+      const { diffWords } = await import('diff');
+      for (const row of d) { if (row.oldNum) row.page1 = r1.pageOfLine[row.oldNum - 1]; if (row.newNum) row.page2 = r2.pageOfLine[row.newNum - 1]; }
+      for (let i = 0; i < d.length;) {
+        if (d[i].type === 'same') { i++; continue; }
+        const rem = [], add = [];
+        while (i < d.length && d[i].type === 'removed') rem.push(d[i++]);
+        while (i < d.length && d[i].type === 'added') add.push(d[i++]);
+        for (let k = 0; k < Math.min(rem.length, add.length); k++) {
+          const words = diffWords(rem[k].line, add[k].line);
+          rem[k].parts = words.filter((w) => !w.added);
+          add[k].parts = words.filter((w) => !w.removed);
+        }
+      }
+      setDiff(d);
     } catch(e) { setError('Failed: ' + e.message); }
     setLoading(false);
   };
@@ -73,7 +92,8 @@ export default function Page() {
               <div className="font-mono text-xs max-h-96 overflow-y-auto border border-neutral-200 rounded-xl">
                 {diff.map((d, i) => (
                   <div key={i} className={'px-3 py-0.5 whitespace-pre-wrap ' + (d.type === 'removed' ? 'bg-red-50 text-red-700' : d.type === 'added' ? 'bg-green-50 text-green-700' : 'text-neutral-500')}>
-                    {d.type === 'removed' ? '- ' : d.type === 'added' ? '+ ' : '  '}{d.line}
+                    <span className="inline-block w-14 text-neutral-400 select-none" data-page>{d.type === 'added' ? `p. ${d.page2}` : `p. ${d.page1}`}</span>
+                    {d.type === 'removed' ? '- ' : d.type === 'added' ? '+ ' : '  '}{d.parts ? d.parts.map((w, k) => <span key={k} className={w.removed ? 'bg-red-200 rounded' : w.added ? 'bg-green-200 rounded' : ''}>{w.value}</span>) : d.line}
                   </div>
                 ))}
               </div>
@@ -104,7 +124,7 @@ export default function Page() {
         ]}
         faqs={[
           { q: "Is PDF Compare free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it highlight the differences between the two documents?", a: "Yes — after the comparison, lines found only in the first PDF are shown in red and lines found only in the second in green, using the Myers diff algorithm (as Diffchecker and git); spacing differences are ignored. The full text of both PDFs is also shown side by side." },
+          { q: "Does it highlight the differences between the two documents?", a: "Yes — after the comparison, lines found only in the first PDF are shown in red and lines found only in the second in green, using the Myers diff algorithm (as Diffchecker and git); inside a changed line the words that differ are highlighted, and each line shows its page number. Spacing differences are ignored. The full text of both PDFs is also shown side by side." },
           { q: "Are my files uploaded to a server?", a: "No, text extraction happens entirely in your browser using the PDF.js library." },
           { q: "Can it compare scanned PDFs?", a: "Not usefully — extraction only pulls text that's actually embedded in the file. Scanned or image-only pages have no text layer, so those panels will come out empty." }
         ]}

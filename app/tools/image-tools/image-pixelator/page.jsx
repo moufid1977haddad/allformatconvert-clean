@@ -6,6 +6,7 @@ import { rasterFromRGBA } from '../../../lib/bigImage';
 import { encodeLike, extOf, pixelateImageData } from '../../../lib/imageOutput';
 import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
+import AnimatedImageNote from '../../../components/AnimatedImageNote';
 
 export default function ImagePixelatorPage() {
   const [srcType, setSrcType] = useState('image/png');
@@ -63,6 +64,7 @@ export default function ImagePixelatorPage() {
           <div><label className="block text-sm text-neutral-500 mb-1">Pixel Size: {pixelSize}px</label><input aria-label="Pixel Size (px)" type="range" min="2" max="50" value={pixelSize} onChange={e => setPixelSize(parseInt(e.target.value))} className="w-full" /></div>
           )}
           <button onClick={apply} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Apply Pixelate</button>
+          <AnimatedImageNote file={file} />
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
         </div>

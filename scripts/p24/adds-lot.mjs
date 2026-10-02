@@ -176,6 +176,22 @@ if (name === 'chromium') { // Excel to PDF: each sheet on one page (Gotenberg si
       const after = probe(au);
       check('audio-metadata: title and artist removed, MP3 sound copied', !/Private memo|Ann Smith/.test(JSON.stringify(after.format.tags || {})) && after.streams[0].codec_name === 'mp3', JSON.stringify(after.format.tags || {}));
     }
+    // review fixes: a drone-style subtitle track holding the GPS position is left out; a .qt file works; MJPEG is said
+    const srt = path.join(dir, 'gps.srt'); fs.writeFileSync(srt, '1\n00:00:00,000 --> 00:00:02,000\nGPS(48.8566,2.3522,35) ISO 100\n');
+    const drone = path.join(dir, 'drone.mp4');
+    execFileSync(FF, ['-v', 'error', '-y', '-f', 'lavfi', '-i', 'testsrc2=size=320x240:rate=25', '-i', srt, '-t', '2', '-c:v', 'libx264', '-c:s', 'mov_text', drone]);
+    const dv = await strip('video-tools/video-metadata', drone);
+    check('video-metadata: the subtitle track holding a GPS position is removed (bytes no longer contain it)', dv.endsWith('.mp4') && !fs.readFileSync(dv).includes('GPS(48.8566') && fs.readFileSync(drone).includes('GPS(48.8566'), dv.slice(-80));
+    const qt = path.join(dir, 'camera.qt');
+    execFileSync(FF, ['-v', 'error', '-y', '-f', 'lavfi', '-i', 'testsrc2=size=320x240:rate=10', '-t', '1', '-c:v', 'mjpeg', '-metadata', 'title=Cam', '-f', 'mov', qt]);
+    const p = await open('video-tools/video-metadata');
+    await p.locator('input[type=file]').first().setInputFiles(qt);
+    await p.getByRole('button', { name: /Remove the metadata/ }).click();
+    const qa = p.locator('[data-metadata-stripper] a[data-download], [data-metadata-stripper] a[download]').first();
+    const qok = await qa.waitFor({ timeout: 120000 }).then(() => true).catch(() => false);
+    const warn = qok ? await p.locator('[data-strip-warning]').innerText().catch(() => '') : (await p.locator('[data-metadata-stripper]').innerText()).slice(0, 120);
+    check('video-metadata: a .qt file (MJPEG) is rewritten, and the EXIF-in-every-picture limit is said', qok && /Motion JPEG/.test(warn), warn.slice(0, 80));
+    await p.close();
   }
 }
 if (name !== 'webkit') { // Video to GIF: refusals (local) and plays once / 3 times (gifsicle after the service); Playwright WebKit decodes no video
@@ -318,6 +334,134 @@ if (name !== 'webkit') { // Video to GIF: refusals (local) and plays once / 3 ti
   const txt = await et.locator('main textarea').first().inputValue();
   check('pdf-extract-text: pages 2-3 only, without "Page N:" headings', /Text of page 2/.test(txt) && /Text of page 3/.test(txt) && !/page 1|page 4|Page \d+:/.test(txt), JSON.stringify(txt.slice(0, 60)));
   await et.close();
+}
+{ // lot 9: animated GIF / APNG / WebP said on every canvas filter; still images say nothing; resizer same parser
+  const FF = path.join(os.tmpdir(), 'ffmpeg-btbn/ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe');
+  if (fs.existsSync(FF)) {
+    const mk = (name, extra) => { const f = path.join(dir, name); execFileSync(FF, ['-v', 'error', '-y', '-f', 'lavfi', '-i', 'testsrc=size=64x64:rate=5', ...extra, f]); return f; };
+    const agif = mk('anim.gif', ['-t', '1']), apng = mk('anim.png', ['-t', '1', '-plays', '0', '-f', 'apng']), awebp = mk('anim.webp', ['-t', '1', '-loop', '0']), still = mk('still.png', ['-frames:v', '1']);
+    const noteOf = async (p) => (await p.locator('[data-animated-note]').count()) ? (await p.locator('[data-animated-note]').innerText()) : '';
+    for (const [tool, f, kind] of [['image-blur', agif, 'GIF'], ['sepia-filter', awebp, 'WebP'], ['png-to-jpg', apng, 'APNG'], ['image-rotate', still, null]]) {
+      const p = await open('image-tools/' + tool);
+      await p.locator('input[type=file]').first().setInputFiles(f);
+      await p.waitForTimeout(800);
+      const t = await noteOf(p);
+      check(`${tool}: ${kind ? 'animated ' + kind + ' said (first frame only)' : 'still PNG — no animation note'}`, kind ? t.includes(`This ${kind} is animated`) : t === '', t.slice(0, 60));
+      await p.close();
+    }
+    const r = await open('image-tools/image-resizer');
+    await r.locator('input[type=file]').first().setInputFiles(apng);
+    await r.getByRole('button', { name: /Resize/ }).first().click();
+    await r.getByText('This APNG is animated').first().waitFor({ timeout: 30000 }).catch(() => {});
+    check('image-resizer: an APNG is said animated too (structure parser, was GIF only)', await r.getByText('This APNG is animated').count() > 0);
+    await r.close();
+  }
+}
+{ // review fixes: decimal comma; whole word with combining marks; Ignore whitespace inside a line
+  const XLSX = (await import('xlsx')).default || (await import('xlsx'));
+  const ws = XLSX.utils.aoa_to_sheet([['item', 'price'], ['tea', 3.14], ['rent', 1234.5]]);
+  ws.C3 = undefined; ws.B3.z = '#,##0.00';
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'S');
+  const xl = path.join(dir, 'prices.xlsx'); fs.writeFileSync(xl, XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }));
+  const e = await open('developer-tools/excel-to-csv');
+  await e.locator('#x2c-delimiter').selectOption(';'); await e.locator('#x2c-decimal').check();
+  await e.locator('input[type=file]').first().setInputFiles(xl);
+  const ea = e.locator('a[download]').first(); await ea.waitFor({ timeout: 30000 });
+  const csv = (await bytesOf(e, ea)).toString('utf8').replace(/\r/g, '');
+  check('excel-to-csv: decimal comma with the semicolon — 3,14 and 1.234,50', csv.includes('tea;3,14') && csv.includes('rent;1.234,50'), JSON.stringify(csv));
+  await e.close();
+  const f = await open('text-tools/find-replace');
+  await f.locator('textarea').first().fill('कि क cafe\u0301 cafe');
+  const inputs = f.locator('main input[type=text]');
+  await inputs.nth(0).fill('क'); await inputs.nth(1).fill('X');
+  await f.locator('#fr-word').check();
+  await f.getByRole('button', { name: /Replace/ }).first().click();
+  await f.waitForTimeout(400);
+  const out = await f.locator('main textarea').last().inputValue();
+  check('find-replace: whole word leaves क inside कि (vowel sign = part of the word)', out.startsWith('कि X'), JSON.stringify(out));
+  await f.close();
+  const d = await open('developer-tools/diff-viewer');
+  await d.locator('textarea').nth(0).fill('a  b\nsame'); await d.locator('textarea').nth(1).fill('a b\nsame');
+  await d.getByLabel(/whitespace/i).check();
+  await d.getByRole('button', { name: /Compare/ }).first().click();
+  await d.locator('div.bg-neutral-800').first().waitFor({ timeout: 15000 }).catch(() => {});
+  const rows = await d.locator('div.bg-red-900\\/30, div.bg-green-900\\/30').count(), sameRows = await d.locator('div.bg-neutral-800').count();
+  check('diff-viewer: Ignore whitespace — a doubled space inside a line is no change', rows === 0 && sameRows === 2, `${rows} changed, ${sameRows} same`);
+  await d.close();
+}
+{ // PDF Split by bookmarks: the plan lists the chapters, the split gives one PDF per chapter
+  const { PDFDocument, PDFName, PDFHexString, PDFNumber } = await import('pdf-lib');
+  const doc = await PDFDocument.create();
+  for (let i = 0; i < 5; i++) doc.addPage([300, 300]);
+  const ctx = doc.context, P = doc.getPages();
+  const items = [['Part one', 0], ['Part two', 2], ['Part three', 4]].map(([t, pg]) => ctx.obj({ Title: PDFHexString.fromText(t), Dest: [P[pg].ref, PDFName.of('Fit')] }));
+  const refs = items.map((d) => ctx.register(d)); const rootRef = ctx.register(ctx.obj({ Type: 'Outlines', First: refs[0], Last: refs[2], Count: PDFNumber.of(3) }));
+  items.forEach((d, i) => { d.set(PDFName.of('Parent'), rootRef); if (i) d.set(PDFName.of('Prev'), refs[i - 1]); if (i < 2) d.set(PDFName.of('Next'), refs[i + 1]); });
+  doc.catalog.set(PDFName.of('Outlines'), rootRef);
+  const f = path.join(dir, 'parts.pdf'); fs.writeFileSync(f, await doc.save());
+  const p = await open('pdf-tools/pdf-split');
+  await p.locator('input[type=file]').first().setInputFiles(f);
+  await p.getByRole('radio', { name: 'By bookmarks' }).click();
+  const planText = await p.locator('[data-bookmark-plan]').innerText({ timeout: 15000 }).catch(() => '');
+  check('pdf-split: By bookmarks lists 3 parts with their pages', /1 Part one — pages 1–2/.test(planText) && /2 Part two — pages 3–4/.test(planText) && /3 Part three — page 5/.test(planText), planText.replace(/\n/g, ' | '));
+  await p.getByRole('button', { name: /^Split/ }).first().click();
+  await p.locator('a[download]').first().waitFor({ timeout: 60000 }).catch(() => {});
+  const names = await p.locator('a[download]').evaluateAll((as) => as.map((a) => a.getAttribute('download')));
+  check('pdf-split: the parts are named after their bookmarks', names.some((n) => /parts_1 Part one\.pdf/.test(n)) && names.some((n) => /parts_3 Part three\.pdf/.test(n)) || names.some((n) => /\.zip$/.test(n)), names.join(' · '));
+  await p.close();
+}
+{ // PDF Compare: the changed word is highlighted and the line carries its page number
+  const { PDFDocument, StandardFonts } = await import('pdf-lib');
+  const mk = async (word, name) => {
+    const pdf = await PDFDocument.create(); const font = await pdf.embedFont(StandardFonts.Helvetica);
+    pdf.addPage([300, 300]).drawText('Opening page text', { x: 20, y: 150, size: 12, font });
+    pdf.addPage([300, 300]).drawText(`The total is ${word} euros`, { x: 20, y: 150, size: 12, font });
+    const f = path.join(dir, name); fs.writeFileSync(f, await pdf.save()); return f;
+  };
+  const a = await mk('120', 'cmp-a.pdf'), c = await mk('150', 'cmp-b.pdf');
+  const p = await open('pdf-tools/pdf-compare');
+  const inputs = p.locator('input[type=file]');
+  await inputs.nth(0).setInputFiles(a); await inputs.nth(1).setInputFiles(c);
+  await p.getByRole('button', { name: /Compare/ }).first().click();
+  await p.locator('span.bg-red-200').first().waitFor({ timeout: 30000 }).catch(() => {});
+  const red = await p.locator('span.bg-red-200').allInnerTexts(), green = await p.locator('span.bg-green-200').allInnerTexts();
+  const pagesShown = await p.locator('[data-page]').allInnerTexts();
+  check('pdf-compare: only "120" / "150" highlighted, on a line marked p. 2', red.join('|') === '120' && green.join('|') === '150' && pagesShown.filter((t) => t === 'p. 2').length >= 2 && pagesShown.includes('p. 1'), `${red}|${green} · ${pagesShown.join(',')}`);
+  await p.close();
+}
+{ // CSV to JSON "rows" shape: the header row exactly as in the file (a list has no keys: nothing renamed)
+  const j = await open('developer-tools/csv-to-json');
+  await j.locator('textarea').first().fill('name,name\nA,B\n');
+  await j.locator('#c2j-shape').selectOption('arrays');
+  await j.getByRole('button', { name: 'Convert', exact: true }).click();
+  await j.waitForFunction(() => document.querySelector('textarea[aria-label="JSON Output"]')?.value, null, { timeout: 15000 }).catch(() => {});
+  const arr = JSON.parse((await j.getByLabel('JSON Output').inputValue()) || 'null');
+  check('csv-to-json: rows shape keeps the duplicate header as written', JSON.stringify(arr) === '[["name","name"],["A","B"]]', JSON.stringify(arr));
+  await j.close();
+}
+{ // ICO to PNG: every size of the icon — PNG entries byte for byte, a 32-bit BMP entry decoded by the browser
+  const p16 = await sharp({ create: { width: 16, height: 16, channels: 4, background: '#ff0000' } }).png().toBuffer();
+  const p256 = await sharp({ create: { width: 256, height: 256, channels: 4, background: '#0000ff' } }).png().toBuffer();
+  const W = 32, dib = Buffer.alloc(40 + W * W * 4 + W * 4);
+  dib.writeUInt32LE(40, 0); dib.writeInt32LE(W, 4); dib.writeInt32LE(W * 2, 8); dib.writeUInt16LE(1, 12); dib.writeUInt16LE(32, 14);
+  for (let i = 0; i < W * W; i++) { dib[40 + i * 4] = 0; dib[41 + i * 4] = 255; dib[42 + i * 4] = 0; dib[43 + i * 4] = 255; } // BGRA green
+  const parts = [[16, p16, 32], [32, dib, 32], [256, p256, 32]];
+  const head = Buffer.alloc(6 + 16 * parts.length); head.writeUInt16LE(1, 2); head.writeUInt16LE(parts.length, 4);
+  let off = head.length;
+  parts.forEach(([s, data, bpp], k) => { const e = 6 + 16 * k; head[e] = s === 256 ? 0 : s; head[e + 1] = s === 256 ? 0 : s; head.writeUInt16LE(1, e + 4); head.writeUInt16LE(bpp, e + 6); head.writeUInt32LE(data.length, e + 8); head.writeUInt32LE(off, e + 12); off += data.length; });
+  const icoFile = path.join(dir, 'app.ico'); fs.writeFileSync(icoFile, Buffer.concat([head, ...parts.map((x) => x[1])]));
+  const p = await open('image-tools/ico-to-png');
+  await p.locator('input[type=file]').first().setInputFiles(icoFile);
+  await p.locator('[data-ico-all]').click();
+  await p.locator('[data-ico-sizes] a[download]').nth(2).waitFor({ timeout: 30000 }).catch(() => {});
+  const links = p.locator('[data-ico-sizes] a[download]');
+  const n = await links.count();
+  const got = [];
+  for (let i = 0; i < n; i++) got.push(await bytesOf(p, links.nth(i)));
+  const metas = await Promise.all(got.map((x) => sharp(x).metadata()));
+  const px32 = got[1] ? [...await sharp(got[1]).ensureAlpha().extract({ left: 5, top: 5, width: 1, height: 1 }).raw().toBuffer()] : [];
+  check('ico-to-png: 3 sizes; the PNG ones byte for byte; the 32-bit BMP one decoded (32 × 32 green)', n === 3 && Buffer.compare(got[0], p16) === 0 && Buffer.compare(got[2], p256) === 0 && metas[1]?.width === 32 && px32[1] > 240 && px32[0] < 15 && px32[3] === 255, `${n} files, ${metas.map((m) => m.width).join('/')}, px ${px32}`);
+  await p.close();
 }
 await b.close();
 console.log(fails ? `${fails} FAIL, ${passes} pass (${name})` : `ALL PASS: ${passes} checks (${name})`);

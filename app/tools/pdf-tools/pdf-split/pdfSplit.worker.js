@@ -1,6 +1,6 @@
 import { MAX_PAGES } from './config';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
-import { carryOver, carryOutline } from '../../../lib/pdfCarryOver';
+import { carryOver, carryOutline, bookmarkPages } from '../../../lib/pdfCarryOver';
 
 class LimitExceededError extends Error {
   constructor(message) {
@@ -18,7 +18,8 @@ let loadedDoc = null;
 async function handleLoad({ file, maxPages }) {
   const limit = maxPages || MAX_PAGES;
   const arrayBuffer = await file.arrayBuffer();
-  const { PDFDocument } = await import('pdf-lib');
+  const lib = await import('pdf-lib');
+  const { PDFDocument } = lib;
   const pdfDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer), { ignoreEncryption: true });
   const pageCount = pdfDoc.getPageCount();
   if (pageCount > limit) {
@@ -26,7 +27,9 @@ async function handleLoad({ file, maxPages }) {
     throw new LimitExceededError(`This PDF has ${pageCount.toLocaleString()} pages, more than the ${limit.toLocaleString()}-page limit.`);
   }
   loadedDoc = pdfDoc;
-  self.postMessage({ type: 'loaded', pageCount });
+  let bookmarks = [];
+  try { bookmarks = bookmarkPages(lib, pdfDoc, 2); } catch { bookmarks = []; } // a damaged outline: the mode says there are none
+  self.postMessage({ type: 'loaded', pageCount, bookmarks });
 }
 
 // files: [{ label, pages: [0-based indices] }], already validated by splitPlan.js in the page.

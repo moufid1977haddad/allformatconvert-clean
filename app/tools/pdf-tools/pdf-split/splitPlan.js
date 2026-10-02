@@ -28,10 +28,26 @@ export function parseRanges(spec, total) {
 
 const span = (pages) => (pages.length === 1 ? String(pages[0] + 1) : `${pages[0] + 1}-${pages[pages.length - 1] + 1}`);
 
-export function planSplit({ mode, spec, every, merge }, total) {
+export function planSplit({ mode, spec, every, merge, bookmarks = [], level = 1 }, total) {
   if (!Number.isInteger(total) || total < 1) return { error: 'This PDF has no pages.' };
   let groups;
-  if (mode === 'every') {
+  if (mode === 'bookmarks') {
+    // P24 (03/10): one file per bookmark, from its page to the page before the next bookmark (Sejda, PDF24). Bookmarks
+    // on the same page share one file (the first title names it); pages before the first bookmark get their own file,
+    // so no page is dropped. Out-of-order bookmarks are read in page order.
+    const marks = bookmarks.filter((b) => b.depth <= level && Number.isInteger(b.page) && b.page >= 0 && b.page < total).sort((a, b) => a.page - b.page);
+    const starts = [];
+    for (const m of marks) if (!starts.length || starts[starts.length - 1].page !== m.page) starts.push(m);
+    if (!starts.length) return { error: bookmarks.length ? 'None of this PDF\'s bookmarks at this level points to a page.' : 'This PDF has no bookmarks. Use Custom ranges instead.' };
+    if (starts.length === 1 && starts[0].page === 0) return { error: 'This PDF has a single bookmark, on page 1: splitting by it would give the same document.' };
+    groups = [];
+    const width = String(starts.length + 1).length;
+    if (starts[0].page > 0) groups.push({ label: '0'.padStart(width, '0') + ' (before the first bookmark)', pages: Array.from({ length: starts[0].page }, (_, i) => i) });
+    starts.forEach((m, k) => {
+      const end = k + 1 < starts.length ? starts[k + 1].page : total;
+      groups.push({ label: `${String(k + 1).padStart(width, '0')} ${m.title}`, pages: Array.from({ length: end - m.page }, (_, i) => m.page + i), title: m.title });
+    });
+  } else if (mode === 'every') {
     const n = Number(every);
     if (!Number.isInteger(n) || n < 1) return { error: 'Enter a whole number of pages per file (1 or more).' };
     if (n >= total) return { error: `This PDF has ${total} page${total > 1 ? 's' : ''}: a file every ${n} pages would just be the same document.` };
@@ -66,6 +82,8 @@ export function planSplit({ mode, spec, every, merge }, total) {
 // "report.pdf" + "1-3" -> "report_1-3.pdf" (iLovePDF names its parts after the original, too).
 export function partName(original, label) {
   const base = String(original || 'document').replace(/\.pdf$/i, '').replace(/[\\/:*?"<>|]+/g, '_') || 'document';
-  const safe = label.length > 60 ? label.slice(0, 57) + '…' : label;
+  // a bookmark title can hold / : ? … (P24): made safe like the original name, or the part's name was not a valid file name
+  const clean = String(label).replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '_').replace(/\s+/g, ' ').trim() || 'part';
+  const safe = clean.length > 60 ? clean.slice(0, 57) + '…' : clean;
   return `${base}_${safe.replace(/,/g, '+')}.pdf`;
 }

@@ -404,3 +404,87 @@ Safari) ; **Audio Waveform** — largeur, hauteur, couleurs, fond transparent, P
 1200 × 150 transparent), zoom au doigt et boutons + / − ; **Screen Recorder** — pause / reprise (non testable dans le
 navigateur de test : pas de capture d'écran simulée) ; **PDF Extract Text** — pages au choix et sans en-têtes
 « Page N: ». Sous WebKit, l'enregistrement du PNG de l'onde passe par le chemin iPhone (non testable ici, dit).
+
+**Lot 9 — note « image animée » et relecture indépendante des lots 3 à 8.**
+
+*Note commune* (dernier point « à faire » du relevé image) : les 13 filtres en `image/*` (bordure, bruit, texte,
+vignette, luminosité, niveaux de gris, flou, miroir, inversion, pixelisation, rotation, coins arrondis, sépia) et PNG to
+JPG / PNG to WebP rendaient un GIF, un APNG ou un WebP animé figé sur sa 1re image sans le dire. Ils le disent
+maintenant avant le travail (`app/lib/animatedImage.js`, lu par structure : blocs du GIF, `acTL` avant `IDAT`, drapeau
+VP8X — pas par recherche d'octets) ; le Resizer passe sur le même analyseur (il ne voyait que les GIF, par une recherche
+d'octets). Prouvé sur 6 vrais fichiers ffmpeg (3 animés, 3 fixes) et au banc.
+
+*Relecture indépendante* (réviseur sans droit d'écriture, sondes ffmpeg/ffprobe réelles) — corrigé :
+- **Grave — Supprimer les métadonnées vidéo** : une piste de sous-titres qui porte la position (légendes de drone
+  DJI, dashcams : `GPS(48.8566,2.3522,35)`) était gardée, contre la promesse « Removes location ». Les pistes de
+  sous-titres sont maintenant retirées, et c'est dit (prouvé : les octets de sortie ne contiennent plus la position).
+- Une vidéo **Motion JPEG** (EXIF dans chaque image) ou **AVCHD .mts** (date et GPS dans le flux) garde ces données
+  avec `-c copy` : la page le dit maintenant après le traitement (prouvé sur un .qt MJPEG). `.qt`, `.weba`, `.m4r`
+  échouaient avec un message faux (« unusual codec ») : muxer donné à ffmpeg (prouvé). Type MIME juste pour .mkv.
+- **Find & Replace, mot entier** : les signes combinants (matras hindi, harakat arabes, accent tapé à part) coupaient
+  le mot — « क » était remplacé dans « कि » ; et une regex valide sans le drapeau `u` (`a\-b`, `\_id`) était refusée
+  dès qu'on cochait « mot entier ». Les deux corrigés (7 cas sondés, dont ceux du réviseur).
+- **JPG / Image to PDF avec format de page** : une photo de téléphone en portrait (EXIF 6/8/3) était réencodée sans le
+  dire, contre la FAQ « JPG photos are put in the PDF as they are ». Intégrée telle quelle et tournée sur la page :
+  prouvé (`scripts/p24/pdf-images-exif.test.mjs` : mêmes octets, page dans le bon sens, bord haut de la photo là où
+  l'EXIF le veut, 4 orientations).
+- **Diff Viewer / Text Comparator** : « Ignore whitespace » n'ignorait que les espaces de bout de ligne (jsdiff) ; un
+  double espace intérieur comptait comme un changement. Lignes comparées sous forme normalisée et montrées telles
+  qu'écrites ; avec « Ignore case », une ligne inchangée montrait le texte de la nouvelle version sous le numéro de
+  l'ancienne (maintenant chaque côté est le sien). PDF Compare (qui ignore les espaces) en profite.
+- **Audio Waveform** : l'export à 3000 px ne montrait que 68 % de la vue à zoom 20 (et débordait au-delà) : chaque
+  colonne prend maintenant sa part exacte des échantillons.
+- **Excel to PDF, une page par feuille, feuille très longue** : risque vérifié, pas de défaut — 500, 3 000, 10 000 et
+  30 000 lignes donnent une page, **aucune ligne perdue** (texte relu), page sous la limite de 14 400 pt ; le texte
+  rapetisse, ce que la FAQ dit maintenant (`scripts/p24/excel-long-sheet.mjs`, Gotenberg local).
+- Faibles, corrigés : Excel to CSV **virgule décimale** (3,14 ; 1.234,50) pour l'Excel européen ; URL Encoder « URL
+  entière » ne réencode plus un `%20` déjà là en `%2520`, et la FAQ de la page développeur qui disait « Not safely »
+  est juste ; Extract Text dit « ces pages » quand une plage est choisie et ne signale plus une faute de frappe comme
+  erreur d'outil ; Media Player lit un SRT à heure sur un chiffre et un SRT en Windows-1252, et oublie sous-titres et
+  capture au changement de vidéo ; GIF Maker garde les durées d'un GIF découpé ; Resizer dit le fond blanc d'un JPG
+  fait depuis un PNG transparent ; QR Scanner ne titre plus « QR Code Found! » pour un code-barres ; description de
+  Round Corners juste.
+- Laissés, dits ici : la recherche de qualité de la taille cible (compresseur) n'est pas garantie maximale (jamais
+  au-dessus de la cible) ; la forme « lignes » de CSV to JSON garde les en-têtes renommés (`name_2`) — signalé à l'écran.
+
+*Ajout* : **PDF Split — par signets** (Sejda, PDF24) : un PDF par signet de 1er niveau (ou de 2 niveaux, chapitres et
+sections), de sa page à la page avant le suivant ; la liste des parties et de leurs pages s'affiche avant de découper ;
+les pages avant le 1er signet forment leur propre fichier (aucune page perdue) ; chaque partie porte le nom de son
+signet et garde ses propres signets. Destinations lues : explicites, nommées (/Dests et arbre /Names), action GoTo,
+numéro de page ; un signet lien web n'ouvre aucune page (ignoré pour la découpe, gardé dans chaque partie). En route,
+défaut trouvé et corrigé : le nom d'une partie ne nettoyait pas l'étiquette — un titre « Chapitre C : résultats / notes »
+donnait un nom de fichier invalide. Prouvé : `scripts/p24/pdf-split-bookmarks.test.mjs` (8/8, parties relues par
+pdf.js) et au banc navigateur.
+
+*Ajouts* : **PDF Compare** — les mots qui diffèrent sont surlignés dans une ligne changée, et chaque ligne porte son
+numéro de page (Draftable, PDF24) ; **ICO to PNG** — « Every size in this icon » : chaque image de l'icône (16, 32,
+48, 256…) en PNG, ou toutes dans un ZIP ; une image PNG rangée dans l'icône est rendue octet pour octet, une image BMP
+est décodée par le navigateur dans un ICO d'une seule image (pas de décodeur maison). Vérifié avant : Chromium,
+Firefox et WebKit montrent tous la plus grande image, donc « Convert » ne se trompait pas, mais les autres tailles
+étaient perdues. *Faibles de la relecture* : CSV to JSON, forme « lignes » — la ligne d'en-tête est celle du fichier
+(une liste n'a pas de clés qui se heurtent : rien à renommer) ; Image Compressor — le message « under the N KB asked »
+cite la valeur employée, plus le champ tel qu'il est après coup ; la détection d'animation lit 2 Mo d'un GIF, et le
+fichier entier seulement si la 1re image dépasse (prouvé sur un GIF de 4,5 Mo dont la 1re image fait 2,2 Mo).
+
+*Relecture indépendante du lot 9 lui-même* (sondes réelles : SheetJS aller-retour ODS, ffmpeg, pdf.js) — corrigé :
+- **Grave — Excel to CSV, virgule décimale sur un .ods européen** : le texte d'une cellule ODS est déjà dans la langue
+  du fichier (« 3,14 », « 1 234,50 € ») ; l'échange le remettait en « 3.14 ». Seul le texte que le format produit
+  lui-même est réécrit ; les points et virgules écrits comme littéraux du format (« kg. », masque de CPF) sont gardés ;
+  un grand nombre General écrit en entier aussi. Prouvé : `scripts/p24/decimal-comma.test.mjs` (14/14, dont ODS et
+  XLSX aller-retour).
+- **PDF Split par signets** : une destination nommée de l'ancien catalogue `/Dests` dont le nom contient un espace
+  était manquée, et le chapitre d'avant absorbait ses pages sans le dire (même défaut dans la reprise des signets de
+  Merge/Split, corrigé aux deux endroits). Prouvé (test des signets, 9/9).
+- **Supprimer les métadonnées** : une pochette JPEG dans un MP4 déclenchait à tort l'avertissement « Motion JPEG » et
+  était recopiée (elle peut porter son propre EXIF) : pochettes retirées (`0:V`), avertissement juste, dit sur la page.
+- **Find & Replace** : dans le repli sans mode Unicode, `\p{…}` aurait cherché le texte « p{L} » sans le dire : refusé
+  avec une phrase claire ; écritures ajoutées à la frontière de mot (géorgien, éthiopien, khmer, birman, tibétain,
+  points hébreux, arabe étendu, CJK ext. A, latin étendu).
+- Media Player : une heure à 3 chiffres dans un SRT est convertie.
+- Laissé, dit ici : comparer deux textes de 20 000 lignes toutes différentes prend ≈ 100 s (135 s avant ce lot) ; le
+  résultat est juste, la page attend.
+
+Bancs du lot 9 (construction finale du lot) : `adds-lot.mjs` 37/37 (Chromium) · 36/36 (Firefox) · 32/32 (WebKit) ;
+solidité des outils touchés 45/45 · 45/45 · 44/45 — le cas « image géante » de PNG to JPG, à 3 pages en parallèle
+sous WebKit, a dépassé le délai du banc ; relancé seul : 3 fois sur 3 vert (charge de la machine, pas l'outil) ;
+tests Node : décimales 14/14, signets 9/9, EXIF 4/4, Split, Merge, éditeur, JWT, caviardage, métadonnées verts.

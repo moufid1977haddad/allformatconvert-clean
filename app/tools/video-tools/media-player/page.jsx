@@ -4,6 +4,7 @@ import { FileDownload } from '../../../components/FileDownload';
 import { Music } from 'lucide-react';
 import SeoContent from '../../../components/SeoContent';
 import { AUDIO_ACCEPT, VIDEO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
+import { detectEncoding } from '../../../lib/csvEncoding';
 export default function MediaPlayerPage() {
   const [file, setFile] = useState(null);
   const [isVideo, setIsVideo] = useState(false);
@@ -19,8 +20,18 @@ export default function MediaPlayerPage() {
   const [subUrl, setSubUrl] = useState(null);
   const [shot, setShot] = useState(null);
   const setSpeed = (r) => { setRate(r); if (mediaRef.current) mediaRef.current.playbackRate = r; };
-  const toVtt = (text) => (/^WEBVTT/.test(text.trim()) ? text : 'WEBVTT\n\n' + text.replace(/\r/g, '').replace(/(\d\d:\d\d:\d\d),(\d{3})/g, '$1.$2'));
-  const loadSubs = async (e) => { const f = e.target.files[0]; e.target.value = ''; if (!f) return; setSubUrl(URL.createObjectURL(new Blob([toVtt(await f.text())], { type: 'text/vtt' }))); };
+  // P24 review (03/10): an SRT time with a one-digit hour (0:00:01,000) is written as WebVTT wants (00:00:01.000) — it
+  // was left with its comma and the cue silently skipped; a file saved in Windows-1252 (common for SRT) is read as such
+  const toVtt = (text) => (/^WEBVTT/.test(text.replace(/^\uFEFF/, '').trim()) ? text : 'WEBVTT\n\n' + text.replace(/^\uFEFF/, '').replace(/\r/g, '')
+    .split('\n').map((line) => (!line.includes('-->') ? line // only the timing lines: a time in the text stays as typed
+      : line.replace(/(^|[^\d])(\d+):(\d{2}):(\d{2})[,.](\d{1,3})/g, (m, pre, h, mi, se, ms) => `${pre}${h.padStart(2, '0')}:${mi}:${se}.${ms.padEnd(3, '0')}`))).join('\n'));
+  const loadSubs = async (e) => {
+    const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    const bytes = new Uint8Array(await f.arrayBuffer());
+    const { encoding } = detectEncoding(bytes);
+    const text = new TextDecoder(encoding).decode(bytes);
+    setSubUrl((old) => { if (old) URL.revokeObjectURL(old); return URL.createObjectURL(new Blob([toVtt(text)], { type: 'text/vtt' })); });
+  };
   const snapshot = () => {
     const v = mediaRef.current; if (!v || !v.videoWidth) return;
     const c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight; c.getContext('2d').drawImage(v, 0, 0);
@@ -33,6 +44,7 @@ export default function MediaPlayerPage() {
     if (!f) return;
     setFile(f);
     setCannotPlay(false);
+    setSubUrl((old) => { if (old) URL.revokeObjectURL(old); return null; }); setShot(null); // a new video: the previous one's subtitles and still go
     // The MIME type is often empty for .mkv, .avi, .flv…: fall back on the extension.
     setIsVideo(f.type ? f.type.startsWith('video') : /\.(mp4|m4v|mov|qt|webm|mkv|avi|wmv|flv|ogv|3gp|3g2|mpg|mpeg|ts|mts|m2ts)$/i.test(f.name));
     setUrl((old) => { if (old) URL.revokeObjectURL(old); return URL.createObjectURL(f); });
