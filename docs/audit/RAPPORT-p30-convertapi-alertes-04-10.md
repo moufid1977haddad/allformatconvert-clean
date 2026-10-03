@@ -159,3 +159,58 @@ facturée à réponse illisible comptée, .docx avec l'interrupteur ConvertAPI c
   journaux de production. **Dépense ConvertAPI : 0,05 $ sur 0,05 $** (`docs/audit/depenses-fournisseurs.jsonl`, 5
   lignes) ; plus aucun appel payant dans ce chantier.
 - Retour arrière prêt, non utilisé : promouvoir `onlineconvertools-fo109wbpv` (= `5af581aa`, production d'avant).
+
+## 5. Chromium dans une instance Railway isolée (lot 5)
+
+### 5.1 Ce que dit Railway, puis ce qu'on a mesuré (règle zéro)
+- Documentation Railway (lue le 04/10, « How Private Networking Works » et « Lock Down a Production Railway Project ») :
+  « Services in different projects cannot communicate over the private network », « each environment has its own
+  isolated network namespace », « services in other projects cannot reach yours at all ».
+- **Mesuré**, avec deux sondes temporaires (Alpine + curl, quelques minutes, supprimées ensuite) :
+  - dans **notre** projet (`fortunate-manifestation`) : les 5 noms privés (`gotenberg-v2`, `gotenberg-fonts`,
+    `allformatconvert-clean`, `allformatconvert-clean-1efa` = pdf-tools, `media-processing` `.railway.internal`) se
+    résolvent en 10 adresses (IPv4 10.x et IPv6 fd12:…) et **`/health` de gotenberg-v2 et gotenberg-fonts répond 200**
+    par le réseau privé (contrôle positif) ;
+  - dans le **projet isolé** (`oct-chromium-isolated`) : **aucun des 5 noms ne se résout** ; **les 10 adresses × 4 ports
+    (3000, 8000, 8080, 80) sont injoignables** (40/40) ; **169.254.169.254** (métadonnées) injoignable ; Internet public
+    joignable (contrôle). 61/61 refus, journal gardé (`netprobe-iso.log`, hors dépôt : il contient nos adresses
+    internes).
+- SSH dans les conteneurs aurait demandé d'enregistrer une clé SSH sur le compte Railway du propriétaire (réglage de
+  sécurité) : **non fait**, d'où les sondes.
+- **L'isolement est réel : l'instance est créée.**
+
+### 5.2 Conception (`services/gotenberg/edge/main.go`, `services/gotenberg/Dockerfile`)
+Recherche : Gotenberg n'a pas d'option « Chromium distant » (un Chromium distant par DevTools ne lirait pas les fichiers
+déposés, que Gotenberg écrit sur son disque) ; Browserless (déploiement Docker libre, docs.browserless.io) : chaque
+requête présente un jeton, comparé à temps constant et retiré avant d'atteindre Chromium ; l'« isolement de navigateur »
+place le contenu non fiable dans un conteneur à part. Même principe retenu ici, avec Gotenberg entier de l'autre côté
+et une signature au lieu d'un jeton partagé (l'instance isolée ne détient rien qui permette de signer).
+- **Une image, deux rôles** (`OCT_EDGE_MODE`), relais `oct-edge` écrit en Go (compilé et testé dans l'image, image Go
+  épinglée par empreinte) qui démarre Gotenberg lui-même sur `127.0.0.1:3001` :
+  - **front** (`gotenberg-v2`, `gotenberg-fonts`) : LibreOffice et le reste comme avant ; routes Chromium de Gotenberg
+    désactivées, **aucun processus Chromium** (la variable Railway `CHROMIUM_AUTO_START` l'emportait sur l'option :
+    retirée de l'environnement de Gotenberg, vérifié « ready to start » sans démarrage) ; `/forms/chromium/*` vérifié
+    contre l'authentification Basic de Gotenberg (comparaison à temps constant), en-tête `Authorization` retiré,
+    relayé en HTTPS vers l'instance isolée avec une **signature Ed25519** (horodatage, méthode, chemin ; 120 s).
+    La clé est **dérivée des identifiants existants** de Gotenberg : aucune nouvelle variable sur `gotenberg-v2`.
+  - **back** (`chromium`, projet `oct-chromium-isolated`) : Chromium seul (LibreOffice coupé), Gotenberg sur la boucle
+    locale sans authentification, `oct-edge` ne laisse passer que `/health` et les requêtes `/forms/chromium/*`
+    **signées**, vérifiées avec la **clé publique** gravée dans l'image (ce n'est pas un secret : elle ne permet pas de
+    signer) ; il **refuse de démarrer** si le mot de passe de Gotenberg est présent.
+- Variables de l'instance isolée : `OCT_EDGE_MODE=back` + **copies** des réglages Chromium/API de `gotenberg-v2`
+  (refus des adresses privées, liste de refus, downloadFrom et webhook coupés, délai, journaux, port), vérifiées
+  égales une à une ; **aucun identifiant** (`scripts/p30/isolated-vars.mjs`). Région `sfo` comme `gotenberg-v2`.
+
+### 5.3 Mesures sur `gotenberg-fonts` (front) → `chromium` (isolée), avant toute bascule
+- De l'extérieur (`scripts/p30/isolated-probe.mjs`) : **14/14** — santé publique ; conversion non signée, avec
+  l'authentification Basic de Gotenberg, signature fausse, périmée ou d'un autre chemin : **403** ; LibreOffice, moteurs
+  PDF, `/version`, `/debug`, métriques, `/` : **404** même signés ; conversion signée : PDF.
+- **Banc des 65 documents** (+ la route URL de Gotenberg ; `scripts/p27/gotenberg-compare.mjs --books --extra-html`,
+  mêmes entrées que P29) contre `gotenberg-v2` en production, mesuré le même soir : **66/66 identiques** (pages, texte,
+  chaque page au pixel) — dont HTML (fichier, fidélité, ressources publiques, scripts), EPUB, MOBI et les 5 pages
+  réelles passées par notre `snapshotPage` (example.com, Wikipédia, MDN, GOV.UK, BBC).
+- **Options de la route URL** (`scripts/p29/url-options.mjs`) : **6/6 identiques**.
+- **27 adresses internes** (`scripts/p26/gotenberg-probe.mjs`) : **jamais atteintes** (boucle locale v4/v6, noms
+  `*.railway.internal`, métadonnées, CGNAT, 198.18, `file://`, identifiants avant l'hôte, DNS publics vers adresses
+  internes, redirection ; route URL 403) ; contrôle public atteint.
+- **Scripts** (`scripts/p29/js-probe.mjs`) : **0/18** exécutés ; cadre d'un autre site, PDF incrustés, `/tmp` : rien.
