@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { contentDisposition } from "@/lib/contentDisposition";
 import { convertPdfToDocx, convertPdfToRtf, ConvertApiError } from "@/lib/providers/convertApi";
+import { convertDocxToDoc, countTextBoxes } from "@/lib/providers/docFromDocx";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkFileSize, MAX_PDF_TO_WORD_STAGED_BYTES } from "@/lib/quota/limits";
 import { isStagedRequest, respondStaged, fileResponse } from "@/lib/media/stagedRoute";
@@ -85,20 +86,21 @@ export async function POST(req: NextRequest) {
   }
 
   // Staged path (files above the Vercel body ceiling) -- see lib/media/stagedRoute.ts.
-  // P25 (E1): output format, DOCX (default) or RTF. The staged path (large PDFs) can only hand back a DOCX: the media
-  // service keeps outputs of a fixed list of types (pdf, docx, xlsx, pptx, png) and changing it is a Railway change.
-  if (isStagedRequest(req)) return respondStaged(req, "docx", (file, body) => {
-    if (body?.format === "rtf") return Promise.resolve(NextResponse.json({ error: "RTF is available for PDFs up to 4 MB. For a larger PDF, choose DOCX." }, { status: 400 }));
-    return convertPdf(req, file, true);
+  // Output format: DOCX (default), RTF (P25) or Word 97-2003 .doc (P26). Large PDFs come through the staged path,
+  // whose result is deposited on the media service under the chosen type (rtf and doc accepted there since P26).
+  if (isStagedRequest(req)) return respondStaged(req, (body) => pickFormat(body?.format) || "docx", (file, body) => {
+    const f = pickFormat(body?.format ?? null);
+    if (!f) return Promise.resolve(NextResponse.json({ error: "Unknown output format." }, { status: 400 }));
+    return convertPdf(req, file, true, f);
   });
 
   let file: File;
-  let format: "docx" | "rtf" = "docx";
+  let format: OutFormat = "docx";
   try {
     const formData = await req.formData();
-    const f = formData.get("format");
-    if (f !== null && f !== "docx" && f !== "rtf") return NextResponse.json({ error: "Unknown output format." }, { status: 400 });
-    if (f === "rtf") format = "rtf";
+    const picked = pickFormat(formData.get("format"));
+    if (!picked) return NextResponse.json({ error: "Unknown output format." }, { status: 400 });
+    format = picked;
     const uploaded = formData.get("file");
     if (!uploaded || !(uploaded instanceof File)) {
       return NextResponse.json({ error: "No file provided." }, { status: 400 });
@@ -110,7 +112,16 @@ export async function POST(req: NextRequest) {
   return convertPdf(req, file, false, format);
 }
 
-async function convertPdf(req: NextRequest, file: File, staged = false, format: "docx" | "rtf" = "docx"): Promise<NextResponse> {
+type OutFormat = "docx" | "rtf" | "doc";
+// null (field absent) -> docx, as before; anything else unknown -> null (refused).
+function pickFormat(v: unknown): OutFormat | null {
+  if (v === null || v === undefined || v === "docx") return "docx";
+  if (v === "rtf" || v === "doc") return v;
+  return null;
+}
+
+async function convertPdf(req: NextRequest, file: File, staged = false, format: OutFormat = "docx"): Promise<NextResponse> {
+  const startedAt = Date.now();
   const extension = getExtension(file.name);
   if (extension !== "pdf") {
     return NextResponse.json({ error: "Unsupported file type. Please upload a .pdf file." }, { status: 400 });
@@ -180,7 +191,38 @@ async function convertPdf(req: NextRequest, file: File, staged = false, format: 
       return NextResponse.json({ error: "Conversion failed. Please try again." }, { status: 502 });
     }
 
-    const outName = file.name.replace(/\.[^.]+$/, "") + (format === "rtf" ? ".rtf" : ".docx");
+    const base = file.name.replace(/\.[^.]+$/, "");
+    if (format === "doc") {
+      // P26: the DOCX above (already paid for) becomes Word 97-2003 on our pdf-tools service (lib/providers/docFromDocx.js).
+      const docx = Buffer.from(bytes);
+      // What is left of this function's 300 s, minus a margin to hand the result back.
+      const left = maxDuration * 1000 - (Date.now() - startedAt) - 20_000;
+      const [doc, textBoxes] = await Promise.all([convertDocxToDoc(docx, Math.min(130_000, left)), countTextBoxes(docx)]);
+      if (!doc.ok) {
+        await alertServerError("pdf-to-word", `doc_${doc.reason}`);
+        await insertToolError(buildServerToolError({
+          tool: "pdf-to-word",
+          file,
+          error: new Error(`doc_${doc.reason}`),
+          userAgent: req.headers.get("user-agent"), headers: req.headers,
+        }));
+        // The .docx is already made and paid for: it is handed over, and the page says plainly that the .doc step
+        // failed -- never a second paid conversion, never nothing.
+        return fileResponse(bytes, {
+          "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "Content-Disposition": contentDisposition(base + ".docx"),
+          "X-Doc-Fallback": "docx",
+          "X-Staged-Ext": "docx",
+          "Access-Control-Expose-Headers": "X-Doc-Fallback",
+        }, staged);
+      }
+      return fileResponse(new Uint8Array(doc.buffer), {
+        "Content-Type": "application/msword",
+        "Content-Disposition": contentDisposition(base + ".doc"),
+        ...(textBoxes ? { "X-Doc-Text-Boxes": String(textBoxes), "Access-Control-Expose-Headers": "X-Doc-Text-Boxes" } : {}),
+      }, staged);
+    }
+    const outName = base + (format === "rtf" ? ".rtf" : ".docx");
     return fileResponse(bytes, {
       "Content-Type": format === "rtf" ? "application/rtf" : "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "Content-Disposition": contentDisposition(outName),

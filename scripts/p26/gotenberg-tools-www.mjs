@@ -4,6 +4,8 @@
 import { chromium } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
+import { previewAuth } from './preview-auth.mjs';
+import { realMediaService } from '../browser-tests/lib/real-media-service.mjs';
 
 const [originArg, outDir] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const only = process.argv.find((a) => a.startsWith('--only='))?.split('=')[1]?.split(',');
@@ -19,11 +21,16 @@ const cases = [
   ['epub', 'epub-to-pdf', fx('sample.epub')],
   ['mobi', 'mobi-to-pdf', fx('sample.mobi')],
   ['url', 'html-to-pdf', 'https://example.com/', 'From URL'],
+  // --big-html=<file>: an HTML file above 4 MB, which goes through the media service (staged path)
+  ...(process.argv.find((a) => a.startsWith('--big-html=')) ? [['html-big', 'html-to-pdf', process.argv.find((a) => a.startsWith('--big-html=')).split('=')[1], 'Upload File']] : []),
 ];
 const b = await chromium.launch();
 const ctx = await b.newContext({ acceptDownloads: true });
 await ctx.addCookies([{ name: 'oct_automation', value: '1', url: origin }]);
+await previewAuth(ctx, origin);
 await ctx.route(/vercel\.live/, (r) => r.abort());
+const media = realMediaService({ origin, corsShim: process.argv.includes('--cors-shim') });
+await media.routeTickets(ctx);
 let fails = 0;
 for (const [name, slug, input, mode] of cases.filter((c) => !only || only.includes(c[0]))) {
   const p = await ctx.newPage();

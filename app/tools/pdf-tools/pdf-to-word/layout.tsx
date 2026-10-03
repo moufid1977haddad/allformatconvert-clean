@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF to Word — Convert Your PDF to an Editable .docx Online Free" },
-  description: "PDF to Word converts a PDF to an editable .docx. In our tests on Word-exported PDFs, headings, tables, columns and lists were kept; scanned PDFs are not supported.",
+  description: "PDF to Word converts a PDF to an editable .docx, .doc (Word 97-2003) or .rtf. In our tests on Word-exported PDFs, headings, tables, columns and lists were kept; scanned PDFs are not supported.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-word" },
   openGraph: {
     title: "PDF to Word — Convert Your PDF to an Editable .docx Online Free",
-    description: "PDF to Word converts a PDF to an editable .docx. In our tests on Word-exported PDFs, headings, tables, columns and lists were kept; scanned PDFs are not supported.",
+    description: "PDF to Word converts a PDF to an editable .docx, .doc (Word 97-2003) or .rtf. In our tests on Word-exported PDFs, headings, tables, columns and lists were kept; scanned PDFs are not supported.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-word",
   },
 };

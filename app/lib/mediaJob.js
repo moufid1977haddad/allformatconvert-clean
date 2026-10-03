@@ -233,7 +233,7 @@ async function stagedCall({ file, endpoint, fields, purpose, onStage, signal }) 
  * Staged document conversion (Office / HTML / PDF): stagedCall, then the converted file is downloaded from
  * the service (which deletes it after one complete download).
  * @param {{file: File, endpoint: string, fields?: object, onStage: (s: object) => void, signal?: AbortSignal}} opts
- * @returns {Promise<{blob: Blob, ext: string, bytes: number, detectedFonts: string[]}>}
+ * @returns {Promise<{blob: Blob, ext: string, bytes: number, detectedFonts: string[], docTextBoxes: number}>}
  */
 export async function runStagedConversion({ file, endpoint, fields, onStage, signal }) {
   const { res, json: j, jid, ticket, cleanup } = await stagedCall({ file, endpoint, fields, onStage, signal });
@@ -244,7 +244,7 @@ export async function runStagedConversion({ file, endpoint, fields, onStage, sig
       throw new MediaJobError(msg, 'convert_' + res.status);
     }
     const dl = await downloadResult({ jid, ticket, expected: j.outputBytes || 0, onStage, signal });
-    return { blob: dl.blob, ext: j.ext, bytes: dl.bytes, detectedFonts: j.detectedFonts || [] };
+    return { blob: dl.blob, ext: j.ext, bytes: dl.bytes, detectedFonts: j.detectedFonts || [], docTextBoxes: j.docTextBoxes || 0, docFallback: !!j.docFallback };
   } catch (e) {
     // The route already destroys the staged file on a failed conversion; this covers cancel/network cases.
     if (e instanceof MediaJobError && e.code !== 'expired') cleanup();
