@@ -14,7 +14,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       python3 \
       python3-venv \
     && rm -rf /var/lib/apt/lists/* \
-    && pdftotext -v
+    && pdftotext -v \
+    && pdfunite -v
 
 # /v1/docx-to-doc (P26, E1): LibreOffice Writer without its GUI, Debian's own package (MPL-2.0), started per
 # request by src/docConvert.js -- it writes the Word 97-2003 .doc that ConvertAPI cannot. From Debian's official

@@ -11,6 +11,13 @@ import UploadPrompt from '@/app/components/UploadPrompt';
 // Real ceiling (hosting-platform payload gate), not the 50 MB the route itself would
 // accept -- see lib/quota/limits.js.
 
+const METHOD_LABELS = {
+  qpdf: 'structural repair (qpdf)',
+  poppler: 'structural repair (Poppler)',
+  rebuilt: 'a rebuilt page list',
+  ghostscript: 'content-stream rewrite (Ghostscript)',
+};
+
 export default function PdfRepairPage() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -131,8 +138,14 @@ export default function PdfRepairPage() {
               {downloadUrl ? (
                 <>
                   <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-200">
-                    Repaired using {result.method === 'qpdf' ? 'structural repair (qpdf)' : 'content-stream rewrite (Ghostscript)'} — {result.pageCount ?? '?'} page{result.pageCount === 1 ? '' : 's'} recovered.
+                    Repaired using {METHOD_LABELS[result.method] || result.method} — {result.pageCount ?? '?'} page{result.pageCount === 1 ? '' : 's'} recovered.
                   </p>
+                  {result.textCheck === 'same' && (
+                    <p className="text-xs text-neutral-600 dark:text-neutral-300">Text checked: the repaired file reads exactly like what {result.checkedWith?.length ? result.checkedWith.join(' and ') : 'PDF readers'} still find{result.checkedWith?.length === 1 ? 's' : ''} in your damaged file.</p>
+                  )}
+                  {result.textCheck === 'unverifiable' && (
+                    <p className="text-xs text-amber-700 dark:text-amber-300" role="status">No PDF reader could open the damaged file, so its text could not be compared with the repaired one: check the pages before relying on it.</p>
+                  )}
                   {result.warnings?.length > 0 && (
                     <details className="text-xs text-neutral-500 dark:text-neutral-400">
                       <summary className="cursor-pointer">What was found and fixed ({result.warnings.length})</summary>
@@ -161,7 +174,7 @@ export default function PdfRepairPage() {
 
       <SeoContent
         title="PDF Repair"
-        description="PDF Repair fixes PDFs with damaged internal structure — most commonly a broken or missing cross-reference table, the index PDF readers use to jump to each page and object. It repairs one class of damage, not every possible way a PDF file can be broken: files with genuinely destroyed content (truncated mid-page, overwritten with garbage, or missing entire objects) may not be recoverable, and the tool says so honestly rather than returning a corrupted result. Like the other server tools named in our privacy policy (most tools on this site run in your browser), this one sends your file to a server: it's uploaded securely over HTTPS to our repair service (which runs qpdf and Ghostscript), and deleted immediately after processing — never stored, logged, or kept around."
+        description="PDF Repair fixes PDFs with damaged internal structure — most commonly a broken or missing cross-reference table, the index PDF readers use to jump to each page and object. It also rebuilds a file whose end was cut off (an interrupted download, a truncated copy) from the pages still inside it. Every repaired file is checked before you get it: its text must read exactly like what PDF readers still find in your damaged file, otherwise it is not delivered. Content that is genuinely destroyed (overwritten with garbage, or pages cut off) cannot be brought back, and the tool says so honestly rather than returning a corrupted result. Like the other server tools named in our privacy policy (most tools on this site run in your browser), this one sends your file to a server: it's uploaded securely over HTTPS to our repair service (which runs qpdf, Poppler and Ghostscript), and deleted immediately after processing — never stored, logged, or kept around."
         howTo={[
           `Click the upload area and select a damaged PDF file, up to ${pdfToolsMaxLabel()}.`,
           "Click 'Repair PDF'. Your file uploads with a real progress bar; a working Cancel button is available the whole time.",
@@ -169,13 +182,14 @@ export default function PdfRepairPage() {
         ]}
         faqs={[
           { q: "Is PDF Repair free to use?", a: "Yes, completely free with no signup required." },
-          { q: "Can this fix any damaged PDF?", a: "No. It repairs structural damage — broken cross-reference tables and similar corruption — using qpdf first, then Ghostscript as a fallback. Files with destroyed content (truncated, overwritten, or missing objects) may not be recoverable, and you'll be told clearly rather than getting a silently broken file back." },
+          { q: "Can this fix any damaged PDF?", a: "No. It repairs structural damage — broken cross-reference tables, a missing end of file and similar corruption — using qpdf first, then Poppler, then a rebuilt page list, and Ghostscript last. Content that is truly destroyed (overwritten, or pages cut off) cannot be recovered, and you'll be told clearly rather than getting a silently broken file back." },
+          { q: "Can the repair change my text?", a: "Not without you knowing. Before a repaired file is offered, its text is read by two independent PDF readers (Ghostscript and Poppler) and compared with what they still read in your damaged file; a result that reads differently is never delivered. In our tests on 248 deliberately damaged PDFs (Greek, Arabic, Chinese, accents, ligatures), no file was delivered with changed text. If no reader can open your damaged file at all, the comparison is impossible: the tool then only uses a structural repair, which keeps the pages' own content as it is in the file, and tells you to check the pages." },
           { q: "Is my file uploaded to a server?", a: "Yes. This is one of the few tools on this site that actually sends your file to a server for processing, because PDF repair genuinely needs Ghostscript and qpdf, which don't run in a browser. Your file is uploaded securely over HTTPS, processed, and deleted immediately afterward — it is never stored, logged, or kept." },
           { q: "How large a PDF can I repair?", a: `Up to ${pdfToolsMaxLabel()} per file — larger files are refused before repair starts.` },
-          { q: "What's the difference between the two repair methods?", a: "qpdf tries first: it precisely reconstructs a damaged cross-reference table without touching your actual content. If that's not enough, Ghostscript rewrites the file from its content streams instead — this can recover more, but re-embeds fonts and images rather than copying them exactly." },
+          { q: "What's the difference between the repair methods?", a: "qpdf tries first: it precisely reconstructs a damaged cross-reference table without touching your actual content. If its result loses text, Poppler rebuilds the file by copying every page it can still read (bookmarks and document properties are not carried over). If the end of the file is missing, a new page list is built from the pages still inside it. Ghostscript, last, rewrites the file from its content streams — this can recover more, but re-embeds fonts and images rather than copying them exactly." },
         ]}
         tips={[
-          "If qpdf alone was enough to repair your file, the result is byte-for-byte closer to your original than a Ghostscript rewrite would be — the report tells you which method was used.",
+          "If qpdf alone was enough to repair your file, the result is the closest to your original — the report tells you which method was used, and whether the text was checked.",
           "A PDF that only opens with warnings in some readers, but not others, is often a broken cross-reference table — exactly what this tool targets.",
           "For a PDF that's merely too large or slow, not damaged, use PDF Compress instead — Repair won't help with that.",
         ]}

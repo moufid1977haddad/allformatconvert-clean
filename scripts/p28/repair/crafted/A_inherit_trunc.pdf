@@ -1,0 +1,22 @@
+%PDF-1.4
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Length 50 >>
+stream
+BT /F1 24 Tf 72 700 Td (Hello inherited one) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 47 >>
+stream
+BT /F1 24 Tf 72 700 Td (Second page text) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /Contents 6 0 R >>
+endobj

@@ -17,6 +17,8 @@ const cases = [
   ['word', 'word-to-pdf', path.resolve('docs/audit/fixtures-p21-office/text.odt')],
   // P28: Word equations (Office Math) in an .rtf -- Gotenberg; lost by 8.36, restored by 8.37
   ['word-equations', 'word-to-pdf', path.resolve('scripts/p28/equations/corpus/word-omml.rtf')],
+  // P28 lot 2: an .odt written by Word (flat MathML, math italic) -- rewritten by lib/odtWordMath.js before Gotenberg
+  ['word-odt-equations', 'word-to-pdf', path.resolve('scripts/p28/equations/corpus/word-omml.odt')],
   ['excel', 'excel-to-pdf', fx('sample.xlsx')],
   ['powerpoint', 'ppt-to-pdf', fx('sample.pptx')],
   ['html', 'html-to-pdf', path.resolve('docs/audit/fidelite-marche/html-to-pdf-test.html'), 'Upload File'],
