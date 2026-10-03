@@ -21,9 +21,12 @@ export function fileResponse(bytes: Uint8Array | ArrayBuffer, headers: Record<st
   return r;
 }
 
+type StagedExt = "pdf" | "docx" | "xlsx" | "pptx" | "rtf" | "doc";
+
 export async function respondStaged(
   req: NextRequest,
-  outExt: "pdf" | "docx" | "xlsx" | "pptx",
+  // P26: rtf and doc too (PDF to Word), and the type may depend on the visitor's choice: a function of the body.
+  outExtOrPick: StagedExt | ((body: any) => StagedExt),
   produce: (file: File, body: any) => Promise<NextResponse>, // body: the JSON the browser posted (its option fields too)
   errorShape: (message: string) => Record<string, unknown> = (message) => ({ error: message }),
 ): Promise<NextResponse> {
@@ -33,6 +36,7 @@ export async function respondStaged(
   } catch {
     return NextResponse.json(errorShape("Invalid request."), { status: 400 });
   }
+  const outExt: StagedExt = typeof outExtOrPick === "function" ? outExtOrPick(body) : outExtOrPick;
   const h: any = openStaged(body);
   if (!h.ok) return NextResponse.json(errorShape(h.error), { status: h.status });
 
@@ -60,14 +64,18 @@ export async function respondStaged(
   }
 
   const bytes: Uint8Array = (res as any).rawBody ?? new Uint8Array(await res.arrayBuffer());
-  const dep: any = await depositOutput(h, bytes, outExt);
+  // A handler may deliver another type than the one asked (P26: PDF to Word hands over the paid .docx when the .doc
+  // step fails) and says so in X-Staged-Ext.
+  const delivered = (res.headers.get("X-Staged-Ext") as StagedExt | null) || outExt;
+  const dep: any = await depositOutput(h, bytes, delivered);
   if (!dep.ok) {
     await discard(h);
     return NextResponse.json(errorShape(dep.error), { status: dep.status });
   }
   const fonts = res.headers.get("X-Detected-Symbol-Fonts");
+  const textBoxes = Number(res.headers.get("X-Doc-Text-Boxes") || 0); // P26: PDF to Word as .doc (see that route)
   return NextResponse.json(
-    { ok: true, jid: h.jid, outputBytes: dep.outputBytes, ext: outExt, detectedFonts: fonts ? fonts.split(",") : [] },
+    { ok: true, jid: h.jid, outputBytes: dep.outputBytes, ext: delivered, detectedFonts: fonts ? fonts.split(",") : [], ...(textBoxes ? { docTextBoxes: textBoxes } : {}), ...(res.headers.get("X-Doc-Fallback") ? { docFallback: true } : {}) },
     { headers: { "Cache-Control": "no-store" } },
   );
 }

@@ -22,20 +22,18 @@ const CONFORMANCE_LEVELS = [
   { value: '3a', label: 'PDF/A-3a (accessible: needs a tagged PDF)', tagged: true },
 ];
 
-// Is this PDF tagged (a structure tree, marked as tagged)? null when it can't be read here (encrypted, damaged, or
-// too big to parse in the browser): the service then checks it and refuses or lowers the level, saying so.
-const TAG_CHECK_MAX_BYTES = 80 * 1024 * 1024;
+// Is this PDF tagged (it has a structure tree -- the service's own rule, py/pdfa_fix.py)? null when it can't be read
+// here (encrypted, damaged, or above 20 MB, kept off the main thread's budget on phones): the service then checks it
+// and refuses or lowers the level, saying so.
+const TAG_CHECK_MAX_BYTES = 20 * 1024 * 1024;
 async function readTagged(file) {
   if (file.size > TAG_CHECK_MAX_BYTES) return null;
   try {
-    const { PDFDocument, PDFName, PDFDict, PDFBool } = await import('pdf-lib');
+    const { PDFDocument, PDFName, PDFDict } = await import('pdf-lib');
     const doc = await PDFDocument.load(await file.arrayBuffer(), { ignoreEncryption: true, updateMetadata: false, throwOnInvalidObject: false });
     if (doc.isEncrypted) return null;
     const root = doc.catalog;
-    const tree = root.lookup(PDFName.of('StructTreeRoot'));
-    const mark = root.lookup(PDFName.of('MarkInfo'));
-    const marked = mark instanceof PDFDict && mark.lookup(PDFName.of('Marked')) === PDFBool.True;
-    return tree instanceof PDFDict && marked;
+    return root.lookup(PDFName.of('StructTreeRoot')) instanceof PDFDict;
   } catch {
     return null;
   }
@@ -52,6 +50,7 @@ export default function PdfToPdfaPage() {
   const [result, setResult] = useState(null); // { compliant, conformance, verapdf }
   const [downloadUrl, setDownloadUrl] = useState(null);
   const inputRef = useRef();
+  const pickedRef = useRef(null);
   const xhrRef = useRef(null);
   const abortRef = useRef(null);
 
@@ -68,7 +67,9 @@ export default function PdfToPdfaPage() {
     }
     setFile(f);
     setTagged(null);
+    pickedRef.current = f;
     readTagged(f).then((t) => {
+      if (pickedRef.current !== f) return; // another file was picked meanwhile
       setTagged(t);
       // a known-untagged file cannot get an "a" level: move to the matching "u" level, said below the menu
       if (t === false) setConformance((c) => (c.endsWith('a') ? `${c[0]}u` : c));

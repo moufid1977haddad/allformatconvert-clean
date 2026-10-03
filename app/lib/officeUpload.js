@@ -48,7 +48,7 @@ export async function convertOffice({ file, endpoint, fields, onStage, signal, a
   if (staged) {
     try {
       const r = await runStagedConversion({ file, endpoint, fields, onStage: stage, signal });
-      return { blob: r.blob, detectedFonts: r.detectedFonts };
+      return { blob: r.blob, detectedFonts: r.detectedFonts, docTextBoxes: r.docTextBoxes || 0, docFallback: !!r.docFallback };
     } catch (e) {
       if (e instanceof MediaJobError && e.code === 'cancelled') throw new Error('Cancelled.');
       throw e;
@@ -74,7 +74,9 @@ export async function convertOffice({ file, endpoint, fields, onStage, signal, a
   const blob = await res.blob();
   // Never offer an empty file as a result (28/09: a 204 with no body was handed over as a 0-byte PDF).
   if (!blob.size) throw new Error('The conversion returned an empty file. Please try again.');
-  return { blob, detectedFonts: header ? header.split(',') : [] };
+  // P26: PDF to Word as .doc says how many text boxes the document has (their text can be cut in the old format).
+  // docFallback: the .doc step failed and the (already paid) .docx was handed over instead.
+  return { blob, detectedFonts: header ? header.split(',') : [], docTextBoxes: Number(res.headers.get('X-Doc-Text-Boxes') || 0), docFallback: res.headers.get('X-Doc-Fallback') === 'docx' };
 }
 
 // ---- audio transcription (route answers with JSON, nothing to download) ---------------------------------
