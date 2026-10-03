@@ -89,6 +89,16 @@ if (!only || only === 'ssrf') {
     ['cgnat-literal', 'http://100.64.0.1/'],
     ['benchmark-literal', 'http://198.18.0.1/'],
     ['file-scheme', 'file:///etc/hostname'],
+    // P28: what 8.37.0 changes -- userinfo before the host, public DNS names that resolve to internal ranges
+    // (nip.io answers <ip>.nip.io with <ip>), and a public redirector pointing inside.
+    ['userinfo-loopback', 'http://example.com@127.0.0.1:3000/health'],
+    ['userinfo-internal', 'http://user:pw@gotenberg-v2.railway.internal:3000/health'],
+    ['dns-loopback', 'http://127.0.0.1.nip.io:3000/health'],
+    ['dns-cgnat', 'http://100.64.0.1.nip.io/'],
+    ['dns-benchmark', 'http://198.18.0.1.nip.io/'],
+    ['dns-rfc1918', 'http://10.0.0.1.nip.io/'],
+    ['dns-metadata', 'http://169.254.169.254.nip.io/latest/meta-data/'],
+    ['redirect-loopback', 'https://httpbin.org/redirect-to?url=http%3A%2F%2F127.0.0.1%3A3000%2Fhealth'],
     ['control-public', 'https://example.com/'],
   ];
   for (const [name, url] of targets) {
@@ -109,6 +119,25 @@ if (!only || only === 'ssrf') {
       verdict += reached ? ' REACHED' : ' not-reached';
       verdict += ` | ${inner.slice(0, 160) || '(iframe empty)'}`;
     } else verdict += ` | ${r.body.toString('utf8').slice(0, 160)}`;
+    log(`ssrf ${name} ${url} -> ${verdict}`);
+  }
+}
+
+// ---- 2 bis (P28). The URL route itself (our URL to PDF tool checks addresses first; this is Gotenberg's own guard) --
+if (!only || only === 'ssrf' || only === 'url') {
+  for (const [name, url] of [['url-loopback', 'http://127.0.0.1:3000/health'], ['url-userinfo', 'http://example.com@127.0.0.1:3000/health'],
+    ['url-internal', 'http://pdf-tools.railway.internal:8080/health'], ['url-pdftools', 'http://allformatconvert-clean.railway.internal:8080/health'],
+    ['url-dns-cgnat', 'http://100.64.0.1.nip.io/'], ['url-redirect', 'https://httpbin.org/redirect-to?url=http%3A%2F%2F127.0.0.1%3A3000%2Fhealth'],
+    ['url-control-public', 'https://example.com/']]) {
+    const r = await post('/forms/chromium/convert/url', [], { url });
+    let verdict = `status ${r.status}`;
+    if (r.status === 200) {
+      const f = path.join(outDir, `ssrf-${name}.pdf`);
+      fs.writeFileSync(f, r.body);
+      const text = pdfText(f).replace(/\s+/g, ' ').trim();
+      verdict += /"status"|"ok"|binaries|Example Domain|ami-id|instance-id/.test(text) ? ' REACHED' : ' not-reached';
+      verdict += ` | ${text.slice(0, 120) || '(empty)'}`;
+    } else verdict += ` | ${r.body.toString('utf8').slice(0, 120)}`;
     log(`ssrf ${name} ${url} -> ${verdict}`);
   }
 }

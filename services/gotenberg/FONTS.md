@@ -2,7 +2,7 @@
 
 One real font is added by this repo (Liberation Sans Narrow, below); the
 Calibri Light fix is a fontconfig rule only, redirecting a font *name* to
-a font already present in the base `gotenberg/gotenberg:8.36.0` image, no
+a font already present in the base `gotenberg/gotenberg:8.37.0` image (8.36.0 until P28), no
 new binary. Both are built into the same image in one build, per the
 decision to test both fixes together rather than rebuild twice.
 
@@ -26,7 +26,7 @@ from Gotenberg's own docs — see the phase 2 spec for the fetch).
 
 | Font | Package | License | Redistributable? |
 |---|---|---|---|
-| Liberation Sans Narrow | `fonts-liberation-sans-narrow` (Debian, present in trixie — the same Debian release `gotenberg/gotenberg:8.36.0` is built on) | GPLv2 with Red Hat's font-embedding exception (verified directly against the font's own `License.txt` in [liberationfonts/liberation-sans-narrow](https://github.com/liberationfonts/liberation-sans-narrow) — not assumed from a summary). The exception exists specifically so embedding the font in a document doesn't GPL-license the document; ordinary GPLv2 terms (keep copyright/license notices, don't claim the "LIBERATION" trademark on a modified version) govern redistributing the font file itself, and explicitly permit commercial redistribution. | Yes |
+| Liberation Sans Narrow | `fonts-liberation-sans-narrow` (Debian, present in trixie — the same Debian release `gotenberg/gotenberg:8.36.0` and `8.37.0` are built on) | GPLv2 with Red Hat's font-embedding exception (verified directly against the font's own `License.txt` in [liberationfonts/liberation-sans-narrow](https://github.com/liberationfonts/liberation-sans-narrow) — not assumed from a summary). The exception exists specifically so embedding the font in a document doesn't GPL-license the document; ordinary GPLv2 terms (keep copyright/license notices, don't claim the "LIBERATION" trademark on a modified version) govern redistributing the font file itself, and explicitly permit commercial redistribution. | Yes |
 
 Dropped from the main `liberation-fonts` project at its 2.00.0 relicense
 to OFL 1.1 — its own README says this was "due to licensing problems,"
