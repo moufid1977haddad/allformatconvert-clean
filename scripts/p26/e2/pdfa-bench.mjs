@@ -1,16 +1,20 @@
 // P26 E2: every PDF of <dir> through /v1/pdfa of a pdf-tools service at every level, with and without downgrade.
 // Each returned file is re-validated HERE by an independent veraPDF run (not the service's own report) against the
 // level the service says it delivered, and for an "a" level its structure tree is checked to be present.
+// P27: EVERY delivered file, b levels included, must carry the source's text word for word (pdftotext, independent of
+// the service's Ghostscript). Permanent corpus: scripts/p27/pdfa-corpus (P26's 20 PDFs + Greek, Arabic, Chinese,
+// ligatures, decomposed accents, subset fonts from Chromium, LibreOffice and pdf-lib).
 //   node scripts/p26/e2/pdfa-bench.mjs <service-url> <api-key-env-name> <dir> <verapdf.bat> [--levels=2u,3a]
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
 const [url, keyEnv, dir, vera] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const levels = (process.argv.find((a) => a.startsWith('--levels='))?.split('=')[1] || '1b,2b,3b,2u,3u,2a,3a').split(',');
 const key = process.env[keyEnv];
 if (!key) { console.error(`set ${keyEnv}`); process.exit(2); }
-const out = path.join(dir, 'out'); fs.mkdirSync(out, { recursive: true });
+const out = process.argv.find((a) => a.startsWith('--out='))?.split('=')[1] || path.join(os.tmpdir(), 'pdfa-bench-out'); fs.mkdirSync(out, { recursive: true });
 
 function veraCheck(file, level) {
   let stdout = '';
@@ -23,7 +27,7 @@ function veraCheck(file, level) {
   } catch { return false; }
 }
 // Text as pdftotext (poppler, independent of the service's Ghostscript) reads it, as a word list.
-const words = (f) => { try { return execFileSync('pdftotext', [f, '-'], { encoding: 'utf8', maxBuffer: 64 << 20 }).split(/\s+/).filter(Boolean); } catch { return null; } };
+const words = (f) => { try { return execFileSync('pdftotext', ['-enc', 'UTF-8', f, '-'], { encoding: 'utf8', maxBuffer: 64 << 20 }).split(/\s+/).filter(Boolean); } catch { return null; } };
 const inspect = (f) => JSON.parse(execFileSync('python', ['services/pdf-tools/py/pdfa_fix.py', 'inspect', f], { encoding: 'utf8' }));
 
 let pass = 0, fail = 0;
@@ -51,11 +55,15 @@ for (const name of fs.readdirSync(dir).filter((f) => f.endsWith('.pdf')).sort())
         const structure = inspect(f).tagged;
         // delivered level must be the requested one unless downgrade was allowed, and must be independently valid;
         // an "a" level must keep the structure tree.
-        // a "u" or "a" file must carry the source's text, word for word (that is what those levels promise)
-        let textSame = true;
-        if (j.conformance[1] !== 'b') { const a = words(src), b2 = words(f); textSame = !!a && !!b2 && a.join(' ') === b2.join(' '); }
+        // every delivered file must carry the source's text, word for word (P27: b levels too)
+        const a = words(src), b2 = words(f);
+        const textSame = !!a && !!b2 && a.join(' ') === b2.join(' ');
+        if (!textSame && a && b2) {
+          const i = a.findIndex((w, k) => w !== b2[k]);
+          console.log(`   first difference at word ${i}: "${a[i]}" -> "${b2[i]}" (${a.filter((w, k) => w !== b2[k]).length}/${a.length} words differ)`);
+        }
         ok = valid && textSame && (j.conformance === level || (allowDowngrade && j.downgraded === true)) && (j.conformance[1] !== 'a' || structure);
-        line += `${textSame ? '' : ' TEXT CHANGED'} got ${j.conformance}${j.downgraded ? ' (downgraded: ' + j.attempts.map((a) => a.conformance + ' ' + a.reason).join(', ') + ')' : ''} | own veraPDF ${valid ? 'valid' : 'INVALID'} | structure ${structure}`;
+        line += `${textSame ? '' : ' TEXT CHANGED'} got ${j.conformance}${j.method ? ' [' + j.method + ']' : ''}${j.downgraded ? ' (downgraded: ' + j.attempts.map((a) => a.conformance + ' ' + a.reason).join(', ') + ')' : ''} | own veraPDF ${valid ? 'valid' : 'INVALID'} | structure ${structure}`;
       } else {
         // a refusal is right only when no downgrade was allowed (or the file cannot be PDF/A at all) and is explained
         ok = r.status === 422 && !!j.error;

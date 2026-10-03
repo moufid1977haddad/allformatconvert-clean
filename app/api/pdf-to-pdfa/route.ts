@@ -22,6 +22,7 @@ const MAX_FILE_SIZE_BYTES = MAX_PDFTOOLS_STAGED_BYTES;
 const LEVEL_RE = /^(1b|2b|3b|2u|3u|2a|3a)$/i;
 
 export async function POST(req: NextRequest) {
+  const startedAt = Date.now();
   const serviceUrl = process.env.PDFTOOLS_SERVICE_URL;
   const apiKey = process.env.PDFTOOLS_API_KEY;
 
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
   if (isStagedRequest(req)) {
     return respondStagedPdfJson(req, (file, body) => {
       const requested = body?.conformance;
-      return convertPdfa(req, file, typeof requested === "string" && LEVEL_RE.test(requested) ? requested.toLowerCase() : "2b", serviceUrl, apiKey, body?.allowDowngrade === true || body?.allowDowngrade === "true");
+      return convertPdfa(req, file, typeof requested === "string" && LEVEL_RE.test(requested) ? requested.toLowerCase() : "2b", serviceUrl, apiKey, body?.allowDowngrade === true || body?.allowDowngrade === "true", startedAt);
     });
   }
 
@@ -55,10 +56,10 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid multipart/form-data request." }, { status: 400 });
   }
-  return convertPdfa(req, file, conformance, serviceUrl, apiKey, allowDowngrade);
+  return convertPdfa(req, file, conformance, serviceUrl, apiKey, allowDowngrade, startedAt);
 }
 
-async function convertPdfa(req: NextRequest, file: File, conformance: string, serviceUrl: string, apiKey: string, allowDowngrade = false): Promise<NextResponse> {
+async function convertPdfa(req: NextRequest, file: File, conformance: string, serviceUrl: string, apiKey: string, allowDowngrade = false, startedAt = Date.now()): Promise<NextResponse> {
   if (file.size === 0) {
     return NextResponse.json({ ok: false, error: "The uploaded file is empty." }, { status: 400 });
   }
@@ -76,9 +77,11 @@ async function convertPdfa(req: NextRequest, file: File, conformance: string, se
   if (allowDowngrade) serviceForm.append("allowDowngrade", "true");
 
   const controller = new AbortController();
-  // 2u/3u/2a/3a (P26): the service allows them 200 s (up to three conversions + validations); ours outlasts it.
-  const advanced = conformance[1] !== "b";
-  const timeoutId = setTimeout(() => controller.abort(), advanced ? Math.min(250_000, 3 * serviceTimeoutMs(file.size)) : serviceTimeoutMs(file.size));
+  // Every level (P26 for 2u/3u/2a/3a, P27 for 1b/2b/3b, now also text-checked): the service allows 200 s (up to three
+  // conversions + validations + text checks); ours outlasts it -- but always ends inside maxDuration (300 s), counting
+  // the time a staged file took to arrive, so the visitor gets the JSON "timed out" answer, never a killed function.
+  const budget = Math.min(250_000, 3 * serviceTimeoutMs(file.size), 270_000 - (Date.now() - startedAt));
+  const timeoutId = setTimeout(() => controller.abort(), Math.max(5_000, budget));
 
   let serviceResponse: Response;
   try {
