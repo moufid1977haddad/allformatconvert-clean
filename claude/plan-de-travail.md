@@ -62,8 +62,8 @@ complètes priment sur 1-2 points de vitesse) — sujet clos ; **le panorama iPh
 |---|---|---|
 | 1 Gotenberg 8.37.0 | ✅ **en production** (`gotenberg-v2` `26130544`, fusion `e060eb63`) : banc 59 documents dont 16 à équations, fidélité égale ou meilleure partout (rapport §1.3), adresses internes toujours refusées (27 sondes), revue de sécurité « GO avec conditions » (conditions vérifiées) ; www 8/8 | Retour arrière : `gotenberg-v2` → `930bc129` |
 | 1b Aptos (trouvé en route) | ✅ **en production** (`8e8e178d`, fusion `df37f58e`) : Aptos → Liberation Sans au lieu de Noto Serif ; classeur Excel 2024 : 1 page comme Excel (2 avant) | — |
-| 2 Équations des ODT écrits par Word | en cours | |
-| 3 PDF Repair : contrôle du texte | en cours | |
+| 2 Équations des ODT écrits par Word | ✅ **en production** (fusion `03aa60d1`, `lib/odtWordMath.js`) : MathML « à plat » de Word rendu lisible (Smallpdf les perd, iLovePDF = Word) ; revue indépendante appliquée | **Non mesuré** : équations d'un `.docx` (ConvertAPI en production, ≈ 0,01 $ à dépenser pour le vérifier — décision propriétaire) ; reste mineur : crochets de matrice non étirés, équations RTF alignées à gauche (Word : centrées) |
+| 3 PDF Repair | ✅ **en production** (pdf-tools `ab0077fd`, site `onlineconvertools-jcglmx2uu`) : texte contrôlé par Ghostscript et Poppler avant toute livraison ; méthodes Poppler et reconstruction de l'arbre des pages ; en ligne sur 248 PDF abîmés : **19 textes altérés en silence → 0**, refus 64 → 25 ; revue indépendante appliquée (3 défauts sérieux corrigés) | Écart restant avec iLovePDF (3-Heights) : PDF chiffré AES-256 dont la fin est perdue (pages dans des flux d'objets chiffrés). Retour arrière : pdf-tools `538d1590`, Vercel `onlineconvertools-1q669xcht` |
 
 **Risque de sécurité ancien, à traiter (revue indépendante P28)** : Chromium de Gotenberg tourne sans bac à sable avec
 JavaScript actif, et HTML to PDF lui passe le HTML déposé tel quel ; Chromium 152 (Gotenberg 8.37) ne corrige pas
@@ -73,7 +73,7 @@ nettoyage du HTML déposé comme `lib/urlFetch/snapshot.mjs` (ce qu'on perdrait 
 
 ## 🌙 P27 — nuit du 03 au 04/10 (`docs/audit/RAPPORT-p27-nuit-04-10.md`, repère `restauration-avant-p27-04-10` = `ffe978a7`)
 
-**P27 terminé le 04/10 : 6 phases sur 7 en production, aucun retour arrière.** Production **`onlineconvertools-g8bo4cvv9` = `b264efbc`** (repère du dernier lot `restauration-avant-p27-lot2` = `8399d22f` = `a5xwln359`) ; pdf-tools code `5c51f840`. Dépenses : ConvertAPI ≈ 0,04 $ (sur 0,05 $), Railway ≈ 0,05 $ (bancs), facture au repos inchangée (pdf-tools 0,023 Go). **Reste au propriétaire** : phase 3 (autoriser `railway up` vers `gotenberg-fonts`), un panorama iPhone de 63 Mpx dans Image Compressor, décision Google Analytics, contrôle du texte de PDF Repair.
+**P27 terminé le 04/10 : 6 phases sur 7 en production, aucun retour arrière.** Production **`onlineconvertools-g8bo4cvv9` = `b264efbc`** (repère du dernier lot `restauration-avant-p27-lot2` = `8399d22f` = `a5xwln359`) ; pdf-tools code `5c51f840`. Dépenses : ConvertAPI ≈ 0,04 $ (sur 0,05 $), Railway ≈ 0,05 $ (bancs), facture au repos inchangée (pdf-tools 0,023 Go). **Reste au propriétaire** : phase 3 (autoriser `railway up` vers `gotenberg-fonts`), un panorama iPhone de 63 Mpx dans Image Compressor, décision Google Analytics, ~~contrôle du texte de PDF Repair~~ (fait par P28).
 
 | Phase | État | Reste |
 |---|---|---|
@@ -84,7 +84,7 @@ nettoyage du HTML déposé comme `lib/urlFetch/snapshot.mjs` (ce qu'on perdrait 
 | 5 Accessibilité AA | ✅ **en production** : **axe 0 violation** sur 972 pages-modes (avant 248 graves/critiques) ; mode sombre contrasté, focus visible, zones d'envoi au clavier (A11yBridge), annonces ; clavier 40/40 ×3 moteurs (local, préversion, www) | — |
 | 6 Clarté d'usage | ✅ **en production** : « Click or drop… » / « Choose… » selon l'appareil (112 zones), mots sous les icônes, 12 catégories au pied de page ; action déjà cachée avant fichier partout | — |
 | 7 Restes P23 | ✅ **en production** : TextArea (gros textes sans blocage), bornes mesurées (Compressor 140 Mpx ordinateur / 50 téléphone ; images PDF 268 / 90), chien de garde | Propriétaire : un panorama iPhone de 63 Mpx dans Image Compressor (au-dessus de 50) |
-| Trouvé en route | ✅ **en production** (lot 3) : PDF Extract Text, Compare, **Redact** (ne trouvait pas « données »), Translate, AI Summary, PDF to HTML, PDF to Excel lisent juste les PDF LibreOffice-Windows à accents décomposés (`app/lib/pdfActualText.js`, mise à jour incrémentale, NFC dans `app/lib/pdfjs.js`, revue indépendante) ; bancs corrigés (préversion protégée comptée « propre », barre Vercel, jeton) | **PDF Repair** (repli Ghostscript) peut altérer le texte comme l'ancien PDF/A : contrôle de texte à ajouter (pdf-tools, Railway) |
+| Trouvé en route | ✅ **en production** (lot 3) : PDF Extract Text, Compare, **Redact** (ne trouvait pas « données »), Translate, AI Summary, PDF to HTML, PDF to Excel lisent juste les PDF LibreOffice-Windows à accents décomposés (`app/lib/pdfActualText.js`, mise à jour incrémentale, NFC dans `app/lib/pdfjs.js`, revue indépendante) ; bancs corrigés (préversion protégée comptée « propre », barre Vercel, jeton) | ✅ **PDF Repair : fait par P28** (texte contrôlé, en production) |
 
 > **P26 (03/10) terminé : Gotenberg protégé, E1 et E2 en production, aucun retour arrière** — tableau P26 ci-dessous.
 > Reste après P27 : ~~Gotenberg 8.37.0~~ (fait par P28), E3 (compte Google). PDF/A b et vraie conversion .doc : faits par P27.
