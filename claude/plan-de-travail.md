@@ -52,6 +52,14 @@
 
 **Après le lancement, sur déclencheur :** AdSense à **20-50 visiteurs/jour réels** (propriétaire : compte AdSense, message « European regulations » dans Privacy & messaging, 2 variables Vercel — ≈ 45 min ; tout le reste est prêt, `RAPPORT-prelancement-01-10.md` §3) ; relevé Search Console des 10 pages entre le **10 et le 24 novembre** ; décisions « juste après » du tableau des déclencheurs.
 
+## 🌙 P27 — nuit du 03 au 04/10 (`docs/audit/RAPPORT-p27-nuit-04-10.md`, repère `restauration-avant-p27-04-10` = `ffe978a7`)
+
+| Phase | État | Reste |
+|---|---|---|
+| 1 PDF/A b : texte | ✅ **en production** : tout PDF/A (b, u, a, abaissement) n'est livré que si son texte est celui du source pour deux lecteurs (Ghostscript, Poppler) ; source gardé d'abord ; sinon refus expliqué. Service en ligne 341/341, 0 texte altéré ; revue indépendante faite. Corpus et banc permanents `scripts/p27/pdfa-corpus`, `scripts/p26/e2/pdfa-bench.mjs` | 4 niveaux b sur 93 refusés à raison (un PDF « impression seulement », `site-mobi` en 1b) |
+| 2 PDF to Word réel | ✅ .doc et RTF de 9,9 Mo sur www, rouverts dans Word et LibreOffice ; **défaut ConvertAPI trouvé** (accents de PDF LibreOffice perdus : « donne% es ») et **corrigé en production** (`/v1/unicode-from-actualtext` avant ConvertAPI, revue indépendante) ; 0,04 $ dépensés sur 0,05 $ | — |
+| 3 Gotenberg 8.37 | ⛔ **bloquée** : `railway up` vers `gotenberg-fonts` refusé par le garde-fou de permissions de Claude Code ; banc 43 documents prêt (8.36 stable 43/43) ; **défaut 8.36 trouvé : équations Word perdues** (8.37 les rétablit) | **Propriétaire** : autoriser ce déploiement (ou le lancer), puis banc, sondes, revue de sécurité |
+
 > **P26 (03/10) terminé : Gotenberg protégé, E1 et E2 en production, aucun retour arrière** — tableau P26 ci-dessous.
 > Reste : défaut ancien des PDF/A b (texte altéré), Gotenberg 8.37.0, une vraie conversion .doc sur www, E3 (compte Google).
 
