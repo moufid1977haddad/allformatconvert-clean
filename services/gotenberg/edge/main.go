@@ -229,7 +229,9 @@ func main() {
 	cmd := exec.Command("gotenberg", gotenbergArgs(mode)...)
 	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
 	if mode == "front" {
-		cmd.Env = os.Environ()
+		// Railway's CHROMIUM_AUTO_START=true would win over --chromium-auto-start=false (measured on gotenberg-fonts,
+		// 04/10): dropped, so no Chromium process exists at all in the front.
+		cmd.Env = filterEnv(os.Environ(), "CHROMIUM_AUTO_START")
 	} else {
 		cmd.Env = filterEnv(os.Environ(), "OCT_TRUSTED_KEYS")
 	}

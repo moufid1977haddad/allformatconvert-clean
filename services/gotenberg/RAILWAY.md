@@ -29,3 +29,20 @@ wasn't true yet — `README.md` only listed 2 of the 9, and the deploy
 failed at the healthcheck on the missing `PORT` var specifically. This
 file is the correction; see `README.md`'s "Deploying this service" section
 for the deployment steps, which now point here.
+
+## P30 (04/10) — Chromium in its own Railway project
+
+This image now runs in two roles (`OCT_EDGE_MODE`, read by `edge/main.go`, the `oct-edge` relay that starts Gotenberg):
+
+| Service | Project | Role | Variables |
+|---|---|---|---|
+| `gotenberg-v2` (production), `gotenberg-fonts` (test) | `fortunate-manifestation` | `front` (default): LibreOffice and the PDF engines here; `/forms/chromium/*` checked against this service's Basic Auth, then relayed, signed, to `OCT_CHROMIUM_URL` (baked in the Dockerfile). Chromium never starts here. | unchanged (the 9 above + the P26 protections) |
+| `chromium` | **`oct-chromium-isolated`** (its own project: Railway does not let services of another project reach ours over the private network) | `back`: Chromium only, Gotenberg on 127.0.0.1, only requests signed by the front pass (public key `OCT_TRUSTED_KEYS`, baked in the Dockerfile) | `OCT_EDGE_MODE=back` + copies of gotenberg-v2's `API_TIMEOUT`, `API_DISABLE_DOWNLOAD_FROM`, `API_DOWNLOAD_FROM_DENY_PRIVATE_IPS`, `CHROMIUM_AUTO_START`, `CHROMIUM_DENY_LIST`, `CHROMIUM_DENY_PRIVATE_IPS`, `WEBHOOK_DISABLE`, `WEBHOOK_DENY_PRIVATE_IPS`, `GOTENBERG_GRACEFUL_SHUTDOWN_DURATION`, `LOG_STD_FORMAT`, `PORT` (`scripts/p30/isolated-vars.mjs`). **No credential**: oct-edge refuses to start in `back` if Gotenberg's password is present. |
+
+- The isolated service is deployed with `railway up` from `git archive HEAD:services/gotenberg` plus a `railway.json`
+  (healthcheck `/health`, region `sfo`, restart on failure) written in the upload directory only.
+- **If Gotenberg's Basic Auth password changes**, the front's signing key changes: recompute the public key with
+  `scripts/p30/edge-pubkey.mjs`, put it in `OCT_TRUSTED_KEYS` (Dockerfile) and redeploy all three services, or every
+  Chromium tool answers 403.
+- Rollback of the whole change: the previous deployment of `gotenberg-v2` (its image started Gotenberg directly, with
+  Chromium inside); the isolated project can then be left idle or deleted by the owner.
