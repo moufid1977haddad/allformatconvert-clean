@@ -98,7 +98,7 @@ export default function ImageToGifPage() {
             <div className="grid grid-cols-4 gap-2">
               {images.map((img, i) => (
                 <div key={i} className="relative">
-                  <img src={img.src} className="w-full h-20 object-cover rounded border border-neutral-200" />
+                  <img alt="Preview of your image" src={img.src} className="w-full h-20 object-cover rounded border border-neutral-200" />
                   <button onClick={() => removeImage(i)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">x</button>
                   <p className="text-xs text-neutral-500 text-center">{i+1}</p>
                 </div>
@@ -113,7 +113,7 @@ export default function ImageToGifPage() {
           {result && (
             <div className="space-y-3 text-center">
               <p className="text-green-600 font-semibold">GIF created ({result.frameCount} frames)</p>
-              <img src={result.url} className="max-w-full mx-auto rounded-xl border border-neutral-200" />
+              <img alt="Preview of your image" src={result.url} className="max-w-full mx-auto rounded-xl border border-neutral-200" />
               <FileDownload href={result.url} name="animated.gif" />
             </div>
           )}

@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import TextArea from '@/app/components/TextArea';
 export default function PasswordGeneratorPage() {
   const [length, setLength] = useState(16);
   const [upper, setUpper] = useState(true);
@@ -107,7 +108,7 @@ export default function PasswordGeneratorPage() {
           <button onClick={generate} className="w-full bg-indigo-600 hover:bg-indigo-500 rounded-xl py-3 font-semibold transition text-white">{mode === 'passphrase' ? 'Generate Passphrase' : 'Generate Password'}</button>
           {password && <p className="text-center text-sm" data-entropy={bits}>Strength: about {bits} bits — {bits >= 100 ? 'excellent' : bits >= 80 ? 'very strong' : bits >= 60 ? 'strong' : bits >= 45 ? 'fair' : 'weak'}{bits < 60 ? ': make it longer' : ''}</p>}
           {mode === 'passphrase' && <p className="text-xs text-neutral-500 text-center">Words from the <a href="https://www.eff.org/dice" target="_blank" rel="noopener noreferrer" className="underline">EFF Large Wordlist</a> by the Electronic Frontier Foundation, used under <a href="https://creativecommons.org/licenses/by/3.0/us/" target="_blank" rel="noopener noreferrer" className="underline">CC BY 3.0 US</a>.</p>}
-          {list.length > 1 && <textarea aria-label="Passwords" readOnly value={list.join('\n')} className="w-full h-40 bg-neutral-50 border border-neutral-200 rounded-xl p-3 font-mono text-sm" />}
+          {list.length > 1 && <TextArea aria-label="Passwords" readOnly value={list.join('\n')} className="w-full h-40 bg-neutral-50 border border-neutral-200 rounded-xl p-3 font-mono text-sm" />}
           {password && <div className="space-y-2"><div className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 font-mono text-center break-all text-indigo-400">{password}</div><button onClick={() => navigator.clipboard.writeText(password)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button></div>}
         </div>
       </div>

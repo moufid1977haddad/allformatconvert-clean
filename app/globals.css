@@ -93,7 +93,42 @@ body {
 }
 
 .dark .text-neutral-400 {
-  color: #707070 !important;
+  /* P27 (axe, WCAG AA): #707070 was 3.5:1 on the dark cards (#1a1a1a); #8f8f8f is 5.4:1 there, 4.9:1 on #222 */
+  color: #8f8f8f !important;
+}
+
+/* P27 (axe on every page in dark mode, WCAG 2.2 AA 4.5:1): the light theme's link and accent colours had no dark
+   variant in places -- indigo-600/700 links 2.2-2.9:1, indigo-500 3.8:1, red-600 3.6:1 on the dark surfaces. One shade
+   for dark backgrounds, only where the element names no dark colour of its own (its dark: class keeps winning). */
+.dark .text-indigo-500:not([class*="dark:text-"]),
+.dark .text-indigo-600:not([class*="dark:text-"]),
+.dark .text-indigo-700:not([class*="dark:text-"]) {
+  color: #818cf8;
+}
+.dark .text-red-600:not([class*="dark:text-"]) {
+  color: #f87171;
+}
+/* ...except inside the light tinted notes (amber, red, green, yellow, blue -50) that stay light in dark mode */
+.dark :is(.bg-amber-50, .bg-red-50, .bg-green-50, .bg-yellow-50, .bg-blue-50) :is(.text-indigo-500, .text-indigo-600, .text-indigo-700):not([class*="dark:text-"]) {
+  color: #4338ca;
+}
+.dark :is(.bg-amber-50, .bg-red-50, .bg-green-50, .bg-yellow-50, .bg-blue-50) .text-red-600:not([class*="dark:text-"]) {
+  color: #b91c1c;
+}
+/* light grey buttons and chips (bg-neutral-200) and the selected-option card (bg-indigo-50) stayed light in dark
+   mode under light text: 1.0-1.9:1 */
+.dark .bg-neutral-200:not([class*="dark:bg-"]) {
+  background-color: #2e2e2e;
+}
+.dark .hover\:bg-neutral-200:hover:not([class*="dark:hover:bg-"]) {
+  background-color: #3a3a3a;
+}
+.dark .bg-indigo-50:not([class*="dark:bg-"]) {
+  background-color: #1e1b4b;
+}
+/* near-black body text (text-neutral-900) on a card that dark mode turns dark: 1.0:1 (Markdown previews) */
+.dark .text-neutral-900:not([class*="dark:text-"]) {
+  color: #ededed;
 }
 
 .dark .hover\:shadow-md:hover {
@@ -126,6 +161,25 @@ body {
   background-color: #222222 !important;
   border-color: #444444 !important;
   color: #ededed !important;
+}
+
+/* P27 (WCAG 2.2 AA 2.4.7 / 2.4.11): keyboard focus is always visible -- 32 fields and buttons removed the browser's
+   outline (focus:outline-none) and some had no replacement ring. One clear outline for :focus-visible (keyboard, and
+   text fields), never for a mouse click on a button. */
+:focus-visible {
+  outline: 2px solid #2563eb !important;
+  outline-offset: 2px !important;
+}
+.dark :focus-visible {
+  outline-color: #93c5fd !important;
+}
+
+/* P27: the upload area's words follow the device (app/components/UploadPrompt.jsx): "click or drop" with a mouse or
+   trackpad, "choose" on a touch screen. */
+.upload-prompt-coarse { display: none; }
+@media (pointer: coarse) {
+  .upload-prompt-fine { display: none; }
+  .upload-prompt-coarse { display: inline; }
 }
 
 /* Hide Google Translate bar */

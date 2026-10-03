@@ -12,6 +12,7 @@ import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { FileDownload } from '../../../components/FileDownload';
 import { videoFileProblem, unreadableVideoMessage } from '../../../lib/fileChecks';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 // 30/09 (owner's iPhone): the merger played every clip in a <canvas> and recorded it with MediaRecorder -- in real
 // time, the videos opening full screen on iPhone, and a WebM (merged.webm) that Photos cannot open. Now, as ffmpeg
@@ -149,7 +150,7 @@ export default function VideoMergerPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => !stage && inputRef.current.click()}>
-            <p className="text-neutral-500">Click or drop videos here (add them in the order you want, or reorder below)</p>
+            <p className="text-neutral-500"><UploadPrompt what="videos" /> (add them in the order you want, or reorder below)</p>
             <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} multiple className="hidden" onChange={handleFiles} />
           </div>
           {files.length > 0 && (

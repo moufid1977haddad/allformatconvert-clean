@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { markdownToHtml } from '../../../lib/codeTools';
 import { TextDownload } from '../../../components/FileDownload';
 import { reportShownMessage } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 
 export default function MarkdownToHtmlPage() {
   const [input, setInput] = useState('');
@@ -21,8 +22,8 @@ export default function MarkdownToHtmlPage() {
         <p className="text-neutral-500 text-center mb-8">Convert Markdown to HTML</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm text-neutral-500 mb-1">Markdown</label><textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" placeholder="Paste Markdown here..." value={input} onChange={e => setInput(e.target.value)} /></div>
-            <div><label className="block text-sm text-neutral-500 mb-1">HTML Output</label><textarea aria-label="HTML Output" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" value={output} readOnly />
+            <div><label className="block text-sm text-neutral-500 mb-1">Markdown</label><TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" placeholder="Paste Markdown here..." value={input} onChange={e => setInput(e.target.value)} /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">HTML Output</label><TextArea aria-label="HTML Output" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" value={output} readOnly />
             <TextDownload text={output} name="document.html" /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">

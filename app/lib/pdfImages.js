@@ -15,6 +15,7 @@
 import { imageDims, decodeToRaster, hasAlpha, encodePngRGBA, encodeJpegWasm } from './bigImage';
 import { checkedBlob } from './mediaSupport';
 import { imageHeaderSize } from './fileChecks';
+import { isMobileDevice } from './isMobileDevice';
 
 const isJpeg = (b) => b[0] === 0xff && b[1] === 0xd8;
 const isPng = (b) => b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47;
@@ -118,11 +119,17 @@ function placedPage(pdfDoc, img, { size, orientation = 'auto', marginMm = 0 }, e
 // Firefox: its size is read from the header first — at most a canvas's largest area, 268 MP, on every device (a lower
 // phone bound was not measured here; a 63 MP iPhone panorama converted from HEIC must pass). A JPEG photo is embedded
 // without being decoded: no bound for it.
-const MAX_DECODED_MP = () => 268;
+// P27 (phase 7), measured (scripts/p27/phone-bound-memory.mjs, Image to PDF, PNG pictures, peak of the tab in Chromium):
+// 24 MP 0.51 GB, 48 MP 0.70 GB, 100 MP 1.65 GB, 200 MP 3.0 GB (done, on a computer). A phone browser reloads a tab
+// around 1.5 GB: 90 MP on a phone (a 63 MP panorama passes, a 108 / 200 MP Android picture does not), 268 on a computer.
+// JPEG photos are not decoded: no bound for them on any device.
+export const PHONE_MAX_DECODED_MP = 90;
+export const MAX_DECODED_MP_COMPUTER = 268;
+const MAX_DECODED_MP = () => (isMobileDevice() ? PHONE_MAX_DECODED_MP : MAX_DECODED_MP_COMPUTER);
 async function assertDecodable(original, file) {
   const size = await imageHeaderSize(file).catch(() => null);
   const mp = size ? (size.width * size.height) / 1e6 : 0;
-  if (mp > MAX_DECODED_MP()) throw new SizeError(`${original.name}: this image is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round(mp)} megapixels), more than a browser can turn into a PDF page (${MAX_DECODED_MP()} megapixels at most). Use a smaller version of the image, or a JPEG.`);
+  if (mp > MAX_DECODED_MP()) throw new SizeError(`${original.name}: this image is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round(mp)} megapixels), more than a browser can turn into a PDF page (${MAX_DECODED_MP()} megapixels at most${isMobileDevice() ? ` on a phone, ${MAX_DECODED_MP_COMPUTER} on a computer` : ''}). Use a smaller version of the image, or a JPEG.`);
 }
 class SizeError extends Error {}
 

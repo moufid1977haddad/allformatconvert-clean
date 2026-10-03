@@ -3,6 +3,7 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { TextDownload } from '../../../components/FileDownload';
 import { reportShownMessage } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 
 export default function TextToListPage() {
   const [text, setText] = useState('');
@@ -18,7 +19,7 @@ export default function TextToListPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Text to List</h1>
         <p className="text-neutral-500 text-center mb-8">Convert text to different list formats</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste your text here..." value={text} onChange={e => setText(e.target.value)} />
+          <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste your text here..." value={text} onChange={e => setText(e.target.value)} />
           <div className="grid grid-cols-3 gap-3">
             <button onClick={toBullet} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition text-white">Bullet List</button>
             <button onClick={toNumbered} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition text-white">Numbered List</button>
@@ -26,7 +27,7 @@ export default function TextToListPage() {
           </div>
           {hasResult && (result ? (
             <div className="space-y-2">
-              <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={result} readOnly />
+              <TextArea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={result} readOnly />
               <TextDownload text={result} name="list.txt" />
               <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => { setCopyError(true); reportShownMessage('Copy to the clipboard failed.'); }); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button>
               {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}

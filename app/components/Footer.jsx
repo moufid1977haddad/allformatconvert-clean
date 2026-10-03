@@ -2,9 +2,10 @@
 import { getToolCounts } from '@/lib/toolCounts';
 import SiteName from './SiteName';
 import PrivacyChoicesLink from './PrivacyChoicesLink';
+import { SITE_CATEGORIES } from '@/app/lib/siteCategories';
 
 export default function Footer() {
-  const { total } = getToolCounts();
+  const { total, counts } = getToolCounts();
   return (
     <footer className="bg-white text-neutral-600 border-t border-neutral-200">
       <div className="max-w-7xl mx-auto px-6 py-12">
@@ -21,12 +22,11 @@ export default function Footer() {
           </div>
           <div>
             <h3 className="font-bold text-base uppercase tracking-widest text-black dark:text-white mb-3">Tools</h3>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/tools/pdf-tools" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">PDF Tools</Link></li>
-              <li><Link href="/tools/image-tools" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">Image Tools</Link></li>
-              <li><Link href="/tools/video-tools" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">Video Tools</Link></li>
-              <li><Link href="/tools/ai-tools" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">AI Tools</Link></li>
-              <li><Link href="/tools/developer-tools" className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">Developer Tools</Link></li>
+            {/* P27: every category (12), not 5 -- the market's footers list all their tool families (Smallpdf, iLovePDF) */}
+            <ul className="grid grid-cols-2 md:grid-cols-1 gap-x-4 gap-y-2 text-sm">
+              {SITE_CATEGORIES.map((c) => (
+                <li key={c.slug}><Link href={c.href} className="hover:text-[#185fa5] dark:hover:text-[#85b7eb] transition font-medium">{c.name}{counts[c.slug] ? <span className="text-neutral-500 dark:text-neutral-400 font-normal"> ({counts[c.slug]})</span> : null}</Link></li>
+              ))}
             </ul>
           </div>
           <div>

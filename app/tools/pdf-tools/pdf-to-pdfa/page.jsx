@@ -6,6 +6,7 @@ import { checkPdfToolsSize, pdfToolsMaxLabel, shouldStage } from '../../../lib/o
 import ProgressBar from '../../../components/ProgressBar';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 // Real ceiling (hosting-platform payload gate), not the 50 MB the route itself would
 // accept -- see lib/quota/limits.js.
@@ -152,12 +153,12 @@ export default function PdfToPdfaPage() {
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">PDF to PDF/A</h1>
         <p className="text-neutral-500 text-center mb-2">Convert to PDF/A for long-term archiving, verified compliant by veraPDF</p>
         <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8">
-          Files up to {pdfToolsMaxLabel()} Your file is uploaded to our conversion service for processing — see below for what that means.
+          Files up to {pdfToolsMaxLabel()}. Your file is uploaded to our conversion service for processing — see below for what that means.
         </p>
 
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-700 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a PDF here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a PDF" />}</p>
             <input ref={inputRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
           </div>
 

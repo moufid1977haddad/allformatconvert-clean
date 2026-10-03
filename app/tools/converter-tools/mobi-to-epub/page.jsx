@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { FileDownload } from '../../../components/FileDownload';
 import { reportShownMessage } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 const XHTML_NS = 'http://www.w3.org/1999/xhtml';
 
@@ -371,7 +372,7 @@ export default function MobiToEpubPage() {
         <p className="text-neutral-500 text-center mb-8">Convert MOBI ebooks to EPUB format</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a MOBI file here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a MOBI file" />}</p>
             <input ref={inputRef} type="file" accept=".mobi,.azw,.azw3,.prc" className="hidden" onChange={handleFile} />
           </div>
           <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">

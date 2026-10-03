@@ -6,6 +6,9 @@ import { itemsToText } from '../../../lib/pdfTextLayout';
 import { diffLines } from '../../../lib/codeTools';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
+import TextArea from '@/app/components/TextArea';
+import { withActualTextUnicode } from '../../../lib/pdfActualText';
 
 export default function Page() {
   const [file1, setFile1] = useState(null);
@@ -21,7 +24,7 @@ export default function Page() {
   const extractText = async (file) => {
     const pdfjsLib = await loadPdfjs();
     const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const pdf = await pdfjsLib.getDocument({ data: await withActualTextUnicode(arrayBuffer) }).promise;
     let text = '';
     const pageOfLine = []; // P24 (03/10): the page each line comes from, shown next to it (Draftable, PDF24 Compare)
     for (let i = 1; i <= pdf.numPages; i++) {
@@ -74,10 +77,10 @@ export default function Page() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div onClick={() => file1Ref.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-400 transition">
-              {file1 ? <p className="text-neutral-700 text-sm font-medium">{file1.name}</p> : <p className="text-neutral-500 text-sm">Click to upload PDF 1</p>}
+              {file1 ? <p className="text-neutral-700 text-sm font-medium">{file1.name}</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="PDF 1" /></p>}
             </div>
             <div onClick={() => file2Ref.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-400 transition">
-              {file2 ? <p className="text-neutral-700 text-sm font-medium">{file2.name}</p> : <p className="text-neutral-500 text-sm">Click to upload PDF 2</p>}
+              {file2 ? <p className="text-neutral-700 text-sm font-medium">{file2.name}</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="PDF 2" /></p>}
             </div>
           </div>
           <input ref={file1Ref} type="file" accept=".pdf" className="hidden" onChange={e => { const f = e.target.files[0]; e.target.value = ''; setFile1(f); }} />
@@ -104,11 +107,11 @@ export default function Page() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm font-medium text-neutral-700 mb-2">{file1.name}</p>
-                <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-3 text-xs h-64 resize-none" value={text1} readOnly />
+                <TextArea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-3 text-xs h-64 resize-none" value={text1} readOnly />
               </div>
               <div>
                 <p className="text-sm font-medium text-neutral-700 mb-2">{file2.name}</p>
-                <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-3 text-xs h-64 resize-none" value={text2} readOnly />
+                <TextArea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-3 text-xs h-64 resize-none" value={text2} readOnly />
               </div>
             </div>
           )}

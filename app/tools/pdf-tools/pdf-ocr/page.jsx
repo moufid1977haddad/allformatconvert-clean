@@ -9,6 +9,8 @@ import { reportToolError } from '../../../lib/reportError';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
+import TextArea from '@/app/components/TextArea';
 
 const LANGUAGES = [
   { code: 'afr', label: "Afrikaans" },
@@ -377,7 +379,7 @@ export default function Page() {
         <p className="text-neutral-500 text-center mb-8">Read text from scanned PDFs and photographed pages, powered by Tesseract.js, entirely in your browser</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload a PDF file</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="a PDF file" /></p>}
           </div>
           <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
           <div>
@@ -415,7 +417,7 @@ export default function Page() {
           {output && (
             <div className="space-y-2">
               <label className="block text-sm text-neutral-500">Recognized Text</label>
-              <textarea aria-label="Recognized Text" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={output} readOnly />
+              <TextArea aria-label="Recognized Text" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={output} readOnly />
               <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Copy Text</button>
               {pdfUrl && <FileDownload href={pdfUrl} name={file.name.replace(/\.pdf$/i, '') + '-searchable.pdf'} />}
             </div>

@@ -5,6 +5,7 @@ import { sha256Hex, dHash, findPairs } from '../../../lib/imageSimilarity';
 import { unreadableImageMessage, imageHeaderSize } from '../../../lib/fileChecks';
 import { CANVAS_MAX_AREA } from '../../../lib/mediaSupport';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 // Beyond a canvas's largest area (268 MP) a picture is never decoded here (a 30 000 × 30 000 PNG is 3.6 GB once open):
 // compared byte for byte only, and said so. Below it, a picture this browser cannot open is caught and said too.
 const HUGE = CANVAS_MAX_AREA;
@@ -75,7 +76,7 @@ export default function DuplicateImageFinderPage() {
         <p className="text-neutral-500 text-center mb-8">Find duplicate images in your collection</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{images.length > 0 ? images.length + ' images loaded' : 'Click to select multiple images'}</p>
+            <p className="text-neutral-500">{images.length > 0 ? images.length + ' images loaded' : <UploadPrompt what="several images" />}</p>
             <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
           </div>
           {notes.map((n, i) => <p key={i} role="alert" className="text-red-400 text-center text-sm">{n}</p>)}
@@ -85,7 +86,7 @@ export default function DuplicateImageFinderPage() {
             <select id="dup-strict" disabled={busy} value={maxBits} onChange={(e) => { setMaxBits(Number(e.target.value)); setPairs(null); }} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2"><option value={3}>Strict — nearly identical (61/64 matching or more)</option><option value={6}>Normal — resized or re-compressed copies (58/64)</option><option value={10}>Loose — also lightly edited copies (54/64; more false matches)</option></select></label>
           {images.length > 0 && (
             <div className="grid grid-cols-4 gap-2">
-              {images.map((img, i) => <div key={i} className="relative">{img.url ? <img src={img.url} onError={() => onThumbError(img)} className="w-full h-16 object-cover rounded" /> : <div className="w-full h-16 rounded bg-neutral-100" />}<p className="text-xs text-neutral-500 truncate">{img.name}</p></div>)}
+              {images.map((img, i) => <div key={i} className="relative">{img.url ? <img alt="Preview of your image" src={img.url} onError={() => onThumbError(img)} className="w-full h-16 object-cover rounded" /> : <div className="w-full h-16 rounded bg-neutral-100" />}<p className="text-xs text-neutral-500 truncate">{img.name}</p></div>)}
             </div>
           )}
           <button onClick={findDuplicates} disabled={images.length < 2 || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">{busy ? 'Comparing…' : 'Find Duplicates'}</button>

@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { reverseCharacters, reverseWords as reverseWordOrder, reverseLines as reverseLineOrder } from '../../../lib/textSegments';
 import { TextDownload } from '../../../components/FileDownload';
 import { reportShownMessage } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 
 export default function TextReverserPage() {
   const [text, setText] = useState('');
@@ -19,7 +20,7 @@ export default function TextReverserPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Text Reverser</h1>
         <p className="text-neutral-500 text-center mb-8">Reverse any text, words or lines</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none" placeholder="Type or paste your text here..." value={text} onChange={e => setText(e.target.value)} />
+          <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none" placeholder="Type or paste your text here..." value={text} onChange={e => setText(e.target.value)} />
           <div className="grid grid-cols-3 gap-3">
             <button onClick={reverseText} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition text-white">Reverse Text</button>
             <button onClick={reverseWords} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition text-white">Reverse Words</button>
@@ -27,7 +28,7 @@ export default function TextReverserPage() {
           </div>
           {result && (
             <div className="space-y-2">
-              <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none" value={result} readOnly />
+              <TextArea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none" value={result} readOnly />
               <TextDownload text={result} name="reversed.txt" />
               <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => { setCopyError(true); reportShownMessage('Copy to the clipboard failed.'); }); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button>
               {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}

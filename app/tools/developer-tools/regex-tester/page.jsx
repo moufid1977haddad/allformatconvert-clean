@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { TextDownload } from '../../../components/FileDownload';
 import { reportShownMessage } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 
 // P24 (03/10), against regex101 (the reference): matches highlighted in the text with their positions, numbered and
 // named capture groups, a replace preview ($1, $<name>, $&), and the match run in a Worker stopped after 2 s — a pattern
@@ -66,7 +67,7 @@ export default function RegexTesterPage() {
             <div className="col-span-3"><label className="block text-sm text-neutral-500 mb-1">Pattern</label><input aria-label="Pattern" type="text" value={pattern} onChange={e => setPattern(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3 font-mono" placeholder="e.g. (?<year>\d{4})-(\d{2})" /></div>
             <div><label className="block text-sm text-neutral-500 mb-1">Flags</label><input aria-label="Flags" type="text" value={flags} onChange={e => setFlags(e.target.value.trim())} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3 font-mono" placeholder="gi" /></div>
           </div>
-          <textarea aria-label="Test text" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none font-mono" placeholder="Enter text to test..." value={text} onChange={e => setText(e.target.value)} />
+          <TextArea aria-label="Test text" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none font-mono" placeholder="Enter text to test..." value={text} onChange={e => setText(e.target.value)} />
           <label className="flex items-center gap-2 text-sm"><input id="rx-replace" type="checkbox" checked={doReplace} onChange={e => setDoReplace(e.target.checked)} /> Replace with</label>
           {doReplace && <input aria-label="Replacement" type="text" value={replacement} onChange={e => setReplacement(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3 font-mono" placeholder="e.g. $2/$<year> — $& is the whole match" />}
           <button onClick={test} disabled={!pattern || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">{busy ? 'Testing…' : 'Test'}</button>
@@ -88,7 +89,7 @@ export default function RegexTesterPage() {
                 </div>
               )}
               {res.replaced !== null && res.replaced !== undefined && (
-                <div><div className="text-sm text-neutral-500 mb-1">Result of the replacement</div><textarea aria-label="Replacement result" readOnly value={res.replaced} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-3 text-sm h-28 font-mono" /><TextDownload text={res.replaced} name="replaced.txt" /></div>
+                <div><div className="text-sm text-neutral-500 mb-1">Result of the replacement</div><TextArea aria-label="Replacement result" readOnly value={res.replaced} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-3 text-sm h-28 font-mono" /><TextDownload text={res.replaced} name="replaced.txt" /></div>
               )}
             </div>
           )}

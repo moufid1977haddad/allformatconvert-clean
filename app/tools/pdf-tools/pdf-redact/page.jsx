@@ -8,6 +8,9 @@ import { matchSpans, annotationText, patternSpans, annotationMatches, termsOf, P
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
+import TextArea from '@/app/components/TextArea';
+import { withActualTextUnicode } from '../../../lib/pdfActualText';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -34,7 +37,7 @@ export default function Page() {
       const arrayBuffer = await file.arrayBuffer();
       const srcDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer));
       const outDoc = await PDFDocument.create();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: await withActualTextUnicode(arrayBuffer) }).promise;
       const scale = 2;
       let totalMatches = 0;
       const pagesHit = [];
@@ -145,12 +148,12 @@ export default function Page() {
         <p className="text-neutral-500 text-center mb-8">Censor sensitive text in your PDF</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload a PDF file</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="a PDF file" /></p>}
           </div>
           <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Text to redact (one word or phrase per line)</label>
-            <textarea id="rd-terms" rows={3} value={keyword} onChange={e => setKeyword(e.target.value)} placeholder="Enter text to censor..." className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-400" />
+            <TextArea id="rd-terms" rows={3} value={keyword} onChange={e => setKeyword(e.target.value)} placeholder="Enter text to censor..." className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-400" />
           </div>
           <fieldset className="text-sm"><legend className="text-neutral-500 mb-1">Also find automatically</legend>
             <div className="flex flex-wrap gap-x-4 gap-y-1">

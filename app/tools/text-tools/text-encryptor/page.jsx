@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { encryptText, decryptText } from '../../../lib/textCrypto';
 import { TextDownload } from '../../../components/FileDownload';
 import { reportShownMessage } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 
 export default function TextEncryptorPage() {
   const [text, setText] = useState('');
@@ -28,7 +29,7 @@ export default function TextEncryptorPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Text Encryptor</h1>
         <p className="text-neutral-500 text-center mb-8">Encrypt and decrypt text with a key</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none" placeholder="Paste your text here..." value={text} onChange={e => setText(e.target.value)} />
+          <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none" placeholder="Paste your text here..." value={text} onChange={e => setText(e.target.value)} />
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Secret Key</label>
             <input type="password" value={key} onChange={e => setKey(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" placeholder="Enter secret key..." />
@@ -40,7 +41,7 @@ export default function TextEncryptorPage() {
           {note && <p className="text-amber-700 text-sm text-center">{note}</p>}
           {result && (
             <div className="space-y-2">
-              <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none" value={result} readOnly />
+              <TextArea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none" value={result} readOnly />
               <TextDownload text={result} name="encrypted.txt" />
               <button onClick={() => { setCopyError(false); navigator.clipboard.writeText(result).catch(() => { setCopyError(true); reportShownMessage('Copy to the clipboard failed.'); }); }} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button>
               {copyError && <p className="text-red-400 text-center text-sm">Copy failed</p>}

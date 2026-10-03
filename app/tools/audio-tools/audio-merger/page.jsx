@@ -16,6 +16,7 @@ import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
 import { execChecked } from '../../../lib/ffmpegRun';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 const LOSSLESS = MERGE_FORMATS.filter((f) => f.lossless);
 const COMPRESSED = MERGE_FORMATS.filter((f) => !f.lossless);
@@ -287,7 +288,7 @@ export default function AudioMergerPage() {
           >
             {items.length > 0
               ? <p className="text-neutral-700 text-sm font-medium">{items.length} file{items.length > 1 ? 's' : ''} · click or drop here to add more</p>
-              : <p className="text-neutral-500 text-sm">Click or drop two or more audio files here</p>}
+              : <p className="text-neutral-500 text-sm"><UploadPrompt what="two or more audio files" /></p>}
           </div>
           <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} multiple className="hidden" onChange={handleFiles} />
           {items.length > 0 && (

@@ -8,6 +8,7 @@ import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
 import { animationOf } from '../../../lib/animatedImage';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 // Modelled on the reference site (iLoveIMG "Resize image"): by pixels with the aspect ratio locked by
 // default and "do not enlarge", or by percentage; the output keeps the source format (it used to always
@@ -125,7 +126,7 @@ export default function ImageResizerPage() {
         <p className="text-neutral-500 text-center mb-8">Resize by pixels or percentage, proportions kept — in your browser</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            {image ? <img src={image} alt="" className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click to choose an image</p>}
+            {image ? <img src={image} alt="" className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500"><UploadPrompt what="an image" /></p>}
             {orig && <p className="text-xs text-neutral-500 mt-2">{orig.w}×{orig.h} px · {fmtSize(file.size)}</p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>

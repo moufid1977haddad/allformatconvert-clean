@@ -5,6 +5,7 @@ import { formatBytes } from '../../../lib/formatBytes';
 import { stripMetadata } from '../../../lib/stripMetadata';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 // The page promised "View image metadata and EXIF data" but read only the
 // browser's file properties (29/09). exifr (MIT, used by metadata viewers)
 // reads EXIF, GPS, IPTC, XMP and ICC from JPEG, HEIC, TIFF, PNG, WebP and AVIF.
@@ -67,7 +68,7 @@ export default function ImageMetadataPage() {
         <p className="text-neutral-500 text-center mb-8">View image metadata and EXIF data</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            {preview ? <img src={preview} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
+            {preview ? <img alt="Preview of your image" src={preview} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500"><UploadPrompt what="an image" /></p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={analyze} />
           </div>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}

@@ -9,6 +9,7 @@ import PlayablePreview from '../../../components/PlayablePreview';
 import { FileDownload } from '../../../components/FileDownload';
 import { execChecked } from '../../../lib/ffmpegRun';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 // Start and end to a tenth of a second (typed, slid, or taken from the player) and fades in/out, as the reference
 // cutter offers (mp3cut.net, read 26/09/2026: fades, keyboard nudges). The duration used to be rounded down to whole
@@ -156,7 +157,7 @@ export default function AudioTrimmerPage() {
         <p className="text-neutral-500 text-center mb-8">Trim and cut audio to a tenth of a second, with fades</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload an audio file</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="an audio file" /></p>}
           </div>
           <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
           {audioUrl && !noPreview && <audio ref={audioRef} src={audioUrl} onLoadedMetadata={onLoaded} onError={() => probeWithFfmpeg(file, fileIdRef.current)} controls className="w-full" />}

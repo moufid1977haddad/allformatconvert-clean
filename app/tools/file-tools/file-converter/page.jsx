@@ -5,6 +5,7 @@ import SeoContent from '../../../components/SeoContent';
 import { FileDownload } from '../../../components/FileDownload';
 import { detectEncoding } from '../../../lib/csvEncoding';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 export default function FileConverterPage() {
   const [file, setFile] = useState(null);
   const [format, setFormat] = useState('txt');
@@ -55,7 +56,7 @@ export default function FileConverterPage() {
         <p className="text-neutral-500 text-center mb-8">Convert text files to different formats</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a text file here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a text file" />}</p>
             <input ref={inputRef} type="file" accept=".txt,.csv,.json,.html,.md" className="hidden" onChange={handleFile} />
           </div>
           <div><label className="block text-sm text-neutral-500 mb-1">Convert to</label><select aria-label="Convert to" value={format} onChange={e => setFormat(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3"><option value="txt">TXT</option><option value="json">JSON</option><option value="csv">CSV</option><option value="html">HTML</option></select></div>

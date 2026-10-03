@@ -2,10 +2,11 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
-import { addImagePage } from '../../../lib/pdfImages';
+import { addImagePage, PHONE_MAX_DECODED_MP, MAX_DECODED_MP_COMPUTER } from '../../../lib/pdfImages';
 import { FileDownload } from '../../../components/FileDownload';
 import ImagePageLayout, { DEFAULT_IMAGE_LAYOUT } from '../../../components/ImagePageLayout';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 export default function Page() {
   const [files, setFiles] = useState([]);
@@ -40,10 +41,11 @@ export default function Page() {
       <div className="max-w-2xl mx-auto">
         <Link href="/tools/pdf-tools" className="text-indigo-600 text-sm hover:underline mb-6 inline-block">Back to PDF Tools</Link>
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800">JPG to PDF</h1>
-        <p className="text-neutral-500 text-center mb-8">Convert JPG, PNG, HEIC, WebP, GIF, BMP, TIFF or AVIF images to one PDF</p>
+        <p className="text-neutral-500 text-center mb-2">Convert JPG, PNG, HEIC, WebP, GIF, BMP, TIFF or AVIF images to one PDF</p>
+        <p className="text-neutral-500 text-xs text-center mb-8">JPEG photos of any size; other images up to {MAX_DECODED_MP_COMPUTER} megapixels each on a computer, {PHONE_MAX_DECODED_MP} on a phone.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {files.length > 0 ? <p className="text-neutral-700 font-medium">{files.length} image(s) selected</p> : <p className="text-neutral-500 text-sm">Click to upload images (JPG, PNG, HEIC, WebP, GIF, BMP, TIFF, AVIF)</p>}
+            {files.length > 0 ? <p className="text-neutral-700 font-medium">{files.length} image(s) selected</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="images" /> (JPG, PNG, HEIC, WebP, GIF, BMP, TIFF, AVIF)</p>}
           </div>
           <input ref={fileRef} type="file" accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.bmp,.avif,.heic,.heif,.tif,.tiff" multiple className="hidden" onChange={handleFiles} />
           {files.length > 0 && (

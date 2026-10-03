@@ -10,6 +10,7 @@ import { Dancing_Script } from 'next/font/google';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 // 30/09 (known gap of 29/09): the signature can also be TYPED (handwriting font) or UPLOADED (photo or scan of a
 // signature, white background removed), as iLovePDF and Smallpdf offer (draw / type / upload). All three end up on the
@@ -305,7 +306,7 @@ export default function Page() {
         <p className="text-neutral-500 text-center mb-8">Draw, type or upload your signature and add it to a PDF</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload a PDF file</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="a PDF file" /></p>}
           </div>
           <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={async (e) => { const f = e.target.files[0]; e.target.value = ''; setResult(null); setError(''); if (!f) return; const problem = (await pdfFileProblem(f)) || (await pdfLockedProblem(f)); if (problem) { setFile(null); setError(problem); return; } setFile(f); }} />
           <div>

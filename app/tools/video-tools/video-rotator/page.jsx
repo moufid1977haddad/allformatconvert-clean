@@ -11,6 +11,7 @@ import { reportToolError } from '../../../lib/reportError';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 // 30/09 (owner's iPhone): the rotator replayed the video in a <canvas> and recorded it with MediaRecorder -- in real
 // time, with the source playing full screen on iPhone, a WebM that Photos cannot open, heavier than the original.
@@ -99,7 +100,7 @@ export default function VideoRotatorPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => !stage && inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? `${file.name} — ${formatBytes(file.size)}` : 'Click or drop a video file here'}</p>
+            <p className="text-neutral-500">{file ? `${file.name} — ${formatBytes(file.size)}` : <UploadPrompt what="a video file" />}</p>
             <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onClick={(e) => { e.target.value = ''; }} onChange={pick} />
           </div>
           {previewUrl && (

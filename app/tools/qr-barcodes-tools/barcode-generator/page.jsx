@@ -11,6 +11,7 @@ import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { textFileProblem, decodedText } from '../../../lib/fileChecks';
 import { useToolError } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 
 // References read on 26/09/2026 (docs/audit/RAPPORT-amelioration-14.md): TEC-IT (100+ types, drawn on its server,
 // 10 free codes, non-commercial use only, SVG for subscribers), barcode-maker.com (~35 types, PNG/JPG/GIF/SVG, batch
@@ -291,7 +292,7 @@ export default function BarcodeGeneratorPage() {
               </div>
               {source === 'list' && <p className="text-xs text-neutral-500">One value per line. To print your own text under a code, put it after a tab (a CSV's second column goes there). Delete a header row if your file has one.</p>}
               {source === 'list' ? (
-                <textarea id="bc-lines" value={lines} onChange={(e) => setLines(e.target.value)} placeholder={`${sym.sample}\n…`} className={input + ' h-40 font-mono text-sm'} aria-label="Values, one per line" />
+                <TextArea id="bc-lines" value={lines} onChange={(e) => setLines(e.target.value)} placeholder={`${sym.sample}\n…`} className={input + ' h-40 font-mono text-sm'} aria-label="Values, one per line" />
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
                   {[['prefix', 'Prefix', 'text'], ['start', 'First number', 'number'], ['count', 'How many', 'number'], ['step', 'Step', 'number'], ['pad', 'Digits (zero-padded)', 'number'], ['suffix', 'Suffix', 'text']].map(([k, label, type]) => (

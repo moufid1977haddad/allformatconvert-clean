@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { reformatJson } from '../../../lib/jsonText';
 import { verifyJwt } from '../../../lib/jwtVerify';
 import { useToolError } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 export default function JwtDecoderPage() {
   const [token, setToken] = useState('');
   const [decoded, setDecoded] = useState(null);
@@ -56,12 +57,12 @@ export default function JwtDecoderPage() {
         <h1 className="text-3xl font-bold text-center mb-2">JWT Decoder</h1>
         <p className="text-neutral-500 text-center mb-8">Decode and inspect JWT tokens</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none font-mono" placeholder="Paste JWT token here..." value={token} onChange={e => { setToken(e.target.value); stale(); setDecoded(null); setError(''); }} />
+          <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-none font-mono" placeholder="Paste JWT token here..." value={token} onChange={e => { setToken(e.target.value); stale(); setDecoded(null); setError(''); }} />
           <button onClick={decode} disabled={!token} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Decode</button>
           {error && <p className="text-red-400 text-center">{error}</p>}
           <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 space-y-2">
             <label htmlFor="jwt-key" className="block text-sm text-neutral-600 font-semibold">Verify the signature{alg ? ` (${alg})` : ''}</label>
-            <textarea id="jwt-key" value={key} onChange={(e) => { setKey(e.target.value); stale(); }} spellCheck={false} autoComplete="off"
+            <TextArea id="jwt-key" value={key} onChange={(e) => { setKey(e.target.value); stale(); }} spellCheck={false} autoComplete="off"
               placeholder={/^HS/.test(alg) ? 'The shared secret' : 'The public key: -----BEGIN PUBLIC KEY----- … or a JWK {"kty": …}'}
               className="w-full bg-white border border-neutral-200 rounded-lg p-3 text-sm h-24 resize-none font-mono" />
             {/^HS/.test(alg) && (

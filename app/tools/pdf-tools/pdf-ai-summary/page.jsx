@@ -6,6 +6,9 @@ import { checkPromptLength, MAX_PROMPT_CHARS } from '@/lib/quota/limits';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
+import TextArea from '@/app/components/TextArea';
+import { withActualTextUnicode } from '../../../lib/pdfActualText';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -27,7 +30,7 @@ export default function Page() {
       // Extract the document's real text (the tool used to send the raw file
       // bytes, base64-encoded, so the model summarized binary noise).
       const pdfjsLib = await loadPdfjs();
-      const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise.catch((e) => {
+      const pdf = await pdfjsLib.getDocument({ data: await withActualTextUnicode(await file.arrayBuffer()) }).promise.catch((e) => {
         throw e?.name === 'PasswordException' ? new Error('this PDF needs a password to open. Remove it first with PDF Unlock, then summarize the unlocked file.') : e;
       });
       let text = '';
@@ -73,7 +76,7 @@ export default function Page() {
         <p className="text-neutral-500 text-center mb-8">Summarize PDF content with AI</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload a PDF file</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="a PDF file" /></p>}
           </div>
           <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
           <button onClick={summarize} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
@@ -84,7 +87,7 @@ export default function Page() {
             <div className="space-y-2">
               <label className="block text-sm text-neutral-500">Summary</label>
               {coverage && <p className="text-xs text-neutral-500">{coverage}</p>}
-              <textarea aria-label="Summary" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={output} readOnly />
+              <TextArea aria-label="Summary" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={output} readOnly />
               <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Copy Summary</button>
               <TextDownload text={output} name={(file?.name || 'document').replace(/\.pdf$/i, '') + '-summary.txt'} />
             </div>

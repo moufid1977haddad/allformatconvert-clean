@@ -8,6 +8,8 @@ import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
 import AnimatedImageNote from '../../../components/AnimatedImageNote';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
+import TextArea from '@/app/components/TextArea';
 
 // P24 (03/10): iLoveIMG's text (watermark / meme) offers fonts, size, colour, shadow, opacity; ezgif adds outline and
 // rotation. Fonts are system stacks with fallbacks (a font missing on the device falls back to a similar one).
@@ -89,12 +91,12 @@ export default function AddTextToImagePage() {
         <p className="text-neutral-500 text-center mb-8">Overlay text on images</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
+            {image ? <img alt="Preview of your image" src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500"><UploadPrompt what="an image" /></p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
           <AnimatedImageNote file={file} />
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          <div><label className="block text-sm text-neutral-500 mb-1">Text (Enter for a new line)</label><textarea aria-label="Text" rows={2} value={text} onChange={e => setText(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
+          <div><label className="block text-sm text-neutral-500 mb-1">Text (Enter for a new line)</label><TextArea aria-label="Text" rows={2} value={text} onChange={e => setText(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
           <div className="grid grid-cols-2 gap-4">
             <div><label className="block text-sm text-neutral-500 mb-1">Font Size: {fontSize}px</label><input aria-label="Font Size (px)" type="range" min="10" max="800" value={fontSize} onChange={e => setFontSize(parseInt(e.target.value))} className="w-full" /></div>
             <div><label className="block text-sm text-neutral-500 mb-1">Color</label><input aria-label="Color" type="color" value={color} onChange={e => setColor(e.target.value)} className="w-full h-10 rounded-lg cursor-pointer" /></div>
@@ -117,7 +119,7 @@ export default function AddTextToImagePage() {
             {outline > 0 && <label className="flex items-center gap-2"><span className="text-neutral-500">Outline colour</span><input id="tx-outline-color" type="color" value={outlineColor} onChange={e => setOutlineColor(e.target.value)} /></label>}
           </div>
           <button onClick={apply} disabled={!image || !text} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Apply Text</button>
-          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
+          {result && <div className="space-y-2"><img alt="Preview of your image" src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
         </div>
       </div>
       <SeoContent

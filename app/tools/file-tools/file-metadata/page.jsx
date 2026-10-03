@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { detectSignature, extensionOf } from '../../../lib/fileSignature';
 import { formatBytes } from '../../../lib/formatBytes';
 import { readEmbedded, EMBEDDED_KINDS } from '../../../lib/embeddedMetadata';
+import UploadPrompt from '@/app/components/UploadPrompt';
 export default function FileMetadataPage() {
   const [metadata, setMetadata] = useState(null);
   const [warning, setWarning] = useState('');
@@ -42,7 +43,7 @@ export default function FileMetadataPage() {
         <p className="text-neutral-500 text-center mb-8">View file metadata and information</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">Click or drop any file here</p>
+            <p className="text-neutral-500"><UploadPrompt what="any file" /></p>
             <input ref={inputRef} type="file" className="hidden" onChange={analyze} />
           </div>
           {warning && <p role="alert" className="text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm">{warning}</p>}

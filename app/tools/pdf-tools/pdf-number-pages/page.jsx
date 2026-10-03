@@ -7,6 +7,7 @@ import { placeOnVisiblePage, visibleSize } from '../../../lib/pdfPlace';
 import { FileDownload } from '../../../components/FileDownload';
 import { textAsPng, fontCanWrite } from '../../../lib/pdfTextImage';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 // P24 (03/10), coverage against iLovePDF's "Add page numbers" (read 02/10: position, margin, facing pages, skip the
 // cover, page range, first number, text templates "{n}", "Page {n}", "Page {n} of {p}", font size and colour).
@@ -111,7 +112,7 @@ export default function PdfNumberPagesPage() {
         <p className="text-neutral-500 text-center mb-8">Add page numbers to your PDF — format, first number, page range, position</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a PDF here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a PDF" />}</p>
             <input ref={inputRef} type="file" accept=".pdf,application/pdf" className="hidden" onChange={handleFile} />
           </div>
           <div>

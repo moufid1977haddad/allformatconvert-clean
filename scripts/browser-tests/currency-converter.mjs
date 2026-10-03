@@ -2,9 +2,10 @@
 // attribution shown; compared with an independent source (ECB via Frankfurter) for EUR->GBP.
 // Usage: node scripts/browser-tests/currency-converter.mjs <origin or _vercel_share URL> [--browser=firefox]
 import { chromium, firefox, webkit } from '@playwright/test';
+import { previewAuth } from '../p26/preview-auth.mjs';
 const entry = process.argv[2]; const origin = new URL(entry).origin;
 const engine = process.argv.includes('--browser=firefox') ? firefox : process.argv.includes('--browser=webkit') ? webkit : chromium;
-const b = await engine.launch(); const page = await b.newPage();
+const b = await engine.launch(); const bctx = await b.newContext(); await previewAuth(bctx, origin); const page = await bctx.newPage();
 if (entry.includes('_vercel_share')) await page.goto(entry);
 let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 const api = await (await fetch('https://open.er-api.com/v6/latest/USD')).json();

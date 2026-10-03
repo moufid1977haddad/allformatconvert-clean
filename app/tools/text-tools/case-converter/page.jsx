@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { sentenceCase, titleCase, capitalizedCase, graphemes } from '../../../lib/textSegments';
 import { TextDownload } from '../../../components/FileDownload';
 import { reportShownMessage } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 
 export default function CaseConverterPage() {
   const [text, setText] = useState('');
@@ -32,7 +33,7 @@ export default function CaseConverterPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Case Converter</h1>
         <p className="text-neutral-500 text-center mb-8">Convert text to any case format</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Type or paste your text here..." value={text} onChange={e => setText(e.target.value)} />
+          <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Type or paste your text here..." value={text} onChange={e => setText(e.target.value)} />
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <button onClick={toUpper} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition text-white">UPPERCASE</button>
             <button onClick={toLower} className="bg-indigo-600 hover:bg-indigo-500 rounded-xl py-2 font-semibold transition text-white">lowercase</button>

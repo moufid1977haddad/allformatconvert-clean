@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { diffLines } from '../../../lib/codeTools';
+import TextArea from '@/app/components/TextArea';
 
 export default function TextComparatorPage() {
   const [text1, setText1] = useState('');
@@ -40,11 +41,11 @@ export default function TextComparatorPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-neutral-500 mb-1">Text 1</label>
-              <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste first text here..." value={text1} onChange={e => setText1(e.target.value)} />
+              <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste first text here..." value={text1} onChange={e => setText1(e.target.value)} />
             </div>
             <div>
               <label className="block text-sm text-neutral-500 mb-1">Text 2</label>
-              <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste second text here..." value={text2} onChange={e => setText2(e.target.value)} />
+              <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste second text here..." value={text2} onChange={e => setText2(e.target.value)} />
             </div>
           </div>
           <div className="flex flex-wrap gap-4 text-sm text-neutral-600">

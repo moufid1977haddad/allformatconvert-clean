@@ -8,6 +8,7 @@ import IosOriginalNote from '../../../components/IosOriginalNote';
 import { FileDownload } from '../../../components/FileDownload';
 import { videoFileProblem, unreadableVideoMessage } from '../../../lib/fileChecks';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 const MAX_DURATION = 120;
 
@@ -479,7 +480,7 @@ export default function VideoWatermarkPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote />
           <div className={"border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center transition " + (loading ? 'opacity-50 pointer-events-none' : 'cursor-pointer hover:border-indigo-500')} onClick={() => !loading && inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a video file" />}</p>
             <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} disabled={loading} />
           </div>
           {file && <video ref={videoRef} controls className="w-full rounded-xl bg-neutral-800" />}
@@ -510,7 +511,7 @@ export default function VideoWatermarkPage() {
             <div>
               <label className="block text-sm text-neutral-500 mb-1">Watermark Image</label>
               <div className="border-2 border-dashed border-neutral-200 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => watermarkInputRef.current.click()}>
-                <p className="text-neutral-500 text-sm">{watermarkImage ? watermarkImage.name : 'Click to upload a logo or image'}</p>
+                <p className="text-neutral-500 text-sm">{watermarkImage ? watermarkImage.name : <UploadPrompt what="a logo or image" />}</p>
                 <input ref={watermarkInputRef} type="file" accept="image/*" className="hidden" onChange={handleWatermarkImage} />
               </div>
             </div>

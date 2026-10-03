@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { base64Encode, base64Decode } from '../../../lib/textCodecs';
 import { TextDownload } from '../../../components/FileDownload';
 import { reportShownMessage } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 export default function Base64EncoderPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -21,13 +22,13 @@ export default function Base64EncoderPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Base64 Encoder</h1>
         <p className="text-neutral-500 text-center mb-8">Encode and decode Base64</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" placeholder="Paste text here..." value={input} onChange={e => setInput(e.target.value)} />
+          <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" placeholder="Paste text here..." value={input} onChange={e => setInput(e.target.value)} />
           <label className="flex items-center justify-center gap-2 text-sm text-neutral-600"><input type="checkbox" checked={urlSafe} onChange={e => setUrlSafe(e.target.checked)} /> URL-safe Base64 when encoding (- and _ instead of + and /, no = padding — as in JWT and URLs)</label>
           <div className="grid grid-cols-2 gap-3">
             <button onClick={encode} disabled={!input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Encode</button>
             <button onClick={decode} disabled={!input} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Decode</button>
           </div>
-          {output && <div className="space-y-2"><textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" value={output} readOnly />
+          {output && <div className="space-y-2"><TextArea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" value={output} readOnly />
           <TextDownload text={output} name="base64.txt" /><button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button></div>}
         </div>
       </div>

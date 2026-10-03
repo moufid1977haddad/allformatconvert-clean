@@ -29,11 +29,11 @@ export default function SeoContent({ title, description, howTo, faqs, tips, exam
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="min-w-0">
               <p className="text-xs font-semibold text-neutral-600 dark:text-neutral-300 mb-1">{example.inputLabel}</p>
-              <pre data-example="input" className="text-xs bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-3 overflow-x-auto whitespace-pre text-neutral-700 dark:text-neutral-200">{example.input}</pre>
+              <pre data-example="input" tabIndex={0} className="text-xs bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-3 overflow-x-auto whitespace-pre text-neutral-700 dark:text-neutral-200">{example.input}</pre>
             </div>
             <div className="min-w-0">
               <p className="text-xs font-semibold text-neutral-600 dark:text-neutral-300 mb-1">{example.outputLabel}</p>
-              <pre data-example="output" className="text-xs bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-3 overflow-x-auto whitespace-pre text-neutral-700 dark:text-neutral-200">{example.output}</pre>
+              <pre data-example="output" tabIndex={0} className="text-xs bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-3 overflow-x-auto whitespace-pre text-neutral-700 dark:text-neutral-200">{example.output}</pre>
             </div>
           </div>
         </div>

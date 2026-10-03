@@ -8,6 +8,8 @@ import { detectEncoding } from '../../../lib/csvEncoding';
 import CsvReadOptions from '../../../components/CsvReadOptions';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
+import TextArea from '@/app/components/TextArea';
 
 // The shared, quote-aware parser (app/lib/csvParser.js) with the delimiter
 // detected like every other CSV tool -- before 28/09 this page split on ',' only,
@@ -79,12 +81,12 @@ export default function CsvToTsvPage() {
         <p className="text-neutral-500 text-center mb-8">Convert CSV to TSV format</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500 text-sm">{fileName || 'Click to choose a .csv file (up to 50 MB), or paste below'}</p>
+            <p className="text-neutral-500 text-sm">{fileName || <><UploadPrompt what="a .csv file" /> (up to 50 MB), or paste below</>}</p>
             <input ref={inputRef} type="file" accept=".csv,.txt,text/csv" className="hidden" onChange={handleFile} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm text-neutral-500 mb-1">CSV Input</label><textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" placeholder="Paste CSV here..." value={input} onChange={(e) => { const v = e.target.value; setInput(v); setFileName(''); setFileBytes(null); setDelimiterChoice('auto'); setDetectedDelimiter(detectDelimiter(v.slice(0, 8192))); }} /></div>
-            <div><label className="block text-sm text-neutral-500 mb-1">TSV Output</label><textarea aria-label="TSV Output" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" value={output} readOnly /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">CSV Input</label><TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" placeholder="Paste CSV here..." value={input} onChange={(e) => { const v = e.target.value; setInput(v); setFileName(''); setFileBytes(null); setDelimiterChoice('auto'); setDetectedDelimiter(detectDelimiter(v.slice(0, 8192))); }} /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">TSV Output</label><TextArea aria-label="TSV Output" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" value={output} readOnly /></div>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
             <span className="flex items-center gap-2">

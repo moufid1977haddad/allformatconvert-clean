@@ -7,6 +7,19 @@ import { imageDims } from '../../../lib/bigImage';
 import { imageHeaderSize } from '../../../lib/fileChecks';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
+import { isMobileDevice } from '../../../lib/isMobileDevice';
+
+// P27 (phase 7): a phone bound, measured. Memory this page needs (peak of the tab, Chromium, scripts/p27/
+// phone-bound-memory.mjs, a noisy photo-like 24 MP JPEG scaled up): 24 MP 0.86 GB, 48 MP 1.4 GB, 100 MP 2.4 GB -- about 22-30 MB per megapixel.
+// A phone browser reloads a tab far below a computer (iOS Safari around 1.5-2 GB on recent iPhones, Android Chrome
+// in the same range on a 4 GB phone): 50 MP keeps a 48 MP iPhone or 50 MP Android photo working and stops the
+// 108 / 200 MP ones, which would end in a reloaded page instead of a message. Computers: MAX_MP below.
+const PHONE_MAX_MP = 50;
+// Computers: measured (P27) on the same images, the JPEG engine (mozjpeg in WebAssembly, 2 GB of memory at most) compresses
+// 140 MP and runs out of memory at 150 MP -- its worker then died without a word and the page said "Compressing… 5%"
+// for ever. The bound is declared before the work, and a watchdog (below) turns any silent stop into a message.
+const MAX_MP = 140;
 
 const formatSize = formatBytes;
 const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/svg+xml': 'svg', 'image/avif': 'avif' };
@@ -84,6 +97,7 @@ export default function ImageCompressorPage() {
   const [error, setError] = useToolError('');
   const inputRef = useRef();
   const workerRef = useRef(null);
+  const stalledRef = useRef(false);
 
   useEffect(() => () => workerRef.current?.terminate(), []);
 
@@ -98,24 +112,41 @@ export default function ImageCompressorPage() {
   const update = (id, patch) => setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)));
 
   // P23 (02/10): a 20 000 × 20 000 PNG (400 MP, 49 KB on disk) kept "Compressing…" for ever (the PNG optimiser on 1.6 GB
-  // of pixels). The size is read from the header first: at most a canvas's largest area, 268 MP, on every device (a
-  // 200 MP Android photo or a 63 MP iPhone panorama still passes — a lower phone bound was not measured for this tool).
+  // of pixels). The size is read from the header first: at most MAX_MP (measured, P27) on a computer; on a
+  // phone PHONE_MAX_MP (P27, measured above; a 63 MP iPhone panorama is above it -- to recheck on a real iPhone).
   const UNREADABLE = 'This file could not be read: it may have been moved or changed since you chose it. Choose it again.';
   const runOne = async (worker, it) => {
     let size = null;
     try { size = await imageHeaderSize(it.file); } catch { update(it.id, { status: 'error', message: UNREADABLE }); return; }
     const mp = size ? (size.width * size.height) / 1e6 : 0;
-    if (mp > 268) {
-      update(it.id, { status: 'error', message: `This image is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round(mp)} megapixels), more than the 268-megapixel limit of a browser canvas. Use a smaller version of the image.` });
+    if (mp > MAX_MP) {
+      update(it.id, { status: 'error', message: `This image is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round(mp)} megapixels), more than the ${MAX_MP} megapixels this in-browser compressor can hold in memory. Use a smaller version of the image.` });
       return;
     }
-    return runInWorker(worker, it);
+    if (mp > PHONE_MAX_MP && isMobileDevice()) {
+      update(it.id, { status: 'error', message: `This image is ${Math.round(mp)} megapixels: on a phone the limit is ${PHONE_MAX_MP} megapixels, because compressing it would need more memory than a phone browser gives a page (it would reload). Use a computer, or a smaller version of the image.` });
+      return;
+    }
+    return runInWorker(worker, it, mp);
   };
-  const runInWorker = (worker, it) => new Promise((resolve) => {
+  // P27: a worker that dies (out of memory inside the image engine) sends nothing; without an answer within a generous
+  // time for the image's size (measured: 100 MP in 20 s on a computer), the image is reported, the worker replaced.
+  const runInWorker = (worker, it, mp = 0) => new Promise((resolve) => {
+    let watchdog = null;
+    const arm = () => {
+      clearTimeout(watchdog);
+      watchdog = setTimeout(() => {
+        worker.removeEventListener('message', onMessage);
+        update(it.id, { status: 'error', message: 'The compression stopped on this image without an answer (usually: an image too large for the memory this browser gives a page). Nothing was produced. Try a smaller version of the image.' });
+        stalledRef.current = true;
+        resolve();
+      }, 60_000 + Math.round(mp * 1500));
+    };
     const onMessage = async (e) => {
       const m = e.data;
       if (m.id !== it.id) return;
-      if (m.type === 'progress') { update(it.id, { pct: m.pct }); return; }
+      if (m.type === 'progress') { arm(); update(it.id, { pct: m.pct }); return; }
+      clearTimeout(watchdog);
       worker.removeEventListener('message', onMessage);
       if (m.type === 'error') { update(it.id, { status: 'error', message: m.message }); return resolve(); }
       if (m.type === 'svg') {
@@ -145,22 +176,31 @@ export default function ImageCompressorPage() {
       resolve();
     };
     worker.addEventListener('message', onMessage);
+    arm();
     // the settings this image was made with: the messages below quote them, not the fields as they are now (P24 review)
     update(it.id, { status: 'working', pct: 0, sentTargetKb: byTarget ? Number(targetKb) : null, sentQuality: quality });
     // __forceBands: set only by the browser tests, to run the iPhone (band) decode in Firefox.
     imageDims(it.file).then((dims) => worker.postMessage({ id: it.id, file: it.file, quality, dims, forceBands: !!window.__forceBands, canvasCap: window.__forceSafariCanvasCap === true, targetBytes: byTarget && Number(targetKb) > 0 ? Math.round(Number(targetKb) * 1024) : 0 }))
-      .catch(() => { worker.removeEventListener('message', onMessage); update(it.id, { status: 'error', message: UNREADABLE }); resolve(); });
+      .catch(() => { clearTimeout(watchdog); worker.removeEventListener('message', onMessage); update(it.id, { status: 'error', message: UNREADABLE }); resolve(); });
   });
 
   const compressAll = async () => {
     if (!items.length) return;
     setBusy(true);
     setError('');
-    workerRef.current?.terminate();
-    const worker = new Worker(new URL('./compress.worker.js', import.meta.url), { type: 'module' });
-    workerRef.current = worker;
-    worker.onerror = (err) => setError('The compression engine stopped: ' + (err?.message || 'unknown error'));
-    for (const it of items) await runOne(worker, it);
+    const start = () => {
+      workerRef.current?.terminate();
+      const w = new Worker(new URL('./compress.worker.js', import.meta.url), { type: 'module' });
+      workerRef.current = w;
+      w.onerror = (err) => setError('The compression engine stopped: ' + (err?.message || 'unknown error'));
+      return w;
+    };
+    let worker = start();
+    for (const it of items) {
+      await runOne(worker, it);
+      // a stalled worker is replaced before the next image (its memory goes with it)
+      if (stalledRef.current) { stalledRef.current = false; worker = start(); }
+    }
     setBusy(false);
   };
 
@@ -173,11 +213,12 @@ export default function ImageCompressorPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Image Compressor</h1>
-        <p className="text-neutral-500 text-center mb-8">Compress JPG, PNG, WebP, AVIF and SVG in your browser — the format is kept, your images never leave your device</p>
+        <p className="text-neutral-500 text-center mb-2">Compress JPG, PNG, WebP, AVIF and SVG in your browser — the format is kept, your images never leave your device</p>
+        <p className="text-neutral-500 text-xs text-center mb-8">Up to {MAX_FILES} images at a time, each up to {MAX_MP} megapixels on a computer and {PHONE_MAX_MP} on a phone (a 48 MP phone photo fits).</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote kind="photo" />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => !busy && inputRef.current.click()}>
-            <p className="text-neutral-500">{items.length ? `${items.length} image${items.length > 1 ? 's' : ''} selected — click to choose others` : `Click to choose images (up to ${MAX_FILES})`}</p>
+            <p className="text-neutral-500">{items.length ? `${items.length} image${items.length > 1 ? 's' : ''} selected — click to choose others` : <><UploadPrompt what="images" /> (up to {MAX_FILES})</>}</p>
             <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/avif,.avif,image/svg+xml,.svg,image/*" multiple className="hidden" onChange={handleFiles} disabled={busy} />
           </div>
           {error && <p className="text-red-600 text-center text-sm">{error}</p>}

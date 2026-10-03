@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { buildSubtitles } from '../../../lib/subtitleTime';
 import { DownloadGroup, TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 export default function SubtitleGeneratorPage() {
   const [file, setFile] = useState(null);
   const [subtitles, setSubtitles] = useState([{ start: '00:00:00', end: '00:00:05', text: '' }]);
@@ -54,7 +55,7 @@ export default function SubtitleGeneratorPage() {
           {error && <p role="alert" className="text-red-600 text-sm text-center">{error}</p>}
           {srtContent && (
             <div className="space-y-2">
-              <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" value={srtContent} readOnly />
+              <TextArea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" value={srtContent} readOnly />
               <DownloadGroup zipName="subtitles.zip" alternatives>
                 <TextDownload text={srtContent} name="subtitles.srt" type="application/x-subrip" />
                 <TextDownload text={vttContent} name="subtitles.vtt" type="text/vtt" />

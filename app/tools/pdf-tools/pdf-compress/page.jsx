@@ -9,6 +9,7 @@ import { MAX_PDF_COMPRESS_STAGED_BYTES, OFFICE_STAGED_THRESHOLD_BYTES } from '@/
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 const MIB = 1024 * 1024;
 const SERVER_MAX_LABEL = `${Math.round(MAX_PDF_COMPRESS_STAGED_BYTES / MIB)} MB`;
@@ -178,7 +179,7 @@ export default function PdfCompressPage() {
         <p className="text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Files up to {SERVER_MAX_LABEL} are compressed with our full engine (images, fonts and structure). Larger files, up to {browserMaxLabel}{isMobile ? ' on this device' : ''}, get a lighter in-browser optimisation (structure only).</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => !loading && inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a PDF here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a PDF" />}</p>
             {file && <p className="text-xs text-neutral-500 mt-1">Original: {formatSize(file.size)}</p>}
             <input ref={inputRef} type="file" accept=".pdf,application/pdf" className="hidden" onChange={handleFile} disabled={loading} />
           </div>

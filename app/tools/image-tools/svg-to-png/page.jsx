@@ -5,6 +5,7 @@ import { drawToRaster, encodeRaster, resultOf } from '../../../lib/imageOutput';
 import { checkedDataURL, canvasSizeProblem } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
 import { reportShownMessage } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 export default function SvgToPngPage() {
   const [file, setFile] = useState(null);
@@ -91,7 +92,7 @@ export default function SvgToPngPage() {
         <p className="text-neutral-500 text-center mb-8">Rasterize SVG vectors to PNG</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop an SVG file here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="an SVG file" />}</p>
             <input ref={inputRef} type="file" accept=".svg" className="hidden" onChange={handleFile} />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -110,7 +111,7 @@ export default function SvgToPngPage() {
           {status && <p role="status" className="text-center text-yellow-400 text-sm">{status}</p>}
           {result && (
             <div className="space-y-2">
-              <img src={result} className="max-h-48 mx-auto rounded" />
+              <img alt="Preview of your image" src={result} className="max-h-48 mx-auto rounded" />
               <FileDownload href={result.url} name={result.name} />
             </div>
           )}

@@ -13,6 +13,7 @@ import { uprightImage } from '../../../lib/pdfImages';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 const THUMB_SCALE = 0.22;
 const CANVAS_MAX_WIDTH = 640;
@@ -373,7 +374,7 @@ export default function PdfEditorPage() {
         {!file && (
           <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6">
             <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 dark:border-neutral-700 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition">
-              <p className="text-neutral-500">Click to upload a PDF file</p>
+              <p className="text-neutral-500"><UploadPrompt what="a PDF file" /></p>
             </div>
             <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
             {error && <p className="text-red-500 text-center text-sm mt-4">{error}</p>}

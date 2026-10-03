@@ -3,6 +3,7 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { SEO } from './seo';
 import { TextDownload } from '../../../components/FileDownload';
+import TextArea from '@/app/components/TextArea';
 
 // RFC 4180-style CSV field writer: a value that itself contains a comma,
 // double quote, or newline is indistinguishable from a delimiter unless it's
@@ -50,8 +51,8 @@ export default function TsvToCsvPage() {
         <p className="text-neutral-500 text-center mb-8">Convert TSV to CSV format</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm text-neutral-500 mb-1">TSV Input</label><textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" placeholder="Paste TSV here..." value={input} onChange={e => setInput(e.target.value)} /></div>
-            <div><label className="block text-sm text-neutral-500 mb-1">CSV Output</label><textarea aria-label="CSV Output" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" value={output} readOnly />
+            <div><label className="block text-sm text-neutral-500 mb-1">TSV Input</label><TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" placeholder="Paste TSV here..." value={input} onChange={e => setInput(e.target.value)} /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">CSV Output</label><TextArea aria-label="CSV Output" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" value={output} readOnly />
             <TextDownload text={output} name="data.csv" /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">

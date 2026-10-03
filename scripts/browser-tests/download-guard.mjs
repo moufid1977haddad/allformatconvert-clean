@@ -89,6 +89,9 @@ const UA = {
 };
 const b = await { chromium, firefox, webkit }[name].launch();
 const ctx = await b.newContext({ acceptDownloads: true, ...(device ? { userAgent: UA[device], hasTouch: true, viewport: device === 'iphone' ? { width: 390, height: 844 } : { width: 820, height: 1180 } } : {}) });
+// On a Vercel PREVIEW, Vercel's comment toolbar (vercel.live) throws "navigator.storage.persisted" under WebKit; not the
+// site's code (absent on www): --no-vercel-toolbar blocks only it (as all-pages-load.mjs)
+if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((url) => url.hostname === 'vercel.live', (r) => r.abort());
 await ctx.addCookies([{ name: 'oct_automation', value: '1', url: origin }]);
 if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((u) => u.hostname === 'vercel.live', (r) => r.abort());
 if (device) {

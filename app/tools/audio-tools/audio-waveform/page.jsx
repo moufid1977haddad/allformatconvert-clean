@@ -6,6 +6,7 @@ import { decodeAnyAudio } from '../../../lib/decodeAudio';
 import { AUDIO_ACCEPT, checkedDataURL, encryptedMusicMessage } from '../../../lib/mediaSupport';
 import { saveBlob } from '../../../lib/download';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 200;
@@ -158,7 +159,7 @@ export default function AudioWaveformPage() {
         <p className="text-neutral-500 text-center mb-8">Visualize your audio waveform</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload an audio file</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="an audio file" /></p>}
           </div>
           <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}

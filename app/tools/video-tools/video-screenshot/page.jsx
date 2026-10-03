@@ -6,6 +6,7 @@ import { checkedDataURL, drawDecodedVideoFrame } from '../../../lib/mediaSupport
 import IosOriginalNote from '../../../components/IosOriginalNote';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 export default function VideoScreenshotPage() {
   const [file, setFile] = useState(null);
   const [screenshots, setScreenshots] = useState([]);
@@ -75,7 +76,7 @@ export default function VideoScreenshotPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a video file" />}</p>
             <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />
           </div>
           {file && (

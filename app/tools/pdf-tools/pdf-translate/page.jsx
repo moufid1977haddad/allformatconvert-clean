@@ -9,6 +9,9 @@ import { useToolError } from '../../../lib/useToolError';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { convertOffice, officeStageLabel } from '../../../lib/officeUpload';
 import { GOOGLE_DOC_LANGUAGE_CODES } from '../../../lib/translateLanguages';
+import UploadPrompt from '@/app/components/UploadPrompt';
+import TextArea from '@/app/components/TextArea';
+import { withActualTextUnicode } from '../../../lib/pdfActualText';
 
 // P25 (03/10, E3): the WHOLE document, layout kept (Google Cloud Translation), offered only when the server says the
 // service is configured (GET /api/pdf-translate-document): no promise on the page before it works.
@@ -60,7 +63,7 @@ export default function Page() {
     try {
       const pdfjsLib = await loadPdfjs();
       const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: await withActualTextUnicode(arrayBuffer) }).promise;
       let text = '';
       for (let i = 1; i <= Math.min(pdf.numPages, MAX_PDF_TRANSLATE_PAGES); i++) {
         const page = await pdf.getPage(i);
@@ -93,7 +96,7 @@ export default function Page() {
         <p className="text-neutral-500 text-center mb-8">Translate PDF content to any language with AI</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload a PDF file</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="a PDF file" /></p>}
           </div>
           {docMode && (
             <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="What to translate">
@@ -128,7 +131,7 @@ export default function Page() {
           {output && (
             <div className="space-y-2">
               <label className="block text-sm text-neutral-500">Translation (first 5 pages)</label>
-              <textarea aria-label="Translation (first 5 pages)" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={output} readOnly />
+              <TextArea aria-label="Translation (first 5 pages)" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={output} readOnly />
               <TextDownload text={output} name="translation.txt" />
               <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 text-white rounded-xl py-2 font-semibold transition">Copy Translation</button>
             </div>

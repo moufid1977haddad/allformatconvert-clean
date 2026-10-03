@@ -11,6 +11,7 @@ import PlayablePreview from '../../../components/PlayablePreview';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { execChecked } from '../../../lib/ffmpegRun';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 const tenth = (x) => Math.round(x * 10) / 10;
 const MAX_PARTS = 100;
@@ -166,7 +167,7 @@ export default function AudioSplitterPage() {
         <p className="text-neutral-500 text-center mb-8">Split audio into multiple parts</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload an audio file</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="an audio file" /></p>}
           </div>
           <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
           {audioUrl && !noPreview && <audio ref={audioRef} src={audioUrl} onLoadedMetadata={onLoaded} onError={() => probe(file, fileIdRef.current)} controls className="w-full" />}
