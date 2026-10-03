@@ -8,6 +8,7 @@ import { FileDownload } from '../../../components/FileDownload';
 import { parsePageRange } from '../../../lib/pageRange';
 import UploadPrompt from '@/app/components/UploadPrompt';
 import TextArea from '@/app/components/TextArea';
+import { withActualTextUnicode } from '../../../lib/pdfActualText';
 
 export default function PdfExtractTextPage() {
   const [file, setFile] = useState(null);
@@ -35,7 +36,7 @@ export default function PdfExtractTextPage() {
     try {
       const pdfjsLib = await loadPdfjs();
       const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: await withActualTextUnicode(arrayBuffer) }).promise;
       let fullText = '';
       let pages;
       try { pages = parsePageRange(range, pdf.numPages); } catch (e) { setStatus(e.message); setLoading(false); return; } // the visitor's typing, not a file error: not reported

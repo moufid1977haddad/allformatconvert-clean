@@ -5,6 +5,7 @@ import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
 import { reportShownMessage } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
+import { withActualTextUnicode } from '../../../lib/pdfActualText';
 
 // Audit 2 (29/09): the PDF's text was pasted into the HTML unescaped -- "a < b" vanished, "&copy;" became (c), text
 // such as "<b>" turned into markup -- and every item was joined with a space on one line, so line breaks were lost
@@ -56,7 +57,7 @@ export default function PdfToHtmlPage() {
     try {
       const pdfjsLib = await loadPdfjs();
       const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: await withActualTextUnicode(arrayBuffer) }).promise;
       let allHtml = '';
       const empty = [];
       for (let i = 1; i <= pdf.numPages; i++) {

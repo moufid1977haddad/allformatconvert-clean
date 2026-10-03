@@ -11,6 +11,7 @@ import { convertOffice, officeStageLabel } from '../../../lib/officeUpload';
 import { GOOGLE_DOC_LANGUAGE_CODES } from '../../../lib/translateLanguages';
 import UploadPrompt from '@/app/components/UploadPrompt';
 import TextArea from '@/app/components/TextArea';
+import { withActualTextUnicode } from '../../../lib/pdfActualText';
 
 // P25 (03/10, E3): the WHOLE document, layout kept (Google Cloud Translation), offered only when the server says the
 // service is configured (GET /api/pdf-translate-document): no promise on the page before it works.
@@ -62,7 +63,7 @@ export default function Page() {
     try {
       const pdfjsLib = await loadPdfjs();
       const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: await withActualTextUnicode(arrayBuffer) }).promise;
       let text = '';
       for (let i = 1; i <= Math.min(pdf.numPages, MAX_PDF_TRANSLATE_PAGES); i++) {
         const page = await pdf.getPage(i);

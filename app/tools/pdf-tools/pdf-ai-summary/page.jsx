@@ -8,6 +8,7 @@ import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
 import TextArea from '@/app/components/TextArea';
+import { withActualTextUnicode } from '../../../lib/pdfActualText';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -29,7 +30,7 @@ export default function Page() {
       // Extract the document's real text (the tool used to send the raw file
       // bytes, base64-encoded, so the model summarized binary noise).
       const pdfjsLib = await loadPdfjs();
-      const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise.catch((e) => {
+      const pdf = await pdfjsLib.getDocument({ data: await withActualTextUnicode(await file.arrayBuffer()) }).promise.catch((e) => {
         throw e?.name === 'PasswordException' ? new Error('this PDF needs a password to open. Remove it first with PDF Unlock, then summarize the unlocked file.') : e;
       });
       let text = '';

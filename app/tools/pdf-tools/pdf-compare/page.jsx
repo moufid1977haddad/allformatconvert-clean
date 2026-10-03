@@ -8,6 +8,7 @@ import { loadPdfjs } from '../../../lib/pdfjs';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
 import TextArea from '@/app/components/TextArea';
+import { withActualTextUnicode } from '../../../lib/pdfActualText';
 
 export default function Page() {
   const [file1, setFile1] = useState(null);
@@ -23,7 +24,7 @@ export default function Page() {
   const extractText = async (file) => {
     const pdfjsLib = await loadPdfjs();
     const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const pdf = await pdfjsLib.getDocument({ data: await withActualTextUnicode(arrayBuffer) }).promise;
     let text = '';
     const pageOfLine = []; // P24 (03/10): the page each line comes from, shown next to it (Draftable, PDF24 Compare)
     for (let i = 1; i <= pdf.numPages; i++) {

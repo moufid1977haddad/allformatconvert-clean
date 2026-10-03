@@ -10,6 +10,7 @@ import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
 import TextArea from '@/app/components/TextArea';
+import { withActualTextUnicode } from '../../../lib/pdfActualText';
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -36,7 +37,7 @@ export default function Page() {
       const arrayBuffer = await file.arrayBuffer();
       const srcDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer));
       const outDoc = await PDFDocument.create();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: await withActualTextUnicode(arrayBuffer) }).promise;
       const scale = 2;
       let totalMatches = 0;
       const pagesHit = [];
