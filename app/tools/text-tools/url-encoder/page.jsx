@@ -42,7 +42,7 @@ export default function UrlEncoderPage() {
           <label className="flex items-center gap-2 text-sm text-neutral-600 cursor-pointer"><input type="checkbox" checked={plusAsSpace} onChange={(e) => setPlusAsSpace(e.target.checked)} className="w-4 h-4" />Decode “+” as a space (form data and query strings)</label>
           {plusAsSpace && text.includes('+') && <p className="text-xs text-amber-700" data-plus-note>Each “+” is read as a space here (form encoding). If your text has real plus signs — an e-mail like a+b@x.com, a phone number — untick this box.</p>}
           <label className="flex items-center gap-2 text-sm text-neutral-600">Encode as
-            <select id="url-mode" value={encMode} onChange={(e) => setEncMode(e.target.value)} className="border border-neutral-200 rounded px-2 py-1 bg-white">
+            <select id="url-mode" value={encMode} onChange={(e) => setEncMode(e.target.value)} className="border border-neutral-200 rounded px-2 py-1 bg-white max-w-full min-w-0">
               <option value="component">A value (query parameter, path segment)</option>
               <option value="url">A whole URL (keeps : / ? # & =)</option>
               <option value="rfc3986">Strict RFC 3986 (also ! ' ( ) *)</option>

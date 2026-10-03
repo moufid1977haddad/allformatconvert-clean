@@ -167,8 +167,8 @@ export default function ExcelToCsvPage() {
         <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Supports workbooks up to {maxRowsLabel} rows{isMobile ? ' on this device' : ''} (including the header row, files up to {maxFileLabel}). Conversion runs in the background — this tab stays responsive.</p>
         <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-600 dark:text-neutral-300">
-            <label className="flex items-center gap-2">Separator
-              <select id="x2c-delimiter" value={delimiter} onChange={(e) => setDelimiter(e.target.value)} disabled={converting} className="border border-neutral-200 rounded px-2 py-1 bg-white dark:bg-neutral-800">
+            <label className="flex items-center gap-2 min-w-0 max-w-full">Separator
+              <select id="x2c-delimiter" value={delimiter} onChange={(e) => setDelimiter(e.target.value)} disabled={converting} className="border border-neutral-200 rounded px-2 py-1 bg-white dark:bg-neutral-800 min-w-0 max-w-full">
                 <option value=",">Comma ,</option><option value=";">Semicolon ; (Excel in most of Europe)</option><option value="tab">Tab</option><option value="|">Pipe |</option>
               </select>
             </label>
