@@ -106,6 +106,13 @@ RUN cd /tmp \
 COPY --chmod=0755 chromium-launcher /usr/local/bin/chromium-launcher
 ENV CHROMIUM_BIN_PATH=/usr/local/bin/chromium-launcher
 
+# P29, after the independent review: --chromium-disable-javascript is a setting of each page Gotenberg opens
+# (DevTools Emulation.setScriptExecutionDisabled), and a cross-site https frame of an uploaded page still ran its script
+# (measured: scripts/p29/js-probe.mjs, case xsiteframe). Chromium's own enterprise policy blocks JavaScript in the whole
+# browser, every frame and process included, and turns off its built-in PDF viewer (PDFium, which has its own
+# JavaScript) for PDFs embedded in a page. Debian's chromium reads managed policies from this directory.
+COPY chromium-policy.json /etc/chromium/policies/managed/onlineconvertools.json
+
 USER gotenberg
 
 # Basic Auth requires BOTH the GOTENBERG_API_BASIC_AUTH_USERNAME/PASSWORD

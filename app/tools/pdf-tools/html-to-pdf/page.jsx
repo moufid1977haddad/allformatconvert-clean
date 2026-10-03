@@ -100,7 +100,7 @@ export default function HtmlToPdfPage() {
       offer(pdfBlob, filename);
       // P29 (04/10): our Chromium runs no script at all (Gotenberg --chromium-disable-javascript, measured: 0 of 18 ways
       // to run one), as for a URL: said whenever the HTML has scripts, since what they would build is missing.
-      if (/<script/i.test(htmlContent)) setNotice('This HTML contains scripts, which are not run here (for safety): anything they would draw or add (charts, generated text) is missing from the PDF. If it is, open the file itself in a web browser and print it from there (Print → Save as PDF).');
+      if (/<script/i.test(htmlContent)) setNotice('This HTML contains scripts, which are not run here (for safety): anything they would draw or add (charts, generated text) is missing from the PDF. If something is missing, open the file itself in a web browser and print it from there (Print → Save as PDF).');
       setDone(true);
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');

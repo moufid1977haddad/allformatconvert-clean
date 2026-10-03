@@ -6,6 +6,7 @@
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { PDFDocument, PDFName, PDFString, StandardFonts } from 'pdf-lib';
 
 const [svc, outDir] = process.argv.slice(2);
 if (!svc || !outDir) { console.error('usage: js-probe.mjs <railway-service> <out-dir>'); process.exit(2); }
@@ -39,6 +40,28 @@ const cases = {
 };
 const noscript = `<noscript>NOSCRIPT-SHOWN</noscript>`;
 
+// Independent review (04/10): paths the 18 cases above do not prove. Each has its own test on the PDF's text.
+// - a cross-site https frame: in-process only because Gotenberg disables site-per-process; example.com runs a script
+//   that adds a French translation (measured on Gotenberg's URL route), so the French text = the frame ran script;
+// - a PDF embedded in the page: Chromium's PDF viewer (PDFium, with its own JavaScript) is outside the page's setting;
+//   the embedded PDF's visible text says whether the viewer rendered it at all, its OpenAction script whether it ran;
+// - file:///tmp/ (allowed by Gotenberg's default deny rule): would a frame list other conversions' folders?
+// - XSLT: a memory-unsafe parser reachable without script; this only says whether it is applied.
+const pdfDoc = await PDFDocument.create();
+const pg = pdfDoc.addPage([300, 100]);
+pg.drawText('PDFEMBED-VISIBLE', { x: 10, y: 50, size: 14, font: await pdfDoc.embedFont(StandardFonts.Helvetica) });
+const js = pdfDoc.context.obj({ Type: 'Action', S: 'JavaScript', JS: PDFString.of("this.getField; app.alert('JSRAN-pdfjs');") });
+pdfDoc.catalog.set(PDFName.of('OpenAction'), pdfDoc.context.register(js));
+const pdfB64 = Buffer.from(await pdfDoc.save()).toString('base64');
+const extra = {
+  xsiteframe: [`<iframe src="https://example.com/" width="700" height="400"></iframe>`, /réservé|domaine|exemples/i],
+  pdfembed: [`<embed src="data:application/pdf;base64,${pdfB64}" type="application/pdf" width="400" height="200">`, /PDFEMBED-VISIBLE|JSRAN-pdfjs/],
+  pdfiframe: [`<iframe src="data:application/pdf;base64,${pdfB64}" width="400" height="200"></iframe>`, /PDFEMBED-VISIBLE|JSRAN-pdfjs/],
+  tmplisting: [`<iframe src="file:///tmp/" width="700" height="400"></iframe>`, /Index of|[0-9a-f]{8}-[0-9a-f]{4}-|Parent directory/i],
+};
+const xslt = `<?xml version="1.0"?><?xml-stylesheet type="text/xsl" href="#s"?><!DOCTYPE d [<!ATTLIST xsl:stylesheet id ID #REQUIRED>]>
+<d><xsl:stylesheet id="s" version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match="/"><html><body><p>XSLT-APPLIED</p></body></html></xsl:template></xsl:stylesheet></d>`;
+
 async function convert(html, name) {
   const fd = new FormData();
   fd.append('files', new Blob([html]), 'index.html');
@@ -60,6 +83,19 @@ for (const [n, frag] of Object.entries(cases)) {
   const hit = (text.match(/JSRAN-[a-z]+/g) || []).join(',');
   if (hit) ran++;
   console.log(`${status !== 200 ? 'ERROR' : hit ? 'RAN  ' : 'NOJS '} ${n.padEnd(11)} status ${status} ${hit}`);
+}
+for (const [n, [frag, re]] of Object.entries(extra)) {
+  const { status, text } = await convert(`<!doctype html><html><head><meta charset="utf-8"></head><body><p>case ${n}</p>${frag}</body></html>`, n);
+  console.log(`${status !== 200 ? 'ERROR' : 'EXTRA'} ${n.padEnd(11)} status ${status} matched: ${(text.match(new RegExp(re.source, 'gi')) || []).slice(0, 3).join(',') || 'nothing'}`);
+}
+{
+  const fd = new FormData();
+  fd.append('files', new Blob([xslt]), 'index.html');
+  const r = await fetch(base + '/forms/chromium/convert/html', { method: 'POST', headers: { Authorization: auth }, body: fd, signal: AbortSignal.timeout(120_000) });
+  const body = Buffer.from(await r.arrayBuffer());
+  const f = path.join(outDir, 'xslt.pdf');
+  if (r.status === 200) fs.writeFileSync(f, body);
+  console.log(`EXTRA xslt        status ${r.status} applied: ${r.status === 200 && /XSLT-APPLIED/.test(execFileSync('pdftotext', [f, '-'], { encoding: 'utf8' }))}`);
 }
 const ns = await convert(`<!doctype html><html><body><p>noscript</p>${noscript}</body></html>`, 'noscript');
 console.log(`noscript content shown: ${/NOSCRIPT-SHOWN/.test(ns.text)} (status ${ns.status})`);

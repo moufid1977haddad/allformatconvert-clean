@@ -3,9 +3,12 @@
 # Chromium runs without its own sandbox: Gotenberg passes --no-sandbox, and Railway leaves no way to turn it on (measured
 # 04/10 on gotenberg-fonts: Railway's seccomp filter refuses user namespaces on most hosts, and the container has no
 # CAP_SYS_ADMIN for the setuid helper -- Chromium aborts at sandbox/linux/services/credentials.cc). So, in depth:
-#   - page scripts never run (--chromium-disable-javascript in the Dockerfile's CMD: 0 of 18 ways measured);
+#   - page scripts never run: --chromium-disable-javascript in the Dockerfile's CMD (each page) and Chromium's managed
+#     policy chromium-policy.json (the whole browser, every frame) -- scripts/p29/js-probe.mjs;
 #   - V8 is started without its JIT compiler (--jitless), the part most V8 exploits target, in case any script
 #     still ran;
-#   - Gotenberg's own API credentials are not handed to Chromium's environment.
+#   - Gotenberg's own API credentials are not put in Chromium's environment. Hygiene only (no crash dump or log of
+#     Chromium can carry them), NOT a boundary: code running as this user can still read Gotenberg's own environment
+#     in /proc (independent review, 04/10).
 exec env -u GOTENBERG_API_BASIC_AUTH_USERNAME -u GOTENBERG_API_BASIC_AUTH_PASSWORD \
   /usr/bin/chromium "$@" --js-flags=--jitless
