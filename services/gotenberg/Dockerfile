@@ -79,6 +79,25 @@ RUN cd /tmp/selawik \
 # other alone.
 COPY fonts.conf /etc/fonts/conf.d/99-office-font-substitutions.conf
 
+# P29 (04/10): Chromium 152 (the one Gotenberg 8.37 ships) does not fix CVE-2026-87491 (V8, exploited in the wild,
+# fixed in Chrome 153). Gotenberg installs Debian's own chromium package, and Debian's security archive already has
+# the fixed build (security-tracker.debian.org: trixie fixed in 153.0.8010.47-2~deb13u1, DSA-6506-1), so the image
+# takes it now instead of waiting for a Gotenberg release. Pinned like the base image: exact files from
+# snapshot.debian.org (the permanent copy of the security archive -- security.debian.org drops a version once it is
+# superseded), checked by SHA-256 (their SHA-1 matches Debian's snapshot records); amd64 only, like our Railway hosts.
+# Measured on gotenberg-fonts before the switch: the 61 documents of scripts/p27/gotenberg-compare.mjs and the probes
+# of scripts/p26/gotenberg-probe.mjs (docs/audit/RAPPORT-p29-securite-chromium-04-10.md). To move to a newer
+# Debian build: same three values, same bench.
+ARG CHROMIUM_DEB_VERSION=154.0.8037.92-1~deb13u1
+ARG CHROMIUM_DEB_BASE=https://snapshot.debian.org/archive/debian-security/20261001T172817Z/pool/updates/main/c/chromium
+RUN cd /tmp     && curl -fsSL -o chromium.deb "$CHROMIUM_DEB_BASE/chromium_${CHROMIUM_DEB_VERSION}_amd64.deb"     && curl -fsSL -o chromium-common.deb "$CHROMIUM_DEB_BASE/chromium-common_${CHROMIUM_DEB_VERSION}_amd64.deb"     && printf '%s  %s
+'         ba20f2bf959cc302694147fb4d881586c7b41688c5dd5b1555f560732733e3d5 chromium.deb         ed25b5290168e9775641864aa6f831b15fc53f57e63b30dcc0256d6588fa0831 chromium-common.deb         | sha256sum -c -     && apt-get update -qq     && apt-get install -y -qq --no-install-recommends ./chromium-common.deb ./chromium.deb     && rm -rf /var/lib/apt/lists/* /tmp/chromium.deb /tmp/chromium-common.deb     && /usr/bin/chromium --version | grep -F "${CHROMIUM_DEB_VERSION%%-*}"     && bash /opt/gotenberg/capture-version.sh "$GOTENBERG_VERSIONS_DIR_PATH" chromium /usr/bin/chromium --version
+
+# P29: Gotenberg starts Chromium through this launcher (V8 without JIT, no API credentials in its environment) --
+# the reasons are in the file itself.
+COPY --chmod=0755 chromium-launcher /usr/local/bin/chromium-launcher
+ENV CHROMIUM_BIN_PATH=/usr/local/bin/chromium-launcher
+
 USER gotenberg
 
 # Basic Auth requires BOTH the GOTENBERG_API_BASIC_AUTH_USERNAME/PASSWORD
@@ -86,4 +105,8 @@ USER gotenberg
 # against Gotenberg's own configuration docs). Baked into the image's CMD
 # rather than left to a Railway start-command override, so this service is
 # never accidentally left open regardless of how it's deployed.
-CMD ["gotenberg", "--api-enable-basic-auth"]
+# P29 (04/10): --chromium-disable-javascript -- no page script ever runs in our Chromium: none of our tools needs one
+# (URL to PDF already strips every script and forbids them by a Content-Security-Policy, lib/urlFetch/snapshot.mjs;
+# Text, Markdown, EPUB and MOBI to PDF build script-free HTML), and an uploaded HTML file is untrusted input printed by
+# a Chromium without sandbox. Measured: 0 of 18 ways to run a script (scripts/p29/js-probe.mjs), 15 of 18 before.
+CMD ["gotenberg", "--api-enable-basic-auth", "--chromium-disable-javascript"]
