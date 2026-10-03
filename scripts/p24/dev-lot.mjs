@@ -130,7 +130,7 @@ const main = (p) => p.locator('main').innerText();
   await p.getByLabel('Test text').fill('a'.repeat(40) + 'b');
   await p.getByRole('button', { name: 'Test', exact: true }).click();
   const slow = await p.getByText(/takes too long/).waitFor({ timeout: 8000 }).then(() => true).catch(() => false);
-  check('regex: catastrophic backtracking stopped after 2 s with a sentence (the page stays responsive)', slow && (await p.evaluate(() => 1 + 1)) === 2);
+  check('regex: catastrophic backtracking stopped after 2 s with a sentence (the page stays responsive)', slow && (await p.evaluate(() => 1 + 1)) === 2, slow ? '' : (await main(p)).replace(/\s+/g, ' ').slice(0, 400));
   await p.close();
 }
 { // Text Comparator: changed words marked

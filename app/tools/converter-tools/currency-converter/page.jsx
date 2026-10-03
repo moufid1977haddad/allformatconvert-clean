@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useState, useEffect } from 'react';
+import { preconnect } from 'react-dom';
 import SeoContent from '../../../components/SeoContent';
 import RateHistory from './RateHistory';
 import { useToolError } from '../../../lib/useToolError';
@@ -29,6 +30,10 @@ function formatMoney(value, code) {
 const formatRate = (r) => (Number.isFinite(r) ? new Intl.NumberFormat(undefined, { maximumSignificantDigits: 6 }).format(r) : '—');
 
 export default function CurrencyConverterPage() {
+  // P27 (04/10): the rates come from another site; the connection is opened while the page loads (Lighthouse mobile:
+  // the result appeared ≈ 0.6 s later than the rest of the page).
+  preconnect('https://open.er-api.com');
+  preconnect('https://api.frankfurter.dev');
   const [amount, setAmount] = useState(100);
   const [from, setFrom] = useState('USD');
   const [to, setTo] = useState('EUR');
@@ -65,6 +70,7 @@ export default function CurrencyConverterPage() {
   // Every rate is quoted against USD: cross rate = rate[to] / rate[from].
   const unitRate = rates && rates[from] && rates[to] ? rates[to] / rates[from] : NaN;
   const result = Number.isFinite(amount) ? amount * unitRate : NaN;
+  const ready = !!rates && !loading;
   const codes = rates ? [...POPULAR.filter((c) => c in rates), ...Object.keys(rates).filter((c) => !POPULAR.includes(c)).sort()] : POPULAR;
 
   const swap = () => { setFrom(to); setTo(from); };
@@ -97,21 +103,25 @@ export default function CurrencyConverterPage() {
               </select>
             </div>
           </div>
-          {/* The result box arrives after the rates are fetched: its place is kept, so nothing below it jumps (Lighthouse
-              CLS 0.12 on a phone before, 30/09/2026). */}
+          {/* The result box's place is kept, so nothing below it jumps (Lighthouse CLS 0.12 on a phone before, 30/09/2026).
+              P27 (04/10): the box itself is drawn from the start, with "…" until the rates arrive (and the amount unformatted: the server's number format is not the visitor's) — drawn only with the
+              rates, its text was the page's largest and came last (Lighthouse mobile LCP 3.4 s, score 87-89). */}
           <div className="min-h-[11rem] flex flex-col justify-center">
-          {loading && <p className="text-center text-neutral-500 dark:text-neutral-400">Loading rates...</p>}
           {error && <p className="text-center text-yellow-700 text-sm">{error}</p>}
-          {rates && !loading && (
-            <div className="bg-neutral-50 dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6 text-center">
-              <div className="text-4xl font-bold text-indigo-400 break-words">{formatMoney(result, to)} {to}</div>
-              <div className="text-neutral-500 dark:text-neutral-400 mt-2">{formatMoney(amount, from)} {from}{currencyName(from) ? ` (${currencyName(from)})` : ''} = {formatMoney(result, to)} {to}{currencyName(to) ? ` (${currencyName(to)})` : ''}</div>
-              <div className="text-neutral-500 dark:text-neutral-400 text-sm mt-2">1 {from} = {formatRate(unitRate)} {to} · 1 {to} = {formatRate(1 / unitRate)} {from}</div>
-              <div className="text-neutral-500 text-xs mt-3">Rates published: {lastUpdate}{nextUpdate ? ` · next update: ${nextUpdate}` : ''} · <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer" className="underline">Rates By Exchange Rate API</a></div>
+          {!error && (
+            <div className="bg-neutral-50 dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6 text-center" aria-busy={!ready}>
+              <div className="text-4xl font-bold text-indigo-400 break-words">{ready ? formatMoney(result, to) : '…'} {to}</div>
+              <div className="text-neutral-500 dark:text-neutral-400 mt-2">{ready ? formatMoney(amount, from) : amount} {from}{currencyName(from) ? ` (${currencyName(from)})` : ''} = {ready ? formatMoney(result, to) : '…'} {to}{currencyName(to) ? ` (${currencyName(to)})` : ''}</div>
+              <div className="text-neutral-500 dark:text-neutral-400 text-sm mt-2">1 {from} = {ready ? formatRate(unitRate) : '…'} {to} · 1 {to} = {ready ? formatRate(1 / unitRate) : '…'} {from}</div>
             </div>
           )}
           </div>
-          {/* P24 (03/10): the same amount in the most used currencies at once, as xe.com lists it */}
+          {/* P27 (04/10): shown from the start (it was the largest text and came only with the rates: Lighthouse mobile LCP
+              3.4 s, score 88); the attribution is required by the rates' terms. Its height is kept for the dates (3 lines on a phone) */}
+          <div className="text-neutral-500 dark:text-neutral-400 text-xs text-center min-h-[3rem] sm:min-h-[2rem]">Rates published: {lastUpdate || (error ? 'unavailable' : '…')}{nextUpdate ? ` · next update: ${nextUpdate}` : ''} · <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer" className="underline">Rates By Exchange Rate API</a></div>
+          {/* P24 (03/10): the same amount in the most used currencies at once, as xe.com lists it. P27: its line is kept
+              before the rates arrive, so the buttons below do not move (CLS) */}
+          <div className="min-h-[1.25rem]">
           {rates && !loading && Number.isFinite(amount) && (
             <details className="text-sm" data-multi>
               <summary className="cursor-pointer text-neutral-600 dark:text-neutral-300">{formatMoney(amount, from)} {from} in other currencies</summary>
@@ -122,6 +132,7 @@ export default function CurrencyConverterPage() {
               </tbody></table>
             </details>
           )}
+          </div>
           <button onClick={loadRates} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl py-2 font-semibold transition">Refresh Rates</button>
         </div>
         <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 mt-6">
