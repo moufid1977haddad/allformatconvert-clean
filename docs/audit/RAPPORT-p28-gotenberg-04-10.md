@@ -163,3 +163,28 @@ non bornée (→ 256 Mo). Trouvé en appliquant : `/Prev` des signets pris pour 
   vrais PDF abîmés (méthode, contrôle du texte ou avertissement affichés, fichier téléchargé) ; `www-light` 29/29.
 Retour arrière : pdf-tools → déploiement `538d1590` ; Vercel → `onlineconvertools-1q669xcht` (= `df37f58e`) ; repère
 `restauration-avant-p28-lot23` = `df37f58e`.
+
+## 5. Facture Railway (mesurée : API de mesures Railway, `scripts/p28/rw-metrics.mjs` ; 10 $/Go/mois, 20 $/vCPU/mois)
+| Service | Avant P28 | Après P28 |
+|---|---|---|
+| gotenberg-v2 (production) | mémoire moyenne 0,72 Go sur 30 h (8.36) | **0,41-0,43 Go** au repos (8.37 : Chromium ≈ 75 Mo de moins) → ≈ −2 à −3 $/mois |
+| gotenberg-fonts (à côté) | 0,57 Go | 0,45-0,50 Go |
+| pdf-tools | 0,023-0,035 Go au repos (P27) | **0,036 Go** au repos — inchangé ; image : `pdfunite` est déjà dans `poppler-utils` (aucun paquet ajouté) |
+Coût par usage : une réparation lit le texte de la source et du résultat (deux lecteurs) : < 1 s de processeur pour un
+document ordinaire (≈ 0,00001 $). Bancs du chantier : quelques minutes de processeur (≈ 0,05 $). Aucun service ajouté,
+aucune variable touchée (Railway ni Vercel), aucune autre dépense ; rien sur Supabase ; ConvertAPI non appelé.
+
+## 6. Reste
+- **Sécurité (revue P28)** : Chromium de Gotenberg sans bac à sable avec JavaScript actif, HTML déposé passé tel quel ;
+  Chromium 152 ne corrige pas CVE-2026-87491. Passer à la prochaine Gotenberg (Chromium ≥ 153) dès sa sortie avec le même
+  banc, et mesurer `CHROMIUM_DISABLE_JAVASCRIPT=true` ou un nettoyage du HTML déposé (au plan).
+- **Équations d'un `.docx`** : converties par ConvertAPI en production, non mesurées (≈ 0,01 $ — décision du propriétaire).
+- Mineur, mesuré : en RTF, équations alignées à gauche (Word : centrées) ; crochets de matrice non étirés dans l'ODT de
+  Word ; une équation colorée par Word sort en noir ; police de formule de LibreOffice (pas Cambria Math).
+- PDF Repair : PDF chiffré AES-256 dont la fin est perdue — iLovePDF le récupère, nous non (pages dans des flux d'objets
+  chiffrés).
+
+## 7. Fin
+Production : **Vercel `onlineconvertools-jcglmx2uu` = `03aa60d1`** (puis commits de rapport) ; **Railway `gotenberg-v2`
+`8e8e178d` (8.37.0 + règles Aptos), `pdf-tools` `ab0077fd`**. Aucun retour arrière nécessaire. Repères :
+`restauration-avant-p28-04-10` = `6a8af4be`, `restauration-avant-p28-lot23` = `df37f58e`.
