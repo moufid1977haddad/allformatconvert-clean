@@ -18,6 +18,9 @@ function serviceTimeoutMs(bytes: number): number {
 // request to the service first.
 const MAX_FILE_SIZE_BYTES = MAX_PDFTOOLS_STAGED_BYTES;
 
+// 1b/2b/3b as before, plus (P26, E2) 2u/3u/2a/3a; 1a is not offered (no open-source tool reaches it, P25 measure).
+const LEVEL_RE = /^(1b|2b|3b|2u|3u|2a|3a)$/i;
+
 export async function POST(req: NextRequest) {
   const serviceUrl = process.env.PDFTOOLS_SERVICE_URL;
   const apiKey = process.env.PDFTOOLS_API_KEY;
@@ -30,12 +33,13 @@ export async function POST(req: NextRequest) {
   if (isStagedRequest(req)) {
     return respondStagedPdfJson(req, (file, body) => {
       const requested = body?.conformance;
-      return convertPdfa(req, file, typeof requested === "string" && /^[0-9][ab]$/i.test(requested) ? requested.toLowerCase() : "2b", serviceUrl, apiKey);
+      return convertPdfa(req, file, typeof requested === "string" && LEVEL_RE.test(requested) ? requested.toLowerCase() : "2b", serviceUrl, apiKey, body?.allowDowngrade === true || body?.allowDowngrade === "true");
     });
   }
 
   let file: File;
   let conformance = "2b";
+  let allowDowngrade = false;
   try {
     const formData = await req.formData();
     const uploaded = formData.get("file");
@@ -44,16 +48,17 @@ export async function POST(req: NextRequest) {
     }
     file = uploaded;
     const requested = formData.get("conformance");
-    if (typeof requested === "string" && /^[0-9][ab]$/i.test(requested)) {
+    if (typeof requested === "string" && LEVEL_RE.test(requested)) {
       conformance = requested.toLowerCase();
     }
+    allowDowngrade = formData.get("allowDowngrade") === "true";
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid multipart/form-data request." }, { status: 400 });
   }
-  return convertPdfa(req, file, conformance, serviceUrl, apiKey);
+  return convertPdfa(req, file, conformance, serviceUrl, apiKey, allowDowngrade);
 }
 
-async function convertPdfa(req: NextRequest, file: File, conformance: string, serviceUrl: string, apiKey: string): Promise<NextResponse> {
+async function convertPdfa(req: NextRequest, file: File, conformance: string, serviceUrl: string, apiKey: string, allowDowngrade = false): Promise<NextResponse> {
   if (file.size === 0) {
     return NextResponse.json({ ok: false, error: "The uploaded file is empty." }, { status: 400 });
   }
@@ -67,9 +72,13 @@ async function convertPdfa(req: NextRequest, file: File, conformance: string, se
   const serviceForm = new FormData();
   serviceForm.append("file", file, file.name);
   serviceForm.append("conformance", conformance);
+  // P26 (E2): 2u/3u/2a/3a; with allowDowngrade the service may deliver the next lower level and says which.
+  if (allowDowngrade) serviceForm.append("allowDowngrade", "true");
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), serviceTimeoutMs(file.size));
+  // 2u/3u/2a/3a (P26): the service allows them 200 s (up to three conversions + validations); ours outlasts it.
+  const advanced = conformance[1] !== "b";
+  const timeoutId = setTimeout(() => controller.abort(), advanced ? Math.min(250_000, 3 * serviceTimeoutMs(file.size)) : serviceTimeoutMs(file.size));
 
   let serviceResponse: Response;
   try {

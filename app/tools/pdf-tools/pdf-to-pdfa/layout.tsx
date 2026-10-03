@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF to PDF/A — Convert & Validate for Archiving Online" },
-  description: "PDF to PDF/A converts your PDF for long-term archiving with Ghostscript, then validates it with veraPDF — you only get a file back if it's verified compliant.",
+  description: "PDF to PDF/A converts your PDF for long-term archiving — PDF/A-1b, 2b, 3b, 2u, 3u, and 2a or 3a for tagged PDFs — then validates it with veraPDF: you only get a file back if it's verified compliant.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-pdfa" },
   openGraph: {
     title: "PDF to PDF/A — Convert & Validate for Archiving Online",
-    description: "PDF to PDF/A converts your PDF for long-term archiving with Ghostscript, then validates it with veraPDF — you only get a file back if it's verified compliant.",
+    description: "PDF to PDF/A converts your PDF for long-term archiving — PDF/A-1b, 2b, 3b, 2u, 3u, and 2a or 3a for tagged PDFs — then validates it with veraPDF: you only get a file back if it's verified compliant.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-pdfa",
   },
 };
