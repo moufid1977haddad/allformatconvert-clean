@@ -16,6 +16,7 @@
 //   const bytes = await withActualTextUnicode(originalBytes)   // the same bytes when there is nothing to add
 // parsing runs on the page's thread: bigger files are passed through untouched (seconds of a frozen page otherwise)
 const MAX_BYTES = 25 * 1024 * 1024;
+const MAX_DECODED = 40 * 1024 * 1024;
 
 const ENTRY = /<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]*)>/g;
 const RANGE = /<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]*)>/g;
@@ -89,7 +90,7 @@ function* tokens(b) {
     if (c === 47) { // /Name
       let j = i + 1;
       while (j < n && !WS.has(b[j]) && !DELIM.has(b[j])) j++;
-      yield { t: 'name', v: String.fromCharCode(...b.subarray(i + 1, j)).replace(/#([0-9a-fA-F]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16))) };
+      yield { t: 'name', v: String.fromCharCode(...b.subarray(i + 1, j)) }; // raw: PDFName.of decodes #xx itself
       i = j;
       continue;
     }
@@ -98,22 +99,9 @@ function* tokens(b) {
     if (j === i) { i++; continue; }
     const word = String.fromCharCode(...b.subarray(i, j));
     i = j;
-    if (word === 'BI') { // inline image: skip to "EI" after "ID"
-      const id = indexOfWord(b, 'ID', i);
-      const ei = id < 0 ? -1 : indexOfWord(b, 'EI', id + 3);
-      if (ei < 0) return;
-      i = ei + 2;
-      continue;
-    }
+    if (word === 'BI') return; // inline image: never read past it (walk() skips such streams anyway)
     yield /^[+-]?(\d+\.?\d*|\.\d+)$/.test(word) ? { t: 'num', v: Number(word) } : { t: 'op', v: word };
   }
-}
-function indexOfWord(b, w, from) {
-  const a = w.charCodeAt(0), c = w.charCodeAt(1);
-  for (let i = from; i + 1 < b.length; i++) {
-    if (b[i] === a && b[i + 1] === c && (i === 0 || WS.has(b[i - 1])) && (i + 2 >= b.length || WS.has(b[i + 2]))) return i;
-  }
-  return -1;
 }
 // operands stack -> operator
 function* operations(bytes) {
@@ -136,13 +124,66 @@ function* operations(bytes) {
   }
 }
 
-const textOf = (bytesOrString) => (typeof bytesOrString === 'string' ? bytesOrString : new TextDecoder('latin1').decode(bytesOrString));
+// byte for byte (TextDecoder('latin1') is windows-1252 and would change 0x80-0x9F)
+const textOf = (b) => { let s = ''; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode(...b.subarray(i, i + 0x8000)); return s; };
 const pdfStringToText = (v) => {
   // a PDF text string: UTF-16BE with BOM, else PDFDocEncoding (≈ Latin-1 for letters)
   if (v.length >= 2 && v[0] === 0xfe && v[1] === 0xff) { let s = ''; for (let i = 2; i + 1 < v.length; i += 2) s += String.fromCharCode((v[i] << 8) | v[i + 1]); return s; }
   return String.fromCharCode(...v);
 };
-const visualOrder = (text) => /[֐-ࣿऀ-෿฀-໿က-႟ក-៿꣠-ꣿᬀ-᭿יִ-﷿ﹰ-﻿]/.test(text);
+const visualOrder = (text) => /[\u0590-\u08ff\u0900-\u0dff\u0e00-\u0eff\u1000-\u109f\u1780-\u17ff\ua8e0-\ua8ff\u1b00-\u1b7f\u200f\ufb1d-\ufdff\ufe70-\ufeff]|[\u{10800}-\u{10fff}\u{1e800}-\u{1eeff}]/u.test(text);
+
+// The new ToUnicode streams are APPENDED to the visitor's bytes as an incremental update (new objects, a cross-reference
+// section for them, /Prev to the previous one): every other byte of the file stays where it was, so PDF.js reads exactly
+// the same document plus the added text entries. Re-saving the whole file with pdf-lib could change what PDF.js reads
+// (pdf-lib keeps the LAST copy of an object in file order, PDF.js follows the cross-reference: review).
+function incrementalUpdate(original, updates, ctx) {
+  const tail = textOf(original.subarray(Math.max(0, original.length - 2048)));
+  const m = [...tail.matchAll(/startxref\s+(\d+)/g)].pop();
+  if (!m) return null;
+  const prev = Number(m[1]);
+  if (!(prev > 0 && prev < original.length)) return null;
+  const head = textOf(original.subarray(prev, Math.min(original.length, prev + 4)));
+  const t = ctx.trailerInfo;
+  const ref = (r) => (r && r.objectNumber !== undefined ? `${r.objectNumber} ${r.generationNumber} R` : null);
+  const root = ref(t.Root);
+  if (!root) return null;
+  const info = ref(t.Info);
+  const id = t.ID ? t.ID.toString() : null;
+  const parts = [];
+  let offset = original.length;
+  const push = (str) => { const b = Uint8Array.from(str, (c) => c.charCodeAt(0) & 0xff); parts.push(b); offset += b.length; };
+  push('\n');
+  const entries = [];
+  for (const u of updates) {
+    entries.push({ num: u.num, gen: u.gen, at: offset });
+    push(`${u.num} ${u.gen} obj\n<< /Length ${u.text.length} >>\nstream\n${u.text}\nendstream\nendobj\n`);
+  }
+  const size = Math.max(ctx.largestObjectNumber + 1, ...updates.map((u) => u.num + 1));
+  const extra = `${info ? ` /Info ${info}` : ''}${id ? ` /ID ${id}` : ''}`;
+  if (head === 'xref') {
+    const xrefAt = offset;
+    let table = 'xref\n';
+    for (const e of entries.sort((a, b) => a.num - b.num)) table += `${e.num} 1\n${String(e.at).padStart(10, '0')} ${String(e.gen).padStart(5, '0')} n\r\n`;
+    push(`${table}trailer\n<< /Size ${size} /Root ${root}${extra} /Prev ${prev} >>\nstartxref\n${xrefAt}\n%%EOF\n`);
+  } else {
+    // the previous section is a cross-reference STREAM (PDF 1.5+): this one is a stream too
+    const xnum = size;
+    const xrefAt = offset;
+    const rows = [...entries.sort((a, b) => a.num - b.num), { num: xnum, gen: 0, at: xrefAt }];
+    const data = new Uint8Array(rows.length * 7);
+    rows.forEach((r, i) => { data[i * 7] = 1; data[i * 7 + 1] = (r.at >>> 24) & 255; data[i * 7 + 2] = (r.at >>> 16) & 255; data[i * 7 + 3] = (r.at >>> 8) & 255; data[i * 7 + 4] = r.at & 255; data[i * 7 + 5] = (r.gen >>> 8) & 255; data[i * 7 + 6] = r.gen & 255; });
+    const index = rows.map((r) => `${r.num} 1`).join(' ');
+    push(`${xnum} 0 obj\n<< /Type /XRef /Size ${xnum + 1} /W [1 4 2] /Index [${index}] /Root ${root}${extra} /Prev ${prev} /Length ${data.length} >>\nstream\n`);
+    parts.push(data); offset += data.length;
+    push(`\nendstream\nendobj\nstartxref\n${xrefAt}\n%%EOF\n`);
+  }
+  const out = new Uint8Array(offset);
+  out.set(original, 0);
+  let o = original.length;
+  for (const p of parts) { out.set(p, o); o += p.length; }
+  return out;
+}
 
 export async function withActualTextUnicode(bytes) {
   const input = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
@@ -154,7 +195,11 @@ export async function withActualTextUnicode(bytes) {
     if (doc.isEncrypted) return bytes;
     const ctx = doc.context;
     const deref = (o) => (o instanceof PDFRef ? ctx.lookup(o) : o);
-    const streamBytes = (s) => { try { return decodePDFRawStream(s).decode(); } catch { return null; } };
+    let decoded = 0;
+    const streamBytes = (s) => {
+      if (s.dict.get(PDFName.of('DecodeParms'))) return null; // predictors: pdf-lib would decode them wrong
+      try { const d = decodePDFRawStream(s).decode(); decoded += d.length; return decoded > MAX_DECODED ? null : d; } catch { return null; }
+    };
 
     // how many fonts use each ToUnicode stream
     const users = new Map();
@@ -176,6 +221,10 @@ export async function withActualTextUnicode(bytes) {
         if (enc !== PDFName.of('Identity-H') && enc !== PDFName.of('Identity-V')) return null;
         width = 2;
       }
+      // embedded fonts only: PDF.js DRAWS a non-embedded composite font's glyphs from its ToUnicode (review)
+      const descFont = sub === PDFName.of('Type0') ? deref(deref(font.get(PDFName.of('DescendantFonts')))?.asArray?.()[0]) : font;
+      const desc = descFont instanceof PDFDict ? deref(descFont.get(PDFName.of('FontDescriptor'))) : null;
+      if (!(desc instanceof PDFDict) || !['FontFile', 'FontFile2', 'FontFile3'].some((k) => desc.get(PDFName.of(k)))) return null;
       const tuRef = font.get(PDFName.of('ToUnicode'));
       if (!(tuRef instanceof PDFRef) || users.get(tuRef.toString()) !== 1) return null;
       const key = tuRef.toString();
@@ -213,9 +262,26 @@ export async function withActualTextUnicode(bytes) {
     };
 
     const seenForms = new Set();
-    const walk = (contentBytes, resources) => {
-      const fontDict = resources && deref(resources.get(PDFName.of('Font')));
+    const followForms = (text, resources) => {
       const xobjects = resources && deref(resources.get(PDFName.of('XObject')));
+      if (!(xobjects instanceof PDFDict)) return;
+      for (const [, name] of text.matchAll(/\/([^\s/[\]()<>{}%]+)\s+Do\b/g)) {
+        const ref = xobjects.get(PDFName.of(name));
+        const xo = deref(ref);
+        if (xo instanceof PDFRawStream && xo.dict.get(PDFName.of('Subtype')) === PDFName.of('Form') && !seenForms.has(String(ref))) {
+          seenForms.add(String(ref));
+          const body = streamBytes(xo);
+          if (body) walk(body, deref(xo.dict.get(PDFName.of('Resources'))) || resources);
+        }
+      }
+    };
+    const walk = (contentBytes, resources) => {
+      const text = textOf(contentBytes);
+      followForms(text, resources);
+      // only a stream that carries ActualText is read (fast on any other file), and never one with an inline image:
+      // where its data ends is a guess, and a wrong guess would put glyphs under the wrong font (review)
+      if (!text.includes('ActualText') || /(^|\s)BI\s/.test(text)) return;
+      const fontDict = resources && deref(resources.get(PDFName.of('Font')));
       let cur = null;
       const saved = [], stack = [];
       for (const { op, args } of operations(contentBytes)) {
@@ -237,14 +303,6 @@ export async function withActualTextUnicode(bytes) {
             if (it.v.length % cur.width) { span.codes.push(null); continue; }
             for (let i = 0; i < it.v.length; i += cur.width) span.codes.push([cur, cur.width === 2 ? (it.v[i] << 8) | it.v[i + 1] : it.v[i]]);
           }
-        } else if (op === 'Do' && xobjects instanceof PDFDict && args[0]?.t === 'name') {
-          const ref = xobjects.get(PDFName.of(args[0].v));
-          const xo = deref(ref);
-          if (xo instanceof PDFRawStream && xo.dict.get(PDFName.of('Subtype')) === PDFName.of('Form') && !seenForms.has(String(ref))) {
-            seenForms.add(String(ref));
-            const body = streamBytes(xo);
-            if (body) walk(body, deref(xo.dict.get(PDFName.of('Resources'))) || resources);
-          }
         }
       }
     };
@@ -261,6 +319,7 @@ export async function withActualTextUnicode(bytes) {
     }
 
     let added = 0;
+    const updates = [];
     for (const info of cmaps.values()) {
       if (!info) continue;
       const adds = [...info.add].filter(([code]) => !info.conflict.has(code) && !info.map.has(code)).sort((a, b) => a[0] - b[0]);
@@ -272,11 +331,11 @@ export async function withActualTextUnicode(bytes) {
         const chunk = adds.slice(i, i + 100);
         blocks += `${chunk.length} beginbfchar\n${chunk.map(([c, ch]) => `<${hex(c)}> <${u16(ch)}>`).join('\n')}\nendbfchar\n`;
       }
-      ctx.assign(info.ref, ctx.stream(info.text.replace('endcmap', `${blocks}endcmap`)));
+      updates.push({ num: info.ref.objectNumber, gen: info.ref.generationNumber, text: info.text.replace('endcmap', `${blocks}endcmap`) });
       added += adds.length;
     }
     if (!added) return bytes;
-    return await doc.save({ updateFieldAppearances: false });
+    return incrementalUpdate(input, updates, ctx) || bytes;
   } catch {
     return bytes; // never in the way of the tool: the original bytes, exactly as before
   }
