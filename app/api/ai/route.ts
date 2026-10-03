@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendAlert } from "@/lib/alert";
+import { reportProviderFailure, reportProviderSuccess } from "@/lib/providerIncident";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkPromptLength } from "@/lib/quota/limits";
 import { actualAiCostMicros } from "@/lib/quota/config";
@@ -64,8 +64,9 @@ export async function POST(req: NextRequest) {
 
       if (!response.ok) {
         await guard.release();
+        // P30: OpenAI outages (no credit, key refused, repeated 429/5xx) alert once per incident (lib/providerIncident.js).
+        await reportProviderFailure("openai", { httpStatus: response.status, code: data?.error?.code });
         if (response.status === 429) {
-          await sendAlert("openai", data?.error?.code || "429");
           return NextResponse.json(
             { error: "This tool is temporarily at capacity. Please try again later." },
             { status: 503 }
@@ -83,6 +84,7 @@ export async function POST(req: NextRequest) {
       // guard.commit(null) already treats as a real, unknown cost -- never
       // released.
       await guard.commit(actualAiCostMicros(data?.usage));
+      await reportProviderSuccess("openai");
       const text = data?.choices?.[0]?.message?.content || "";
       return NextResponse.json({ text });
     } catch (err: any) {

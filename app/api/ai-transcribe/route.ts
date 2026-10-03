@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendAlert } from "@/lib/alert";
+import { reportProviderFailure, reportProviderSuccess } from "@/lib/providerIncident";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { MAX_AUDIO_UPLOAD_BYTES } from "@/lib/quota/limits";
 import { actualAiTranscribeCostMicros } from "@/lib/quota/config";
@@ -77,8 +77,9 @@ async function transcribe(req: NextRequest, file: File, tool: string | null): Pr
 
       if (!response.ok) {
         await guard.release();
+        // P30: OpenAI outages (no credit, key refused, repeated 429/5xx) alert once per incident (lib/providerIncident.js).
+        await reportProviderFailure("openai", { httpStatus: response.status, code: data?.error?.code });
         if (response.status === 429) {
-          await sendAlert("openai", data?.error?.code || "429");
           return NextResponse.json(
             { error: "This tool is temporarily at capacity. Please try again later." },
             { status: 503 }
@@ -96,6 +97,7 @@ async function transcribe(req: NextRequest, file: File, tool: string | null): Pr
       // null, which guard.commit(null) already treats as a real, unknown
       // cost -- never released.
       await guard.commit(actualAiTranscribeCostMicros(data?.duration));
+      await reportProviderSuccess("openai");
       // Timed segments too (30/09): the page offers SRT and VTT subtitles, as transcription sites do. Only the start,
       // end and text of each segment are passed on.
       const segments = Array.isArray(data?.segments)

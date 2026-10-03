@@ -244,7 +244,7 @@ export async function runStagedConversion({ file, endpoint, fields, onStage, sig
       throw new MediaJobError(msg, 'convert_' + res.status);
     }
     const dl = await downloadResult({ jid, ticket, expected: j.outputBytes || 0, onStage, signal });
-    return { blob: dl.blob, ext: j.ext, bytes: dl.bytes, detectedFonts: j.detectedFonts || [], docTextBoxes: j.docTextBoxes || 0, docFallback: !!j.docFallback };
+    return { blob: dl.blob, ext: j.ext, bytes: dl.bytes, detectedFonts: j.detectedFonts || [], docTextBoxes: j.docTextBoxes || 0, docFallback: !!j.docFallback, engineFallback: j.engineFallback || null };
   } catch (e) {
     // The route already destroys the staged file on a failed conversion; this covers cancel/network cases.
     if (e instanceof MediaJobError && e.code !== 'expired') cleanup();

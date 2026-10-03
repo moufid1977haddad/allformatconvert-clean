@@ -8,6 +8,7 @@ import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES, MAX_OFFICE_STAGED_BYTES, MAX_SPREADSHEET_STAGED_BYTES } from "@/lib/quota/limits";
 import { isStagedRequest, respondStaged, fileResponse } from "@/lib/media/stagedRoute";
 import { alertServerError } from "@/lib/quota/errorAlerts";
+import { convertApiUnavailable, alertConvertApiFailure, convertApiSucceeded } from "@/lib/convertApiOutage";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
 
 // Give the Gotenberg/ConvertAPI round-trip (up to GOTENBERG_TIMEOUT_MS
@@ -213,6 +214,7 @@ async function handleConvertApi(req: NextRequest, file: File, staged: boolean): 
     // ConvertAPI's 2xx response means it already billed for this
     // conversion, whether or not the payload turns out to be a valid PDF.
     await guard.commit(costMicros);
+    await convertApiSucceeded();
 
     const bytes = new Uint8Array(pdfBuffer);
     const isPdf = bytes.length >= 5 && String.fromCharCode(...bytes.slice(0, 5)) === "%PDF-";
@@ -237,9 +239,10 @@ async function handleConvertApi(req: NextRequest, file: File, staged: boolean): 
       "Content-Disposition": contentDisposition(outName),
     }, staged);
   } catch (err) {
-    // No automatic fallback to Gotenberg on any ConvertAPI failure -- every
-    // failure returns an explicit error to the user, never a silent retry
-    // against a different provider.
+    // P30 (owner's decision, 04/10): when ConvertAPI ITSELF is unavailable (no credit, key refused, overloaded,
+    // down) and nothing was billed, the .docx is converted by our own LibreOffice instead -- never silently: the
+    // response carries X-Engine-Fallback and the page tells the visitor which engine made the PDF and how it can
+    // differ. Any other failure (the file, a timeout, a billed answer) still returns its explicit error.
     //
     // Release/commit boundary (see lib/providers/convertApi.js's
     // ConvertApiError#billed): release() only when ConvertAPI never
@@ -255,11 +258,20 @@ async function handleConvertApi(req: NextRequest, file: File, staged: boolean): 
     }
 
     if (err instanceof ConvertApiError) {
+      // Server-side only, and deliberately limited to the error code and HTTP status -- never the token, never the
+      // raw upstream body. A provider outage alerts once per incident (lib/convertApiOutage.ts).
+      await alertConvertApiFailure("word-to-pdf", err);
+      if (convertApiUnavailable(err)) {
+        console.log(`[convertapi] docx->pdf unavailable (${err.code}, HTTP ${err.httpStatus ?? "n/a"}): LibreOffice backup`);
+        const res = await handleGotenberg(req, file, "docx", staged);
+        if (res.ok) {
+          res.headers.set("X-Engine-Fallback", "libreoffice");
+          res.headers.set("Access-Control-Expose-Headers", "X-Engine-Fallback, X-Detected-Symbol-Fonts");
+        }
+        return res;
+      }
       const mapped = CONVERTAPI_ERROR_RESPONSES[err.code] || CONVERTAPI_ERROR_RESPONSES.upstream_error;
       if (mapped.alert) {
-        // Server-side only, and deliberately limited to the error code and
-        // HTTP status -- never the token, never the raw upstream body.
-        await alertServerError("word-to-pdf", `${err.code} (HTTP ${err.httpStatus ?? "n/a"})`);
         await insertToolError(buildServerToolError({
           tool: "word-to-pdf",
           file,

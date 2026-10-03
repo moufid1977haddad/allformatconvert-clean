@@ -11,6 +11,7 @@ import { alertServerError } from "@/lib/quota/errorAlerts";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
 import { contentDisposition } from "@/lib/contentDisposition";
 import { PDF_NO_TABLES_MESSAGE, PDF_NO_TABLES_CODES } from "@/lib/pdfNoTables";
+import { convertApiUnavailable, convertApiUnavailableMessage, alertConvertApiFailure, convertApiSucceeded } from "@/lib/convertApiOutage";
 
 type Spec = {
   tool: "pdf-to-excel" | "pdf-to-ppt";
@@ -66,6 +67,7 @@ export function makePdfToOfficeHandler(spec: Spec) {
       const { buffer, costMicros } = await spec.convert(buf, file.name);
       console.log(`[convertapi] pdf->${spec.ext} cost_micros=${costMicros} input_mb=${Math.round(file.size / 1048576)}`);
       await guard.commit(costMicros); // a 2xx was billed, whatever the bytes turn out to be
+      await convertApiSucceeded();
       const bytes = new Uint8Array(buffer);
       // .xlsx / .pptx are ZIP containers: "PK". Anything else is refused, never handed over under that name.
       if (!(bytes.length >= 2 && bytes[0] === 0x50 && bytes[1] === 0x4b)) {
@@ -86,7 +88,10 @@ export function makePdfToOfficeHandler(spec: Spec) {
         const mapped = ERRORS[(err as any).code] || ERRORS.upstream_error;
         // Numbers only (never the body, never with the Authorization header): enough to tell which failure it was.
         console.error(`[convertapi] pdf->${spec.ext} failed code=${(err as any).code} http=${(err as any).httpStatus ?? "n/a"} convertapi_code=${(err as any).bodyCode ?? "n/a"}`);
-        if (mapped.alert) await report(`${(err as any).code} (HTTP ${(err as any).httpStatus ?? "n/a"})`);
+        // P30: a provider outage alerts once per incident; the visitor is told to come back (no backup of this quality).
+        await alertConvertApiFailure(spec.tool, err);
+        if (mapped.alert) await insertToolError(buildServerToolError({ tool: spec.tool, file, error: new Error(`${(err as any).code} (HTTP ${(err as any).httpStatus ?? "n/a"})`), userAgent: req.headers.get("user-agent"), headers: req.headers }));
+        if (convertApiUnavailable(err)) return NextResponse.json({ error: convertApiUnavailableMessage(spec.label) }, { status: 503 });
         return NextResponse.json({ error: mapped.message }, { status: mapped.status });
       }
       await report("unexpected_error");
