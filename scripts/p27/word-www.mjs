@@ -1,13 +1,13 @@
 // P27 phase 2: the two real paid conversions P26 could not make (owner's budget: 0.05 $ at ConvertAPI), through the
 // PDF to Word page on www, as a visitor: a text PDF -> .doc, and a PDF above 4 MB -> .rtf (media service path).
 // Each file is checked by its signature here, then reopened in Word and LibreOffice by the caller.
-//   node scripts/p27/word-www.mjs <origin> <small.pdf> <big.pdf> <out-dir>
+//   node scripts/p27/word-www.mjs <origin> <small.pdf> <big.pdf> <out-dir> [--one=docx]
 import { chromium } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 import { realMediaService } from '../browser-tests/lib/real-media-service.mjs';
 
-const [originArg, small, big, out] = process.argv.slice(2);
+const [originArg, small, big, out] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const origin = new URL(originArg).origin;
 fs.mkdirSync(out, { recursive: true });
 const OLE = Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]);
@@ -50,6 +50,14 @@ async function run(name, file, format) {
   return res;
 }
 
+// --one=<format>: a single conversion of <small.pdf> (diagnosis, one paid call)
+const one = process.argv.find((a) => a.startsWith('--one='))?.split('=')[1];
+if (one) {
+  const r1 = await run(`www-one-${path.basename(small, '.pdf')}`, small, one);
+  check(`${path.basename(small)} -> .${one} on www`, r1.state === 'ok', `${r1.name} ${r1.buf?.length} B ${r1.ms} ms ${r1.alert || ''}`);
+  await b.close();
+  process.exit(fail ? 1 : 0);
+}
 let j = media.jobs.length;
 let r = await run('www-doc', small, 'doc');
 check('text PDF -> .doc (Word 97 container) on www', r.state === 'ok' && /\.doc$/.test(r.name) && r.buf.subarray(0, 8).equals(OLE), `${r.name} ${r.buf?.length} B ${r.ms} ms ${r.alert || ''}`);
