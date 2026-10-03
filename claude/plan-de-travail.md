@@ -73,7 +73,7 @@ nettoyage du HTML déposé comme `lib/urlFetch/snapshot.mjs` (ce qu'on perdrait 
 
 ## 🌙 P27 — nuit du 03 au 04/10 (`docs/audit/RAPPORT-p27-nuit-04-10.md`, repère `restauration-avant-p27-04-10` = `ffe978a7`)
 
-**P27 terminé le 04/10 : 6 phases sur 7 en production, aucun retour arrière.** Production **`onlineconvertools-g8bo4cvv9` = `b264efbc`** (repère du dernier lot `restauration-avant-p27-lot2` = `8399d22f` = `a5xwln359`) ; pdf-tools code `5c51f840`. Dépenses : ConvertAPI ≈ 0,04 $ (sur 0,05 $), Railway ≈ 0,05 $ (bancs), facture au repos inchangée (pdf-tools 0,023 Go). **Reste au propriétaire** : phase 3 (autoriser `railway up` vers `gotenberg-fonts`), un panorama iPhone de 63 Mpx dans Image Compressor, décision Google Analytics, ~~contrôle du texte de PDF Repair~~ (fait par P28).
+**P27 terminé le 04/10 : 6 phases sur 7 en production, aucun retour arrière.** Production **`onlineconvertools-g8bo4cvv9` = `b264efbc`** (repère du dernier lot `restauration-avant-p27-lot2` = `8399d22f` = `a5xwln359`) ; pdf-tools code `5c51f840`. Dépenses : ConvertAPI ≈ 0,04 $ (sur 0,05 $), Railway ≈ 0,05 $ (bancs), facture au repos inchangée (pdf-tools 0,023 Go). **Reste au propriétaire** : ~~phase 3~~ (faite par P28), un panorama iPhone de 63 Mpx dans Image Compressor (dans sa passe iPhone, test 26), ~~décision Google Analytics~~ (gardé, P28), ~~contrôle du texte de PDF Repair~~ (fait par P28).
 
 | Phase | État | Reste |
 |---|---|---|
@@ -84,7 +84,7 @@ nettoyage du HTML déposé comme `lib/urlFetch/snapshot.mjs` (ce qu'on perdrait 
 | 5 Accessibilité AA | ✅ **en production** : **axe 0 violation** sur 972 pages-modes (avant 248 graves/critiques) ; mode sombre contrasté, focus visible, zones d'envoi au clavier (A11yBridge), annonces ; clavier 40/40 ×3 moteurs (local, préversion, www) | — |
 | 6 Clarté d'usage | ✅ **en production** : « Click or drop… » / « Choose… » selon l'appareil (112 zones), mots sous les icônes, 12 catégories au pied de page ; action déjà cachée avant fichier partout | — |
 | 7 Restes P23 | ✅ **en production** : TextArea (gros textes sans blocage), bornes mesurées (Compressor 140 Mpx ordinateur / 50 téléphone ; images PDF 268 / 90), chien de garde | Propriétaire : un panorama iPhone de 63 Mpx dans Image Compressor (au-dessus de 50) |
-| Trouvé en route | ✅ **en production** (lot 3) : PDF Extract Text, Compare, **Redact** (ne trouvait pas « données »), Translate, AI Summary, PDF to HTML, PDF to Excel lisent juste les PDF LibreOffice-Windows à accents décomposés (`app/lib/pdfActualText.js`, mise à jour incrémentale, NFC dans `app/lib/pdfjs.js`, revue indépendante) ; bancs corrigés (préversion protégée comptée « propre », barre Vercel, jeton) | ✅ **PDF Repair : fait par P28** (texte contrôlé, en production) |
+| Trouvé en route | ✅ **en production** (lot 3) : PDF Extract Text, Compare, **Redact** (ne trouvait pas « données »), Translate, AI Summary, PDF to HTML, PDF to Excel lisent juste les PDF LibreOffice-Windows à accents décomposés (`app/lib/pdfActualText.js`, mise à jour incrémentale, NFC dans `app/lib/pdfjs.js`, revue indépendante) ; bancs corrigés (préversion protégée comptée « propre », barre Vercel, jeton) | ✅ **PDF Repair : contrôle du texte fait par P28** (en production) |
 
 > **P26 (03/10) terminé : Gotenberg protégé, E1 et E2 en production, aucun retour arrière** — tableau P26 ci-dessous.
 > Reste après P27 : ~~Gotenberg 8.37.0~~ (fait par P28), E3 (compte Google). PDF/A b et vraie conversion .doc : faits par P27.
