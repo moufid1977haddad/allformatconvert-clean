@@ -3,6 +3,23 @@
 > **📍 EMPLACEMENT DE CE DOCUMENT — lire en premier.**
 > Jusqu'au 19 septembre 2026, ce document vivait **uniquement dans le Projet claude.ai**, invisible depuis le dépôt. Claude Code a donc travaillé des semaines sans la RÈGLE ZÉRO, sans les interdits permanents et sans la liste des pièges — et a redécouvert à ses frais des choses déjà écrites ici. **Il vit désormais dans le dépôt, à `claude/plan-de-travail.md`, et c'est la seule copie qui fait foi.** À lire au début de chaque chantier.
 
+## 💳 RÈGLE PERMANENTE — crédits des fournisseurs payants (P30, 04/10, tous les chantiers suivants)
+
+**Constat** (`docs/audit/RAPPORT-p30-convertapi-alertes-04-10.md` §1) : le crédit ConvertAPI s'est épuisé le 02/10 avec
+**au plus 1 conversion de visiteur sur 93** passées par le site depuis le 04/09 ; le reste : nos bancs et essais (www et
+préversions), et ≈ 157 conversions hors du site (le vrai jeton était dans `.env.local`).
+1. **Simulation par défaut.** Un banc n'appelle jamais un fournisseur payant réel : en local, `scripts/p26/e1/fake-providers.mjs`
+   (jeton factice `local-bench-fake`) ; les préversions n'ont pas les jetons payants. **Le code l'impose pour ConvertAPI** :
+   appel réel seulement par la production Vercel (repère d'exécution vérifié), refusé avant tout envoi ailleurs.
+2. **Appels réels comptés et plafonnés.** Sur www, uniquement avec le budget donné par le propriétaire dans le prompt du
+   chantier, chaque appel inscrit **avant** l'envoi dans `docs/audit/depenses-fournisseurs.jsonl` par
+   `scripts/p30/paid-ledger.mjs` (`reservePaid`), qui refuse au-delà du budget. Un appel non facturé (refus) est rendu
+   (`refundPaid`).
+3. **Le site compte lui-même** les conversions ConvertAPI facturées sur la période du forfait (1 000/mois, renouvellement
+   le 4) et alerte à 50, 80, 100 % ; au-delà, ConvertAPI facture le surplus.
+4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
+   rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
+
 ## ✅ INCIDENT 402 DU 03/10 — CLOS (compte passé en Pro par le propriétaire, plafond de dépense 50 $/mois)
 
 **Constat chiffré** (API d'usage Vercel `/v2/usage?type=requests`, lue le 03/10, cycle du 03/09 au 02/10, heure de la machine) :
