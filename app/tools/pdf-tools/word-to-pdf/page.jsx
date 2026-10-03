@@ -43,7 +43,8 @@ export default function WordToPdfPage() {
 
     try {
       setStage(null);
-      const result = await convertOffice({ file: file, endpoint: '/api/convert-to-pdf', onStage: setStage });
+      // engineFallback: this page shows the "backup converter" notice, so the route may use it (P30).
+      const result = await convertOffice({ file: file, endpoint: '/api/convert-to-pdf', fields: { engineFallback: 'allowed' }, onStage: setStage });
       setDetectedFonts(result.detectedFonts);
       setEngineFallback(result.engineFallback || null);
       const blob = result.blob;

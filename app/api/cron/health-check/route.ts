@@ -246,6 +246,10 @@ export async function GET(request: NextRequest) {
   const { error: ipRateDeleteErr } = await supabaseAdmin
     .from("usage_counters").delete().like("bucket_key", "ip_rate:%").lt("updated_at", twoDaysAgo);
   if (ipRateDeleteErr) console.error("health-check housekeeping: ip_rate counter prune failed (non-fatal):", ipRateDeleteErr.message);
+  // P30: the 10-minute provider failure buckets (lib/providerIncident.js) are only read for 20 minutes.
+  const { error: providerFailDeleteErr } = await supabaseAdmin
+    .from("usage_counters").delete().like("bucket_key", "provider_fail:%").lt("updated_at", twoDaysAgo);
+  if (providerFailDeleteErr) console.error("health-check housekeeping: provider_fail counter prune failed (non-fatal):", providerFailDeleteErr.message);
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString();
   const { error: eventsDeleteErr } = await supabaseAdmin
     .from("usage_events").delete().lt("created_at", ninetyDaysAgo);

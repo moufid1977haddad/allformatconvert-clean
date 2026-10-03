@@ -22,14 +22,15 @@ export function convertApiUnavailableMessage(label: string): string {
 }
 
 /**
- * Alerting for one ConvertAPI failure: a provider failure goes to the incident tracker (once per incident); a failure
- * the tracker does not treat as the provider's (a corrupted file) keeps the per-route hourly alert it had before.
+ * Alerting for one ConvertAPI failure: a provider failure goes to the incident tracker (once per incident); any other
+ * failure (the file, the request) keeps exactly the per-route hourly alert it had before P30 -- `routeAlert` is the
+ * route's own "alert" flag for that code (false for an unsupported format, as before).
  */
-export async function alertConvertApiFailure(route: string, err: ConvertApiError): Promise<void> {
+export async function alertConvertApiFailure(route: string, err: ConvertApiError, routeAlert: boolean): Promise<void> {
   const failure = { httpStatus: err.httpStatus, code: err.code };
   if (err.code === "not_production") return; // our own refusal outside production (P30), not an incident
   if (classifyProviderFailure(failure)) await reportProviderFailure("convertapi", failure);
-  else await alertServerError(route, `${err.code} (HTTP ${err.httpStatus ?? "n/a"})`);
+  else if (routeAlert) await alertServerError(route, `${err.code} (HTTP ${err.httpStatus ?? "n/a"})`);
 }
 
 export const convertApiSucceeded = () => reportProviderSuccess("convertapi");

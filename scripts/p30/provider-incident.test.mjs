@@ -31,17 +31,16 @@ function memoryDeps(t0 = Date.UTC(2026, 9, 4, 12, 0, 0)) {
       counters.set(k, v);
       return { newValue: v, allowed: true };
     },
-    checkStateTransition: async (key, isProblem) => {
-      const was = state.get(key) === 1;
-      if (was === isProblem) return { alert: false };
-      state.set(key, isProblem ? 1 : 0);
-      return { alert: true, recovered: !isProblem };
-    },
+    readCounter: async (b, p) => counters.get(`${b}|${p}`) || 0,
+    openIncident: async (prov) => { if (state.get(prov) === 1) return false; state.set(prov, 1); return true; },
+    closeIncident: async (prov) => { if (state.get(prov) !== 1) return false; state.set(prov, 0); return true; },
+    incidentOpen: async (prov) => state.get(prov) === 1,
     sendAlert: async (service, status) => { sent.push({ service, status }); return { ntfy: 'sent', email: 'sent' }; },
   };
 }
+const MIN = 60_000;
 
-test('classification: outage now, transient when repeated, file errors never', () => {
+test('classification: outage now, transient when repeated, file and request errors never', () => {
   const c = inc.classifyProviderFailure;
   assert.equal(c({ httpStatus: 403, code: 'quota_exceeded' }), 'outage');
   assert.equal(c({ httpStatus: 402 }), 'outage');
@@ -49,15 +48,20 @@ test('classification: outage now, transient when repeated, file errors never', (
   assert.equal(c({ httpStatus: 429, code: 'insufficient_quota' }), 'outage');
   assert.equal(c({ httpStatus: 429, code: 'rate_limit_exceeded' }), 'transient');
   assert.equal(c({ httpStatus: 503, code: 'rate_limited' }), 'transient');
-  assert.equal(c({ httpStatus: 502 }), 'transient');
-  assert.equal(c({}), 'transient'); // no answer at all
+  assert.equal(c({ httpStatus: 502, code: 'upstream_error' }), 'transient');
+  assert.equal(c({ code: 'upstream_error' }), 'transient'); // network: no answer
+  assert.equal(c({ code: 'timeout' }), 'transient'); // our own timeout
+  assert.equal(c({}), 'transient');
+  assert.equal(c({ httpStatus: 500, code: 'timeout' }), null); // ConvertAPI's per-file conversion timeout
+  assert.equal(c({ httpStatus: 400, code: 'upstream_error' }), null); // a 4xx about the request or the file
+  assert.equal(c({ httpStatus: 422, code: 'upstream_error' }), null);
   assert.equal(c({ httpStatus: 500, code: 'corrupted_file' }), null);
   assert.equal(c({ httpStatus: 415, code: 'unsupported_format' }), null);
   assert.equal(c({ code: 'not_production' }), null);
   assert.equal(c({ httpStatus: 400 }), null);
 });
 
-test('quota refusal: one alert per incident, then one recovery', async () => {
+test('quota refusal: one alert per incident, recovery only after a quiet window', async () => {
   inc._resetForTests();
   const d = memoryDeps();
   assert.equal(await inc.reportProviderFailure('convertapi', { httpStatus: 403, code: 'quota_exceeded' }, d), 'opened');
@@ -65,33 +69,49 @@ test('quota refusal: one alert per incident, then one recovery', async () => {
   assert.equal(d.sent.length, 1);
   assert.equal(d.sent[0].service, 'convertapi');
   assert.match(d.sent[0].status, /^down \(quota_exceeded, HTTP 403\)/);
+  assert.equal(await inc.reportProviderSuccess('convertapi', d), 'holding'); // failures still in the window
+  d.setNow(d.now() + 25 * MIN);
   assert.equal(await inc.reportProviderSuccess('convertapi', d), 'recovered');
   assert.deepEqual(d.sent[1], { service: 'convertapi', status: 'recovered' });
-  // later successes inside the recheck interval do not even read the state
-  assert.equal(await inc.reportProviderSuccess('convertapi', d), 'skipped');
+  assert.equal(await inc.reportProviderSuccess('convertapi', d), 'skipped'); // cached on this instance
   d.setNow(d.now() + inc.SUCCESS_RECHECK_MS + 1);
   assert.equal(await inc.reportProviderSuccess('convertapi', d), 'fine');
   assert.equal(d.sent.length, 2);
-  // a new incident after recovery alerts again
   assert.equal(await inc.reportProviderFailure('convertapi', { httpStatus: 403, code: 'quota_exceeded' }, d), 'opened');
   assert.equal(d.sent.length, 3);
 });
 
-test('transient failures open an incident only on the third inside the window', async () => {
+test('transient failures: three within a sliding 10-20 min window, across a bucket boundary too', async () => {
   inc._resetForTests();
-  const d = memoryDeps();
+  const d = memoryDeps(Date.UTC(2026, 9, 4, 12, 8, 0));
   assert.equal(await inc.reportProviderFailure('openai', { httpStatus: 502 }, d), 'counted');
   assert.equal(await inc.reportProviderFailure('openai', { httpStatus: 503 }, d), 'counted');
-  assert.equal(d.sent.length, 0);
+  d.setNow(Date.UTC(2026, 9, 4, 12, 11, 0)); // next bucket
   assert.equal(await inc.reportProviderFailure('openai', { httpStatus: 500 }, d), 'opened');
   assert.equal(d.sent.length, 1);
-  // two failures in one window and one in the next do not add up
-  const d2 = memoryDeps(Date.UTC(2026, 9, 4, 12, 8, 0));
-  await inc.reportProviderFailure('pangram', { httpStatus: 500 }, d2);
-  await inc.reportProviderFailure('pangram', { httpStatus: 500 }, d2);
-  d2.setNow(Date.UTC(2026, 9, 4, 12, 11, 0));
-  assert.equal(await inc.reportProviderFailure('pangram', { httpStatus: 500 }, d2), 'counted');
-  assert.equal(d2.sent.length, 0);
+  // one failure every 6 minutes (the reviewer's case) is still seen
+  inc._resetForTests();
+  const e = memoryDeps(Date.UTC(2026, 9, 4, 13, 0, 0));
+  const r = [];
+  for (let i = 0; i < 4; i++) { e.setNow(Date.UTC(2026, 9, 4, 13, 0, 0) + i * 6 * MIN); r.push(await inc.reportProviderFailure('pangram', { httpStatus: 500 }, e)); }
+  assert.ok(r.includes('opened'), r.join(','));
+  // failures far apart never open
+  inc._resetForTests();
+  const f = memoryDeps(Date.UTC(2026, 9, 4, 14, 0, 0));
+  for (let i = 0; i < 5; i++) { f.setNow(Date.UTC(2026, 9, 4, 14, 0, 0) + i * 25 * MIN); assert.equal(await inc.reportProviderFailure('pangram', { httpStatus: 500 }, f), 'counted'); }
+});
+
+test('partial outage does not flap: no recovery while failures continue', async () => {
+  inc._resetForTests();
+  const d = memoryDeps();
+  for (let i = 0; i < 3; i++) await inc.reportProviderFailure('convertapi', { httpStatus: 502, code: 'upstream_error' }, d);
+  assert.equal(d.sent.length, 1);
+  for (let i = 0; i < 20; i++) {
+    d.setNow(d.now() + 2 * MIN);
+    await inc.reportProviderSuccess('convertapi', d);
+    await inc.reportProviderFailure('convertapi', { httpStatus: 502, code: 'upstream_error' }, d);
+  }
+  assert.equal(d.sent.length, 1, 'one "down", no recovered/down pairs');
 });
 
 test('providers are tracked separately; file errors and non-production never alert', async () => {
@@ -107,15 +127,41 @@ test('providers are tracked separately; file errors and non-production never ale
   assert.equal(off.sent.length, 0);
 });
 
-test('a broken counter or state store never throws and never hides an outage', async () => {
+test('concurrent openings send one alert (atomic open)', async () => {
+  inc._resetForTests();
+  const d = memoryDeps();
+  const r = await Promise.all(Array.from({ length: 10 }, () => inc.reportProviderFailure('convertapi', { httpStatus: 403, code: 'quota_exceeded' }, d)));
+  assert.equal(r.filter((x) => x === 'opened').length, 1);
+  assert.equal(d.sent.length, 1);
+});
+
+test('a broken store never throws, never hides an outage, and does not spam', async () => {
   inc._resetForTests();
   const d = memoryDeps();
   d.incrementCounter = async () => { throw new Error('db down'); };
+  d.readCounter = async () => { throw new Error('db down'); };
+  d.openIncident = async () => { throw new Error('db down'); };
   assert.equal(await inc.reportProviderFailure('openai', { httpStatus: 502 }, d), 'opened');
-  const e = memoryDeps();
-  e.checkStateTransition = async () => { throw new Error('db down'); };
-  assert.equal(await inc.reportProviderFailure('openai', { httpStatus: 403 }, e), 'ignored');
-  assert.equal(await inc.reportProviderSuccess('openai', e), 'skipped');
+  for (let i = 0; i < 5; i++) assert.equal(await inc.reportProviderFailure('openai', { httpStatus: 502 }, d), 'already-open');
+  d.setNow(d.now() + 31 * MIN);
+  assert.equal(await inc.reportProviderFailure('openai', { httpStatus: 502 }, d), 'opened');
+  assert.equal(d.sent.length, 2);
+  d.incidentOpen = async () => { throw new Error('db down'); };
+  assert.equal(await inc.reportProviderSuccess('openai', d), 'skipped');
+});
+
+test('runtime production check needs more than VERCEL_ENV', () => {
+  const saved = { e: process.env.VERCEL_ENV, r: process.env.VERCEL_REGION, l: process.env.AWS_LAMBDA_FUNCTION_NAME };
+  try {
+    process.env.VERCEL_ENV = 'production'; delete process.env.VERCEL_REGION; delete process.env.AWS_LAMBDA_FUNCTION_NAME;
+    assert.equal(inc.isVercelProduction(), false);
+    process.env.VERCEL_REGION = 'iad1';
+    assert.equal(inc.isVercelProduction(), true);
+    process.env.VERCEL_ENV = 'preview';
+    assert.equal(inc.isVercelProduction(), false);
+  } finally {
+    for (const [k, v] of [['VERCEL_ENV', saved.e], ['VERCEL_REGION', saved.r], ['AWS_LAMBDA_FUNCTION_NAME', saved.l]]) { if (v === undefined) delete process.env[k]; else process.env[k] = v; }
+  }
 });
 
 test('ConvertAPI plan period starts on the renewal day', () => {
@@ -161,7 +207,7 @@ test('ConvertAPI: no real call outside Vercel production (bench placeholder exce
   const saved = { env: process.env.VERCEL_ENV, token: process.env.CONVERTAPI_TOKEN };
   try {
     process.env.CONVERTAPI_TOKEN = 'a-real-looking-token';
-    for (const env of [undefined, 'preview', 'development']) {
+    for (const env of [undefined, 'preview', 'development', 'production']) { // 'production' alone: as from a pulled .env file
       if (env === undefined) delete process.env.VERCEL_ENV; else process.env.VERCEL_ENV = env;
       await assert.rejects(convertDocxToPdf(Buffer.from('x'), 'a.docx'), (e) => e instanceof ConvertApiError && e.code === 'not_production');
     }

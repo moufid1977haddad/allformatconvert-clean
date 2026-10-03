@@ -252,7 +252,7 @@ async function convertPdf(req: NextRequest, file: File, staged = false, format: 
       const mapped = CONVERTAPI_ERROR_RESPONSES[err.code] || CONVERTAPI_ERROR_RESPONSES.upstream_error;
       // Server-side only, and deliberately limited to the error code and HTTP status -- never the token, never the
       // raw upstream body. P30: a provider outage alerts once per incident (lib/convertApiOutage.ts).
-      await alertConvertApiFailure("pdf-to-word", err);
+      await alertConvertApiFailure("pdf-to-word", err, mapped.alert);
       if (mapped.alert) {
         await insertToolError(buildServerToolError({
           tool: "pdf-to-word",

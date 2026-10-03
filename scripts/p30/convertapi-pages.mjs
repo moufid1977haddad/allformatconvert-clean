@@ -9,6 +9,7 @@
 import { chromium } from '@playwright/test';
 import fs from 'node:fs';
 import { reservePaid, refundPaid } from './paid-ledger.mjs';
+import { previewAuth } from '../p26/preview-auth.mjs';
 
 const origin = new URL(process.argv[2]).origin;
 const arg = (k) => process.argv.find((a) => a.startsWith(`--${k}=`))?.split('=')[1];
@@ -37,12 +38,26 @@ const cases = [
   { id: 'pdf-to-word', path: '/tools/pdf-tools/pdf-to-word', file: PDF, name: 'p30-letter.pdf', paid: true, out: 'PK', label: 'Word' },
   { id: 'pdf-to-excel', path: '/tools/pdf-tools/pdf-to-excel', file: 'scripts/p27/pdfa-corpus/lo-fidelite-01_docx-untagged.pdf', name: 'p30-letter.pdf', paid: true, out: 'PK', label: 'Excel' },
   { id: 'pdf-to-ppt', path: '/tools/pdf-tools/pdf-to-ppt', file: PDF, name: 'p30-letter.pdf', paid: true, out: 'PK', label: 'PowerPoint' },
+  // Merge PDF converts an added .docx through the same route (fallback mode only: on www it would spend a credit).
+  ...(expect === 'fallback' ? [{ id: 'pdf-merge-docx', path: '/tools/pdf-tools/pdf-merge', files: [DOCX, PDF], paid: false, out: '%PDF-' }] : []),
 ].filter((c) => !only || only.includes(c.id));
 if (big) cases.push({ id: 'word-to-pdf-staged', path: '/tools/pdf-tools/word-to-pdf', buffer: await bigDocx(), name: 'p30-big.docx', paid: true, out: '%PDF-' });
 
 const b = await chromium.launch();
 const ctx = await b.newContext({ acceptDownloads: true });
 await ctx.addCookies([{ name: 'oct_automation', value: '1', url: origin }]);
+// A protected preview: the caller's OIDC token (`vercel env run -e preview -- node ...`), for the preview origin only.
+console.log('preview auth', await previewAuth(ctx, origin));
+// --cors-shim (preview only): the media service answers CORS for the site's own origins only; its calls are relayed
+// through Playwright with that one header added. On www, run without it.
+if (process.argv.includes('--cors-shim')) {
+  await ctx.route((u) => /media-processing.*\.up\.railway\.app$/.test(u.hostname), async (r) => {
+    const cors = { 'access-control-allow-origin': origin, 'access-control-allow-headers': 'Authorization, Content-Type, X-Chunk-Sha256', 'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS' };
+    if (r.request().method() === 'OPTIONS') return r.fulfill({ status: 204, headers: cors });
+    const resp = await r.fetch();
+    return r.fulfill({ response: resp, headers: { ...resp.headers(), ...cors } });
+  });
+}
 let pass = 0, fail = 0;
 const check = (n, ok, info = '') => { ok ? pass++ : fail++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 
@@ -52,11 +67,16 @@ for (const c of cases) {
   const p = await ctx.newPage();
   await p.goto(`${origin}${c.path}`, { waitUntil: 'load' });
   await p.waitForTimeout(800);
-  await p.locator('input[type=file]').first().setInputFiles({ name: c.name, mimeType: 'application/octet-stream', buffer: c.buffer || fs.readFileSync(c.file) });
-  await p.getByRole('button', { name: /^Convert/ }).first().click();
+  if (c.files) {
+    await p.locator('input[type=file]').first().setInputFiles(c.files.map((f) => ({ name: 'p30-' + f.split('/').pop(), mimeType: 'application/octet-stream', buffer: fs.readFileSync(f) })));
+    await p.getByRole('button', { name: /^Merge PDFs/ }).first().click();
+  } else {
+    await p.locator('input[type=file]').first().setInputFiles({ name: c.name, mimeType: 'application/octet-stream', buffer: c.buffer || fs.readFileSync(c.file) });
+    await p.getByRole('button', { name: /^Convert/ }).first().click();
+  }
   const state = await Promise.race([
     p.locator('[data-file-download] [data-download], a[download]').first().waitFor({ timeout: 240000 }).then(() => 'file'),
-    p.locator('p[role=alert]').filter({ hasText: /./ }).first().waitFor({ timeout: 240000 }).then(() => 'alert'),
+    p.locator('p[role=alert], .bg-red-50').filter({ hasText: /./ }).first().waitFor({ timeout: 240000 }).then(() => 'alert'),
   ]).catch(() => 'timeout');
   let head = '', producer = '', alert = '';
   if (state === 'file') {
@@ -69,12 +89,13 @@ for (const c of cases) {
       const named = /LibreOffice/.test(s) ? 'LibreOffice' : /ConvertAPI|convertapi|Aspose|Microsoft/i.exec(s)?.[0] || '';
       return [String.fromCharCode(...t.slice(0, 5)) + ` ${t.length}`, m ? m[1] : named];
     });
-  } else if (state === 'alert') alert = await p.locator('p[role=alert]').filter({ hasText: /./ }).first().innerText();
+  } else if (state === 'alert') alert = await p.locator('p[role=alert], .bg-red-50').filter({ hasText: /./ }).first().innerText();
   await p.waitForTimeout(500);
   const notice = await p.locator('[data-engine-fallback]').count() ? await p.locator('[data-engine-fallback]').innerText() : '';
   const isWordToPdfDocx = c.id === 'word-to-pdf' || c.id === 'word-to-pdf-staged';
   if (expect === 'fallback') {
-    if (c.id === 'word-to-pdf-odt') check(c.id, state === 'file' && head.startsWith(c.out) && !notice, `${state} ${head} notice=${notice ? 'yes' : 'no'}`);
+    if (c.id === 'pdf-merge-docx') check(c.id, state === 'file' && head.startsWith('%PDF-') && /p30-fidelite-02\.docx: made by our backup converter/.test(notice), `${state} ${head} notice=${notice.slice(0, 60)}`);
+    else if (c.id === 'word-to-pdf-odt') check(c.id, state === 'file' && head.startsWith(c.out) && !notice, `${state} ${head} notice=${notice ? 'yes' : 'no'}`);
     else if (isWordToPdfDocx) check(c.id, state === 'file' && head.startsWith('%PDF-') && /LibreOffice/i.test(producer) && /backup converter/.test(notice), `${state} ${head} producer=${producer} notice=${notice.slice(0, 50)}`);
     else check(c.id, state === 'alert' && new RegExp(`PDF to ${c.label} is temporarily unavailable.*try again later`, 'i').test(alert), `${state} ${alert.slice(0, 120)}`);
   } else {

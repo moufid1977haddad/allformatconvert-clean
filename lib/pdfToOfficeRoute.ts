@@ -89,7 +89,7 @@ export function makePdfToOfficeHandler(spec: Spec) {
         // Numbers only (never the body, never with the Authorization header): enough to tell which failure it was.
         console.error(`[convertapi] pdf->${spec.ext} failed code=${(err as any).code} http=${(err as any).httpStatus ?? "n/a"} convertapi_code=${(err as any).bodyCode ?? "n/a"}`);
         // P30: a provider outage alerts once per incident; the visitor is told to come back (no backup of this quality).
-        await alertConvertApiFailure(spec.tool, err);
+        await alertConvertApiFailure(spec.tool, err, mapped.alert);
         if (mapped.alert) await insertToolError(buildServerToolError({ tool: spec.tool, file, error: new Error(`${(err as any).code} (HTTP ${(err as any).httpStatus ?? "n/a"})`), userAgent: req.headers.get("user-agent"), headers: req.headers }));
         if (convertApiUnavailable(err)) return NextResponse.json({ error: convertApiUnavailableMessage(spec.label) }, { status: 503 });
         return NextResponse.json({ error: mapped.message }, { status: mapped.status });

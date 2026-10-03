@@ -120,10 +120,11 @@ function backendFor(extension: string): "convertapi" | "gotenberg" {
 export async function POST(req: NextRequest) {
   // Staged path (files above the Vercel body ceiling): the browser already sent the file straight to the
   // media service and only posts a small JSON here; see lib/media/stagedRoute.ts.
-  if (isStagedRequest(req)) return respondStaged(req, "pdf", (file, body) => convertFile(req, file, true, officeOptions((k) => body?.[k])));
+  if (isStagedRequest(req)) return respondStaged(req, "pdf", (file, body) => convertFile(req, file, true, officeOptions((k) => body?.[k]), body?.engineFallback === "allowed"));
 
   let file: File;
   let options: OfficeOptions = {};
+  let fallbackAllowed = false;
   try {
     const formData = await req.formData();
     const uploaded = formData.get("file");
@@ -132,10 +133,11 @@ export async function POST(req: NextRequest) {
     }
     file = uploaded;
     options = officeOptions((k) => formData.get(k));
+    fallbackAllowed = formData.get("engineFallback") === "allowed";
   } catch {
     return NextResponse.json({ error: "Invalid multipart/form-data request." }, { status: 400 });
   }
-  return convertFile(req, file, false, options);
+  return convertFile(req, file, false, options, fallbackAllowed);
 }
 
 // P24 (03/10): LibreOffice options Gotenberg takes, whitelisted — only these names and values are forwarded.
@@ -148,7 +150,9 @@ function officeOptions(get: (k: string) => unknown): OfficeOptions {
   return out;
 }
 
-async function convertFile(req: NextRequest, file: File, staged = false, options: OfficeOptions = {}): Promise<NextResponse> {
+// P30: `fallbackAllowed` -- the caller shows the "backup converter" notice (Word to PDF, Merge PDF send
+// engineFallback=allowed); any other caller gets the plain "try again later" answer, never an unannounced backup PDF.
+async function convertFile(req: NextRequest, file: File, staged = false, options: OfficeOptions = {}, fallbackAllowed = false): Promise<NextResponse> {
   const extension = getExtension(file.name);
   if (!ALLOWED_EXTENSIONS.has(extension)) {
     return NextResponse.json(
@@ -171,14 +175,24 @@ async function convertFile(req: NextRequest, file: File, staged = false, options
 
   const backend = backendFor(extension);
   if (backend === "convertapi") {
-    return handleConvertApi(req, file, staged);
+    return handleConvertApi(req, file, staged, fallbackAllowed);
   }
-  return handleGotenberg(req, file, extension, staged, options);
+  const res = await handleGotenberg(req, file, extension, staged, options);
+  // P30: .docx with ConvertAPI switched off (rollback switch) is the same backup engine: announced the same way.
+  if (extension === "docx" && res.ok) markEngineFallback(res);
+  return res;
 }
 
 // .docx only, and only while CONVERTAPI_ENABLED === "true" -- see
 // docs/specs/2026-09-03-convertapi-word-to-pdf-integration.md.
-async function handleConvertApi(req: NextRequest, file: File, staged: boolean): Promise<NextResponse> {
+function markEngineFallback(res: NextResponse) {
+  res.headers.set("X-Engine-Fallback", "libreoffice");
+  res.headers.set("Access-Control-Expose-Headers", "X-Engine-Fallback, X-Detected-Symbol-Fonts");
+}
+
+const WORD_TO_PDF_UNAVAILABLE = "Word to PDF is temporarily unavailable for .docx files: our conversion service is not responding right now. Please try again later.";
+
+async function handleConvertApi(req: NextRequest, file: File, staged: boolean, fallbackAllowed = false): Promise<NextResponse> {
   // Validated BEFORE calling ConvertAPI, so a credit is never spent on a
   // file that would fail anyway (§5). In practice the generic
   // MAX_FILE_SIZE_BYTES check above already enforces a ceiling at or above
@@ -260,17 +274,17 @@ async function handleConvertApi(req: NextRequest, file: File, staged: boolean): 
     if (err instanceof ConvertApiError) {
       // Server-side only, and deliberately limited to the error code and HTTP status -- never the token, never the
       // raw upstream body. A provider outage alerts once per incident (lib/convertApiOutage.ts).
-      await alertConvertApiFailure("word-to-pdf", err);
+      const mapped = CONVERTAPI_ERROR_RESPONSES[err.code] || CONVERTAPI_ERROR_RESPONSES.upstream_error;
+      await alertConvertApiFailure("word-to-pdf", err, mapped.alert);
       if (convertApiUnavailable(err)) {
+        if (!fallbackAllowed) return NextResponse.json({ error: WORD_TO_PDF_UNAVAILABLE }, { status: 503 });
         console.log(`[convertapi] docx->pdf unavailable (${err.code}, HTTP ${err.httpStatus ?? "n/a"}): LibreOffice backup`);
         const res = await handleGotenberg(req, file, "docx", staged);
-        if (res.ok) {
-          res.headers.set("X-Engine-Fallback", "libreoffice");
-          res.headers.set("Access-Control-Expose-Headers", "X-Engine-Fallback, X-Detected-Symbol-Fonts");
-        }
+        if (res.ok) markEngineFallback(res);
+        // Both engines failing: the plain "try again later", not the backup's "your file may be corrupted".
+        else if (res.status >= 500) return NextResponse.json({ error: WORD_TO_PDF_UNAVAILABLE }, { status: 503 });
         return res;
       }
-      const mapped = CONVERTAPI_ERROR_RESPONSES[err.code] || CONVERTAPI_ERROR_RESPONSES.upstream_error;
       if (mapped.alert) {
         await insertToolError(buildServerToolError({
           tool: "word-to-pdf",

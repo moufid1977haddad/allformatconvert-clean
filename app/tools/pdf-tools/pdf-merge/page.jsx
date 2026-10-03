@@ -27,6 +27,8 @@ export default function PdfMergePage() {
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState('');
   const [downloadUrl, setDownloadUrl] = useState(null);
+  // P30: .docx files our backup converter (LibreOffice) made because the usual one (ConvertAPI) was unavailable.
+  const [backupNames, setBackupNames] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
   const [bookmarkPerFile, setBookmarkPerFile] = useState(true); // P24: one bookmark per merged file (Sejda, PDF24)
   const inputRef = useRef();
@@ -101,12 +103,14 @@ export default function PdfMergePage() {
   // Images and Office documents become PDFs first; returns the list in the same order, or null after an error.
   const prepare = async () => {
     const out = [];
+    const backup = [];
     for (const f of files) {
       if (isPdf(f)) { out.push(f); continue; }
       try {
         if (isOffice(f)) {
           setStatus(`Converting ${f.name} to PDF on our server…`);
-          const { blob } = await convertOffice({ file: f, endpoint: '/api/convert-to-pdf' });
+          const { blob, engineFallback } = await convertOffice({ file: f, endpoint: '/api/convert-to-pdf', fields: { engineFallback: 'allowed' } });
+          if (engineFallback) backup.push(f.name);
           out.push(new File([blob], f.name.replace(/\.[^.]+$/, '') + '.pdf', { type: 'application/pdf' }));
         } else {
           setStatus(`Turning ${f.name} into a page…`);
@@ -122,6 +126,7 @@ export default function PdfMergePage() {
       }
     }
     setStatus('');
+    setBackupNames(backup);
     return out;
   };
 
@@ -134,6 +139,7 @@ export default function PdfMergePage() {
     setProgress(0);
     setPhase('merging');
     setDownloadUrl(null);
+    setBackupNames([]);
     const ready = await prepare();
     if (!ready) { setLoading(false); setPhase(''); return; }
 
@@ -217,11 +223,16 @@ export default function PdfMergePage() {
             </>
           )}
           {status && !loading && <p className="text-center text-green-600 dark:text-green-400 text-sm">{status}</p>}
-          {files.some(isOffice) && <p className="text-center text-neutral-500 text-xs">Word, Excel and PowerPoint files are converted to PDF on our server first (deleted after conversion; .docx through ConvertAPI). PDFs and images are not sent to our server: only those Office files are.</p>}
+          {files.some(isOffice) && <p className="text-center text-neutral-500 text-xs">Word, Excel and PowerPoint files are converted to PDF on our server first (deleted after conversion; .docx through ConvertAPI, or our own LibreOffice server when ConvertAPI is unavailable, said under the result). PDFs and images are not sent to our server: only those Office files are.</p>}
           {downloadUrl && !loading && (
             <div className="bg-neutral-50 dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6 text-center">
               <div className="text-green-500 text-xl font-bold mb-3">Done!</div>
               <FileDownload href={downloadUrl} name="merged.pdf" />
+              {backupNames.length > 0 && (
+                <p className="text-amber-700 dark:text-amber-400 text-sm mt-3" role="status" data-engine-fallback>
+                  {backupNames.join(', ')}: made by our backup converter. The engine we normally use for .docx files is unavailable right now, so our own LibreOffice server converted {backupNames.length > 1 ? 'these files' : 'this file'}. The text is all there, but fonts, line and page breaks and equation spacing can differ from Word, and an image stored in a non-standard way can be missing. For the usual conversion, try again later.
+                </p>
+              )}
             </div>
           )}
         </div>
