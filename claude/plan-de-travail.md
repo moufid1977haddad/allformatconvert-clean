@@ -71,6 +71,19 @@ et trois autorisations Railway à décider — `pdf-tools` pour E2 (2u/3u, 2a/3a
 | E7 | ✅ **en production** (même déploiement) ; www vérifié | — |
 | Erreurs | ✅ **en production** : 203 outils directs + filet sur les 225 ; une erreur provoquée par le banc **écrite** dans `tool_errors` sur www (02/10 ≈ 21 h 54 UTC, outil json-formatter, 2 lignes à ignorer) | — |
 
+## 🛠️ P26 — services Railway : sécurité Gotenberg, PDF/A u/a, DOC, gros RTF (03/10, `docs/audit/RAPPORT-p26-railway-03-10.md`)
+
+Repère de restauration `restauration-avant-p26-03-10` = `11910e7a`. Railway piloté par la CLI officielle déjà connectée
+(compte du propriétaire) ; aucun service ajouté, aucune variable Vercel touchée.
+
+| # | État | Ce qui manque |
+|---|---|---|
+| Gotenberg (E4 + HTML déposés) | ✅ **en production** (`gotenberg-v2` déploiement `930bc129`, et `gotenberg-fonts` `55fa4c41`) : `CHROMIUM/LIBREOFFICE/WEBHOOK/API_DOWNLOAD_FROM_DENY_PRIVATE_IPS`, `WEBHOOK_DISABLE`, `API_DISABLE_DOWNLOAD_FROM`, `CHROMIUM_DENY_LIST` (règle `file://` par défaut + 100.64/10, 198.18/15) ; faille prouvée avant (pdf-tools, service média, boucle locale imprimés), 13 adresses refusées après ; 18 conversions directes + 7 par les pages de www identiques au pixel ; revue de sécurité indépendante : feu vert | **Gotenberg 8.37.0** (classe CGNAT/198.18 comme internes même derrière un nom DNS, bornes contre les pages hostiles) : change Chromium 152 / LibreOffice 26.8 → chantier dédié, banc des 18 documents au pixel sur `gotenberg-fonts` d'abord. Retour arrière : déploiement `515a1679` (Rollback Railway) |
+| E2 PDF/A | **service en ligne** (pdf-tools `cdccc46b`) ; pages : voir le rapport §4 | **1a non proposé** (aucun outil libre). **Défaut ANCIEN trouvé (grave, non corrigé : consigne « ancien comportement identique »)** : les niveaux **1b/2b/3b** en production altèrent le texte (Ghostscript) — grec, ligatures « ti/fi », accents (491 mots sur 612 sur un document LibreOffice) ; pages visuellement justes. **Correction mesurée** (celle des niveaux u) : PDF source gardé d'abord, Ghostscript seulement si le texte est inchangé, sinon livrer en le disant — à faire dans un lot dédié avec `scripts/p26/e2/pdfa-bench.mjs` (contrôle mot à mot) |
+| E1 DOC + RTF > 4 Mo | **service en ligne** (pdf-tools `/v1/docx-to-doc`, LibreOffice 25.2 des rétroportages Debian ; service média : sorties rtf/doc `c04f9c3c`) ; pages : voir le rapport §4 | Aucune vraie conversion ConvertAPI faite (règle P26 : aucune dépense hors Railway) : bancs avec de vraies sorties ConvertAPI antérieures ; **à la première occasion, une vraie conversion PDF → .doc sur www** (≈ 0,01 $) |
+| E3 | en attente du **compte Google Cloud du propriétaire** (liste au tableau P25) | inchangé |
+| Facture Railway | mesurée (rapport §6) : aucune hausse au repos ; ≈ 0,00003 $ par .doc | — |
+
 ## 🧑‍⚖️ Décisions du propriétaire — P21 (02/10, `docs/audit/RAPPORT-p21-nuit-jour-02-10.md`)
 
 | # | Quoi | Coût | Recommandation |

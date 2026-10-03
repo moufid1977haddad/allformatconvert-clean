@@ -92,3 +92,71 @@ des pages déposées, non fait) ; montée en 8.37.0 (§1.3).
 
 ### 1.7 Facture Railway
 Aucun service ajouté. Mesure mémoire / processeur : §6.
+
+## 2. Lot 2 — E2 : PDF/A 2u, 3u, 2a, 3a
+
+### 2.1 Moyen retenu (recherche de P25, confirmée)
+Comme iLovePDF (`conformance` + `allow_downgrade`) : le niveau demandé est visé, et seulement si le visiteur l'a
+accepté, le niveau inférieur est essayé — et **dit**. Chemins, dans `services/pdf-tools` (`src/pdfa.js`,
+`py/pdfa_fix.py`) :
+- **u** (2u, 3u) : Ghostscript comme pour b (il écrit les tables Unicode), l'étiquette XMP passée à U, puis veraPDF U ;
+- **a** (2a, 3a) : seulement si le PDF source est **balisé** (arbre de structure + `/MarkInfo /Marked true`) ;
+  Ghostscript perdrait la structure, donc le source est gardé tel quel (pikepdf : profil sRGB, XMP depuis les infos du
+  document, `/MarkInfo`, drapeaux des annotations conformes à 6.3.2 — LibreOffice écrit ses liens sans `/F`) ; **le
+  contenu des pages n'est pas touché** (4 PDF balisés : rendus source et 2a identiques au pixel) ; puis veraPDF A ;
+- abaissement (si coché) : a → u → b de la même partie ; sinon refus avec la raison ;
+- **1b/2b/3b : même chemin de code qu'avant, même limite de 60 s**. Les nouveaux niveaux ont 200 s (jusqu'à trois
+  conversions + validations).
+- 1a : non proposé (aucun outil libre ne l'atteint, mesure de P25).
+
+### 2.2 Mesure sur de vrais fichiers (20 PDF, chaque fichier livré revalidé à part par un veraPDF 1.30.2 local)
+Fichiers : Chromium balisé / non balisé ; LibreOffice 26.2 (Word, Excel, PowerPoint, ODT ; il balise même par défaut) ;
+8 PDF fabriqués par le site (Gotenberg : Word, Excel, PowerPoint, HTML, MOBI…), un PDF pdf-lib. Banc
+`scripts/p26/e2/pdfa-bench.mjs` : en local **220/220** ; niveaux atteints **sans** abaissement : 1b/2b/3b 20/20,
+2u/3u 12/20, 2a/3a 7/20 (5 des 7 PDF balisés).
+
+**Pourquoi 2u ou 2a échoue quand il échoue** (veraPDF, règle 6.2.11.7.2, seule règle en échec) : le PDF **source**
+contient des glyphes sans texte Unicode — LibreOffice imprime « ti » (sec**ti**on, ac**ti**on) en une ligature et
+« é » en « e » + accent combinant, sans leur donner de texte (vérifié dans les tables du PDF d'origine, avant
+Ghostscript). Deviner ces caractères serait inventer du contenu : le niveau n'est pas atteint et la page le dit
+(« some characters in this PDF have no Unicode text behind them (often ligatures…) »), ou livre 2b si le visiteur l'a
+permis. Les PDF de Chromium et de Gotenberg en HTML passent 2u ; les PDF balisés de Chromium, d'Excel, de PowerPoint
+et d'ODT passent 2a et 3a.
+
+### 2.3 Défaut trouvé en route : veraPDF « U » ne prouve pas que le texte est juste
+Sur le vrai service (Ghostscript 10.00 de Debian), 2u passait sur des PDF de LibreOffice **en perdant la ligature
+« ti »** (« section » → « secon ») : veraPDF vérifie qu'un texte Unicode **existe** pour chaque glyphe, pas qu'il est
+le bon. Correction (avant toute page) : un niveau u est d'abord tenté **sur le PDF source tel quel** (texte inchangé par
+construction) ; sinon Ghostscript, **accepté seulement si son texte est celui du source, mot pour mot** (extraction par
+Ghostscript `txtwrite`) ; sinon le niveau n'est pas atteint et la raison est dite. Le banc vérifie en plus chaque
+fichier u ou a livré **mot pour mot contre le source avec pdftotext** (outil indépendant du service).
+
+**Défaut ANCIEN, en production avant P26, non corrigé ici (consigne : ancien comportement identique)** : les niveaux
+**1b/2b/3b** ont la même altération du texte (aspect des pages juste, recherche / copier-coller faux) — mesuré sur la
+production d'avant P26 : PDF Chromium « Ελληνικά » → « Ε½½ην»¼ά » ; PowerPoint du site « Répartition » →
+« Répar琀椀琀椀on » ; un document LibreOffice : 491 mots sur 612 altérés (« données » → « donnees », « section » →
+« sec琀椀on »). Ghostscript 10.07 local : même famille de pertes. **Correction mesurée, à faire dans un lot dédié** :
+même méthode que les niveaux u (source gardé d'abord ; Ghostscript seulement si le texte est inchangé, sinon livrer en
+le disant). Inscrit au plan.
+
+## 3. Lot 3 — E1 : PDF to Word en .doc, et RTF / DOC au-delà de 4 Mo
+
+### 3.1 Moyen retenu
+ConvertAPI n'écrit aucun .doc (P25). Comme CloudConvert / iLovePDF : LibreOffice. Le PDF devient un DOCX comme pour
+« Word (.docx) » (ConvertAPI, même coût), puis `/v1/docx-to-doc` de **pdf-tools** le passe en Word 97-2003
+(`soffice --convert-to "doc:MS Word 97"`, profil propre à chaque demande, 2 conversions à la fois au plus, sortie
+vérifiée : conteneur Compound File). **Pourquoi pdf-tools** (le plus économe) : il tourne en permanence, une conversion
+ne coûte que ses secondes ; le service média dort au repos et chaque réveil facturerait ses minutes d'attente ; le
+LibreOffice de Gotenberg n'écrit que du PDF. Gros fichiers : le service média accepte désormais les sorties `rtf` et
+`doc` (signature vérifiée au dépôt) ; la route choisit le type selon la demande.
+
+### 3.2 Mesures (fichiers rouverts dans Word 16 et LibreOffice 26)
+- 10 DOCX, dont **les 2 seules vraies sorties ConvertAPI disponibles** (lettre de 3 pages, rapport avec tableau ; P25)
+  et un DOCX Word avec une image en ligne et une flottante : **texte courant → .doc identique** — Word compte les
+  mêmes mots, pages, tableaux, images ; LibreOffice imprime le même texte. ConvertAPI écrit du texte courant (aucun
+  cadre, vrais tableaux : vérifié dans ses RTF).
+- **Limite de l'ancien format, dite sur la page** : du texte placé dans des **zones de texte de taille fixe** peut être
+  coupé dans le .doc (DOCX issus de l'import PDF de LibreOffice, une zone par ligne : 4 à 5 % des mots perdus). La
+  page prévient avant l'envoi, et le dit après quand le document a des zones de texte (comptées dans le DOCX).
+- Si l'étape .doc échoue (taille, délai) alors que ConvertAPI a déjà facturé le DOCX : **le DOCX payé est livré, et la
+  page le dit** — jamais une deuxième conversion payante, jamais rien.
