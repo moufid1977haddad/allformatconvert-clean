@@ -89,7 +89,9 @@ function withTimeout(fn, ms = config.REQUEST_TIMEOUT_MS) {
 
 app.get('/health', async (_req, res) => {
   const binaries = await checkAllBinaries();
-  const allOk = Object.values(binaries).every((b) => b.ok);
+  // soffice (P26, .doc only) is reported but does not decide the service's health: a LibreOffice problem must not
+  // mark repair, PDF/A and compression down (nor block a deploy on Railway's health check).
+  const allOk = Object.entries(binaries).every(([name, b]) => name === 'soffice' || b.ok);
   res.status(allOk ? 200 : 503).json({ ok: allOk, binaries });
 });
 
@@ -142,10 +144,17 @@ app.post('/v1/repair', requireApiKey, withTempDir(withTimeout(async (req, res, s
 // P26: the outer limit is the longer one of the new levels (up to three conversions + validations with
 // allowDowngrade); 1b/2b/3b keep their own REQUEST_TIMEOUT_MS from the start of the request, exactly as before.
 app.post('/v1/pdfa', requireApiKey, withTempDir(withTimeout(async (req, res, outerSignal) => {
-  const requestStart = Date.now();
   const inner = new AbortController();
   outerSignal.addEventListener('abort', () => inner.abort(), { once: true });
   const signal = inner.signal;
+  res.on('finish', () => clearTimeout(oldLimit));
+  res.on('close', () => clearTimeout(oldLimit));
+  // The old limit, armed at the start exactly like withTimeout(REQUEST_TIMEOUT_MS) did: an upload still running at
+  // 60 s is cut, a conversion still running is aborted. Only a request for a new level clears it (below).
+  const oldLimit = setTimeout(() => {
+    inner.abort();
+    if (!req.complete) req.destroy();
+  }, config.REQUEST_TIMEOUT_MS);
   const startedAt = Date.now();
   try {
     await runUpload(req, res);
@@ -170,14 +179,11 @@ app.post('/v1/pdfa', requireApiKey, withTempDir(withTimeout(async (req, res, out
 
   // P26: 2u/3u/2a/3a take their own path (pdfa.js); every other value is handled exactly as before.
   const advanced = ADVANCED_LEVELS.includes(String(req.body?.conformance || '').toLowerCase());
-  let oldLimit = null;
-  if (!advanced) {
-    oldLimit = setTimeout(() => inner.abort(), Math.max(0, config.REQUEST_TIMEOUT_MS - (Date.now() - requestStart)));
-  }
+  if (advanced) clearTimeout(oldLimit);
   const report = advanced
     ? await convertToPdfALevel(req.tempDir, req.body.conformance.toLowerCase(), req.body?.allowDowngrade === 'true', signal)
     : await convertToPdfA(req.tempDir, requestedConformance, signal);
-  if (oldLimit) clearTimeout(oldLimit);
+  clearTimeout(oldLimit);
   const durationMs = Date.now() - startedAt;
 
   if (signal.aborted) {

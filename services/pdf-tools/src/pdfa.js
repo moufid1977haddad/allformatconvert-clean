@@ -169,22 +169,61 @@ async function inspectPdf(workDir, signal) {
   return r && r.out ? r.out : null;
 }
 
+const GS_KEPT = 'gs.pdf'; // Ghostscript's output of a "u" attempt: exactly what the "b" path of the same part makes
+
+// Text of a PDF as Ghostscript reads it (txtwrite device), whitespace folded. Measured (P26): Ghostscript's PDF/A
+// rewrite can lose text that the source maps correctly -- the "ti" ligature of LibreOffice PDFs came out as nothing
+// ("section" -> "secon") while veraPDF still passed U, since it checks that a mapping EXISTS, not that it is right.
+async function pdfText(workDir, name, signal) {
+  const out = `${name}.txt`;
+  const r = await runProcess(GS_BIN, ['-q', '-dNOPAUSE', '-dBATCH', '-dSAFER', '-sDEVICE=txtwrite', `-sOutputFile=${out}`, name], { cwd: workDir, signal });
+  const file = path.join(workDir, out);
+  if (r.code !== 0 || !fs.existsSync(file)) return null;
+  return fs.readFileSync(file, 'utf8').replace(/\s+/g, ' ').trim();
+}
+
 async function attemptLevel(workDir, level, signal) {
   const part = level[0];
   const kind = level[1];
   if (kind === 'b') {
+    // After a failed "u" attempt, its Ghostscript output (same arguments as convertToPdfA) is validated as B
+    // instead of running Ghostscript a second time on the same input.
+    const kept = path.join(workDir, GS_KEPT);
+    if (fs.existsSync(kept)) {
+      fs.copyFileSync(kept, path.join(workDir, OUTPUT_NAME));
+      const verapdf = await validateWithVeraPdf(workDir, level, signal);
+      if (!verapdf.compliant) return { ok: false, reason: 'not_compliant', verapdf };
+      return { ok: true, compliant: true, conformance: level, verapdf, outputPath: path.join(workDir, OUTPUT_NAME) };
+    }
     const r = await convertToPdfA(workDir, level, signal);
     return r.ok ? r : { ok: false, reason: r.verapdf ? 'not_compliant' : 'conversion_failed', verapdf: r.verapdf };
   }
   if (kind === 'u') {
+    // 1. The source itself, untouched (text exactly the source's): enough when it already meets PDF/A.
+    const kept = await fix(workDir, ['keep', INPUT_NAME, OUTPUT_NAME, part, 'U'], signal);
+    if (kept.ok) {
+      const verapdf = await validateWithVeraPdf(workDir, level, signal);
+      if (verapdf.compliant) return { ok: true, compliant: true, conformance: level, verapdf, outputPath: path.join(workDir, OUTPUT_NAME) };
+    }
+    // 2. Ghostscript (fonts embedded, colours converted...), relabelled U, and accepted only if its text is the
+    //    source's text, word for word.
     const gs = await convertWithGhostscript(workDir, level, signal);
     if (!gs.succeeded) return { ok: false, reason: 'conversion_failed' };
-    fs.renameSync(path.join(workDir, OUTPUT_NAME), path.join(workDir, 'gs.pdf'));
-    const relabel = await fix(workDir, ['set-id', 'gs.pdf', OUTPUT_NAME, part, 'U'], signal);
+    fs.renameSync(path.join(workDir, OUTPUT_NAME), path.join(workDir, GS_KEPT));
+    const relabel = await fix(workDir, ['set-id', GS_KEPT, OUTPUT_NAME, part, 'U'], signal);
     if (!relabel.ok) return { ok: false, reason: 'conversion_failed' };
+    const verapdf = await validateWithVeraPdf(workDir, level, signal);
+    if (!verapdf.compliant) {
+      const onlyUnicode = (verapdf.failedRules || []).length > 0 && verapdf.failedRules.every((r) => r.clause === '6.2.11.7.2');
+      return { ok: false, reason: onlyUnicode ? 'no_unicode' : 'not_compliant', verapdf };
+    }
+    const [before, after] = await Promise.all([pdfText(workDir, INPUT_NAME, signal), pdfText(workDir, OUTPUT_NAME, signal)]);
+    if (before === null || after === null || before !== after) return { ok: false, reason: 'text_changed', verapdf };
+    return { ok: true, compliant: true, conformance: level, verapdf, outputPath: path.join(workDir, OUTPUT_NAME) };
   } else {
     const info = await inspectPdf(workDir, signal);
-    if (!info || !info.tagged) return { ok: false, reason: 'untagged' };
+    if (!info || info.ok === false) return { ok: false, reason: info?.encrypted ? 'encrypted' : 'conversion_failed' };
+    if (!info.tagged) return { ok: false, reason: 'untagged' };
     const kept = await fix(workDir, ['keep', INPUT_NAME, OUTPUT_NAME, part, 'A'], signal);
     if (!kept.ok) return { ok: false, reason: 'conversion_failed' };
   }
@@ -200,7 +239,9 @@ async function attemptLevel(workDir, level, signal) {
 }
 
 const REASON_TEXT = {
+  encrypted: 'the PDF is password-protected',
   untagged: 'the PDF is not tagged (no structure tree), which an "a" level requires',
+  text_changed: 'making it conformant would have changed some of its text (letters such as ligatures or accents would be lost), so it was not delivered as a "u" level',
   no_unicode: 'some characters in this PDF have no Unicode text behind them (often ligatures such as "fi" or "ti", or accents drawn separately), which a "u" or "a" level requires',
   not_compliant: 'the result did not pass veraPDF validation',
   conversion_failed: 'the file could not be converted',
@@ -217,10 +258,26 @@ async function convertToPdfALevel(workDir, requested, allowDowngrade, signal) {
     if (r.ok) {
       return { ...r, requested, downgraded: level !== requested, attempts };
     }
-    last = r;
+    if (!last) last = r; // the REQUESTED level's report is the one shown with "not compliant with PDF/A-<requested>"
     attempts.push({ conformance: level, reason: r.reason, why: REASON_TEXT[r.reason] });
   }
   const first = attempts[0];
+  const lower = attempts.slice(1).map((a) => a.conformance);
+  const tail = lower.length
+    ? ` The lower level${lower.length > 1 ? 's' : ''} (${lower.map((l) => `PDF/A-${l}`).join(', ')}) could not be reached either.`
+    : '';
+  let error;
+  if (first?.reason === 'untagged') {
+    error = `PDF/A-${requested} needs a tagged PDF, and this one has no tags. Export it again with tags (Word: "Document structure tags for accessibility"; LibreOffice: "Universal accessibility (PDF/UA)")${lower.length ? '.' : `, or choose PDF/A-${part}u.`}`;
+  } else if (first?.reason === 'encrypted') {
+    error = 'This PDF is password-protected. Remove the password first (Unlock PDF), then convert it.';
+  } else if (first?.reason === 'text_changed') {
+    error = `PDF/A-${requested} can't be reached for this file: ${REASON_TEXT.text_changed}.`;
+  } else if (first?.reason === 'no_unicode') {
+    error = `PDF/A-${requested} can't be reached: ${REASON_TEXT.no_unicode}.${lower.length ? '' : ` PDF/A-${part}b has no such requirement.`}`;
+  } else {
+    error = `The converted file did not pass veraPDF validation against PDF/A-${requested}.`;
+  }
   return {
     ok: false,
     compliant: false,
@@ -228,11 +285,7 @@ async function convertToPdfALevel(workDir, requested, allowDowngrade, signal) {
     requested,
     attempts,
     untagged: first?.reason === 'untagged',
-    error: first?.reason === 'untagged'
-      ? `PDF/A-${requested} needs a tagged PDF, and this one has no tags. Export it again with tags (Word: "Document structure tags for accessibility"; LibreOffice: "Universal accessibility (PDF/UA)"), or choose PDF/A-${part}u.`
-      : first?.reason === 'no_unicode'
-        ? `PDF/A-${requested} can't be reached: ${REASON_TEXT.no_unicode}. PDF/A-${part}b has no such requirement.`
-        : `The converted file did not pass veraPDF validation against PDF/A-${requested}.`,
+    error: error + tail,
     verapdf: last?.verapdf,
   };
 }
