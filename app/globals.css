@@ -108,6 +108,13 @@ body {
 .dark .text-red-600:not([class*="dark:text-"]) {
   color: #f87171;
 }
+/* ...except inside the light tinted notes (amber, red, green, yellow, blue -50) that stay light in dark mode */
+.dark :is(.bg-amber-50, .bg-red-50, .bg-green-50, .bg-yellow-50, .bg-blue-50) :is(.text-indigo-500, .text-indigo-600, .text-indigo-700):not([class*="dark:text-"]) {
+  color: #4338ca;
+}
+.dark :is(.bg-amber-50, .bg-red-50, .bg-green-50, .bg-yellow-50, .bg-blue-50) .text-red-600:not([class*="dark:text-"]) {
+  color: #b91c1c;
+}
 /* light grey buttons and chips (bg-neutral-200) and the selected-option card (bg-indigo-50) stayed light in dark
    mode under light text: 1.0-1.9:1 */
 .dark .bg-neutral-200:not([class*="dark:bg-"]) {

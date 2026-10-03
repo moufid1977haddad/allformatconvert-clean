@@ -169,8 +169,8 @@ export default function ColorConverterPage() {
             );
           })}
           <div className="grid grid-cols-2 gap-2 text-sm" data-contrast>
-            <div className="rounded-lg p-3 border border-neutral-200" style={{ background: '#fff', color: hexA }}><b>Text on white</b><div className="text-neutral-700">{ratio(onWhite)}:1 — {grade(onWhite)}</div></div>
-            <div className="rounded-lg p-3 border border-neutral-200" style={{ background: '#000', color: hexA }}><b>Text on black</b><div className="text-neutral-200">{ratio(onBlack)}:1 — {grade(onBlack)}</div></div>
+            <div className="rounded-lg p-3 border border-neutral-200" style={{ background: '#fff', color: hexA }}><b>Text on white</b><div style={{ color: '#404040' }}>{ratio(onWhite)}:1 — {grade(onWhite)}</div></div>
+            <div className="rounded-lg p-3 border border-neutral-200" style={{ background: '#000', color: hexA }}><b>Text on black</b><div style={{ color: '#e5e5e5' }}>{ratio(onBlack)}:1 — {grade(onBlack)}</div></div>
           </div>
           <p className="text-xs text-neutral-500">WCAG 2 contrast of the colour as it appears on each background (transparency included): 4.5:1 is the AA minimum for body text, 3:1 for large text, 7:1 is AAA.</p>
           <button onClick={() => copy(hexA)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy HEX</button>

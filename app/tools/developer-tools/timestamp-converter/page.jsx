@@ -1,5 +1,5 @@
 ﻿'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { parseTimestamp, describe, toZoneValue, parseInZone, describeZone, relativeTime } from '../../../lib/timestamp';
 import { useToolError } from '../../../lib/useToolError';
@@ -10,14 +10,19 @@ import { useToolError } from '../../../lib/useToolError';
 // Chromium lists the old ICU names (Asia/Calcutta, Europe/Kiev): shown under today's IANA names, which every browser accepts
 const MODERN = { 'Asia/Calcutta': 'Asia/Kolkata', 'Asia/Katmandu': 'Asia/Kathmandu', 'Asia/Saigon': 'Asia/Ho_Chi_Minh', 'Asia/Rangoon': 'Asia/Yangon', 'Europe/Kiev': 'Europe/Kyiv', 'Atlantic/Faeroe': 'Atlantic/Faroe', 'Pacific/Truk': 'Pacific/Chuuk', 'Pacific/Ponape': 'Pacific/Pohnpei', 'Pacific/Enderbury': 'Pacific/Kanton', 'America/Godthab': 'America/Nuuk', 'Asia/Ulan_Bator': 'Asia/Ulaanbaatar', 'Asia/Dacca': 'Asia/Dhaka', 'Asia/Thimbu': 'Asia/Thimphu', 'Asia/Ujung_Pandang': 'Asia/Makassar', 'America/Buenos_Aires': 'America/Argentina/Buenos_Aires', 'America/Indianapolis': 'America/Indiana/Indianapolis', 'America/Louisville': 'America/Kentucky/Louisville', 'Africa/Asmera': 'Africa/Asmara' };
 const modern = (z) => { const m = MODERN[z]; if (!m) return z; try { new Intl.DateTimeFormat('en', { timeZone: m }); return m; } catch { return z; } }; // an older browser keeps the name it knows
-const LOCAL_TZ = modern(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
+// P27: read in the browser after the first render -- the page is built on a server in UTC, so reading it while
+// rendering gave the visitor's zone in the browser and UTC in the HTML (React hydration error #418 on every page view
+// outside UTC, found by the Firefox and WebKit page benches).
+const readLocalTz = () => modern(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
 const ZONES = (() => { try { return [...new Set(Intl.supportedValuesOf('timeZone').map(modern))].sort(); } catch { return []; } })();
 export default function TimestampConverterPage() {
   const [timestamp, setTimestamp] = useState('');
   const [date, setDate] = useState('');
   const [result, setResult] = useState(null);
   const [error, setError] = useToolError('');
-  const [tz, setTz] = useState(LOCAL_TZ);
+  const [LOCAL_TZ, setLocalTz] = useState('UTC');
+  const [tz, setTz] = useState('UTC');
+  useEffect(() => { const z = readLocalTz(); setLocalTz(z); setTz((t) => (t === 'UTC' ? z : t)); }, []);
   const [lastMs, setLastMs] = useState(null);
   const show = (ms, unit, ambiguous = false, gapMinutes = 0, zone = tz) => { setLastMs(ms); setResult({ ...describe(ms), unit, zone: describeZone(ms, zone), ago: relativeTime(ms), ambiguous, gapMinutes }); setError(''); };
   // a date before year 1 cannot go into <input type=datetime-local>: the field is left empty and the result says the year

@@ -19,6 +19,12 @@ const PREVIEW = 20_000;
 
 const fmt = (n) => (n >= 1024 * 1024 ? `${(n / (1024 * 1024)).toFixed(1)} MB` : `${Math.round(n / 1024)} KB`);
 
+// What a tool's onChange reads from a change event, for a text that did not go through the field.
+const changeEvent = (value, el) => {
+  const target = { value, name: el?.name || '', id: el?.id || '' };
+  return { target, currentTarget: target, type: 'change', nativeEvent: {}, preventDefault() {}, stopPropagation() {}, persist() {} };
+};
+
 function TextArea({ value, onChange, readOnly, className = '', ...rest }, ref) {
   const [editAnyway, setEditAnyway] = useState(false);
   const text = typeof value === 'string' ? value : value == null ? '' : String(value);
@@ -35,7 +41,7 @@ function TextArea({ value, onChange, readOnly, className = '', ...rest }, ref) {
     if (next.length <= LIMIT) return rest.onPaste?.(e);
     e.preventDefault();
     setEditAnyway(false);
-    onChange({ target: { value: next, name: el.name, id: el.id }, currentTarget: { value: next, name: el.name, id: el.id }, type: 'change' });
+    onChange(changeEvent(next, el));
   };
 
   if (!large || editAnyway) {
@@ -61,7 +67,7 @@ function TextArea({ value, onChange, readOnly, className = '', ...rest }, ref) {
           {readOnly ? 'Show it all here (slow)' : 'Edit here anyway (slow)'}
         </button>
         {!readOnly && onChange && (
-          <button type="button" onClick={() => onChange({ target: { value: '' }, currentTarget: { value: '' }, type: 'change' })} className="px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800">
+          <button type="button" onClick={() => onChange(changeEvent('', null))} className="px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800">
             Clear
           </button>
         )}
