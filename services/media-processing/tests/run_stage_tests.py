@@ -192,6 +192,18 @@ def run():
         st, b4, h = req(srv, "GET", f"/v1/jobs/{jid4}/result", tk4, raw_response=True)
         check("png served as image/png, exact bytes", st == 200 and b4 == png and h["Content-Type"] == "image/png", h.get("Content-Type"))
 
+        # --- rtf and doc outputs (P26, E1: PDF to Word as RTF / Word 97-2003 for large PDFs)
+        for ext, good, mime in (("rtf", b"{\\rtf1\\ansi " + os.urandom(3000), "application/rtf"),
+                                ("doc", b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1" + os.urandom(3000), "application/msword")):
+            jid5, tk5, st, _ = stage_upload(srv, b"w" * 3000)
+            req(srv, "POST", f"/v1/jobs/{jid5}/start", tk5)
+            st, j, _ = deposit(srv, jid5, b"PK\x03\x04" + os.urandom(3000), ext=ext)
+            check(f"{ext} deposit with other bytes refused", st == 400, (st, j))
+            st, j, _ = deposit(srv, jid5, good, ext=ext)
+            check(f"{ext} deposit accepted", st == 200, (st, j))
+            st, b5, h = req(srv, "GET", f"/v1/jobs/{jid5}/result", tk5, raw_response=True)
+            check(f"{ext} served as {mime}, exact bytes", st == 200 and b5 == good and h["Content-Type"] == mime, h.get("Content-Type"))
+
         # --- cancel destroys everything
         jid3, tk3, st, _ = stage_upload(srv, b"y" * 5000)
         req(srv, "POST", f"/v1/jobs/{jid3}/start", tk3)

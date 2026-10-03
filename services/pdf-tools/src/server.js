@@ -9,7 +9,8 @@ const { logMetric } = require('./metrics');
 const { makeRequestDir, cleanupDir, sweepStaleTempDirs } = require('./tempfiles');
 const { checkAllBinaries } = require('./binaries');
 const { repairPdf } = require('./repair');
-const { convertToPdfA } = require('./pdfa');
+const { convertToPdfA, convertToPdfALevel, ADVANCED_LEVELS } = require('./pdfa');
+const { docxToDoc } = require('./docConvert');
 const compress = require('./compress');
 
 sweepStaleTempDirs();
@@ -138,7 +139,13 @@ app.post('/v1/repair', requireApiKey, withTempDir(withTimeout(async (req, res, s
   logMetric({ apiKeyName: req.apiKey.name, endpoint: '/v1/repair', bytesIn, bytesOut: outBytes.length, durationMs, verdict: `repaired_${report.method}` });
 })));
 
-app.post('/v1/pdfa', requireApiKey, withTempDir(withTimeout(async (req, res, signal) => {
+// P26: the outer limit is the longer one of the new levels (up to three conversions + validations with
+// allowDowngrade); 1b/2b/3b keep their own REQUEST_TIMEOUT_MS from the start of the request, exactly as before.
+app.post('/v1/pdfa', requireApiKey, withTempDir(withTimeout(async (req, res, outerSignal) => {
+  const requestStart = Date.now();
+  const inner = new AbortController();
+  outerSignal.addEventListener('abort', () => inner.abort(), { once: true });
+  const signal = inner.signal;
   const startedAt = Date.now();
   try {
     await runUpload(req, res);
@@ -161,7 +168,16 @@ app.post('/v1/pdfa', requireApiKey, withTempDir(withTimeout(async (req, res, sig
     return;
   }
 
-  const report = await convertToPdfA(req.tempDir, requestedConformance, signal);
+  // P26: 2u/3u/2a/3a take their own path (pdfa.js); every other value is handled exactly as before.
+  const advanced = ADVANCED_LEVELS.includes(String(req.body?.conformance || '').toLowerCase());
+  let oldLimit = null;
+  if (!advanced) {
+    oldLimit = setTimeout(() => inner.abort(), Math.max(0, config.REQUEST_TIMEOUT_MS - (Date.now() - requestStart)));
+  }
+  const report = advanced
+    ? await convertToPdfALevel(req.tempDir, req.body.conformance.toLowerCase(), req.body?.allowDowngrade === 'true', signal)
+    : await convertToPdfA(req.tempDir, requestedConformance, signal);
+  if (oldLimit) clearTimeout(oldLimit);
   const durationMs = Date.now() - startedAt;
 
   if (signal.aborted) {
@@ -180,12 +196,13 @@ app.post('/v1/pdfa', requireApiKey, withTempDir(withTimeout(async (req, res, sig
   res.status(200).json({
     ok: true,
     compliant: true,
-    conformance: requestedConformance,
+    conformance: advanced ? report.conformance : requestedConformance,
+    ...(advanced ? { requested: report.requested, downgraded: report.downgraded, attempts: report.attempts } : {}),
     verapdf: report.verapdf,
     file: outBytes.toString('base64'),
   });
   logMetric({ apiKeyName: req.apiKey.name, endpoint: '/v1/pdfa', bytesIn, bytesOut: outBytes.length, durationMs, verdict: 'compliant' });
-})));
+}, config.PDFA_ADVANCED_TIMEOUT_MS)));
 
 // ---- /v1/compress: small files, multipart in, the PDF itself out (no base64) ------------------------------
 function sendCompressResult(res, r) {
@@ -246,6 +263,29 @@ app.post('/v1/compress-staged', requireApiKey, express.json({ limit: '4kb' }), w
     stop();
   }
 }, config.COMPRESS_TIMEOUT_MS)));
+
+// ---- /v1/docx-to-doc (P26, E1): a DOCX in, the Word 97-2003 .doc out (LibreOffice, src/docConvert.js) ---------
+app.post('/v1/docx-to-doc', requireApiKey, withTempDir(withTimeout(async (req, res, signal) => {
+  const startedAt = Date.now();
+  try {
+    await runUpload(req, res);
+  } catch (err) {
+    if (err.message !== 'handled') throw err;
+    return;
+  }
+  if (!req.file) return res.status(400).json({ ok: false, error: 'No file provided.' });
+  const bytesIn = req.file.size;
+  const r = await docxToDoc(req.tempDir, signal);
+  const durationMs = Date.now() - startedAt;
+  if (!r.ok) {
+    logMetric({ apiKeyName: req.apiKey.name, endpoint: '/v1/docx-to-doc', bytesIn, durationMs, verdict: `failed_${r.status}` });
+    return res.status(r.status).json({ ok: false, error: r.error });
+  }
+  const out = fs.readFileSync(r.outputPath);
+  logMetric({ apiKeyName: req.apiKey.name, endpoint: '/v1/docx-to-doc', bytesIn, bytesOut: out.length, durationMs, verdict: 'converted' });
+  res.setHeader('Content-Type', 'application/msword');
+  return res.status(200).send(out);
+}, config.DOC_TIMEOUT_MS)));
 
 app.listen(config.PORT, () => {
   console.log(`pdf-tools-service listening on :${config.PORT}`);

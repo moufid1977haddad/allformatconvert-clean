@@ -14,6 +14,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       python3-venv \
     && rm -rf /var/lib/apt/lists/*
 
+# /v1/docx-to-doc (P26, E1): LibreOffice Writer without its GUI, Debian's own package (MPL-2.0), started per
+# request by src/docConvert.js -- it writes the Word 97-2003 .doc that ConvertAPI cannot.
+RUN apt-get update && apt-get install -y --no-install-recommends libreoffice-writer-nogui \
+    && rm -rf /var/lib/apt/lists/* \
+    && soffice --version
+
 # /v1/compress: pikepdf + Adobe's tx (py/compress.py). Own virtualenv, pinned
 # versions, prebuilt wheels only (no compiler in the image).
 COPY py/requirements.txt /opt/pdfpy/requirements.txt
@@ -45,6 +51,7 @@ ENV GS_BIN=gs
 ENV QPDF_BIN=qpdf
 ENV VERAPDF_BIN=verapdf
 ENV PDFPY_BIN=/opt/pdfpy/bin/python
+ENV SOFFICE_BIN=soffice
 # tx must be found by py/compress.py (shutil.which)
 ENV PATH=/opt/pdfpy/bin:$PATH
 ENV NODE_ENV=production

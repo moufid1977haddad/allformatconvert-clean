@@ -40,6 +40,10 @@ STAGE_OUTPUTS = {
     "pptx": ("application/vnd.openxmlformats-officedocument.presentationml.presentation", b"PK"),
     # Image Upscaler: the AI service (services/background-removal, /upscale-staged) deposits its PNG here.
     "png": ("image/png", b"\x89PNG\r\n\x1a\n"),
+    # P26 (E1): PDF to Word as Rich Text (ConvertAPI) and as Word 97-2003 .doc (pdf-tools' LibreOffice), for PDFs
+    # above the ~4.5 MB a Vercel response can carry. .doc is a Compound File.
+    "rtf": ("application/rtf", b"{\\rtf"),
+    "doc": ("application/msword", b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"),
 }
 
 
