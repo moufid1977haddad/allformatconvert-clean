@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendAlert } from "@/lib/alert";
+import { classifyProviderFailure, reportProviderFailure, reportProviderSuccess } from "@/lib/providerIncident";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { actualImageCostMicros } from "@/lib/quota/config";
 import { reserveImageGen } from "@/lib/quota/imageGen";
@@ -86,11 +86,12 @@ export async function POST(req: NextRequest) {
     if (code === "moderation_blocked" || /safety|moderation/i.test(data?.error?.message || "")) {
       return NextResponse.json({ error: "This description was refused by the safety filter. Please describe something else." }, { status: 400 });
     }
+    // P30: OpenAI outages (no credit, key refused, repeated 429/5xx) alert once per incident (lib/providerIncident.js).
+    await reportProviderFailure("openai", { httpStatus: response.status, code });
     if (response.status === 429) {
-      await sendAlert("openai", code || "429");
       return NextResponse.json({ error: "The image generator is busy. Please try again in a minute." }, { status: 503 });
     }
-    await alertServerError("ai-image", `provider_${response.status}_${code}`);
+    if (!classifyProviderFailure({ httpStatus: response.status, code })) await alertServerError("ai-image", `provider_${response.status}_${code}`);
     return NextResponse.json({ error: "Image generation failed. Please try again." }, { status: 502 });
   }
 
@@ -99,6 +100,7 @@ export async function POST(req: NextRequest) {
   console.log(`[openai-image] model=${MODEL} quality=${QUALITY} size=${size} input_tokens=${data?.usage?.input_tokens} output_tokens=${data?.usage?.output_tokens} cost_micros=${cost}`);
   await guard.commit(cost);
   await own.settle(cost);
+  await reportProviderSuccess("openai");
   const b64 = data?.data?.[0]?.b64_json;
   if (typeof b64 !== "string" || !b64) {
     await alertServerError("ai-image", "2xx without image");

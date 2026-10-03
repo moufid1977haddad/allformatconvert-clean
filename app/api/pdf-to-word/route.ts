@@ -6,6 +6,7 @@ import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkFileSize, MAX_PDF_TO_WORD_STAGED_BYTES } from "@/lib/quota/limits";
 import { isStagedRequest, respondStaged, fileResponse } from "@/lib/media/stagedRoute";
 import { alertServerError } from "@/lib/quota/errorAlerts";
+import { convertApiUnavailable, convertApiUnavailableMessage, alertConvertApiFailure, convertApiSucceeded } from "@/lib/convertApiOutage";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
 
 // Give the ConvertAPI round-trip enough headroom inside the function's own
@@ -165,6 +166,7 @@ async function convertPdf(req: NextRequest, file: File, staged = false, format: 
     // ConvertAPI's 2xx response means it already billed for this
     // conversion, whether or not the payload turns out to be a valid docx.
     await guard.commit(costMicros);
+    await convertApiSucceeded();
 
     const bytes = new Uint8Array(docxBuffer);
     // .docx is a ZIP container -- check for the "PK" magic bytes, NOT the
@@ -248,10 +250,10 @@ async function convertPdf(req: NextRequest, file: File, staged = false, format: 
 
     if (err instanceof ConvertApiError) {
       const mapped = CONVERTAPI_ERROR_RESPONSES[err.code] || CONVERTAPI_ERROR_RESPONSES.upstream_error;
+      // Server-side only, and deliberately limited to the error code and HTTP status -- never the token, never the
+      // raw upstream body. P30: a provider outage alerts once per incident (lib/convertApiOutage.ts).
+      await alertConvertApiFailure("pdf-to-word", err, mapped.alert);
       if (mapped.alert) {
-        // Server-side only, and deliberately limited to the error code and
-        // HTTP status -- never the token, never the raw upstream body.
-        await alertServerError("pdf-to-word", `${err.code} (HTTP ${err.httpStatus ?? "n/a"})`);
         await insertToolError(buildServerToolError({
           tool: "pdf-to-word",
           file,
@@ -259,6 +261,8 @@ async function convertPdf(req: NextRequest, file: File, staged = false, format: 
           userAgent: req.headers.get("user-agent"), headers: req.headers,
         }));
       }
+      // P30: no backup of the same quality for PDF to Word: the visitor is told to come back later.
+      if (convertApiUnavailable(err)) return NextResponse.json({ error: convertApiUnavailableMessage("Word") }, { status: 503 });
       return NextResponse.json({ error: mapped.message }, { status: mapped.status });
     }
 

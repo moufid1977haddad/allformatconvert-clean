@@ -13,6 +13,8 @@ export default function WordToPdfPage() {
   const [error, setError] = useToolError('');
   const [done, setDone] = useState(false);
   const [detectedFonts, setDetectedFonts] = useState([]);
+  // P30: set when the usual .docx engine (ConvertAPI) was unavailable and our LibreOffice server made the PDF.
+  const [engineFallback, setEngineFallback] = useState(null);
   const inputRef = useRef();
   const [pdf, offer, clearPdf] = useDownloadable();
 
@@ -37,11 +39,14 @@ export default function WordToPdfPage() {
     setDone(false);
     clearPdf();
     setDetectedFonts([]);
+    setEngineFallback(null);
 
     try {
       setStage(null);
-      const result = await convertOffice({ file: file, endpoint: '/api/convert-to-pdf', onStage: setStage });
+      // engineFallback: this page shows the "backup converter" notice, so the route may use it (P30).
+      const result = await convertOffice({ file: file, endpoint: '/api/convert-to-pdf', fields: { engineFallback: 'allowed' }, onStage: setStage });
       setDetectedFonts(result.detectedFonts);
+      setEngineFallback(result.engineFallback || null);
       const blob = result.blob;
       const filename = (file.name.replace(/\.[^.]+$/, '') || 'document') + '.pdf';
       offer(blob, filename);
@@ -84,6 +89,11 @@ export default function WordToPdfPage() {
             <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
               <div className="text-green-500 text-xl font-bold mb-1">PDF ready</div>
               <DownloadReady file={pdf} className="mt-3" />
+              {engineFallback && (
+                <p className="text-amber-700 text-sm mt-3" role="status" data-engine-fallback>
+                  Made by our backup converter: the engine we normally use for .docx files is unavailable right now, so our own LibreOffice server made this PDF. Your text is all there, but fonts, line and page breaks and equation spacing can differ from Word, and an image stored in a non-standard way can be missing. For the usual conversion, try again later.
+                </p>
+              )}
               {detectedFonts.length > 0 && (
                 <p className="text-amber-600 text-sm mt-3">
                   Heads up: this file uses {detectedFontsList} icon font{detectedFonts.length > 1 ? 's' : ''}, which can&apos;t legally be reproduced — those specific characters may appear as blank boxes in your PDF. Everything else converted normally.
@@ -105,6 +115,7 @@ export default function WordToPdfPage() {
           { q: "Is Word to PDF completely free to use?", a: "Yes, it's completely free with no signup required." },
           { q: "What file formats does Word to PDF support?", a: ".docx (converted by ConvertAPI) and, converted by our own LibreOffice server: .doc, macro-enabled .docm, templates .dotx / .dotm / .dot, OpenDocument .odt / .ott, .rtf and WordPerfect .wpd (Microsoft Works .wps is not accepted: our converter cannot read it). We checked that each of these formats converts; the page-by-page fidelity measurement quoted on this page was made on .docx files." },
           { q: "Will my documents be uploaded to a server?", a: "Yes. A .docx file goes securely over HTTPS through our server to our conversion provider, ConvertAPI (file storage turned off); a .doc file goes to our own LibreOffice server. The file is deleted after conversion — we don't keep it." },
+          { q: "What happens if the .docx converter is down?", a: "If ConvertAPI is unavailable, your .docx is converted by our own LibreOffice server instead, and the page tells you so next to the download. That PDF has all your text, but fonts, line and page breaks and equation spacing can differ from Word, and an image stored in a non-standard way can be missing; try again later for the usual conversion." },
           { q: "Do I need to install any software to use Word to PDF?", a: "No, it works directly in your web browser." },
           { q: "Will the text in my PDF be selectable?", a: "Yes. Because conversion is done server-side rather than by rasterizing a screenshot, the resulting PDF has fully selectable, searchable text." },
           { q: "Why does this look different from the previous in-browser converter?", a: "This tool now converts documents server-side instead of approximating the layout in your browser. The trade-off is that your file is uploaded; in return, fonts, spacing and page layout follow the original Word document, and the text is selectable." },

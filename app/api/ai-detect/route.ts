@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { alertServerError } from "@/lib/quota/errorAlerts";
 import { reserveAiDetect } from "@/lib/quota/aiDetect";
 import { logUsageEvent } from "@/lib/quota/logEvent";
+import { classifyProviderFailure, reportProviderFailure, reportProviderSuccess } from "@/lib/providerIncident";
 import {
   requirePangramKey, detectWithPangram, countBillableWords, billedWords, pangramCostMicros,
   AI_DETECT_MAX_WORDS, AI_DETECT_MIN_WORDS, AI_DETECT_MAX_CHARS,
@@ -58,6 +59,7 @@ export async function POST(req: NextRequest) {
   try {
     const result = await detectWithPangram(clean, { apiKey });
     await logUsageEvent({ route: ROUTE, tool: TOOL, outcome: "accepted", estimatedCostMicros: costMicros });
+    await reportProviderSuccess("pangram");
     return NextResponse.json({ ...result, words });
   } catch (err) {
     const e = err as Error & { billed?: boolean; status?: number };
@@ -78,7 +80,11 @@ export async function POST(req: NextRequest) {
     } else {
       await logUsageEvent({ route: ROUTE, tool: TOOL, outcome: "accepted", estimatedCostMicros: costMicros });
     }
-    await alertServerError(ROUTE, e?.message || String(err));
+    // P30: a Pangram failure (no credit, key refused, repeated failures) alerts once per incident, then on recovery;
+    // only what is not the provider's failure keeps the hourly per-route alert.
+    // A failure without an HTTP status (unreadable answer, task failed or still running) keeps its hourly alert too.
+    if (e?.status && classifyProviderFailure({ httpStatus: e.status })) await reportProviderFailure("pangram", { httpStatus: e.status });
+    else await alertServerError(ROUTE, e?.message || String(err));
     const busy = e?.status === 429;
     return NextResponse.json(
       { error: busy ? "The AI detector is temporarily at capacity. Please try again later." : "The AI detector failed. Please try again." },

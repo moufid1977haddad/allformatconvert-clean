@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/health-check",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/alert-test",
+      "schedule": "17 9 1 1 *"
     }
   ],
   "ignoreCommand": "git diff --quiet ${VERCEL_GIT_PREVIOUS_SHA:-HEAD^} HEAD -- . ':(exclude)docs/**' ':(exclude)**/*.md' ':(exclude)README*'"

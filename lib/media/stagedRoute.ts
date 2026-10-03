@@ -75,7 +75,7 @@ export async function respondStaged(
   const fonts = res.headers.get("X-Detected-Symbol-Fonts");
   const textBoxes = Number(res.headers.get("X-Doc-Text-Boxes") || 0); // P26: PDF to Word as .doc (see that route)
   return NextResponse.json(
-    { ok: true, jid: h.jid, outputBytes: dep.outputBytes, ext: delivered, detectedFonts: fonts ? fonts.split(",") : [], ...(textBoxes ? { docTextBoxes: textBoxes } : {}), ...(res.headers.get("X-Doc-Fallback") ? { docFallback: true } : {}) },
+    { ok: true, jid: h.jid, outputBytes: dep.outputBytes, ext: delivered, detectedFonts: fonts ? fonts.split(",") : [], ...(textBoxes ? { docTextBoxes: textBoxes } : {}), ...(res.headers.get("X-Doc-Fallback") ? { docFallback: true } : {}), ...(res.headers.get("X-Engine-Fallback") ? { engineFallback: res.headers.get("X-Engine-Fallback") } : {}) },
     { headers: { "Cache-Control": "no-store" } },
   );
 }
