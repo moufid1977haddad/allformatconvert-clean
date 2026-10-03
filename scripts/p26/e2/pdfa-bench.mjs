@@ -22,6 +22,8 @@ function veraCheck(file, level) {
     return v.compliant === true;
   } catch { return false; }
 }
+// Text as pdftotext (poppler, independent of the service's Ghostscript) reads it, as a word list.
+const words = (f) => { try { return execFileSync('pdftotext', [f, '-'], { encoding: 'utf8', maxBuffer: 64 << 20 }).split(/\s+/).filter(Boolean); } catch { return null; } };
 const inspect = (f) => JSON.parse(execFileSync('python', ['services/pdf-tools/py/pdfa_fix.py', 'inspect', f], { encoding: 'utf8' }));
 
 let pass = 0, fail = 0;
@@ -49,8 +51,11 @@ for (const name of fs.readdirSync(dir).filter((f) => f.endsWith('.pdf')).sort())
         const structure = inspect(f).tagged;
         // delivered level must be the requested one unless downgrade was allowed, and must be independently valid;
         // an "a" level must keep the structure tree.
-        ok = valid && (j.conformance === level || (allowDowngrade && j.downgraded === true)) && (j.conformance[1] !== 'a' || structure);
-        line += ` got ${j.conformance}${j.downgraded ? ' (downgraded: ' + j.attempts.map((a) => a.conformance + ' ' + a.reason).join(', ') + ')' : ''} | own veraPDF ${valid ? 'valid' : 'INVALID'} | structure ${structure}`;
+        // a "u" or "a" file must carry the source's text, word for word (that is what those levels promise)
+        let textSame = true;
+        if (j.conformance[1] !== 'b') { const a = words(src), b2 = words(f); textSame = !!a && !!b2 && a.join(' ') === b2.join(' '); }
+        ok = valid && textSame && (j.conformance === level || (allowDowngrade && j.downgraded === true)) && (j.conformance[1] !== 'a' || structure);
+        line += `${textSame ? '' : ' TEXT CHANGED'} got ${j.conformance}${j.downgraded ? ' (downgraded: ' + j.attempts.map((a) => a.conformance + ' ' + a.reason).join(', ') + ')' : ''} | own veraPDF ${valid ? 'valid' : 'INVALID'} | structure ${structure}`;
       } else {
         // a refusal is right only when no downgrade was allowed (or the file cannot be PDF/A at all) and is explained
         ok = r.status === 422 && !!j.error;

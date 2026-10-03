@@ -16,10 +16,18 @@ const MAX_PARALLEL = 2; // each soffice takes ~150-300 MB while it runs
 let running = 0;
 const waiting = [];
 
-async function slot() {
-  if (running < MAX_PARALLEL) { running++; return; }
-  await new Promise((resolve) => waiting.push(resolve));
-  running++;
+// Resolves true once a slot is taken, false if the request was aborted while waiting (it then leaves the queue).
+async function slot(signal) {
+  if (signal?.aborted) return false;
+  if (running < MAX_PARALLEL) { running++; return true; }
+  const got = await new Promise((resolve) => {
+    const entry = () => { signal?.removeEventListener('abort', onAbort); resolve(true); };
+    const onAbort = () => { const i = waiting.indexOf(entry); if (i >= 0) waiting.splice(i, 1); resolve(false); };
+    signal?.addEventListener('abort', onAbort, { once: true });
+    waiting.push(entry);
+  });
+  if (got) running++;
+  return got;
 }
 function release() {
   running--;
@@ -36,14 +44,14 @@ async function docxToDoc(workDir, signal) {
   if (head[0] !== 0x50 || head[1] !== 0x4b) return { ok: false, status: 400, error: 'This is not a DOCX file.' };
   fs.renameSync(src, path.join(workDir, INPUT_NAME));
   const profile = path.join(workDir, 'lo-profile');
-  await slot();
+  if (!(await slot(signal))) return { ok: false, status: 504, error: 'Conversion to .doc timed out.' };
   let r;
   try {
     r = await runProcess(config.SOFFICE_BIN, [
       `-env:UserInstallation=${pathToFileUrl(profile)}`,
       '--headless', '--norestore', '--nolockcheck', '--nodefault', '--nologo',
       '--convert-to', 'doc:MS Word 97', '--outdir', workDir, path.join(workDir, INPUT_NAME),
-    ], { cwd: workDir, signal });
+    ], { cwd: workDir, signal, killGroup: true });
   } catch (err) {
     return { ok: false, status: 500, error: 'The Word converter could not be started.', detail: err.code || err.message };
   } finally {
