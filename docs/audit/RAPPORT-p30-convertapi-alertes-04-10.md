@@ -129,3 +129,33 @@ dire — et 5 points : fenêtre fixe (une panne à un échec toutes les 6 minute
 comme panne, transitions non atomiques (alertes en double), production reconnue au seul `VERCEL_ENV`. **Tous corrigés**
 (ci-dessus), plus : statut HTTP de Pangram conservé, compteur « jamais d'exception » réellement protégé, conversion
 facturée à réponse illisible comptée, .docx avec l'interrupteur ConvertAPI coupé annoncé de la même façon.
+
+## 4. Équations d'un .docx sur www (lot 4)
+
+`node scripts/p29/docx-equations-www.mjs https://www.onlineconvertools.com <dossier> word-omml.docx dsmt4-mathtype6.docx
+--chantier=P30 --budget=0.05` (corpus P28), après la fusion du lot A — deux vraies conversions par ConvertAPI (producteur
+« ConvertAPI », pas de secours) :
+- **word-omml.docx** (7 équations Office Math écrites par Word 16) contre le PDF exporté par Word lui-même : **1 page /
+  1, 100 % des mots, 0,0 % de pixels différents** (`scripts/p30/vs-word.py`). Identique à Word.
+- **dsmt4-mathtype6.docx** (objet MathType 6) : l'équation (a = b/c) est rendue, à sa place dans la phrase. Word ne peut
+  pas servir de référence pour ce fichier sur ce poste (l'export par COM reste bloqué sur l'objet, comme en P28).
+- **Rien de perdu ni d'abîmé : aucune correction.** Pour mémoire, le secours LibreOffice (§3) rend aussi les 7 équations
+  (espacement plus serré, 2,4 % de pixels différents) et l'objet MathType.
+
+## 6. Mise en production du lot A (03/10 au soir, heure UTC de la machine ; 04/10 pour le propriétaire)
+
+- Banc local (construction de production, ConvertAPI refusé, Supabase simulé) : 6/6 ; tests unitaires 12/12 ; tests Go
+  du relais (lot 5) à part.
+- **Préversion** `onlineconvertools-ie22p04kq` (`d1397cd6`), **une passe** : **7/7** — secours annoncé sur Word to PDF
+  (envoi direct **et par morceaux**, fichier de 4,6 Mo), Merge PDF (avis qui nomme le .docx), .odt sans avis, PDF to
+  Word / Excel / PowerPoint « try again later ». Journal de la préversion : `runtime=true` — le repère d'exécution de
+  Vercel existe bien (la production le trouvera).
+- **Fusion `f8db1de9`** (sans poussée forcée) → production **`onlineconvertools-gjjrs94r8` = `f8db1de9`**.
+- **Alerte de test envoyée** : `vercel crons run /api/cron/alert-test` le **03/10 à 23 h 06 UTC** ; journal de
+  production : **`[alert-test] ntfy=sent email=sent`** (ntfy et Resend ont accepté l'envoi). Le propriétaire doit
+  l'avoir reçue sur son téléphone (« 🧪 OnlineConverTools — test alert ») et par courriel.
+- **www** : `www-light` **29/29** ; **rétablissement vérifié par de vraies conversions** : Word to PDF ×2 (§4), PDF to
+  Word (DOCX 9,5 Ko), PDF to Excel (XLSX 6,9 Ko), PDF to PowerPoint (PPTX 19,4 Ko) — **5/5**, aucune erreur dans les
+  journaux de production. **Dépense ConvertAPI : 0,05 $ sur 0,05 $** (`docs/audit/depenses-fournisseurs.jsonl`, 5
+  lignes) ; plus aucun appel payant dans ce chantier.
+- Retour arrière prêt, non utilisé : promouvoir `onlineconvertools-fo109wbpv` (= `5af581aa`, production d'avant).
