@@ -90,8 +90,16 @@ COPY fonts.conf /etc/fonts/conf.d/99-office-font-substitutions.conf
 # Debian build: same three values, same bench.
 ARG CHROMIUM_DEB_VERSION=154.0.8037.92-1~deb13u1
 ARG CHROMIUM_DEB_BASE=https://snapshot.debian.org/archive/debian-security/20261001T172817Z/pool/updates/main/c/chromium
-RUN cd /tmp     && curl -fsSL -o chromium.deb "$CHROMIUM_DEB_BASE/chromium_${CHROMIUM_DEB_VERSION}_amd64.deb"     && curl -fsSL -o chromium-common.deb "$CHROMIUM_DEB_BASE/chromium-common_${CHROMIUM_DEB_VERSION}_amd64.deb"     && printf '%s  %s
-'         ba20f2bf959cc302694147fb4d881586c7b41688c5dd5b1555f560732733e3d5 chromium.deb         ed25b5290168e9775641864aa6f831b15fc53f57e63b30dcc0256d6588fa0831 chromium-common.deb         | sha256sum -c -     && apt-get update -qq     && apt-get install -y -qq --no-install-recommends ./chromium-common.deb ./chromium.deb     && rm -rf /var/lib/apt/lists/* /tmp/chromium.deb /tmp/chromium-common.deb     && /usr/bin/chromium --version | grep -F "${CHROMIUM_DEB_VERSION%%-*}"     && bash /opt/gotenberg/capture-version.sh "$GOTENBERG_VERSIONS_DIR_PATH" chromium /usr/bin/chromium --version
+RUN cd /tmp \
+    && curl -fsSL -o chromium.deb "$CHROMIUM_DEB_BASE/chromium_${CHROMIUM_DEB_VERSION}_amd64.deb" \
+    && curl -fsSL -o chromium-common.deb "$CHROMIUM_DEB_BASE/chromium-common_${CHROMIUM_DEB_VERSION}_amd64.deb" \
+    && echo "ba20f2bf959cc302694147fb4d881586c7b41688c5dd5b1555f560732733e3d5  chromium.deb" | sha256sum -c - \
+    && echo "ed25b5290168e9775641864aa6f831b15fc53f57e63b30dcc0256d6588fa0831  chromium-common.deb" | sha256sum -c - \
+    && apt-get update -qq \
+    && apt-get install -y -qq --no-install-recommends ./chromium-common.deb ./chromium.deb \
+    && rm -rf /var/lib/apt/lists/* /tmp/chromium.deb /tmp/chromium-common.deb \
+    && /usr/bin/chromium --version | grep -F "${CHROMIUM_DEB_VERSION%%-*}" \
+    && bash /opt/gotenberg/capture-version.sh "$GOTENBERG_VERSIONS_DIR_PATH" chromium /usr/bin/chromium --version
 
 # P29: Gotenberg starts Chromium through this launcher (V8 without JIT, no API credentials in its environment) --
 # the reasons are in the file itself.
