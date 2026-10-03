@@ -91,12 +91,16 @@ export default function HtmlToPdfPage() {
     setDone(false);
     clearPdf();
     setError('');
+    setNotice('');
     try {
       setStage(null);
       const result = await convertOffice({ file: new File([uploadBlob], 'document.html', { type: 'text/html' }), endpoint: '/api/convert-html-to-pdf', onStage: setStage });
       const pdfBlob = result.blob;
       const filename = (file?.name ? file.name.replace(/\.[^.]+$/, '') : 'document') + '.pdf';
       offer(pdfBlob, filename);
+      // P29 (04/10): our Chromium runs no script at all (Gotenberg --chromium-disable-javascript, measured: 0 of 18 ways
+      // to run one), as for a URL: said whenever the HTML has scripts, since what they would build is missing.
+      if (/<script\b/i.test(htmlContent)) setNotice('This HTML contains scripts, which are not run here (for safety): anything they would draw or add (charts, generated text) is missing from the PDF. If something is missing, open the file itself in a web browser and print it from there (Print → Save as PDF).');
       setDone(true);
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -113,8 +117,8 @@ export default function HtmlToPdfPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="flex gap-2">
             <button onClick={() => { setMode('url'); setHtmlContent(''); setFile(null); setDone(false); clearPdf(); setError(''); setNotice(''); }} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'url' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>From URL</button>
-            <button onClick={() => { setMode('file'); setHtmlContent(''); setFile(null); setDone(false); clearPdf(); setError(''); }} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'file' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>Upload File</button>
-            <button onClick={() => { setMode('paste'); setHtmlContent(''); setFile(null); setDone(false); clearPdf(); setError(''); }} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'paste' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>Paste Code</button>
+            <button onClick={() => { setMode('file'); setHtmlContent(''); setFile(null); setDone(false); clearPdf(); setError(''); setNotice(''); }} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'file' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>Upload File</button>
+            <button onClick={() => { setMode('paste'); setHtmlContent(''); setFile(null); setDone(false); clearPdf(); setError(''); setNotice(''); }} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'paste' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>Paste Code</button>
           </div>
           {mode === 'url' ? (
             <div className="space-y-3">
@@ -164,7 +168,7 @@ export default function HtmlToPdfPage() {
       </div>
       <SeoContent
         title="HTML to PDF"
-        description="HTML to PDF converts a web page from its address (URL), an HTML file or pasted HTML code. For an address, our server fetches the page with its style sheets, images and fonts — public http and https pages only, never a private network address — and prints it at the screen width you choose (desktop, laptop, tablet or phone), on A4, Letter, Legal, A3 or A5, with your margins, or as one long page; the page's scripts are not run, for safety, so a page that builds its content with JavaScript can come out incomplete (the tool says so). For a file or code, it uploads your HTML — including its CSS — to our conversion service, which renders it with a real browser engine (Chromium via Gotenberg) and returns a PDF for you to download. We tested a page with CSS grid, flexbox, a gradient with a shadow, a table with a merged cell, two-column text, an inline SVG, print-only CSS and French accents: it matched what Chrome prints for the same page. The one difference: a font that isn't installed on our servers (Georgia in our test) is replaced by a similar one (Liberation Serif), so line breaks can shift slightly."
+        description="HTML to PDF converts a web page from its address (URL), an HTML file or pasted HTML code. For an address, our server fetches the page with its style sheets, images and fonts — public http and https pages only, never a private network address — and prints it at the screen width you choose (desktop, laptop, tablet or phone), on A4, Letter, Legal, A3 or A5, with your margins, or as one long page; the page's scripts are not run, for safety, so a page that builds its content with JavaScript can come out incomplete (the tool says so). For a file or code, it uploads your HTML — including its CSS — to our conversion service, which renders it with a real browser engine (Chromium via Gotenberg) and returns a PDF for you to download; there too its scripts are not run, for safety, and the tool tells you when your HTML contains any. We tested a page with CSS grid, flexbox, a gradient with a shadow, a table with a merged cell, two-column text, an inline SVG, print-only CSS and French accents: it matched what Chrome prints for the same page. The one difference: a font that isn't installed on our servers (Georgia in our test) is replaced by a similar one (Liberation Serif), so line breaks can shift slightly."
         howTo={[
           "Choose 'From URL' and type the address of a public web page, or 'Upload File' to select an .html file, or 'Paste Code' to type or paste HTML directly.",
           "For a URL, choose the screen size the page is laid out at, the paper, orientation and margins, and optionally 'One long page'.",
@@ -177,7 +181,7 @@ export default function HtmlToPdfPage() {
           { q: "Can I customize page size, margins, or headers/footers?", a: "Page size (A4, Letter, Legal, A3, A5), orientation and margins: yes, with the three choices above the button — or leave them on 'As in the document' to keep the page's own CSS. Headers and footers: not offered." },
           { q: "Can I convert a web page from its URL?", a: "Yes: choose 'From URL' and type the address. Our server fetches the page and everything it needs to display (style sheets, images, fonts), then prints it with Chromium. Only public http:// and https:// addresses on the standard ports are accepted: addresses of private or local networks are refused, and every redirect is checked the same way. The page's scripts are not run, for safety — most pages print fully, but one that builds its content with JavaScript can come out incomplete, and the tool tells you when a page looks like one. Pages behind a login cannot be converted: only what anyone can see without signing in." },
           { q: "Will my HTML documents be uploaded to a server?", a: "Yes. Your HTML code or file is uploaded to our conversion service, purely to render the final PDF with a real browser engine, and it's discarded immediately afterward." },
-          { q: "What HTML features are supported?", a: "Whatever a modern Chromium browser can render: CSS styling, images, tables, and most modern HTML5 elements. In our test the PDF matched Chrome's print output, except that fonts missing from our servers are replaced by similar ones." }
+          { q: "What HTML features are supported?", a: "Whatever a modern Chromium browser can render: CSS styling, images, tables, and most modern HTML5 elements. In our test the PDF matched Chrome's print output, except that fonts missing from our servers are replaced by similar ones. Scripts (JavaScript) are not run, for safety: content a script would build, such as a chart, is missing from the PDF, and the tool says so when your HTML has scripts." }
         ]}
         tips={[
           "Use absolute image URLs (starting with https://) rather than relative paths, since a relative path won't resolve on the conversion service.",

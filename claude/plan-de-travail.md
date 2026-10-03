@@ -52,6 +52,19 @@
 
 **Après le lancement, sur déclencheur :** AdSense à **20-50 visiteurs/jour réels** (propriétaire : compte AdSense, message « European regulations » dans Privacy & messaging, 2 variables Vercel — ≈ 45 min ; tout le reste est prêt, `RAPPORT-prelancement-01-10.md` §3) ; relevé Search Console des 10 pages entre le **10 et le 24 novembre** ; décisions « juste après » du tableau des déclencheurs.
 
+## 🔒 P29 — 04/10 : sécurité de Chromium (Gotenberg), équations .docx (`docs/audit/RAPPORT-p29-securite-chromium-04-10.md`, repère `restauration-avant-p29-04-10` = `e578eeaa`)
+
+| Lot | État | Reste |
+|---|---|---|
+| 1 Chromium | mesuré sur `gotenberg-fonts` : **Chromium 154 de Debian** (CVE-2026-87491 corrigée, sans attendre Gotenberg), **JavaScript coupé** (0/18 façons de lancer un script, 15/18 avant), V8 sans JIT ; 65/65 conversions identiques au pixel (dont URL to PDF tel que le site l'envoie) ; 27 adresses internes refusées. **Bac à sable impossible sur Railway** (seccomp refuse les espaces de noms sur 2 hôtes sur 3, pas de `CAP_SYS_ADMIN`) | mise en production en cours |
+| 2 Équations .docx | **bloqué** : **crédits ConvertAPI épuisés** depuis le 02/10 ≈ 19 h 52 → Word to PDF (.docx), PDF to Word, PDF to Excel, PDF to PowerPoint en échec sur www (HTTP 403 `quota_exceeded`, 0 $ dépensé) | **Propriétaire : recharger ConvertAPI**, puis `scripts/p29/docx-equations-www.mjs` (≈ 0,02 $, commande au rapport §2) |
+
+**À surveiller (règle permanente)** : Chromium de Gotenberg suit désormais l'archive de sécurité de Debian
+(`services/gotenberg/Dockerfile`, trois valeurs : version, horodatage snapshot.debian.org, SHA-256). À chaque nouvelle
+version de Chromium dans trixie-security corrigeant une faille exploitée, ou à chaque version de Gotenberg : mêmes
+bancs (`scripts/p27/gotenberg-compare.mjs --extra-html` + `scripts/p29/url-snapshots.mjs`, `scripts/p26/gotenberg-probe.mjs`,
+`scripts/p29/js-probe.mjs`) sur `gotenberg-fonts` d'abord.
+
 ## 🧮 P28 — 04/10 : Gotenberg 8.37, équations Word, PDF Repair (`docs/audit/RAPPORT-p28-gotenberg-04-10.md`, repère `restauration-avant-p28-04-10` = `6a8af4be`)
 
 **Décisions du propriétaire (prompt P28, 04/10)** : **Google Analytics reste chargé comme aujourd'hui** (les statistiques
@@ -65,7 +78,7 @@ complètes priment sur 1-2 points de vitesse) — sujet clos ; **le panorama iPh
 | 2 Équations des ODT écrits par Word | ✅ **en production** (fusion `03aa60d1`, `lib/odtWordMath.js`) : MathML « à plat » de Word rendu lisible (Smallpdf les perd, iLovePDF = Word) ; revue indépendante appliquée | **Non mesuré** : équations d'un `.docx` (ConvertAPI en production, ≈ 0,01 $ à dépenser pour le vérifier — décision propriétaire) ; reste mineur : crochets de matrice non étirés, équations RTF alignées à gauche (Word : centrées) |
 | 3 PDF Repair | ✅ **en production** (pdf-tools `ab0077fd`, site `onlineconvertools-jcglmx2uu`) : texte contrôlé par Ghostscript et Poppler avant toute livraison ; méthodes Poppler et reconstruction de l'arbre des pages ; en ligne sur 248 PDF abîmés : **19 textes altérés en silence → 0**, refus 64 → 25 ; revue indépendante appliquée (3 défauts sérieux corrigés) | Écart restant avec iLovePDF (3-Heights) : PDF chiffré AES-256 dont la fin est perdue (pages dans des flux d'objets chiffrés). Retour arrière : pdf-tools `538d1590`, Vercel `onlineconvertools-1q669xcht` |
 
-**Risque de sécurité ancien, à traiter (revue indépendante P28)** : Chromium de Gotenberg tourne sans bac à sable avec
+**Risque de sécurité ancien (revue indépendante P28) — traité par P29 (section ci-dessus)** : Chromium de Gotenberg tourne sans bac à sable avec
 JavaScript actif, et HTML to PDF lui passe le HTML déposé tel quel ; Chromium 152 (Gotenberg 8.37) ne corrige pas
 CVE-2026-87491 (V8, exploitée, corrigée en 153). À faire : passer à la prochaine Gotenberg embarquant Chromium ≥ 153 dès sa
 sortie (même banc : `scripts/p27/gotenberg-compare.mjs` + sondes), et mesurer `CHROMIUM_DISABLE_JAVASCRIPT=true` ou un

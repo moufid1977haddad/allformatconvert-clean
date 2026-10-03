@@ -4,7 +4,7 @@
 // format the pages accept (docs/audit/fixtures-p21-office), the fidelity documents, Office math and scripts
 // (scripts/p27/gotenberg-fixtures), HTML (file, fidelity page, public resources), the EPUB and MOBI books as our pages
 // build them, and URL to PDF.
-//   node scripts/p27/gotenberg-compare.mjs <railway-service> <out-dir> [--books=<dir with epub.html, mobi.html>]
+//   node scripts/p27/gotenberg-compare.mjs <railway-service> <out-dir> [--books=<dir with epub.html, mobi.html>] [--extra-html=<dir>]
 // Credentials come from the Railway CLI (the owner's login) and stay in this process: never printed, never written.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -59,6 +59,11 @@ for (const b of ['epub', 'mobi']) {
   const f = books && path.join(books, `${b}.html`);
   if (f && fs.existsSync(f)) html(b, fs.readFileSync(f));
   else console.log(`SKIP ${b}: no --books dir with ${b}.html (scripts/p26/capture-book-html.mjs)`);
+}
+// P29: URL to PDF as the site sends it (pages snapshotted once by scripts/p29/url-snapshots.mjs), and any other HTML.
+const extraHtml = process.argv.find((a) => a.startsWith('--extra-html='))?.split('=')[1];
+if (extraHtml) for (const n of fs.readdirSync(extraHtml).filter((n) => n.endsWith('.html')).sort()) {
+  html(n.replace(/\.html$/, ''), fs.readFileSync(path.join(extraHtml, n)), { printBackground: 'true' });
 }
 // URL to PDF: a static public page (our own /about would load analytics; example.com is the stable control).
 conv.push(['url-example', '/forms/chromium/convert/url', [], { url: 'https://example.com/' }]);
