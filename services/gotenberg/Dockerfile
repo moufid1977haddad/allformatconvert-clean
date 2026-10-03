@@ -19,6 +19,13 @@
 # P28 (04/10): 8.37.0 -- digest read from Docker Hub's registry API on 2026-10-04 (manifest list). Measured against
 # 8.36.0 on 59 documents before the switch (docs/audit/RAPPORT-p28-gotenberg-04-10.md): it restores libreoffice-math,
 # which 8.30-8.36 had dropped, so Word equations (Office Math, Equation 3.0/MathType, LibreOffice Math) were lost.
+# P30 (04/10): oct-edge, the small relay that moves Chromium out of this service (edge/main.go explains both roles).
+# Built from source here, with its tests, by the official Go image pinned by digest (read from Docker Hub on 04/10).
+FROM golang:1.27.1-trixie@sha256:3b77fc618ec235a1ab412de7737f120dd507c57e8d87de4cbb7994fb94275ed5 AS edge
+WORKDIR /src
+COPY edge/ ./
+RUN CGO_ENABLED=0 go test ./... && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /oct-edge .
+
 FROM gotenberg/gotenberg:8.37.0@sha256:f29984bd1e226bf1b93ba90af06000afa8b315853e99d27b9aaa41b93f15c769
 
 USER root
@@ -113,6 +120,18 @@ ENV CHROMIUM_BIN_PATH=/usr/local/bin/chromium-launcher
 # JavaScript) for PDFs embedded in a page. Debian's chromium reads managed policies from this directory.
 COPY chromium-policy.json /etc/chromium/policies/managed/onlineconvertools.json
 
+# P30 (04/10): Chromium in its own Railway service, in its own project -- no private network shared with ours (Railway:
+# "services in other projects cannot reach yours at all"), no secret (docs/audit/RAPPORT-p30-convertapi-alertes-04-10.md
+# §5). This image runs in two roles, chosen by OCT_EDGE_MODE (oct-edge decides Gotenberg's command line per role):
+#   front (default) -- gotenberg-v2, gotenberg-fonts: LibreOffice and the rest here; Chromium routes relayed, signed, to
+#     OCT_CHROMIUM_URL; Chromium never starts in this container.
+#   back -- the isolated service: Chromium only, Gotenberg on the loopback, only signed requests let through, checked
+#     with the PUBLIC key below (derived from the front's Basic Auth credentials, scripts/p30/edge-pubkey.mjs: if the
+#     password changes, this key must follow, or the Chromium tools answer 403).
+COPY --from=edge /oct-edge /usr/local/bin/oct-edge
+ENV OCT_CHROMIUM_URL=https://chromium-production-9551.up.railway.app
+ENV OCT_TRUSTED_KEYS=uofwqkprXLXYPN6-kWYiqz2p0L2mH6oByT7v176hs_8
+
 USER gotenberg
 
 # Basic Auth requires BOTH the GOTENBERG_API_BASIC_AUTH_USERNAME/PASSWORD
@@ -126,4 +145,8 @@ USER gotenberg
 # a Chromium without sandbox. Measured: 0 of 18 ways to run a script (scripts/p29/js-probe.mjs), 15 of 18 before.
 # --chromium-clear-cookies (P29, independent review): a cookie that a remote image or style sheet of one visitor's HTML
 # sets is not sent again while printing the next visitor's page (a third party could otherwise link our visitors).
-CMD ["gotenberg", "--api-enable-basic-auth", "--chromium-disable-javascript", "--chromium-clear-cookies"]
+# P30: oct-edge starts Gotenberg itself with these same flags (front: plus --api-enable-basic-auth and the Chromium
+# routes disabled; back: no Basic Auth -- loopback only behind the signature check -- and LibreOffice disabled), on
+# 127.0.0.1:3001, and listens on $PORT. Rollback: the previous Railway deployment (this CMD was
+# ["gotenberg", "--api-enable-basic-auth", "--chromium-disable-javascript", "--chromium-clear-cookies"]).
+CMD ["oct-edge"]
