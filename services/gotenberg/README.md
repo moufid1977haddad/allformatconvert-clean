@@ -23,7 +23,7 @@ Two things this directory now solves, independently:
 
 ## What's in this image vs. the production one
 
-`FROM gotenberg/gotenberg:8.36.0` (pinned exact version — see `Dockerfile`
+`FROM gotenberg/gotenberg:8.37.0` (8.36.0 until P28, 04/10/2026; pinned exact version — see `Dockerfile`
 for why the base image was chosen and what it already includes) plus:
 - A fontconfig rule (`fonts.conf`) that fixes "Calibri Light" resolving to
   the wrong substitute font.

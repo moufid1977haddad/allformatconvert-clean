@@ -36,7 +36,10 @@ for (const f of ['scripts/audit/fixtures/files/sample.docx', 'scripts/audit/fixt
   'scripts/audit/fixtures/files/sample.xls', 'scripts/converter-tests/fixtures/edge-cases.xlsx',
   ...['01.docx', '02.docx', '03.xlsx', '04.xlsx', '05.pptx', '06.pptx'].map((n) => `docs/audit/fixtures-fidelite/fidelite-${n}`),
   ...fs.readdirSync('docs/audit/fixtures-p21-office').filter((n) => !n.endsWith('.md')).map((n) => `docs/audit/fixtures-p21-office/${n}`),
-  'scripts/p27/gotenberg-fixtures/math.docx', 'scripts/p27/gotenberg-fixtures/multilingual.docx']) conv.push(office(f));
+  'scripts/p27/gotenberg-fixtures/math.docx', 'scripts/p27/gotenberg-fixtures/multilingual.docx',
+  // P28: real Word documents with equations (Word-native Office Math in every Word format, Equation Editor 3.0 /
+  // MathType objects, LibreOffice Math objects) -- scripts/p28/equations/SOURCES.md.
+  ...fs.readdirSync('scripts/p28/equations/corpus').map((n) => `scripts/p28/equations/corpus/${n}`)]) conv.push(office(f));
 const html = (name, buf, extra = {}) => conv.push([name, '/forms/chromium/convert/html', [['index.html', buf]], { preferCssPageSize: 'true', ...extra }]);
 html('html', fs.readFileSync('scripts/audit/fixtures/files/sample.html'));
 html('html-fidelity', fs.readFileSync('docs/audit/fidelite-marche/html-to-pdf-test.html'));

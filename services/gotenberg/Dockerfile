@@ -16,7 +16,10 @@
 # (this file pinning tag+digest) is a separate, independent goal: today the
 # production Gotenberg service runs the floating public image with no
 # pinned version at all -- see docs/audit/RAPPORT-gotenberg-versionne.md.
-FROM gotenberg/gotenberg:8.36.0@sha256:87c16b9f364279d321bc9772d31fa58aa6abe036423c270698bd636c3a8e9466
+# P28 (04/10): 8.37.0 -- digest read from Docker Hub's registry API on 2026-10-04 (manifest list). Measured against
+# 8.36.0 on 59 documents before the switch (docs/audit/RAPPORT-p28-gotenberg-04-10.md): it restores libreoffice-math,
+# which 8.30-8.36 had dropped, so Word equations (Office Math, Equation 3.0/MathType, LibreOffice Math) were lost.
+FROM gotenberg/gotenberg:8.37.0@sha256:f29984bd1e226bf1b93ba90af06000afa8b315853e99d27b9aaa41b93f15c769
 
 USER root
 
