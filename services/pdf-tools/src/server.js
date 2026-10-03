@@ -11,6 +11,7 @@ const { checkAllBinaries } = require('./binaries');
 const { repairPdf } = require('./repair');
 const { convertToPdfALevel, ADVANCED_LEVELS } = require('./pdfa');
 const { docxToDoc } = require('./docConvert');
+const { runProcess } = require('./runProcess');
 const compress = require('./compress');
 
 sweepStaleTempDirs();
@@ -295,6 +296,40 @@ app.post('/v1/docx-to-doc', requireApiKey, withTempDir(withTimeout(async (req, r
   res.setHeader('Content-Type', 'application/msword');
   return res.status(200).send(out);
 }, config.DOC_TIMEOUT_MS)));
+
+// ---- /v1/unicode-from-actualtext (P27): a PDF in; out the same PDF where accent glyphs without Unicode text get the
+// accent their own /ActualText says (py/actualtext.py: that measured case only), or 204 when there is nothing to add. Called before a PDF goes to
+// ConvertAPI (PDF to Word/Excel/PowerPoint), which ignores ActualText: measured, "données" came out "donne% es".
+const ACTUALTEXT_SCRIPT = require('path').join(__dirname, '..', 'py', 'actualtext.py');
+app.post('/v1/unicode-from-actualtext', requireApiKey, withTempDir(withTimeout(async (req, res, signal) => {
+  const startedAt = Date.now();
+  try {
+    await runUpload(req, res);
+  } catch (err) {
+    if (err.message !== 'handled') throw err;
+    return;
+  }
+  if (!req.file) return res.status(400).json({ ok: false, error: 'No file provided.' });
+  const bytesIn = req.file.size;
+  const r = await runProcess(config.PDFPY_BIN, [ACTUALTEXT_SCRIPT, 'input.pdf', 'output.pdf'], { cwd: req.tempDir, signal });
+  let added = null;
+  try { added = JSON.parse(r.stdout.trim().split(/\r?\n/).pop()).added; } catch { /* reported below */ }
+  const outPath = require('path').join(req.tempDir, 'output.pdf');
+  const durationMs = Date.now() - startedAt;
+  if (r.code !== 0 || typeof added !== 'number') {
+    logMetric({ apiKeyName: req.apiKey.name, endpoint: '/v1/unicode-from-actualtext', bytesIn, durationMs, verdict: signal.aborted ? 'timeout' : 'failed' });
+    return res.status(signal.aborted ? 504 : 422).json({ ok: false, error: 'This PDF could not be read.' });
+  }
+  if (!added || !fs.existsSync(outPath)) {
+    logMetric({ apiKeyName: req.apiKey.name, endpoint: '/v1/unicode-from-actualtext', bytesIn, durationMs, verdict: 'unchanged' });
+    return res.status(204).end();
+  }
+  const out = fs.readFileSync(outPath);
+  logMetric({ apiKeyName: req.apiKey.name, endpoint: '/v1/unicode-from-actualtext', bytesIn, bytesOut: out.length, durationMs, verdict: `added_${added}` });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('X-Unicode-Added', String(added));
+  return res.status(200).send(out);
+}, config.ACTUALTEXT_TIMEOUT_MS)));
 
 app.listen(config.PORT, () => {
   console.log(`pdf-tools-service listening on :${config.PORT}`);
