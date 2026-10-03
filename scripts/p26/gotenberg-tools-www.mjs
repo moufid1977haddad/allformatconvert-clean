@@ -15,6 +15,8 @@ const fx = (f) => path.resolve('scripts/audit/fixtures/files', f);
 const cases = [
   // .odt, not .docx: in production .docx goes to ConvertAPI (paid, CONVERTAPI_ENABLED), every other Word format to Gotenberg.
   ['word', 'word-to-pdf', path.resolve('docs/audit/fixtures-p21-office/text.odt')],
+  // P28: Word equations (Office Math) in an .rtf -- Gotenberg; lost by 8.36, restored by 8.37
+  ['word-equations', 'word-to-pdf', path.resolve('scripts/p28/equations/corpus/word-omml.rtf')],
   ['excel', 'excel-to-pdf', fx('sample.xlsx')],
   ['powerpoint', 'ppt-to-pdf', fx('sample.pptx')],
   ['html', 'html-to-pdf', path.resolve('docs/audit/fidelite-marche/html-to-pdf-test.html'), 'Upload File'],

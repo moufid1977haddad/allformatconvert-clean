@@ -39,7 +39,10 @@ for (const f of ['scripts/audit/fixtures/files/sample.docx', 'scripts/audit/fixt
   'scripts/p27/gotenberg-fixtures/math.docx', 'scripts/p27/gotenberg-fixtures/multilingual.docx',
   // P28: real Word documents with equations (Word-native Office Math in every Word format, Equation Editor 3.0 /
   // MathType objects, LibreOffice Math objects) -- scripts/p28/equations/SOURCES.md.
-  ...fs.readdirSync('scripts/p28/equations/corpus').map((n) => `scripts/p28/equations/corpus/${n}`)]) conv.push(office(f));
+  ...fs.readdirSync('scripts/p28/equations/corpus').map((n) => `scripts/p28/equations/corpus/${n}`),
+  // P28: an Excel workbook and a PowerPoint deck made by Office 2024 with its default theme (Aptos, Aptos Narrow,
+  // Aptos Display) -- the font rule of services/gotenberg/fonts.conf
+  ...fs.readdirSync('scripts/p28/aptos/corpus').map((n) => `scripts/p28/aptos/corpus/${n}`)]) conv.push(office(f));
 const html = (name, buf, extra = {}) => conv.push([name, '/forms/chromium/convert/html', [['index.html', buf]], { preferCssPageSize: 'true', ...extra }]);
 html('html', fs.readFileSync('scripts/audit/fixtures/files/sample.html'));
 html('html-fidelity', fs.readFileSync('docs/audit/fidelite-marche/html-to-pdf-test.html'));
