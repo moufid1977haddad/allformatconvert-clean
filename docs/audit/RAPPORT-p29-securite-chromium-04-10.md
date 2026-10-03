@@ -10,7 +10,7 @@ chaque lot.
 
 | Lot | Contenu | État |
 |---|---|---|
-| 1 | Chromium de Gotenberg : version corrigée (CVE-2026-87491), JavaScript coupé dans tout le navigateur, V8 sans JIT, visionneuse PDF coupée ; page HTML to PDF honnête | mesuré sur `gotenberg-fonts`, revue indépendante appliquée ; mise en production en cours |
+| 1 | Chromium de Gotenberg : version corrigée (CVE-2026-87491), JavaScript coupé dans tout le navigateur, V8 sans JIT, visionneuse PDF coupée ; page HTML to PDF honnête | ✅ **en production** (`gotenberg-v2` `1bb98768`, fusion `5af581aa`), revue indépendante appliquée |
 | 2 | Équations .docx par ConvertAPI | **bloqué : crédits ConvertAPI épuisés** (§2) — 0 $ dépensés ; le propriétaire doit recharger |
 
 ## 1. Lot 1 — Chromium
@@ -129,3 +129,45 @@ l'édition (échappement du shell). Trouvé en traçant le code servi, corrigé,
   https://www.onlineconvertools.com <dossier> scripts/p28/equations/corpus/word-omml.docx
   scripts/p28/equations/corpus/dsmt4-mathtype6.docx` (≈ 0,02 $) puis comparaison avec le PDF de Word et celui de
   Gotenberg 8.37 (déjà mesuré en P28 : équations rendues).
+
+## 3. Mise en production du lot 1 (04/10, heure UTC de la machine ≈ 21 h 16)
+- Préversion `onlineconvertools-5urpnsf6i` (une passe, `scripts/p29/html-page.mjs`) : 6/6 — PDF livrés (fichier,
+  fichier sans script, code collé), avis présent exactement quand le HTML a un script.
+- Fusion **`5af581aa`** (sans poussée forcée) → Railway **`gotenberg-v2` déploiement `1bb98768`** (SUCCESS, commit
+  `5af581aa`) ; `pdf-tools` reconstruit sur le même commit (même code, `/health` 200) ; Vercel production
+  **`onlineconvertools-fo109wbpv` = `5af581aa`**.
+- **Nouveau comportement vérifié en ligne sur `gotenberg-v2`** (corollaire 4) : 0/18 scripts, cadre d'un autre site,
+  PDF incrustés et `/tmp` bloqués ; banc complet **65/65 identiques** à la mesure faite avant la bascule, options de la
+  route URL **6/6** ; 27 adresses internes refusées, contrôle public atteint.
+- **www** (règle d'usage Vercel : contrôle léger) : `www-light` **29/29** ; une vraie conversion par outil touché par
+  les pages : Word (dont équations, ODT de Word), Excel, PowerPoint, HTML (fichier), EPUB, MOBI, URL **9/9**
+  (`scripts/p26/gotenberg-tools-www.mjs`), Markdown to PDF et Text to PDF par le moteur de rendu (émoji, bengali) **2/2**
+  (`scripts/p29/md-text-www.mjs`), page HTML to PDF **6/6** (`scripts/p29/html-page.mjs`).
+- Retour arrière prêt, non utilisé : Railway `gotenberg-v2` → déploiement `8e8e178d` (Rollback : image et variables
+  d'avant) ; Vercel → promouvoir `onlineconvertools-jcglmx2uu` (= `03aa60d1`).
+
+## 4. Facture Railway
+- Aucune variable touchée, aucun service ajouté. Image : deux paquets Chromium remplacés (même taille à 1 % près).
+- Mémoire de `gotenberg-v2` (`scripts/p28/rw-metrics.mjs`) : avant, moyenne 0,71 Go sur 30 h (pics de bancs compris) ;
+  juste après la bascule 0,43 Go au repos. À relire après quelques heures de repos (une seule mesure après).
+- Bancs du chantier : quelques minutes de processeur sur `gotenberg-fonts` et `gotenberg-v2` (≈ 0,05 $).
+- ConvertAPI : 0 $ (aucun appel facturé). Supabase : rien.
+
+## 5. Reste
+- **Propriétaire — ConvertAPI** : recharger les crédits (4 outils en échec sur www depuis le 02/10 ≈ 19 h 52), puis la
+  mesure des équations .docx (§2, ≈ 0,02 $). Option à décider : quand ConvertAPI répond « crédits épuisés » (403, non
+  facturé), passer le .docx à Gotenberg 8.37 (équations rendues, P28) au lieu d'une erreur — aujourd'hui la règle du
+  site est « jamais de repli silencieux vers un autre moteur ».
+- **Propriétaire — option chiffrée** : Chromium dans une instance Railway séparée, sans réseau privé (§1.7).
+- **Claude, sur déclencheur** : nouvelle version de Chromium dans trixie-security corrigeant une faille exploitée, ou
+  nouvelle Gotenberg → mêmes bancs sur `gotenberg-fonts` d'abord (règle au plan). Quand une Gotenberg embarquera un
+  Chromium ≥ 154, la couche Chromium de `services/gotenberg/Dockerfile` pourra être retirée (sinon la construction le
+  dira : un paquet plus ancien ne s'installe pas par-dessus).
+- Risque restant, mesuré et dit : Chromium sans bac à sable (impossible sur Railway) analyse encore du HTML, des CSS,
+  des images et des polices non fiables ; JavaScript, JIT et visionneuse PDF ne sont plus atteignables.
+
+## 6. Fin
+Production : **Vercel `onlineconvertools-fo109wbpv` = `5af581aa`** (puis commits de rapport) ; **Railway
+`gotenberg-v2` `1bb98768`** (Gotenberg 8.37.0, Chromium 154.0.8037.92, JavaScript bloqué, V8 sans JIT), `pdf-tools`
+`033d7927` (code inchangé). `gotenberg-fonts` : déploiement `f06d1764` (même image, à côté). Aucun retour arrière.
+Repère : `restauration-avant-p29-04-10` = `e578eeaa`.
