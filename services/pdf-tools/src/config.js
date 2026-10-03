@@ -36,5 +36,7 @@ module.exports = {
   SOFFICE_BIN: process.env.SOFFICE_BIN || 'soffice',
   DOC_TIMEOUT_MS: Number(process.env.DOC_TIMEOUT_MS) || 120_000,
   // /v1/pdfa levels 2u/3u/2a/3a (P26): up to three conversions + veraPDF runs when a lower level is allowed.
+  // P27: the PDF/A text check (src/pdfa.js) reads with Poppler too. Set by the Dockerfile's poppler-utils.
+  PDFTOTEXT_BIN: process.env.PDFTOTEXT_BIN || 'pdftotext',
   PDFA_ADVANCED_TIMEOUT_MS: Number(process.env.PDFA_ADVANCED_TIMEOUT_MS) || 200_000,
 };

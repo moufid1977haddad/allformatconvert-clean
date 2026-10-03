@@ -6,13 +6,15 @@ FROM node:20-bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
       ghostscript \
       qpdf \
+      poppler-utils \
       openjdk-17-jre-headless \
       curl \
       unzip \
       ca-certificates \
       python3 \
       python3-venv \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && pdftotext -v
 
 # /v1/docx-to-doc (P26, E1): LibreOffice Writer without its GUI, Debian's own package (MPL-2.0), started per
 # request by src/docConvert.js -- it writes the Word 97-2003 .doc that ConvertAPI cannot. From Debian's official
@@ -56,6 +58,8 @@ ENV QPDF_BIN=qpdf
 ENV VERAPDF_BIN=verapdf
 ENV PDFPY_BIN=/opt/pdfpy/bin/python
 ENV SOFFICE_BIN=soffice
+# P27: PDF/A text check (src/pdfa.js); poppler-utils above (GPL-2, used unmodified as a separate program)
+ENV PDFTOTEXT_BIN=pdftotext
 # tx must be found by py/compress.py (shutil.which)
 ENV PATH=/opt/pdfpy/bin:$PATH
 ENV NODE_ENV=production

@@ -9,7 +9,7 @@ const { logMetric } = require('./metrics');
 const { makeRequestDir, cleanupDir, sweepStaleTempDirs } = require('./tempfiles');
 const { checkAllBinaries } = require('./binaries');
 const { repairPdf } = require('./repair');
-const { convertToPdfA, convertToPdfALevel, ADVANCED_LEVELS } = require('./pdfa');
+const { convertToPdfALevel, ADVANCED_LEVELS } = require('./pdfa');
 const { docxToDoc } = require('./docConvert');
 const compress = require('./compress');
 
@@ -141,16 +141,15 @@ app.post('/v1/repair', requireApiKey, withTempDir(withTimeout(async (req, res, s
   logMetric({ apiKeyName: req.apiKey.name, endpoint: '/v1/repair', bytesIn, bytesOut: outBytes.length, durationMs, verdict: `repaired_${report.method}` });
 })));
 
-// P26: the outer limit is the longer one of the new levels (up to three conversions + validations with
-// allowDowngrade); 1b/2b/3b keep their own REQUEST_TIMEOUT_MS from the start of the request, exactly as before.
+// The outer limit is PDFA_ADVANCED_TIMEOUT_MS for every level since P27 (up to three conversions + validations and
+// the text checks); REQUEST_TIMEOUT_MS still bounds the upload itself.
 app.post('/v1/pdfa', requireApiKey, withTempDir(withTimeout(async (req, res, outerSignal) => {
   const inner = new AbortController();
   outerSignal.addEventListener('abort', () => inner.abort(), { once: true });
   const signal = inner.signal;
   res.on('finish', () => clearTimeout(oldLimit));
   res.on('close', () => clearTimeout(oldLimit));
-  // The old limit, armed at the start exactly like withTimeout(REQUEST_TIMEOUT_MS) did: an upload still running at
-  // 60 s is cut, a conversion still running is aborted. Only a request for a new level clears it (below).
+  // Armed at the start: an upload still running at REQUEST_TIMEOUT_MS is cut. Cleared once the file is in (below).
   const oldLimit = setTimeout(() => {
     inner.abort();
     if (!req.complete) req.destroy();
@@ -177,12 +176,13 @@ app.post('/v1/pdfa', requireApiKey, withTempDir(withTimeout(async (req, res, out
     return;
   }
 
-  // P26: 2u/3u/2a/3a take their own path (pdfa.js); every other value is handled exactly as before.
+  // P27: every level takes the same path (pdfa.js convertToPdfALevel): 1b/2b/3b are no longer Ghostscript's output
+  // as it comes -- the source kept first, Ghostscript only if its text is unchanged (see attemptB). That can take
+  // two veraPDF runs and two text reads more than before, so all levels have the longer limit of the P26 levels.
+  clearTimeout(oldLimit);
   const advanced = ADVANCED_LEVELS.includes(String(req.body?.conformance || '').toLowerCase());
-  if (advanced) clearTimeout(oldLimit);
-  const report = advanced
-    ? await convertToPdfALevel(req.tempDir, req.body.conformance.toLowerCase(), req.body?.allowDowngrade === 'true', signal)
-    : await convertToPdfA(req.tempDir, requestedConformance, signal);
+  const level = advanced ? req.body.conformance.toLowerCase() : requestedConformance;
+  const report = await convertToPdfALevel(req.tempDir, level, advanced && req.body?.allowDowngrade === 'true', signal);
   clearTimeout(oldLimit);
   const durationMs = Date.now() - startedAt;
 
@@ -202,8 +202,11 @@ app.post('/v1/pdfa', requireApiKey, withTempDir(withTimeout(async (req, res, out
   res.status(200).json({
     ok: true,
     compliant: true,
-    conformance: advanced ? report.conformance : requestedConformance,
-    ...(advanced ? { requested: report.requested, downgraded: report.downgraded, attempts: report.attempts } : {}),
+    conformance: report.conformance,
+    requested: report.requested,
+    downgraded: report.downgraded,
+    attempts: report.attempts,
+    method: report.method,
     verapdf: report.verapdf,
     file: outBytes.toString('base64'),
   });

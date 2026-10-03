@@ -1,5 +1,5 @@
 const { runProcess } = require('./runProcess');
-const { GS_BIN, QPDF_BIN, VERAPDF_BIN, PDFPY_BIN, SOFFICE_BIN } = require('./config');
+const { GS_BIN, QPDF_BIN, VERAPDF_BIN, PDFPY_BIN, SOFFICE_BIN, PDFTOTEXT_BIN } = require('./config');
 
 async function checkBinary(bin, args, signal) {
   try {
@@ -24,7 +24,7 @@ async function checkSoffice() {
 }
 
 async function checkAllBinaries() {
-  const [gs, qpdf, verapdf, pdfpy, tx, soffice] = await Promise.all([
+  const [gs, qpdf, verapdf, pdfpy, tx, soffice, pdftotext] = await Promise.all([
     checkBinary(GS_BIN, ['--version']),
     checkBinary(QPDF_BIN, ['--version']),
     checkBinary(VERAPDF_BIN, ['--version']),
@@ -33,8 +33,10 @@ async function checkAllBinaries() {
     checkBinary('tx', ['-v']),
     // /v1/docx-to-doc (P26, E1)
     checkSoffice(),
+    // /v1/pdfa text check (P27): no PDF/A file is delivered without it
+    checkBinary(PDFTOTEXT_BIN, ['-v']),
   ]);
-  return { ghostscript: gs, qpdf, verapdf, pdfpy, tx, soffice };
+  return { ghostscript: gs, qpdf, verapdf, pdfpy, tx, soffice, pdftotext };
 }
 
 module.exports = { checkAllBinaries };

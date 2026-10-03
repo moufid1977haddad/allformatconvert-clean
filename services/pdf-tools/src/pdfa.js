@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { runProcess } = require('./runProcess');
-const { GS_BIN, VERAPDF_BIN, PDFPY_BIN } = require('./config');
+const { GS_BIN, QPDF_BIN, VERAPDF_BIN, PDFPY_BIN, PDFTOTEXT_BIN } = require('./config');
 
 // Vendored, unmodified, from this machine's own Ghostscript 10.07.1 install
 // (lib/PDFA_def.ps and iccprofiles/srgb.icc) -- these ship as part of
@@ -16,7 +16,7 @@ const ICC_NAME = 'srgb.icc';
 
 // Ghostscript's -dPDFA switch only takes the numeric part (1/2/3); it always
 // targets the "b" (basic) conformance variant -- it cannot produce "a"
-// (accessible/tagged) structure, so this service only ever offers 1b/2b/3b.
+// (accessible/tagged) structure (see the P26 levels below).
 function levelDigit(conformance) {
   return conformance[0];
 }
@@ -114,38 +114,6 @@ async function validateWithVeraPdf(workDir, conformance, signal) {
   }
 }
 
-// Converts to PDF/A with Ghostscript, then validates the result with
-// veraPDF. The file is only ever returned if veraPDF confirms compliance --
-// a Ghostscript conversion that "succeeds" but doesn't actually pass
-// validation is reported as a failure, not silently handed over.
-async function convertToPdfA(workDir, conformance, signal) {
-  const conversion = await convertWithGhostscript(workDir, conformance, signal);
-
-  if (!conversion.succeeded) {
-    return {
-      ok: false,
-      compliant: false,
-      conformance,
-      error: 'Ghostscript could not convert this file to PDF/A.',
-      ghostscriptExitCode: conversion.exitCode,
-    };
-  }
-
-  const verapdf = await validateWithVeraPdf(workDir, conformance, signal);
-
-  if (!verapdf.compliant) {
-    return {
-      ok: false,
-      compliant: false,
-      conformance,
-      error: `The converted file did not pass veraPDF validation against PDF/A-${conformance}.`,
-      verapdf,
-    };
-  }
-
-  return { ok: true, compliant: true, conformance, verapdf, outputPath: path.join(workDir, OUTPUT_NAME) };
-}
-
 // ---- P26 (E2): levels 2u, 3u, 2a, 3a ---------------------------------------------------------------------
 // U (Unicode): Ghostscript as for B (it writes ToUnicode maps where it can), the XMP relabelled U, then veraPDF
 // against the U profile. A (accessible): needs a TAGGED source -- Ghostscript drops the structure tree, so the
@@ -153,7 +121,7 @@ async function convertToPdfA(workDir, conformance, signal) {
 // checks it against the A profile. Measured on real files before being offered (docs/audit/RAPPORT-p26-railway-03-10.md).
 // allowDowngrade (iLovePDF's allow_downgrade): when the level is not reached, the next lower one is tried
 // (A -> U -> B of the same part) and the response says so; without it, nothing but the requested level is returned.
-// 1b/2b/3b keep the exact code path above (convertToPdfA).
+// 1b/2b/3b: attemptB (P27).
 const FIX_SCRIPT = path.join(__dirname, '..', 'py', 'pdfa_fix.py');
 const ADVANCED_LEVELS = ['2u', '3u', '2a', '3a'];
 
@@ -171,77 +139,150 @@ async function inspectPdf(workDir, signal) {
 
 const GS_KEPT = 'gs.pdf'; // Ghostscript's output of a "u" attempt: exactly what the "b" path of the same part makes
 
-// Text of a PDF as Ghostscript reads it (txtwrite device), whitespace folded. Measured (P26): Ghostscript's PDF/A
-// rewrite can lose text that the source maps correctly -- the "ti" ligature of LibreOffice PDFs came out as nothing
-// ("section" -> "secon") while veraPDF still passed U, since it checks that a mapping EXISTS, not that it is right.
-async function pdfText(workDir, name, signal) {
-  const out = `${name}.txt`;
-  const r = await runProcess(GS_BIN, ['-q', '-dNOPAUSE', '-dBATCH', '-dSAFER', '-sDEVICE=txtwrite', `-sOutputFile=${out}`, name], { cwd: workDir, signal });
+// Text of a PDF as TWO readers see it -- Ghostscript (txtwrite) and Poppler (pdftotext, the reader of most Linux
+// viewers). Measured (P26): Ghostscript's PDF/A rewrite can lose text that the source maps correctly -- the "ti"
+// ligature of LibreOffice PDFs came out as nothing ("section" -> "secon") while veraPDF still passed U, since it checks
+// that a mapping EXISTS, not that it is right. Measured (P27): txtwrite ignores /ActualText (LibreOffice and Chromium
+// wrap accents drawn as two glyphs, ligatures and Arabic in it: "données" reads "donne" + U+0008 + "es"), so a rewrite
+// that dropped the ActualText would look unchanged to it; pdftotext reads ActualText.
+async function readText(workDir, bin, args, out, signal) {
   const file = path.join(workDir, out);
-  if (r.code !== 0 || !fs.existsSync(file)) return null;
-  return fs.readFileSync(file, 'utf8').replace(/\s+/g, ' ').trim();
+  fs.rmSync(file, { force: true }); // never read a previous attempt's text
+  let r;
+  try {
+    r = await runProcess(bin, args, { cwd: workDir, signal });
+  } catch {
+    return null;
+  }
+  if (r.code !== 0 || !fs.existsSync(file)) {
+    fs.rmSync(file, { force: true });
+    return null;
+  }
+  return fs.readFileSync(file, 'utf8');
 }
+
+const readBoth = (workDir, name, signal) => Promise.all([
+  readText(workDir, GS_BIN, ['-q', '-dNOPAUSE', '-dBATCH', '-dSAFER', '-sDEVICE=txtwrite', `-sOutputFile=${name}.gs.txt`, name], `${name}.gs.txt`, signal),
+  readText(workDir, PDFTOTEXT_BIN, ['-enc', 'UTF-8', name, `${name}.pp.txt`], `${name}.pp.txt`, signal),
+]);
+
+const PLAIN = 'input-plain.pdf';
+async function pdfText(workDir, name, signal) {
+  // the source never changes within a request: read once (it can be compared to two candidates)
+  const cache = path.join(workDir, `${name}.both.json`);
+  if (name === INPUT_NAME && fs.existsSync(cache)) return JSON.parse(fs.readFileSync(cache, 'utf8'));
+  let texts = await readBoth(workDir, name, signal);
+  if (name === INPUT_NAME && texts.includes(null)) {
+    // A source with an owner password (copy restriction) can be refused by a reader; the result never has one
+    // (PDF/A forbids encryption). Its text is then read from a decrypted copy -- same content streams, same text.
+    const r = await runProcess(QPDF_BIN, ['--decrypt', INPUT_NAME, PLAIN], { cwd: workDir, signal }).catch(() => null);
+    if (r && (r.code === 0 || r.code === 3) && fs.existsSync(path.join(workDir, PLAIN))) texts = await readBoth(workDir, PLAIN, signal);
+  }
+  if (texts.includes(null)) return null;
+  if (name === INPUT_NAME) fs.writeFileSync(cache, JSON.stringify(texts));
+  return texts;
+}
+
+// Only ASCII whitespace is layout: a no-break space or an ideographic space is text, and is compared as such.
+const LAYOUT_SPACE = /[ \t\n\r\f\v]+/g;
+const letters = (t) => t.replace(LAYOUT_SPACE, '');
+const folded = (t) => t.replace(LAYOUT_SPACE, ' ').trim();
+
+// P27: a file is delivered only if its text is the source's text: the same characters in the same order for BOTH
+// readers (layout spaces aside), and the same words for at least one of them -- where a reader puts a word space is
+// decided from glyph positions, which a rewrite can move by a hair without changing any letter (independent review).
+// null when a text cannot be read -- then nothing is delivered either.
+async function textUnchanged(workDir, signal) {
+  const [before, after] = await Promise.all([pdfText(workDir, INPUT_NAME, signal), pdfText(workDir, OUTPUT_NAME, signal)]);
+  if (before === null || after === null) return null;
+  const sameLetters = before.every((t, i) => letters(t) === letters(after[i]));
+  const sameWords = before.some((t, i) => folded(t) === folded(after[i]));
+  return sameLetters && sameWords;
+}
+
+const delivered = (level, method, verapdf, workDir) => ({ ok: true, compliant: true, conformance: level, method, verapdf, outputPath: path.join(workDir, OUTPUT_NAME) });
+
+// The source kept as it is (pdfa_fix.py keep), validated, and -- one rule for every level -- text-checked.
+// { result } when delivered; otherwise what was found, and the caller tries Ghostscript or says why.
+async function attemptKept(workDir, level, conf, signal) {
+  const kept = await fix(workDir, ['keep', INPUT_NAME, OUTPUT_NAME, level[0], conf], signal);
+  if (!kept.ok) return { tried: false };
+  const verapdf = await validateWithVeraPdf(workDir, level, signal);
+  if (!verapdf.compliant) return { tried: true, verapdf };
+  const same = await textUnchanged(workDir, signal);
+  if (same !== true) return { tried: true, verapdf, reason: same === null ? 'text_unchecked' : 'text_changed' };
+  return { result: delivered(level, 'kept', verapdf, workDir) };
+}
+
+// P27: 1b/2b/3b (asked for, or the lower level of a u/a request). Before P27 they were Ghostscript's output as it
+// came, and measured in production (P26) that output changed the text of real files -- Greek "Ελληνικά" ->
+// "Ε½½ην»¼ά", ligatures "section" -> "sec琀椀on", accents "données" -> "donnees" -- while the pages LOOKED right.
+// Same method as the u levels: 1. the source itself, its pages untouched (only what PDF/A requires is added), when it
+// already meets PDF/A-<part>b; 2. Ghostscript (fonts embedded, colours converted...), accepted only if veraPDF passes
+// AND its text is the source's; 3. otherwise no file, and the reason.
+async function attemptB(workDir, level, signal) {
+  const info = await inspectPdf(workDir, signal);
+  if (info && info.ok === false && info.encrypted) return { ok: false, reason: 'encrypted' };
+  const kept = await attemptKept(workDir, level, 'B', signal);
+  if (kept.result) return kept.result;
+  // After a failed "u" attempt, its Ghostscript output (same arguments) is reused instead of running Ghostscript a
+  // second time on the same input.
+  const gsOut = path.join(workDir, GS_KEPT);
+  if (!fs.existsSync(gsOut)) {
+    const gs = await convertWithGhostscript(workDir, level, signal);
+    if (!gs.succeeded) return { ok: false, reason: 'conversion_failed', ghostscriptExitCode: gs.exitCode };
+    fs.renameSync(path.join(workDir, OUTPUT_NAME), gsOut);
+  }
+  fs.copyFileSync(gsOut, path.join(workDir, OUTPUT_NAME));
+  const verapdf = await validateWithVeraPdf(workDir, level, signal);
+  if (!verapdf.compliant) return { ok: false, reason: 'not_compliant', verapdf };
+  const same = await textUnchanged(workDir, signal);
+  if (same !== true) return { ok: false, reason: same === null ? 'text_unchecked' : 'text_changed' };
+  return delivered(level, 'ghostscript', verapdf, workDir);
+}
+
+// Measured (P26): when a u or a level fails veraPDF, the usual cause is text the SOURCE PDF itself never maps to
+// Unicode -- ligatures ("ti", "fi") and decomposed accents that LibreOffice prints as glyphs without text. Guessing
+// those characters would be inventing content, so the level is not reached and the visitor is told why.
+const unicodeReason = (verapdf) => ((verapdf.failedRules || []).length > 0 && verapdf.failedRules.every((r) => r.clause === '6.2.11.7.2') ? 'no_unicode' : 'not_compliant');
 
 async function attemptLevel(workDir, level, signal) {
   const part = level[0];
   const kind = level[1];
-  if (kind === 'b') {
-    // After a failed "u" attempt, its Ghostscript output (same arguments as convertToPdfA) is validated as B
-    // instead of running Ghostscript a second time on the same input.
-    const kept = path.join(workDir, GS_KEPT);
-    if (fs.existsSync(kept)) {
-      fs.copyFileSync(kept, path.join(workDir, OUTPUT_NAME));
-      const verapdf = await validateWithVeraPdf(workDir, level, signal);
-      if (!verapdf.compliant) return { ok: false, reason: 'not_compliant', verapdf };
-      return { ok: true, compliant: true, conformance: level, verapdf, outputPath: path.join(workDir, OUTPUT_NAME) };
-    }
-    const r = await convertToPdfA(workDir, level, signal);
-    return r.ok ? r : { ok: false, reason: r.verapdf ? 'not_compliant' : 'conversion_failed', verapdf: r.verapdf };
-  }
+  if (kind === 'b') return attemptB(workDir, level, signal);
   if (kind === 'u') {
-    // 1. The source itself, untouched (text exactly the source's): enough when it already meets PDF/A.
-    const kept = await fix(workDir, ['keep', INPUT_NAME, OUTPUT_NAME, part, 'U'], signal);
-    if (kept.ok) {
-      const verapdf = await validateWithVeraPdf(workDir, level, signal);
-      if (verapdf.compliant) return { ok: true, compliant: true, conformance: level, verapdf, outputPath: path.join(workDir, OUTPUT_NAME) };
-    }
+    // 1. The source itself, its pages untouched: enough when it already meets PDF/A.
+    const kept = await attemptKept(workDir, level, 'U', signal);
+    if (kept.result) return kept.result;
     // 2. Ghostscript (fonts embedded, colours converted...), relabelled U, and accepted only if its text is the
-    //    source's text, word for word.
+    //    source's text.
     const gs = await convertWithGhostscript(workDir, level, signal);
     if (!gs.succeeded) return { ok: false, reason: 'conversion_failed' };
     fs.renameSync(path.join(workDir, OUTPUT_NAME), path.join(workDir, GS_KEPT));
     const relabel = await fix(workDir, ['set-id', GS_KEPT, OUTPUT_NAME, part, 'U'], signal);
     if (!relabel.ok) return { ok: false, reason: 'conversion_failed' };
     const verapdf = await validateWithVeraPdf(workDir, level, signal);
-    if (!verapdf.compliant) {
-      const onlyUnicode = (verapdf.failedRules || []).length > 0 && verapdf.failedRules.every((r) => r.clause === '6.2.11.7.2');
-      return { ok: false, reason: onlyUnicode ? 'no_unicode' : 'not_compliant', verapdf };
-    }
-    const [before, after] = await Promise.all([pdfText(workDir, INPUT_NAME, signal), pdfText(workDir, OUTPUT_NAME, signal)]);
-    if (before === null || after === null || before !== after) return { ok: false, reason: 'text_changed', verapdf };
-    return { ok: true, compliant: true, conformance: level, verapdf, outputPath: path.join(workDir, OUTPUT_NAME) };
-  } else {
-    const info = await inspectPdf(workDir, signal);
-    if (!info || info.ok === false) return { ok: false, reason: info?.encrypted ? 'encrypted' : 'conversion_failed' };
-    if (!info.tagged) return { ok: false, reason: 'untagged' };
-    const kept = await fix(workDir, ['keep', INPUT_NAME, OUTPUT_NAME, part, 'A'], signal);
-    if (!kept.ok) return { ok: false, reason: 'conversion_failed' };
+    if (!verapdf.compliant) return { ok: false, reason: unicodeReason(verapdf), verapdf };
+    const same = await textUnchanged(workDir, signal);
+    if (same !== true) return { ok: false, reason: same === null ? 'text_unchecked' : 'text_changed' };
+    return delivered(level, 'ghostscript', verapdf, workDir);
   }
-  const verapdf = await validateWithVeraPdf(workDir, level, signal);
-  if (!verapdf.compliant) {
-    // Measured (P26): the usual cause is text the SOURCE PDF itself never maps to Unicode -- ligatures ("ti",
-    // "fi") and decomposed accents that LibreOffice prints as glyphs without text. Guessing those characters would
-    // be inventing content, so the level is not reached and the visitor is told why.
-    const onlyUnicode = (verapdf.failedRules || []).length > 0 && verapdf.failedRules.every((r) => r.clause === '6.2.11.7.2');
-    return { ok: false, reason: onlyUnicode ? 'no_unicode' : 'not_compliant', verapdf };
-  }
-  return { ok: true, compliant: true, conformance: level, verapdf, outputPath: path.join(workDir, OUTPUT_NAME) };
+  // a: only the source itself, structure kept.
+  const info = await inspectPdf(workDir, signal);
+  if (!info || info.ok === false) return { ok: false, reason: info?.encrypted ? 'encrypted' : 'conversion_failed' };
+  if (!info.tagged) return { ok: false, reason: 'untagged' };
+  const kept = await attemptKept(workDir, level, 'A', signal);
+  if (kept.result) return kept.result;
+  if (!kept.tried) return { ok: false, reason: 'conversion_failed' };
+  if (kept.reason) return { ok: false, reason: kept.reason };
+  return { ok: false, reason: unicodeReason(kept.verapdf), verapdf: kept.verapdf };
 }
 
 const REASON_TEXT = {
   encrypted: 'the PDF is password-protected',
   untagged: 'the PDF is not tagged (no structure tree), which an "a" level requires',
-  text_changed: 'making it conformant would have changed some of its text (letters such as ligatures or accents would be lost), so it was not delivered as a "u" level',
+  text_changed: 'making it conformant would have changed some of its text (letters such as ligatures, accents or non-Latin script would be altered)',
+  text_unchecked: 'its text could not be read back to check that the conversion kept it unchanged',
   no_unicode: 'some characters in this PDF have no Unicode text behind them (often ligatures such as "fi" or "ti", or accents drawn separately), which a "u" or "a" level requires',
   not_compliant: 'the result did not pass veraPDF validation',
   conversion_failed: 'the file could not be converted',
@@ -249,7 +290,7 @@ const REASON_TEXT = {
 
 async function convertToPdfALevel(workDir, requested, allowDowngrade, signal) {
   const part = requested[0];
-  const chain = requested[1] === 'a' ? [`${part}a`, `${part}u`, `${part}b`] : [`${part}u`, `${part}b`];
+  const chain = requested[1] === 'a' ? [`${part}a`, `${part}u`, `${part}b`] : requested[1] === 'u' ? [`${part}u`, `${part}b`] : [`${part}b`];
   const attempts = [];
   let last = null;
   for (const level of allowDowngrade ? chain : chain.slice(0, 1)) {
@@ -264,17 +305,24 @@ async function convertToPdfALevel(workDir, requested, allowDowngrade, signal) {
   const first = attempts[0];
   const lower = attempts.slice(1).map((a) => a.conformance);
   const tail = lower.length
-    ? ` The lower level${lower.length > 1 ? 's' : ''} (${lower.map((l) => `PDF/A-${l}`).join(', ')}) could not be reached either.`
+    ? ` The lower level${lower.length > 1 ? 's' : ''} could not be reached either (${attempts.slice(1).map((a) => `PDF/A-${a.conformance}: ${a.why}`).join('; ')}).`
+    : '';
+  // P27: when the text would have changed, say what to do instead -- the visitor's own application writes PDF/A
+  // from the original document without this risk.
+  const textAdvice = attempts.some((a) => a.reason === 'text_changed' || a.reason === 'text_unchecked')
+    ? ' No file was returned, rather than one whose search and copy-paste would give wrong text. To archive this document, export it as PDF/A from its original (Word: Save As › PDF › Options › “PDF/A compliant”; LibreOffice: Export as PDF › “Archive (PDF/A, ISO 19005)”).'
     : '';
   let error;
   if (first?.reason === 'untagged') {
     error = `PDF/A-${requested} needs a tagged PDF, and this one has no tags. Export it again with tags (Word: "Document structure tags for accessibility"; LibreOffice: "Universal accessibility (PDF/UA)")${lower.length ? '.' : `, or choose PDF/A-${part}u.`}`;
   } else if (first?.reason === 'encrypted') {
     error = 'This PDF is password-protected. Remove the password first (Unlock PDF), then convert it.';
-  } else if (first?.reason === 'text_changed') {
-    error = `PDF/A-${requested} can't be reached for this file: ${REASON_TEXT.text_changed}.`;
+  } else if (first?.reason === 'text_changed' || first?.reason === 'text_unchecked') {
+    error = `PDF/A-${requested} can't be made from this file without risk to its text: ${REASON_TEXT[first.reason]}.`;
   } else if (first?.reason === 'no_unicode') {
     error = `PDF/A-${requested} can't be reached: ${REASON_TEXT.no_unicode}.${lower.length ? '' : ` PDF/A-${part}b has no such requirement.`}`;
+  } else if (first?.reason === 'conversion_failed') {
+    error = `This file could not be converted to PDF/A-${requested} (it may be damaged — PDF Repair can often fix that).`;
   } else {
     error = `The converted file did not pass veraPDF validation against PDF/A-${requested}.`;
   }
@@ -285,9 +333,10 @@ async function convertToPdfALevel(workDir, requested, allowDowngrade, signal) {
     requested,
     attempts,
     untagged: first?.reason === 'untagged',
-    error: error + tail,
-    verapdf: last?.verapdf,
+    error: error + tail + textAdvice,
+    // veraPDF's report only when it is the reason (a text refusal with a passing report would read "not compliant")
+    verapdf: last?.reason === 'not_compliant' || last?.reason === 'no_unicode' ? last.verapdf : undefined,
   };
 }
 
-module.exports = { convertToPdfA, convertToPdfALevel, ADVANCED_LEVELS };
+module.exports = { convertToPdfALevel, ADVANCED_LEVELS };
