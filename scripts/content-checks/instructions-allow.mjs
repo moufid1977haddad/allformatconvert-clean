@@ -21,6 +21,7 @@ export const ALLOW = {
   'math-tools/roman-numeral-converter': { xiv: EXAMPLE, XIV: EXAMPLE },
   'pdf-tools/pdf-extract-text': { 'Page 1:': "output heading built in code ('Page ' + i + ':')", 'Page 2:': 'same' },
   'pdf-tools/pdf-ocr': { 'Page X of Y': 'counter rendered as Page {currentPage} of {totalPages}' },
+  'pdf-tools/pdf-to-pdfa': { 'PDF/A compliant': "Microsoft Word's own PDF option (P27 advice)", 'Archive (PDF/A, ISO 19005)': "LibreOffice's own PDF export option (P27 advice)" },
   'pdf-tools/word-to-pdf': { 'Update Field': "Microsoft Word's own menu item" },
   'text-tools/duplicate-remover': { Apple: EXAMPLE, apple: EXAMPLE },
   'text-tools/word-counter': { 'Mr.': EXAMPLE },
