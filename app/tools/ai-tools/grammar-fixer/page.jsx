@@ -5,6 +5,7 @@ import { checkPromptLength } from '@/lib/quota/limits';
 import { changes, applyChoices } from './diff';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 
 // The corrected text used to replace the visitor's without showing what changed. Now every change is shown in
 // place (removed words struck through, added words underlined) and can be undone or restored one by one, as
@@ -70,7 +71,7 @@ export default function GrammarFixerPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Grammar Fixer</h1>
         <p className="text-neutral-500 text-center mb-8">Fix grammar and spelling errors with AI, and see every change</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste text to fix grammar..." value={input} onChange={e => setInput(e.target.value)} aria-label="Text to fix" />
+          <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste text to fix grammar..." value={input} onChange={e => setInput(e.target.value)} aria-label="Text to fix" />
           <button onClick={process} disabled={!input.trim() || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Processing...' : 'Fix Grammar'}
           </button>
@@ -105,7 +106,7 @@ export default function GrammarFixerPage() {
                       </button>))}
               </div>
               <label className="block text-sm text-neutral-500">Result</label>
-              <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={result} readOnly aria-label="Result" />
+              <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={result} readOnly aria-label="Result" />
               <TextDownload text={result} name="corrected.txt" />
               <button onClick={copy} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">{copied ? 'Copied' : 'Copy'}</button>
             </div>

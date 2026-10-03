@@ -8,6 +8,7 @@ import { encodeExtra } from '../tools/image-tools/image-converter/extraFormats';
 import { FileDownload, DownloadGroup } from './FileDownload';
 import { parsePageRange } from '../lib/pageRange';
 import { useToolError } from '../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 // PDF → images, shared by PDF to Image and PDF to JPG (P21, 02/10).
 // Market (02/10): iLovePDF "PDF to JPG" offers "Page to JPG" and "Extract images", quality Normal (recommended) / High;
@@ -145,7 +146,7 @@ export default function PdfToImages({ tool, formats = PDF_IMAGE_FORMATS.map((f) 
   return (
     <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
       <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition" onClick={() => inputRef.current.click()}>
-        <p className="text-neutral-600">{file ? file.name : 'Click or drop a PDF here'}</p>
+        <p className="text-neutral-600">{file ? file.name : <UploadPrompt what="a PDF" />}</p>
         <input ref={inputRef} type="file" accept=".pdf,application/pdf" className="hidden" onChange={pick} />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

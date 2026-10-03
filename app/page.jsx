@@ -216,14 +216,14 @@ function FileDropZone({ dark, toolCounts }) {
             type="button"
             onClick={() => inputRef.current?.click()}
             className="dropzone-choose-btn"
-            style={{ background: dark ? '#378add' : '#185fa5' }}
+            style={{ background: dark ? '#2a72c0' : '#185fa5' }}
           >
             Choose a file
           </button>
           <p style={{ fontSize: '14px', color: dark ? '#94a3b8' : '#475569', marginTop: '18px', marginBottom: '8px' }}>
             or drop it here — we&apos;ll suggest the right tool for it
           </p>
-          <p style={{ fontSize: '11px', color: dark ? '#64748b' : '#64748b', marginBottom: '18px' }}>
+          <p style={{ fontSize: '11px', color: dark ? '#94a3b8' : '#64748b', marginBottom: '18px' }}>
             We only read the file type. Your file stays on your device.
           </p>
           <div className="format-pills">
@@ -238,7 +238,7 @@ function FileDropZone({ dark, toolCounts }) {
             ))}
             <span
               className="format-pill"
-              style={{ background: dark ? '#1c1c1e' : '#ffffff', border: dark ? '1px solid #334155' : '1px solid #e2e8f0', color: dark ? '#64748b' : '#64748b' }}
+              style={{ background: dark ? '#1c1c1e' : '#ffffff', border: dark ? '1px solid #334155' : '1px solid #e2e8f0', color: dark ? '#94a3b8' : '#64748b' }}
             >
               + 40 more
             </span>
@@ -343,7 +343,10 @@ export default function Home() {
     <div className="min-h-screen bg-neutral-100 dark:bg-black">
 
       <style>{`
-        @keyframes fadeUp  { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:translateY(0); } }
+        /* P27 (Lighthouse mobile): the hero slides in but is never invisible -- it faded in from opacity 0, so the browser
+           could not count the headline as painted (LCP) until the animation ran, after the scripts. */
+        @keyframes fadeUp  { from { transform:translateY(28px); } to { transform:translateY(0); } }
+        @media (prefers-reduced-motion: reduce) { .hero-left, .hero-dropzone-wrap { animation:none !important; } }
         .badge-pill:hover  { background: #e2e8f0 !important; }
 
         /* ── DESKTOP : hero côte à côte ── */

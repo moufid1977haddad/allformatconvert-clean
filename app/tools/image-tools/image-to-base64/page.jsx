@@ -5,6 +5,8 @@ import SeoContent from '../../../components/SeoContent';
 import { sniffFormat } from '../../../lib/detectFileFormat';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
+import TextArea from '@/app/components/TextArea';
 // P23 (02/10): a 2 MB photo gave 2.6 million characters pushed whole into the text box: WebKit (Safari's engine) froze
 // the page 84 s (Chromium 2.9 s). Measured: 100 000 characters take 0.27 s in WebKit, 1 000 000 take 6.9 s
 // (scripts/p23/textarea-cost.mjs). The box shows the first 100 000; Copy and Download give everything (base64.guru,
@@ -54,11 +56,11 @@ export default function ImageToBase64Page() {
         <p className="text-neutral-500 text-center mb-8">Convert images to Base64 data URI</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{fileName || 'Click or drop an image here'}</p>
+            <p className="text-neutral-500">{fileName || <UploadPrompt what="an image" />}</p>
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={encode} />
           </div>
           {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
-          {result && <div className="space-y-2"><label className="flex items-center gap-2 text-sm text-neutral-600">Output<select id="b64-format" value={fmt} onChange={(e) => setFmt(e.target.value)} className="border border-neutral-200 rounded px-2 py-1 bg-white"><option value="datauri">Data URI (data:image/…;base64,…)</option><option value="raw">Plain Base64</option><option value="img">HTML &lt;img&gt; tag</option><option value="css">CSS background-image</option><option value="json">JSON</option></select></label><textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-xs h-48 resize-none font-mono" value={out.length > PREVIEW_CHARS ? out.slice(0, PREVIEW_CHARS) : out} readOnly />{out.length > PREVIEW_CHARS && <p className="text-xs text-neutral-500">Preview of the first {PREVIEW_CHARS.toLocaleString('en-US')} of {out.length.toLocaleString('en-US')} characters, so the page stays responsive; Copy Base64 and Download give the whole text.</p>}<button onClick={() => navigator.clipboard.writeText(out)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy Base64</button><TextDownload text={out} name={(fileName || 'image').replace(/\.[^.]+$/, '') + '.base64.txt'} /></div>}
+          {result && <div className="space-y-2"><label className="flex items-center gap-2 text-sm text-neutral-600">Output<select id="b64-format" value={fmt} onChange={(e) => setFmt(e.target.value)} className="border border-neutral-200 rounded px-2 py-1 bg-white"><option value="datauri">Data URI (data:image/…;base64,…)</option><option value="raw">Plain Base64</option><option value="img">HTML &lt;img&gt; tag</option><option value="css">CSS background-image</option><option value="json">JSON</option></select></label><TextArea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-xs h-48 resize-none font-mono" value={out.length > PREVIEW_CHARS ? out.slice(0, PREVIEW_CHARS) : out} readOnly />{out.length > PREVIEW_CHARS && <p className="text-xs text-neutral-500">Preview of the first {PREVIEW_CHARS.toLocaleString('en-US')} of {out.length.toLocaleString('en-US')} characters, so the page stays responsive; Copy Base64 and Download give the whole text.</p>}<button onClick={() => navigator.clipboard.writeText(out)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy Base64</button><TextDownload text={out} name={(fileName || 'image').replace(/\.[^.]+$/, '') + '.base64.txt'} /></div>}
         </div>
       </div>
       <SeoContent

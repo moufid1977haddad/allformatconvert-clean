@@ -15,6 +15,7 @@ export default function ProgressBar({ pct, label }: { pct: number; label?: strin
           className="h-full bg-indigo-600 rounded-full transition-[width] duration-150 ease-out text-white"
           style={{ width: `${clamped}%` }}
           role="progressbar"
+          aria-label={label || 'Progress'}
           aria-valuenow={clamped}
           aria-valuemin={0}
           aria-valuemax={100}

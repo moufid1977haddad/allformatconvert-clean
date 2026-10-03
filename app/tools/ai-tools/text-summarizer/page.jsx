@@ -5,6 +5,7 @@ import { checkPromptLength } from '@/lib/quota/limits';
 import { readAiJson } from '../../../lib/aiClient';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 
 export default function TextSummarizerPage() {
   const [input, setInput] = useState('');
@@ -41,7 +42,7 @@ export default function TextSummarizerPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Text Summarizer</h1>
         <p className="text-neutral-500 text-center mb-8">Summarize long texts with AI</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste text to summarize..." value={input} onChange={e => setInput(e.target.value)} />
+          <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste text to summarize..." value={input} onChange={e => setInput(e.target.value)} />
           <button onClick={process} disabled={!input.trim() || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Summarizing...' : 'Summarize'}
           </button>
@@ -49,7 +50,7 @@ export default function TextSummarizerPage() {
           {output && (
             <div className="space-y-2">
               <label className="block text-sm text-neutral-500">Result</label>
-              <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={output} readOnly />
+              <TextArea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={output} readOnly />
               <TextDownload text={output} name="summary.txt" />
               <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button>
             </div>

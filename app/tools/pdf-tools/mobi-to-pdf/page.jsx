@@ -8,6 +8,7 @@ import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import { formatBytes } from '../../../lib/formatBytes';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 const escapeHtml = (str) => String(str)
   .replace(/&/g, '&amp;')
@@ -245,7 +246,7 @@ export default function MobiToPdfPage() {
         <p className="text-neutral-500 text-center mb-8">Convert MOBI ebooks to PDF</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a MOBI file here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a MOBI file" />}</p>
             <input ref={inputRef} type="file" accept=".mobi,.azw,.azw3" className="hidden" onChange={handleFile} />
           </div>
           <p className="text-neutral-500 text-xs text-center -mt-2">Max {officeMaxLabel(MAX_HTML_STAGED_BYTES)} of prepared content per book — image-heavy books count for more than their file size.</p>

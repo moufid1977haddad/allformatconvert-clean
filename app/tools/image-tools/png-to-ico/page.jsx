@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { FileDownload } from '../../../components/FileDownload';
 import { unreadableImageMessage } from '../../../lib/fileChecks';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 // P24 (03/10): Windows also uses 24, 64 and 128 px icons (CloudConvert and icoconvert offer them); the first four stay
 // selected by default, as before.
@@ -126,7 +127,7 @@ export default function PngToIcoPage() {
         <p className="text-neutral-500 text-center mb-8">Create favicon ICO from PNG</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a PNG file here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a PNG file" />}</p>
             <input ref={inputRef} type="file" accept=".png" className="hidden" onChange={handleFile} />
           </div>
           <div>

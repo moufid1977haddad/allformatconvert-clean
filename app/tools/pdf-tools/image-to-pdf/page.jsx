@@ -1,7 +1,8 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { addImagePage } from '../../../lib/pdfImages';
+import { addImagePage, PHONE_MAX_DECODED_MP, MAX_DECODED_MP_COMPUTER } from '../../../lib/pdfImages';
+import UploadPrompt from '@/app/components/UploadPrompt';
 import { FileDownload } from '../../../components/FileDownload';
 import ImagePageLayout, { DEFAULT_IMAGE_LAYOUT } from '../../../components/ImagePageLayout';
 import { reportShownMessage } from '../../../lib/useToolError';
@@ -54,10 +55,11 @@ export default function ImageToPdfPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Image to PDF</h1>
-        <p className="text-neutral-500 text-center mb-8">Convert JPG, PNG, HEIC, WebP, GIF, BMP, TIFF or AVIF images to a PDF file</p>
+        <p className="text-neutral-500 text-center mb-2">Convert JPG, PNG, HEIC, WebP, GIF, BMP, TIFF or AVIF images to a PDF file</p>
+        <p className="text-neutral-500 text-xs text-center mb-8">JPEG photos of any size; other images up to {MAX_DECODED_MP_COMPUTER} megapixels each on a computer, {PHONE_MAX_DECODED_MP} on a phone.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">Click to add images (JPG, PNG, HEIC, WebP, GIF, BMP, TIFF, AVIF)</p>
+            <p className="text-neutral-500"><UploadPrompt what="images" /> (JPG, PNG, HEIC, WebP, GIF, BMP, TIFF, AVIF)</p>
             <input ref={inputRef} type="file" accept="image/*,.heic,.heif,.tif,.tiff" multiple className="hidden" onChange={handleFiles} />
           </div>
           {files.length > 0 && (
@@ -96,7 +98,7 @@ export default function ImageToPdfPage() {
         faqs={[
           { q: "What image formats does Image to PDF support?", a: "JPG, PNG, HEIC / HEIF (iPhone photos), WebP, GIF (first frame), BMP, TIFF (every page) and AVIF. A file that cannot be read is named in an error message, never skipped silently." },
           { q: "Can I choose the page size and margins?", a: "Yes. Keep \"Fit to each picture\" for pages the size of each picture, or choose A4, US Letter, US Legal or A5, with an automatic, portrait or landscape orientation and no, small (10 mm) or big (20 mm) margin. Each picture is scaled to fit inside the margins and centred, never cropped or stretched." },
-          { q: "Is there a limit to how many images I can convert?", a: "There's no fixed limit — it's bound only by your device's available memory." },
+          { q: "Is there a limit to how many images I can convert?", a: "No fixed number of images — it's bound by your device's memory. Each image other than a JPEG photo must be decoded first, so it is limited to 268 megapixels on a computer and 90 on a phone (measured memory use; a phone browser reloads a page that goes beyond); JPEG photos have no size limit." },
           { q: "Is my data secure when using this tool?", a: "Yes, everything happens locally in your browser. Your images are never uploaded to a server." },
           { q: "Can I reorder images before converting?", a: "No, images appear in the PDF in the order you selected them — there's no drag-and-drop reordering or arrow buttons." }
         ]}

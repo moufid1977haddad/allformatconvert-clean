@@ -5,6 +5,7 @@ import SeoContent from '../../../components/SeoContent';
 import { encryptBytes, decryptBytes } from '../../../lib/textCrypto';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 export default function FileEncryptorPage() {
   const [file, setFile] = useState(null);
   const [password, setPassword] = useState('');
@@ -42,7 +43,7 @@ export default function FileEncryptorPage() {
             <button onClick={() => setMode('decrypt')} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'decrypt' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100'}`}>Decrypt</button>
           </div>
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a file here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a file" />}</p>
             <input ref={inputRef} type="file" className="hidden" onChange={handleFile} />
           </div>
           <div><label className="block text-sm text-neutral-500 mb-1">Password</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" placeholder="Enter password..." /></div>

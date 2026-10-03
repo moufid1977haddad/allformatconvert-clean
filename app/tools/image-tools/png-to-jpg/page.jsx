@@ -7,6 +7,7 @@ import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
 import AnimatedImageNote from '../../../components/AnimatedImageNote';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 export default function PNGtoJPGPage() {
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
@@ -36,7 +37,7 @@ export default function PNGtoJPGPage() {
         <p className="text-neutral-500 text-center mb-8">Convert PNG to JPG in your browser</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500">Click or drop an image here</p>}
+            {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500"><UploadPrompt what="an image" /></p>}
             <input ref={inputRef} type="file" accept=".png" className="hidden" onChange={handleFile} />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">

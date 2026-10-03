@@ -5,6 +5,7 @@ import SeoContent from '../../../components/SeoContent';
 import { readTar, TarFormatError } from '../../../lib/tarReader';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 // 30/09 (real Safari 17.6 on the Mac): "t.tar.gz" could not be selected ("One or more files could not be selected")
 // while "t.tgz" could. Safari and the macOS/iOS pickers match a file by its LAST extension only ("gz"), so a
 // double extension such as ".tar.gz" in `accept` never matches. Single extensions + the MIME types the systems
@@ -54,7 +55,7 @@ export default function TarExtractorPage() {
         <p className="text-neutral-500 text-center mb-8">Extract TAR archive files in your browser</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">Click or drop a .tar, .tar.gz, or .tgz file here</p>
+            <p className="text-neutral-500"><UploadPrompt what="a .tar, .tar.gz, or .tgz file" /></p>
             <input ref={inputRef} type="file" accept={TAR_ACCEPT} className="hidden" onChange={extract} />
           </div>
           {loading && <p className="text-center text-neutral-500">Extracting...</p>}

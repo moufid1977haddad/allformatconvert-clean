@@ -7,6 +7,8 @@ import { convertOffice, checkOfficeSize, officeStageLabel } from '../../../lib/o
 import SeoContent from '../../../components/SeoContent';
 import { FileDownload } from '../../../components/FileDownload';
 import { reportShownMessage } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
+import TextArea from '@/app/components/TextArea';
 
 export default function TextToPdfPage() {
   const [text, setText] = useState('');
@@ -74,10 +76,10 @@ export default function TextToPdfPage() {
             <button onClick={() => { setMode('file'); setText(''); setFile(null); setDownloadUrl(null); }} className={`flex-1 py-2 rounded-lg font-semibold transition ${mode === 'file' ? 'bg-indigo-600 text-white' : 'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>Upload File</button>
           </div>
           {mode === 'paste' ? (
-            <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste your text here..." value={text} onChange={e => setText(e.target.value)} />
+            <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste your text here..." value={text} onChange={e => setText(e.target.value)} />
           ) : (
             <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-              <p className="text-neutral-500">{file ? file.name : 'Click or drop a .txt file here'}</p>
+              <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a .txt file" />}</p>
               <input ref={inputRef} type="file" accept=".txt" className="hidden" onChange={handleFile} />
             </div>
           )}

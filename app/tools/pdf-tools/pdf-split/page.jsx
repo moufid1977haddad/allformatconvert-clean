@@ -8,6 +8,7 @@ import { planSplit } from './splitPlan';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 // iLovePDF's free modes (splitPlan.js): custom ranges, a file every N pages, every page, chosen pages.
 const MODES = [
@@ -146,7 +147,7 @@ export default function PdfSplitPage() {
         <p className="text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Supports PDFs up to {maxPages.toLocaleString()} pages{isMobile ? ' on this device' : ''} (files up to {maxFileLabel}). Splitting runs in the background — this tab stays responsive.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{fileName ? fileName + (pageCount > 0 ? ' (' + pageCount + ' pages)' : '') : 'Click or drop a PDF here'}</p>
+            <p className="text-neutral-500">{fileName ? fileName + (pageCount > 0 ? ' (' + pageCount + ' pages)' : '') : <UploadPrompt what="a PDF" />}</p>
             <input ref={inputRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} disabled={loading} />
           </div>
           {pageCount > 0 && (

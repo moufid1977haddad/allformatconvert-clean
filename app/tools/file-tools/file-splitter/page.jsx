@@ -6,6 +6,7 @@ import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL, MAX_CHUNKS } from './config';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 export default function FileSplitterPage() {
   const [file, setFile] = useState(null);
   const [chunkSize, setChunkSize] = useState(1);
@@ -103,7 +104,7 @@ export default function FileSplitterPage() {
         <p className="text-neutral-500 text-xs text-center mb-8">Supports files up to {MAX_FILE_SIZE_LABEL} and up to {MAX_CHUNKS.toLocaleString()} parts. Splitting is instant — chunks are lazy byte-range views, not copied into memory.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           {mode === 'split' && <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a file here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a file" />}</p>
             <input ref={inputRef} type="file" className="hidden" onChange={handleFile} />
           </div>}
           <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Mode">

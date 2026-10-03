@@ -58,6 +58,9 @@ function summarize(lhr) {
     tbt: num('total-blocking-time'), si: num('speed-index'), tti: num('interactive'),
     totalBytes: num('total-byte-weight'), js: byType.script || null, font: byType.font || null, image: byType.image || null, thirdParty: byType['third-party'] || null,
     failing, nodes, opportunities,
+    // P27: which element is the LCP and how its time splits (render delay = waiting for scripts / a re-render)
+    lcpElement: (() => { const d = a['lcp-breakdown-insight']?.details?.items || []; const n = d.find((x) => x.type === 'node'); return n ? `${n.selector} :: ${(n.snippet || '').slice(0, 90)}` : null; })(),
+    lcpRenderDelay: (() => { const t = (a['lcp-breakdown-insight']?.details?.items || []).find((x) => x.type === 'table'); const r = t?.items?.find((x) => x.subpart === 'elementRenderDelay'); return r ? Math.round(r.duration) : null; })(),
     runtimeError: lhr.runtimeError ? lhr.runtimeError.code : null,
   };
 }
@@ -65,7 +68,8 @@ function summarize(lhr) {
 function runOne(url) {
   return new Promise((resolve) => {
     const tmp = path.join(os.tmpdir(), `lh-${process.pid}-${Date.now()}.json`);
-    const flags = [cli, url, '--output=json', `--output-path=${tmp}`, '--quiet', '--chrome-flags=--headless=new --no-sandbox',
+    // P27: LH_CHROME_FLAGS adds flags (e.g. --ignore-certificate-errors behind scripts/perf/h2-proxy.mjs)
+    const flags = [cli, url, '--output=json', `--output-path=${tmp}`, '--quiet', `--chrome-flags=--headless=new --no-sandbox ${process.env.LH_CHROME_FLAGS || ''}`.trim(),
       '--only-categories=performance,accessibility,best-practices,seo', '--max-wait-for-load=45000',
       // our own measurement must not count as a visit in Google Analytics (the gtag library itself still loads)
       '--blocked-url-patterns=*google-analytics.com/g/collect*', '--blocked-url-patterns=*analytics.google.com/g/collect*'];

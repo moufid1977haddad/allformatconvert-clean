@@ -6,6 +6,7 @@ import { checkPdfToolsSize, pdfToolsMaxLabel, shouldStage } from '../../../lib/o
 import ProgressBar from '../../../components/ProgressBar';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 // Real ceiling (hosting-platform payload gate), not the 50 MB the route itself would
 // accept -- see lib/quota/limits.js.
@@ -108,7 +109,7 @@ export default function PdfRepairPage() {
 
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-700 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a damaged PDF here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a damaged PDF" />}</p>
             <input ref={inputRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
           </div>
 

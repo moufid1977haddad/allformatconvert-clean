@@ -5,6 +5,7 @@ import { sha256Hex, dHash, findPairs } from '../../../lib/imageSimilarity';
 import { unreadableImageMessage, imageHeaderSize } from '../../../lib/fileChecks';
 import { CANVAS_MAX_AREA } from '../../../lib/mediaSupport';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 // Beyond a canvas's largest area (268 MP) a picture is never decoded here (a 30 000 × 30 000 PNG is 3.6 GB once open):
 // compared byte for byte only, and said so. Below it, a picture this browser cannot open is caught and said too.
 const HUGE = CANVAS_MAX_AREA;
@@ -75,7 +76,7 @@ export default function DuplicateImageFinderPage() {
         <p className="text-neutral-500 text-center mb-8">Find duplicate images in your collection</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{images.length > 0 ? images.length + ' images loaded' : 'Click to select multiple images'}</p>
+            <p className="text-neutral-500">{images.length > 0 ? images.length + ' images loaded' : <UploadPrompt what="several images" />}</p>
             <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
           </div>
           {notes.map((n, i) => <p key={i} role="alert" className="text-red-400 text-center text-sm">{n}</p>)}

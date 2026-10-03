@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { toolBgColors, categoryColors } from '@/app/lib/toolColors';
 import { loadGoogleTranslate } from '@/app/lib/googleTranslate';
 import SiteName from './SiteName';
+import { SITE_CATEGORIES } from '@/app/lib/siteCategories';
 import {
   Search, FileText, Image as ImageIcon, Film, Headphones, Video, Type, Folder,
   QrCode, Repeat, Code, Calculator, Bot, Menu, X,
@@ -21,20 +22,13 @@ const ToolIcon = dynamic(() => import('@/app/lib/toolIcons').then((m) => m.ToolI
 // later, as before (the session was already read asynchronously).
 const getSupabase = () => import('@/lib/supabase').then((m) => m.supabase);
 
-const categories = [
-  { href: '/tools/pdf-tools', name: 'PDF Tools', label: 'PDF', icon: FileText },
-  { href: '/tools/image-tools', name: 'Image Tools', label: 'Image', icon: ImageIcon },
-  { href: '/tools/gif-tools', name: 'GIF Tools', label: 'GIF', icon: Film },
-  { href: '/tools/audio-tools', name: 'Audio Tools', label: 'Audio', icon: Headphones },
-  { href: '/tools/video-tools', name: 'Video Tools', label: 'Video', icon: Video },
-  { href: '/tools/text-tools', name: 'Text Tools', label: 'Text', icon: Type },
-  { href: '/tools/file-tools', name: 'File Tools', label: 'File', icon: Folder },
-  { href: '/tools/qr-barcodes-tools', name: 'QR & Barcode Tools', label: 'QR', icon: QrCode },
-  { href: '/tools/converter-tools', name: 'Converter Tools', label: 'Convert', icon: Repeat },
-  { href: '/tools/developer-tools', name: 'Developer Tools', label: 'Dev', icon: Code },
-  { href: '/tools/math-tools', name: 'Math Tools', label: 'Math', icon: Calculator },
-  { href: '/tools/ai-tools', name: 'AI Tools', label: 'AI', icon: Bot },
-];
+// The 12 categories (app/lib/siteCategories.js, shared with the footer), each with its icon.
+const CATEGORY_ICONS = {
+  'pdf-tools': FileText, 'image-tools': ImageIcon, 'gif-tools': Film, 'audio-tools': Headphones, 'video-tools': Video,
+  'text-tools': Type, 'file-tools': Folder, 'qr-barcodes-tools': QrCode, 'converter-tools': Repeat,
+  'developer-tools': Code, 'math-tools': Calculator, 'ai-tools': Bot,
+};
+const categories = SITE_CATEGORIES.map((c) => ({ ...c, icon: CATEGORY_ICONS[c.slug] }));
 
 // Maps a category's group count to a literal xl:grid-cols-N class so Tailwind's
 // static scanner can find it (dynamic template strings would be invisible to it).
@@ -731,20 +725,54 @@ export default function Navbar() {
   useEffect(() => {
     let subscription = null;
     let cancelled = false;
-    getSupabase().then((supabase) => {
-      if (cancelled) return;
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (!cancelled) setUser(session?.user ?? null);
-      });
-      ({ data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        setUser(session?.user ?? null);
-      }));
-    }).catch((e) => { console.warn('[navbar] account state not loaded:', e); }); // the Sign In link stays shown
-    // Warm the mega-menu icons once the page is idle, so the first menu opened shows them at once.
-    const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 2000));
-    idle(() => { import('@/app/lib/toolIcons'); });
-    return () => { cancelled = true; if (subscription) subscription.unsubscribe(); };
+    let started = false;
+    const start = () => {
+      if (started) return;
+      started = true;
+      getSupabase().then((supabase) => {
+        if (cancelled) return;
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (!cancelled) setUser(session?.user ?? null);
+        });
+        ({ data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+          setUser(session?.user ?? null);
+        }));
+      }).catch((e) => { console.warn('[navbar] account state not loaded:', e); }); // the Sign In link stays shown
+    };
+    // P27 (Lighthouse mobile): the account library (Supabase, ≈ 51 KB compressed) was fetched on EVERY page right
+    // after the first paint, for every visitor -- measured: -0.4 s of LCP and 3 points when it is not. It is now
+    // loaded only when there can be an account to show: a session already stored by Supabase in this browser
+    // (localStorage sb-<project>-auth-token), or a sign-in coming back in the address (code / access_token), or a
+    // sign-in made in another tab meanwhile (storage event). A visitor who never signed in never downloads it here.
+    const SESSION_KEY = /^sb-.+-auth-token$/;
+    let stored = true;
+    try { stored = Object.keys(window.localStorage).some((k) => SESSION_KEY.test(k)); } catch { /* storage blocked: load it */ }
+    const authInUrl = /[?#&](code|access_token|refresh_token|error_description)=/.test(window.location.href);
+    const onStorage = (e) => { if (e.key && SESSION_KEY.test(e.key) && e.newValue) start(); };
+    // a sign-in in THIS tab (the /signin page, then a client-side navigation): re-checked on every route change below
+    const onCheck = () => start();
+    if (stored || authInUrl) start();
+    else { window.addEventListener('storage', onStorage); window.addEventListener('oct-auth-check', onCheck); }
+    // Warm the mega-menu icons once the page is idle, a few seconds after it has loaded (not in the first paint's way),
+    // so the first menu opened shows them at once.
+    const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1000));
+    const warm = () => setTimeout(() => idle(() => { import('@/app/lib/toolIcons'); }), 3000);
+    if (document.readyState === 'complete') warm(); else window.addEventListener('load', warm, { once: true });
+    return () => {
+      cancelled = true;
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('oct-auth-check', onCheck);
+      window.removeEventListener('load', warm);
+      if (subscription) subscription.unsubscribe();
+    };
   }, []);
+
+  // P27: a session stored since the page opened (signed in on /signin, then navigated here) loads the account state.
+  useEffect(() => {
+    try {
+      if (Object.keys(window.localStorage).some((k) => /^sb-.+-auth-token$/.test(k))) window.dispatchEvent(new Event('oct-auth-check'));
+    } catch { /* storage blocked: already loaded at start */ }
+  }, [pathname]);
 
   const handleSignOut = async () => {
     setUserMenuOpen(false);
@@ -794,7 +822,10 @@ export default function Navbar() {
 
           {/* Logo */}
           <div className="shrink-0">
-            <Link href="/" className="flex items-center gap-1.5 lg:gap-2 px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition notranslate">
+            {/* P27 (Lighthouse mobile): no prefetch from the bar's two always-visible links (home, Sign In) -- Next.js fetched
+                both pages' code (the account library among it, ≈ 60 KB) during the first paint of every page. A click still
+                opens them at once enough; the tools and categories below keep their prefetch. */}
+            <Link href="/" prefetch={false} className="flex items-center gap-1.5 lg:gap-2 px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition notranslate">
               <svg
                 className="w-7 h-7 lg:w-9 lg:h-9 xl:w-[46px] xl:h-[46px]"
                 viewBox="0 0 64 64"
@@ -831,16 +862,20 @@ export default function Navbar() {
                   <Link
                     href={cat.href}
                     title={cat.name}
-                    className={`flex items-center gap-0.5 min-[1410px]:gap-1 px-0.5 min-[1410px]:px-2 py-1 text-[11px] min-[1410px]:text-xs font-bold uppercase tracking-wide transition border-b-2 text-black dark:text-white ${isActive ? 'border-current' : 'border-transparent hover:opacity-60'}`}
+                    className={`flex flex-col items-center gap-0.5 px-0.5 min-[1410px]:px-1.5 pt-0.5 pb-px text-[10px] min-[1410px]:text-[11px] font-semibold leading-none transition border-b-2 text-black dark:text-white ${isActive ? 'border-current' : 'border-transparent hover:opacity-60'}`}
                   >
                     <span className="flex items-center justify-center shrink-0 rounded-md bg-neutral-100 dark:bg-neutral-800 w-[29px] h-[29px]">
                       <cat.icon className={`w-[21px] h-[21px] ${catColor}`} aria-hidden="true" />
                     </span>
                     <span className="sr-only">{cat.name}</span>
-                    <span aria-hidden="true" className="hidden min-[2100px]:inline-block min-[2100px]:truncate min-[2100px]:max-w-[64px]">{cat.label}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className={`w-2.5 h-2.5 shrink-0 opacity-50 transition-transform ${openCat === cat.href ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+                    {/* P27: a word under every icon, at every width (the market's menus are words: iLovePDF, FreeConvert,
+                        CloudConvert); short words so the bar keeps its width, cut with an ellipsis if a translation is long */}
+                    <span aria-hidden="true" className="flex items-center gap-px max-w-[62px]">
+                      <span className="truncate">{cat.label}</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className={`w-2 h-2 shrink-0 opacity-50 transition-transform ${openCat === cat.href ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </span>
                   </Link>
                   {openCat === cat.href && dropTools.length > 0 && isGrouped && (
                     <div
@@ -1160,6 +1195,8 @@ export default function Navbar() {
             {/* Dark mode */}
             <button
               onClick={() => setDark(!dark)}
+              aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+              title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
               className="p-1 rounded-lg bg-[#eaf3fb] dark:bg-[#16283a] hover:opacity-80 transition text-[#185fa5] dark:text-[#85b7eb] shrink-0 hidden lg:block"
             >
               {dark ? (
@@ -1200,7 +1237,7 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <Link href="/signin" className="flex items-center px-1.5 min-[1410px]:px-2.5 py-1 rounded-lg bg-[#185fa5] dark:bg-[#378add] hover:opacity-90 transition text-white text-xs font-bold whitespace-nowrap">
+              <Link href="/signin" prefetch={false} className="flex items-center px-1.5 min-[1410px]:px-2.5 py-1 rounded-lg bg-[#185fa5] dark:bg-[#2a72c0] hover:opacity-90 transition text-white text-xs font-bold whitespace-nowrap">
                 Sign In
               </Link>
             )}

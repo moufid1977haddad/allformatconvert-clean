@@ -8,6 +8,7 @@ import { HASH_ALGORITHMS, DEFAULT_ALGORITHMS, TAG_NAME, byId, toHex, toBase64, p
 import { formatBytes } from '../../../lib/formatBytes';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 
 const GROUPS = [...new Set(HASH_ALGORITHMS.map((a) => a.group))];
 const fmtSize = formatBytes;
@@ -222,7 +223,7 @@ export default function HashGeneratorPage() {
 
           {mode === 'text' ? (
             <>
-              <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-y" placeholder="Type or paste text — it is hashed as you type" value={text} onChange={(e) => setText(e.target.value)} aria-label="Text to hash" />
+              <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-32 resize-y" placeholder="Type or paste text — it is hashed as you type" value={text} onChange={(e) => setText(e.target.value)} aria-label="Text to hash" />
               {!active.length && <p className="text-sm text-neutral-500">Tick at least one algorithm.</p>}
               {textResult && active.length > 0 && (
                 <div className="space-y-2">

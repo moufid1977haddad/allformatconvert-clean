@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 export default function PptToPdfPage() {
   const [file, setFile] = useState(null);
@@ -66,7 +67,7 @@ export default function PptToPdfPage() {
         <p className="text-neutral-500 text-xs text-center mb-8">In our tests, layout, images, gradients, tables and charts carried over. A text box narrower than its text can wrap and be partly hidden, and Wingdings and Webdings icon fonts can&apos;t legally be reproduced and will appear blank.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a PowerPoint or OpenDocument presentation here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a PowerPoint or OpenDocument presentation" />}</p>
             <input ref={inputRef} type="file" accept=".pptx,.ppt,.odp,.otp,.pptm,.ppsx,.ppsm,.pps,.potx,.potm,.pot" className="hidden" onChange={handleFile} />
           </div>
           <p className="text-neutral-500 text-xs text-center -mt-2">Max {officeMaxLabel()} per file</p>

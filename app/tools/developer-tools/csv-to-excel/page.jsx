@@ -11,6 +11,8 @@ import CsvReadOptions, { numbersNote } from '../../../components/CsvReadOptions'
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { formatBytes } from '../../../lib/formatBytes';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
+import TextArea from '@/app/components/TextArea';
 
 // Only the first 8KB is needed to see several rows -- detectDelimiter only
 // looks at the first 10 non-empty logical lines anyway, so sampling more of
@@ -189,10 +191,10 @@ export default function CsvToExcelPage() {
         <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Supports CSVs up to {effectiveMaxRowsLabel} rows (including the header row){isMobile ? ' on this device' : ''} (files up to {MAX_FILE_SIZE_LABEL}). Conversion runs in the background — this tab stays responsive.</p>
         <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-600 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500 dark:text-neutral-400 text-sm">{fileName || 'Click or drop a .csv file here'}</p>
+            <p className="text-neutral-500 dark:text-neutral-400 text-sm">{fileName || <UploadPrompt what="a .csv file" />}</p>
             <input ref={inputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={handleFile} />
           </div>
-          <textarea
+          <TextArea
             className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-xl p-4 text-sm h-48 resize-none font-mono text-neutral-800 dark:text-neutral-200"
             placeholder="...or paste CSV here"
             value={input}

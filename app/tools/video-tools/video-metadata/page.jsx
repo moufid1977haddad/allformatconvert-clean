@@ -5,6 +5,7 @@ import MediaInfo from '../../../components/MediaInfo';
 import MetadataStripper from '../../../components/MetadataStripper';
 import { VIDEO_ACCEPT } from '../../../lib/mediaSupport';
 import IosOriginalNote from '../../../components/IosOriginalNote';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 // 28/09/2026: the page used to list only name, size, MIME type, duration, width and height from the browser's
 // player, and nothing but an error for a format the player cannot read (AVI, WMV, MKV in Safari…). The full
@@ -33,7 +34,7 @@ export default function VideoMetadataPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputEl && inputEl.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a video file here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a video file" />}</p>
             <input ref={setInputEl} type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleFile} />
           </div>
           {videoUrl && <video src={videoUrl} controls playsInline className="w-full rounded-xl bg-neutral-800" />}

@@ -5,6 +5,7 @@ import { reformatJson } from '../../../lib/jsonText';
 import { stripBom } from '../../../lib/jsonLossless';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 export default function JsonMinifierPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -17,8 +18,8 @@ export default function JsonMinifierPage() {
         <p className="text-neutral-500 text-center mb-8">Minify JSON data</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm text-neutral-500 mb-1">Input</label><textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" placeholder="Paste JSON here..." value={input} onChange={e => setInput(e.target.value)} /></div>
-            <div><label className="block text-sm text-neutral-500 mb-1">Minified Output</label><textarea aria-label="Minified Output" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" value={output} readOnly />
+            <div><label className="block text-sm text-neutral-500 mb-1">Input</label><TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" placeholder="Paste JSON here..." value={input} onChange={e => setInput(e.target.value)} /></div>
+            <div><label className="block text-sm text-neutral-500 mb-1">Minified Output</label><TextArea aria-label="Minified Output" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" value={output} readOnly />
             <TextDownload text={output} name="minified.json" /></div>
           </div>
           {error && <p className="text-red-400 text-center">{error}</p>}

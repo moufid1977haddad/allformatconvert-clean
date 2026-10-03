@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 
 const MAX_CHARS = 1000;
 const PER_DAY = 5; // lib/quota/imageGen.js IMAGE_GEN_PER_IP_PER_DAY
@@ -73,7 +74,7 @@ export default function ImageGeneratorPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div>
             <label htmlFor="prompt" className="block text-sm text-neutral-600 mb-1">Describe your image</label>
-            <textarea id="prompt" value={prompt} maxLength={MAX_CHARS} onChange={(e) => setPrompt(e.target.value)} rows={4}
+            <TextArea id="prompt" value={prompt} maxLength={MAX_CHARS} onChange={(e) => setPrompt(e.target.value)} rows={4}
               placeholder="e.g. A red fox in a snowy forest at sunrise, photorealistic"
               className="w-full rounded-xl border border-neutral-200 bg-neutral-50 p-3 text-sm focus:border-indigo-400 focus:outline-none" />
             <div className="flex justify-between text-xs text-neutral-500"><span>Be specific: subject, setting, style, lighting.</span><span>{prompt.length}/{MAX_CHARS}</span></div>

@@ -7,6 +7,7 @@ import { AUDIO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
 import PlayablePreview from '../../../components/PlayablePreview';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 export default function AudioEqualizerPage() {
   const [file, setFile] = useState(null);
@@ -163,7 +164,7 @@ export default function AudioEqualizerPage() {
         <p className="text-neutral-500 text-center mb-8">Adjust bass, mid, and treble frequencies</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm">Click to upload an audio file</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="an audio file" /></p>}
           </div>
           <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
           {audioUrl && <audio ref={audioElRef} src={audioUrl} controls onPlay={setupEQ} onError={() => setError('This browser cannot play this format, so there is no live preview; "Export as WAV" still applies the equalizer to the whole file.')} className="w-full" />}

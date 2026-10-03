@@ -6,6 +6,7 @@ import { qrMatrix, drawCanvas, toSvg, toPdf, readsBackAs, contrast } from '../..
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { imageHeaderSize, OPENABLE_PIXELS } from '../../../lib/fileChecks';
 import { useToolError } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 
 // Features from QRCode Monkey, the free reference (read 2026-09-23): content types, colours, logo, error
 // correction, up to 2000 px, PNG/SVG/PDF. What it does not do and this page does: every code is read back
@@ -120,7 +121,7 @@ export default function QrGeneratorPage() {
               <div key={type + k}>
                 <label htmlFor={`qr-${k}`} className="block text-sm text-neutral-500 mb-1">{label}</label>
                 {kind === 'textarea'
-                  ? <textarea id={`qr-${k}`} value={fields[k] || ''} onChange={set(k)} placeholder={ph} className={input + ' h-24 resize-none'} />
+                  ? <TextArea id={`qr-${k}`} value={fields[k] || ''} onChange={set(k)} placeholder={ph} className={input + ' h-24 resize-none'} />
                   : <input id={`qr-${k}`} type={k === 'password' ? 'text' : 'text'} value={fields[k] || ''} onChange={set(k)} placeholder={ph} className={input} />}
               </div>
             ))}

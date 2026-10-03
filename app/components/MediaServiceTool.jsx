@@ -12,6 +12,7 @@ import PlayablePreview from './PlayablePreview';
 import { formatBytes } from '../lib/formatBytes';
 import { FileDownload } from './FileDownload';
 import { useToolError } from '../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 // Shared UI of the tools that run on the media-processing service
 // (video-compressor, video-converter). The engine is the service; the browser
@@ -135,7 +136,7 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => !busy && inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? `${file.name} — ${fmt(file.size)}` : 'Click or drop a video file here'}</p>
+            <p className="text-neutral-500">{file ? `${file.name} — ${fmt(file.size)}` : <UploadPrompt what="a video file" />}</p>
             <input ref={inputRef} type="file" accept={VIDEO_ACCEPT} className="hidden" onClick={(e) => { e.target.value = ''; }} onChange={pick} />
           </div>
           {file && previewUrl && <video src={previewUrl} controls playsInline style={previewStyle ? previewStyle(params) : undefined} className="w-full rounded-xl bg-neutral-800 max-h-72" />}

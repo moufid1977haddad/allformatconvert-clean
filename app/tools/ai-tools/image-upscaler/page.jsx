@@ -6,6 +6,7 @@ import { webgpuAvailable, readImage, localOutputProblem, upscaleInBrowser, serve
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 // Input ceiling, the free offers' level (iLoveIMG 6 Mpx, Upscale.media 6.25 Mpx without an account; 28/09),
 // checked here BEFORE any work. The same on our server (UPSCALE_MAX_INPUT_PIXELS) and on this device.
@@ -144,7 +145,7 @@ export default function ImageUpscalerPage() {
         <p className="text-neutral-500 text-center mb-8">Enlarge small images 2× or 4× with an AI model that rebuilds real detail</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition" onClick={() => !loading && inputRef.current.click()}>
-            {preview && file ? <img src={preview} alt="" className="max-h-48 mx-auto rounded" /> : <div><p className="text-neutral-500 text-sm">Click to upload an image</p><p className="text-neutral-500 text-xs mt-1">JPG, PNG, WebP · up to 6 megapixels (e.g. 3000×2000)</p></div>}
+            {preview && file ? <img src={preview} alt="" className="max-h-48 mx-auto rounded" /> : <div><p className="text-neutral-500 text-sm"><UploadPrompt what="an image" /></p><p className="text-neutral-500 text-xs mt-1">JPG, PNG, WebP · up to 6 megapixels (e.g. 3000×2000)</p></div>}
             <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} disabled={loading} />
           </div>
           <div>

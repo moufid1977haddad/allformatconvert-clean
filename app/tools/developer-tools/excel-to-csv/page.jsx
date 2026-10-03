@@ -8,6 +8,7 @@ import { isMobileDevice } from '../../../lib/isMobileDevice';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { formatBytes } from '../../../lib/formatBytes';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 const MAX_ROWS_LABEL = MAX_ROWS.toLocaleString();
 const MOBILE_MAX_ROWS_LABEL = MOBILE_MAX_ROWS.toLocaleString();
@@ -175,7 +176,7 @@ export default function ExcelToCsvPage() {
             <label className="flex items-center gap-2"><input id="x2c-bom" type="checkbox" checked={bom} onChange={(e) => setBom(e.target.checked)} disabled={converting} /> Add a UTF-8 BOM (Excel then reads accents correctly)</label>
           </div>
           <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-600 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500 dark:text-neutral-400 text-sm">{fileName || 'Click or drop an Excel or ODS file here'}</p>
+            <p className="text-neutral-500 dark:text-neutral-400 text-sm">{fileName || <UploadPrompt what="an Excel or ODS file" />}</p>
             <input ref={inputRef} type="file" accept=".xlsx,.xls,.ods" className="hidden" onChange={handleFile} />
           </div>
           {timeEstimate && !converting && !error && fileName && (

@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useEffect } from 'react';
 import SeoContent from '../../../components/SeoContent';
+import TextArea from '@/app/components/TextArea';
 
 const COLORS = ['bg-yellow-300','bg-green-300','bg-blue-300','bg-pink-300','bg-purple-300','bg-orange-300'];
 const STORAGE_KEY = 'sticky-notes';
@@ -39,7 +40,7 @@ export default function StickyNotesPage() {
         <h1 className="text-3xl font-bold text-center mb-2">Sticky Notes</h1>
         <p className="text-neutral-500 text-center mb-8">Create and manage sticky notes</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4 mb-6">
-          <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-24 resize-none" placeholder="Write your note here..." value={text} onChange={e => setText(e.target.value)} />
+          <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-24 resize-none" placeholder="Write your note here..." value={text} onChange={e => setText(e.target.value)} />
           {/* wraps on a phone: the colour buttons are 44 px touch targets there (P21) */}
           <div className="flex flex-wrap gap-3 items-center">
             <div className="flex flex-wrap gap-2">

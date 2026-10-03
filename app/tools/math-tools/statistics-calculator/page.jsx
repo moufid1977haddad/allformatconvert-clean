@@ -3,6 +3,7 @@ import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { parseNumberList, statistics, formatStat } from '../../../lib/mathTools';
 import { useToolError } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 
 export default function StatisticsCalculatorPage() {
   const [input, setInput] = useState('');
@@ -22,7 +23,7 @@ export default function StatisticsCalculatorPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Enter numbers separated by commas, spaces or new lines</label>
-            <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-24 resize-none" placeholder="e.g. 1, 2, 3, 4, 5" value={input} onChange={e => setInput(e.target.value)} />
+            <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-24 resize-none" placeholder="e.g. 1, 2, 3, 4, 5" value={input} onChange={e => setInput(e.target.value)} />
           </div>
           <div className="flex flex-wrap items-center gap-2 text-sm">
             <label htmlFor="st-quartiles" className="text-neutral-600">Quartile method</label>

@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 export default function WordToPdfPage() {
   const [file, setFile] = useState(null);
@@ -66,7 +67,7 @@ export default function WordToPdfPage() {
         <p className="text-neutral-500 text-xs text-center mb-8">In our tests, .docx fonts, tables, columns, headers and footers matched two other online converters.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a Word, OpenDocument or RTF file here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a Word, OpenDocument or RTF file" />}</p>
             <input ref={inputRef} type="file" accept=".docx,.doc,.odt,.ott,.rtf,.docm,.dotx,.dotm,.dot,.wpd" className="hidden" onChange={handleFile} />
           </div>
           <p className="text-neutral-500 text-xs text-center -mt-2">Max {officeMaxLabel()} per file</p>

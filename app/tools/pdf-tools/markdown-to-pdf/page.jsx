@@ -7,6 +7,8 @@ import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import PageSetup, { PAGE_SETUP_DEFAULT, withPageSetup } from '../../../components/PageSetup';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
+import TextArea from '@/app/components/TextArea';
 
 // A real PDF file (P18, 01/10). The tool used to open the browser's print dialog ("Save as PDF"): on an iPhone or an
 // iPad that is no file at all, and the page itself said "Use Save as PDF in the print dialog". The reference
@@ -104,11 +106,11 @@ export default function MarkdownToPdfPage() {
           </div>
           {mode === 'file' ? (
             <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-              <p className="text-neutral-500">{file ? file.name : 'Click or drop a .md file here'}</p>
+              <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a .md file" />}</p>
               <input ref={inputRef} type="file" accept=".md,.markdown,.txt" className="hidden" onChange={handleFile} />
             </div>
           ) : (
-            <textarea aria-label="Markdown" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm font-mono h-48 resize-none" placeholder="Paste your Markdown here..." value={mdContent} onChange={(e) => { setMdContent(e.target.value); reset(); }} />
+            <TextArea aria-label="Markdown" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm font-mono h-48 resize-none" placeholder="Paste your Markdown here..." value={mdContent} onChange={(e) => { setMdContent(e.target.value); reset(); }} />
           )}
           <p className="text-neutral-500 text-xs text-center -mt-2">Max {officeMaxLabel(MAX_HTML_STAGED_BYTES)} of Markdown</p>
           <PageSetup value={setup} onChange={setSetup} />

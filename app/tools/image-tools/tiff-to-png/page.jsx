@@ -7,6 +7,7 @@ import { reportToolError, extOf } from '../../../lib/reportError';
 import { describeFormatMismatch } from '../../../lib/detectFileFormat';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 const GENERIC_DECODE_ERROR = "This TIFF file couldn't be read. It may be corrupted, or use a rare TIFF variant this tool doesn't support. Try re-saving it with different settings (e.g. Deflate/ZIP compression) in an image editor, or try a different file.";
 const GENERIC_WORKER_ERROR = 'Something went wrong while converting this file. Please try again, or try a different file.';
@@ -141,7 +142,7 @@ export default function TiffToPngPage() {
         <p className="text-neutral-500 text-center mb-8">Convert TIFF images to PNG</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500">Click or drop a TIFF file here</p>}
+            {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500"><UploadPrompt what="a TIFF file" /></p>}
             <input ref={inputRef} type="file" accept=".tiff,.tif" className="hidden" onChange={handleFile} />
           </div>
           {loading ? (

@@ -7,6 +7,8 @@ import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import PageSetup, { PAGE_SETUP_DEFAULT, withPageSetup } from '../../../components/PageSetup';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
+import TextArea from '@/app/components/TextArea';
 
 export default function HtmlToPdfPage() {
   const [file, setFile] = useState(null);
@@ -135,11 +137,11 @@ export default function HtmlToPdfPage() {
             </div>
           ) : mode === 'file' ? (
             <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-              <p className="text-neutral-500">{file ? file.name : 'Click or drop an HTML file here'}</p>
+              <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="an HTML file" />}</p>
               <input ref={inputRef} type="file" accept=".html,.htm" className="hidden" onChange={handleFile} />
             </div>
           ) : (
-            <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm font-mono h-48 resize-none" placeholder="Paste your HTML code here..." value={htmlContent} onChange={(e) => { setHtmlContent(e.target.value); setDone(false); clearPdf(); }} />
+            <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm font-mono h-48 resize-none" placeholder="Paste your HTML code here..." value={htmlContent} onChange={(e) => { setHtmlContent(e.target.value); setDone(false); clearPdf(); }} />
           )}
           {mode !== 'url' && <>
           <p className="text-neutral-500 text-xs text-center -mt-2">Max {officeMaxLabel(MAX_HTML_STAGED_BYTES)} of HTML</p>

@@ -5,6 +5,8 @@ import { transcribeAudio, checkAudioSize, audioMaxLabel } from '../../../lib/off
 import { encryptedMusicMessage } from '../../../lib/mediaSupport';
 import TranscriptExports from '../../../components/TranscriptExports';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
+import TextArea from '@/app/components/TextArea';
 
 export default function AudioTranscriberPage() {
   const [output, setOutput] = useState('');
@@ -41,7 +43,7 @@ export default function AudioTranscriberPage() {
         <p className="text-neutral-500 text-center mb-8">Transcribe audio files with AI</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
-            {fileName ? <p className="text-neutral-700 text-sm font-medium">{fileName}</p> : <p className="text-neutral-500 text-sm">Click to upload an audio file (mp3, wav, m4a...)</p>}
+            {fileName ? <p className="text-neutral-700 text-sm font-medium">{fileName}</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="an audio file" /> (mp3, wav, m4a...)</p>}
           </div>
           <p className="text-neutral-500 text-xs text-center -mt-2">Max {audioMaxLabel()} per file</p>
           <input ref={fileRef} type="file" accept="audio/*" className="hidden" onChange={handleFile} />
@@ -50,7 +52,7 @@ export default function AudioTranscriberPage() {
           {output && (
             <div className="space-y-2">
               <label className="block text-sm text-neutral-500">Transcript</label>
-              <textarea aria-label="Transcript" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={output} readOnly />
+              <TextArea aria-label="Transcript" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" value={output} readOnly />
               <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy</button>
               <TranscriptExports text={output} segments={segments} baseName={fileName} />
             </div>

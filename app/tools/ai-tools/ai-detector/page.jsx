@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { readAiJson } from '../../../lib/aiClient';
 import { countBillableWords, AI_DETECT_MIN_WORDS, AI_DETECT_MAX_WORDS, AI_DETECT_MAX_CHARS, AI_DETECT_FREE_WORDS_PER_DAY } from '@/lib/ai/pangram';
 import { useToolError } from '../../../lib/useToolError';
+import TextArea from '@/app/components/TextArea';
 
 // 30/09 (docs/audit/RAPPORT-ai-detector-30-09.md): the rewriting method (RAIDAR, lib/ai/raidar.js) called a human
 // arXiv abstract AI on www, and no free method measured on our 97-text corpus reached the market's level without
@@ -54,7 +55,7 @@ export default function AIDetectorPage() {
         <h1 className="text-3xl font-bold text-center mb-2">AI Detector</h1>
         <p className="text-neutral-500 text-center mb-8">Detect if text was written by AI</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
-          <textarea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste text to analyze..." value={input} onChange={e => setInput(e.target.value)} />
+          <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste text to analyze..." value={input} onChange={e => setInput(e.target.value)} />
           <p className={`text-xs -mt-2 ${words > AI_DETECT_MAX_WORDS ? 'text-red-600' : 'text-neutral-500'}`}>{words} word{words === 1 ? '' : 's'} · {AI_DETECT_MIN_WORDS} to {AI_DETECT_MAX_WORDS} words per analysis · {AI_DETECT_FREE_WORDS_PER_DAY.toLocaleString('en-US')} free words a day, no signup (each analysis counts as the next 100 words)</p>
           <button onClick={process} disabled={!input.trim() || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Processing...' : 'Detect AI Content'}

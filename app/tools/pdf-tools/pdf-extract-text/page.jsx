@@ -6,6 +6,8 @@ import { reportToolError } from '../../../lib/reportError';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
 import { parsePageRange } from '../../../lib/pageRange';
+import UploadPrompt from '@/app/components/UploadPrompt';
+import TextArea from '@/app/components/TextArea';
 
 export default function PdfExtractTextPage() {
   const [file, setFile] = useState(null);
@@ -68,7 +70,7 @@ export default function PdfExtractTextPage() {
         <p className="text-neutral-500 text-center mb-8">Extract all text content from your PDF</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a PDF here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a PDF" />}</p>
             <input ref={inputRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-neutral-600">
@@ -83,7 +85,7 @@ export default function PdfExtractTextPage() {
           {status && <p role="status" className="text-center text-yellow-400 text-sm">{status}</p>}
           {text && (
             <div className="space-y-3">
-              <textarea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={text} readOnly />
+              <TextArea aria-label="Result" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none" value={text} readOnly />
               <button onClick={() => navigator.clipboard.writeText(text)} className="w-full bg-neutral-200 hover:bg-neutral-300 rounded-xl py-2 font-semibold transition">Copy</button>
               <FileDownload blob={textBlob} name={file.name.replace(/\.pdf$/i, '.txt')} />
             </div>

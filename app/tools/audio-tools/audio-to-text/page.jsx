@@ -7,6 +7,8 @@ import { encryptedMusicMessage } from '../../../lib/mediaSupport';
 import TranscriptExports from '../../../components/TranscriptExports';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
+import TextArea from '@/app/components/TextArea';
 
 export default function AudioToTextPage() {
   // Mode : 'mic' ou 'file'
@@ -127,7 +129,7 @@ export default function AudioToTextPage() {
               </div>
               {micTranscript && (
                 <div className="space-y-2">
-                  <textarea aria-label="Result"
+                  <TextArea aria-label="Result"
                     className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none text-neutral-800"
                     value={micTranscript}
                     readOnly
@@ -154,7 +156,7 @@ export default function AudioToTextPage() {
               >
                 {file
                   ? <p className="text-neutral-700 font-medium">{file.name}</p>
-                  : <p className="text-neutral-500 text-sm">Click to upload an audio file (MP3, WAV, M4A...)</p>
+                  : <p className="text-neutral-500 text-sm"><UploadPrompt what="an audio file" /> (MP3, WAV, M4A...)</p>
                 }
               </div>
               <p className="text-neutral-500 text-xs text-center -mt-2">Max {audioMaxLabel()} per file</p>
@@ -171,7 +173,7 @@ export default function AudioToTextPage() {
               {fileTranscript && (
                 <div className="space-y-2">
                   <label className="block text-sm text-neutral-500">Transcript</label>
-                  <textarea aria-label="Transcript"
+                  <TextArea aria-label="Transcript"
                     className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none text-neutral-800"
                     value={fileTranscript}
                     readOnly

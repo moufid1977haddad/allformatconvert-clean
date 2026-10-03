@@ -7,6 +7,7 @@ import { encodeLike, extOf } from '../../../lib/imageOutput';
 import { FileDownload } from '../../../components/FileDownload';
 import { emptyImageProblem, unreadableImageMessage } from '../../../lib/fileChecks';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 export default function ImageCropperPage() {
   const [srcType, setSrcType] = useState('image/png');
   const [file, setFile] = useState(null);
@@ -89,7 +90,7 @@ export default function ImageCropperPage() {
         <p className="text-neutral-500 text-center mb-8">Crop images with custom dimensions</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            {image ? <div className="relative inline-block"><img ref={imgRef} src={image} onLoad={onImageLoad} onError={onImageError} className="max-h-48 mx-auto rounded block" />{imgDims.width > 0 && <div aria-hidden="true" className="absolute border-2 border-indigo-500 bg-indigo-500/15 pointer-events-none" style={{ left: `${100 * crop.x / imgDims.width}%`, top: `${100 * crop.y / imgDims.height}%`, width: `${100 * Math.min(crop.w, imgDims.width - crop.x) / imgDims.width}%`, height: `${100 * Math.min(crop.h, imgDims.height - crop.y) / imgDims.height}%` }} />}</div> : <p className="text-neutral-500">Click or drop an image here</p>}
+            {image ? <div className="relative inline-block"><img ref={imgRef} src={image} onLoad={onImageLoad} onError={onImageError} className="max-h-48 mx-auto rounded block" />{imgDims.width > 0 && <div aria-hidden="true" className="absolute border-2 border-indigo-500 bg-indigo-500/15 pointer-events-none" style={{ left: `${100 * crop.x / imgDims.width}%`, top: `${100 * crop.y / imgDims.height}%`, width: `${100 * Math.min(crop.w, imgDims.width - crop.x) / imgDims.width}%`, height: `${100 * Math.min(crop.h, imgDims.height - crop.y) / imgDims.height}%` }} />}</div> : <p className="text-neutral-500"><UploadPrompt what="an image" /></p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
           {image && (

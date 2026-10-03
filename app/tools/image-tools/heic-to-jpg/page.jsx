@@ -5,6 +5,7 @@ import { reportToolError } from '../../../lib/reportError';
 import { imageDims } from '../../../lib/bigImage';
 import { loadRaster, encodeRaster } from '../../../lib/imageOutput';
 import { FileDownload } from '../../../components/FileDownload';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 export default function HeicToJpgPage() {
   const [file, setFile] = useState(null);
@@ -51,7 +52,7 @@ export default function HeicToJpgPage() {
         <p className="text-neutral-500 text-center mb-8">Convert iPhone HEIC photos to JPG format</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : 'Click or drop a HEIC file here'}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a HEIC file" />}</p>
             <input ref={inputRef} type="file" accept=".heic,.heif" className="hidden" onChange={handleFile} />
           </div>
           <div>
