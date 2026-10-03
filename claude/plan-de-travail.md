@@ -20,6 +20,15 @@ préversions), et ≈ 157 conversions hors du site (le vrai jeton était dans `.
 4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
    rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
 
+## 🔔 P30 — 04/10 : panne ConvertAPI, secours, alertes, Chromium isolé (`docs/audit/RAPPORT-p30-convertapi-alertes-04-10.md`, repère `restauration-avant-p30-04-10` = `bce5e714`)
+
+| Lot | État | Reste |
+|---|---|---|
+| 1 Rétablissement + cause | ✅ Word to PDF (.docx), PDF to Word, Excel, PowerPoint **fonctionnent sur www** (5 vraies conversions, 0,05 $) ; cause : ≥ 99 % de la consommation passée par le site = nos bancs (rapport §1) ; règle permanente ci-dessus | Propriétaire, facultatif : le tableau de bord ConvertAPI (statistiques) dirait d'où viennent les ≈ 157 conversions hors du site ; **retirer le vrai jeton ConvertAPI de `.env.local`** (le code le refuse déjà hors production) |
+| A Alertes + secours | ✅ **en production** (`onlineconvertools-gjjrs94r8` = `f8db1de9`) : téléphone + courriel une fois par incident (ConvertAPI, OpenAI, Pangram) et au rétablissement ; seuils 50/80/100 % du forfait ConvertAPI (1 000/mois) ; secours LibreOffice **annoncé** (Word to PDF, Merge PDF) ; « try again later » (PDF to Word/Excel/PowerPoint) ; **alerte de test envoyée le 03/10 à 23 h 06 UTC (ntfy=sent, email=sent)** ; revue indépendante ×2 appliquée | Le propriétaire confirme avoir reçu la notification de test. Si le forfait change : `lib/providers/convertApiPlan.js` (2 valeurs). Retour arrière : promouvoir `onlineconvertools-fo109wbpv` |
+| 4 Équations .docx | ✅ identiques à Word (0,0 % de pixels différents) ; MathType rendu ; rien à corriger | — |
+| 5 Chromium isolé | voir le rapport §5 | — |
+
 ## ✅ INCIDENT 402 DU 03/10 — CLOS (compte passé en Pro par le propriétaire, plafond de dépense 50 $/mois)
 
 **Constat chiffré** (API d'usage Vercel `/v2/usage?type=requests`, lue le 03/10, cycle du 03/09 au 02/10, heure de la machine) :
@@ -74,7 +83,7 @@ préversions), et ≈ 157 conversions hors du site (le vrai jeton était dans `.
 | Lot | État | Reste |
 |---|---|---|
 | 1 Chromium | ✅ **en production** (`gotenberg-v2` `1bb98768`, fusion `5af581aa`, Vercel `fo109wbpv`) : **Chromium 154 de Debian** (CVE-2026-87491 corrigée, sans attendre Gotenberg) ; **JavaScript bloqué dans tout Chromium** (option de Gotenberg + politique d'entreprise : un cadre d'un autre site exécutait encore son script avec l'option seule — trouvé par la revue indépendante) ; V8 sans JIT ; visionneuse PDF coupée ; 0/18 + 4 cas bloqués ; 65/65 conversions et 6/6 options URL identiques au pixel ; 27 adresses internes refusées ; www 29/29 + 11 vraies conversions. **Bac à sable impossible sur Railway** (mesuré) | Option propriétaire : instance Chromium séparée sans réseau privé (nouveau service payant ≈ 3-4 $/mois, chiffré au rapport §1.7). Retour arrière : `gotenberg-v2` → `8e8e178d`, Vercel → `jcglmx2uu` |
-| 2 Équations .docx | **bloqué** : **crédits ConvertAPI épuisés** depuis le 02/10 ≈ 19 h 52 → Word to PDF (.docx), PDF to Word, PDF to Excel, PDF to PowerPoint en échec sur www (HTTP 403 `quota_exceeded`, 0 $ dépensé) | **Propriétaire : recharger ConvertAPI**, puis `scripts/p29/docx-equations-www.mjs` (≈ 0,02 $, commande au rapport §2) |
+| 2 Équations .docx | ✅ **fait par P30** (identiques à Word ; crédits rechargés par le propriétaire) — ancien constat : **crédits ConvertAPI épuisés** depuis le 02/10 ≈ 19 h 52 → Word to PDF (.docx), PDF to Word, PDF to Excel, PDF to PowerPoint en échec sur www (HTTP 403 `quota_exceeded`, 0 $ dépensé) | **Propriétaire : recharger ConvertAPI**, puis `scripts/p29/docx-equations-www.mjs` (≈ 0,02 $, commande au rapport §2) |
 
 **À surveiller (règle permanente)** : Chromium de Gotenberg suit désormais l'archive de sécurité de Debian
 (`services/gotenberg/Dockerfile`, trois valeurs : version, horodatage snapshot.debian.org, SHA-256). À chaque nouvelle
