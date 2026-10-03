@@ -14,8 +14,8 @@ Railway (mêmes droits) ; aucun identifiant affiché ni écrit (les scripts lise
 | Lot | Contenu | État |
 |---|---|---|
 | 1 | Gotenberg : adresses privées interdites (+ webhook, downloadFrom) | ✅ **en production** (Railway `gotenberg-v2` déploiement `930bc129`, 03/10 23 h 54 UTC) |
-| 2 | E2 : PDF/A 2u, 3u, 2a, 3a | en cours |
-| 3 | E1 : DOC, RTF > 4 Mo | à faire |
+| 2 | E2 : PDF/A 2u, 3u, 2a, 3a | ✅ **en production** (pdf-tools `bf8a5d74`, site `arram1kr8` = `35f6cccb`) |
+| 3 | E1 : PDF to Word en .doc, RTF et DOC au-delà de 4 Mo | ✅ **en production** (même déploiement ; service média `c04f9c3c`) |
 
 ## 1. Lot 1 — Gotenberg : un fichier HTML déposé ne peut plus faire charger une adresse interne
 
@@ -160,3 +160,83 @@ LibreOffice de Gotenberg n'écrit que du PDF. Gros fichiers : le service média 
   page prévient avant l'envoi, et le dit après quand le document a des zones de texte (comptées dans le DOCX).
 - Si l'étape .doc échoue (taille, délai) alors que ConvertAPI a déjà facturé le DOCX : **le DOCX payé est livré, et la
   page le dit** — jamais une deuxième conversion payante, jamais rien.
+
+- **Page** : formats Word (.docx), Word 97-2003 (.doc), Rich Text (.rtf) pour toute taille acceptée (99 Mo) ;
+  « RTF jusqu'à 4 Mo » retiré ; note sur la limite des zones de texte ; politique de confidentialité mise à jour (le
+  DOCX passe par notre serveur pour le .doc).
+
+## 4. Mise en production (règle d'usage Vercel : lourd en local, une passe sur la préversion, léger sur www)
+
+**Service d'abord (« additif d'abord »), trois fusions de `services/` seuls sur master, chacune vérifiée en ligne** :
+| Fusion | Contenu | Vérifié en ligne |
+|---|---|---|
+| `96ede7de` | pdf-tools u/a + `/v1/docx-to-doc` ; service média rtf/doc | ancien comportement **24/24 identique** (PDF/A 1b/2b/3b, réparation, compression sur 5 vrais PDF, au pixel) ; nouveau code présent (`soffice` dans `/health`) |
+| `aa2f0688` | corrections de la revue (§5) | 24/24 identique ; E2 en ligne **160/160**, texte mot pour mot |
+| `d191ddb0` | LibreOffice 25.2 (rétroportages Debian) | 24/24 identique ; Ghostscript 10.00, qpdf 11.3, veraPDF 1.30.2 inchangés ; .doc : texte courant 6/6 identique |
+
+**Bancs locaux sur la construction de production** (`next build` + `next start`) :
+- E2 : `pdfa-bench` 20 PDF × 7 niveaux (avec et sans abaissement) **220/220** puis **160/160** sur le code final, chaque
+  fichier revalidé par un veraPDF à part et, pour u/a, comparé mot pour mot au source ; page PDF/A **8/8 sous
+  Chromium, Firefox et WebKit** (non balisé : 2a/3a éteints et dit ; balisé : 2a vérifié ; sans Unicode : abaissement dit
+  ou refus avec la raison ; 2b par défaut inchangé ; PDF de 5,7 Mo par le service média → 3u vérifié).
+- E1 : page PDF to Word **7/7 sous Chromium, Firefox et WebKit** — .doc, .docx, .rtf petits ; **RTF et DOC d'un PDF de
+  5,7 Mo par le service média** (le RTF déposé est la sortie ConvertAPI octet pour octet) ; document à zones de texte :
+  la page le dit. **Sans dépense ni Supabase** : un module de banc chargé dans le seul serveur local
+  (`scripts/p26/e1/fake-providers.mjs`) répond à la place de ConvertAPI avec de **vraies sorties ConvertAPI antérieures**
+  et à la place de Supabase (28 + 128 appels interceptés, aucun envoyé) ; pdf-tools et le service média réels (leurs
+  clés lues dans Railway, en mémoire). Fichiers rouverts : Word 16 (mots, pages, tableaux, images identiques au DOCX)
+  et LibreOffice 26.
+- Solidité (fichier vide, abîmé, faux) : **tous les outils sous Chromium 522/522** (le code partagé `convertOffice` /
+  `respondStaged` a changé) ; outils touchés sous Firefox **45/45** et WebKit **45/45** ; les 7 conversions Gotenberg par
+  les pages + un HTML de 6 Mo par le service média.
+- File .doc : 5 demandes simultanées avec un délai court → 4 converties, 1 coupée proprement (504), la suivante servie ;
+  aucun LibreOffice laissé en vie. `runprocess.test.mjs` 2/2.
+
+**Préversion, une fois** (`onlineconvertools-rktt3w3r9`, commit `8cb6914d`, jeton OIDC de développement limité à son
+origine) : page PDF/A 8/8 (vrai pdf-tools, vrai service média) ; 7 conversions Gotenberg **identiques au pixel** à la
+référence de www + HTML de 6 Mo ; PDF to Word contrôlé **sans conversion** (une vraie serait payante) : 3 formats, note
+.doc, boutons actifs pour 5,7 Mo.
+
+**Fusion** `35f6cccb` (code du site = celui de la préversion, vérifié) → production Vercel **`onlineconvertools-arram1kr8`**.
+**www** : contrôle léger 29/29, RAW 7/7, PDF/A 8/8 réelles (gratuites), PDF to Word contrôlé sans conversion, 7
+conversions Gotenberg identiques au pixel à la référence du début de nuit, adresses internes toujours refusées.
+**Aucun retour arrière.** Retour arrière prêt : Vercel → promouvoir `onlineconvertools-3qifwbvs0` (site d'avant les
+pages P26) ; Railway → pdf-tools `4e9a95db` (d'avant P26), Gotenberg `515a1679`, service média `ba834c25`.
+
+**Pas fait, par règle** : aucune vraie conversion PDF → .doc avec ConvertAPI (≈ 0,01 $, « aucune dépense hors facture
+Railway ») — l'étape ConvertAPI est le code inchangé du DOCX ; à faire à la première occasion sur www.
+
+## 5. Revues indépendantes
+- **Sécurité (point 1, obligatoire)** : feu vert (§1.6).
+- **Code des lots 2-3** (non obligatoire, faite avant la production) : 1 critique, 3 sérieux, 4 moyens, 3 mineurs —
+  **tous corrigés et mesurés** : demande .doc dont le délai expire pendant l'attente → service bloqué (défaut ancien de
+  `runProcess`, rendu atteignable) ; LibreOffice orphelin après une coupure (groupe de processus) ; 60 s des anciens
+  niveaux PDF/A pendant l'envoi pas strictement identiques (rétablies dès le début de la demande) ; .doc qui échoue
+  après la facture ConvertAPI → rien livré (désormais le DOCX payé, dit) ; PDF chiffré annoncé « non balisé » ; règles
+  veraPDF du mauvais niveau affichées ; Ghostscript relancé pour rien ; double lecture du balisage en retard ; règle
+  « balisé » différente entre la page et le service ; lecture de 80 Mo dans le navigateur (20 Mo) ; LibreOffice qui
+  pouvait rendre tout `/health` rouge.
+
+## 6. Facture Railway (mesurée, API de mesures Railway ; tarif : 10 $/Go/mois de mémoire, 20 $/vCPU/mois)
+| Service | Avant P26 | Après P26 |
+|---|---|---|
+| gotenberg-v2 (production) | 0,55 à 1,1 Go (la mémoire monte avec le temps), CPU ≈ 0 | 0,48-0,52 Go après redémarrage, CPU ≈ 0 — **aucune hausse** due aux protections (le mandataire existe depuis 8.32) |
+| gotenberg-fonts (repli) | 0,4-0,8 Go | 0,44 Go — inchangé |
+| pdf-tools | 0,017-0,035 Go au repos | **0,025 Go au repos** : LibreOffice ne reste pas en mémoire (lancé par demande) |
+| service média | en veille | en veille — inchangé |
+Coût par usage : un .doc ≈ 1 s, ≈ 0,25 Go, 1 vCPU → **≈ 0,00001 $** ; un PDF/A u/a ≈ 3-10 s → **≈ 0,00005 $**. Les bancs
+de cette nuit ≈ **0,03-0,05 $** de Railway. Aucun nouveau service, aucune dépense ailleurs, sauf **1 conversion
+ConvertAPI imprévue (≈ 0,01 $)** au début (§1.5).
+
+## 7. Fin
+**Production : Vercel `onlineconvertools-arram1kr8` = `35f6cccb` ; Railway : gotenberg-v2 `930bc129`, gotenberg-fonts
+`55fa4c41`, pdf-tools `bf8a5d74`, service média `c04f9c3c`. Aucun retour arrière.**
+
+**Ce qui manque** (au plan) :
+1. **Défaut ancien, grave, des PDF/A 1b/2b/3b** : texte altéré par Ghostscript (§2.3) — lot dédié, correction mesurée.
+2. **Gotenberg 8.37.0** (CGNAT/198.18 derrière un nom DNS, bornes contre les pages hostiles) — chantier dédié, banc au pixel.
+3. Une vraie conversion PDF → .doc sur www (≈ 0,01 $).
+4. **E3** : en attente du compte Google Cloud du propriétaire (liste au plan, tableau P25).
+5. Les DOCX à zones de texte fixes perdent 4-5 % du texte en .doc (limite de l'ancien format, dite sur la page).
+6. Word ne sait pas imprimer en PDF par automatisation sur cette machine (il bloque) : les comparaisons Word sont faites
+   par ses propres comptes (mots, pages, tableaux, images), le rendu visuel par LibreOffice.
