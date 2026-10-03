@@ -77,9 +77,9 @@ const SPACES = [
 ];
 
 export default function ColorConverterPage() {
-  // starts on a blue that reads on white (5.2:1): the page's own sample text must pass WCAG AA (axe, P27)
-  const [rgb, setRgb] = useState({ r: 37, g: 99, b: 235 });
-  const [hexText, setHexText] = useState('#2563eb');
+  // starts on a blue that reads on white AND on black (4.6:1 both): the page's own sample texts must pass WCAG AA (axe, P27)
+  const [rgb, setRgb] = useState({ r: 58, g: 114, b: 216 });
+  const [hexText, setHexText] = useState('#3a72d8');
   const [hexError, setHexError] = useState('');
   const [alpha, setAlpha] = useState(1);
   // What the visitor is typing in one space is kept as typed (else 100% cyan would snap back while editing).

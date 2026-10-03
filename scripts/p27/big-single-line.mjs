@@ -20,6 +20,7 @@ const json = JSON.stringify(Array.from({ length: Math.ceil((mb * 1024 * 1024) / 
 
 const b = await { chromium, firefox, webkit }[engine].launch();
 const ctx = await b.newContext({ viewport: { width: 1280, height: 900 } });
+if (engine === 'chromium') await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin });
 await ctx.addCookies([{ name: 'oct_automation', value: '1', url: origin }]);
 
 async function measure(name, url, load) {
@@ -56,8 +57,11 @@ for (const [name, url] of [['JSON Formatter', '/tools/developer-tools/json-forma
   await measure(`${name}, ${mb} MB pasted on one line`, url, async (p) => {
     const ta = p.locator('textarea').first();
     await ta.focus();
-    // a paste: the browser inserts the clipboard text (insertText is what a paste does to a text field)
-    await p.evaluate((t) => document.execCommand('insertText', false, t), json);
+    // a REAL paste (Ctrl+V from the system clipboard): the page's paste handling runs, as for a visitor
+    await p.evaluate((t) => navigator.clipboard.writeText(t), json);
+    await ta.focus();
+    await p.keyboard.press('Control+V');
+    await p.waitForFunction(() => document.querySelector('[data-large-text]') || document.querySelector('textarea')?.value.length > 1000, null, { timeout: 120000 }).catch(() => {});
   });
 }
 await b.close();

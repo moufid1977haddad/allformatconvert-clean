@@ -61,12 +61,12 @@ export default function GIFtoPNGPage() {
         <p className="text-neutral-500 text-center mb-8">Convert GIF to PNG in your browser</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            {image ? <img src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500"><UploadPrompt what="an image" /></p>}
+            {image ? <img alt="Preview of your image" src={image} className="max-h-48 mx-auto rounded" /> : <p className="text-neutral-500"><UploadPrompt what="an image" /></p>}
             <input ref={inputRef} type="file" accept=".gif" className="hidden" onChange={handleFile} />
           </div>
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <button onClick={convert} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert</button>
-          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
+          {result && <div className="space-y-2"><img alt="Preview of your image" src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
           {gifFile && <button onClick={extractAll} disabled={zipBusy} className="w-full bg-neutral-800 hover:bg-neutral-700 text-white disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">{zipBusy ? 'Extracting frames...' : 'Extract all frames (ZIP of PNGs)'}</button>}
           {zip && <FileDownload href={zip.url} name="gif-frames.zip" />}
         </div>

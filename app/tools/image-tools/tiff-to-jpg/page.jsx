@@ -171,7 +171,7 @@ export default function TiffToJpgPage() {
             </div>
           )}
           {result && pageInfo?.icc && <p className="text-xs text-neutral-500" data-tiff-icc>This TIFF carries a colour profile (for example Adobe RGB), which is not applied here: colours may look less saturated than in a colour-managed viewer.</p>}
-          {result && <div className="space-y-2"><img src={result} className="max-h-48 mx-auto rounded" /><FileDownload href={result} name={file ? file.name.replace(/\.[^.]+$/, '') + '.jpg' : 'converted.jpg'} /></div>}
+          {result && <div className="space-y-2"><img alt="Preview of your image" src={result} className="max-h-48 mx-auto rounded" /><FileDownload href={result} name={file ? file.name.replace(/\.[^.]+$/, '') + '.jpg' : 'converted.jpg'} /></div>}
         </div>
       </div>
       <SeoContent

@@ -90,7 +90,7 @@ export default function ImageCropperPage() {
         <p className="text-neutral-500 text-center mb-8">Crop images with custom dimensions</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            {image ? <div className="relative inline-block"><img ref={imgRef} src={image} onLoad={onImageLoad} onError={onImageError} className="max-h-48 mx-auto rounded block" />{imgDims.width > 0 && <div aria-hidden="true" className="absolute border-2 border-indigo-500 bg-indigo-500/15 pointer-events-none" style={{ left: `${100 * crop.x / imgDims.width}%`, top: `${100 * crop.y / imgDims.height}%`, width: `${100 * Math.min(crop.w, imgDims.width - crop.x) / imgDims.width}%`, height: `${100 * Math.min(crop.h, imgDims.height - crop.y) / imgDims.height}%` }} />}</div> : <p className="text-neutral-500"><UploadPrompt what="an image" /></p>}
+            {image ? <div className="relative inline-block"><img alt="Preview of your image" ref={imgRef} src={image} onLoad={onImageLoad} onError={onImageError} className="max-h-48 mx-auto rounded block" />{imgDims.width > 0 && <div aria-hidden="true" className="absolute border-2 border-indigo-500 bg-indigo-500/15 pointer-events-none" style={{ left: `${100 * crop.x / imgDims.width}%`, top: `${100 * crop.y / imgDims.height}%`, width: `${100 * Math.min(crop.w, imgDims.width - crop.x) / imgDims.width}%`, height: `${100 * Math.min(crop.h, imgDims.height - crop.y) / imgDims.height}%` }} />}</div> : <p className="text-neutral-500"><UploadPrompt what="an image" /></p>}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
           {image && (
@@ -110,7 +110,7 @@ export default function ImageCropperPage() {
           )}
           <button onClick={applyCrop} disabled={!image} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Crop Image</button>
           {error && <p role="alert" className="text-red-400 text-center text-sm">{error}</p>}
-          {result && <div className="space-y-2"><img src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
+          {result && <div className="space-y-2"><img alt="Preview of your image" src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
         </div>
       </div>
       <SeoContent

@@ -111,7 +111,7 @@ export default function SvgToPngPage() {
           {status && <p role="status" className="text-center text-yellow-400 text-sm">{status}</p>}
           {result && (
             <div className="space-y-2">
-              <img src={result} className="max-h-48 mx-auto rounded" />
+              <img alt="Preview of your image" src={result} className="max-h-48 mx-auto rounded" />
               <FileDownload href={result.url} name={result.name} />
             </div>
           )}

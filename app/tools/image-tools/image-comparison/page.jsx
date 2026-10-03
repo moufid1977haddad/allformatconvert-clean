@@ -65,11 +65,11 @@ export default function ImageComparisonPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="border-2 border-dashed border-neutral-200 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => ref1.current.click()}>
-              {image1 ? <img src={image1} className="max-h-32 mx-auto rounded" /> : <p className="text-neutral-500 text-sm">Image 1 (Before)</p>}
+              {image1 ? <img alt="Preview of your image" src={image1} className="max-h-32 mx-auto rounded" /> : <p className="text-neutral-500 text-sm">Image 1 (Before)</p>}
               <input ref={ref1} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files[0]; e.target.value = ''; if (f) checkImage(f, 'first', () => { setImage1(URL.createObjectURL(f)); setDiff(null); }); }} />
             </div>
             <div className="border-2 border-dashed border-neutral-200 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => ref2.current.click()}>
-              {image2 ? <img src={image2} className="max-h-32 mx-auto rounded" /> : <p className="text-neutral-500 text-sm">Image 2 (After)</p>}
+              {image2 ? <img alt="Preview of your image" src={image2} className="max-h-32 mx-auto rounded" /> : <p className="text-neutral-500 text-sm">Image 2 (After)</p>}
               <input ref={ref2} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files[0]; e.target.value = ''; if (f) checkImage(f, 'second', () => { setImage2(URL.createObjectURL(f)); setDiff(null); }); }} />
             </div>
           </div>
@@ -89,9 +89,9 @@ export default function ImageComparisonPage() {
           {image1 && image2 && mode === 'slider' && (
             <div className="space-y-4">
               <div className="relative overflow-hidden rounded-xl" style={{height: '300px'}}>
-                <img src={image2} className="absolute inset-0 w-full h-full object-contain bg-neutral-100" />
+                <img alt="Preview of your image" src={image2} className="absolute inset-0 w-full h-full object-contain bg-neutral-100" />
                 <div className="absolute inset-0 overflow-hidden" style={{width: sliderPos + '%'}}>
-                  <img src={image1} className="absolute inset-0 w-full h-full object-contain bg-neutral-100" style={{width: (100 / Math.max(sliderPos, 1) * 100) + '%', maxWidth: 'none'}} />
+                  <img alt="Preview of your image" src={image1} className="absolute inset-0 w-full h-full object-contain bg-neutral-100" style={{width: (100 / Math.max(sliderPos, 1) * 100) + '%', maxWidth: 'none'}} />
                 </div>
                 <div className="absolute top-0 bottom-0 w-1 bg-white" style={{left: sliderPos + '%'}}>
                   <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center text-neutral-900 font-bold shadow-lg">⇄</div>
