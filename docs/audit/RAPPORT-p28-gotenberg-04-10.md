@@ -14,8 +14,8 @@ dans sa passe iPhone (test 26). Rapport complété après chaque lot.
 |---|---|---|
 | 1 | Gotenberg 8.36 → **8.37.0** (équations Word rétablies) | ✅ **en production** (`gotenberg-v2` `26130544`, fusion `e060eb63`) |
 | 1b | Trouvé en route : **Aptos** (police par défaut d'Office depuis 2024) rendue en police à empattements → Liberation Sans | ✅ **en production** (`gotenberg-v2` `8e8e178d`, fusion `df37f58e`) |
-| 2 | Équations des ODT écrits par Word (MathML « à plat ») | voir §3 |
-| 3 | PDF Repair : texte contrôlé, deux méthodes de plus | voir §4 |
+| 2 | Équations des ODT écrits par Word (MathML « à plat ») | ✅ **en production** (site `onlineconvertools-jcglmx2uu`, fusion `03aa60d1`) |
+| 3 | PDF Repair : texte contrôlé, deux méthodes de plus | ✅ **en production** (pdf-tools `ab0077fd` + site, fusion `03aa60d1`) : 19 textes altérés en silence → 0 ; 64 refus → 25 |
 
 ## 1. Lot 1 — Gotenberg 8.37.0
 
@@ -98,3 +98,93 @@ Excel (Aptos Narrow) : 1 page chez Excel, 2 pages avant la règle (colonne « Co
 diapositives en Liberation Sans de largeur proche de PowerPoint. Fusion `df37f58e` → `gotenberg-v2` `8e8e178d` ; banc de
 production identique à la mesure à côté ; sondes propres ; www 8/8 (texte en Liberation Sans).
 Retour arrière : déploiement `26130544` (8.37 sans la règle) ou `930bc129` (8.36).
+
+## 3. Lot 2 — équations des ODT écrits par Word
+**Constat (mesuré)** : un document Word enregistré en ODT (« Enregistrer sous… OpenDocument ») porte ses équations en
+objets formule au MathML « à plat » (les parties directement sous `<math>`, sans `<mrow>`) et en lettres
+mathématiques Unicode (𝑥, 𝜕, 𝛻 : l'italique mathématique de Word). LibreOffice les empile verticalement avec une marque
+d'erreur « ¿ » et n'a pas de glyphe pour ces lettres — en 8.37 comme dans LibreOffice 26 de bureau (en 8.36 : une icône
+de pièce de puzzle). iLovePDF (Word) les rend juste, **Smallpdf les perd**.
+**Cause et moyen** : MathML donne un sens standard aux deux : un seul `<mrow>` autour des parties, et la lettre de base
+avec `mathvariant`. Essai sur LibreOffice de bureau puis sur Gotenberg 8.37 : équations lisibles, au niveau de Word et
+d'iLovePDF (reste : crochets de matrice non étirés).
+**Correction** (`lib/odtWordMath.js`, appelée par `/api/convert-to-pdf` pour .odt/.ott, sur le modèle de
+`lib/xlsxDefaultFont.js`) : seuls les objets formule **sans `<semantics>`** (ceux de LibreOffice en ont toujours un) sont
+réécrits ; tout autre fichier part octet pour octet ; un fichier illisible part comme avant (raison écrite au journal).
+Revue indépendante appliquée : seuls italique, gras, gras italique sont convertis (𝔼, 𝟙… laissés : LibreOffice
+dessinerait E, 1 — faux mais plausible) ; table explicite des variantes grecques (NFKC confondrait 𝜙/𝜑, 𝜖/ε) ; un jeton
+qui mêle lettres mathématiques et texte ordinaire est laissé tel quel. Test `scripts/p28/test-odt-word-math.mjs`
+(18 cas + corpus réel : 6 objets réécrits dans l'ODT de Word, 0 dans celui de LibreOffice, `mimetype` gardé en tête et
+non compressé). Préversion puis www : la conversion par la page donne le PDF mesuré en direct (identique au pixel).
+**Non mesuré** : le `.docx` passe par ConvertAPI en production ; son rendu des équations demanderait un appel payant
+(≈ 0,01 $, interdit dans ce chantier) — aucune promesse ajoutée à la page Word to PDF.
+
+## 4. Lot 3 — PDF Repair : aucun texte altéré sans le dire
+### 4.1 Mesure avant (service en ligne, Ghostscript 10.00, qpdf 11.3)
+Corpus permanent : 248 copies abîmées (`scripts/p28/repair/make_damaged.py` : troncature à 90 % et 60 %, fin de
+fichier coupée, table xref décalée, 2 Ko effacés au milieu, longueurs de flux fausses, `endobj` retirés, octets parasites
+en tête) des 31 PDF de texte de P27 (grec, arabe, chinois, ligatures, accents décomposés). Banc
+`scripts/p28/repair/bench-service.mjs` (texte relu ici par Ghostscript et Poppler, comparé à ce qu'ils lisent dans le
+fichier abîmé et dans l'original). **Avant : 184 livrés, 64 refusés ; 35 livrés par le repli Ghostscript, dont 19 avec
+un texte différent de celui que les lecteurs trouvent dans la source — sans le dire.** En local (Ghostscript 10.07,
+qpdf 12.4) le repli ne se déclenchait jamais : seule la mesure sur le vrai service montrait le défaut. Trouvé aussi :
+qpdf 12 peut perdre un objet et livrer un texte amputé d'une phrase que les deux lecteurs lisent encore dans la source.
+### 4.2 Ce que fait le marché
+iLovePDF répare avec un moteur commercial (« 3-Heights PDF Analysis & Repair », pdf-tools.com) : il reconstruit l'arbre
+des pages des PDF tronqués (texte d'origine retrouvé) ; sur le PDF effacé au milieu il livre exactement le texte lisible
+de la source ; il échoue (sans fichier) sur 3 tronqués sur 4 que nous refusons aussi.
+### 4.3 Correction (service pdf-tools, `src/repair.js`, `py/rebuild_pages.py`)
+Méthodes dans l'ordre : qpdf → **Poppler** (`pdfunite` : recopie les pages lues par Poppler ; signets et balisage non
+repris, dit) → **reconstruction de l'arbre des pages** (fin de fichier perdue : nouveau catalogue au-dessus de l'arbre des
+pages survivant, ou, s'il est perdu, des pages autonomes dans l'ordre du fichier — une seule révision exigée, « vérifiez
+l'ordre et qu'aucune page supprimée ne réapparaît » dit) → Ghostscript. **Chaque résultat n'est livré que si son texte
+est celui que Ghostscript et Poppler lisent dans le fichier abîmé** (même règle que les PDF/A de P27 : mêmes caractères
+pour chaque lecteur qui lit la source, mêmes mots pour au moins un, et même nombre de pages pour Poppler). Si aucun
+lecteur n'ouvre la source, seule une réparation structurelle (contenu des pages non réécrit) est livrée, et la page dit
+que le texte n'a pas pu être comparé. Sinon : rien, et une phrase claire. Lecture de la source en parallèle des
+réparations ; délai propre de 200 s (site : 230 s). Page : méthode, lecteurs utilisés, avertissements, FAQ.
+### 4.4 Revue indépendante (« GO après corrections ») — toutes appliquées
+Trois défauts sérieux de la reconstruction, prouvés sur des cas fabriqués (gardés : `scripts/p28/repair/crafted/`) :
+une ancienne révision d'une page reprise à la place de la récente (→ dernière occurrence de chaque objet) ; une page
+supprimée ressuscitée et l'ordre faux (→ l'arbre survivant d'abord ; sinon une seule révision, avertissement) ; attributs
+hérités perdus, pages blanches (→ refus quand une page n'a pas ses propres `/MediaBox` et `/Resources`). Moyens : page
+perdue d'un scan sans texte comptée « identique » (→ nombre de pages), messages d'échec et notes inexacts, décompression
+non bornée (→ 256 Mo). Trouvé en appliquant : `/Prev` des signets pris pour une révision (corrigé).
+### 4.5 Mesures après
+- Local (248) : 0 livré avec un texte différent de la source lisible ; refus 52 → 25 ; les 27 récupérés ont exactement
+  le texte de l'original ; cas fabriqués : comportement attendu (README).
+- **Service en ligne (pdf-tools `ab0077fd`, fusion `03aa60d1`) : 223 livrés (148 qpdf, 1 Poppler, 74 reconstruits), 25
+  refusés ; Ghostscript n'a plus rien livré ; 0 texte altéré par rapport aux lecteurs du service.** 41 reconstructions
+  « non vérifiables » : 26 ont exactement le texte de l'original, 15 celui que Ghostscript lit encore dans la source
+  tronquée (la fin du document est réellement perdue). 31 PDF intacts : 31 par qpdf, texte identique.
+- PDF/A 1b/2b/3b et Compress sur le service reconstruit : inchangés.
+- Durée : document ordinaire < 1 s de plus ; cas extrême de 10 400 pages (local) 51-79 s (lecture du texte).
+- Préversion `onlineconvertools-4rkivi23v` (une passe) puis **www** (`onlineconvertools-jcglmx2uu`) : page Repair avec 4
+  vrais PDF abîmés (méthode, contrôle du texte ou avertissement affichés, fichier téléchargé) ; `www-light` 29/29.
+Retour arrière : pdf-tools → déploiement `538d1590` ; Vercel → `onlineconvertools-1q669xcht` (= `df37f58e`) ; repère
+`restauration-avant-p28-lot23` = `df37f58e`.
+
+## 5. Facture Railway (mesurée : API de mesures Railway, `scripts/p28/rw-metrics.mjs` ; 10 $/Go/mois, 20 $/vCPU/mois)
+| Service | Avant P28 | Après P28 |
+|---|---|---|
+| gotenberg-v2 (production) | mémoire moyenne 0,72 Go sur 30 h (8.36) | **0,41-0,43 Go** au repos (8.37 : Chromium ≈ 75 Mo de moins) → ≈ −2 à −3 $/mois |
+| gotenberg-fonts (à côté) | 0,57 Go | 0,45-0,50 Go |
+| pdf-tools | 0,023-0,035 Go au repos (P27) | **0,036 Go** au repos — inchangé ; image : `pdfunite` est déjà dans `poppler-utils` (aucun paquet ajouté) |
+Coût par usage : une réparation lit le texte de la source et du résultat (deux lecteurs) : < 1 s de processeur pour un
+document ordinaire (≈ 0,00001 $). Bancs du chantier : quelques minutes de processeur (≈ 0,05 $). Aucun service ajouté,
+aucune variable touchée (Railway ni Vercel), aucune autre dépense ; rien sur Supabase ; ConvertAPI non appelé.
+
+## 6. Reste
+- **Sécurité (revue P28)** : Chromium de Gotenberg sans bac à sable avec JavaScript actif, HTML déposé passé tel quel ;
+  Chromium 152 ne corrige pas CVE-2026-87491. Passer à la prochaine Gotenberg (Chromium ≥ 153) dès sa sortie avec le même
+  banc, et mesurer `CHROMIUM_DISABLE_JAVASCRIPT=true` ou un nettoyage du HTML déposé (au plan).
+- **Équations d'un `.docx`** : converties par ConvertAPI en production, non mesurées (≈ 0,01 $ — décision du propriétaire).
+- Mineur, mesuré : en RTF, équations alignées à gauche (Word : centrées) ; crochets de matrice non étirés dans l'ODT de
+  Word ; une équation colorée par Word sort en noir ; police de formule de LibreOffice (pas Cambria Math).
+- PDF Repair : PDF chiffré AES-256 dont la fin est perdue — iLovePDF le récupère, nous non (pages dans des flux d'objets
+  chiffrés).
+
+## 7. Fin
+Production : **Vercel `onlineconvertools-jcglmx2uu` = `03aa60d1`** (puis commits de rapport) ; **Railway `gotenberg-v2`
+`8e8e178d` (8.37.0 + règles Aptos), `pdf-tools` `ab0077fd`**. Aucun retour arrière nécessaire. Repères :
+`restauration-avant-p28-04-10` = `6a8af4be`, `restauration-avant-p28-lot23` = `df37f58e`.
