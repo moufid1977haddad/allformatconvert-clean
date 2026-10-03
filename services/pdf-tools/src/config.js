@@ -32,4 +32,9 @@ module.exports = {
   MAX_COMPRESS_BYTES: Number(process.env.MAX_COMPRESS_BYTES) || 200 * 1024 * 1024,
   // Where staged files live. No default on purpose: without it /v1/compress-staged answers 503.
   MEDIA_SERVICE_URL: process.env.MEDIA_SERVICE_URL || '',
+  // /v1/docx-to-doc (src/docConvert.js). Set by the Dockerfile; locally, the path of soffice.
+  SOFFICE_BIN: process.env.SOFFICE_BIN || 'soffice',
+  DOC_TIMEOUT_MS: Number(process.env.DOC_TIMEOUT_MS) || 120_000,
+  // /v1/pdfa levels 2u/3u/2a/3a (P26): up to three conversions + veraPDF runs when a lower level is allowed.
+  PDFA_ADVANCED_TIMEOUT_MS: Number(process.env.PDFA_ADVANCED_TIMEOUT_MS) || 200_000,
 };

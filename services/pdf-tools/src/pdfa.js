@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { runProcess } = require('./runProcess');
-const { GS_BIN, VERAPDF_BIN } = require('./config');
+const { GS_BIN, VERAPDF_BIN, PDFPY_BIN } = require('./config');
 
 // Vendored, unmodified, from this machine's own Ghostscript 10.07.1 install
 // (lib/PDFA_def.ps and iccprofiles/srgb.icc) -- these ship as part of
@@ -146,4 +146,95 @@ async function convertToPdfA(workDir, conformance, signal) {
   return { ok: true, compliant: true, conformance, verapdf, outputPath: path.join(workDir, OUTPUT_NAME) };
 }
 
-module.exports = { convertToPdfA };
+// ---- P26 (E2): levels 2u, 3u, 2a, 3a ---------------------------------------------------------------------
+// U (Unicode): Ghostscript as for B (it writes ToUnicode maps where it can), the XMP relabelled U, then veraPDF
+// against the U profile. A (accessible): needs a TAGGED source -- Ghostscript drops the structure tree, so the
+// source itself is kept (py/pdfa_fix.py keep: OutputIntent, XMP, MarkInfo; page content untouched) and veraPDF
+// checks it against the A profile. Measured on real files before being offered (docs/audit/RAPPORT-p26-railway-03-10.md).
+// allowDowngrade (iLovePDF's allow_downgrade): when the level is not reached, the next lower one is tried
+// (A -> U -> B of the same part) and the response says so; without it, nothing but the requested level is returned.
+// 1b/2b/3b keep the exact code path above (convertToPdfA).
+const FIX_SCRIPT = path.join(__dirname, '..', 'py', 'pdfa_fix.py');
+const ADVANCED_LEVELS = ['2u', '3u', '2a', '3a'];
+
+async function fix(workDir, args, signal) {
+  const r = await runProcess(PDFPY_BIN, [FIX_SCRIPT, ...args], { cwd: workDir, signal });
+  let out = null;
+  try { out = JSON.parse(r.stdout.trim().split(/\r?\n/).pop()); } catch { /* reported below */ }
+  return { ok: r.code === 0 && out && out.ok !== false, out, stderr: r.stderr.slice(-500) };
+}
+
+async function inspectPdf(workDir, signal) {
+  const r = await fix(workDir, ['inspect', INPUT_NAME], signal).catch(() => null);
+  return r && r.out ? r.out : null;
+}
+
+async function attemptLevel(workDir, level, signal) {
+  const part = level[0];
+  const kind = level[1];
+  if (kind === 'b') {
+    const r = await convertToPdfA(workDir, level, signal);
+    return r.ok ? r : { ok: false, reason: r.verapdf ? 'not_compliant' : 'conversion_failed', verapdf: r.verapdf };
+  }
+  if (kind === 'u') {
+    const gs = await convertWithGhostscript(workDir, level, signal);
+    if (!gs.succeeded) return { ok: false, reason: 'conversion_failed' };
+    fs.renameSync(path.join(workDir, OUTPUT_NAME), path.join(workDir, 'gs.pdf'));
+    const relabel = await fix(workDir, ['set-id', 'gs.pdf', OUTPUT_NAME, part, 'U'], signal);
+    if (!relabel.ok) return { ok: false, reason: 'conversion_failed' };
+  } else {
+    const info = await inspectPdf(workDir, signal);
+    if (!info || !info.tagged) return { ok: false, reason: 'untagged' };
+    const kept = await fix(workDir, ['keep', INPUT_NAME, OUTPUT_NAME, part, 'A'], signal);
+    if (!kept.ok) return { ok: false, reason: 'conversion_failed' };
+  }
+  const verapdf = await validateWithVeraPdf(workDir, level, signal);
+  if (!verapdf.compliant) {
+    // Measured (P26): the usual cause is text the SOURCE PDF itself never maps to Unicode -- ligatures ("ti",
+    // "fi") and decomposed accents that LibreOffice prints as glyphs without text. Guessing those characters would
+    // be inventing content, so the level is not reached and the visitor is told why.
+    const onlyUnicode = (verapdf.failedRules || []).length > 0 && verapdf.failedRules.every((r) => r.clause === '6.2.11.7.2');
+    return { ok: false, reason: onlyUnicode ? 'no_unicode' : 'not_compliant', verapdf };
+  }
+  return { ok: true, compliant: true, conformance: level, verapdf, outputPath: path.join(workDir, OUTPUT_NAME) };
+}
+
+const REASON_TEXT = {
+  untagged: 'the PDF is not tagged (no structure tree), which an "a" level requires',
+  no_unicode: 'some characters in this PDF have no Unicode text behind them (often ligatures such as "fi" or "ti", or accents drawn separately), which a "u" or "a" level requires',
+  not_compliant: 'the result did not pass veraPDF validation',
+  conversion_failed: 'the file could not be converted',
+};
+
+async function convertToPdfALevel(workDir, requested, allowDowngrade, signal) {
+  const part = requested[0];
+  const chain = requested[1] === 'a' ? [`${part}a`, `${part}u`, `${part}b`] : [`${part}u`, `${part}b`];
+  const attempts = [];
+  let last = null;
+  for (const level of allowDowngrade ? chain : chain.slice(0, 1)) {
+    if (signal?.aborted) break;
+    const r = await attemptLevel(workDir, level, signal);
+    if (r.ok) {
+      return { ...r, requested, downgraded: level !== requested, attempts };
+    }
+    last = r;
+    attempts.push({ conformance: level, reason: r.reason, why: REASON_TEXT[r.reason] });
+  }
+  const first = attempts[0];
+  return {
+    ok: false,
+    compliant: false,
+    conformance: requested,
+    requested,
+    attempts,
+    untagged: first?.reason === 'untagged',
+    error: first?.reason === 'untagged'
+      ? `PDF/A-${requested} needs a tagged PDF, and this one has no tags. Export it again with tags (Word: "Document structure tags for accessibility"; LibreOffice: "Universal accessibility (PDF/UA)"), or choose PDF/A-${part}u.`
+      : first?.reason === 'no_unicode'
+        ? `PDF/A-${requested} can't be reached: ${REASON_TEXT.no_unicode}. PDF/A-${part}b has no such requirement.`
+        : `The converted file did not pass veraPDF validation against PDF/A-${requested}.`,
+    verapdf: last?.verapdf,
+  };
+}
+
+module.exports = { convertToPdfA, convertToPdfALevel, ADVANCED_LEVELS };
