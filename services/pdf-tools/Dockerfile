@@ -15,8 +15,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # /v1/docx-to-doc (P26, E1): LibreOffice Writer without its GUI, Debian's own package (MPL-2.0), started per
-# request by src/docConvert.js -- it writes the Word 97-2003 .doc that ConvertAPI cannot.
-RUN apt-get update && apt-get install -y --no-install-recommends libreoffice-writer-nogui \
+# request by src/docConvert.js -- it writes the Word 97-2003 .doc that ConvertAPI cannot. From Debian's official
+# backports (25.2, security-supported), not bookworm's 7.4: measured on a real ConvertAPI document, 7.4 wrote a
+# section heading that LibreOffice then laid over the text, where 25-26 keep it in place. Only this package is taken
+# from backports; Ghostscript, qpdf and the rest stay bookworm's.
+RUN echo "deb http://deb.debian.org/debian bookworm-backports main" > /etc/apt/sources.list.d/bookworm-backports.list \
+    && apt-get update && apt-get install -y --no-install-recommends -t bookworm-backports libreoffice-writer-nogui \
     && rm -rf /var/lib/apt/lists/* \
     && soffice --version
 
