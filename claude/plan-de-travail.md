@@ -54,19 +54,21 @@
 
 ## 🌙 P27 — nuit du 03 au 04/10 (`docs/audit/RAPPORT-p27-nuit-04-10.md`, repère `restauration-avant-p27-04-10` = `ffe978a7`)
 
+**P27 terminé le 04/10 : 6 phases sur 7 en production, aucun retour arrière.** Production **`onlineconvertools-g8bo4cvv9` = `b264efbc`** (repère du dernier lot `restauration-avant-p27-lot2` = `8399d22f` = `a5xwln359`) ; pdf-tools code `5c51f840`. Dépenses : ConvertAPI ≈ 0,04 $ (sur 0,05 $), Railway ≈ 0,05 $ (bancs), facture au repos inchangée (pdf-tools 0,023 Go). **Reste au propriétaire** : phase 3 (autoriser `railway up` vers `gotenberg-fonts`), un panorama iPhone de 63 Mpx dans Image Compressor, décision Google Analytics, contrôle du texte de PDF Repair.
+
 | Phase | État | Reste |
 |---|---|---|
 | 1 PDF/A b : texte | ✅ **en production** : tout PDF/A (b, u, a, abaissement) n'est livré que si son texte est celui du source pour deux lecteurs (Ghostscript, Poppler) ; source gardé d'abord ; sinon refus expliqué. Service en ligne 341/341, 0 texte altéré ; revue indépendante faite. Corpus et banc permanents `scripts/p27/pdfa-corpus`, `scripts/p26/e2/pdfa-bench.mjs` | 4 niveaux b sur 93 refusés à raison (un PDF « impression seulement », `site-mobi` en 1b) |
 | 2 PDF to Word réel | ✅ .doc et RTF de 9,9 Mo sur www, rouverts dans Word et LibreOffice ; **défaut ConvertAPI trouvé** (accents de PDF LibreOffice perdus : « donne% es ») et **corrigé en production** (`/v1/unicode-from-actualtext` avant ConvertAPI, revue indépendante) ; 0,04 $ dépensés sur 0,05 $ | — |
 | 3 Gotenberg 8.37 | ⛔ **bloquée** : `railway up` vers `gotenberg-fonts` refusé par le garde-fou de permissions de Claude Code ; banc 43 documents prêt (8.36 stable 43/43) ; **défaut 8.36 trouvé : équations Word perdues** (8.37 les rétablit) | **Propriétaire** : autoriser ce déploiement (ou le lancer), puis banc, sondes, revue de sécurité |
-| 4 Vitesse mobile | ⏳ lot 2 (voir rapport §4) : Supabase plus chargé pour les visiteurs sans compte, préchargements retirés, accueil sans fondu ; JS du premier affichage −90 à −140 Ko | Google Analytics coûte ≈ 120 ms de TBT : le différer au premier geste = décision d'audience (non fait) |
-| 5 Accessibilité AA | ⏳ lot 2 : mode sombre contrasté, focus visible, zones d'envoi au clavier (A11yBridge), annonces ; clavier 40/40 ×3 moteurs | — |
-| 6 Clarté d'usage | ⏳ lot 2 : « Click or drop… » / « Choose… » selon l'appareil (112 zones), mots sous les icônes, 12 catégories au pied de page ; action déjà cachée avant fichier partout | — |
-| 7 Restes P23 | ⏳ lot 2 : TextArea (gros textes sans blocage), bornes mesurées (Compressor 140 Mpx ordinateur / 50 téléphone ; images PDF 268 / 90), chien de garde | Propriétaire : un panorama iPhone de 63 Mpx dans Image Compressor (au-dessus de 50) |
-| Trouvé en route | **PDF Extract Text, Compare, Redact, Translate, AI Summary, PDF to HTML** (pdf.js) lisent « donnees » sur les PDF LibreOffice-Windows à accents décomposés (pdf.js ignore `/ActualText` hors arbre de structure) ; **PDF Repair** (repli Ghostscript) peut altérer le texte comme l'ancien PDF/A | Chantier dédié : réparer ToUnicode dans le navigateur (port de `actualtext.py`, ≈ 3-4 h + revue) ; contrôle de texte sur la réparation Ghostscript |
+| 4 Vitesse mobile | ✅ **en production** : **243 pages ≥ 90** (Lighthouse mobile, construction locale servie en HTTP/2 : accueil 94, médiane 94, min 92) ; Supabase plus chargé pour les visiteurs sans compte, préchargements retirés, accueil sans fondu, Currency Converter 88 → 93-94 ; JS du premier affichage −90 à −140 Ko | Google Analytics coûte ≈ 120 ms de TBT : le différer au premier geste = décision d'audience (non fait) |
+| 5 Accessibilité AA | ✅ **en production** : **axe 0 violation** sur 972 pages-modes (avant 248 graves/critiques) ; mode sombre contrasté, focus visible, zones d'envoi au clavier (A11yBridge), annonces ; clavier 40/40 ×3 moteurs (local, préversion, www) | — |
+| 6 Clarté d'usage | ✅ **en production** : « Click or drop… » / « Choose… » selon l'appareil (112 zones), mots sous les icônes, 12 catégories au pied de page ; action déjà cachée avant fichier partout | — |
+| 7 Restes P23 | ✅ **en production** : TextArea (gros textes sans blocage), bornes mesurées (Compressor 140 Mpx ordinateur / 50 téléphone ; images PDF 268 / 90), chien de garde | Propriétaire : un panorama iPhone de 63 Mpx dans Image Compressor (au-dessus de 50) |
+| Trouvé en route | ✅ **en production** (lot 3) : PDF Extract Text, Compare, **Redact** (ne trouvait pas « données »), Translate, AI Summary, PDF to HTML, PDF to Excel lisent juste les PDF LibreOffice-Windows à accents décomposés (`app/lib/pdfActualText.js`, mise à jour incrémentale, NFC dans `app/lib/pdfjs.js`, revue indépendante) ; bancs corrigés (préversion protégée comptée « propre », barre Vercel, jeton) | **PDF Repair** (repli Ghostscript) peut altérer le texte comme l'ancien PDF/A : contrôle de texte à ajouter (pdf-tools, Railway) |
 
 > **P26 (03/10) terminé : Gotenberg protégé, E1 et E2 en production, aucun retour arrière** — tableau P26 ci-dessous.
-> Reste : défaut ancien des PDF/A b (texte altéré), Gotenberg 8.37.0, une vraie conversion .doc sur www, E3 (compte Google).
+> Reste après P27 : Gotenberg 8.37.0 (phase 3 de P27 bloquée par une permission), E3 (compte Google). PDF/A b et vraie conversion .doc : faits par P27.
 
 ## 📋 P25 — décisions E1 à E7 + remontée des erreurs (03/10, `docs/audit/RAPPORT-p25-decisions-03-10.md`)
 
