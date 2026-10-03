@@ -6,6 +6,7 @@ import { chromium, firefox, webkit } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { previewAuth } from '../preview-auth.mjs';
 import { realMediaService } from '../../browser-tests/lib/real-media-service.mjs';
 
 const [originArg, fx, vera] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
@@ -23,6 +24,7 @@ const b = await { chromium, firefox, webkit }[engine].launch();
 console.log('engine', engine);
 const ctx = await b.newContext({ acceptDownloads: true });
 await ctx.addCookies([{ name: 'oct_automation', value: '1', url: origin }]);
+await previewAuth(ctx, origin);
 await ctx.route(/vercel\.live/, (r) => r.abort());
 const media = realMediaService({ origin, corsShim: process.argv.includes('--cors-shim') });
 await media.routeTickets(ctx);
