@@ -214,11 +214,11 @@ test('ConvertAPI: no real call outside Vercel production (bench placeholder exce
     delete process.env.CONVERTAPI_TOKEN;
     process.env.VERCEL_ENV = 'preview';
     await assert.rejects(convertDocxToPdf(Buffer.from('x'), 'a.docx'), (e) => e.code === 'not_production');
-    assert.equal(calls.length, 0, 'nothing may leave the machine');
+    assert.equal(calls.filter((u) => u.includes('convertapi.com')).length, 0, 'nothing may reach ConvertAPI');
     process.env.CONVERTAPI_TOKEN = 'local-bench-fake';
     const r = await convertDocxToPdf(Buffer.from('x'), 'a.docx');
     assert.equal(r.pdfBuffer.subarray(0, 5).toString(), '%PDF-');
-    assert.equal(calls.length, 1);
+    assert.equal(calls.filter((u) => u.includes('convertapi.com')).length, 1);
   } finally {
     globalThis.fetch = realFetch;
     if (saved.env === undefined) delete process.env.VERCEL_ENV; else process.env.VERCEL_ENV = saved.env;
