@@ -9,10 +9,10 @@ Supabase (aucun schéma, aucun script), aucune autre variable d'environnement. R
 
 | Lot | Contenu | État |
 |---|---|---|
-| 1 | Rétablissement vérifié sur www, cause de l'épuisement, règle « les bancs ne consomment plus le crédit » | voir §1 |
-| A (2 + 3) | Alertes fournisseurs (téléphone + courriel, une fois par incident, rétablissement, seuil du forfait) ; secours LibreOffice annoncé pour Word to PDF ; « réessayez plus tard » pour PDF to Word / Excel / PowerPoint | voir §2, §3 |
-| 4 | Équations .docx sur www comparées à Word | voir §4 |
-| 5 | Chromium dans une instance Railway isolée | voir §5 |
+| 1 | Rétablissement vérifié sur www, cause de l'épuisement, règle « les bancs ne consomment plus le crédit » | ✅ (§1, §6) |
+| A (2 + 3) | Alertes fournisseurs (téléphone + courriel, une fois par incident, rétablissement, seuil du forfait) ; secours LibreOffice annoncé pour Word to PDF ; « réessayez plus tard » pour PDF to Word / Excel / PowerPoint | ✅ **en production** (§2, §3, §6) |
+| 4 | Équations .docx sur www comparées à Word | ✅ identiques à Word (§4) |
+| 5 | Chromium dans une instance Railway isolée (projet à part, sans secret) ; revue de sécurité « GO avec conditions », conditions remplies | ✅ **en production** (§5) |
 
 ## 1. Pourquoi le crédit s'est épuisé (mesuré le 04/10)
 
@@ -214,3 +214,59 @@ et une signature au lieu d'un jeton partagé (l'instance isolée ne détient rie
   `*.railway.internal`, métadonnées, CGNAT, 198.18, `file://`, identifiants avant l'hôte, DNS publics vers adresses
   internes, redirection ; route URL 403) ; contrôle public atteint.
 - **Scripts** (`scripts/p29/js-probe.mjs`) : **0/18** exécutés ; cadre d'un autre site, PDF incrustés, `/tmp` : rien.
+
+### 5.4 Revue de sécurité indépendante — « GO avec conditions », conditions remplies
+Agent séparé, lecture seule. Aucun moyen trouvé d'atteindre Chromium sans signature (ni sur le front, ni sur l'instance
+isolée), aucun chemin ou encodage qui transforme une requête Chromium signée en route LibreOffice / moteurs PDF, rien
+dans l'instance isolée qui permette de signer. Conditions et suites :
+1. **Reprise du sous-domaine** : si l'instance isolée (ou son domaine `*.up.railway.app`) était supprimée ou renommée,
+   n'importe qui pourrait réclamer ce nom et recevoir le HTML des visiteurs → **règle écrite** (RAILWAY.md, plan) :
+   ne jamais la supprimer ni la renommer tant qu'une image front y renvoie ; retour arrière des fronts d'abord.
+2. **Clé publique et mot de passe** : la clé publique (dans le dépôt) permet de tester des mots de passe hors ligne →
+   **mesuré** sans l'afficher : mot de passe de 32 caractères, jeu mixte, 24 caractères distincts (bien au-delà de
+   128 bits) : recherche hors de portée. (Une graine indépendante demanderait une nouvelle variable : non autorisée.)
+3. **Risque résiduel accepté et écrit** : un Chromium compromis dans l'instance isolée pourrait la détourner jusqu'à son
+   redémarrage et voir les documents suivants, sans rien obtenir qui mène à notre projet.
+- Corrigés aussi : comparaison Basic Auth à temps constant sur empreintes ; l'instance isolée refuse de démarrer avec
+  **tout** nom d'allure secrète (mot de passe, jeton, secret, identifiants de Gotenberg) ; le contrôle quotidien du site
+  fait une petite conversion HTML par toute la chaîne (la santé de `gotenberg-v2` ne couvre plus Chromium).
+- Après ces corrections, banc complet refait sur `gotenberg-fonts` : 14/14, 66/66, 6/6, 27 refusées, 0/18.
+
+### 5.5 Mise en production (03/10, ≈ 23 h 28 UTC de la machine)
+- Préversion Vercel `onlineconvertools-gw2kf8qu7` (`228033b8`) : construite (le seul code du site touché est le
+  contrôle quotidien, que la préversion ne peut pas exercer : Gotenberg n'y est pas configuré).
+- **Fusion `9f6ecfda`** (sans poussée forcée) → Railway **`gotenberg-v2` déploiement `3236df60`** (SUCCESS, commit
+  `9f6ecfda`) ; Vercel production **`onlineconvertools-osaer8a95` = `9f6ecfda`** ; instance isolée **`chromium`
+  déploiement `883863bd`** (projet `oct-chromium-isolated`, même code) ; `gotenberg-fonts` `7c312005` (même image).
+- **Nouveau comportement vérifié en ligne** (corollaire 4) : journal de `gotenberg-v2` « oct-edge: front mode … Chromium
+  ready to start » (aucun Chromium lancé) ; les **148 requêtes Chromium** du banc apparaissent dans le journal de
+  l'instance isolée, **aucune** dans celui de `gotenberg-v2`.
+- **Banc complet sur la production** : **66/66 identiques** au pixel à la mesure faite avant la bascule, options URL
+  **6/6**, **27 adresses internes refusées** (contrôle public atteint), **0/18** scripts.
+- **www** : `www-light` **29/29** ; vraies conversions par les routes du site : Word, équations Word, ODT de Word, Excel,
+  PowerPoint, HTML, EPUB, MOBI, URL **9/9** ; Markdown et Text to PDF (émoji, bengali) **2/2** ; page HTML to PDF **6/6**.
+- Contrôle quotidien lancé une fois (`vercel crons run /api/cron/health-check`) : « gotenberg=ok:200
+  **gotenberg-chromium=ok:200** openai=ok:200 background-removal=ok:200 resend=ok:200 supabase-auth=ok:200
+  pdf-tools=ok:200 » (il a aussi envoyé le résumé du jour, comme chaque matin).
+- **Retour arrière prêt, non utilisé** : Railway `gotenberg-v2` → déploiement `1bb98768` (image et variables d'avant,
+  Chromium à l'intérieur) ; garder l'instance isolée tant qu'une image front y renvoie.
+
+## 7. Facture
+- **ConvertAPI** : 0,05 $ sur 0,05 $ autorisés (5 conversions réelles, `docs/audit/depenses-fournisseurs.jsonl`).
+- **Railway** (`scripts/p28/rw-metrics.mjs`) : instance isolée **≈ 0,27 Go au repos** (≈ 2,7 $/mois de mémoire au tarif
+  de 10 $/Go/mois, dans l'enveloppe autorisée de 3-4 $) ; **`gotenberg-v2` : ≈ 0,69 Go avant, 0,13 Go juste après la
+  bascule** (Chromium n'y démarre plus ; LibreOffice se charge au premier document) — **effet net mesuré proche de
+  zéro, voire en baisse** ; une seule mesure après : **à relire après quelques heures de repos**. Sondes réseau
+  temporaires : quelques minutes chacune, supprimées. Bancs : quelques minutes de processeur (≈ 0,05 $).
+- Supabase : rien (aucun schéma, aucun script ; les lignes d'état des alertes sont écrites par la production elle-même).
+- Vercel : 1 préversion par lot, contrôles légers sur www (règle d'usage).
+
+## 8. Fin
+Production : **Vercel `onlineconvertools-osaer8a95` = `9f6ecfda`** (puis commits de rapport) ; **Railway `gotenberg-v2`
+`3236df60`** (front oct-edge, sans Chromium), **`chromium` `883863bd`** (projet `oct-chromium-isolated`),
+`gotenberg-fonts` `7c312005`. Repères : `restauration-avant-p30-04-10` = `bce5e714`, `restauration-avant-p30-lot5` =
+`bb239865`. Aucun retour arrière.
+
+**Reste au propriétaire** : confirmer la réception de la notification de test (03/10, 23 h 06 UTC) ; facultatif :
+retirer le vrai jeton ConvertAPI de `.env.local` et regarder dans le tableau de bord ConvertAPI d'où viennent les
+≈ 157 conversions hors du site ; si le forfait ConvertAPI change, 2 valeurs dans `lib/providers/convertApiPlan.js`.
