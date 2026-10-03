@@ -52,6 +52,25 @@
 
 **Après le lancement, sur déclencheur :** AdSense à **20-50 visiteurs/jour réels** (propriétaire : compte AdSense, message « European regulations » dans Privacy & messaging, 2 variables Vercel — ≈ 45 min ; tout le reste est prêt, `RAPPORT-prelancement-01-10.md` §3) ; relevé Search Console des 10 pages entre le **10 et le 24 novembre** ; décisions « juste après » du tableau des déclencheurs.
 
+## 🧮 P28 — 04/10 : Gotenberg 8.37, équations Word, PDF Repair (`docs/audit/RAPPORT-p28-gotenberg-04-10.md`, repère `restauration-avant-p28-04-10` = `6a8af4be`)
+
+**Décisions du propriétaire (prompt P28, 04/10)** : **Google Analytics reste chargé comme aujourd'hui** (les statistiques
+complètes priment sur 1-2 points de vitesse) — sujet clos ; **le panorama iPhone de 63 Mpx est dans sa passe iPhone
+(test 26)**.
+
+| Lot | État | Reste |
+|---|---|---|
+| 1 Gotenberg 8.37.0 | ✅ **en production** (`gotenberg-v2` `26130544`, fusion `e060eb63`) : banc 59 documents dont 16 à équations, fidélité égale ou meilleure partout (rapport §1.3), adresses internes toujours refusées (27 sondes), revue de sécurité « GO avec conditions » (conditions vérifiées) ; www 8/8 | Retour arrière : `gotenberg-v2` → `930bc129` |
+| 1b Aptos (trouvé en route) | ✅ **en production** (`8e8e178d`, fusion `df37f58e`) : Aptos → Liberation Sans au lieu de Noto Serif ; classeur Excel 2024 : 1 page comme Excel (2 avant) | — |
+| 2 Équations des ODT écrits par Word | en cours | |
+| 3 PDF Repair : contrôle du texte | en cours | |
+
+**Risque de sécurité ancien, à traiter (revue indépendante P28)** : Chromium de Gotenberg tourne sans bac à sable avec
+JavaScript actif, et HTML to PDF lui passe le HTML déposé tel quel ; Chromium 152 (Gotenberg 8.37) ne corrige pas
+CVE-2026-87491 (V8, exploitée, corrigée en 153). À faire : passer à la prochaine Gotenberg embarquant Chromium ≥ 153 dès sa
+sortie (même banc : `scripts/p27/gotenberg-compare.mjs` + sondes), et mesurer `CHROMIUM_DISABLE_JAVASCRIPT=true` ou un
+nettoyage du HTML déposé comme `lib/urlFetch/snapshot.mjs` (ce qu'on perdrait sur HTML/EPUB/MOBI to PDF).
+
 ## 🌙 P27 — nuit du 03 au 04/10 (`docs/audit/RAPPORT-p27-nuit-04-10.md`, repère `restauration-avant-p27-04-10` = `ffe978a7`)
 
 **P27 terminé le 04/10 : 6 phases sur 7 en production, aucun retour arrière.** Production **`onlineconvertools-g8bo4cvv9` = `b264efbc`** (repère du dernier lot `restauration-avant-p27-lot2` = `8399d22f` = `a5xwln359`) ; pdf-tools code `5c51f840`. Dépenses : ConvertAPI ≈ 0,04 $ (sur 0,05 $), Railway ≈ 0,05 $ (bancs), facture au repos inchangée (pdf-tools 0,023 Go). **Reste au propriétaire** : phase 3 (autoriser `railway up` vers `gotenberg-fonts`), un panorama iPhone de 63 Mpx dans Image Compressor, décision Google Analytics, contrôle du texte de PDF Repair.
@@ -60,15 +79,15 @@
 |---|---|---|
 | 1 PDF/A b : texte | ✅ **en production** : tout PDF/A (b, u, a, abaissement) n'est livré que si son texte est celui du source pour deux lecteurs (Ghostscript, Poppler) ; source gardé d'abord ; sinon refus expliqué. Service en ligne 341/341, 0 texte altéré ; revue indépendante faite. Corpus et banc permanents `scripts/p27/pdfa-corpus`, `scripts/p26/e2/pdfa-bench.mjs` | 4 niveaux b sur 93 refusés à raison (un PDF « impression seulement », `site-mobi` en 1b) |
 | 2 PDF to Word réel | ✅ .doc et RTF de 9,9 Mo sur www, rouverts dans Word et LibreOffice ; **défaut ConvertAPI trouvé** (accents de PDF LibreOffice perdus : « donne% es ») et **corrigé en production** (`/v1/unicode-from-actualtext` avant ConvertAPI, revue indépendante) ; 0,04 $ dépensés sur 0,05 $ | — |
-| 3 Gotenberg 8.37 | ⛔ **bloquée** : `railway up` vers `gotenberg-fonts` refusé par le garde-fou de permissions de Claude Code ; banc 43 documents prêt (8.36 stable 43/43) ; **défaut 8.36 trouvé : équations Word perdues** (8.37 les rétablit) | **Propriétaire** : autoriser ce déploiement (ou le lancer), puis banc, sondes, revue de sécurité |
-| 4 Vitesse mobile | ✅ **en production** : **243 pages ≥ 90** (Lighthouse mobile, construction locale servie en HTTP/2 : accueil 94, médiane 94, min 92) ; Supabase plus chargé pour les visiteurs sans compte, préchargements retirés, accueil sans fondu, Currency Converter 88 → 93-94 ; JS du premier affichage −90 à −140 Ko | Google Analytics coûte ≈ 120 ms de TBT : le différer au premier geste = décision d'audience (non fait) |
+| 3 Gotenberg 8.37 | ✅ **fait par P28** (en production le 04/10, voir la section P28) | — |
+| 4 Vitesse mobile | ✅ **en production** : **243 pages ≥ 90** (Lighthouse mobile, construction locale servie en HTTP/2 : accueil 94, médiane 94, min 92) ; Supabase plus chargé pour les visiteurs sans compte, préchargements retirés, accueil sans fondu, Currency Converter 88 → 93-94 ; JS du premier affichage −90 à −140 Ko | Google Analytics coûte ≈ 120 ms de TBT — **décision du propriétaire (P28) : il reste chargé comme aujourd'hui**, clos |
 | 5 Accessibilité AA | ✅ **en production** : **axe 0 violation** sur 972 pages-modes (avant 248 graves/critiques) ; mode sombre contrasté, focus visible, zones d'envoi au clavier (A11yBridge), annonces ; clavier 40/40 ×3 moteurs (local, préversion, www) | — |
 | 6 Clarté d'usage | ✅ **en production** : « Click or drop… » / « Choose… » selon l'appareil (112 zones), mots sous les icônes, 12 catégories au pied de page ; action déjà cachée avant fichier partout | — |
 | 7 Restes P23 | ✅ **en production** : TextArea (gros textes sans blocage), bornes mesurées (Compressor 140 Mpx ordinateur / 50 téléphone ; images PDF 268 / 90), chien de garde | Propriétaire : un panorama iPhone de 63 Mpx dans Image Compressor (au-dessus de 50) |
 | Trouvé en route | ✅ **en production** (lot 3) : PDF Extract Text, Compare, **Redact** (ne trouvait pas « données »), Translate, AI Summary, PDF to HTML, PDF to Excel lisent juste les PDF LibreOffice-Windows à accents décomposés (`app/lib/pdfActualText.js`, mise à jour incrémentale, NFC dans `app/lib/pdfjs.js`, revue indépendante) ; bancs corrigés (préversion protégée comptée « propre », barre Vercel, jeton) | **PDF Repair** (repli Ghostscript) peut altérer le texte comme l'ancien PDF/A : contrôle de texte à ajouter (pdf-tools, Railway) |
 
 > **P26 (03/10) terminé : Gotenberg protégé, E1 et E2 en production, aucun retour arrière** — tableau P26 ci-dessous.
-> Reste après P27 : Gotenberg 8.37.0 (phase 3 de P27 bloquée par une permission), E3 (compte Google). PDF/A b et vraie conversion .doc : faits par P27.
+> Reste après P27 : ~~Gotenberg 8.37.0~~ (fait par P28), E3 (compte Google). PDF/A b et vraie conversion .doc : faits par P27.
 
 ## 📋 P25 — décisions E1 à E7 + remontée des erreurs (03/10, `docs/audit/RAPPORT-p25-decisions-03-10.md`)
 
