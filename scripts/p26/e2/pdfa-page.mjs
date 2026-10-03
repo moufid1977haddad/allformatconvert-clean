@@ -2,7 +2,7 @@
 //   node scripts/p26/e2/pdfa-page.mjs <origin> <fixtures-dir> <verapdf.bat> [--cors-shim]
 // fixtures-dir: chrome-tagged.pdf, chrome-untagged.pdf, lo-fidelite-01_docx-tagged.pdf (no Unicode for some glyphs),
 // big.pdf (> 4 MB: staged through the media service).
-import { chromium } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -18,7 +18,9 @@ const veraOk = (file, level) => {
   try { const j = JSON.parse(s).report.jobs[0]; const v = Array.isArray(j.validationResult) ? j.validationResult[0] : j.validationResult; return v.compliant === true; } catch { return false; }
 };
 
-const b = await chromium.launch();
+const engine = process.argv.find((a) => a.startsWith('--browser='))?.split('=')[1] || 'chromium';
+const b = await { chromium, firefox, webkit }[engine].launch();
+console.log('engine', engine);
 const ctx = await b.newContext({ acceptDownloads: true });
 await ctx.addCookies([{ name: 'oct_automation', value: '1', url: origin }]);
 await ctx.route(/vercel\.live/, (r) => r.abort());
@@ -33,8 +35,8 @@ async function run(name, file, level, { downgrade = null } = {}) {
   await p.waitForTimeout(1500); // the page reads the file's tags
   const select = p.getByLabel('PDF/A conformance');
   const disabledA = await select.locator('option[value="2a"]').isDisabled();
-  const note = await p.locator('[data-testid=pdfa-tag-note]').innerText().catch(() => '');
   if (level) await select.selectOption(level);
+  const note = await p.locator('[data-testid=pdfa-tag-note]').innerText().catch(() => '');
   if (downgrade !== null) {
     const box = p.getByRole('checkbox');
     if ((await box.isChecked()) !== downgrade) await box.click();

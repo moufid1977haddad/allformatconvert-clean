@@ -3,19 +3,21 @@
 // written to Supabase); our real pdf-tools (.doc) and media (staging) services are used.
 //   node scripts/p26/e1/word-page.mjs <origin> <pdf-dir> <out-dir>
 // pdf-dir: small.pdf (< 4 MB), big.pdf (> 4 MB), textbox.pdf (any PDF; the fake answers a DOCX with text boxes).
-import { chromium } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 import { realMediaService } from '../../browser-tests/lib/real-media-service.mjs';
 
-const [originArg, pdfDir, out] = process.argv.slice(2);
+const [originArg, pdfDir, out] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const origin = new URL(originArg).origin;
 fs.mkdirSync(out, { recursive: true });
 let pass = 0, fail = 0;
 const check = (n, ok, info = '') => { ok ? pass++ : fail++; console.log(ok ? 'PASS' : 'FAIL', n, info); };
 const OLE = Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]);
 
-const b = await chromium.launch();
+const engine = process.argv.find((a) => a.startsWith('--browser='))?.split('=')[1] || 'chromium';
+const b = await { chromium, firefox, webkit }[engine].launch();
+console.log('engine', engine);
 const ctx = await b.newContext({ acceptDownloads: true });
 await ctx.addCookies([{ name: 'oct_automation', value: '1', url: origin }]);
 const media = realMediaService({ origin, corsShim: true });
