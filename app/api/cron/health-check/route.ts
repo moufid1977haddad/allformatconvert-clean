@@ -249,6 +249,9 @@ export async function GET(request: NextRequest) {
     "pdf-tools": await checkPdfTools(),
   };
 
+  // P30: what each dependency answered (statuses only), readable in the function log after a manual run.
+  console.log("[health-check]", Object.entries(checks).map(([k, v]) => `${k}=${v.ok ? "ok" : "FAIL"}:${v.detail}`).join(" "));
+
   // One alert per incident, not one per cron run: a service that's still
   // down on the next run stays silent, and a matching alert fires once it
   // comes back. State persists in usage_counters via checkStateTransition.
