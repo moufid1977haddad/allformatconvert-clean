@@ -302,3 +302,63 @@ désormais le texte lu (NFC), seulement pour les chaînes qui portent un accent 
 **Après** (`scripts/p27/actualtext-pages.mjs`, construction locale, Chromium, Firefox, WebKit) : **4/4 ×3** — Extract
 Text lit « Les données numérisées doivent être conservées », PDF to HTML écrit « données », **Redact trouve et retire
 « données »** (absent de la page rendue), Compare montre « données ».
+
+## 9. Mises en production (règle d'usage Vercel : lourd en local, une passe sur la préversion, léger sur www)
+| Lot | Contenu | Production | Retour arrière prêt |
+|---|---|---|---|
+| Service 1 | pdf-tools : PDF/A b/u/a avec contrôle du texte, `poppler-utils` | `83a62d4c` (fusion `ed388b30`) | version précédente de pdf-tools (commit `ffe978a7`) |
+| Service 2 | pdf-tools : `/v1/unicode-from-actualtext` (additif) | `0901abe9` (fusion `a3dbff9e`), puis resserré `5c51f840` (`8399d22f`) | idem |
+| Lot 1 | Site : page PDF/A (promesse de texte, FAQ), ActualText avant ConvertAPI | `onlineconvertools-g0lpolk68` = `98b84eba` | `ffe978a7` (repère `restauration-avant-p27-04-10`) |
+| **Lots 2 + 3** | Phases 4 à 7, outils de texte PDF du navigateur, Currency Converter, Timestamp | **`onlineconvertools-g8bo4cvv9` = `b264efbc`** (fusion sans poussée forcée de `ce69ec93`) | `onlineconvertools-a5xwln359` = `8399d22f` (repère `restauration-avant-p27-lot2`) |
+
+**Lots 2 + 3 — vérifications.**
+- **Local, construction de production finale** (Chromium, Firefox, WebKit) : 238 pages ×3 + Safari 16.4 simulé propres ;
+  tests Node 9/9 ; lots dev 46, image 12, GIF 3, audio-vidéo 7/5, PDF 23, TIFF 2, ajouts 40/39/32 — tous passés
+  (un test regex WebKit, temporisé à 2 s, a échoué 2 fois sur ≈ 10 sous la charge de la passe complète, 6/6 seul ou
+  dans son lot : sensible au temps, pas une régression) ; clavier 40/40 ×3 ; iPhone et iPad : téléchargements 172/172,
+  grandes images, RAW 35/35, mise en page 450/450 ; PDF/A page 8/8 ×3 ; PDF to Word page 7/7 ×3 ; outils de texte PDF
+  4/4 ×3 ; **robustesse de tous les outils 522/522 ×3** ; axe 972 pages-modes 0 violation ; Lighthouse 243 pages ≥ 90.
+- **Préversion** `onlineconvertools-9agexsnph` (`7ca2204f`), **une passe**, par le relais de préversion du dépôt
+  (`vercel-preview-proxy.mjs`, jeton ajouté côté serveur) : 238 pages ×3 + Safari 16.4 propres ; clavier 40/40 ×3 ;
+  outils de texte PDF 4/4 ×3 ; PDF/A page 8/8 ; page PDF to Word ; Currency Converter ; téléchargements iPhone et iPad
+  172/172 ; RAW iPhone 35/35 ; mise en page 450/450 ; robustesse 522/522.
+- **www** (léger) : `www-light` 29/29 ; RAW `CRW_7673` 7/7 ; outils de texte PDF 4/4 (Redact retire « données ») ;
+  Currency Converter ; clavier 40/40 ; lot dev 46/46 (Timestamp, URL Encoder, Excel to CSV, Regex… réellement utilisés) ;
+  Image Compressor (2 vrais fichiers compressés et rouverts). Aucun appel payant.
+
+**Trouvé en route sur les bancs eux-mêmes (corrigé).** Une préversion Vercel protégée renvoie vers la page de connexion
+de Vercel, qui répond 200 avec un titre : `all-pages-load.mjs` la comptait « propre » (une première passe directe sur
+la préversion a ainsi donné « 238 propres » sans rien vérifier — refaite par le relais). Le banc compte désormais
+comme un problème toute page qui quitte le site. `download-guard.mjs` reçoit `--no-vercel-toolbar` (la barre de
+commentaires de Vercel lève sa propre erreur sous WebKit, constat du 28/09) ; `keyboard-check`, `actualtext-pages` et
+`currency-converter` reçoivent le jeton de préversion. Et : Vercel ne clone que les 10 derniers commits ; une branche
+poussée plus de 10 commits après son dernier déploiement fait échouer l'`ignoreCommand` (« bad object ») — préversion
+faite sur une nouvelle branche `p27-lot2` (réglage du projet non touché) ; `scripts/p27/wait-deploy.sh` attend par
+branche.
+
+## 10. Facture Railway (mesurée, API de mesures Railway en lecture ; 10 $/Go/mois de mémoire, 20 $/vCPU/mois)
+| Service | Avant P27 (P26) | Après P27 |
+|---|---|---|
+| pdf-tools au repos | 0,017-0,035 Go | **0,023 Go** (après le dernier redéploiement) — inchangé |
+| pdf-tools après un usage intensif | — | jusqu'à **0,29 Go pendant ≈ 4 h**, puis redescend seul (mémoire récupérable ; dossiers de travail supprimés à chaque demande) : ≈ 0,02 $ par épisode |
+| gotenberg-v2, gotenberg-fonts | — | **non touchés** (phase 3 bloquée) |
+Coût par usage : un PDF/A ajoute deux lectures de texte (≈ 1-3 s de processeur) → **≈ +0,00001 à 0,00002 $** ; la
+complétion ActualText avant ConvertAPI ≈ 0,2-1 s → **≈ 0,000005 $** par conversion PDF → Office. L'image du service
+grossit de `poppler-utils` (quelques Mo). Les bancs de la nuit ≈ **0,04-0,05 $** de Railway (≈ 0,06 vCPU et 0,2 Go en
+moyenne pendant quelques heures). Chaque poussée sur master reconstruit pdf-tools (comportement existant de Railway,
+non modifié) : même code, quelques minutes de construction. Aucun nouveau service, aucune autre variable touchée.
+**Dépenses de la nuit : ConvertAPI ≈ 0,04 $ (plafond 0,05 $) ; Railway ≈ 0,05 $ ; rien d'autre ; rien sur Supabase.**
+
+## 11. Fin — état et reste au propriétaire
+**Production : Vercel `onlineconvertools-g8bo4cvv9` = `b264efbc` ; Railway pdf-tools reconstruit sur `b264efbc`
+(code du service = `5c51f840`) ; Gotenberg inchangé (8.36).** Aucun retour arrière n'a été nécessaire.
+Reste au propriétaire :
+1. **Phase 3 (Gotenberg 8.37)** : autoriser `railway up` vers `gotenberg-fonts` (règle de permission de Claude Code) ou
+   le lancer ; ensuite banc 43 documents au pixel 8.36/8.37, sondes d'adresses internes, revue de sécurité, décision.
+   Raison de le faire : 8.36 perd les équations des documents Word (mesuré).
+2. **Un vrai iPhone** : Image Compressor avec un panorama de ≈ 63 Mpx (au-dessus de la borne téléphone de 50 Mpx :
+   le message doit s'afficher avant tout travail).
+3. **Google Analytics** (≈ 120 ms de blocage par page) : le charger au premier geste gagnerait 1-2 points Lighthouse
+   mais perdrait les visites très courtes dans les statistiques — décision d'audience, non prise.
+4. **PDF Repair** : son repli Ghostscript peut altérer le texte comme l'ancien PDF/A (même cause) ; un contrôle du
+   texte comme en phase 1 serait la suite logique (service pdf-tools, Railway).
