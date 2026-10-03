@@ -16,7 +16,8 @@ Deliberately narrow -- only that measured case, so that nothing can be mapped wr
     marks gets none; a ToUnicode stream shared by several fonts, a font that is not an indirect object, a CMap this
     parser does not fully understand (usecmap, names, odd syntax), a Type0 font whose encoding is not Identity-H/V:
     left alone;
-  - encrypted or damaged files (qpdf had to repair them) are not rewritten at all.
+  - encrypted or damaged files (qpdf had to repair them) are not rewritten at all; non-embedded fonts and content
+    streams with inline images are left alone.
 Page content, fonts and everything but the ToUnicode streams are untouched.
 
     actualtext.py <in.pdf> <out.pdf>   -> prints {"added": N}; writes <out.pdf> only when N > 0
@@ -91,8 +92,18 @@ def main():
 
     cmaps = {}  # ToUnicode objgen -> {"stream", "map", "width", "add", "conflict"}
 
+    def embedded(font):
+        # PDF.js DRAWS a non-embedded composite font's glyphs from its ToUnicode: such fonts are left alone (review
+        # of the browser version, P27); LibreOffice always embeds
+        f = font
+        if font.get("/Subtype") == pikepdf.Name.Type0:
+            kids = font.get("/DescendantFonts")
+            f = kids[0] if isinstance(kids, pikepdf.Array) and len(kids) else None
+        desc = f.get("/FontDescriptor") if isinstance(f, pikepdf.Dictionary) else None
+        return isinstance(desc, pikepdf.Dictionary) and any(k in desc for k in ("/FontFile", "/FontFile2", "/FontFile3"))
+
     def info_for(font):
-        if not font.is_indirect or code_width(font) is None:
+        if not font.is_indirect or code_width(font) is None or not embedded(font):
             return None
         tu = font.get("/ToUnicode")
         if not isinstance(tu, pikepdf.Stream) or users.get(tu.objgen, 0) != 1:
@@ -134,7 +145,14 @@ def main():
     def walk(owner, resources):
         fonts = {str(k): v for k, v in (resources.get("/Font") or {}).items()}
         cur, saved, stack = None, [], []
-        for operands, op in pikepdf.parse_content_stream(owner):
+        ops = pikepdf.parse_content_stream(owner)
+        # a stream with an inline image: where its data ends is a guess (qpdf and PDF.js can disagree), and a wrong guess
+        # would put glyphs under the wrong font -- its spans are not used (review of the browser version, P27); forms it
+        # draws are still followed
+        inline = any(str(op) in ("INLINE IMAGE", "BI", "ID", "EI") for _, op in ops)
+        for operands, op in ops:
+            if inline and str(op) != "Do":
+                continue
             op = str(op)
             if op == "q":
                 saved.append(cur)
