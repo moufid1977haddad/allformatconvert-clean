@@ -26,7 +26,29 @@ function withAssets(pdfjsLib) {
   const assets = { wasmUrl: base + 'wasm/', cMapUrl: base + 'cmaps/', cMapPacked: true, iccUrl: base + 'iccs/', standardFontDataUrl: base + 'standard_fonts/' };
   const getDocument = (src) => {
     const params = src instanceof Uint8Array || src instanceof ArrayBuffer ? { data: src } : typeof src === 'string' || src instanceof URL ? { url: src } : { ...src };
-    return pdfjsLib.getDocument({ ...assets, ...params });
+    const task = pdfjsLib.getDocument({ ...assets, ...params });
+    // P27: text read as one composed letter per accented letter (NFC). PDF.js gives an accent drawn as its own glyph
+    // (LibreOffice; and after app/lib/pdfActualText.js gives that glyph its text) as "e" + U+0301: shown right, but a
+    // search for "données" (Redact) or a copy did not match it. Only strings that hold a combining mark are touched.
+    const loaded = task.promise.then((doc) => {
+      const getPage = doc.getPage.bind(doc);
+      doc.getPage = async (n) => {
+        const page = await getPage(n);
+        if (!page.__nfcText) {
+          const getTextContent = page.getTextContent.bind(page);
+          page.getTextContent = async (opts) => {
+            const content = await getTextContent(opts);
+            for (const it of content.items) if (typeof it.str === 'string' && /\p{M}/u.test(it.str)) it.str = it.str.normalize('NFC');
+            return content;
+          };
+          page.__nfcText = true;
+        }
+        return page;
+      };
+      return doc;
+    });
+    Object.defineProperty(task, 'promise', { value: loaded, configurable: true });
+    return task;
   };
   // a plain copy of the exports (a bundled module's exports are read-only: a Proxy may not return another getDocument)
   return { ...pdfjsLib, getDocument };
