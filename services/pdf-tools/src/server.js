@@ -96,7 +96,18 @@ app.get('/health', async (_req, res) => {
   res.status(allOk ? 200 : 503).json({ ok: allOk, binaries });
 });
 
-app.post('/v1/repair', requireApiKey, withTempDir(withTimeout(async (req, res, signal) => {
+// P28: repair reads the text of the damaged file and of every candidate (two readers each) and can try four methods,
+// so it has its own outer limit (REPAIR_TIMEOUT_MS); REQUEST_TIMEOUT_MS still bounds the upload itself, as for PDF/A.
+app.post('/v1/repair', requireApiKey, withTempDir(withTimeout(async (req, res, outerSignal) => {
+  const inner = new AbortController();
+  outerSignal.addEventListener('abort', () => inner.abort(), { once: true });
+  const signal = inner.signal;
+  res.on('finish', () => clearTimeout(uploadLimit));
+  res.on('close', () => clearTimeout(uploadLimit));
+  const uploadLimit = setTimeout(() => {
+    inner.abort();
+    if (!req.complete) req.destroy();
+  }, config.REQUEST_TIMEOUT_MS);
   const startedAt = Date.now();
   try {
     await runUpload(req, res);
@@ -116,6 +127,7 @@ app.post('/v1/repair', requireApiKey, withTempDir(withTimeout(async (req, res, s
     return;
   }
 
+  clearTimeout(uploadLimit);
   const report = await repairPdf(req.tempDir, signal);
   const durationMs = Date.now() - startedAt;
 
@@ -127,7 +139,7 @@ app.post('/v1/repair', requireApiKey, withTempDir(withTimeout(async (req, res, s
 
   if (!report.ok) {
     res.status(422).json(report);
-    logMetric({ apiKeyName: req.apiKey.name, endpoint: '/v1/repair', bytesIn, durationMs, verdict: 'unrecoverable' });
+    logMetric({ apiKeyName: req.apiKey.name, endpoint: '/v1/repair', bytesIn, durationMs, verdict: report.textCheck === 'differs' ? 'text_would_change' : 'unrecoverable' });
     return;
   }
 
@@ -135,12 +147,14 @@ app.post('/v1/repair', requireApiKey, withTempDir(withTimeout(async (req, res, s
   res.status(200).json({
     ok: true,
     method: report.method,
+    textCheck: report.textCheck,
+    checkedWith: report.checkedWith,
     warnings: report.warnings,
     pageCount: report.pageCount,
     file: outBytes.toString('base64'),
   });
-  logMetric({ apiKeyName: req.apiKey.name, endpoint: '/v1/repair', bytesIn, bytesOut: outBytes.length, durationMs, verdict: `repaired_${report.method}` });
-})));
+  logMetric({ apiKeyName: req.apiKey.name, endpoint: '/v1/repair', bytesIn, bytesOut: outBytes.length, durationMs, verdict: `repaired_${report.method}_${report.textCheck}` });
+}, config.REPAIR_TIMEOUT_MS)));
 
 // The outer limit is PDFA_ADVANCED_TIMEOUT_MS for every level since P27 (up to three conversions + validations and
 // the text checks); REQUEST_TIMEOUT_MS still bounds the upload itself.

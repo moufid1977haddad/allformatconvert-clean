@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF Repair — Fix Damaged PDF Files Online" },
-  description: "PDF Repair fixes PDFs with damaged structure, like a broken cross-reference table, using qpdf and Ghostscript on our server.",
+  description: "PDF Repair fixes PDFs with damaged structure, like a broken cross-reference table or a cut-off end, and checks that the repaired file keeps your text.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-repair" },
   openGraph: {
     title: "PDF Repair — Fix Damaged PDF Files Online",
-    description: "PDF Repair fixes PDFs with damaged structure, like a broken cross-reference table, using qpdf and Ghostscript on our server.",
+    description: "PDF Repair fixes PDFs with damaged structure, like a broken cross-reference table or a cut-off end, and checks that the repaired file keeps your text.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-repair",
   },
 };

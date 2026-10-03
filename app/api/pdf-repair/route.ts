@@ -8,10 +8,10 @@ import { isStagedRequest, respondStagedPdfJson } from "@/lib/media/stagedRoute";
 // enough headroom inside the function's own execution budget.
 export const maxDuration = 300;
 
-// Grows with the file (a large scan takes the service longer); stays under maxDuration.
-function serviceTimeoutMs(bytes: number): number {
-  return Math.min(240_000, 65_000 + Math.ceil(bytes / (1024 * 1024)) * 3_000);
-}
+// P28: the service bounds a repair itself (REPAIR_TIMEOUT_MS, 200 s: up to four methods, each repaired file's text
+// read back by two readers -- 51-79 s measured on a 10 400-page PDF). Waiting a little longer lets its own answer
+// arrive first; stays under maxDuration.
+const SERVICE_TIMEOUT_MS = 230_000;
 
 // Deliberately stricter than the service's own MAX_FILE_SIZE_BYTES so this
 // route fails fast with a clear message rather than uploading a doomed
@@ -60,7 +60,7 @@ async function repairFile(req: NextRequest, file: File, serviceUrl: string, apiK
   serviceForm.append("file", file, file.name);
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), serviceTimeoutMs(file.size));
+  const timeoutId = setTimeout(() => controller.abort(), SERVICE_TIMEOUT_MS);
 
   let serviceResponse: Response;
   try {

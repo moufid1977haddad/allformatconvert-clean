@@ -42,4 +42,8 @@ module.exports = {
   // (25 s: the site waits 30 s, so the service gives up first and frees its process)
   ACTUALTEXT_TIMEOUT_MS: Number(process.env.ACTUALTEXT_TIMEOUT_MS) || 25_000,
   PDFA_ADVANCED_TIMEOUT_MS: Number(process.env.PDFA_ADVANCED_TIMEOUT_MS) || 200_000,
+  // /v1/repair (P28): Poppler's pdfunite is the second structural repair method (poppler-utils, like pdftotext), and
+  // every repaired candidate's text is read back by two readers -- up to four repairs and ten text reads at worst.
+  PDFUNITE_BIN: process.env.PDFUNITE_BIN || 'pdfunite',
+  REPAIR_TIMEOUT_MS: Number(process.env.REPAIR_TIMEOUT_MS) || 200_000,
 };

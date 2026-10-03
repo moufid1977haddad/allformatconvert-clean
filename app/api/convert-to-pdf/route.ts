@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { contentDisposition } from "@/lib/contentDisposition";
 import { detectProprietarySymbolFonts } from "@/lib/officeSymbolFonts";
 import { nameNamelessFonts } from "@/lib/xlsxDefaultFont";
+import { normalizeWordMathInOdt } from "@/lib/odtWordMath";
 import { convertDocxToPdf, ConvertApiError } from "@/lib/providers/convertApi";
 import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES, MAX_OFFICE_STAGED_BYTES, MAX_SPREADSHEET_STAGED_BYTES } from "@/lib/quota/limits";
@@ -317,6 +318,18 @@ async function handleGotenberg(req: NextRequest, file: File, extension: string, 
       if (patched > 0) fileToConvert = new Blob([new Uint8Array(buffer)], { type: file.type });
     } catch (err: any) {
       console.error("xlsx font normalization skipped:", err?.message || "unknown error");
+    }
+  }
+
+  // .odt/.ott written by Word: its equations are "flat" MathML with math-italic letters, which LibreOffice draws as a
+  // garbled stack -- see lib/odtWordMath.js (P28). Only those formula objects are rewritten; any other file goes as
+  // uploaded, and a file that can't be read is converted as before (reason logged), like the .xlsx step above.
+  if (extension === "odt" || extension === "ott") {
+    try {
+      const { buffer, patched } = await normalizeWordMathInOdt(Buffer.from(await file.arrayBuffer()));
+      if (patched > 0) fileToConvert = new Blob([new Uint8Array(buffer)], { type: file.type });
+    } catch (err: any) {
+      console.error("odt equation normalization skipped:", err?.message || "unknown error");
     }
   }
 
