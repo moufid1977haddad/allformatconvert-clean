@@ -124,4 +124,6 @@ USER gotenberg
 # (URL to PDF already strips every script and forbids them by a Content-Security-Policy, lib/urlFetch/snapshot.mjs;
 # Text, Markdown, EPUB and MOBI to PDF build script-free HTML), and an uploaded HTML file is untrusted input printed by
 # a Chromium without sandbox. Measured: 0 of 18 ways to run a script (scripts/p29/js-probe.mjs), 15 of 18 before.
-CMD ["gotenberg", "--api-enable-basic-auth", "--chromium-disable-javascript"]
+# --chromium-clear-cookies (P29, independent review): a cookie that a remote image or style sheet of one visitor's HTML
+# sets is not sent again while printing the next visitor's page (a third party could otherwise link our visitors).
+CMD ["gotenberg", "--api-enable-basic-auth", "--chromium-disable-javascript", "--chromium-clear-cookies"]
