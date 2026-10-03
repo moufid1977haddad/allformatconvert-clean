@@ -14,7 +14,9 @@ const modern = (z) => { const m = MODERN[z]; if (!m) return z; try { new Intl.Da
 // rendering gave the visitor's zone in the browser and UTC in the HTML (React hydration error #418 on every page view
 // outside UTC, found by the Firefox and WebKit page benches).
 const readLocalTz = () => modern(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
-const ZONES = (() => { try { return [...new Set(Intl.supportedValuesOf('timeZone').map(modern))].sort(); } catch { return []; } })();
+// the zone list differs between the server's Node and each browser's own list (Firefox, Safari): read after the first
+// render too, or the menu's options would not match the HTML (React #418)
+const readZones = () => { try { return [...new Set(Intl.supportedValuesOf('timeZone').map(modern))].sort(); } catch { return []; } };
 export default function TimestampConverterPage() {
   const [timestamp, setTimestamp] = useState('');
   const [date, setDate] = useState('');
@@ -22,7 +24,8 @@ export default function TimestampConverterPage() {
   const [error, setError] = useToolError('');
   const [LOCAL_TZ, setLocalTz] = useState('UTC');
   const [tz, setTz] = useState('UTC');
-  useEffect(() => { const z = readLocalTz(); setLocalTz(z); setTz((t) => (t === 'UTC' ? z : t)); }, []);
+  const [ZONES, setZones] = useState([]);
+  useEffect(() => { const z = readLocalTz(); setLocalTz(z); setTz((t) => (t === 'UTC' ? z : t)); setZones(readZones()); }, []);
   const [lastMs, setLastMs] = useState(null);
   const show = (ms, unit, ambiguous = false, gapMinutes = 0, zone = tz) => { setLastMs(ms); setResult({ ...describe(ms), unit, zone: describeZone(ms, zone), ago: relativeTime(ms), ambiguous, gapMinutes }); setError(''); };
   // a date before year 1 cannot go into <input type=datetime-local>: the field is left empty and the result says the year
