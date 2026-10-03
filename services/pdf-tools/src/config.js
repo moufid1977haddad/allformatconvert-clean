@@ -38,5 +38,8 @@ module.exports = {
   // /v1/pdfa levels 2u/3u/2a/3a (P26): up to three conversions + veraPDF runs when a lower level is allowed.
   // P27: the PDF/A text check (src/pdfa.js) reads with Poppler too. Set by the Dockerfile's poppler-utils.
   PDFTOTEXT_BIN: process.env.PDFTOTEXT_BIN || 'pdftotext',
+  // /v1/unicode-from-actualtext (P27): a pass over the content streams, before ConvertAPI.
+  // (25 s: the site waits 30 s, so the service gives up first and frees its process)
+  ACTUALTEXT_TIMEOUT_MS: Number(process.env.ACTUALTEXT_TIMEOUT_MS) || 25_000,
   PDFA_ADVANCED_TIMEOUT_MS: Number(process.env.PDFA_ADVANCED_TIMEOUT_MS) || 200_000,
 };
