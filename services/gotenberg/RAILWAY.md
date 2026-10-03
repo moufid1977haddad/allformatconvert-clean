@@ -44,5 +44,13 @@ This image now runs in two roles (`OCT_EDGE_MODE`, read by `edge/main.go`, the `
 - **If Gotenberg's Basic Auth password changes**, the front's signing key changes: recompute the public key with
   `scripts/p30/edge-pubkey.mjs`, put it in `OCT_TRUSTED_KEYS` (Dockerfile) and redeploy all three services, or every
   Chromium tool answers 403.
+- **Never delete or rename the `chromium` service or its domain (`chromium-production-9551.up.railway.app`) while a
+  front image refers to it** (security review, 04/10): a freed `*.up.railway.app` name can be claimed by anyone, who
+  would then receive the visitors' HTML. Roll the fronts back (or point `OCT_CHROMIUM_URL` elsewhere) FIRST.
 - Rollback of the whole change: the previous deployment of `gotenberg-v2` (its image started Gotenberg directly, with
-  Chromium inside); the isolated project can then be left idle or deleted by the owner.
+  Chromium inside); keep the isolated project until no deployment of any front refers to it.
+- Accepted residual (security review): Chromium, Gotenberg and oct-edge share one user in the isolated container, so
+  code running in a compromised Chromium could tamper with that container and see later visitors' documents until it
+  restarts. It obtains nothing that leads back to our project: no credential (oct-edge refuses to start with anything
+  credential-like in its environment), only a public key, no private network shared with ours (measured), and the
+  front strips Gotenberg's Authorization header before relaying. JavaScript and the JIT stay off (P29).

@@ -149,3 +149,13 @@ func TestArgs(t *testing.T) {
 		t.Error("back args wrong")
 	}
 }
+
+func TestSecretLooking(t *testing.T) {
+	got := secretLooking([]string{"OCT_TRUSTED_KEYS=abc", "PORT=3000", "CHROMIUM_DENY_LIST=x", "RAILWAY_PUBLIC_DOMAIN=x", "GOTENBERG_API_BASIC_AUTH_USERNAME=u", "MY_TOKEN=t", "DB_PASSWORD=p", "API_SECRET=s"})
+	if strings.Join(got, ",") != "GOTENBERG_API_BASIC_AUTH_USERNAME,MY_TOKEN,DB_PASSWORD,API_SECRET" {
+		t.Fatalf("got %v", got)
+	}
+	if !sameCredentials("user", "pass", "user", "pass") || sameCredentials("user", "pas", "user", "pass") || sameCredentials("usr", "pass", "user", "pass") {
+		t.Fatal("credential comparison wrong")
+	}
+}

@@ -21,6 +21,29 @@ async function checkGotenberg(): Promise<CheckResult> {
   }
 }
 
+// P30: Gotenberg's /health no longer covers Chromium, which runs in its own Railway project behind gotenberg-v2
+// (services/gotenberg/edge): one tiny HTML conversion through the whole chain, the way our HTML tools call it.
+async function checkGotenbergChromium(): Promise<CheckResult> {
+  const url = process.env.GOTENBERG_URL;
+  const user = process.env.GOTENBERG_USERNAME;
+  const pass = process.env.GOTENBERG_PASSWORD;
+  if (!url || !user || !pass) return { ok: false, detail: "not_configured" };
+  try {
+    const form = new FormData();
+    form.append("files", new Blob(["<!doctype html><html><body><p>health check</p></body></html>"], { type: "text/html" }), "index.html");
+    const res = await fetch(`${url.replace(/\/+$/, "")}/forms/chromium/convert/html`, {
+      method: "POST",
+      headers: { Authorization: "Basic " + Buffer.from(`${user}:${pass}`).toString("base64") },
+      body: form,
+      signal: AbortSignal.timeout(20000),
+    });
+    const head = Buffer.from(await res.arrayBuffer()).subarray(0, 5).toString();
+    return { ok: res.ok && head === "%PDF-", detail: res.ok ? (head === "%PDF-" ? "200" : "non_pdf") : String(res.status) };
+  } catch {
+    return { ok: false, detail: "unreachable" };
+  }
+}
+
 async function checkOpenAI(): Promise<CheckResult> {
   const key = process.env.OPENAI_API_KEY;
   if (!key) return { ok: false, detail: "not_configured" };
@@ -218,6 +241,7 @@ export async function GET(request: NextRequest) {
 
   const checks: Record<string, CheckResult> = {
     gotenberg: await checkGotenberg(),
+    "gotenberg-chromium": await checkGotenbergChromium(),
     openai: await checkOpenAI(),
     "background-removal": await checkBackgroundRemoval(),
     resend: await checkResend(),

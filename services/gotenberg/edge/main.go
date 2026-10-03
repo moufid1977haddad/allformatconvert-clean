@@ -148,13 +148,37 @@ func FrontHandler(username, password string, remote *url.URL, key ed25519.Privat
 			return
 		}
 		u, p, ok := r.BasicAuth()
-		if !ok || subtle.ConstantTimeCompare([]byte(u), []byte(username)) != 1 || subtle.ConstantTimeCompare([]byte(p), []byte(password)) != 1 {
+		if !ok || !sameCredentials(u, p, username, password) {
 			w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 		relay.ServeHTTP(w, r)
 	})
+}
+
+// sameCredentials compares fixed-size digests, both always computed and combined without short-circuit, so the time
+// taken tells nothing about which part was wrong or about the lengths (security review, 04/10).
+func sameCredentials(u, p, username, password string) bool {
+	hu, hp := sha256.Sum256([]byte(u)), sha256.Sum256([]byte(p))
+	wu, wp := sha256.Sum256([]byte(username)), sha256.Sum256([]byte(password))
+	return subtle.ConstantTimeCompare(hu[:], wu[:])&subtle.ConstantTimeCompare(hp[:], wp[:]) == 1
+}
+
+// secretLooking lists environment names that look like a credential (the isolated service must hold none).
+func secretLooking(env []string) []string {
+	var found []string
+	for _, kv := range env {
+		name, _, _ := strings.Cut(kv, "=")
+		up := strings.ToUpper(name)
+		if name == "OCT_TRUSTED_KEYS" {
+			continue
+		}
+		if strings.HasPrefix(up, "GOTENBERG_API_BASIC_AUTH") || strings.Contains(up, "PASSWORD") || strings.Contains(up, "SECRET") || strings.Contains(up, "TOKEN") {
+			found = append(found, name)
+		}
+	}
+	return found
 }
 
 // BackHandler: only /health and signed Chromium requests reach the local Gotenberg.
@@ -219,9 +243,9 @@ func main() {
 		if err != nil {
 			log.Fatalf("oct-edge: %v", err)
 		}
-		// The isolated service must hold no credential at all: refuse to start if Gotenberg's would be there.
-		if os.Getenv("GOTENBERG_API_BASIC_AUTH_PASSWORD") != "" {
-			log.Fatal("oct-edge: back must not receive Gotenberg's credentials")
+		// The isolated service must hold no credential at all: refuse to start if anything credential-like is there.
+		if found := secretLooking(os.Environ()); len(found) > 0 {
+			log.Fatalf("oct-edge: back must not receive credentials, found %v", found)
 		}
 		handler = BackHandler(keys, local, time.Now)
 	}
