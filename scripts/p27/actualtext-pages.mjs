@@ -6,6 +6,7 @@
 //   - Compare: the PDF against itself shows no difference, and its text panel contains "données".
 //   node scripts/p27/actualtext-pages.mjs <origin> <lo.pdf> [--browser=chromium|firefox|webkit]
 import { chromium, firefox, webkit } from '@playwright/test';
+import { previewAuth } from '../p26/preview-auth.mjs';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -19,6 +20,7 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'p27-at-'));
 const b = await { chromium, firefox, webkit }[engine].launch();
 const ctx = await b.newContext({ acceptDownloads: true });
 await ctx.addCookies([{ name: 'oct_automation', value: '1', url: origin }]);
+await previewAuth(ctx, origin); // a protected Vercel preview (vercel env run): token on the preview's own requests only
 let pass = 0, fail = 0;
 const check = (n, ok, info = '') => { ok ? pass++ : fail++; console.log(ok ? 'PASS' : 'FAIL', `${engine} ${n}`, info); };
 const fetchDownload = (p) => p.locator('[data-file-download] [data-download]').first().evaluate(async (el) => {

@@ -5,6 +5,7 @@
 //   - when the result is ready, the polite status region announces it ([data-a11y-status]); errors use role=alert.
 //   node scripts/p27/keyboard-check.mjs <origin> [--browser=chromium|firefox|webkit]
 import { chromium, firefox, webkit } from '@playwright/test';
+import { previewAuth } from '../p26/preview-auth.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -36,6 +37,7 @@ const TOOLS = [
 const b = await { chromium, firefox, webkit }[engine].launch();
 const ctx = await b.newContext({ viewport: { width: 1366, height: 900 } });
 await ctx.addCookies([{ name: 'oct_automation', value: '1', url: origin }]);
+await previewAuth(ctx, origin); // a protected Vercel preview (vercel env run): token on the preview's own requests only
 await ctx.route('**/api/**', (r) => r.abort()); // nothing is sent to a service from this check
 let pass = 0, fail = 0;
 const check = (n, ok, info = '') => { ok ? pass++ : fail++; console.log(ok ? 'PASS' : 'FAIL', n, info); };

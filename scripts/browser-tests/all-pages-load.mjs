@@ -36,6 +36,9 @@ for (const u of urls) {
     status = r ? r.status() : 0;
     await p.waitForTimeout(600);
     const h1 = await p.locator('h1').first().textContent({ timeout: 5000 }).catch(() => '');
+    // P27: a protected preview redirects to Vercel's login page, which answers 200 with an <h1>: a page that ends on
+    // another site is a problem, not a clean page
+    if (new URL(p.url()).origin !== new URL(origin).origin) errors.push(`left the site for ${new URL(p.url()).origin}`);
     if (status !== 200 || !h1 || errors.length) bad.push({ u, status, h1: (h1 || '').trim().slice(0, 40), errors: errors.slice(0, 2).map((e) => e.slice(0, 160)) });
   } catch (e) { bad.push({ u, status, errors: [String(e.message).slice(0, 160)] }); }
   await p.close();
