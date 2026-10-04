@@ -83,10 +83,14 @@ export function textToHtmlDocument(text, title = 'Document', { page = 'A4', land
   // Han characters in the Japanese or Korean design when the text is Japanese or Korean, else Chinese (Simplified).
   const cjk = /[぀-ヿㇰ-ㇿ]/.test(clean) ? 'JP' : /[가-힯ᄀ-ᇿ㄰-㆏]/.test(clean) && !/[一-鿿]/.test(clean) ? 'KR' : 'SC';
   const paragraphs = clean.split('\n').map((p) => `<p dir="auto">${p ? esc(p) : '&#8203;'}</p>`).join('\n');
+  // P32 (04/10): Arabic and Hebrew named, so the service draws them with the same Noto faces as the in-browser engine
+  // (unnamed, Chromium's fallback picked DejaVu Sans for Arabic — measured on Gotenberg). The line height stays a
+  // number (1.6 × the text size, the in-browser engine's pitch): Noto Sans Arabic's line metrics are 2.112 em
+  // (Noto Sans: 1.362 em), so with "line-height: normal" every Arabic line came out 5.25 pt taller at 12 pt.
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>
 @page { size: ${page in PAGE_SIZES ? page : 'A4'}${landscape ? ' landscape' : ''}; margin: ${Number(margin) || 50}pt; }
 html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-body { margin: 0; font-family: 'Noto Sans', 'Noto Sans CJK ${cjk}', 'Noto Color Emoji', sans-serif; font-size: ${Number(fontSize) || 12}pt; line-height: 1.6; color: #000; }
+body { margin: 0; font-family: 'Noto Sans', 'Noto Sans Arabic', 'Noto Sans Hebrew', 'Noto Sans CJK ${cjk}', 'Noto Color Emoji', sans-serif; font-size: ${Number(fontSize) || 12}pt; line-height: 1.6; color: #000; }
 p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 </style></head><body>
 ${paragraphs}
