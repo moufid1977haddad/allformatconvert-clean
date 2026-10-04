@@ -54,6 +54,8 @@ const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/6
 const b = await { chromium, firefox, webkit }[engine].launch();
 const ctx = await b.newContext({ acceptDownloads: true, ...(device === 'iphone' ? { userAgent: UA, hasTouch: true, isMobile: engine !== 'firefox', viewport: { width: 390, height: 844 } } : {}) });
 await ctx.addInitScript(() => { navigator.share = async () => {}; navigator.canShare = () => true; });
+// Vercel's toolbar on previews (vercel.live, absent on www) throws in Playwright's WebKit: not the site's code
+if (process.argv.includes('--no-vercel-toolbar')) await ctx.route((url) => url.hostname === 'vercel.live', (r) => r.abort());
 
 for (const c of CASES) {
   if (only.length && !only.includes(c.kind)) continue;

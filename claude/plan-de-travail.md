@@ -23,14 +23,33 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
    rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
 
-## 🧾 P31 — 03/10 : forfait ConvertAPI (branche `p31-convertapi-forfait`, non déployée)
+## 📱 P31 — 03→04/10 : correctifs de la passe iPhone (26 tests) + AJOUT ConvertAPI (`docs/audit/RAPPORT-p31-iphone-correctifs-04-10.md`, repère `restauration-avant-p31-04-10` = `fb2d1db3`)
 
-| Point | État | Reste |
+**Règle (leçon P21, permanente)** : rien n'est « corrigé sur iPhone » tant que l'iPhone ne l'a pas confirmé — statut maximal
+« corrigé, à confirmer sur iPhone ». Mini-passe iPhone de 10 vérifications : rapport §12.
+
+| Point | État | Reste (priorité) |
 |---|---|---|
-| A Compteur du forfait | ✅ code : renouvellement le **3** ; période 03/10 → 03/11 démarrée à **6** conversions (relevé du 03/10, 23 h 08 UTC, constante `CONVERTAPI_PLAN_BASELINE`) ; seuils 50/80/100 % inchangés | déploiement à la demande du propriétaire |
-| B Coût réel | ✅ `ConversionCost` déjà ajouté (jamais autre chose que 1 mesuré, taille et durée sans effet) ; **une requête traitée puis échouée (500, 400, 415…) compte 1** (conditions ConvertAPI), refus 401/402/403/429/503 non comptés. Fin de l'essai : expiration à 30 jours, pas 250 conversions consommées | — |
-| D 1 conversion simultanée | ✅ code : sur 503/429 (« No available conversion PODs ») la requête **attend son tour** (3, 5, 10, 15 s…, Retry-After respecté, ≤ 60 s petit fichier, 10 s à 100 Mio), puis message « busy, try again in a minute » ; Word to PDF ne bascule plus sur LibreOffice au premier 503 | mesure www avant/après : `scripts/p31/convertapi-concurrency.mjs` (budget `p31-convertapi` = 10 conversions) |
-| E 200 Mo | ✅ aucun outil n'annonce plus de 100 Mo ; Merge PDF vérifie désormais chaque fichier Office **avant** l'envoi (100 Mo, tableurs 60 Mo) ; FAQ PDF Tools : PDF to Word/Excel/PowerPoint 99 Mo | — |
+| 1 Download iOS (13, 14, 17, 21) | corrigé, à confirmer sur iPhone : **Blob retypé `application/octet-stream` + attribut `download`, jamais de navigation**, sur les 195 outils (annexe A) ; Save / Share garde le vrai type ; `/zipdl/f/` abandonné ; banc `scripts/p31/download-names.mjs` (8 formats × 3 moteurs + iPhone) ; revue indépendante appliquée | **P1** propriétaire : mini-passe §12 n° 1-3 |
+| 2 M4R `.m4r.html` (22) | corrigé, à confirmer : c'était la page 404 du site (adresse du service worker) ; sorties audio contrôlées octet par octet ; table extension → MIME testée (69) ; aide sonnerie 40 s / GarageBand / Finder-iTunes | P1 : §12 n° 4 |
+| 3 PDF to JPG figé (20) | corrigé, à confirmer : pdf.js sans `ImageDecoder`/`OffscreenCanvas` sur Safari (attente sans délai, cause la plus probable) ; délai de garde 60 s par page avec message ; `app/lib/canvasLimit.js` appliqué aux canvas d'échelle libre (8 fichiers, 46 inventoriés) | P1 : §12 n° 5-6 |
+| 4 Background Remover (18) | liseré réduit (4,91 → 3,90 % sur 28 cas, décontamination Germer 2020) ; **morceau de fond en haut non corrigé** (modèle IS-Net) ; aucun modèle meilleur partout ; 0 $ | **P2 décision propriétaire** : tester BRIA RMBG 2.0 (API fal, 0,018 $/image) sur 29 photos ≈ 0,52 $ — compte fal requis ; P1 : §12 n° 7 |
+| 5 Code Formatter (16) | corrigé, à confirmer : 13 langages, 20 dialectes SQL, auto-détection, erreurs ligne/colonne, chargement à la demande | P1 : §12 n° 8 |
+| 6 Panorama 63 Mpx (26) | corrigé, à confirmer : taille lue à la sélection (Image Compressor, JPG/Image to PDF) ; « Reduce to 50 MP then compress » | P1 : §12 n° 9 |
+| 7 Quality sur PNG | ✅ curseur factice masqué (PNG, BMP, GIF, ICO, TIFF) ; Image Compressor : réel (palette) | — |
+| 8 Affichage tactile (23) | corrigé, à confirmer : 239 pages × 390/375 px, 0 débordement, 0 cible < 44 px (`scripts/p31/layout-iphone.mjs`) | P3 : écrans de résultat et menu mobile ouvert non mesurés |
+| A Compteur ConvertAPI | ✅ code : renouvellement le **3** ; période 03/10 → 03/11 démarrée à **6** (`CONVERTAPI_PLAN_BASELINE`) ; seuils inchangés | — |
+| B Coût réel | ✅ `ConversionCost` (toujours 1, taille et durée sans effet) ; **une requête traitée puis échouée compte** (conditions ConvertAPI) — le site la compte maintenant ; fin de l'essai : **expiration à 30 jours** (source : aide ConvertAPI via index de recherche) | P3 propriétaire : confirmer la date d'ouverture du compte |
+| C Rapport P30 | ✅ « ≈ 157 hors du site » corrigé (faux) | — |
+| D 1 conversion simultanée | ✅ code + 10 tests : file d'attente serveur sur 503/429, message honnête, plus de bascule LibreOffice inutile ; **mesure réelle sur www refusée par le garde-fou** (0 conversion dépensée) | **P2 propriétaire** : `node scripts/p31/convertapi-concurrency.mjs --label=after --go` (2 conversions du forfait) |
+| E 200 Mo | ✅ rien au-dessus de 100 Mo annoncé ; Merge PDF contrôle les fichiers Office avant l'envoi | — |
+| F Jeton `.env.local` | **non fait** (refusé deux fois par le garde-fou) | **P1 propriétaire** : `! sed -i '/^CONVERTAPI_TOKEN=/d' .env.local` |
+
+**Pièges notés (P31)** : (1) jamais `npm ci` dans le dépôt principal pendant que des sous-agents y ont une jonction
+`node_modules` ou qu'un `next start` tourne (il vide tout puis échoue) — `npm install` à la place ; (2) heredoc bash : une double barre
+oblique inverse devient simple (déjà vu P29) — écrire les fichiers par l'outil d'écriture ; (3) Playwright-Firefox : `click()` d'un lien de
+Blob `octet-stream` ne rend pas la main → `noWaitAfter: true` ; (4) WebKit de Playwright n'a ni `ImageDecoder` ni
+`OffscreenCanvas` : les chemins de pdf.js et des workers d'image du vrai Safari n'y sont **jamais** exercés.
 
 ## 🔔 P30 — 04/10 : panne ConvertAPI, secours, alertes, Chromium isolé (`docs/audit/RAPPORT-p30-convertapi-alertes-04-10.md`, repère `restauration-avant-p30-04-10` = `bce5e714`)
 
