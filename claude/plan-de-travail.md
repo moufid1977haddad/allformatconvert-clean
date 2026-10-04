@@ -23,6 +23,26 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
    rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
 
+## 📱 P32 — 04/10 : deux pannes iPhone restantes + essai BRIA + interligne arabe (`docs/audit/RAPPORT-p32-iphone-bria-04-10.md`, repère `restauration-avant-p32-04-10` = `39e4ff69`)
+
+**Règle (P21/P31, permanente)** : statut maximal « corrigé, à confirmer sur iPhone ». Mini-passe iPhone de 5 vérifications : rapport §6.
+
+| Point | État | Reste (priorité) |
+|---|---|---|
+| 1 PDF to JPG mode Pages (iPhone) | corrigé, à confirmer : cause non prouvée (hypothèse n° 1 : `FontFace.loaded` des polices standard jamais résolu sous iOS 26 — le rendu l'attend, Extract non) ; **correctif garanti** : sur iPhone / iPad, page non dessinée en 20 s → `/api/pdf-render` (pdftoppm sur pdf-tools, même dpi / qualité / pages), avis avant et après, textes de confidentialité et méta-descriptions exacts ; PDF to Image et PDF Redact protégés aussi ; revue de sécurité « GO avec conditions », conditions appliquées | **P1** propriétaire : mini-passe §6 n° 1-2 ; P2 : PDF OCR dépend du même rendu (non protégé, rendu non livré) — à essayer sur iPhone ; P2 : test d'alignement du noircissement Redact sur page Poppler (police TrueType non incorporée, CropBox décalée) ; P3 : confirmation explicite avant envoi pour Redact (décision propriétaire) |
+| 2 Image Compressor panorama 63 Mpx | corrigé, à confirmer : cause mesurée (MozJPEG q95 4:4:4 dans la page, 1 050 Mio jamais rendus + 765 dans le worker) ; réduction dans le worker, un seul encodage ; cible téléphone **48 Mpx** (12 220 × 3 927) ; pic ≤ référence 48 Mpx (Firefox 953-958 contre 961-963 Mo) | P1 : §6 n° 3 ; **P2 décision propriétaire** : JPG to PDF / Image to PDF avec un WebP/HEIC/AVIF/BMP/GIF de 63 Mpx reste au-dessus de la référence (1 467 Mo) — borne téléphone 40-48 Mpx, PDF en bandes ou PNG |
+| 3 BRIA RMBG 2.0 (fal) | **non branché** : pas meilleur partout (mieux 4, égal 6, mixte 9, moins bien 9 sur 28) ; enlève la nappe d'IMG_2433 (1 419 px → 0) mais garde le dessous de verre ; 0,638 $ réservés / ≈ 0,54 $ facturés sur 1 $ | **P3 décision propriétaire** : BRIA = 18 $ / 1 000 images (≈ 6 × IS-Net) ; piste : second avis seulement quand IS-Net garde un morceau de fond en haut |
+| 4 Text to PDF interligne arabe | pas d'écart propre à l'arabe (pas fixe 19,20 pt, mesuré) ; l'impression vient de l'alignement à droite ; corrigé au passage : arabe/hébreu du service en Noto au lieu de DejaVu | si le propriétaire voit encore un écart : capture + texte exact |
+
+**➡️ Prochain chantier après P32 : référencement Google (trafic)** — plan détaillé donné par le propriétaire.
+
+**Pièges notés (P32)** : (1) l'interception de Playwright (`route.request().postDataBuffer()`) **ne contient pas la partie
+fichier** d'un multipart — pour tester une route locale avec un fichier, la servir sur son propre port
+(`scripts/p32/local-render-route.mjs`) ; (2) `pdf-tools` sur Railway est relié à GitHub et **se redéploie à chaque push
+sur master** (pas de chemin surveillé) : un changement de service = commit additif sur master d'abord ; (3) heredoc bash :
+encore une barre oblique inverse perdue (Dockerfile) — Edit/Write pour tout fichier qui en contient ; (4) `TaskStop` d'un
+`npx next start` laisse le vrai processus Node en écoute : le tuer par son PID.
+
 ## 📱 P31 — 03→04/10 : correctifs de la passe iPhone (26 tests) + AJOUT ConvertAPI (`docs/audit/RAPPORT-p31-iphone-correctifs-04-10.md`, repère `restauration-avant-p31-04-10` = `fb2d1db3`) — **en production : `onlineconvertools-ooe79sko9` = `4b74d592` (04/10), www 29/29, retour arrière : `onlineconvertools-osaer8a95`**
 
 **Règle (leçon P21, permanente)** : rien n'est « corrigé sur iPhone » tant que l'iPhone ne l'a pas confirmé — statut maximal
@@ -45,7 +65,7 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 | E 200 Mo | ✅ rien au-dessus de 100 Mo annoncé ; Merge PDF contrôle les fichiers Office avant l'envoi | — |
 | F Jeton `.env.local` | ✅ **fait par le propriétaire le 04/10** (`sed` par le nom de la variable, vérifié par les noms seuls : plus aucune variable `CONVERTAPI…` dans `.env.local`) | — |
 
-**➡️ Prochain chantier : P32 — essai de BRIA RMBG 2.0 (Background Remover)** : via l'API fal, **0,018 $ par image**,
+**✅ Fait par P32 (voir section P32) — ~~Prochain chantier : P32 — essai de BRIA RMBG 2.0 (Background Remover)~~** : via l'API fal, **0,018 $ par image**,
 licence commerciale (API ; les poids auto-hébergés sont CC BY-NC, exclus). Test sur les 29 photos (28 du banc + IMG_2433)
 ≈ **0,52 $**, avec `scripts/p31/bg/` et le registre `scripts/p30/paid-ledger.mjs` (budget fixé par le propriétaire). La clé
 **`FAL_KEY` sera placée par le propriétaire lui-même dans `.env.local`** (jamais affichée ni demandée dans le terminal).
