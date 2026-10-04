@@ -18,7 +18,7 @@ Chromium, Firefox, WebKit, agent iPhone, tactile), jamais le vrai téléphone.
 | 7 Curseur Quality sur PNG | corrigé | factice pour PNG/BMP/GIF/ICO/TIFF → masqué ; réel dans Image Compressor (palette) |
 | 8 Affichage tactile (test 23) | corrigé, à confirmer sur iPhone | 239 pages × 390 et 375 px : 0 débordement, 0 cible < 44 px |
 | AJOUT ConvertAPI A-E | code fait ; **mesure D sur www non faite** (refusée par le garde-fou, au propriétaire) | 22/22 tests |
-| AJOUT F (jeton de `.env.local`) | **non fait** (refusé par le garde-fou) — commande au propriétaire §9 | — |
+| AJOUT F (jeton de `.env.local`) | ✅ fait par le propriétaire le 04/10 (refusé au garde-fou de Claude) | plus aucune variable `CONVERTAPI…` (noms seuls) |
 
 ## 1. Download sur iOS (priorité absolue)
 
@@ -242,9 +242,9 @@ seulement si le fichier est vraiment livré (bandeau fermé = non) ; (5) le chem
 - **E 200 Mo** : aucun des 4 outils n'annonce plus de 100 Mo (Word to PDF 100, PDF to Word/Excel/PowerPoint 99) ; refus
   avant l'envoi déjà en place. **Défaut trouvé et corrigé** : Merge PDF n'examinait pas la taille des fichiers Office avant
   l'envoi (le serveur refusait après) — désormais avant (100 Mo par document, 60 Mo par tableur). Test des constantes.
-- **F** : la suppression de la ligne `CONVERTAPI_TOKEN` de `.env.local` a été **refusée deux fois par le garde-fou** (même
-  en commande minimale) ; rien n'a été affiché. **À faire par le propriétaire** dans ce terminal :
-  `! sed -i '/^CONVERTAPI_TOKEN=/d' .env.local` puis `! grep -c '^CONVERTAPI_TOKEN=' .env.local` (attendu : 0).
+- **F** : la suppression a été refusée deux fois au garde-fou de Claude ; **faite par le propriétaire le 04/10** dans ce
+  terminal (`sed -i '/^CONVERTAPI_TOKEN=/d' .env.local`), vérifiée par les noms seuls : plus aucune variable `CONVERTAPI…`.
+  Aucune valeur affichée. Le code refusait déjà tout appel réel hors de la production Vercel.
 
 ## 10. Incidents de la session (dits tels quels)
 - Mon `npm ci` (pour installer Prettier) a **vidé `node_modules`** du dépôt principal avant d'échouer (fichier verrouillé
