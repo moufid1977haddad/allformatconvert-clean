@@ -32,7 +32,7 @@ for (const t of TOOLS) {
     await sharp({ create: { width: 64, height: 48, channels: 3, background: '#3366cc' } }).jpeg().toFile(jpg);
     await page.locator('input[type=file]').first().setInputFiles(jpg);
     await page.getByRole('button', { name: /Convert/ }).first().click().catch(() => {});
-    const a = page.locator('a[download]').first();
+    const a = page.locator('a[download][href]').first(); // P31: the link gets its address once retyped
     const ok = await a.waitFor({ timeout: 30000 }).then(() => true).catch(() => false);
     let meta = null;
     if (ok) { const href = await a.getAttribute('href'); const bytes = Buffer.from(await page.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href)); meta = await sharp(bytes).metadata(); }

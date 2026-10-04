@@ -1,0 +1,75 @@
+// P31 (03/10), point 6: an image over a tool's size bound is said as soon as it is chosen, before the button, read
+// from the file's header (no decoding) — the owner's 63 MP iPhone panorama (kit P27, 14000 × 4500) was accepted by
+// Image Compressor as "1 image selected" with no word. Then "Reduce to 50 MP then compress" in one gesture: the result
+// must be a real JPEG of the dimensions announced. Also JPG to PDF / Image to PDF (P27's other bounds): a PNG over
+// 90 MP is named at selection on a phone (header-only PNG made here: 10 000 × 10 000).
+// Usage: node scripts/p31/size-preflight.mjs <origin> [--browser=chromium|webkit|firefox]   (iPhone user agent)
+import { chromium, firefox, webkit } from '@playwright/test';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import zlib from 'node:zlib';
+
+const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--'))).origin;
+const engine = (process.argv.find((a) => a.startsWith('--browser=')) || '--browser=chromium').slice(10);
+const tag = `${engine} [iphone]`;
+let fails = 0, passes = 0;
+const check = (n, ok, info = '') => { if (ok) passes++; else fails++; console.log(ok ? 'PASS' : 'FAIL', `${tag} ${n}`, ok ? '' : info); };
+const PANO = path.join(process.env.P31_KIT || path.join(os.tmpdir(), 'p31-kit'), 'kit-iphone-p27', 'panorama-63mpx.jpg');
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'p31-size-'));
+// a PNG whose header says 10 000 × 10 000 (100 MP); its pixels are one tiny compressed block (only the header is read)
+const crcTable = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
+const crc = (buf) => { let c = 0xffffffff; for (const b of buf) c = crcTable[(c ^ b) & 255] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
+const chunk = (type, data) => { const len = Buffer.alloc(4); len.writeUInt32BE(data.length); const td = Buffer.concat([Buffer.from(type), data]); const c = Buffer.alloc(4); c.writeUInt32BE(crc(td)); return Buffer.concat([len, td, c]); };
+const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(10000, 0); ihdr.writeUInt32BE(10000, 4); ihdr[8] = 8; ihdr[9] = 2;
+const BIG_PNG = path.join(tmp, 'poster-100mp.png');
+fs.writeFileSync(BIG_PNG, Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk('IHDR', ihdr), chunk('IDAT', zlib.deflateSync(Buffer.alloc(64))), chunk('IEND', Buffer.alloc(0))]));
+const sof = (b) => { for (let i = 2; i < b.length - 9;) { if (b[i] !== 0xff) return null; const m = b[i + 1], len = b.readUInt16BE(i + 2); if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) return { height: b.readUInt16BE(i + 5), width: b.readUInt16BE(i + 7) }; i += 2 + len; } return null; };
+
+const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
+const b = await { chromium, firefox, webkit }[engine].launch();
+const ctx = await b.newContext({ acceptDownloads: true, userAgent: UA, hasTouch: true, isMobile: engine !== 'firefox', viewport: { width: 390, height: 844 } });
+
+if (!fs.existsSync(PANO)) check('kit panorama present', false, PANO);
+else {
+  const p = await ctx.newPage();
+  await p.goto(`${origin}/tools/image-tools/image-compressor`, { waitUntil: 'load' });
+  await p.waitForTimeout(1000);
+  const t0 = Date.now();
+  await p.locator('input[type=file]').first().setInputFiles(PANO);
+  const box = p.locator('[data-over-limit]');
+  await box.waitFor({ timeout: 5000 }).catch(() => {});
+  const shownMs = Date.now() - t0;
+  const text = (await box.count()) ? await box.innerText() : '';
+  check(`63 MP panorama: message at selection in ${shownMs} ms, before any click ("${text.split('\n')[0].slice(0, 120)}…")`, /14,000 × 4,500/.test(text) && /63 megapixels/.test(text) && /50 megapixels/.test(text) && shownMs < 5000, text);
+  const above = await p.evaluate(() => { const a = document.querySelector('[data-over-limit]'), c = [...document.querySelectorAll('button')].find((x) => /^Compress/.test(x.textContent)); return !!(a && c && (a.compareDocumentPosition(c) & Node.DOCUMENT_POSITION_FOLLOWING)); });
+  check('the message stands above the Compress button', above);
+  const btnText = (await p.locator('[data-reduce-then-compress]').count()) ? await p.locator('[data-reduce-then-compress]').innerText() : '';
+  const dims = /It can be reduced to ([\d,]+) × ([\d,]+)/.exec(text);
+  check(`one-gesture option "${btnText}" with the resulting size (${dims ? dims[1] + ' × ' + dims[2] : '?'})`, /Reduce to 50 MP then compress/.test(btnText) && !!dims);
+  await p.locator('[data-reduce-then-compress]').click();
+  const row = p.locator('[data-file-download]').first();
+  await row.waitFor({ timeout: 300000 }).catch(() => {});
+  if (await row.count()) {
+    const bytes = Buffer.from(await row.locator('a[data-download]').evaluate(async (a) => { for (let i = 0; i < 50 && a.dataset.retyped !== '1'; i++) await new Promise((r) => setTimeout(r, 100)); return Array.from(new Uint8Array(await (await fetch(a.href)).arrayBuffer())); }));
+    const s = sof(bytes), want = dims ? { width: +dims[1].replace(/,/g, ''), height: +dims[2].replace(/,/g, '') } : null;
+    const note = await p.locator('li').first().innerText();
+    check(`result: a real JPEG of ${s ? s.width + ' × ' + s.height : '?'} (announced ${want ? want.width + ' × ' + want.height : '?'}), ${(bytes.length / 1e6).toFixed(2)} MB < ${(fs.statSync(PANO).size / 1e6).toFixed(2)} MB, note says it was reduced`, s && want && s.width === want.width && s.height === want.height && s.width * s.height <= 50e6 && bytes.length < fs.statSync(PANO).size && /reduced from 14000 × 4500/.test(note), note);
+  } else check('result offered after reduce + compress', false, await p.locator('main').innerText().then((t) => t.slice(0, 300)));
+  await p.close();
+}
+for (const slug of ['pdf-tools/jpg-to-pdf', 'pdf-tools/image-to-pdf']) {
+  const p = await ctx.newPage();
+  await p.goto(`${origin}/tools/${slug}`, { waitUntil: 'load' });
+  await p.waitForTimeout(1000);
+  await p.locator('input[type=file]').first().setInputFiles(BIG_PNG);
+  const box = p.locator('[data-size-preflight]');
+  await box.waitFor({ timeout: 5000 }).catch(() => {});
+  const text = (await box.count()) ? await box.innerText() : '';
+  check(`${slug}: a 100 MP PNG is named at selection (phone bound 90 MP)`, /10,000 × 10,000/.test(text) && /90 megapixels at most on a phone/.test(text), text);
+  await p.close();
+}
+await b.close();
+fs.rmSync(tmp, { recursive: true, force: true });
+console.log(fails ? `${fails} FAIL, ${passes} pass (${tag})` : `ALL PASS: ${passes} checks (${tag})`);
+process.exit(fails ? 1 : 0);

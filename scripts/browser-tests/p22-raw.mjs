@@ -69,7 +69,7 @@ async function bmpPixelsHash(p) {
     // An iPhone / iPad link prepared for the tap (/zipdl/f/, P21) is served by the site's service worker from Cache
     // Storage (as download-guard reads it); elsewhere the link is the result's blob: URL.
     const staged = /\/zipdl\/f\//.test(a.getAttribute('href') || '');
-    const res = staged ? await (await caches.open('ocv-downloads-v1')).match(a.href) : await fetch(a.href);
+    const res = staged ? await (await caches.open('ocv-downloads-v1')).match(a.href) : await (async () => { for (let i = 0; i < 100 && !a.getAttribute('href'); i++) await new Promise((r) => setTimeout(r, 100)); return fetch(a.href); })();
     const b = new Uint8Array(await res.arrayBuffer()), v = new DataView(b.buffer);
     if (b[0] !== 0x42 || b[1] !== 0x4d || v.getUint16(28, true) !== 24) return { error: 'not a 24-bit BMP' };
     const w = v.getInt32(18, true), h = v.getInt32(22, true), off = v.getUint32(10, true), row = Math.ceil((w * 3) / 4) * 4;
@@ -87,7 +87,7 @@ async function bmpPixelsHash(p) {
 async function resultBytes(p) {
   const n = await p.locator('[data-file-download] [data-download]').first().evaluate(async (a) => {
     const staged = /\/zipdl\/f\//.test(a.getAttribute('href') || '');
-    const res = staged ? await (await caches.open('ocv-downloads-v1')).match(a.href) : await fetch(a.href);
+    const res = staged ? await (await caches.open('ocv-downloads-v1')).match(a.href) : await (async () => { for (let i = 0; i < 100 && !a.getAttribute('href'); i++) await new Promise((r) => setTimeout(r, 100)); return fetch(a.href); })();
     window.__res = new Uint8Array(await res.arrayBuffer()); return window.__res.length;
   });
   const parts = [];
@@ -112,7 +112,7 @@ async function convert(file, format) {
   const secs = ((Date.now() - t0) / 1000).toFixed(1);
   const text = await p.locator('body').innerText();
   // iPhone / iPad: the link is prepared for the tap (staged) shortly after the result shows (download-guard checks it)
-  if (r === 'ok' && device) await p.locator('[data-file-download] [data-download][data-staged="1"]').first().waitFor({ timeout: 15000 }).catch(() => {});
+  if (r === 'ok' && device) await p.locator('[data-file-download] [data-download][data-retyped="1"]').first().waitFor({ timeout: 15000 }).catch(() => {});
   const out = { r, secs, errors, text, caps: await iosCapHits(p) };
   if (r === 'ok') {
     try { if (format === 'bmp') out.bmp = await within(180000, 'reading the result', bmpPixelsHash(p)); else out.bytes = await within(300000, 'reading the result', resultBytes(p)); }

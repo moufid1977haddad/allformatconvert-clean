@@ -11,7 +11,7 @@ import { alertServerError } from "@/lib/quota/errorAlerts";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
 import { contentDisposition } from "@/lib/contentDisposition";
 import { PDF_NO_TABLES_MESSAGE, PDF_NO_TABLES_CODES } from "@/lib/pdfNoTables";
-import { convertApiUnavailable, convertApiUnavailableMessage, alertConvertApiFailure, convertApiSucceeded } from "@/lib/convertApiOutage";
+import { convertApiUnavailable, convertApiUnavailableMessage, convertApiBusy, convertApiBusyMessage, alertConvertApiFailure, convertApiSucceeded } from "@/lib/convertApiOutage";
 
 type Spec = {
   tool: "pdf-to-excel" | "pdf-to-ppt";
@@ -91,6 +91,8 @@ export function makePdfToOfficeHandler(spec: Spec) {
         // P30: a provider outage alerts once per incident; the visitor is told to come back (no backup of this quality).
         await alertConvertApiFailure(spec.tool, err, mapped.alert);
         if (mapped.alert) await insertToolError(buildServerToolError({ tool: spec.tool, file, error: new Error(`${(err as any).code} (HTTP ${(err as any).httpStatus ?? "n/a"})`), userAgent: req.headers.get("user-agent"), headers: req.headers }));
+        // P31: still busy after the wait in lib/providers/convertApi.js (one conversion at a time): retry soon.
+        if (convertApiBusy(err)) return NextResponse.json({ error: convertApiBusyMessage(`PDF to ${spec.label}`) }, { status: 503 });
         if (convertApiUnavailable(err)) return NextResponse.json({ error: convertApiUnavailableMessage(spec.label) }, { status: 503 });
         return NextResponse.json({ error: mapped.message }, { status: mapped.status });
       }

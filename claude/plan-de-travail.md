@@ -7,7 +7,9 @@
 
 **Constat** (`docs/audit/RAPPORT-p30-convertapi-alertes-04-10.md` §1) : le crédit ConvertAPI s'est épuisé le 02/10 avec
 **au plus 1 conversion de visiteur sur 93** passées par le site depuis le 04/09 ; le reste : nos bancs et essais (www et
-préversions), et ≈ 157 conversions hors du site (le vrai jeton était dans `.env.local`).
+préversions) et les documents du propriétaire — **aucun appel inconnu** (tableau de bord ConvertAPI, 03/10 : 119 conversions
+depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'essai (250 conversions) a expiré par sa durée de
+30 jours, pas par consommation. *Les « ≈ 157 conversions hors du site » écrites d'abord étaient fausses : corrigé par P31 le 03/10.*
 1. **Simulation par défaut.** Un banc n'appelle jamais un fournisseur payant réel : en local, `scripts/p26/e1/fake-providers.mjs`
    (jeton factice `local-bench-fake`) ; les préversions n'ont pas les jetons payants. **Le code l'impose pour ConvertAPI** :
    appel réel seulement par la production Vercel (repère d'exécution vérifié), refusé avant tout envoi ailleurs.
@@ -15,16 +17,45 @@ préversions), et ≈ 157 conversions hors du site (le vrai jeton était dans `.
    chantier, chaque appel inscrit **avant** l'envoi dans `docs/audit/depenses-fournisseurs.jsonl` par
    `scripts/p30/paid-ledger.mjs` (`reservePaid`), qui refuse au-delà du budget. Un appel non facturé (refus) est rendu
    (`refundPaid`).
-3. **Le site compte lui-même** les conversions ConvertAPI facturées sur la période du forfait (1 000/mois, renouvellement
-   le 4) et alerte à 50, 80, 100 % ; au-delà, ConvertAPI facture le surplus.
+3. **Le site compte lui-même** les conversions ConvertAPI facturées sur la période du forfait (« Developer » : 1 000/mois,
+   57,49 CAD taxes comprises, renouvellement le **3**, 200 Mo par fichier, **1 conversion simultanée**) et alerte à 50, 80,
+   100 % ; au-delà, ConvertAPI facture le surplus. Une requête traitée puis échouée compte aussi (conditions de ConvertAPI).
 4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
    rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
+
+## 📱 P31 — 03→04/10 : correctifs de la passe iPhone (26 tests) + AJOUT ConvertAPI (`docs/audit/RAPPORT-p31-iphone-correctifs-04-10.md`, repère `restauration-avant-p31-04-10` = `fb2d1db3`)
+
+**Règle (leçon P21, permanente)** : rien n'est « corrigé sur iPhone » tant que l'iPhone ne l'a pas confirmé — statut maximal
+« corrigé, à confirmer sur iPhone ». Mini-passe iPhone de 10 vérifications : rapport §12.
+
+| Point | État | Reste (priorité) |
+|---|---|---|
+| 1 Download iOS (13, 14, 17, 21) | corrigé, à confirmer sur iPhone : **Blob retypé `application/octet-stream` + attribut `download`, jamais de navigation**, sur les 195 outils (annexe A) ; Save / Share garde le vrai type ; `/zipdl/f/` abandonné ; banc `scripts/p31/download-names.mjs` (8 formats × 3 moteurs + iPhone) ; revue indépendante appliquée | **P1** propriétaire : mini-passe §12 n° 1-3 |
+| 2 M4R `.m4r.html` (22) | corrigé, à confirmer : c'était la page 404 du site (adresse du service worker) ; sorties audio contrôlées octet par octet ; table extension → MIME testée (69) ; aide sonnerie 40 s / GarageBand / Finder-iTunes | P1 : §12 n° 4 |
+| 3 PDF to JPG figé (20) | corrigé, à confirmer : pdf.js sans `ImageDecoder`/`OffscreenCanvas` sur Safari (attente sans délai, cause la plus probable) ; délai de garde 60 s par page avec message ; `app/lib/canvasLimit.js` appliqué aux canvas d'échelle libre (8 fichiers, 46 inventoriés) | P1 : §12 n° 5-6 |
+| 4 Background Remover (18) | liseré réduit (4,91 → 3,90 % sur 28 cas, décontamination Germer 2020) ; **morceau de fond en haut non corrigé** (modèle IS-Net) ; aucun modèle meilleur partout ; 0 $ | **P2 décision propriétaire** : tester BRIA RMBG 2.0 (API fal, 0,018 $/image) sur 29 photos ≈ 0,52 $ — compte fal requis ; P1 : §12 n° 7 |
+| 5 Code Formatter (16) | corrigé, à confirmer : 13 langages, 20 dialectes SQL, auto-détection, erreurs ligne/colonne, chargement à la demande | P1 : §12 n° 8 |
+| 6 Panorama 63 Mpx (26) | corrigé, à confirmer : taille lue à la sélection (Image Compressor, JPG/Image to PDF) ; « Reduce to 50 MP then compress » | P1 : §12 n° 9 |
+| 7 Quality sur PNG | ✅ curseur factice masqué (PNG, BMP, GIF, ICO, TIFF) ; Image Compressor : réel (palette) | — |
+| 8 Affichage tactile (23) | corrigé, à confirmer : 239 pages × 390/375 px, 0 débordement, 0 cible < 44 px (`scripts/p31/layout-iphone.mjs`) | P3 : écrans de résultat et menu mobile ouvert non mesurés |
+| A Compteur ConvertAPI | ✅ code : renouvellement le **3** ; période 03/10 → 03/11 démarrée à **6** (`CONVERTAPI_PLAN_BASELINE`) ; seuils inchangés | — |
+| B Coût réel | ✅ `ConversionCost` (toujours 1, taille et durée sans effet) ; **une requête traitée puis échouée compte** (conditions ConvertAPI) — le site la compte maintenant ; fin de l'essai : **expiration à 30 jours** (source : aide ConvertAPI via index de recherche) | P3 propriétaire : confirmer la date d'ouverture du compte |
+| C Rapport P30 | ✅ « ≈ 157 hors du site » corrigé (faux) | — |
+| D 1 conversion simultanée | ✅ code + 10 tests : file d'attente serveur sur 503/429, message honnête, plus de bascule LibreOffice inutile ; **mesure réelle sur www refusée par le garde-fou** (0 conversion dépensée) | **P2 propriétaire** : `node scripts/p31/convertapi-concurrency.mjs --label=after --go` (2 conversions du forfait) |
+| E 200 Mo | ✅ rien au-dessus de 100 Mo annoncé ; Merge PDF contrôle les fichiers Office avant l'envoi | — |
+| F Jeton `.env.local` | **non fait** (refusé deux fois par le garde-fou) | **P1 propriétaire** : `! sed -i '/^CONVERTAPI_TOKEN=/d' .env.local` |
+
+**Pièges notés (P31)** : (1) jamais `npm ci` dans le dépôt principal pendant que des sous-agents y ont une jonction
+`node_modules` ou qu'un `next start` tourne (il vide tout puis échoue) — `npm install` à la place ; (2) heredoc bash : une double barre
+oblique inverse devient simple (déjà vu P29) — écrire les fichiers par l'outil d'écriture ; (3) Playwright-Firefox : `click()` d'un lien de
+Blob `octet-stream` ne rend pas la main → `noWaitAfter: true` ; (4) WebKit de Playwright n'a ni `ImageDecoder` ni
+`OffscreenCanvas` : les chemins de pdf.js et des workers d'image du vrai Safari n'y sont **jamais** exercés.
 
 ## 🔔 P30 — 04/10 : panne ConvertAPI, secours, alertes, Chromium isolé (`docs/audit/RAPPORT-p30-convertapi-alertes-04-10.md`, repère `restauration-avant-p30-04-10` = `bce5e714`)
 
 | Lot | État | Reste |
 |---|---|---|
-| 1 Rétablissement + cause | ✅ Word to PDF (.docx), PDF to Word, Excel, PowerPoint **fonctionnent sur www** (5 vraies conversions, 0,05 $) ; cause : ≥ 99 % de la consommation passée par le site = nos bancs (rapport §1) ; règle permanente ci-dessus | Propriétaire, facultatif : le tableau de bord ConvertAPI (statistiques) dirait d'où viennent les ≈ 157 conversions hors du site ; **retirer le vrai jeton ConvertAPI de `.env.local`** (le code le refuse déjà hors production) |
+| 1 Rétablissement + cause | ✅ Word to PDF (.docx), PDF to Word, Excel, PowerPoint **fonctionnent sur www** (5 vraies conversions, 0,05 $) ; cause : ≥ 99 % de la consommation passée par le site = nos bancs (rapport §1) ; règle permanente ci-dessus | Propriétaire, facultatif : **retirer le vrai jeton ConvertAPI de `.env.local`** (le code le refuse déjà hors production). *(« ≈ 157 conversions hors du site » : faux, corrigé par P31 le 03/10 — aucune conversion inconnue au tableau de bord.)* |
 | A Alertes + secours | ✅ **en production** (`onlineconvertools-gjjrs94r8` = `f8db1de9`) : téléphone + courriel une fois par incident (ConvertAPI, OpenAI, Pangram) et au rétablissement ; seuils 50/80/100 % du forfait ConvertAPI (1 000/mois) ; secours LibreOffice **annoncé** (Word to PDF, Merge PDF) ; « try again later » (PDF to Word/Excel/PowerPoint) ; **alerte de test envoyée le 03/10 à 23 h 06 UTC (ntfy=sent, email=sent)** ; revue indépendante ×2 appliquée | Le propriétaire confirme avoir reçu la notification de test. Si le forfait change : `lib/providers/convertApiPlan.js` (2 valeurs). Retour arrière : promouvoir `onlineconvertools-fo109wbpv` |
 | 4 Équations .docx | ✅ identiques à Word (0,0 % de pixels différents) ; MathType rendu ; rien à corriger | — |
 | 5 Chromium isolé | ✅ **en production** : Chromium de Gotenberg dans le projet Railway **`oct-chromium-isolated`** (service `chromium`, déploiement `883863bd`, aucun secret, réseau privé du nôtre **injoignable — mesuré** : 5 noms, 10 adresses × 4 ports, métadonnées) ; `gotenberg-v2` (`3236df60`) n'a plus de Chromium et relaie, signé Ed25519 (relais `oct-edge`, `services/gotenberg/edge`) ; **66/66 et 6/6 identiques au pixel**, 27 adresses internes refusées, 0/18 script, www 29/29 + 9/9 + 2/2 + 6/6 ; revue de sécurité « GO avec conditions », conditions remplies ; mémoire nette ≈ inchangée (isolée 0,27 Go, gotenberg-v2 0,69 → 0,13 Go, à relire) | **Ne jamais supprimer ni renommer le service `chromium` ni son domaine tant qu'une image front y renvoie** (reprise du nom possible). Si le mot de passe Basic Auth de Gotenberg change : `scripts/p30/edge-pubkey.mjs`, nouvelle clé dans le Dockerfile, redéployer les trois services. Retour arrière : `gotenberg-v2` → `1bb98768` |

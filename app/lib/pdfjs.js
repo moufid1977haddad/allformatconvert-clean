@@ -21,12 +21,26 @@ import { installPolyfills } from './polyfills';
 // warning and the page rendered WHITE (PDF to JPG, Redact, OCR…; measured: scripts/p24/pdfjs-decoders.mjs). Without
 // cMapUrl, the text of a Chinese, Japanese or Korean PDF whose fonts are not embedded came out empty or wrong.
 // Every getDocument of the site goes through here, so they are given once, for all tools.
+// P31 (03/10): on Safari (iPhone, iPad, Mac), PDF.js 5 decodes a page's JPEG photos in its worker with WebCodecs'
+// ImageDecoder and awaits decoder.decode() with no time limit (its own test: "not Chrome" = use it), and hands the
+// result over through OffscreenCanvas. On the owner's iPhone (iOS 26) PDF to JPG stayed on "Page 1 of 3…" with a
+// PDF of three photos; Playwright's WebKit, which has neither ImageDecoder nor OffscreenCanvas, takes PDF.js's own
+// JPEG decoder and passes. Safari is given that proven path: same pixels (PDF.js's decoder is the reference one),
+// a little slower on photos. Tools also bound each page with a time limit (app/lib/canvasLimit.js withTimeout).
+function safariWorkerOptions() {
+  if (typeof navigator === 'undefined') return {};
+  const ua = navigator.userAgent || '';
+  const safari = /AppleWebKit/.test(ua) && !/Chrome|Chromium|CriOS|Edg|FxiOS|Firefox|Android/.test(ua);
+  const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  return safari || ios ? { isImageDecoderSupported: false, isOffscreenCanvasSupported: false } : {};
+}
+
 function withAssets(pdfjsLib) {
   const base = `/pdfjs/${pdfjsLib.version}/`;
   const assets = { wasmUrl: base + 'wasm/', cMapUrl: base + 'cmaps/', cMapPacked: true, iccUrl: base + 'iccs/', standardFontDataUrl: base + 'standard_fonts/' };
   const getDocument = (src) => {
     const params = src instanceof Uint8Array || src instanceof ArrayBuffer ? { data: src } : typeof src === 'string' || src instanceof URL ? { url: src } : { ...src };
-    const task = pdfjsLib.getDocument({ ...assets, ...params });
+    const task = pdfjsLib.getDocument({ ...assets, ...safariWorkerOptions(), ...params });
     // P27: text read as one composed letter per accented letter (NFC). PDF.js gives an accent drawn as its own glyph
     // (LibreOffice; and after app/lib/pdfActualText.js gives that glyph its text) as "e" + U+0301: shown right, but a
     // search for "données" (Redact) or a copy did not match it. Only strings that hold a combining mark are touched.

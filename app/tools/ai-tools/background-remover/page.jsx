@@ -62,7 +62,8 @@ const PREVIEW_PIXELS = 1_500_000;
 // The refined alpha (curve 0.1–0.9: soft detail such as fine hair is kept), the "mixing" alpha and the local subject / background colours are drawn stretched on each band,
 // and composeBand gives every edge pixel the subject's colour instead of the photo's mix (what remove.bg calls "edge
 // color corrections"). Measured on 28 real cut-outs laid on known backgrounds (docs/audit/RAPPORT-p21-nuit-jour-02-10.md):
-// background colour left in the edge 11.0 % → 4.8 %.
+// background colour left in the edge 11.0 % → 4.8 %. P31 (03/10): colours from the nearest sure subject/background
+// pixels + multi-level foreground estimation (see mattingRefine.js): 4.9 % → 3.9 %, same alpha error, same speed.
 async function refineEdges(img, maskImg) {
   const k = Math.min(1, Math.sqrt(WORK_PIXELS / (img.naturalWidth * img.naturalHeight)));
   const w = Math.max(1, Math.round(img.naturalWidth * k)), h = Math.max(1, Math.round(img.naturalHeight * k));

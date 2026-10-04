@@ -29,7 +29,12 @@ export function reservePaid({ chantier, budgetUsd, provider, usd, what }) {
   return before + usd;
 }
 
-/** A reserved call that the provider refused (non-2xx: ConvertAPI does not bill it) is recorded back as 0 $. */
+/**
+ * A reserved call the provider certainly did not count is recorded back as 0 $. P31 (03/10): for ConvertAPI that is a
+ * refusal before processing (401, 402/403 no conversions left, 429/503 busy) or a request our route never sent; a
+ * request ConvertAPI processed and failed (HTTP 500...) IS counted ("whether or not the conversion succeeds",
+ * convertapi.com/terms) and must not be refunded.
+ */
 export function refundPaid({ chantier, provider, usd, what }) {
   fs.appendFileSync(LEDGER, JSON.stringify({ at: new Date().toISOString(), chantier, provider, usd: -usd, what: `refund (not billed): ${what}` }) + '\n');
 }

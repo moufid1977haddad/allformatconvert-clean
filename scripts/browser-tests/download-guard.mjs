@@ -5,8 +5,10 @@
 // Then, in the same engine:
 //   --device=iphone : iPhone Safari user agent + touch; --device=ipad : iPadOS desktop-class Safari ("Macintosh" user
 //   agent) + 5 touch points — the case of the iPad 9th generation (Split PDF, 29/09). On both: the "Save / Share"
-//   button must be there and hand the real file to navigator.share (stubbed: it records the files), and "Download"
-//   must go through the attachment path (/zipdl/, the site's service worker), as on a real iPhone.
+//   button must be there and hand the real file to navigator.share (stubbed: it records the files, real type kept).
+// Everywhere (P31, 03/10): "Download" is a blob: link to the file RETYPED application/octet-stream, with the download
+//   attribute = the full name, and no request to /zipdl/ (the P21 service-worker address opened PDFs and gave an
+//   M4R saved as ".m4r.html" on the real iPhone).
 // Also checked: leaving the page with a file not yet downloaded asks first (beforeunload); after "Download" it does not.
 // Usage: node scripts/browser-tests/download-guard.mjs <origin> [--browser=chromium|firefox|webkit] [--device=iphone|ipad]
 //        [--only=slug,slug] [--no-vercel-toolbar] [--service] (also the tools that use our servers: Markdown to PDF,
@@ -141,13 +143,13 @@ if (!device && (!only.length || only.includes('markdown-editor'))) {
 async function fileOf(p, row) {
   return p.evaluate(async (el) => {
     const a = el.querySelector('a[data-download]');
-    // An iOS link prepared for the tap (/zipdl/f/, P21) is answered by the service worker from Cache Storage on
-    // navigation only: read the same cached response here.
-    const staged = /\/zipdl\/f\//.test(a.getAttribute('href') || '');
-    const res = staged ? await (await caches.open('ocv-downloads-v1')).match(a.href) : await fetch(a.href);
+    // P31: the link is made retyped as soon as the row has read its file — wait for it (a second at most).
+    for (let i = 0; i < 50 && a.dataset.retyped !== '1'; i++) await new Promise((r) => setTimeout(r, 100));
+    const res = await fetch(a.href);
     const buf = await res.arrayBuffer();
+    const blobType = (await (await fetch(a.href)).blob()).type;
     const vis = (x) => { const r = x.getBoundingClientRect(); const s = getComputedStyle(x); return r.width > 20 && r.height > 12 && s.visibility !== 'hidden' && s.display !== 'none' && +s.opacity > 0.1; };
-    return { name: el.dataset.name, shownBytes: el.dataset.bytes, text: el.innerText, linkText: a.innerText.trim(), visible: vis(a), bytes: Array.from(new Uint8Array(buf)) };
+    return { href: a.getAttribute('href'), downloadAttr: a.getAttribute('download'), blobType, name: el.dataset.name, shownBytes: el.dataset.bytes, text: el.innerText, linkText: a.innerText.trim(), visible: vis(a), bytes: Array.from(new Uint8Array(buf)) };
   }, row);
 }
 
@@ -178,6 +180,7 @@ for (const t of TOOLS) {
       const buf = Buffer.from(f.bytes);
       check(`${label}: "${f.name}" — visible "Download" link, name, format and size shown`, f.visible && f.linkText === 'Download' && f.text.includes(f.name) && /\b\d+(\.\d)? (B|KB|MB|GB)\b/.test(f.text), `${f.linkText} | ${f.text.replace(/\s+/g, ' ')}`);
       check(`${label}: "${f.name}" is a real ${kind} file (${buf.length} bytes)`, MAGIC[kind](buf) && String(buf.length) === f.shownBytes, `first bytes ${buf.subarray(0, 8).toString('hex')}, shown ${f.shownBytes}`);
+      check(`${label}: "${f.name}" — Download = blob: retyped application/octet-stream, download="${f.name}"`, /^blob:/.test(f.href || '') && f.blobType === 'application/octet-stream' && f.downloadAttr === f.name, `${f.href} ${f.blobType} ${f.downloadAttr}`);
     }
     // A file never downloaded: leaving asks first (desktop engines). One rule for the whole site since P19 (01/10):
     // text results (formatters, checksums) and generators (QR) too — they were exempt until then.
@@ -212,30 +215,28 @@ for (const t of TOOLS) {
         const f0 = files[0];
         check(`${label}: Share hands the real file to the share sheet`, shared.length === 1 && shared[0].name === f0.name && shared[0].size === f0.bytes.length, JSON.stringify(shared));
       }
-      // P21 (02/10): on iOS the Download link must already point at the file served as an attachment
-      // (/zipdl/f/<id>/<name>) BEFORE the tap. Reading the file and handing it to the worker after the tap took
-      // longer than the second iOS gives a tap for a phone-photo PDF (JPG to PDF), and Safari opened the PDF.
-      const link = first.locator('a[data-download]');
-      await link.and(p.locator('[data-staged="1"]')).waitFor({ timeout: 10000 }).catch(() => {});
-      const href = await link.getAttribute('href');
-      check(`${label}: Download link points at the prepared attachment before the tap (/zipdl/f/)`, /^\/zipdl\/f\/[0-9a-f]{32}\//.test(href || ''), href);
+      // P31 (03/10): the tap saves the retyped blob under the full name, without any navigation (/zipdl/).
       zipdl.length = 0;
       const dlp = p.waitForEvent('download', { timeout: 30000 }).catch(() => null);
-      await first.locator('a[data-download]').click();
+      await first.locator('a[data-download]').click({ noWaitAfter: true }); // P31: Playwright-Firefox waits for an octet-stream navigation otherwise
       const dl = await dlp;
-      check(`${label}: Download saved as an attachment (/zipdl/, as iOS needs)`, !!dl && zipdl.length > 0 && dl.suggestedFilename() === files[0].name, `${dl ? dl.suggestedFilename() : 'no download'} ${zipdl[0] || 'no /zipdl/ request'}`);
+      const got = dl ? fs.readFileSync(await dl.path()) : null;
+      check(`${label}: Download saved under its full name with the same bytes, no /zipdl/ request`, !!dl && zipdl.length === 0 && dl.suggestedFilename() === files[0].name && got && got.equals(Buffer.from(files[0].bytes)), `${dl ? dl.suggestedFilename() : 'no download'} ${zipdl[0] || ''}`);
     } else if (guarded) {
       // Every file downloaded (the ZIP, or each row's Download) -> leaving no longer asks. Several formats of one
       // result: downloading the first is enough. A text result copied: nothing downloaded at all.
       if (t.copy) {
         await t.copy(p);
       } else if (t.alternatives) {
-        const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), first.locator('a[data-download]').click()]);
+        const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), first.locator('a[data-download]').click({ noWaitAfter: true })]);
         await dl.path();
       } else if (!savedAll) {
+        let k = 0;
         for (const a of await p.locator('[data-file-download] a[data-download]').all()) {
-          const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), a.click()]);
-          await dl.path();
+          const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), a.click({ noWaitAfter: true })]);
+          // P31 review: the real download, by name and bytes (Firefox renamed by type before the octet-stream rule)
+          const f = files[k++], got = fs.readFileSync(await dl.path());
+          if (f) check(`${label}: "${f.name}" saved under that exact name, same bytes`, dl.suggestedFilename() === f.name && got.equals(Buffer.from(f.bytes)), `${dl.suggestedFilename()} ${got.length} B`);
         }
       }
       // The rows' "downloaded" state is set by React after the click: wait until every row says so (under CPU load a

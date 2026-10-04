@@ -4,7 +4,7 @@ import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { AUDIO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
 import ProgressBar from '../../../components/ProgressBar';
-import { AUDIO_OUTPUT_FORMATS, AUDIO_BITRATES, DEFAULT_AUDIO_KBPS, formatTakesBitrate, buildOutputSpec, sanitizedInputExt, AUDIO_SAMPLE_RATES, AUDIO_CHANNELS } from '../../../lib/audioFormats';
+import { AUDIO_OUTPUT_FORMATS, AUDIO_BITRATES, DEFAULT_AUDIO_KBPS, formatTakesBitrate, buildOutputSpec, sanitizedInputExt, AUDIO_SAMPLE_RATES, AUDIO_CHANNELS, audioOutputProblem } from '../../../lib/audioFormats';
 import { reportToolError } from '../../../lib/reportError';
 import { runMediaJob, mediaServiceConfigured } from '../../../lib/mediaJob';
 import PlayablePreview from '../../../components/PlayablePreview';
@@ -87,6 +87,8 @@ export default function AudioConverterPage() {
       // P24: ffmpeg.exec resolves even when ffmpeg fails — its exit code is checked (a failed run must never look done)
       if (await ffmpeg.exec(['-i', inputName, ...extraArgs, outputName]) !== 0) throw new Error('ffmpeg could not write this format with these settings. Try another output format, sample rate or quality.');
       const data = await ffmpeg.readFile(outputName);
+      const bad = audioOutputProblem(format, data); // P31: never offer a file that is not the format named
+      if (bad) throw new Error(bad);
       const url = URL.createObjectURL(new Blob([data.buffer], { type: mime }));
       setResult({ url, name: file.name.replace(/\.[^.]+$/, '') + '.' + ext });
       setProgress(100);
@@ -122,6 +124,11 @@ export default function AudioConverterPage() {
             <select aria-label="Target Format" value={format} onChange={e => setFormat(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-4 py-2 text-sm">
               {AUDIO_OUTPUT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
             </select>
+            {format === 'm4r' && (
+              <p className="mt-2 text-xs text-neutral-600" data-ringtone-help>
+                An iPhone ringtone lasts 40 seconds at most. To install it: on the iPhone, with Apple&apos;s GarageBand app; on a computer, with the Finder (Mac) or iTunes (Windows) while the iPhone is connected.
+              </p>
+            )}
             {formatTakesBitrate(format) && (
               <div className="mt-3">
                 <label className="block text-sm text-neutral-500 mb-1">Quality</label>

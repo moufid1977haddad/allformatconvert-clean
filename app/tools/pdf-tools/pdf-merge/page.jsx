@@ -7,7 +7,8 @@ import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
 import { addImagePage } from '../../../lib/pdfImages';
-import { convertOffice } from '../../../lib/officeUpload';
+import { convertOffice, checkOfficeSize, officeMaxLabel } from '../../../lib/officeUpload';
+import { MAX_OFFICE_STAGED_BYTES, MAX_SPREADSHEET_STAGED_BYTES } from '@/lib/quota/limits';
 import { useToolError } from '../../../lib/useToolError';
 
 // P21 (02/10), format coverage: Smallpdf's Merge PDF "combine[s] PDF documents with other PDFs, Word, Excel, and
@@ -17,6 +18,11 @@ import { useToolError } from '../../../lib/useToolError';
 const OFFICE_RE = /\.(docx?|docm|dotx?|dotm|odt|ott|rtf|wpd|xlsx?|xlsm|xlsb|xltx?|xltm|ods|ots|csv|pptx?|pptm|ppsx?|ppsm|potx?|potm|odp|otp)$/i;
 const isPdf = (f) => /\.pdf$/i.test(f.name) || f.type === 'application/pdf';
 const isOffice = (f) => OFFICE_RE.test(f.name);
+// P31 (03/10): each Office file is checked against the server's own ceiling for it (app/api/convert-to-pdf/route.ts:
+// spreadsheets 60 MB, other documents 100 MB, under ConvertAPI's 200 MB for .docx) BEFORE anything is uploaded; it was
+// refused by the server only after the upload. The 700 MB total is the in-browser merge of PDFs and images.
+const SHEET_RE = /\.(xlsx|xls|csv|ods|ots|xlsm|xlsb|xltx|xltm|xlt)$/i;
+const officeCapFor = (f) => (SHEET_RE.test(f.name) ? MAX_SPREADSHEET_STAGED_BYTES : MAX_OFFICE_STAGED_BYTES);
 const MERGE_ACCEPT = '.pdf,application/pdf,image/*,.heic,.heif,.tif,.tiff,.doc,.docx,.docm,.dotx,.dot,.odt,.rtf,.xls,.xlsx,.xlsm,.xlsb,.ods,.csv,.ppt,.pptx,.pptm,.ppsx,.pps,.odp';
 
 export default function PdfMergePage() {
@@ -104,6 +110,12 @@ export default function PdfMergePage() {
   const prepare = async () => {
     const out = [];
     const backup = [];
+    // Every Office file first, so a too-large third file never lets the first two be uploaded for nothing.
+    for (const f of files) {
+      if (isPdf(f) || !isOffice(f)) continue;
+      const size = checkOfficeSize(f, officeCapFor(f));
+      if (!size.ok) { setError(`${f.name}: ${size.message}`); return null; }
+    }
     for (const f of files) {
       if (isPdf(f)) { out.push(f); continue; }
       try {
@@ -223,7 +235,7 @@ export default function PdfMergePage() {
             </>
           )}
           {status && !loading && <p className="text-center text-green-600 dark:text-green-400 text-sm">{status}</p>}
-          {files.some(isOffice) && <p className="text-center text-neutral-500 text-xs">Word, Excel and PowerPoint files are converted to PDF on our server first (deleted after conversion; .docx through ConvertAPI, or our own LibreOffice server when ConvertAPI is unavailable, said under the result). PDFs and images are not sent to our server: only those Office files are.</p>}
+          {files.some(isOffice) && <p className="text-center text-neutral-500 text-xs">Word, Excel and PowerPoint files are converted to PDF on our server first (deleted after conversion; .docx through ConvertAPI, or our own LibreOffice server when ConvertAPI is unavailable, said under the result), up to {officeMaxLabel(MAX_OFFICE_STAGED_BYTES)} per document and {officeMaxLabel(MAX_SPREADSHEET_STAGED_BYTES)} per spreadsheet. PDFs and images are not sent to our server: only those Office files are.</p>}
           {downloadUrl && !loading && (
             <div className="bg-neutral-50 dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6 text-center">
               <div className="text-green-500 text-xl font-bold mb-3">Done!</div>
@@ -250,7 +262,7 @@ export default function PdfMergePage() {
           { q: "Is Merge PDF free to use?", a: "Yes, completely free with no signup required." },
           { q: "Are my files safe?", a: "PDFs and images are merged directly in your browser, in a background Web Worker, and are never uploaded; only a Word, Excel or PowerPoint file you add is sent to our server first, to be converted to PDF (a .docx through our provider ConvertAPI, with file storage turned off), and deleted after conversion — the page says so when you add one." },
           { q: "Can I merge images or Word files with PDFs?", a: "Yes. Each image (JPG, PNG, HEIC, WebP, GIF, BMP, TIFF, AVIF) becomes a page at its own size, upright; each Word, Excel or PowerPoint document is converted to PDF first, then everything is merged in the order of the list." },
-          { q: "How many PDF files can I merge at once?", a: `Up to ${MAX_TOTAL_PAGES.toLocaleString()} pages combined and ${MAX_TOTAL_SIZE_LABEL} total on desktop (${MOBILE_MAX_TOTAL_PAGES.toLocaleString()} pages / ${MOBILE_MAX_TOTAL_SIZE_LABEL} on phones and tablets) -- measured limits to keep merging reliable in the browser tab, rather than risking a crash on a very large combined document. Split larger jobs into batches and merge the results together.` },
+          { q: "How many PDF files can I merge at once?", a: `Up to ${MAX_TOTAL_PAGES.toLocaleString()} pages combined and ${MAX_TOTAL_SIZE_LABEL} total on desktop (${MOBILE_MAX_TOTAL_PAGES.toLocaleString()} pages / ${MOBILE_MAX_TOTAL_SIZE_LABEL} on phones and tablets) -- measured limits to keep merging reliable in the browser tab, rather than risking a crash on a very large combined document. Split larger jobs into batches and merge the results together. A Word, Excel or PowerPoint file you add is converted on our server first, up to ${officeMaxLabel(MAX_OFFICE_STAGED_BYTES)} per document and ${officeMaxLabel(MAX_SPREADSHEET_STAGED_BYTES)} per spreadsheet; a larger one is refused before it is sent.` },
           { q: "Does merging PDFs reduce quality?", a: "No. The merged PDF retains the full quality of all original files including images, fonts, and formatting." }
         ]}
         tips={[

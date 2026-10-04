@@ -55,7 +55,7 @@ export async function runVariant(c, variant) {
     Bm = await raw(await sharp(Buffer.from(r.bg.buffer), { raw: { width: w, height: h, channels: 4 } }).png().toBuffer(), W, H, 4);
   }
   void stretch;
-  composeBand(out, A, Fm, Bm, opts.project !== false);
+  composeBand(out, A, Fm, Bm, opts.project !== false, { ...DEFAULTS, ...opts });
   return out;
 }
 
@@ -126,9 +126,10 @@ function metrics(res, gt, bgImg, W, H) {
 
 const VARIANTS = {
   production: 'production',
-  decontaminate: { guided: false, curveLo: 0, curveHi: 1, decontaminate: true },
+  // P31 (03/10): 'p21' = the page until 03/10 (blur-fusion means); 'refined' = the page's current DEFAULTS (P31:
+  // nearest sure colours + multi-level foreground estimation)
+  p21: { ...DEFAULTS, estimator: 'blur' },
   refined: { ...DEFAULTS },
-  'refined-noproj': { ...DEFAULTS, project: false },
 };
 if (process.env.BG_VARIANTS) { Object.assign(VARIANTS, JSON.parse(process.env.BG_VARIANTS)); for (const k of Object.keys(VARIANTS)) if (VARIANTS[k] === null) delete VARIANTS[k]; }
 
@@ -154,4 +155,4 @@ for (const c of index) {
 const mean = (vn, key) => +(rows.reduce((s, r) => s + r[vn][key], 0) / rows.length).toFixed(2);
 console.log('\nMEAN over', rows.length, 'cases');
 for (const vn of Object.keys(VARIANTS)) console.log(vn.padEnd(14), ['bgLeakPct', 'alphaMAE', 'veilPct', 'holesPct', 'edgeOnWhite', 'edgeOnBlack'].map((k) => `${k} ${mean(vn, k)}`).join('  '));
-fs.writeFileSync(path.join(DIR, 'mesures.json'), JSON.stringify(rows, null, 1));
+fs.writeFileSync(process.env.BG_OUT || path.join(DIR, 'mesures.json'), JSON.stringify(rows, null, 1));

@@ -9,6 +9,7 @@ import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
+import { reducedSize, reduceImageFile } from '../../../lib/reduceImage';
 
 // P27 (phase 7): a phone bound, measured. Memory this page needs (peak of the tab, Chromium, scripts/p27/
 // phone-bound-memory.mjs, a noisy photo-like 24 MP JPEG scaled up): 24 MP 0.86 GB, 48 MP 1.4 GB, 100 MP 2.4 GB -- about 22-30 MB per megapixel.
@@ -106,7 +107,40 @@ export default function ImageCompressorPage() {
     e.target.value = '';
     if (!files.length) return;
     setError(files.length > MAX_FILES ? `Up to ${MAX_FILES} images at a time — the first ${MAX_FILES} were kept.` : '');
-    setItems(files.slice(0, MAX_FILES).map((file, i) => ({ id: `${Date.now()}-${i}`, file, preview: URL.createObjectURL(file), status: 'ready' })));
+    const list = files.slice(0, MAX_FILES).map((file, i) => ({ id: `${Date.now()}-${i}`, file, preview: URL.createObjectURL(file), status: 'ready' }));
+    setItems(list);
+    // P31 (03/10): the size is read from the file's header as soon as it is chosen (no decoding), so an image over
+    // the bound is said BEFORE the Compress button — the owner's 63 MP iPhone panorama was "1 image selected" with no
+    // word until then.
+    for (const it of list) {
+      imageHeaderSize(it.file).then((size) => { if (size) update(it.id, { size }); }).catch(() => {});
+    }
+  };
+  const limitMp = () => (isMobileDevice() ? PHONE_MAX_MP : MAX_MP);
+  const overLimit = items.filter((it) => it.size && it.status === 'ready' && (it.size.width * it.size.height) / 1e6 > limitMp());
+
+  // P31: "Reduce to 50 MP then compress", in one gesture (the market's resize-then-compress, e.g. iLoveIMG's two
+  // tools, in one step here). Each image over the bound is reduced band by band, then everything is compressed.
+  const reduceThenCompress = async () => {
+    setBusy(true); setError('');
+    const max = limitMp();
+    const next = [];
+    for (const it of items) {
+      if (!(it.size && (it.size.width * it.size.height) / 1e6 > max) || it.status !== 'ready') { next.push(it); continue; }
+      try {
+        update(it.id, { status: 'reducing', pct: 0 });
+        const dims = (await imageDims(it.file)) || it.size;
+        const file = await reduceImageFile(it.file, dims, max, { onProgress: (pct) => update(it.id, { pct }) });
+        const r = reducedSize(dims.width, dims.height, max);
+        const changed = { ...it, file, size: r, status: 'ready', reducedFrom: it.size, origBytes: it.file.size };
+        update(it.id, { file, size: r, status: 'ready', reducedFrom: it.size, origBytes: it.file.size });
+        next.push(changed);
+      } catch (e) {
+        update(it.id, { status: 'error', message: `This image could not be reduced on this device (${(e && e.message) || 'unknown error'}). Use a computer, or a smaller version of the image.` });
+      }
+    }
+    setBusy(false);
+    await compressAll(next.filter((it) => it.status === 'ready'));
   };
 
   const update = (id, patch) => setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)));
@@ -154,7 +188,7 @@ export default function ImageCompressorPage() {
         let chosen = null, unreadable = false, anySmaller = false;
         let cautious = false;
         for (const { blob: c, cautious: isCautious } of m.candidates) {
-          if (c.size >= it.file.size) continue;
+          if (c.size >= (it.origBytes || it.file.size)) continue;
           anySmaller = true;
           try {
             if ((await svgMaxPixelDiff(it.file, c)) < SVG_MAX_PIXEL_DIFF) { chosen = c; cautious = isCautious; break; }
@@ -167,12 +201,12 @@ export default function ImageCompressorPage() {
         return resolve();
       }
       // Never hand over a "compressed" file that is not smaller than what the visitor brought.
-      if (m.blob.size >= it.file.size) {
+      if (m.blob.size >= (it.origBytes || it.file.size)) { // never larger than what the visitor brought
         update(it.id, { status: 'notSmaller', outSize: m.blob.size });
         return resolve();
       }
       const base = it.file.name.replace(/\.[^.]+$/, '') || 'image';
-      update(it.id, { status: 'done', url: URL.createObjectURL(m.blob), blob: m.blob, outSize: m.blob.size, note: m.note, name: `${base}-compressed.${EXT[m.blob.type] || 'jpg'}` });
+      update(it.id, { status: 'done', url: URL.createObjectURL(m.blob), blob: m.blob, outSize: m.blob.size, note: [it.reducedFrom ? `reduced from ${it.reducedFrom.width} × ${it.reducedFrom.height} to ${it.size.width} × ${it.size.height}` : '', m.note].filter(Boolean).join(' · '), name: `${base}-compressed.${EXT[m.blob.type] || 'jpg'}` });
       resolve();
     };
     worker.addEventListener('message', onMessage);
@@ -184,8 +218,9 @@ export default function ImageCompressorPage() {
       .catch(() => { clearTimeout(watchdog); worker.removeEventListener('message', onMessage); update(it.id, { status: 'error', message: UNREADABLE }); resolve(); });
   });
 
-  const compressAll = async () => {
-    if (!items.length) return;
+  const compressAll = async (only) => {
+    const list = Array.isArray(only) ? only : items;
+    if (!list.length) return;
     setBusy(true);
     setError('');
     const start = () => {
@@ -196,7 +231,7 @@ export default function ImageCompressorPage() {
       return w;
     };
     let worker = start();
-    for (const it of items) {
+    for (const it of list) {
       await runOne(worker, it);
       // a stalled worker is replaced before the next image (its memory goes with it)
       if (stalledRef.current) { stalledRef.current = false; worker = start(); }
@@ -206,7 +241,7 @@ export default function ImageCompressorPage() {
 
   const done = items.filter((it) => it.status === 'done');
 
-  const totalIn = done.reduce((s, it) => s + it.file.size, 0);
+  const totalIn = done.reduce((s, it) => s + (it.origBytes || it.file.size), 0);
   const totalOut = done.reduce((s, it) => s + it.outSize, 0);
 
   return (
@@ -232,7 +267,18 @@ export default function ImageCompressorPage() {
             <input id="quality" type="range" min="10" max="100" value={quality} onChange={(e) => setQuality(parseInt(e.target.value, 10))} className="w-full" disabled={busy} />
             <p className="text-xs text-neutral-500 mt-1">Lower = smaller file. {DEFAULT_QUALITY}% is our recommended balance.</p>
           </div>
-          <button onClick={compressAll} disabled={!items.length || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
+          {overLimit.length > 0 && !busy && (
+            <div role="alert" data-over-limit className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 space-y-2">
+              {overLimit.map((it) => {
+                const mp = (it.size.width * it.size.height) / 1e6, r = reducedSize(it.size.width, it.size.height, limitMp());
+                return <p key={it.id}><span className="font-semibold break-all">{it.file.name}</span> is {it.size.width.toLocaleString('en-US')} × {it.size.height.toLocaleString('en-US')} pixels ({Math.round(mp)} megapixels): {isMobileDevice() ? `on a phone the limit is ${PHONE_MAX_MP} megapixels, because compressing more would need more memory than a phone browser gives a page.` : `more than the ${MAX_MP} megapixels this in-browser compressor can hold in memory.`} It can be reduced to {r.width.toLocaleString('en-US')} × {r.height.toLocaleString('en-US')} ({Math.round((r.width * r.height) / 1e6 * 10) / 10} MP) first.</p>;
+              })}
+              <button type="button" onClick={reduceThenCompress} data-reduce-then-compress className="w-full min-h-[44px] rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-semibold px-4 py-2">
+                Reduce to {limitMp()} MP then compress
+              </button>
+            </div>
+          )}
+          <button onClick={() => compressAll()} disabled={!items.length || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
             {busy ? 'Compressing…' : `Compress ${items.length > 1 ? `${items.length} images` : 'image'}`}
           </button>
           {items.length > 0 && (
@@ -244,10 +290,11 @@ export default function ImageCompressorPage() {
                   <img src={it.preview} alt="" className="w-14 h-14 object-cover rounded" />
                   <div className="flex-1 min-w-0 text-sm">
                     <p className="truncate font-medium text-neutral-800">{it.file.name}</p>
-                    {it.status === 'ready' && <p className="text-neutral-500">{formatSize(it.file.size)}</p>}
+                    {it.status === 'ready' && <p className="text-neutral-500">{formatSize(it.file.size)}{it.size ? ` · ${it.size.width} × ${it.size.height}` : ''}{it.reducedFrom ? ` (reduced from ${it.reducedFrom.width} × ${it.reducedFrom.height})` : ''}</p>}
+                    {it.status === 'reducing' && <p className="text-neutral-500">Reducing to {limitMp()} MP… {Math.round(it.pct || 0)}%</p>}
                     {it.status === 'working' && <p className="text-neutral-500">Compressing… {Math.round(it.pct || 0)}%</p>}
                     {it.status === 'done' && (
-                      <p className="text-neutral-600">{formatSize(it.file.size)} → <span className="font-semibold text-indigo-600">{formatSize(it.outSize)}</span> <span className="text-green-700 font-semibold">(−{Math.round((1 - it.outSize / it.file.size) * 100)}%)</span>{it.note ? <span className="text-neutral-500"> · {it.note}</span> : null}</p>
+                      <p className="text-neutral-600">{formatSize(it.origBytes || it.file.size)} → <span className="font-semibold text-indigo-600">{formatSize(it.outSize)}</span> <span className="text-green-700 font-semibold">(−{Math.round((1 - it.outSize / (it.origBytes || it.file.size)) * 100)}%)</span>{it.note ? <span className="text-neutral-500"> · {it.note}</span> : null}</p>
                     )}
                     {it.status === 'notSmaller' && it.sentTargetKb && it.file.size <= it.sentTargetKb * 1024 && <p className="text-amber-800" data-under-target>This image is already {formatSize(it.file.size)}, under the {it.sentTargetKb} KB asked: nothing to compress.</p>}
                     {it.status === 'notSmaller' && !(it.sentTargetKb && it.file.size <= it.sentTargetKb * 1024) && <p className="text-amber-800">Already well compressed: at {it.sentQuality ?? quality}% the result would be {formatSize(it.outSize)}, not smaller than {formatSize(it.file.size)}. Nothing to download — lower the quality to shrink it further.</p>}

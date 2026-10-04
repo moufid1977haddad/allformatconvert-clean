@@ -37,7 +37,7 @@ export const AUDIO_OUTPUT_FORMATS = [
   // P21 (02/10), format coverage (CloudConvert's audio converter offers M4R, M4B, MP2, AU, CAF, WV, MKA). Each one
   // proven on a real file read back by ffprobe (scripts/browser-tests/p21-audio-formats.mjs). ffmpeg names no muxer
   // after .m4r / .m4b: both are AAC in Apple's MP4 ("ipod" muxer), as iTunes writes them.
-  { value: 'm4r', label: 'M4R (iPhone ringtone, AAC)', ext: 'm4r', mime: 'application/octet-stream', // audio/mp4 and audio/x-m4r made Firefox save it as .m4a (measured 02/10)
+  { value: 'm4r', label: 'M4R (iPhone ringtone, AAC)', ext: 'm4r', mime: 'audio/mp4', // its real type (Save / Share, previews); the Download link is retyped octet-stream since P31, so Firefox keeps .m4r
     extraArgs: ['-c:a', 'aac', '-f', 'ipod'] },
   { value: 'm4b', label: 'M4B (audiobook, AAC)', ext: 'm4b', mime: 'audio/mp4', extraArgs: ['-c:a', 'aac', '-f', 'ipod'] },
   { value: 'mp2', label: 'MP2 (MPEG Layer II)', ext: 'mp2', mime: 'audio/mpeg', extraArgs: ['-c:a', 'mp2'] },
@@ -96,4 +96,28 @@ export function buildOutputSpec(formatValue, kbps, { sampleRate, channels } = {}
 export function sanitizedInputExt(file) {
   const raw = (file.name.split('.').pop() || 'dat').toLowerCase();
   return /^[a-z0-9]{1,10}$/.test(raw) ? raw : 'dat';
+}
+
+// P31 (03/10): what the first bytes of each output format must be. An iPhone saved an M4R as "….m4r.html" (an HTML
+// page under the file's name): a result is checked before it is offered, and a wrong one fails loudly instead.
+const sig = (b, off, s) => [...s].every((c, i) => b[off + i] === c.charCodeAt(0));
+const mpegSync = (b) => b[0] === 0xff && (b[1] & 0xe0) === 0xe0;
+const OUTPUT_MAGIC = {
+  mp3: (b) => sig(b, 0, 'ID3') || mpegSync(b), mp2: (b) => sig(b, 0, 'ID3') || mpegSync(b),
+  wav: (b) => sig(b, 0, 'RIFF') && sig(b, 8, 'WAVE'), aac: (b) => (b[0] === 0xff && (b[1] & 0xf6) === 0xf0) || sig(b, 0, 'ADIF'),
+  flac: (b) => sig(b, 0, 'fLaC'), ogg: (b) => sig(b, 0, 'OggS'), opus: (b) => sig(b, 0, 'OggS'),
+  m4a: (b) => sig(b, 4, 'ftyp'), m4r: (b) => sig(b, 4, 'ftyp'), m4b: (b) => sig(b, 4, 'ftyp'), alac: (b) => sig(b, 4, 'ftyp'),
+  wma: (b) => b[0] === 0x30 && b[1] === 0x26 && b[2] === 0xb2 && b[3] === 0x75, aiff: (b) => sig(b, 0, 'FORM') && sig(b, 8, 'AIF'),
+  ac3: (b) => b[0] === 0x0b && b[1] === 0x77, wv: (b) => sig(b, 0, 'wvpk'), caf: (b) => sig(b, 0, 'caff'), au: (b) => sig(b, 0, '.snd'),
+  mka: (b) => b[0] === 0x1a && b[1] === 0x45 && b[2] === 0xdf && b[3] === 0xa3,
+};
+export const AUDIO_OUTPUT_MAGIC = OUTPUT_MAGIC;
+/** null when `bytes` really is the format `value`; otherwise the sentence to show (never offer such a file). */
+export function audioOutputProblem(value, bytes) {
+  const b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  const fmt = getAudioFormat(value);
+  if (!b.length) return 'The converted file came out empty. Please try again, or choose another format.';
+  const ok = OUTPUT_MAGIC[fmt.value];
+  if (ok && !ok(b)) return `The converted file is not a real ${fmt.label} file, so it is not offered. Please try again, or choose another format.`;
+  return null;
 }

@@ -16,6 +16,9 @@ import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 
+// P31: the output formats a quality value changes (see the slider below).
+const QUALITY_FORMATS = ['jpg', 'webp', 'avif', 'pdf'];
+
 const GENERIC_CONVERSION_ERROR = 'Conversion failed. Please try again, or try a different file.';
 const GENERIC_HEIC_ERROR = 'Failed to decode this HEIC/HEIF file. It may be corrupted or use a variant this tool doesn\'t support.';
 
@@ -328,8 +331,13 @@ export default function ImageConverterPage() {
                       </p>
                     )}
                   </div>
-                  <div className="flex-1 min-w-[160px]">
-                    <label className="text-xs text-neutral-500 block mb-1">Quality: <span className="font-semibold text-indigo-500">{quality}%</span></label>
+                  {/* P31 (03/10): the slider only exists for the formats it changes. Measured: PNG at 10 % and 100 % gave the
+                      same bytes (owner's iPhone showed "Quality 80 %" for a PNG output) — PNG, BMP, GIF, ICO and TIFF are
+                      written losslessly or with a fixed palette whatever it says. CloudConvert and Convertio show it for
+                      JPG / WebP / AVIF only too. PDF: it sets the JPEG quality of a photo without transparency. */}
+                  {QUALITY_FORMATS.includes(format) ? (
+                  <div className="flex-1 min-w-[160px]" data-quality-control>
+                    <label className="text-xs text-neutral-500 block mb-1">Quality: <span className="font-semibold text-indigo-500">{quality}%</span>{format === 'pdf' ? ' (photos without transparency)' : ''}</label>
                     <input
                       aria-label="Quality (%)"
                       type="range"
@@ -341,6 +349,11 @@ export default function ImageConverterPage() {
                       className="w-full accent-indigo-500"
                     />
                   </div>
+                  ) : (
+                  <p className="flex-1 min-w-[160px] text-xs text-neutral-500 self-center" data-no-quality>
+                    {format.toUpperCase()} has no quality setting here: {format === 'gif' ? 'it is written with 256 colours (the GIF limit).' : 'it is written without loss.'}
+                  </p>
+                  )}
                 </div>
               </div>
 
@@ -423,7 +436,7 @@ export default function ImageConverterPage() {
         ]}
         tips={[
           "WebP usually gives the best balance of quality and file size for web use — a solid default choice.",
-          "The quality slider only affects lossy formats (JPG, WebP and AVIF); PNG output is always lossless, so it won't change PNG file size.",
+          "The quality slider is shown only for the formats it changes (JPG, WebP, AVIF, and photos in a PDF); PNG, BMP, TIFF and ICO are written without loss, GIF with 256 colours.",
           "AVIF gives the smallest files of the four but takes a few seconds per photo, because it is encoded by a WebAssembly encoder; WebP is much faster.",
           "Check the size shown under each result: when the new format is larger (PNG is lossless; HEIC and WebP pack more than JPG), a line says why and what to pick for a smaller file."
         ]}

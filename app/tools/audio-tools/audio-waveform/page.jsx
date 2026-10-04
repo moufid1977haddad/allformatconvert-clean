@@ -162,7 +162,7 @@ export default function AudioWaveformPage() {
             {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="an audio file" /></p>}
           </div>
           <input ref={fileRef} type="file" accept={AUDIO_ACCEPT} className="hidden" onChange={handleFile} />
-          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+          {error && <p className="text-red-400 text-center text-sm break-words">{error}</p>}
           <canvas
             ref={canvasRef}
             width={800}

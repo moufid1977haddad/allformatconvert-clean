@@ -825,7 +825,7 @@ export default function Navbar() {
             {/* P27 (Lighthouse mobile): no prefetch from the bar's two always-visible links (home, Sign In) -- Next.js fetched
                 both pages' code (the account library among it, ≈ 60 KB) during the first paint of every page. A click still
                 opens them at once enough; the tools and categories below keep their prefetch. */}
-            <Link href="/" prefetch={false} className="flex items-center gap-1.5 lg:gap-2 px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition notranslate">
+            <Link href="/" prefetch={false} className="touch-hit flex items-center gap-1.5 lg:gap-2 px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition notranslate">
               <svg
                 className="w-7 h-7 lg:w-9 lg:h-9 xl:w-[46px] xl:h-[46px]"
                 viewBox="0 0 64 64"
@@ -946,7 +946,7 @@ export default function Navbar() {
                 aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={mobileMenuOpen}
                 aria-controls="mobile-menu-panel"
-                className="flex items-center justify-center w-8 h-7 rounded-lg bg-[#eaf3fb] dark:bg-[#16283a] text-[#185fa5] dark:text-[#85b7eb] hover:opacity-80 transition"
+                className="touch-hit flex items-center justify-center w-8 h-7 rounded-lg bg-[#eaf3fb] dark:bg-[#16283a] text-[#185fa5] dark:text-[#85b7eb] hover:opacity-80 transition"
               >
                 {mobileMenuOpen ? <X className="w-4 h-4" aria-hidden="true" /> : <Menu className="w-4 h-4" aria-hidden="true" />}
               </button>
@@ -1123,7 +1123,7 @@ export default function Navbar() {
                 type="button"
                 onClick={() => setSearchPanelOpen(true)}
                 aria-label="Search tools"
-                className="flex min-[1536px]:hidden items-center justify-center w-8 h-7 rounded-lg bg-[#eaf3fb] dark:bg-[#16283a] text-[#185fa5] dark:text-[#85b7eb] hover:opacity-80 transition"
+                className="touch-hit flex min-[1536px]:hidden items-center justify-center w-8 h-7 rounded-lg bg-[#eaf3fb] dark:bg-[#16283a] text-[#185fa5] dark:text-[#85b7eb] hover:opacity-80 transition"
               >
                 <Search className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
@@ -1237,7 +1237,7 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <Link href="/signin" prefetch={false} className="flex items-center px-1.5 min-[1410px]:px-2.5 py-1 rounded-lg bg-[#185fa5] dark:bg-[#2a72c0] hover:opacity-90 transition text-white text-xs font-bold whitespace-nowrap">
+              <Link href="/signin" prefetch={false} className="touch-hit flex items-center px-1.5 min-[1410px]:px-2.5 py-1 rounded-lg bg-[#185fa5] dark:bg-[#2a72c0] hover:opacity-90 transition text-white text-xs font-bold whitespace-nowrap">
                 Sign In
               </Link>
             )}

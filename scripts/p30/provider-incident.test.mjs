@@ -164,10 +164,11 @@ test('runtime production check needs more than VERCEL_ENV', () => {
   }
 });
 
-test('ConvertAPI plan period starts on the renewal day', () => {
-  assert.equal(plan.planPeriodKey(new Date(Date.UTC(2026, 9, 4, 0, 0, 1))), 'plan-2026-10');
-  assert.equal(plan.planPeriodKey(new Date(Date.UTC(2026, 10, 3, 23, 59))), 'plan-2026-10');
-  assert.equal(plan.planPeriodKey(new Date(Date.UTC(2026, 10, 4, 0, 0))), 'plan-2026-11');
+test('ConvertAPI plan period starts on the renewal day (the 3rd since P31)', () => {
+  assert.equal(plan.CONVERTAPI_PLAN_RENEWAL_DAY, 3);
+  assert.equal(plan.planPeriodKey(new Date(Date.UTC(2026, 9, 3, 0, 0, 1))), 'plan-2026-10');
+  assert.equal(plan.planPeriodKey(new Date(Date.UTC(2026, 10, 2, 23, 59))), 'plan-2026-10');
+  assert.equal(plan.planPeriodKey(new Date(Date.UTC(2026, 10, 3, 0, 0))), 'plan-2026-11');
   assert.equal(plan.planPeriodKey(new Date(Date.UTC(2027, 0, 2))), 'plan-2026-12');
 });
 
@@ -176,7 +177,7 @@ test('ConvertAPI plan counter: thresholds at 50/80/100 % of 1,000, counted by cr
   const alerts = [];
   const flags = new Set();
   const deps = {
-    now: () => new Date(Date.UTC(2026, 9, 10)),
+    now: () => new Date(Date.UTC(2026, 11, 10)), // plan-2026-12: no baseline (P31)
     incrementCounter: async (b, p, n) => { const k = `${b}|${p}`; const v = (counters.get(k) || 0) + n; counters.set(k, v); return { newValue: v }; },
     checkAndAlertThresholds: async ({ counterName, periodKey, value, cap }) => {
       for (const th of [50, 80, 100]) {

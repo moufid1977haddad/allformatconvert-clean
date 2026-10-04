@@ -11,6 +11,7 @@ import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
 import TextArea from '@/app/components/TextArea';
+import { fitScale } from '../../../lib/canvasLimit'; // P31: one canvas cap for iPhone / iPad
 
 const LANGUAGES = [
   { code: 'afr', label: "Afrikaans" },
@@ -332,7 +333,8 @@ export default function Page() {
         setCurrentPage(i);
         setPagePct(0);
         const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 2 });
+        const unit = page.getViewport({ scale: 1 });
+        const viewport = page.getViewport({ scale: fitScale(unit.width, unit.height, 2) });
         const canvas = document.createElement('canvas');
         canvas.width = viewport.width;
         canvas.height = viewport.height;

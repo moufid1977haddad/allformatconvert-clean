@@ -6,6 +6,7 @@ import { reportToolError } from '../../../lib/reportError';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
 import { BATCH_BYTES, MOBILE_BATCH_BYTES, MAX_FILE_BYTES, MAX_FILE_LABEL, MOBILE_MAX_FILE_BYTES, MOBILE_MAX_FILE_LABEL, ZIP_IN_MEMORY_MAX, ZIP_IN_MEMORY_LABEL } from './config';
 import { useToolError } from '../../../lib/useToolError';
+import { saveBlob } from '../../../lib/download'; // retyped octet-stream behind a download link (P31)
 
 // Decimal units, like the caps shown on the page ("up to 1.9 GB" = 1 900 000 000 bytes): a file listed at 1.95 GB
 // is over it, not "1.82 GB" in binary units that would look under it.
@@ -23,7 +24,6 @@ function firstVolume(files) {
 // with this site's origin).
 const PREVIEW = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp', avif: 'image/avif', bmp: 'image/bmp', pdf: 'application/pdf', txt: 'text/plain', md: 'text/plain', csv: 'text/plain', log: 'text/plain', json: 'text/plain', xml: 'text/plain', mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg', m4a: 'audio/mp4', mp4: 'video/mp4', webm: 'video/webm' };
 const extOf = (p) => (p.match(/\.([^./]+)$/) || [])[1]?.toLowerCase() || '';
-const saveBlob = (blob, name) => { const u = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = u; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(u), 60000); };
 
 // Files in batches of at most `limit` extracted bytes (a bigger file goes alone).
 function batches(entries, limit) {

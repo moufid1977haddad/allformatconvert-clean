@@ -1,7 +1,8 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { formatBytes } from '../lib/formatBytes';
-import { attachmentPathActive, isIosDevice, saveBlob, stageAttachment, unstageAttachment } from '../lib/download';
+import { downloadUrl, isIosDevice, saveBlob } from '../lib/download';
+import { mimeForName } from '../lib/mimeTypes';
 
 // THE download of the site (P18, 01/10). Every file a tool makes is offered through this component, so every tool
 // shows the same thing: the file's name, its format and size, a "Download" button — and, when a tool makes several
@@ -11,17 +12,14 @@ import { attachmentPathActive, isIosDevice, saveBlob, stageAttachment, unstageAt
 // when touched — no button said "Download". The owner saw the same on other tools. Result links had grown tool by
 // tool (~110 of them, a dozen styles).
 //
-// iPhone / iPad: the Download link points, as soon as the row appears, at a real address of the site that answers
-// with the file as an attachment (stageAttachment, app/lib/download.js) — touching it saves the file at once, as on
-// iLovePDF. Until P21 the file was read and handed over AFTER the tap: fine for Split PDF's small parts, but JPG to
-// PDF with a phone photo took longer than the second iOS gives a tap, and Safari opened the PDF (owner's iPhone,
-// 02/10). That link is a plain one, without the download attribute, exactly like iLovePDF's: a navigation always
-// goes through the service worker (a download-attribute link may be fetched by the browser's download manager
-// directly, bypassing it). Before the address is ready (a fraction of a second), IosDownloadBridge still handles
-// the tap. A second
-// button, "Save / Share", opens Apple's share sheet with the file itself (Save to Files, AirDrop, Mail, WhatsApp) —
-// navigator.share({ files }), available on iOS / iPadOS 15+. It needs the File ready BEFORE the tap (the tap's
-// permission does not survive an await), hence the file is read when the row appears.
+// The Download link (P31, 03/10, owner's iPhone on iOS 26): a blob: address of the file RETYPED
+// application/octet-stream, with the download attribute and the full name — made as soon as the row appears, so the
+// tap itself awaits nothing (app/lib/download.js says why: Safari displays a PDF it is given as application/pdf, even
+// as an attachment, and P21's service-worker address gave an M4R saved as "….m4r.html"). Until the file is read (a
+// tool that gave only `href`), the tool's own address is shown and IosDownloadBridge handles a tap on iPhone. A second
+// button, "Save / Share", opens Apple's share sheet with the file itself, under its REAL type (Save to Files, AirDrop,
+// Mail, WhatsApp) — navigator.share({ files }), available on iOS / iPadOS 15+. It needs the File ready BEFORE the tap
+// (the tap's permission does not survive an await), hence the file is read when the row appears.
 //
 // A result not yet downloaded makes the browser ask before the page is left or reloaded (beforeunload). ONE rule for
 // the whole site (owner, P19, 01/10): every file a visitor made and has not taken arms the question — text results
@@ -109,7 +107,6 @@ const GroupContext = createContext(null);
 export function FileDownload({ blob: blobProp, href, name, note, primary = true, guard = true, text, linkProps, className = '' }) {
   const id = useId();
   const group = useContext(GroupContext);
-  const [blob, setBlob] = useState(blobProp || null);
   // false, or how the file was taken: 'downloaded', 'copied', or 'sibling' (another format of the same result was)
   const [saved, setSaved] = useState(false);
   // The address of a file given as a Blob is made in the browser only (after the first render), never while the page
@@ -124,42 +121,33 @@ export function FileDownload({ blob: blobProp, href, name, note, primary = true,
   }, [blobProp, href]);
   const url = href || ownUrl;
 
-  // Read the file when only its address is known: its size and type are shown, and Share needs the file itself.
+  // The file itself, always the one of the CURRENT props (P31 review): a Blob given is used as it is, at once; a file
+  // given by address is read, and its bytes are used only while they belong to that address — never, even for one
+  // render, the previous result's bytes under the new name.
+  const src = blobProp || href || null;
+  const [read, setRead] = useState(null); // { src, blob } of a file given by address
   useEffect(() => {
-    if (blobProp) { setBlob(blobProp); return undefined; }
+    if (blobProp || !href) { setRead(null); return undefined; }
     let alive = true;
-    setBlob(null);
-    if (url) fetch(url).then((r) => r.blob()).then((b) => { if (alive) setBlob(b); }).catch(() => {});
+    fetch(href).then((r) => r.blob()).then((b) => { if (alive) setRead({ src: href, blob: b }); }).catch(() => {});
     return () => { alive = false; };
-  }, [blobProp, url]);
+  }, [blobProp, href]);
+  const blob = blobProp || (read && read.src === src ? read.blob : null);
 
-  const file = useMemo(() => (blob ? new File([blob], name, { type: blob.type || 'application/octet-stream' }) : null), [blob, name]);
+  // The REAL type for Save / Share: the one of the name's extension (app/lib/mimeTypes.js), else the Blob's own.
+  const file = useMemo(() => (blob ? new File([blob], name, { type: mimeForName(name) || blob.type || 'application/octet-stream' }) : null), [blob, name]);
 
-  // iPhone / iPad: the file made ready at a real address before any tap (see the header). The address is used only
-  // while it belongs to the file and name on screen (never, even for a frame, an older result's), and is made again
-  // when the visitor comes back to the tab after the browser may have dropped it (older than 20 minutes).
-  const [staged, setStaged] = useState(null); // { blob, name, url }
-  const stagedAt = useRef(0);
+  // The retyped address of the download link, made again when the file changes, freed a minute later; used only while
+  // it is the current file's. Until it exists (one render, or while a file given by address is read) the button is
+  // inactive: it never falls back to an address under the file's real type (Safari would display a PDF).
+  const [dl, setDl] = useState(null); // { blob, url }
   useEffect(() => {
-    if (!blob || !attachmentPathActive()) return undefined;
-    let alive = true;
-    const made = [];
-    const stage = () => stageAttachment(blob, name).then((u) => {
-      if (!u) return;
-      made.push(u);
-      if (alive) { stagedAt.current = Date.now(); setStaged({ blob, name, url: u }); } else unstageAttachment(u);
-    }).catch(() => {});
-    stage();
-    const again = () => { if (document.visibilityState === 'visible' && stagedAt.current && Date.now() - stagedAt.current > 20 * 60 * 1000) stage(); };
-    document.addEventListener('visibilitychange', again);
-    return () => {
-      alive = false;
-      document.removeEventListener('visibilitychange', again);
-      const old = made.slice();
-      setTimeout(() => { for (const u of old) unstageAttachment(u); }, 60000);
-    };
-  }, [blob, name]);
-  const stagedUrl = staged && staged.blob === blob && staged.name === name ? staged.url : null;
+    if (!blob) { setDl(null); return undefined; }
+    const u = downloadUrl(blob);
+    setDl({ blob, url: u });
+    return () => { setTimeout(() => URL.revokeObjectURL(u), 60000); };
+  }, [blob]);
+  const dlUrl = dl && blob && dl.blob === blob ? dl.url : null;
   const [canShare, setCanShare] = useState(false); // decided in the browser (the server cannot know the device)
   useEffect(() => { setCanShare(file ? shareSupported(file) : false); }, [file]);
 
@@ -200,7 +188,7 @@ export function FileDownload({ blob: blobProp, href, name, note, primary = true,
 
   const share = useCallback(async () => {
     try { await navigator.share({ files: [file], title: name }); markSaved('downloaded'); }
-    catch (e) { if (e && e.name !== 'AbortError') saveBlob(file, name); }
+    catch (e) { if (e && e.name !== 'AbortError') saveBlob(file, name).then((ok) => { if (ok) markSaved('downloaded'); }); }
   }, [file, name, markSaved]);
 
   if (!url) return null;
@@ -217,8 +205,9 @@ export function FileDownload({ blob: blobProp, href, name, note, primary = true,
         </div>
       </div>
       <div className="flex gap-2 shrink-0">
-        <a {...linkProps} href={stagedUrl || url} download={stagedUrl ? undefined : name} data-download data-staged={stagedUrl ? '1' : undefined} onClick={() => markSaved('downloaded')} aria-label={`Download ${name}`}
-          className={`flex-1 sm:flex-none text-center rounded-lg px-4 py-2 font-semibold text-sm transition ${btn}`}>
+        <a {...linkProps} href={dlUrl || undefined} download={name} data-download data-retyped={dlUrl ? '1' : undefined} data-ocv-retyped=""
+          aria-disabled={dlUrl ? undefined : 'true'} onClick={(e) => { if (!dlUrl) { e.preventDefault(); return; } markSaved('downloaded'); }} aria-label={`Download ${name}`}
+          className={`flex-1 sm:flex-none text-center rounded-lg px-4 py-2 font-semibold text-sm transition ${btn} ${dlUrl ? '' : 'opacity-60 cursor-wait'}`}>
           Download
         </a>
         {canShare && (
@@ -261,8 +250,9 @@ export function DownloadGroup({ zipName = 'files.zip', alternatives = false, chi
         return { name: unique, input: blob, lastModified: new Date() };
       });
       const zip = await downloadZip(entries).blob();
-      await saveBlob(new Blob([zip], { type: 'application/zip' }), zipName);
-      for (const it of items.current.values()) it.markSaved('downloaded');
+      setBusy(false);
+      // "Downloaded" only once the file is really handed over (on iPhone, a late ZIP waits for a tap on its bar)
+      if (await saveBlob(new Blob([zip], { type: 'application/zip' }), zipName)) for (const it of items.current.values()) it.markSaved('downloaded');
     } finally { setBusy(false); }
   };
   return (

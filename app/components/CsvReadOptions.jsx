@@ -9,9 +9,9 @@ export default function CsvReadOptions({ showEncoding, encodingChoice, detectedE
   return (
     <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
       {showEncoding && (
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 max-w-full">
           <label htmlFor="csv-encoding" className="text-neutral-500 dark:text-neutral-400">Encoding:</label>
-          <select id="csv-encoding" value={encodingChoice} onChange={(e) => onEncoding(e.target.value)} className={sel}>
+          <select id="csv-encoding" value={encodingChoice} onChange={(e) => onEncoding(e.target.value)} className={`${sel} min-w-0`}>
             <option value="auto">Auto-detected: {encodingLabel(detectedEncoding)}</option>
             {CSV_ENCODINGS.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
           </select>
