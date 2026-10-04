@@ -1,12 +1,15 @@
 import type { Metadata } from 'next';
 
+const TITLE = "Code Formatter — JavaScript, TypeScript, JSON, HTML, CSS, SQL, YAML Online";
+const DESCRIPTION = "Code Formatter formats JavaScript, TypeScript, JSX, JSON, HTML, XML, CSS, SCSS, LESS, SQL (20 dialects), YAML, Markdown and GraphQL entirely in your browser, with automatic language detection and errors shown by line and column.";
+
 export const metadata: Metadata = {
-  title: { absolute: "Code Formatter — Reformat Json, Css, or HTML Entirely Online" },
-  description: "Code Formatter reformats JSON, CSS, or HTML entirely in your browser.",
+  title: { absolute: TITLE },
+  description: DESCRIPTION,
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/code-formatter" },
   openGraph: {
-    title: "Code Formatter — Reformat Json, Css, or HTML Entirely Online",
-    description: "Code Formatter reformats JSON, CSS, or HTML entirely in your browser.",
+    title: TITLE,
+    description: DESCRIPTION,
     url: "https://www.onlineconvertools.com/tools/developer-tools/code-formatter",
   },
 };

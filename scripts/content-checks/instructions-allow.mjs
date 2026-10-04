@@ -8,6 +8,7 @@ export const ALLOW = {
     '35mm photo': EXAMPLE, 'flat vector illustration': EXAMPLE, '3D render': EXAMPLE,
     'golden hour': EXAMPLE, 'neon-lit': EXAMPLE, 'soft studio light': EXAMPLE,
   },
+  'developer-tools/code-formatter': { 'Line 3, column 12: Unexpected token': 'an example error message, built in code (P31)' },
   'developer-tools/csv-to-excel': { 'Smith, John': 'an example CSV value' },
   'developer-tools/json-to-python': { 'first-name': 'an example JSON key' },
   'developer-tools/json-to-rust': { camelCase: 'serde attribute value in generated code', 'last-name': 'an example JSON key' },

@@ -58,7 +58,7 @@ const tools = [
   { title: '.env to JSON', description: 'Convert .env files to JSON', href: '/tools/developer-tools/env-to-json', group: 'Utilities' },
   { title: 'Code Minifier', description: 'Minify JS, CSS, HTML code', href: '/tools/developer-tools/code-minifier', group: 'Code Formatting' },
   { title: 'Diff Viewer', description: 'Compare two texts', href: '/tools/developer-tools/diff-viewer', group: 'Generators & Security' },
-  { title: 'Code Formatter', description: 'Format and beautify code', href: '/tools/developer-tools/code-formatter', group: 'Code Formatting' },
+  { title: 'Code Formatter', description: 'Format JS, TS, JSON, HTML, XML, CSS, SQL, YAML, Markdown and more', href: '/tools/developer-tools/code-formatter', group: 'Code Formatting' },
   { title: 'Cron Expression', description: 'Build and validate cron expressions', href: '/tools/developer-tools/cron-expression', group: 'Utilities' },
   { title: 'Cron Expression Builder', description: 'Build cron expressions', href: '/tools/developer-tools/cron-expression-builder', group: 'Utilities' },
 ];
