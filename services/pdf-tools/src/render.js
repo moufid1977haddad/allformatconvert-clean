@@ -22,6 +22,17 @@ const FORMATS = {
   tiff: { args: () => ['-tiff', '-tiffcompression', 'lzw'], ext: 'tif', mime: 'image/tiff' },
 };
 const MIN_DPI = 36;
+
+// Each Poppler process gets an address-space ceiling on Linux (independent review 04/10): a PDF whose JPEG 2000 or
+// JBIG2 picture announces 50,000 × 50,000 pixels would otherwise be decoded in full and could take the container (and
+// the repairs, PDF/A, compressions running beside it) down. prlimit (util-linux, in every Debian image) execs the tool,
+// so the abort kill still reaches it.
+function run(bin, args, opts) {
+  if (process.platform === 'linux' && config.RENDER_MEMORY_LIMIT_BYTES > 0) {
+    return runProcess(config.PRLIMIT_BIN, [`--as=${config.RENDER_MEMORY_LIMIT_BYTES}`, '--', bin, ...args], opts);
+  }
+  return runProcess(bin, args, opts);
+}
 const MAX_DPI = 600;
 
 /** Validates the fields of a render request (multipart body or JSON). */
@@ -44,7 +55,7 @@ function parseRenderParams(src) {
 async function pageInfo(workDir, page, signal) {
   const unreadable = { ok: false, status: 422, error: 'This file could not be read as a PDF. It may be damaged, or not a PDF despite its name.' };
   // page count first: pdfinfo -f/-l beyond the last page is an error, not a count
-  const all = await runProcess(config.PDFINFO_BIN, ['input.pdf'], { cwd: workDir, signal });
+  const all = await run(config.PDFINFO_BIN, ['input.pdf'], { cwd: workDir, signal });
   if (all.aborted) return { ok: false, status: 504, error: 'Rendering timed out.' };
   if (all.code !== 0) {
     if (/password/i.test(all.stderr)) return { ok: false, status: 422, error: 'This PDF is protected by a password. Remove the password with our PDF Unlock tool (you need to know it), then convert the unlocked file.' };
@@ -53,7 +64,7 @@ async function pageInfo(workDir, page, signal) {
   const pages = Number((/^Pages:\s+(\d+)/m.exec(all.stdout || '') || [])[1]);
   if (!pages) return unreadable;
   if (page > pages) return { ok: false, status: 400, error: `This PDF has ${pages} page${pages > 1 ? 's' : ''}.` };
-  const r = await runProcess(config.PDFINFO_BIN, ['-box', '-f', String(page), '-l', String(page), 'input.pdf'], { cwd: workDir, signal });
+  const r = await run(config.PDFINFO_BIN, ['-box', '-f', String(page), '-l', String(page), 'input.pdf'], { cwd: workDir, signal });
   if (r.aborted) return { ok: false, status: 504, error: 'Rendering timed out.' };
   if (r.code !== 0) return unreadable;
   const out = r.stdout || '';
@@ -90,6 +101,16 @@ function release() {
  * to send back).
  */
 async function renderPage(workDir, p, signal) {
+  // pdfinfo inside the same two-at-a-time limit as pdftoppm (review 04/10)
+  if (!(await acquire(config.RENDER_QUEUE_MS))) return { ok: false, status: 503, error: 'Our PDF service is busy right now. Please try again in a minute.' };
+  try {
+    return await renderAcquired(workDir, p, signal);
+  } finally {
+    release();
+  }
+}
+
+async function renderAcquired(workDir, p, signal) {
   const info = await pageInfo(workDir, p.page, signal);
   if (!info.ok) return info;
   const fmt = FORMATS[p.format];
@@ -102,12 +123,11 @@ async function renderPage(workDir, p, signal) {
     reduced = 'page';
   }
   if (dpi < 1) return { ok: false, status: 422, error: 'This page is too large to be drawn as an image.' };
-  if (!(await acquire(config.RENDER_QUEUE_MS))) return { ok: false, status: 503, error: 'Our PDF service is busy right now. Please try again in a minute.' };
-  try {
+  {
     for (let attempt = 0; attempt < 3; attempt++) {
       const base = `page-${attempt}`;
       const out = path.join(workDir, `${base}.${fmt.ext}`);
-      const r = await runProcess(config.PDFTOPPM_BIN, [...fmt.args(p.quality), '-r', String(dpi), '-cropbox', '-f', String(p.page), '-l', String(p.page), '-singlefile', 'input.pdf', base], { cwd: workDir, signal });
+      const r = await run(config.PDFTOPPM_BIN, [...fmt.args(p.quality), '-r', String(dpi), '-cropbox', '-f', String(p.page), '-l', String(p.page), '-singlefile', 'input.pdf', base], { cwd: workDir, signal });
       if (r.aborted) return { ok: false, status: 504, error: 'Rendering timed out.' };
       if (r.code !== 0 || !fs.existsSync(out)) return { ok: false, status: 422, error: 'This page could not be drawn. The PDF may be damaged.' };
       const bytes = fs.statSync(out).size;
@@ -120,8 +140,6 @@ async function renderPage(workDir, p, signal) {
       reduced = 'output';
     }
     return { ok: false, status: 422, error: 'This page makes an image too large to send at this resolution. Choose a lower resolution or JPG.' };
-  } finally {
-    release();
   }
 }
 

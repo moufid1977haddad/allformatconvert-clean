@@ -44,6 +44,7 @@ export default function Page() {
   const handleFile = async (e) => { const f = e.target.files[0]; e.target.value = ''; setResult(null); setSummary(''); setError(''); if (!f) return; const problem = (await pdfFileProblem(f)) || (await pdfLockedProblem(f)); if (problem) { setFile(null); setError(problem); return; } setFile(f); }; // P21: a bad file is said when it is chosen
 
   const redact = async () => {
+    let sentToServer = false; // P32: said even if the service then fails (review 04/10)
     const terms = termsOf(keyword);
     if (!file || (!terms.length && !kinds.length)) return;
     setLoading(true);
@@ -122,6 +123,7 @@ export default function Page() {
         }
         if (!drawn) {
           if (!renderer) renderer = new ServerPageRenderer(file);
+          sentToServer = true;
           let r;
           try {
             r = await renderer.render({ page: i + 1, dpi: Math.max(36, Math.round(72 * viewport.scale)), format: 'png', maxPixels: Math.max(100000, Math.ceil(canvas.width * canvas.height * 1.05)) });
@@ -192,7 +194,7 @@ export default function Page() {
       } finally {
         if (renderer) renderer.close();
       }
-    } catch(e) { setError('Redaction failed: ' + e.message); }
+    } catch(e) { setError('Redaction failed: ' + e.message + (sentToServer ? ' Your PDF was sent to our own PDF service for this attempt, then deleted.' : '')); }
     setLoading(false);
   };
 

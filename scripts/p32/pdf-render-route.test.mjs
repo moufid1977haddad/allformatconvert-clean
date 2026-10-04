@@ -114,6 +114,18 @@ try {
   // service answering something that is not an image → 502
   res = await handlePdfRender(direct({ page: 1, dpi: 150, format: 'jpg' }), deps({ fetchImpl: async () => new Response('<html>', { status: 200, headers: { 'Content-Type': 'text/html' } }) }));
   check('unexpected answer type → 502, never handed to the page', res.status === 502);
+  // review 04/10: another site's form, the service's key refused, the global hourly cap
+  const cross = direct({ page: 1, dpi: 150, format: 'jpg' });
+  const crossReq = new Request(cross, { headers: { ...Object.fromEntries(cross.headers), 'sec-fetch-site': 'cross-site' } });
+  counted = 0;
+  res = await handlePdfRender(crossReq, deps());
+  check('cross-site form → 403, not counted', res.status === 403 && counted === 0);
+  reports.length = 0;
+  res = await handlePdfRender(direct({ page: 1, dpi: 150, format: 'jpg' }), deps({ env: { ...env, PDFTOOLS_API_KEY: 'wrong-key' } }));
+  j = await res.json();
+  check('service refuses our key → 500 with a neutral sentence + alert', res.status === 500 && !/API key/i.test(j.error) && reports.includes('service_refused_401'), `${j.error} | ${reports.join(',')}`);
+  res = await handlePdfRender(direct({ page: 1, dpi: 150, format: 'jpg' }), deps({ rateLimit: async () => ({ allowed: false, layer: 'global', retryAfterSeconds: 900 }) }));
+  check('global hourly cap → 429 + sentence', res.status === 429 && /too many pages right now/.test((await res.json()).error));
   // unit: renderFields
   check('renderFields keeps only checked fields', JSON.stringify(renderFields({ page: '2', dpi: '300', format: 'jpg', quality: '80', extra: 'x' }).fields) === JSON.stringify({ page: '2', dpi: '300', format: 'jpg', quality: '80' }));
 } finally {

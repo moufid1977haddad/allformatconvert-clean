@@ -18,7 +18,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && pdftotext -v \
     && pdfunite -v \
     && pdftoppm -v \
-    && pdfinfo -v
+    && pdfinfo -v \
+    && prlimit --version
 
 # P32: /v1/render-page draws pages with Poppler's pdftoppm (poppler-utils above). A PDF that does not embed its fonts
 # (Helvetica, Times… the 14 standard fonts, as in the iPhone kit's pdf-avec-images.pdf) is drawn with the URW base-35

@@ -58,4 +58,7 @@ module.exports = {
   MAX_RENDER_OUTPUT_BYTES: Number(process.env.MAX_RENDER_OUTPUT_BYTES) || 4_000_000,
   RENDER_CONCURRENCY: Number(process.env.RENDER_CONCURRENCY) || 2,
   RENDER_QUEUE_MS: Number(process.env.RENDER_QUEUE_MS) || 20_000,
+  // address space of one pdfinfo / pdftoppm (Linux only, via prlimit): a 40 MP page takes ~160 MB in Splash
+  RENDER_MEMORY_LIMIT_BYTES: process.env.RENDER_MEMORY_LIMIT_BYTES === undefined ? 1536 * 1024 * 1024 : Number(process.env.RENDER_MEMORY_LIMIT_BYTES),
+  PRLIMIT_BIN: process.env.PRLIMIT_BIN || 'prlimit',
 };

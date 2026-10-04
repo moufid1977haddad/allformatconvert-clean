@@ -197,6 +197,7 @@ export default function PdfToImages({ tool, formats = PDF_IMAGE_FORMATS.map((f) 
       // what was finished before a page that could not be done is still offered (P31)
       if ((e instanceof StepTimeout || e instanceof ServerRenderError) && out.length) setResults(out);
       if (drawnByServer.length) setNotice(`Our own PDF service drew ${drawnByServer.length > 1 ? 'pages' : 'page'} ${listPages(drawnByServer)}: your PDF was sent there, then deleted.`);
+      else if (renderer) setNotice('Your PDF was sent to our own PDF service for this attempt, then deleted.');
     } finally {
       if (renderer) renderer.close();
     }

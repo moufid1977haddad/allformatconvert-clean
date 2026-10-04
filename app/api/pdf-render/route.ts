@@ -1,7 +1,6 @@
 import { NextRequest } from "next/server";
 import { alertServerError } from "@/lib/quota/errorAlerts";
-import { checkHourDayRateLimit } from "@/lib/quota/hourDayRateLimit";
-import { PDF_RENDER_PAGES_PER_HOUR, PDF_RENDER_PAGES_PER_DAY } from "@/lib/quota/config";
+import { checkPdfRenderRateLimit } from "@/lib/quota/pdfRenderRateLimit";
 import { openStaged } from "@/lib/media/staged";
 import { handlePdfRender } from "@/lib/pdfRender";
 
@@ -12,7 +11,7 @@ export const maxDuration = 60;
 export async function POST(req: NextRequest) {
   return handlePdfRender(req, {
     env: process.env,
-    rateLimit: (r: Request) => checkHourDayRateLimit(r as NextRequest, { prefix: "pdf_render", perHour: PDF_RENDER_PAGES_PER_HOUR, perDay: PDF_RENDER_PAGES_PER_DAY }),
+    rateLimit: (r: Request) => checkPdfRenderRateLimit(r as NextRequest),
     openStaged,
     reportFailure: (detail: string) => alertServerError("pdf-render", detail),
   });
