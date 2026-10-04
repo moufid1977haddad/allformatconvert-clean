@@ -16,10 +16,10 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF to Image"
-        description={'PDF to Image turns each page of your PDF into a PNG, JPG, WebP, TIFF or BMP picture, or extracts the photos and images embedded in it, in your browser with PDF.js — the PDF is not uploaded. Choose Normal (150 dpi), High (300 dpi, for printing) or Screen (72 dpi) and all pages or only some. Download each picture, or all of them in one ZIP.'}
+        description={'PDF to Image turns each page of your PDF into a PNG, JPG, WebP, TIFF or BMP picture, or extracts the photos and images embedded in it, in your browser with PDF.js — on a computer the PDF is not uploaded. On iPhone and iPad only, a page the device cannot draw within 20 seconds is drawn by our own PDF service instead (the page says so): the PDF is sent there, then deleted. Choose Normal (150 dpi), High (300 dpi, for printing) or Screen (72 dpi) and all pages or only some. Download each picture, or all of them in one ZIP.'}
         howTo={['Click or drop a PDF on the upload area.', 'Choose "Pages to images" to turn each page into a picture, or "Extract images" to take out the photos and pictures inside the PDF.', 'Pick the format, the resolution (Normal 150 dpi, High 300 dpi for printing, or Screen 72 dpi) and, if you want, only some pages, like 1-3, 5.', 'Click "Convert pages" (or "Extract images"), then "Download" under each picture or "Download all" for one ZIP file.']}
         faqs={[
-          { q: 'Is PDF to Image free?', a: 'Yes, free and with no sign-up. It runs in your browser, so there is no upload and no daily limit.' },
+          { q: 'Is PDF to Image free?', a: 'Yes, free and with no sign-up. It runs in your browser, so there is no upload and no daily limit (pages drawn by our PDF service for an iPhone or iPad: up to 300 an hour).' },
           { q: 'Which formats can I get?', a: 'PNG (lossless, the default), JPG, WebP, TIFF and BMP. JPG and WebP have a quality setting.' },
           { q: 'What is the difference between the two modes?', a: '"Pages to images" makes one picture per page, exactly as the page looks. "Extract images" takes out the pictures placed inside the PDF (photos, scans, logos) at their own resolution, one file per picture — text and drawings are not included.' },
           { q: 'Which resolution should I choose?', a: 'Normal (150 dpi) is sharp on screens. High (300 dpi) is for printing. A page too large for your device to draw at once is rendered at the highest resolution that fits, and the page says so.' },

@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { mintTicket, readConfig, validateRequest } from '@/lib/media/ticket';
 import { checkHourDayRateLimit } from '@/lib/quota/hourDayRateLimit';
-import { MAX_OFFICE_STAGED_BYTES, MAX_PDF_COMPRESS_STAGED_BYTES } from '@/lib/quota/limits';
+import { MAX_OFFICE_STAGED_BYTES, MAX_PDF_COMPRESS_STAGED_BYTES, MAX_PDFTOOLS_STAGED_BYTES } from '@/lib/quota/limits';
 
 // Documents whose tool has its own measured ceiling (allow-list; anything else gets the Office one).
-const STAGE_PURPOSE_CAPS = { 'pdf-compress': MAX_PDF_COMPRESS_STAGED_BYTES };
+// 'pdf-render' (P32): a PDF whose pages an iPhone / iPad could not draw, drawn by pdf-tools (/api/pdf-render).
+const STAGE_PURPOSE_CAPS = { 'pdf-compress': MAX_PDF_COMPRESS_STAGED_BYTES, 'pdf-render': MAX_PDFTOOLS_STAGED_BYTES };
 
 // Issues a one-job upload ticket for the media-processing service. The file
 // itself never comes through here: only this small JSON does.

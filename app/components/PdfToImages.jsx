@@ -1,8 +1,8 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useRef, useState, useSyncExternalStore } from 'react';
 import { loadPdfjs } from '../lib/pdfjs';
 import { reportToolError } from '../lib/reportError';
-import { rasterFromCanvas, rasterFromRGBA } from '../lib/bigImage';
+import { rasterFromCanvas, rasterFromRGBA, imageDims, decodeToRaster } from '../lib/bigImage';
 import { fitScale, freeCanvas, withTimeout, StepTimeout } from '../lib/canvasLimit';
 import { encodeRaster } from '../lib/imageOutput';
 import { encodeExtra } from '../tools/image-tools/image-converter/extraFormats';
@@ -10,6 +10,7 @@ import { FileDownload, DownloadGroup } from './FileDownload';
 import { parsePageRange } from '../lib/pageRange';
 import { useToolError } from '../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
+import { serverRenderAvailable, ServerPageRenderer, ServerRenderError, LOCAL_PAGE_LIMIT_MS, LOCAL_PAGE_LIMIT_LABEL, listPages } from '../lib/serverPageRender';
 
 // PDF → images, shared by PDF to Image and PDF to JPG (P21, 02/10).
 // Market (02/10): iLovePDF "PDF to JPG" offers "Page to JPG" and "Extract images", quality Normal (recommended) / High;
@@ -34,6 +35,14 @@ export { parsePageRange } from '../lib/pageRange';
 // above the slowest page measured (a 300 dpi photo page on a phone: a few seconds).
 const PAGE_TIME_LIMIT = () => (typeof window !== 'undefined' && window.__pdfPageTimeLimitMs) || 60000; // tests shorten it
 const stuck = (n, total, done) => `Page ${n} of ${total} could not be finished on this device after a minute${done ? ` (the ${done} file${done > 1 ? 's' : ''} made before it ${done > 1 ? 'are' : 'is'} below)` : ''}. Try a lower resolution or fewer pages at a time, or use a computer for this PDF.`;
+
+// P32 (04/10): on iPhone / iPad, a page the device has not drawn within LOCAL_PAGE_LIMIT_MS is drawn by our PDF service
+// (app/lib/serverPageRender.js). It makes JPG, PNG and TIFF itself; WebP and BMP are encoded here from its PNG.
+// the device does not change while the page is open: nothing to subscribe to (useSyncExternalStore reads it once on
+// the client, false in the server render, so hydration matches)
+const noSubscribe = () => () => {};
+
+const SERVER_FORMAT = { jpg: 'jpg', png: 'png', tiff: 'tiff', webp: 'png', bmp: 'png' };
 
 async function encode(raster, format, quality) {
   if (format === 'tiff' || format === 'bmp') return (await encodeExtra(format, raster, quality / 100)).blob;
@@ -71,6 +80,8 @@ export default function PdfToImages({ tool, formats = PDF_IMAGE_FORMATS.map((f) 
   const [progress, setProgress] = useState('');
   const [error, setError] = useToolError('');
   const [notice, setNotice] = useState('');
+  // read after mounting (the server render does not know the device): the notice of the P32 fallback, iPhone / iPad only
+  const onAppleTouch = useSyncExternalStore(noSubscribe, serverRenderAvailable, () => false);
   const inputRef = useRef();
   const base = file ? file.name.replace(/\.pdf$/i, '') : 'document';
   const lossy = format === 'jpg' || format === 'webp';
@@ -81,6 +92,11 @@ export default function PdfToImages({ tool, formats = PDF_IMAGE_FORMATS.map((f) 
     if (!file) return;
     setBusy(true); setResults([]); setError(''); setNotice('');
     const out = [];
+    const canFallBack = mode === 'pages' && serverRenderAvailable();
+    const drawnByServer = [];
+    let renderer = null;
+    let remote = false; // once a page needed our service, the next ones go there directly
+    let serverReduced = 0;
     try {
       const pdfjsLib = await loadPdfjs();
       let pdf;
@@ -98,22 +114,46 @@ export default function PdfToImages({ tool, formats = PDF_IMAGE_FORMATS.map((f) 
         const page = await pdf.getPage(n);
         if (mode === 'pages') {
           const unit = page.getViewport({ scale: 1 });
-          // P31: the surface is capped for the device (iPhone / iPad: 16.7 MP), one page at a time, freed at once.
-          const scale = fitScale(unit.width, unit.height, dpi / 72);
-          if (scale < dpi / 72) reduced = Math.max(reduced, Math.round(72 * scale));
-          const vp = page.getViewport({ scale });
-          const canvas = document.createElement('canvas');
-          canvas.width = Math.floor(vp.width); canvas.height = Math.floor(vp.height);
-          console.info(`[pdf-to-images] page ${n}: canvas ${canvas.width}×${canvas.height} (${(canvas.width * canvas.height / 1e6).toFixed(1)} MP)`);
-          try {
-            const ctx = canvas.getContext('2d');
-            if (!ctx) throw new Error(`Page ${n} is too large for this device to draw. Choose a lower resolution.`);
-            ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); // pages are white paper
-            const task = page.render({ canvasContext: ctx, viewport: vp });
-            await withTimeout(task.promise, PAGE_TIME_LIMIT(), stuck(n, pdf.numPages, out.length), () => task.cancel());
-            const blob = await withTimeout(encode(rasterFromCanvas(canvas, canvas.width, canvas.height), format, quality), PAGE_TIME_LIMIT(), stuck(n, pdf.numPages, out.length));
-            out.push({ blob, url: URL.createObjectURL(blob), name: `${base}-page-${n}.${ext}`, note: `page ${n} · ${canvas.width}×${canvas.height}` });
-          } finally { freeCanvas(canvas); }
+          if (!remote) {
+            // P31: the surface is capped for the device (iPhone / iPad: 16.7 MP), one page at a time, freed at once.
+            const scale = fitScale(unit.width, unit.height, dpi / 72);
+            const vp = page.getViewport({ scale });
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.floor(vp.width); canvas.height = Math.floor(vp.height);
+            console.info(`[pdf-to-images] page ${n}: canvas ${canvas.width}×${canvas.height} (${(canvas.width * canvas.height / 1e6).toFixed(1)} MP)`);
+            // P32: on iPhone / iPad the device gets LOCAL_PAGE_LIMIT_MS, then our service draws the page
+            const limit = canFallBack ? LOCAL_PAGE_LIMIT_MS() : PAGE_TIME_LIMIT();
+            try {
+              const ctx = canvas.getContext('2d');
+              if (!ctx) throw new Error(`Page ${n} is too large for this device to draw. Choose a lower resolution.`);
+              ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); // pages are white paper
+              const task = page.render({ canvasContext: ctx, viewport: vp });
+              await withTimeout(task.promise, limit, stuck(n, pdf.numPages, out.length), () => task.cancel());
+              const blob = await withTimeout(encode(rasterFromCanvas(canvas, canvas.width, canvas.height), format, quality), limit, stuck(n, pdf.numPages, out.length));
+              if (scale < dpi / 72) reduced = Math.max(reduced, Math.round(72 * scale));
+              out.push({ blob, url: URL.createObjectURL(blob), name: `${base}-page-${n}.${ext}`, note: `page ${n} · ${canvas.width}×${canvas.height}` });
+            } catch (e) {
+              if (!canFallBack) throw e;
+              console.warn(`[pdf-to-images] page ${n} not drawn on this device (${e?.name}: ${e?.message}); our PDF service draws it`);
+              remote = true;
+            } finally { freeCanvas(canvas); }
+          }
+          if (remote) {
+            setProgress(`Page ${n} of ${pdf.numPages}: drawing it on our PDF service…`);
+            if (!renderer) renderer = new ServerPageRenderer(file, { onStage: (st) => { if (st.stage === 'upload') setProgress(`Sending the PDF to our PDF service… ${Math.floor(st.pct || 0)}%`); } });
+            let r;
+            try {
+              r = await renderer.render({ page: n, dpi, format: SERVER_FORMAT[format], quality });
+            } catch (e) {
+              throw new ServerRenderError(`Page ${n} of ${pdf.numPages} could not be drawn on this device, and our PDF service could not draw it either: ${e.message}${out.length ? ` (the ${out.length} file${out.length > 1 ? 's' : ''} made before it ${out.length > 1 ? 'are' : 'is'} below)` : ''}`);
+            }
+            let blob = r.blob;
+            const d = await imageDims(blob).catch(() => null);
+            if (format === 'webp' || format === 'bmp') blob = await encode(await decodeToRaster(blob, d), format, quality);
+            if (r.reduced) serverReduced = serverReduced ? Math.min(serverReduced, r.dpi) : r.dpi;
+            drawnByServer.push(n);
+            out.push({ blob, url: URL.createObjectURL(blob), name: `${base}-page-${n}.${ext}`, note: `page ${n} · ${d ? `${d.width}×${d.height}` : `${r.dpi} dpi`} · drawn by our PDF service` });
+          }
         } else {
           const ops = await withTimeout(page.getOperatorList(), PAGE_TIME_LIMIT(), stuck(n, pdf.numPages, out.length));
           const seen = new Set();
@@ -144,14 +184,21 @@ export default function PdfToImages({ tool, formats = PDF_IMAGE_FORMATS.map((f) 
         }
         page.cleanup();
       }
-      if (!out.length) setNotice(mode === 'images' ? 'No pictures were found in these pages: their content is text or drawings. Choose "Pages to images" to get each page as a picture.' : 'No page was converted.');
-      else if (reduced) setNotice(`Some pages are very large, so they were rendered at ${reduced} dpi, the most this device can draw at once.`);
+      const notes = [];
+      if (!out.length) notes.push(mode === 'images' ? 'No pictures were found in these pages: their content is text or drawings. Choose "Pages to images" to get each page as a picture.' : 'No page was converted.');
+      if (drawnByServer.length) notes.push(`This device could not draw ${drawnByServer.length > 1 ? 'pages' : 'page'} ${listPages(drawnByServer)}, so our own PDF service drew ${drawnByServer.length > 1 ? 'them' : 'it'}: your PDF was sent there, then deleted.`);
+      if (reduced) notes.push(`Some pages are very large, so they were rendered at ${reduced} dpi, the most this device can draw at once.`);
+      if (serverReduced) notes.push(`Some pages are very large, so our PDF service drew them at ${serverReduced} dpi.`);
+      setNotice(notes.join(' '));
       setResults(out);
     } catch (e) {
       reportToolError({ tool, file, error: e });
       setError(e.message || String(e));
       // what was finished before a page that could not be done is still offered (P31)
-      if (e instanceof StepTimeout && out.length) setResults(out);
+      if ((e instanceof StepTimeout || e instanceof ServerRenderError) && out.length) setResults(out);
+      if (drawnByServer.length) setNotice(`Our own PDF service drew ${drawnByServer.length > 1 ? 'pages' : 'page'} ${listPages(drawnByServer)}: your PDF was sent there, then deleted.`);
+    } finally {
+      if (renderer) renderer.close();
     }
     setProgress(''); setBusy(false);
   };
@@ -197,6 +244,7 @@ export default function PdfToImages({ tool, formats = PDF_IMAGE_FORMATS.map((f) 
       <button onClick={run} disabled={!file || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white min-h-[44px]">
         {busy ? (progress || 'Converting…') : mode === 'pages' ? 'Convert pages' : 'Extract images'}
       </button>
+      {onAppleTouch && mode === 'pages' && <p className="text-xs text-neutral-600 text-center" data-server-render-note>On iPhone and iPad, a page your device cannot draw within {LOCAL_PAGE_LIMIT_LABEL} is drawn by our own PDF service instead: your PDF is sent there, then deleted.</p>}
       {error && <p role="alert" data-p2i-message className="text-red-600 text-center text-sm">{error}</p>}
       {notice && <p role="status" data-p2i-message className="text-neutral-700 text-center text-sm">{notice}</p>}
       {results.length > 0 && (

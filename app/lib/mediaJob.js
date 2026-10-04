@@ -200,6 +200,27 @@ export async function runMediaJob({ file, op, params, onStage, signal }) {
 }
 
 /**
+ * P32: the file staged on the service and kept there for several calls of one route (PDF pages drawn one by one by
+ * /api/pdf-render). Resolves with {jid, ticket, cleanup}; the caller sends {jid, ticket, filename} to its route as
+ * often as it needs, and calls cleanup() when done (the service's TTL removes it otherwise).
+ */
+export async function stageForRoute({ file, purpose, onStage = () => {}, signal }) {
+  if (!mediaServiceConfigured()) throw new MediaJobError('Large-file processing is not available right now.', 'not_configured');
+  const { jid, ticket, cleanup } = await openAndUpload({ file, op: 'stage', params: {}, purpose, onStage, signal });
+  try {
+    const s = await api(`/v1/jobs/${jid}/start`, { method: 'POST', ticket, signal });
+    if (s.status !== 202) {
+      if (s.status === 409 && s.json.error === 'incomplete') throw new MediaJobError('The upload was incomplete. Please try again.', 'incomplete');
+      throw new MediaJobError(s.json.message || 'The service could not accept this file.', s.json.error || 'start');
+    }
+  } catch (e) {
+    if (e instanceof MediaJobError && e.code !== 'expired') cleanup();
+    throw e;
+  }
+  return { jid, ticket, cleanup };
+}
+
+/**
  * Staged call: the file goes to the service in chunks (no Vercel body ceiling), then the tool's own API
  * route is asked, with a tiny JSON, to read it server-to-server and do its work. Resolves with the route's
  * JSON answer and the ids needed to download a result (if the route deposited one).

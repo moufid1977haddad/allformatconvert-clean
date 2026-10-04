@@ -1,6 +1,6 @@
 'use client';
 import { pdfFileProblem, pdfLockedProblem } from '../../../lib/fileChecks';
-import { useState, useRef } from 'react';
+import { useState, useRef, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
@@ -11,7 +11,23 @@ import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
 import TextArea from '@/app/components/TextArea';
 import { withActualTextUnicode } from '../../../lib/pdfActualText';
-import { fitScale } from '../../../lib/canvasLimit'; // P31: one canvas cap for iPhone / iPad
+import { fitScale, withTimeout } from '../../../lib/canvasLimit'; // P31: one canvas cap for iPhone / iPad
+import { serverRenderAvailable, ServerPageRenderer, LOCAL_PAGE_LIMIT_MS, LOCAL_PAGE_LIMIT_LABEL, listPages } from '../../../lib/serverPageRender';
+
+// P32 (04/10): a page drawn by our PDF service comes with the page's /Rotate applied (pdftoppm); the redaction works
+// on the unrotated page (rotation 0 viewport, rotation set back on the new page), so the image is turned back here.
+// the device does not change while the page is open: nothing to subscribe to (useSyncExternalStore reads it once on
+// the client, false in the server render, so hydration matches)
+const noSubscribe = () => () => {};
+
+function drawUnrotated(ctx, img, W, H, rot) {
+  ctx.save();
+  if (rot === 90) { ctx.translate(0, H); ctx.rotate(-Math.PI / 2); ctx.drawImage(img, 0, 0, H, W); }
+  else if (rot === 180) { ctx.translate(W, H); ctx.rotate(Math.PI); ctx.drawImage(img, 0, 0, W, H); }
+  else if (rot === 270) { ctx.translate(W, 0); ctx.rotate(Math.PI / 2); ctx.drawImage(img, 0, 0, H, W); }
+  else ctx.drawImage(img, 0, 0, W, H);
+  ctx.restore();
+}
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -22,6 +38,8 @@ export default function Page() {
   const [error, setError] = useToolError('');
   const [summary, setSummary] = useState('');
   const fileRef = useRef();
+  // P32: the notice of the iPhone / iPad fallback, read after mounting (the server render does not know the device)
+  const onAppleTouch = useSyncExternalStore(noSubscribe, serverRenderAvailable, () => false);
 
   const handleFile = async (e) => { const f = e.target.files[0]; e.target.value = ''; setResult(null); setSummary(''); setError(''); if (!f) return; const problem = (await pdfFileProblem(f)) || (await pdfLockedProblem(f)); if (problem) { setFile(null); setError(problem); return; } setFile(f); }; // P21: a bad file is said when it is chosen
 
@@ -40,6 +58,11 @@ export default function Page() {
       const outDoc = await PDFDocument.create();
       const pdf = await pdfjsLib.getDocument({ data: await withActualTextUnicode(arrayBuffer) }).promise;
       const scale = 2;
+      const canFallBack = serverRenderAvailable();
+      let renderer = null;
+      let remote = false;
+      const drawnByServer = [];
+      try {
       let totalMatches = 0;
       const pagesHit = [];
       const measure = document.createElement('canvas').getContext('2d');
@@ -83,7 +106,34 @@ export default function Page() {
         canvas.width = viewport.width;
         canvas.height = viewport.height;
         const ctx = canvas.getContext('2d');
-        await page.render({ canvasContext: ctx, viewport }).promise;
+        // P32: on iPhone / iPad, a page the device has not drawn within LOCAL_PAGE_LIMIT_MS is drawn by our PDF service
+        // (same density, PNG, lossless) and the redaction boxes are painted on it here, exactly as on a local drawing.
+        let drawn = false;
+        if (!remote) {
+          try {
+            const task = page.render({ canvasContext: ctx, viewport });
+            await (canFallBack ? withTimeout(task.promise, LOCAL_PAGE_LIMIT_MS(), 'timeout', () => task.cancel()) : task.promise);
+            drawn = true;
+          } catch (e) {
+            if (!canFallBack) throw e;
+            console.warn(`[pdf-redact] page ${i + 1} not drawn on this device (${e?.name}: ${e?.message}); our PDF service draws it`);
+            remote = true;
+          }
+        }
+        if (!drawn) {
+          if (!renderer) renderer = new ServerPageRenderer(file);
+          let r;
+          try {
+            r = await renderer.render({ page: i + 1, dpi: Math.max(36, Math.round(72 * viewport.scale)), format: 'png', maxPixels: Math.max(100000, Math.ceil(canvas.width * canvas.height * 1.05)) });
+          } catch (e2) {
+            throw new Error(`page ${i + 1} could not be drawn on this device, and our PDF service could not draw it either: ${e2.message}`);
+          }
+          const img = await createImageBitmap(r.blob);
+          ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+          drawUnrotated(ctx, img, canvas.width, canvas.height, ((rotation % 360) + 360) % 360);
+          if (img.close) img.close();
+          drawnByServer.push(i + 1);
+        }
 
         ctx.fillStyle = '#000000';
         const poly = (pts) => { ctx.beginPath(); pts.forEach(([x, y], n) => { const [vx, vy] = viewport.convertToViewportPoint(x, y); if (n) ctx.lineTo(vx, vy); else ctx.moveTo(vx, vy); }); ctx.closePath(); ctx.fill(); };
@@ -137,7 +187,11 @@ export default function Page() {
       const pdfBytes = await outDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setResult(URL.createObjectURL(blob));
-      setSummary(`Blacked out ${totalMatches} occurrence${totalMatches > 1 ? 's' : ''} on page${pagesHit.length > 1 ? 's' : ''} ${pagesHit.join(', ')}. Check the result before sharing it: text drawn as an image (a scan) cannot be found.`);
+      const byServer = drawnByServer.length ? ` This device could not draw ${drawnByServer.length > 1 ? 'pages' : 'page'} ${listPages(drawnByServer)}, so our own PDF service drew ${drawnByServer.length > 1 ? 'them' : 'it'} before the blacking out: your PDF was sent there, then deleted.` : '';
+      setSummary(`Blacked out ${totalMatches} occurrence${totalMatches > 1 ? 's' : ''} on page${pagesHit.length > 1 ? 's' : ''} ${pagesHit.join(', ')}. Check the result before sharing it: text drawn as an image (a scan) cannot be found.${byServer}`);
+      } finally {
+        if (renderer) renderer.close();
+      }
     } catch(e) { setError('Redaction failed: ' + e.message); }
     setLoading(false);
   };
@@ -167,6 +221,7 @@ export default function Page() {
           <button onClick={redact} disabled={!file || (!keyword.trim() && !kinds.length) || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Redacting...' : 'Redact PDF'}
           </button>
+          {onAppleTouch && <p className="text-xs text-neutral-600 text-center" data-server-render-note>On iPhone and iPad, a page your device cannot draw within {LOCAL_PAGE_LIMIT_LABEL} is drawn by our own PDF service instead: your PDF is sent there, then deleted.</p>}
           {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
           {summary && <p className="text-neutral-700 text-center text-sm" data-summary>{summary}</p>}
           {result && <FileDownload href={result} name="redacted.pdf" />}
@@ -174,7 +229,7 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Redact"
-        description="PDF Redact searches your PDF's text for the words or phrases you list (one per line) and, if you tick them, every e-mail address, phone number (9 to 15 digits) and card number (checked with the Luhn formula), using PDF.js — ignoring case, spaces and line breaks, so a phrase is found even when it wraps onto the next line or changes font mid-way — as well as form field values and comments. It then permanently destroys the matches rather than just covering them: any page containing a match is rendered to a flattened image with only the matched words blacked out in the pixels themselves (the rest of the line stays readable), and that image replaces the page's original content entirely — so there are no text objects left on that page to select, copy, or extract. Pages with no match are left untouched, keeping their original selectable, searchable text. Everything runs locally in your browser; your file is never uploaded to a server."
+        description="PDF Redact searches your PDF's text for the words or phrases you list (one per line) and, if you tick them, every e-mail address, phone number (9 to 15 digits) and card number (checked with the Luhn formula), using PDF.js — ignoring case, spaces and line breaks, so a phrase is found even when it wraps onto the next line or changes font mid-way — as well as form field values and comments. It then permanently destroys the matches rather than just covering them: any page containing a match is rendered to a flattened image with only the matched words blacked out in the pixels themselves (the rest of the line stays readable), and that image replaces the page's original content entirely — so there are no text objects left on that page to select, copy, or extract. Pages with no match are left untouched, keeping their original selectable, searchable text. On a computer, everything runs locally in your browser and your file is not uploaded. On an iPhone or iPad, a page with a match that the device cannot draw within 20 seconds is drawn by our own PDF service (not a third party) before the blacking out, which is still done in your browser: the PDF is sent there, then deleted, and the page tells you."
         howTo={[
           "Click the upload area and select a PDF file from your device.",
           "Type each word or phrase to redact on its own line, and/or tick e-mail addresses, phone numbers or card numbers.",
@@ -189,7 +244,7 @@ export default function Page() {
           { q: "What do the automatic patterns find?", a: "E-mail addresses; phone numbers of 9 to 15 digits written with spaces, dots, dashes, brackets or a +country code (dates like 2026-10-02 are left alone); card numbers of 13 to 19 digits that pass the Luhn check every real card number passes. A number of another kind with as many digits can be covered too: check the listed pages." },
           { q: "Are form fields and comments redacted?", a: "Yes — a form field value or a comment containing the phrase is blacked out too, and the page is flattened, so the field and its value no longer exist in the file." },
           { q: "Can it redact text in a scanned PDF?", a: "No — a scan is a picture with no text in it, so there is nothing to search. Run PDF OCR first, then redact the OCR'd file." },
-          { q: "Is my file uploaded to a server?", a: "No, matching and redaction both happen locally in your browser." }
+          { q: "Is my file uploaded to a server?", a: "Not on a computer: matching and redaction both happen locally in your browser. On an iPhone or iPad, if the device cannot draw a page that has a match within 20 seconds, our own PDF service draws that page (your PDF is sent there, then deleted; the page tells you), and the matches are still found and blacked out in your browser." }
         ]}
         tips={[
           "Because matched pages are fully flattened to images, expect some loss of text searchability and a larger file size for those pages — that trade-off is what makes the redaction genuinely irreversible.",

@@ -16,15 +16,15 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF to JPG"
-        description={'PDF to JPG turns each page of your PDF into a JPG picture, or extracts the photos and images embedded in it, in your browser with PDF.js — the PDF is not uploaded. Choose Normal (150 dpi), High (300 dpi, for printing) or Screen (72 dpi), the JPG quality, and all pages or only some. Download each picture, or all of them in one ZIP.'}
+        description={'PDF to JPG turns each page of your PDF into a JPG picture, or extracts the photos and images embedded in it, in your browser with PDF.js — on a computer the PDF is not uploaded. On iPhone and iPad only, a page the device cannot draw within 20 seconds is drawn by our own PDF service instead (the page says so): the PDF is sent there, then deleted. Choose Normal (150 dpi), High (300 dpi, for printing) or Screen (72 dpi), the JPG quality, and all pages or only some. Download each picture, or all of them in one ZIP.'}
         howTo={['Click or drop a PDF on the upload area.', 'Choose "Pages to images" to turn each page into a picture, or "Extract images" to take out the photos and pictures inside the PDF.', 'Pick the format, the resolution (Normal 150 dpi, High 300 dpi for printing, or Screen 72 dpi) and, if you want, only some pages, like 1-3, 5.', 'Click "Convert pages" (or "Extract images"), then "Download" under each picture or "Download all" for one ZIP file.']}
         faqs={[
-          { q: 'Is PDF to JPG free?', a: 'Yes, free and with no sign-up. It runs in your browser, so there is no upload and no daily limit.' },
+          { q: 'Is PDF to JPG free?', a: 'Yes, free and with no sign-up. It runs in your browser, so there is no upload and no daily limit (pages drawn by our PDF service for an iPhone or iPad: up to 300 an hour).' },
           { q: 'What is the difference between the two modes?', a: '"Pages to images" makes one JPG per page, exactly as the page looks. "Extract images" takes out the pictures placed inside the PDF (photos, scans, logos) at their own resolution, one file per picture — text and drawings are not included.' },
           { q: 'Which resolution should I choose?', a: 'Normal (150 dpi) is sharp on screens and keeps files small. High (300 dpi) is for printing. A page too large for your device to draw at once is rendered at the highest resolution that fits, and the page says so.' },
           { q: 'Can I convert only some pages?', a: 'Yes: type pages and ranges such as 1-3, 5, 8- in the Pages box. Leave it empty for every page.' },
           { q: 'My PDF has a password. What can I do?', a: 'A password-protected PDF cannot be read until it is unlocked. Use our PDF Unlock tool with the password, then convert the unlocked file.' },
-          { q: 'Is my PDF uploaded?', a: 'No. Pages are rendered and saved as JPG in your browser; your file is not sent to a server.' }
+          { q: 'Is my PDF uploaded?', a: 'Not on a computer: pages are rendered and saved as JPG in your browser. On an iPhone or iPad, if the device cannot draw a page within 20 seconds, that page is drawn by our own PDF service (not a third party): your PDF is sent there, then deleted, and the page tells you. "Extract images" always stays in your browser.' }
         ]}
         tips={['Need lossless pictures, transparency or another format? Use PDF to Image: PNG, JPG, WebP, TIFF or BMP.', '"Extract images" gives the pictures at the resolution they were stored at, which can be higher than the page itself.', 'Very long PDFs: convert a range of pages at a time to keep your device responsive.']}
       />
