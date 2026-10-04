@@ -132,6 +132,21 @@ async function assertDecodable(original, file) {
   if (mp > MAX_DECODED_MP()) throw new SizeError(`${original.name}: this image is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round(mp)} megapixels), more than a browser can turn into a PDF page (${MAX_DECODED_MP()} megapixels at most${isMobileDevice() ? ` on a phone, ${MAX_DECODED_MP_COMPUTER} on a computer` : ''}). Use a smaller version of the image, or a JPEG.`);
 }
 class SizeError extends Error {}
+/**
+ * P31 (03/10): the same bound, said as soon as the files are chosen (header only, nothing decoded), before the
+ * Convert button. Resolves to the sentences for the images over it (JPEG photos are never decoded: never listed).
+ */
+export async function decodedSizeProblems(files) {
+  const out = [];
+  for (const f of files) {
+    const head = new Uint8Array(await f.slice(0, 3).arrayBuffer().catch(() => new ArrayBuffer(0)));
+    if (head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff) continue; // a JPEG: embedded as it is
+    const size = await imageHeaderSize(f).catch(() => null);
+    const mp = size ? (size.width * size.height) / 1e6 : 0;
+    if (mp > MAX_DECODED_MP()) out.push(`${f.name}: this image is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round(mp)} megapixels), more than a browser can turn into a PDF page (${MAX_DECODED_MP()} megapixels at most${isMobileDevice() ? ` on a phone, ${MAX_DECODED_MP_COMPUTER} on a computer` : ''}). Use a smaller version of the image (Image Resizer), or a JPEG.`);
+  }
+  return out;
+}
 
 // Adds a page to pdfDoc; throws Error(`${file.name}: …`) when the file can't be used.
 export async function addImagePage(pdfDoc, original, layout = null) {

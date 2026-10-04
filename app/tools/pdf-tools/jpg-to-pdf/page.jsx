@@ -7,6 +7,7 @@ import { FileDownload } from '../../../components/FileDownload';
 import ImagePageLayout, { DEFAULT_IMAGE_LAYOUT } from '../../../components/ImagePageLayout';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
+import SizePreflight from '../../../components/SizePreflight';
 
 export default function Page() {
   const [files, setFiles] = useState([]);
@@ -54,6 +55,7 @@ export default function Page() {
             </div>
           )}
           <ImagePageLayout value={layout} onChange={setLayout} disabled={loading} />
+          <SizePreflight files={files} />
           <button onClick={convert} disabled={!files.length || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Converting...' : 'Convert to PDF'}
           </button>
