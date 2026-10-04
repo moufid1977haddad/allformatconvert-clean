@@ -5,3 +5,61 @@
 {"at":"2026-10-03T23:07:51.606Z","chantier":"P30","provider":"convertapi","usd":0.01,"what":"pdf-to-ppt p30-letter.pdf on https://www.onlineconvertools.com"}
 {"at":"2026-10-04T02:44:39.610Z","chantier":"p31-convertapi","provider":"convertapi","usd":0.01,"what":"word-to-pdf sample.docx on https://www.onlineconvertools.com (P31 concurrency after, round 1)"}
 {"at":"2026-10-04T02:44:39.646Z","chantier":"p31-convertapi","provider":"convertapi","usd":0.01,"what":"word-to-pdf fidelite-01.docx on https://www.onlineconvertools.com (P31 concurrency after, round 1)"}
+{"at":"2026-10-04T22:18:37.031Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove cup__violet"}
+{"at":"2026-10-04T22:18:46.901Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 cup__violet"}
+{"at":"2026-10-04T22:19:04.883Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove beer-mug__field"}
+{"at":"2026-10-04T22:19:06.785Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove beer-mug__green"}
+{"at":"2026-10-04T22:19:07.435Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove beer-mug__leaf"}
+{"at":"2026-10-04T22:19:08.544Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove beer-mug__violet"}
+{"at":"2026-10-04T22:19:09.829Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove cat-fur__field"}
+{"at":"2026-10-04T22:19:11.775Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove cat-fur__green"}
+{"at":"2026-10-04T22:19:12.420Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove cat-fur__leaf"}
+{"at":"2026-10-04T22:19:13.636Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove cat-fur__violet"}
+{"at":"2026-10-04T22:19:14.320Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove cat-short__field"}
+{"at":"2026-10-04T22:19:15.433Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove cat-short__green"}
+{"at":"2026-10-04T22:19:16.404Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove cat-short__leaf"}
+{"at":"2026-10-04T22:19:17.462Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove cat-short__violet"}
+{"at":"2026-10-04T22:19:18.275Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove china-cup__field"}
+{"at":"2026-10-04T22:19:19.565Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove china-cup__green"}
+{"at":"2026-10-04T22:19:20.322Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove china-cup__leaf"}
+{"at":"2026-10-04T22:19:23.482Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove china-cup__violet"}
+{"at":"2026-10-04T22:19:27.209Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove cup__field"}
+{"at":"2026-10-04T22:19:28.829Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove cup__green"}
+{"at":"2026-10-04T22:19:30.081Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove cup__leaf"}
+{"at":"2026-10-04T22:19:31.282Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove helmet__field"}
+{"at":"2026-10-04T22:19:33.484Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove helmet__green"}
+{"at":"2026-10-04T22:19:36.518Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove helmet__leaf"}
+{"at":"2026-10-04T22:19:37.248Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove helmet__violet"}
+{"at":"2026-10-04T22:19:38.153Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove IMG_2433 (photo du proprietaire)"}
+{"at":"2026-10-04T22:19:38.764Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove teacup__field"}
+{"at":"2026-10-04T22:19:40.622Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove teacup__green"}
+{"at":"2026-10-04T22:19:41.527Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove teacup__leaf"}
+{"at":"2026-10-04T22:19:43.497Z","chantier":"P32","provider":"fal","usd":0.018,"what":"fal-ai/bria/background/remove teacup__violet"}
+{"at":"2026-10-04T22:19:50.431Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 beer-mug__field"}
+{"at":"2026-10-04T22:19:51.551Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 beer-mug__green"}
+{"at":"2026-10-04T22:19:52.329Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 beer-mug__leaf"}
+{"at":"2026-10-04T22:19:53.387Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 beer-mug__violet"}
+{"at":"2026-10-04T22:19:53.820Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 cat-fur__field"}
+{"at":"2026-10-04T22:19:54.174Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 cat-fur__green"}
+{"at":"2026-10-04T22:19:54.585Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 cat-fur__leaf"}
+{"at":"2026-10-04T22:19:55.110Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 cat-fur__violet"}
+{"at":"2026-10-04T22:19:55.814Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 cat-short__field"}
+{"at":"2026-10-04T22:19:57.676Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 cat-short__green"}
+{"at":"2026-10-04T22:19:58.298Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 cat-short__leaf"}
+{"at":"2026-10-04T22:19:58.874Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 cat-short__violet"}
+{"at":"2026-10-04T22:19:59.616Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 china-cup__field"}
+{"at":"2026-10-04T22:20:00.169Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 china-cup__green"}
+{"at":"2026-10-04T22:20:00.774Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 china-cup__leaf"}
+{"at":"2026-10-04T22:20:01.386Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 china-cup__violet"}
+{"at":"2026-10-04T22:20:02.011Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 cup__field"}
+{"at":"2026-10-04T22:20:02.787Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 cup__green"}
+{"at":"2026-10-04T22:20:03.399Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 cup__leaf"}
+{"at":"2026-10-04T22:20:04.108Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 helmet__field"}
+{"at":"2026-10-04T22:20:04.462Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 helmet__green"}
+{"at":"2026-10-04T22:20:05.471Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 helmet__leaf"}
+{"at":"2026-10-04T22:20:06.294Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 helmet__violet"}
+{"at":"2026-10-04T22:20:07.691Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 IMG_2433 (photo du proprietaire)"}
+{"at":"2026-10-04T22:20:08.346Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 teacup__field"}
+{"at":"2026-10-04T22:20:08.763Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 teacup__green"}
+{"at":"2026-10-04T22:20:09.171Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 teacup__leaf"}
+{"at":"2026-10-04T22:20:10.357Z","chantier":"P32","provider":"fal","usd":0.004,"what":"fal-ai/birefnet/v2 teacup__violet"}
