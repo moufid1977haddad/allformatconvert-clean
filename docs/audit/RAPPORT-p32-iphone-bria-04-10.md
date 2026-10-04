@@ -250,8 +250,35 @@ décode probablement réduit, non vérifié).
 - Si le propriétaire voit toujours plus d'espace : capture et texte exact (une ligne vide en trop viendrait d'un retour à
   la ligne).
 
-## 5. Mise en ligne
-_(à compléter)_
+## 5. Mise en ligne (cycle unique)
+
+1. **Bancs lourds en local** sur la construction de production (`npm run build` avec ses gardes, vert) : §1d, §2e, plus
+   `download-names` Chromium 47/47 et WebKit iPhone 47/47, `output-formats` 69/69, `size-preflight` 6/6 × 2.
+2. **pdf-tools d'abord (changement additif, avant les appelants)** : le service Railway est relié à GitHub et se
+   redéploie à chaque push sur master. Commit `385f73bb` (service seul) → déploiement `0e36d9eb` **SUCCESS** ; `/health`
+   vert avec `pdftoppm 22.12.0` et `pdfinfo 22.12.0` ; **ancien comportement vérifié sur www** : PDF Repair 200 (qpdf, 3
+   pages, texte identique), PDF Compress 200 (371 → 91 Ko) ; www-light 29/29.
+3. **Préversion, une seule fois** : `onlineconvertools-h5vzhwpag` (commit `cd1e9d3e`, code identique à la fusion ; la
+   première, sur le commit de fusion `493bb9d9`, a été **annulée par `ignoreCommand`** — aucun fichier changé par rapport
+   au premier parent), par `vercel-preview-proxy` (jeton frais en mémoire) : **vraie route + vrai pdf-tools** WebKit
+   iPhone **13/13** ; chemin > 4 Mo (PDF de 14 pages, 5,8 Mo, ticket `pdf-render`, envoi au vrai service média, deux pages
+   rendues du même dépôt, suppression, 410 ensuite) **7/7** ; texte Helvetica non incorporé bien dessiné par le pdf-tools
+   de production (polices URW).
+4. **Production** : master `8a6137e7` (avance rapide ; code = `cd1e9d3e` testé, vérifié par `git diff`) → Vercel
+   **`onlineconvertools-l0fs94z0x`** prêt ; pdf-tools reconstruit sur le même code (`43106653`, SUCCESS). La préversion
+   automatique du push de branche (`9dfa6x5g3`) a été annulée (une seule préversion).
+5. **Contrôle léger sur www** : www-light **29/29** ; une page par `/api/pdf-render` sur www : 200, `image/jpeg`, 96 759 o ;
+   méta-description de PDF to JPG à jour ; Image Compressor sert la cible 48 MP. **Aucune régression, aucun retour
+   arrière.**
+- **Retours arrière prêts** : Vercel → promouvoir `onlineconvertools-cs2bhpt77` (= `385f73bb`, site de P31) ; pdf-tools →
+  annuler `385f73bb` par un commit sur master (redéploiement automatique ; les anciens points d'entrée sont inchangés).
+- **Dépenses P32** : fal ≈ 0,54 $ facturés (0,638 $ réservés, plafond 1 $) ; Railway : deux reconstructions de pdf-tools ;
+  Supabase : rien de modifié (les compteurs `pdf_render` et `office_rate` ont été incrémentés par les bancs de la
+  préversion et l'appel de contrôle sur www, comme tout usage réel du site ; aucun script n'a touché la base).
+- **Processus** : serveurs locaux (3310, 3496, 3498) et mandataire (3200) arrêtés ; aucun port en écoute.
+- Sous-agents : Image Compressor et Text to PDF en worktrees (commits repris : `cd1e9d3e`, `af134abe`), banc BRIA dans
+  le dépôt ; le sous-agent Text to PDF a joint le Gotenberg de production en lecture (identifiants de la CLI Railway en
+  mémoire) — aucune autre action Railway que pdf-tools.
 
 ## 6. Mini-passe iPhone (5 vérifications, fichiers déjà sur l'iPhone)
 
