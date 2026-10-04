@@ -55,7 +55,12 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(caches.open(STAGED_CACHE).then(async (c) => {
       const hit = await c.match(event.request, { ignoreSearch: true });
       if (hit) { const h = new Headers(hit.headers); h.set('Content-Type', 'application/octet-stream'); return new Response(hit.body, { status: 200, headers: h }); } // P31: never application/pdf
-      for (const req of await c.keys()) if (req.url.includes(`/zipdl/f/${staged[1]}/`)) return c.match(req);
+      for (const req of await c.keys()) {
+        if (!req.url.includes(`/zipdl/f/${staged[1]}/`)) continue;
+        const res = await c.match(req), h = new Headers(res.headers);
+        h.set('Content-Type', 'application/octet-stream');
+        return new Response(res.body, { status: 200, headers: h });
+      }
       // Gone (left too long, or evicted by the system): 204 keeps the visitor on the tool page with their result,
       // where the row makes the file ready again (FileDownload), instead of replacing the page with an error.
       return new Response(null, { status: 204 });

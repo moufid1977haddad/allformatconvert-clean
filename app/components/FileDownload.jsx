@@ -107,7 +107,6 @@ const GroupContext = createContext(null);
 export function FileDownload({ blob: blobProp, href, name, note, primary = true, guard = true, text, linkProps, className = '' }) {
   const id = useId();
   const group = useContext(GroupContext);
-  const [blob, setBlob] = useState(blobProp || null);
   // false, or how the file was taken: 'downloaded', 'copied', or 'sibling' (another format of the same result was)
   const [saved, setSaved] = useState(false);
   // The address of a file given as a Blob is made in the browser only (after the first render), never while the page
@@ -122,19 +121,25 @@ export function FileDownload({ blob: blobProp, href, name, note, primary = true,
   }, [blobProp, href]);
   const url = href || ownUrl;
 
-  // Read the file when only its address is known: its size and type are shown, and Share needs the file itself.
+  // The file itself, always the one of the CURRENT props (P31 review): a Blob given is used as it is, at once; a file
+  // given by address is read, and its bytes are used only while they belong to that address — never, even for one
+  // render, the previous result's bytes under the new name.
+  const src = blobProp || href || null;
+  const [read, setRead] = useState(null); // { src, blob } of a file given by address
   useEffect(() => {
-    if (blobProp) { setBlob(blobProp); return undefined; }
+    if (blobProp || !href) { setRead(null); return undefined; }
     let alive = true;
-    setBlob(null);
-    if (url) fetch(url).then((r) => r.blob()).then((b) => { if (alive) setBlob(b); }).catch(() => {});
+    fetch(href).then((r) => r.blob()).then((b) => { if (alive) setRead({ src: href, blob: b }); }).catch(() => {});
     return () => { alive = false; };
-  }, [blobProp, url]);
+  }, [blobProp, href]);
+  const blob = blobProp || (read && read.src === src ? read.blob : null);
 
   // The REAL type for Save / Share: the one of the name's extension (app/lib/mimeTypes.js), else the Blob's own.
   const file = useMemo(() => (blob ? new File([blob], name, { type: mimeForName(name) || blob.type || 'application/octet-stream' }) : null), [blob, name]);
 
-  // The retyped address of the download link, made again when the file changes, freed a minute later.
+  // The retyped address of the download link, made again when the file changes, freed a minute later; used only while
+  // it is the current file's. Until it exists (one render, or while a file given by address is read) the button is
+  // inactive: it never falls back to an address under the file's real type (Safari would display a PDF).
   const [dl, setDl] = useState(null); // { blob, url }
   useEffect(() => {
     if (!blob) { setDl(null); return undefined; }
@@ -142,7 +147,7 @@ export function FileDownload({ blob: blobProp, href, name, note, primary = true,
     setDl({ blob, url: u });
     return () => { setTimeout(() => URL.revokeObjectURL(u), 60000); };
   }, [blob]);
-  const dlUrl = dl && dl.blob === blob ? dl.url : null;
+  const dlUrl = dl && blob && dl.blob === blob ? dl.url : null;
   const [canShare, setCanShare] = useState(false); // decided in the browser (the server cannot know the device)
   useEffect(() => { setCanShare(file ? shareSupported(file) : false); }, [file]);
 
@@ -183,7 +188,7 @@ export function FileDownload({ blob: blobProp, href, name, note, primary = true,
 
   const share = useCallback(async () => {
     try { await navigator.share({ files: [file], title: name }); markSaved('downloaded'); }
-    catch (e) { if (e && e.name !== 'AbortError') saveBlob(file, name); }
+    catch (e) { if (e && e.name !== 'AbortError') saveBlob(file, name).then((ok) => { if (ok) markSaved('downloaded'); }); }
   }, [file, name, markSaved]);
 
   if (!url) return null;
@@ -200,8 +205,9 @@ export function FileDownload({ blob: blobProp, href, name, note, primary = true,
         </div>
       </div>
       <div className="flex gap-2 shrink-0">
-        <a {...linkProps} href={dlUrl || url} download={name} data-download data-retyped={dlUrl ? '1' : undefined} data-ocv-retyped={dlUrl ? '' : undefined} onClick={() => markSaved('downloaded')} aria-label={`Download ${name}`}
-          className={`flex-1 sm:flex-none text-center rounded-lg px-4 py-2 font-semibold text-sm transition ${btn}`}>
+        <a {...linkProps} href={dlUrl || undefined} download={name} data-download data-retyped={dlUrl ? '1' : undefined} data-ocv-retyped=""
+          aria-disabled={dlUrl ? undefined : 'true'} onClick={(e) => { if (!dlUrl) { e.preventDefault(); return; } markSaved('downloaded'); }} aria-label={`Download ${name}`}
+          className={`flex-1 sm:flex-none text-center rounded-lg px-4 py-2 font-semibold text-sm transition ${btn} ${dlUrl ? '' : 'opacity-60 cursor-wait'}`}>
           Download
         </a>
         {canShare && (
@@ -244,8 +250,9 @@ export function DownloadGroup({ zipName = 'files.zip', alternatives = false, chi
         return { name: unique, input: blob, lastModified: new Date() };
       });
       const zip = await downloadZip(entries).blob();
-      await saveBlob(new Blob([zip], { type: 'application/zip' }), zipName);
-      for (const it of items.current.values()) it.markSaved('downloaded');
+      setBusy(false);
+      // "Downloaded" only once the file is really handed over (on iPhone, a late ZIP waits for a tap on its bar)
+      if (await saveBlob(new Blob([zip], { type: 'application/zip' }), zipName)) for (const it of items.current.values()) it.markSaved('downloaded');
     } finally { setBusy(false); }
   };
   return (

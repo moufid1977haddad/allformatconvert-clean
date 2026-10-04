@@ -30,7 +30,8 @@ export function downloadableBlob(blob) {
 let lastGestureAt = -Infinity;
 if (typeof window !== 'undefined') {
   for (const ev of ['pointerup', 'touchend', 'click']) { // a keyboard Enter on a link fires 'click' too
-    window.addEventListener(ev, () => { lastGestureAt = performance.now(); }, { capture: true, passive: true });
+    // only the visitor's own: our own synthetic click (clickLink) must not count as a fresh gesture (P31 review)
+    window.addEventListener(ev, (e) => { if (e.isTrusted) lastGestureAt = performance.now(); }, { capture: true, passive: true });
   }
 }
 const GESTURE_WINDOW_MS = 800;
@@ -54,9 +55,12 @@ function clickLink(url, name) {
   a.remove();
 }
 
+// Resolves to true when the visitor taps Download, false when the bar is closed or replaced by another one.
 function offerTap(url, name) {
   const old = document.getElementById('ocv-download-tap');
-  if (old) old.remove();
+  if (old) old.__ocvClose(false);
+  let settle;
+  const delivered = new Promise((r) => { settle = r; });
   const bar = document.createElement('div');
   bar.id = 'ocv-download-tap';
   bar.setAttribute('role', 'status');
@@ -77,20 +81,26 @@ function offerTap(url, name) {
   close.textContent = '✕';
   close.setAttribute('aria-label', 'Close');
   close.style.cssText = 'background:transparent;color:#fff;border:0;min-width:44px;min-height:44px;font-size:18px';
-  const done = () => { bar.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000); };
-  link.addEventListener('click', () => setTimeout(done, 0));
-  close.addEventListener('click', done);
+  const done = (ok) => { bar.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000); settle(ok); };
+  bar.__ocvClose = done;
+  link.addEventListener('click', () => setTimeout(() => done(true), 0));
+  close.addEventListener('click', () => done(false));
   bar.append(label, link, close);
   document.body.appendChild(bar);
+  return delivered;
 }
 
-/** Saves `blob` under `name` (the visitor's Downloads). Resolves once the download has been handed over. */
+/**
+ * Saves `blob` under `name` (the visitor's Downloads). Resolves to true once the download has been handed over, false
+ * if the visitor closed the "is ready" bar instead (iPhone / iPad, file finished long after the tap).
+ */
 export async function saveBlob(blob, name) {
   const url = downloadUrl(blob);
-  if (isIosDevice() && performance.now() - lastGestureAt >= GESTURE_WINDOW_MS) { offerTap(url, name); return; }
+  if (isIosDevice() && performance.now() - lastGestureAt >= GESTURE_WINDOW_MS) return offerTap(url, name);
   clickLink(url, name);
   // Revoked later, never right after the click: Safari may still be reading it.
   setTimeout(() => URL.revokeObjectURL(url), 60000);
+  return true;
 }
 
 // "photo.HEIC" + ("inverted", "jpg") -> "photo-inverted.jpg". Keeps the visitor's own name, as iLoveIMG does

@@ -231,9 +231,12 @@ for (const t of TOOLS) {
         const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), first.locator('a[data-download]').click({ noWaitAfter: true })]);
         await dl.path();
       } else if (!savedAll) {
+        let k = 0;
         for (const a of await p.locator('[data-file-download] a[data-download]').all()) {
           const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), a.click({ noWaitAfter: true })]);
-          await dl.path();
+          // P31 review: the real download, by name and bytes (Firefox renamed by type before the octet-stream rule)
+          const f = files[k++], got = fs.readFileSync(await dl.path());
+          if (f) check(`${label}: "${f.name}" saved under that exact name, same bytes`, dl.suggestedFilename() === f.name && got.equals(Buffer.from(f.bytes)), `${dl.suggestedFilename()} ${got.length} B`);
         }
       }
       // The rows' "downloaded" state is set by React after the click: wait until every row says so (under CPU load a
