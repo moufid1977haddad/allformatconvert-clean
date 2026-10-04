@@ -13,6 +13,8 @@
 // Since P21 (02/10): the page puts the file in Cache Storage ahead of time and links to /zipdl/f/<id>/<name>; this
 // worker answers that address from the cache, as many times as it is asked, so the tap itself is a plain navigation
 // (iOS keeps a tap's permission to download for about one second only; the cache survives iOS stopping this worker).
+// Since P31 (03/10): no page links to /zipdl/f/ any more (a blob link retyped application/octet-stream instead,
+// app/lib/download.js); the handler stays for tabs opened before, always answering application/octet-stream.
 const STAGED_CACHE = 'ocv-downloads-v1';
 const pending = new Map();
 const files = new Map();
@@ -52,7 +54,7 @@ self.addEventListener('fetch', (event) => {
   if (staged) {
     event.respondWith(caches.open(STAGED_CACHE).then(async (c) => {
       const hit = await c.match(event.request, { ignoreSearch: true });
-      if (hit) return hit;
+      if (hit) { const h = new Headers(hit.headers); h.set('Content-Type', 'application/octet-stream'); return new Response(hit.body, { status: 200, headers: h }); } // P31: never application/pdf
       for (const req of await c.keys()) if (req.url.includes(`/zipdl/f/${staged[1]}/`)) return c.match(req);
       // Gone (left too long, or evicted by the system): 204 keeps the visitor on the tool page with their result,
       // where the row makes the file ready again (FileDownload), instead of replacing the page with an error.
@@ -66,7 +68,7 @@ self.addEventListener('fetch', (event) => {
   if (file) {
     files.delete(m[1]);
     event.respondWith(new Response(file.blob, { headers: {
-      'Content-Type': file.blob.type || 'application/octet-stream',
+      'Content-Type': 'application/octet-stream', // P31: Safari displays a PDF typed application/pdf, attachment or not
       'Content-Length': String(file.blob.size),
       'Content-Disposition': disposition(file.name),
       'Cache-Control': 'no-store',
@@ -97,7 +99,7 @@ self.addEventListener('fetch', (event) => {
   }, { highWaterMark: 4 });
   event.respondWith(new Response(stream, {
     headers: {
-      'Content-Type': 'application/zip',
+      'Content-Type': 'application/octet-stream', // P31: one neutral type for every download of the site
       // A plain ASCII name first (WebKit ignored the RFC 5987 form alone: no name at all), then the exact UTF-8 one.
       'Content-Disposition': disposition(name),
       'Cache-Control': 'no-store',
