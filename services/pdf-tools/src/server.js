@@ -13,6 +13,7 @@ const { convertToPdfALevel, ADVANCED_LEVELS } = require('./pdfa');
 const { docxToDoc } = require('./docConvert');
 const { runProcess } = require('./runProcess');
 const compress = require('./compress');
+const { parseRenderParams, renderPage } = require('./render');
 
 sweepStaleTempDirs();
 
@@ -344,6 +345,65 @@ app.post('/v1/unicode-from-actualtext', requireApiKey, withTempDir(withTimeout(a
   res.setHeader('X-Unicode-Added', String(added));
   return res.status(200).send(out);
 }, config.ACTUALTEXT_TIMEOUT_MS)));
+
+// ---- /v1/render-page (P32): one PDF page -> one image (pdftoppm, src/render.js) --------------------------------
+// For an iPhone / iPad whose browser could not draw the page. Multipart: file + page, dpi, format, quality[, maxPixels].
+// Answer: the image itself, with X-Render-* headers (density really used, page count, why it was reduced). Nothing is
+// kept: the request's temp dir goes in withTempDir's finally, as for every endpoint.
+function sendRender(res, r) {
+  res.setHeader('Content-Type', r.mime);
+  res.setHeader('X-Render-Dpi', String(r.dpi));
+  res.setHeader('X-Render-Pages', String(r.pages));
+  if (r.reduced) res.setHeader('X-Render-Reduced', r.reduced);
+  res.setHeader('Cache-Control', 'no-store');
+  return res.status(200).send(fs.readFileSync(r.outputPath));
+}
+function renderVerdict(r, signal) {
+  return r.ok ? `rendered_${r.reduced || 'full'}` : signal.aborted ? 'timeout' : `failed_${r.status}`;
+}
+
+app.post('/v1/render-page', requireApiKey, withTempDir(withTimeout(async (req, res, signal) => {
+  const startedAt = Date.now();
+  try {
+    await runUpload(req, res);
+  } catch (err) {
+    if (err.message !== 'handled') throw err;
+    return;
+  }
+  if (!req.file) return res.status(400).json({ ok: false, error: 'No file provided.' });
+  if (req.file.size > config.MAX_RENDER_INPUT_BYTES) return res.status(413).json({ ok: false, error: `Files up to ${Math.floor(config.MAX_RENDER_INPUT_BYTES / 1048576)} MB are accepted.` });
+  const p = parseRenderParams(req.body || {});
+  if (!p.ok) return res.status(400).json({ ok: false, error: p.error });
+  const r = await renderPage(req.tempDir, p, signal);
+  logMetric({ apiKeyName: req.apiKey.name, endpoint: '/v1/render-page', bytesIn: req.file.size, bytesOut: r.ok ? r.bytes : null, durationMs: Date.now() - startedAt, verdict: renderVerdict(r, signal) });
+  if (!r.ok) return res.status(r.status).json({ ok: false, error: r.error });
+  return sendRender(res, r);
+}, config.RENDER_TIMEOUT_MS)));
+
+// ---- /v1/render-page-staged (P32): same, the PDF is on the media service (files above the Vercel body ceiling) ----
+// Body: {jid, ticket, page, dpi, format, quality[, maxPixels]}; ticket = the server-role ticket minted by the site. The
+// staged file stays on the media service for the next page (the site deletes it when the visitor is done; the media
+// service's TTL otherwise); this service only keeps it in this request's temp dir.
+app.post('/v1/render-page-staged', requireApiKey, express.json({ limit: '4kb' }), withTempDir(withTimeout(async (req, res, signal) => {
+  const startedAt = Date.now();
+  if (!config.MEDIA_SERVICE_URL) {
+    console.error('[render-page-staged] MEDIA_SERVICE_URL is not set');
+    return res.status(503).json({ ok: false, error: 'Large-file rendering is not available right now.' });
+  }
+  const { jid, ticket } = req.body || {};
+  if (typeof jid !== 'string' || !/^[0-9a-zA-Z]{16,64}$/.test(jid) || typeof ticket !== 'string' || ticket.length > 2048) {
+    return res.status(400).json({ ok: false, error: 'Invalid request.' });
+  }
+  const p = parseRenderParams(req.body);
+  if (!p.ok) return res.status(400).json({ ok: false, error: p.error });
+  const src = await compress.fetchSource(req.tempDir, jid, ticket, signal, config.MAX_RENDER_INPUT_BYTES);
+  if (!src.ok) return res.status(src.status).json({ ok: false, error: src.error });
+  const bytesIn = fs.statSync(require('path').join(req.tempDir, compress.INPUT_NAME)).size;
+  const r = await renderPage(req.tempDir, p, signal);
+  logMetric({ apiKeyName: req.apiKey.name, endpoint: '/v1/render-page-staged', bytesIn, bytesOut: r.ok ? r.bytes : null, durationMs: Date.now() - startedAt, verdict: renderVerdict(r, signal) });
+  if (!r.ok) return res.status(r.status).json({ ok: false, error: r.error });
+  return sendRender(res, r);
+}, config.RENDER_TIMEOUT_MS)));
 
 app.listen(config.PORT, () => {
   console.log(`pdf-tools-service listening on :${config.PORT}`);

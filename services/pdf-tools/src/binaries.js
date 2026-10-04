@@ -1,5 +1,5 @@
 const { runProcess } = require('./runProcess');
-const { GS_BIN, QPDF_BIN, VERAPDF_BIN, PDFPY_BIN, SOFFICE_BIN, PDFTOTEXT_BIN, PDFUNITE_BIN } = require('./config');
+const { GS_BIN, QPDF_BIN, VERAPDF_BIN, PDFPY_BIN, SOFFICE_BIN, PDFTOTEXT_BIN, PDFUNITE_BIN, PDFTOPPM_BIN, PDFINFO_BIN } = require('./config');
 
 async function checkBinary(bin, args, signal) {
   try {
@@ -24,7 +24,7 @@ async function checkSoffice() {
 }
 
 async function checkAllBinaries() {
-  const [gs, qpdf, verapdf, pdfpy, tx, soffice, pdftotext, pdfunite] = await Promise.all([
+  const [gs, qpdf, verapdf, pdfpy, tx, soffice, pdftotext, pdfunite, pdftoppm, pdfinfo] = await Promise.all([
     checkBinary(GS_BIN, ['--version']),
     checkBinary(QPDF_BIN, ['--version']),
     checkBinary(VERAPDF_BIN, ['--version']),
@@ -37,8 +37,11 @@ async function checkAllBinaries() {
     checkBinary(PDFTOTEXT_BIN, ['-v']),
     // /v1/repair (P28): second structural repair method
     checkBinary(PDFUNITE_BIN, ['-v']),
+    // /v1/render-page (P32): a page drawn for an iPhone / iPad that could not draw it
+    checkBinary(PDFTOPPM_BIN, ['-v']),
+    checkBinary(PDFINFO_BIN, ['-v']),
   ]);
-  return { ghostscript: gs, qpdf, verapdf, pdfpy, tx, soffice, pdftotext, pdfunite };
+  return { ghostscript: gs, qpdf, verapdf, pdfpy, tx, soffice, pdftotext, pdfunite, pdftoppm, pdfinfo };
 }
 
 module.exports = { checkAllBinaries };
