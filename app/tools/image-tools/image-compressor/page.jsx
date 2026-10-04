@@ -9,7 +9,7 @@ import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
-import { reducedSize, reduceImageFile } from '../../../lib/reduceImage';
+import { reducedSize } from '../../../lib/reduceImage';
 
 // P27 (phase 7): a phone bound, measured. Memory this page needs (peak of the tab, Chromium, scripts/p27/
 // phone-bound-memory.mjs, a noisy photo-like 24 MP JPEG scaled up): 24 MP 0.86 GB, 48 MP 1.4 GB, 100 MP 2.4 GB -- about 22-30 MB per megapixel.
@@ -21,6 +21,14 @@ const PHONE_MAX_MP = 50;
 // 140 MP and runs out of memory at 150 MP -- its worker then died without a word and the page said "Compressing… 5%"
 // for ever. The bound is declared before the work, and a watchdog (below) turns any silent stop into a message.
 const MAX_MP = 140;
+// P32 (04/10): what "Reduce to … MP then compress" makes on a phone. The encoder's memory grows with the pixels (MozJPEG,
+// measured in Node: 4.0 × the RGBA size; tab peaks: scripts/p32/compressor-peak-memory.mjs), and the one size proven on the owner's iPhone is
+// a 48 MP photo (8064 × 6048 = 48.8 MP, compressed fine). 50 MP would need 2-3 % more than that proof; 48 MP needs less,
+// so the reduced panorama is never heavier than a photo the phone is known to handle. Computers: reduced to MAX_MP.
+const PHONE_REDUCE_MP = 48;
+// A fresh worker for any image over this (the iPhone canvas limit): the previous image's encoder memory goes with the
+// old worker instead of adding to the next one's.
+const FRESH_WORKER_MP = 16.7;
 
 const formatSize = formatBytes;
 const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/svg+xml': 'svg', 'image/avif': 'avif' };
@@ -117,30 +125,20 @@ export default function ImageCompressorPage() {
     }
   };
   const limitMp = () => (isMobileDevice() ? PHONE_MAX_MP : MAX_MP);
+  const reduceMp = () => (isMobileDevice() ? PHONE_REDUCE_MP : MAX_MP);
   const overLimit = items.filter((it) => it.size && it.status === 'ready' && (it.size.width * it.size.height) / 1e6 > limitMp());
 
-  // P31: "Reduce to 50 MP then compress", in one gesture (the market's resize-then-compress, e.g. iLoveIMG's two
-  // tools, in one step here). Each image over the bound is reduced band by band, then everything is compressed.
+  // P31: "Reduce to … MP then compress", in one gesture (the market's resize-then-compress, e.g. iLoveIMG's two
+  // tools, in one step here). P32 (04/10): each image over the bound is reduced INSIDE the compressor's worker, its
+  // pixels handed straight to the encoder (lib/reduceImage.js) -- the page no longer encodes an intermediate JPEG.
   const reduceThenCompress = async () => {
-    setBusy(true); setError('');
-    const max = limitMp();
-    const next = [];
-    for (const it of items) {
-      if (!(it.size && (it.size.width * it.size.height) / 1e6 > max) || it.status !== 'ready') { next.push(it); continue; }
-      try {
-        update(it.id, { status: 'reducing', pct: 0 });
-        const dims = (await imageDims(it.file)) || it.size;
-        const file = await reduceImageFile(it.file, dims, max, { onProgress: (pct) => update(it.id, { pct }) });
-        const r = reducedSize(dims.width, dims.height, max);
-        const changed = { ...it, file, size: r, status: 'ready', reducedFrom: it.size, origBytes: it.file.size };
-        update(it.id, { file, size: r, status: 'ready', reducedFrom: it.size, origBytes: it.file.size });
-        next.push(changed);
-      } catch (e) {
-        update(it.id, { status: 'error', message: `This image could not be reduced on this device (${(e && e.message) || 'unknown error'}). Use a computer, or a smaller version of the image.` });
-      }
-    }
-    setBusy(false);
-    await compressAll(next.filter((it) => it.status === 'ready'));
+    const limit = limitMp(), target = reduceMp();
+    const list = items.filter((it) => it.status === 'ready').map((it) => {
+      if (!(it.size && (it.size.width * it.size.height) / 1e6 > limit)) return it;
+      update(it.id, { reduceMp: target });
+      return { ...it, reduceMp: target };
+    });
+    await compressAll(list);
   };
 
   const update = (id, patch) => setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)));
@@ -153,6 +151,8 @@ export default function ImageCompressorPage() {
     let size = null;
     try { size = await imageHeaderSize(it.file); } catch { update(it.id, { status: 'error', message: UNREADABLE }); return; }
     const mp = size ? (size.width * size.height) / 1e6 : 0;
+    // an image the visitor chose to reduce is compressed at its reduced size (the worker reduces it first)
+    if (it.reduceMp) return runInWorker(worker, it, mp);
     if (mp > MAX_MP) {
       update(it.id, { status: 'error', message: `This image is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round(mp)} megapixels), more than the ${MAX_MP} megapixels this in-browser compressor can hold in memory. Use a smaller version of the image.` });
       return;
@@ -179,7 +179,7 @@ export default function ImageCompressorPage() {
     const onMessage = async (e) => {
       const m = e.data;
       if (m.id !== it.id) return;
-      if (m.type === 'progress') { arm(); update(it.id, { pct: m.pct }); return; }
+      if (m.type === 'progress') { arm(); update(it.id, { pct: m.pct, status: m.phase === 'reduce' ? 'reducing' : 'working' }); return; }
       clearTimeout(watchdog);
       worker.removeEventListener('message', onMessage);
       if (m.type === 'error') { update(it.id, { status: 'error', message: m.message }); return resolve(); }
@@ -188,7 +188,7 @@ export default function ImageCompressorPage() {
         let chosen = null, unreadable = false, anySmaller = false;
         let cautious = false;
         for (const { blob: c, cautious: isCautious } of m.candidates) {
-          if (c.size >= (it.origBytes || it.file.size)) continue;
+          if (c.size >= it.file.size) continue;
           anySmaller = true;
           try {
             if ((await svgMaxPixelDiff(it.file, c)) < SVG_MAX_PIXEL_DIFF) { chosen = c; cautious = isCautious; break; }
@@ -201,20 +201,29 @@ export default function ImageCompressorPage() {
         return resolve();
       }
       // Never hand over a "compressed" file that is not smaller than what the visitor brought.
-      if (m.blob.size >= (it.origBytes || it.file.size)) { // never larger than what the visitor brought
+      if (m.blob.size >= it.file.size) { // never larger than what the visitor brought
         update(it.id, { status: 'notSmaller', outSize: m.blob.size });
         return resolve();
       }
       const base = it.file.name.replace(/\.[^.]+$/, '') || 'image';
-      update(it.id, { status: 'done', url: URL.createObjectURL(m.blob), blob: m.blob, outSize: m.blob.size, note: [it.reducedFrom ? `reduced from ${it.reducedFrom.width} × ${it.reducedFrom.height} to ${it.size.width} × ${it.size.height}` : '', m.note].filter(Boolean).join(' · '), name: `${base}-compressed.${EXT[m.blob.type] || 'jpg'}` });
+      update(it.id, { status: 'done', url: URL.createObjectURL(m.blob), blob: m.blob, outSize: m.blob.size, ...(reduceTo ? { size: reduceTo, reducedFrom } : {}), note: [reduceTo ? `reduced from ${reducedFrom.width} × ${reducedFrom.height} to ${reduceTo.width} × ${reduceTo.height}` : '', m.note].filter(Boolean).join(' · '), name: `${base}-compressed.${EXT[m.blob.type] || 'jpg'}` });
       resolve();
     };
     worker.addEventListener('message', onMessage);
     arm();
     // the settings this image was made with: the messages below quote them, not the fields as they are now (P24 review)
-    update(it.id, { status: 'working', pct: 0, sentTargetKb: byTarget ? Number(targetKb) : null, sentQuality: quality });
+    let reduceTo = null, reducedFrom = null;
+    update(it.id, { status: it.reduceMp ? 'reducing' : 'working', pct: 0, sentTargetKb: byTarget ? Number(targetKb) : null, sentQuality: quality });
     // __forceBands: set only by the browser tests, to run the iPhone (band) decode in Firefox.
-    imageDims(it.file).then((dims) => worker.postMessage({ id: it.id, file: it.file, quality, dims, forceBands: !!window.__forceBands, canvasCap: window.__forceSafariCanvasCap === true, targetBytes: byTarget && Number(targetKb) > 0 ? Math.round(Number(targetKb) * 1024) : 0 }))
+    imageDims(it.file).then((dims) => {
+      if (it.reduceMp) {
+        // the reduced shape follows the size as displayed (EXIF rotation applied), which the band reader works in
+        if (!dims) throw new Error('unreadable');
+        reduceTo = reducedSize(dims.width, dims.height, it.reduceMp);
+        reducedFrom = dims;
+      }
+      worker.postMessage({ id: it.id, file: it.file, quality, dims, reduceTo, forceBands: !!window.__forceBands, canvasCap: window.__forceSafariCanvasCap === true, targetBytes: byTarget && Number(targetKb) > 0 ? Math.round(Number(targetKb) * 1024) : 0 });
+    })
       .catch(() => { clearTimeout(watchdog); worker.removeEventListener('message', onMessage); update(it.id, { status: 'error', message: UNREADABLE }); resolve(); });
   });
 
@@ -230,8 +239,12 @@ export default function ImageCompressorPage() {
       w.onerror = (err) => setError('The compression engine stopped: ' + (err?.message || 'unknown error'));
       return w;
     };
-    let worker = start();
+    let worker = start(), used = false;
     for (const it of list) {
+      // P32: a large image starts in a fresh worker, so the encoder memory of the image before it is given back first
+      // (a worker's WebAssembly memory only grows; on a phone two large images' worth would not fit)
+      if (used && (it.reduceMp || (it.size && (it.size.width * it.size.height) / 1e6 > FRESH_WORKER_MP))) worker = start();
+      used = true;
       await runOne(worker, it);
       // a stalled worker is replaced before the next image (its memory goes with it)
       if (stalledRef.current) { stalledRef.current = false; worker = start(); }
@@ -241,7 +254,7 @@ export default function ImageCompressorPage() {
 
   const done = items.filter((it) => it.status === 'done');
 
-  const totalIn = done.reduce((s, it) => s + (it.origBytes || it.file.size), 0);
+  const totalIn = done.reduce((s, it) => s + it.file.size, 0);
   const totalOut = done.reduce((s, it) => s + it.outSize, 0);
 
   return (
@@ -270,11 +283,11 @@ export default function ImageCompressorPage() {
           {overLimit.length > 0 && !busy && (
             <div role="alert" data-over-limit className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 space-y-2">
               {overLimit.map((it) => {
-                const mp = (it.size.width * it.size.height) / 1e6, r = reducedSize(it.size.width, it.size.height, limitMp());
-                return <p key={it.id}><span className="font-semibold break-all">{it.file.name}</span> is {it.size.width.toLocaleString('en-US')} × {it.size.height.toLocaleString('en-US')} pixels ({Math.round(mp)} megapixels): {isMobileDevice() ? `on a phone the limit is ${PHONE_MAX_MP} megapixels, because compressing more would need more memory than a phone browser gives a page.` : `more than the ${MAX_MP} megapixels this in-browser compressor can hold in memory.`} It can be reduced to {r.width.toLocaleString('en-US')} × {r.height.toLocaleString('en-US')} ({Math.round((r.width * r.height) / 1e6 * 10) / 10} MP) first.</p>;
+                const mp = (it.size.width * it.size.height) / 1e6, r = reducedSize(it.size.width, it.size.height, reduceMp());
+                return <p key={it.id}><span className="font-semibold break-all">{it.file.name}</span> is {it.size.width.toLocaleString('en-US')} × {it.size.height.toLocaleString('en-US')} pixels ({Math.round(mp)} megapixels): {isMobileDevice() ? `on a phone the limit is ${PHONE_MAX_MP} megapixels, because compressing more would need more memory than a phone browser gives a page.` : `more than the ${MAX_MP} megapixels this in-browser compressor can hold in memory.`} It can be reduced to {r.width.toLocaleString('en-US')} × {r.height.toLocaleString('en-US')} ({Math.round((r.width * r.height) / 1e6 * 10) / 10} MP{isMobileDevice() ? ', the size of a 48 MP phone photo' : ''}) first.</p>;
               })}
               <button type="button" onClick={reduceThenCompress} data-reduce-then-compress className="w-full min-h-[44px] rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-semibold px-4 py-2">
-                Reduce to {limitMp()} MP then compress
+                Reduce to {reduceMp()} MP then compress
               </button>
             </div>
           )}
@@ -291,10 +304,10 @@ export default function ImageCompressorPage() {
                   <div className="flex-1 min-w-0 text-sm">
                     <p className="truncate font-medium text-neutral-800">{it.file.name}</p>
                     {it.status === 'ready' && <p className="text-neutral-500">{formatSize(it.file.size)}{it.size ? ` · ${it.size.width} × ${it.size.height}` : ''}{it.reducedFrom ? ` (reduced from ${it.reducedFrom.width} × ${it.reducedFrom.height})` : ''}</p>}
-                    {it.status === 'reducing' && <p className="text-neutral-500">Reducing to {limitMp()} MP… {Math.round(it.pct || 0)}%</p>}
+                    {it.status === 'reducing' && <p className="text-neutral-500">Reducing to {it.reduceMp || reduceMp()} MP… {Math.round(it.pct || 0)}%</p>}
                     {it.status === 'working' && <p className="text-neutral-500">Compressing… {Math.round(it.pct || 0)}%</p>}
                     {it.status === 'done' && (
-                      <p className="text-neutral-600">{formatSize(it.origBytes || it.file.size)} → <span className="font-semibold text-indigo-600">{formatSize(it.outSize)}</span> <span className="text-green-700 font-semibold">(−{Math.round((1 - it.outSize / (it.origBytes || it.file.size)) * 100)}%)</span>{it.note ? <span className="text-neutral-500"> · {it.note}</span> : null}</p>
+                      <p className="text-neutral-600">{formatSize(it.file.size)} → <span className="font-semibold text-indigo-600">{formatSize(it.outSize)}</span> <span className="text-green-700 font-semibold">(−{Math.round((1 - it.outSize / it.file.size) * 100)}%)</span>{it.note ? <span className="text-neutral-500"> · {it.note}</span> : null}</p>
                     )}
                     {it.status === 'notSmaller' && it.sentTargetKb && it.file.size <= it.sentTargetKb * 1024 && <p className="text-amber-800" data-under-target>This image is already {formatSize(it.file.size)}, under the {it.sentTargetKb} KB asked: nothing to compress.</p>}
                     {it.status === 'notSmaller' && !(it.sentTargetKb && it.file.size <= it.sentTargetKb * 1024) && <p className="text-amber-800">Already well compressed: at {it.sentQuality ?? quality}% the result would be {formatSize(it.outSize)}, not smaller than {formatSize(it.file.size)}. Nothing to download — lower the quality to shrink it further.</p>}

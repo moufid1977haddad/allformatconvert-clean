@@ -33,7 +33,11 @@ export async function uprightImage(file) {
   // and never calls a callback — testing `canvas.toBlob ?` first made JPG to PDF and Image to PDF wait forever on any
   // WebP, GIF, BMP or AVIF in Firefox (found by the P21 format bench, 02/10, also on www).
   if (raster.canvas) blob = await checkedBlob(raster.canvas, 'image/jpeg', 0.92).catch(() => null);
-  if (!blob || blob.type !== 'image/jpeg') blob = await encodeJpegWasm(rgba, raster.width, raster.height, 92);
+  // P32 (04/10): an image decoded in bands (over the iPhone canvas limit) is encoded with 4:2:0 colour sampling: at
+  // quality 92 MozJPEG would choose 4:4:4 and need 5.4 × the pixels' size in memory instead of 3.9 × (a 63 MP WebP
+  // panorama: 1.3 GB of encoder memory instead of 0.94 GB, on top of the pixels). The photos that take this path on a
+  // phone (HEIC, WebP, AVIF) are stored at 4:2:0 already: nothing visible is lost.
+  if (!blob || blob.type !== 'image/jpeg') blob = await encodeJpegWasm(rgba, raster.width, raster.height, 92, '#ffffff', { chroma420: !raster.canvas });
   return { kind: 'jpg', bytes: new Uint8Array(await blob.arrayBuffer()) };
 }
 async function embedUpright(pdfDoc, file) {

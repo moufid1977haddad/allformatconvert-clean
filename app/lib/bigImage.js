@@ -208,9 +208,12 @@ const WEBP_OPTIONS = {
 };
 
 // quality 0-100. Opaque output: transparency flattened onto white first.
-export async function encodeJpegWasm(rgba, width, height, quality, background = '#ffffff') {
+// chroma420 (P32, 04/10): keep 4:2:0 colour sampling at any quality. By default (auto_subsample) MozJPEG switches to
+// 4:4:4 from quality 90, and its memory goes from 3.9 to 5.4 times the RGBA size (measured: a 63 MP image needs
+// 939 MB of WebAssembly memory at 4:2:0, 1,299 MB at 4:4:4) -- the difference between a phone keeping the page or not.
+export async function encodeJpegWasm(rgba, width, height, quality, background = '#ffffff', { chroma420 = false } = {}) {
   const m = await moz();
-  const out = m.encode(flattenedOnWhite(rgba, hexToRgb(background)), width, height, { ...MOZ_OPTIONS, quality });
+  const out = m.encode(flattenedOnWhite(rgba, hexToRgb(background)), width, height, { ...MOZ_OPTIONS, quality, ...(chroma420 ? { auto_subsample: false, chroma_subsample: 2 } : {}) });
   if (!out || out.length < 4 || out[0] !== 0xff || out[1] !== 0xd8) throw new Error('The JPEG encoder produced no valid file.');
   return new Blob([out], { type: 'image/jpeg' });
 }

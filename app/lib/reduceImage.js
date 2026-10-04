@@ -2,9 +2,14 @@
 // in one gesture, before the tool's own work — instead of only a refusal. The photo is read band by band by the
 // browser's own decoder (app/lib/bigImage.js forEachBand: a few megapixels at a time, never a canvas over the iPhone
 // limit) and each output pixel is the average of the source pixels it covers (area average, as Photoshop's
-// "bicubic sharper" is not needed for a reduction of this order). The result keeps the format (JPEG at 95 %, PNG
-// lossless, WebP at 95 %) so the tool then compresses it as it would any image.
-import { forEachBand, encodeJpegWasm, encodePngRGBA, encodeWebpWasm } from './bigImage';
+// "bicubic sharper" is not needed for a reduction of this order).
+//
+// P32 (04/10): the reduced pixels are no longer encoded into an intermediate JPEG on the page (MozJPEG at 95 %) and
+// decoded again by the compressor: on the owner's iPhone that page-side encoder grew to ~1 GB of WebAssembly memory
+// that the page never gives back, and the compressor's worker then needed its own ~0.95 GB -- the tab was killed at
+// "Compressing…". The reduction now runs inside the compressor's worker and hands its pixels straight to the
+// encoder: one encode, no intermediate file (measured: scripts/p32/compressor-peak-memory.mjs).
+import { forEachBand } from './bigImage.js';
 
 /** { width, height } of a w × h image reduced to at most maxMp megapixels, aspect ratio kept. */
 export function reducedSize(w, h, maxMp) {
@@ -15,12 +20,11 @@ export function reducedSize(w, h, maxMp) {
 }
 
 /**
- * `file` (displayed size dims = { width, height }) reduced to at most maxMp megapixels.
- * Resolves to a File of the same name and kind (JPEG / PNG / WebP).
+ * `blob` (displayed size dims = { width, height }) reduced to ow × oh by area average, read band by band.
+ * Resolves to the RGBA pixels (Uint8ClampedArray, ow * oh * 4): the only full-size buffer this allocates.
  */
-export async function reduceImageFile(file, dims, maxMp, { onProgress = () => {} } = {}) {
+export async function reduceToRGBA(blob, dims, ow, oh, { onProgress = () => {} } = {}) {
   const { width: W, height: H } = dims;
-  const { width: ow, height: oh } = reducedSize(W, H, maxMp);
   const out = new Uint8ClampedArray(ow * oh * 4);
   const sx = ow / W, sy = oh / H;
   // Accumulators of the output row being built (premultiplied by alpha, so transparent pixels do not bleed colour).
@@ -37,7 +41,7 @@ export async function reduceImageFile(file, dims, maxMp, { onProgress = () => {}
     }
     acc.fill(0); wsum.fill(0);
   };
-  await forEachBand(file, dims, 4_000_000, async (rgba, y0, rows) => {
+  await forEachBand(blob, dims, 4_000_000, async (rgba, y0, rows) => {
     for (let r = 0; r < rows; r++) {
       const oy = Math.min(oh - 1, Math.floor((y0 + r) * sy));
       if (oy !== accRow) { flush(); accRow = oy; }
@@ -48,14 +52,8 @@ export async function reduceImageFile(file, dims, maxMp, { onProgress = () => {}
       }
     }
     onProgress(Math.min(99, Math.round(((y0 + rows) / H) * 100)));
-    await new Promise((r) => setTimeout(r, 0)); // let the page paint between bands
   });
   flush();
-  const type = file.type === 'image/png' || file.type === 'image/webp' ? file.type : 'image/jpeg';
-  const blob = type === 'image/png' ? await encodePngRGBA(out, ow, oh)
-    : type === 'image/webp' ? await encodeWebpWasm(out, ow, oh, 95)
-      : await encodeJpegWasm(out, ow, oh, 95);
   onProgress(100);
-  const name = type === 'image/jpeg' && !/\.jpe?g$/i.test(file.name) ? file.name.replace(/\.[^.]+$/, '') + '.jpg' : file.name;
-  return new File([blob], name, { type });
+  return out;
 }

@@ -46,7 +46,9 @@ else {
   check('the message stands above the Compress button', above);
   const btnText = (await p.locator('[data-reduce-then-compress]').count()) ? await p.locator('[data-reduce-then-compress]').innerText() : '';
   const dims = /It can be reduced to ([\d,]+) × ([\d,]+)/.exec(text);
-  check(`one-gesture option "${btnText}" with the resulting size (${dims ? dims[1] + ' × ' + dims[2] : '?'})`, /Reduce to 50 MP then compress/.test(btnText) && !!dims);
+  // P32 (04/10): on a phone the reduction target is 48 MP (the size proven on the owner's iPhone), the bound stays 50 MP
+  const targetMp = Number((/Reduce to (\d+) MP then compress/.exec(btnText) || [])[1] || 0);
+  check(`one-gesture option "${btnText}" with the resulting size (${dims ? dims[1] + ' × ' + dims[2] : '?'})`, targetMp > 0 && targetMp <= 50 && !!dims && +dims[1].replace(/,/g, '') * +dims[2].replace(/,/g, '') <= targetMp * 1e6);
   await p.locator('[data-reduce-then-compress]').click();
   const row = p.locator('[data-file-download]').first();
   await row.waitFor({ timeout: 300000 }).catch(() => {});
@@ -54,7 +56,7 @@ else {
     const bytes = Buffer.from(await row.locator('a[data-download]').evaluate(async (a) => { for (let i = 0; i < 50 && a.dataset.retyped !== '1'; i++) await new Promise((r) => setTimeout(r, 100)); return Array.from(new Uint8Array(await (await fetch(a.href)).arrayBuffer())); }));
     const s = sof(bytes), want = dims ? { width: +dims[1].replace(/,/g, ''), height: +dims[2].replace(/,/g, '') } : null;
     const note = await p.locator('li').first().innerText();
-    check(`result: a real JPEG of ${s ? s.width + ' × ' + s.height : '?'} (announced ${want ? want.width + ' × ' + want.height : '?'}), ${(bytes.length / 1e6).toFixed(2)} MB < ${(fs.statSync(PANO).size / 1e6).toFixed(2)} MB, note says it was reduced`, s && want && s.width === want.width && s.height === want.height && s.width * s.height <= 50e6 && bytes.length < fs.statSync(PANO).size && /reduced from 14000 × 4500/.test(note), note);
+    check(`result: a real JPEG of ${s ? s.width + ' × ' + s.height : '?'} (announced ${want ? want.width + ' × ' + want.height : '?'}), ${(bytes.length / 1e6).toFixed(2)} MB < ${(fs.statSync(PANO).size / 1e6).toFixed(2)} MB, note says it was reduced`, s && want && s.width === want.width && s.height === want.height && s.width * s.height <= targetMp * 1e6 && bytes.length < fs.statSync(PANO).size && new RegExp(`reduced from 14000 × 4500 to ${want.width} × ${want.height}`).test(note), note);
   } else check('result offered after reduce + compress', false, await p.locator('main').innerText().then((t) => t.slice(0, 300)));
   await p.close();
 }

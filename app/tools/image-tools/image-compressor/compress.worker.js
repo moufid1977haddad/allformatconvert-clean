@@ -14,6 +14,7 @@ import UPNG from 'upng-js';
 import { sniffFormat } from '../../../lib/detectFileFormat';
 import { decodeToRaster, simulateIosCanvasCap } from '../../../lib/bigImage';
 import { encodeAvif } from '../../../lib/avifEncode';
+import { reduceToRGBA } from '../../../lib/reduceImage';
 
 const wasmCache = {};
 function wasm(name) {
@@ -77,6 +78,23 @@ async function decode(blob, dims, forceBands) {
     return raster.imageData();
   } catch {
     throw new Error('Could not open this image. The file may be damaged or in a format your browser cannot read.');
+  }
+}
+
+// P32 (04/10): "Reduce to N MP then compress" -- the image is reduced HERE, band by band (lib/reduceImage.js), and its
+// pixels go straight to the encoder below. Before, the page encoded the reduced pixels into a JPEG at 95 % (its own
+// MozJPEG, ~1 GB of WebAssembly memory kept by the page) that this worker then decoded again: on the owner's iPhone
+// the 63 MP panorama killed the tab at "Compressing…". Now the only full-size buffers are the reduced pixels and the
+// encoder's own memory, as for a photo of that size.
+async function reduceDecode(blob, dims, to, progress) {
+  if (typeof OffscreenCanvas === 'undefined' || typeof createImageBitmap === 'undefined') {
+    throw new Error('This browser cannot process images in the background (it needs Safari 16.4 or later, or a current Chrome, Edge or Firefox).');
+  }
+  try {
+    const data = await reduceToRGBA(blob, dims, to.width, to.height, { onProgress: progress });
+    return { data, width: to.width, height: to.height };
+  } catch (e) {
+    throw new Error(`This image could not be reduced on this device (${(e && e.message) || 'unknown error'}). Use a computer, or a smaller version of the image.`);
   }
 }
 
@@ -210,7 +228,7 @@ async function compressSvg(file, progress) {
 }
 
 self.onmessage = async (e) => {
-  const { id, file, quality, dims, forceBands, canvasCap, targetBytes } = e.data;
+  const { id, file, quality, dims, forceBands, canvasCap, targetBytes, reduceTo } = e.data;
   if (canvasCap) simulateIosCanvasCap(); // browser tests: the iPhone's canvas limit, here too
   const progress = (pct) => self.postMessage({ id, type: 'progress', pct });
   try {
@@ -239,8 +257,10 @@ self.onmessage = async (e) => {
     if (format === 'webp' && String.fromCharCode(...head.slice(12, 16)) === 'VP8X' && (head[20] & 0x02)) {
       throw new Error('This WebP is animated: here only its first picture would be kept. Convert it to GIF, then use our GIF Compressor, to keep the animation.');
     }
-    progress(5);
-    const img = await decode(file, dims, !!forceBands);
+    const img = reduceTo
+      ? await reduceDecode(file, dims, reduceTo, (pct) => self.postMessage({ id, type: 'progress', phase: 'reduce', pct }))
+      : (progress(5), await decode(file, dims, !!forceBands));
+    if (reduceTo) progress(5);
     let out, note = '';
     if (format === 'png') {
       const r = await encodePng(img, quality, progress);
