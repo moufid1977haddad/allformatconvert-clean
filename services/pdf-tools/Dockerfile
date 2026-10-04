@@ -13,9 +13,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates \
       python3 \
       python3-venv \
+      fonts-urw-base35 \
     && rm -rf /var/lib/apt/lists/* \
     && pdftotext -v \
-    && pdfunite -v
+    && pdfunite -v \
+    && pdftoppm -v \
+    && pdfinfo -v
+
+# P32: /v1/render-page draws pages with Poppler's pdftoppm (poppler-utils above). A PDF that does not embed its fonts
+# (Helvetica, Times… the 14 standard fonts, as in the iPhone kit's pdf-avec-images.pdf) is drawn with the URW base-35
+# metric clones (fonts-urw-base35, already Ghostscript's own fonts), found by fontconfig under the standard names.
 
 # /v1/docx-to-doc (P26, E1): LibreOffice Writer without its GUI, Debian's own package (MPL-2.0), started per
 # request by src/docConvert.js -- it writes the Word 97-2003 .doc that ConvertAPI cannot. From Debian's official

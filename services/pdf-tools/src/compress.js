@@ -59,18 +59,21 @@ function mediaUrl(jid, suffix) {
   return `${config.MEDIA_SERVICE_URL.replace(/\/+$/, '')}/v1/jobs/${jid}${suffix}`;
 }
 
-async function fetchSource(workDir, jid, ticket, signal) {
+// maxBytes (P32): /v1/render-page-staged takes the site's pdf-tools ceiling, not compression's.
+async function fetchSource(workDir, jid, ticket, signal, maxBytes = config.MAX_COMPRESS_BYTES) {
   const res = await fetch(mediaUrl(jid, '/source'), { headers: { Authorization: 'Bearer ' + ticket }, signal });
   if (!res.ok || !res.body) {
     return { ok: false, status: res.status === 404 || res.status === 409 ? 410 : 502, error: 'Your uploaded file is no longer available. Please upload it again.' };
   }
   const expected = Number(res.headers.get('content-length') || 0);
-  if (expected > config.MAX_COMPRESS_BYTES) {
-    return { ok: false, status: 413, error: `Files up to ${Math.floor(config.MAX_COMPRESS_BYTES / 1048576)} MB are accepted.` };
+  if (expected > maxBytes) {
+    try { await res.body.cancel(); } catch { /* already closed */ }
+    return { ok: false, status: 413, error: `Files up to ${Math.floor(maxBytes / 1048576)} MB are accepted.` };
   }
   const dest = path.join(workDir, INPUT_NAME);
   await pipeline(Readable.fromWeb(res.body), fs.createWriteStream(dest));
   const got = fs.statSync(dest).size;
+  if (got > maxBytes) return { ok: false, status: 413, error: `Files up to ${Math.floor(maxBytes / 1048576)} MB are accepted.` };
   if (got === 0 || (expected && got !== expected)) {
     return { ok: false, status: 502, error: 'Your uploaded file arrived incomplete. Please try again.' };
   }

@@ -46,4 +46,16 @@ module.exports = {
   // every repaired candidate's text is read back by two readers -- up to four repairs and ten text reads at worst.
   PDFUNITE_BIN: process.env.PDFUNITE_BIN || 'pdfunite',
   REPAIR_TIMEOUT_MS: Number(process.env.REPAIR_TIMEOUT_MS) || 200_000,
+  // /v1/render-page (P32, src/render.js): one page -> one image, for an iPhone / iPad that could not draw it.
+  // poppler-utils (Dockerfile) brings pdftoppm and pdfinfo. The site waits 55 s, so the service gives up first.
+  PDFTOPPM_BIN: process.env.PDFTOPPM_BIN || 'pdftoppm',
+  PDFINFO_BIN: process.env.PDFINFO_BIN || 'pdfinfo',
+  RENDER_TIMEOUT_MS: Number(process.env.RENDER_TIMEOUT_MS) || 50_000,
+  // the staged file of a render is a PDF the site accepts for its pdf-tools (MAX_PDFTOOLS_STAGED_BYTES, 44 MB)
+  MAX_RENDER_INPUT_BYTES: Number(process.env.MAX_RENDER_INPUT_BYTES) || 44 * 1024 * 1024,
+  MAX_RENDER_PIXELS: Number(process.env.MAX_RENDER_PIXELS) || 40_000_000,
+  // the image goes back through a Vercel function (answer ceiling ~4.5 MB)
+  MAX_RENDER_OUTPUT_BYTES: Number(process.env.MAX_RENDER_OUTPUT_BYTES) || 4_000_000,
+  RENDER_CONCURRENCY: Number(process.env.RENDER_CONCURRENCY) || 2,
+  RENDER_QUEUE_MS: Number(process.env.RENDER_QUEUE_MS) || 20_000,
 };
