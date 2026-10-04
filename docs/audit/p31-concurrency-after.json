@@ -1,0 +1,30 @@
+{
+ "at": "2026-10-04T02:44:42.665Z",
+ "origin": "https://www.onlineconvertools.com",
+ "label": "after",
+ "engineFallback": true,
+ "results": [
+  {
+   "file": "sample.docx",
+   "round": 1,
+   "startedAtMs": 30,
+   "ms": 2489,
+   "status": 200,
+   "engine": "convertapi",
+   "pdfBytes": 42859,
+   "message": null,
+   "ledger": "kept (counted by ConvertAPI, or unknown)"
+  },
+  {
+   "file": "fidelite-01.docx",
+   "round": 1,
+   "startedAtMs": 40,
+   "ms": 3017,
+   "status": 200,
+   "engine": "convertapi",
+   "pdfBytes": 209541,
+   "message": null,
+   "ledger": "kept (counted by ConvertAPI, or unknown)"
+  }
+ ]
+}

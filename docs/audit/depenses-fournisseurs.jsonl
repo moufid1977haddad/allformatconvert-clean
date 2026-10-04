@@ -3,3 +3,5 @@
 {"at":"2026-10-03T23:07:44.755Z","chantier":"P30","provider":"convertapi","usd":0.01,"what":"pdf-to-word p30-letter.pdf on https://www.onlineconvertools.com"}
 {"at":"2026-10-03T23:07:48.505Z","chantier":"P30","provider":"convertapi","usd":0.01,"what":"pdf-to-excel p30-letter.pdf on https://www.onlineconvertools.com"}
 {"at":"2026-10-03T23:07:51.606Z","chantier":"P30","provider":"convertapi","usd":0.01,"what":"pdf-to-ppt p30-letter.pdf on https://www.onlineconvertools.com"}
+{"at":"2026-10-04T02:44:39.610Z","chantier":"p31-convertapi","provider":"convertapi","usd":0.01,"what":"word-to-pdf sample.docx on https://www.onlineconvertools.com (P31 concurrency after, round 1)"}
+{"at":"2026-10-04T02:44:39.646Z","chantier":"p31-convertapi","provider":"convertapi","usd":0.01,"what":"word-to-pdf fidelite-01.docx on https://www.onlineconvertools.com (P31 concurrency after, round 1)"}

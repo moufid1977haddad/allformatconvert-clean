@@ -39,11 +39,17 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 | 7 Quality sur PNG | ✅ curseur factice masqué (PNG, BMP, GIF, ICO, TIFF) ; Image Compressor : réel (palette) | — |
 | 8 Affichage tactile (23) | corrigé, à confirmer : 239 pages × 390/375 px, 0 débordement, 0 cible < 44 px (`scripts/p31/layout-iphone.mjs`) | P3 : écrans de résultat et menu mobile ouvert non mesurés |
 | A Compteur ConvertAPI | ✅ code : renouvellement le **3** ; période 03/10 → 03/11 démarrée à **6** (`CONVERTAPI_PLAN_BASELINE`) ; seuils inchangés | — |
-| B Coût réel | ✅ `ConversionCost` (toujours 1, taille et durée sans effet) ; **une requête traitée puis échouée compte** (conditions ConvertAPI) — le site la compte maintenant ; fin de l'essai : **expiration à 30 jours** (source : aide ConvertAPI via index de recherche) | P3 propriétaire : confirmer la date d'ouverture du compte |
+| B Coût réel | ✅ `ConversionCost` (toujours 1, taille et durée sans effet) ; une requête traitée puis échouée compte (conditions ConvertAPI), le site la compte maintenant. **Fin de l'essai — confirmée par le tableau de bord du propriétaire : première conversion le 02/09/2026, panne le 02/10/2026, soit 30 jours = expiration de l'essai (119 conversions utilisées sur 250)** | — |
 | C Rapport P30 | ✅ « ≈ 157 hors du site » corrigé (faux) | — |
-| D 1 conversion simultanée | ✅ code + 10 tests : file d'attente serveur sur 503/429, message honnête, plus de bascule LibreOffice inutile ; **mesure réelle sur www refusée par le garde-fou** (0 conversion dépensée) | **P2 propriétaire** : `node scripts/p31/convertapi-concurrency.mjs --label=after --go` (2 conversions du forfait) |
+| D 1 conversion simultanée | ✅ file d'attente serveur sur 503/429 (10 tests simulés). **Mesure réelle sur www le 04/10 (autorisée par le propriétaire, 2 conversions du forfait)** : 2 requêtes parallèles arrivées dans la même seconde → **2 PDF faits par ConvertAPI (2,5 s et 3,0 s), aucun 503, aucun secours, aucun échec** ; le second visiteur reçoit simplement son PDF. La file n'a pas été sollicitée en réel (ConvertAPI a accepté les deux) | P3 : si un 503 « No available conversion PODs » apparaît un jour dans les journaux, vérifier la ligne `[convertapi] busy … try 2 in 3 s` |
 | E 200 Mo | ✅ rien au-dessus de 100 Mo annoncé ; Merge PDF contrôle les fichiers Office avant l'envoi | — |
 | F Jeton `.env.local` | ✅ **fait par le propriétaire le 04/10** (`sed` par le nom de la variable, vérifié par les noms seuls : plus aucune variable `CONVERTAPI…` dans `.env.local`) | — |
+
+**➡️ Prochain chantier : P32 — essai de BRIA RMBG 2.0 (Background Remover)** : via l'API fal, **0,018 $ par image**,
+licence commerciale (API ; les poids auto-hébergés sont CC BY-NC, exclus). Test sur les 29 photos (28 du banc + IMG_2433)
+≈ **0,52 $**, avec `scripts/p31/bg/` et le registre `scripts/p30/paid-ledger.mjs` (budget fixé par le propriétaire). La clé
+**`FAL_KEY` sera placée par le propriétaire lui-même dans `.env.local`** (jamais affichée ni demandée dans le terminal).
+Brancher seulement si BRIA bat IS-Net sur toutes les photos (morceau de nappe en haut d'IMG_2433 compris) ; sinon chiffrer.
 
 **Pièges notés (P31)** : (1) jamais `npm ci` dans le dépôt principal pendant que des sous-agents y ont une jonction
 `node_modules` ou qu'un `next start` tourne (il vide tout puis échoue) — `npm install` à la place ; (2) heredoc bash : une double barre

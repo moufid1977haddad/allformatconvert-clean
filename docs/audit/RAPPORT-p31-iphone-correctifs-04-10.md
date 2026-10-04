@@ -17,7 +17,7 @@ Chromium, Firefox, WebKit, agent iPhone, tactile), jamais le vrai téléphone.
 | 6 Panorama 63 Mpx (test 26) | corrigé, à confirmer sur iPhone | message à la sélection en 96 ms ; « Réduire à 50 Mpx puis compresser » → JPEG 12 472 × 4 008 |
 | 7 Curseur Quality sur PNG | corrigé | factice pour PNG/BMP/GIF/ICO/TIFF → masqué ; réel dans Image Compressor (palette) |
 | 8 Affichage tactile (test 23) | corrigé, à confirmer sur iPhone | 239 pages × 390 et 375 px : 0 débordement, 0 cible < 44 px |
-| AJOUT ConvertAPI A-E | code fait ; **mesure D sur www non faite** (refusée par le garde-fou, au propriétaire) | 22/22 tests |
+| AJOUT ConvertAPI A-E | ✅ fait ; mesure D réelle faite le 04/10 (§13) ; cause B confirmée (§13) | 22/22 tests ; 2/2 PDF par ConvertAPI en parallèle |
 | AJOUT F (jeton de `.env.local`) | ✅ fait par le propriétaire le 04/10 (refusé au garde-fou de Claude) | plus aucune variable `CONVERTAPI…` (noms seuls) |
 
 ## 1. Download sur iOS (priorité absolue)
@@ -268,7 +268,7 @@ seulement si le fichier est vraiment livré (bandeau fermé = non) ; (5) le chem
   déploiement **`onlineconvertools-ooe79sko9`** prêt le 04/10 vers 02 h 30 UTC. Contrôle léger sur www : **29/29** ; un
   téléchargement réel par le nouveau chemin (JPG to PDF, WebKit iPhone) : **6/6**. Aucune régression, **aucun retour
   arrière**. Retour arrière possible : promouvoir `onlineconvertools-osaer8a95` (= `9f6ecfda`, P30).
-- Dépenses P31 : **0 $** (aucune conversion ConvertAPI, aucun appel de détourage payant, aucun redéploiement Railway).
+- Dépenses P31 au déploiement : 0 $ (puis 2 conversions du forfait pour la mesure D, §13).
 
 ## 12. Mini-passe iPhone (10 vérifications au plus)
 
@@ -284,6 +284,28 @@ seulement si le fichier est vraiment livré (bandeau fermé = non) ; (5) le chem
 | 8 | Code Formatter (16) | — (taper `const nom = "Élodie"; const ville = "Montréal";`) | Language « Auto-detect » → Format | mis en forme comme JavaScript, accents intacts, statut « Formatted as JavaScript (detected) » |
 | 9 | Image Compressor (26) | `kit-iphone-p27/panorama-63mpx.jpg` | choisir le fichier, **ne rien toucher** | message des 63 Mpx **avant** le bouton ; puis « Reduce to 50 MP then compress » → un JPEG de 12 472 × 4 008 |
 | 10 | Image Converter + une page CSV | `kit-iphone-p21/photo-2.jpg` ; `kit-iphone-p21/photo-renommee.csv` dans CSV to JSON | Image Converter : format PNG ; CSV to JSON : choisir le fichier | pas de curseur Quality pour PNG (phrase « no quality setting ») ; aucune page ne défile de côté, boutons faciles à toucher |
+
+## 13. Fin du chantier (04/10)
+
+- **F — jeton ConvertAPI** : retiré de `.env.local` par le propriétaire. Sa vérification (`grep -o` par noms seuls) ne
+  montre plus aucune variable `CONVERTAPI…`. Le garde-fou de Claude refuse toute lecture de `.env.local`, même des seuls
+  noms : la preuve est la vérification du propriétaire.
+- **D — mesure réelle sur www** (autorisée par le propriétaire, `node scripts/p31/convertapi-concurrency.mjs --label=after
+  --go`, `docs/audit/p31-concurrency-after.json`) : 2 requêtes Word to PDF parallèles (`sample.docx`, `fidelite-01.docx`) →
+  **2 PDF faits par ConvertAPI, 2 489 ms et 3 017 ms, statut 200, aucun secours, aucun échec**. Journaux de production :
+  les deux à la même seconde, `cost_micros=10000` chacune, **aucune ligne `busy` ni 503**. Ce que voit le second visiteur :
+  son PDF en 3 s, sans message. ConvertAPI a accepté les deux conversions simultanées : la file d'attente n'a pas été
+  sollicitée en réel (elle reste prouvée sur ConvertAPI simulé, 10 tests) ; rien n'a échoué, donc **rien à corriger ni à
+  redéployer**. Dépense : **2 conversions du forfait sur les 10 autorisées** (registre `p31-convertapi` : 2/10).
+- **B — cause de la fin de l'essai, confirmée par le tableau de bord du propriétaire** : première conversion le
+  **02/09/2026**, panne le **02/10/2026**, soit **30 jours** : l'essai a **expiré** (119 conversions utilisées sur 250), il
+  n'a pas été épuisé.
+- **Prochain chantier (P32, au plan)** : essai de BRIA RMBG 2.0 via fal (0,018 $/image, licence commerciale de l'API ;
+  ≈ 0,52 $ sur 29 photos), avec la clé `FAL_KEY` placée par le propriétaire dans `.env.local`.
+- **Processus** : le shell encore ouvert était le serveur Next local de P31 (`next start -p 3310`) et le mandataire de la
+  préversion (port 3200), arrêtés après le déploiement. Vérifié : aucun processus `node` ou `python` restant, aucun port
+  3200 / 3310-3313 en écoute.
+- **Dépenses totales P31** : 2 conversions ConvertAPI du forfait (≈ 0,02 $ de forfait), 0 $ hors forfait.
 
 ## Annexe A — outil → chemin de téléchargement → corrigé
 _(généré par `node scripts/p31/download-table.mjs`, copie de `docs/audit/p31-tableau-telechargements.md`)_
