@@ -96,7 +96,7 @@ export async function saveBlob(blob, name) {
 // "photo.HEIC" + ("inverted", "jpg") -> "photo-inverted.jpg". Keeps the visitor's own name, as iLoveIMG does
 // ("photo_inverted.jpg"): a file called "result.png" is lost among the others in Downloads.
 export function derivedName(originalName, suffix, ext) {
-  const base = String(originalName || 'image').replace(/\.[^./\]+$/, '').replace(/[\/:*?"<>|]+/g, '_').slice(0, 120) || 'file';
+  const base = String(originalName || 'image').replace(/\.[^./\\]+$/, '').replace(/[\\/:*?"<>|]+/g, '_').slice(0, 120) || 'file';
   return `${base}${suffix ? `-${suffix}` : ''}.${ext}`;
 }
 

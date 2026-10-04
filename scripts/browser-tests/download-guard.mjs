@@ -218,7 +218,7 @@ for (const t of TOOLS) {
       // P31 (03/10): the tap saves the retyped blob under the full name, without any navigation (/zipdl/).
       zipdl.length = 0;
       const dlp = p.waitForEvent('download', { timeout: 30000 }).catch(() => null);
-      await first.locator('a[data-download]').click();
+      await first.locator('a[data-download]').click({ noWaitAfter: true }); // P31: Playwright-Firefox waits for an octet-stream navigation otherwise
       const dl = await dlp;
       const got = dl ? fs.readFileSync(await dl.path()) : null;
       check(`${label}: Download saved under its full name with the same bytes, no /zipdl/ request`, !!dl && zipdl.length === 0 && dl.suggestedFilename() === files[0].name && got && got.equals(Buffer.from(files[0].bytes)), `${dl ? dl.suggestedFilename() : 'no download'} ${zipdl[0] || ''}`);
@@ -228,11 +228,11 @@ for (const t of TOOLS) {
       if (t.copy) {
         await t.copy(p);
       } else if (t.alternatives) {
-        const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), first.locator('a[data-download]').click()]);
+        const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), first.locator('a[data-download]').click({ noWaitAfter: true })]);
         await dl.path();
       } else if (!savedAll) {
         for (const a of await p.locator('[data-file-download] a[data-download]').all()) {
-          const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), a.click()]);
+          const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), a.click({ noWaitAfter: true })]);
           await dl.path();
         }
       }

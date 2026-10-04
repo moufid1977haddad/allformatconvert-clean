@@ -38,7 +38,7 @@ export function convertApiUnavailableMessage(label: string): string {
  * failure (the file, the request) keeps exactly the per-route hourly alert it had before P30 -- `routeAlert` is the
  * route's own "alert" flag for that code (false for an unsupported format, as before).
  */
-export async function alertConvertApiFailure(route: string, err: ConvertApiError, routeAlert: boolean): Promise<void> {
+export async function alertConvertApiFailure(route: string, err: InstanceType<typeof ConvertApiError>, routeAlert: boolean): Promise<void> {
   const failure = { httpStatus: err.httpStatus, code: err.code };
   if (err.code === "not_production") return; // our own refusal outside production (P30), not an incident
   if (classifyProviderFailure(failure)) await reportProviderFailure("convertapi", failure);

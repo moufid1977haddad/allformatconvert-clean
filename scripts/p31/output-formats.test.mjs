@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import { MIME_BY_EXT, mimeForName } from '../../app/lib/mimeTypes.js';
 import { AUDIO_OUTPUT_FORMATS, AUDIO_OUTPUT_MAGIC, audioOutputProblem, buildOutputSpec } from '../../app/lib/audioFormats.js';
 import { MERGE_FORMATS } from '../../app/lib/audioMerge.js';
+import { derivedName } from '../../app/lib/download.js';
 
 let n = 0;
 const same = (label, ext, mime) => {
@@ -42,4 +43,11 @@ for (const f of AUDIO_OUTPUT_FORMATS) { n++; assert.ok(audioOutputProblem(f.valu
 assert.equal(mimeForName('memo-vocal.m4r'), 'audio/mp4');
 assert.equal(mimeForName('Rapport été.PDF'), 'application/pdf');
 assert.equal(mimeForName('no-extension'), null);
+// The saved name keeps the visitor's own, without its old extension (a bash heredoc once turned \\ into \ in this
+// regex: "sample.png" became "sample.png.jpg" — caught by scripts/p31/download-names.mjs, 03/10).
+assert.equal(derivedName('sample.png', '', 'jpg'), 'sample.jpg');
+assert.equal(derivedName('IMG_2433.HEIC', 'grayscale', 'png'), 'IMG_2433-grayscale.png');
+assert.equal(derivedName('dossier\\a:b.jpg', 'x', 'png'), 'dossier_a_b-x.png');
+assert.equal(derivedName('Été à Montréal 🎉.webp', 'no-background', 'png'), 'Été à Montréal 🎉-no-background.png');
+assert.equal(derivedName('', '', 'png'), 'image.png');
 console.log(`output-formats: ${n} checks, ALL PASS`);
