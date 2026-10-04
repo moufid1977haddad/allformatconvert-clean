@@ -7,7 +7,9 @@
 
 **Constat** (`docs/audit/RAPPORT-p30-convertapi-alertes-04-10.md` §1) : le crédit ConvertAPI s'est épuisé le 02/10 avec
 **au plus 1 conversion de visiteur sur 93** passées par le site depuis le 04/09 ; le reste : nos bancs et essais (www et
-préversions), et ≈ 157 conversions hors du site (le vrai jeton était dans `.env.local`).
+préversions) et les documents du propriétaire — **aucun appel inconnu** (tableau de bord ConvertAPI, 03/10 : 119 conversions
+depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'essai (250 conversions) a expiré par sa durée de
+30 jours, pas par consommation. *Les « ≈ 157 conversions hors du site » écrites d'abord étaient fausses : corrigé par P31 le 03/10.*
 1. **Simulation par défaut.** Un banc n'appelle jamais un fournisseur payant réel : en local, `scripts/p26/e1/fake-providers.mjs`
    (jeton factice `local-bench-fake`) ; les préversions n'ont pas les jetons payants. **Le code l'impose pour ConvertAPI** :
    appel réel seulement par la production Vercel (repère d'exécution vérifié), refusé avant tout envoi ailleurs.
@@ -15,16 +17,26 @@ préversions), et ≈ 157 conversions hors du site (le vrai jeton était dans `.
    chantier, chaque appel inscrit **avant** l'envoi dans `docs/audit/depenses-fournisseurs.jsonl` par
    `scripts/p30/paid-ledger.mjs` (`reservePaid`), qui refuse au-delà du budget. Un appel non facturé (refus) est rendu
    (`refundPaid`).
-3. **Le site compte lui-même** les conversions ConvertAPI facturées sur la période du forfait (1 000/mois, renouvellement
-   le 4) et alerte à 50, 80, 100 % ; au-delà, ConvertAPI facture le surplus.
+3. **Le site compte lui-même** les conversions ConvertAPI facturées sur la période du forfait (« Developer » : 1 000/mois,
+   57,49 CAD taxes comprises, renouvellement le **3**, 200 Mo par fichier, **1 conversion simultanée**) et alerte à 50, 80,
+   100 % ; au-delà, ConvertAPI facture le surplus. Une requête traitée puis échouée compte aussi (conditions de ConvertAPI).
 4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
    rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
+
+## 🧾 P31 — 03/10 : forfait ConvertAPI (branche `p31-convertapi-forfait`, non déployée)
+
+| Point | État | Reste |
+|---|---|---|
+| A Compteur du forfait | ✅ code : renouvellement le **3** ; période 03/10 → 03/11 démarrée à **6** conversions (relevé du 03/10, 23 h 08 UTC, constante `CONVERTAPI_PLAN_BASELINE`) ; seuils 50/80/100 % inchangés | déploiement à la demande du propriétaire |
+| B Coût réel | ✅ `ConversionCost` déjà ajouté (jamais autre chose que 1 mesuré, taille et durée sans effet) ; **une requête traitée puis échouée (500, 400, 415…) compte 1** (conditions ConvertAPI), refus 401/402/403/429/503 non comptés. Fin de l'essai : expiration à 30 jours, pas 250 conversions consommées | — |
+| D 1 conversion simultanée | ✅ code : sur 503/429 (« No available conversion PODs ») la requête **attend son tour** (3, 5, 10, 15 s…, Retry-After respecté, ≤ 60 s petit fichier, 10 s à 100 Mio), puis message « busy, try again in a minute » ; Word to PDF ne bascule plus sur LibreOffice au premier 503 | mesure www avant/après : `scripts/p31/convertapi-concurrency.mjs` (budget `p31-convertapi` = 10 conversions) |
+| E 200 Mo | ✅ aucun outil n'annonce plus de 100 Mo ; Merge PDF vérifie désormais chaque fichier Office **avant** l'envoi (100 Mo, tableurs 60 Mo) ; FAQ PDF Tools : PDF to Word/Excel/PowerPoint 99 Mo | — |
 
 ## 🔔 P30 — 04/10 : panne ConvertAPI, secours, alertes, Chromium isolé (`docs/audit/RAPPORT-p30-convertapi-alertes-04-10.md`, repère `restauration-avant-p30-04-10` = `bce5e714`)
 
 | Lot | État | Reste |
 |---|---|---|
-| 1 Rétablissement + cause | ✅ Word to PDF (.docx), PDF to Word, Excel, PowerPoint **fonctionnent sur www** (5 vraies conversions, 0,05 $) ; cause : ≥ 99 % de la consommation passée par le site = nos bancs (rapport §1) ; règle permanente ci-dessus | Propriétaire, facultatif : le tableau de bord ConvertAPI (statistiques) dirait d'où viennent les ≈ 157 conversions hors du site ; **retirer le vrai jeton ConvertAPI de `.env.local`** (le code le refuse déjà hors production) |
+| 1 Rétablissement + cause | ✅ Word to PDF (.docx), PDF to Word, Excel, PowerPoint **fonctionnent sur www** (5 vraies conversions, 0,05 $) ; cause : ≥ 99 % de la consommation passée par le site = nos bancs (rapport §1) ; règle permanente ci-dessus | Propriétaire, facultatif : **retirer le vrai jeton ConvertAPI de `.env.local`** (le code le refuse déjà hors production). *(« ≈ 157 conversions hors du site » : faux, corrigé par P31 le 03/10 — aucune conversion inconnue au tableau de bord.)* |
 | A Alertes + secours | ✅ **en production** (`onlineconvertools-gjjrs94r8` = `f8db1de9`) : téléphone + courriel une fois par incident (ConvertAPI, OpenAI, Pangram) et au rétablissement ; seuils 50/80/100 % du forfait ConvertAPI (1 000/mois) ; secours LibreOffice **annoncé** (Word to PDF, Merge PDF) ; « try again later » (PDF to Word/Excel/PowerPoint) ; **alerte de test envoyée le 03/10 à 23 h 06 UTC (ntfy=sent, email=sent)** ; revue indépendante ×2 appliquée | Le propriétaire confirme avoir reçu la notification de test. Si le forfait change : `lib/providers/convertApiPlan.js` (2 valeurs). Retour arrière : promouvoir `onlineconvertools-fo109wbpv` |
 | 4 Équations .docx | ✅ identiques à Word (0,0 % de pixels différents) ; MathType rendu ; rien à corriger | — |
 | 5 Chromium isolé | ✅ **en production** : Chromium de Gotenberg dans le projet Railway **`oct-chromium-isolated`** (service `chromium`, déploiement `883863bd`, aucun secret, réseau privé du nôtre **injoignable — mesuré** : 5 noms, 10 adresses × 4 ports, métadonnées) ; `gotenberg-v2` (`3236df60`) n'a plus de Chromium et relaie, signé Ed25519 (relais `oct-edge`, `services/gotenberg/edge`) ; **66/66 et 6/6 identiques au pixel**, 27 adresses internes refusées, 0/18 script, www 29/29 + 9/9 + 2/2 + 6/6 ; revue de sécurité « GO avec conditions », conditions remplies ; mémoire nette ≈ inchangée (isolée 0,27 Go, gotenberg-v2 0,69 → 0,13 Go, à relire) | **Ne jamais supprimer ni renommer le service `chromium` ni son domaine tant qu'une image front y renvoie** (reprise du nom possible). Si le mot de passe Basic Auth de Gotenberg change : `scripts/p30/edge-pubkey.mjs`, nouvelle clé dans le Dockerfile, redéployer les trois services. Retour arrière : `gotenberg-v2` → `1bb98768` |

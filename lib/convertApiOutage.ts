@@ -17,6 +17,18 @@ export function convertApiUnavailable(err: unknown): boolean {
   return err.code === "upstream_error" && (err.httpStatus === undefined || err.httpStatus >= 500);
 }
 
+/**
+ * P31: ConvertAPI stayed busy (HTTP 503/429: our plan runs one conversion at a time) for the whole wait budget of
+ * lib/providers/convertApi.js -- other files were being converted. Not an outage: the visitor is told to retry soon.
+ */
+export function convertApiBusy(err: unknown): boolean {
+  return err instanceof ConvertApiError && !err.billed && err.code === "rate_limited";
+}
+
+export function convertApiBusyMessage(tool: string): string {
+  return `${tool} is busy converting other files right now and yours could not start in time. Please try again in a minute.`;
+}
+
 export function convertApiUnavailableMessage(label: string): string {
   return `PDF to ${label} is temporarily unavailable: the conversion engine it uses is not responding right now, and we have no backup that keeps the layout as well. Please try again later.`;
 }

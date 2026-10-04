@@ -8,7 +8,7 @@ import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkFileSize, MAX_CONVERTAPI_FILE_BYTES, MAX_OFFICE_STAGED_BYTES, MAX_SPREADSHEET_STAGED_BYTES } from "@/lib/quota/limits";
 import { isStagedRequest, respondStaged, fileResponse } from "@/lib/media/stagedRoute";
 import { alertServerError } from "@/lib/quota/errorAlerts";
-import { convertApiUnavailable, alertConvertApiFailure, convertApiSucceeded } from "@/lib/convertApiOutage";
+import { convertApiUnavailable, convertApiBusy, convertApiBusyMessage, alertConvertApiFailure, convertApiSucceeded } from "@/lib/convertApiOutage";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
 
 // Give the Gotenberg/ConvertAPI round-trip (up to GOTENBERG_TIMEOUT_MS
@@ -277,7 +277,9 @@ async function handleConvertApi(req: NextRequest, file: File, staged: boolean, f
       const mapped = CONVERTAPI_ERROR_RESPONSES[err.code] || CONVERTAPI_ERROR_RESPONSES.upstream_error;
       await alertConvertApiFailure("word-to-pdf", err, mapped.alert);
       if (convertApiUnavailable(err)) {
-        if (!fallbackAllowed) return NextResponse.json({ error: WORD_TO_PDF_UNAVAILABLE }, { status: 503 });
+        // P31: busy (one conversion at a time) even after the wait in lib/providers/convertApi.js. A caller with the
+        // backup notice still gets LibreOffice (the visitor would otherwise wait again); any other caller: retry soon.
+        if (!fallbackAllowed) return NextResponse.json({ error: convertApiBusy(err) ? convertApiBusyMessage("Word to PDF") : WORD_TO_PDF_UNAVAILABLE }, { status: 503 });
         console.log(`[convertapi] docx->pdf unavailable (${err.code}, HTTP ${err.httpStatus ?? "n/a"}): LibreOffice backup`);
         const res = await handleGotenberg(req, file, "docx", staged);
         if (res.ok) markEngineFallback(res);

@@ -6,7 +6,7 @@ import { guardPaidRoute } from "@/lib/quota/guard";
 import { checkFileSize, MAX_PDF_TO_WORD_STAGED_BYTES } from "@/lib/quota/limits";
 import { isStagedRequest, respondStaged, fileResponse } from "@/lib/media/stagedRoute";
 import { alertServerError } from "@/lib/quota/errorAlerts";
-import { convertApiUnavailable, convertApiUnavailableMessage, alertConvertApiFailure, convertApiSucceeded } from "@/lib/convertApiOutage";
+import { convertApiUnavailable, convertApiUnavailableMessage, convertApiBusy, convertApiBusyMessage, alertConvertApiFailure, convertApiSucceeded } from "@/lib/convertApiOutage";
 import { buildServerToolError, insertToolError } from "@/lib/reportError";
 
 // Give the ConvertAPI round-trip enough headroom inside the function's own
@@ -261,6 +261,8 @@ async function convertPdf(req: NextRequest, file: File, staged = false, format: 
           userAgent: req.headers.get("user-agent"), headers: req.headers,
         }));
       }
+      // P31: still busy after the wait in lib/providers/convertApi.js (one conversion at a time): retry soon.
+      if (convertApiBusy(err)) return NextResponse.json({ error: convertApiBusyMessage("PDF to Word") }, { status: 503 });
       // P30: no backup of the same quality for PDF to Word: the visitor is told to come back later.
       if (convertApiUnavailable(err)) return NextResponse.json({ error: convertApiUnavailableMessage("Word") }, { status: 503 });
       return NextResponse.json({ error: mapped.message }, { status: mapped.status });

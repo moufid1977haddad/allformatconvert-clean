@@ -39,13 +39,22 @@ poste** (bancs `curl`/navigateur automatisé, et un Safari — le Mac du propri�
 **une seule** requête réussie de tout le mois vient d'une autre adresse (29/09) ; les préversions ne sont jamais vues par
 un visiteur. **Part des visiteurs réels : au plus 1 conversion sur 93 (≈ 1 %) ; bancs et essais : ≥ 99 %.**
 
-**Écart non résolu** : le compte gratuit de ConvertAPI donne 250 conversions (page des tarifs, lue le 04/10) ; le site
-n'en a fait passer que 93. Les ≈ 157 autres ne sont **pas passées par Vercel** : appels faits hors du site (évaluation
-du 03/09 décrite dans `docs/specs/2026-09-03-convertapi-word-to-pdf-integration.md`, essais dans le tableau de bord de
-ConvertAPI), ou un serveur local — **le vrai jeton ConvertAPI est présent dans `.env.local`** (vérifié par booléen, sans
-lire sa valeur) : tout `next start` local lancé avec `CONVERTAPI_ENABLED=true` dépensait du crédit réel. Seul le tableau
-de bord de ConvertAPI (onglet statistiques, compte du propriétaire) peut départager. La protection ci-dessous rend la
-question sans objet pour l'avenir.
+**Écart avec les 250 conversions de l'essai — corrigé par P31 le 03/10.** Ce paragraphe affirmait que « ≈ 157
+conversions » avaient été faites **hors du site** (jeton de `.env.local`, essais du tableau de bord). **C'est faux.**
+Le tableau de bord ConvertAPI, lu par le propriétaire le 03/10, donne **119 conversions depuis l'ouverture du compte**,
+dont **109 du 25/08 au 03/10 (100 réussies, 9 échouées)** ; toutes sont nos fichiers d'essai ou les documents du
+propriétaire, envoyés par les serveurs Vercel ou par la connexion du propriétaire début septembre ; **aucun appel
+inconnu, aucune fuite du jeton**. Les 9 échecs comptés correspondent exactement aux 9 réponses HTTP 500 vues par Vercel
+(2 en production, 7 sur préversion, 28/09) : ConvertAPI compte une requête traitée « whether or not the conversion
+succeeds » (conditions, convertapi.com/terms) ; les 2 HTTP 403 du 03/10 (plus de conversions) ne sont pas comptés.
+L'essai ne s'est donc **pas** arrêté parce que 250 conversions avaient été consommées : la cause la plus cohérente est
+sa **durée** — le centre d'aide de ConvertAPI (article « How to create a free account? », help.convertapi.com) indique
+que l'essai de 250 conversions **expire au bout de 30 jours** ; le compte a servi pour la première fois le 03/09
+(évaluation de la spécification), et les refus sont arrivés le 02-03/10. Ni la taille ni la durée n'en sont la cause :
+`ConversionCost` = 1 mesuré de 10 Mio à 148 Mio et jusqu'à 204 s de conversion (`RAPPORT-plafonds-mesures.md` §4).
+Le propriétaire peut confirmer la date d'ouverture du compte dans le tableau de bord. P31 a aussi corrigé le compteur
+du site (renouvellement le 3, 6 conversions déjà utilisées le 03/10 à 23 h 08 UTC, échecs traités comptés) :
+`lib/providers/convertApiPlan.js`, tests `scripts/p31/convertapi-queue.test.mjs`.
 
 **Règle écrite au plan** (« crédits des fournisseurs ») et **mise dans le code** :
 - `lib/providers/convertApi.js` : un appel réel n'est fait **que par la production Vercel** (`VERCEL_ENV=production`).
@@ -79,7 +88,7 @@ retenu ici ; ntfy accepte la publication en JSON (titre, message, priorité), se
   journal (testé).
 - **Avant l'épuisement** : l'API de ConvertAPI ne donne le solde qu'au « master token » (documentation lue le 04/10), que
   le site n'a pas et qu'aucune nouvelle variable ne peut porter. Le site **compte lui-même** chaque conversion facturée
-  (`ConversionCost`) sur la période du forfait (renouvellement le 4 de chaque mois) et alerte à **50, 80 et 100 %** des
+  (`ConversionCost`) sur la période du forfait (renouvellement le 3 de chaque mois — P31, 03/10 ; écrit « le 4 » ici d'abord) et alerte à **50, 80 et 100 %** des
   **1 000 conversions** du forfait mensuel le plus petit (« Developer », page des tarifs lue le 04/10). Au-delà,
   ConvertAPI **facture le surplus** au lieu de refuser : l'alerte de 100 % le dit.
 - Seule la **production Vercel** ouvre ou ferme un incident (préversions et serveurs locaux partagent la même base) ;
@@ -268,5 +277,6 @@ Production : **Vercel `onlineconvertools-osaer8a95` = `9f6ecfda`** (puis commits
 `bb239865`. Aucun retour arrière.
 
 **Reste au propriétaire** : confirmer la réception de la notification de test (03/10, 23 h 06 UTC) ; facultatif :
-retirer le vrai jeton ConvertAPI de `.env.local` et regarder dans le tableau de bord ConvertAPI d'où viennent les
-≈ 157 conversions hors du site ; si le forfait ConvertAPI change, 2 valeurs dans `lib/providers/convertApiPlan.js`.
+retirer le vrai jeton ConvertAPI de `.env.local` ; si le forfait ConvertAPI change, les valeurs de
+`lib/providers/convertApiPlan.js`. (Les « ≈ 157 conversions hors du site » écrites ici d'abord n'existent pas :
+corrigé par P31 le 03/10, voir §1.)
