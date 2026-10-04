@@ -14,6 +14,7 @@ import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
+import { fitScale } from '../../../lib/canvasLimit'; // P31: one canvas cap for iPhone / iPad
 
 const THUMB_SCALE = 0.22;
 const CANVAS_MAX_WIDTH = 640;
@@ -135,7 +136,7 @@ export default function PdfEditorPage() {
     const totalRotation = (activeMeta.baseRotation + activeEntry.rotationDelta) % 360;
     const pdfPage = await pdfDoc.getPage(activeMeta.originalIndex + 1);
     const unscaled = pdfPage.getViewport({ scale: 1, rotation: totalRotation });
-    const scale = Math.min(CANVAS_MAX_WIDTH / unscaled.width, 1.8);
+    const scale = fitScale(unscaled.width, unscaled.height, Math.min(CANVAS_MAX_WIDTH / unscaled.width, 1.8));
     const viewport = pdfPage.getViewport({ scale, rotation: totalRotation });
     viewportRef.current = viewport;
 

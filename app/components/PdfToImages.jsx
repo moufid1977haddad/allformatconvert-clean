@@ -2,7 +2,8 @@
 import { useRef, useState } from 'react';
 import { loadPdfjs } from '../lib/pdfjs';
 import { reportToolError } from '../lib/reportError';
-import { rasterFromCanvas, rasterFromRGBA, CANVAS_MAX_PIXELS } from '../lib/bigImage';
+import { rasterFromCanvas, rasterFromRGBA } from '../lib/bigImage';
+import { fitScale, freeCanvas, withTimeout, StepTimeout } from '../lib/canvasLimit';
 import { encodeRaster } from '../lib/imageOutput';
 import { encodeExtra } from '../tools/image-tools/image-converter/extraFormats';
 import { FileDownload, DownloadGroup } from './FileDownload';
@@ -28,6 +29,11 @@ export const PDF_IMAGE_FORMATS = [
 const DPIS = [[150, 'Normal — 150 dpi (recommended)'], [300, 'High — 300 dpi (print)'], [72, 'Screen — 72 dpi (smallest)']];
 
 export { parsePageRange } from '../lib/pageRange';
+
+// P31 (03/10): no page may keep the tool busy for ever (owner's iPhone: "Page 1 of 3…" frozen). 60 s per page is far
+// above the slowest page measured (a 300 dpi photo page on a phone: a few seconds).
+const PAGE_TIME_LIMIT_MS = 60000;
+const stuck = (n, total, done) => `Page ${n} of ${total} could not be finished on this device after a minute${done ? ` (the ${done} file${done > 1 ? 's' : ''} made before it ${done > 1 ? 'are' : 'is'} below)` : ''}. Try a lower resolution or fewer pages at a time, or use a computer for this PDF.`;
 
 async function encode(raster, format, quality) {
   if (format === 'tiff' || format === 'bmp') return (await encodeExtra(format, raster, quality / 100)).blob;
@@ -92,20 +98,24 @@ export default function PdfToImages({ tool, formats = PDF_IMAGE_FORMATS.map((f) 
         const page = await pdf.getPage(n);
         if (mode === 'pages') {
           const unit = page.getViewport({ scale: 1 });
-          let scale = dpi / 72;
-          const fit = Math.sqrt(CANVAS_MAX_PIXELS / (unit.width * unit.height)) * 0.99;
-          if (scale > fit) { scale = fit; reduced = Math.max(reduced, Math.round(72 * fit)); }
+          // P31: the surface is capped for the device (iPhone / iPad: 16.7 MP), one page at a time, freed at once.
+          const scale = fitScale(unit.width, unit.height, dpi / 72);
+          if (scale < dpi / 72) reduced = Math.max(reduced, Math.round(72 * scale));
           const vp = page.getViewport({ scale });
           const canvas = document.createElement('canvas');
           canvas.width = Math.floor(vp.width); canvas.height = Math.floor(vp.height);
-          const ctx = canvas.getContext('2d');
-          ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); // pages are white paper
-          await page.render({ canvasContext: ctx, viewport: vp }).promise;
-          const blob = await encode(rasterFromCanvas(canvas, canvas.width, canvas.height), format, quality);
-          out.push({ blob, url: URL.createObjectURL(blob), name: `${base}-page-${n}.${ext}`, note: `page ${n} · ${canvas.width}×${canvas.height}` });
-          canvas.width = 1;
+          console.info(`[pdf-to-images] page ${n}: canvas ${canvas.width}×${canvas.height} (${(canvas.width * canvas.height / 1e6).toFixed(1)} MP)`);
+          try {
+            const ctx = canvas.getContext('2d');
+            if (!ctx) throw new Error(`Page ${n} is too large for this device to draw. Choose a lower resolution.`);
+            ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); // pages are white paper
+            const task = page.render({ canvasContext: ctx, viewport: vp });
+            await withTimeout(task.promise, PAGE_TIME_LIMIT_MS, stuck(n, pdf.numPages, out.length), () => task.cancel());
+            const blob = await withTimeout(encode(rasterFromCanvas(canvas, canvas.width, canvas.height), format, quality), PAGE_TIME_LIMIT_MS, stuck(n, pdf.numPages, out.length));
+            out.push({ blob, url: URL.createObjectURL(blob), name: `${base}-page-${n}.${ext}`, note: `page ${n} · ${canvas.width}×${canvas.height}` });
+          } finally { freeCanvas(canvas); }
         } else {
-          const ops = await page.getOperatorList();
+          const ops = await withTimeout(page.getOperatorList(), PAGE_TIME_LIMIT_MS, stuck(n, pdf.numPages, out.length));
           const seen = new Set();
           let k = 0;
           for (let i = 0; i < ops.fnArray.length; i++) {
@@ -116,16 +126,18 @@ export default function PdfToImages({ tool, formats = PDF_IMAGE_FORMATS.map((f) 
             if (id && seen.has(id)) continue;
             if (id) seen.add(id);
             const img = typeof arg === 'string'
-              ? await new Promise((resolve) => { const objs = id.startsWith('g_') ? page.commonObjs : page.objs; objs.get(id, resolve); })
+              ? await withTimeout(new Promise((resolve) => { const objs = id.startsWith('g_') ? page.commonObjs : page.objs; objs.get(id, resolve); }), PAGE_TIME_LIMIT_MS, stuck(n, pdf.numPages, out.length))
               : arg;
             if (!img || img.width < 16 || img.height < 16) continue; // bullets, rules, 1-px spacers
-            let raster;
+            let raster, c = null;
+            console.info(`[pdf-to-images] page ${n} image: ${img.width}×${img.height}${img.bitmap ? ' (bitmap)' : ''}`);
             if (img.bitmap) {
-              const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+              c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
               c.getContext('2d').drawImage(img.bitmap, 0, 0);
               raster = rasterFromCanvas(c, c.width, c.height);
             } else raster = rasterFromRGBA(rgbaOf(img), img.width, img.height);
-            const blob = await encode(raster, format, quality);
+            let blob;
+            try { blob = await withTimeout(encode(raster, format, quality), PAGE_TIME_LIMIT_MS, stuck(n, pdf.numPages, out.length)); } finally { freeCanvas(c); }
             k++;
             out.push({ blob, url: URL.createObjectURL(blob), name: `${base}-page-${n}-image-${k}.${ext}`, note: `page ${n} · ${img.width}×${img.height}` });
           }
@@ -138,6 +150,8 @@ export default function PdfToImages({ tool, formats = PDF_IMAGE_FORMATS.map((f) 
     } catch (e) {
       reportToolError({ tool, file, error: e });
       setError(e.message || String(e));
+      // what was finished before a page that could not be done is still offered (P31)
+      if (e instanceof StepTimeout && out.length) setResults(out);
     }
     setProgress(''); setBusy(false);
   };

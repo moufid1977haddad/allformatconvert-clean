@@ -11,6 +11,7 @@ import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
 import TextArea from '@/app/components/TextArea';
 import { withActualTextUnicode } from '../../../lib/pdfActualText';
+import { fitScale } from '../../../lib/canvasLimit'; // P31: one canvas cap for iPhone / iPad
 
 export default function Page() {
   const [file, setFile] = useState(null);
@@ -76,7 +77,8 @@ export default function Page() {
         // underneath at all -- there is no text left to extract because the
         // page no longer contains any text objects, matched or not.
         const rotation = page.rotate;
-        const viewport = page.getViewport({ scale, rotation: 0 });
+        const unit = page.getViewport({ scale: 1, rotation: 0 });
+        const viewport = page.getViewport({ scale: fitScale(unit.width, unit.height, scale), rotation: 0 });
         const canvas = document.createElement('canvas');
         canvas.width = viewport.width;
         canvas.height = viewport.height;

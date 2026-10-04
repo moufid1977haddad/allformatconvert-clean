@@ -4,6 +4,7 @@ import GifFromVideoTool from '../../../components/GifFromVideoTool';
 import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { assertVideoReadable } from '../../../lib/mediaSupport';
 import { useToolError } from '../../../lib/useToolError';
+import { fitSize } from '../../../lib/canvasLimit'; // P31: one canvas cap for iPhone / iPad
 
 // Video Tools > Video to GIF (P18, 01/10). It used to capture still PNG frames and never made a GIF, although its name
 // says GIF. It now makes an animated GIF the way GIF Tools > Video to GIF does (the proven path: ffmpeg palettegen /
@@ -40,7 +41,8 @@ function FrameExtractor({ file, busy }) {
       if (video.readyState < 1) await new Promise((r, j) => { video.onloadedmetadata = r; video.onerror = () => j(new Error("This video's frames could not be read in this browser.")); });
       assertVideoReadable(video);
       const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+      const fit = fitSize(video.videoWidth, video.videoHeight); // P31: an 8K video's frame is over the iPhone canvas cap
+      canvas.width = fit.width; canvas.height = fit.height;
       const ctx = canvas.getContext('2d');
       const total = Math.max(1, Math.round(fps * duration));
       const end = Number.isFinite(video.duration) ? video.duration : Infinity;

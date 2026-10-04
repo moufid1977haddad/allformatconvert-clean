@@ -6,6 +6,7 @@ import SeoContent from '../../../components/SeoContent';
 import { AUDIO_ACCEPT, VIDEO_ACCEPT, encryptedMusicMessage } from '../../../lib/mediaSupport';
 import { detectEncoding } from '../../../lib/csvEncoding';
 import UploadPrompt from '@/app/components/UploadPrompt';
+import { fitSize, freeCanvas } from '../../../lib/canvasLimit'; // P31: one canvas cap for iPhone / iPad
 export default function MediaPlayerPage() {
   const [file, setFile] = useState(null);
   const [isVideo, setIsVideo] = useState(false);
@@ -35,8 +36,9 @@ export default function MediaPlayerPage() {
   };
   const snapshot = () => {
     const v = mediaRef.current; if (!v || !v.videoWidth) return;
-    const c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight; c.getContext('2d').drawImage(v, 0, 0);
-    c.toBlob((b) => b && setShot(URL.createObjectURL(b)), 'image/png');
+    const { width, height } = fitSize(v.videoWidth, v.videoHeight); // an 8K frame is 33 MP: over the iPhone canvas cap
+    const c = document.createElement('canvas'); c.width = width; c.height = height; c.getContext('2d').drawImage(v, 0, 0, width, height);
+    c.toBlob((b) => { freeCanvas(c); if (b) setShot(URL.createObjectURL(b)); }, 'image/png');
   };
 
   const handleFile = (e) => {
