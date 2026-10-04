@@ -395,7 +395,10 @@ export default function PdfEditorPage() {
                 return (
                   <div key={`${entry.originalIndex}-${i}`} className={`border rounded-lg p-2 cursor-pointer ${i === activePos ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950' : 'border-neutral-200 dark:border-neutral-700'}`} onClick={() => setActivePos(i)}>
                     <div className="flex items-start gap-2">
-                      <input type="checkbox" checked={selected.has(entry.originalIndex)} onChange={(e) => { e.stopPropagation(); toggleSelect(entry.originalIndex); }} className="mt-1" />
+                      {/* P31: a 44 × 44 px touch area around the small checkbox (negative margins: the layout is unchanged) */}
+                      <label className="-ml-4 -mr-2 -mt-3 -mb-4 pl-4 pr-4 pt-4 pb-4 flex shrink-0 cursor-pointer" onClick={(e) => e.stopPropagation()}>
+                        <input type="checkbox" aria-label={`Select page ${entry.originalIndex + 1}`} checked={selected.has(entry.originalIndex)} onChange={(e) => { e.stopPropagation(); toggleSelect(entry.originalIndex); }} />
+                      </label>
                       <div className="flex-1 overflow-hidden rounded border border-neutral-200 dark:border-neutral-700" style={{ aspectRatio: '1 / 1.2' }}>
                         <img src={meta.thumbUrl} alt={`Page ${entry.originalIndex + 1}`} className="w-full h-full object-contain bg-white" style={{ transform: `rotate(${entry.rotationDelta}deg)` }} />
                       </div>

@@ -224,11 +224,23 @@ html[dir="rtl"] p {
     min-width: 44px;
   }
   /* a small button laid over a thumbnail (remove ✕): it keeps its size so the picture stays visible, and touches
-     within 10 px of it still reach it (review, 02/10: a 44 px circle covered most of a 63 px thumbnail) */
+     within 12 px of it still reach it (review, 02/10: a 44 px circle covered most of a 63 px thumbnail; P31, 03/10:
+     12 px, not 10, so the smallest of them, 20 px, still gets a 44 px area) */
   main :is(button, [role="button"]).absolute:not([data-seo-content] *)::after {
     content: "";
     position: absolute;
-    inset: -10px;
+    inset: -12px;
+  }
+  /* P31 (03/10): the navbar's small controls on a phone (logo, menu, search, Sign In: 24-36 px tall) keep their look
+     and the bar keeps its height; an invisible area centred on each grows the touch target to at least 44 × 44 px. */
+  .touch-hit {
+    position: relative;
+  }
+  .touch-hit::after {
+    content: "";
+    position: absolute;
+    inset-block: min(0px, calc((100% - 44px) / 2));
+    inset-inline: min(0px, calc((100% - 44px) / 2));
   }
   /* sliders: the track keeps its look, the touch area becomes 44 px tall */
   main input[type="range"]:not([data-seo-content] *) {
