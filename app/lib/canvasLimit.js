@@ -41,11 +41,13 @@ export function freeCanvas(c) {
 }
 
 export class StepTimeout extends Error {}
-/** `promise`, or a StepTimeout with `message` after `ms` (onTimeout runs first: cancel the work there). */
+/** `promise`, or a StepTimeout with `message` after `ms` (onTimeout runs right after the rejection: cancel the work there). */
 export function withTimeout(promise, ms, message, onTimeout) {
   let t;
   return Promise.race([
     promise,
-    new Promise((_, reject) => { t = setTimeout(() => { try { onTimeout && onTimeout(); } catch { /* already done */ } reject(new StepTimeout(message)); }, ms); }),
+    // reject FIRST: a cancel (PDF.js renderTask.cancel) rejects the work's own promise at once, and the race would
+    // then show "Rendering cancelled" instead of the sentence (measured 03/10, WebKit)
+    new Promise((_, reject) => { t = setTimeout(() => { reject(new StepTimeout(message)); try { onTimeout && onTimeout(); } catch { /* already done */ } }, ms); }),
   ]).finally(() => clearTimeout(t));
 }

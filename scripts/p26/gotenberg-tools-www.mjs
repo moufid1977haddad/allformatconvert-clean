@@ -56,7 +56,7 @@ for (const [name, slug, input, mode] of cases.filter((c) => !only || only.includ
   }
   const b64 = await p.locator('[data-file-download] [data-download]').first().evaluate(async (a) => {
     const staged = /\/zipdl\/f\//.test(a.getAttribute('href') || '');
-    const res = staged ? await (await caches.open('ocv-downloads-v1')).match(a.href) : await fetch(a.href);
+    const res = staged ? await (await caches.open('ocv-downloads-v1')).match(a.href) : await (async () => { for (let i = 0; i < 100 && !a.getAttribute('href'); i++) await new Promise((r) => setTimeout(r, 100)); return fetch(a.href); })();
     const u = new Uint8Array(await res.arrayBuffer()); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s);
   });
   const buf = Buffer.from(b64, 'base64');

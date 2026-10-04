@@ -25,7 +25,7 @@ let pass = 0, fail = 0;
 const check = (n, ok, info = '') => { ok ? pass++ : fail++; console.log(ok ? 'PASS' : 'FAIL', `${engine} ${n}`, info); };
 const fetchDownload = (p) => p.locator('[data-file-download] [data-download]').first().evaluate(async (el) => {
   const staged = /\/zipdl\/f\//.test(el.getAttribute('href') || '');
-  const resp = staged ? await (await caches.open('ocv-downloads-v1')).match(el.href) : await fetch(el.href);
+  const resp = staged ? await (await caches.open('ocv-downloads-v1')).match(el.href) : await (async () => { for (let i = 0; i < 100 && !el.getAttribute('href'); i++) await new Promise((r) => setTimeout(r, 100)); return fetch(el.href); })();
   const u = new Uint8Array(await resp.arrayBuffer()); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s);
 }).then((b64) => Buffer.from(b64, 'base64'));
 

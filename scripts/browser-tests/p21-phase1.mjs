@@ -1,6 +1,6 @@
 // P21 phase 1 (02/10) — the three defects seen on the owner's real iPhone, checked on the real pages.
-//   1. JPG to PDF: on iPhone / iPad the "Download" link already points at the file served as an attachment before
-//      the tap (/zipdl/f/...), and touching it saves the PDF (also covered for 28 tools by download-guard.mjs).
+//   1. JPG to PDF: the "Download" link is a blob: of the PDF retyped application/octet-stream with the download
+//      attribute (P31, 03/10 — it was the /zipdl/f/ attachment until then), and touching it saves the PDF.
 //   2. Background Remover: a white disc on blue-violet plastic, the service PLAYED with a mask a few pixels too wide
 //      and soft (what IS-Net stretched from 1024 px gives): the edge of the cut-out must not keep the blue (background
 //      share in the edge ring < 10 %; it is ~40 % without the P21 refinement), the centre stays the photo's own white,
@@ -55,13 +55,15 @@ if (device === 'iphone') {
   await p.getByRole('button', { name: 'Convert to PDF' }).click();
   const link = p.locator('a[data-download]').first();
   await link.waitFor({ timeout: 60000 });
-  await p.locator('a[data-download][data-staged="1"]').first().waitFor({ timeout: 15000 }).catch(() => {});
+  // P31 (03/10): the P21 design (link to /zipdl/f/ served by the service worker) failed on the real iPhone (PDF opened,
+  // M4R saved as .m4r.html). Now: a blob: of the file retyped application/octet-stream, download="portrait.pdf".
+  await p.locator('a[data-download][data-retyped="1"]').first().waitFor({ timeout: 15000 }).catch(() => {});
   const href = await link.getAttribute('href');
-  const hasDownloadAttr = await link.evaluate((a) => a.hasAttribute('download'));
-  check('JPG to PDF: Download link is the prepared attachment before the tap, a plain link (no download attribute)', /^\/zipdl\/f\/[0-9a-f]{32}\/portrait\.pdf$/.test(href || '') && !hasDownloadAttr, `${href} download-attr=${hasDownloadAttr}`);
-  const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }).catch(() => null), link.click()]);
+  const info = await link.evaluate(async (a) => ({ download: a.getAttribute('download'), type: (await (await fetch(a.href)).blob()).type }));
+  check('JPG to PDF: Download link is a blob: retyped application/octet-stream with download="portrait.pdf"', /^blob:/.test(href || '') && info.download === 'portrait.pdf' && info.type === 'application/octet-stream', `${href} ${JSON.stringify(info)}`);
+  const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }).catch(() => null), link.click({ noWaitAfter: true })]);
   const buf = dl ? fs.readFileSync(await dl.path()) : Buffer.alloc(0);
-  check('JPG to PDF: the tap saves portrait.pdf (a real PDF) as an attachment', !!dl && dl.suggestedFilename() === 'portrait.pdf' && buf.subarray(0, 5).toString() === '%PDF-' && navs.some((u) => u.includes('/zipdl/f/')), `${dl && dl.suggestedFilename()} ${buf.length} bytes, ${navs.join(' ')}`);
+  check('JPG to PDF: the tap saves portrait.pdf (a real PDF), no navigation to /zipdl/', !!dl && dl.suggestedFilename() === 'portrait.pdf' && buf.subarray(0, 5).toString() === '%PDF-' && navs.length === 0, `${dl && dl.suggestedFilename()} ${buf.length} bytes, ${navs.join(' ')}`);
   check('JPG to PDF: no page error', !errors.length, errors.join(' | '));
   await ctx.close();
 }

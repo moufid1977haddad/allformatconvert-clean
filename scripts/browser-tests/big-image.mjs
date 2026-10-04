@@ -74,7 +74,7 @@ let fails = 0; const check = (n, ok, info = '') => { if (!ok) fails++; console.l
 async function resultBytes(p) {
   const n = await p.locator('[data-file-download] [data-download]').first().evaluate(async (a) => {
     const staged = /\/zipdl\/f\//.test(a.getAttribute('href') || '');
-    const res = staged ? await (await caches.open('ocv-downloads-v1')).match(a.href) : await fetch(a.href);
+    const res = staged ? await (await caches.open('ocv-downloads-v1')).match(a.href) : await (async () => { for (let i = 0; i < 100 && !a.getAttribute('href'); i++) await new Promise((r) => setTimeout(r, 100)); return fetch(a.href); })();
     window.__res = new Uint8Array(await res.arrayBuffer()); return window.__res.length;
   });
   const parts = [];
@@ -96,7 +96,7 @@ async function convert(file, fmt) {
     ]).catch(() => 'timeout');
     if (r !== 'ok') return { error: r === 'timeout' ? 'no result after 10 min' : (await page.locator('main').innerText()).match(/(failed to convert|megapixel limit)[\s\S]{0,300}/)?.[0].replace(/\n/g, ' | ') || 'error' };
     const secs = (Date.now() - t0) / 1000;
-    if (device) await page.locator('[data-file-download] [data-download][data-staged="1"]').first().waitFor({ timeout: 15000 }).catch(() => {});
+    if (device) await page.locator('[data-file-download] [data-download][data-retyped="1"]').first().waitFor({ timeout: 15000 }).catch(() => {});
     const name = await page.locator('[data-file-download]').first().getAttribute('data-name');
     return { buf: await resultBytes(page), name, secs };
   } finally { await page.close(); }
