@@ -23,7 +23,7 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
    rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
 
-## 📱 P31 — 03→04/10 : correctifs de la passe iPhone (26 tests) + AJOUT ConvertAPI (`docs/audit/RAPPORT-p31-iphone-correctifs-04-10.md`, repère `restauration-avant-p31-04-10` = `fb2d1db3`)
+## 📱 P31 — 03→04/10 : correctifs de la passe iPhone (26 tests) + AJOUT ConvertAPI (`docs/audit/RAPPORT-p31-iphone-correctifs-04-10.md`, repère `restauration-avant-p31-04-10` = `fb2d1db3`) — **en production : `onlineconvertools-ooe79sko9` = `4b74d592` (04/10), www 29/29, retour arrière : `onlineconvertools-osaer8a95`**
 
 **Règle (leçon P21, permanente)** : rien n'est « corrigé sur iPhone » tant que l'iPhone ne l'a pas confirmé — statut maximal
 « corrigé, à confirmer sur iPhone ». Mini-passe iPhone de 10 vérifications : rapport §12.

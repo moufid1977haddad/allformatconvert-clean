@@ -264,7 +264,11 @@ seulement si le fichier est vraiment livré (bandeau fermé = non) ; (5) le chem
   par le vrai Gotenberg** : Chromium 14/14, WebKit iPhone 7/7 ; PDF to JPG WebKit iPhone 4/4 ; taille (panorama + PDF)
   Chromium iPhone 6/6. (Seule erreur vue : `navigator.storage.persisted` levée par la barre d'outils Vercel des préversions
   dans WebKit — absente de www, pas notre code ; bloquée par `--no-vercel-toolbar`.)
-- **Production** : _voir la fin de cette section._
+- **Production** : fusion `4b74d592` (code identique au commit testé sur la préversion, vérifié par `merge-stage.sh`),
+  déploiement **`onlineconvertools-ooe79sko9`** prêt le 04/10 vers 02 h 30 UTC. Contrôle léger sur www : **29/29** ; un
+  téléchargement réel par le nouveau chemin (JPG to PDF, WebKit iPhone) : **6/6**. Aucune régression, **aucun retour
+  arrière**. Retour arrière possible : promouvoir `onlineconvertools-osaer8a95` (= `9f6ecfda`, P30).
+- Dépenses P31 : **0 $** (aucune conversion ConvertAPI, aucun appel de détourage payant, aucun redéploiement Railway).
 
 ## 12. Mini-passe iPhone (10 vérifications au plus)
 
