@@ -79,4 +79,8 @@ Aucune refonte, aucune nouvelle fonction, aucun texte marketing modifié. Bancs 
 - Aucun outil n'annonce un résultat qu'il ne livre pas (priorité 1 : aucun cas trouvé hors §3).
 
 ## 6. Déploiement (un seul, fin du lot B)
-(complété ci-dessous)
+- master `6887a0b1` (avance rapide) → Vercel **`onlineconvertools-h9vbm07hj`** prête ; pdf-tools reconstruit sur le même
+  service (`0f9fc564`, SUCCESS ; aucun changement Railway dans ce lot, la reconstruction suit chaque push sur master).
+- Contrôle léger : www-light **29/29** ; `/privacy` affiche « Last updated: October 5, 2026 » ; l'exemple de CSV to SQL
+  montre `VARCHAR(7)`. Aucun retour arrière. Retour arrière prêt : `onlineconvertools-f2vxs809j`.
+- Dépense : 0 $.

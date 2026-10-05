@@ -23,7 +23,7 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
    rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
 
-## 🧪 P34 — 05/10 (nuit, lot B) : non-régression de tous les outils en local (`docs/audit/RAPPORT-p34-non-regression-05-10.md`)
+## 🧪 P34 — 05/10 (nuit, lot B) : non-régression de tous les outils en local (`docs/audit/RAPPORT-p34-non-regression-05-10.md`) — **en production : `onlineconvertools-h9vbm07hj` = `6887a0b1`, www 29/29 ; retour arrière : `onlineconvertools-f2vxs809j`**
 
 Fournisseurs simulés (`scripts/p34/fake-all-providers.mjs` : aucun appel payant, rien dans Supabase, aucune alerte), ≈ 190
 lancements : **aucune régression d'outil** ; solidité 522/522 ×3 moteurs, toutes les pages ×3 + Safari 16.4, téléchargements
