@@ -113,8 +113,10 @@ async function ocrAcquired(workDir, p, signal) {
   const pdfPath = path.join(workDir, 'out.pdf');
   if (t.code !== 0 || !fs.existsSync(txtPath) || !fs.existsSync(pdfPath)) return { ok: false, status: 422, error: 'Our OCR service could not recognize this page.' };
   const pdf = fs.readFileSync(pdfPath);
-  if (pdf.length > config.MAX_OCR_OUTPUT_BYTES) return { ok: false, status: 422, error: 'This page holds too much text to send back.' };
-  return { ok: true, text: fs.readFileSync(txtPath, 'utf8'), pdf, dpi, reduced, pages: info.pages };
+  const text = fs.readFileSync(txtPath, 'utf8');
+  // the layer AND the whole answer (text + base64 layer) must fit the way back (review 05/10)
+  if (pdf.length > config.MAX_OCR_OUTPUT_BYTES || Buffer.byteLength(text) + Math.ceil(pdf.length / 3) * 4 > config.MAX_OCR_ANSWER_BYTES) return { ok: false, status: 422, error: 'This page holds too much text to send back.' };
+  return { ok: true, text, pdf, dpi, reduced, pages: info.pages };
 }
 
 module.exports = { parseOcrParams, ocrPage, installedLanguages, MAX_LANGS };

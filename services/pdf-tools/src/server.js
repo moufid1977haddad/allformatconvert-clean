@@ -94,7 +94,9 @@ app.get('/health', async (_req, res) => {
   const binaries = await checkAllBinaries();
   // soffice (P26, .doc only) is reported but does not decide the service's health: a LibreOffice problem must not
   // mark repair, PDF/A and compression down (nor block a deploy on Railway's health check).
-  const allOk = Object.entries(binaries).every(([name, b]) => name === 'soffice' || b.ok);
+  // P33: tesseract (OCR only) is reported the same way: an OCR problem must not mark the other endpoints down; the OCR
+  // endpoint answers 503 by itself (security review 05/10)
+  const allOk = Object.entries(binaries).every(([name, b]) => name === 'soffice' || name === 'tesseract' || b.ok);
   // P33: the OCR models installed (codes only), so the site's language list can be checked against them
   let ocrLanguages = null;
   try { ocrLanguages = [...(await installedLanguages())].sort(); } catch { /* reported by binaries.tesseract */ }
@@ -350,6 +352,24 @@ app.post('/v1/unicode-from-actualtext', requireApiKey, withTempDir(withTimeout(a
   return res.status(200).send(out);
 }, config.ACTUALTEXT_TIMEOUT_MS)));
 
+// P33 (security review 05/10): at most STAGED_FETCH_CONCURRENCY staged sources (up to 44 MB each) copied into /tmp at
+// the same time, render and OCR together; a request that cannot start within STAGED_FETCH_QUEUE_MS gets 503.
+let stagedRunning = 0;
+const stagedWaiting = [];
+async function fetchStagedBounded(dir, jid, ticket, signal, max) {
+  const got = stagedRunning < config.STAGED_FETCH_CONCURRENCY ? (stagedRunning++, true) : await new Promise((resolve) => {
+    const entry = { resolve, timer: setTimeout(() => { const i = stagedWaiting.indexOf(entry); if (i >= 0) stagedWaiting.splice(i, 1); resolve(false); }, config.STAGED_FETCH_QUEUE_MS) };
+    stagedWaiting.push(entry);
+  });
+  if (!got) return { ok: false, status: 503, error: 'Our PDF service is busy right now. Please try again in a minute.' };
+  try {
+    return await compress.fetchSource(dir, jid, ticket, signal, max);
+  } finally {
+    const next = stagedWaiting.shift();
+    if (next) { clearTimeout(next.timer); next.resolve(true); } else stagedRunning--;
+  }
+}
+
 // ---- /v1/render-page (P32): one PDF page -> one image (pdftoppm, src/render.js) --------------------------------
 // For an iPhone / iPad whose browser could not draw the page. Multipart: file + page, dpi, format, quality[, maxPixels].
 // Answer: the image itself, with X-Render-* headers (density really used, page count, why it was reduced). Nothing is
@@ -400,7 +420,7 @@ app.post('/v1/render-page-staged', requireApiKey, express.json({ limit: '4kb' })
   }
   const p = parseRenderParams(req.body);
   if (!p.ok) return res.status(400).json({ ok: false, error: p.error });
-  const src = await compress.fetchSource(req.tempDir, jid, ticket, signal, config.MAX_RENDER_INPUT_BYTES);
+  const src = await fetchStagedBounded(req.tempDir, jid, ticket, signal, config.MAX_RENDER_INPUT_BYTES);
   if (!src.ok) return res.status(src.status).json({ ok: false, error: src.error });
   const bytesIn = fs.statSync(require('path').join(req.tempDir, compress.INPUT_NAME)).size;
   const r = await renderPage(req.tempDir, p, signal);
@@ -462,7 +482,7 @@ app.post('/v1/ocr-page-staged', requireApiKey, express.json({ limit: '4kb' }), w
   }
   const p = await ocrParams(req, res);
   if (!p) return;
-  const src = await compress.fetchSource(req.tempDir, jid, ticket, signal, config.MAX_RENDER_INPUT_BYTES);
+  const src = await fetchStagedBounded(req.tempDir, jid, ticket, signal, config.MAX_RENDER_INPUT_BYTES);
   if (!src.ok) return res.status(src.status).json({ ok: false, error: src.error });
   const bytesIn = fs.statSync(require('path').join(req.tempDir, compress.INPUT_NAME)).size;
   return ocrRequest(req, res, p, signal, '/v1/ocr-page-staged', bytesIn);

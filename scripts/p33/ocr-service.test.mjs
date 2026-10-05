@@ -105,7 +105,7 @@ try {
   const s = await fetch('http://127.0.0.1:3591/v1/ocr-page-staged', { method: 'POST', headers: { 'X-API-Key': KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ jid: 'a'.repeat(32), ticket: 'x', page: 1, lang: 'eng' }) });
   check('staged without MEDIA_SERVICE_URL → 503', s.status === 503);
   const par = await Promise.all([1, 2, 3, 1].map((pg) => ocr(3591, { page: pg, lang: 'eng' })));
-  check('4 parallel recognitions all succeed (2 at a time)', par.every((x) => x.res.status === 200), par.map((x) => `${x.ms} ms`).join(', '));
+  check('4 parallel recognitions all succeed (queued, 1 at a time)', par.every((x) => x.res.status === 200), par.map((x) => `${x.ms} ms`).join(', '));
   check('one metric line per request, no file name and no recognized text in logs', A.lines.some((l) => l.includes('"/v1/ocr-page"')) && !A.lines.some((l) => /pdf-avec-images|photo-\d|PDF avec/.test(l)), A.lines.filter((l) => /photo|PDF avec/.test(l)).join(' | '));
   // the render endpoint of P32 is untouched
   const form = new FormData();
