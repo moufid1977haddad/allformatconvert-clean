@@ -1,6 +1,6 @@
 'use client';
 import { pdfFileProblem, pdfLockedProblem } from '../../../lib/fileChecks';
-import { useState, useRef, useSyncExternalStore } from 'react';
+import { useState, useRef, useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
@@ -11,7 +11,7 @@ import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
 import TextArea from '@/app/components/TextArea';
 import { withActualTextUnicode } from '../../../lib/pdfActualText';
-import { fitScale, withTimeout } from '../../../lib/canvasLimit'; // P31: one canvas cap for iPhone / iPad
+import { fitScale, withTimeout, StepTimeout } from '../../../lib/canvasLimit'; // P31: one canvas cap for iPhone / iPad
 import { serverRenderAvailable, ServerPageRenderer, LOCAL_PAGE_LIMIT_MS, LOCAL_PAGE_LIMIT_LABEL, listPages } from '../../../lib/serverPageRender';
 
 // P32 (04/10): a page drawn by our PDF service comes with the page's /Rotate applied (pdftoppm); the redaction works
@@ -19,6 +19,16 @@ import { serverRenderAvailable, ServerPageRenderer, LOCAL_PAGE_LIMIT_MS, LOCAL_P
 // the device does not change while the page is open: nothing to subscribe to (useSyncExternalStore reads it once on
 // the client, false in the server render, so hydration matches)
 const noSubscribe = () => () => {};
+
+// P33 (05/10): real iPhone pass of 04/10 (iOS 26) — kit-iphone-p21/pdf-avec-images.pdf, "photo-2", "Redact PDF": no
+// file, no message, no error. Playwright's WebKit and Chromium (iPhone) redact the same file in ~2 s, and no request
+// reached /api/pdf-render or /api/report-error during the owner's test (Vercel logs), so the page never got to the
+// 20-second drawing fallback nor showed an error. The page now always answers: every step says where it is
+// ("Page 2 of 3: reading its text…"), a step with no progress for STEP_LIMIT_MS stops with a sentence naming it (and
+// that sentence reaches tool_errors, so the next real failure tells us which step it was), and the result or the
+// message is scrolled into view (on a phone it appeared under the keyboard / below the fold).
+const STEP_LIMIT_MS = () => (typeof window !== 'undefined' && window.__redactStepLimitMs) || 60000;
+const quoteTerms = (terms) => terms.map((t) => `“${t}”`).join(', ');
 
 function drawUnrotated(ctx, img, W, H, rot) {
   ctx.save();
@@ -37,7 +47,13 @@ export default function Page() {
   const [result, setResult] = useState(null);
   const [error, setError] = useToolError('');
   const [summary, setSummary] = useState('');
+  const [progress, setProgress] = useState('');
   const fileRef = useRef();
+  const resultRef = useRef(null);
+  // P33: the outcome (file row, summary or message) is brought into view when it appears
+  useEffect(() => {
+    if ((summary || error) && resultRef.current && resultRef.current.scrollIntoView) resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [summary, error]);
   // P32: the notice of the iPhone / iPad fallback, read after mounting (the server render does not know the device)
   const onAppleTouch = useSyncExternalStore(noSubscribe, serverRenderAvailable, () => false);
 
@@ -51,13 +67,17 @@ export default function Page() {
     setError('');
     setSummary('');
     setResult(null);
+    setProgress('Opening the PDF...');
+    const limit = STEP_LIMIT_MS();
+    const step = (promise, what, onTimeout) => withTimeout(promise, limit, `${what} made no progress for ${Math.round(limit / 1000)} seconds on this device. Try again; if it happens again, use a computer for this PDF.`, onTimeout);
     try {
       const { PDFDocument, degrees } = await import('pdf-lib');
       const pdfjsLib = await loadPdfjs();
       const arrayBuffer = await file.arrayBuffer();
-      const srcDoc = await PDFDocument.load(await openablePdfBytes(arrayBuffer));
+      const srcDoc = await step(PDFDocument.load(await openablePdfBytes(arrayBuffer)), 'Opening the PDF');
       const outDoc = await PDFDocument.create();
-      const pdf = await pdfjsLib.getDocument({ data: await withActualTextUnicode(arrayBuffer) }).promise;
+      const loadingTask = pdfjsLib.getDocument({ data: await withActualTextUnicode(arrayBuffer) });
+      const pdf = await step(loadingTask.promise, 'Opening the PDF', () => loadingTask.destroy());
       const scale = 2;
       const canFallBack = serverRenderAvailable();
       let renderer = null;
@@ -66,11 +86,14 @@ export default function Page() {
       try {
       let totalMatches = 0;
       const pagesHit = [];
+      const perPage = []; // [page, occurrences]
       const measure = document.createElement('canvas').getContext('2d');
 
       for (let i = 0; i < pdf.numPages; i++) {
-        const page = await pdf.getPage(i + 1);
-        const content = await page.getTextContent();
+        const where = `Page ${i + 1} of ${pdf.numPages}`;
+        setProgress(`${where}: reading its text...`);
+        const page = await step(pdf.getPage(i + 1), `${where}: opening the page`);
+        const content = await step(page.getTextContent(), `${where}: reading its text`);
         const items = content.items.filter((it) => typeof it.str === 'string');
         const strs = items.map((it) => it.str);
         const spans = [
@@ -79,16 +102,18 @@ export default function Page() {
         ];
         // Form field values and comments are searched too: they are part of the page's annotations, which are
         // copied as they are on a page without a match in its text (29/09).
-        const annots = (await page.getAnnotations()).filter((an) => an.rect && annotationMatches(annotationText(an), terms, kinds));
+        const annots = (await step(page.getAnnotations(), `${where}: reading its form fields and comments`)).filter((an) => an.rect && annotationMatches(annotationText(an), terms, kinds));
 
         if (spans.length === 0 && annots.length === 0) {
           const [copied] = await outDoc.copyPages(srcDoc, [i]);
           outDoc.addPage(copied);
           continue;
         }
-        totalMatches += new Set(spans.map((sp) => sp.m)).size;
-        totalMatches += annots.length;
+        const here = new Set(spans.map((sp) => sp.m)).size + annots.length;
+        totalMatches += here;
         pagesHit.push(i + 1);
+        perPage.push([i + 1, here]);
+        setProgress(`${where}: blacking out ${here} occurrence${here > 1 ? 's' : ''}...`);
 
         // A black rectangle drawn on top of the page still leaves the
         // original text operators in the content stream, so the "hidden"
@@ -113,7 +138,7 @@ export default function Page() {
         if (!remote) {
           try {
             const task = page.render({ canvasContext: ctx, viewport });
-            await (canFallBack ? withTimeout(task.promise, LOCAL_PAGE_LIMIT_MS(), 'timeout', () => task.cancel()) : task.promise);
+            await (canFallBack ? withTimeout(task.promise, LOCAL_PAGE_LIMIT_MS(), 'timeout', () => task.cancel()) : step(task.promise, `${where}: drawing the page`, () => task.cancel()));
             drawn = true;
           } catch (e) {
             if (!canFallBack) throw e;
@@ -124,6 +149,7 @@ export default function Page() {
         if (!drawn) {
           if (!renderer) renderer = new ServerPageRenderer(file);
           sentToServer = true;
+          setProgress(`${where}: drawing it on our PDF service...`);
           let r;
           try {
             r = await renderer.render({ page: i + 1, dpi: Math.max(36, Math.round(72 * viewport.scale)), format: 'png', maxPixels: Math.max(100000, Math.ceil(canvas.width * canvas.height * 1.05)) });
@@ -171,7 +197,8 @@ export default function Page() {
           poly([[ax0, ay0], [ax1, ay0], [ax1, ay1], [ax0, ay1]]);
         }
 
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const blob = await step(new Promise((resolve) => canvas.toBlob(resolve, 'image/png')), `${where}: making the blacked-out image`);
+        if (!blob) throw new Error(`${where}: this device could not make the blacked-out image.`);
         const imgBytes = await blob.arrayBuffer();
         const embeddedImg = await outDoc.embedPng(imgBytes);
         const { width: pw, height: ph } = page.getViewport({ scale: 1, rotation: 0 });
@@ -181,20 +208,26 @@ export default function Page() {
       }
 
       if (totalMatches === 0) {
-        setError('No matches found for that text.');
+        // no file is made: nothing would be removed (P33: the terms are named back, as the market's tools do)
+        const asked = [terms.length ? quoteTerms(terms) : '', ...kinds.map((k) => PATTERNS[k].label.toLowerCase())].filter(Boolean).join(', ');
+        setError(`No match found for ${asked} in this PDF's text (${pdf.numPages} page${pdf.numPages > 1 ? 's' : ''} searched). Text that is part of a picture (a scan) cannot be found: run PDF OCR first.`);
         setLoading(false);
+        setProgress('');
         return;
       }
 
-      const pdfBytes = await outDoc.save();
+      setProgress('Saving the redacted PDF...');
+      const pdfBytes = await step(outDoc.save(), 'Saving the redacted PDF');
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setResult(URL.createObjectURL(blob));
       const byServer = drawnByServer.length ? ` This device could not draw ${drawnByServer.length > 1 ? 'pages' : 'page'} ${listPages(drawnByServer)}, so our own PDF service drew ${drawnByServer.length > 1 ? 'them' : 'it'} before the blacking out: your PDF was sent there, then deleted.` : '';
-      setSummary(`Blacked out ${totalMatches} occurrence${totalMatches > 1 ? 's' : ''} on page${pagesHit.length > 1 ? 's' : ''} ${pagesHit.join(', ')}. Check the result before sharing it: text drawn as an image (a scan) cannot be found.${byServer}`);
+      const detail = perPage.map(([pg, n]) => `page ${pg}: ${n}`).join(', ');
+      setSummary(`Blacked out ${totalMatches} occurrence${totalMatches > 1 ? 's' : ''} (${detail}). ${pagesHit.length > 1 ? 'These pages are' : 'This page is'} now a flattened image: the blacked-out text no longer exists in the file. Check the result before sharing it: text drawn as an image (a scan) cannot be found.${byServer}`);
       } finally {
         if (renderer) renderer.close();
       }
-    } catch(e) { setError('Redaction failed: ' + e.message + (sentToServer ? ' Your PDF was sent to our own PDF service for this attempt, then deleted.' : '')); }
+    } catch(e) { setError((e instanceof StepTimeout ? e.message : 'Redaction failed: ' + e.message) + (sentToServer ? ' Your PDF was sent to our own PDF service for this attempt, then deleted.' : '')); }
+    setProgress('');
     setLoading(false);
   };
 
@@ -223,10 +256,13 @@ export default function Page() {
           <button onClick={redact} disabled={!file || (!keyword.trim() && !kinds.length) || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
             {loading ? 'Redacting...' : 'Redact PDF'}
           </button>
+          {loading && progress && <p className="text-xs text-neutral-600 text-center" aria-live="polite" data-redact-progress>{progress}</p>}
           {onAppleTouch && <p className="text-xs text-neutral-600 text-center" data-server-render-note>On iPhone and iPad, a page your device cannot draw within {LOCAL_PAGE_LIMIT_LABEL} is drawn by our own PDF service instead: your PDF is sent there, then deleted.</p>}
-          {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
-          {summary && <p className="text-neutral-700 text-center text-sm" data-summary>{summary}</p>}
-          {result && <FileDownload href={result} name="redacted.pdf" />}
+          <div ref={resultRef} className="space-y-4 scroll-mt-24">
+            {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
+            {summary && <p className="text-neutral-700 text-center text-sm" data-summary>{summary}</p>}
+            {result && <FileDownload href={result} name="redacted.pdf" />}
+          </div>
         </div>
       </div>
       <SeoContent

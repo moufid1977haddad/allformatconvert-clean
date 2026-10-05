@@ -30,9 +30,12 @@ export function matchSpans(strs, keyword) {
   return spans;
 }
 
-// Text a pdf.js annotation carries (form field value, comment, alternate text).
+// Text a pdf.js annotation carries (form field value, comment, alternate text; P33: a link's address too — a
+// "Contact me" link to mailto:jane@… on a page whose text does not hold the address was copied as it was, address
+// included).
+const decoded = (u) => { try { return typeof u === 'string' ? decodeURIComponent(u) : null; } catch { return null; } };
 export function annotationText(a) {
-  const parts = [a.fieldValue, a.contentsObj && a.contentsObj.str, a.contents, a.alternativeText, a.textContent && [].concat(a.textContent).join(' ')];
+  const parts = [a.fieldValue, a.contentsObj && a.contentsObj.str, a.contents, a.alternativeText, a.textContent && [].concat(a.textContent).join(' '), a.url, a.unsafeUrl, decoded(a.unsafeUrl), a.titleObj && a.titleObj.str];
   return parts.flat().filter((v) => typeof v === 'string').join(' ');
 }
 
