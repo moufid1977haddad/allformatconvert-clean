@@ -1,0 +1,545 @@
+[
+  {
+    "path": "/tools/pdf-tools/pdf-compare",
+    "task": "Extrait le texte de deux PDF avec PDF.js, marque les lignes différentes (Myers, espaces ignorés) avec le numéro de page de chaque ligne et les mots changés dans une ligne modifiée, puis affiche les deux textes côte à côte.",
+    "inputs": {"accept": ".pdf", "formats": ["PDF (deux fichiers, un par zone)"], "ref": "app/tools/pdf-tools/pdf-compare/page.jsx:86-87"},
+    "outputs": {"formats": ["Affichage à l'écran seulement (aucun fichier à télécharger) : liste des différences + deux zones de texte en lecture seule"], "ref": "app/tools/pdf-tools/pdf-compare/page.jsx:92-117"},
+    "controls": [
+      {"label": "Click or drop PDF 1 here / Choose PDF 1 (zone gauche)", "ref": "app/tools/pdf-tools/pdf-compare/page.jsx:79-81; app/components/UploadPrompt.jsx:10-11"},
+      {"label": "Click or drop PDF 2 here / Choose PDF 2 (zone droite)", "ref": "app/tools/pdf-tools/pdf-compare/page.jsx:82-84"},
+      {"label": "Compare PDFs (pendant le travail : Comparing...)", "ref": "app/tools/pdf-tools/pdf-compare/page.jsx:88-90"}
+    ],
+    "steps": ["cliquer la zone gauche → choisir le 1er PDF", "cliquer la zone droite → choisir le 2e PDF", "bouton « Compare PDFs »", "lire le compte « N line(s) only in <fichier1> (red) · N line(s) only in <fichier2> (green) », la liste (lignes rouges/vertes, numéro « p. N », mots changés surlignés) puis les deux textes complets"],
+    "limits": [
+      {"what": "taille max par fichier sur ordinateur", "value": "aucune limite codée (mémoire du navigateur)", "constant": null, "ref": "app/tools/pdf-tools/pdf-compare/page.jsx:24-71 (aucun contrôle de taille)"},
+      {"what": "taille max sur iPhone/Android", "value": "aucune limite codée", "constant": null, "ref": "app/tools/pdf-tools/pdf-compare/page.jsx (aucun isMobileDevice)"},
+      {"what": "réparation des accents LibreOffice (ActualText) avant lecture", "value": "appliquée seulement aux fichiers ≤ 25 Mo ; au-delà le texte est lu tel quel", "constant": "MAX_BYTES", "ref": "app/lib/pdfActualText.js:17"}
+    ],
+    "processing": {"where": "browser", "detail": "PDF.js (build legacy) dans le navigateur ; aucun envoi du fichier. Seul un message d'erreur nettoyé (sans fichier ni contenu) part vers /api/report-error si une erreur est affichée.", "ref": "app/tools/pdf-tools/pdf-compare/page.jsx:24-38; app/lib/pdfjs.js:71-76; app/lib/useToolError.js:2-7,47"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun import d'authentification dans page.jsx)",
+    "watermark": "sans objet (aucun fichier produit)",
+    "browsers": "Safari : PDF.js legacy + polyfill de l'itération des flux pour getTextContent (app/lib/pdfjs.js:3-15).",
+    "twin": "/tools/text-tools/text-comparator et /tools/developer-tools/diff-viewer comparent du texte collé (pas des PDF) ; pas de jumeau PDF",
+    "notes": "Algorithme : diffLines (jsdiff diffArrays, clé = ligne trim + espaces réduits) app/lib/codeTools.js:49-66 ; mots : diffWords page.jsx:53-65. PDF scanné : message « Neither PDF has text to compare: scanned pages are pictures. Make them searchable with PDF OCR first, then compare. » ou « <nom> has no text … use PDF OCR on it first. » page.jsx:94. Ordre des lignes = ordre des objets texte du fichier (pas de remise en ordre des colonnes) app/lib/pdfTextLayout.js:10-36. PDF à mot de passe d'ouverture : erreur brute de PDF.js préfixée « Failed: » page.jsx:67. Le titre et la méta actuels ne mentionnent pas le marquage des différences."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-compress",
+    "task": "Réduit la taille d'un PDF à trois niveaux (Extreme, Recommended, Lossless) sur notre serveur pdf-tools (pikepdf + tx d'Adobe), ou, au-delà du plafond serveur et seulement si l'appareil le permet, par une ré-écriture de structure dans le navigateur.",
+    "inputs": {"accept": ".pdf,application/pdf", "formats": ["PDF"], "ref": "app/tools/pdf-tools/pdf-compress/page.jsx:184"},
+    "outputs": {"formats": ["PDF (<nom>-compressed.pdf)"], "ref": "app/tools/pdf-tools/pdf-compress/page.jsx:229"},
+    "controls": [
+      {"label": "Click or drop a PDF here / Choose a PDF", "ref": "app/tools/pdf-tools/pdf-compress/page.jsx:181-182"},
+      {"label": "Extreme — « Smallest file. Images reduced to screen resolution (72 dpi). »", "ref": "app/tools/pdf-tools/pdf-compress/page.jsx:20"},
+      {"label": "Recommended — « Good quality, good compression. Images at 150 dpi. » (choix par défaut)", "ref": "app/tools/pdf-tools/pdf-compress/page.jsx:21,27"},
+      {"label": "Lossless — « Identical look, nothing re-encoded. Fonts and structure optimised. »", "ref": "app/tools/pdf-tools/pdf-compress/page.jsx:22"},
+      {"label": "Compress PDF", "ref": "app/tools/pdf-tools/pdf-compress/page.jsx:209-211"},
+      {"label": "Cancel (pendant le travail)", "ref": "app/tools/pdf-tools/pdf-compress/page.jsx:206"},
+      {"label": "Download (+ Save / Share sur iPhone/iPad)", "ref": "app/components/FileDownload.jsx:208-217"}
+    ],
+    "steps": ["choisir un PDF (la taille d'origine s'affiche : « Original: … »)", "choisir le niveau Extreme / Recommended / Lossless (masqué si le fichier passe par la voie navigateur)", "bouton « Compress PDF » (barre : Uploading… / Compressing… / Downloading… ou « Optimising in your browser… »)", "lire Before / After / Saved, et « N images recompressed · N fonts optimised »", "bouton « Download »"],
+    "limits": [
+      {"what": "moteur complet (serveur), quand le service média est configuré", "value": "200 Mo", "constant": "MAX_PDF_COMPRESS_STAGED_BYTES", "ref": "lib/quota/limits.js:99; app/tools/pdf-tools/pdf-compress/page.jsx:45"},
+      {"what": "moteur complet si NEXT_PUBLIC_MEDIA_SERVICE_URL absent du build", "value": "4 Mo (au-delà : voie navigateur), alors que le texte affiche toujours « 200 MB »", "constant": "OFFICE_STAGED_THRESHOLD_BYTES", "ref": "app/tools/pdf-tools/pdf-compress/page.jsx:15,45,179; lib/quota/limits.js:82; app/lib/mediaJob.js:16-17"},
+      {"what": "envoi direct (multipart) / envoi par morceaux", "value": "≤ 4 Mo direct à /api/pdf-compress ; > 4 Mo par morceaux au service média puis pdf-tools", "constant": "OFFICE_STAGED_THRESHOLD_BYTES", "ref": "app/tools/pdf-tools/pdf-compress/page.jsx:95-121"},
+      {"what": "voie navigateur sur ordinateur (structure seulement)", "value": "fichiers > plafond serveur jusqu'à 700 Mo et 2 000 pages", "constant": "MAX_FILE_SIZE_BYTES / MAX_PAGES", "ref": "app/tools/pdf-tools/pdf-compress/config.js:13-15; pdfCompress.worker.js:19-21"},
+      {"what": "voie navigateur sur téléphone/tablette", "value": "plafond 100 Mo / 300 pages, mais inatteignable quand le service média est configuré : un fichier > 200 Mo est refusé (max(200, 100) = 200) et un fichier ≤ 200 Mo va au serveur", "constant": "MOBILE_MAX_FILE_SIZE_BYTES / MOBILE_MAX_PAGES", "ref": "app/tools/pdf-tools/pdf-compress/config.js:19-21; page.jsx:45-49,58-61"},
+      {"what": "durée max côté serveur", "value": "285 s (route) ; 270 s (service, valeur par défaut)", "constant": "SERVICE_TIMEOUT_MS / COMPRESS_TIMEOUT_MS", "ref": "app/api/pdf-compress/route.ts:16; services/pdf-tools/src/config.js:31"}
+    ],
+    "processing": {"where": "mixed", "detail": "≤ plafond serveur : fichier envoyé en HTTPS à /api/pdf-compress puis au service pdf-tools (Railway, py/compress.py : pikepdf + tx d'Adobe), dossier temporaire par requête supprimé à la fin de la requête ; > 4 Mo : morceaux déposés sur le service média (Railway), lus par pdf-tools, résultat déposé sur le service média et supprimé après le premier téléchargement complet ou au bout de MEDIA_JOB_TTL_SECONDS (valeur dans Railway ; README recommande 900 s). Au-delà du plafond serveur : pdf-lib dans un Web Worker, rien n'est envoyé. Aucun tiers.", "ref": "app/tools/pdf-tools/pdf-compress/page.jsx:91-159; app/api/pdf-compress/route.ts:8-12,66-70,99; services/pdf-tools/src/server.js:28-41; services/pdf-tools/src/tempfiles.js:15-20; services/media-processing/app/jobs.py:6-13; services/media-processing/README.md:85"},
+    "quota": "aucune limite sur /api/pdf-compress ; fichiers > 4 Mo : le ticket d'envoi par morceaux (/api/media/ticket, seau office_rate) est limité par réseau à l'heure et au jour (MEDIA_JOBS_PER_HOUR_PER_IP / MEDIA_JOBS_PER_DAY_PER_IP, valeurs en variables d'environnement)",
+    "signup": "aucune inscription demandée (vérifié : app/api/pdf-compress/route.ts et app/api/media/ticket/route.js ne lisent aucun compte)",
+    "watermark": "aucun filigrane ajouté (vérifié : services/pdf-tools/py/compress.py:278-317 ne dessine rien)",
+    "browsers": "Téléphones/tablettes détectés par isMobileDevice (app/lib/isMobileDevice.js:3-11) : voir limites. Bouton Save / Share sur iPhone/iPad (FileDownload.jsx:92-96).",
+    "twin": null,
+    "notes": "Niveaux : recommended 150 dpi q65, extreme 72 dpi q65, low = aucune image touchée (services/pdf-tools/py/compress.py:28-34). Polices Type 1 → CFF par tx à tous les niveaux, sous-ensembles TrueType fusionnés (compress.py:301-306). Fichier non plus petit : rien à télécharger, message « This PDF is already well optimised… Try a stronger level. » / « …already as small as we can make it… » (page.jsx:84-89 ; services/pdf-tools/src/compress.js:49). Résultat vérifié par qpdf --check (compress.js:44-47). PDF à mot de passe d'ouverture : refus « This PDF is password-protected. Remove the password first (Unlock PDF), then compress it. » (compress.js:33-38) ; un PDF qui s'ouvre sans mot de passe (restrictions seulement) est traité (pikepdf.open sans mot de passe compress.py:285 ; voie navigateur : app/lib/pdfDecrypt.js:41-54). Mesures citées (35/41/43 %, 15/79 %, pixel identique) : docs/audit/RAPPORT-ecarts-marche.md:95-100."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-crop",
+    "task": "Réduit la zone visible (CropBox) de chaque page choisie des marges haut/bas/gauche/droite saisies en points, mesurées sur la page telle qu'elle s'affiche.",
+    "inputs": {"accept": ".pdf", "formats": ["PDF"], "ref": "app/tools/pdf-tools/pdf-crop/page.jsx:65"},
+    "outputs": {"formats": ["PDF (cropped.pdf)"], "ref": "app/tools/pdf-tools/pdf-crop/page.jsx:80"},
+    "controls": [
+      {"label": "Click or drop a PDF file here / Choose a PDF file", "ref": "app/tools/pdf-tools/pdf-crop/page.jsx:62-63"},
+      {"label": "Top margin (pt) / Bottom margin (pt) / Left margin (pt) / Right margin (pt) (texte « top margin (pt) » mis en capitale par CSS)", "ref": "app/tools/pdf-tools/pdf-crop/page.jsx:67-71"},
+      {"label": "Pages (empty = all; e.g. 1-3, 5) — placeholder « all pages »", "ref": "app/tools/pdf-tools/pdf-crop/page.jsx:74-75"},
+      {"label": "Crop PDF (pendant : Cropping...)", "ref": "app/tools/pdf-tools/pdf-crop/page.jsx:76-78"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un PDF", "saisir les quatre marges en points", "facultatif : pages (1-3, 5, 8-)", "bouton « Crop PDF »", "bouton « Download » à côté de cropped.pdf"],
+    "limits": [
+      {"what": "taille max par fichier (ordinateur et téléphone)", "value": "aucune limite codée", "constant": null, "ref": "app/tools/pdf-tools/pdf-crop/page.jsx:21-53"},
+      {"what": "marges", "value": "nombre ≥ 0 ; si les marges ne laissent rien d'une page : erreur « these margins are larger than page N (W x H pt): nothing would be left of it. »", "constant": null, "ref": "app/tools/pdf-tools/pdf-crop/page.jsx:33-36,45; app/lib/pdfCropBox.js:16-17"}
+    ],
+    "processing": {"where": "browser", "detail": "pdf-lib dans la page ; aucun envoi.", "ref": "app/tools/pdf-tools/pdf-crop/page.jsx:29-50"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée)",
+    "watermark": "aucun filigrane ajouté (vérifié : seul setCropBox page.jsx:46)",
+    "browsers": null,
+    "twin": "/tools/image-tools/image-cropper (images, pas PDF)",
+    "notes": "Le contenu hors du cadre reste dans le fichier (seule la CropBox change, page.jsx:46). Rotation de page prise en compte (app/lib/pdfCropBox.js:9-18). Recadrage cumulatif (part de la CropBox actuelle). PDF qui s'ouvre sans mot de passe déchiffré d'abord ; PDF à mot de passe d'ouverture : « This PDF needs a password to open. Remove the password first with the PDF Unlock tool… » (app/lib/pdfDecrypt.js:32-53). Pas d'aperçu, une seule série de marges par passage, un seul fichier à la fois."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-delete-pages",
+    "task": "Supprime d'un PDF les pages dont on tape les numéros ou plages (1, 3, 5-7, 10-).",
+    "inputs": {"accept": ".pdf", "formats": ["PDF"], "ref": "app/tools/pdf-tools/pdf-delete-pages/page.jsx:72"},
+    "outputs": {"formats": ["PDF (<nom>-edited.pdf)"], "ref": "app/tools/pdf-tools/pdf-delete-pages/page.jsx:89"},
+    "controls": [
+      {"label": "Click or drop a PDF here / Choose a PDF (puis « <nom> (N pages) »)", "ref": "app/tools/pdf-tools/pdf-delete-pages/page.jsx:70-71"},
+      {"label": "Pages to delete (e.g. 1, 3, 5-7) — placeholder « 1, 3, 5-7 » ; « Total pages: N »", "ref": "app/tools/pdf-tools/pdf-delete-pages/page.jsx:76-78"},
+      {"label": "Delete Pages (pendant : Processing...)", "ref": "app/tools/pdf-tools/pdf-delete-pages/page.jsx:81-83"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un PDF (le nombre de pages s'affiche)", "taper les pages à supprimer", "bouton « Delete Pages » (message « Deleted N pages; M left. »)", "bouton « Download »"],
+    "limits": [
+      {"what": "taille max (ordinateur et téléphone)", "value": "aucune limite codée", "constant": null, "ref": "app/tools/pdf-tools/pdf-delete-pages/page.jsx:20-62"},
+      {"what": "nombre de pages supprimées", "value": "au moins une page doit rester : « That is every page of this PDF (N): at least one page must stay. »", "constant": null, "ref": "app/tools/pdf-tools/pdf-delete-pages/page.jsx:52"}
+    ],
+    "processing": {"where": "browser", "detail": "pdf-lib dans la page ; aucun envoi.", "ref": "app/tools/pdf-tools/pdf-delete-pages/page.jsx:46-56"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée)",
+    "watermark": "aucun filigrane ajouté (vérifié : removePage seulement page.jsx:53)",
+    "browsers": null,
+    "twin": "/tools/pdf-tools/pdf-organize (bouton Remove), /tools/pdf-tools/pdf-editor (✕ par page), /tools/pdf-tools/pdf-reorder-pages (pages omises)",
+    "notes": "Syntaxe : virgules, espaces ou points-virgules ; « 8- » = jusqu'à la fin ; mot ou page hors document refusé avec phrase (app/lib/pageRange.js:4-19). PDF à restrictions déchiffré ; PDF à mot de passe d'ouverture refusé (app/lib/pdfDecrypt.js:41-54). Signets, formulaires : non traités spécialement (pdf-lib removePage)."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-editor",
+    "task": "Réorganise les pages d'un PDF (déplacer, tourner, supprimer, extraire une sélection) et ajoute par-dessus du texte, des images PNG/JPEG, des traits à main levée et des surlignages rectangulaires.",
+    "inputs": {"accept": ".pdf (PDF) ; image ajoutée : image/png,image/jpeg", "formats": ["PDF", "PNG et JPEG pour les images ajoutées"], "ref": "app/tools/pdf-tools/pdf-editor/page.jsx:380,450,234-237"},
+    "outputs": {"formats": ["PDF (<nom>-edited.pdf pour Save Changes, <nom>-extracted.pdf pour Extract Selected)"], "ref": "app/tools/pdf-tools/pdf-editor/page.jsx:361-362,506"},
+    "controls": [
+      {"label": "Click or drop a PDF file here / Choose a PDF file", "ref": "app/tools/pdf-tools/pdf-editor/page.jsx:377-378"},
+      {"label": "Panneau des pages : case à cocher « Select page N », ↑, ↓, ⟳, ✕", "ref": "app/tools/pdf-tools/pdf-editor/page.jsx:400-414"},
+      {"label": "Outils Select / Text / Image / Pen / Highlight (texte en minuscules mis en capitale par CSS)", "ref": "app/tools/pdf-tools/pdf-editor/page.jsx:423-425"},
+      {"label": "Pen : couleur (Pen colour) + épaisseur 1-10 (Pen width) ; Highlight : couleur (Highlight colour)", "ref": "app/tools/pdf-tools/pdf-editor/page.jsx:426-434"},
+      {"label": "Par texte ajouté : champ texte, taille 6-72, couleur, Move, ✕ ; par image : Width 20-1000, Move, ✕", "ref": "app/tools/pdf-tools/pdf-editor/page.jsx:454-470"},
+      {"label": "Clear annotations on this page", "ref": "app/tools/pdf-tools/pdf-editor/page.jsx:476-484"},
+      {"label": "Save Changes", "ref": "app/tools/pdf-tools/pdf-editor/page.jsx:496"},
+      {"label": "Extract Selected (N)", "ref": "app/tools/pdf-tools/pdf-editor/page.jsx:497-499"},
+      {"label": "Cancel (pendant le travail)", "ref": "app/tools/pdf-tools/pdf-editor/page.jsx:492"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un PDF (« Rendering previews… i/N » : vignette de chaque page)", "panneau : ↑ ↓ ⟳ ✕ par page, cases pour l'extraction", "choisir Text (clic = texte « Text » 18 pt), Image (clic puis choix PNG/JPEG, largeur 150 pt), Pen (tracer) ou Highlight (rectangle tracé, 35 % d'opacité)", "modifier texte/taille/couleur ou largeur d'image sous la page ; Move puis clic pour déplacer", "bouton « Save Changes » ou, avec des pages cochées, « Extract Selected (N) »", "bouton « Download »"],
+    "limits": [
+      {"what": "taille max sur ordinateur", "value": "700 Mo", "constant": "MAX_FILE_SIZE_BYTES", "ref": "app/tools/pdf-tools/pdf-editor/config.js:24-25; page.jsx:65,82-85"},
+      {"what": "pages max sur ordinateur", "value": "2 000", "constant": "MAX_PAGES", "ref": "app/tools/pdf-tools/pdf-editor/config.js:23; page.jsx:93-98"},
+      {"what": "taille / pages max sur téléphone ou tablette", "value": "100 Mo / 300 pages", "constant": "MOBILE_MAX_FILE_SIZE_BYTES / MOBILE_MAX_PAGES", "ref": "app/tools/pdf-tools/pdf-editor/config.js:30-32; page.jsx:64-66"},
+      {"what": "texte ajouté", "value": "Helvetica (WinAnsi) : lettres latines, chiffres, ponctuation courante ; sinon refus « …has characters the editor's font cannot write… »", "constant": null, "ref": "app/tools/pdf-tools/pdf-editor/pdfEditor.worker.js:128-133"},
+      {"what": "mesure des plafonds", "value": "commentaire du code seulement (Node, chemin d'enregistrement), aucun rapport dans docs/audit/", "constant": null, "ref": "app/tools/pdf-tools/pdf-editor/config.js:1-22"}
+    ],
+    "processing": {"where": "browser", "detail": "PDF.js pour les vignettes et l'aperçu (fil principal), pdf-lib dans un Web Worker pour l'enregistrement ; aucun envoi.", "ref": "app/tools/pdf-tools/pdf-editor/page.jsx:90-119,323; app/tools/pdf-tools/pdf-editor/pdfEditor.worker.js:83-160"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée)",
+    "watermark": "aucun filigrane ajouté (vérifié : drawOverlaysOnPage ne dessine que les éléments de l'utilisateur, pdfEditor.worker.js:46-81)",
+    "browsers": "Image JPEG d'un téléphone redressée selon l'EXIF avant insertion (page.jsx:242-256).",
+    "twin": "/tools/pdf-tools/pdf-organize, /tools/pdf-tools/pdf-sign (image sur page), /tools/image-tools/image-editor (images)",
+    "notes": "Les « annotations » (Pen, Highlight) sont dessinées dans le contenu de la page (drawLine / drawRectangle), pas des annotations PDF modifiables (pdfEditor.worker.js:59-79). Extract Selected copie les pages ORIGINALES sans texte/image/trait ajouté ni rotation (pdfEditor.worker.js:97-108). Seuls textes et images ont un ✕ propre ; traits et surlignages s'effacent seulement par page (page.jsx:460,469,476-484). Le texte existant ne peut pas être modifié. PDF à mot de passe d'ouverture : « Failed to read PDF: … » de PDF.js (page.jsx:92,123-125). Pas de glisser-déposer des pages (flèches)."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-extract-text",
+    "task": "Lit la couche texte d'un PDF (toutes les pages ou celles choisies) avec PDF.js et la rend en texte brut, avec ou sans en-têtes « Page N: ».",
+    "inputs": {"accept": ".pdf", "formats": ["PDF"], "ref": "app/tools/pdf-tools/pdf-extract-text/page.jsx:75"},
+    "outputs": {"formats": ["Texte à l'écran + fichier TXT (<nom>.txt, UTF-8)"], "ref": "app/tools/pdf-tools/pdf-extract-text/page.jsx:65,89-91"},
+    "controls": [
+      {"label": "Click or drop a PDF here / Choose a PDF", "ref": "app/tools/pdf-tools/pdf-extract-text/page.jsx:73-74"},
+      {"label": "Pages (empty: all) — placeholder « e.g. 1-3, 5, 8- »", "ref": "app/tools/pdf-tools/pdf-extract-text/page.jsx:78-80"},
+      {"label": "Start each page with \"Page N:\" (coché par défaut)", "ref": "app/tools/pdf-tools/pdf-extract-text/page.jsx:20,81"},
+      {"label": "Extract Text (pendant : Extracting...)", "ref": "app/tools/pdf-tools/pdf-extract-text/page.jsx:83-85"},
+      {"label": "Copy", "ref": "app/tools/pdf-tools/pdf-extract-text/page.jsx:90"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un PDF", "facultatif : pages, case « Start each page with \"Page N:\" »", "bouton « Extract Text »", "lire le texte ; bouton « Copy » ou « Download » (.txt)"],
+    "limits": [
+      {"what": "taille max (ordinateur et téléphone)", "value": "aucune limite codée", "constant": null, "ref": "app/tools/pdf-tools/pdf-extract-text/page.jsx:31-63"},
+      {"what": "correction des accents LibreOffice (ActualText)", "value": "fichiers ≤ 25 Mo seulement", "constant": "MAX_BYTES", "ref": "app/lib/pdfActualText.js:17"}
+    ],
+    "processing": {"where": "browser", "detail": "PDF.js dans le navigateur ; aucun envoi du fichier ni du texte. En cas d'erreur, seuls le type d'erreur, l'extension, une tranche de taille et le message nettoyé partent à /api/report-error.", "ref": "app/tools/pdf-tools/pdf-extract-text/page.jsx:37-59; app/lib/reportError.js:142-155"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet (sortie texte)",
+    "browsers": "Safari : PDF.js legacy + polyfill (app/lib/pdfjs.js:3-15).",
+    "twin": "/tools/pdf-tools/pdf-ocr (texte d'un scan) ; /tools/pdf-tools/pdf-to-word",
+    "notes": "Aucun OCR : PDF sans couche texte → « This PDF has no text layer: its pages are pictures (a scan). Use PDF OCR to read the text from the pictures. » (page.jsx:52). Sauts de ligne et espaces reconstruits d'après les positions, dans l'ordre des objets du fichier, SANS remise en ordre des colonnes (app/lib/pdfTextLayout.js:10-36). PDF à mot de passe d'ouverture : « Error: … » de PDF.js (page.jsx:60). Plage invalide : phrase de parsePageRange (page.jsx:42)."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-forms",
+    "task": "Lit les champs d'un formulaire PDF existant (AcroForm) avec leur valeur, permet de modifier texte, cases, boutons radio, listes, puis réécrit seulement les champs changés, avec aplatissement facultatif.",
+    "inputs": {"accept": ".pdf", "formats": ["PDF avec champs AcroForm"], "ref": "app/tools/pdf-tools/pdf-forms/page.jsx:117"},
+    "outputs": {"formats": ["PDF (filled_form.pdf)"], "ref": "app/tools/pdf-tools/pdf-forms/page.jsx:155"},
+    "controls": [
+      {"label": "Click or drop a PDF with form fields here / Choose a PDF with form fields", "ref": "app/tools/pdf-tools/pdf-forms/page.jsx:114-115"},
+      {"label": "un contrôle par champ : zone de texte, case à cocher, liste « (none) » + options pour radio et liste déroulante, liste multiple ; « (read-only) » ; « Signature/Button field: kept as it is (not editable here). »", "ref": "app/tools/pdf-tools/pdf-forms/page.jsx:120-145"},
+      {"label": "Flatten the form (values become part of the page and can no longer be edited)", "ref": "app/tools/pdf-tools/pdf-forms/page.jsx:147"},
+      {"label": "Fill and Download PDF (pendant : Processing...)", "ref": "app/tools/pdf-tools/pdf-forms/page.jsx:151-153"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un PDF à formulaire (les champs s'affichent avec leur valeur)", "modifier les champs voulus", "facultatif : cocher « Flatten the form… »", "bouton « Fill and Download PDF » (prépare le fichier, ne télécharge pas)", "bouton « Download » à côté de filled_form.pdf"],
+    "limits": [
+      {"what": "taille max", "value": "aucune limite codée", "constant": null, "ref": "app/tools/pdf-tools/pdf-forms/page.jsx:40-105"},
+      {"what": "caractères écrits", "value": "police standard du formulaire (WinAnsi, Europe de l'Ouest) ; autre écriture : « a character you typed cannot be written with the form's standard font (only Western European letters can). »", "constant": null, "ref": "app/tools/pdf-tools/pdf-forms/page.jsx:97-100"}
+    ],
+    "processing": {"where": "browser", "detail": "pdf-lib dans la page ; aucun envoi.", "ref": "app/tools/pdf-tools/pdf-forms/page.jsx:52-55,79-102"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Formulaire XFA (Adobe LiveCycle) : message « This PDF is an XFA form (made with Adobe LiveCycle / Designer): its fields are not standard PDF fields, and only Adobe Acrobat or Reader can fill them… » (page.jsx:57-59,150). Sans champ : « No form fields found in this PDF. » (page.jsx:150). Champs en lecture seule non modifiés (page.jsx:84). Boutons radio présentés en liste déroulante (page.jsx:132-137). Formulaire à restrictions déchiffré d'abord (page.jsx:10-14,54). Ne crée pas de champs."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-merge",
+    "task": "Assemble en un PDF, dans l'ordre de la liste, des PDF, des images (une page chacune) et des fichiers Word/Excel/PowerPoint convertis d'abord sur notre serveur.",
+    "inputs": {"accept": ".pdf,application/pdf,image/*,.heic,.heif,.tif,.tiff,.doc,.docx,.docm,.dotx,.dot,.odt,.rtf,.xls,.xlsx,.xlsm,.xlsb,.ods,.csv,.ppt,.pptx,.pptm,.ppsx,.pps,.odp", "formats": ["PDF", "images (JPG, PNG, HEIC/HEIF, WebP, GIF, BMP, TIFF, AVIF… tout image/* décodable)", "Word/OpenDocument/RTF", "Excel/ODS/CSV", "PowerPoint/ODP"], "ref": "app/tools/pdf-tools/pdf-merge/page.jsx:26,199"},
+    "outputs": {"formats": ["PDF (merged.pdf)"], "ref": "app/tools/pdf-tools/pdf-merge/page.jsx:242"},
+    "controls": [
+      {"label": "Click to add PDFs, images or Office files (sélection multiple)", "ref": "app/tools/pdf-tools/pdf-merge/page.jsx:198-199"},
+      {"label": "par fichier : ↑, ↓, ✕ ; glisser une ligne (souris)", "ref": "app/tools/pdf-tools/pdf-merge/page.jsx:204-215"},
+      {"label": "Add a bookmark for each file (its own bookmarks are kept under it) (coché par défaut)", "ref": "app/tools/pdf-tools/pdf-merge/page.jsx:39,231"},
+      {"label": "Merge PDFs (désactivé sous 2 fichiers)", "ref": "app/tools/pdf-tools/pdf-merge/page.jsx:232-234"},
+      {"label": "Cancel (pendant le travail)", "ref": "app/tools/pdf-tools/pdf-merge/page.jsx:227"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["ajouter au moins 2 fichiers (plusieurs clics possibles)", "ordonner par glisser (souris) ou ↑ ↓", "facultatif : décocher le signet par fichier", "bouton « Merge PDFs » (« Converting <nom> to PDF on our server… » pour un fichier Office)", "bouton « Download » (merged.pdf)"],
+    "limits": [
+      {"what": "total sur ordinateur", "value": "700 Mo et 2 000 pages cumulées", "constant": "MAX_TOTAL_SIZE_BYTES / MAX_TOTAL_PAGES", "ref": "app/tools/pdf-tools/pdf-merge/config.js:20-22; page.jsx:47-51,147; pdfMerge.worker.js:28-33"},
+      {"what": "total sur téléphone ou tablette", "value": "100 Mo et 300 pages", "constant": "MOBILE_MAX_TOTAL_SIZE_BYTES / MOBILE_MAX_TOTAL_PAGES", "ref": "app/tools/pdf-tools/pdf-merge/config.js:29-31"},
+      {"what": "fichier Word/PowerPoint (service média configuré)", "value": "100 Mo", "constant": "MAX_OFFICE_STAGED_BYTES", "ref": "lib/quota/limits.js:64; app/tools/pdf-tools/pdf-merge/page.jsx:24-25,114-118"},
+      {"what": "tableur (service média configuré)", "value": "60 Mo", "constant": "MAX_SPREADSHEET_STAGED_BYTES", "ref": "lib/quota/limits.js:80"},
+      {"what": "fichier Office sans service média (NEXT_PUBLIC_MEDIA_SERVICE_URL absent)", "value": "4 Mo (c'est la valeur du HTML extrait dans contenu-avant.json)", "constant": "MAX_PLATFORM_UPLOAD_BYTES", "ref": "app/lib/officeUpload.js:16-17; lib/quota/limits.js:53"},
+      {"what": "image autre que JPEG", "value": "268 Mpx sur ordinateur, 48 Mpx sur téléphone (pas d'option de réduction ici)", "constant": "MAX_DECODED_MP_COMPUTER / PHONE_MAX_MP", "ref": "app/lib/pdfImages.js:147-156; page.jsx:131 (addImagePage sans reduce)"},
+      {"what": "mesure des plafonds 700 Mo / 2 000 pages", "value": "commentaire du code seulement, aucun rapport dans docs/audit/", "constant": null, "ref": "app/tools/pdf-tools/pdf-merge/config.js:1-31"}
+    ],
+    "processing": {"where": "mixed", "detail": "PDF et images : pdf-lib dans un Web Worker (images converties en page dans la page), rien n'est envoyé. Word/Excel/PowerPoint : envoyés à /api/convert-to-pdf ; .docx → ConvertAPI (tiers, StoreFile=false) avec repli LibreOffice (Gotenberg, notre serveur Railway) annoncé sous le résultat ; .doc, tableurs, présentations → Gotenberg. > 4 Mo : envoi par morceaux au service média (supprimé après téléchargement complet ou TTL).", "ref": "app/tools/pdf-tools/pdf-merge/page.jsx:110-143,158; app/api/convert-to-pdf/route.ts:45-56,166-180,206-207; lib/providers/convertApi.js:168-170; app/lib/officeUpload.js:42-56"},
+    "quota": "PDF/images : aucune. .docx : limite par réseau heure/jour (guard) + plafond mensuel du site (guardPaidRoute route « word-to-pdf »). Fichiers Office > 4 Mo : ticket média limité par réseau heure/jour (MEDIA_JOBS_PER_HOUR_PER_IP / _PER_DAY).",
+    "signup": "aucune inscription demandée (vérifié : lib/quota/guard.js:15-37 se fonde sur l'adresse réseau, aucune authentification)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "Glisser une ligne : souris seulement ; flèches pour le tactile (page.jsx:75-77). HEIC décodé par heic2any, TIFF par le décodeur du site (app/lib/pdfImages.js:61-95).",
+    "twin": "/tools/pdf-tools/image-to-pdf et /tools/pdf-tools/jpg-to-pdf (images seules) ; /tools/pdf-tools/word-to-pdf (conversion Office seule)",
+    "notes": "Images non JPEG (WebP, GIF, BMP, HEIC, AVIF, JPEG miroir) ré-encodées en JPEG q92 (ou PNG si transparence) : la qualité d'origine n'est pas gardée à l'identique (app/lib/pdfImages.js:23-41). Signets : un par fichier + ses propres signets ; champs de formulaire de tous les fichiers gardés, renommés si doublon (pdfMerge.worker.js:17-49 ; page.jsx:171). .docx par repli LibreOffice : avertissement « made by our backup converter… » (page.jsx:243-246). Fichier non PDF et non Office traité comme image (page.jsx:119-133). OFFICE_RE accepte aussi .wpd/.ott/.otp/.pot… absents de l'attribut accept (page.jsx:18 vs 26)."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-number-pages",
+    "task": "Écrit un numéro de page sur les pages choisies d'un PDF : 5 formats (dont texte libre avec {n} et {p}), premier numéro, de/à, couverture sautée, 6 positions, marge, taille, couleur, pages en vis-à-vis.",
+    "inputs": {"accept": ".pdf,application/pdf", "formats": ["PDF"], "ref": "app/tools/pdf-tools/pdf-number-pages/page.jsx:116"},
+    "outputs": {"formats": ["PDF (<nom>-numbered.pdf)"], "ref": "app/tools/pdf-tools/pdf-number-pages/page.jsx:158"},
+    "controls": [
+      {"label": "Click or drop a PDF here / Choose a PDF", "ref": "app/tools/pdf-tools/pdf-number-pages/page.jsx:114-115"},
+      {"label": "Position : top-left, top-center, top-right, bottom-left, bottom-center (défaut), bottom-right", "ref": "app/tools/pdf-tools/pdf-number-pages/page.jsx:25,30,119-124"},
+      {"label": "Number format : 1 / 12 (défaut), 1, Page 1, Page 1 of 12, Custom text…", "ref": "app/tools/pdf-tools/pdf-number-pages/page.jsx:17-23,127-130"},
+      {"label": "Custom text ({n} = number, {p} = last number)", "ref": "app/tools/pdf-tools/pdf-number-pages/page.jsx:131-132"},
+      {"label": "First number / From page / To page (empty = last)", "ref": "app/tools/pdf-tools/pdf-number-pages/page.jsx:133-138"},
+      {"label": "Margin : Small (18 pt) / Recommended (30 pt, défaut) / Big (54 pt)", "ref": "app/tools/pdf-tools/pdf-number-pages/page.jsx:24,139-142"},
+      {"label": "Font size: N pt (curseur 6-36, défaut 12)", "ref": "app/tools/pdf-tools/pdf-number-pages/page.jsx:143-144"},
+      {"label": "Colour", "ref": "app/tools/pdf-tools/pdf-number-pages/page.jsx:145-146"},
+      {"label": "Skip the first page (cover)", "ref": "app/tools/pdf-tools/pdf-number-pages/page.jsx:148"},
+      {"label": "Facing pages (left and right swap on even numbers, as in a printed book)", "ref": "app/tools/pdf-tools/pdf-number-pages/page.jsx:149"},
+      {"label": "Add Page Numbers (pendant : Processing...)", "ref": "app/tools/pdf-tools/pdf-number-pages/page.jsx:150-152"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un PDF", "position + format", "facultatif : premier numéro, de/à, couverture, marge, taille, couleur, vis-à-vis", "bouton « Add Page Numbers » (« Numbered pages A to B (x to y). »)", "bouton « Download »"],
+    "limits": [
+      {"what": "taille max", "value": "aucune limite codée", "constant": null, "ref": "app/tools/pdf-tools/pdf-number-pages/page.jsx:47-105"},
+      {"what": "taille de police", "value": "6 à 36 pt au curseur (le code borne à 6-72)", "constant": null, "ref": "app/tools/pdf-tools/pdf-number-pages/page.jsx:75,144"}
+    ],
+    "processing": {"where": "browser", "detail": "pdf-lib dans la page ; texte hors WinAnsi dessiné par le navigateur en image PNG ; aucun envoi.", "ref": "app/tools/pdf-tools/pdf-number-pages/page.jsx:63-98"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Le texte doit contenir {n} (page.jsx:62). Avec « Skip the first page », la page 2 reçoit le « First number » (1 par défaut) (page.jsx:68,80). {p} = dernier numéro utilisé, pas le nombre total de pages (page.jsx:74,81). Vis-à-vis : gauche/droite inversées quand le NUMÉRO affiché est pair (page.jsx:91). Placement selon la page affichée (rotation, CropBox) (app/lib/pdfPlace.js). Fichier non-PDF refusé à la sélection (app/lib/fileChecks.js:105-113). Pas de chiffres romains. Le titre de page actuel est tronqué : « … Label (e.g » (layout.tsx:5)."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-ocr",
+    "task": "Reconnaît le texte de chaque page d'un PDF (scans, photos dans un PDF) avec Tesseract dans 102 langues (jusqu'à 3 à la fois) et rend le texte plus un PDF interrogeable (couche de texte invisible ajoutée).",
+    "inputs": {"accept": ".pdf", "formats": ["PDF (une image JPG/PNG seule n'est pas acceptée)"], "ref": "app/tools/pdf-tools/pdf-ocr/page.jsx:295"},
+    "outputs": {"formats": ["Texte à l'écran (« --- Page N --- »)", "PDF interrogeable (<nom>-searchable.pdf), produit seulement si du texte a été reconnu"], "ref": "app/tools/pdf-tools/pdf-ocr/page.jsx:232,257-260,328-334"},
+    "controls": [
+      {"label": "Click or drop a PDF file here / Choose a PDF file", "ref": "app/tools/pdf-tools/pdf-ocr/page.jsx:292-293"},
+      {"label": "Language of the document (up to 3) — recherche par nom anglais, nom natif ou code ; langue du navigateur présélectionnée", "ref": "app/tools/pdf-tools/pdf-ocr/page.jsx:63-67,296-305"},
+      {"label": "Run OCR", "ref": "app/tools/pdf-tools/pdf-ocr/page.jsx:319-321"},
+      {"label": "Copy Text", "ref": "app/tools/pdf-tools/pdf-ocr/page.jsx:332"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un PDF", "choisir 1 à 3 langues", "bouton « Run OCR » (barres : téléchargement du moteur et des langues au 1er usage, puis « Page X of Y »)", "lire le texte « Recognized Text », bouton « Copy Text » ou « Download » (…-searchable.pdf)"],
+    "limits": [
+      {"what": "taille max sur ordinateur", "value": "aucune limite codée ; une étape sans progrès pendant 90 s arrête l'OCR avec un message", "constant": "DESKTOP_STALL_MS", "ref": "app/tools/pdf-tools/pdf-ocr/page.jsx:26,96,180"},
+      {"what": "langues", "value": "102 codes Tesseract (afr … yid), 3 au plus", "constant": "LANGUAGES / MAX_LANGS", "ref": "lib/ocrLanguageCodes.js:5-112; lib/pdfOcr.js:31; page.jsx:303"},
+      {"what": "iPhone/iPad : délai avant relais serveur", "value": "20 s sans progrès (ou échec)", "constant": "LOCAL_OCR_LIMIT_MS", "ref": "app/lib/serverPageOcr.js:16-17"},
+      {"what": "iPhone/iPad : taille max acceptée par notre service OCR", "value": "44 Mo si service média configuré, sinon 4 Mo moins 64 Kio", "constant": "STAGED_MAX_BYTES / DIRECT_MAX_BYTES", "ref": "app/lib/serverPageRender.js:18-19; app/lib/serverPageOcr.js:59-62"},
+      {"what": "iPhone/iPad : pages reconnues par le service", "value": "300 pages/heure et 1 000 pages/jour par réseau, 3 000 pages/heure pour tous", "constant": "PDF_OCR_PAGES_PER_HOUR / PDF_OCR_PAGES_PER_DAY / PDF_OCR_GLOBAL_PER_HOUR", "ref": "lib/quota/config.js:55-57; lib/quota/pdfOcrRateLimit.js:8-20"},
+      {"what": "iPhone/iPad : file d'attente du service", "value": "2 reconnaissances à la fois, 1 par visiteur ; attente jusqu'à 200 s puis 50 s de reconnaissance", "constant": null, "ref": "lib/pdfOcr.js:15-16,28-29"}
+    ],
+    "processing": {"where": "mixed", "detail": "Ordinateur et Android : Tesseract.js dans le navigateur, rien n'est envoyé (le moteur et les données de langue sont téléchargés depuis cdn.jsdelivr.net). iPhone/iPad seulement (isAppleTouchDevice) : si une étape ne progresse pas pendant 20 s ou échoue, cette page et les suivantes sont reconnues par notre service pdf-tools (Tesseract, Railway) via /api/pdf-ocr ; le PDF est envoyé (direct ≤ 4 Mo, sinon par morceaux au service média) puis supprimé (dossier temporaire par requête ; fichier mis en attente supprimé par close() ou TTL) ; la page le dit avant et après.", "ref": "app/tools/pdf-tools/pdf-ocr/page.jsx:95-100,129-169,201-231,262,324; app/lib/serverPageRender.js:23-26; app/lib/canvasLimit.js:13-17; lib/pdfOcr.js:1-18; app/lib/ocrLanguages.js:4"},
+    "quota": "Ordinateur : aucune. iPhone/iPad (relais serveur) : limite chiffrée 300 pages/h et 1 000/jour par réseau, 3 000/h pour tous ; > 4 Mo : ticket média limité par réseau heure/jour (variables d'environnement).",
+    "signup": "aucune inscription demandée (vérifié : app/api/pdf-ocr/route.ts:13-21)",
+    "watermark": "aucun filigrane ajouté (vérifié : couche texte invisible seulement, page.jsx:247-255)",
+    "browsers": "iPhone/iPad : relais serveur décrit ci-dessus. Ordinateur : arrêt après 90 s sans progrès ; téléchargement des langues bloqué (pare-feu sur cdn.jsdelivr.net) : « The <langue> language data could not be downloaded… » (page.jsx:161-166).",
+    "twin": "/tools/pdf-tools/pdf-extract-text (couche texte existante)",
+    "notes": "Page qui a déjà son propre texte (au moins la moitié de ce qui est reconnu) : pas de couche ajoutée, texte reconnu affiché quand même (page.jsx:233-247,261). Rien reconnu : « No text was recognized in this PDF. », pas de PDF (page.jsx:257-264). Pages déjà reconnues gardées si erreur (page.jsx:271-272). Précision mesurée dans le dépôt : 0,8 % CER à 7 pt (docs/audit/RAPPORT-qualite-2-29-09.md:60) ; la fourchette « 4-16 % » n'a pas de rapport."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-organize",
+    "task": "Réorganise les pages d'un seul PDF dans une liste numérotée : monter, descendre, tourner de 90°, dupliquer, insérer une page blanche, retirer.",
+    "inputs": {"accept": ".pdf", "formats": ["PDF"], "ref": "app/tools/pdf-tools/pdf-organize/page.jsx:112"},
+    "outputs": {"formats": ["PDF (organized.pdf)"], "ref": "app/tools/pdf-tools/pdf-organize/page.jsx:132"},
+    "controls": [
+      {"label": "Click or drop a PDF file here / Choose a PDF file (puis « <nom> (N pages) »)", "ref": "app/tools/pdf-tools/pdf-organize/page.jsx:109-110"},
+      {"label": "par ligne « Page N » / « Blank page » (+ « (turned 90°) ») : Up, Down, Rotate, Duplicate, Blank after, Remove", "ref": "app/tools/pdf-tools/pdf-organize/page.jsx:115-124"},
+      {"label": "Apply Changes (pendant : Processing...)", "ref": "app/tools/pdf-tools/pdf-organize/page.jsx:128-130"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un PDF (liste « Page 1 … Page N », sans vignette)", "Up / Down / Rotate / Duplicate / Blank after / Remove sur chaque ligne", "bouton « Apply Changes »", "bouton « Download » à côté de organized.pdf"],
+    "limits": [
+      {"what": "taille max", "value": "aucune limite codée", "constant": null, "ref": "app/tools/pdf-tools/pdf-organize/page.jsx:21-100"},
+      {"what": "pages gardées", "value": "au moins une page réelle : « Keep at least one page of the PDF. »", "constant": null, "ref": "app/tools/pdf-tools/pdf-organize/page.jsx:73"}
+    ],
+    "processing": {"where": "browser", "detail": "PDF.js (nombre de pages) et pdf-lib (construction) dans la page ; aucun envoi.", "ref": "app/tools/pdf-tools/pdf-organize/page.jsx:30-35,68-96"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": "/tools/pdf-tools/pdf-reorder-pages, /tools/pdf-tools/pdf-delete-pages, /tools/pdf-tools/pdf-rotate, /tools/pdf-tools/pdf-editor (même travail sur les pages, avec vignettes)",
+    "notes": "Aucune vignette ni glisser-déposer : liste textuelle « Page N » (page.jsx:117). Rotate : +90° dans le sens horaire (page.jsx:59,81). Page blanche à la taille (CropBox) de la page réelle précédente, sinon A4 595,28 × 841,89 pt (page.jsx:84-88). Titre, auteur, sujet, mots-clés et champs de formulaire gardés (app/lib/pdfCarryOver.js:8-13) ; signets suivent leurs pages (page.jsx:93-94). PDF à mot de passe d'ouverture : « Failed to read PDF: … » (page.jsx:32,37)."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-protect",
+    "task": "Chiffre un PDF en AES-128 avec un mot de passe d'ouverture et des permissions (impression, copie, modification, commentaires, formulaires, pages) protégées par un mot de passe de permissions choisi ou aléatoire.",
+    "inputs": {"accept": ".pdf", "formats": ["PDF"], "ref": "app/tools/pdf-tools/pdf-protect/page.jsx:67"},
+    "outputs": {"formats": ["PDF chiffré (<nom>-protected.pdf)"], "ref": "app/tools/pdf-tools/pdf-protect/page.jsx:95"},
+    "controls": [
+      {"label": "Click or drop a PDF here / Choose a PDF", "ref": "app/tools/pdf-tools/pdf-protect/page.jsx:65-66"},
+      {"label": "Password (placeholder « Enter password »)", "ref": "app/tools/pdf-tools/pdf-protect/page.jsx:70-71"},
+      {"label": "Permissions (what people who open the file may do) — section repliée", "ref": "app/tools/pdf-tools/pdf-protect/page.jsx:73-74"},
+      {"label": "Printing : Allowed (défaut) / Low resolution only / Not allowed", "ref": "app/tools/pdf-tools/pdf-protect/page.jsx:13,76-79"},
+      {"label": "Copy text and images / Edit the content / Add comments / Fill in form fields / Insert, rotate or delete pages (seul « Fill in form fields » est coché par défaut)", "ref": "app/tools/pdf-tools/pdf-protect/page.jsx:13,80-82"},
+      {"label": "Permissions password (optional — needed to change these permissions; leave empty for a random one nobody knows)", "ref": "app/tools/pdf-tools/pdf-protect/page.jsx:83-84"},
+      {"label": "Protect PDF (pendant : Processing...)", "ref": "app/tools/pdf-tools/pdf-protect/page.jsx:87-89"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un PDF", "taper le mot de passe", "facultatif : ouvrir Permissions", "bouton « Protect PDF » (« Encrypted with AES-128. »)", "bouton « Download »"],
+    "limits": [
+      {"what": "taille max", "value": "aucune limite codée", "constant": null, "ref": "app/tools/pdf-tools/pdf-protect/page.jsx:28-57"},
+      {"what": "mot de passe de permissions", "value": "doit différer du mot de passe d'ouverture", "constant": null, "ref": "app/tools/pdf-tools/pdf-protect/page.jsx:34"}
+    ],
+    "processing": {"where": "browser", "detail": "@cantoo/pdf-lib dans la page ; en-tête relevé en 1.7 pour obtenir AES-128 (V=4) ; refus si autre chiffrement ; aucun envoi.", "ref": "app/tools/pdf-tools/pdf-protect/page.jsx:36-49"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": "/tools/pdf-tools/pdf-unlock (inverse) ; /tools/file-tools/file-encryptor (tout fichier)",
+    "notes": "PAR DÉFAUT, sans ouvrir Permissions : impression permise, remplissage de formulaires permis, mais copie, modification, commentaires et réorganisation des pages INTERDITS (page.jsx:13). Mot de passe de permissions vide → 48 caractères aléatoires (24 octets en base 36) que personne ne connaît (page.jsx:45). Avec le mot de passe d'ouverture, PDF Unlock de ce site enlève tout chiffrement et toutes les restrictions (app/lib/pdfUnlock.js:13,33). AES-256 non utilisé (révision 5 dépréciée) (page.jsx:38-41). PDF déjà protégé à mot de passe d'ouverture refusé (app/lib/pdfDecrypt.js:49-53)."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-redact",
+    "task": "Cherche dans le texte d'un PDF les mots/phrases listés et, au choix, les adresses e-mail, numéros de téléphone et numéros de carte, puis remplace chaque page touchée par une image où les correspondances sont noircies dans les pixels, avec une couche de texte invisible pour les autres mots.",
+    "inputs": {"accept": ".pdf", "formats": ["PDF avec couche texte (un scan n'a rien à trouver)"], "ref": "app/tools/pdf-tools/pdf-redact/page.jsx:270"},
+    "outputs": {"formats": ["PDF (redacted.pdf)"], "ref": "app/tools/pdf-tools/pdf-redact/page.jsx:290"},
+    "controls": [
+      {"label": "Click or drop a PDF file here / Choose a PDF file", "ref": "app/tools/pdf-tools/pdf-redact/page.jsx:267-268"},
+      {"label": "Text to redact (one word or phrase per line) — placeholder « Enter text to censor... »", "ref": "app/tools/pdf-tools/pdf-redact/page.jsx:272-273"},
+      {"label": "Also find automatically : E-mail addresses / Phone numbers / Card numbers", "ref": "app/tools/pdf-tools/pdf-redact/page.jsx:275-281; app/lib/pdfRedact.js:55-62"},
+      {"label": "Redact PDF (pendant : Redacting...)", "ref": "app/tools/pdf-tools/pdf-redact/page.jsx:282-284"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un PDF (PDF à mot de passe d'ouverture refusé dès la sélection)", "taper les termes, un par ligne, et/ou cocher les motifs", "bouton « Redact PDF » (progression « Page X of Y: … »)", "lire le résumé (occurrences par page, éléments retirés), bouton « Download » à côté de redacted.pdf"],
+    "limits": [
+      {"what": "taille max sur ordinateur", "value": "aucune limite codée ; une étape sans progrès 60 s s'arrête avec un message", "constant": "STEP_LIMIT_MS", "ref": "app/tools/pdf-tools/pdf-redact/page.jsx:31,72-73"},
+      {"what": "téléphone : numéros", "value": "9 à 15 chiffres, pas une date AAAA-MM-JJ", "constant": "PATTERNS.phone", "ref": "app/lib/pdfRedact.js:57-58"},
+      {"what": "cartes", "value": "13 à 19 chiffres passant Luhn", "constant": "PATTERNS.card", "ref": "app/lib/pdfRedact.js:54,59-62"},
+      {"what": "iPhone/iPad : délai avant dessin par notre service", "value": "20 s", "constant": "LOCAL_PAGE_LIMIT_MS", "ref": "app/lib/serverPageRender.js:29-30"},
+      {"what": "iPhone/iPad : taille max envoyée au service", "value": "44 Mo si service média configuré, sinon ~4 Mo", "constant": "STAGED_MAX_BYTES / DIRECT_MAX_BYTES", "ref": "app/lib/serverPageRender.js:18-19"},
+      {"what": "iPhone/iPad : pages dessinées par le service", "value": "300/heure et 1 000/jour par réseau, 3 000/heure pour tous", "constant": "PDF_RENDER_PAGES_PER_HOUR / _PER_DAY / PDF_RENDER_GLOBAL_PER_HOUR", "ref": "lib/quota/config.js:48-51; app/api/pdf-render/route.ts:3,14"}
+    ],
+    "processing": {"where": "mixed", "detail": "Ordinateur et Android : PDF.js + pdf-lib dans le navigateur, rien n'est envoyé. iPhone/iPad : une page touchée que l'appareil ne dessine pas en 20 s est dessinée (PNG) par notre service pdf-tools via /api/pdf-render (PDF envoyé puis supprimé, annoncé) ; le noircissement reste fait dans le navigateur.", "ref": "app/tools/pdf-tools/pdf-redact/page.jsx:84,167-196,248,286; app/lib/serverPageRender.js:23-26"},
+    "quota": "Ordinateur : aucune. iPhone/iPad (relais de dessin) : 300 pages/h, 1 000/jour par réseau, 3 000/h pour tous.",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "iPhone/iPad : relais de dessin serveur (page.jsx:286).",
+    "twin": null,
+    "notes": "Recherche sans casse, sans espaces, sans accents ni traits d'union (app/lib/pdfRedact.js:8-11). Champs de formulaire et commentaires cherchés aussi (page.jsx:113-115). Pages SANS correspondance : copiées, mais tampons, pièces jointes, médias, liens vers une page caviardée ou exécutant un script retirés (app/lib/redactSanitize.js via page.jsx:134 ; résumé page.jsx:249). Fichier relu : si un terme reste trouvable, aucun fichier (page.jsx:237-245). Aucune correspondance : « No match found for … Text that is part of a picture (a scan) cannot be found: run PDF OCR first. » (page.jsx:126-133). Mots non gardés en texte invisible : noircis, voisins d'un cadre, verticaux, hors WinAnsi (page.jsx:251)."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-reorder-pages",
+    "task": "Recompose un PDF dans l'ordre de pages tapé (3, 1, 2 ; plages dans les deux sens ; répétitions permises ; pages omises retirées), avec deux raccourcis (ordre inverse, impaires puis paires).",
+    "inputs": {"accept": ".pdf", "formats": ["PDF"], "ref": "app/tools/pdf-tools/pdf-reorder-pages/page.jsx:85"},
+    "outputs": {"formats": ["PDF (<nom>-reordered.pdf)"], "ref": "app/tools/pdf-tools/pdf-reorder-pages/page.jsx:108"},
+    "controls": [
+      {"label": "Click or drop a PDF here / Choose a PDF (puis « <nom> (N pages) »)", "ref": "app/tools/pdf-tools/pdf-reorder-pages/page.jsx:83-84"},
+      {"label": "New page order (e.g. 3, 1, 2) — pré-rempli 1, 2, 3…", "ref": "app/tools/pdf-tools/pdf-reorder-pages/page.jsx:38,89-90"},
+      {"label": "Reverse order / Odd pages, then even", "ref": "app/tools/pdf-tools/pdf-reorder-pages/page.jsx:93-94"},
+      {"label": "Reorder Pages (pendant : Processing...)", "ref": "app/tools/pdf-tools/pdf-reorder-pages/page.jsx:101-103"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un PDF (champ pré-rempli)", "modifier l'ordre (ou Reverse order / Odd pages, then even) ; la page signale « Left out of the new PDF: … » et les doublons", "bouton « Reorder Pages »", "bouton « Download »"],
+    "limits": [
+      {"what": "taille max", "value": "aucune limite codée", "constant": null, "ref": "app/tools/pdf-tools/pdf-reorder-pages/page.jsx:24-75"},
+      {"what": "numéro invalide", "value": "refusé avec phrase, bouton désactivé (jamais ignoré)", "constant": null, "ref": "app/lib/pageRange.js:23-38; page.jsx:21,96,101"}
+    ],
+    "processing": {"where": "browser", "detail": "pdf-lib dans la page ; aucun envoi.", "ref": "app/tools/pdf-tools/pdf-reorder-pages/page.jsx:53-68"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": "/tools/pdf-tools/pdf-organize (même résultat par boutons), /tools/pdf-tools/pdf-editor",
+    "notes": "« 5-1 » = 5, 4, 3, 2, 1 (page.jsx:91 ; pageRange.js:35). Titre, auteur, champs de formulaire et signets suivent leurs pages (page.jsx:63-65 ; app/lib/pdfCarryOver.js:8-13). Aucun outil du site n'offre de vignettes à glisser (Organize : liste et boutons Up/Down ; Editor : vignettes avec flèches)."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-repair",
+    "task": "Répare la structure d'un PDF endommagé (table des références croisées, fin coupée) sur notre service pdf-tools (qpdf, puis Poppler, puis liste de pages reconstruite, puis Ghostscript) et ne livre le résultat que si son texte se lit comme celui du fichier abîmé.",
+    "inputs": {"accept": ".pdf", "formats": ["PDF"], "ref": "app/tools/pdf-tools/pdf-repair/page.jsx:120"},
+    "outputs": {"formats": ["PDF (<nom>-repaired.pdf) + rapport (méthode, pages récupérées, vérification du texte, « What was found and fixed (N) »)"], "ref": "app/tools/pdf-tools/pdf-repair/page.jsx:106,136-171"},
+    "controls": [
+      {"label": "Click or drop a damaged PDF here / Choose a damaged PDF", "ref": "app/tools/pdf-tools/pdf-repair/page.jsx:118-119"},
+      {"label": "Repair PDF", "ref": "app/tools/pdf-tools/pdf-repair/page.jsx:131-133"},
+      {"label": "Cancel (pendant l'envoi, barre « Uploading… »)", "ref": "app/tools/pdf-tools/pdf-repair/page.jsx:125-129"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un PDF (taille vérifiée à la sélection)", "bouton « Repair PDF » (barre d'envoi, Cancel)", "lire « Repaired using … — N pages recovered. », la vérification du texte et la liste repliée", "bouton « Download »"],
+    "limits": [
+      {"what": "taille max quand le service média est configuré", "value": "44 Mo", "constant": "MAX_PDFTOOLS_STAGED_BYTES", "ref": "lib/quota/limits.js:93; app/lib/officeUpload.js:111-120"},
+      {"what": "taille max sans service média (build sans NEXT_PUBLIC_MEDIA_SERVICE_URL)", "value": "4 Mo (valeur du HTML extrait dans contenu-avant.json)", "constant": "MAX_PLATFORM_UPLOAD_BYTES", "ref": "app/lib/officeUpload.js:111; lib/quota/limits.js:53"},
+      {"what": "durée", "value": "230 s côté route ; 200 s côté service", "constant": "SERVICE_TIMEOUT_MS / REPAIR_TIMEOUT_MS", "ref": "app/api/pdf-repair/route.ts:11-14; services/pdf-tools/src/config.js:48"}
+    ],
+    "processing": {"where": "our-server", "detail": "≤ 4 Mo : envoi XHR multipart à /api/pdf-repair puis au service pdf-tools (Railway) /v1/repair, dossier temporaire supprimé à la fin de la requête, résultat renvoyé en base64. > 4 Mo (service média configuré) : envoi par morceaux au service média, résultat déposé puis téléchargé ; supprimé après le premier téléchargement complet ou au bout de MEDIA_JOB_TTL_SECONDS (README : 900 s). Aucun tiers.", "ref": "app/tools/pdf-tools/pdf-repair/page.jsx:57-103; app/api/pdf-repair/route.ts:29-31,66-70; services/pdf-tools/src/server.js:28-41; services/media-processing/app/jobs.py:6-13"},
+    "quota": "aucune limite sur /api/pdf-repair ; fichiers > 4 Mo : ticket média limité par réseau heure/jour (variables d'environnement)",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Vérification par Ghostscript (txtwrite) et Poppler (pdftotext) (services/pdf-tools/src/repair.js:117-150) ; si aucun lecteur n'ouvre l'original : « No PDF reader could open the damaged file… check the pages » (page.jsx:146-148). Corpus de 248 fichiers abîmés : docs/audit/RAPPORT-p28-gotenberg-04-10.md:124,154. Échec : message du service + « qpdf exit code: …, Ghostscript exit code: … » (page.jsx:158-161). En cas d'erreur serveur, extension et tranche de taille (pas le contenu) vont dans tool_errors (app/api/pdf-repair/route.ts:79-84,94-99)."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-rotate",
+    "task": "Ajoute 90° horaire, 180° ou 90° anti-horaire à l'orientation de toutes les pages ou des pages choisies.",
+    "inputs": {"accept": ".pdf", "formats": ["PDF"], "ref": "app/tools/pdf-tools/pdf-rotate/page.jsx:60"},
+    "outputs": {"formats": ["PDF (<nom>-rotated.pdf)"], "ref": "app/tools/pdf-tools/pdf-rotate/page.jsx:80"},
+    "controls": [
+      {"label": "Click or drop a PDF here / Choose a PDF", "ref": "app/tools/pdf-tools/pdf-rotate/page.jsx:58-59"},
+      {"label": "Rotation angle : 90° clockwise (défaut) / 180° / 90° counter-clockwise", "ref": "app/tools/pdf-tools/pdf-rotate/page.jsx:12,63-68"},
+      {"label": "Pages (empty = all; e.g. 1-3, 5, 8-) — placeholder « all pages »", "ref": "app/tools/pdf-tools/pdf-rotate/page.jsx:70-71"},
+      {"label": "Rotate PDF (pendant : Rotating...)", "ref": "app/tools/pdf-tools/pdf-rotate/page.jsx:72-74"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un PDF", "choisir l'angle", "facultatif : pages", "bouton « Rotate PDF »", "bouton « Download »"],
+    "limits": [{"what": "taille max", "value": "aucune limite codée", "constant": null, "ref": "app/tools/pdf-tools/pdf-rotate/page.jsx:28-50"}],
+    "processing": {"where": "browser", "detail": "pdf-lib (setRotation : seule la valeur /Rotate change, contenu non redessiné) ; aucun envoi.", "ref": "app/tools/pdf-tools/pdf-rotate/page.jsx:35-42"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": "/tools/pdf-tools/pdf-organize (Rotate par page), /tools/pdf-tools/pdf-editor (⟳), /tools/image-tools/image-rotate, /tools/video-tools/video-rotator",
+    "notes": "Angle ajouté à la rotation existante (page.jsx:38-41). Pas d'aperçu. Un angle par passage. PDF à mot de passe d'ouverture : message de app/lib/pdfDecrypt.js:34."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-sign",
+    "task": "Ajoute une signature (tracée, tapée en écriture manuscrite ou image téléversée sans le fond blanc) en image PNG transparente sur la dernière, la première, chaque ou une page donnée, dans un coin ou à l'endroit où on la fait glisser.",
+    "inputs": {"accept": ".pdf (document) ; image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp (image de signature)", "formats": ["PDF", "PNG, JPG, WebP pour la signature"], "ref": "app/tools/pdf-tools/pdf-sign/page.jsx:311,327"},
+    "outputs": {"formats": ["PDF (signed.pdf)"], "ref": "app/tools/pdf-tools/pdf-sign/page.jsx:376"},
+    "controls": [
+      {"label": "Click or drop a PDF file here / Choose a PDF file", "ref": "app/tools/pdf-tools/pdf-sign/page.jsx:308-311"},
+      {"label": "Draw / Type / Upload image", "ref": "app/tools/pdf-tools/pdf-sign/page.jsx:314"},
+      {"label": "Type : « Type your name » (60 caractères max, police Dancing Script)", "ref": "app/tools/pdf-tools/pdf-sign/page.jsx:19,319-323"},
+      {"label": "Upload image : « Choose a signature image » + « Remove white background » (coché par défaut)", "ref": "app/tools/pdf-tools/pdf-sign/page.jsx:53,324-330"},
+      {"label": "Clear signature", "ref": "app/tools/pdf-tools/pdf-sign/page.jsx:334"},
+      {"label": "Page : Last page (défaut) / First page / Every page / Page number…", "ref": "app/tools/pdf-tools/pdf-sign/page.jsx:38,337-340"},
+      {"label": "Position : Where I drag it on the page / Bottom right (défaut) / Bottom left / Bottom centre / Top right", "ref": "app/tools/pdf-tools/pdf-sign/page.jsx:30,40,341-344"},
+      {"label": "Add Signature to PDF (pendant : Adding signature...)", "ref": "app/tools/pdf-tools/pdf-sign/page.jsx:372-374"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un PDF", "Draw (tracer), Type (taper son nom) ou Upload image", "choisir la page et la position ; avec « Where I drag it on the page », la page s'affiche : glisser la signature, poignée ronde pour la taille, flèches et + / − au clavier", "bouton « Add Signature to PDF »", "bouton « Download » à côté de signed.pdf"],
+    "limits": [
+      {"what": "taille max", "value": "aucune limite codée", "constant": null, "ref": "app/tools/pdf-tools/pdf-sign/page.jsx:250-299"},
+      {"what": "taille dans un coin", "value": "au plus 200 × 80 pt et 40 % de la largeur, à 36 pt des bords", "constant": null, "ref": "app/tools/pdf-tools/pdf-sign/page.jsx:283-288"}
+    ],
+    "processing": {"where": "browser", "detail": "Canvas + PDF.js (aperçu de page) + pdf-lib ; police Dancing Script auto-hébergée par next/font ; aucun envoi.", "ref": "app/tools/pdf-tools/pdf-sign/page.jsx:18-19,191-220,250-299"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "Tracé au doigt (touchAction none, page.jsx:332-333).",
+    "twin": "/tools/pdf-tools/pdf-editor (ajout d'image sur une page)",
+    "notes": "Signature simple (image), pas une signature numérique cryptographique. Position par défaut : Bottom right, l'aperçu de page n'apparaît qu'avec « Where I drag it on the page » (page.jsx:40,193-194,348). Encre opaque sur fond transparent : ce qui est sous les traits est couvert, le reste visible (page.jsx:94-105,291). PDF à mot de passe d'ouverture refusé dès la sélection (page.jsx:311 ; app/lib/fileChecks.js:125-134). Sans signature : « Add your signature first (draw, type or upload it) — an empty signature was not added. » (page.jsx:253)."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-split",
+    "task": "Découpe un PDF en plusieurs PDF : plages personnalisées (séparées ou fusionnées), toutes les N pages, chaque page, pages choisies, impaires/paires, ou par signets (1 ou 2 niveaux), avec téléchargement un par un ou en ZIP.",
+    "inputs": {"accept": ".pdf", "formats": ["PDF"], "ref": "app/tools/pdf-tools/pdf-split/page.jsx:151"},
+    "outputs": {"formats": ["PDF par partie (<nom>_<pages>.pdf ou <nom>_<NN titre de signet>.pdf)", "ZIP (<nom>_split.zip)"], "ref": "app/tools/pdf-tools/pdf-split/splitPlan.js:83-89; page.jsx:211-217"},
+    "controls": [
+      {"label": "Click or drop a PDF here / Choose a PDF", "ref": "app/tools/pdf-tools/pdf-split/page.jsx:149-151"},
+      {"label": "Custom ranges / Every N pages / Every page / Select pages / Odd / even pages / By bookmarks", "ref": "app/tools/pdf-tools/pdf-split/page.jsx:14-21,155-160"},
+      {"label": "Page ranges — each becomes its own PDF (e.g. 1-3, 4-6, 8-) / Pages to extract (e.g. 2, 5, 9-12)", "ref": "app/tools/pdf-tools/pdf-split/page.jsx:161-166"},
+      {"label": "Split at : top-level bookmarks (chapters) / two levels (chapters and sections)", "ref": "app/tools/pdf-tools/pdf-split/page.jsx:167-175"},
+      {"label": "Pages per file", "ref": "app/tools/pdf-tools/pdf-split/page.jsx:177-182"},
+      {"label": "Merge all ranges into one PDF / Merge the extracted pages into one PDF", "ref": "app/tools/pdf-tools/pdf-split/page.jsx:183-188"},
+      {"label": "Split PDF", "ref": "app/tools/pdf-tools/pdf-split/page.jsx:203-205"},
+      {"label": "Cancel (pendant le travail)", "ref": "app/tools/pdf-tools/pdf-split/page.jsx:200"},
+      {"label": "Download all (N files, ZIP) + Download par partie", "ref": "app/components/FileDownload.jsx:261-265,211"}
+    ],
+    "steps": ["choisir un PDF (lecture dans un Web Worker, nombre de pages affiché)", "choisir un mode et le remplir ; la ligne « N PDFs will be created from M pages. » s'affiche", "bouton « Split PDF »", "« Download all (N files, ZIP) » ou « Download » par partie"],
+    "limits": [
+      {"what": "ordinateur", "value": "700 Mo et 2 000 pages", "constant": "MAX_FILE_SIZE_BYTES / MAX_PAGES", "ref": "app/tools/pdf-tools/pdf-split/config.js:17-19; page.jsx:71-75; pdfSplit.worker.js:25-28"},
+      {"what": "téléphone ou tablette", "value": "100 Mo et 300 pages", "constant": "MOBILE_MAX_FILE_SIZE_BYTES / MOBILE_MAX_PAGES", "ref": "app/tools/pdf-tools/pdf-split/config.js:24-26"},
+      {"what": "durée annoncée au-delà de 500 parties", "value": "≈ 0,105 s par partie (mesure : 2 000 fichiers d'une page en 3,5 min)", "constant": null, "ref": "app/tools/pdf-tools/pdf-split/page.jsx:190; docs/audit/RAPPORT-licence-et-ameliorations.md:133"},
+      {"what": "mesure des plafonds 700 Mo / 2 000 pages", "value": "commentaire du code seulement, aucun rapport dans docs/audit/", "constant": null, "ref": "app/tools/pdf-tools/pdf-split/config.js:1-16"}
+    ],
+    "processing": {"where": "browser", "detail": "pdf-lib dans un Web Worker ; ZIP fait par client-zip dans le navigateur ; aucun envoi.", "ref": "app/tools/pdf-tools/pdf-split/page.jsx:52-57; pdfSplit.worker.js:18-61; app/components/FileDownload.jsx:241-256"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": "/tools/file-tools/file-splitter (découpe d'octets, pas de pages) ; /tools/pdf-tools/pdf-editor (Extract Selected)",
+    "notes": "Plage invalide (« 5-3 », au-delà de la dernière page, texte) refusée avec phrase avant création (splitPlan.js:12-27). « Every N pages » refusé si N ≥ nombre de pages (splitPlan.js:53). Signets : pages avant le 1er signet dans un fichier à part, nommé « 0 (before the first bookmark) » (splitPlan.js:45). Chaque partie garde formulaires, titre/auteur et signets de ses pages (pdfSplit.worker.js:50-53). Pas de vignettes."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-unlock",
+    "task": "Enlève le chiffrement d'un PDF (mot de passe d'ouverture et/ou restrictions) avec le mot de passe fourni, ou sans mot de passe pour un PDF à restrictions seules, et garde signets, formulaires et informations du document.",
+    "inputs": {"accept": ".pdf", "formats": ["PDF chiffré"], "ref": "app/tools/pdf-tools/pdf-unlock/page.jsx:59"},
+    "outputs": {"formats": ["PDF non chiffré (unlocked.pdf)"], "ref": "app/tools/pdf-tools/pdf-unlock/page.jsx:68"},
+    "controls": [
+      {"label": "Click or drop a protected PDF here / Choose a protected PDF", "ref": "app/tools/pdf-tools/pdf-unlock/page.jsx:56-57"},
+      {"label": "Password (if required) — placeholder « Enter PDF password »", "ref": "app/tools/pdf-tools/pdf-unlock/page.jsx:61-62"},
+      {"label": "Unlock PDF (pendant : Unlocking...)", "ref": "app/tools/pdf-tools/pdf-unlock/page.jsx:64-66"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir le PDF protégé", "taper le mot de passe (inutile si le PDF s'ouvre sans mot de passe et n'a que des restrictions)", "bouton « Unlock PDF »", "bouton « Download » à côté de unlocked.pdf"],
+    "limits": [{"what": "taille max", "value": "aucune limite codée", "constant": null, "ref": "app/tools/pdf-tools/pdf-unlock/page.jsx:20-47"}],
+    "processing": {"where": "browser", "detail": "@cantoo/pdf-lib dans la page ; aucun envoi.", "ref": "app/lib/pdfUnlock.js:9-34"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": "/tools/pdf-tools/pdf-protect (inverse)",
+    "notes": "PDF non chiffré : AUCUN fichier, message « This PDF is not protected: it opens without a password and has no restrictions, so there is nothing to remove. » (page.jsx:29-32). Mot de passe manquant : « This PDF is password-protected. Please enter the password. » ; faux : « Could not unlock PDF. Wrong password? » (page.jsx:38-42 ; node_modules/@cantoo/pdf-lib/cjs/core/crypto.js:1399,1407). Mot de passe propriétaire accepté aussi (crypto.js:1403-1404). Ne devine pas un mot de passe inconnu."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-watermark",
+    "task": "Ajoute un filigrane texte (toute écriture) ou image PNG/JPG à un PDF : 9 positions ou mosaïque, rotation 0/45/90/180/270°, opacité, au-dessus ou sous le contenu, pages de/à.",
+    "inputs": {"accept": ".pdf,application/pdf (document) ; image/png,image/jpeg (filigrane image)", "formats": ["PDF", "PNG, JPG pour l'image"], "ref": "app/tools/pdf-tools/pdf-watermark/page.jsx:151,174,61-63"},
+    "outputs": {"formats": ["PDF (<nom>-watermarked.pdf)"], "ref": "app/tools/pdf-tools/pdf-watermark/page.jsx:215"},
+    "controls": [
+      {"label": "Click or drop a PDF here / Choose a PDF", "ref": "app/tools/pdf-tools/pdf-watermark/page.jsx:149-151"},
+      {"label": "Text / Image", "ref": "app/tools/pdf-tools/pdf-watermark/page.jsx:153-157"},
+      {"label": "Watermark text (défaut CONFIDENTIAL) ; Font size: automatic (curseur 0-150) ; Colour (gris #808080) ; Bold (coché)", "ref": "app/tools/pdf-tools/pdf-watermark/page.jsx:25-30,158-168"},
+      {"label": "Choose image (PNG or JPG) / Change image ; Image width: N% of the page (5-100, 25 % max en mosaïque)", "ref": "app/tools/pdf-tools/pdf-watermark/page.jsx:170-178"},
+      {"label": "Position : top-left … bottom-right (9, défaut center)", "ref": "app/tools/pdf-tools/pdf-watermark/page.jsx:18,31,180-186"},
+      {"label": "Mosaic (repeat across the whole page)", "ref": "app/tools/pdf-tools/pdf-watermark/page.jsx:187"},
+      {"label": "Rotation : None / 45° (défaut) / 90° / 180° / 270°", "ref": "app/tools/pdf-tools/pdf-watermark/page.jsx:19,33,190-193"},
+      {"label": "Layer : Over the content (défaut) / Below the content", "ref": "app/tools/pdf-tools/pdf-watermark/page.jsx:35,194-197"},
+      {"label": "From page / To page (empty = last)", "ref": "app/tools/pdf-tools/pdf-watermark/page.jsx:198-201"},
+      {"label": "Opacity: N% (10-100, défaut 30)", "ref": "app/tools/pdf-tools/pdf-watermark/page.jsx:34,203-206"},
+      {"label": "Add Watermark (pendant : Processing...)", "ref": "app/tools/pdf-tools/pdf-watermark/page.jsx:207-209"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un PDF", "Text (taper) ou Image (choisir PNG/JPG)", "position ou Mosaic, rotation, couche, pages, opacité", "bouton « Add Watermark » (« Watermarked pages A to B. »)", "bouton « Download »"],
+    "limits": [{"what": "taille max", "value": "aucune limite codée", "constant": null, "ref": "app/tools/pdf-tools/pdf-watermark/page.jsx:67-140"}],
+    "processing": {"where": "browser", "detail": "pdf-lib ; texte hors WinAnsi dessiné par le navigateur en PNG transparent ; aucun envoi.", "ref": "app/tools/pdf-tools/pdf-watermark/page.jsx:73-133"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "le filigrane est celui que l'utilisateur demande ; aucun filigrane du site ajouté (vérifié)",
+    "browsers": null,
+    "twin": "/tools/video-tools/video-watermark (vidéo), /tools/image-tools/add-text-to-image (image)",
+    "notes": "Taille automatique : min(largeur, hauteur)/9 (mosaïque /20), au moins 12 pt (10 en mosaïque) (page.jsx:96). « Below the content » : caché sur une page scannée, le statut le dit (page.jsx:131,135). Un seul fichier à la fois. Image autre que PNG/JPG refusée (page.jsx:61-63)."
+  }
+]

@@ -14,7 +14,8 @@ for (const cat of fs.readdirSync('app/tools')) {
   if (!fs.statSync(d).isDirectory()) continue;
   for (const t of fs.readdirSync(d)) if (fs.statSync(path.join(d, t)).isDirectory() && fs.readdirSync(path.join(d, t)).some((f) => /^page\.(jsx|tsx|js)$/.test(f))) pages.push(`/tools/${cat}/${t}`);
 }
-const ent = (s) => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#x27;|&#39;/g, "'").replace(/&nbsp;|&#160;/g, ' ').replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)));
+// &amp; last, so that an entity shown as text ("&amp;lt;") stays "&lt;" (one decoding, as the browser does)
+const ent = (s) => s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#x27;|&#39;/g, "'").replace(/&nbsp;|&#160;/g, ' ').replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16))).replace(/&amp;/g, '&');
 const text = (h) => ent(h.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
 const words = (t) => (t.match(/[\p{L}\p{N}][\p{L}\p{N}'’-]*/gu) || []).length;
 

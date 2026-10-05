@@ -1,0 +1,384 @@
+[
+  {
+    "path": "/tools/converter-tools/color-converter",
+    "task": "Convertit une couleur entre HEX, RGB, HSL, HSV/HSB et CMYK (chaque format éditable), avec opacité, et affiche son contraste WCAG 2 en texte sur blanc et sur noir.",
+    "inputs": {
+      "accept": null,
+      "formats": ["HEX à 3, 4, 6 ou 8 chiffres (4e et 8e = transparence)", "RGB 0-255", "HSL (H 0-360, S/L 0-100)", "HSV/HSB (H 0-360, S/V 0-100)", "CMYK 0-100 %", "sélecteur de couleur natif", "opacité 0-100 %"],
+      "ref": "app/tools/converter-tools/color-converter/page.jsx:10-18,73-77,96-102,127-128,133-134,142"
+    },
+    "outputs": {
+      "formats": ["#rrggbb ou #rrggbbaa", "rgb() / rgba()", "hsl() / hsla()", "hsv() (sans alpha)", "cmyk() (sans alpha)", "texte copié dans le presse-papiers"],
+      "ref": "app/tools/converter-tools/color-converter/page.jsx:19-21,74-76,104-107,165"
+    },
+    "controls": [
+      {"label": "Colour picker (aria-label du sélecteur natif)", "ref": "app/tools/converter-tools/color-converter/page.jsx:127"},
+      {"label": "HEX", "ref": "app/tools/converter-tools/color-converter/page.jsx:125,128"},
+      {"label": "Opacity (alpha): {N} %", "ref": "app/tools/converter-tools/color-converter/page.jsx:133-134"},
+      {"label": "RGB — champs R, G, B", "ref": "app/tools/converter-tools/color-converter/page.jsx:137-145"},
+      {"label": "HSL — champs H, S%, L%", "ref": "app/tools/converter-tools/color-converter/page.jsx:74"},
+      {"label": "HSV / HSB — champs H, S%, V%", "ref": "app/tools/converter-tools/color-converter/page.jsx:75"},
+      {"label": "CMYK — champs C%, M%, Y%, K%", "ref": "app/tools/converter-tools/color-converter/page.jsx:76"},
+      {"label": "Copy (un par format RGB/HSL/HSV/CMYK)", "ref": "app/tools/converter-tools/color-converter/page.jsx:148,166"},
+      {"label": "Text on white / Text on black (ratio — AAA | AA | AA large text only | fails)", "ref": "app/tools/converter-tools/color-converter/page.jsx:111-112,171-174"},
+      {"label": "Copy HEX", "ref": "app/tools/converter-tools/color-converter/page.jsx:176"}
+    ],
+    "steps": ["modifier la couleur par le sélecteur, le champ HEX, le curseur « Opacity (alpha) » ou n'importe quel champ RGB/HSL/HSV/CMYK → tous les autres se mettent à jour", "lire le contraste « Text on white » / « Text on black »", "bouton « Copy » à côté d'un format, ou « Copy HEX »"],
+    "limits": [
+      {"what": "valeurs bornées", "value": "RGB 0-255 ; H 0-360 ; S, L, V, C, M, Y, K 0-100 ; entiers seulement (parseInt)", "constant": "SPACES", "ref": "app/tools/converter-tools/color-converter/page.jsx:73-77,96-102"},
+      {"what": "précision affichée", "value": "HSL, HSV et CMYK arrondis à l'entier", "constant": null, "ref": "app/tools/converter-tools/color-converter/page.jsx:41,55,62-67"},
+      {"what": "noms de couleurs (rebeccapurple…)", "value": "non acceptés : seul HEX est analysé", "constant": null, "ref": "app/tools/converter-tools/color-converter/page.jsx:10-18"},
+      {"what": "ratio de contraste", "value": "tronqué à 2 décimales (pas arrondi), sur la couleur composée avec le fond (alpha compris)", "constant": null, "ref": "app/tools/converter-tools/color-converter/page.jsx:109-112"}
+    ],
+    "processing": {"where": "browser", "detail": "Tout le calcul est dans la page ; aucune requête réseau ; la page n'utilise ni useToolError ni reportShownMessage, donc même un message d'erreur ne part pas.", "ref": "app/tools/converter-tools/color-converter/page.jsx:1-205"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucune route app/api appelée par page.jsx)",
+    "watermark": "sans objet",
+    "browsers": "Sélecteur natif <input type=color> (sans alpha). Copie via navigator.clipboard.writeText sans gestion d'échec (un refus du navigateur n'affiche rien).",
+    "twin": "/tools/developer-tools/color-picker (quasi : choisit une couleur et donne HEX/RGB, app/tools/developer-tools/color-picker/layout.tsx:5-6)",
+    "notes": "Message HEX invalide : « \"…\" is not a HEX colour: use 3, 4, 6 or 8 digits 0-9 / A-F, like #3b82f6, #fff or #3b82f680 (with transparency). The fields below still show #… » (page.jsx:94). CMYK = formule simple K = 1 − max(R,G,B), pas de profil d'impression (page.jsx:5-6,62-71). Couleur de départ #3a72d8 (page.jsx:81-82)."
+  },
+  {
+    "path": "/tools/converter-tools/currency-converter",
+    "task": "Convertit un montant entre les devises publiées par ExchangeRate-API avec le taux du jour, et trace l'historique du taux de la paire (1 semaine à 10 ans) d'après les taux de référence des banques centrales (Frankfurter).",
+    "inputs": {"accept": null, "formats": ["montant (champ nombre)", "devise From", "devise To"], "ref": "app/tools/converter-tools/currency-converter/page.jsx:86-104"},
+    "outputs": {
+      "formats": ["montant converti au format de la devise (yen sans décimales…)", "taux unitaire et inverse", "tableau du montant dans les 20 devises populaires", "graphique d'historique avec High / Low / Average / Change", "fichier CSV de l'historique « <FROM>-<TO>-<période>.csv »"],
+      "ref": "app/tools/converter-tools/currency-converter/page.jsx:22-30,113-115,124-134 ; RateHistory.jsx:88,132-137,143"
+    },
+    "controls": [
+      {"label": "Amount", "ref": "app/tools/converter-tools/currency-converter/page.jsx:86-87"},
+      {"label": "From (options « CODE — Nom »)", "ref": "app/tools/converter-tools/currency-converter/page.jsx:18,91-94"},
+      {"label": "⇄ (bouton sans texte ni aria-label)", "ref": "app/tools/converter-tools/currency-converter/page.jsx:97"},
+      {"label": "To", "ref": "app/tools/converter-tools/currency-converter/page.jsx:100-103"},
+      {"label": "{montant} {FROM} in other currencies (bloc dépliable)", "ref": "app/tools/converter-tools/currency-converter/page.jsx:126-127"},
+      {"label": "Rates published: … · next update: … · Rates By Exchange Rate API", "ref": "app/tools/converter-tools/currency-converter/page.jsx:121"},
+      {"label": "Refresh Rates", "ref": "app/tools/converter-tools/currency-converter/page.jsx:136"},
+      {"label": "{FROM}/{TO} rate history — 1W 1M 6M 1Y 5Y 10Y", "ref": "app/tools/converter-tools/currency-converter/RateHistory.jsx:11-14,93-98"},
+      {"label": "Download (CSV de l'historique)", "ref": "app/tools/converter-tools/currency-converter/RateHistory.jsx:143 ; app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["saisir le montant (Amount)", "choisir « From » et « To », ou inverser avec ⇄", "le résultat s'affiche dès que les taux sont chargés (pas de bouton de calcul)", "facultatif : « Refresh Rates » ; période 1W…10Y du graphique ; « Download » pour le CSV"],
+    "limits": [
+      {"what": "nombre de devises", "value": "celles que renvoie l'API : 166 au moment du rapport", "constant": "RATES_URL", "ref": "app/tools/converter-tools/currency-converter/page.jsx:8-12,74 ; docs/audit/RAPPORT-licence-et-ameliorations.md:124-126"},
+      {"what": "fraîcheur des taux", "value": "mis à jour une fois par jour par la source ; date de publication et prochaine mise à jour affichées", "constant": null, "ref": "app/tools/converter-tools/currency-converter/page.jsx:8-9,58-62,121"},
+      {"what": "couverture de l'historique", "value": "158 des 166 devises (sans historique : BGN, CLF, FOK, HRK, KID, SLL, TVD, ZWL) ; certaines commencent plus tard (ZWG 2024)", "constant": null, "ref": "docs/audit/RAPPORT-p25-decisions-03-10.md:30-32 ; RateHistory.jsx:44-48,105-109"},
+      {"what": "pas de l'historique", "value": "quotidien jusqu'à 1Y, hebdomadaire 5Y, mensuel 10Y", "constant": "RANGES", "ref": "app/tools/converter-tools/currency-converter/RateHistory.jsx:11-14,139"},
+      {"what": "affichage des petits montants", "value": "au moins 4 chiffres significatifs sous 1, 12 décimales au plus", "constant": null, "ref": "app/tools/converter-tools/currency-converter/page.jsx:20-29"}
+    ],
+    "processing": {"where": "third-party", "detail": "Le navigateur télécharge la table complète des taux d'open.er-api.com/v6/latest/USD (même requête pour tout visiteur, sans montant) ; pour l'historique il demande à api.frankfurter.dev/v2 la liste /currencies puis /rates?base=<FROM>&quotes=<TO>&from=<date>[&group=week|month] — les deux codes choisis partent donc chez Frankfurter. Le montant ne quitte jamais la page. Les messages d'erreur affichés (textes fixes) passent par useToolError vers /api/report-error.", "ref": "app/tools/converter-tools/currency-converter/page.jsx:12,35-36,42,52 ; RateHistory.jsx:9,21,49-51 ; app/lib/useToolError.js:28-29"},
+    "quota": "aucune côté site ; si ExchangeRate-API répond 429 : « The exchange-rate service is busy. Please try again in a few minutes. »",
+    "signup": "aucune inscription demandée (vérifié : seuls des appels à open.er-api.com et api.frankfurter.dev)",
+    "watermark": "sans objet",
+    "browsers": "Noms des devises par Intl.DisplayNames du navigateur : sans cette API, codes seuls ; un code inconnu du navigateur s'affiche seul (Node 24 : FOK, KID, TVD, GGP, IMP, JEP sans nom — non vérifié en navigateur). Le graphique se lit au survol ou au toucher.",
+    "twin": null,
+    "notes": "Attribution exigée par les conditions d'ExchangeRate-API (lien « Rates By Exchange Rate API », page.jsx:8-9,121). Messages : « Could not load rates. Check your connection. » (page.jsx:54), « The exchange-rate service sent no usable rates. Please try again later. » (56), « Choose two different currencies to see their rate history. » (RateHistory.jsx:103), « No rate history is published for … by the central-bank sources this chart uses. The conversion above still works. » (105-109), « The rate history could not be loaded… » (104). Montant négatif accepté (parseFloat, page.jsx:87). Le texte ne parle pas du tableau « in other currencies »."
+  },
+  {
+    "path": "/tools/converter-tools/mobi-to-epub",
+    "task": "Convertit un ebook Kindle sans DRM (MOBI, AZW, AZW3, PRC) en fichier EPUB 3 dans le navigateur.",
+    "inputs": {"accept": ".mobi,.azw,.azw3,.prc", "formats": ["MOBI", "AZW", "AZW3", "PRC"], "ref": "app/tools/converter-tools/mobi-to-epub/page.jsx:376"},
+    "outputs": {"formats": ["EPUB (paquet OPF version 3.0 + nav.xhtml + toc.ncx), nommé <nom d'origine>.epub"], "ref": "app/tools/converter-tools/mobi-to-epub/page.jsx:176-241,332-357,385"},
+    "controls": [
+      {"label": "Click or drop a MOBI file here (souris) / Choose a MOBI file (écran tactile)", "ref": "app/tools/converter-tools/mobi-to-epub/page.jsx:375 ; app/components/UploadPrompt.jsx:10-11"},
+      {"label": "Convert to EPUB (Converting... pendant le travail)", "ref": "app/tools/converter-tools/mobi-to-epub/page.jsx:378-380"},
+      {"label": "Done!", "ref": "app/tools/converter-tools/mobi-to-epub/page.jsx:384"},
+      {"label": "Download", "ref": "app/tools/converter-tools/mobi-to-epub/page.jsx:385 ; app/components/FileDownload.jsx:211"},
+      {"label": "Save / Share (seulement si le navigateur sait partager un fichier)", "ref": "app/components/FileDownload.jsx:151-152,213-218"}
+    ],
+    "steps": ["cliquer la zone (ou y déposer le fichier) et choisir un .mobi/.azw/.azw3/.prc", "bouton « Convert to EPUB »", "attendre « Done! »", "bouton « Download » (ou « Save / Share »)"],
+    "limits": [
+      {"what": "taille max par fichier (ordinateur)", "value": "NON TROUVÉ — aucune constante ni contrôle de taille (cherché dans page.jsx, UploadPrompt.jsx, FileDownload.jsx, FileDropBridge.jsx) ; le fichier entier est lu en mémoire", "constant": null, "ref": "app/tools/converter-tools/mobi-to-epub/page.jsx:284"},
+      {"what": "taille max (iPhone/Android)", "value": "NON TROUVÉ — même code, aucune limite propre au téléphone", "constant": null, "ref": "app/tools/converter-tools/mobi-to-epub/page.jsx:263-366"},
+      {"what": "nombre de fichiers", "value": "un à la fois (input sans multiple)", "constant": null, "ref": "app/tools/converter-tools/mobi-to-epub/page.jsx:264,376"},
+      {"what": "DRM", "value": "non pris en charge et non détecté : le champ encryption est lu par le parser mais jamais testé", "constant": null, "ref": "node_modules/@lingo-reader/mobi-parser/dist/index.browser.mjs:162 ; app/tools/converter-tools/mobi-to-epub/page.jsx:276-366"},
+      {"what": "compressions MOBI lues", "value": "aucune, PalmDOC, Huffman/CDIC ; autre = erreur « Unsupported compression »", "constant": null, "ref": "node_modules/@lingo-reader/mobi-parser/dist/index.browser.mjs:796-805"}
+    ],
+    "processing": {"where": "browser", "detail": "Lecture par @lingo-reader/mobi-parser et empaquetage par JSZip dans la page ; le seul fetch lit des adresses blob: locales. En cas d'échec, le message d'erreur (nettoyé) est envoyé par reportShownMessage à /api/report-error ; le fichier, jamais.", "ref": "app/tools/converter-tools/mobi-to-epub/page.jsx:107-110,278-285,359-361 ; app/lib/useToolError.js:19-31"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucune route app/api de conversion)",
+    "watermark": "aucun filigrane ajouté (vérifié : rien n'est ajouté au contenu ; l'OPF n'a pas de « generator »)",
+    "browsers": "Dépôt de fichier assuré par FileDropBridge (filtre selon accept) ; téléphone : invite « Choose a MOBI file », bouton Save / Share là où navigator.share accepte les fichiers.",
+    "twin": null,
+    "notes": "Choix du lecteur par l'extension : .azw3 → KF8, sinon MOBI6, l'autre essayé seulement si le premier échoue (page.jsx:243-254). Copié : chapitres dans l'ordre du spine, images, feuilles de style (et leurs url()), couverture (avec repli EXTH 201 pour les MOBI6, page.jsx:32-101,322-330), titre, auteurs, éditeur, description, langue (page.jsx:176-195). Titres de la table des matières = ceux du livre, sinon « Chapter N » (page.jsx:296-316). Liens internes non réécrits. L'OPF n'a pas la meta dcterms:modified exigée par EPUB 3 ; dc:language peut valoir « unknown » (parser index.browser.mjs:785). Erreurs : « No readable chapters found in this file. » (page.jsx:289), « Error: <message> » (361)."
+  },
+  {
+    "path": "/tools/converter-tools/unit-converter",
+    "task": "Convertit une valeur entre unités de 12 catégories (longueur, masse, température, consommation, vitesse, surface, volume, temps, données, pression, énergie, puissance) avec des facteurs exacts.",
+    "inputs": {"accept": null, "formats": ["nombre décimal, négatif, notation 6.02e23 ; espaces de milliers ; « 1,000 » refusé comme ambigu"], "ref": "app/tools/converter-tools/unit-converter/page.jsx:61-77,119-129"},
+    "outputs": {"formats": ["résultat jusqu'à 12 chiffres significatifs, notation scientifique sous 1e-6 et dès 1e15", "ligne « 1 X = … Y » (sauf Temperature et Fuel economy)"], "ref": "app/tools/converter-tools/unit-converter/page.jsx:51-55,152-155"},
+    "controls": [
+      {"label": "Length | Weight | Temperature | Fuel economy | Speed | Area | Volume | Time | Data | Pressure | Energy | Power (boutons)", "ref": "app/tools/converter-tools/unit-converter/page.jsx:15-29,104-114"},
+      {"label": "Value", "ref": "app/tools/converter-tools/unit-converter/page.jsx:119-128"},
+      {"label": "From", "ref": "app/tools/converter-tools/unit-converter/page.jsx:137-140"},
+      {"label": "To", "ref": "app/tools/converter-tools/unit-converter/page.jsx:143-146"},
+      {"label": "Unités de température affichées « C », « F », « K », « R » (sans °)", "ref": "app/tools/converter-tools/unit-converter/page.jsx:19"}
+    ],
+    "steps": ["bouton de catégorie (From/To reviennent aux deux premières unités)", "saisir la valeur (Value)", "choisir « From » et « To »", "lire le résultat, mis à jour à chaque frappe"],
+    "limits": [
+      {"what": "unités par catégorie", "value": "Length 11 (m, km, cm, mm, µm, nm, ft, inch, mile, yard, nautical mile) ; Weight 10 ; Temperature 4 ; Fuel economy 4 ; Speed 4 ; Area 9 ; Volume 16 ; Time 10 ; Data 14 ; Pressure 10 ; Energy 10 ; Power 7", "constant": "CONVERSIONS", "ref": "app/tools/converter-tools/unit-converter/page.jsx:15-29"},
+      {"what": "consommation", "value": "doit être > 0 (« Fuel economy must be more than 0… »)", "constant": null, "ref": "app/tools/converter-tools/unit-converter/page.jsx:83,130"},
+      {"what": "température", "value": "alerte sous le zéro absolu (« That is below absolute zero (0 K = -273.15 °C = -459.67 °F). »)", "constant": null, "ref": "app/tools/converter-tools/unit-converter/page.jsx:85,131"},
+      {"what": "saisie invalide", "value": "« Type a number, e.g. 12.5, -40 or 6.02e23. » ; « 1,000 » → « Is 1,000 one thousand or one? Write 1000 for a thousand, or 1 for one. »", "constant": null, "ref": "app/tools/converter-tools/unit-converter/page.jsx:71,129,153"}
+    ],
+    "processing": {"where": "browser", "detail": "Calcul dans la page, aucune requête, aucun rapport d'erreur.", "ref": "app/tools/converter-tools/unit-converter/page.jsx:1-184"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucune requête)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Facteurs = définitions exactes (NIST SP 811) : psi, mmHg conventionnel, torr, calorie thermochimique, BTU IT, eV, ft·lbf, hp mécanique et métrique, année grégorienne 365,2425 j (page.jsx:6-14). Consommation calculée par l'inverse via km/L (page.jsx:31-37). Rankine présent (page.jsx:43,47)."
+  },
+  {
+    "path": "/tools/qr-barcodes-tools/barcode-generator",
+    "task": "Crée des codes-barres de 37 types (linéaires, EAN/UPC/ISBN, GS1 DataBar, 2D) à une taille d'impression exacte, un par un ou par lots (ZIP ou planches d'étiquettes PDF), et relit chaque code avec un décodeur indépendant quand il en existe un.",
+    "inputs": {
+      "accept": ".csv,.tsv,.txt,text/csv,text/tab-separated-values,text/plain (import de lot seulement)",
+      "formats": ["valeur tapée (un code)", "liste, une valeur par ligne, texte sous le code après une tabulation", "série numérotée", "CSV/TSV : 1re colonne valeur, 2e colonne texte (séparateur tab, ; ou ,)"],
+      "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:34-50,150-168,283,289-299"
+    },
+    "outputs": {
+      "formats": ["un code : PNG, SVG, PDF, EPS, JPG, GIF + « Download all » en ZIP", "lot : ZIP d'un format au choix (+ errors.txt si des valeurs échouent)", "lot : planches d'étiquettes en un PDF vectoriel"],
+      "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:22-26,141-142,240-251,307-308,419-421 ; labels.js:65-111"
+    },
+    "controls": [
+      {"label": "One barcode | Many (ZIP or labels)", "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:266-271"},
+      {"label": "Barcode type (indice sous la liste)", "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:273-277"},
+      {"label": "Value", "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:282-283"},
+      {"label": "Use the example ({exemple})", "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:284"},
+      {"label": "A list (one value per line) | A numbered series | Import CSV / TSV…", "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:289-291"},
+      {"label": "Prefix | First number | How many | Step | Digits (zero-padded) | Suffix", "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:298"},
+      {"label": "Output : « PNG files in a ZIP » … « GIF files in a ZIP » | « Label sheets (PDF) »", "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:305-309"},
+      {"label": "Labels (planches Avery A4/US Letter, papier à découper, rouleaux thermiques, Custom…) | Paper | Label width (mm) | Label height (mm) | Columns | Rows | Top margin (mm) | Left margin (mm) | Gap across (mm) | Gap down (mm) | Start at label | Copies of each code", "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:314-327"},
+      {"label": "Keep the size set below (shrink only if it does not fit) | Fill the label | Outline the labels (to line up the sheet)", "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:330-332"},
+      {"label": "Size : Units (Millimetres (print) | Mils (print) | Pixels (screen)) | Module width | Resolution (dpi) | Bar height | Quiet zone (modules) | Rotation (0° 90° 180° 270°)", "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:342-355"},
+      {"label": "Use {x} mm ({n} dots) (ajustement à un nombre entier de points)", "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:361-365"},
+      {"label": "Text and colours : Show the value under the bars | Text under the bars (leave empty to print the value) | Text size (pt) | Bar colour | Background | Text colour | Transparent background (PNG, GIF, SVG, PDF, EPS) | Add the optional check digit | Check digit scheme | Error correction | Shape | Columns (1-30) | Error correction level (0-8) | Error correction (% of symbol)", "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:373-390"},
+      {"label": "Generate Barcode (Creating and checking… pendant le travail)", "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:395"},
+      {"label": "Generate all as ZIP | Generate label sheets (PDF) | Cancel", "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:398-399"},
+      {"label": "Download (par fichier) | Download all (6 files, ZIP)", "ref": "app/components/FileDownload.jsx:211,264 ; page.jsx:419-421"},
+      {"label": "Print it on label sheets… | Preview the PDF in a new tab", "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:422,440"}
+    ],
+    "steps": ["choisir « Barcode type »", "« One barcode » : taper la valeur (ou « Use the example ») — « Many (ZIP or labels) » : liste, série ou « Import CSV / TSV… », puis « Output »", "régler « Size » et, au besoin, « Text and colours »", "« Generate Barcode » (ou « Generate all as ZIP » / « Generate label sheets (PDF) »)", "lire le statut de relecture, puis « Download » / « Download all »"],
+    "limits": [
+      {"what": "codes par ZIP", "value": "5000", "constant": "MAX_BATCH", "ref": "app/tools/qr-barcodes-tools/barcode-generator/config.js:2 ; page.jsx:210"},
+      {"what": "étiquettes par PDF (copies comprises)", "value": "5000", "constant": "MAX_LABELS", "ref": "app/tools/qr-barcodes-tools/barcode-generator/labels.js:24 ; page.jsx:213-214"},
+      {"what": "fichier CSV/TSV importé", "value": "5 Mo au plus (5e6 octets)", "constant": null, "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:160"},
+      {"what": "résolution", "value": "72 à 2400 dpi (96 en pixels)", "constant": null, "ref": "app/tools/qr-barcodes-tools/barcode-generator/render.js:35 ; page.jsx:349"},
+      {"what": "zone de silence", "value": "0 à 50 modules ; « auto » = valeur par type", "constant": null, "ref": "app/tools/qr-barcodes-tools/barcode-generator/render.js:16-29,62"},
+      {"what": "couleurs", "value": "barres plus sombres que le fond et contraste ≥ 3:1, sinon refus", "constant": null, "ref": "app/tools/qr-barcodes-tools/barcode-generator/render.js:254-261"},
+      {"what": "types non relus", "value": "MSI Plessey, Pharmacode, Code 11, EAN-5 seul, EAN-2 seul", "constant": null, "ref": "app/tools/qr-barcodes-tools/barcode-generator/symbologies.js:19-21,38-39 ; page.jsx:118,416"},
+      {"what": "sur iPhone/Android", "value": "NON TROUVÉ — aucune limite propre au téléphone (même code) ; sans OffscreenCanvas les lots se font un par un dans la page", "constant": null, "ref": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx:225-237"}
+    ],
+    "processing": {"where": "browser", "detail": "Dessin par bwip-js, relecture par zxing-cpp (WebAssembly servi depuis /wasm du site, jamais d'un CDN) sur l'image raster du canvas ; SVG/PDF/EPS redessinés à part depuis les mêmes réglages ; lots dans 1 à 4 Workers ; ZIP par client-zip, GIF par gifenc. Aucun fichier ni valeur envoyé, sauf le texte nettoyé d'un message d'erreur affiché (useToolError → /api/report-error) — le message « No code could be made: line 1: <valeur> — … » contient des valeurs.", "ref": "app/tools/qr-barcodes-tools/barcode-generator/render.js:77-85,239-248,327-336 ; read.worker.js:1-7 ; page.jsx:64,172-192,198,247 ; app/lib/useToolError.js:28-29"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucune route app/api)",
+    "watermark": "aucun filigrane ajouté (vérifié : rien d'ajouté au dessin) ; les PDF portent /Producer (onlineconvertools.com Barcode Generator, bwip-js) et l'EPS %%Creator: onlineconvertools.com Barcode Generator (bwip-js) dans leurs métadonnées",
+    "browsers": "Sans OffscreenCanvas (Safari ancien) : lot fait un par un sur la page (page.jsx:225-237). Pas d'autre particularité Safari/iPhone dans le code.",
+    "twin": "/tools/qr-barcodes-tools/qr-generator (QR Code et Micro QR existent aussi ici : symbologies.js:56-57)",
+    "notes": "Usage commercial permis par les conditions du site (app/terms/page.jsx:32). Résolution écrite dans PNG (pHYs) et JPG (JFIF) seulement, pas dans GIF (render.js:204-224,239-248). JPG sans transparence : dessiné sur blanc ou le fond choisi (render.js:233-238). Code 39 / ITF avec chiffre de contrôle optionnel : la relecture vérifie seulement le type (render.js:301,324). Add-on posé à 9 modules (render.js:49-51). Seuils GS1 de module minimal signalés (page.jsx:29-31,366-368). Marge de 1 mm dans chaque étiquette (labels.js:23). Planches : L7160, L7163, L7651, L7674, 5160, 5163, 5167, papier A4 3×7, Letter 3×10 ; rouleaux 40×30 … 4×6 in (labels.js:10-21). Fichier de lot vide/binaire refusé par une phrase (page.jsx:161-163). Statut un code : « ✓ Scanned back by an independent reader (zxing-cpp): … » ou « Created, but not scanned back: no independent reader exists for … » (page.jsx:415-417)."
+  },
+  {
+    "path": "/tools/qr-barcodes-tools/qr-generator",
+    "task": "Crée un QR code statique (lien, texte, e-mail, téléphone, SMS, Wi-Fi, vCard 3.0 ou position) avec couleurs, forme des modules, correction d'erreur et logo, le relit, puis le propose en PNG, SVG et PDF.",
+    "inputs": {
+      "accept": "image/png,image/jpeg,image/gif,image/webp,image/svg+xml (logo seulement)",
+      "formats": ["champs texte selon le type", "logo PNG, JPG, GIF, WebP ou SVG"],
+      "ref": "app/tools/qr-barcodes-tools/qr-generator/page.jsx:21-30,164 ; app/lib/qrPayload.js:11-20"
+    },
+    "outputs": {
+      "formats": ["qrcode.png (200 à 2000 px de côté)", "qrcode.svg (vectoriel, largeur/hauteur = taille PNG en px)", "qrcode.pdf (vectoriel, page de 288 pt = 4 in)", "qrcode.zip (Download all)"],
+      "ref": "app/tools/qr-barcodes-tools/qr-generator/page.jsx:14,95-99,177-181 ; app/lib/qrRender.js:62-113"
+    },
+    "controls": [
+      {"label": "URL | Text | Email | Phone | SMS | Wi-Fi | Contact (vCard) | Location", "ref": "app/lib/qrPayload.js:11-20 ; page.jsx:113-118"},
+      {"label": "Web address | Text | Email address | Subject (optional) | Message (optional) | Phone number | Network name (SSID) | Password | First name | Last name | Company | Job title | Phone | Email | Website | Street | City | Postcode | Country | Latitude | Longitude", "ref": "app/tools/qr-barcodes-tools/qr-generator/page.jsx:21-30"},
+      {"label": "Security : WPA / WPA2 / WPA3 | WEP | No password ; Hidden network", "ref": "app/tools/qr-barcodes-tools/qr-generator/page.jsx:128-135"},
+      {"label": "Design : Code colour | Background", "ref": "app/tools/qr-barcodes-tools/qr-generator/page.jsx:140-143"},
+      {"label": "Shape : Squares | Rounded | Dots", "ref": "app/tools/qr-barcodes-tools/qr-generator/page.jsx:18,145-148"},
+      {"label": "Error correction : Low (7 %) | Medium (15 %) | Quartile (25 %) | High (30 %) ; « High is required with a logo. »", "ref": "app/tools/qr-barcodes-tools/qr-generator/page.jsx:15-17,151-155"},
+      {"label": "PNG size: {N} × {N} px (curseur)", "ref": "app/tools/qr-barcodes-tools/qr-generator/page.jsx:158-159"},
+      {"label": "Add a logo (optional) | Change logo | Remove", "ref": "app/tools/qr-barcodes-tools/qr-generator/page.jsx:162-163"},
+      {"label": "Generate QR Code (Creating and checking… pendant le travail)", "ref": "app/tools/qr-barcodes-tools/qr-generator/page.jsx:169"},
+      {"label": "✓ Scanned back successfully (version {v}, error correction {L|M|Q|H}).", "ref": "app/tools/qr-barcodes-tools/qr-generator/page.jsx:176"},
+      {"label": "Download (×3) | Download all (3 files, ZIP)", "ref": "app/tools/qr-barcodes-tools/qr-generator/page.jsx:177-181 ; app/components/FileDownload.jsx:211,264"}
+    ],
+    "steps": ["choisir le type (URL, Text, Email, Phone, SMS, Wi-Fi, Contact (vCard), Location) et remplir les champs", "facultatif : Design (couleurs, Shape, Error correction, PNG size, logo)", "bouton « Generate QR Code » : dessin puis relecture", "« Download » PNG / SVG / PDF ou « Download all »"],
+    "limits": [
+      {"what": "taille PNG", "value": "200 à 2000 px, pas de 50", "constant": "MIN_SIZE / MAX_SIZE", "ref": "app/tools/qr-barcodes-tools/qr-generator/page.jsx:14,159"},
+      {"what": "logo", "value": "2 Mo au plus, 100 mégapixels au plus, dessiné dans 22 % de la largeur du code ; correction forcée à High", "constant": "MAX_LOGO_BYTES / OPENABLE_PIXELS", "ref": "app/tools/qr-barcodes-tools/qr-generator/page.jsx:19,49,55-60 ; app/lib/fileChecks.js:200 ; app/lib/qrRender.js:28-35"},
+      {"what": "contenu", "value": "capacité d'un QR code au niveau choisi ; au-delà : « This is too much content for one QR code. Shorten it, or lower the error correction. »", "constant": null, "ref": "app/tools/qr-barcodes-tools/qr-generator/page.jsx:86"},
+      {"what": "couleurs", "value": "code plus sombre que le fond, contraste ≥ 3:1", "constant": null, "ref": "app/tools/qr-barcodes-tools/qr-generator/page.jsx:80-82"},
+      {"what": "relecture", "value": "sur le PNG réduit à 800 px, jsQR, sans inversion ; SVG et PDF non relus", "constant": null, "ref": "app/lib/qrRender.js:115-136"}
+    ],
+    "processing": {"where": "browser", "detail": "Matrice par la bibliothèque qrcode, dessin canvas/SVG/pdf-lib, relecture jsQR, le tout dans la page ; aucun envoi du texte ni du logo. Les messages d'erreur affichés (textes fixes, sans contenu tapé) passent par useToolError.", "ref": "app/lib/qrRender.js:9-14,93-136 ; app/tools/qr-barcodes-tools/qr-generator/page.jsx:42"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucune route app/api)",
+    "watermark": "aucun filigrane ajouté (vérifié : qrRender.js ne dessine que les modules et le logo choisi)",
+    "browsers": null,
+    "twin": "/tools/qr-barcodes-tools/barcode-generator (type « QR Code » et « Micro QR », symbologies.js:56-57)",
+    "notes": "Codes statiques (contenu écrit dans le code, aucune redirection). Zone de silence 4 modules (qrRender.js:7) ; motifs de repérage toujours pleins quelle que soit la forme (qrRender.js:2-5,23). PDF : « Rounded » dessiné en carrés (qrRender.js:103). Logo : SVG embarque l'image d'origine (qrRender.js:85), PDF une copie PNG ≤ 512 px (page.jsx:66-72). Charges : https:// ajouté sans schéma, mailto:, tel:, SMSTO:, WIFI:, vCard 3.0, geo: (qrPayload.js:26-75). Messages de validation : « Enter a web address. », « This is not a valid web address. », « Enter a valid email address. », « Enter the Wi-Fi password, or choose \"No password\". », « Enter at least a name or a company. », « Enter a latitude (-90 to 90) and a longitude (-180 to 180). » (qrPayload.js:28-73). Échec de relecture : « With this logo the code no longer scans reliably… » / « This code did not scan back correctly with these settings. Try the \"Squares\" shape or stronger colours. » (page.jsx:90-93)."
+  },
+  {
+    "path": "/tools/qr-barcodes-tools/qr-scanner",
+    "task": "Lit un QR code en direct par la caméra, ou des QR codes et codes-barres (jusqu'à 20) dans une image envoyée, déposée ou collée.",
+    "inputs": {"accept": "image/*", "formats": ["toute image que le navigateur ouvre (fichier, dépôt, collage)", "flux caméra"], "ref": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx:53-62,86-93,117-152,184"},
+    "outputs": {"formats": ["texte décodé", "liste des codes trouvés avec leur format", "lien ouvrable si http(s)"], "ref": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx:154,198-214"},
+    "controls": [
+      {"label": "Scan with camera | Stop camera", "ref": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx:162-164"},
+      {"label": "Upload an image", "ref": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx:165"},
+      {"label": "Paste image", "ref": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx:166"},
+      {"label": "Camera (liste, si plusieurs caméras)", "ref": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx:170-173"},
+      {"label": "Click, drop or paste (Ctrl+V) a QR code image here", "ref": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx:183"},
+      {"label": "Paste box — on a phone, long-press here and choose Paste", "ref": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx:186-196"},
+      {"label": "QR Code Found! | Code Found!", "ref": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx:207"},
+      {"label": "{N} codes found in this picture | Read as {format}.", "ref": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx:200,204"},
+      {"label": "Copy | Open link", "ref": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx:210-211"}
+    ],
+    "steps": ["« Scan with camera » et autoriser la caméra (arrêt automatique dès qu'un code est lu) — ou « Upload an image », dépôt, Ctrl+V, « Paste image », ou appui long dans la Paste box", "lire le texte ; si plusieurs codes, cliquer celui voulu dans la liste", "« Copy » ou, pour une adresse http(s), « Open link »"],
+    "limits": [
+      {"what": "image envoyée", "value": "réduite à 12 mégapixels au plus avant lecture", "constant": null, "ref": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx:65-70"},
+      {"what": "codes par image", "value": "20", "constant": null, "ref": "app/tools/qr-barcodes-tools/qr-scanner/scan.worker.js:12"},
+      {"what": "délai de lecture zxing", "value": "20 s, puis repli sur jsQR (QR seulement)", "constant": null, "ref": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx:28-34,72-78"},
+      {"what": "caméra", "value": "QR seulement (jsQR), image réduite à 800 px, environ 10 lectures par seconde", "constant": "SCAN_EVERY_MS / SCAN_MAX_SIDE", "ref": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx:9-10,43-51,97-105"},
+      {"what": "type de fichier", "value": "image/* seulement : « \"…\" is not an image. »", "constant": null, "ref": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx:55"}
+    ],
+    "processing": {"where": "browser", "detail": "Image lue par zxing-cpp (WebAssembly servi depuis /wasm, Worker) puis jsQR ; caméra lue image par image par jsQR ; rien n'est envoyé. Les messages d'erreur (exceptions caméra, presse-papiers, image) sont envoyés nettoyés par reportShownMessage.", "ref": "app/tools/qr-barcodes-tools/qr-scanner/scan.worker.js:1-17 ; page.jsx:43-51,80,107,141"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucune route app/api)",
+    "watermark": "sans objet",
+    "browsers": "Caméra : page https obligatoire, caméra arrière demandée (facingMode environment), message si refusée / absente / occupée (page.jsx:88-114). iPhone : pas de « Coller » sur une zone de dépôt, d'où le bouton « Paste image » (Async Clipboard, Safari 13.1+) et la Paste box éditable (page.jsx:127-152). Image réduite à 12 Mpx à cause de la limite de canvas d'iOS (page.jsx:65-66).",
+    "twin": null,
+    "notes": "zxing lit tous ses formats (formats: []) : QR, Micro QR, Data Matrix, Aztec, PDF417, EAN-13/8, UPC-A/E, Code 128/39/93, ITF, Codabar… (scan.worker.js:1-3,12), inversion essayée (tryInvert). « Open link » seulement pour http(s) et rel=noopener noreferrer nofollow, avec l'avertissement « Check the address before opening it: QR codes can hide malicious links. » (page.jsx:154,211-213). Échec : « No QR code or barcode found in this image » (page.jsx:77)."
+  },
+  {
+    "path": "/tools/math-tools/fraction-calculator",
+    "task": "Additionne, soustrait, multiplie ou divise deux fractions (ou nombres mixtes, ou décimaux) en arithmétique exacte, et donne la fraction réduite, le nombre mixte, le décimal exact et les étapes.",
+    "inputs": {"accept": null, "formats": ["entier, décimal (0.75), fraction (3/4, 3/-4), nombre mixte (1 3/4) dans chaque case", "case facultative de partie entière"], "ref": "app/lib/mathTools.js:139-160,234-243 ; app/tools/math-tools/fraction-calculator/page.jsx:46-79"},
+    "outputs": {"formats": ["fraction réduite", "nombre mixte (s'il diffère)", "décimal exact ou périodique entre parenthèses", "étapes numérotées"], "ref": "app/lib/mathTools.js:173-231 ; page.jsx:93-104"},
+    "controls": [
+      {"label": "Whole number 1 (optional) / Whole number 2 (optional) (aria-label des petites cases)", "ref": "app/tools/math-tools/fraction-calculator/page.jsx:46,72"},
+      {"label": "Numérateurs / dénominateurs (placeholders 1/2 et 1/3)", "ref": "app/tools/math-tools/fraction-calculator/page.jsx:49-53,75-79"},
+      {"label": "+ | - | * | /", "ref": "app/tools/math-tools/fraction-calculator/page.jsx:58-67"},
+      {"label": "Calculate (inactif tant que les deux fractions ne sont pas remplies)", "ref": "app/tools/math-tools/fraction-calculator/page.jsx:84-90"},
+      {"label": "= {mixte} (mixed number) | Digits in brackets repeat forever.", "ref": "app/tools/math-tools/fraction-calculator/page.jsx:96-98"}
+    ],
+    "steps": ["remplir numérateur et dénominateur de chaque fraction (partie entière facultative à gauche)", "choisir + - * ou /", "bouton « Calculate »", "lire fraction, nombre mixte, décimal et étapes"],
+    "limits": [
+      {"what": "taille des nombres", "value": "aucune limite (BigInt)", "constant": null, "ref": "app/lib/mathTools.js:137-172 ; page.jsx:23-24"},
+      {"what": "décimal périodique", "value": "coupé après 100 chiffres de période (+ les chiffres non périodiques), suivi de « … (the repeating part is longer than 100 digits) »", "constant": "max = 100", "ref": "app/lib/mathTools.js:196-207"},
+      {"what": "nombre mixte", "value": "partie entière entière ; signe moins seulement sur la partie entière", "constant": null, "ref": "app/lib/mathTools.js:234-242"}
+    ],
+    "processing": {"where": "browser", "detail": "Calcul dans la page ; les messages d'erreur (entrée citée entre guillemets, remplacée par [text] au nettoyage) passent par useToolError.", "ref": "app/tools/math-tools/fraction-calculator/page.jsx:13,31-34 ; app/lib/reportError.js:110-115"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucune requête de calcul)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Messages : « \"…\" is not a number or fraction. Examples: 3/4, -2/5, 1 1/2, 0.75. », « \"…\": the denominator cannot be zero. », « Cannot divide by zero. », « \"…\": the whole-number part must be a whole number. », « With a whole-number part, put the minus sign on the whole number only (-1 1/2). » (mathTools.js:145,151,159,170,238-239). Étapes : PPCM si dénominateurs différents, réciproque pour /, simplification (mathTools.js:211-231)."
+  },
+  {
+    "path": "/tools/math-tools/percentage-calculator",
+    "task": "Six calculs de pourcentage indépendants, mis à jour à la frappe : X % de Y, X est quel % de Y, variation de X à Y, X est Y % de quoi, augmenter/diminuer X de Y %, écart en % entre X et Y.",
+    "inputs": {"accept": null, "formats": ["deux champs nombre par panneau (+ Increase/Decrease au 5e)"], "ref": "app/tools/math-tools/percentage-calculator/page.jsx:29-87"},
+    "outputs": {"formats": ["nombre à 10 chiffres significatifs au plus, sans notation scientifique ; « % » sur les panneaux 2, 3 et 6"], "ref": "app/tools/math-tools/percentage-calculator/page.jsx:35,45,55,65,76,86 ; app/lib/exactNumbers.js:10-14"},
+    "controls": [
+      {"label": "What is X% of Y? (X % | Y)", "ref": "app/tools/math-tools/percentage-calculator/page.jsx:29-32"},
+      {"label": "X is what % of Y? (X | Y)", "ref": "app/tools/math-tools/percentage-calculator/page.jsx:39-42"},
+      {"label": "Percentage change from X to Y (From X | To Y)", "ref": "app/tools/math-tools/percentage-calculator/page.jsx:49-52"},
+      {"label": "X is Y% of what? (X | Y %)", "ref": "app/tools/math-tools/percentage-calculator/page.jsx:59-62"},
+      {"label": "Increase or decrease X by Y% (X | Y % | Increase / Decrease)", "ref": "app/tools/math-tools/percentage-calculator/page.jsx:69-73"},
+      {"label": "Percentage difference between X and Y (X | Y)", "ref": "app/tools/math-tools/percentage-calculator/page.jsx:80-83"}
+    ],
+    "steps": ["choisir le panneau voulu parmi les six", "saisir les deux nombres", "le résultat s'affiche sous les champs (pas de bouton)"],
+    "limits": [
+      {"what": "précision", "value": "10 chiffres significatifs (virgule flottante)", "constant": "formatSignificant digits = 10", "ref": "app/lib/exactNumbers.js:10-14"},
+      {"what": "division par zéro", "value": "« Cannot divide by zero » (panneaux 2, 3, 4) ; « Undefined when X + Y = 0 » (panneau 6)", "constant": null, "ref": "app/tools/math-tools/percentage-calculator/page.jsx:45,55,65,86"},
+      {"what": "formule de variation", "value": "(Y − X) ÷ abs(X) × 100 : peut descendre sous −100 % si Y < 0", "constant": null, "ref": "app/tools/math-tools/percentage-calculator/page.jsx:55"},
+      {"what": "formule d'écart", "value": "abs(X − Y) ÷ (abs(X + Y) ÷ 2) × 100", "constant": null, "ref": "app/tools/math-tools/percentage-calculator/page.jsx:86"}
+    ],
+    "processing": {"where": "browser", "detail": "Calcul dans la page, aucune requête, aucun rapport d'erreur (ni useToolError ni reportShownMessage).", "ref": "app/tools/math-tools/percentage-calculator/page.jsx:1-111"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucune requête)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "FAQ, exemple et liens associés viennent de seo.js (seo.js:14-62) ; la note du lien Unit Converter y est périmée (seo.js:38). Le texte de la page le plus riche du lot (10 questions), mais 4 phrases contredisent le code (voir audit)."
+  },
+  {
+    "path": "/tools/math-tools/roman-numeral-converter",
+    "task": "Convertit dans les deux sens entre un nombre entier de 1 à 3999 et un chiffre romain en forme standard, à la frappe.",
+    "inputs": {"accept": null, "formats": ["entier 1-3999 (chiffres seulement)", "chiffre romain I V X L C D M, minuscules acceptées"], "ref": "app/tools/math-tools/roman-numeral-converter/page.jsx:17-32 ; app/lib/exactNumbers.js:68-75"},
+    "outputs": {"formats": ["chiffre romain en majuscules", "nombre", "ligne « N = ROMAIN »"], "ref": "app/tools/math-tools/roman-numeral-converter/page.jsx:52-56"},
+    "controls": [
+      {"label": "Number (1-3999)", "ref": "app/tools/math-tools/roman-numeral-converter/page.jsx:42-43"},
+      {"label": "⇅ (symbole, pas un bouton)", "ref": "app/tools/math-tools/roman-numeral-converter/page.jsx:46"},
+      {"label": "Roman Numeral", "ref": "app/tools/math-tools/roman-numeral-converter/page.jsx:48-49"},
+      {"label": "Copy Roman Numeral | Copy failed", "ref": "app/tools/math-tools/roman-numeral-converter/page.jsx:58-59"}
+    ],
+    "steps": ["taper un nombre dans « Number (1-3999) » ou un chiffre romain dans « Roman Numeral »", "l'autre champ se remplit à la frappe", "« Copy Roman Numeral »"],
+    "limits": [
+      {"what": "plage", "value": "1 à 3999 (« Standard Roman numerals go from 1 (I) to 3999 (MMMCMXCIX). »)", "constant": null, "ref": "app/tools/math-tools/roman-numeral-converter/page.jsx:23-24 ; app/lib/exactNumbers.js:63"},
+      {"what": "décimales / exposant", "value": "refusés : « Type a whole number (no decimals, no exponent): Roman numerals have no fractions. »", "constant": null, "ref": "app/tools/math-tools/roman-numeral-converter/page.jsx:21"},
+      {"what": "syntaxe romaine", "value": "stricte : seule la forme canonique est acceptée (IIII, IM, VX, MMMM refusés)", "constant": "ROMAN", "ref": "app/lib/exactNumbers.js:59-75 ; page.jsx:7-8,51"}
+    ],
+    "processing": {"where": "browser", "detail": "Calcul dans la page ; seul l'échec de copie envoie le texte fixe « Copy to the clipboard failed. » par reportShownMessage.", "ref": "app/tools/math-tools/roman-numeral-converter/page.jsx:58"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucune requête de calcul)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Message de forme invalide : « \"…\" is not a valid Roman numeral (standard form, 1 to 3999 — for example 4 is IV, not IIII). » (page.jsx:51). La FAQ 2 et l'astuce 4 actuelles disent l'inverse. Le bouton de copie est inactif sans résultat valide (page.jsx:58)."
+  },
+  {
+    "path": "/tools/math-tools/scientific-calculator",
+    "task": "Évalue une expression tapée ou composée au clavier de la page (trigonométrie en radians ou degrés, log10, ln, racine, puissances, factorielle, π, e, Ans, mémoire) avec le moteur mathjs.",
+    "inputs": {"accept": null, "formats": ["expression texte (×, ÷, √(, π acceptés)", "boutons"], "ref": "app/lib/mathTools.js:30-40 ; app/tools/math-tools/scientific-calculator/page.jsx:118-127"},
+    "outputs": {"formats": ["résultat à 12 chiffres significatifs", "historique des 10 derniers calculs"], "ref": "app/lib/mathTools.js:19-24,67 ; page.jsx:24,153-161"},
+    "controls": [
+      {"label": "Type or click buttons... (champ)", "ref": "app/tools/math-tools/scientific-calculator/page.jsx:118-127"},
+      {"label": "Radians | Degrees", "ref": "app/tools/math-tools/scientific-calculator/page.jsx:133-137"},
+      {"label": "MC | MR | M+", "ref": "app/tools/math-tools/scientific-calculator/page.jsx:139-141"},
+      {"label": "sin() cos() tan() log() ln() sqrt() π e sin⁻¹ cos⁻¹ tan⁻¹ x² ! 1/x |x| Ans ( ) ^ ⌫ 7 8 9 / 4 5 6 * 1 2 3 - 0 . C + =", "ref": "app/tools/math-tools/scientific-calculator/page.jsx:87-103"},
+      {"label": "History (click to reuse)", "ref": "app/tools/math-tools/scientific-calculator/page.jsx:155"}
+    ],
+    "steps": ["choisir Radians ou Degrees", "taper l'expression ou utiliser les boutons", "« = » ou Entrée", "M+, MR, MC pour la mémoire ; cliquer une ligne de l'historique pour la reprendre"],
+    "limits": [
+      {"what": "affichage", "value": "12 chiffres significatifs ; notation scientifique seulement sous 1e-6 et à partir de 1e21 (entre 1e12 et 1e21 : chiffres complétés par des zéros, ex. 2^60 → 1152921504610000000)", "constant": null, "ref": "app/lib/mathTools.js:19-24 (vérifié node)"},
+      {"what": "historique", "value": "10 calculs", "constant": null, "ref": "app/tools/math-tools/scientific-calculator/page.jsx:24"},
+      {"what": "grand résultat", "value": "au-delà d'environ 1.8e308 (171!) : message « infinite or too large »", "constant": null, "ref": "app/lib/mathTools.js:66"}
+    ],
+    "processing": {"where": "browser", "detail": "mathjs (chargé à la demande) dans la page ; les messages d'erreur passent par reportShownMessage (nettoyés ; un message mathjs peut contenir un mot tapé, non cité).", "ref": "app/lib/mathTools.js:27-28,56-62 ; page.jsx:25"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucune requête de calcul)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "log = base 10, ln = naturel (mathTools.js:37-38) ; multiplication implicite (2π, 3(4+1)) ; Ans à pleine précision (mathTools.js:39-40,54). Messages : « tan is undefined here (the cosine is 0). », « This is not defined for negative numbers (for example the factorial of a negative number). », « Cannot read this expression: … », « Incomplete expression. », « The result is not a real number (for example the square root or logarithm of a negative number). », « The result is infinite or too large to show (division by zero, log of 0, or beyond about 1.8e308, like 171!). » (mathTools.js:48,60-66). Fonctions x², 1/x et |x| entourent le dernier nombre tapé (page.jsx:27-47,64-66)."
+  },
+  {
+    "path": "/tools/math-tools/statistics-calculator",
+    "task": "Calcule 23 statistiques descriptives d'une liste de nombres (moyennes, médiane, mode, dispersion, quartiles inclusifs ou exclusifs, asymétrie, kurtosis, valeurs aberrantes).",
+    "inputs": {"accept": null, "formats": ["nombres séparés par virgules, espaces, tabulations, retours à la ligne ou points-virgules ; point décimal ; notation 1e3"], "ref": "app/lib/mathTools.js:71-76 ; app/tools/math-tools/statistics-calculator/page.jsx:25-26"},
+    "outputs": {"formats": ["grille de 23 valeurs à 12 chiffres significatifs"], "ref": "app/tools/math-tools/statistics-calculator/page.jsx:39-62 ; app/lib/mathTools.js:134"},
+    "controls": [
+      {"label": "Enter numbers separated by commas, spaces or new lines (placeholder « e.g. 1, 2, 3, 4, 5 »)", "ref": "app/tools/math-tools/statistics-calculator/page.jsx:25-26"},
+      {"label": "Quartile method : Inclusive — Excel QUARTILE.INC, calculator.net | Exclusive — Excel QUARTILE.EXC, Minitab, SPSS", "ref": "app/tools/math-tools/statistics-calculator/page.jsx:29-33"},
+      {"label": "Calculate", "ref": "app/tools/math-tools/statistics-calculator/page.jsx:35"},
+      {"label": "Count | Sum | Mean | Median | Mode | Geometric mean | Harmonic mean | Range | Sample std dev (s) | Population std dev (σ) | Sample variance (s²) | Population variance (σ²) | Q1 | Q3 | Interquartile range (IQR) | Standard error of the mean | Coefficient of variation (sample s ÷ |mean|) | Skewness (Excel SKEW) | Excess kurtosis (Excel KURT) | Sum of squares (Σ(x − mean)²) | Outliers (1.5 × IQR rule) | Min | Max", "ref": "app/tools/math-tools/statistics-calculator/page.jsx:40-62"}
+    ],
+    "steps": ["coller ou taper les nombres", "choisir « Quartile method » (Inclusive par défaut)", "bouton « Calculate »", "lire la grille ; corriger les valeurs citées après « Not a number: » et recalculer"],
+    "limits": [
+      {"what": "entrées non numériques", "value": "refus avec les 5 premières citées puis « … »", "constant": null, "ref": "app/lib/mathTools.js:73-74"},
+      {"what": "mesures non définies", "value": "« — » avec raison pour moyennes géométrique/harmonique, Q1/Q3, asymétrie (n ≥ 3), kurtosis (n ≥ 4) ; « — » sans raison pour écart type/variance d'échantillon (n = 1), IQR, erreur standard, coefficient de variation, valeurs aberrantes", "constant": null, "ref": "app/tools/math-tools/statistics-calculator/page.jsx:45-60 ; app/lib/mathTools.js:103-125"},
+      {"what": "texte collé très long", "value": "au-delà de 1 000 000 de caractères le champ montre un aperçu en lecture seule et l'outil travaille sur tout le texte", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:11-18"},
+      {"what": "précision", "value": "12 chiffres significatifs ; sommes compensées (Neumaier)", "constant": null, "ref": "app/lib/mathTools.js:19-24,82-101"}
+    ],
+    "processing": {"where": "browser", "detail": "Calcul dans la page ; les nombres valides ne partent jamais. Le message « Not a number: … » (qui cite jusqu'à 5 entrées tapées) est affiché via useToolError et envoyé nettoyé à /api/report-error.", "ref": "app/tools/math-tools/statistics-calculator/page.jsx:12-16 ; app/lib/mathTools.js:74 ; app/lib/useToolError.js:28-29"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucune requête de calcul)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "« 1,000 » est lu comme 1 et 0 (la virgule sépare) ; « 2,5 » comme 2 et 5 (mathTools.js:72). Mode : « None (no value repeats) » ou valeurs avec (×n) (page.jsx:44). Changer de méthode de quartile recalcule si un résultat est affiché (page.jsx:30). Asymétrie/kurtosis = SKEW/KURT d'Excel (mathTools.js:121-124)."
+  }
+]

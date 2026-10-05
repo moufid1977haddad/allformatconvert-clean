@@ -101,3 +101,13 @@ Ne lance pas `npm run build` (le contrôleur le fait). Les défauts C1 des pages
 Par outil : titre et méta (avec longueurs), mots du texte visible avant/après (estimés depuis le source), affirmations
 fausses ou invérifiables supprimées (renvoi à l'audit), chaînes d'interface corrigées, exemples exécutés (commande), points
 non vérifiables laissés de côté. Message final ≤ 15 lignes : résultat des trois contrôles, ce qui reste douteux.
+
+## Précisions (06/10, après l'audit)
+- **Production** : `NEXT_PUBLIC_MEDIA_SERVICE_URL` est défini sur www (le service média est en ligne depuis le 20/09) :
+  décris toujours la branche « service configuré » du code (`mediaServiceConfigured()` vrai, `MediaServiceTool`, limites du
+  service, 25 MiB pour la transcription, etc.), jamais la page de repli `LegacyPage`. `docs/audit/p36/contenu-avant.json`
+  a été relu **sur www** (et non plus sur une construction locale, qui n'a pas cette variable) ; les entités HTML n'y
+  sont plus décodées deux fois.
+- Les messages d'erreur affichés sont envoyés, nettoyés, à `/api/report-error` (P25) : une page qui dit « nothing is
+  sent » doit rester exacte pour le fichier et le texte de l'utilisateur ; ne promets pas « aucune requête » si une erreur
+  affichée peut partir.

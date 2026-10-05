@@ -1,0 +1,448 @@
+[
+  {
+    "path": "/tools/gif-tools/apng-to-gif",
+    "task": "Décode toutes les images d'un PNG animé (APNG) ou d'un PNG fixe et les réencode en GIF animé, dans le navigateur.",
+    "inputs": {"accept": "image/png,image/apng", "formats": ["PNG", "APNG"], "ref": "app/tools/gif-tools/apng-to-gif/page.jsx:62"},
+    "outputs": {"formats": ["GIF (nom converted.gif)"], "ref": "app/tools/gif-tools/apng-to-gif/page.jsx:66"},
+    "controls": [
+      {"label": "Click or drop an APNG file here (ordinateur) / Choose an APNG file (écran tactile)", "ref": "app/tools/gif-tools/apng-to-gif/page.jsx:61 ; app/components/UploadPrompt.jsx:10-11"},
+      {"label": "Convert to GIF (pendant le travail : Converting...)", "ref": "app/tools/gif-tools/apng-to-gif/page.jsx:64"},
+      {"label": "« N frame(s) » sous l'aperçu", "ref": "app/tools/gif-tools/apng-to-gif/page.jsx:66"},
+      {"label": "Download (et Save / Share sur iPhone/iPad)", "ref": "app/components/FileDownload.jsx:211,216"}
+    ],
+    "steps": ["choisir ou déposer un PNG/APNG (aperçu affiché)", "bouton « Convert to GIF »", "aperçu du GIF + nombre d'images", "bouton « Download »"],
+    "limits": [
+      {"what": "taille d'une image (largeur × hauteur), tous appareils", "value": "16 777 216 pixels (16,7 Mpx) au plus, lue dans l'en-tête avant décodage ; message « too large for an animation (16 megapixels at most). Make it smaller first with our Image Resizer. »", "constant": "MAX_ANIMATION_PIXELS", "ref": "app/lib/gifEncode.js:51-58 ; app/tools/gif-tools/apng-to-gif/page.jsx:32-33"},
+      {"what": "taille du fichier", "value": "NON TROUVÉ (aucune constante : cherché dans page.jsx, app/lib/gifEncode.js, app/lib/fileChecks.js)", "constant": null, "ref": "app/tools/gif-tools/apng-to-gif/page.jsx:31"},
+      {"what": "nombre d'images de l'animation", "value": "NON TROUVÉ (aucune limite dans page.jsx)", "constant": null, "ref": "app/tools/gif-tools/apng-to-gif/page.jsx:43-46"}
+    ],
+    "processing": {"where": "browser", "detail": "upng-js décode, gifenc encode, dans la page ; aucun envoi du fichier. Seul un message d'erreur affiché est rapporté au site (/api/report-error), sans le fichier ni son nom (texte nettoyé).", "ref": "app/tools/gif-tools/apng-to-gif/page.jsx:23-52 ; app/lib/useToolError.js:2-7 ; app/lib/reportError.js:7-11,16"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : la page n'appelle aucune route)",
+    "watermark": "aucun filigrane ajouté (vérifié : seules les images de l'APNG sont écrites, page.jsx:43-46)",
+    "browsers": "Limite 16,7 Mpx par image appliquée partout (pas seulement iPhone). Plancher du site : Safari 16.4 (app/lib/polyfills.js:5).",
+    "twin": null,
+    "notes": "Transparence 1 bit : alpha < 128 = transparent (app/lib/gifEncode.js:4,10) ; chaque image quantifiée à 256 couleurs (255 + 1 transparente si besoin, gifEncode.js:19,32-37). Nombre de lectures conservé : acTL num_plays 0 = boucle infinie, 1 = une fois, n = n-1 répétitions (page.jsx:39-40). Image APNG sans délai → 100 ms (page.jsx:44). Message pour un fichier non PNG : « This is not a PNG / APNG file (or it is empty). Choose an animated PNG. » (page.jsx:34)."
+  },
+  {
+    "path": "/tools/gif-tools/avi-to-gif",
+    "task": "Transforme un extrait (début, durée ≤ 60 s) d'une vidéo AVI ou d'une autre vidéo en GIF animé, sur notre serveur avec ffmpeg.",
+    "inputs": {"accept": "video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts", "formats": ["AVI", "MP4", "M4V", "MOV", "QT", "WebM", "MKV", "WMV", "FLV", "OGV", "3GP", "3G2", "MPG", "MPEG", "TS", "MTS", "M2TS", "tout fichier de type video/*"], "ref": "app/components/MediaServiceTool.jsx:140 ; app/lib/mediaSupport.js:237-238"},
+    "outputs": {"formats": ["GIF (nom : nom de la vidéo + .gif)"], "ref": "app/components/GifFromVideoTool.jsx:46 ; services/media-processing/app/ffmpeg_ops.py:207-209,569-576"},
+    "controls": [
+      {"label": "Click or drop a video file here / Choose a video file", "ref": "app/components/MediaServiceTool.jsx:139"},
+      {"label": "Start (seconds) (défaut 0)", "ref": "app/components/GifFromVideoTool.jsx:20,53-54"},
+      {"label": "Length (seconds) (défaut 5, 0,2 à 60)", "ref": "app/components/GifFromVideoTool.jsx:20,56-57"},
+      {"label": "Width (160, 240, 320, 360, 400, 480, 540, 600, 640, 720, 800, 960, 1080 px ; défaut 480 px)", "ref": "app/components/GifFromVideoTool.jsx:8,20,59-62"},
+      {"label": "Plays : Forever (loop) / Once / 3 times / 5 times", "ref": "app/components/GifFromVideoTool.jsx:64-70"},
+      {"label": "Compression : None (best quality) / Light (smaller file) / Strong (smallest, some noise)", "ref": "app/components/GifFromVideoTool.jsx:72-77"},
+      {"label": "Frames per second (5, 8, 10, 12, 15, 20, 25, 30 ; défaut 10)", "ref": "app/components/GifFromVideoTool.jsx:9,20,79-82"},
+      {"label": "Make GIF (pendant le travail : Cancel)", "ref": "app/components/GifFromVideoTool.jsx:19 ; app/components/MediaServiceTool.jsx:152-154"},
+      {"label": "Download (et Save / Share sur iPhone/iPad)", "ref": "app/components/MediaServiceTool.jsx:178 ; app/components/FileDownload.jsx:211,216"}
+    ],
+    "steps": ["choisir ou déposer une vidéo (aperçu <video> affiché, réglages apparaissent)", "Start / Length / Width / Plays / Compression / Frames per second", "bouton « Make GIF » : Preparing… → Uploading (%) → Converting (%) → Downloading the result", "aperçu du GIF, tailles Before / After / Saved, bouton « Download »"],
+    "limits": [
+      {"what": "taille max du fichier (ordinateur et téléphone, même valeur)", "value": "1 Go affiché « 1 GB » (1024 Mio) ; le site refuse aussi au-delà de MEDIA_TICKET_MAX_BYTES (variable d'environnement, valeur non lue)", "constant": "MAX_UPLOAD_MB", "ref": "app/components/MediaServiceTool.jsx:21,76-79 ; lib/media/ticket.js:48,60-61"},
+      {"what": "durée du GIF", "value": "0,2 à 60 secondes", "constant": "GIF_MAX_SECONDS", "ref": "app/components/GifFromVideoTool.jsx:10,37-38 ; services/media-processing/app/ffmpeg_ops.py:303,316-317"},
+      {"what": "durée de la vidéo source", "value": "plafond MEDIA_MAX_DURATION_SECONDS (variable d'environnement, valeur non lue ; message « Media up to N minutes is accepted. »)", "constant": "MAX_DURATION_SECONDS", "ref": "services/media-processing/app/config.py:41 ; services/media-processing/app/jobs.py:195-196"},
+      {"what": "conversions par connexion", "value": "limite par heure et par jour (MEDIA_JOBS_PER_HOUR_PER_IP, MEDIA_JOBS_PER_DAY_PER_IP, valeurs non lues) ; messages « Too many conversions from your connection this hour. Please try again later. » / « Daily conversion limit reached for your connection. Please try again tomorrow. »", "constant": null, "ref": "app/api/media/ticket/route.js:28,36-42 ; lib/media/ticket.js:49-50"},
+      {"what": "largeur", "value": "jamais agrandie au-delà de la largeur de la vidéo ; hauteur proportionnelle (paire)", "constant": "GIF_WIDTHS", "ref": "services/media-processing/app/ffmpeg_ops.py:301,322-323,574"}
+    ],
+    "processing": {"where": "mixed", "detail": "Le fichier est envoyé par morceaux directement à notre service media-processing (Railway, ffmpeg n8.1.2 : palettegen/paletteuse, Lanczos) après un ticket demandé à /api/media/ticket. La vidéo est supprimée du serveur dès la fin du traitement (succès, erreur ou annulation) ; le GIF est supprimé après sa première lecture complète, faite automatiquement par la page avant l'affichage du bouton Download, sinon après MEDIA_JOB_TTL_SECONDS (README propose 900 s) par un balayeur. Si « Plays » ≠ Forever ou « Compression » ≠ None, le GIF est retravaillé dans le navigateur par gifsicle (WebAssembly).", "ref": "app/lib/mediaJob.js:3-5,79-127,130-134,159-197 ; services/media-processing/app/jobs.py:6-13 ; services/media-processing/app/main.py:236-240 ; services/media-processing/app/config.py:44 ; services/media-processing/README.md:85 ; app/components/GifFromVideoTool.jsx:21-31 ; services/media-processing/Dockerfile:8-21 ; docs/audit/RAPPORT-video-deploiement.md:10"},
+    "quota": "limite par réseau heure/jour (bucket media_rate de /api/media/ticket, valeurs en variables d'environnement) ; pas le guard payant",
+    "signup": "aucune inscription demandée (vérifié : app/api/media/ticket/route.js ne lit aucun compte)",
+    "watermark": "aucun filigrane ajouté (vérifié : filtre ffmpeg ffmpeg_ops.py:574 et gifsicle GifFromVideoTool.jsx:27-28)",
+    "browsers": "Aperçu <video> du fichier dans la page : un AVI ne se lit pas dans les navigateurs (la page le dit, page.jsx:12) → durée non lue, donc début/longueur non vérifiés contre la vidéo avant l'envoi (MediaServiceTool.jsx:58 ; GifFromVideoTool.jsx:40). iPhone : note « a video picked from Photo Library reaches this page already shrunk by iOS… » (app/components/IosOriginalNote.jsx). Plancher du site Safari 16.4 (app/lib/polyfills.js:5).",
+    "twin": "/tools/gif-tools/mov-to-gif, /tools/gif-tools/mp4-to-gif, /tools/gif-tools/webm-to-gif, /tools/gif-tools/video-to-gif, /tools/video-tools/video-to-gif (même moteur GifFromVideoTool, même accept)",
+    "notes": "Messages réels : « Start must be a number of seconds, 0 or more. », « Length must be at least 0.2 seconds. », « A GIF here lasts at most 60 seconds; choose a shorter length (or several GIFs). », « This video lasts X s: the start (Y s) is after its end. », note « The video ends X s after the start: the GIF lasts X s, not Y s. » (GifFromVideoTool.jsx:36-42). Fichier sans piste vidéo refusé : « This file has no video track; choose an audio format instead. » (ffmpeg_ops.py:559-560). File d'attente : « All conversion slots are busy — waiting for a free one… » / « Waiting for a free slot — you are number N in line » (MediaServiceTool.jsx:28,123). Fichier vide refusé avant envoi (MediaServiceTool.jsx:75). Coquille actuelle : « a AVI » (page.jsx:9,14)."
+  },
+  {
+    "path": "/tools/gif-tools/gif-compressor",
+    "task": "Réduit le poids d'un GIF (animé ou non) avec gifsicle dans le navigateur : compression avec perte réglable, moins de couleurs, taille réduite.",
+    "inputs": {"accept": ".gif", "formats": ["GIF (signature GIF8 vérifiée)"], "ref": "app/tools/gif-tools/gif-compressor/page.jsx:29,60"},
+    "outputs": {"formats": ["GIF (nom compressed.gif)"], "ref": "app/tools/gif-tools/gif-compressor/page.jsx:86"},
+    "controls": [
+      {"label": "Click or drop a GIF file here / Choose a GIF file", "ref": "app/tools/gif-tools/gif-compressor/page.jsx:59"},
+      {"label": "Quality: N% (curseur 10 à 100, défaut 80)", "ref": "app/tools/gif-tools/gif-compressor/page.jsx:11,62"},
+      {"label": "Colours : Keep (up to 256) / 128 / 64 / 32 / 16", "ref": "app/tools/gif-tools/gif-compressor/page.jsx:64-65"},
+      {"label": "Size : Keep / 75% / 50% / 33% / 25%", "ref": "app/tools/gif-tools/gif-compressor/page.jsx:66-67"},
+      {"label": "Compress (pendant : Compressing...)", "ref": "app/tools/gif-tools/gif-compressor/page.jsx:69"},
+      {"label": "Before / After / Saved ou Larger by", "ref": "app/tools/gif-tools/gif-compressor/page.jsx:74-78"},
+      {"label": "Download", "ref": "app/tools/gif-tools/gif-compressor/page.jsx:86 ; app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un GIF (aperçu)", "régler Quality, Colours, Size", "bouton « Compress »", "comparer Before / After, bouton « Download »"],
+    "limits": [
+      {"what": "taille d'image (en-tête du GIF), tous appareils", "value": "100 000 000 pixels au plus ; message « too large to compress in a browser »", "constant": "OPENABLE_PIXELS", "ref": "app/lib/fileChecks.js:199-200 ; app/tools/gif-tools/gif-compressor/page.jsx:30-31"},
+      {"what": "taille du fichier", "value": "NON TROUVÉ (aucune constante dans page.jsx ni fileChecks.js)", "constant": null, "ref": "app/tools/gif-tools/gif-compressor/page.jsx:22-48"}
+    ],
+    "processing": {"where": "browser", "detail": "gifsicle-wasm-browser : -O2 --lossy=(100-qualité)×2 [--colors N] [--scale k], dans la page ; rien n'est envoyé.", "ref": "app/tools/gif-tools/gif-compressor/page.jsx:34-42"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau dans page.jsx)",
+    "watermark": "aucun filigrane ajouté (vérifié : commande gifsicle page.jsx:41)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Qualité 100 → --lossy=0 (optimisation sans perte seulement), 10 → --lossy=180 (page.jsx:35-38). Un résultat pas plus petit n'est pas caché : « Your GIF is already well optimised. … keep your original, or lower the quality and try again. » (page.jsx:80-84). Messages : fichier vide, « This is not a GIF file … For a PNG, JPG or WebP, use our Image Compressor. » (page.jsx:27-29). Changer Quality ne remet pas le résultat à zéro (Colours et Size oui, page.jsx:62-67)."
+  },
+  {
+    "path": "/tools/gif-tools/gif-maker",
+    "task": "Assemble plusieurs images (ou les images d'un GIF animé) en un GIF animé, avec ordre, durée par image, cadrage et nombre de répétitions, dans le navigateur.",
+    "inputs": {"accept": "image/*", "formats": ["toute image que le navigateur ouvre (JPG, PNG, WebP, GIF…)", "GIF animé : découpé en ses images (300 au plus par GIF)"], "ref": "app/tools/gif-tools/gif-maker/page.jsx:41-60,125"},
+    "outputs": {"formats": ["GIF (nom animated.gif)"], "ref": "app/tools/gif-tools/gif-maker/page.jsx:173"},
+    "controls": [
+      {"label": "Click to add images for GIF frames (sélection multiple)", "ref": "app/tools/gif-tools/gif-maker/page.jsx:124-125"},
+      {"label": "x (Remove frame N), ◀ / ▶ (Move frame N earlier / later)", "ref": "app/tools/gif-tools/gif-maker/page.jsx:132,135,137"},
+      {"label": "champ durée par image en ms (vide = délai commun ; 20 à 10000)", "ref": "app/tools/gif-tools/gif-maker/page.jsx:139-141"},
+      {"label": "Frames of another shape : Fit (keep proportions, add background) / Crop to fill (keep proportions) / Stretch (old behaviour)", "ref": "app/tools/gif-tools/gif-maker/page.jsx:13,147-148"},
+      {"label": "Background (couleur, défaut #FFFFFF, si Fit)", "ref": "app/tools/gif-tools/gif-maker/page.jsx:28,149"},
+      {"label": "Output size : Largest width and height (no frame shrunk) / Same as the first image / Custom… (Width (px), Height (px))", "ref": "app/tools/gif-tools/gif-maker/page.jsx:150-157"},
+      {"label": "Repeat : Forever / 1 more time / 2 more times / 3 more times / 5 more times / 10 more times", "ref": "app/tools/gif-tools/gif-maker/page.jsx:158-161"},
+      {"label": "Frame Delay: N ms (curseur 50 à 1000, défaut 200)", "ref": "app/tools/gif-tools/gif-maker/page.jsx:26,164"},
+      {"label": "Create GIF (pendant : Creating...)", "ref": "app/tools/gif-tools/gif-maker/page.jsx:166"},
+      {"label": "Download", "ref": "app/tools/gif-tools/gif-maker/page.jsx:173"}
+    ],
+    "steps": ["ajouter au moins 2 images", "ordonner (◀ ▶), retirer (x), durée par image si voulu", "Frames of another shape, Background, Output size, Repeat, Frame Delay", "bouton « Create GIF »", "aperçu « GIF created (N frames, W × H px, taille) », bouton « Download »"],
+    "limits": [
+      {"what": "côté le plus long du GIF", "value": "1920 px (réduit au-delà, signalé « reduced to 1920 px on the longest side »)", "constant": "MAX_SIDE", "ref": "app/tools/gif-tools/gif-maker/page.jsx:14,78,163"},
+      {"what": "images tirées d'un GIF animé ajouté", "value": "300 au plus par GIF (note « only the first 300 were added »)", "constant": "MAX_GIF_FRAMES", "ref": "app/tools/gif-tools/gif-maker/page.jsx:43,50"},
+      {"what": "GIF animé ajouté sur iPhone/iPad", "value": "refusé (repris comme image fixe) au-delà de 16,7 Mpx ; ordinateur 268 Mpx", "constant": "IOS_CANVAS_MAX_PIXELS", "ref": "app/lib/gifFrames.js:18-19 ; app/lib/canvasLimit.js:11,20-23 ; app/tools/gif-tools/gif-maker/page.jsx:54"},
+      {"what": "nombre minimal d'images", "value": "2", "constant": null, "ref": "app/tools/gif-tools/gif-maker/page.jsx:83,165-166"},
+      {"what": "taille ou nombre de fichiers", "value": "NON TROUVÉ (aucune constante dans page.jsx)", "constant": null, "ref": "app/tools/gif-tools/gif-maker/page.jsx:38-68"}
+    ],
+    "processing": {"where": "browser", "detail": "Images lues dans la page (FileReader), dessinées sur un canvas, encodées par gifenc ; rien n'est envoyé.", "ref": "app/tools/gif-tools/gif-maker/page.jsx:56-60,88-107"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau dans page.jsx)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:96-105)",
+    "browsers": "iPhone/iPad : GIF animé ajouté limité à 16,7 Mpx (gifFrames.js:18-19).",
+    "twin": "/tools/gif-tools/image-to-gif (même tâche, moins d'options)",
+    "notes": "Pas de transparence : chaque image est peinte sur la couleur de fond dans les trois modes (page.jsx:96) — un PNG transparent sort sur fond blanc par défaut. Pas de tramage (gifenc quantize/applyPalette, page.jsx:101-102). Durée par image < 20 ms ignorée → délai commun (page.jsx:104-105). « Same as the first image » ne réduit le GIF que si la première image est plus petite que la plus grande (page.jsx:76-77). Message : « N file(s) could not be read as images and were left out. » (page.jsx:64). Repeat N = N répétitions en plus (gifenc repeat, page.jsx:92,160)."
+  },
+  {
+    "path": "/tools/gif-tools/gif-to-apng",
+    "task": "Décode toutes les images d'un GIF (en recomposant chaque image comme un lecteur GIF) et les réencode en PNG animé (APNG) sans perte, dans le navigateur.",
+    "inputs": {"accept": "image/gif", "formats": ["GIF (signature GIF vérifiée)"], "ref": "app/tools/gif-tools/gif-to-apng/page.jsx:65,87"},
+    "outputs": {"formats": ["APNG (nom converted.png)"], "ref": "app/tools/gif-tools/gif-to-apng/page.jsx:72-73,91"},
+    "controls": [
+      {"label": "Click or drop a GIF file here / Choose a GIF file", "ref": "app/tools/gif-tools/gif-to-apng/page.jsx:86"},
+      {"label": "Convert to APNG (pendant : Converting...)", "ref": "app/tools/gif-tools/gif-to-apng/page.jsx:89"},
+      {"label": "« N frame(s) »", "ref": "app/tools/gif-tools/gif-to-apng/page.jsx:91"},
+      {"label": "Download", "ref": "app/tools/gif-tools/gif-to-apng/page.jsx:91 ; app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un GIF (aperçu)", "bouton « Convert to APNG »", "aperçu + nombre d'images", "bouton « Download » (converted.png)"],
+    "limits": [
+      {"what": "taille d'image (en-tête), tous appareils", "value": "16 777 216 pixels au plus", "constant": "MAX_ANIMATION_PIXELS", "ref": "app/lib/gifEncode.js:51-58 ; app/tools/gif-tools/gif-to-apng/page.jsx:66-67"},
+      {"what": "taille du fichier / nombre d'images", "value": "NON TROUVÉ (aucune constante dans page.jsx ni gifFrames.js)", "constant": null, "ref": "app/tools/gif-tools/gif-to-apng/page.jsx:53-77"}
+    ],
+    "processing": {"where": "browser", "detail": "gifuct-js décode, recomposition sur canvas (méthodes de disposition 1, 2 et 3), upng-js encode sans perte (cnum 0) ; rien n'est envoyé.", "ref": "app/lib/gifFrames.js:12-40 ; app/tools/gif-tools/gif-to-apng/page.jsx:58-72"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Nombre de lectures du GIF (NETSCAPE2.0) reporté dans acTL : boucle infinie → infinie, sans extension → une fois (page.jsx:24-51,72). Image de délai 0 → 100 ms (gifFrames.js:36). Message : « This is not a GIF file (or it is empty). Choose an animated GIF. » (page.jsx:65)."
+  },
+  {
+    "path": "/tools/gif-tools/gif-to-mp4",
+    "task": "Convertit l'animation complète d'un GIF en vidéo MP4 H.264 muette avec ffmpeg.wasm, dans le navigateur.",
+    "inputs": {"accept": "image/gif", "formats": ["GIF (signature GIF vérifiée)"], "ref": "app/tools/gif-tools/gif-to-mp4/page.jsx:26,87"},
+    "outputs": {"formats": ["MP4 H.264 yuv420p, faststart, sans son (nom converted.mp4)"], "ref": "app/tools/gif-tools/gif-to-mp4/page.jsx:50-60,91"},
+    "controls": [
+      {"label": "Click or drop a GIF file here / Choose a GIF file", "ref": "app/tools/gif-tools/gif-to-mp4/page.jsx:86"},
+      {"label": "Convert to MP4 (pendant : Converting...)", "ref": "app/tools/gif-tools/gif-to-mp4/page.jsx:89"},
+      {"label": "lecteur vidéo + Download", "ref": "app/tools/gif-tools/gif-to-mp4/page.jsx:91"}
+    ],
+    "steps": ["choisir un GIF (aperçu)", "bouton « Convert to MP4 » (premier usage : téléchargement du moteur ffmpeg.wasm)", "lecture de la vidéo", "bouton « Download »"],
+    "limits": [
+      {"what": "taille d'image (en-tête), tous appareils", "value": "16 777 216 pixels au plus", "constant": "MAX_ANIMATION_PIXELS", "ref": "app/lib/gifEncode.js:51-58 ; app/tools/gif-tools/gif-to-mp4/page.jsx:27-28"},
+      {"what": "taille du fichier", "value": "NON TROUVÉ (aucune constante dans page.jsx ni app/lib/ffmpegRun.js)", "constant": null, "ref": "app/tools/gif-tools/gif-to-mp4/page.jsx:19-77"}
+    ],
+    "processing": {"where": "browser", "detail": "ffmpeg.wasm (@ffmpeg/ffmpeg 0.12.15) dans la page ; le GIF n'est pas envoyé. Le moteur @ffmpeg/core 0.12.9 est téléchargé depuis unpkg.com au premier usage (aucune coreURL donnée). Échec non lié au fichier rapporté à /api/report-error sans le fichier (extension et tranche de taille seulement).", "ref": "app/tools/gif-tools/gif-to-mp4/page.jsx:29-37,73 ; node_modules/@ffmpeg/ffmpeg/dist/esm/const.js:3-4 ; node_modules/@ffmpeg/ffmpeg/dist/esm/worker.js:11-17 ; app/lib/reportError.js:7-11,145,151"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié : arguments ffmpeg page.jsx:50-60)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Durées : délai < 20 ms compté 100 ms ; cadence = 1000 / PGCD des délais ; dernière image tenue (tpad) ; vidéo coupée à la somme des délais (page.jsx:38-58). Largeur/hauteur impaire ramenée au pair inférieur par mise à l'échelle (page.jsx:57). Transparence → blanc, vérifié par test (scripts/browser-tests/gif-audit-2.mjs:143). Une seule lecture : pas de boucle dans le MP4 (FAQ). Contrôle de sortie : boîte ftyp exigée (page.jsx:63). Messages : « Conversion failed: this is not a GIF file (or it is empty). Choose an animated GIF. » (page.jsx:26,74)."
+  },
+  {
+    "path": "/tools/gif-tools/image-to-gif",
+    "task": "Assemble plusieurs images en un GIF animé à délai unique, à la forme de la première image, dans le navigateur.",
+    "inputs": {"accept": "image/*", "formats": ["toute image que le navigateur ouvre (JPG, PNG, BMP, GIF, WebP…) ; un GIF/WebP animé ne donne que sa première image"], "ref": "app/tools/gif-tools/image-to-gif/page.jsx:33-44,95"},
+    "outputs": {"formats": ["GIF (nom animated.gif)"], "ref": "app/tools/gif-tools/image-to-gif/page.jsx:117"},
+    "controls": [
+      {"label": "Click to add images (sélection multiple)", "ref": "app/tools/gif-tools/image-to-gif/page.jsx:94-95"},
+      {"label": "x (retirer une image)", "ref": "app/tools/gif-tools/image-to-gif/page.jsx:102"},
+      {"label": "Images of another shape than the first : Fit (keep proportions, transparent around) / Crop to fill (keep proportions) / Stretch to the first image", "ref": "app/tools/gif-tools/image-to-gif/page.jsx:12,108-109"},
+      {"label": "Frame Delay: N ms (curseur 50 à 1000, défaut 200)", "ref": "app/tools/gif-tools/image-to-gif/page.jsx:21,110"},
+      {"label": "Create GIF (pendant : Creating...)", "ref": "app/tools/gif-tools/image-to-gif/page.jsx:111"},
+      {"label": "« GIF created (N frames) » + Download", "ref": "app/tools/gif-tools/image-to-gif/page.jsx:115-117"}
+    ],
+    "steps": ["ajouter au moins 2 images", "retirer celles en trop (x)", "choisir le cadrage et le délai", "bouton « Create GIF »", "aperçu, bouton « Download »"],
+    "limits": [
+      {"what": "taille d'une image ajoutée", "value": "100 000 000 pixels au plus (« too large (W × H pixels) »)", "constant": null, "ref": "app/tools/gif-tools/image-to-gif/page.jsx:39"},
+      {"what": "côté le plus long du GIF", "value": "1920 px (taille de la première image réduite au-delà)", "constant": null, "ref": "app/tools/gif-tools/image-to-gif/page.jsx:65-69"},
+      {"what": "nombre minimal d'images", "value": "2", "constant": null, "ref": "app/tools/gif-tools/image-to-gif/page.jsx:56,111"},
+      {"what": "taille ou nombre de fichiers", "value": "NON TROUVÉ (aucune constante)", "constant": null, "ref": "app/tools/gif-tools/image-to-gif/page.jsx:28-50"}
+    ],
+    "processing": {"where": "browser", "detail": "FileReader + canvas + gifenc (via app/lib/gifEncode.js) ; rien n'est envoyé.", "ref": "app/tools/gif-tools/image-to-gif/page.jsx:33-44,60-81"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": "/tools/gif-tools/gif-maker (même tâche, avec ordre, durée par image, fond, taille, répétitions, GIF animé découpé)",
+    "notes": "Transparence 1 bit conservée (gifEncode.js:4,18-37 ; vérifié scripts/browser-tests/gif-audit-2.mjs:108). Boucle infinie toujours, pas d'option (gifenc repeat par défaut 0 ; aucun repeat passé, page.jsx:79). Pas de réordonnancement. Message d'image refusée : « NAME: empty (0 bytes). / could not be read. / is not an image this browser can open. … Choose JPG, PNG, WebP or GIF pictures. » (page.jsx:34-47)."
+  },
+  {
+    "path": "/tools/gif-tools/mov-to-gif",
+    "task": "Transforme un extrait (≤ 60 s) d'une vidéo MOV (iPhone, QuickTime) ou d'une autre vidéo en GIF animé, sur notre serveur avec ffmpeg.",
+    "inputs": {"accept": "video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts", "formats": ["MOV, QT et les mêmes formats que avi-to-gif"], "ref": "app/components/MediaServiceTool.jsx:140 ; app/lib/mediaSupport.js:237-238"},
+    "outputs": {"formats": ["GIF"], "ref": "app/components/GifFromVideoTool.jsx:46"},
+    "controls": [{"label": "identiques à avi-to-gif (Start (seconds), Length (seconds), Width, Plays, Compression, Frames per second, Make GIF, Cancel, Download)", "ref": "app/components/GifFromVideoTool.jsx:19,53-82 ; app/components/MediaServiceTool.jsx:152-154,178"}],
+    "steps": ["identiques à avi-to-gif"],
+    "limits": [{"what": "identiques à avi-to-gif (1 GB, 0,2-60 s, durée source MEDIA_MAX_DURATION_SECONDS, conversions par heure/jour par connexion)", "value": "voir avi-to-gif", "constant": "MAX_UPLOAD_MB, GIF_MAX_SECONDS", "ref": "app/components/MediaServiceTool.jsx:21 ; app/components/GifFromVideoTool.jsx:10 ; app/api/media/ticket/route.js:36-42"}],
+    "processing": {"where": "mixed", "detail": "identique à avi-to-gif : serveur media-processing (ffmpeg), suppression de la vidéo à la fin du traitement, du GIF après sa lecture par la page ou au TTL ; Plays/Compression par gifsicle dans le navigateur.", "ref": "app/lib/mediaJob.js:3-5 ; services/media-processing/app/jobs.py:6-13 ; app/components/GifFromVideoTool.jsx:21-31"},
+    "quota": "limite par réseau heure/jour (/api/media/ticket, bucket media_rate)",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "Note iPhone sur les vidéos de la Photothèque réduites par iOS (IosOriginalNote.jsx). Lecture de l'aperçu d'un MOV HEVC dépend du navigateur : NON TROUVÉ dans le code.",
+    "twin": "/tools/gif-tools/avi-to-gif, mp4-to-gif, webm-to-gif, video-to-gif, /tools/video-tools/video-to-gif",
+    "notes": "Texte propre actuel : une seule phrase (« iPhone and QuickTime videos (MOV) are supported directly ») ; le reste est identique à avi/webm-to-gif à 83 % (docs/audit/p36/unicite-avant.json)."
+  },
+  {
+    "path": "/tools/gif-tools/mp4-to-gif",
+    "task": "Transforme un extrait (≤ 60 s) d'une vidéo MP4 ou d'une autre vidéo en GIF animé, sur notre serveur avec ffmpeg.",
+    "inputs": {"accept": "video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts", "formats": ["MP4, M4V et les mêmes formats que avi-to-gif"], "ref": "app/components/MediaServiceTool.jsx:140 ; app/lib/mediaSupport.js:237-238"},
+    "outputs": {"formats": ["GIF"], "ref": "app/components/GifFromVideoTool.jsx:46"},
+    "controls": [{"label": "identiques à avi-to-gif", "ref": "app/components/GifFromVideoTool.jsx:19,53-82"}],
+    "steps": ["identiques à avi-to-gif"],
+    "limits": [{"what": "identiques à avi-to-gif", "value": "voir avi-to-gif", "constant": "MAX_UPLOAD_MB, GIF_MAX_SECONDS", "ref": "app/components/MediaServiceTool.jsx:21 ; app/components/GifFromVideoTool.jsx:10"}],
+    "processing": {"where": "mixed", "detail": "identique à avi-to-gif", "ref": "app/lib/mediaJob.js:3-5 ; services/media-processing/app/jobs.py:6-13"},
+    "quota": "limite par réseau heure/jour (/api/media/ticket, bucket media_rate)",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "Plancher du site Safari 16.4 (app/lib/polyfills.js:5).",
+    "twin": "/tools/gif-tools/avi-to-gif, mov-to-gif, webm-to-gif, video-to-gif, /tools/video-tools/video-to-gif",
+    "notes": "Aucun texte propre au MP4 hors du nom ; 75-76 % identique à avi/mov/webm-to-gif, 60 % à video-to-gif (unicite-avant.json)."
+  },
+  {
+    "path": "/tools/gif-tools/video-to-gif",
+    "task": "Transforme un extrait (≤ 60 s) d'une vidéo (MP4, MOV, WebM, MKV, AVI…) en GIF animé, sur notre serveur avec ffmpeg.",
+    "inputs": {"accept": "video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts", "formats": ["MP4, M4V, MOV, QT, WebM, MKV, AVI, WMV, FLV, OGV, 3GP, 3G2, MPG, MPEG, TS, MTS, M2TS, video/*"], "ref": "app/components/MediaServiceTool.jsx:140 ; app/lib/mediaSupport.js:237-238"},
+    "outputs": {"formats": ["GIF"], "ref": "app/components/GifFromVideoTool.jsx:46"},
+    "controls": [{"label": "identiques à avi-to-gif", "ref": "app/components/GifFromVideoTool.jsx:19,53-82"}],
+    "steps": ["identiques à avi-to-gif"],
+    "limits": [{"what": "identiques à avi-to-gif", "value": "voir avi-to-gif", "constant": "MAX_UPLOAD_MB, GIF_MAX_SECONDS", "ref": "app/components/MediaServiceTool.jsx:21 ; app/components/GifFromVideoTool.jsx:10"}],
+    "processing": {"where": "mixed", "detail": "identique à avi-to-gif", "ref": "app/lib/mediaJob.js:3-5 ; services/media-processing/app/jobs.py:6-13 ; app/components/GifFromVideoTool.jsx:21-31"},
+    "quota": "limite par réseau heure/jour (/api/media/ticket, bucket media_rate)",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "Aperçu non lisible pour l'AVI (et autres formats que le navigateur ne lit pas) : début/longueur alors non vérifiés avant l'envoi (MediaServiceTool.jsx:55-58 ; GifFromVideoTool.jsx:40).",
+    "twin": "/tools/video-tools/video-to-gif (même moteur GifFromVideoTool + option « Or extract frames as PNG images », app/tools/video-tools/video-to-gif/page.jsx:101-107) ; aussi avi/mov/mp4/webm-to-gif",
+    "notes": "Deux pages homonymes « Video to GIF » se concurrencent (titres app/tools/gif-tools/video-to-gif/layout.tsx:5 et app/tools/video-tools/video-to-gif/layout.tsx:5) ; similarité 42 % (unicite-avant.json). La page gif-tools n'a pas l'extraction d'images en PNG."
+  },
+  {
+    "path": "/tools/gif-tools/webm-to-gif",
+    "task": "Transforme un extrait (≤ 60 s) d'une vidéo WebM (VP8, VP9, AV1) ou d'une autre vidéo en GIF animé, sur notre serveur avec ffmpeg.",
+    "inputs": {"accept": "video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts", "formats": ["WebM et les mêmes formats que avi-to-gif"], "ref": "app/components/MediaServiceTool.jsx:140 ; app/lib/mediaSupport.js:237-238"},
+    "outputs": {"formats": ["GIF"], "ref": "app/components/GifFromVideoTool.jsx:46"},
+    "controls": [{"label": "identiques à avi-to-gif", "ref": "app/components/GifFromVideoTool.jsx:19,53-82"}],
+    "steps": ["identiques à avi-to-gif"],
+    "limits": [{"what": "identiques à avi-to-gif", "value": "voir avi-to-gif", "constant": "MAX_UPLOAD_MB, GIF_MAX_SECONDS", "ref": "app/components/MediaServiceTool.jsx:21 ; app/components/GifFromVideoTool.jsx:10"}],
+    "processing": {"where": "mixed", "detail": "identique à avi-to-gif ; ffmpeg du service = build statique BtbN n8.1.2 GPL (décodage AV1 : le service encode et relit de l'AV1 dans ses tests, services/media-processing/tests/run_tests.py:263-266)", "ref": "services/media-processing/Dockerfile:8-21 ; app/lib/mediaJob.js:3-5"},
+    "quota": "limite par réseau heure/jour (/api/media/ticket, bucket media_rate)",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": "/tools/gif-tools/avi-to-gif, mov-to-gif, mp4-to-gif, video-to-gif, /tools/video-tools/video-to-gif",
+    "notes": "Texte propre actuel : une phrase (VP8, VP9, AV1, enregistrements d'écran) ; 84 % identique à avi-to-gif (unicite-avant.json)."
+  },
+  {
+    "path": "/tools/file-tools/file-comparator",
+    "task": "Dit si deux fichiers sont identiques octet par octet et, sinon, donne la position du premier octet différent, dans le navigateur.",
+    "inputs": {"accept": null, "formats": ["tout fichier (deux fichiers)"], "ref": "app/tools/file-tools/file-comparator/page.jsx:50,54"},
+    "outputs": {"formats": ["aucun fichier : verdict affiché sur la page"], "ref": "app/tools/file-tools/file-comparator/page.jsx:59-67"},
+    "controls": [
+      {"label": "File 1 (puis nom du fichier choisi)", "ref": "app/tools/file-tools/file-comparator/page.jsx:49"},
+      {"label": "File 2", "ref": "app/tools/file-tools/file-comparator/page.jsx:53"},
+      {"label": "Compare Files (pendant : Comparing… N%)", "ref": "app/tools/file-tools/file-comparator/page.jsx:57"},
+      {"label": "Files are identical / Files are different ; « First difference at byte N (offset 0x…). » ou « Identical up to byte N, then the first/second file continues (N more bytes). »", "ref": "app/tools/file-tools/file-comparator/page.jsx:61-62"}
+    ],
+    "steps": ["cliquer « File 1 » et choisir un fichier", "cliquer « File 2 » et choisir l'autre", "bouton « Compare Files » (pourcentage affiché)", "verdict, position de la première différence, nom et taille de chaque fichier"],
+    "limits": [
+      {"what": "taille des fichiers", "value": "NON TROUVÉ (aucune constante ; lecture par tranches de 8 Mio, page.jsx:22-31)", "constant": null, "ref": "app/tools/file-tools/file-comparator/page.jsx:22"}
+    ],
+    "processing": {"where": "browser", "detail": "Lecture par tranches de 8 Mio avec Blob.slice dans la page ; rien n'est envoyé.", "ref": "app/tools/file-tools/file-comparator/page.jsx:19-33"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Pas de comparaison ligne à ligne ni côte à côte. Aucune mesure de vitesse ou de fichier multi-gigaoctet dans docs/audit (seul RAPPORT-qualite-2-29-09.md:70 note l'ancien défaut « gros fichiers chargés en entier »)."
+  },
+  {
+    "path": "/tools/file-tools/file-converter",
+    "task": "Relit un fichier texte (encodage détecté) et l'enregistre en TXT UTF-8, en JSON {\"content\": texte}, en CSV (tabulations → virgules, RFC 4180) ou en HTML (texte échappé dans <pre>), dans le navigateur.",
+    "inputs": {"accept": ".txt,.csv,.json,.html,.md", "formats": ["TXT", "CSV", "JSON", "HTML", "MD"], "ref": "app/tools/file-tools/file-converter/page.jsx:60"},
+    "outputs": {"formats": ["TXT", "JSON", "CSV", "HTML (nom : nom d'origine + nouvelle extension)"], "ref": "app/tools/file-tools/file-converter/page.jsx:62,65"},
+    "controls": [
+      {"label": "Click or drop a text file here / Choose a text file", "ref": "app/tools/file-tools/file-converter/page.jsx:59"},
+      {"label": "Convert to : TXT / JSON / CSV / HTML", "ref": "app/tools/file-tools/file-converter/page.jsx:62"},
+      {"label": "Convert", "ref": "app/tools/file-tools/file-converter/page.jsx:63"},
+      {"label": "Download", "ref": "app/tools/file-tools/file-converter/page.jsx:65"}
+    ],
+    "steps": ["choisir un fichier .txt/.csv/.json/.html/.md", "« Convert to »", "bouton « Convert »", "bouton « Download »"],
+    "limits": [{"what": "taille du fichier", "value": "NON TROUVÉ (fichier lu en entier, page.jsx:22 ; aucune constante)", "constant": null, "ref": "app/tools/file-tools/file-converter/page.jsx:22"}],
+    "processing": {"where": "browser", "detail": "Détection d'encodage (BOM, UTF-8 valide, sinon page de code ANSI de la langue du navigateur), puis enveloppe selon le format ; rien n'est envoyé.", "ref": "app/tools/file-tools/file-converter/page.jsx:20-45 ; app/lib/csvEncoding.js"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Le contenu n'est jamais interprété : un CSV en JSON donne {\"content\": \"a,b…\"} ; un JSON en CSV ne change que les tabulations ; un HTML en TXT garde les balises (page.jsx:28-44). Fichier vide refusé (page.jsx:15). .tsv, .htm, .markdown, .log non acceptés par le sélecteur (page.jsx:60)."
+  },
+  {
+    "path": "/tools/file-tools/file-encryptor",
+    "task": "Chiffre un fichier avec un mot de passe (AES-256-GCM, clé PBKDF2-SHA-256 600 000 itérations) ou le déchiffre, dans le navigateur.",
+    "inputs": {"accept": null, "formats": ["tout fichier"], "ref": "app/tools/file-tools/file-encryptor/page.jsx:47"},
+    "outputs": {"formats": ["fichier chiffré « nom.encrypted » (en-tête OCF1 + sel 16 o + IV 12 o + chiffré + étiquette 16 o)", "fichier déchiffré (nom sans .encrypted, sinon nom + .decrypted)"], "ref": "app/tools/file-tools/file-encryptor/page.jsx:53 ; app/lib/textCrypto.js:71-84"},
+    "controls": [
+      {"label": "Encrypt / Decrypt (onglets)", "ref": "app/tools/file-tools/file-encryptor/page.jsx:42-43"},
+      {"label": "Click or drop a file here / Choose a file", "ref": "app/tools/file-tools/file-encryptor/page.jsx:46"},
+      {"label": "Password (placeholder « Enter password... »)", "ref": "app/tools/file-tools/file-encryptor/page.jsx:49"},
+      {"label": "Encrypt File / Decrypt File (pendant : Processing...)", "ref": "app/tools/file-tools/file-encryptor/page.jsx:50"},
+      {"label": "Download", "ref": "app/tools/file-tools/file-encryptor/page.jsx:53"}
+    ],
+    "steps": ["choisir Encrypt ou Decrypt", "choisir le fichier", "taper le mot de passe", "bouton « Encrypt File » / « Decrypt File »", "bouton « Download »"],
+    "limits": [{"what": "taille du fichier", "value": "NON TROUVÉ (fichier lu en entier en mémoire, page.jsx:23 ; aucune constante dans page.jsx ni textCrypto.js)", "constant": null, "ref": "app/tools/file-tools/file-encryptor/page.jsx:23"}],
+    "processing": {"where": "browser", "detail": "Web Crypto du navigateur ; rien n'est envoyé.", "ref": "app/lib/textCrypto.js:30-33,76-100"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Mauvais mot de passe sur un fichier OCF1 : « Wrong password, or the encrypted file was changed or cut: it cannot be decrypted. » (textCrypto.js:95). Fichier SANS en-tête OCF1 (ancien XOR, fichier non chiffré, ou 4 premiers octets modifiés) : « déchiffré » par XOR sans contrôle, avec l'avertissement page.jsx:29 — le résultat peut être illisible. Surcoût 48 octets = 4 (OCF1) + 16 (sel) + 12 (IV) + 16 (étiquette). Défaut d'interface : changer d'onglet après un résultat renomme le fichier proposé sans le recalculer (page.jsx:53 lit le mode courant)."
+  },
+  {
+    "path": "/tools/file-tools/file-metadata",
+    "task": "Affiche les propriétés d'un fichier (nom, taille, extension, type déduit du nom, vrai format lu dans les premiers octets, date de modification) et les métadonnées internes de photos, PDF, documents Office/OpenDocument, ZIP et MP3, dans le navigateur.",
+    "inputs": {"accept": null, "formats": ["tout fichier ; signature reconnue pour 46 formats ; métadonnées internes : JPEG, PNG, WebP, TIFF, HEIC, AVIF, PDF, ZIP (dont DOCX/XLSX/PPTX/ODT…), MP3"], "ref": "app/tools/file-tools/file-metadata/page.jsx:47 ; app/lib/fileSignature.js:11-58 ; app/lib/embeddedMetadata.js:99-111"},
+    "outputs": {"formats": ["aucun fichier : tableau affiché"], "ref": "app/tools/file-tools/file-metadata/page.jsx:50-71"},
+    "controls": [
+      {"label": "Click or drop any file here / Choose any file", "ref": "app/tools/file-tools/file-metadata/page.jsx:46"},
+      {"label": "Name / Size / Extension / Type given by the name / Real format (from content) / Last modified", "ref": "app/tools/file-tools/file-metadata/page.jsx:38"},
+      {"label": "« Reading the metadata inside the file… », groupes de métadonnées internes, ou « No metadata found inside this file (read for … ) »", "ref": "app/tools/file-tools/file-metadata/page.jsx:60-71"}
+    ],
+    "steps": ["choisir un fichier (pas de bouton)", "propriétés affichées, alerte si le contenu ne correspond pas à l'extension", "métadonnées internes affichées ensuite"],
+    "limits": [{"what": "taille du fichier", "value": "NON TROUVÉ (seuls les 0x8010 premiers octets sont lus pour la signature, page.jsx:23 ; lecture interne selon le format dans app/lib/embeddedMetadata.js)", "constant": null, "ref": "app/tools/file-tools/file-metadata/page.jsx:23"}],
+    "processing": {"where": "browser", "detail": "File API ; rien n'est envoyé.", "ref": "app/tools/file-tools/file-metadata/page.jsx:16-36"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Documents Office anciens (.doc/.xls/.ppt, format OLE) : signature reconnue mais aucune métadonnée interne lue (embeddedMetadata.js:103-108). Alerte réelle : « The content is a X, but the name ends in .Y (usually .Z). Check where this file comes from before opening it. » (page.jsx:35). Pas de dimensions d'image ni de durée."
+  },
+  {
+    "path": "/tools/file-tools/file-splitter",
+    "task": "Coupe un fichier en parties numérotées (par taille ou en N parties égales) et recolle des parties .part1…partN, dans le navigateur.",
+    "inputs": {"accept": null, "formats": ["tout fichier (découpe)", "fichiers nommés *.partN (recollage)"], "ref": "app/tools/file-tools/file-splitter/page.jsx:26-28,108,116"},
+    "outputs": {"formats": ["parties « nom.part1 »… (et « Download all (N files, ZIP) » nommé nom-parts.zip)", "fichier recollé (nom d'origine)"], "ref": "app/tools/file-tools/file-splitter/page.jsx:37,117,134-136 ; app/components/FileDownload.jsx:264"},
+    "controls": [
+      {"label": "Split a file / Join parts", "ref": "app/tools/file-tools/file-splitter/page.jsx:111"},
+      {"label": "Click or drop a file here / Choose a file", "ref": "app/tools/file-tools/file-splitter/page.jsx:107"},
+      {"label": "By size / Into equal parts", "ref": "app/tools/file-tools/file-splitter/page.jsx:121-122"},
+      {"label": "Number of parts (2 à 1000)", "ref": "app/tools/file-tools/file-splitter/page.jsx:124"},
+      {"label": "Chunk Size + Unit (B / KB / MB ; KB = 1024 o, MB = 1 048 576 o)", "ref": "app/tools/file-tools/file-splitter/page.jsx:62,126-127"},
+      {"label": "Split File (pendant : Splitting...)", "ref": "app/tools/file-tools/file-splitter/page.jsx:129"},
+      {"label": "Choose all the parts (name.part1, name.part2…)", "ref": "app/tools/file-tools/file-splitter/page.jsx:115"},
+      {"label": "Download all (N files, ZIP) / Download", "ref": "app/components/FileDownload.jsx:211,264 ; app/tools/file-tools/file-splitter/page.jsx:134-136"}
+    ],
+    "steps": ["« Split a file » : choisir le fichier", "By size (Chunk Size, Unit) ou Into equal parts (Number of parts)", "bouton « Split File »", "« Download » par partie ou « Download all (N files, ZIP) »", "pour recoller : « Join parts », choisir toutes les parties, « Download »"],
+    "limits": [
+      {"what": "taille du fichier à découper (tous appareils)", "value": "5 GB (5 × 1024³ octets)", "constant": "MAX_FILE_SIZE_BYTES", "ref": "app/tools/file-tools/file-splitter/config.js:28-29 ; page.jsx:48-49"},
+      {"what": "nombre de parties", "value": "1000", "constant": "MAX_CHUNKS", "ref": "app/tools/file-tools/file-splitter/config.js:30 ; page.jsx:73-74,124"},
+      {"what": "recollage", "value": "NON TROUVÉ (aucune limite de taille ; noms *.partN d'un seul fichier, sans trou, tailles cohérentes, page.jsx:22-38)", "constant": null, "ref": "app/tools/file-tools/file-splitter/page.jsx:22-38"}
+    ],
+    "processing": {"where": "browser", "detail": "Découpe par Blob.slice (vue, sans copie) ; chaque ligne de résultat (FileDownload avec seulement href) relit ensuite sa partie dès qu'elle s'affiche (fetch(href).blob()) ; « Download all » construit le ZIP en mémoire (client-zip). Rien n'est envoyé.", "ref": "app/tools/file-tools/file-splitter/page.jsx:79-90,136 ; app/components/FileDownload.jsx:124-135,241-256"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Mesure de mémoire (Node, ancien vs nouveau code) seulement en commentaire, config.js:7-14 ; aucun rapport navigateur. Messages : « That chunk size would produce N parts, over the 1,000-part limit. Choose a larger chunk size. » (page.jsx:74) ; recollage : « Part N is missing (or chosen twice)… », « These parts come from different files… » (page.jsx:28-35)."
+  },
+  {
+    "path": "/tools/file-tools/tar-extractor",
+    "task": "Extrait les fichiers d'une archive TAR, TAR.GZ ou TGZ dans le navigateur.",
+    "inputs": {"accept": ".tar,.tgz,.gz,.taz,application/x-tar,application/x-gtar,application/gzip,application/x-gzip,application/x-compressed-tar", "formats": ["TAR (ustar, PAX, noms longs GNU)", "TAR compressé gzip (.tar.gz, .tgz)"], "ref": "app/tools/file-tools/tar-extractor/page.jsx:14,59 ; app/lib/tarReader.js:10-13"},
+    "outputs": {"formats": ["fichiers d'origine (un par un, ou « Download all (N files, ZIP) » = extracted-files.zip)"], "ref": "app/tools/file-tools/tar-extractor/page.jsx:67-69"},
+    "controls": [
+      {"label": "Click or drop a .tar, .tar.gz, or .tgz file here / Choose a .tar, .tar.gz, or .tgz file", "ref": "app/tools/file-tools/tar-extractor/page.jsx:58"},
+      {"label": "Extracting... ; « N file(s) extracted »", "ref": "app/tools/file-tools/tar-extractor/page.jsx:61,66"},
+      {"label": "Download all (N files, ZIP) / Download", "ref": "app/components/FileDownload.jsx:211,264"}
+    ],
+    "steps": ["choisir l'archive (extraction automatique, pas de bouton)", "liste des fichiers (chemin en note)", "« Download » par fichier ou « Download all (N files, ZIP) »"],
+    "limits": [{"what": "taille de l'archive", "value": "NON TROUVÉ (aucune constante ; archive lue et décompressée en entier en mémoire, page.jsx:31-36)", "constant": null, "ref": "app/tools/file-tools/tar-extractor/page.jsx:31-36"}],
+    "processing": {"where": "browser", "detail": "DecompressionStream('gzip') si l'en-tête est 1F 8B, puis lecteur TAR maison ; rien n'est envoyé.", "ref": "app/tools/file-tools/tar-extractor/page.jsx:31-44 ; app/lib/tarReader.js"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "Safari et les sélecteurs macOS/iOS ne reconnaissent que la dernière extension : d'où .gz dans accept (page.jsx:9-14).",
+    "twin": "/tools/file-tools/zip-extractor (ouvre aussi TAR, TGZ, et .tar.bz2/.tar.xz/.tar.zst)",
+    "notes": "Liens physiques extraits comme copie de leur cible ; liens symboliques et fichiers épars GNU non extraits et listés « Not extracted (N): … » (tarReader.js:107-115 ; page.jsx:45,63). .gz d'un seul fichier : « This .gz file holds a single compressed file, not a TAR archive. Open it with the ZIP Extractor (File Tools)… » (page.jsx:40). Seul le gzip est décompressé : un .taz compressé par compress (.Z) n'est pas lu (page.jsx:32)."
+  },
+  {
+    "path": "/tools/file-tools/zip-creator",
+    "task": "Réunit plusieurs fichiers dans une archive ZIP (niveau de compression au choix, mot de passe AES-256 en option), dans un Web Worker du navigateur.",
+    "inputs": {"accept": null, "formats": ["tout fichier (sélection multiple, pas de dossier)"], "ref": "app/tools/file-tools/zip-creator/page.jsx:106"},
+    "outputs": {"formats": ["ZIP (nom archive.zip ; DEFLATE ou STORE ; AES-256 WinZip AE-2 si mot de passe)"], "ref": "app/tools/file-tools/zip-creator/page.jsx:158 ; app/tools/file-tools/zip-creator/zipCreator.worker.js:22-56"},
+    "controls": [
+      {"label": "Click to add files", "ref": "app/tools/file-tools/zip-creator/page.jsx:105"},
+      {"label": "Remove", "ref": "app/tools/file-tools/zip-creator/page.jsx:113"},
+      {"label": "Compression level : None (store only, fastest) / Fast (lower compression) / Normal (balanced, default) / Best (smallest file, slowest)", "ref": "app/tools/file-tools/zip-creator/page.jsx:120-131"},
+      {"label": "Protect with a password (AES-256) ; Password ; Repeat the password", "ref": "app/tools/file-tools/zip-creator/page.jsx:136,140-141"},
+      {"label": "Create ZIP ; pendant : Zipping… + Cancel", "ref": "app/tools/file-tools/zip-creator/page.jsx:151-155"},
+      {"label": "« Zipped N file(s). » + Download", "ref": "app/tools/file-tools/zip-creator/page.jsx:78,158"}
+    ],
+    "steps": ["ajouter des fichiers", "retirer avec « Remove »", "« Compression level »", "option mot de passe (deux fois)", "bouton « Create ZIP » (barre de progression, Cancel)", "bouton « Download » (archive.zip)"],
+    "limits": [
+      {"what": "total des fichiers sur ordinateur", "value": "700 MB (700 × 1024² octets)", "constant": "MAX_TOTAL_SIZE_BYTES", "ref": "app/tools/file-tools/zip-creator/config.js:16-17 ; page.jsx:32-35,59"},
+      {"what": "total sur téléphone/tablette (isMobileDevice)", "value": "100 MB", "constant": "MOBILE_MAX_TOTAL_SIZE_BYTES", "ref": "app/tools/file-tools/zip-creator/config.js:22-23 ; app/lib/isMobileDevice.js:3-11"}
+    ],
+    "processing": {"where": "browser", "detail": "Web Worker : JSZip sans mot de passe, zip.js avec mot de passe (AES-256, jamais ZipCrypto) ; rien n'est envoyé.", "ref": "app/tools/file-tools/zip-creator/zipCreator.worker.js:19-56"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Fichiers placés à la racine sous leur seul nom (zip.file(file.name), worker:45-47) : deux fichiers de même nom ne donnent pas deux entrées (JSZip remplace ; zip.js lève une erreur) — NON vérifié par test. Mesures 700/100 MB faites sous Node, consignées seulement en commentaire (config.js:1-22). Seul lecteur indépendant vérifié pour l'AES : bsdtar/libarchive (docs/audit/RAPPORT-p24-couverture-03-10.md:217-221). Avertissement mot de passe accentué (page.jsx:142)."
+  },
+  {
+    "path": "/tools/file-tools/zip-extractor",
+    "task": "Liste puis extrait à la demande les fichiers d'une archive ZIP, RAR, 7Z, TAR, GZ et des autres formats lus par 7-Zip, protégée ou en plusieurs parties, dans le navigateur.",
+    "inputs": {"accept": null, "formats": ["ZIP (zip.js)", "formats lus par 7-Zip 24.09 (7z-wasm) ; testés dans le dépôt : RAR, RAR5, 7z, ZIP AES/ZipCrypto, CAB, LZH, 7z-bzip2, archives en plusieurs parties"], "ref": "app/tools/file-tools/zip-extractor/page.jsx:262 ; app/tools/file-tools/zip-extractor/extract.worker.js:7-17 ; docs/audit/RAPPORT-amelioration-15.md:35"},
+    "outputs": {"formats": ["fichiers d'origine (un par un)", "un ZIP de tout (nom de l'archive + .zip)", "dossier choisi (Chrome/Edge)"], "ref": "app/tools/file-tools/zip-extractor/page.jsx:132-145,167-211,214-231"},
+    "controls": [
+      {"label": "Drop an archive here, or click to choose", "ref": "app/tools/file-tools/zip-extractor/page.jsx:260"},
+      {"label": "This archive is password-protected / Wrong password — try again ; Unlock", "ref": "app/tools/file-tools/zip-extractor/page.jsx:269,272"},
+      {"label": "Cancel", "ref": "app/tools/file-tools/zip-extractor/page.jsx:281"},
+      {"label": "Download all as ZIP", "ref": "app/tools/file-tools/zip-extractor/page.jsx:292"},
+      {"label": "Save all to a folder (si showDirectoryPicker existe)", "ref": "app/tools/file-tools/zip-extractor/page.jsx:61,293"},
+      {"label": "Open (jpg, jpeg, png, gif, webp, avif, bmp, pdf, txt, md, csv, log, json, xml, mp3, wav, ogg, m4a, mp4, webm) / Download par ligne", "ref": "app/tools/file-tools/zip-extractor/page.jsx:25,302-303"}
+    ],
+    "steps": ["déposer ou choisir l'archive (toutes les parties pour une archive découpée)", "mot de passe si demandé, « Unlock »", "liste des fichiers avec tailles (« Nothing is extracted until you ask. »)", "« Download » / « Open » par fichier, ou « Download all as ZIP », ou « Save all to a folder »"],
+    "limits": [
+      {"what": "taille d'un fichier extrait sur ordinateur", "value": "1.9 GB (1 900 000 000 octets)", "constant": "MAX_FILE_BYTES", "ref": "app/tools/file-tools/zip-extractor/config.js:20-21 ; page.jsx:69-70,130"},
+      {"what": "taille d'un fichier extrait sur téléphone/tablette", "value": "300 MB (non mesuré sur appareil réel : RAPPORT-amelioration-15.md:51)", "constant": "MOBILE_MAX_FILE_BYTES", "ref": "app/tools/file-tools/zip-extractor/config.js:22-23"},
+      {"what": ".tar contenu dans un .tar.gz/.tgz/.tar.bz2/.tar.xz/.tar.zst…", "value": "même plafond : 1.9 GB (300 MB téléphone), décompressé en mémoire avant la liste", "constant": "MAX_FILE_BYTES", "ref": "app/tools/file-tools/zip-extractor/config.js:20 ; extract.worker.js:175-199 ; page.jsx:98"},
+      {"what": "« Download all as ZIP » hors Chrome/Edge", "value": "ZIP en mémoire jusqu'à 1.9 GB, au-delà flux par service worker (vérifié 2,2 Go Firefox et WebKit)", "constant": "ZIP_IN_MEMORY_MAX", "ref": "app/tools/file-tools/zip-extractor/config.js:24-27 ; page.jsx:178-196 ; docs/audit/RAPPORT-nuit-27-09.md:17,96"},
+      {"what": "archive elle-même", "value": "pas de constante (lue par morceaux, WORKERFS)", "constant": null, "ref": "app/tools/file-tools/zip-extractor/extract.worker.js:9,186"}
+    ],
+    "processing": {"where": "browser", "detail": "Web Worker : zip.js pour ZIP, 7-Zip 24.09 en WebAssembly (servi depuis /wasm/7zz.wasm du site) pour le reste ; rien n'est envoyé ; mot de passe gardé dans l'onglet. Erreur d'ouverture rapportée à /api/report-error sans le fichier.", "ref": "app/tools/file-tools/zip-extractor/extract.worker.js:7-17,79-81 ; page.jsx:101,274"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "Chrome/Edge : ZIP écrit directement sur le disque (showSaveFilePicker) et « Save all to a folder ». Firefox/Safari : ZIP en mémoire ≤ 1.9 GB, au-delà flux par service worker, impossible en fenêtre privée (message page.jsx:182). Téléphone/tablette : plafonds 300 MB et lots de 64 MB (config.js:19,22).",
+    "twin": "/tools/file-tools/tar-extractor (TAR/TGZ seulement)",
+    "notes": "Noms ZIP : UTF-8 si valide, sinon CP437 (extract.worker.js:13-16). Liens symboliques non listés, signalés (page.jsx:106). Fichier extrait de taille différente de l'annonce : erreur « came out at … instead of …: the archive may be damaged » (page.jsx:139). Le nombre « 40+ » de formats n'apparaît nulle part dans le code ni dans un rapport."
+  }
+]

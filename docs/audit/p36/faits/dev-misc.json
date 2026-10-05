@@ -1,0 +1,331 @@
+[
+  {
+    "path": "/tools/developer-tools/api-tester",
+    "task": "Envoie une requête HTTP (GET, POST, PUT, DELETE ou PATCH) depuis le navigateur vers l'URL saisie et affiche le code de statut et le corps de la réponse.",
+    "inputs": {"accept": null, "formats": ["URL (texte libre)", "en-têtes au format objet JSON", "corps texte libre (méthodes autres que GET)"], "ref": "app/tools/developer-tools/api-tester/page.jsx:41-47"},
+    "outputs": {"formats": ["statut + statusText", "corps de réponse : ré-indenté (2 espaces) s'il est du JSON valide, sinon texte brut, nombres conservés tels que reçus"], "ref": "app/tools/developer-tools/api-tester/page.jsx:25-30,49 ; app/lib/jsonText.js:20-21"},
+    "controls": [
+      {"label": "sélecteur de méthode (aria-label « HTTP method ») : GET, POST, PUT, DELETE, PATCH", "ref": "app/tools/developer-tools/api-tester/page.jsx:41-43"},
+      {"label": "champ URL, placeholder « https://api.example.com/endpoint »", "ref": "app/tools/developer-tools/api-tester/page.jsx:44"},
+      {"label": "Headers (JSON)", "ref": "app/tools/developer-tools/api-tester/page.jsx:46"},
+      {"label": "Body (affiché pour toute méthode sauf GET)", "ref": "app/tools/developer-tools/api-tester/page.jsx:47"},
+      {"label": "Send Request (« Sending... » pendant l'envoi ; inactif sans URL)", "ref": "app/tools/developer-tools/api-tester/page.jsx:48"}
+    ],
+    "steps": ["choisir la méthode → saisir l'URL → (facultatif) en-têtes en JSON → (méthodes ≠ GET) corps → bouton « Send Request » → lire statut et corps"],
+    "limits": [
+      {"what": "taille de requête/réponse", "value": "aucune limite dans le code", "constant": null, "ref": "app/tools/developer-tools/api-tester/page.jsx:14-33"},
+      {"what": "délai maximal / annulation", "value": "aucun (pas d'AbortController)", "constant": null, "ref": "app/tools/developer-tools/api-tester/page.jsx:24"},
+      {"what": "champs texte (en-têtes, corps) au-delà de 1 000 000 caractères", "value": "aperçu des 20 000 premiers caractères, l'outil garde le texte entier", "constant": "LIMIT / PREVIEW", "ref": "app/components/TextArea.jsx:17-18,47-75"}
+    ],
+    "processing": {"where": "browser", "detail": "fetch() part du navigateur directement vers l'URL saisie (aucun relais par nos serveurs) ; CORS appliqué par le navigateur. Content-Type: application/json ajouté seulement quand un corps est envoyé, et remplaçable par les en-têtes saisis (spread après). Si une erreur s'affiche (en-têtes JSON invalides, échec réseau/CORS), son message nettoyé est envoyé à POST /api/report-error (journal tool_errors) ; le nettoyage laisse passer l'extrait que V8 cite d'un JSON invalide (testé : « Bearer sk_ » transmis).", "ref": "app/tools/developer-tools/api-tester/page.jsx:17-24,31 ; app/lib/useToolError.js:19-30 ; app/lib/reportError.js:16,72-122,163-171"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : page.jsx n'importe ni auth, ni Supabase, ni lib/quota/guard.js)",
+    "watermark": "sans objet",
+    "browsers": "Règle de tout navigateur (hors code) : depuis la page https, une URL http:// publique est bloquée (contenu mixte). Le message d'erreur affiché est celui du navigateur (e.message), il diffère selon Chrome/Firefox/Safari.",
+    "twin": null,
+    "notes": "En-têtes de réponse non affichés ; pas de durée ; pas d'historique ni d'enregistrement ; HEAD et OPTIONS absents ; en-têtes JSON invalides → message de JSON.parse affiché, requête non envoyée (page.jsx:20,31). Couleur du statut : vert < 400, jaune ≥ 400, rouge si erreur (page.jsx:49)."
+  },
+  {
+    "path": "/tools/developer-tools/aspect-ratio",
+    "task": "Calcule le rapport simplifié et la valeur décimale d'une largeur et d'une hauteur, et la dimension manquante pour une nouvelle largeur ou hauteur au même rapport.",
+    "inputs": {"accept": null, "formats": ["nombres > 0 : entiers, décimaux (2.35), notation exponentielle (1e3)"], "ref": "app/tools/developer-tools/aspect-ratio/page.jsx:14,43-44,53,58"},
+    "outputs": {"formats": ["rapport simplifié L:H (décimales mises à l'échelle : 2.35 et 1 → 47:20)", "décimal L÷H à 4 décimales max", "hauteur (ou largeur) arrondie au pixel + valeur exacte « ≈ x » ou « exactly x » à 6 décimales si non entière"], "ref": "app/tools/developer-tools/aspect-ratio/page.jsx:19-34,47-48,54,59"},
+    "controls": [
+      {"label": "Width", "ref": "app/tools/developer-tools/aspect-ratio/page.jsx:43"},
+      {"label": "Height", "ref": "app/tools/developer-tools/aspect-ratio/page.jsx:44"},
+      {"label": "New width → height", "ref": "app/tools/developer-tools/aspect-ratio/page.jsx:52-54"},
+      {"label": "New height → width", "ref": "app/tools/developer-tools/aspect-ratio/page.jsx:57-59"},
+      {"label": "Common Presets : 16:9 (1920x1080), 4:3 (1024x768), 1:1 (1080x1080), 21:9 (2560x1080), 9:16 (1080x1920)", "ref": "app/tools/developer-tools/aspect-ratio/page.jsx:35,62"}
+    ],
+    "steps": ["saisir Width et Height (ou cliquer un préréglage) → lire le rapport et « Decimal » (mise à jour à la frappe) → (facultatif) saisir « New width → height » ou « New height → width » → lire « Height: » / « Width: »"],
+    "limits": [
+      {"what": "valeurs acceptées", "value": "strictement positives ; vide, 0, négatif ou texte → « — » (aucun rapport) ; nouvelle dimension invalide → « Enter a positive number »", "constant": null, "ref": "app/tools/developer-tools/aspect-ratio/page.jsx:14,17-19,29,54,59"}
+    ],
+    "processing": {"where": "browser", "detail": "calcul local à chaque frappe (PGCD), aucun envoi", "ref": "app/tools/developer-tools/aspect-ratio/page.jsx:10-34"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun import d'auth/guard dans page.jsx)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Valeur initiale 1920 × 1080 (page.jsx:5-6). Pas de sélecteur de format de sortie : rapport et décimal toujours affichés ensemble."
+  },
+  {
+    "path": "/tools/developer-tools/color-picker",
+    "task": "Choisit une couleur avec le sélecteur natif du navigateur ou un code hexadécimal saisi, l'affiche en aperçu et donne sa valeur RGB.",
+    "inputs": {"accept": null, "formats": ["sélecteur natif input type=color", "texte libre dans « Input » ; conversion RGB seulement pour 6 chiffres hexadécimaux, # facultatif, casse indifférente"], "ref": "app/tools/developer-tools/color-picker/page.jsx:6,15,19"},
+    "outputs": {"formats": ["HEX : la valeur telle que choisie ou saisie (non normalisée)", "RGB affiché « r,g,b », copié « rgb(r,g,b) »"], "ref": "app/tools/developer-tools/color-picker/page.jsx:17-18"},
+    "controls": [
+      {"label": "bouton couleur natif (aria-label « Pick a colour »), sous le grand aperçu", "ref": "app/tools/developer-tools/color-picker/page.jsx:15"},
+      {"label": "carte HEX + bouton « Copy »", "ref": "app/tools/developer-tools/color-picker/page.jsx:17"},
+      {"label": "carte RGB + bouton « Copy »", "ref": "app/tools/developer-tools/color-picker/page.jsx:18"},
+      {"label": "Input (aria-label « Colour value (HEX) »)", "ref": "app/tools/developer-tools/color-picker/page.jsx:19"}
+    ],
+    "steps": ["cliquer le petit bouton couleur sous l'aperçu (ou taper #rrggbb dans « Input ») → l'aperçu 192 px change → lire HEX et RGB → « Copy »"],
+    "limits": [
+      {"what": "conversion RGB", "value": "6 chiffres hexadécimaux seulement ; 3 chiffres, 8 chiffres (alpha) ou noms CSS → carte RGB vide", "constant": null, "ref": "app/tools/developer-tools/color-picker/page.jsx:6,18"}
+    ],
+    "processing": {"where": "browser", "detail": "aucun envoi ; copie par navigator.clipboard.writeText", "ref": "app/tools/developer-tools/color-picker/page.jsx:17-18"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun import d'auth/guard)",
+    "watermark": "sans objet",
+    "browsers": "Le sélecteur est celui du navigateur (input type=color) : son apparence et ses outils (pipette sous Chrome/Edge ordinateur) dépendent du navigateur, pas du site. Sans #, l'aperçu garde la couleur précédente et le sélecteur natif affiche noir (valeur invalide).",
+    "twin": "/tools/converter-tools/color-converter (HEX, RGB, HSL, HSV, CMYK éditables, même sélecteur natif : app/tools/converter-tools/color-converter/page.jsx:5,119,127)",
+    "notes": "Couleur initiale #3b82f6 (page.jsx:5). Pas de HSL/CMYK, pas d'alpha, pas de palette ni d'historique."
+  },
+  {
+    "path": "/tools/developer-tools/cron-expression",
+    "task": "Compose une expression cron standard à 5 champs, la vérifie, la décrit en anglais et liste ses 5 prochaines exécutions dans le fuseau du visiteur.",
+    "inputs": {"accept": null, "formats": ["5 champs texte (Minute, Hour, Day, Month, Weekday)", "expression entière collée : 5 champs, macros @yearly @annually @monthly @weekly @daily @midnight @hourly, ligne crontab (commande retirée)"], "ref": "app/tools/developer-tools/cron-expression/page.jsx:28-30 ; app/components/CronPaste.jsx:7,11-26"},
+    "outputs": {"formats": ["expression « m h dom mon dow »", "description en anglais (cronstrue, 24 h, verbose)", "5 prochaines exécutions, heure locale du navigateur", "message « Invalid cron expression: … » si invalide"], "ref": "app/tools/developer-tools/cron-expression/page.jsx:19,32-40 ; app/lib/cronInfo.js:10-27"},
+    "controls": [
+      {"label": "Paste a whole expression (placeholder « e.g. */15 9-17 * * 1-5  or  @daily »)", "ref": "app/components/CronPaste.jsx:39-41"},
+      {"label": "Minute / Hour / Day / Month / Weekday", "ref": "app/tools/developer-tools/cron-expression/page.jsx:30"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/cron-expression/page.jsx:42"},
+      {"label": "Presets : Every minute, Every hour, Every day at midnight, Every week, Every month, Every year", "ref": "app/tools/developer-tools/cron-expression/page.jsx:20,43"}
+    ],
+    "steps": ["coller une expression dans « Paste a whole expression » ou remplir les 5 champs, ou cliquer un préréglage → lire l'expression, sa description et « Next runs (your time zone) » → « Copy »"],
+    "limits": [
+      {"what": "format", "value": "cron standard à 5 champs ; 6-7 champs de type Quartz/Spring/AWS non découpés mais expliqués ; @reboot sans planning", "constant": null, "ref": "app/components/CronPaste.jsx:17,20-25 ; app/lib/cronInfo.js:12"},
+      {"what": "prochaines exécutions affichées", "value": "5", "constant": "count (défaut 5)", "ref": "app/lib/cronInfo.js:10"}
+    ],
+    "processing": {"where": "browser", "detail": "cron-parser 5.10.1 + cronstrue 3.27.0 chargés après le premier affichage, aucun envoi", "ref": "app/tools/developer-tools/cron-expression/page.jsx:18 ; app/lib/cronInfo.js:7-8 ; package.json:30-31"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun import d'auth/guard)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": "/tools/developer-tools/cron-expression-builder (même code, 8 préréglages au lieu de 6)",
+    "notes": "Le bouton Copy copie l'expression même invalide (page.jsx:42). Le fuseau des prochaines exécutions est celui du navigateur, sans choix (page.jsx:37-38)."
+  },
+  {
+    "path": "/tools/developer-tools/cron-expression-builder",
+    "task": "Compose une expression cron standard à 5 champs, la vérifie, la décrit en anglais et liste ses 5 prochaines exécutions dans le fuseau du visiteur, avec 8 préréglages.",
+    "inputs": {"accept": null, "formats": ["5 champs texte", "expression collée (macros, ligne crontab)"], "ref": "app/tools/developer-tools/cron-expression-builder/page.jsx:28-32 ; app/components/CronPaste.jsx:7,11-26"},
+    "outputs": {"formats": ["expression", "description en anglais", "5 prochaines exécutions (fuseau du navigateur)", "message d'erreur si invalide"], "ref": "app/tools/developer-tools/cron-expression-builder/page.jsx:19,34-42 ; app/lib/cronInfo.js:10-27"},
+    "controls": [
+      {"label": "Paste a whole expression", "ref": "app/components/CronPaste.jsx:39"},
+      {"label": "Minute / Hour / Day / Month / Weekday", "ref": "app/tools/developer-tools/cron-expression-builder/page.jsx:30-32"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/cron-expression-builder/page.jsx:44"},
+      {"label": "Presets : Every minute, Every hour, Every day, Every week, Every month, Every year, Every weekday (0 9 * * 1-5), Every 15 min (*/15 * * * *)", "ref": "app/tools/developer-tools/cron-expression-builder/page.jsx:20,45"}
+    ],
+    "steps": ["coller une expression ou remplir les 5 champs, ou cliquer un préréglage → lire l'expression, sa description et les 5 prochaines exécutions → « Copy »"],
+    "limits": [
+      {"what": "format", "value": "cron standard à 5 champs ; 6-7 champs Quartz expliqués, non lus", "constant": null, "ref": "app/components/CronPaste.jsx:20-25 ; app/lib/cronInfo.js:12"},
+      {"what": "prochaines exécutions affichées", "value": "5", "constant": "count", "ref": "app/lib/cronInfo.js:10"}
+    ],
+    "processing": {"where": "browser", "detail": "cron-parser + cronstrue chargés après le premier affichage, aucun envoi", "ref": "app/tools/developer-tools/cron-expression-builder/page.jsx:18"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun import d'auth/guard)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": "/tools/developer-tools/cron-expression (même code, 6 préréglages)",
+    "notes": "Seule différence réelle avec cron-expression : les préréglages « Every weekday » et « Every 15 min » et l'intitulé « Every day » (au lieu de « Every day at midnight »), page.jsx:20."
+  },
+  {
+    "path": "/tools/developer-tools/diff-viewer",
+    "task": "Compare deux textes ligne par ligne (algorithme de Myers) et affiche dans une seule colonne les lignes supprimées, ajoutées et inchangées, avec les mots modifiés surlignés.",
+    "inputs": {"accept": null, "formats": ["deux zones de texte (Original, Modified)"], "ref": "app/tools/developer-tools/diff-viewer/page.jsx:37-38"},
+    "outputs": {"formats": ["liste unifiée : « - » rouge supprimée, « + » verte ajoutée, gris inchangée ; numéro de ligne gauche et droite ; mots différents surlignés dans les paires de lignes modifiées"], "ref": "app/tools/developer-tools/diff-viewer/page.jsx:14-27,42-50"},
+    "controls": [
+      {"label": "Original", "ref": "app/tools/developer-tools/diff-viewer/page.jsx:37"},
+      {"label": "Modified", "ref": "app/tools/developer-tools/diff-viewer/page.jsx:38"},
+      {"label": "Ignore whitespace", "ref": "app/tools/developer-tools/diff-viewer/page.jsx:40"},
+      {"label": "Ignore case", "ref": "app/tools/developer-tools/diff-viewer/page.jsx:40"},
+      {"label": "Compare (inactif si un des textes est vide)", "ref": "app/tools/developer-tools/diff-viewer/page.jsx:41"}
+    ],
+    "steps": ["coller le texte d'origine à gauche et le modifié à droite → cocher « Ignore whitespace » / « Ignore case » si besoin → « Compare » → lire la liste"],
+    "limits": [
+      {"what": "taille des textes", "value": "aucune limite dans le code ; au-delà de 1 000 000 caractères la zone montre un aperçu des 20 000 premiers", "constant": "LIMIT / PREVIEW", "ref": "app/components/TextArea.jsx:17-18"},
+      {"what": "hauteur du résultat", "value": "zone défilante de max-h-96 (24rem)", "constant": null, "ref": "app/tools/developer-tools/diff-viewer/page.jsx:43"}
+    ],
+    "processing": {"where": "browser", "detail": "jsdiff (paquet diff 9.0.0) diffArrays puis diffWords/diffWordsWithSpace, chargé à la demande, dans le fil principal (pas de Worker) ; aucun envoi", "ref": "app/lib/codeTools.js:49-66 ; app/tools/developer-tools/diff-viewer/page.jsx:15-16 ; package.json:32"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun import d'auth/guard)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": "/tools/text-tools/text-comparator (même diffLines et mêmes options « Ignore case » / « Ignore spaces » : app/tools/text-tools/text-comparator/page.jsx:4,12-18,52-53 ; présentation côte à côte selon son about)",
+    "notes": "CRLF, CR et LF équivalents (codeTools.js:51). « Ignore whitespace » = espaces de début/fin retirés et suites d'espaces réduites à un (codeTools.js:53). Une ligne jugée inchangée grâce aux options s'affiche dans la version de gauche (codeTools.js:62). Pas de téléchargement du résultat, pas d'import de fichier."
+  },
+  {
+    "path": "/tools/developer-tools/markdown-editor",
+    "task": "Affiche à côté d'une zone de saisie Markdown son rendu HTML (CommonMark + GFM, nettoyé par DOMPurify), mis à jour à la frappe, et permet de télécharger le .md et le .html.",
+    "inputs": {"accept": null, "formats": ["texte Markdown saisi ou collé (HTML brut autorisé, nettoyé)"], "ref": "app/tools/developer-tools/markdown-editor/page.jsx:9,28"},
+    "outputs": {"formats": ["document.md (le Markdown, text/markdown)", "document.html (fragment HTML nettoyé, sans DOCTYPE ni head ni meta charset)", "document.zip (les deux)"], "ref": "app/tools/developer-tools/markdown-editor/page.jsx:18,31-34 ; app/components/FileDownload.jsx:230-271,278-282"},
+    "controls": [
+      {"label": "Markdown (zone de saisie)", "ref": "app/tools/developer-tools/markdown-editor/page.jsx:28"},
+      {"label": "Preview", "ref": "app/tools/developer-tools/markdown-editor/page.jsx:29"},
+      {"label": "Download (une ligne par fichier : document.md, document.html)", "ref": "app/components/FileDownload.jsx:208-212"},
+      {"label": "Download all (2 files, ZIP)", "ref": "app/components/FileDownload.jsx:261-265"},
+      {"label": "Save / Share (iPhone/iPad seulement)", "ref": "app/components/FileDownload.jsx:213-218"}
+    ],
+    "steps": ["taper ou coller du Markdown à gauche → l'aperçu se met à jour à droite → « Download » de document.md ou document.html, ou « Download all (2 files, ZIP) »"],
+    "limits": [
+      {"what": "taille du texte", "value": "aucune limite dans le code ; au-delà de 1 000 000 caractères la zone montre un aperçu des 20 000 premiers", "constant": "LIMIT / PREVIEW", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "marked (gfm: true) puis DOMPurify (scripts, gestionnaires d'événements, liens javascript: retirés) ; aucun envoi. Les images référencées dans le Markdown sont chargées par le navigateur depuis leur site d'origine.", "ref": "app/tools/developer-tools/markdown-editor/page.jsx:3,15-21,29 ; package.json:52"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun import d'auth/guard)",
+    "watermark": "sans objet",
+    "browsers": "Bouton « Save / Share » (feuille de partage) seulement sur iPhone/iPad (FileDownload.jsx:91-96,213-218).",
+    "twin": "/tools/developer-tools/markdown-previewer (code identique sauf le texte d'exemple, ligne 9, et la classe de l'aperçu, ligne 29)",
+    "notes": "Aperçu probablement sans style visuel (titres de la taille du texte, listes sans puces, tableaux sans bordures) : classe prose sans plugin @tailwindcss/typography + reset Tailwind (node_modules/tailwindcss/preflight.css:73-80,197-200) — à confirmer visuellement. Question « Leave page? » armée après modification tant que le fichier n'est ni téléchargé ni copié ; le texte d'exemple ne l'arme pas (FileDownload.jsx:24-30,155-167). DOMPurify 3.4.7 vient d'une dépendance indirecte, absente de package.json (package-lock.json:4580-4582)."
+  },
+  {
+    "path": "/tools/developer-tools/markdown-previewer",
+    "task": "Affiche à côté d'une zone de saisie Markdown son rendu HTML (CommonMark + GFM, nettoyé par DOMPurify), mis à jour à la frappe, et permet de télécharger le .md et le .html.",
+    "inputs": {"accept": null, "formats": ["texte Markdown saisi ou collé (HTML brut autorisé, nettoyé)"], "ref": "app/tools/developer-tools/markdown-previewer/page.jsx:9,28"},
+    "outputs": {"formats": ["document.md", "document.html (fragment sans DOCTYPE ni meta charset)", "document.zip"], "ref": "app/tools/developer-tools/markdown-previewer/page.jsx:18,31-34"},
+    "controls": [
+      {"label": "Markdown (zone de saisie)", "ref": "app/tools/developer-tools/markdown-previewer/page.jsx:28"},
+      {"label": "Preview", "ref": "app/tools/developer-tools/markdown-previewer/page.jsx:29"},
+      {"label": "Download (document.md, document.html)", "ref": "app/components/FileDownload.jsx:208-212"},
+      {"label": "Download all (2 files, ZIP)", "ref": "app/components/FileDownload.jsx:261-265"}
+    ],
+    "steps": ["taper ou coller du Markdown → aperçu à droite → « Download » ou « Download all (2 files, ZIP) »"],
+    "limits": [
+      {"what": "taille du texte", "value": "aucune limite dans le code ; aperçu de zone au-delà de 1 000 000 caractères", "constant": "LIMIT / PREVIEW", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "marked (gfm: true) + DOMPurify, aucun envoi ; images chargées depuis leur site d'origine", "ref": "app/tools/developer-tools/markdown-previewer/page.jsx:3,15-21"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun import d'auth/guard)",
+    "watermark": "sans objet",
+    "browsers": "Bouton « Save / Share » seulement sur iPhone/iPad (FileDownload.jsx:91-96).",
+    "twin": "/tools/developer-tools/markdown-editor (code identique)",
+    "notes": "Aperçu en classe text-sm seule (page.jsx:29) sous le reset Tailwind : rendu visuel des titres/listes/tableaux probablement absent, à confirmer. Texte d'exemple « # Hello World / Start writing **markdown** here... » (page.jsx:9)."
+  },
+  {
+    "path": "/tools/developer-tools/markdown-to-html",
+    "task": "Convertit du Markdown (CommonMark + GFM) en un document HTML5 complet, à copier ou télécharger.",
+    "inputs": {"accept": null, "formats": ["texte Markdown collé"], "ref": "app/tools/developer-tools/markdown-to-html/page.jsx:25"},
+    "outputs": {"formats": ["HTML : <!DOCTYPE html><html><head><meta charset=\"utf-8\"></head><body>…</body></html>, sans <title> ni lang ; HTML brut du Markdown conservé tel quel (non nettoyé)", "document.html (téléchargement)"], "ref": "app/tools/developer-tools/markdown-to-html/page.jsx:14-15,26-27 ; app/lib/codeTools.js:78-81"},
+    "controls": [
+      {"label": "Markdown (placeholder « Paste Markdown here... »)", "ref": "app/tools/developer-tools/markdown-to-html/page.jsx:25"},
+      {"label": "HTML Output (lecture seule)", "ref": "app/tools/developer-tools/markdown-to-html/page.jsx:26"},
+      {"label": "Download (document.html)", "ref": "app/tools/developer-tools/markdown-to-html/page.jsx:27"},
+      {"label": "Convert (inactif sans texte)", "ref": "app/tools/developer-tools/markdown-to-html/page.jsx:30"},
+      {"label": "Copy (inactif sans résultat)", "ref": "app/tools/developer-tools/markdown-to-html/page.jsx:31"}
+    ],
+    "steps": ["coller le Markdown → « Convert » → relire « HTML Output » → « Copy » ou « Download » (document.html)"],
+    "limits": [
+      {"what": "taille du texte", "value": "aucune limite dans le code ; aperçu de zone au-delà de 1 000 000 caractères", "constant": "LIMIT / PREVIEW", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "marked chargé à la demande au premier clic ; aucun envoi du texte. En cas d'erreur, le message affiché (préfixe « Error: ») est envoyé nettoyé à /api/report-error.", "ref": "app/lib/codeTools.js:78-81 ; app/tools/developer-tools/markdown-to-html/page.jsx:16 ; app/lib/reportError.js:163-171"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun import d'auth/guard)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Pas d'aperçu rendu (pour cela : Markdown Previewer). Blocs de code : classe language-xxx et < > & échappés (comportement de marked). Question « Leave page? » armée tant que le résultat n'est ni copié ni téléchargé (FileDownload.jsx:24-30,278-282)."
+  },
+  {
+    "path": "/tools/developer-tools/password-generator",
+    "task": "Génère de 1 à 50 mots de passe aléatoires (jeux de caractères au choix) ou phrases de passe (mots de la liste EFF de 7 776 mots) avec crypto.getRandomValues, et affiche une estimation de force en bits.",
+    "inputs": {"accept": null, "formats": ["options seulement (aucune saisie de texte)"], "ref": "app/tools/developer-tools/password-generator/page.jsx:79-107"},
+    "outputs": {"formats": ["1 mot de passe ou phrase affiché + bouton Copy", "si plusieurs : liste dans une zone en lecture seule (aria-label « Passwords »)", "« Strength: about N bits — weak / fair / strong / very strong / excellent »"], "ref": "app/tools/developer-tools/password-generator/page.jsx:109,111-112"},
+    "controls": [
+      {"label": "Password / Passphrase", "ref": "app/tools/developer-tools/password-generator/page.jsx:80"},
+      {"label": "Length: N (curseur 8 à 64, défaut 16)", "ref": "app/tools/developer-tools/password-generator/page.jsx:6,95"},
+      {"label": "Uppercase / Lowercase / Numbers / Symbols", "ref": "app/tools/developer-tools/password-generator/page.jsx:97"},
+      {"label": "Avoid look-alike characters (0 O 1 l I |)", "ref": "app/tools/developer-tools/password-generator/page.jsx:102"},
+      {"label": "Number of words: N (curseur 3 à 20, défaut 6)", "ref": "app/tools/developer-tools/password-generator/page.jsx:20,85"},
+      {"label": "Word separator : Hyphen ( - ), Space, Period ( . ), Underscore ( _ ), Comma ( , ), None", "ref": "app/tools/developer-tools/password-generator/page.jsx:87-90"},
+      {"label": "Capitalize", "ref": "app/tools/developer-tools/password-generator/page.jsx:91"},
+      {"label": "Include a number", "ref": "app/tools/developer-tools/password-generator/page.jsx:92"},
+      {"label": "How many (1 à 50)", "ref": "app/tools/developer-tools/password-generator/page.jsx:106"},
+      {"label": "Generate Password / Generate Passphrase (selon le mode)", "ref": "app/tools/developer-tools/password-generator/page.jsx:108"},
+      {"label": "Copy (copie le premier seulement)", "ref": "app/tools/developer-tools/password-generator/page.jsx:112"}
+    ],
+    "steps": ["choisir Password ou Passphrase → régler longueur et types (ou nombre de mots, séparateur, Capitalize, Include a number) → « How many » → « Generate Password » / « Generate Passphrase » → « Copy »"],
+    "limits": [
+      {"what": "longueur", "value": "8 à 64 caractères", "constant": null, "ref": "app/tools/developer-tools/password-generator/page.jsx:95"},
+      {"what": "mots par phrase de passe", "value": "3 à 20", "constant": null, "ref": "app/tools/developer-tools/password-generator/page.jsx:33,85"},
+      {"what": "nombre par clic", "value": "1 à 50 (valeur hors bornes ramenée)", "constant": null, "ref": "app/tools/developer-tools/password-generator/page.jsx:40,68,106"}
+    ],
+    "processing": {"where": "browser", "detail": "crypto.getRandomValues avec tirage sans biais (rejet), liste EFF chargée depuis le site (app/lib/effWordlist.js, 7 776 mots uniques vérifiés) ; aucun envoi, aucun journal d'erreur sur cette page", "ref": "app/tools/developer-tools/password-generator/page.jsx:24-30,32,56-64"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun import d'auth/guard)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Symboles : !@#$%^&*()_+-=[]{}|;:,.<>? (page.jsx:53). Chaque type coché apparaît au moins une fois (page.jsx:65-67). Aucun type coché : rien ne se passe, sans message (page.jsx:54). Bits = longueur × log2(taille de l'alphabet) (page.jsx:71) ; phrase : mots × log2(7776) + log2(10 × mots) si chiffre (page.jsx:44). Seuils : ≥100 excellent, ≥80 very strong, ≥60 strong, ≥45 fair, sinon weak + « make it longer » (page.jsx:109). Crédit EFF CC BY 3.0 US affiché en mode phrase (page.jsx:110)."
+  },
+  {
+    "path": "/tools/developer-tools/regex-tester",
+    "task": "Teste une expression régulière JavaScript sur un texte : surligne les correspondances, liste leur position et leurs groupes, et montre le résultat d'un remplacement facultatif.",
+    "inputs": {"accept": null, "formats": ["motif (syntaxe JavaScript)", "drapeaux d g i m s u v y, chacun une fois", "texte à tester", "texte de remplacement ($1, $<name>, $&, $$)"], "ref": "app/tools/developer-tools/regex-tester/page.jsx:38,67-72"},
+    "outputs": {"formats": ["nombre de correspondances (« N match(es) », « 5000+ » au plafond, « No match »)", "texte avec correspondances surlignées (jusqu'à 5 000)", "tableau # / Position / Match / Groups (200 premières)", "Result of the replacement + téléchargement replaced.txt"], "ref": "app/tools/developer-tools/regex-tester/page.jsx:19,77-92"},
+    "controls": [
+      {"label": "Pattern", "ref": "app/tools/developer-tools/regex-tester/page.jsx:67"},
+      {"label": "Flags (défaut « g »)", "ref": "app/tools/developer-tools/regex-tester/page.jsx:28,68"},
+      {"label": "zone de texte (aria-label « Test text », placeholder « Enter text to test... »)", "ref": "app/tools/developer-tools/regex-tester/page.jsx:70"},
+      {"label": "Replace with (case à cocher) + champ Replacement", "ref": "app/tools/developer-tools/regex-tester/page.jsx:71-72"},
+      {"label": "Test (« Testing… » pendant le calcul ; inactif sans motif)", "ref": "app/tools/developer-tools/regex-tester/page.jsx:73"},
+      {"label": "Download (replaced.txt)", "ref": "app/tools/developer-tools/regex-tester/page.jsx:92"}
+    ],
+    "steps": ["saisir le motif → les drapeaux → coller le texte → (facultatif) cocher « Replace with » et saisir le remplacement → « Test » → lire le surlignage, le tableau et le résultat du remplacement → « Download » si besoin"],
+    "limits": [
+      {"what": "durée maximale d'un test", "value": "2 secondes, puis arrêt du Worker et message « This pattern takes too long… »", "constant": null, "ref": "app/tools/developer-tools/regex-tester/page.jsx:42"},
+      {"what": "correspondances calculées et surlignées", "value": "5 000", "constant": null, "ref": "app/tools/developer-tools/regex-tester/page.jsx:19,22,77"},
+      {"what": "correspondances listées dans le tableau", "value": "200", "constant": null, "ref": "app/tools/developer-tools/regex-tester/page.jsx:83,88"}
+    ],
+    "processing": {"where": "browser", "detail": "RegExp natif dans un Worker (blob:) ; le texte n'est jamais envoyé. Un motif invalide : message du moteur (qui cite le motif) envoyé à /api/report-error ; le motif y est masqué « [path] » sauf s'il contient \" ' < ou > (testé). Délai dépassé : message fixe « pattern timeout (2 s) » envoyé.", "ref": "app/tools/developer-tools/regex-tester/page.jsx:11-24,39-44 ; app/lib/reportError.js:97,163-171"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun import d'auth/guard)",
+    "watermark": "sans objet",
+    "browsers": "Le drapeau v est accepté par le contrôle (page.jsx:38) mais n'existe pas avant Safari 17 : sous Safari 16.4-16.x il produit une erreur de syntaxe affichée.",
+    "twin": null,
+    "notes": "Le remplacement utilise les drapeaux saisis tels quels : sans g, seule la première correspondance est remplacée (page.jsx:21), alors que la liste les trouve toutes (g ajouté, page.jsx:14). Correspondances vides marquées d'un trait rouge (page.jsx:53). Pas de choix de saveur (JavaScript seulement), pas d'enregistrement."
+  },
+  {
+    "path": "/tools/developer-tools/timestamp-converter",
+    "task": "Convertit un horodatage Unix (secondes, millisecondes, microsecondes ou nanosecondes, unité déduite du nombre de chiffres) en date UTC et dans un fuseau IANA au choix, et une date/heure de ce fuseau en horodatage.",
+    "inputs": {"accept": null, "formats": ["horodatage : chiffres, signe - facultatif, décimales (lues pour les secondes seulement)", "date et heure (input datetime-local, à la seconde)", "fuseau horaire IANA"], "ref": "app/lib/timestamp.js:19-34 ; app/tools/developer-tools/timestamp-converter/page.jsx:49-58"},
+    "outputs": {"formats": ["Read as <unité>", "UTC en ISO 8601", "date dans le fuseau choisi avec décalage (UTC±hh:mm)", "Relative (ex. « 3 days ago »)", "Seconds et Milliseconds", "avertissement si l'heure existe deux fois (passage à l'heure d'hiver)"], "ref": "app/tools/developer-tools/timestamp-converter/page.jsx:60-67 ; app/lib/timestamp.js:44-53,99-115"},
+    "controls": [
+      {"label": "Time zone (for the date field and the result) — « Your time zone (…) », UTC, puis la liste IANA du navigateur", "ref": "app/tools/developer-tools/timestamp-converter/page.jsx:49-54"},
+      {"label": "Use Current Time", "ref": "app/tools/developer-tools/timestamp-converter/page.jsx:56"},
+      {"label": "Unix Timestamp + Convert", "ref": "app/tools/developer-tools/timestamp-converter/page.jsx:57"},
+      {"label": "Date and Time + Convert", "ref": "app/tools/developer-tools/timestamp-converter/page.jsx:58"}
+    ],
+    "steps": ["choisir le fuseau (le vôtre par défaut) → « Use Current Time », ou saisir un horodatage et cliquer son « Convert », ou une date et cliquer son « Convert » → lire le bloc de résultats"],
+    "limits": [
+      {"what": "unités déduites", "value": "≤ 11 chiffres : secondes ; 12-14 : millisecondes ; 15-17 : microsecondes ; 18-20 : nanosecondes ; > 20 chiffres refusé", "constant": "UNITS", "ref": "app/lib/timestamp.js:11-16,24-26"},
+      {"what": "plage de dates", "value": "± 8 640 000 000 000 000 ms (année ± 275 760)", "constant": "MAX_MS", "ref": "app/lib/timestamp.js:17,32,88"},
+      {"what": "précision", "value": "milliseconde (µs/ns tronqués ; décimales d'une valeur en ms/µs/ns ignorées sans message)", "constant": null, "ref": "app/lib/timestamp.js:14-15,30"}
+    ],
+    "processing": {"where": "browser", "detail": "calcul local (BigInt, Intl) ; aucun envoi des valeurs ; un message d'erreur affiché est envoyé nettoyé à /api/report-error (dates et longs nombres remplacés par [number])", "ref": "app/tools/developer-tools/timestamp-converter/page.jsx:5,24 ; app/lib/useToolError.js:37-51 ; app/lib/reportError.js:117"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun import d'auth/guard)",
+    "watermark": "sans objet",
+    "browsers": "Liste des fuseaux lue dans le navigateur (Intl.supportedValuesOf) ; si absente, seuls le fuseau du visiteur et UTC sont proposés (page.jsx:19). Anciens noms ICU de Chromium affichés sous leur nom IANA actuel (page.jsx:11-12).",
+    "twin": null,
+    "notes": "Messages réels : « Enter a whole number of seconds (or milliseconds, microseconds, nanoseconds) — digits only, optionally negative. » ; « This number has more than 20 digits… » ; « This timestamp is outside the range… (year ±275 760). » ; heure sautée : « <date> does not exist in <zone>: the clocks skip that time there… » ; « Pick a date and time first. » (app/lib/timestamp.js:22,26,32,58,84,94). Date → horodatage donne des secondes entières (page.jsx:38). Date avant l'an 1 : le champ date reste vide (page.jsx:31-32)."
+  },
+  {
+    "path": "/tools/developer-tools/uuid-generator",
+    "task": "Génère de 1 à 1000 UUID version 4 (aléatoires) ou version 7 (ordonnés dans le temps, RFC 9562), ou l'UUID nul, au format choisi.",
+    "inputs": {"accept": null, "formats": ["options seulement"], "ref": "app/tools/developer-tools/uuid-generator/page.jsx:46-56"},
+    "outputs": {"formats": ["liste d'UUID (minuscules ou majuscules, avec ou sans tirets, avec ou sans accolades)", "uuids.txt (un par ligne)"], "ref": "app/tools/developer-tools/uuid-generator/page.jsx:25,57-58"},
+    "controls": [
+      {"label": "Count (1 à 1000, défaut 1)", "ref": "app/tools/developer-tools/uuid-generator/page.jsx:7,46"},
+      {"label": "Version : v4 — random / v7 — time-ordered (sorts by creation time) / Nil UUID (all zeros)", "ref": "app/tools/developer-tools/uuid-generator/page.jsx:48-49"},
+      {"label": "Uppercase", "ref": "app/tools/developer-tools/uuid-generator/page.jsx:51"},
+      {"label": "Hyphens (coché par défaut)", "ref": "app/tools/developer-tools/uuid-generator/page.jsx:13,52"},
+      {"label": "{Braces} (GUID)", "ref": "app/tools/developer-tools/uuid-generator/page.jsx:53"},
+      {"label": "Generate", "ref": "app/tools/developer-tools/uuid-generator/page.jsx:56"},
+      {"label": "Copy (un par UUID)", "ref": "app/tools/developer-tools/uuid-generator/page.jsx:57"},
+      {"label": "Download (uuids.txt)", "ref": "app/tools/developer-tools/uuid-generator/page.jsx:58"}
+    ],
+    "steps": ["régler Count → Version → Uppercase / Hyphens / {Braces} → « Generate » → « Copy » sur une ligne ou « Download » (uuids.txt)"],
+    "limits": [
+      {"what": "nombre par clic", "value": "1 à 1000 (valeur hors bornes ramenée et affichée dans le champ)", "constant": null, "ref": "app/tools/developer-tools/uuid-generator/page.jsx:35-36"},
+      {"what": "UUID nul", "value": "un seul, quel que soit Count", "constant": null, "ref": "app/tools/developer-tools/uuid-generator/page.jsx:38"}
+    ],
+    "processing": {"where": "browser", "detail": "v4 : 122 bits de crypto.getRandomValues ; v7 : 48 bits d'heure Unix en ms, version 7, compteur 12 bits (départ aléatoire sur 11 bits, +1 dans la même ms), variante, reste aléatoire ; aucun envoi", "ref": "app/tools/developer-tools/uuid-generator/page.jsx:17-33"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun import d'auth/guard)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Versions 1, 3, 5 non proposées. Un nouveau clic remplace la liste. Pas de bouton « copier tout » (seulement Download). Question « Leave page? » armée tant que uuids.txt n'est ni téléchargé ni copié (FileDownload.jsx:24-30,278-282)."
+  }
+]

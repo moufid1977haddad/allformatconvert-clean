@@ -1,0 +1,1246 @@
+[
+  {
+    "path": "/tools/ai-tools/ai-chatbot",
+    "task": "Conversation avec un assistant IA (gpt-4o-mini) ; chaque message est envoyé avec les derniers échanges de la conversation affichée.",
+    "inputs": {
+      "accept": null,
+      "formats": [
+        "texte tapé (une ligne)"
+      ],
+      "ref": "app/tools/ai-tools/ai-chatbot/page.jsx:59"
+    },
+    "outputs": {
+      "formats": [
+        "bulles de réponse dans la conversation (aucun fichier, aucun bouton Copy/Download)"
+      ],
+      "ref": "app/tools/ai-tools/ai-chatbot/page.jsx:48-55"
+    },
+    "controls": [
+      {
+        "label": "champ « Ask me anything... » (Entrée envoie)",
+        "ref": "app/tools/ai-tools/ai-chatbot/page.jsx:59"
+      },
+      {
+        "label": "Send",
+        "ref": "app/tools/ai-tools/ai-chatbot/page.jsx:60-62"
+      },
+      {
+        "label": "« Start a conversation... » (vide) / « Thinking... » (en attente)",
+        "ref": "app/tools/ai-tools/ai-chatbot/page.jsx:47, 55"
+      }
+    ],
+    "steps": [
+      "taper un message → Entrée ou « Send » → « Thinking... » → la réponse s'ajoute à la conversation ; recharger la page efface tout"
+    ],
+    "limits": [
+      {
+        "what": "longueur max d'un message (historique compris)",
+        "value": "8 000 caractères en tout ; l'historique le plus ancien est retiré d'abord (budget = 8 000 − longueur du message − 120)",
+        "constant": "MAX_PROMPT_CHARS",
+        "ref": "app/lib/aiClient.js:16-26 ; app/tools/ai-tools/ai-chatbot/page.jsx:23-29 ; lib/quota/limits.js:5"
+      },
+      {
+        "what": "longueur max de la réponse du modèle",
+        "value": "1 000 jetons (max_tokens) — une réponse plus longue est coupée",
+        "constant": null,
+        "ref": "app/api/ai/route.ts:35"
+      }
+    ],
+    "processing": {
+      "where": "third-party",
+      "detail": "le texte part du navigateur vers notre route Vercel /api/ai (tool: 'ai-chatbot'), qui ajoute la consigne choisie côté serveur (lib/ai/toolPrompts.js) et l'envoie à OpenAI (chat/completions, modèle gpt-4o-mini, max_tokens 1000) ; la réponse revient en un seul JSON {text} (pas de flux). Rien du texte n'est enregistré par nous : la base ne reçoit que route, outil, issue et coût (lib/quota/logEvent.js:4-8) ; un message d'erreur affiché est signalé sans le texte du visiteur (app/lib/useToolError.js:2-7). La conservation côté OpenAI n'est documentée nulle part dans le dépôt.",
+      "ref": "app/api/ai/route.ts:23-43, 86-89 ; lib/quota/logEvent.js:4-8"
+    },
+    "quota": "garde partagée : limite par réseau (IP hachée) par heure et par jour UTC, compteur COMMUN à tous les outils payants (IP_RATE_LIMIT_PER_HOUR / IP_RATE_LIMIT_PER_DAY, valeurs en variables d'environnement, lib/quota/config.js:13-14 ; lib/quota/ipRateLimit.js:4-8 ; refus 429 « Too many requests from this network. Try again in about N minutes. » lib/quota/guard.js:16-25) + plafond de dépense mensuel du site (GLOBAL_SPEND_CAP_USD, défaut 20 $ dans le code, lib/quota/config.js:6 ; refus 503 « This tool has reached its usage limit for the month — that's a site-wide limit, not something on your end. It resets on <date> (UTC). » lib/quota/guard.js:28-37)",
+    "signup": "aucune inscription demandée (vérifié : la route ne lit ni en-tête Authorization ni session ; seule app/api/quota/me/route.ts:13-17 exige un jeton et aucun outil de ce lot ne l'appelle)",
+    "watermark": "sans objet (texte)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Consigne serveur : « You are a helpful, friendly AI assistant… » (lib/ai/toolPrompts.js:19-21). Conversation gardée seulement dans la page (useState, page.jsx:9) : aucun enregistrement. Défaut de code (pas de texte) : le message est ajouté à l'écran et le champ vidé AVANT le contrôle des 8 000 caractères (page.jsx:17-24) — un message trop long reste affiché sans réponse. Pas de bouton Copy ni Download."
+  },
+  {
+    "path": "/tools/ai-tools/ai-detector",
+    "task": "Estime si un texte a été écrit par une IA, par une personne ou les deux, avec le classifieur de Pangram (verdict + parts IA / assistée par IA / humaine).",
+    "inputs": {
+      "accept": null,
+      "formats": [
+        "texte collé ou tapé, 40 à 1 000 mots"
+      ],
+      "ref": "app/tools/ai-tools/ai-detector/page.jsx:58-59"
+    },
+    "outputs": {
+      "formats": [
+        "verdict « Likely written by AI » / « Mix of AI and human writing » / « Likely written by a person »",
+        "trois pourcentages : AI-written, AI-assisted, Human"
+      ],
+      "ref": "app/tools/ai-tools/ai-detector/page.jsx:15-19, 64-71"
+    },
+    "controls": [
+      {
+        "label": "zone de texte, placeholder « Paste text to analyze... »",
+        "ref": "app/tools/ai-tools/ai-detector/page.jsx:58"
+      },
+      {
+        "label": "compteur « N words · 40 to 1000 words per analysis · 2,000 free words a day, no signup (each analysis counts as the next 100 words) »",
+        "ref": "app/tools/ai-tools/ai-detector/page.jsx:59"
+      },
+      {
+        "label": "Detect AI Content (pendant : « Processing... »)",
+        "ref": "app/tools/ai-tools/ai-detector/page.jsx:60-62"
+      }
+    ],
+    "steps": [
+      "coller 40 à 1 000 mots → « Detect AI Content » → verdict + trois parts + mise en garde (page.jsx:72)"
+    ],
+    "limits": [
+      {
+        "what": "minimum par analyse",
+        "value": "40 mots (« Paste at least 40 words… »)",
+        "constant": "AI_DETECT_MIN_WORDS",
+        "ref": "lib/ai/pangram.js:19 ; app/tools/ai-tools/ai-detector/page.jsx:34 ; app/api/ai-detect/route.ts:40"
+      },
+      {
+        "what": "maximum par analyse (mots)",
+        "value": "1 000 mots facturables",
+        "constant": "AI_DETECT_MAX_WORDS",
+        "ref": "lib/ai/pangram.js:18 ; page.jsx:35 ; app/api/ai-detect/route.ts:41"
+      },
+      {
+        "what": "maximum par analyse (caractères)",
+        "value": "12 000 caractères",
+        "constant": "AI_DETECT_MAX_CHARS",
+        "ref": "lib/ai/pangram.js:30 ; page.jsx:36 ; app/api/ai-detect/route.ts:36-38"
+      },
+      {
+        "what": "façon de compter les mots",
+        "value": "le plus grand de : mots séparés par des espaces, suites de lettres/chiffres (caractères invisibles retirés), 1 mot par 8 caractères ; dans les écritures sans espaces (chinois, japonais, thaï, lao, khmer, birman, tibétain, javanais, balinais) 1 caractère = 1 mot",
+        "constant": "CHARS_PER_BILLABLE_WORD",
+        "ref": "lib/ai/pangram.js:31-53"
+      },
+      {
+        "what": "allocation gratuite par visiteur",
+        "value": "2 000 mots facturés par jour UTC, chaque analyse arrondie à la centaine supérieure ; visiteur = IP (IPv4) ou bloc /64 (IPv6) ; 30 000 sur les préversions seulement",
+        "constant": "AI_DETECT_WORDS_PER_IP_PER_DAY",
+        "ref": "lib/quota/aiDetect.js:17, 23, 26-40 ; lib/ai/pangram.js:56-58"
+      },
+      {
+        "what": "budget mensuel propre",
+        "value": "50 $ par mois, séparé du plafond du site",
+        "constant": "AI_DETECT_MONTHLY_BUDGET_MICROS",
+        "ref": "lib/quota/aiDetect.js:8-10, 18"
+      },
+      {
+        "what": "durée max d'une analyse",
+        "value": "45 s côté Pangram (10 s par requête), fonction Vercel 60 s",
+        "constant": null,
+        "ref": "lib/ai/pangram.js:94 ; app/api/ai-detect/route.ts:15"
+      }
+    ],
+    "processing": {
+      "where": "third-party",
+      "detail": "le texte (rogné des espaces de bord) part vers notre route Vercel /api/ai-detect, qui le transmet à l'API de Pangram (https://text.external-api.pangram.com/task, modèle pangram-4) puis relit la tâche jusqu'au résultat ; seuls verdict, parts et titre sont rendus. Rien du texte n'est enregistré par nous (usage_events : route, outil, issue, coût). La conservation côté Pangram n'est documentée nulle part dans le dépôt. Sans PANGRAM_API_KEY la route répond 503 « The AI detector is not available… ».",
+      "ref": "app/api/ai-detect/route.ts:20-63 ; lib/ai/pangram.js:11-12, 94-118 ; lib/quota/logEvent.js:4-8"
+    },
+    "quota": "PAS la garde partagée (app/api/ai-detect/route.ts:11-14) : 2 000 mots facturés par visiteur et par jour UTC (429 « This analysis counts N words and M of today's 2000 free words are left… » ou « You have used today's 2000 free words. More tomorrow… ») + budget mensuel propre 50 $ (503 « The AI detector has reached its monthly budget — a site-wide limit… »), lib/quota/aiDetect.js:60-83",
+    "signup": "aucune inscription demandée (vérifié : la route ne lit ni en-tête Authorization ni session ; seule app/api/quota/me/route.ts:13-17 exige un jeton et aucun outil de ce lot ne l'appelle)",
+    "watermark": "sans objet (texte)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Mesures du site (préversion, route du site) : 97 textes, 0/57 humain dit IA, 40/40 IA reconnues, langues en/fr/de/es/it (docs/audit/RAPPORT-p17-30-09.md:66-79). Étude citée : Chicago Booth / NBER w34223, ≈ 0 faux positif, 96-98 % reconnues (RAPPORT-ai-detector-30-09.md:71). Un refus de Pangram (4xx) rend mots et budget ; toute autre panne garde la réservation (route.ts:64-82). 429 de Pangram → « The AI detector is temporarily at capacity. Please try again later. » ; autre panne → « The AI detector failed. Please try again. » (route.ts:88-91). L'ancienne méthode RAIDAR (lib/ai/raidar.js) n'est plus appelée par la page."
+  },
+  {
+    "path": "/tools/ai-tools/ai-paraphraser",
+    "task": "Réécrit un texte avec d'autres mots et tournures en gardant le sens (gpt-4o-mini).",
+    "inputs": {
+      "accept": null,
+      "formats": [
+        "texte collé ou tapé"
+      ],
+      "ref": "app/tools/ai-tools/ai-paraphraser/page.jsx:45"
+    },
+    "outputs": {
+      "formats": [
+        "texte affiché (champ « Result », lecture seule)",
+        "fichier .txt (paraphrased.txt)"
+      ],
+      "ref": "app/tools/ai-tools/ai-paraphraser/page.jsx:52-54"
+    },
+    "controls": [
+      {
+        "label": "zone de texte, placeholder « Paste text to paraphrase... »",
+        "ref": "app/tools/ai-tools/ai-paraphraser/page.jsx:45"
+      },
+      {
+        "label": "Paraphrase (pendant le travail : « Processing... »)",
+        "ref": "app/tools/ai-tools/ai-paraphraser/page.jsx:46-47"
+      },
+      {
+        "label": "Result",
+        "ref": "app/tools/ai-tools/ai-paraphraser/page.jsx:52"
+      },
+      {
+        "label": "Download (paraphrased.txt)",
+        "ref": "app/tools/ai-tools/ai-paraphraser/page.jsx:54 → app/components/FileDownload.jsx:211 ; « Save / Share » en plus si le navigateur partage des fichiers (FileDownload.jsx:95, 213-218)"
+      },
+      {
+        "label": "Copy",
+        "ref": "app/tools/ai-tools/ai-paraphraser/page.jsx:55"
+      }
+    ],
+    "steps": [
+      "coller le texte → bouton « Paraphrase » → le résultat apparaît dans « Result » → « Download » (paraphrased.txt) ou « Copy »"
+    ],
+    "limits": [
+      {
+        "what": "longueur max du texte envoyé (ordinateur et téléphone, aucune différence dans le code)",
+        "value": "8 000 caractères ; au-delà refus avec « Text is limited to 8,000 characters — this input is N. » (pas de troncature)",
+        "constant": "MAX_PROMPT_CHARS",
+        "ref": "lib/quota/limits.js:5, 126-133 ; app/api/ai/route.ts:20-21"
+      },
+      {
+        "what": "longueur max de la réponse du modèle",
+        "value": "1 000 jetons (max_tokens) — une réponse plus longue est coupée",
+        "constant": null,
+        "ref": "app/api/ai/route.ts:35"
+      }
+    ],
+    "processing": {
+      "where": "third-party",
+      "detail": "le texte part du navigateur vers notre route Vercel /api/ai (tool: 'ai-paraphraser'), qui ajoute la consigne choisie côté serveur (lib/ai/toolPrompts.js) et l'envoie à OpenAI (chat/completions, modèle gpt-4o-mini, max_tokens 1000) ; la réponse revient en un seul JSON {text} (pas de flux). Rien du texte n'est enregistré par nous : la base ne reçoit que route, outil, issue et coût (lib/quota/logEvent.js:4-8) ; un message d'erreur affiché est signalé sans le texte du visiteur (app/lib/useToolError.js:2-7). La conservation côté OpenAI n'est documentée nulle part dans le dépôt.",
+      "ref": "app/api/ai/route.ts:23-43, 86-89 ; lib/quota/logEvent.js:4-8"
+    },
+    "quota": "garde partagée : limite par réseau (IP hachée) par heure et par jour UTC, compteur COMMUN à tous les outils payants (IP_RATE_LIMIT_PER_HOUR / IP_RATE_LIMIT_PER_DAY, valeurs en variables d'environnement, lib/quota/config.js:13-14 ; lib/quota/ipRateLimit.js:4-8 ; refus 429 « Too many requests from this network. Try again in about N minutes. » lib/quota/guard.js:16-25) + plafond de dépense mensuel du site (GLOBAL_SPEND_CAP_USD, défaut 20 $ dans le code, lib/quota/config.js:6 ; refus 503 « This tool has reached its usage limit for the month — that's a site-wide limit, not something on your end. It resets on <date> (UTC). » lib/quota/guard.js:28-37)",
+    "signup": "aucune inscription demandée (vérifié : la route ne lit ni en-tête Authorization ni session ; seule app/api/quota/me/route.ts:13-17 exige un jeton et aucun outil de ce lot ne l'appelle)",
+    "watermark": "sans objet (texte)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Consigne serveur : « …Rewrite the provided text using different words and sentence structures while preserving the original meaning. Return only the paraphrased text. » (lib/ai/toolPrompts.js:23-25). Une seule version par clic ; aucun réglage (ton, force). Langues : aucune restriction dans le code, aucune mesure."
+  },
+  {
+    "path": "/tools/ai-tools/ai-translator",
+    "task": "Traduit un texte vers l'une de 10 langues cibles (gpt-4o-mini) ; la langue source n'est pas choisie.",
+    "inputs": {
+      "accept": null,
+      "formats": [
+        "texte collé ou tapé"
+      ],
+      "ref": "app/tools/ai-tools/ai-translator/page.jsx:55"
+    },
+    "outputs": {
+      "formats": [
+        "texte affiché (champ « Result », lecture seule)",
+        "fichier .txt (translation.txt)"
+      ],
+      "ref": "app/tools/ai-tools/ai-translator/page.jsx:62-64"
+    },
+    "controls": [
+      {
+        "label": "Target Language (liste : English, French, Spanish, German, Italian, Portuguese, Arabic, Chinese, Japanese, Russian)",
+        "ref": "app/tools/ai-tools/ai-translator/page.jsx:50-53"
+      },
+      {
+        "label": "zone de texte, placeholder « Paste text to translate... »",
+        "ref": "app/tools/ai-tools/ai-translator/page.jsx:55"
+      },
+      {
+        "label": "Translate (pendant : « Translating... »)",
+        "ref": "app/tools/ai-tools/ai-translator/page.jsx:56-57"
+      },
+      {
+        "label": "Result",
+        "ref": "app/tools/ai-tools/ai-translator/page.jsx:62"
+      },
+      {
+        "label": "Download (translation.txt)",
+        "ref": "app/tools/ai-tools/ai-translator/page.jsx:64 → app/components/FileDownload.jsx:211 ; « Save / Share » en plus si le navigateur partage des fichiers (FileDownload.jsx:95, 213-218)"
+      },
+      {
+        "label": "Copy",
+        "ref": "app/tools/ai-tools/ai-translator/page.jsx:65"
+      }
+    ],
+    "steps": [
+      "choisir « Target Language » → coller le texte → « Translate » → résultat dans « Result » → « Download » (translation.txt) ou « Copy »"
+    ],
+    "limits": [
+      {
+        "what": "longueur max du texte envoyé (ordinateur et téléphone, aucune différence dans le code)",
+        "value": "8 000 caractères ; au-delà refus avec « Text is limited to 8,000 characters — this input is N. » (pas de troncature)",
+        "constant": "MAX_PROMPT_CHARS",
+        "ref": "lib/quota/limits.js:5, 126-133 ; app/api/ai/route.ts:20-21"
+      },
+      {
+        "what": "longueur max de la réponse du modèle",
+        "value": "1 000 jetons (max_tokens) — une réponse plus longue est coupée",
+        "constant": null,
+        "ref": "app/api/ai/route.ts:35"
+      }
+    ],
+    "processing": {
+      "where": "third-party",
+      "detail": "le texte part du navigateur vers notre route Vercel /api/ai (tool: 'ai-translator'), qui ajoute la consigne choisie côté serveur (lib/ai/toolPrompts.js) et l'envoie à OpenAI (chat/completions, modèle gpt-4o-mini, max_tokens 1000) ; la réponse revient en un seul JSON {text} (pas de flux). Rien du texte n'est enregistré par nous : la base ne reçoit que route, outil, issue et coût (lib/quota/logEvent.js:4-8) ; un message d'erreur affiché est signalé sans le texte du visiteur (app/lib/useToolError.js:2-7). La conservation côté OpenAI n'est documentée nulle part dans le dépôt.",
+      "ref": "app/api/ai/route.ts:23-43, 86-89 ; lib/quota/logEvent.js:4-8"
+    },
+    "quota": "garde partagée : limite par réseau (IP hachée) par heure et par jour UTC, compteur COMMUN à tous les outils payants (IP_RATE_LIMIT_PER_HOUR / IP_RATE_LIMIT_PER_DAY, valeurs en variables d'environnement, lib/quota/config.js:13-14 ; lib/quota/ipRateLimit.js:4-8 ; refus 429 « Too many requests from this network. Try again in about N minutes. » lib/quota/guard.js:16-25) + plafond de dépense mensuel du site (GLOBAL_SPEND_CAP_USD, défaut 20 $ dans le code, lib/quota/config.js:6 ; refus 503 « This tool has reached its usage limit for the month — that's a site-wide limit, not something on your end. It resets on <date> (UTC). » lib/quota/guard.js:28-37)",
+    "signup": "aucune inscription demandée (vérifié : la route ne lit ni en-tête Authorization ni session ; seule app/api/quota/me/route.ts:13-17 exige un jeton et aucun outil de ce lot ne l'appelle)",
+    "watermark": "sans objet (texte)",
+    "browsers": null,
+    "twin": "/tools/pdf-tools/pdf-translate (même route /api/ai, tool 'pdf-translate', mêmes 10 langues : lib/ai/toolPrompts.js:80-83)",
+    "notes": "Consigne serveur : « You are a professional translator. Translate the provided text to <langue>. Return only the translation without explanations. » (lib/ai/toolPrompts.js:26-29). Langues cibles : English, French, Spanish, German, Italian, Portuguese, Arabic, Chinese, Japanese, Russian (page.jsx:10 ; toolPrompts.js:10-13) ; toute autre valeur refusée « Unsupported targetLang. » (toolPrompts.js:113-114). Aucune détection de langue dans le code ; aucune langue source affichée. Défaut : English."
+  },
+  {
+    "path": "/tools/ai-tools/ai-writer",
+    "task": "Rédige un texte (brouillon) à partir d'une description (gpt-4o-mini).",
+    "inputs": {
+      "accept": null,
+      "formats": [
+        "texte collé ou tapé"
+      ],
+      "ref": "app/tools/ai-tools/ai-writer/page.jsx:45"
+    },
+    "outputs": {
+      "formats": [
+        "texte affiché (champ « Result », lecture seule)",
+        "fichier .txt (text.txt)"
+      ],
+      "ref": "app/tools/ai-tools/ai-writer/page.jsx:52-54"
+    },
+    "controls": [
+      {
+        "label": "zone de texte, placeholder « Describe what you want to write... »",
+        "ref": "app/tools/ai-tools/ai-writer/page.jsx:45"
+      },
+      {
+        "label": "Generate Content (pendant le travail : « Processing... »)",
+        "ref": "app/tools/ai-tools/ai-writer/page.jsx:46-47"
+      },
+      {
+        "label": "Result",
+        "ref": "app/tools/ai-tools/ai-writer/page.jsx:52"
+      },
+      {
+        "label": "Download (text.txt)",
+        "ref": "app/tools/ai-tools/ai-writer/page.jsx:54 → app/components/FileDownload.jsx:211 ; « Save / Share » en plus si le navigateur partage des fichiers (FileDownload.jsx:95, 213-218)"
+      },
+      {
+        "label": "Copy",
+        "ref": "app/tools/ai-tools/ai-writer/page.jsx:55"
+      }
+    ],
+    "steps": [
+      "coller le texte → bouton « Generate Content » → le résultat apparaît dans « Result » → « Download » (text.txt) ou « Copy »"
+    ],
+    "limits": [
+      {
+        "what": "longueur max du texte envoyé (ordinateur et téléphone, aucune différence dans le code)",
+        "value": "8 000 caractères ; au-delà refus avec « Text is limited to 8,000 characters — this input is N. » (pas de troncature)",
+        "constant": "MAX_PROMPT_CHARS",
+        "ref": "lib/quota/limits.js:5, 126-133 ; app/api/ai/route.ts:20-21"
+      },
+      {
+        "what": "longueur max de la réponse du modèle",
+        "value": "1 000 jetons (max_tokens) — une réponse plus longue est coupée",
+        "constant": null,
+        "ref": "app/api/ai/route.ts:35"
+      }
+    ],
+    "processing": {
+      "where": "third-party",
+      "detail": "le texte part du navigateur vers notre route Vercel /api/ai (tool: 'ai-writer'), qui ajoute la consigne choisie côté serveur (lib/ai/toolPrompts.js) et l'envoie à OpenAI (chat/completions, modèle gpt-4o-mini, max_tokens 1000) ; la réponse revient en un seul JSON {text} (pas de flux). Rien du texte n'est enregistré par nous : la base ne reçoit que route, outil, issue et coût (lib/quota/logEvent.js:4-8) ; un message d'erreur affiché est signalé sans le texte du visiteur (app/lib/useToolError.js:2-7). La conservation côté OpenAI n'est documentée nulle part dans le dépôt.",
+      "ref": "app/api/ai/route.ts:23-43, 86-89 ; lib/quota/logEvent.js:4-8"
+    },
+    "quota": "garde partagée : limite par réseau (IP hachée) par heure et par jour UTC, compteur COMMUN à tous les outils payants (IP_RATE_LIMIT_PER_HOUR / IP_RATE_LIMIT_PER_DAY, valeurs en variables d'environnement, lib/quota/config.js:13-14 ; lib/quota/ipRateLimit.js:4-8 ; refus 429 « Too many requests from this network. Try again in about N minutes. » lib/quota/guard.js:16-25) + plafond de dépense mensuel du site (GLOBAL_SPEND_CAP_USD, défaut 20 $ dans le code, lib/quota/config.js:6 ; refus 503 « This tool has reached its usage limit for the month — that's a site-wide limit, not something on your end. It resets on <date> (UTC). » lib/quota/guard.js:28-37)",
+    "signup": "aucune inscription demandée (vérifié : la route ne lit ni en-tête Authorization ni session ; seule app/api/quota/me/route.ts:13-17 exige un jeton et aucun outil de ce lot ne l'appelle)",
+    "watermark": "sans objet (texte)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Consigne serveur : « You are a professional content writer. Generate high-quality, engaging content based on the user input. Be creative and detailed. » (lib/ai/toolPrompts.js:30-32). Sortie ≤ 1 000 jetons (≈ 750 mots en anglais) : pas d'article long. Aucun réglage (ton, longueur)."
+  },
+  {
+    "path": "/tools/ai-tools/audio-transcriber",
+    "task": "Transcrit la parole d'un fichier audio en texte avec OpenAI Whisper (whisper-1), avec sous-titres SRT/VTT minutés.",
+    "inputs": {
+      "accept": "audio/*",
+      "formats": [
+        "tout fichier que le sélecteur classe audio ; Whisper refuse les formats qu'il ne lit pas (liste non écrite dans le dépôt) ; fichiers chiffrés .ncm, .qmc*, .mflac*, .mgg*, .tkm, .bkc*, .kgm, .kgma, .vpr, .kwm, .m4p, .aa, .aax refusés avec explication"
+      ],
+      "ref": "app/tools/ai-tools/audio-transcriber/page.jsx:21, 49 ; app/lib/mediaSupport.js:245-255"
+    },
+    "outputs": {
+      "formats": [
+        "texte (champ « Transcript », lecture seule)",
+        "TXT",
+        "SRT (si segments minutés)",
+        "VTT (si segments minutés)"
+      ],
+      "ref": "app/tools/ai-tools/audio-transcriber/page.jsx:54-57 ; app/components/TranscriptExports.jsx:12-15"
+    },
+    "controls": [
+      {
+        "label": "zone « Click or drop an audio file here » (souris) / « Choose an audio file » (tactile) + « (mp3, wav, m4a...) »",
+        "ref": "app/tools/ai-tools/audio-transcriber/page.jsx:45-46 ; app/components/UploadPrompt.jsx:7-13"
+      },
+      {
+        "label": "« Max <N> MB per file »",
+        "ref": "app/tools/ai-tools/audio-transcriber/page.jsx:48"
+      },
+      {
+        "label": "« Transcribing... » (état)",
+        "ref": "app/tools/ai-tools/audio-transcriber/page.jsx:50"
+      },
+      {
+        "label": "Transcript",
+        "ref": "app/tools/ai-tools/audio-transcriber/page.jsx:54"
+      },
+      {
+        "label": "Copy",
+        "ref": "app/tools/ai-tools/audio-transcriber/page.jsx:56"
+      },
+      {
+        "label": "Download (<nom>.txt / .srt / .vtt) ; « Download all (N files, ZIP) » dès 2 fichiers",
+        "ref": "app/components/TranscriptExports.jsx:12-15 ; app/components/FileDownload.jsx:261-265"
+      }
+    ],
+    "steps": [
+      "choisir ou déposer un fichier audio → la transcription démarre seule (aucun bouton) → « Transcribing... » → texte dans « Transcript » → « Copy » ou « Download » TXT / SRT / VTT"
+    ],
+    "limits": [
+      {
+        "what": "taille max par fichier (ordinateur et téléphone, identique)",
+        "value": "25 MiB si le service d'envoi (NEXT_PUBLIC_MEDIA_SERVICE_URL) est configuré, sinon 4 MiB ; message « This file is X MB but this tool accepts audio up to N MB — … »",
+        "constant": "MAX_AUDIO_STAGED_BYTES / MAX_PLATFORM_UPLOAD_BYTES",
+        "ref": "app/lib/officeUpload.js:84-94 ; lib/quota/limits.js:10, 53, 83-84"
+      },
+      {
+        "what": "valeur servie en production",
+        "value": "NON TROUVÉ — le texte relevé dans contenu-avant.json affiche « Max 4 MB » et « limited to 4 MB » (rendu sans le service) ; la valeur réelle dépend de NEXT_PUBLIC_MEDIA_SERVICE_URL au build, non lue (règle des secrets). Cherché : app/lib/officeUpload.js:84-86, docs/audit/p36/contenu-avant.json, scripts/p36/extract-content.mjs (origine non écrite)",
+        "constant": null,
+        "ref": "docs/audit/p36/contenu-avant.json (audio-transcriber : ui, faq[2])"
+      },
+      {
+        "what": "seuil d'envoi par morceaux",
+        "value": "au-delà de 4 MiB le fichier va d'abord au service media-processing (morceaux de 8 MiB)",
+        "constant": "OFFICE_STAGED_THRESHOLD_BYTES",
+        "ref": "app/lib/officeUpload.js:99-101 ; lib/quota/limits.js:57-59, 82"
+      },
+      {
+        "what": "contrôle serveur",
+        "value": "25 MiB (« Audio files are limited to 25 MB. »)",
+        "constant": "MAX_AUDIO_UPLOAD_BYTES",
+        "ref": "app/api/ai-transcribe/route.ts:32-35"
+      }
+    ],
+    "processing": {
+      "where": "third-party",
+      "detail": "≤ 4 MiB : le fichier part en multipart vers notre route Vercel /api/ai-transcribe, qui l'envoie à OpenAI (audio/transcriptions, whisper-1, verbose_json, aucune langue imposée). > 4 MiB : envoi en morceaux à notre service media-processing (Railway), la route le relit de serveur à serveur, le transmet à OpenAI, puis le supprime du service dans tous les cas (discard). Seuls texte et segments {start,end,text} reviennent. Rien n'est enregistré par nous (usage_events : route, outil, issue, coût).",
+      "ref": "app/lib/officeUpload.js:97-108 ; app/api/ai-transcribe/route.ts:13-15, 41-56, 99-106 ; lib/media/stagedRoute.ts:88-113"
+    },
+    "quota": "garde partagée : limite par réseau (IP hachée) par heure et par jour UTC, compteur COMMUN à tous les outils payants (IP_RATE_LIMIT_PER_HOUR / IP_RATE_LIMIT_PER_DAY, valeurs en variables d'environnement, lib/quota/config.js:13-14 ; lib/quota/ipRateLimit.js:4-8 ; refus 429 « Too many requests from this network. Try again in about N minutes. » lib/quota/guard.js:16-25) + plafond de dépense mensuel du site (GLOBAL_SPEND_CAP_USD, défaut 20 $ dans le code, lib/quota/config.js:6 ; refus 503 « This tool has reached its usage limit for the month — that's a site-wide limit, not something on your end. It resets on <date> (UTC). » lib/quota/guard.js:28-37) ; plus, au-delà de 4 MiB, le billet d'envoi du service (MEDIA_JOBS_PER_HOUR_PER_IP / MEDIA_JOBS_PER_DAY_PER_IP, compteur office_rate, app/api/media/ticket/route.js:24-42 ; lib/media/ticket.js:49-50)",
+    "signup": "aucune inscription demandée (vérifié : la route ne lit ni en-tête Authorization ni session ; seule app/api/quota/me/route.ts:13-17 exige un jeton et aucun outil de ce lot ne l'appelle)",
+    "watermark": "sans objet (texte)",
+    "browsers": null,
+    "twin": "/tools/audio-tools/audio-to-text (même route et même helper transcribeAudio, tool 'audio-to-text' : app/tools/audio-tools/audio-to-text/page.jsx:81 ; doublon signalé dans docs/audit/2026-09-06-couverture-formats.md:55)",
+    "notes": "Coût réservé au pire cas (débit supposé 32 kbit/s) puis ajusté à la durée réelle renvoyée par Whisper (lib/quota/config.js:116, 132-140 ; route.ts:99). Le champ Transcript n'est pas modifiable (readOnly, page.jsx:55). Erreur OpenAI renvoyée telle quelle (route.ts:88) ; 429 OpenAI → « This tool is temporarily at capacity. Please try again later. » (route.ts:82-86)."
+  },
+  {
+    "path": "/tools/ai-tools/background-remover",
+    "task": "Détoure une photo : le fond devient transparent, résultat en PNG à la résolution d'origine.",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "tout format d'image que le navigateur décode (l'interface annonce JPG, PNG, WEBP)"
+      ],
+      "ref": "app/tools/ai-tools/background-remover/page.jsx:229, 232 ; page.jsx:23-29 ; app/lib/bigImage.js:337-343"
+    },
+    "outputs": {
+      "formats": [
+        "PNG transparent, nom <original>-no-background.png"
+      ],
+      "ref": "app/tools/ai-tools/background-remover/page.jsx:93, 131, 249 ; app/lib/download.js:108-111"
+    },
+    "controls": [
+      {
+        "label": "zone « Click or drop an image here » / « Choose an image » + « JPG, PNG, WEBP supported »",
+        "ref": "app/tools/ai-tools/background-remover/page.jsx:228-230"
+      },
+      {
+        "label": "« Max 50 MB per file — matches the largest limit offered by remove.bg, Pixian, and PhotoRoom; … »",
+        "ref": "app/tools/ai-tools/background-remover/page.jsx:231"
+      },
+      {
+        "label": "Remove Background (pendant : « Removing background… »)",
+        "ref": "app/tools/ai-tools/background-remover/page.jsx:233-235"
+      },
+      {
+        "label": "barre « Removing background » + « This can take a bit longer than usual if the tool hasn't been used in a while. »",
+        "ref": "app/tools/ai-tools/background-remover/page.jsx:236-240"
+      },
+      {
+        "label": "Result (aperçu sur damier)",
+        "ref": "app/tools/ai-tools/background-remover/page.jsx:245-248"
+      },
+      {
+        "label": "Download (+ « Save / Share » si partage de fichiers possible)",
+        "ref": "app/tools/ai-tools/background-remover/page.jsx:249 ; app/components/FileDownload.jsx:211-218"
+      }
+    ],
+    "steps": [
+      "choisir ou déposer une image → « Remove Background » → barre de progression → aperçu sur damier → « Download »"
+    ],
+    "limits": [
+      {
+        "what": "taille max du fichier d'origine (ordinateur et téléphone, identique)",
+        "value": "50 MiB (« Images are limited to 50 MB — this file is X MB. »)",
+        "constant": "MAX_REMOVEBG_ORIGINAL_BYTES",
+        "ref": "lib/quota/limits.js:23 ; app/tools/ai-tools/background-remover/page.jsx:151-152 ; lib/quota/limits.js:135-140"
+      },
+      {
+        "what": "copie envoyée au serveur",
+        "value": "JPEG qualité 0,92, côté le plus long ≤ 1 024 px",
+        "constant": "RESIZE_TARGET_PX",
+        "ref": "app/tools/ai-tools/background-remover/page.jsx:21, 36-47"
+      },
+      {
+        "what": "plafond de la copie envoyée",
+        "value": "3 MiB (« The resized image is unexpectedly large. Try a different photo. »)",
+        "constant": "MAX_REMOVEBG_UPLOAD_BYTES",
+        "ref": "lib/quota/limits.js:32 ; app/api/remove-bg/route.ts:39-42"
+      },
+      {
+        "what": "délai max du service",
+        "value": "60 s (« Background removal timed out. Please try again. »)",
+        "constant": "SERVICE_TIMEOUT_MS",
+        "ref": "app/api/remove-bg/route.ts:18, 66-74"
+      },
+      {
+        "what": "affinage des bords",
+        "value": "copie ≤ 1 Mpx, dans un Worker, abandonné après 30 s (le détourage est alors donné sans affinage)",
+        "constant": "WORK_PIXELS",
+        "ref": "app/lib/mattingRefine.js:23 ; app/tools/ai-tools/background-remover/page.jsx:67-88, 209-215"
+      },
+      {
+        "what": "limite en pixels",
+        "value": "NON TROUVÉ — aucune limite en pixels dans la page ; la recomposition se fait par bandes de 4 Mpx (cherché : page.jsx, app/lib/bigImage.js, lib/quota/limits.js)",
+        "constant": "BAND_PIXELS",
+        "ref": "app/tools/ai-tools/background-remover/page.jsx:58, 91-132"
+      }
+    ],
+    "processing": {
+      "where": "mixed",
+      "detail": "le navigateur réduit l'image (≤ 1 024 px, JPEG) et n'envoie que cette copie, en base64, à notre route Vercel /api/remove-bg, qui la passe à notre service background-removal (Railway, modèle IS-Net general-use, ?output=mask) ; le service travaille en mémoire, n'écrit rien sur disque et ne journalise ni image ni nom ; il renvoie un MASQUE, et le navigateur l'applique à l'ORIGINAL (qui ne quitte jamais l'appareil), affine les bords et écrit le PNG pleine résolution. Aucun tiers.",
+      "ref": "app/tools/ai-tools/background-remover/page.jsx:15-20, 182-216 ; app/api/remove-bg/route.ts:55-63, 125-130 ; services/background-removal/app/main.py:1-13"
+    },
+    "quota": "garde partagée : limite par réseau (IP hachée) par heure et par jour UTC, compteur COMMUN à tous les outils payants (IP_RATE_LIMIT_PER_HOUR / IP_RATE_LIMIT_PER_DAY, valeurs en variables d'environnement, lib/quota/config.js:13-14 ; lib/quota/ipRateLimit.js:4-8 ; refus 429 « Too many requests from this network. Try again in about N minutes. » lib/quota/guard.js:16-25) + plafond de dépense mensuel du site (GLOBAL_SPEND_CAP_USD, défaut 20 $ dans le code, lib/quota/config.js:6 ; refus 503 « This tool has reached its usage limit for the month — that's a site-wide limit, not something on your end. It resets on <date> (UTC). » lib/quota/guard.js:28-37) (app/api/remove-bg/route.ts:44-45 ; coût réservé 0,0031 $ par image, lib/quota/config.js:84, 150)",
+    "signup": "aucune inscription demandée (vérifié : la route ne lit ni en-tête Authorization ni session ; seule app/api/quota/me/route.ts:13-17 exige un jeton et aucun outil de ce lot ne l'appelle)",
+    "watermark": "aucun filigrane ajouté (vérifié : le PNG est écrit directement depuis les pixels d'origine + alpha, page.jsx:111-128)",
+    "browsers": "Écriture du PNG par CompressionStream : refus « This browser cannot write PNG files this large (it needs Safari 16.4 or later…) » sans elle (app/lib/bigImage.js:245-246) ; iPhone/iPad : aucune toile > 4 Mpx, lecture par bandes (page.jsx:52-58 ; bigImage.js:19-25, 337-343).",
+    "twin": null,
+    "notes": "Le service ne garde que le plus grand sujet d'un seul tenant (filtre « largest connected component », services/background-removal/app/infer.py:10-13, 137-153) : plusieurs sujets séparés → seul le plus grand reste. Mesure du délai : ≈ 4,3-5 s clic → réponse, veille comprise (docs/audit/RAPPORT-detourage-phase2.md:267). Couleur des bords : fond restant 11,0 % → 3,9 % (page.jsx:64-66). Erreurs : « The uploaded image could not be processed. » (400), « This tool is temporarily at capacity. Please try again later. » (503), « Background removal failed. Please try again. » (route.ts:94-116)."
+  },
+  {
+    "path": "/tools/ai-tools/data-extractor",
+    "task": "Extrait des données structurées (noms, dates, prix…) d'un texte collé, rendues en JSON ou tableau texte (gpt-4o-mini).",
+    "inputs": {
+      "accept": null,
+      "formats": [
+        "texte collé ou tapé"
+      ],
+      "ref": "app/tools/ai-tools/data-extractor/page.jsx:45"
+    },
+    "outputs": {
+      "formats": [
+        "texte affiché (champ « Result », lecture seule)",
+        "fichier .txt (extracted-data.txt)"
+      ],
+      "ref": "app/tools/ai-tools/data-extractor/page.jsx:52-54"
+    },
+    "controls": [
+      {
+        "label": "zone de texte, placeholder « Paste text to extract data from... »",
+        "ref": "app/tools/ai-tools/data-extractor/page.jsx:45"
+      },
+      {
+        "label": "Extract Data (pendant le travail : « Processing... »)",
+        "ref": "app/tools/ai-tools/data-extractor/page.jsx:46-47"
+      },
+      {
+        "label": "Result",
+        "ref": "app/tools/ai-tools/data-extractor/page.jsx:52"
+      },
+      {
+        "label": "Download (extracted-data.txt)",
+        "ref": "app/tools/ai-tools/data-extractor/page.jsx:54 → app/components/FileDownload.jsx:211 ; « Save / Share » en plus si le navigateur partage des fichiers (FileDownload.jsx:95, 213-218)"
+      },
+      {
+        "label": "Copy",
+        "ref": "app/tools/ai-tools/data-extractor/page.jsx:55"
+      }
+    ],
+    "steps": [
+      "coller le texte → bouton « Extract Data » → le résultat apparaît dans « Result » → « Download » (extracted-data.txt) ou « Copy »"
+    ],
+    "limits": [
+      {
+        "what": "longueur max du texte envoyé (ordinateur et téléphone, aucune différence dans le code)",
+        "value": "8 000 caractères ; au-delà refus avec « Text is limited to 8,000 characters — this input is N. » (pas de troncature)",
+        "constant": "MAX_PROMPT_CHARS",
+        "ref": "lib/quota/limits.js:5, 126-133 ; app/api/ai/route.ts:20-21"
+      },
+      {
+        "what": "longueur max de la réponse du modèle",
+        "value": "1 000 jetons (max_tokens) — une réponse plus longue est coupée",
+        "constant": null,
+        "ref": "app/api/ai/route.ts:35"
+      }
+    ],
+    "processing": {
+      "where": "third-party",
+      "detail": "le texte part du navigateur vers notre route Vercel /api/ai (tool: 'data-extractor'), qui ajoute la consigne choisie côté serveur (lib/ai/toolPrompts.js) et l'envoie à OpenAI (chat/completions, modèle gpt-4o-mini, max_tokens 1000) ; la réponse revient en un seul JSON {text} (pas de flux). Rien du texte n'est enregistré par nous : la base ne reçoit que route, outil, issue et coût (lib/quota/logEvent.js:4-8) ; un message d'erreur affiché est signalé sans le texte du visiteur (app/lib/useToolError.js:2-7). La conservation côté OpenAI n'est documentée nulle part dans le dépôt.",
+      "ref": "app/api/ai/route.ts:23-43, 86-89 ; lib/quota/logEvent.js:4-8"
+    },
+    "quota": "garde partagée : limite par réseau (IP hachée) par heure et par jour UTC, compteur COMMUN à tous les outils payants (IP_RATE_LIMIT_PER_HOUR / IP_RATE_LIMIT_PER_DAY, valeurs en variables d'environnement, lib/quota/config.js:13-14 ; lib/quota/ipRateLimit.js:4-8 ; refus 429 « Too many requests from this network. Try again in about N minutes. » lib/quota/guard.js:16-25) + plafond de dépense mensuel du site (GLOBAL_SPEND_CAP_USD, défaut 20 $ dans le code, lib/quota/config.js:6 ; refus 503 « This tool has reached its usage limit for the month — that's a site-wide limit, not something on your end. It resets on <date> (UTC). » lib/quota/guard.js:28-37)",
+    "signup": "aucune inscription demandée (vérifié : la route ne lit ni en-tête Authorization ni session ; seule app/api/quota/me/route.ts:13-17 exige un jeton et aucun outil de ce lot ne l'appelle)",
+    "watermark": "sans objet (texte)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Consigne serveur : « …Extract structured data from the provided text. Format the extracted data in a clear, organized way (JSON or table format when appropriate). » (lib/ai/toolPrompts.js:33-35). Sortie = texte libre du modèle, pas de fichier CSV/Excel/JSON ; le téléchargement est un .txt. Pas d'OCR, pas de fichier en entrée."
+  },
+  {
+    "path": "/tools/ai-tools/email-generator",
+    "task": "Rédige un courriel complet (objet, salutation, corps, formule de fin) à partir d'une description et d'un ton (gpt-4o-mini).",
+    "inputs": {
+      "accept": null,
+      "formats": [
+        "description tapée"
+      ],
+      "ref": "app/tools/ai-tools/email-generator/page.jsx:55"
+    },
+    "outputs": {
+      "formats": [
+        "texte affiché (« Result », lecture seule)",
+        "fichier .txt (email.txt)"
+      ],
+      "ref": "app/tools/ai-tools/email-generator/page.jsx:62-64"
+    },
+    "controls": [
+      {
+        "label": "Tone (liste : Professional, Friendly, Formal, Casual, Persuasive)",
+        "ref": "app/tools/ai-tools/email-generator/page.jsx:50-53"
+      },
+      {
+        "label": "zone de texte, placeholder « Describe the email you need... »",
+        "ref": "app/tools/ai-tools/email-generator/page.jsx:55"
+      },
+      {
+        "label": "Generate Email (pendant : « Generating... »)",
+        "ref": "app/tools/ai-tools/email-generator/page.jsx:56-57"
+      },
+      {
+        "label": "Result",
+        "ref": "app/tools/ai-tools/email-generator/page.jsx:62"
+      },
+      {
+        "label": "Download (email.txt)",
+        "ref": "app/tools/ai-tools/email-generator/page.jsx:64 → app/components/FileDownload.jsx:211 ; « Save / Share » en plus si le navigateur partage des fichiers (FileDownload.jsx:95, 213-218)"
+      },
+      {
+        "label": "Copy",
+        "ref": "app/tools/ai-tools/email-generator/page.jsx:65"
+      }
+    ],
+    "steps": [
+      "choisir « Tone » → décrire le courriel → « Generate Email » → résultat dans « Result » → « Download » (email.txt) ou « Copy »"
+    ],
+    "limits": [
+      {
+        "what": "longueur max du texte envoyé (ordinateur et téléphone, aucune différence dans le code)",
+        "value": "8 000 caractères ; au-delà refus avec « Text is limited to 8,000 characters — this input is N. » (pas de troncature)",
+        "constant": "MAX_PROMPT_CHARS",
+        "ref": "lib/quota/limits.js:5, 126-133 ; app/api/ai/route.ts:20-21"
+      },
+      {
+        "what": "longueur max de la réponse du modèle",
+        "value": "1 000 jetons (max_tokens) — une réponse plus longue est coupée",
+        "constant": null,
+        "ref": "app/api/ai/route.ts:35"
+      }
+    ],
+    "processing": {
+      "where": "third-party",
+      "detail": "le texte part du navigateur vers notre route Vercel /api/ai (tool: 'email-generator'), qui ajoute la consigne choisie côté serveur (lib/ai/toolPrompts.js) et l'envoie à OpenAI (chat/completions, modèle gpt-4o-mini, max_tokens 1000) ; la réponse revient en un seul JSON {text} (pas de flux). Rien du texte n'est enregistré par nous : la base ne reçoit que route, outil, issue et coût (lib/quota/logEvent.js:4-8) ; un message d'erreur affiché est signalé sans le texte du visiteur (app/lib/useToolError.js:2-7). La conservation côté OpenAI n'est documentée nulle part dans le dépôt.",
+      "ref": "app/api/ai/route.ts:23-43, 86-89 ; lib/quota/logEvent.js:4-8"
+    },
+    "quota": "garde partagée : limite par réseau (IP hachée) par heure et par jour UTC, compteur COMMUN à tous les outils payants (IP_RATE_LIMIT_PER_HOUR / IP_RATE_LIMIT_PER_DAY, valeurs en variables d'environnement, lib/quota/config.js:13-14 ; lib/quota/ipRateLimit.js:4-8 ; refus 429 « Too many requests from this network. Try again in about N minutes. » lib/quota/guard.js:16-25) + plafond de dépense mensuel du site (GLOBAL_SPEND_CAP_USD, défaut 20 $ dans le code, lib/quota/config.js:6 ; refus 503 « This tool has reached its usage limit for the month — that's a site-wide limit, not something on your end. It resets on <date> (UTC). » lib/quota/guard.js:28-37)",
+    "signup": "aucune inscription demandée (vérifié : la route ne lit ni en-tête Authorization ni session ; seule app/api/quota/me/route.ts:13-17 exige un jeton et aucun outil de ce lot ne l'appelle)",
+    "watermark": "sans objet (texte)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Consigne serveur : « You are a professional email writer. Generate a well-structured <ton> email based on the user description. Include subject line, greeting, body, and closing. » (lib/ai/toolPrompts.js:36-39). Tons : Professional, Friendly, Formal, Casual, Persuasive (page.jsx:10 ; toolPrompts.js:14), toute autre valeur refusée « Unsupported tone. ». Défaut : Professional. Aucun modèle de courriel prédéfini."
+  },
+  {
+    "path": "/tools/ai-tools/grammar-fixer",
+    "task": "Corrige orthographe, grammaire et ponctuation par modifications minimales (gpt-4o-mini, température 0) et montre chaque changement, annulable un par un.",
+    "inputs": {
+      "accept": null,
+      "formats": [
+        "texte collé ou tapé"
+      ],
+      "ref": "app/tools/ai-tools/grammar-fixer/page.jsx:74"
+    },
+    "outputs": {
+      "formats": [
+        "texte avec changements marqués (barré rouge / souligné vert)",
+        "texte final (« Result », lecture seule)",
+        "fichier .txt (corrected.txt)"
+      ],
+      "ref": "app/tools/ai-tools/grammar-fixer/page.jsx:98-110"
+    },
+    "controls": [
+      {
+        "label": "zone « Text to fix », placeholder « Paste text to fix grammar... »",
+        "ref": "app/tools/ai-tools/grammar-fixer/page.jsx:74"
+      },
+      {
+        "label": "Fix Grammar (pendant : « Processing... »)",
+        "ref": "app/tools/ai-tools/grammar-fixer/page.jsx:75-77"
+      },
+      {
+        "label": "« N changes — K kept, U undone » / « No changes: your text was already correct. »",
+        "ref": "app/tools/ai-tools/grammar-fixer/page.jsx:87-89"
+      },
+      {
+        "label": "Keep all",
+        "ref": "app/tools/ai-tools/grammar-fixer/page.jsx:92"
+      },
+      {
+        "label": "Undo all",
+        "ref": "app/tools/ai-tools/grammar-fixer/page.jsx:93"
+      },
+      {
+        "label": "clic sur un changement (« Click a change to undo it (click again to restore it). »)",
+        "ref": "app/tools/ai-tools/grammar-fixer/page.jsx:97-106"
+      },
+      {
+        "label": "Result",
+        "ref": "app/tools/ai-tools/grammar-fixer/page.jsx:108-109"
+      },
+      {
+        "label": "Download (corrected.txt)",
+        "ref": "app/tools/ai-tools/grammar-fixer/page.jsx:110"
+      },
+      {
+        "label": "Copy (devient « Copied »)",
+        "ref": "app/tools/ai-tools/grammar-fixer/page.jsx:111"
+      }
+    ],
+    "steps": [
+      "coller le texte → « Fix Grammar » → relire les changements (barrés/soulignés) → cliquer un changement pour l'annuler, ou « Keep all » / « Undo all » → « Copy » ou « Download » (corrected.txt)"
+    ],
+    "limits": [
+      {
+        "what": "longueur max du texte envoyé (ordinateur et téléphone, aucune différence dans le code)",
+        "value": "8 000 caractères ; au-delà refus avec « Text is limited to 8,000 characters — this input is N. » (pas de troncature)",
+        "constant": "MAX_PROMPT_CHARS",
+        "ref": "lib/quota/limits.js:5, 126-133 ; app/api/ai/route.ts:20-21"
+      },
+      {
+        "what": "longueur max de la réponse du modèle",
+        "value": "1 000 jetons (max_tokens) — une réponse plus longue est coupée",
+        "constant": null,
+        "ref": "app/api/ai/route.ts:35"
+      },
+      {
+        "what": "avertissement de langue moins fiable",
+        "value": "affiché si le texte contient du japonais, chinois, russe, hindi ou des lettres propres au turc",
+        "constant": "WEAK_LANGUAGES",
+        "ref": "app/tools/ai-tools/grammar-fixer/page.jsx:17-24, 78-82"
+      }
+    ],
+    "processing": {
+      "where": "third-party",
+      "detail": "le texte part du navigateur vers notre route Vercel /api/ai (tool: 'grammar-fixer'), qui ajoute la consigne choisie côté serveur (lib/ai/toolPrompts.js) et l'envoie à OpenAI (chat/completions, modèle gpt-4o-mini, max_tokens 1000) ; la réponse revient en un seul JSON {text} (pas de flux). Rien du texte n'est enregistré par nous : la base ne reçoit que route, outil, issue et coût (lib/quota/logEvent.js:4-8) ; un message d'erreur affiché est signalé sans le texte du visiteur (app/lib/useToolError.js:2-7). La conservation côté OpenAI n'est documentée nulle part dans le dépôt.",
+      "ref": "app/api/ai/route.ts:23-43, 86-89 ; lib/quota/logEvent.js:4-8"
+    },
+    "quota": "garde partagée : limite par réseau (IP hachée) par heure et par jour UTC, compteur COMMUN à tous les outils payants (IP_RATE_LIMIT_PER_HOUR / IP_RATE_LIMIT_PER_DAY, valeurs en variables d'environnement, lib/quota/config.js:13-14 ; lib/quota/ipRateLimit.js:4-8 ; refus 429 « Too many requests from this network. Try again in about N minutes. » lib/quota/guard.js:16-25) + plafond de dépense mensuel du site (GLOBAL_SPEND_CAP_USD, défaut 20 $ dans le code, lib/quota/config.js:6 ; refus 503 « This tool has reached its usage limit for the month — that's a site-wide limit, not something on your end. It resets on <date> (UTC). » lib/quota/guard.js:28-37)",
+    "signup": "aucune inscription demandée (vérifié : la route ne lit ni en-tête Authorization ni session ; seule app/api/quota/me/route.ts:13-17 exige un jeton et aucun outil de ce lot ne l'appelle)",
+    "watermark": "sans objet (texte)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Consigne « modifications minimales », 3 exemples, température 0 (lib/ai/toolPrompts.js:40-67). Différence mot à mot par l'algorithme de Myers ; au-delà d'un seuil d'écarts la réécriture est montrée comme un seul changement (diff.js:9-10). Mesures : anglais 25/25, texte juste intact (docs/audit/RAPPORT-deploiement-28-09.md:67 ; RAPPORT-grammaire-modifications-minimales.md:10) ; sur 40 phrases d'apprenants, corrections exactes / phrases empirées (consigne actuelle) : pt 29/3, de 16-17/2-5, ja 19/7, zh 3/11-12, tr 12/14-16, hi 2/32, it 9/5, es 11/9, ar 6/4, ru 14/8 (RAPPORT-deploiement-28-09.md:64-77). Défaut de code : page.jsx:56 lit response.json() sans readAiJson (une page d'erreur HTML donne « Error: Unexpected token… »)."
+  },
+  {
+    "path": "/tools/ai-tools/image-captioner",
+    "task": "Écrit une légende descriptive d'une image (gpt-4o-mini vision).",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "toute image que le navigateur décode (createImageBitmap puis <img>) ; GIF animé : une image"
+      ],
+      "ref": "app/tools/ai-tools/image-captioner/page.jsx:69 ; app/lib/imageForVision.js:12-41"
+    },
+    "outputs": {
+      "formats": [
+        "texte (« Caption », lecture seule)",
+        "fichier .txt (caption.txt)"
+      ],
+      "ref": "app/tools/ai-tools/image-captioner/page.jsx:76-78"
+    },
+    "controls": [
+      {
+        "label": "zone « Click or drop an image here » / « Choose an image » (aperçu ensuite)",
+        "ref": "app/tools/ai-tools/image-captioner/page.jsx:65-67"
+      },
+      {
+        "label": "« Max 80 MB per image — it is reduced on your device before sending, so large photos work »",
+        "ref": "app/tools/ai-tools/image-captioner/page.jsx:68"
+      },
+      {
+        "label": "Generate Caption (pendant : « Generating... »)",
+        "ref": "app/tools/ai-tools/image-captioner/page.jsx:70-72"
+      },
+      {
+        "label": "Caption",
+        "ref": "app/tools/ai-tools/image-captioner/page.jsx:76"
+      },
+      {
+        "label": "Download (caption.txt)",
+        "ref": "app/tools/ai-tools/image-captioner/page.jsx:78"
+      },
+      {
+        "label": "Copy",
+        "ref": "app/tools/ai-tools/image-captioner/page.jsx:79"
+      }
+    ],
+    "steps": [
+      "choisir ou déposer une image → « Generate Caption » → légende dans « Caption » → « Copy » ou « Download » (caption.txt)"
+    ],
+    "limits": [
+      {
+        "what": "taille max du fichier d'origine (ordinateur et téléphone, identique)",
+        "value": "80 MiB (« This image is X but this tool accepts images up to 80 MB. ») — mesuré jusqu'à 58 Mo / 80 Mpx",
+        "constant": "MAX_IMAGE_CAPTIONER_ORIGINAL_BYTES",
+        "ref": "lib/quota/limits.js:100-103 ; app/tools/ai-tools/image-captioner/page.jsx:28-32"
+      },
+      {
+        "what": "image envoyée",
+        "value": "JPEG qualité 0,85, côté le plus long ≤ 2 048 px, transparence peinte en blanc",
+        "constant": "VISION_MAX_SIDE",
+        "ref": "app/lib/imageForVision.js:9-10, 45-58"
+      },
+      {
+        "what": "plafond serveur de l'image envoyée",
+        "value": "5 MiB (« Images are limited to 5 MB. »)",
+        "constant": "MAX_VISION_IMAGE_BYTES",
+        "ref": "lib/quota/limits.js:6 ; app/api/ai-vision/route.ts:20-24"
+      },
+      {
+        "what": "longueur max de la légende",
+        "value": "500 jetons",
+        "constant": null,
+        "ref": "app/api/ai-vision/route.ts:38"
+      }
+    ],
+    "processing": {
+      "where": "third-party",
+      "detail": "le navigateur décode l'image et n'envoie qu'une copie JPEG réduite (≤ 2 048 px) en base64 à notre route Vercel /api/ai-vision, qui l'envoie à OpenAI (chat/completions, gpt-4o-mini, consigne « Generate a creative, descriptive caption for this image. »). L'original ne quitte pas l'appareil. Rien n'est enregistré par nous.",
+      "ref": "app/tools/ai-tools/image-captioner/page.jsx:45-51 ; app/lib/imageForVision.js:1-7 ; app/api/ai-vision/route.ts:14-49 ; lib/ai/toolPrompts.js:86-88"
+    },
+    "quota": "garde partagée : limite par réseau (IP hachée) par heure et par jour UTC, compteur COMMUN à tous les outils payants (IP_RATE_LIMIT_PER_HOUR / IP_RATE_LIMIT_PER_DAY, valeurs en variables d'environnement, lib/quota/config.js:13-14 ; lib/quota/ipRateLimit.js:4-8 ; refus 429 « Too many requests from this network. Try again in about N minutes. » lib/quota/guard.js:16-25) + plafond de dépense mensuel du site (GLOBAL_SPEND_CAP_USD, défaut 20 $ dans le code, lib/quota/config.js:6 ; refus 503 « This tool has reached its usage limit for the month — that's a site-wide limit, not something on your end. It resets on <date> (UTC). » lib/quota/guard.js:28-37) (app/api/ai-vision/route.ts:26-27)",
+    "signup": "aucune inscription demandée (vérifié : la route ne lit ni en-tête Authorization ni session ; seule app/api/quota/me/route.ts:13-17 exige un jeton et aucun outil de ce lot ne l'appelle)",
+    "watermark": "sans objet (texte)",
+    "browsers": "Formats décodés selon le navigateur (ex. HEIC seulement là où le navigateur l'ouvre) ; message « This image could not be read. It may be corrupt or in a format your browser cannot open. » sinon (app/lib/imageForVision.js:39-44) ; navigateur incapable d'encoder du JPEG : « Your browser could not prepare this image… » (imageForVision.js:59-62).",
+    "twin": null,
+    "notes": "Langue de la légende non imposée (consigne en anglais, toolPrompts.js:87). Défaut de code : page.jsx:52 lit response.json() sans readAiJson. Une seule image à la fois (files[0], page.jsx:23)."
+  },
+  {
+    "path": "/tools/ai-tools/image-generator",
+    "task": "Crée une image à partir d'une description, avec OpenAI gpt-image-2 (qualité « low »), en carré, portrait ou paysage.",
+    "inputs": {
+      "accept": null,
+      "formats": [
+        "description texte ≤ 1 000 caractères"
+      ],
+      "ref": "app/tools/ai-tools/image-generator/page.jsx:8, 77"
+    },
+    "outputs": {
+      "formats": [
+        "WebP (ai-image.webp, renvoyé par OpenAI, compression 90)",
+        "PNG (ai-image.png, converti dans le navigateur)"
+      ],
+      "ref": "app/api/ai-image/route.ts:57, 109-115 ; app/tools/ai-tools/image-generator/page.jsx:49-67, 101-104"
+    },
+    "controls": [
+      {
+        "label": "Describe your image (placeholder « e.g. A red fox in a snowy forest at sunrise, photorealistic », compteur N/1000)",
+        "ref": "app/tools/ai-tools/image-generator/page.jsx:76-80"
+      },
+      {
+        "label": "exemples : « A cosy reading nook by a rainy window » / « Isometric illustration of a tiny island with a lighthouse » / « Close-up photo of a hummingbird drinking from a red flower »",
+        "ref": "app/tools/ai-tools/image-generator/page.jsx:15-19, 81-85"
+      },
+      {
+        "label": "Square 1024×1024 / Portrait 1024×1536 / Landscape 1536×1024",
+        "ref": "app/tools/ai-tools/image-generator/page.jsx:10-14, 87-93"
+      },
+      {
+        "label": "Generate Image (pendant : « Generating… (about 10–30 seconds) »)",
+        "ref": "app/tools/ai-tools/image-generator/page.jsx:94-96"
+      },
+      {
+        "label": "Download (ai-image.webp) / Download (ai-image.png) ; « Download all (2 files, ZIP) »",
+        "ref": "app/tools/ai-tools/image-generator/page.jsx:101-104 ; app/components/FileDownload.jsx:261-265"
+      }
+    ],
+    "steps": [
+      "décrire l'image (ou cliquer un exemple) → choisir Square / Portrait / Landscape → « Generate Image » → aperçu → « Download » WebP ou PNG"
+    ],
+    "limits": [
+      {
+        "what": "longueur max de la description",
+        "value": "1 000 caractères (champ maxLength ; serveur « Descriptions are limited to 1000 characters. »)",
+        "constant": "MAX_IMAGE_PROMPT_CHARS",
+        "ref": "app/tools/ai-tools/image-generator/page.jsx:8, 77 ; app/api/ai-image/route.ts:13, 29-31"
+      },
+      {
+        "what": "images gratuites par visiteur",
+        "value": "5 par jour UTC (« You have used today's 5 free images. More tomorrow (the count resets at midnight UTC). ») ; une image refusée par le filtre est rendue",
+        "constant": "IMAGE_GEN_PER_IP_PER_DAY",
+        "ref": "lib/quota/imageGen.js:13, 29-35, 51-56 ; app/api/ai-image/route.ts:82-88"
+      },
+      {
+        "what": "budget mensuel propre",
+        "value": "5 $ par mois (« The image generator has reached its monthly budget — a site-wide limit… »)",
+        "constant": "IMAGE_GEN_MONTHLY_BUDGET_MICROS",
+        "ref": "lib/quota/imageGen.js:14, 36-38"
+      },
+      {
+        "what": "tailles",
+        "value": "1024x1024, 1024x1536, 1536x1024 seulement",
+        "constant": "SIZES",
+        "ref": "app/api/ai-image/route.ts:12, 32-33"
+      },
+      {
+        "what": "durée max de la fonction",
+        "value": "120 s",
+        "constant": "maxDuration",
+        "ref": "app/api/ai-image/route.ts:16"
+      }
+    ],
+    "processing": {
+      "where": "third-party",
+      "detail": "la description part vers notre route Vercel /api/ai-image, qui appelle OpenAI images/generations (gpt-image-2, quality low, n 1, output_format webp, moderation auto) ; l'image revient en WebP, vérifiée (RIFF…WEBP), servie avec Cache-Control no-store, jamais enregistrée ; le journal ne garde que les jetons et le coût, jamais la description.",
+      "ref": "app/api/ai-image/route.ts:8-14, 54-58, 98-115"
+    },
+    "quota": "trois couches : 5 images/jour/visiteur + budget propre 5 $/mois (lib/quota/imageGen.js:13-14), puis garde partagée : limite par réseau (IP hachée) par heure et par jour UTC, compteur COMMUN à tous les outils payants (IP_RATE_LIMIT_PER_HOUR / IP_RATE_LIMIT_PER_DAY, valeurs en variables d'environnement, lib/quota/config.js:13-14 ; lib/quota/ipRateLimit.js:4-8 ; refus 429 « Too many requests from this network. Try again in about N minutes. » lib/quota/guard.js:16-25) + plafond de dépense mensuel du site (GLOBAL_SPEND_CAP_USD, défaut 20 $ dans le code, lib/quota/config.js:6 ; refus 503 « This tool has reached its usage limit for the month — that's a site-wide limit, not something on your end. It resets on <date> (UTC). » lib/quota/guard.js:28-37) (app/api/ai-image/route.ts:35-50)",
+    "signup": "aucune inscription demandée (vérifié : la route ne lit ni en-tête Authorization ni session ; seule app/api/quota/me/route.ts:13-17 exige un jeton et aucun outil de ce lot ne l'appelle)",
+    "watermark": "aucun filigrane ajouté par le site (vérifié : octets d'OpenAI renvoyés tels quels, route.ts:109-115 ; PNG redessiné sur canvas, page.jsx:56-64)",
+    "browsers": "PNG fait par canvas.toBlob ; échec → « This browser could not convert the image to PNG — download the WebP instead. » (page.jsx:62, 65).",
+    "twin": null,
+    "notes": "Filtre de sécurité : « This description was refused by the safety filter. Please describe something else. » (route.ts:86-88) ; 429 OpenAI → « The image generator is busy. Please try again in a minute. » (route.ts:91-93). Mesure : 16 s par image, 2 images sur préversion (docs/audit/RAPPORT-ecarts-marche.md:41, 160). Classement à l'aveugle connu seulement pour gpt-image-2 « high » ; « low » non mesuré (RAPPORT-ecarts-marche.md:155, 182). Le site interdit model, quality, n, moderation, system, output_format, background venant du navigateur (route.ts:14, 25-26)."
+  },
+  {
+    "path": "/tools/ai-tools/image-upscaler",
+    "task": "Agrandit une image ×2 ou ×4 avec le réseau de super-résolution 4xNomos2_hq_mosr (MoSR), sur l'appareil (WebGPU) ou sur notre serveur.",
+    "inputs": {
+      "accept": "image/jpeg,image/png,image/webp",
+      "formats": [
+        "JPG",
+        "PNG",
+        "WebP"
+      ],
+      "ref": "app/tools/ai-tools/image-upscaler/page.jsx:148-149"
+    },
+    "outputs": {
+      "formats": [
+        "PNG (<nom>-upscaled-2x.png ou -4x.png), transparence gardée"
+      ],
+      "ref": "app/tools/ai-tools/image-upscaler/page.jsx:185-187 ; services/background-removal/app/upscale.py:94-104, 151-153"
+    },
+    "controls": [
+      {
+        "label": "zone « Click or drop an image here » / « Choose an image » + « JPG, PNG, WebP · up to 6 megapixels (e.g. 3000×2000) »",
+        "ref": "app/tools/ai-tools/image-upscaler/page.jsx:147-148"
+      },
+      {
+        "label": "Enlarge : 2× / 4× (avec dimensions de sortie)",
+        "ref": "app/tools/ai-tools/image-upscaler/page.jsx:152-158"
+      },
+      {
+        "label": "Upscale Image",
+        "ref": "app/tools/ai-tools/image-upscaler/page.jsx:169"
+      },
+      {
+        "label": "Cancel (pendant le travail)",
+        "ref": "app/tools/ai-tools/image-upscaler/page.jsx:166"
+      },
+      {
+        "label": "« This device is slow — use our server instead (about N s) » (proposé si l'appareil est lent)",
+        "ref": "app/tools/ai-tools/image-upscaler/page.jsx:165"
+      },
+      {
+        "label": "Compare (curseur Before/After)",
+        "ref": "app/tools/ai-tools/image-upscaler/page.jsx:174-184"
+      },
+      {
+        "label": "Download",
+        "ref": "app/tools/ai-tools/image-upscaler/page.jsx:187"
+      }
+    ],
+    "steps": [
+      "choisir ou déposer une image (≤ 6 Mpx, ≤ 30 MB) → 2× ou 4× → « Upscale Image » → la page dit où le calcul tourne et le temps restant (« Cancel » possible) → curseur Compare → « Download » (PNG)"
+    ],
+    "limits": [
+      {
+        "what": "taille max du fichier (ordinateur et téléphone)",
+        "value": "30 MiB (« This file is X MB; images up to 30 MB are accepted. ») ; même plafond sur le service",
+        "constant": "MAX_FILE_BYTES / MAX_SOURCE_BYTES",
+        "ref": "app/tools/ai-tools/image-upscaler/page.jsx:16, 44 ; services/background-removal/app/upscale.py:41, 139-140"
+      },
+      {
+        "what": "pixels max en entrée",
+        "value": "6 000 000 (ex. 3000×2000), contrôlé avant tout travail",
+        "constant": "MAX_INPUT_PIXELS",
+        "ref": "app/tools/ai-tools/image-upscaler/page.jsx:15, 50-53"
+      },
+      {
+        "what": "pixels max côté serveur",
+        "value": "variable UPSCALE_MAX_INPUT_PIXELS (défaut code 1 000 000) ; posée à 6 000 000 d'après le rapport",
+        "constant": "MAX_INPUT_PIXELS (service)",
+        "ref": "services/background-removal/app/upscale.py:40 ; docs/audit/RAPPORT-global-28-09.md:122"
+      },
+      {
+        "what": "envoi en bandes",
+        "value": "au-delà de 2 Mpx, l'image va au serveur en bandes (une requête et un billet par bande)",
+        "constant": "SERVER_PART_PIXELS",
+        "ref": "app/lib/localUpscale.js:189-194, 200-239 ; page.jsx:80-84"
+      },
+      {
+        "what": "délai max d'un appel serveur",
+        "value": "290 s (« Upscaling took too long. Try a smaller image. »)",
+        "constant": null,
+        "ref": "app/api/image-upscale/route.ts:12, 35, 48"
+      },
+      {
+        "what": "iPhone / iPad",
+        "value": "résultat > 16,7 Mpx écrit en PNG par bandes (pas de toile géante), aperçu ≤ 2 Mpx",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/lib/localUpscale.js:60-78 ; app/lib/bigImage.js:19"
+      }
+    ],
+    "processing": {
+      "where": "mixed",
+      "detail": "Sur l'appareil quand WebGPU existe, que l'image n'a pas de transparence et que le résultat tient dans le navigateur : modèle /models/4xNomos2_hq_mosr-web.onnx (17 288 863 octets, servi par le site) exécuté par ONNX Runtime Web 1.30.0 chargé depuis cdn.jsdelivr.net, l'image ne part pas (« Running on your device: your image is not uploaded. »). Sinon (ou échec GPU, ou choix du serveur) : envoi en morceaux à notre service media-processing (Railway), notre route /api/image-upscale passe l'identifiant à notre service background-removal (/upscale-staged), qui lit l'image, calcule et dépose le PNG sur media-processing ; le visiteur le télécharge ; le dossier (entrée + sortie) est supprimé après un téléchargement complet, sinon à l'expiration MEDIA_JOB_TTL_SECONDS. Aucun tiers ne reçoit l'image.",
+      "ref": "app/tools/ai-tools/image-upscaler/page.jsx:62-87, 99-125, 164, 186 ; app/lib/localUpscale.js:13-43 ; app/api/image-upscale/route.ts:6-11, 38-43 ; services/media-processing/app/jobs.py:6-13, 299-302 ; services/media-processing/app/main.py:240 ; services/media-processing/app/config.py:44"
+    },
+    "quota": "PAS la garde partagée : sur l'appareil aucune limite ; sur notre serveur, billet d'envoi limité par réseau, heure et jour (MEDIA_JOBS_PER_HOUR_PER_IP / MEDIA_JOBS_PER_DAY_PER_IP, compteur office_rate ; « Too many conversions from your connection this hour. Please try again later. » / « Daily conversion limit reached for your connection. Please try again tomorrow. », app/api/media/ticket/route.js:24-42 ; lib/media/ticket.js:49-50) + budget mensuel propre 5 $ (« The AI upscaler's server has reached its monthly budget — a site-wide limit… », lib/quota/upscaleBudget.js:14, 41-49)",
+    "signup": "aucune inscription demandée (vérifié : la route ne lit ni en-tête Authorization ni session ; seule app/api/quota/me/route.ts:13-17 exige un jeton et aucun outil de ce lot ne l'appelle)",
+    "watermark": "aucun filigrane ajouté (vérifié : PNG écrit depuis la sortie du modèle, localUpscale.js:165-183 ; upscale.py:149-153)",
+    "browsers": "WebGPU requis pour le calcul sur l'appareil (adaptateur non logiciel, localUpscale.js:17-23) ; sans WebGPU → serveur ; iPhone/iPad (y compris iPad à trackpad) : PNG écrit par bandes, nécessite CompressionStream (localUpscale.js:60-65 ; bigImage.js:245-246). Liste de navigateurs WebGPU de la page : recherche, pas un test (RAPPORT-global-28-09.md:119, 127).",
+    "twin": null,
+    "notes": "×2 = résultat ×4 réduit (navigateur : moyenne 2×2 ou lissage, localUpscale.js:80-88, 172-179 ; serveur : Lanczos, upscale.py:102-103). Modèle : 4xNomos2_hq_mosr de Philip Hofmann, CC BY 4.0, crédité sur la page (page.jsx:190 ; upscale.py:3-11). Mesure : LPIPS 0,107 contre 0,164 pour iLoveIMG, 9 modèles libres comparés (docs/audit/RAPPORT-ecarts-marche.md:126-139). Temps serveur ≈ 35 s par Mpx + 10 s (localUpscale.js:186-187). Erreur de lecture : « This file could not be opened as an image. JPG, PNG and WebP are supported. » (page.jsx:58)."
+  },
+  {
+    "path": "/tools/ai-tools/keyword-extractor",
+    "task": "Extrait les mots et expressions clés d'un texte, en liste numérotée avec une courte explication pour chacun (gpt-4o-mini).",
+    "inputs": {
+      "accept": null,
+      "formats": [
+        "texte collé ou tapé"
+      ],
+      "ref": "app/tools/ai-tools/keyword-extractor/page.jsx:45"
+    },
+    "outputs": {
+      "formats": [
+        "texte affiché (champ « Result », lecture seule)",
+        "fichier .txt (keywords.txt)"
+      ],
+      "ref": "app/tools/ai-tools/keyword-extractor/page.jsx:52-54"
+    },
+    "controls": [
+      {
+        "label": "zone de texte, placeholder « Paste text to extract keywords... »",
+        "ref": "app/tools/ai-tools/keyword-extractor/page.jsx:45"
+      },
+      {
+        "label": "Extract Keywords (pendant le travail : « Processing... »)",
+        "ref": "app/tools/ai-tools/keyword-extractor/page.jsx:46-47"
+      },
+      {
+        "label": "Result",
+        "ref": "app/tools/ai-tools/keyword-extractor/page.jsx:52"
+      },
+      {
+        "label": "Download (keywords.txt)",
+        "ref": "app/tools/ai-tools/keyword-extractor/page.jsx:54 → app/components/FileDownload.jsx:211 ; « Save / Share » en plus si le navigateur partage des fichiers (FileDownload.jsx:95, 213-218)"
+      },
+      {
+        "label": "Copy",
+        "ref": "app/tools/ai-tools/keyword-extractor/page.jsx:55"
+      }
+    ],
+    "steps": [
+      "coller le texte → bouton « Extract Keywords » → le résultat apparaît dans « Result » → « Download » (keywords.txt) ou « Copy »"
+    ],
+    "limits": [
+      {
+        "what": "longueur max du texte envoyé (ordinateur et téléphone, aucune différence dans le code)",
+        "value": "8 000 caractères ; au-delà refus avec « Text is limited to 8,000 characters — this input is N. » (pas de troncature)",
+        "constant": "MAX_PROMPT_CHARS",
+        "ref": "lib/quota/limits.js:5, 126-133 ; app/api/ai/route.ts:20-21"
+      },
+      {
+        "what": "longueur max de la réponse du modèle",
+        "value": "1 000 jetons (max_tokens) — une réponse plus longue est coupée",
+        "constant": null,
+        "ref": "app/api/ai/route.ts:35"
+      }
+    ],
+    "processing": {
+      "where": "third-party",
+      "detail": "le texte part du navigateur vers notre route Vercel /api/ai (tool: 'keyword-extractor'), qui ajoute la consigne choisie côté serveur (lib/ai/toolPrompts.js) et l'envoie à OpenAI (chat/completions, modèle gpt-4o-mini, max_tokens 1000) ; la réponse revient en un seul JSON {text} (pas de flux). Rien du texte n'est enregistré par nous : la base ne reçoit que route, outil, issue et coût (lib/quota/logEvent.js:4-8) ; un message d'erreur affiché est signalé sans le texte du visiteur (app/lib/useToolError.js:2-7). La conservation côté OpenAI n'est documentée nulle part dans le dépôt.",
+      "ref": "app/api/ai/route.ts:23-43, 86-89 ; lib/quota/logEvent.js:4-8"
+    },
+    "quota": "garde partagée : limite par réseau (IP hachée) par heure et par jour UTC, compteur COMMUN à tous les outils payants (IP_RATE_LIMIT_PER_HOUR / IP_RATE_LIMIT_PER_DAY, valeurs en variables d'environnement, lib/quota/config.js:13-14 ; lib/quota/ipRateLimit.js:4-8 ; refus 429 « Too many requests from this network. Try again in about N minutes. » lib/quota/guard.js:16-25) + plafond de dépense mensuel du site (GLOBAL_SPEND_CAP_USD, défaut 20 $ dans le code, lib/quota/config.js:6 ; refus 503 « This tool has reached its usage limit for the month — that's a site-wide limit, not something on your end. It resets on <date> (UTC). » lib/quota/guard.js:28-37)",
+    "signup": "aucune inscription demandée (vérifié : la route ne lit ni en-tête Authorization ni session ; seule app/api/quota/me/route.ts:13-17 exige un jeton et aucun outil de ce lot ne l'appelle)",
+    "watermark": "sans objet (texte)",
+    "browsers": null,
+    "twin": "/tools/text-tools/word-counter (densité des mots, sans IA, composant KeywordDensity) — outil voisin, pas identique",
+    "notes": "Consigne serveur : « …Extract the most important keywords and key phrases from the provided text. Return them as a numbered list with brief explanations of why each is important. » (lib/ai/toolPrompts.js:68-70). Aucun volume de recherche ni donnée de concurrence. Nombre de mots-clés non fixé."
+  },
+  {
+    "path": "/tools/ai-tools/sentiment-analyzer",
+    "task": "Classe le sentiment d'un texte (Positive, Negative ou Neutral) avec un pourcentage de confiance et une explication (gpt-4o-mini).",
+    "inputs": {
+      "accept": null,
+      "formats": [
+        "texte collé ou tapé"
+      ],
+      "ref": "app/tools/ai-tools/sentiment-analyzer/page.jsx:45"
+    },
+    "outputs": {
+      "formats": [
+        "texte affiché (champ « Result », lecture seule)",
+        "fichier .txt (sentiment.txt)"
+      ],
+      "ref": "app/tools/ai-tools/sentiment-analyzer/page.jsx:52-54"
+    },
+    "controls": [
+      {
+        "label": "zone de texte, placeholder « Paste text to analyze sentiment... »",
+        "ref": "app/tools/ai-tools/sentiment-analyzer/page.jsx:45"
+      },
+      {
+        "label": "Analyze Sentiment (pendant le travail : « Processing... »)",
+        "ref": "app/tools/ai-tools/sentiment-analyzer/page.jsx:46-47"
+      },
+      {
+        "label": "Result",
+        "ref": "app/tools/ai-tools/sentiment-analyzer/page.jsx:52"
+      },
+      {
+        "label": "Download (sentiment.txt)",
+        "ref": "app/tools/ai-tools/sentiment-analyzer/page.jsx:54 → app/components/FileDownload.jsx:211 ; « Save / Share » en plus si le navigateur partage des fichiers (FileDownload.jsx:95, 213-218)"
+      },
+      {
+        "label": "Copy",
+        "ref": "app/tools/ai-tools/sentiment-analyzer/page.jsx:55"
+      }
+    ],
+    "steps": [
+      "coller le texte → bouton « Analyze Sentiment » → le résultat apparaît dans « Result » → « Download » (sentiment.txt) ou « Copy »"
+    ],
+    "limits": [
+      {
+        "what": "longueur max du texte envoyé (ordinateur et téléphone, aucune différence dans le code)",
+        "value": "8 000 caractères ; au-delà refus avec « Text is limited to 8,000 characters — this input is N. » (pas de troncature)",
+        "constant": "MAX_PROMPT_CHARS",
+        "ref": "lib/quota/limits.js:5, 126-133 ; app/api/ai/route.ts:20-21"
+      },
+      {
+        "what": "longueur max de la réponse du modèle",
+        "value": "1 000 jetons (max_tokens) — une réponse plus longue est coupée",
+        "constant": null,
+        "ref": "app/api/ai/route.ts:35"
+      }
+    ],
+    "processing": {
+      "where": "third-party",
+      "detail": "le texte part du navigateur vers notre route Vercel /api/ai (tool: 'sentiment-analyzer'), qui ajoute la consigne choisie côté serveur (lib/ai/toolPrompts.js) et l'envoie à OpenAI (chat/completions, modèle gpt-4o-mini, max_tokens 1000) ; la réponse revient en un seul JSON {text} (pas de flux). Rien du texte n'est enregistré par nous : la base ne reçoit que route, outil, issue et coût (lib/quota/logEvent.js:4-8) ; un message d'erreur affiché est signalé sans le texte du visiteur (app/lib/useToolError.js:2-7). La conservation côté OpenAI n'est documentée nulle part dans le dépôt.",
+      "ref": "app/api/ai/route.ts:23-43, 86-89 ; lib/quota/logEvent.js:4-8"
+    },
+    "quota": "garde partagée : limite par réseau (IP hachée) par heure et par jour UTC, compteur COMMUN à tous les outils payants (IP_RATE_LIMIT_PER_HOUR / IP_RATE_LIMIT_PER_DAY, valeurs en variables d'environnement, lib/quota/config.js:13-14 ; lib/quota/ipRateLimit.js:4-8 ; refus 429 « Too many requests from this network. Try again in about N minutes. » lib/quota/guard.js:16-25) + plafond de dépense mensuel du site (GLOBAL_SPEND_CAP_USD, défaut 20 $ dans le code, lib/quota/config.js:6 ; refus 503 « This tool has reached its usage limit for the month — that's a site-wide limit, not something on your end. It resets on <date> (UTC). » lib/quota/guard.js:28-37)",
+    "signup": "aucune inscription demandée (vérifié : la route ne lit ni en-tête Authorization ni session ; seule app/api/quota/me/route.ts:13-17 exige un jeton et aucun outil de ce lot ne l'appelle)",
+    "watermark": "sans objet (texte)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Consigne serveur : « …Determine if it is Positive, Negative, or Neutral, provide a confidence percentage, and explain the key sentiment indicators. » (lib/ai/toolPrompts.js:71-73). Le pourcentage est donné par le modèle lui-même, pas calculé. Un texte à la fois, pas de lot."
+  },
+  {
+    "path": "/tools/ai-tools/text-summarizer",
+    "task": "Résume un texte en gardant les points clés (gpt-4o-mini).",
+    "inputs": {
+      "accept": null,
+      "formats": [
+        "texte collé ou tapé"
+      ],
+      "ref": "app/tools/ai-tools/text-summarizer/page.jsx:45"
+    },
+    "outputs": {
+      "formats": [
+        "texte affiché (champ « Result », lecture seule)",
+        "fichier .txt (summary.txt)"
+      ],
+      "ref": "app/tools/ai-tools/text-summarizer/page.jsx:52-54"
+    },
+    "controls": [
+      {
+        "label": "zone de texte, placeholder « Paste text to summarize... »",
+        "ref": "app/tools/ai-tools/text-summarizer/page.jsx:45"
+      },
+      {
+        "label": "Summarize (pendant le travail : « Summarizing... »)",
+        "ref": "app/tools/ai-tools/text-summarizer/page.jsx:46-47"
+      },
+      {
+        "label": "Result",
+        "ref": "app/tools/ai-tools/text-summarizer/page.jsx:52"
+      },
+      {
+        "label": "Download (summary.txt)",
+        "ref": "app/tools/ai-tools/text-summarizer/page.jsx:54 → app/components/FileDownload.jsx:211 ; « Save / Share » en plus si le navigateur partage des fichiers (FileDownload.jsx:95, 213-218)"
+      },
+      {
+        "label": "Copy",
+        "ref": "app/tools/ai-tools/text-summarizer/page.jsx:55"
+      }
+    ],
+    "steps": [
+      "coller le texte → bouton « Summarize » → le résultat apparaît dans « Result » → « Download » (summary.txt) ou « Copy »"
+    ],
+    "limits": [
+      {
+        "what": "longueur max du texte envoyé (ordinateur et téléphone, aucune différence dans le code)",
+        "value": "8 000 caractères ; au-delà refus avec « Text is limited to 8,000 characters — this input is N. » (pas de troncature)",
+        "constant": "MAX_PROMPT_CHARS",
+        "ref": "lib/quota/limits.js:5, 126-133 ; app/api/ai/route.ts:20-21"
+      },
+      {
+        "what": "longueur max de la réponse du modèle",
+        "value": "1 000 jetons (max_tokens) — une réponse plus longue est coupée",
+        "constant": null,
+        "ref": "app/api/ai/route.ts:35"
+      }
+    ],
+    "processing": {
+      "where": "third-party",
+      "detail": "le texte part du navigateur vers notre route Vercel /api/ai (tool: 'text-summarizer'), qui ajoute la consigne choisie côté serveur (lib/ai/toolPrompts.js) et l'envoie à OpenAI (chat/completions, modèle gpt-4o-mini, max_tokens 1000) ; la réponse revient en un seul JSON {text} (pas de flux). Rien du texte n'est enregistré par nous : la base ne reçoit que route, outil, issue et coût (lib/quota/logEvent.js:4-8) ; un message d'erreur affiché est signalé sans le texte du visiteur (app/lib/useToolError.js:2-7). La conservation côté OpenAI n'est documentée nulle part dans le dépôt.",
+      "ref": "app/api/ai/route.ts:23-43, 86-89 ; lib/quota/logEvent.js:4-8"
+    },
+    "quota": "garde partagée : limite par réseau (IP hachée) par heure et par jour UTC, compteur COMMUN à tous les outils payants (IP_RATE_LIMIT_PER_HOUR / IP_RATE_LIMIT_PER_DAY, valeurs en variables d'environnement, lib/quota/config.js:13-14 ; lib/quota/ipRateLimit.js:4-8 ; refus 429 « Too many requests from this network. Try again in about N minutes. » lib/quota/guard.js:16-25) + plafond de dépense mensuel du site (GLOBAL_SPEND_CAP_USD, défaut 20 $ dans le code, lib/quota/config.js:6 ; refus 503 « This tool has reached its usage limit for the month — that's a site-wide limit, not something on your end. It resets on <date> (UTC). » lib/quota/guard.js:28-37)",
+    "signup": "aucune inscription demandée (vérifié : la route ne lit ni en-tête Authorization ni session ; seule app/api/quota/me/route.ts:13-17 exige un jeton et aucun outil de ce lot ne l'appelle)",
+    "watermark": "sans objet (texte)",
+    "browsers": null,
+    "twin": "/tools/pdf-tools/pdf-ai-summary (même route /api/ai, tool 'pdf-ai-summary', texte extrait d'un PDF : app/tools/pdf-tools/pdf-ai-summary/page.jsx:60 ; lib/ai/toolPrompts.js:77-79)",
+    "notes": "Consigne serveur : « You are a text summarizer. Create a concise summary of the provided text. Keep the key points and main ideas. Return only the summary. » (lib/ai/toolPrompts.js:74-76). 8 000 caractères ≈ 1 300 mots anglais (estimation, pas une constante du code). Aucun réglage de longueur."
+  }
+]

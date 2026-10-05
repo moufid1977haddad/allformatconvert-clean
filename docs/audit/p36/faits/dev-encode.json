@@ -1,0 +1,369 @@
+[
+  {
+    "path": "/tools/developer-tools/base64-encoder",
+    "task": "Encode du texte (UTF-8) en Base64 standard ou URL-safe, et décode du Base64 (standard ou URL-safe) en texte.",
+    "inputs": {"accept": null, "formats": ["texte collé ou tapé (encodage)", "Base64 standard ou URL-safe, avec ou sans « = », espaces et retours à la ligne ignorés (décodage)"], "ref": "app/tools/developer-tools/base64-encoder/page.jsx:25; app/lib/textCodecs.js:29-38"},
+    "outputs": {"formats": ["texte Base64 (standard, ou URL-safe sans « = » si la case est cochée)", "texte UTF-8 décodé", "fichier texte base64.txt (même nom pour un résultat décodé)"], "ref": "app/lib/textCodecs.js:23-27,41; app/tools/developer-tools/base64-encoder/page.jsx:31-32"},
+    "controls": [
+      {"label": "Paste text here... (zone de saisie)", "ref": "app/tools/developer-tools/base64-encoder/page.jsx:25"},
+      {"label": "URL-safe Base64 when encoding (- and _ instead of + and /, no = padding — as in JWT and URLs)", "ref": "app/tools/developer-tools/base64-encoder/page.jsx:26"},
+      {"label": "Encode", "ref": "app/tools/developer-tools/base64-encoder/page.jsx:28"},
+      {"label": "Decode", "ref": "app/tools/developer-tools/base64-encoder/page.jsx:29"},
+      {"label": "Result (zone de résultat, lecture seule)", "ref": "app/tools/developer-tools/base64-encoder/page.jsx:31"},
+      {"label": "base64.txt + bouton « Download » (et « Save / Share » sur iPhone/iPad)", "ref": "app/tools/developer-tools/base64-encoder/page.jsx:32; app/components/FileDownload.jsx:92-96,211,216"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/base64-encoder/page.jsx:32"}
+    ],
+    "steps": ["coller du texte (ou du Base64) → cocher ou non « URL-safe Base64 when encoding… » (n'agit que sur l'encodage) → bouton « Encode » ou « Decode » → bouton « Copy » ou « Download » (base64.txt)"],
+    "limits": [
+      {"what": "taille maximale du texte", "value": "NON TROUVÉ (aucune constante ; cherché dans page.jsx, textCodecs.js, TextArea.jsx)", "constant": null, "ref": "app/tools/developer-tools/base64-encoder/page.jsx:12-18"},
+      {"what": "au-delà de 1 000 000 caractères, le champ affiche un aperçu des 20 000 premiers ; l'outil traite tout le texte", "value": "1 000 000 / 20 000 caractères", "constant": "LIMIT / PREVIEW", "ref": "app/components/TextArea.jsx:17-18,47-64"},
+      {"what": "limite téléphone", "value": "aucune limite propre au téléphone dans le code", "constant": null, "ref": "app/tools/developer-tools/base64-encoder/page.jsx:1-60"}
+    ],
+    "processing": {"where": "browser", "detail": "Encodage : TextEncoder (UTF-8) puis btoa ; option URL-safe remplace + / par - _ et retire les = ; décodage : atob puis TextDecoder UTF-8 strict. Aucun appel réseau. Seul le texte d'un message d'erreur, nettoyé, peut partir vers /api/report-error.", "ref": "app/lib/textCodecs.js:15-45; app/tools/developer-tools/base64-encoder/page.jsx:17; app/lib/useToolError.js:19-31"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau ni import d'authentification dans page.jsx:1-7)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": "/tools/file-tools/base64-encoder (fichier → Data URL / Base64 brut, encodage seulement, aucun décodage) ; voisin : /tools/image-tools/image-to-base64 (images seulement, 5 formes de sortie)",
+    "notes": "Messages réels : « This is not valid Base64: only A-Z, a-z, 0-9, + / (or - _) and = padding are allowed. » (textCodecs.js:34) ; « This is not valid Base64: its length is impossible (one character too many or missing). » (textCodecs.js:36) ; Base64 d'un binaire : « This Base64 decodes to N bytes of binary data, not UTF-8 text (for example an image or a compressed file), so it can't be shown as text. » (page.jsx:16). Le BOM UTF-8 éventuel est conservé au décodage (ignoreBOM: true, textCodecs.js:41). Les boutons sont désactivés quand le champ est vide (page.jsx:28-29). Pas de décodage Base64 → fichier sur cette page."
+  },
+  {
+    "path": "/tools/file-tools/base64-encoder",
+    "task": "Lit un fichier choisi ou déposé et donne son contenu en Base64, sous forme de Data URL (data:<type>;base64,…) ou de Base64 brut.",
+    "inputs": {"accept": null, "formats": ["tout fichier, un à la fois (pas d'attribut accept, pas de multiple) ; fichier vide refusé"], "ref": "app/tools/file-tools/base64-encoder/page.jsx:33,63"},
+    "outputs": {"formats": ["Data URL texte", "Base64 brut (sans le préfixe data:…;base64,)", "fichier texte <nom du fichier>.base64.txt (contient la forme choisie)"], "ref": "app/tools/file-tools/base64-encoder/page.jsx:24-25,72,79"},
+    "controls": [
+      {"label": "Click or drop any file here (souris) / Choose any file (écran tactile) ; le nom du fichier remplace ce texte une fois choisi", "ref": "app/tools/file-tools/base64-encoder/page.jsx:62; app/components/UploadPrompt.jsx:10-11"},
+      {"label": "Encoding... (pendant la lecture)", "ref": "app/tools/file-tools/base64-encoder/page.jsx:65"},
+      {"label": "Data URL", "ref": "app/tools/file-tools/base64-encoder/page.jsx:72"},
+      {"label": "Raw Base64", "ref": "app/tools/file-tools/base64-encoder/page.jsx:72"},
+      {"label": "N characters (compteur)", "ref": "app/tools/file-tools/base64-encoder/page.jsx:73"},
+      {"label": "Result (zone, lecture seule)", "ref": "app/tools/file-tools/base64-encoder/page.jsx:75"},
+      {"label": "Preview of the first 100,000 characters; Copy and Download give the whole text.", "ref": "app/tools/file-tools/base64-encoder/page.jsx:76"},
+      {"label": "Copy Base64", "ref": "app/tools/file-tools/base64-encoder/page.jsx:78"},
+      {"label": "<nom>.base64.txt + bouton « Download » (et « Save / Share » sur iPhone/iPad)", "ref": "app/tools/file-tools/base64-encoder/page.jsx:79; app/components/FileDownload.jsx:92-96,211,216"}
+    ],
+    "steps": ["cliquer la zone (ou déposer un fichier, ou « Choose any file » sur téléphone) → l'encodage démarre seul dès le choix (pas de bouton) → choisir « Data URL » (par défaut) ou « Raw Base64 » → bouton « Copy Base64 » ou « Download »"],
+    "limits": [
+      {"what": "taille max par fichier sur ordinateur", "value": "NON TROUVÉ (aucune constante ; cherché dans page.jsx, fileChecks.js, aucun import de deviceLimits)", "constant": null, "ref": "app/tools/file-tools/base64-encoder/page.jsx:1-9,28-54"},
+      {"what": "taille max par fichier sur iPhone/Android", "value": "NON TROUVÉ (aucune constante propre au téléphone)", "constant": null, "ref": "app/tools/file-tools/base64-encoder/page.jsx:1-9"},
+      {"what": "aperçu affiché dans la zone de résultat (Copy et Download donnent tout)", "value": "100 000 caractères", "constant": "PREVIEW_CHARS", "ref": "app/tools/file-tools/base64-encoder/page.jsx:15-17,68,75-76"},
+      {"what": "fichier vide", "value": "refusé : « This file is empty (0 bytes): there is nothing to encode. Choose the file again. »", "constant": null, "ref": "app/tools/file-tools/base64-encoder/page.jsx:33; app/lib/fileChecks.js:100-101"}
+    ],
+    "processing": {"where": "browser", "detail": "FileReader.readAsDataURL dans la page ; si le navigateur ne donne aucun type ou application/octet-stream, le type est lu dans les 32 784 premiers octets (47 signatures : PNG, JPEG, HEIC, AVIF, PDF, ZIP, MP4…) et remplace celui de la Data URL. Rien n'est envoyé ; seul le texte d'un message d'erreur, nettoyé, peut partir vers /api/report-error.", "ref": "app/tools/file-tools/base64-encoder/page.jsx:39-49; app/lib/fileSignature.js:11-64; app/lib/useToolError.js:37-51"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau ni authentification dans page.jsx)",
+    "watermark": "sans objet",
+    "browsers": "Dépôt de fichier assuré par le pont global FileDropBridge (app/layout.tsx:118 ; app/components/FileDropBridge.jsx:4-13) ; texte de la zone différent souris / tactile (UploadPrompt.jsx:1-13) ; bouton « Save / Share » sur iPhone/iPad (FileDownload.jsx:15-22,92-96). Mesure WebKit citée en commentaire pour l'aperçu de 100 000 caractères (page.jsx:15-16, scripts/p23/textarea-cost.mjs).",
+    "twin": "/tools/developer-tools/base64-encoder (texte ↔ Base64) ; /tools/image-tools/image-to-base64 (images seulement, accept=\"image/*\", sorties Data URI / Plain Base64 / <img> / CSS / JSON)",
+    "notes": "Erreur de lecture : « Failed to read file: <message du navigateur> » (page.jsx:48,51). Pas de décodage Base64 → fichier. Le nom du fichier téléchargé est <nom complet>.base64.txt, extension d'origine comprise (page.jsx:79)."
+  },
+  {
+    "path": "/tools/developer-tools/url-encoder",
+    "task": "Encode un texte en pourcentage selon trois modes (une valeur, une URL entière, RFC 3986 strict) et décode un texte encodé, « + » lu comme espace par défaut.",
+    "inputs": {"accept": null, "formats": ["texte collé ou tapé"], "ref": "app/tools/developer-tools/url-encoder/page.jsx:32"},
+    "outputs": {"formats": ["texte encodé ou décodé", "fichier texte encoded.txt (même nom après un décodage)"], "ref": "app/tools/developer-tools/url-encoder/page.jsx:46-47"},
+    "controls": [
+      {"label": "Paste URL here... (zone de saisie)", "ref": "app/tools/developer-tools/url-encoder/page.jsx:32"},
+      {"label": "Decode “+” as a space (form data and query strings) — cochée par défaut", "ref": "app/tools/developer-tools/url-encoder/page.jsx:22,33"},
+      {"label": "Each “+” is read as a space here (form encoding). If your text has real plus signs — an e-mail like a+b@x.com, a phone number — untick this box. (affiché si la case est cochée et le texte contient +)", "ref": "app/tools/developer-tools/url-encoder/page.jsx:34"},
+      {"label": "Encode as : « A value (query parameter, path segment) » (défaut) / « A whole URL (keeps : / ? # & =) » / « Strict RFC 3986 (also ! ' ( ) *) »", "ref": "app/tools/developer-tools/url-encoder/page.jsx:23,35-40"},
+      {"label": "Encode", "ref": "app/tools/developer-tools/url-encoder/page.jsx:43"},
+      {"label": "Decode", "ref": "app/tools/developer-tools/url-encoder/page.jsx:44"},
+      {"label": "Result", "ref": "app/tools/developer-tools/url-encoder/page.jsx:46"},
+      {"label": "encoded.txt + « Download »", "ref": "app/tools/developer-tools/url-encoder/page.jsx:47; app/components/FileDownload.jsx:211"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/url-encoder/page.jsx:47"}
+    ],
+    "steps": ["coller le texte → choisir « Encode as » (pour encoder) ou laisser/décocher « Decode “+” as a space » (pour décoder) → bouton « Encode » ou « Decode » → « Copy » ou « Download » (encoded.txt)"],
+    "limits": [
+      {"what": "taille maximale du texte", "value": "NON TROUVÉ (aucune constante dans page.jsx)", "constant": null, "ref": "app/tools/developer-tools/url-encoder/page.jsx:9-25"},
+      {"what": "aperçu du champ au-delà de 1 000 000 caractères (l'outil traite tout)", "value": "1 000 000 / 20 000 caractères", "constant": "LIMIT / PREVIEW", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "A value = encodeURIComponent ; A whole URL = encodeURI appliqué entre les %XX déjà présents (gardés tels quels) ; Strict RFC 3986 = encodeURIComponent + ! ' ( ) * encodés ; Decode = decodeURIComponent, après + → espace si la case est cochée. Aucun appel réseau.", "ref": "app/tools/developer-tools/url-encoder/page.jsx:9-14,22-25"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau dans page.jsx)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": "/tools/text-tools/url-encoder (identique : même ENCODERS, mêmes contrôles ; différences : police à chasse fixe ici, placeholder « Paste your URL or text here... » et message « Copy failed » là-bas)",
+    "notes": "Messages : « Invalid URL encoding » (page.jsx:25) ; « This text has a broken character (a lone surrogate) that URLs cannot carry. » (page.jsx:24). ATTENTION rédacteur : le commentaire page.jsx:19-21 dit que l'encodage ne produit jamais de « + » brut ; c'est faux en mode « A whole URL » (encodeURI garde + ; ; , @ $ ! ~ * ' ( ) en plus de : / ? # & =) : « a+b » encodé en URL entière puis décodé avec la case cochée donne « a b ». Ne pas promettre d'aller-retour exact dans ce mode. Le libellé « keeps : / ? # & = » est incomplet pour la même raison."
+  },
+  {
+    "path": "/tools/text-tools/url-encoder",
+    "task": "Encode un texte en pourcentage selon trois modes (une valeur, une URL entière, RFC 3986 strict) et décode un texte encodé, « + » lu comme espace par défaut.",
+    "inputs": {"accept": null, "formats": ["texte collé ou tapé"], "ref": "app/tools/text-tools/url-encoder/page.jsx:41"},
+    "outputs": {"formats": ["texte encodé ou décodé", "fichier texte encoded.txt"], "ref": "app/tools/text-tools/url-encoder/page.jsx:57-58"},
+    "controls": [
+      {"label": "Paste your URL or text here... (zone de saisie)", "ref": "app/tools/text-tools/url-encoder/page.jsx:41"},
+      {"label": "Decode “+” as a space (form data and query strings) — cochée par défaut", "ref": "app/tools/text-tools/url-encoder/page.jsx:24,42"},
+      {"label": "avertissement « Each “+” is read as a space here (form encoding)… untick this box. »", "ref": "app/tools/text-tools/url-encoder/page.jsx:43"},
+      {"label": "Encode as : « A value (query parameter, path segment) » (défaut) / « A whole URL (keeps : / ? # & =) » / « Strict RFC 3986 (also ! ' ( ) *) »", "ref": "app/tools/text-tools/url-encoder/page.jsx:25,44-49"},
+      {"label": "Encode", "ref": "app/tools/text-tools/url-encoder/page.jsx:52"},
+      {"label": "Decode", "ref": "app/tools/text-tools/url-encoder/page.jsx:53"},
+      {"label": "Result", "ref": "app/tools/text-tools/url-encoder/page.jsx:57"},
+      {"label": "encoded.txt + « Download »", "ref": "app/tools/text-tools/url-encoder/page.jsx:58; app/components/FileDownload.jsx:211"},
+      {"label": "Copy (message « Copy failed » si le presse-papiers refuse)", "ref": "app/tools/text-tools/url-encoder/page.jsx:59-60"}
+    ],
+    "steps": ["coller le texte → choisir « Encode as » ou régler la case « + » → « Encode » ou « Decode » → « Copy » ou « Download » (encoded.txt)"],
+    "limits": [
+      {"what": "taille maximale du texte", "value": "NON TROUVÉ (aucune constante dans page.jsx)", "constant": null, "ref": "app/tools/text-tools/url-encoder/page.jsx:10-34"},
+      {"what": "aperçu du champ au-delà de 1 000 000 caractères", "value": "1 000 000 / 20 000 caractères", "constant": "LIMIT / PREVIEW", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "Identique à la page développeur : encodeURIComponent / encodeURI par segments / RFC 3986 ; decodeURIComponent après + → espace si coché. Aucun appel réseau.", "ref": "app/tools/text-tools/url-encoder/page.jsx:10-15,24-34"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau dans page.jsx)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": "/tools/developer-tools/url-encoder (identique)",
+    "notes": "Messages : « Invalid URL encoding » (page.jsx:32), « This text has a broken character (a lone surrogate) that URLs cannot carry. » (page.jsx:26), « Copy failed » (page.jsx:60). Même réserve que la page jumelle sur le « + » en mode « A whole URL » (page.jsx:21-23 commentaire inexact)."
+  },
+  {
+    "path": "/tools/developer-tools/html-encoder",
+    "task": "Échappe & < > \" ' en entités HTML et décode toute entité HTML (nommée, décimale, hexadécimale) en une seule passe.",
+    "inputs": {"accept": null, "formats": ["texte ou HTML collé"], "ref": "app/tools/developer-tools/html-encoder/page.jsx:18"},
+    "outputs": {"formats": ["texte encodé (&amp; &lt; &gt; &quot; &#39;)", "texte décodé", "fichier texte encoded.txt (même nom après un décodage)"], "ref": "app/lib/textCodecs.js:65-68; app/tools/developer-tools/html-encoder/page.jsx:23-24"},
+    "controls": [
+      {"label": "Paste HTML here... (zone de saisie)", "ref": "app/tools/developer-tools/html-encoder/page.jsx:18"},
+      {"label": "Encode", "ref": "app/tools/developer-tools/html-encoder/page.jsx:20"},
+      {"label": "Decode", "ref": "app/tools/developer-tools/html-encoder/page.jsx:21"},
+      {"label": "Result", "ref": "app/tools/developer-tools/html-encoder/page.jsx:23"},
+      {"label": "encoded.txt + « Download »", "ref": "app/tools/developer-tools/html-encoder/page.jsx:24; app/components/FileDownload.jsx:211"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/html-encoder/page.jsx:24"}
+    ],
+    "steps": ["coller le texte → « Encode » ou « Decode » → « Copy » ou « Download » (encoded.txt)"],
+    "limits": [
+      {"what": "taille maximale du texte", "value": "NON TROUVÉ (aucune constante)", "constant": null, "ref": "app/tools/developer-tools/html-encoder/page.jsx:10-11"},
+      {"what": "aperçu du champ au-delà de 1 000 000 caractères", "value": "1 000 000 / 20 000 caractères", "constant": "LIMIT / PREVIEW", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "Encode : remplacement des 5 caractères (' → &#39;). Decode : une passe ; numériques convertis par String.fromCodePoint (0, > 0x10FFFF et D800-DFFF → �) ; nommées résolues une par une par DOMParser (aucun script exécuté, aucune ressource chargée). Aucun appel réseau.", "ref": "app/lib/textCodecs.js:65-90"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau dans page.jsx)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": "/tools/developer-tools/html-entity-decoder (mêmes fonctions et boutons ; seul le nom du fichier téléchargé diffère : decoded.txt)",
+    "notes": "Nuances pour le rédacteur (prouvées par le code, à ne pas contredire) : le « ; » final est facultatif (textCodecs.js:75) et DOMParser applique les entités historiques sans « ; » comme un navigateur : « &copyright » donne « ©right » ; les numériques 128-159 (&#150;) donnent le caractère de contrôle U+0096, pas « – » comme un navigateur (textCodecs.js:77-79). Encode puis Decode redonne le texte d'origine (vrai). ATTENTION : le JSON d'extraction montre ce texte doublement décodé (scripts/p36/extract-content.mjs:17) ; la page affiche bien « &nbsp; », « &copy; », « &#x1F600; », « &amp;lt; … &lt; » littéralement (page.jsx:29,39-40)."
+  },
+  {
+    "path": "/tools/developer-tools/html-entity-decoder",
+    "task": "Décode toute entité HTML (nommée, décimale, hexadécimale) en caractère en une seule passe, en laissant les balises intactes ; peut aussi échapper & < > \" '.",
+    "inputs": {"accept": null, "formats": ["texte ou HTML collé"], "ref": "app/tools/developer-tools/html-entity-decoder/page.jsx:22"},
+    "outputs": {"formats": ["texte décodé", "texte encodé", "fichier texte decoded.txt (même nom après un encodage)"], "ref": "app/tools/developer-tools/html-entity-decoder/page.jsx:27-28"},
+    "controls": [
+      {"label": "Paste HTML here... (zone de saisie)", "ref": "app/tools/developer-tools/html-entity-decoder/page.jsx:22"},
+      {"label": "Encode", "ref": "app/tools/developer-tools/html-entity-decoder/page.jsx:24"},
+      {"label": "Decode", "ref": "app/tools/developer-tools/html-entity-decoder/page.jsx:25"},
+      {"label": "Result", "ref": "app/tools/developer-tools/html-entity-decoder/page.jsx:27"},
+      {"label": "decoded.txt + « Download »", "ref": "app/tools/developer-tools/html-entity-decoder/page.jsx:28; app/components/FileDownload.jsx:211"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/html-entity-decoder/page.jsx:28"}
+    ],
+    "steps": ["coller le texte → « Decode » (ou « Encode ») → « Copy » ou « Download » (decoded.txt)"],
+    "limits": [
+      {"what": "taille maximale du texte", "value": "NON TROUVÉ (aucune constante)", "constant": null, "ref": "app/tools/developer-tools/html-entity-decoder/page.jsx:14-15"},
+      {"what": "aperçu du champ au-delà de 1 000 000 caractères", "value": "1 000 000 / 20 000 caractères", "constant": "LIMIT / PREVIEW", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "Mêmes fonctions que HTML Encoder (htmlDecode + browserNamedEntity via DOMParser, htmlEncode). Aucun appel réseau.", "ref": "app/tools/developer-tools/html-entity-decoder/page.jsx:4,10-15; app/lib/textCodecs.js:65-90"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau dans page.jsx)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": "/tools/developer-tools/html-encoder (même outil)",
+    "notes": "Ordre des boutons : « Encode » à gauche, « Decode » à droite, comme sur le jumeau (page.jsx:24-25). Sous-titre identique au jumeau : « Encode and decode HTML entities » (page.jsx:20). Mêmes nuances que le jumeau (entités historiques sans « ; », 128-159). Le JSON d'extraction montre le texte doublement décodé ; la page affiche « &nbsp; », « &euro; », « &#x20AC; », « &#0; » littéralement (page.jsx:33,42-43,49)."
+  },
+  {
+    "path": "/tools/developer-tools/hex-to-text",
+    "task": "Convertit du texte en octets UTF-8 écrits en hexadécimal, et de l'hexadécimal en texte UTF-8.",
+    "inputs": {"accept": null, "formats": ["texte (Text to Hex)", "hexadécimal, 2 chiffres par octet, séparateurs espace , : ; - et préfixes 0x ou \\x acceptés (Hex to Text)"], "ref": "app/tools/developer-tools/hex-to-text/page.jsx:21; app/lib/textCodecs.js:51-55"},
+    "outputs": {"formats": ["paires hexadécimales minuscules séparées par une espace", "texte UTF-8", "fichier texte converted.txt"], "ref": "app/lib/textCodecs.js:47-49; app/tools/developer-tools/hex-to-text/page.jsx:26-27"},
+    "controls": [
+      {"label": "Enter text or hex... (zone de saisie)", "ref": "app/tools/developer-tools/hex-to-text/page.jsx:21"},
+      {"label": "Text to Hex", "ref": "app/tools/developer-tools/hex-to-text/page.jsx:23"},
+      {"label": "Hex to Text", "ref": "app/tools/developer-tools/hex-to-text/page.jsx:24"},
+      {"label": "Result", "ref": "app/tools/developer-tools/hex-to-text/page.jsx:26"},
+      {"label": "converted.txt + « Download »", "ref": "app/tools/developer-tools/hex-to-text/page.jsx:27; app/components/FileDownload.jsx:211"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/hex-to-text/page.jsx:27"}
+    ],
+    "steps": ["coller texte ou hexadécimal → « Text to Hex » ou « Hex to Text » → « Copy » ou « Download » (converted.txt)"],
+    "limits": [
+      {"what": "taille maximale du texte", "value": "NON TROUVÉ (aucune constante)", "constant": null, "ref": "app/tools/developer-tools/hex-to-text/page.jsx:11-14"},
+      {"what": "aperçu du champ au-delà de 1 000 000 caractères", "value": "1 000 000 / 20 000 caractères", "constant": "LIMIT / PREVIEW", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "TextEncoder (UTF-8) → hex ; hex → octets → TextDecoder UTF-8 strict. Aucun appel réseau ; le texte d'un message d'erreur (sans contenu) peut partir vers /api/report-error.", "ref": "app/lib/textCodecs.js:47-63; app/tools/developer-tools/hex-to-text/page.jsx:13"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau dans page.jsx)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Messages : « This is not valid hex: only 0-9 and A-F are allowed (spaces, commas and 0x prefixes are fine). » (textCodecs.js:54) ; « This hex has an odd number of digits: every byte needs two. » (textCodecs.js:55) ; « These bytes are not valid UTF-8 text (they may be binary data, or text in another encoding). » (textCodecs.js:61). Pas d'option majuscules ni de séparateur au choix (sortie fixe, textCodecs.js:47-48)."
+  },
+  {
+    "path": "/tools/developer-tools/unicode-converter",
+    "task": "Écrit chaque caractère d'un texte en séquence \\uXXXX (unités UTF-16) et reconvertit en texte les séquences \\uXXXX, \\u{…} et U+XXXX.",
+    "inputs": {"accept": null, "formats": ["texte (To Unicode)", "\\uXXXX (4 chiffres), \\u{1 à 6 chiffres}, U+XXXX à U+XXXXXX (U majuscule) (From Unicode)"], "ref": "app/tools/developer-tools/unicode-converter/page.jsx:9-13,20"},
+    "outputs": {"formats": ["séquences \\uXXXX en minuscules, une par unité UTF-16 (ASCII compris, emoji = 2 séquences)", "texte", "fichier texte converted.txt"], "ref": "app/tools/developer-tools/unicode-converter/page.jsx:9,25-26"},
+    "controls": [
+      {"label": "Enter text or unicode... (zone de saisie)", "ref": "app/tools/developer-tools/unicode-converter/page.jsx:20"},
+      {"label": "To Unicode", "ref": "app/tools/developer-tools/unicode-converter/page.jsx:22"},
+      {"label": "From Unicode", "ref": "app/tools/developer-tools/unicode-converter/page.jsx:23"},
+      {"label": "Result", "ref": "app/tools/developer-tools/unicode-converter/page.jsx:25"},
+      {"label": "converted.txt + « Download »", "ref": "app/tools/developer-tools/unicode-converter/page.jsx:26; app/components/FileDownload.jsx:211"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/unicode-converter/page.jsx:26"}
+    ],
+    "steps": ["coller le texte ou les séquences → « To Unicode » ou « From Unicode » → « Copy » ou « Download » (converted.txt)"],
+    "limits": [
+      {"what": "taille maximale du texte", "value": "NON TROUVÉ (aucune constante)", "constant": null, "ref": "app/tools/developer-tools/unicode-converter/page.jsx:9-13"},
+      {"what": "aperçu du champ au-delà de 1 000 000 caractères", "value": "1 000 000 / 20 000 caractères", "constant": "LIMIT / PREVIEW", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "split('') + charCodeAt (unités UTF-16) ; retour : \\u{…} et U+… via String.fromCodePoint (≤ 0x10FFFF, sinon laissé tel quel), puis \\uXXXX via String.fromCharCode. Aucun appel réseau.", "ref": "app/tools/developer-tools/unicode-converter/page.jsx:9-13"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau dans page.jsx)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Aucun message d'erreur : un texte sans séquence reconnue est rendu inchangé. « u+1f600 » (u minuscule) n'est pas reconnu (regex sensible à la casse, page.jsx:12). Les HTML entities ne sont pas lues (outil dédié : HTML Entity Decoder) ; les octets UTF-8 : Hex to Text."
+  },
+  {
+    "path": "/tools/developer-tools/hash-generator",
+    "task": "Calcule jusqu'à 17 empreintes et sommes de contrôle (MD5, SHA-1/2/3, Keccak-256, BLAKE2b/3, RIPEMD-160, CRC32/CRC32C, xxHash) d'un texte ou de fichiers, avec HMAC facultatif et vérification d'une empreinte attendue.",
+    "inputs": {"accept": null, "formats": ["texte (UTF-8, haché pendant la saisie)", "fichiers de tout type, plusieurs à la fois (input multiple, sans accept)"], "ref": "app/tools/developer-tools/hash-generator/page.jsx:86-99,226,246"},
+    "outputs": {"formats": ["empreintes en hex minuscules, HEX MAJUSCULES ou Base64", "checksums.txt (mode Files seulement) : lignes « ALGO (fichier) = hex », préfixe HMAC- avec une clé"], "ref": "app/tools/developer-tools/hash-generator/page.jsx:134,140,205-209,276-279"},
+    "controls": [
+      {"label": "Text / Files (choix du mode)", "ref": "app/tools/developer-tools/hash-generator/page.jsx:173-177"},
+      {"label": "Algorithms — groupes Common (MD5, SHA-1, SHA-256, SHA-512), SHA-2 and SHA-3 (SHA-224, SHA-384, SHA3-256, SHA3-512, Keccak-256 (Ethereum)), Other (BLAKE2b-512, BLAKE3, RIPEMD-160), Checksums (CRC32, CRC32C, xxHash64, XXH3-64, XXH128)", "ref": "app/tools/developer-tools/hash-generator/page.jsx:179-194; app/lib/hashAlgorithms.js:7-25"},
+      {"label": "Select all / Defaults / None", "ref": "app/tools/developer-tools/hash-generator/page.jsx:196-198"},
+      {"label": "Output : Hex, lowercase / Hex, UPPERCASE / Base64", "ref": "app/tools/developer-tools/hash-generator/page.jsx:204-209"},
+      {"label": "HMAC secret key (optional) — placeholder « Leave empty for a plain hash »", "ref": "app/tools/developer-tools/hash-generator/page.jsx:211-214"},
+      {"label": "HMAC is not defined for …: they are skipped while a key is set. (avertissement)", "ref": "app/tools/developer-tools/hash-generator/page.jsx:216"},
+      {"label": "Expected hash, to verify (optional) — placeholder « Paste the checksum published with the download » ; erreur « This is neither hexadecimal nor Base64. »", "ref": "app/tools/developer-tools/hash-generator/page.jsx:218-222"},
+      {"label": "Type or paste text — it is hashed as you type (zone texte) ; « N bytes of UTF-8 text »", "ref": "app/tools/developer-tools/hash-generator/page.jsx:226,230"},
+      {"label": "Drop files here, or click to choose / Any type, any size, several at once", "ref": "app/tools/developer-tools/hash-generator/page.jsx:244-245"},
+      {"label": "Remove (par fichier)", "ref": "app/tools/developer-tools/hash-generator/page.jsx:253"},
+      {"label": "Hash 1 file / Hash N files (ou « Tick at least one algorithm »)", "ref": "app/tools/developer-tools/hash-generator/page.jsx:264-266"},
+      {"label": "Hashing <fichier> (i of N)… + Cancel", "ref": "app/tools/developer-tools/hash-generator/page.jsx:258-262"},
+      {"label": "Copy / Copied (par valeur) ; « ✓ matches the expected hash »", "ref": "app/tools/developer-tools/hash-generator/page.jsx:152-153"},
+      {"label": "Copy all (mode Files)", "ref": "app/tools/developer-tools/hash-generator/page.jsx:278"},
+      {"label": "checksums.txt + « Download » (mode Files)", "ref": "app/tools/developer-tools/hash-generator/page.jsx:279; app/components/FileDownload.jsx:211"}
+    ],
+    "steps": [
+      "Texte : « Text » → cocher les algorithmes (défaut MD5, SHA-1, SHA-256, SHA-512, CRC32) → taper ou coller (calcul 200 ms après la dernière frappe) → « Copy » sur une valeur",
+      "Fichiers : « Files » → cocher les algorithmes → déposer ou choisir un ou plusieurs fichiers → bouton « Hash N files » (Cancel possible) → « Copy », « Copy all » ou « Download » (checksums.txt)",
+      "Vérifier : coller l'empreinte publiée dans « Expected hash, to verify (optional) » → la valeur égale passe en vert, sinon « ✗ None of the selected algorithms gives the expected hash. » + algorithmes de même longueur"
+    ],
+    "limits": [
+      {"what": "taille max par fichier (ordinateur et téléphone)", "value": "aucune limite dans le code (lecture par tranches de 8 Mio) ; mesure « 5 Gio : 52 s » seulement dans le message du commit 44ae126c, pas dans docs/audit/", "constant": "CHUNK", "ref": "app/tools/developer-tools/hash-generator/hash.worker.js:10,41-52"},
+      {"what": "fichier tenu en mémoire une fois pour Web Crypto (SHA-1, SHA-256, SHA-384, SHA-512) sur ordinateur", "value": "700 Mio (734 003 200 octets) ; au-delà, hash-wasm en flux", "constant": "inMemoryMax", "ref": "app/tools/developer-tools/hash-generator/page.jsx:19-21,31; hash.worker.js:31-34"},
+      {"what": "même seuil sur téléphone/tablette (isMobileDevice)", "value": "100 Mio (104 857 600 octets)", "constant": "inMemoryMax", "ref": "app/tools/developer-tools/hash-generator/page.jsx:21; app/lib/isMobileDevice.js:3-11"},
+      {"what": "répartition sur plusieurs Workers", "value": "à partir de 16 Mio, jusqu'à 4 Workers (min de 4, cœurs − 1, nombre d'algorithmes)", "constant": "PARALLEL_FROM", "ref": "app/tools/developer-tools/hash-generator/page.jsx:22-29"}
+    ],
+    "processing": {"where": "browser", "detail": "Web Workers (module) dans l'onglet ; Web Crypto pour SHA-1/256/384/512 si le fichier tient sous le seuil et si crypto.subtle existe, sinon hash-wasm (MIT) pour tout ; SHA-224 toujours hash-wasm. Rien n'est envoyé ; seul le texte d'une erreur affichée (nettoyé) peut partir vers /api/report-error.", "ref": "app/tools/developer-tools/hash-generator/page.jsx:40-59; hash.worker.js:7-61; app/lib/hashAlgorithms.js:5-25"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau dans page.jsx, seo.js, hash.worker.js)",
+    "watermark": "sans objet",
+    "browsers": "Seuil mémoire 100 Mio quand isMobileDevice() est vrai : navigator.userAgentData.mobile s'il existe, sinon UA Android/iPhone/iPod/Mobile, ou iPad (Macintosh + écran tactile) (app/lib/isMobileDevice.js:3-11) ; une tablette Android sous Chromium peut déclarer mobile=false (à vérifier). Sans crypto.subtle, tout passe par hash-wasm (hash.worker.js:30-31). La zone de dépôt dit « click » même sur téléphone (page.jsx:244, pas d'UploadPrompt).",
+    "twin": null,
+    "notes": "HMAC : non proposé pour Keccak-256, BLAKE3, CRC32, CRC32C, xxHash64, XXH3-64, XXH128 (hashAlgorithms.js:16,18,20-24) ; ils sont ignorés quand une clé est saisie (page.jsx:82,84,216). Empreinte attendue : hex (espaces et « : » permis) ou Base64/base64url (hashAlgorithms.js:35-45). Les lignes de checksums.txt utilisent toujours l'hex minuscule, quel que soit le format affiché (page.jsx:140). Le texte du titre, de la méta et des FAQ est dans seo.js (title seo.js:21, description seo.js:22, FAQ seo.js:1-9,25) ; la page passe aussi un exemple (seo.js:27-33 : MD5/SHA-1/SHA-256/CRC32 de « hello », valeurs justes) et des liens (seo.js:34-40, dont « ZIP Extractor — open ZIP, RAR, 7z and 40+ archive formats », affirmation sur un autre outil à faire vérifier par son lot). Message d'annulation : « Cancelled. Files finished before the cancel are listed below. » (page.jsx:132) ; copie refusée : « Copy was blocked by the browser. Select the text and copy it by hand. » (page.jsx:137)."
+  },
+  {
+    "path": "/tools/developer-tools/jwt-decoder",
+    "task": "Décode l'en-tête et la charge utile d'un JWT signé (3 parties) en JSON indenté, affiche exp/iat/nbf en dates UTC, et vérifie la signature avec un secret ou une clé publique.",
+    "inputs": {"accept": null, "formats": ["JWT compact à 3 parties (JWS) ; clé : secret texte ou base64/base64url (HS*), JWK oct, clé publique PEM « PUBLIC KEY » (SPKI) ou JWK RSA/EC/OKP"], "ref": "app/tools/developer-tools/jwt-decoder/page.jsx:37-38,60,65-72; app/lib/jwtVerify.js:38-79"},
+    "outputs": {"formats": ["HEADER et PAYLOAD en JSON indenté (texte d'origine réindenté, grands nombres intacts)", "lignes « exp: … (UTC) — expired / — not expired yet », « nbf: … — not valid yet », « iat: … »", "verdict de signature"], "ref": "app/tools/developer-tools/jwt-decoder/page.jsx:39-50,76-80,83"},
+    "controls": [
+      {"label": "Paste JWT token here... (zone de saisie)", "ref": "app/tools/developer-tools/jwt-decoder/page.jsx:60"},
+      {"label": "Decode", "ref": "app/tools/developer-tools/jwt-decoder/page.jsx:61"},
+      {"label": "Verify the signature (+ algorithme lu dans l'en-tête, ex. « (HS256) »)", "ref": "app/tools/developer-tools/jwt-decoder/page.jsx:64"},
+      {"label": "zone de clé — placeholder « The shared secret » (HS*) ou « The public key: -----BEGIN PUBLIC KEY----- … or a JWK {\"kty\": …} »", "ref": "app/tools/developer-tools/jwt-decoder/page.jsx:65-67"},
+      {"label": "Secret is : text / base64 / base64url (HS* seulement)", "ref": "app/tools/developer-tools/jwt-decoder/page.jsx:68-74"},
+      {"label": "Verify signature / Checking…", "ref": "app/tools/developer-tools/jwt-decoder/page.jsx:75"},
+      {"label": "Signature verified (ALG): this token was signed with this key and has not been changed. Check exp / nbf in the decoded payload as well.", "ref": "app/tools/developer-tools/jwt-decoder/page.jsx:79"},
+      {"label": "Invalid signature (ALG) … Do not trust it.", "ref": "app/tools/developer-tools/jwt-decoder/page.jsx:80"},
+      {"label": "Checked in your browser with WebCrypto; the key and the token are not sent anywhere. HS256/384/512, RS256/384/512, PS256/384/512, ES256/384/512 and EdDSA (Ed25519, in browsers that support it).", "ref": "app/tools/developer-tools/jwt-decoder/page.jsx:81"}
+    ],
+    "steps": ["coller le jeton → « Decode » (en-tête, charge utile, dates) → pour la signature : coller le secret ou la clé publique sous « Verify the signature », choisir « Secret is » si HS* → « Verify signature »"],
+    "limits": [
+      {"what": "taille du jeton", "value": "NON TROUVÉ (aucune constante dans page.jsx ni jwtVerify.js)", "constant": null, "ref": "app/tools/developer-tools/jwt-decoder/page.jsx:35-53; app/lib/jwtVerify.js:82-128"},
+      {"what": "algorithmes vérifiés", "value": "HS256/384/512, RS256/384/512, PS256/384/512, ES256/384/512, EdDSA/Ed25519", "constant": "ALGS / SUPPORTED_ALGS", "ref": "app/lib/jwtVerify.js:8-15"}
+    ],
+    "processing": {"where": "browser", "detail": "Décodage atob + TextDecoder ; vérification crypto.subtle (WebCrypto) ; seule la partie publique d'un JWK est gardée. Aucun appel réseau ; « Invalid JWT token » est signalé (texte seul) à /api/report-error ; les verdicts de signature ne sont pas signalés.", "ref": "app/tools/developer-tools/jwt-decoder/page.jsx:11,23-34,52; app/lib/jwtVerify.js:1-2,66-67,100-111"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau dans page.jsx ni jwtVerify.js)",
+    "watermark": "sans objet",
+    "browsers": "EdDSA demande WebCrypto Ed25519 ; sinon message « This browser cannot verify Ed25519 (EdDSA) signatures yet: WebCrypto Ed25519 is recent. Try a current Chrome, Edge, Firefox or Safari 17+. » (app/lib/jwtVerify.js:34-40,109). Sans WebCrypto : « This browser has no WebCrypto: the signature cannot be checked here. » (jwtVerify.js:100).",
+    "twin": null,
+    "notes": "Refus expliqués (jwtVerify.js) : alg none (94), alg inconnu (95), crit (97), b64:false (98), JWK Set (59), certificat X.509 (72), clé PKCS#1 « RSA PUBLIC KEY » (73), clé privée (74), clé publique pour HS* = attaque par confusion d'algorithme (50), courbe ES incorrecte (62), signature ECDSA de mauvaise longueur (104). Diagnostics : secret avec espaces ou retour à la ligne autour (114-118), RSA-PSS signé avec un autre sel (119-127), espaces dans le jeton retirés et signalés (85). Decode ne fait pas de trim et refuse un JWE à 5 parties (« Invalid JWT token », page.jsx:37-38,52). Pas de bouton Copy ni Download. Risque à vérifier : si Google Traduction est actif, HEADER/PAYLOAD (texte de page, page.jsx:83) pourraient être envoyés à Google (aucun notranslate)."
+  },
+  {
+    "path": "/tools/developer-tools/url-parser",
+    "task": "Découpe une URL avec l'analyseur URL du navigateur : protocol, hostname, port, pathname, search, hash et paramètres de requête décodés.",
+    "inputs": {"accept": null, "formats": ["une URL absolue (champ d'une ligne)"], "ref": "app/tools/developer-tools/url-parser/page.jsx:25"},
+    "outputs": {"formats": ["lignes protocol, hostname, port, pathname, search, hash (« — » si vide)", "section « Query Params » : clé = valeur(s) décodée(s), valeurs d'une clé répétée jointes par « , »"], "ref": "app/tools/developer-tools/url-parser/page.jsx:13-15,28"},
+    "controls": [
+      {"label": "champ, placeholder « https://example.com/path?key=value#hash »", "ref": "app/tools/developer-tools/url-parser/page.jsx:25"},
+      {"label": "Parse URL", "ref": "app/tools/developer-tools/url-parser/page.jsx:26"},
+      {"label": "lignes protocol / hostname / port / pathname / search / hash", "ref": "app/tools/developer-tools/url-parser/page.jsx:15,28"},
+      {"label": "Query Params", "ref": "app/tools/developer-tools/url-parser/page.jsx:28"},
+      {"label": "Invalid URL (erreur)", "ref": "app/tools/developer-tools/url-parser/page.jsx:17,27"}
+    ],
+    "steps": ["coller une URL avec son protocole → bouton « Parse URL » → lire les six lignes et « Query Params »"],
+    "limits": [
+      {"what": "longueur de l'URL", "value": "NON TROUVÉ (aucune constante dans page.jsx)", "constant": null, "ref": "app/tools/developer-tools/url-parser/page.jsx:9-18"}
+    ],
+    "processing": {"where": "browser", "detail": "new URL(texte) puis searchParams.forEach ; aucun appel réseau ; « Invalid URL » signalé (texte seul) à /api/report-error.", "ref": "app/tools/developer-tools/url-parser/page.jsx:8-17"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau dans page.jsx)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Non affichés : username, password, origin, host (page.jsx:15). Normalisation WHATWG du navigateur : hôte en minuscules, nom international en punycode (xn--), port par défaut vide (affiché « — »), « \\ » → « / », « https:example.com » accepté ; « localhost:3000 » ou « example.com:8080/a » sont lus avec le protocole « localhost: » / « example.com: ». Pas de bouton Copy. Risque à vérifier : Google Traduction actif → lignes de résultat (texte de page) envoyées à Google (aucun notranslate)."
+  },
+  {
+    "path": "/tools/developer-tools/number-base-converter",
+    "task": "Convertit un nombre (signe et partie fractionnaire permis) écrit dans une base de 2 à 36 vers le binaire, l'octal, le décimal, l'hexadécimal et une base de 2 à 36 au choix, pendant la saisie, en arithmétique exacte.",
+    "inputs": {"accept": null, "formats": ["nombre en base 2-36 : chiffres 0-9 puis A-Z, « - » ou « + » initial, un point, « _ » et espaces ignorés, préfixe 0b (base 2), 0o (base 8), 0x (base 16)"], "ref": "app/components/BaseConverter.jsx:39-41; app/lib/exactNumbers.js:16-37"},
+    "outputs": {"formats": ["cinq résultats : Binary (2), Octal (8), Decimal (10), Hexadecimal (16) + base « Also convert to » (Base 36 par défaut ; si elle est l'une des quatre, quatre résultats) ; partie fractionnaire non finie : 40 chiffres puis « … », coupée, pas arrondie"], "ref": "app/components/BaseConverter.jsx:10,18,33,63-73; app/lib/exactNumbers.js:39-45"},
+    "controls": [
+      {"label": "Value — placeholder « e.g. 255, -1010.11, 0xFF, ZZ »", "ref": "app/components/BaseConverter.jsx:39-41"},
+      {"label": "From Base (Binary (2), Base 3 … Base 36 (36)) — défaut Decimal (10)", "ref": "app/components/BaseConverter.jsx:17,44-47"},
+      {"label": "Also convert to (même liste) — défaut Base 36 (36)", "ref": "app/components/BaseConverter.jsx:18,50-53"},
+      {"label": "Upper-case letters — cochée par défaut", "ref": "app/components/BaseConverter.jsx:19,55-57"},
+      {"label": "Copy / Copied (sous chaque résultat) ; « Copy failed »", "ref": "app/components/BaseConverter.jsx:67,74"},
+      {"label": "Not a number in base N: use the digits …, an optional minus sign and one point. (erreur)", "ref": "app/components/BaseConverter.jsx:59-61"},
+      {"label": "A result ending in “…” has more than 40 digits after the point in that base (it may never end, like 1/3 in decimal): the first 40 are shown, cut, not rounded; Copy gives those 40 digits.", "ref": "app/components/BaseConverter.jsx:71-73"}
+    ],
+    "steps": ["taper le nombre dans « Value » → choisir « From Base » → (option) « Also convert to » et « Upper-case letters » → lire les résultats mis à jour à chaque frappe → « Copy » sous un résultat"],
+    "limits": [
+      {"what": "nombre de chiffres", "value": "aucune limite dans le code (BigInt) ; aucun essai dans docs/audit/", "constant": null, "ref": "app/lib/exactNumbers.js:32-36,40-44"},
+      {"what": "chiffres après le point affichés", "value": "40", "constant": "maxFrac", "ref": "app/lib/exactNumbers.js:39,43"}
+    ],
+    "processing": {"where": "browser", "detail": "parseBaseNumber / formatBaseNumber, fraction de BigInt, aucun flottant. Aucun appel réseau ; seul « Copy to the clipboard failed. » est signalé.", "ref": "app/components/BaseConverter.jsx:23-32; app/lib/exactNumbers.js:21-45"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau dans page.jsx ni BaseConverter.jsx)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": "/tools/math-tools/number-base-converter (même composant <BaseConverter />, même h1 et sous-titre ; seuls titre, méta et textes SEO diffèrent)",
+    "notes": "Négatifs : signe « - » devant le résultat, pas de complément à deux (exactNumbers.js:36,44). « -0 » donne 0. Le message d'erreur abrège la liste des chiffres au-delà de la base 11 (base 16 : « 0123456789…F », BaseConverter.jsx:60). Copy retire « … » (BaseConverter.jsx:31). Risque à vérifier : Google Traduction actif → résultats (texte de page) envoyés à Google."
+  },
+  {
+    "path": "/tools/math-tools/number-base-converter",
+    "task": "Convertit un nombre (signe et partie fractionnaire permis) écrit dans une base de 2 à 36 vers le binaire, l'octal, le décimal, l'hexadécimal et une base de 2 à 36 au choix, pendant la saisie, en arithmétique exacte.",
+    "inputs": {"accept": null, "formats": ["nombre en base 2-36 : chiffres 0-9 puis A-Z, « - » ou « + » initial, un point, « _ » et espaces ignorés, préfixe 0b / 0o / 0x pour les bases 2 / 8 / 16"], "ref": "app/tools/math-tools/number-base-converter/page.jsx:3,11; app/components/BaseConverter.jsx:39-41; app/lib/exactNumbers.js:16-37"},
+    "outputs": {"formats": ["identiques à la page développeur : quatre bases usuelles + « Also convert to » (Base 36 par défaut), 40 chiffres après le point puis « … »"], "ref": "app/components/BaseConverter.jsx:10,18,33,63-73"},
+    "controls": [
+      {"label": "Value — placeholder « e.g. 255, -1010.11, 0xFF, ZZ »", "ref": "app/components/BaseConverter.jsx:39-41"},
+      {"label": "From Base — défaut Decimal (10)", "ref": "app/components/BaseConverter.jsx:17,44-47"},
+      {"label": "Also convert to — défaut Base 36 (36)", "ref": "app/components/BaseConverter.jsx:18,50-53"},
+      {"label": "Upper-case letters — cochée par défaut", "ref": "app/components/BaseConverter.jsx:19,55-57"},
+      {"label": "Copy / Copied ; « Copy failed »", "ref": "app/components/BaseConverter.jsx:67,74"}
+    ],
+    "steps": ["taper le nombre dans « Value » → choisir « From Base » → (option) « Also convert to » et « Upper-case letters » → lire les résultats → « Copy » sous un résultat"],
+    "limits": [
+      {"what": "nombre de chiffres", "value": "aucune limite dans le code (BigInt) ; aucun essai dans docs/audit/", "constant": null, "ref": "app/lib/exactNumbers.js:32-36,40-44"},
+      {"what": "chiffres après le point affichés", "value": "40", "constant": "maxFrac", "ref": "app/lib/exactNumbers.js:39,43"}
+    ],
+    "processing": {"where": "browser", "detail": "Même composant que la page développeur (BigInt, aucun appel réseau).", "ref": "app/tools/math-tools/number-base-converter/page.jsx:3,11; app/components/BaseConverter.jsx:23-32"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau dans page.jsx ni BaseConverter.jsx)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": "/tools/developer-tools/number-base-converter (identique)",
+    "notes": "Mêmes faits que la page jumelle. Différencier les deux pages par le public (math : fractions exactes, bases 2-36, représentation signée ; dev : hex/binaire, préfixes 0x/0b/0o, grands entiers 64 bits)."
+  }
+]

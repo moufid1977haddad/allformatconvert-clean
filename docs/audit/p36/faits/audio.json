@@ -1,0 +1,416 @@
+[
+  {
+    "path": "/tools/audio-tools/audio-booster",
+    "task": "Change the volume of one audio file by a gain factor (0.25x to 5x) or normalize its loudness to -16 LUFS, then save it in a chosen audio format.",
+    "inputs": {"accept": "audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.opus,.wma,.aiff,.aif,.amr,.mka,.weba,.caf", "formats": ["MP3", "WAV", "M4A", "AAC", "FLAC", "OGG", "OGA", "Opus", "WMA", "AIFF", "AIF", "AMR", "MKA", "WEBA", "CAF", "any other file the OS types audio/*"], "ref": "app/tools/audio-tools/audio-booster/page.jsx:92 + app/lib/mediaSupport.js:257-258"},
+    "outputs": {"formats": ["MP3", "WAV", "AAC", "FLAC", "OGG (Vorbis)", "M4A (AAC)", "Opus", "WMA", "AIFF", "ALAC (.m4a)", "AC3", "M4R", "M4B", "MP2", "WV (WavPack)", "CAF", "AU", "MKA (FLAC)"], "ref": "app/tools/audio-tools/audio-booster/page.jsx:103 + app/lib/audioFormats.js:22-48"},
+    "controls": [
+      {"label": "Click or drop an audio file here (touch screens: Choose an audio file)", "ref": "app/tools/audio-tools/audio-booster/page.jsx:90 + app/components/UploadPrompt.jsx:7-8"},
+      {"label": "Volume Boost: {n}x (slider 0.25 to 5, step 0.25, default 2; marks 0.25x (quieter) / 1x (normal) / 5x (max))", "ref": "app/tools/audio-tools/audio-booster/page.jsx:94-96 + :16"},
+      {"label": "Normalize instead (even loudness at -16 LUFS, the podcast and streaming standard)", "ref": "app/tools/audio-tools/audio-booster/page.jsx:98"},
+      {"label": "Prevent distortion (limiter: loud peaks are held just under full scale instead of being cut flat) — ticked by default", "ref": "app/tools/audio-tools/audio-booster/page.jsx:99 + :21"},
+      {"label": "Output Format (default MP3)", "ref": "app/tools/audio-tools/audio-booster/page.jsx:101-104 + :17"},
+      {"label": "Boost Audio (Boosting... while running)", "ref": "app/tools/audio-tools/audio-booster/page.jsx:106-108"},
+      {"label": "Download / Save / Share (result row)", "ref": "app/components/FileDownload.jsx:207-218"}
+    ],
+    "steps": ["choose an audio file → set Volume Boost (or tick Normalize instead) → limiter box → Output Format → « Boost Audio » → preview player → « Download »"],
+    "limits": [
+      {"what": "file size on computer", "value": "no limit in the code (whole file copied into ffmpeg.wasm memory)", "constant": null, "ref": "app/tools/audio-tools/audio-booster/page.jsx:47 (writeFile of the whole file); no size check in the page"},
+      {"what": "file size on iPhone/Android", "value": "NON TROUVÉ — no device-specific limit in the page or its imports", "constant": null, "ref": "searched page.jsx, app/lib/audioFormats.js, app/lib/opusService.js, app/lib/mediaJob.js"},
+      {"what": "Opus output only: size of the lossless FLAC sent to the service", "value": "value in env var MEDIA_TICKET_MAX_BYTES (not read); refusal message 'Files up to N MB are accepted.'", "constant": "MEDIA_TICKET_MAX_BYTES", "ref": "lib/media/ticket.js:48,60-61 + app/api/media/ticket/route.js:27-30"},
+      {"what": "gain range", "value": "0.25x to 5x, step 0.25; the limiter (alimiter limit=0.95) only applies when gain > 1 and normalize is off", "constant": null, "ref": "app/tools/audio-tools/audio-booster/page.jsx:95,56"},
+      {"what": "normalize target", "value": "loudnorm I=-16 LUFS, TP=-1.5 dB, LRA=11; output at the source's sample rate", "constant": null, "ref": "app/tools/audio-tools/audio-booster/page.jsx:52-56"}
+    ],
+    "processing": {"where": "mixed", "detail": "Every format except Opus: ffmpeg.wasm in the browser (engine @ffmpeg/core 0.12.9 fetched from unpkg.com, no file sent). Opus, when NEXT_PUBLIC_MEDIA_SERVICE_URL is set at build: the boosted audio is rendered to FLAC in the browser, sent in chunks to our media-processing service (Railway) and encoded with libopus at the service default 128 kbit/s; the service deletes the input when processing ends and the output after the first complete download (made automatically by the page) or after MEDIA_JOB_TTL_SECONDS. Without the service, Opus is made in the browser by ffmpeg's native encoder. On failure an error report (extension, size bucket, sanitized message, never the file) goes to /api/report-error.", "ref": "app/tools/audio-tools/audio-booster/page.jsx:36-68; app/lib/opusService.js:133-149; app/lib/mediaJob.js:16-17,157-200; services/media-processing/app/jobs.py:6-13; services/media-processing/app/ffmpeg_ops.py:20,217; node_modules/@ffmpeg/ffmpeg/dist/esm/const.js:3-4; app/lib/reportError.js:7-12"},
+    "quota": "aucune pour le traitement dans le navigateur ; sortie Opus : limite par réseau par heure et par jour (MEDIA_JOBS_PER_HOUR_PER_IP / MEDIA_JOBS_PER_DAY_PER_IP, bucket media_rate) — app/api/media/ticket/route.js:28-42, lib/media/ticket.js:49-50",
+    "signup": "aucune inscription demandée (vérifié : page.jsx sans appel d'authentification ; /api/media/ticket ne lit aucun compte, app/api/media/ticket/route.js:13-50)",
+    "watermark": "sans objet (audio) — aucun ajout au son en dehors du filtre choisi (page.jsx:56)",
+    "browsers": "Preview replaced by a sentence when the browser cannot play the output format (PlayablePreview.jsx:186-201); Firefox: Opus retyped audio/opus so it is not saved as .ogg (opusService.js:147-148)",
+    "twin": null,
+    "notes": "No output-signature check here (only non-empty, page.jsx:65), unlike Audio Converter. Booster always re-encodes (filter chain), even when the output format equals the source. When 'Normalize instead' is ticked the slider is disabled (page.jsx:95) and the limiter box is ignored (page.jsx:56). Encrypted streaming downloads (.ncm, .qmc*, .kgm, .m4p, .aa/.aax…) are refused with a sentence (mediaSupport.js:245-255). Error text: 'Boost failed: …' (page.jsx:77)."
+  },
+  {
+    "path": "/tools/audio-tools/audio-compressor",
+    "task": "Make one audio file smaller by re-encoding it at a chosen bitrate (64 to 320 kbps), optionally in mono and at a lower sample rate.",
+    "inputs": {"accept": "audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.opus,.wma,.aiff,.aif,.amr,.mka,.weba,.caf", "formats": ["MP3", "WAV", "M4A", "AAC", "FLAC", "OGG", "OGA", "Opus", "WMA", "AIFF", "AIF", "AMR", "MKA", "WEBA", "CAF"], "ref": "app/tools/audio-tools/audio-compressor/page.jsx:97 + app/lib/mediaSupport.js:257-258"},
+    "outputs": {"formats": ["MP3", "AAC", "OGG (Vorbis)", "M4A (AAC)", "Opus", "WMA", "AC3", "M4B", "MP2"], "ref": "app/tools/audio-tools/audio-compressor/page.jsx:116 + app/lib/audioFormats.js:53-55"},
+    "controls": [
+      {"label": "Click or drop an audio file here / Choose an audio file", "ref": "app/tools/audio-tools/audio-compressor/page.jsx:95"},
+      {"label": "Bitrate: {n} kbps — buttons 64k 96k 128k 192k 256k 320k (default 128)", "ref": "app/tools/audio-tools/audio-compressor/page.jsx:99-104 + :27"},
+      {"label": "Mono (half the data for speech) — hidden for Opus via the service", "ref": "app/tools/audio-tools/audio-compressor/page.jsx:106-108"},
+      {"label": "Sample rate (Keep the original, 48 kHz (video), 44.1 kHz (CD), 32 kHz, 22.05 kHz, 16 kHz (speech), 8 kHz (telephone)) — hidden for Opus via the service", "ref": "app/tools/audio-tools/audio-compressor/page.jsx:109-110 + app/lib/audioFormats.js:75"},
+      {"label": "Output Format (default MP3)", "ref": "app/tools/audio-tools/audio-compressor/page.jsx:114-117"},
+      {"label": "Compress Audio (Compressing... while running)", "ref": "app/tools/audio-tools/audio-compressor/page.jsx:119-121"},
+      {"label": "Result tiles Original / Compressed / Saved or Larger by", "ref": "app/tools/audio-tools/audio-compressor/page.jsx:125-129"}
+    ],
+    "steps": ["choose an audio file → Bitrate button → (Mono, Sample rate) → Output Format → « Compress Audio » → sizes Original/Compressed/Saved → preview → « Download »"],
+    "limits": [
+      {"what": "file size on computer", "value": "no limit in the code (whole file in ffmpeg.wasm memory)", "constant": null, "ref": "app/tools/audio-tools/audio-compressor/page.jsx:56; no size check"},
+      {"what": "file size on iPhone/Android", "value": "NON TROUVÉ — no device-specific limit", "constant": null, "ref": "searched page.jsx and its imports"},
+      {"what": "Opus only: size of the FLAC sent to the service", "value": "env var MEDIA_TICKET_MAX_BYTES (value not read)", "constant": "MEDIA_TICKET_MAX_BYTES", "ref": "lib/media/ticket.js:48,60-61"},
+      {"what": "bitrate actually used", "value": "min(chosen bitrate, source's own bitrate, at least 8 kbps); the page says so when it lowered it", "constant": null, "ref": "app/tools/audio-tools/audio-compressor/page.jsx:57-61,130"},
+      {"what": "sample rates refused per format", "value": "OGG/AC3/MP2: 48, 44.1, 32 kHz only; Opus (browser): 48/24/16/12/8 kHz — other choices refused with a sentence", "constant": "RATES_BY_FORMAT", "ref": "app/lib/audioFormats.js:79-84"}
+    ],
+    "processing": {"where": "mixed", "detail": "ffmpeg.wasm in the browser for every format except Opus. Opus with the service configured: decoded to FLAC in the browser, sent to our media-processing service, encoded by libopus at the chosen (capped) bitrate, deleted by the service as for the other tools.", "ref": "app/tools/audio-tools/audio-compressor/page.jsx:63-70; app/lib/opusService.js:140-149; services/media-processing/app/ffmpeg_ops.py:657-663; services/media-processing/app/jobs.py:6-10"},
+    "quota": "aucune dans le navigateur ; Opus : limite par réseau heure/jour (MEDIA_JOBS_PER_HOUR_PER_IP / MEDIA_JOBS_PER_DAY_PER_IP) — app/api/media/ticket/route.js:35-42",
+    "signup": "aucune inscription demandée (vérifié : aucune authentification dans page.jsx ni /api/media/ticket)",
+    "watermark": "sans objet",
+    "browsers": "preview replaced by a sentence when the browser cannot play the format (PlayablePreview.jsx:198-201)",
+    "twin": null,
+    "notes": "Not dynamic-range compression (said on the page). Result tiles print formatBytes() then ' MB' again: '1.2 MB MB', '500 KB MB' (page.jsx:126-127,134 + app/lib/formatBytes.js:7-13). When the result is not smaller, an amber box says 'Your file is already well compressed.' (page.jsx:131-136). AC3/MP2 at 64-128 kbps: compressor passes -b:a itself (page.jsx:67), so the >=192 floor of buildOutputSpec does not apply here."
+  },
+  {
+    "path": "/tools/audio-tools/audio-converter",
+    "task": "Convert one audio file to another audio format, with a choice of bitrate, sample rate and channels.",
+    "inputs": {"accept": "audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.opus,.wma,.aiff,.aif,.amr,.mka,.weba,.caf", "formats": ["MP3", "WAV", "M4A", "AAC", "FLAC", "OGG", "OGA", "Opus", "WMA", "AIFF", "AIF", "AMR", "MKA", "WEBA", "CAF"], "ref": "app/tools/audio-tools/audio-converter/page.jsx:121 + app/lib/mediaSupport.js:257-258"},
+    "outputs": {"formats": ["MP3", "WAV", "AAC", "FLAC", "OGG (Vorbis)", "M4A (AAC)", "Opus", "WMA", "AIFF", "ALAC (.m4a)", "AC3", "M4R", "M4B", "MP2", "WV (WavPack)", "CAF", "AU", "MKA (FLAC)"], "ref": "app/tools/audio-tools/audio-converter/page.jsx:125 + app/lib/audioFormats.js:22-48"},
+    "controls": [
+      {"label": "Click or drop an audio file here / Choose an audio file", "ref": "app/tools/audio-tools/audio-converter/page.jsx:119"},
+      {"label": "Target Format (default MP3)", "ref": "app/tools/audio-tools/audio-converter/page.jsx:123-126 + :17"},
+      {"label": "Quality: Standard — 128 kbps / High — 192 kbps (default) / Very high — 256 kbps / Best — 320 kbps (MP3, AAC, M4A, M4R, M4B, OGG, WMA, AC3, MP2 only)", "ref": "app/tools/audio-tools/audio-converter/page.jsx:132-139 + app/lib/audioFormats.js:64-67"},
+      {"label": "Sample rate (Keep the original … 8 kHz (telephone)) and Channels (Keep the original / Mono / Stereo) — hidden for Opus", "ref": "app/tools/audio-tools/audio-converter/page.jsx:140-147 + app/lib/audioFormats.js:75-76"},
+      {"label": "M4R note: 'An iPhone ringtone lasts 40 seconds at most…'", "ref": "app/tools/audio-tools/audio-converter/page.jsx:127-131"},
+      {"label": "Convert Audio / progress bar 'Converting…' + Cancel", "ref": "app/tools/audio-tools/audio-converter/page.jsx:149-158"}
+    ],
+    "steps": ["choose an audio file → Target Format → (Quality, Sample rate, Channels) → « Convert Audio » (progress, Cancel) → preview → « Download »"],
+    "limits": [
+      {"what": "file size on computer", "value": "no limit in the code (browser path)", "constant": null, "ref": "app/tools/audio-tools/audio-converter/page.jsx:86; no size check"},
+      {"what": "file size on iPhone/Android", "value": "NON TROUVÉ", "constant": null, "ref": "searched page.jsx and imports"},
+      {"what": "Opus only: size of the ORIGINAL file sent to the service", "value": "env var MEDIA_TICKET_MAX_BYTES (value not read)", "constant": "MEDIA_TICKET_MAX_BYTES", "ref": "app/tools/audio-tools/audio-converter/page.jsx:53-58 + lib/media/ticket.js:60-61"},
+      {"what": "AC3 and MP2 bitrate", "value": "at least 192 kbps whatever Quality says (128 is raised to 192)", "constant": null, "ref": "app/lib/audioFormats.js:86"},
+      {"what": "sample rates per format", "value": "OGG/AC3/MP2: 48, 44.1, 32 kHz; others any listed rate", "constant": "RATES_BY_FORMAT", "ref": "app/lib/audioFormats.js:79-84"}
+    ],
+    "processing": {"where": "mixed", "detail": "ffmpeg.wasm in the browser for every target except Opus; the output's first bytes are checked against the format before it is offered. Opus (service configured): the whole original file is sent in chunks to our media-processing service, converted by libopus at 128 kbit/s ('medium'), deleted by the service (input when processing ends, output after the page's download or TTL). Without the service: ffmpeg's native Opus encoder in the browser.", "ref": "app/tools/audio-tools/audio-converter/page.jsx:51-69,83-93; app/lib/audioFormats.js:116-123; services/media-processing/app/ffmpeg_ops.py:20,217; services/media-processing/app/jobs.py:6-10"},
+    "quota": "aucune dans le navigateur ; Opus : limite par réseau heure ET jour (MEDIA_JOBS_PER_HOUR_PER_IP / MEDIA_JOBS_PER_DAY_PER_IP) — app/api/media/ticket/route.js:35-42",
+    "signup": "aucune inscription demandée (vérifié : page.jsx, /api/media/ticket)",
+    "watermark": "sans objet",
+    "browsers": "Opus result retyped audio/opus for Firefox (page.jsx:60-61); M4R kept as .m4r via retyped download link (audioFormats.js:40)",
+    "twin": "/tools/video-tools/video-to-audio (same AUDIO_OUTPUT_FORMATS list, video input — app/tools/video-tools/video-to-audio/page.jsx:6,95)",
+    "notes": "One file at a time (no multiple attribute, page.jsx:121). Cancel only stops the browser path (terminate, page.jsx:37-44); during an Opus job it only resets the button. AMR is readable but not writable (audioFormats.js:16-21). ffmpeg engine weight: 32.2 MB uncompressed / ~10.2 MB over the network (docs/audit/RAPPORT-formats-navigateurs.md:59)."
+  },
+  {
+    "path": "/tools/audio-tools/audio-equalizer",
+    "task": "Adjust the bass (200 Hz shelf), mid (1 kHz peak) and treble (3 kHz shelf) of one audio file, hear it live, and export the result as WAV.",
+    "inputs": {"accept": "audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.opus,.wma,.aiff,.aif,.amr,.mka,.weba,.caf", "formats": ["MP3", "WAV", "M4A", "AAC", "FLAC", "OGG", "OGA", "Opus", "WMA", "AIFF", "AIF", "AMR", "MKA", "WEBA", "CAF"], "ref": "app/tools/audio-tools/audio-equalizer/page.jsx:169 + app/lib/mediaSupport.js:257-258"},
+    "outputs": {"formats": ["WAV (16-bit PCM)"], "ref": "app/tools/audio-tools/audio-equalizer/page.jsx:78-112,153-154"},
+    "controls": [
+      {"label": "Click or drop an audio file here / Choose an audio file", "ref": "app/tools/audio-tools/audio-equalizer/page.jsx:167"},
+      {"label": "audio player (live preview through the equalizer)", "ref": "app/tools/audio-tools/audio-equalizer/page.jsx:170"},
+      {"label": "Bass: {n} dB / Mid: {n} dB / Treble: {n} dB — sliders -12 to +12, step 1 (accessible name of each slider is ': dB')", "ref": "app/tools/audio-tools/audio-equalizer/page.jsx:172-176"},
+      {"label": "Export as WAV (Exporting... while running)", "ref": "app/tools/audio-tools/audio-equalizer/page.jsx:180-182"}
+    ],
+    "steps": ["choose an audio file → play it → move Bass/Mid/Treble → « Export as WAV » → preview → « Download »"],
+    "limits": [
+      {"what": "file size on computer", "value": "no limit in the code (whole file decoded to a float AudioBuffer in memory)", "constant": null, "ref": "app/tools/audio-tools/audio-equalizer/page.jsx:119-125 + app/lib/decodeAudio.js:7"},
+      {"what": "file size on iPhone/Android", "value": "NON TROUVÉ", "constant": null, "ref": "searched page.jsx, decodeAudio.js"},
+      {"what": "band gains", "value": "-12 to +12 dB, lowshelf 200 Hz, peaking 1000 Hz, highshelf 3000 Hz", "constant": null, "ref": "app/tools/audio-tools/audio-equalizer/page.jsx:55-63,128-133,175"},
+      {"what": "export clipping", "value": "if the rendered peak exceeds full scale, the whole file is lowered to 0.999 and the page says by how many dB", "constant": null, "ref": "app/tools/audio-tools/audio-equalizer/page.jsx:137-152"}
+    ],
+    "processing": {"where": "browser", "detail": "Web Audio API (AudioContext for the live preview, OfflineAudioContext for the export); formats the browser cannot decode (WMA, AC3, AMR…) are first turned into WAV by ffmpeg.wasm in the browser. Nothing is sent.", "ref": "app/tools/audio-tools/audio-equalizer/page.jsx:47-69,114-157; app/lib/decodeAudio.js:5-24"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau hors moteur ffmpeg)",
+    "watermark": "sans objet",
+    "browsers": "If the browser cannot play the file, the player shows 'This browser cannot play this format, so there is no live preview; \"Export as WAV\" still applies the equalizer to the whole file.' (page.jsx:170)",
+    "twin": null,
+    "notes": "The exported WAV is at the AudioContext's decoding rate (decodeAudioData resamples to the context rate, page.jsx:120-121), 16-bit, same channel count. No preset save. Live preview has no clipping protection (page.jsx:65)."
+  },
+  {
+    "path": "/tools/audio-tools/audio-merger",
+    "task": "Join two or more audio files into one, in a chosen order, end to end or with crossfades/fades, in one of 14 output formats.",
+    "inputs": {"accept": "audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.opus,.wma,.aiff,.aif,.amr,.mka,.weba,.caf (multiple)", "formats": ["MP3", "WAV", "M4A", "AAC", "FLAC", "OGG", "OGA", "Opus", "WMA", "AIFF", "AIF", "AMR", "MKA", "WEBA", "CAF"], "ref": "app/tools/audio-tools/audio-merger/page.jsx:293 + app/lib/mediaSupport.js:257-258"},
+    "outputs": {"formats": ["FLAC", "WAV", "AIFF", "ALAC (.m4a)", "CAF", "W64", "MP3", "M4A (AAC)", "AAC (.aac, raw)", "M4R", "OGG (Vorbis)", "Opus", "WMA", "AC3"], "ref": "app/lib/audioMerge.js:55-90 + app/tools/audio-tools/audio-merger/page.jsx:368-375"},
+    "controls": [
+      {"label": "Click or drop two or more audio files here / Choose two or more audio files; then '{n} files · click or drop here to add more'", "ref": "app/tools/audio-tools/audio-merger/page.jsx:289-291"},
+      {"label": "file list with ↑ (Move up), ↓ (Move down), ✕ (Remove), drag to reorder; 'Remove all'", "ref": "app/tools/audio-tools/audio-merger/page.jsx:296-327"},
+      {"label": "Transitions: Crossfade between files / Fade in at the start / Fade out at the end", "ref": "app/tools/audio-tools/audio-merger/page.jsx:333-337"},
+      {"label": "Length (seconds) 0.1–10 (default 2) / Curve: Equal power (steady loudness) | Linear / Between files: Overlap (shorter result) | Fade out, then in (same length)", "ref": "app/tools/audio-tools/audio-merger/page.jsx:341-358 + app/lib/audioMerge.js:123-131"},
+      {"label": "per join: Crossfade into the next file / Fade out, then fade the next file in", "ref": "app/tools/audio-tools/audio-merger/page.jsx:317-321"},
+      {"label": "Output format (optgroups 'Lossless — no quality loss' / 'Compressed — smaller files') and Bitrate (… kbit/s, default marked '(high quality)')", "ref": "app/tools/audio-tools/audio-merger/page.jsx:367-383"},
+      {"label": "Merge Audio Files (Reading files… while analysing) / progress + Cancel", "ref": "app/tools/audio-tools/audio-merger/page.jsx:392-400"}
+    ],
+    "steps": ["add 2+ files (any number of times) → reorder (drag / arrows) → optional Transitions → Output format (+ Bitrate) → read the notes → « Merge Audio Files » → preview + format · length · size → « Download »"],
+    "limits": [
+      {"what": "number and size of files on computer", "value": "no limit in the code (all files written into ffmpeg.wasm memory)", "constant": null, "ref": "app/tools/audio-tools/audio-merger/page.jsx:79-83"},
+      {"what": "same on iPhone/Android", "value": "NON TROUVÉ", "constant": null, "ref": "searched page.jsx, app/lib/audioMerge.js"},
+      {"what": "minimum files", "value": "2", "constant": null, "ref": "app/tools/audio-tools/audio-merger/page.jsx:184,273"},
+      {"what": "fade length", "value": "0.1 to 10 s, shortened to what the files allow", "constant": "FADE_MIN / FADE_MAX", "ref": "app/lib/audioMerge.js:129-131 + page.jsx:174-176"},
+      {"what": "Opus only: size of the joined FLAC sent to the service", "value": "env var MEDIA_TICKET_MAX_BYTES (value not read)", "constant": "MEDIA_TICKET_MAX_BYTES", "ref": "page.jsx:218-220 + lib/media/ticket.js:60-61"},
+      {"what": "bitrates", "value": "MP3/M4A/AAC/M4R/OGG 64-320 (MP3 default 320, others 256); Opus 64-256 (default 192); WMA 64-256 shown as 69-275 real; AC3 192-640 (default 448)", "constant": "LOSSY_KBPS", "ref": "app/lib/audioMerge.js:48,64-89"}
+    ],
+    "processing": {"where": "mixed", "detail": "ffmpeg.wasm in the browser (each file decoded on its own, samples joined, encoded once). Opus with the service: joined to FLAC in the browser, then encoded by libopus on our media-processing service, deleted by the service.", "ref": "app/tools/audio-tools/audio-merger/page.jsx:183-242; app/lib/audioMerge.js:1-8; app/lib/opusService.js:140-149"},
+    "quota": "aucune dans le navigateur ; Opus : limite par réseau heure/jour (MEDIA_JOBS_PER_HOUR_PER_IP / MEDIA_JOBS_PER_DAY_PER_IP) — app/api/media/ticket/route.js:35-42",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "M4R downloaded untyped so Firefox keeps .m4r (page.jsx:226-229)",
+    "twin": null,
+    "notes": "Default format: all lossless → same lossless format if shared and it holds the depth, else FLAC (WAV for 32-bit/float); all same lossy → that format (raw AAC → M4A); otherwise MP3 (audioMerge.js:96-107). Different sample rates → resampled to the highest (audioMerge.js:28-30, page.jsx:265). Compressed outputs: end lengthened by up to one encoder block (M4A/M4R/AC3 +4.7 to +16 ms, raw AAC +28-39 ms; docs/audit/RAPPORT-audio-merger-format-sortie.md:68); WMA end padded with silence to a whole 2048-sample frame (audioMerge.js:84-86). Measurements quoted in the FAQ are in docs/audit/RAPPORT-audio-merger-format-sortie.md:10,38-41 and RAPPORT-audio-merger-ordre-fondu.md:46."
+  },
+  {
+    "path": "/tools/audio-tools/audio-metadata",
+    "task": "Show the technical report of one audio file (container, codec, bitrate, sample rate, channels, bit depth, tags, chapters, cover) and optionally save a copy without its metadata.",
+    "inputs": {"accept": "audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.opus,.wma,.aiff,.aif,.amr,.mka,.weba,.caf", "formats": ["MP3", "WAV", "M4A", "AAC", "FLAC", "OGG", "OGA", "Opus", "WMA", "AIFF", "AIF", "AMR", "MKA", "WEBA", "CAF"], "ref": "app/tools/audio-tools/audio-metadata/page.jsx:38 + app/lib/mediaSupport.js:257-258"},
+    "outputs": {"formats": ["on-screen report", "JSON report (<name>-metadata.json)", "copy without metadata in the source's container (<name>-no-metadata.<ext>)"], "ref": "app/components/MediaInfo.jsx:41-49 + app/components/MetadataStripper.jsx:106-123"},
+    "controls": [
+      {"label": "Click or drop an audio file here / Choose an audio file", "ref": "app/tools/audio-tools/audio-metadata/page.jsx:36"},
+      {"label": "sections General / Tags (only when the file has tags) / Stream n — audio / Chapters; cover picture", "ref": "app/components/MediaInfo.jsx:43-47"},
+      {"label": "Copy full report (JSON)", "ref": "app/components/MediaInfo.jsx:48"},
+      {"label": "Download (JSON report row)", "ref": "app/components/MediaInfo.jsx:49"},
+      {"label": "Remove the metadata (no re-encoding) (Removing the metadata… while running)", "ref": "app/components/MetadataStripper.jsx:130-132"}
+    ],
+    "steps": ["choose an audio file → report appears (first time loads the engine) → « Copy full report (JSON) » or « Download » → optional « Remove the metadata (no re-encoding) » → « Download »"],
+    "limits": [
+      {"what": "file size for the report", "value": "no limit in the code: file mounted with WORKERFS (read in pieces)", "constant": null, "ref": "app/lib/mediaProbe.js:2-4,14-15"},
+      {"what": "file size for 'Remove the metadata'", "value": "2 GiB ('This file is over 2 GB, more than a browser tab can rewrite.')", "constant": "MAX_BYTES", "ref": "app/components/MetadataStripper.jsx:79,96"},
+      {"what": "same on iPhone/Android", "value": "NON TROUVÉ (no device-specific value)", "constant": null, "ref": "searched MediaInfo.jsx, mediaProbe.js, MetadataStripper.jsx"}
+    ],
+    "processing": {"where": "browser", "detail": "ffprobe/ffmpeg compiled to WebAssembly in the browser (engine fetched from unpkg.com); nothing sent.", "ref": "app/lib/mediaProbe.js:9-32; app/components/MetadataStripper.jsx:92-126"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "preview <audio> shown for every file; formats the browser cannot play still get a report (page.jsx:39-41)",
+    "twin": "/tools/video-tools/video-metadata (same MediaInfo + MetadataStripper components)",
+    "notes": "Stripping keeps only the audio streams (-map 0:a), removes tags, chapters and the cover picture, copies the sound (-c copy) (MetadataStripper.jsx:108-110,133). Stream rows: Codec (+profile), Sample rate, Channels (+layout), Bit depth (when known), Sample format, Bitrate, Duration, Language, Title (mediaProbe.js:51-64). Encrypted streaming files get the explanatory sentence (page.jsx:40). Layout title is broken: 'Audio Metadata — Instantly Reads and Displays an Audio' (layout.tsx:5)."
+  },
+  {
+    "path": "/tools/audio-tools/audio-splitter",
+    "task": "Cut one audio file into parts: at one point, into 2-100 equal parts, or every N seconds, all parts in one chosen format.",
+    "inputs": {"accept": "audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.opus,.wma,.aiff,.aif,.amr,.mka,.weba,.caf", "formats": ["MP3", "WAV", "M4A", "AAC", "FLAC", "OGG", "OGA", "Opus", "WMA", "AIFF", "AIF", "AMR", "MKA", "WEBA", "CAF"], "ref": "app/tools/audio-tools/audio-splitter/page.jsx:172 + app/lib/mediaSupport.js:257-258"},
+    "outputs": {"formats": ["MP3", "WAV", "AAC", "FLAC", "OGG (Vorbis)", "M4A (AAC)", "Opus", "WMA", "AIFF", "ALAC (.m4a)", "AC3", "M4R", "M4B", "MP2", "WV", "CAF", "AU", "MKA"], "ref": "app/tools/audio-tools/audio-splitter/page.jsx:207 + app/lib/audioFormats.js:22-48"},
+    "controls": [
+      {"label": "Click or drop an audio file here / Choose an audio file", "ref": "app/tools/audio-tools/audio-splitter/page.jsx:170"},
+      {"label": "At one point / Equal parts / Every N seconds", "ref": "app/tools/audio-tools/audio-splitter/page.jsx:177-181"},
+      {"label": "Split at (seconds, to 0.1): {t}s (of {d}s) + Split point slider (default: middle)", "ref": "app/tools/audio-tools/audio-splitter/page.jsx:183-186 + :79"},
+      {"label": "Number of equal parts (2 to 100)", "ref": "app/tools/audio-tools/audio-splitter/page.jsx:188-190"},
+      {"label": "One part every (seconds, to 0.1) (default 60 s, or a tenth of files under 2 min)", "ref": "app/tools/audio-tools/audio-splitter/page.jsx:192-194 + :81"},
+      {"label": "plan line '{n} parts: a–b s, …'", "ref": "app/tools/audio-tools/audio-splitter/page.jsx:196-201"},
+      {"label": "Output Format (default: the source's extension when it is a value of the list, else MP3)", "ref": "app/tools/audio-tools/audio-splitter/page.jsx:204-208 + :67-70"},
+      {"label": "Split Audio (Splitting... while running)", "ref": "app/tools/audio-tools/audio-splitter/page.jsx:210-212"},
+      {"label": "Download all ({n} files, ZIP) + one Download row per part", "ref": "app/tools/audio-tools/audio-splitter/page.jsx:214-223 + app/components/FileDownload.jsx:268-273"}
+    ],
+    "steps": ["choose an audio file → mode (At one point / Equal parts / Every N seconds) → value → Output Format → « Split Audio » → preview each part → « Download » per part or « Download all (N files, ZIP) »"],
+    "limits": [
+      {"what": "parts per run", "value": "2 to 100, each at least 0.1 s", "constant": "MAX_PARTS / MIN_PART", "ref": "app/tools/audio-tools/audio-splitter/page.jsx:17-18,109-111"},
+      {"what": "file size on computer", "value": "no limit in the code", "constant": null, "ref": "page.jsx:126 (whole file in ffmpeg.wasm memory)"},
+      {"what": "file size on iPhone/Android", "value": "NON TROUVÉ", "constant": null, "ref": "searched page.jsx and imports"},
+      {"what": "Opus only", "value": "one service job PER PART (each counts against the per-network hour/day limit); size per part ≤ MEDIA_TICKET_MAX_BYTES", "constant": "MEDIA_TICKET_MAX_BYTES", "ref": "app/tools/audio-tools/audio-splitter/page.jsx:136-139 + app/api/media/ticket/route.js:35-42"}
+    ],
+    "processing": {"where": "mixed", "detail": "ffmpeg.wasm in the browser (atrim, to the sample). Opus with the service: each part rendered to FLAC in the browser and encoded by libopus on our media-processing service, then deleted by the service.", "ref": "app/tools/audio-tools/audio-splitter/page.jsx:115-148; app/lib/opusService.js:140-149"},
+    "quota": "aucune dans le navigateur ; Opus : limite par réseau heure/jour, un ticket par partie — app/api/media/ticket/route.js:35-42",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "If the browser cannot play the file, length read by ffmpeg.wasm and 'This browser cannot play this format, so there is no preview; splitting works the same.' (page.jsx:73,83-93,174)",
+    "twin": null,
+    "notes": "Every part is re-encoded (filter graph + encoder), whatever the format (page.jsx:132,142). Part names part01_<name>.<ext> (page.jsx:133-134). Measured: WAV/MP3/FLAC/OGG parts rejoin exactly; M4A +17 ms; WMA −0.1 s (docs/audit/RAPPORT-p19-01-10.md:100). Default-format rule uses the extension only: .m4a → M4A (AAC) even for an ALAC file; .aif/.oga/.weba/.amr → MP3 (page.jsx:69-70, audioFormats.js:22-48)."
+  },
+  {
+    "path": "/tools/audio-tools/audio-to-text",
+    "task": "Get a transcript either by live dictation through the browser's speech recognition, or by sending an audio file to OpenAI Whisper through our server.",
+    "inputs": {"accept": "audio/*", "formats": ["any file the OS types audio/* (no extension list); OpenAI decides what it can read"], "ref": "app/tools/audio-tools/audio-to-text/page.jsx:163"},
+    "outputs": {"formats": ["text on screen", "TXT", "SRT and VTT (file mode, when Whisper returns timed segments)"], "ref": "app/tools/audio-tools/audio-to-text/page.jsx:143,187 + app/components/TranscriptExports.jsx:5-16"},
+    "controls": [
+      {"label": "Use Microphone / Upload Audio File (mode tabs)", "ref": "app/tools/audio-tools/audio-to-text/page.jsx:96-107"},
+      {"label": "Start Transcription / Stop (mic mode)", "ref": "app/tools/audio-tools/audio-to-text/page.jsx:119-127"},
+      {"label": "Copy + Download transcript.txt (mic mode)", "ref": "app/tools/audio-tools/audio-to-text/page.jsx:137-143"},
+      {"label": "Click or drop an audio file here (MP3, WAV, M4A...) / 'Max {N} MB per file'", "ref": "app/tools/audio-tools/audio-to-text/page.jsx:159-162"},
+      {"label": "Transcribe Audio (Transcribing... while running)", "ref": "app/tools/audio-tools/audio-to-text/page.jsx:165-171"},
+      {"label": "Transcript, Copy, Download rows .txt / .srt / .vtt + Download all (ZIP)", "ref": "app/tools/audio-tools/audio-to-text/page.jsx:175-187"}
+    ],
+    "steps": ["mic: « Use Microphone » → « Start Transcription » → speak → « Stop » → « Copy » or « Download »", "file: « Upload Audio File » → choose a file → « Transcribe Audio » → « Copy » or « Download » (.txt, .srt, .vtt)"],
+    "limits": [
+      {"what": "file size, service configured (NEXT_PUBLIC_MEDIA_SERVICE_URL set at build)", "value": "25 MiB (shown '25 MB')", "constant": "MAX_AUDIO_STAGED_BYTES = MAX_AUDIO_UPLOAD_BYTES", "ref": "app/lib/officeUpload.js:85-86 + lib/quota/limits.js:10,84"},
+      {"what": "file size, service not configured", "value": "4 MiB (shown '4 MB') — fallback only; the served HTML (contenu-avant.json) shows 25 MB, so the service is active in production", "constant": "MAX_PLATFORM_UPLOAD_BYTES", "ref": "app/lib/officeUpload.js:85 + lib/quota/limits.js:53"},
+      {"what": "server-side ceiling", "value": "25 MiB ('Audio files are limited to 25 MB.')", "constant": "MAX_AUDIO_UPLOAD_BYTES", "ref": "app/api/ai-transcribe/route.ts:32-35"},
+      {"what": "same on iPhone/Android", "value": "same values (no device distinction)", "constant": null, "ref": "app/lib/officeUpload.js:85"},
+      {"what": "mic mode duration", "value": "no limit in the code (browser decides when recognition ends)", "constant": null, "ref": "app/tools/audio-tools/audio-to-text/page.jsx:32-50"}
+    ],
+    "processing": {"where": "third-party", "detail": "Mic mode: browser's SpeechRecognition (webkitSpeechRecognition), the page never receives the audio; recognition.lang not set. File mode: file ≤ 4 MiB posted to /api/ai-transcribe (Vercel); larger files first uploaded in chunks to our media-processing service, read server-to-server by the route, then deleted from the service (discard). The route sends the file to OpenAI https://api.openai.com/v1/audio/transcriptions, model whisper-1, verbose_json; returns text + timed segments. Nothing in the code deletes anything at OpenAI.", "ref": "app/tools/audio-tools/audio-to-text/page.jsx:32-50,74-86; app/lib/officeUpload.js:97-108; app/api/ai-transcribe/route.ts:12-21,40-56,101-106; lib/media/staged.js:109-113"},
+    "quota": "mode fichier : limite par réseau heure/jour (guard, bucket ip_rate) + plafond de dépense mensuel du site (message 'This tool has reached its usage limit for the month…') — app/api/ai-transcribe/route.ts:37-38, lib/quota/guard.js:15-37 ; >4 MiB : en plus le ticket de dépôt (bucket office_rate, heure/jour) — app/api/media/ticket/route.js:24-42 ; micro : aucune",
+    "signup": "aucune inscription demandée (vérifié : guardPaidRoute ne lit aucun compte, lib/quota/guard.js:15-37)",
+    "watermark": "sans objet",
+    "browsers": "Mic: no SpeechRecognition (Firefox) → 'Speech recognition not supported. Try Chrome.' (page.jsx:33-35); UI line 'Works best in Google Chrome with microphone permission' (page.jsx:146)",
+    "twin": "/tools/ai-tools/audio-transcriber (same transcribeAudio + /api/ai-transcribe, app/tools/ai-tools/audio-transcriber/page.jsx:4,32)",
+    "notes": "No 'Back to Audio Tools' link on this page (page.jsx:88-92). Size checked as soon as the file is picked; the button stays disabled above the limit (page.jsx:64-72,167). OpenAI 429 → 'This tool is temporarily at capacity. Please try again later.' (route.ts:82-86). Layout title broken: 'Audio to Text — Offer Two Ways Online Free' (layout.tsx:5)."
+  },
+  {
+    "path": "/tools/audio-tools/audio-trimmer",
+    "task": "Keep the part of one audio file between a start and an end time (to 0.1 s), with optional fade in and fade out.",
+    "inputs": {"accept": "audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.opus,.wma,.aiff,.aif,.amr,.mka,.weba,.caf", "formats": ["MP3", "WAV", "M4A", "AAC", "FLAC", "OGG", "OGA", "Opus", "WMA", "AIFF", "AIF", "AMR", "MKA", "WEBA", "CAF"], "ref": "app/tools/audio-tools/audio-trimmer/page.jsx:162 + app/lib/mediaSupport.js:257-258"},
+    "outputs": {"formats": ["the source's own format (no fade; or PCM WAV/AIFF/16-bit FLAC cut in their codec)", "with a fade: same format for MP3, WAV, FLAC, OGG, M4A, AAC, AIFF; WAV for any other"], "ref": "app/tools/audio-tools/audio-trimmer/page.jsx:19-23,128-141"},
+    "controls": [
+      {"label": "Click or drop an audio file here / Choose an audio file", "ref": "app/tools/audio-tools/audio-trimmer/page.jsx:160"},
+      {"label": "Start (seconds): m:ss.s / End (seconds): m:ss.s — number fields step 0.1 + Start slider / End slider", "ref": "app/tools/audio-tools/audio-trimmer/page.jsx:168-172"},
+      {"label": "Set to the player's position (under Start and under End)", "ref": "app/tools/audio-tools/audio-trimmer/page.jsx:173"},
+      {"label": "Kept: {n} s (of {d} s)", "ref": "app/tools/audio-tools/audio-trimmer/page.jsx:177"},
+      {"label": "Fade in (seconds) / Fade out (seconds) (0 to 30, step 0.1)", "ref": "app/tools/audio-tools/audio-trimmer/page.jsx:179-182"},
+      {"label": "Trim Audio (Trimming... while running)", "ref": "app/tools/audio-tools/audio-trimmer/page.jsx:187-189"}
+    ],
+    "steps": ["choose an audio file → Start / End (type, slide, or « Set to the player's position ») → optional Fade in / Fade out → « Trim Audio » → preview → « Download »"],
+    "limits": [
+      {"what": "file size on computer", "value": "no limit in the code", "constant": null, "ref": "page.jsx:116 (whole file into ffmpeg.wasm)"},
+      {"what": "file size on iPhone/Android", "value": "NON TROUVÉ", "constant": null, "ref": "searched page.jsx and imports"},
+      {"what": "precision", "value": "0.1 s; fades ≤ kept length", "constant": null, "ref": "page.jsx:93-96,103"}
+    ],
+    "processing": {"where": "browser", "detail": "ffmpeg.wasm in the browser: stream copy (-ss/-to, -c copy) when there is no fade and the source is not PCM WAV/AIFF or 16-bit FLAC; otherwise atrim in the filter graph (to the sample) and re-encode (MP3 -q:a 2, OGG -q:a 6, M4A/AAC 192k, FLAC, PCM).", "ref": "app/tools/audio-tools/audio-trimmer/page.jsx:117-136"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "unplayable format → length read by ffmpeg.wasm, 'This browser cannot play this format, so there is no preview; trimming works the same (type the start and end).' (page.jsx:62,77-92,164)",
+    "twin": null,
+    "notes": "Keeps ONE section (start→end); it cannot remove a section from the middle. Stream-copy cut lands on audio frames: measured +0.3 to +39.5 ms at the start (docs/audit/RAPPORT-nuit-27-09.md:84). With a fade, an ALAC .m4a becomes AAC 192k (REENCODE.m4a, page.jsx:21). Output file 'trimmed_<name>.<ext>' (page.jsx:141); 'Saved as WAV: this format cannot be re-encoded with fades in the browser.' (page.jsx:194)."
+  },
+  {
+    "path": "/tools/audio-tools/audio-waveform",
+    "task": "Draw the waveform of one audio file, zoom and pan it, and save the visible part as a PNG of a chosen size and colours.",
+    "inputs": {"accept": "audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.opus,.wma,.aiff,.aif,.amr,.mka,.weba,.caf", "formats": ["MP3", "WAV", "M4A", "AAC", "FLAC", "OGG", "OGA", "Opus", "WMA", "AIFF", "AIF", "AMR", "MKA", "WEBA", "CAF"], "ref": "app/tools/audio-tools/audio-waveform/page.jsx:164 + app/lib/mediaSupport.js:257-258"},
+    "outputs": {"formats": ["PNG (<name>-waveform.png)"], "ref": "app/tools/audio-tools/audio-waveform/page.jsx:142-152"},
+    "controls": [
+      {"label": "Click or drop an audio file here / Choose an audio file", "ref": "app/tools/audio-tools/audio-waveform/page.jsx:162"},
+      {"label": "canvas: scroll to zoom (centred on the pointer), drag to pan (finger too); 'Zoom: {n}x'", "ref": "app/tools/audio-tools/audio-waveform/page.jsx:94-138,166-180"},
+      {"label": "Width 800/1200/1920 (default)/3000 px, Height 150/200/300 (default)/500/800 px, Wave colour, Background colour, Transparent", "ref": "app/tools/audio-tools/audio-waveform/page.jsx:21,182-188"},
+      {"label": "Zoom in + / Zoom out − / Reset Zoom / Download PNG", "ref": "app/tools/audio-tools/audio-waveform/page.jsx:190-194"}
+    ],
+    "steps": ["choose an audio file → waveform drawn → zoom / pan → size and colours → « Download PNG »"],
+    "limits": [
+      {"what": "zoom", "value": "1x to 200x", "constant": "MIN_ZOOM / MAX_ZOOM", "ref": "app/tools/audio-tools/audio-waveform/page.jsx:11-12"},
+      {"what": "file size on computer", "value": "no limit in the code (whole file decoded in memory)", "constant": null, "ref": "page.jsx:35-36"},
+      {"what": "file size on iPhone/Android", "value": "NON TROUVÉ", "constant": null, "ref": "searched page.jsx, decodeAudio.js"}
+    ],
+    "processing": {"where": "browser", "detail": "Web Audio decodeAudioData (ffmpeg.wasm fallback for WMA/AC3/AMR…), canvas drawing, PNG saved with saveBlob; nothing sent.", "ref": "app/tools/audio-tools/audio-waveform/page.jsx:27-44,142-152; app/lib/decodeAudio.js:5-24"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié : drawOn ne dessine que le fond et l'onde, page.jsx:47-87)",
+    "browsers": "touch: pointer events + touchAction none (page.jsx:171-175); PNG made as a Blob, not a data: URL, for iOS (page.jsx:146)",
+    "twin": null,
+    "notes": "The PNG is redrawn at the chosen size from the visible range (not a copy of the 800×200 preview) (page.jsx:147). Every channel is drawn (min/max envelope) (page.jsx:54-57). Download PNG uses saveBlob, not the FileDownload row (page.jsx:150)."
+  },
+  {
+    "path": "/tools/audio-tools/voice-recorder",
+    "task": "Record the microphone in the browser, with pause/resume, and download the recording as recorded, as MP3 or as WAV.",
+    "inputs": {"accept": null, "formats": ["microphone (getUserMedia audio)"], "ref": "app/tools/audio-tools/voice-recorder/page.jsx:53"},
+    "outputs": {"formats": ["M4A (AAC in MP4) where the browser records audio/mp4 (Safari; Chrome/Edge 126+ per code comment)", "WebM (Opus) otherwise (Firefox)", "MP3 192 kbit/s (Export as MP3)", "WAV 16-bit (Export as WAV)"], "ref": "app/tools/audio-tools/voice-recorder/page.jsx:54-57,36,128-138 + app/lib/mediaSupport.js:33-35,219-225"},
+    "controls": [
+      {"label": "Start Recording", "ref": "app/tools/audio-tools/voice-recorder/page.jsx:162"},
+      {"label": "Pause / Resume / Stop Recording", "ref": "app/tools/audio-tools/voice-recorder/page.jsx:165-168"},
+      {"label": "status 'Recording...' / 'Paused — Resume to continue the same recording'", "ref": "app/tools/audio-tools/voice-recorder/page.jsx:158"},
+      {"label": "Download rows recording.<m4a|webm>, recording.wav, recording.mp3 + Download all (ZIP)", "ref": "app/tools/audio-tools/voice-recorder/page.jsx:175-179"},
+      {"label": "Export as MP3 (Making the MP3… while running)", "ref": "app/tools/audio-tools/voice-recorder/page.jsx:180-184"},
+      {"label": "Export as WAV (Converting... while running)", "ref": "app/tools/audio-tools/voice-recorder/page.jsx:185-189"}
+    ],
+    "steps": ["« Start Recording » → allow the microphone → (« Pause » / « Resume ») → « Stop Recording » → player → « Download » (as recorded) or « Export as MP3 » / « Export as WAV » → « Download »"],
+    "limits": [
+      {"what": "recording length", "value": "no limit in the code (chunks kept in memory)", "constant": null, "ref": "app/tools/audio-tools/voice-recorder/page.jsx:58-59"},
+      {"what": "same on iPhone/Android", "value": "NON TROUVÉ", "constant": null, "ref": "searched page.jsx, mediaSupport.js"}
+    ],
+    "processing": {"where": "browser", "detail": "MediaRecorder records; MP3 made by ffmpeg.wasm (libmp3lame 192k) in the browser; WAV by Web Audio decodeAudioData + 16-bit PCM writer. Nothing sent.", "ref": "app/tools/audio-tools/voice-recorder/page.jsx:27-43,45-82,128-143"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "No getUserMedia/MediaRecorder → 'This browser cannot record audio. Please use a current Safari, Chrome, Edge or Firefox.' or 'Recording needs a secure (https) page.' (page.jsx:48-51); refused mic → 'Microphone access was refused…' (page.jsx:78)",
+    "twin": null,
+    "notes": "Recorded type preference: audio/mp4;codecs=mp4a.40.2, audio/mp4, audio/webm;codecs=opus, audio/webm (page.jsx:56); the extension follows the real recorder type (mediaSupport.js:219-225): audio/mp4 → .m4a. Empty recording → 'The recording came out empty, so nothing was saved…' (mediaSupport.js:221-223). WAV is at the AudioContext's rate (page.jsx:134-135)."
+  },
+  {
+    "path": "/tools/video-tools/media-player",
+    "task": "Play one local audio or video file in the browser's own player, with speed, loop, picture-in-picture, frame capture and SRT/VTT subtitles.",
+    "inputs": {"accept": "audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.opus,.wma,.aiff,.aif,.amr,.mka,.weba,.caf,video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts", "formats": ["every audio/video extension listed; playback only if the browser can decode it"], "ref": "app/tools/video-tools/media-player/page.jsx:66 + app/lib/mediaSupport.js:237-238,257-258"},
+    "outputs": {"formats": ["PNG of the current frame (<name>-frame.png)"], "ref": "app/tools/video-tools/media-player/page.jsx:37-42,98"},
+    "controls": [
+      {"label": "Click or drop a media file here / Choose a media file; 'Supports MP4, MP3, WAV, OGG, WebM'", "ref": "app/tools/video-tools/media-player/page.jsx:64-65"},
+      {"label": "Speed 0.5× 0.75× 1× 1.25× 1.5× 2×", "ref": "app/tools/video-tools/media-player/page.jsx:89-90"},
+      {"label": "Loop", "ref": "app/tools/video-tools/media-player/page.jsx:91"},
+      {"label": "Picture in picture (video, only when document.pictureInPictureEnabled)", "ref": "app/tools/video-tools/media-player/page.jsx:93"},
+      {"label": "Save this frame (video)", "ref": "app/tools/video-tools/media-player/page.jsx:94"},
+      {"label": "Subtitles (.srt, .vtt) (video)", "ref": "app/tools/video-tools/media-player/page.jsx:95"}
+    ],
+    "steps": ["choose a media file → play (native controls) → optional Speed / Loop / Picture in picture / Save this frame → « Download » (frame) / Subtitles (.srt, .vtt)"],
+    "limits": [
+      {"what": "file size", "value": "no limit in the code (blob URL of the local file)", "constant": null, "ref": "app/tools/video-tools/media-player/page.jsx:53"},
+      {"what": "saved frame size", "value": "fitted under the canvas cap: 16,777,216 px on iPhone/iPad, 268,435,456 px elsewhere", "constant": "IOS_CANVAS_MAX_PIXELS", "ref": "app/tools/video-tools/media-player/page.jsx:39 + app/lib/canvasLimit.js:11,22,32"}
+    ],
+    "processing": {"where": "browser", "detail": "<audio>/<video> on a blob: URL; subtitles converted to WebVTT in the page (encoding detected); frame drawn on a canvas. Nothing sent.", "ref": "app/tools/video-tools/media-player/page.jsx:27-54,77-87"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté sur l'image enregistrée (page.jsx:40)",
+    "browsers": "Unplayable file → 'This browser cannot play this X file. Convert it first with the Video Converter (to MP4) / Audio Converter (to MP3), then play it here.' (page.jsx:70-73)",
+    "twin": null,
+    "notes": "No 'Back to …' link (page.jsx:59-61). Subtitles, frame and PiP are video-only (page.jsx:92-96). SRT with 1-digit hour and Windows-1252 encoding handled (page.jsx:25-35). One file at a time."
+  },
+  {
+    "path": "/tools/video-tools/screen-recorder",
+    "task": "Record a screen, window or tab (with its sound and optionally the microphone) in the browser and download it as MP4 or WebM.",
+    "inputs": {"accept": null, "formats": ["getDisplayMedia (screen/window/tab, video + audio)", "optional microphone (getUserMedia)"], "ref": "app/tools/video-tools/screen-recorder/page.jsx:53-58"},
+    "outputs": {"formats": ["MP4 (H.264 + AAC) where MediaRecorder supports it", "WebM (VP9/Opus or default) otherwise", "MP4 made by our service from a WebM ('Make an MP4')"], "ref": "app/tools/video-tools/screen-recorder/page.jsx:14-18,115-128"},
+    "controls": [
+      {"label": "Start Recording", "ref": "app/tools/video-tools/screen-recorder/page.jsx:144"},
+      {"label": "Pause / Resume / Stop Recording", "ref": "app/tools/video-tools/screen-recorder/page.jsx:147-150"},
+      {"label": "Add my microphone (mixed with the screen's sound)", "ref": "app/tools/video-tools/screen-recorder/page.jsx:155-158"},
+      {"label": "timer mm:ss", "ref": "app/tools/video-tools/screen-recorder/page.jsx:141"},
+      {"label": "Download (screen-recording-YYYY-MM-DD-HH-MM-SS.<ext>)", "ref": "app/tools/video-tools/screen-recorder/page.jsx:165"},
+      {"label": "Make an MP4 (plays on iPhone and everywhere) — only when the recording is not MP4", "ref": "app/tools/video-tools/screen-recorder/page.jsx:166"}
+    ],
+    "steps": ["(tick « Add my microphone ») → « Start Recording » → choose screen/window/tab → (« Pause » / « Resume ») → « Stop Recording » → preview → « Download »; WebM: optional « Make an MP4 (plays on iPhone and everywhere) » → « Download »"],
+    "limits": [
+      {"what": "recording length", "value": "no limit in the code (chunks every 1 s kept in memory)", "constant": null, "ref": "app/tools/video-tools/screen-recorder/page.jsx:76,91"},
+      {"what": "Make an MP4: size sent to the service", "value": "env var MEDIA_TICKET_MAX_BYTES (value not read)", "constant": "MEDIA_TICKET_MAX_BYTES", "ref": "lib/media/ticket.js:48,60-61"},
+      {"what": "iPhone/iPad", "value": "not available (no getDisplayMedia): message shown, button disabled", "constant": null, "ref": "app/tools/video-tools/screen-recorder/page.jsx:46,138,144"}
+    ],
+    "processing": {"where": "mixed", "detail": "Recording entirely in the browser (MediaRecorder). 'Make an MP4' sends the WebM to our media-processing service (convert, target mp4, quality high), which deletes the input when processing ends and the output after the page's download or TTL.", "ref": "app/tools/video-tools/screen-recorder/page.jsx:48-106,115-128; services/media-processing/app/jobs.py:6-10"},
+    "quota": "enregistrement : aucune ; « Make an MP4 » : limite par réseau heure/jour (MEDIA_JOBS_PER_HOUR_PER_IP / MEDIA_JOBS_PER_DAY_PER_IP) — app/api/media/ticket/route.js:35-42",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié : flux MediaRecorder brut, page.jsx:74)",
+    "browsers": "MP4 recorded where isTypeSupported says so (code comment: Safari, Chrome and Edge 126+); Firefox WebM (page.jsx:10-18); no sound → amber note (page.jsx:70); iPhone/iPad unsupported (page.jsx:138)",
+    "twin": null,
+    "notes": "No 'Back to …' link (page.jsx:134-136). Recording also stops when sharing is ended from the browser's indicator (page.jsx:90). Errors: 'Screen share was cancelled.' / 'Recording failed: …' (page.jsx:104)."
+  },
+  {
+    "path": "/tools/video-tools/subtitle-generator",
+    "task": "Type subtitle lines with start and end times and download them as an SRT and a WebVTT file.",
+    "inputs": {"accept": null, "formats": ["typed rows (start, end, text) — no file input is rendered"], "ref": "app/tools/video-tools/subtitle-generator/page.jsx:39-51"},
+    "outputs": {"formats": ["SRT (subtitles.srt)", "WebVTT (subtitles.vtt)"], "ref": "app/tools/video-tools/subtitle-generator/page.jsx:59-62"},
+    "controls": [
+      {"label": "Subtitle {n} / Remove", "ref": "app/tools/video-tools/subtitle-generator/page.jsx:42-43"},
+      {"label": "Start (HH:MM:SS.mmm) / End (HH:MM:SS.mmm) (default 00:00:00 and 00:00:05)", "ref": "app/tools/video-tools/subtitle-generator/page.jsx:46-47,10"},
+      {"label": "text field 'Subtitle text...' (single line)", "ref": "app/tools/video-tools/subtitle-generator/page.jsx:49"},
+      {"label": "Add Subtitle / Generate SRT", "ref": "app/tools/video-tools/subtitle-generator/page.jsx:53-54"},
+      {"label": "Download rows subtitles.srt, subtitles.vtt + Download all (ZIP)", "ref": "app/tools/video-tools/subtitle-generator/page.jsx:59-62"}
+    ],
+    "steps": ["fill Start / End / text of row 1 → « Add Subtitle » for more → « Generate SRT » → « Download » (.srt or .vtt)"],
+    "limits": [
+      {"what": "time format", "value": "[[HH:]MM:]SS[.,mmm]; seconds and minutes ≤ 59 (a bare '75' is refused); up to 3 fraction digits", "constant": null, "ref": "app/lib/subtitleTime.js:8-17"},
+      {"what": "rows", "value": "no limit; empty-text rows skipped; end must be after start", "constant": null, "ref": "app/lib/subtitleTime.js:28-37"}
+    ],
+    "processing": {"where": "browser", "detail": "Text built in the page; nothing sent.", "ref": "app/tools/video-tools/subtitle-generator/page.jsx:23-29; app/lib/subtitleTime.js:26-42"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Manual builder; no video or audio is read (file state is dead code, page.jsx:9,16). Cues sorted by start time (subtitleTime.js:38). No import/paste of an existing SRT. Text input is single-line, so a two-line subtitle cannot be typed (page.jsx:49). Error messages: 'Subtitle n: \"x\" is not a time (use HH:MM:SS, MM:SS or HH:MM:SS.mmm).', '…it ends (…) before or when it starts (…).', 'Type the text of at least one subtitle.' (subtitleTime.js:32-37). The site's Audio to Text and Audio Transcriber already export SRT/VTT from Whisper (TranscriptExports.jsx:5-16)."
+  },
+  {
+    "path": "/tools/video-tools/video-metadata",
+    "task": "Show the technical report of one video file (container, streams, codecs, resolution, frame rate, colour, rotation, audio tracks, subtitles, tags, chapters) and optionally save a copy without metadata.",
+    "inputs": {"accept": "video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts", "formats": ["MP4", "M4V", "MOV", "QT", "WebM", "MKV", "AVI", "WMV", "FLV", "OGV", "3GP", "3G2", "MPG", "MPEG", "TS", "MTS", "M2TS"], "ref": "app/tools/video-tools/video-metadata/page.jsx:38 + app/lib/mediaSupport.js:237-238"},
+    "outputs": {"formats": ["on-screen report", "JSON report", "copy without metadata in the source's container (<name>-no-metadata.<ext>)"], "ref": "app/components/MediaInfo.jsx:41-49 + app/components/MetadataStripper.jsx:106-123"},
+    "controls": [
+      {"label": "Click or drop a video file here / Choose a video file", "ref": "app/tools/video-tools/video-metadata/page.jsx:37"},
+      {"label": "iPhone note (Photo Library re-encodes; save to Files first)", "ref": "app/tools/video-tools/video-metadata/page.jsx:35 + app/components/IosOriginalNote.jsx:17-22"},
+      {"label": "General / Tags / Stream n — video|audio|subtitle / Chapters", "ref": "app/components/MediaInfo.jsx:44-47"},
+      {"label": "Copy full report (JSON) / Download", "ref": "app/components/MediaInfo.jsx:48-49"},
+      {"label": "Remove the metadata (no re-encoding)", "ref": "app/components/MetadataStripper.jsx:130-132"}
+    ],
+    "steps": ["choose a video file → report → « Copy full report (JSON) » / « Download » → optional « Remove the metadata (no re-encoding) » → « Download »"],
+    "limits": [
+      {"what": "file size for the report", "value": "no limit in the code (WORKERFS mount)", "constant": null, "ref": "app/lib/mediaProbe.js:2-4,14-15"},
+      {"what": "file size for 'Remove the metadata'", "value": "2 GiB", "constant": "MAX_BYTES", "ref": "app/components/MetadataStripper.jsx:79,96"},
+      {"what": "iPhone", "value": "a video picked from Photo Library arrives re-encoded by iOS (page says to use Files)", "constant": null, "ref": "app/components/IosOriginalNote.jsx:4-7,20"}
+    ],
+    "processing": {"where": "browser", "detail": "ffprobe/ffmpeg.wasm in the browser; nothing sent.", "ref": "app/lib/mediaProbe.js:9-32; app/components/MetadataStripper.jsx:92-126"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "iOS Photo Library re-encodes the video before the page gets it (IosOriginalNote.jsx:4-7)",
+    "twin": "/tools/audio-tools/audio-metadata (same MediaInfo + MetadataStripper)",
+    "notes": "Video stream rows: Codec, Resolution, Display aspect, Frame rate, Pixel format, Color, Rotation (only when ≠ 0), Cover picture, Bitrate, Duration, Language, Title (mediaProbe.js:57-63). Stripping keeps video (no cover) and audio, drops subtitle/data tracks, tags, chapters; warns for Motion JPEG and .mts (MetadataStripper.jsx:107-122). No 'Back to …' link (page.jsx:30-33)."
+  }
+]

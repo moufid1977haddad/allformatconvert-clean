@@ -1,0 +1,437 @@
+[
+  {
+    "path": "/tools/text-tools/ascii-art",
+    "task": "Turns a short typed text (60 characters max) into a FIGlet ASCII-art banner in one of 10 fonts.",
+    "inputs": {"accept": null, "formats": ["typed text, single-line field, 60 characters max"], "ref": "app/tools/text-tools/ascii-art/page.jsx:42"},
+    "outputs": {"formats": ["FIGlet banner shown in a monospaced block", "TXT download ascii-art.txt"], "ref": "app/tools/text-tools/ascii-art/page.jsx:48,51"},
+    "controls": [
+      {"label": "Type your text here... (placeholder)", "ref": "app/tools/text-tools/ascii-art/page.jsx:42"},
+      {"label": "Font (select: Standard, Big, Slant, Small, Banner, Block, Doom, Shadow, ANSI Shadow, 3-D; default Standard)", "ref": "app/tools/text-tools/ascii-art/page.jsx:9-20,26,43"},
+      {"label": "Generate", "ref": "app/tools/text-tools/ascii-art/page.jsx:45"},
+      {"label": "Copy", "ref": "app/tools/text-tools/ascii-art/page.jsx:49"},
+      {"label": "Download (file row ascii-art.txt) / Save / Share", "ref": "app/tools/text-tools/ascii-art/page.jsx:51; app/components/FileDownload.jsx:208-218"}
+    ],
+    "steps": ["type text (max 60) → choose Font → « Generate » (disabled while empty) → result below → « Copy » or « Download »"],
+    "limits": [
+      {"what": "text length", "value": "60 characters (maxLength)", "constant": null, "ref": "app/tools/text-tools/ascii-art/page.jsx:42"},
+      {"what": "taille max sur ordinateur / téléphone", "value": "aucune autre limite (pas de fichier)", "constant": null, "ref": "app/tools/text-tools/ascii-art/page.jsx:22-35"}
+    ],
+    "processing": {"where": "browser", "detail": "figlet npm package 1.12.0 (author Patrick Gillespie, node_modules/figlet/package.json:3,20-21); each font is a JS chunk of the site imported when chosen; the text never leaves the page. Only a shown error message (e.g. 'Copy to the clipboard failed.') is reported, sanitized, to /api/report-error.", "ref": "app/tools/text-tools/ascii-art/page.jsx:4,9-20,28-35,49; app/lib/useToolError.js:19-31; app/lib/reportError.js:16,133-171"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau ni contrôle de compte dans app/tools/text-tools/ascii-art/page.jsx ; aucune route app/api ne cite l'outil)",
+    "watermark": "sans objet",
+    "browsers": "Rien de propre au navigateur dans le code. Bouton « Save / Share » seulement si navigator.share accepte un fichier (app/components/FileDownload.jsx:95,151-152,213-218).",
+    "twin": null,
+    "notes": "Missing characters are listed ABOVE the Generate button, text « Not in this font, left out: … » (page.jsx:32-33,44). Font coverage measured with node on the installed fonts (94 printable ASCII + 38 accented letters é è ê ë à â ä ç ô ö ù û ü î ï ñ É È À Ç Ä Ö Ü ß á í ó ú ã õ å æ ø Å Æ Ø œ Œ): Standard all; Big, Slant, Small, Block, Shadow all ASCII + 36/38 (no œ Œ); Banner and Doom all ASCII + only Ä Ö Ü ä ö ü ß; ANSI Shadow lacks \" ' + = ` { | } ~, no accented letter, lowercase drawn as uppercase, drawn with Unicode box characters (█ ╗ ╔ ═ ║ ╝ ╚), not ASCII; 3-D all ASCII, no accented letter. Width of « HELLO WORLD »: Small 56, Standard 67, Doom 67, Slant 70, Big 78, Shadow 80, Banner 84, ANSI Shadow 88, 3-D 109, Block 111 columns. Only Banner draws with #. A result not yet downloaded or copied arms the « leave page? » question (FileDownload.jsx:24-30,75-80,165)."
+  },
+  {
+    "path": "/tools/text-tools/case-converter",
+    "task": "Converts the text in the box to one of 12 letter cases (7 text cases, 5 programming cases), in place.",
+    "inputs": {"accept": null, "formats": ["typed or pasted text"], "ref": "app/tools/text-tools/case-converter/page.jsx:36"},
+    "outputs": {"formats": ["converted text in the same box", "TXT download converted.txt"], "ref": "app/tools/text-tools/case-converter/page.jsx:12-29,54"},
+    "controls": [
+      {"label": "Type or paste your text here... (placeholder)", "ref": "app/tools/text-tools/case-converter/page.jsx:36"},
+      {"label": "UPPERCASE", "ref": "app/tools/text-tools/case-converter/page.jsx:38"},
+      {"label": "lowercase", "ref": "app/tools/text-tools/case-converter/page.jsx:39"},
+      {"label": "Title Case", "ref": "app/tools/text-tools/case-converter/page.jsx:40"},
+      {"label": "Capitalized Case", "ref": "app/tools/text-tools/case-converter/page.jsx:41"},
+      {"label": "Sentence case", "ref": "app/tools/text-tools/case-converter/page.jsx:42"},
+      {"label": "aLtErNaTe", "ref": "app/tools/text-tools/case-converter/page.jsx:43"},
+      {"label": "iNVERSE", "ref": "app/tools/text-tools/case-converter/page.jsx:44"},
+      {"label": "camelCase", "ref": "app/tools/text-tools/case-converter/page.jsx:45"},
+      {"label": "PascalCase", "ref": "app/tools/text-tools/case-converter/page.jsx:46"},
+      {"label": "snake_case", "ref": "app/tools/text-tools/case-converter/page.jsx:47"},
+      {"label": "kebab-case", "ref": "app/tools/text-tools/case-converter/page.jsx:48"},
+      {"label": "CONSTANT_CASE", "ref": "app/tools/text-tools/case-converter/page.jsx:49"},
+      {"label": "Clear", "ref": "app/tools/text-tools/case-converter/page.jsx:50"},
+      {"label": "Copy", "ref": "app/tools/text-tools/case-converter/page.jsx:52"},
+      {"label": "Download (file row converted.txt) / Save / Share", "ref": "app/tools/text-tools/case-converter/page.jsx:54; app/components/FileDownload.jsx:208-218"}
+    ],
+    "steps": ["type or paste text → click a case button (the box is rewritten in place) → « Copy » or « Download »"],
+    "limits": [
+      {"what": "text size", "value": "aucune limite ; au-delà de 1 000 000 caractères la zone affiche un aperçu des 20 000 premiers et l'outil travaille sur tout le texte", "constant": "LIMIT, PREVIEW", "ref": "app/components/TextArea.jsx:17-18,47-75"}
+    ],
+    "processing": {"where": "browser", "detail": "All conversions are JavaScript string functions in the page; nothing is sent. Only a shown error message ('Copy to the clipboard failed.') is reported, sanitized, to /api/report-error.", "ref": "app/tools/text-tools/case-converter/page.jsx:12-29,52; app/lib/textSegments.js:93-143; app/lib/reportError.js:133-171"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau dans la page ni dans app/lib/textSegments.js)",
+    "watermark": "sans objet",
+    "browsers": "aLtErNaTe / iNVERSE work per grapheme with Intl.Segmenter, per code point without it (Firefox 111-124) (app/lib/textSegments.js:9-14).",
+    "twin": null,
+    "notes": "Sentence case: decided sentence by sentence; a mostly-capitals sentence is lower-cased except a fixed acronym list (USA, NASA, PDF, SEO… app/lib/textSegments.js:70); mixed-case words kept (iPhone, McDonald, :62,81); I, I'm, I'll, I've, I'd restored (:72,87); sentences found by Intl.Segmenter + abbreviations Mr., Dr., e.g.… (:30,33-53). Title Case: Chicago minor words a, an, the, and, but, or, nor, for, so, yet, as, at, by, in, of, off, on, per, to, up, via, vs, from, into, onto, over, with stay lower-case except first/last word and after : . ! ? — (:107-132); hyphenated parts capitalised (Well-Known, :131); O'Neil, D'Angelo (:124). Capitalized Case: every word capitalised, mixed-case and all-caps words kept (:135-141). aLtErNaTe: lower on even positions, upper on odd, counting every character including spaces and punctuation (page.jsx:17). iNVERSE: swaps each character's case (page.jsx:29). Programming cases: words split on spaces, punctuation and case changes (myHTTPServer → my HTTP Server), apostrophes inside words removed, letters of all alphabets kept, each line converted on its own (page.jsx:21-28). Conversion overwrites the box (no undo). The Download row appears as soon as the box is not empty, before any conversion (page.jsx:54; FileDownload.jsx:278-282), and arms the « leave page? » question until copied or downloaded (FileDownload.jsx:24-30,165)."
+  },
+  {
+    "path": "/tools/text-tools/character-counter",
+    "task": "Counts, live, the characters of a text: total, letters, digits, spaces, other symbols, without spaces, lines, UTF-16 units and UTF-8 bytes.",
+    "inputs": {"accept": null, "formats": ["typed or pasted text"], "ref": "app/tools/text-tools/character-counter/page.jsx:16"},
+    "outputs": {"formats": ["9 counters on screen (no file)"], "ref": "app/tools/text-tools/character-counter/page.jsx:18-26"},
+    "controls": [
+      {"label": "Type or paste your text here... (placeholder)", "ref": "app/tools/text-tools/character-counter/page.jsx:16"},
+      {"label": "Total Characters", "ref": "app/tools/text-tools/character-counter/page.jsx:18"},
+      {"label": "Letters", "ref": "app/tools/text-tools/character-counter/page.jsx:19"},
+      {"label": "Digits", "ref": "app/tools/text-tools/character-counter/page.jsx:20"},
+      {"label": "Spaces", "ref": "app/tools/text-tools/character-counter/page.jsx:21"},
+      {"label": "Other symbols", "ref": "app/tools/text-tools/character-counter/page.jsx:22"},
+      {"label": "Without spaces", "ref": "app/tools/text-tools/character-counter/page.jsx:23"},
+      {"label": "Lines", "ref": "app/tools/text-tools/character-counter/page.jsx:24"},
+      {"label": "UTF-16 units", "ref": "app/tools/text-tools/character-counter/page.jsx:25"},
+      {"label": "UTF-8 bytes", "ref": "app/tools/text-tools/character-counter/page.jsx:26"},
+      {"label": "Clear", "ref": "app/tools/text-tools/character-counter/page.jsx:28"}
+    ],
+    "steps": ["type or paste text → counters update on every change → « Clear » to empty"],
+    "limits": [
+      {"what": "text size", "value": "aucune limite ; aperçu au-delà de 1 000 000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "countCharacters() in the page; nothing sent, no error message exists on this page.", "ref": "app/tools/text-tools/character-counter/page.jsx:4,9; app/lib/textTools.js:20-37"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : page sans appel réseau)",
+    "watermark": "sans objet",
+    "browsers": "Characters = graphemes via Intl.Segmenter; without it (Firefox 111-124, inside the site floor firefox 111, node_modules/next/dist/docs/03-architecture/supported-browsers.md:19) code points: 👍🏽 = 2, 👨‍👩‍👧 = 5, e + combining accent = 2 (app/lib/textSegments.js:9-14). Devanagari conjuncts form one grapheme only with Unicode 15.1+ segmentation rules (measured under Node ICU 78 only: « नमस्ते » = 3; no browser measurement in the repo).",
+    "twin": "/tools/text-tools/word-counter (also counts characters with and without spaces)",
+    "notes": "Letter = grapheme starting with \\p{L}; Digit = starting with \\p{N} (so ½, ², Ⅷ count as digits); Spaces = any \\s grapheme, tabs and line breaks included; Other = everything else, emoji included (app/lib/textTools.js:23-28). Without spaces = total minus that Spaces count, so line breaks are excluded too (:31). UTF-16 units = text.length (:33); UTF-8 bytes = TextEncoder (:34). Lines = number of line-break-separated parts, 0 for empty text; a final line break adds one more (empty) line (:35, :18). No copy/download (nothing to export)."
+  },
+  {
+    "path": "/tools/text-tools/duplicate-remover",
+    "task": "Removes repeated lines from a text, keeping the first occurrence of each line in its original order.",
+    "inputs": {"accept": null, "formats": ["typed or pasted text, one item per line"], "ref": "app/tools/text-tools/duplicate-remover/page.jsx:30"},
+    "outputs": {"formats": ["result text field", "TXT download deduplicated.txt"], "ref": "app/tools/text-tools/duplicate-remover/page.jsx:40-41"},
+    "controls": [
+      {"label": "Paste your text here... (placeholder)", "ref": "app/tools/text-tools/duplicate-remover/page.jsx:30"},
+      {"label": "Ignore case", "ref": "app/tools/text-tools/duplicate-remover/page.jsx:32"},
+      {"label": "Ignore surrounding spaces", "ref": "app/tools/text-tools/duplicate-remover/page.jsx:33"},
+      {"label": "Remove empty lines", "ref": "app/tools/text-tools/duplicate-remover/page.jsx:34"},
+      {"label": "Remove Duplicates", "ref": "app/tools/text-tools/duplicate-remover/page.jsx:37"},
+      {"label": "N line(s) removed (message)", "ref": "app/tools/text-tools/duplicate-remover/page.jsx:36"},
+      {"label": "Download (file row deduplicated.txt) / Save / Share", "ref": "app/tools/text-tools/duplicate-remover/page.jsx:41; app/components/FileDownload.jsx:208-218"},
+      {"label": "Copy", "ref": "app/tools/text-tools/duplicate-remover/page.jsx:42"},
+      {"label": "Result is empty (message)", "ref": "app/tools/text-tools/duplicate-remover/page.jsx:46"}
+    ],
+    "steps": ["paste text → tick options if needed → « Remove Duplicates » (disabled while empty) → « N lines removed » + result → « Download » or « Copy »"],
+    "limits": [
+      {"what": "text size", "value": "aucune limite ; aperçu au-delà de 1 000 000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "removeDuplicateLines() in the page; nothing sent except a sanitized 'Copy to the clipboard failed.' report.", "ref": "app/tools/text-tools/duplicate-remover/page.jsx:18-23; app/lib/textTools.js:39-53"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : page sans appel réseau)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Lines split on CRLF, CR or LF (app/lib/textTools.js:18); result joined with LF (:52). Comparison key: trimmed if 'Ignore surrounding spaces', NFC-normalised (é typed as one character or e + accent are the same line), lower-cased with toLocaleLowerCase if 'Ignore case' (:45-46); the line kept is the original, untrimmed (:50). Without 'Remove empty lines', blank lines are compared like any line: only the first blank line survives, the others are removed as duplicates (:45-48). The 'removed' counter adds duplicates and removed empty lines together (:47-48)."
+  },
+  {
+    "path": "/tools/text-tools/find-replace",
+    "task": "Replaces every match of a search term (plain text or JavaScript regular expression) in a text, the result going to a separate field.",
+    "inputs": {"accept": null, "formats": ["typed or pasted text", "Find term", "Replace with term"], "ref": "app/tools/text-tools/find-replace/page.jsx:66,69-74"},
+    "outputs": {"formats": ["result text field", "TXT download replaced.txt"], "ref": "app/tools/text-tools/find-replace/page.jsx:92-93"},
+    "controls": [
+      {"label": "Paste your text here... (placeholder)", "ref": "app/tools/text-tools/find-replace/page.jsx:66"},
+      {"label": "Find", "ref": "app/tools/text-tools/find-replace/page.jsx:69-70"},
+      {"label": "Replace with", "ref": "app/tools/text-tools/find-replace/page.jsx:73-74"},
+      {"label": "Use regular expression", "ref": "app/tools/text-tools/find-replace/page.jsx:77-80"},
+      {"label": "Ignore case", "ref": "app/tools/text-tools/find-replace/page.jsx:82"},
+      {"label": "Whole words only", "ref": "app/tools/text-tools/find-replace/page.jsx:83"},
+      {"label": "Replace All", "ref": "app/tools/text-tools/find-replace/page.jsx:85"},
+      {"label": "N replacement(s) made (message)", "ref": "app/tools/text-tools/find-replace/page.jsx:89"},
+      {"label": "Download (file row replaced.txt) / Save / Share", "ref": "app/tools/text-tools/find-replace/page.jsx:93; app/components/FileDownload.jsx:208-218"},
+      {"label": "Copy", "ref": "app/tools/text-tools/find-replace/page.jsx:94"},
+      {"label": "Result is empty (message)", "ref": "app/tools/text-tools/find-replace/page.jsx:98"}
+    ],
+    "steps": ["paste text → fill Find and Replace with → optional « Use regular expression », « Ignore case », « Whole words only » → « Replace All » (disabled without text or Find) → count + Result field → « Download » or « Copy »; the original text stays in the first box"],
+    "limits": [
+      {"what": "text size", "value": "aucune limite ; aperçu au-delà de 1 000 000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "JavaScript RegExp in the page. A shown error (invalid regular expression, page.jsx:41,47) is reported to /api/report-error after sanitizing; the sanitizer turns a quoted /pattern/ into [path] (app/lib/reportError.js:97) and strips quoted text, URLs, e-mails, long numbers (:110-117). The text itself is never sent.", "ref": "app/tools/text-tools/find-replace/page.jsx:21,24-58; app/lib/useToolError.js:37-52; app/lib/reportError.js:72-122"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : page sans appel réseau)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": "/tools/developer-tools/regex-tester (regex side) — non audité ici",
+    "notes": "Plain mode: the Find term is escaped (page.jsx:8,29) and the replacement is literal ($&, $1, $$ kept as typed, :56). Regex mode: replacement understands $1, $&, $<name> (String.replace, :56). Flags: g, plus i with Ignore case (:32); never m or s: ^ and $ match only the start/end of the whole text; u only when Whole words only is ticked (:35), so \\p{…} and \\u{…} do not work in regex mode alone; in whole-word + regex mode a pattern the u flag refuses falls back to a code-point word class, and \\p{…}/\\u{…} then gives the shown error « \\p{…} and \\u{…} need the Unicode mode… » (:36-44). Whole word = not preceded/followed by a letter, mark, digit or _ of any script (:30-35). Count = number of matches (:52). No single-replacement mode, no undo, but the input is never modified."
+  },
+  {
+    "path": "/tools/text-tools/lorem-ipsum",
+    "task": "Generates deterministic Lorem ipsum placeholder text as N paragraphs, N sentences or N words.",
+    "inputs": {"accept": null, "formats": ["Amount (number, default 1)", "Type (Paragraphs, Sentences, Words; default Paragraphs)"], "ref": "app/tools/text-tools/lorem-ipsum/page.jsx:10-11,27-36"},
+    "outputs": {"formats": ["result text field", "TXT download lorem-ipsum.txt"], "ref": "app/tools/text-tools/lorem-ipsum/page.jsx:42-43"},
+    "controls": [
+      {"label": "Amount", "ref": "app/tools/text-tools/lorem-ipsum/page.jsx:27-28"},
+      {"label": "Type (Paragraphs / Sentences / Words)", "ref": "app/tools/text-tools/lorem-ipsum/page.jsx:31-36"},
+      {"label": "Generate", "ref": "app/tools/text-tools/lorem-ipsum/page.jsx:39"},
+      {"label": "Download (file row lorem-ipsum.txt) / Save / Share", "ref": "app/tools/text-tools/lorem-ipsum/page.jsx:43; app/components/FileDownload.jsx:208-218"},
+      {"label": "Copy", "ref": "app/tools/text-tools/lorem-ipsum/page.jsx:44"},
+      {"label": "Result is empty (message)", "ref": "app/tools/text-tools/lorem-ipsum/page.jsx:48"}
+    ],
+    "steps": ["enter Amount → choose Type → « Generate » → result → « Download » or « Copy »"],
+    "limits": [
+      {"what": "Amount", "value": "entier ≥ 1, sans maximum dans le code ; max=\"100\" ne borne que les flèches du champ", "constant": null, "ref": "app/tools/text-tools/lorem-ipsum/page.jsx:28; app/lib/textTools.js:115"}
+    ],
+    "processing": {"where": "browser", "detail": "lorem() in the page; nothing sent. An invalid amount throws 'Enter a whole number of 1 or more.', which is reported (reportShownMessage) but NOT displayed: the page shows 'Result is empty'.", "ref": "app/tools/text-tools/lorem-ipsum/page.jsx:15-18,48; app/lib/textTools.js:100-119"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : page sans appel réseau)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Word stream = the 69-word classic passage « lorem ipsum dolor sit amet consectetur adipiscing elit … id est laborum », repeated as needed (app/lib/textTools.js:100,105-107). Words: exactly N words, first letter capitalised, final period (:116). Sentence k: 8 to 16 words (8 + (7k mod 9)), starts at word 11k of the stream, first sentence forced to start « Lorem ipsum » (:108-113). Paragraph: 5 sentences, paragraphs separated by a blank line (:118). Deterministic: same request, same text. parseInt on the field: 2.7 → 2; empty → NaN → error not shown (page.jsx:28,16)."
+  },
+  {
+    "path": "/tools/text-tools/sticky-notes",
+    "task": "Keeps coloured text notes on a board saved in this browser's local storage.",
+    "inputs": {"accept": null, "formats": ["typed text"], "ref": "app/tools/text-tools/sticky-notes/page.jsx:43"},
+    "outputs": {"formats": ["notes on screen, saved in localStorage key 'sticky-notes' (no file, no copy, no export)"], "ref": "app/tools/text-tools/sticky-notes/page.jsx:7,24-27,54-61"},
+    "controls": [
+      {"label": "Write your note here... (placeholder)", "ref": "app/tools/text-tools/sticky-notes/page.jsx:43"},
+      {"label": "6 colour buttons, aria-label « Note colour: yellow / green / blue / pink / purple / orange » (default yellow)", "ref": "app/tools/text-tools/sticky-notes/page.jsx:6,12,47-48"},
+      {"label": "Add Note", "ref": "app/tools/text-tools/sticky-notes/page.jsx:51"},
+      {"label": "X (delete a note)", "ref": "app/tools/text-tools/sticky-notes/page.jsx:57"}
+    ],
+    "steps": ["type a note → pick a colour → « Add Note » (disabled while blank) → note appears and is saved → « X » deletes it"],
+    "limits": [
+      {"what": "nombre / taille des notes", "value": "aucune limite dans le code ; seule la capacité localStorage du navigateur (non gérée : setItem sans try)", "constant": null, "ref": "app/tools/text-tools/sticky-notes/page.jsx:26"}
+    ],
+    "processing": {"where": "browser", "detail": "Notes stored in window.localStorage under 'sticky-notes' as JSON {id, text, color}; read once at load, malformed entries skipped; written on every change. Nothing sent.", "ref": "app/tools/text-tools/sticky-notes/page.jsx:7,15-27,31"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun compte, aucun appel réseau)",
+    "watermark": "sans objet",
+    "browsers": "Private windows erase localStorage when closed (browser behaviour, not in the code). If storage is full or blocked, localStorage.setItem throws inside an effect with no try (page.jsx:26).",
+    "twin": null,
+    "notes": "Notes cannot be edited, reordered, exported or shared; deletion is immediate, no confirmation (page.jsx:35,57). Line breaks are kept on display (whitespace-pre-wrap, :58). Board: 1 column on phone, 2 from sm, 3 from lg (:54). Colour buttons wrap on a phone (comment :44)."
+  },
+  {
+    "path": "/tools/text-tools/text-comparator",
+    "task": "Compares two pasted texts line by line (Myers diff) and shows them side by side with changed words highlighted.",
+    "inputs": {"accept": null, "formats": ["Text 1 (pasted)", "Text 2 (pasted)"], "ref": "app/tools/text-tools/text-comparator/page.jsx:43-48"},
+    "outputs": {"formats": ["side-by-side rows on screen + 'N difference(s) found' (no copy, no file)"], "ref": "app/tools/text-tools/text-comparator/page.jsx:56-66"},
+    "controls": [
+      {"label": "Text 1", "ref": "app/tools/text-tools/text-comparator/page.jsx:43-44"},
+      {"label": "Text 2", "ref": "app/tools/text-tools/text-comparator/page.jsx:47-48"},
+      {"label": "Ignore case", "ref": "app/tools/text-tools/text-comparator/page.jsx:52"},
+      {"label": "Ignore spaces", "ref": "app/tools/text-tools/text-comparator/page.jsx:53"},
+      {"label": "Compare", "ref": "app/tools/text-tools/text-comparator/page.jsx:55"},
+      {"label": "N difference(s) found (message)", "ref": "app/tools/text-tools/text-comparator/page.jsx:58"},
+      {"label": "empty (placeholder for a missing line)", "ref": "app/tools/text-tools/text-comparator/page.jsx:61-62"}
+    ],
+    "steps": ["paste Text 1 and Text 2 → optional « Ignore case », « Ignore spaces » → « Compare » (disabled until both filled) → count + rows: same lines dark grey, differing rows red-tinted, removed words red (left), added words green (right)"],
+    "limits": [
+      {"what": "text size", "value": "aucune limite ; aperçu au-delà de 1 000 000 caractères par zone", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "npm package 'diff' (diffArrays for lines, diffWords / diffWordsWithSpace inside a changed pair), loaded from the site on first Compare. Nothing sent.", "ref": "app/tools/text-tools/text-comparator/page.jsx:17-34; app/lib/codeTools.js:49-66"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : page sans appel réseau)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": "/tools/developer-tools/diff-viewer (same diffLines, with line numbers and 'Ignore whitespace' / 'Ignore case', app/tools/developer-tools/diff-viewer/page.jsx:40,46)",
+    "notes": "Line endings CRLF/CR/LF normalised, final line break ignored (codeTools.js:51). Ignore spaces = trim + collapse runs to one space (codeTools.js:53): 'a b' vs 'ab' still differ. Ignore case = toLowerCase on the key (:53). Same rows show each side as written (page.jsx:22). Removed/added runs are paired in order; a lone added or removed line is marked whole (:23-31). The count is the number of differing rows (:58). No copy, no download, no line numbers."
+  },
+  {
+    "path": "/tools/text-tools/text-encryptor",
+    "task": "Encrypts a text with a password (AES-256-GCM, PBKDF2-SHA-256 600,000 iterations) into Base64, and decrypts it back.",
+    "inputs": {"accept": null, "formats": ["text to encrypt, or Base64 produced by this tool", "password in the 'Secret Key' field"], "ref": "app/tools/text-tools/text-encryptor/page.jsx:32-35"},
+    "outputs": {"formats": ["Base64 text (encrypt) or plain text (decrypt) in a Result field", "TXT download encrypted.txt (same name after Decrypt)"], "ref": "app/tools/text-tools/text-encryptor/page.jsx:44-45"},
+    "controls": [
+      {"label": "Paste your text here... (placeholder)", "ref": "app/tools/text-tools/text-encryptor/page.jsx:32"},
+      {"label": "Secret Key (password field, placeholder « Enter secret key... »)", "ref": "app/tools/text-tools/text-encryptor/page.jsx:34-35"},
+      {"label": "Encrypt", "ref": "app/tools/text-tools/text-encryptor/page.jsx:38"},
+      {"label": "Decrypt", "ref": "app/tools/text-tools/text-encryptor/page.jsx:39"},
+      {"label": "Download (file row encrypted.txt) / Save / Share", "ref": "app/tools/text-tools/text-encryptor/page.jsx:45; app/components/FileDownload.jsx:208-218"},
+      {"label": "Copy", "ref": "app/tools/text-tools/text-encryptor/page.jsx:46"}
+    ],
+    "steps": ["paste text (or encrypted Base64) → type the password in « Secret Key » → « Encrypt » or « Decrypt » (both disabled without text and key) → Result → « Download » or « Copy »"],
+    "limits": [
+      {"what": "text size", "value": "aucune limite ; aperçu au-delà de 1 000 000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "Web Crypto API: PBKDF2-SHA-256 600,000 iterations (ITERATIONS), random 16-byte salt and 12-byte IV per message, AES-GCM 256; output Base64 of 'OCT1' | salt | iv | ciphertext+tag. Nothing sent; error messages shown are reported sanitized to /api/report-error.", "ref": "app/lib/textCrypto.js:12,16-44; app/tools/text-tools/text-encryptor/page.jsx:15-25"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : page sans appel réseau)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": "/tools/file-tools/file-encryptor (same scheme for files, 'OCF1', app/lib/textCrypto.js:70-101)",
+    "notes": "Decrypt: whitespace in the Base64 ignored (textCrypto.js:26). Real messages: « Enter a password: without one, the text cannot be encrypted. » (:36), « Enter the password used to encrypt this text. » (:48), « This is not an encrypted text from this tool (it is not valid Base64). » (:50), « Wrong password, or the encrypted text was changed or cut: it cannot be decrypted. » (:57), « Wrong password, or this is not a text encrypted by this tool. » (:66). Any Base64 not starting with OCT1 or shorter than 48 bytes is XOR-decoded as the pre-29-09-2026 format (:51,60-64) and returned if it is valid UTF-8, with the note « Decrypted from the old XOR format this tool used before 29 September 2026. That format is weak: encrypt the text again to protect it with AES-256. » (page.jsx:23): a wrong password there can yield garbage instead of a refusal. No password recovery."
+  },
+  {
+    "path": "/tools/text-tools/text-repeater",
+    "task": "Repeats a text 1 to 100 times joined by a new line, a space, a comma + space, or nothing.",
+    "inputs": {"accept": null, "formats": ["typed or pasted text", "Repeat count (default 3)", "Separator (default New Line)"], "ref": "app/tools/text-tools/text-repeater/page.jsx:10-11,33-46"},
+    "outputs": {"formats": ["result text field", "TXT download repeated.txt"], "ref": "app/tools/text-tools/text-repeater/page.jsx:53-54"},
+    "controls": [
+      {"label": "Paste your text here... (placeholder)", "ref": "app/tools/text-tools/text-repeater/page.jsx:33"},
+      {"label": "Repeat count", "ref": "app/tools/text-tools/text-repeater/page.jsx:36-37"},
+      {"label": "Separator (New Line / Space / Comma / None)", "ref": "app/tools/text-tools/text-repeater/page.jsx:40-46"},
+      {"label": "Repeat", "ref": "app/tools/text-tools/text-repeater/page.jsx:49"},
+      {"label": "Download (file row repeated.txt) / Save / Share", "ref": "app/tools/text-tools/text-repeater/page.jsx:54; app/components/FileDownload.jsx:208-218"},
+      {"label": "Copy", "ref": "app/tools/text-tools/text-repeater/page.jsx:55"}
+    ],
+    "steps": ["paste text → Repeat count → Separator → « Repeat » (disabled while empty) → result → « Download » or « Copy »"],
+    "limits": [
+      {"what": "repetitions", "value": "1 à 100 (entier), sinon message « Enter a whole number of repetitions from 1 to 100. »", "constant": null, "ref": "app/tools/text-tools/text-repeater/page.jsx:20-21,50"}
+    ],
+    "processing": {"where": "browser", "detail": "Array.join in the page; nothing sent.", "ref": "app/tools/text-tools/text-repeater/page.jsx:17-25"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : page sans appel réseau)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Separators: New Line '\\n', Space ' ', Comma ', ' (comma + space), None '' (page.jsx:18). The text is repeated as typed, line breaks included."
+  },
+  {
+    "path": "/tools/text-tools/text-reverser",
+    "task": "Reverses a text's character order, word order (line by line) or line order.",
+    "inputs": {"accept": null, "formats": ["typed or pasted text"], "ref": "app/tools/text-tools/text-reverser/page.jsx:23"},
+    "outputs": {"formats": ["result text field", "TXT download reversed.txt"], "ref": "app/tools/text-tools/text-reverser/page.jsx:31-32"},
+    "controls": [
+      {"label": "Type or paste your text here... (placeholder)", "ref": "app/tools/text-tools/text-reverser/page.jsx:23"},
+      {"label": "Reverse Text", "ref": "app/tools/text-tools/text-reverser/page.jsx:25"},
+      {"label": "Reverse Words", "ref": "app/tools/text-tools/text-reverser/page.jsx:26"},
+      {"label": "Reverse Lines", "ref": "app/tools/text-tools/text-reverser/page.jsx:27"},
+      {"label": "Download (file row reversed.txt) / Save / Share", "ref": "app/tools/text-tools/text-reverser/page.jsx:32; app/components/FileDownload.jsx:208-218"},
+      {"label": "Copy", "ref": "app/tools/text-tools/text-reverser/page.jsx:33"}
+    ],
+    "steps": ["type or paste text → « Reverse Text », « Reverse Words » or « Reverse Lines » → result → « Download » or « Copy »"],
+    "limits": [
+      {"what": "text size", "value": "aucune limite ; aperçu au-delà de 1 000 000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "reverseCharacters / reverseWords / reverseLines in the page; nothing sent.", "ref": "app/tools/text-tools/text-reverser/page.jsx:14-16; app/lib/textSegments.js:146-157"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : page sans appel réseau)",
+    "watermark": "sans objet",
+    "browsers": "Reverse Text keeps graphemes whole with Intl.Segmenter; without it (Firefox 111-124) code points: ZWJ emoji and combining accents are split (app/lib/textSegments.js:9-14).",
+    "twin": null,
+    "notes": "Reverse Words: per line split on '\\n', words = runs of non-space, spacing pattern and leading/trailing spaces kept, punctuation stays glued to its word (textSegments.js:148-155). Reverse Lines: split on '\\n' (:157). No case/space normalisation (palindrome check only works for exact strings). Empty result shows nothing (page.jsx:29)."
+  },
+  {
+    "path": "/tools/text-tools/text-sorter",
+    "task": "Sorts lines A-Z, Z-A, by length, by leading number (ascending or descending) or shuffles them.",
+    "inputs": {"accept": null, "formats": ["typed or pasted text, one item per line"], "ref": "app/tools/text-tools/text-sorter/page.jsx:35"},
+    "outputs": {"formats": ["result text field", "TXT download sorted.txt"], "ref": "app/tools/text-tools/text-sorter/page.jsx:46-47"},
+    "controls": [
+      {"label": "Paste your text here... (placeholder)", "ref": "app/tools/text-tools/text-sorter/page.jsx:35"},
+      {"label": "Sort A-Z", "ref": "app/tools/text-tools/text-sorter/page.jsx:37"},
+      {"label": "Sort Z-A", "ref": "app/tools/text-tools/text-sorter/page.jsx:38"},
+      {"label": "Sort by Length", "ref": "app/tools/text-tools/text-sorter/page.jsx:39"},
+      {"label": "Shuffle", "ref": "app/tools/text-tools/text-sorter/page.jsx:40"},
+      {"label": "Sort by Number (0-9)", "ref": "app/tools/text-tools/text-sorter/page.jsx:41"},
+      {"label": "Sort by Number (9-0)", "ref": "app/tools/text-tools/text-sorter/page.jsx:42"},
+      {"label": "Download (file row sorted.txt) / Save / Share", "ref": "app/tools/text-tools/text-sorter/page.jsx:47; app/components/FileDownload.jsx:208-218"},
+      {"label": "Copy", "ref": "app/tools/text-tools/text-sorter/page.jsx:48"},
+      {"label": "Result is empty (message)", "ref": "app/tools/text-tools/text-sorter/page.jsx:52"}
+    ],
+    "steps": ["paste lines → click one of the 6 buttons → result → « Download » or « Copy »"],
+    "limits": [
+      {"what": "text size", "value": "aucune limite ; aperçu au-delà de 1 000 000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "sortLines() and an in-page shuffle; nothing sent.", "ref": "app/tools/text-tools/text-sorter/page.jsx:14-28; app/lib/textTools.js:55-77"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : page sans appel réseau)",
+    "watermark": "sans objet",
+    "browsers": "Alphabetical order = Intl.Collator of the browser's language (textTools.js:57-58): measured under Node, Swedish and Danish put å, ä/æ, ö/ø after z; English, German, French keep them next to a/o. Length = graphemes with Intl.Segmenter, code points without it (Firefox 111-124).",
+    "twin": null,
+    "notes": "A-Z: case-insensitive, accents secondary, numbers inside lines by value (item 2 < item 10), ties broken by a case/accent-sensitive comparison (textTools.js:57-59,63). Z-A = reverse (:64). Length: shortest first, ties A-Z (:65). By Number: number at the start of each line (sign incl. Unicode minus, decimals, exponent), lines without one after, A-Z (:66-75). Shuffle: crypto.getRandomValues + Fisher-Yates with j = rnd[i] % (i+1) → modulo bias at most n/2^32 (page.jsx:18-28). Lines split on CRLF/CR/LF, result joined with LF (textTools.js:18)."
+  },
+  {
+    "path": "/tools/text-tools/text-to-list",
+    "task": "Turns non-empty lines into a bullet list (•), a numbered list (1.) or a comma-separated line.",
+    "inputs": {"accept": null, "formats": ["typed or pasted text, one item per line"], "ref": "app/tools/text-tools/text-to-list/page.jsx:22"},
+    "outputs": {"formats": ["result text field", "TXT download list.txt"], "ref": "app/tools/text-tools/text-to-list/page.jsx:30-31"},
+    "controls": [
+      {"label": "Paste your text here... (placeholder)", "ref": "app/tools/text-tools/text-to-list/page.jsx:22"},
+      {"label": "Bullet List", "ref": "app/tools/text-tools/text-to-list/page.jsx:24"},
+      {"label": "Numbered List", "ref": "app/tools/text-tools/text-to-list/page.jsx:25"},
+      {"label": "Comma List", "ref": "app/tools/text-tools/text-to-list/page.jsx:26"},
+      {"label": "Download (file row list.txt) / Save / Share", "ref": "app/tools/text-tools/text-to-list/page.jsx:31; app/components/FileDownload.jsx:208-218"},
+      {"label": "Copy", "ref": "app/tools/text-tools/text-to-list/page.jsx:32"},
+      {"label": "Result is empty (message)", "ref": "app/tools/text-tools/text-to-list/page.jsx:36"}
+    ],
+    "steps": ["paste one item per line → « Bullet List », « Numbered List » or « Comma List » → result → « Download » or « Copy »"],
+    "limits": [
+      {"what": "text size", "value": "aucune limite ; aperçu au-delà de 1 000 000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "split/map/join in the page; nothing sent.", "ref": "app/tools/text-tools/text-to-list/page.jsx:13-15"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : page sans appel réseau)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Lines split on '\\n'; blank lines skipped in all three modes (page.jsx:13-15). Bullet = '• ' + trimmed line; Numbered = 'N. ' + trimmed line; Comma = lines joined with ', ' WITHOUT trimming (leading/trailing spaces kept). Existing bullets or numbers in the input are not removed. No custom separator."
+  },
+  {
+    "path": "/tools/text-tools/text-truncator",
+    "task": "Shortens a text to N characters (as displayed) or N words, adding '...' when it cuts.",
+    "inputs": {"accept": null, "formats": ["typed or pasted text", "Limit (default 100)", "Type (Characters / Words, default Characters)"], "ref": "app/tools/text-tools/text-truncator/page.jsx:11-12,26-37"},
+    "outputs": {"formats": ["result text field", "TXT download truncated.txt"], "ref": "app/tools/text-tools/text-truncator/page.jsx:44-45"},
+    "controls": [
+      {"label": "Paste your text here... (placeholder)", "ref": "app/tools/text-tools/text-truncator/page.jsx:26"},
+      {"label": "Limit", "ref": "app/tools/text-tools/text-truncator/page.jsx:29-30"},
+      {"label": "Type (Characters / Words)", "ref": "app/tools/text-tools/text-truncator/page.jsx:33-37"},
+      {"label": "Truncate", "ref": "app/tools/text-tools/text-truncator/page.jsx:41"},
+      {"label": "Download (file row truncated.txt) / Save / Share", "ref": "app/tools/text-tools/text-truncator/page.jsx:45; app/components/FileDownload.jsx:208-218"},
+      {"label": "Copy", "ref": "app/tools/text-tools/text-truncator/page.jsx:46"}
+    ],
+    "steps": ["paste text → Limit → Type → « Truncate » (disabled while empty) → result → « Download » or « Copy »"],
+    "limits": [
+      {"what": "Limit", "value": "entier ≥ 0 (min=\"1\" ne borne que les flèches) ; sinon « The limit must be a whole number, 0 or more. »", "constant": null, "ref": "app/tools/text-tools/text-truncator/page.jsx:30,40; app/lib/textTools.js:82"}
+    ],
+    "processing": {"where": "browser", "detail": "truncate() in the page; nothing sent except the sanitized report of a shown error.", "ref": "app/tools/text-tools/text-truncator/page.jsx:16-19; app/lib/textTools.js:81-98"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : page sans appel réseau)",
+    "watermark": "sans objet",
+    "browsers": "Characters = graphemes with Intl.Segmenter; code points without it (Firefox 111-124): a combining accent or ZWJ emoji can be split (app/lib/textSegments.js:9-14).",
+    "twin": null,
+    "notes": "Ellipsis = three ASCII dots '...', not '…', added after the kept part and not counted in the limit (textTools.js:81,85,94). Characters mode removes trailing whitespace before the ellipsis (:85). Words = runs of non-whitespace; cut right after the N-th word, original spacing and line breaks kept (:88-95). Text within the limit returned unchanged. Limit 0 → '...' alone (:97, :85)."
+  },
+  {
+    "path": "/tools/text-tools/whitespace-remover",
+    "task": "Cleans spacing five ways: all extra spaces and blank lines, extra spaces only, leading, trailing, or join into one line.",
+    "inputs": {"accept": null, "formats": ["typed or pasted text"], "ref": "app/tools/text-tools/whitespace-remover/page.jsx:21"},
+    "outputs": {"formats": ["result text field", "TXT download cleaned.txt"], "ref": "app/tools/text-tools/whitespace-remover/page.jsx:31-32"},
+    "controls": [
+      {"label": "Paste your text here... (placeholder)", "ref": "app/tools/text-tools/whitespace-remover/page.jsx:21"},
+      {"label": "Remove All Extra", "ref": "app/tools/text-tools/whitespace-remover/page.jsx:23"},
+      {"label": "Remove Extra Spaces", "ref": "app/tools/text-tools/whitespace-remover/page.jsx:24"},
+      {"label": "Remove Leading", "ref": "app/tools/text-tools/whitespace-remover/page.jsx:25"},
+      {"label": "Remove Trailing", "ref": "app/tools/text-tools/whitespace-remover/page.jsx:26"},
+      {"label": "Join Into One Line", "ref": "app/tools/text-tools/whitespace-remover/page.jsx:27"},
+      {"label": "Download (file row cleaned.txt) / Save / Share", "ref": "app/tools/text-tools/whitespace-remover/page.jsx:32; app/components/FileDownload.jsx:208-218"},
+      {"label": "Copy", "ref": "app/tools/text-tools/whitespace-remover/page.jsx:33"},
+      {"label": "Result is empty (message)", "ref": "app/tools/text-tools/whitespace-remover/page.jsx:37"}
+    ],
+    "steps": ["paste text → one of the 5 buttons → result → « Download » or « Copy »"],
+    "limits": [
+      {"what": "text size", "value": "aucune limite ; aperçu au-delà de 1 000 000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "Functions of app/lib/textTools.js in the page; nothing sent.", "ref": "app/tools/text-tools/whitespace-remover/page.jsx:5,14; app/lib/textTools.js:127-159"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : page sans appel réseau)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Horizontal whitespace = anything JS \\s matches except CR/LF (NBSP, U+2000-U+200A, U+202F, U+3000, tabs, also \\v \\f U+2028/2029) (textTools.js:135). Remove Extra Spaces: each line collapsed to single spaces and trimmed, every line kept, blank ones too (:140). Remove All Extra: same + a run of blank lines becomes one, blank lines at the start and end removed (:145-153). Join Into One Line: every whitespace run incl. line breaks → one space, ends trimmed (:156). Remove Leading / Trailing: trimStart / trimEnd per line (:158-159). Lines split on CRLF/CR/LF, output LF (:18). Zero-width space U+200B is not whitespace for JS and is kept."
+  },
+  {
+    "path": "/tools/text-tools/word-counter",
+    "task": "Counts, live, words, characters, characters without spaces, sentences, paragraphs and reading/speaking time, with a keyword density table.",
+    "inputs": {"accept": null, "formats": ["typed or pasted text"], "ref": "app/tools/text-tools/word-counter/page.jsx:26"},
+    "outputs": {"formats": ["6 counters + speaking-time line + keyword density table on screen (no file)"], "ref": "app/tools/text-tools/word-counter/page.jsx:28-36"},
+    "controls": [
+      {"label": "Type or paste your text here... (placeholder)", "ref": "app/tools/text-tools/word-counter/page.jsx:26"},
+      {"label": "Words", "ref": "app/tools/text-tools/word-counter/page.jsx:28"},
+      {"label": "Characters", "ref": "app/tools/text-tools/word-counter/page.jsx:29"},
+      {"label": "No Spaces", "ref": "app/tools/text-tools/word-counter/page.jsx:30"},
+      {"label": "Sentences", "ref": "app/tools/text-tools/word-counter/page.jsx:31"},
+      {"label": "Paragraphs", "ref": "app/tools/text-tools/word-counter/page.jsx:32"},
+      {"label": "Min Read", "ref": "app/tools/text-tools/word-counter/page.jsx:33"},
+      {"label": "About N min to say aloud (130 words a minute); reading time at 200 words a minute.", "ref": "app/tools/text-tools/word-counter/page.jsx:35"},
+      {"label": "Keyword density — buttons « 1 word », « 2 words », « 3 words »; checkbox « Leave out common English words (the, and, of…) » (ticked by default); columns Word/Phrase, Times, Density", "ref": "app/components/KeywordDensity.jsx:12,28-37"},
+      {"label": "Clear", "ref": "app/tools/text-tools/word-counter/page.jsx:37"}
+    ],
+    "steps": ["type or paste text → counters and density update on every change → « Clear » to empty"],
+    "limits": [
+      {"what": "text size", "value": "aucune limite ; aperçu au-delà de 1 000 000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"},
+      {"what": "density table", "value": "15 lignes au plus ; phrases de 2-3 mots seulement si vues plus d'une fois", "constant": null, "ref": "app/components/KeywordDensity.jsx:22"}
+    ],
+    "processing": {"where": "browser", "detail": "Intl.Segmenter word/sentence/grapheme segmentation in the page; nothing sent or stored.", "ref": "app/tools/text-tools/word-counter/page.jsx:12-19; app/lib/textSegments.js:9-55,161-165; app/components/KeywordDensity.jsx:13-23"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : page sans appel réseau)",
+    "watermark": "sans objet",
+    "browsers": "Without Intl.Segmenter (Firefox 111-124): words by regex — a run of Chinese/Japanese/Thai counts as one word (textSegments.js:26); sentences by regex — '3.50' ends a sentence at '3.' (:38); characters by code point (:14). Firefox and Chromium segment some kana differently; handled by counting any segment holding a letter or digit (:21-23).",
+    "twin": "/tools/text-tools/character-counter",
+    "notes": "Words = segments that are word-like or contain a letter/digit (textSegments.js:17-27). Sentences = ICU sentences merged after a known abbreviation (Mr, Mrs, Dr, e.g, i.e, etc, months…, :30-53), only those containing a letter or digit (:55). Characters = graphemes, spaces and line breaks included (page.jsx:13-14); No Spaces = graphemes that are not whitespace (:15). Paragraphs = non-empty pieces between line breaks, so each line counts (:17). Min Read = ceil(words/200) (:18); speaking = ceil(words/130) (:19). Density: words lower-cased, 56 English stop words skipped when ticked but kept in the total; percentages = times ÷ all words (KeywordDensity.jsx:8,14-22,43)."
+  }
+]

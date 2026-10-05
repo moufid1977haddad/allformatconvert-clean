@@ -1,0 +1,327 @@
+[
+  {
+    "path": "/tools/video-tools/video-compressor",
+    "task": "Réduit le poids d'une vidéo en la réencodant en MP4 (H.264 par défaut, H.265 ou AV1 au choix) sur le service vidéo du site.",
+    "served_version": "Production = version service (MediaServiceTool), car NEXT_PUBLIC_MEDIA_SERVICE_URL est définie (docs/audit/RAPPORT-video-deploiement.md:28,54 ; vérifié par GET www le 05/10 : aucun « MediaRecorder »). La première version de contenu-avant.json montrait à tort LegacyPage.jsx (WebM / MediaRecorder, non servie) ; régénéré pendant l’audit, il montre maintenant la version service. Bascule : app/tools/video-tools/video-compressor/page.jsx:64.",
+    "inputs": {"accept": "video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts", "formats": ["MP4", "M4V", "MOV", "QT", "WebM", "MKV", "AVI", "WMV", "FLV", "OGV", "3GP", "3G2", "MPG", "MPEG", "TS", "MTS", "M2TS", "toute vidéo que ffmpeg lit avec une piste image"], "ref": "app/lib/mediaSupport.js:237-238 ; app/components/MediaServiceTool.jsx:140 ; services/media-processing/app/ffmpeg_ops.py:262-296,533-534 (« This file has no video track to compress. »)"},
+    "outputs": {"formats": ["MP4 (H.264 + AAC 96 kbit/s)", "MP4 (H.265/HEVC étiqueté hvc1 + AAC 96 kbit/s)", "MP4 (AV1 SVT + AAC 96 kbit/s)"], "ref": "services/media-processing/app/ffmpeg_ops.py:532-552 ; nom de fichier <nom>-compressed.mp4 ou <nom>-h265-compressed.mp4 / -av1-compressed.mp4 : app/tools/video-tools/video-compressor/page.jsx:73"},
+    "controls": [
+      {"label": "Click or drop a video file here (souris) / Choose a video file (écran tactile)", "ref": "app/components/UploadPrompt.jsx:10-11 ; app/components/MediaServiceTool.jsx:139"},
+      {"label": "Compression level : « Light — best quality, smaller file » / « Balanced — recommended » (défaut) / « Strong — smallest file »", "ref": "app/tools/video-tools/video-compressor/page.jsx:12-16,71,77-80"},
+      {"label": "Resolution : « Keep original resolution » (défaut), « Limit to 1440p », « Limit to 1080p », « Limit to 720p », « Limit to 480p », « Limit to 360p », « Limit to 240p »", "ref": "app/tools/video-tools/video-compressor/page.jsx:27-36,83-86"},
+      {"label": "Codec : « H.264 — plays everywhere » (défaut), « H.265 / HEVC — much smaller, most phones and computers », « AV1 — best quality for its size, recent browsers and devices »", "ref": "app/tools/video-tools/video-compressor/page.jsx:21-25,89-92"},
+      {"label": "Exact quality (CRF), optional (placeholder « Automatic, from the level — or 0 to 51 » ; 0 to 63 pour AV1)", "ref": "app/tools/video-tools/video-compressor/page.jsx:26,95-96"},
+      {"label": "Compress Video", "ref": "app/tools/video-tools/video-compressor/page.jsx:70 ; app/components/MediaServiceTool.jsx:154"},
+      {"label": "Cancel (pendant le travail)", "ref": "app/components/MediaServiceTool.jsx:151-152"},
+      {"label": "Download", "ref": "app/components/FileDownload.jsx:209-211 ; app/components/MediaServiceTool.jsx:178"}
+    ],
+    "steps": ["choisir ou déposer une vidéo (les réglages apparaissent une fois le fichier choisi, MediaServiceTool.jsx:143)", "Compression level / Resolution / Codec / Exact quality (CRF) facultatifs", "bouton « Compress Video » → étapes affichées : Preparing… → Uploading → Waiting for a free slot (rang dans la file) → Converting (pourcentage réel) → Downloading the result (MediaServiceTool.jsx:25-31,120-127)", "tableau Before / After (MP4) / Saved ou Larger by (MediaServiceTool.jsx:165-169) + aperçu vidéo + bouton « Download » ; ou encadré « This video is already well compressed. » sans fichier (MediaServiceTool.jsx:156-160)"],
+    "limits": [
+      {"what": "taille max par fichier sur ordinateur", "value": "1 Go (1024 Mo)", "constant": "MAX_UPLOAD_MB (page) + MEDIA_TICKET_MAX_BYTES (Vercel) + MEDIA_MAX_FILE_BYTES (service)", "ref": "app/components/MediaServiceTool.jsx:21,76-79 (message « This file is X, over the 1 GB limit. ») ; app/api/media/ticket/route.js:27-30 ; services/media-processing/app/jobs.py:115-116"},
+      {"what": "taille max sur iPhone/Android", "value": "1 Go, aucune distinction téléphone dans le code", "constant": "MAX_UPLOAD_MB", "ref": "app/components/MediaServiceTool.jsx:76"},
+      {"what": "durée max de la vidéo", "value": "NON TROUVÉ dans le code (variable MEDIA_MAX_DURATION_SECONDS ; valeur proposée 7200 s = 2 h dans services/media-processing/README.md:84 et docs/audit/RAPPORT-video-architecture.md:142)", "constant": "MEDIA_MAX_DURATION_SECONDS", "ref": "services/media-processing/app/config.py:41 ; jobs.py:195-197 (« Media up to N minutes is accepted. »)"},
+      {"what": "temps max d'un encodage", "value": "NON TROUVÉ dans le code (variable ; 1500 s = 25 min proposé README:86)", "constant": "MEDIA_FFMPEG_TIMEOUT_SECONDS", "ref": "services/media-processing/app/jobs.py:366-367 (« The conversion took too long and was stopped. Try a shorter file. »)"},
+      {"what": "tâches par réseau par heure / par jour", "value": "valeurs en variables d'environnement (non lues) ; 20/h et 60/jour posées au déploiement selon docs/audit/RAPPORT-video-deploiement.md:28", "constant": "MEDIA_JOBS_PER_HOUR_PER_IP / MEDIA_JOBS_PER_DAY_PER_IP", "ref": "app/api/media/ticket/route.js:36-42 ; lib/media/ticket.js:49-50"},
+      {"what": "file d'attente du service", "value": "variables MEDIA_MAX_CONCURRENT_JOBS / MEDIA_MAX_QUEUED_JOBS (2 et 10 proposés README:81-82) ; la page réessaie toutes les 3 s jusqu'à 200 fois", "constant": "MEDIA_MAX_CONCURRENT_JOBS, MEDIA_MAX_QUEUED_JOBS", "ref": "services/media-processing/app/jobs.py:99,206-208 ; app/lib/mediaJob.js:164-171"}
+    ],
+    "processing": {"where": "our-server", "detail": "Le navigateur demande un billet à /api/media/ticket (JSON : op et taille seulement), puis envoie la vidéo par morceaux (taille MEDIA_CHUNK_BYTES, 8 Mio proposé README:89), chacun vérifié par SHA-256, directement au service media-processing (Railway), sans passer par Vercel ; reprise après coupure. L'original est supprimé dès la fin du traitement (succès, erreur ou annulation) ; le résultat est supprimé après le premier téléchargement complet — que la page fait automatiquement avant d'afficher le bouton Download — ou, s'il n'est jamais téléchargé, par le balayeur après MEDIA_JOB_TTL_SECONDS (900 s proposé). Journal : opération, tranche de taille, statut, durée ; jamais le nom ni le contenu. En cas d'échec la page signale à /api/report-error : extension, tranche de taille, message nettoyé, navigateur. Encodage : niveau choisi (CRF x264 27/30/34 ; H.265 27/30/34 ; AV1 42/48/55), puis le niveau plus fort une fois si le résultat n'est pas au moins 2 % plus petit ; sinon aucun fichier (notSmaller). CRF exact : un encodage, livré même plus gros.", "ref": "app/lib/mediaJob.js:78-128,157-197 ; services/media-processing/app/jobs.py:7-13,85-87,271,317-408,411-427 ; services/media-processing/app/main.py:213-240 ; services/media-processing/app/ffmpeg_ops.py:23-30,41,532-552 ; app/components/MediaServiceTool.jsx:109 ; app/lib/reportError.js:7-11"},
+    "quota": "limite par réseau heure/jour propre au service vidéo (seau media_rate, séparé des outils payants ; MEDIA_JOBS_PER_HOUR_PER_IP / MEDIA_JOBS_PER_DAY_PER_IP) — app/api/media/ticket/route.js:28,36-42 ; pas de guard.js, pas de plafond de dépense (aucun service payant)",
+    "signup": "aucune inscription demandée (vérifié : app/api/media/ticket/route.js:13-50 ne lit aucune session ; le billet ne porte que jid, op, max, exp — lib/media/ticket.js:27-33)",
+    "watermark": "aucun filigrane ajouté (vérifié : commandes ffmpeg sans overlay, services/media-processing/app/ffmpeg_ops.py:541-552)",
+    "browsers": "Même chemin dans tous les navigateurs (le traitement est sur le serveur). Sur iPhone/iPad, note affichée : une vidéo prise dans la Photothèque arrive déjà réduite par iOS ; passer par Fichiers (app/components/IosOriginalNote.jsx:8-11,19-21 ; MediaServiceTool.jsx:137). Raison de l'abandon du mode navigateur : Safari n'a pas captureStream() sur <video> (docs/audit/RAPPORT-safari-defauts.md:14,32).",
+    "twin": null,
+    "notes": "Message réel si rien de plus petit : « This video is already well compressed. … To go smaller, lower the resolution instead. » (MediaServiceTool.jsx:158-159). Avec « Strong » il n'y a qu'un essai (jobs.py:336-337). Le son est toujours réencodé en AAC 96 kbit/s (ffmpeg_ops.py:547,551), seule la première piste image et la première piste son sont gardées (ffmpeg_ops.py:546,549). Métadonnées du fichier retirées (-map_metadata -1, ffmpeg_ops.py:521). Mesure H.265/AV1 −40/−50 % à VMAF égal : docs/audit/RAPPORT-p25-decisions-03-10.md §5 (2 clips 1080p de 10 s). Railway ~3,8× plus rapide que le banc local (RAPPORT-video-qualite.md §3)."
+  },
+  {
+    "path": "/tools/video-tools/video-converter",
+    "task": "Convertit une vidéo vers l'un de 22 formats vidéo, un GIF animé ou l'un de 11 formats audio (extraction du son), sur le service vidéo du site, avec options d'édition pour MP4/MOV/M4V.",
+    "served_version": "Production = version service (page.jsx:71 ; RAPPORT-video-deploiement.md:54 ; vérifié GET www 05/10). La première version de contenu-avant.json montrait à tort LegacyPage.jsx (« WebM only ») ; régénéré pendant l’audit, il montre maintenant la version service.",
+    "inputs": {"accept": "video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts", "formats": ["vidéos de la liste accept ; les fichiers audio ne sont PAS acceptés par le sélecteur ni au dépôt"], "ref": "app/components/MediaServiceTool.jsx:140 ; app/lib/mediaSupport.js:237-238 ; app/components/FileDropBridge.jsx:66-69"},
+    "outputs": {"formats": ["MP4 (H.264)", "H.265/HEVC (MP4)", "AV1 (MP4)", "MOV", "MKV", "WebM (VP9 + Opus)", "AVI (MPEG-4 + MP3)", "AVI (XviD)", "WMV", "ASF", "FLV", "F4V", "MPG", "MPEG", "VOB", "TS", "M2TS (AC-3)", "MTS (AC-3)", "3GP", "3G2", "M4V", "OGV (Theora, 720p max)", "GIF animé", "MP3", "M4A", "AAC", "WAV", "AIFF", "OGG (Vorbis)", "Opus", "FLAC", "WMA", "AC3", "AMR (8 kHz mono)"], "ref": "app/tools/video-tools/video-converter/page.jsx:8-19 ; services/media-processing/app/ffmpeg_ops.py:180-223,564-565 ; nom : page.jsx:86-91 (suffixe -h265, -av1, -xvid ; -converted si même extension)"},
+    "controls": [
+      {"label": "Click or drop a video file here / Choose a video file", "ref": "app/components/UploadPrompt.jsx:10-11"},
+      {"label": "Convert to (groupes Video / Image / Audio only ; défaut « MP4 (H.264) — plays everywhere »)", "ref": "app/tools/video-tools/video-converter/page.jsx:78,98-103"},
+      {"label": "Quality : « High quality » / « Balanced » (défaut) / « Small file » — désactivé pour GIF, WAV, FLAC", "ref": "app/tools/video-tools/video-converter/page.jsx:22,78,106-109"},
+      {"label": "Resolution : « Keep original resolution », « Limit to 2160p (4K) », « Limit to 1440p », « Limit to 1080p », « Limit to 720p », « Limit to 480p », « Limit to 360p », « Limit to 240p », « Limit to 144p » — désactivé pour l'audio et le GIF", "ref": "app/tools/video-tools/video-converter/page.jsx:41,112-115"},
+      {"label": "More options: speed, mirror, volume, fades, exact quality (seulement MP4 H.264/H.265/AV1, MOV, M4V)", "ref": "app/tools/video-tools/video-converter/page.jsx:27,117-119"},
+      {"label": "Speed : 0.25× (slow motion), 0.5×, 0.75×, Normal speed, 1.25×, 1.5×, 2×, 3×, 4× (time-lapse)", "ref": "app/tools/video-tools/video-converter/page.jsx:28,121-122"},
+      {"label": "Mirror : None / Left-right ⇆ / Top-bottom ⇅ / Both", "ref": "app/tools/video-tools/video-converter/page.jsx:123-125"},
+      {"label": "Volume: 100 % (0 à 300, pas de 10)", "ref": "app/tools/video-tools/video-converter/page.jsx:126-127"},
+      {"label": "Fade in (s) / Fade out (s) (0 à 10, pas 0,5)", "ref": "app/tools/video-tools/video-converter/page.jsx:128-131"},
+      {"label": "Fade the picture too (from / to black)", "ref": "app/tools/video-tools/video-converter/page.jsx:132"},
+      {"label": "Exact quality (CRF, lower = better and bigger), instead of the quality level above", "ref": "app/tools/video-tools/video-converter/page.jsx:133-134"},
+      {"label": "Convert", "ref": "app/tools/video-tools/video-converter/page.jsx:77"},
+      {"label": "Cancel / Download", "ref": "app/components/MediaServiceTool.jsx:152,178"}
+    ],
+    "steps": ["choisir une vidéo", "Convert to / Quality / Resolution (+ More options pour MP4, H.265, AV1, MOV, M4V)", "bouton « Convert » → Uploading → file d'attente → Converting % → Downloading the result", "Before / After / Saved ou Larger by, aperçu, bouton « Download »"],
+    "limits": [
+      {"what": "taille max par fichier (ordinateur et téléphone)", "value": "1 Go", "constant": "MAX_UPLOAD_MB / MEDIA_TICKET_MAX_BYTES / MEDIA_MAX_FILE_BYTES", "ref": "app/components/MediaServiceTool.jsx:21,76-79 ; app/api/media/ticket/route.js:27-30 ; services/media-processing/app/jobs.py:115-116"},
+      {"what": "durée max", "value": "NON TROUVÉ dans le code (MEDIA_MAX_DURATION_SECONDS ; 7200 s proposé README:84)", "constant": "MEDIA_MAX_DURATION_SECONDS", "ref": "services/media-processing/app/jobs.py:195-197"},
+      {"what": "temps max d'un encodage", "value": "NON TROUVÉ dans le code (MEDIA_FFMPEG_TIMEOUT_SECONDS ; 1500 s proposé README:86)", "constant": "MEDIA_FFMPEG_TIMEOUT_SECONDS", "ref": "services/media-processing/app/jobs.py:366-367"},
+      {"what": "GIF depuis le convertisseur", "value": "toute la vidéo, 12 i/s, largeur ≤ 640 px (jamais agrandie), pas de plafond de 60 s (la page n'envoie aucun paramètre GIF)", "constant": "GIF_DEFAULT_FPS, GIF_DEFAULT_MAX_WIDTH", "ref": "app/tools/video-tools/video-converter/page.jsx:79-85 ; services/media-processing/app/ffmpeg_ops.py:303-326,569-576"},
+      {"what": "vitesse / volume / fondus / CRF", "value": "vitesse 0,25-4 ; volume 0-300 % ; fondus 0-10 s chacun, refusés s'ils dépassent la durée ; CRF 0-51 (H.264, H.265), 0-63 (AV1) ; AV1 en MP4 seulement", "constant": "SPEEDS, MAX_VOLUME, MAX_FADE_SECONDS, CRF_RANGE", "ref": "services/media-processing/app/ffmpeg_ops.py:375-380,457-476,524-530,595-598,629-632"},
+      {"what": "tâches par réseau heure / jour", "value": "variables d'environnement (20/h, 60/jour posées au déploiement : RAPPORT-video-deploiement.md:28)", "constant": "MEDIA_JOBS_PER_HOUR_PER_IP / MEDIA_JOBS_PER_DAY_PER_IP", "ref": "app/api/media/ticket/route.js:36-42"}
+    ],
+    "processing": {"where": "our-server", "detail": "Même chemin que video-compressor (billet, envoi direct par morceaux au service Railway, original supprimé à la fin du traitement, résultat supprimé après le téléchargement automatique par la page ou après le TTL). Taille : cibles à CRF (mp4, m4v, mov, mkv, flv, ts, 3gp, 3g2, f4v, m2ts, mts, h265, av1, webm) — jusqu'à 3 encodages avec CRF relevé si le résultat dépasse l'original, essai abandonné à 12 % s'il est projeté au-delà de 125 % ; si le dernier est encore plus gros, il est livré (larger). Vieux encodeurs (AVI, XviD, WMV, ASF, OGV, MPG, MPEG, VOB) : débit dérivé de la source avec 15 % de marge. GIF et audio : un seul encodage. CRF exact : un seul encodage.", "ref": "services/media-processing/app/ffmpeg_ops.py:32-68,160-177,511-664 ; services/media-processing/app/jobs.py:317-408 ; app/lib/mediaJob.js:157-197"},
+    "quota": "limite par réseau heure/jour du service vidéo (app/api/media/ticket/route.js:36-42) ; pas de plafond de dépense",
+    "signup": "aucune inscription demandée (vérifié : app/api/media/ticket/route.js:13-50)",
+    "watermark": "aucun filigrane ajouté (vérifié : ffmpeg_ops.py:180-223,652 — aucun overlay)",
+    "browsers": "Identique partout (serveur). Note iOS sur la Photothèque (IosOriginalNote.jsx:19-21).",
+    "twin": "/tools/video-tools/video-to-audio (extraction du son, mais dans le navigateur) ; /tools/video-tools/video-compressor (même service, op compress) ; /tools/gif-tools/video-to-gif (GIF avec options)",
+    "notes": "AV1 + miroir vertical : ajout d'un scale pour contourner un refus de SVT-AV1 (ffmpeg_ops.py:648-651). Le texte d'aide sous More options dit : « With an exact CRF, the video is encoded once at that value, even if the file comes out larger than the original. » (page.jsx:136). Messages d'erreur service : « This file has no video track; choose an audio format instead. », « This file has no audio track to extract. » (ffmpeg_ops.py:559-562). MPEG-2 peut sortir +0,3 à +2,2 % plus gros (RAPPORT-video-qualite.md §3 décision 6)."
+  },
+  {
+    "path": "/tools/video-tools/video-filter",
+    "task": "Applique un filtre visuel prédéfini (Grayscale, Sepia, Invert, Blur, Brightness, Contrast, Saturate) à une vidéo sur le service vidéo du site et rend un MP4.",
+    "inputs": {"accept": "video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts", "formats": ["vidéos de la liste accept"], "ref": "app/components/MediaServiceTool.jsx:140 ; app/lib/mediaSupport.js:237-238"},
+    "outputs": {"formats": ["MP4 (H.264 CRF 20 + AAC 160 kbit/s)"], "ref": "app/tools/video-tools/video-filter/page.jsx:53-54 (nom <nom>-<filtre>.mp4) ; services/media-processing/app/ffmpeg_ops.py:19-20,111-122,182"},
+    "controls": [
+      {"label": "Click or drop a video file here / Choose a video file", "ref": "app/components/UploadPrompt.jsx:10-11"},
+      {"label": "Grayscale (défaut) / Sepia / Invert / Blur / Brightness / Contrast / Saturate (boutons radio « Filter »)", "ref": "app/tools/video-tools/video-filter/page.jsx:10-18,52,57-61"},
+      {"label": "Apply Filter", "ref": "app/tools/video-tools/video-filter/page.jsx:51"},
+      {"label": "Cancel / Download", "ref": "app/components/MediaServiceTool.jsx:152,178"}
+    ],
+    "steps": ["choisir une vidéo (aperçu avec le filtre CSS en direct)", "cliquer un filtre", "bouton « Apply Filter » → envoi, file, traitement %, téléchargement", "aperçu, Before/After, bouton « Download »"],
+    "limits": [
+      {"what": "taille max (ordinateur et téléphone)", "value": "1 Go", "constant": "MAX_UPLOAD_MB", "ref": "app/components/MediaServiceTool.jsx:21,76-79"},
+      {"what": "durée max / temps max", "value": "NON TROUVÉ dans le code (MEDIA_MAX_DURATION_SECONDS, MEDIA_FFMPEG_TIMEOUT_SECONDS)", "constant": "MEDIA_MAX_DURATION_SECONDS", "ref": "services/media-processing/app/jobs.py:195-197,366-367"},
+      {"what": "intensité des filtres (fixe)", "value": "Blur gblur sigma 3 ; Brightness ×1,5 ; Contrast ×2 autour de 127,5 ; Saturate 300 % ; Grayscale Rec.709 ; Sepia matrice CSS ; Invert negate", "constant": "VIDEO_FILTERS", "ref": "services/media-processing/app/ffmpeg_ops.py:353-366"},
+      {"what": "tâches par réseau heure / jour", "value": "variables d'environnement", "constant": "MEDIA_JOBS_PER_HOUR_PER_IP / MEDIA_JOBS_PER_DAY_PER_IP", "ref": "app/api/media/ticket/route.js:36-42"}
+    ],
+    "processing": {"where": "our-server", "detail": "Service vidéo Railway, même chemin et mêmes suppressions que video-compressor ; conversion mp4 qualité high + filtre ; échelle de taille (cible mp4) jusqu'à 3 encodages, puis livré même plus gros. Le son est réencodé en AAC 160 kbit/s (première piste).", "ref": "app/tools/video-tools/video-filter/page.jsx:53 ; services/media-processing/app/ffmpeg_ops.py:446-449,568,594-607 ; services/media-processing/app/jobs.py:338-339,385-389"},
+    "quota": "limite par réseau heure/jour du service vidéo (app/api/media/ticket/route.js:36-42)",
+    "signup": "aucune inscription demandée (vérifié : app/api/media/ticket/route.js:13-50)",
+    "watermark": "aucun filigrane ajouté (vérifié : ffmpeg_ops.py:357-366 — filtres de couleur/flou seulement)",
+    "browsers": "Identique partout (serveur) ; aperçu par filtre CSS sur l'élément <video> (page.jsx:55 ; MediaServiceTool.jsx:142). Note iOS (IosOriginalNote.jsx:19-21).",
+    "twin": null,
+    "notes": "Titre servi tronqué : « Video Filter — Apply One Visual Effect (grayscale, Sepia, » (layout.tsx:5). Un seul filtre à la fois (page.jsx:59). L'aperçu CSS floute l'image affichée réduite (max-h-72), le service floute la pleine résolution."
+  },
+  {
+    "path": "/tools/video-tools/video-merger",
+    "task": "Assemble deux vidéos ou plus en un MP4 dans l'ordre choisi : par copie dans le navigateur si elles sont identiques en codage, sinon après mise au format de la première sur le service vidéo.",
+    "inputs": {"accept": "video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts (multiple)", "formats": ["vidéos de la liste accept ; fichier vide ou image/PDF renommé refusé à l'ajout"], "ref": "app/tools/video-tools/video-merger/page.jsx:7,63-69,154"},
+    "outputs": {"formats": ["MP4 (H.264 ou HEVC selon les clips + AAC)"], "ref": "app/tools/video-tools/video-merger/page.jsx:25,128,134 (nom <premier>-merged.mp4)"},
+    "controls": [
+      {"label": "Click or drop videos here (add them in the order you want, or reorder below) / Choose videos (…)", "ref": "app/tools/video-tools/video-merger/page.jsx:153 ; app/components/UploadPrompt.jsx:10-11"},
+      {"label": "↑ / ↓ / ✕ (par vidéo ; aria « Move <nom> up », « Move <nom> down », « Remove <nom> »)", "ref": "app/tools/video-tools/video-merger/page.jsx:162-164"},
+      {"label": "Merge Videos (N)", "ref": "app/tools/video-tools/video-merger/page.jsx:173"},
+      {"label": "Cancel", "ref": "app/tools/video-tools/video-merger/page.jsx:172"},
+      {"label": "Download", "ref": "app/tools/video-tools/video-merger/page.jsx:180"}
+    ],
+    "steps": ["ajouter au moins 2 vidéos", "ordonner avec ↑ ↓, retirer avec ✕", "bouton « Merge Videos (N) » → « Loading the video engine (about 10 MB the first time)… » → « Reading the videos… » → si différentes : « Uploading clip i of n to our video service » / « Matching clip i of n to the first one » / « Downloading clip i of n » → « Joining … (no re-encoding)… »", "message de résultat, lecteur, bouton « Download »"],
+    "limits": [
+      {"what": "taille totale sur ordinateur", "value": "2 000 000 000 octets (affiché via formatBytes)", "constant": "maxTotal (2e9)", "ref": "app/tools/video-tools/video-merger/page.jsx:60,79"},
+      {"what": "taille totale sur téléphone et tablette (iPad compris)", "value": "700 000 000 octets", "constant": "maxTotal (700e6)", "ref": "app/tools/video-tools/video-merger/page.jsx:58,60 ; app/lib/isMobileDevice.js:3-10"},
+      {"what": "taille max d'un clip envoyé au service (clips différents)", "value": "1 Go (ticket : « Files up to 1024 MB are accepted. »)", "constant": "MEDIA_TICKET_MAX_BYTES", "ref": "app/api/media/ticket/route.js:27-30 ; lib/media/ticket.js:60-62"},
+      {"what": "nombre de vidéos", "value": "au moins 2 ; pas de maximum dans le code", "constant": null, "ref": "app/tools/video-tools/video-merger/page.jsx:74,173"},
+      {"what": "images par seconde (clips différents)", "value": "celle du premier clip, 60 au plus", "constant": null, "ref": "app/tools/video-tools/video-merger/page.jsx:106,178"},
+      {"what": "tâches par réseau heure / jour (une tâche par clip si différents)", "value": "variables d'environnement", "constant": "MEDIA_JOBS_PER_HOUR_PER_IP / MEDIA_JOBS_PER_DAY_PER_IP", "ref": "app/api/media/ticket/route.js:36-42 ; video-merger/page.jsx:108-117"}
+    ],
+    "processing": {"where": "mixed", "detail": "Navigateur : ffmpeg.wasm (core 0.12.9 chargé depuis unpkg.com) lit chaque clip (ffprobe) ; si tous ont la même signature (codec H.264 ou HEVC, profil, taille, format de pixels, cadence, rotation, en-têtes, et son AAC identique ou absent), copie sans réencodage, rien n'est envoyé. Sinon, chaque clip est envoyé au service vidéo Railway (un billet par clip) : mis à la taille de la premier (black bars), à sa cadence (≤ 60), son 48 kHz stéréo (silence ajouté si absent), x264 qualité high, puis rapatrié ; l'original est supprimé à la fin du traitement et la copie après son téléchargement ; la jonction finale se fait dans le navigateur par copie.", "ref": "app/tools/video-tools/video-merger/page.jsx:17-46,80-128 ; services/media-processing/app/ffmpeg_ops.py:608-623 ; node_modules/@ffmpeg/ffmpeg/dist/esm/const.js:3-4"},
+    "quota": "aucune si les clips sont identiques ; sinon limite par réseau heure/jour du service vidéo, un billet par clip (app/api/media/ticket/route.js:36-42)",
+    "signup": "aucune inscription demandée (vérifié : app/api/media/ticket/route.js:13-50)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:128 copie ; ffmpeg_ops.py:608-623)",
+    "browsers": "Sur téléphone/tablette (iPad compris) plafond total 700 Mo (page.jsx:60). Note iOS : choisir via « Choose Files » (IosOriginalNote.jsx:19-21). Fichier illisible sous Firefox géré (page.jsx:30-31,95-98).",
+    "twin": "/tools/audio-tools/audio-merger (même idée pour l'audio)",
+    "notes": "Message résultat copie : « Joined without re-encoding (the videos were alike): same quality, X. Nothing was uploaded. » ; sinon « Clips matched to the first one on our video service, then joined: MP4, X. » + mention 60 i/s si la source dépasse (page.jsx:176-178). Vitesse, volume, fondus refusés pour une fusion (ffmpeg_ops.py:475-476)."
+  },
+  {
+    "path": "/tools/video-tools/video-resizer",
+    "task": "Change la largeur et la hauteur d'une vidéo (Fit, Fill ou Stretch) ou la recadre sur une zone choisie, sur le service vidéo du site, et rend un MP4.",
+    "inputs": {"accept": "video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts", "formats": ["vidéos de la liste accept"], "ref": "app/components/MediaServiceTool.jsx:140"},
+    "outputs": {"formats": ["MP4 (H.264 CRF 20 + AAC 160 kbit/s)"], "ref": "app/tools/video-tools/video-resizer/page.jsx:128-138 (noms <nom>-<L>x<H>.mp4 ou <nom>-cropped-<L>x<H>.mp4) ; services/media-processing/app/ffmpeg_ops.py:19-20,113-114"},
+    "controls": [
+      {"label": "Resize / Crop (onglets)", "ref": "app/tools/video-tools/video-resizer/page.jsx:47-54"},
+      {"label": "Width / Height (16 à 7680, arrondis au pair à la sortie du champ ; défaut 1280×720, 720×1280 pour une vidéo verticale)", "ref": "app/tools/video-tools/video-resizer/page.jsx:12,38-41,70-75,127"},
+      {"label": "Préréglages : 480p, 720p, 1080p, 4K (2160p) (orientés selon la vidéo), Square 1080, Vertical 1080×1920, Portrait post 4:5 (1080×1350), Story 720×1280, 4:3 (1440×1080)", "ref": "app/tools/video-tools/video-resizer/page.jsx:17-18,77-82"},
+      {"label": "If the shape differs from the video's : « Fit — keep the whole picture, black bars » (défaut) / « Fill — crop the edges, no bars » / « Stretch — distort to the exact size »", "ref": "app/tools/video-tools/video-resizer/page.jsx:83-89"},
+      {"label": "Crop : cadre déplaçable + poignée ; formes Free / 1:1 / 16:9 / 9:16 / 4:5 / 4:3 ; « Whole picture » ; champs Left / Top / Width / Height", "ref": "app/tools/video-tools/video-resizer/CropControls.jsx:7,62-79"},
+      {"label": "Resize Video", "ref": "app/tools/video-tools/video-resizer/page.jsx:126"},
+      {"label": "Cancel / Download", "ref": "app/components/MediaServiceTool.jsx:152,178"}
+    ],
+    "steps": ["choisir une vidéo (la page lit sa taille : « Your video: L×H (vertical|square|horizontal). »)", "onglet Resize : largeur/hauteur ou préréglage + Fit/Fill/Stretch ; ou onglet Crop : placer le cadre (zone initiale = 80 % du centre)", "bouton « Resize Video » → envoi, file, traitement %, téléchargement", "Before/After, aperçu, « Download »"],
+    "limits": [
+      {"what": "taille max (ordinateur et téléphone)", "value": "1 Go", "constant": "MAX_UPLOAD_MB", "ref": "app/components/MediaServiceTool.jsx:21,76-79"},
+      {"what": "dimensions de sortie", "value": "16 à 7680 px, nombres pairs ; recadrage ≥ 16×16, côtés pairs", "constant": null, "ref": "services/media-processing/app/ffmpeg_ops.py:409-445 ; video-resizer/page.jsx:12,131"},
+      {"what": "durée max / temps max", "value": "NON TROUVÉ dans le code (variables d'environnement)", "constant": "MEDIA_MAX_DURATION_SECONDS, MEDIA_FFMPEG_TIMEOUT_SECONDS", "ref": "services/media-processing/app/jobs.py:195-197,366-367"},
+      {"what": "tâches par réseau heure / jour", "value": "variables d'environnement", "constant": "MEDIA_JOBS_PER_HOUR_PER_IP / MEDIA_JOBS_PER_DAY_PER_IP", "ref": "app/api/media/ticket/route.js:36-42"}
+    ],
+    "processing": {"where": "our-server", "detail": "Service vidéo Railway, même chemin et suppressions que video-compressor ; scale Lanczos + pad (Fit) / crop (Fill) / scale (Stretch), ou crop dans l'image affichée (rotation du téléphone appliquée), sans mise à l'échelle ; échelle de taille mp4 (3 encodages max).", "ref": "services/media-processing/app/ffmpeg_ops.py:409-445 ; app/tools/video-tools/video-resizer/CropControls.jsx:2-4,80"},
+    "quota": "limite par réseau heure/jour du service vidéo (app/api/media/ticket/route.js:36-42)",
+    "signup": "aucune inscription demandée (vérifié : app/api/media/ticket/route.js:13-50)",
+    "watermark": "aucun filigrane ajouté (vérifié : ffmpeg_ops.py:438-445)",
+    "browsers": "Si le navigateur ne lit pas la taille de la vidéo, le recadrage est impossible : « The video's size could not be read here, so the crop box cannot be placed. Try another browser, or use Resize. » (page.jsx:130). Note iOS (IosOriginalNote.jsx:19-21).",
+    "twin": "/tools/image-tools/image-resizer (même idée pour l'image)",
+    "notes": "Les préréglages 480p/720p/1080p/4K suivent l'orientation de la vidéo (page.jsx:13-18). Le texte sous le cadre : « The kept area: L×H px of L×H. The result keeps that size (no scaling). » (CropControls.jsx:80)."
+  },
+  {
+    "path": "/tools/video-tools/video-rotator",
+    "task": "Tourne une vidéo de 90°, 180° ou 270° et/ou la retourne en miroir : en réencodant l'image sur le service vidéo (MP4), ou, pour MP4/MOV/M4V/3GP/3G2, en réécrivant seulement l'indication de rotation dans le navigateur.",
+    "inputs": {"accept": "video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts", "formats": ["toute vidéo de la liste (service)", "sans perte : .mp4 .mov .m4v .3gp .3g2"], "ref": "app/tools/video-tools/video-rotator/page.jsx:28,104"},
+    "outputs": {"formats": ["MP4 H.264 CRF 20 + AAC 160 kbit/s (Compatible everywhere)", "même format que la source, même taille (Instant, lossless)"], "ref": "app/tools/video-tools/video-rotator/page.jsx:69-72,81,88-89 ; app/lib/mp4Rotate.js:69-96 ; noms <nom>-rotated.<ext> / <nom>-rotated.mp4 / <nom>-mirrored.mp4"},
+    "controls": [
+      {"label": "No rotation / 90° ↻ (défaut) / 180° / 270° ↺", "ref": "app/tools/video-tools/video-rotator/page.jsx:32,111"},
+      {"label": "No mirror (défaut) / Mirror ⇆ (left-right) / Flip ⇅ (top-bottom)", "ref": "app/tools/video-tools/video-rotator/page.jsx:112-116"},
+      {"label": "How to rotate : « Compatible everywhere (recommended) » (défaut) / « Instant, lossless » — affiché seulement pour .mp4 .mov .m4v .3gp .3g2", "ref": "app/tools/video-tools/video-rotator/page.jsx:33,117-129"},
+      {"label": "Rotate Video", "ref": "app/tools/video-tools/video-rotator/page.jsx:134"},
+      {"label": "Cancel (envoi au service seulement) / Download", "ref": "app/tools/video-tools/video-rotator/page.jsx:132-133,141"}
+    ],
+    "steps": ["choisir une vidéo (aperçu tourné/retourné en CSS)", "angle et/ou miroir", "pour MP4/MOV/M4V/3GP/3G2 : Compatible everywhere ou Instant, lossless", "bouton « Rotate Video »", "message de résultat, lecteur, « Download »"],
+    "limits": [
+      {"what": "taille max en Compatible everywhere (ordinateur et téléphone)", "value": "1 Go", "constant": "MAX_SERVICE_BYTES", "ref": "app/tools/video-tools/video-rotator/page.jsx:27,74-78,122"},
+      {"what": "taille max en Instant, lossless", "value": "aucune dans la page (le fichier est lu par tranches ; seul le bloc moov est chargé, borné par MAX_MOOV)", "constant": "MAX_MOOV", "ref": "app/lib/mp4Rotate.js:6-8,73-74,95"},
+      {"what": "angles", "value": "0, 90, 180, 270 seulement", "constant": "ROTATIONS", "ref": "app/tools/video-tools/video-rotator/page.jsx:111 ; services/media-processing/app/ffmpeg_ops.py:367"},
+      {"what": "tâches par réseau heure / jour (Compatible everywhere)", "value": "variables d'environnement", "constant": "MEDIA_JOBS_PER_HOUR_PER_IP / MEDIA_JOBS_PER_DAY_PER_IP", "ref": "app/api/media/ticket/route.js:36-42"}
+    ],
+    "processing": {"where": "mixed", "detail": "Instant, lossless : réécriture de la matrice tkhd dans le navigateur, rien n'est envoyé, pas de réencodage. Compatible everywhere (défaut) et tout miroir, et tout format hors MP4/MOV/M4V/3GP/3G2 : service vidéo Railway (transpose/hflip/vflip, MP4 qualité high, son réencodé AAC 160), suppressions comme video-compressor. Miroir + Instant, lossless : refusé avec message, rien n'est envoyé.", "ref": "app/tools/video-tools/video-rotator/page.jsx:54-92 ; app/lib/mp4Rotate.js:69-96 ; services/media-processing/app/ffmpeg_ops.py:367,373,421-428"},
+    "quota": "aucune en Instant, lossless ; limite par réseau heure/jour du service vidéo en Compatible everywhere (app/api/media/ticket/route.js:36-42)",
+    "signup": "aucune inscription demandée (vérifié : app/api/media/ticket/route.js:13-50)",
+    "watermark": "aucun filigrane ajouté (vérifié : mp4Rotate.js réécrit 36 octets ; ffmpeg_ops.py:421-428)",
+    "browsers": "La rotation par métadonnée est ignorée par l'ancien Windows Media Player (page.jsx:21-26 ; RAPPORT-p17-30-09.md:13). Note iOS (IosOriginalNote.jsx:19-21).",
+    "twin": "/tools/image-tools/image-rotate, /tools/image-tools/image-flip (images)",
+    "notes": "Messages réels : « \"Instant, lossless\" works for MP4, MOV, M4V and 3GP only; this format has no rotation setting. Nothing was uploaded. … » (page.jsx:63) ; « This file is X; turning the picture itself happens on our video service, which accepts up to 1 GB. Choose \"Instant, lossless\" instead: it has no size limit. » (page.jsx:75-77). Le libellé du mode sans perte dit « any size » (page.jsx:126)."
+  },
+  {
+    "path": "/tools/video-tools/video-screenshot",
+    "task": "Capture l'image affichée d'une vidéo en PNG, JPG ou WebP, dans le navigateur, autant de fois que voulu.",
+    "inputs": {"accept": "video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts", "formats": ["seulement les vidéos que le navigateur sait lire (sinon message)"], "ref": "app/tools/video-tools/video-screenshot/page.jsx:80,84"},
+    "outputs": {"formats": ["PNG", "JPG (fond blanc sous la transparence)", "WebP (encodeur wasm si le navigateur n'en a pas)"], "ref": "app/tools/video-tools/video-screenshot/page.jsx:44-64,89-91 ; noms <nom>-<t>s.<png|jpg|webp> page.jsx:117 ; ZIP <nom>-screenshots.zip page.jsx:112"},
+    "controls": [
+      {"label": "Format : PNG (défaut) / JPG / WebP", "ref": "app/tools/video-tools/video-screenshot/page.jsx:13,87-92"},
+      {"label": "Go to (seconds) (placeholder « e.g. 12.5 », pas 0,04)", "ref": "app/tools/video-tools/video-screenshot/page.jsx:95-96"},
+      {"label": "Quality: 90% (10-100, JPG et WebP seulement)", "ref": "app/tools/video-tools/video-screenshot/page.jsx:14,98-103"},
+      {"label": "Capture Screenshot", "ref": "app/tools/video-tools/video-screenshot/page.jsx:105"},
+      {"label": "Download (par image) / Download all (N files, ZIP)", "ref": "app/tools/video-tools/video-screenshot/page.jsx:112-121 ; app/components/FileDownload.jsx:211,264"}
+    ],
+    "steps": ["choisir une vidéo (lecteur)", "aller à l'instant voulu (lecteur ou « Go to (seconds) »)", "Format (et Quality pour JPG/WebP)", "bouton « Capture Screenshot » (répétable)", "« Download » sous chaque image ou « Download all (N files, ZIP) »"],
+    "limits": [
+      {"what": "taille max par fichier sur ordinateur", "value": "aucune dans le code (lecture par le lecteur du navigateur)", "constant": null, "ref": "app/tools/video-tools/video-screenshot/page.jsx:19-24"},
+      {"what": "taille max sur iPhone/Android", "value": "aucune dans le code ; image = taille native de la vidéo, sans réduction (pas de fitSize ici)", "constant": null, "ref": "app/lib/mediaSupport.js:317-319"},
+      {"what": "nombre de captures", "value": "illimité dans le code", "constant": null, "ref": "app/tools/video-tools/video-screenshot/page.jsx:68"}
+    ],
+    "processing": {"where": "browser", "detail": "Image décodée dessinée sur un canvas puis encodée (toBlob) dans la page ; rien n'est envoyé.", "ref": "app/tools/video-tools/video-screenshot/page.jsx:34-69 ; app/lib/mediaSupport.js:314-332"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau dans page.jsx)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:42-58)",
+    "browsers": "Safari n'a pas d'encodeur WebP : libwebp en WebAssembly (page.jsx:56-63). Message si le navigateur ne lit pas le format : « This browser cannot play this video's format, so no frame can be captured here. Convert it to MP4 first with the Video Converter, then capture. » (page.jsx:84). Note iOS (IosOriginalNote.jsx).",
+    "twin": "/tools/video-tools/video-to-gif (option « Or extract frames as PNG images »)",
+    "notes": "Erreur si l'image n'est pas encore décodée : « This frame could not be read yet — play the video for a moment (or move the slider), then capture again. » (mediaSupport.js:331)."
+  },
+  {
+    "path": "/tools/video-tools/video-to-audio",
+    "task": "Extrait la piste son d'une vidéo vers l'un de 18 formats audio, avec ffmpeg.wasm dans le navigateur.",
+    "inputs": {"accept": "video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts", "formats": ["vidéos de la liste accept (lues par ffmpeg.wasm, pas par le lecteur)"], "ref": "app/tools/video-tools/video-to-audio/page.jsx:90"},
+    "outputs": {"formats": ["MP3", "WAV", "AAC", "FLAC", "OGG (Vorbis)", "M4A (AAC)", "Opus", "WMA", "AIFF", "ALAC (Apple Lossless, .m4a)", "AC3 (Dolby Digital)", "M4R (iPhone ringtone, AAC)", "M4B (audiobook, AAC)", "MP2 (MPEG Layer II)", "WV (WavPack, lossless)", "CAF (Apple Core Audio)", "AU (Sun / NeXT)", "MKA (Matroska audio, FLAC)"], "ref": "app/lib/audioFormats.js:22-48 ; nom <nom>.<ext> : app/tools/video-tools/video-to-audio/page.jsx:66"},
+    "controls": [
+      {"label": "Target Format (18 options, défaut MP3)", "ref": "app/tools/video-tools/video-to-audio/page.jsx:15,93-96"},
+      {"label": "Quality : « Standard — 128 kbps » / « High — 192 kbps » (défaut) / « Very high — 256 kbps » / « Best — 320 kbps » — seulement MP3, AAC, M4A, M4R, M4B, OGG, WMA, AC3, MP2", "ref": "app/tools/video-tools/video-to-audio/page.jsx:16,97-104 ; app/lib/audioFormats.js:64-67"},
+      {"label": "Extract Audio", "ref": "app/tools/video-tools/video-to-audio/page.jsx:113"},
+      {"label": "Cancel", "ref": "app/tools/video-tools/video-to-audio/page.jsx:110"},
+      {"label": "Download", "ref": "app/tools/video-tools/video-to-audio/page.jsx:115"}
+    ],
+    "steps": ["choisir une vidéo", "Target Format (+ Quality si format avec débit)", "bouton « Extract Audio » → « Loading ffmpeg... » → « Extracting audio... » + barre « Extracting… »", "lecteur audio + « Download »"],
+    "limits": [
+      {"what": "taille max par fichier sur ordinateur", "value": "aucune dans le code ; tout le fichier est copié en mémoire du moteur", "constant": null, "ref": "app/tools/video-tools/video-to-audio/page.jsx:24-30,59"},
+      {"what": "taille max sur iPhone/Android", "value": "aucune dans le code (pas de distinction téléphone)", "constant": null, "ref": "app/tools/video-tools/video-to-audio/page.jsx:24-30"},
+      {"what": "débit AC3 / MP2", "value": "192 kbit/s au moins même si 128 est choisi", "constant": null, "ref": "app/lib/audioFormats.js:86"}
+    ],
+    "processing": {"where": "browser", "detail": "ffmpeg.wasm (@ffmpeg/core 0.12.9, chargé depuis unpkg.com : ~10 Mo réseau, 32 Mo décompressé) ; commande -i input -vn [+ codec/débit] output ; rien n'est envoyé. Aucun -ac : les canaux sont laissés au choix par défaut de chaque encodeur. Opus = encodeur natif de ffmpeg (libopus plante dans ce core). En cas d'échec : signalement /api/report-error (extension, tranche de taille).", "ref": "app/tools/video-tools/video-to-audio/page.jsx:41-79 ; app/lib/audioFormats.js:29-32,80-88 ; node_modules/@ffmpeg/ffmpeg/dist/esm/const.js:3-4 ; docs/audit/RAPPORT-formats-navigateurs.md:59"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel au site sauf le signalement d'erreur)",
+    "watermark": "sans objet (sortie audio)",
+    "browsers": null,
+    "twin": "/tools/video-tools/video-converter (cibles « Audio only », sur le serveur) ; /tools/audio-tools/audio-converter (n'accepte que l'audio : AUDIO_ACCEPT, app/lib/mediaSupport.js:257-258)",
+    "notes": "Message d'erreur réel : « ffmpeg could not write this format with these settings. Try another output format, sample rate or quality. » (page.jsx:63) affiché « Error: … ». La sortie n'est pas vérifiée par octets magiques ici (audioOutputProblem non appelé)."
+  },
+  {
+    "path": "/tools/video-tools/video-to-gif",
+    "task": "Fait un GIF animé d'un extrait de vidéo (début, durée ≤ 60 s, largeur, i/s, boucle, compression) sur le service vidéo du site ; option : extraire jusqu'à 150 images PNG dans le navigateur.",
+    "inputs": {"accept": "video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts", "formats": ["vidéos de la liste accept ; extraction d'images : seulement si le navigateur lit la vidéo"], "ref": "app/components/MediaServiceTool.jsx:140 ; app/tools/video-tools/video-to-gif/page.jsx:41-42"},
+    "outputs": {"formats": ["GIF animé (palette 256 couleurs palettegen/paletteuse, dither bayer)", "PNG (images extraites) + ZIP"], "ref": "services/media-processing/app/ffmpeg_ops.py:569-576 ; app/components/GifFromVideoTool.jsx:46 (nom <nom>.gif) ; app/tools/video-tools/video-to-gif/page.jsx:58,86"},
+    "controls": [
+      {"label": "Start (seconds) (défaut 0)", "ref": "app/components/GifFromVideoTool.jsx:20,53-55"},
+      {"label": "Length (seconds) (0,2 à 60, défaut 5)", "ref": "app/components/GifFromVideoTool.jsx:10,20,56-58"},
+      {"label": "Width : 160 … 1080 px (13 valeurs, défaut 480 px)", "ref": "app/components/GifFromVideoTool.jsx:8,20,59-63"},
+      {"label": "Plays : « Forever (loop) » (défaut) / « Once » / « 3 times » / « 5 times »", "ref": "app/components/GifFromVideoTool.jsx:64-71"},
+      {"label": "Compression : « None (best quality) » (défaut) / « Light (smaller file) » / « Strong (smallest, some noise) »", "ref": "app/components/GifFromVideoTool.jsx:72-78"},
+      {"label": "Frames per second : 5, 8, 10 (défaut), 12, 15, 20, 25, 30", "ref": "app/components/GifFromVideoTool.jsx:9,20,79-83"},
+      {"label": "Make GIF", "ref": "app/components/GifFromVideoTool.jsx:19"},
+      {"label": "▸ Or extract frames as PNG images → Start (s), Frames per second: N (1-15), Duration: N s (1-10), bouton « Extract N frames »", "ref": "app/tools/video-tools/video-to-gif/page.jsx:70-83"},
+      {"label": "Cancel / Download / Download all (N files, ZIP)", "ref": "app/components/MediaServiceTool.jsx:152,178 ; app/components/FileDownload.jsx:264"}
+    ],
+    "steps": ["choisir une vidéo", "Start, Length, Width, Plays, Compression, Frames per second", "bouton « Make GIF » → envoi, file, traitement %, téléchargement (+ gifsicle dans le navigateur si boucle ≠ Forever ou compression)", "aperçu + « Download »", "option : « Or extract frames as PNG images » → « Extract N frames » → PNG un par un ou ZIP"],
+    "limits": [
+      {"what": "taille max par fichier (GIF, ordinateur et téléphone)", "value": "1 Go", "constant": "MAX_UPLOAD_MB", "ref": "app/components/MediaServiceTool.jsx:21,76-79"},
+      {"what": "durée du GIF", "value": "0,2 à 60 s ; raccourcie (avec note) si la vidéo finit avant", "constant": "GIF_MAX_SECONDS", "ref": "app/components/GifFromVideoTool.jsx:10,32-44 ; services/media-processing/app/ffmpeg_ops.py:303,316-317"},
+      {"what": "largeur", "value": "jamais agrandie au-delà de la vidéo (min(largeur, iw))", "constant": "GIF_WIDTHS", "ref": "services/media-processing/app/ffmpeg_ops.py:301,322-323"},
+      {"what": "extraction d'images", "value": "1-15 i/s × 1-10 s = 150 images au plus ; image réduite si elle dépasse le plafond de canvas (iPhone)", "constant": null, "ref": "app/tools/video-tools/video-to-gif/page.jsx:44,47,78-79"},
+      {"what": "tâches par réseau heure / jour (GIF)", "value": "variables d'environnement", "constant": "MEDIA_JOBS_PER_HOUR_PER_IP / MEDIA_JOBS_PER_DAY_PER_IP", "ref": "app/api/media/ticket/route.js:36-42"}
+    ],
+    "processing": {"where": "mixed", "detail": "GIF : service vidéo Railway (ffmpeg -ss, fps, scale Lanczos, palettegen/paletteuse), suppressions comme video-compressor ; boucle et compression : gifsicle-wasm dans le navigateur sur le GIF reçu. Extraction d'images : entièrement dans le navigateur (canvas), rien n'est envoyé.", "ref": "app/components/GifFromVideoTool.jsx:4-6,23-31 ; services/media-processing/app/ffmpeg_ops.py:569-576 ; app/tools/video-tools/video-to-gif/page.jsx:37-66"},
+    "quota": "limite par réseau heure/jour du service vidéo pour le GIF (app/api/media/ticket/route.js:36-42) ; aucune pour l'extraction d'images",
+    "signup": "aucune inscription demandée (vérifié : app/api/media/ticket/route.js:13-50)",
+    "watermark": "aucun filigrane ajouté (vérifié : ffmpeg_ops.py:574-575)",
+    "browsers": "Note iOS (IosOriginalNote.jsx:19-21) ; extraction d'images limitée au plafond de canvas iPhone (page.jsx:7,44).",
+    "twin": "/tools/gif-tools/video-to-gif (même composant GifFromVideoTool, gif-tools/video-to-gif/page.jsx:2,6) ; /tools/gif-tools/mp4-to-gif, mov-to-gif, webm-to-gif, avi-to-gif (même famille)",
+    "notes": "Messages réels : « Length must be at least 0.2 seconds. », « A GIF here lasts at most 60 seconds; choose a shorter length (or several GIFs). », « This video lasts X s: the start (Y s) is after its end. », note « The video ends X s after the start: the GIF lasts X s, not Y s. » (GifFromVideoTool.jsx:36-42). Texte sous les réglages : « Up to 60 seconds. The height follows the video… » (GifFromVideoTool.jsx:85)."
+  },
+  {
+    "path": "/tools/video-tools/video-trimmer",
+    "task": "Coupe un passage d'une vidéo : par copie sans réencodage dans le navigateur (défaut), ou à l'image près en réencodant en MP4 (« Precise cut »), dans le navigateur ou, si ce serait long, sur le service vidéo.",
+    "inputs": {"accept": "video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts", "formats": ["vidéos de la liste ; sans aperçu, la durée est lue par ffmpeg.wasm"], "ref": "app/tools/video-tools/video-trimmer/page.jsx:107-122,256"},
+    "outputs": {"formats": ["format d'origine (copie : MP4→MP4, MOV→MOV, WebM→WebM, MKV→MKV…)", "MP4 H.264 + AAC (Precise cut : navigateur CRF 18 / AAC 192 ; service CRF 20 / AAC 160)"], "ref": "app/tools/video-tools/video-trimmer/page.jsx:149-154,195,216-219,229-232 (nom trimmed_<nom>.<ext>) ; services/media-processing/app/ffmpeg_ops.py:19-20"},
+    "controls": [
+      {"label": "Click or drop a video file here / Choose a video file", "ref": "app/tools/video-tools/video-trimmer/page.jsx:255"},
+      {"label": "Start: Xs / End: Xs (curseurs, pas 0,1 s)", "ref": "app/tools/video-tools/video-trimmer/page.jsx:262-263"},
+      {"label": "Precise cut (case à cocher, non cochée par défaut)", "ref": "app/tools/video-tools/video-trimmer/page.jsx:65,267-270"},
+      {"label": "Trim Video (X.Xs)", "ref": "app/tools/video-tools/video-trimmer/page.jsx:277"},
+      {"label": "Cancel", "ref": "app/tools/video-tools/video-trimmer/page.jsx:275"},
+      {"label": "Download", "ref": "app/tools/video-tools/video-trimmer/page.jsx:285"}
+    ],
+    "steps": ["choisir une vidéo (refus immédiat au-delà de la limite)", "régler Start et End", "cocher « Precise cut » si besoin", "bouton « Trim Video (X.Xs) » → « Loading the video engine (about 10 MB the first time, cached afterwards)… » → « Cutting… » ou « Cutting to the frame (re-encoding)… N% » ou, sur le service, « Sending the clip (X) to our video service… N% »", "lecteur, taille et durée réelle (« you asked for … »), « Download »"],
+    "limits": [
+      {"what": "taille max par fichier sur ordinateur", "value": "300 Mo", "constant": "MAX_MB_DESKTOP", "ref": "app/tools/video-tools/video-trimmer/page.jsx:40,74,84-87"},
+      {"what": "taille max sur téléphone ET tablette (iPad compris)", "value": "100 Mo (valeur prudente, non mesurée sur iPhone selon le commentaire)", "constant": "MAX_MB_MOBILE", "ref": "app/tools/video-tools/video-trimmer/page.jsx:36-41,74 ; app/lib/isMobileDevice.js:3-10"},
+      {"what": "bascule du Precise cut vers le service", "value": "si l'estimation locale dépasse 45 s : 3,7 s par seconde de 1080p sous Chromium, 29 s ailleurs (Firefox, Safari) ; tailles impaires restent dans le navigateur", "constant": "SECONDS_PER_1080P_SECOND", "ref": "app/tools/video-tools/video-trimmer/page.jsx:16-29"},
+      {"what": "tâches par réseau heure / jour (Precise cut sur le service)", "value": "variables d'environnement", "constant": "MEDIA_JOBS_PER_HOUR_PER_IP / MEDIA_JOBS_PER_DAY_PER_IP", "ref": "app/api/media/ticket/route.js:36-42"}
+    ],
+    "processing": {"where": "mixed", "detail": "Coupe rapide : ffmpeg.wasm (core 0.12.9 depuis unpkg.com) copie le passage (-c copy) depuis l'image clé au début ou avant, toutes les pistes son, sous-titres pour MKV/WebM ; rien n'est envoyé. Precise cut court (Chromium) : réencodage dans le navigateur. Precise cut long : le navigateur copie un morceau de l'image clé précédente jusqu'à 1 s après la fin (piece.mkv) et l'envoie au service vidéo Railway, qui coupe à l'image près ; si aucune image clé n'est trouvée, le fichier entier est envoyé. Suppressions côté service comme video-compressor.", "ref": "app/tools/video-tools/video-trimmer/page.jsx:140-232 ; services/media-processing/app/ffmpeg_ops.py:329-345,577-593"},
+    "quota": "aucune pour la coupe rapide et le Precise cut local ; limite par réseau heure/jour du service vidéo pour le Precise cut envoyé (app/api/media/ticket/route.js:36-42)",
+    "signup": "aucune inscription demandée (vérifié : app/api/media/ticket/route.js:13-50)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:216-219)",
+    "browsers": "Firefox et Safari : Precise cut presque toujours envoyé au service (estimation 29 s/s, page.jsx:23-28). Format sans aperçu : « This browser cannot play this format, so there is no preview; cutting works the same. » (page.jsx:259). Note iOS (IosOriginalNote.jsx).",
+    "twin": "/tools/audio-tools/audio-trimmer (même moteur pour l'audio)",
+    "notes": "Messages réels : « This file is X, over the 300 MB limit. Trimming runs in your browser's memory, so the limit is declared up front. » (page.jsx:86) ; « This video's format can't be cut without re-encoding, so nothing was produced. Try \"Precise cut\", or an MP4 (H.264), MOV, or WebM file. » (page.jsx:226)."
+  },
+  {
+    "path": "/tools/video-tools/video-watermark",
+    "task": "Incruste un texte ou une image en filigrane dans une vidéo de 2 minutes au plus et rend un MP4, avec ffmpeg.wasm dans le navigateur.",
+    "inputs": {"accept": "video/*,.mp4,.m4v,.mov,.qt,.webm,.mkv,.avi,.wmv,.flv,.ogv,.3gp,.3g2,.mpg,.mpeg,.ts,.mts,.m2ts ; filigrane image : image/*", "formats": ["vidéo lisible par le navigateur ET codec H.264, HEVC, VP8, VP9, Theora ou ProRes (AV1 et autres refusés après le clic)"], "ref": "app/tools/video-tools/video-watermark/page.jsx:77,227-240,332-340,484,515"},
+    "outputs": {"formats": ["MP4 (libx264 veryfast, réglage de qualité par défaut + AAC)"], "ref": "app/tools/video-tools/video-watermark/page.jsx:305,397-417,436 (nom <nom>-watermarked.mp4)"},
+    "controls": [
+      {"label": "Watermark Type : Text (défaut) / Image (boutons « text »/« image » affichés en capitales initiales)", "ref": "app/tools/video-tools/video-watermark/page.jsx:115,491-502"},
+      {"label": "Watermark Text (défaut « Watermark »)", "ref": "app/tools/video-tools/video-watermark/page.jsx:116,507-508"},
+      {"label": "Watermark Image : Click or drop a logo or image here / Choose a logo or image", "ref": "app/tools/video-tools/video-watermark/page.jsx:512-515"},
+      {"label": "Size: 15% of the video width (5 à 60)", "ref": "app/tools/video-tools/video-watermark/page.jsx:120,521-522"},
+      {"label": "Text colour (texte seulement, défaut blanc)", "ref": "app/tools/video-tools/video-watermark/page.jsx:121,523"},
+      {"label": "Opacity: 70% (10 à 100 %)", "ref": "app/tools/video-tools/video-watermark/page.jsx:118,526-527"},
+      {"label": "Position : top-left, top-center, top-right, middle-left, center, middle-right, bottom-left, bottom-center, bottom-right (défaut bottom-right)", "ref": "app/tools/video-tools/video-watermark/page.jsx:119,531-536"},
+      {"label": "Add Watermark", "ref": "app/tools/video-tools/video-watermark/page.jsx:546"},
+      {"label": "Cancel / Download", "ref": "app/tools/video-tools/video-watermark/page.jsx:542,555"}
+    ],
+    "steps": ["choisir une vidéo (« Checking video length... »)", "Text ou Image, texte ou logo", "Size, Text colour, Opacity, Position", "bouton « Add Watermark » → barre « Encoding... (about Ns remaining) »", "lecteur + « Download »"],
+    "limits": [
+      {"what": "durée max de la vidéo", "value": "120 s (2 minutes)", "constant": "MAX_DURATION", "ref": "app/tools/video-tools/video-watermark/page.jsx:13,179-180,263"},
+      {"what": "taille max par fichier (ordinateur et téléphone)", "value": "aucune dans le code ; tout le fichier est copié en mémoire du moteur", "constant": null, "ref": "app/tools/video-tools/video-watermark/page.jsx:133-151,306"},
+      {"what": "image de filigrane", "value": "ramenée à 2048 px au plus avant incrustation", "constant": null, "ref": "app/tools/video-tools/video-watermark/page.jsx:371-375"},
+      {"what": "codecs vidéo acceptés", "value": "h264, hevc, vp8, vp9, theora, prores", "constant": "SUPPORTED_VIDEO_CODECS", "ref": "app/tools/video-tools/video-watermark/page.jsx:77,335-340"}
+    ],
+    "processing": {"where": "browser", "detail": "ffmpeg.wasm (core 0.12.9 depuis unpkg.com) : filigrane dessiné sur un canvas en PNG (texte gras sans-serif avec contour sombre), puis overlay à une position en pixels (marge 3 % du petit côté), réencodage libx264 veryfast + AAC ; rien n'est envoyé. En cas d'échec : signalement /api/report-error (extension, tranche de taille).", "ref": "app/tools/video-tools/video-watermark/page.jsx:25,284-417,454 ; node_modules/@ffmpeg/ffmpeg/dist/esm/const.js:3-4"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel au site sauf le signalement d'erreur)",
+    "watermark": "sans objet (l'outil ajoute le filigrane choisi par le visiteur, rien d'autre)",
+    "browsers": "Message si le navigateur ne lit pas le format : « This browser can't play this video's format or codec, so it can't be watermarked here -- the file itself may be fine. … » (page.jsx:236). Mesure du site pour un réencodage x264 en ffmpeg.wasm : ≈ 3,7 s par seconde de 1080p sous Chrome, ≈ 29 s sous Firefox (video-trimmer/page.jsx:16,23).",
+    "twin": null,
+    "notes": "Messages réels : « This video is Ns -- over the 2-minute limit. … Trim it first, or use a shorter clip. » (page.jsx:180) ; « This video is encoded in AV1, which this tool's video engine can't decode reliably … » (page.jsx:337) ; « Couldn't determine this video's length, so it can't be safely watermarked here. … » (page.jsx:197). Libellé de bouton réel « Add Watermark » (la FAQ dit « Convert »)."
+  }
+]

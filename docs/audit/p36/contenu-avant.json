@@ -284,7 +284,7 @@
   "desc": "Audio Transcriber is a free online tool that converts speech in an audio file into text using OpenAI's Whisper speech recognition model.",
   "h1": "Audio Transcriber",
   "uiWords": 26,
-  "ui": "Audio Transcriber Transcribe audio files with AI Click or drop an audio file here Choose an audio file (mp3, wav, m4a...) Max 4 MB per file",
+  "ui": "Audio Transcriber Transcribe audio files with AI Click or drop an audio file here Choose an audio file (mp3, wav, m4a...) Max 25 MB per file",
   "seoWords": 363,
   "about": {
    "heading": "About Audio Transcriber",
@@ -308,7 +308,7 @@
    },
    {
     "q": "How large can my audio file be?",
-    "a": "Uploads are limited to 4 MB — the maximum the transcription engine (OpenAI Whisper) itself accepts. For longer recordings, split the audio into smaller segments and transcribe each one separately."
+    "a": "Uploads are limited to 25 MB — the maximum the transcription engine (OpenAI Whisper) itself accepts. For longer recordings, split the audio into smaller segments and transcribe each one separately."
    },
    {
     "q": "Can I get subtitles (SRT or VTT)?",
@@ -1349,7 +1349,7 @@
    },
    {
     "q": "How large can an uploaded audio file be?",
-    "a": "File-upload transcription accepts up to 4 MB per file — the maximum the transcription engine (OpenAI Whisper) itself accepts. Split a longer recording into smaller pieces and transcribe each separately if you hit the limit. Microphone dictation has no such limit since it doesn't call a paid API."
+    "a": "File-upload transcription accepts up to 25 MB per file — the maximum the transcription engine (OpenAI Whisper) itself accepts. Split a longer recording into smaller pieces and transcribe each separately if you hit the limit. Microphone dictation has no such limit since it doesn't call a paid API."
    },
    {
     "q": "Is Audio to Text free to use?",
@@ -2928,10 +2928,10 @@
   "h1": "HTML Encoder",
   "uiWords": 9,
   "ui": "HTML Encoder Encode and decode HTML entities Encode Decode",
-  "seoWords": 294,
+  "seoWords": 299,
   "about": {
    "heading": "About HTML Encoder",
-   "text": "HTML Encoder converts the five characters that matter for safe HTML output — &, <, >, quote, and apostrophe — into their HTML entities, entirely in your browser. Decoding turns every HTML entity back into its character in a single pass — the five above, all named entities such as or &copy; (resolved by the browser's own HTML parser) and numeric ones such as &#8364; or 😀 — so already-escaped text like &amp;lt; correctly decodes to <, not <."
+   "text": "HTML Encoder converts the five characters that matter for safe HTML output — &, <, >, quote, and apostrophe — into their HTML entities, entirely in your browser. Decoding turns every HTML entity back into its character in a single pass — the five above, all named entities such as &nbsp; or &copy; (resolved by the browser's own HTML parser) and numeric ones such as &#8364; or &#x1F600; — so already-escaped text like &amp;lt; correctly decodes to &lt;, not <."
   },
   "howto": [
    "Paste or type text into the input box.",
@@ -2950,12 +2950,12 @@
     "a": "Ampersand, less-than, greater-than, double quote, and apostrophe — the characters that matter for safely embedding text in HTML."
    },
    {
-    "q": "Does Decode handle entities like or &copy;?",
+    "q": "Does Decode handle entities like &nbsp; or &copy;?",
     "a": "Yes — every named HTML entity and every numeric entity (decimal or hex) is decoded; tags and other text are left exactly as they are."
    },
    {
     "q": "Does it decode twice?",
-    "a": "No — each entity is decoded once, so &amp;lt; becomes < (the text of an entity), exactly as a browser would display it."
+    "a": "No — each entity is decoded once, so &amp;lt; becomes &lt; (the text of an entity), exactly as a browser would display it."
    }
   ],
   "tips": [
@@ -2981,10 +2981,10 @@
   "h1": "HTML Entity Decoder",
   "uiWords": 10,
   "ui": "HTML Entity Decoder Encode and decode HTML entities Encode Decode",
-  "seoWords": 304,
+  "seoWords": 311,
   "about": {
    "heading": "About HTML Entity Decoder",
-   "text": "HTML Entity Decoder decodes HTML entities — named ones like , &copy; and &euro;, and numeric ones like &#8364; or 😀 — back into characters, entirely in your browser. Named entities are resolved by the browser's own HTML parser (DOMParser, which never runs scripts or loads resources), one entity at a time: everything else in your text, including any HTML tags, is left exactly as written, and each entity is decoded once (&amp;lt; gives <)."
+   "text": "HTML Entity Decoder decodes HTML entities — named ones like &nbsp;, &copy; and &euro;, and numeric ones like &#8364; or &#x1F600; — back into characters, entirely in your browser. Named entities are resolved by the browser's own HTML parser (DOMParser, which never runs scripts or loads resources), one entity at a time: everything else in your text, including any HTML tags, is left exactly as written, and each entity is decoded once (&amp;lt; gives &lt;)."
   },
   "howto": [
    "Paste or type text into the input box.",
@@ -3000,11 +3000,11 @@
    },
    {
     "q": "What are HTML entities?",
-    "a": "Codes that represent characters with special meaning in HTML, such as &amp; for an ampersand, < for a less-than sign, or for a non-breaking space."
+    "a": "Codes that represent characters with special meaning in HTML, such as &amp; for an ampersand, &lt; for a less-than sign, or &nbsp; for a non-breaking space."
    },
    {
     "q": "Which entities does Decode understand?",
-    "a": "Every named HTML5 entity (like , &copy;, &euro;) and every numeric one, decimal (&#8364;) or hexadecimal (€), including emoji code points."
+    "a": "Every named HTML5 entity (like &nbsp;, &copy;, &euro;) and every numeric one, decimal (&#8364;) or hexadecimal (&#x20AC;), including emoji code points."
    },
    {
     "q": "Are HTML tags in my text removed?",
@@ -3771,7 +3771,7 @@
   "h1": "JSON to XML",
   "uiWords": 14,
   "ui": "JSON to XML Convert JSON to XML format JSON Input XML Output Convert Copy",
-  "seoWords": 317,
+  "seoWords": 318,
   "about": {
    "heading": "About JSON to XML",
    "text": "JSON to XML recursively converts JSON into nested XML tags using the fast-xml-parser library, entirely in your browser. Each key becomes a tag name, objects nest naturally, text is escaped automatically (so an ampersand or a less-than sign in a value doesn't break the output), and array items become repeated sibling tags with the same name — the standard, valid way to represent a list in XML."
@@ -3794,7 +3794,7 @@
    },
    {
     "q": "Does it escape special characters like & and <?",
-    "a": "Yes — text values are escaped automatically (& becomes &amp;, < becomes <, and so on), so the output is well-formed XML."
+    "a": "Yes — text values are escaped automatically (& becomes &amp;, < becomes &lt;, and so on), so the output is well-formed XML."
    },
    {
     "q": "Does it convert JSON arrays correctly?",
@@ -8648,7 +8648,7 @@
   "desc": "EPUB to PDF reads your ebook's chapters, images, stylesheets and cover in your browser, then our own conversion service prints them to a real PDF and deletes them right after.",
   "h1": "EPUB to PDF",
   "uiWords": 39,
-  "ui": "EPUB to PDF Convert EPUB ebooks to PDF Click or drop an EPUB file here Choose an EPUB file Max 4 MB of prepared content per book — image-heavy books count for more than their file size. Convert to PDF",
+  "ui": "EPUB to PDF Convert EPUB ebooks to PDF Click or drop an EPUB file here Choose an EPUB file Max 100 MB of prepared content per book — image-heavy books count for more than their file size. Convert to PDF",
   "seoWords": 385,
   "about": {
    "heading": "About EPUB to PDF",
@@ -8705,7 +8705,7 @@
   "desc": "Excel to PDF converts your .xlsx, .xls, .csv, or .ods file to PDF using LibreOffice. In our tests numbers, formulas and color scales carried over.",
   "h1": "Excel to PDF",
   "uiWords": 77,
-  "ui": "Excel to PDF Convert .xlsx, .xls, .xlsm, .xlsb, .csv, .ods and other spreadsheets to PDF using LibreOffice In our tests, number formats, formulas, merged cells and color scales carried over. Wingdings and Webdings icon fonts can't legally be reproduced and will appear blank. Click or drop an Excel file here Choose an Excel file Max 4 MB per file Fit each sheet on one page (a wide sheet is not cut over several pages) Convert to PDF",
+  "ui": "Excel to PDF Convert .xlsx, .xls, .xlsm, .xlsb, .csv, .ods and other spreadsheets to PDF using LibreOffice In our tests, number formats, formulas, merged cells and color scales carried over. Wingdings and Webdings icon fonts can't legally be reproduced and will appear blank. Click or drop an Excel file here Choose an Excel file Max 60 MB per file Fit each sheet on one page (a wide sheet is not cut over several pages) Convert to PDF",
   "seoWords": 618,
   "about": {
    "heading": "About Excel to PDF",
@@ -8770,7 +8770,7 @@
   "desc": "HTML to PDF converts your HTML code or file to PDF with a real browser engine (Chromium). In our tests CSS grid, flexbox, gradients and tables matched Chrome.",
   "h1": "HTML to PDF",
   "uiWords": 69,
-  "ui": "HTML to PDF Convert HTML files or code to PDF with a real browser engine From URL Upload File Paste Code Click or drop an HTML file here Choose an HTML file Max 4 MB of HTML Page size As in the document A4 Letter Legal A3 A5 Orientation Portrait Landscape Margins As in the document None Small (10 mm) Normal (20 mm) Big (30 mm) Convert to PDF",
+  "ui": "HTML to PDF Convert HTML files or code to PDF with a real browser engine From URL Upload File Paste Code Click or drop an HTML file here Choose an HTML file Max 100 MB of HTML Page size As in the document A4 Letter Legal A3 A5 Orientation Portrait Landscape Margins As in the document None Small (10 mm) Normal (20 mm) Big (30 mm) Convert to PDF",
   "seoWords": 741,
   "about": {
    "heading": "About HTML to PDF",
@@ -8955,7 +8955,7 @@
   "desc": "Markdown to PDF online free: turn a .md file or pasted Markdown into a real PDF file with selectable text, tables, code blocks and clickable links.",
   "h1": "Markdown to PDF",
   "uiWords": 64,
-  "ui": "Markdown to PDF Convert Markdown files or text to a PDF file Upload File Paste Text Click or drop a .md file here Choose a .md file Max 4 MB of Markdown Page size As in the document A4 Letter Legal A3 A5 Orientation Portrait Landscape Margins As in the document None Small (10 mm) Normal (20 mm) Big (30 mm) Convert to PDF",
+  "ui": "Markdown to PDF Convert Markdown files or text to a PDF file Upload File Paste Text Click or drop a .md file here Choose a .md file Max 100 MB of Markdown Page size As in the document A4 Letter Legal A3 A5 Orientation Portrait Landscape Margins As in the document None Small (10 mm) Normal (20 mm) Big (30 mm) Convert to PDF",
   "seoWords": 374,
   "about": {
    "heading": "About Markdown to PDF",
@@ -9009,7 +9009,7 @@
   "desc": "MOBI to PDF decodes your Kindle ebook in your browser, then our own conversion service prints its text and images to a real PDF and deletes them right after.",
   "h1": "MOBI to PDF",
   "uiWords": 39,
-  "ui": "MOBI to PDF Convert MOBI ebooks to PDF Click or drop a MOBI file here Choose a MOBI file Max 4 MB of prepared content per book — image-heavy books count for more than their file size. Convert to PDF",
+  "ui": "MOBI to PDF Convert MOBI ebooks to PDF Click or drop a MOBI file here Choose a MOBI file Max 100 MB of prepared content per book — image-heavy books count for more than their file size. Convert to PDF",
   "seoWords": 445,
   "about": {
    "heading": "About MOBI to PDF",
@@ -9555,7 +9555,7 @@
    },
    {
     "q": "How many PDF files can I merge at once?",
-    "a": "Up to 2,000 pages combined and 700 MB total on desktop (300 pages / 100 MB on phones and tablets) -- measured limits to keep merging reliable in the browser tab, rather than risking a crash on a very large combined document. Split larger jobs into batches and merge the results together. A Word, Excel or PowerPoint file you add is converted on our server first, up to 4 MB per document and 4 MB per spreadsheet; a larger one is refused before it is sent."
+    "a": "Up to 2,000 pages combined and 700 MB total on desktop (300 pages / 100 MB on phones and tablets) -- measured limits to keep merging reliable in the browser tab, rather than risking a crash on a very large combined document. Split larger jobs into batches and merge the results together. A Word, Excel or PowerPoint file you add is converted on our server first, up to 100 MB per document and 60 MB per spreadsheet; a larger one is refused before it is sent."
    },
    {
     "q": "Does merging PDFs reduce quality?",
@@ -9959,14 +9959,14 @@
   "desc": "PDF Repair fixes PDFs with damaged structure, like a broken cross-reference table or a cut-off end, and checks that the repaired file keeps your text.",
   "h1": "PDF Repair",
   "uiWords": 47,
-  "ui": "PDF Repair Recover PDFs with damaged structure — broken cross-reference tables and similar corruption Files up to 4 MB. Your file is uploaded to our repair service for processing — see below for what that means. Click or drop a damaged PDF here Choose a damaged PDF Repair PDF",
+  "ui": "PDF Repair Recover PDFs with damaged structure — broken cross-reference tables and similar corruption Files up to 44 MB. Your file is uploaded to our repair service for processing — see below for what that means. Click or drop a damaged PDF here Choose a damaged PDF Repair PDF",
   "seoWords": 694,
   "about": {
    "heading": "About PDF Repair",
    "text": "PDF Repair fixes PDFs with damaged internal structure — most commonly a broken or missing cross-reference table, the index PDF readers use to jump to each page and object. It also rebuilds a file whose end was cut off (an interrupted download, a truncated copy) from the pages still inside it. Every repaired file is checked before you get it: its text must read exactly like what PDF readers still find in your damaged file, otherwise it is not delivered. Content that is genuinely destroyed (overwritten with garbage, or pages cut off) cannot be brought back, and the tool says so honestly rather than returning a corrupted result. Like the other server tools named in our privacy policy (most tools on this site run in your browser), this one sends your file to a server: it's uploaded securely over HTTPS to our repair service (which runs qpdf, Poppler and Ghostscript), and deleted immediately after processing — never stored, logged, or kept around."
   },
   "howto": [
-   "Click the upload area and select a damaged PDF file, up to 4 MB.",
+   "Click the upload area and select a damaged PDF file, up to 44 MB.",
    "Click 'Repair PDF'. Your file uploads with a real progress bar; a working Cancel button is available the whole time.",
    "If the repair succeeds, review what was found and fixed, then download the repaired file. If the file is too damaged, you'll get a clear explanation instead of a broken result."
   ],
@@ -9990,7 +9990,7 @@
    },
    {
     "q": "How large a PDF can I repair?",
-    "a": "Up to 4 MB per file — larger files are refused before repair starts."
+    "a": "Up to 44 MB per file — larger files are refused before repair starts."
    },
    {
     "q": "What's the difference between the repair methods?",
@@ -10192,7 +10192,7 @@
   "desc": "Convert the tables of a PDF into an editable Excel spreadsheet (.xlsx). Free, no signup, files up to 99 MB.",
   "h1": "PDF to Excel",
   "uiWords": 31,
-  "ui": "PDF to Excel Turn the tables of a PDF into an editable Excel spreadsheet Click or drop a PDF here Choose a PDF Max 4 MB per file Convert to .xlsx",
+  "ui": "PDF to Excel Turn the tables of a PDF into an editable Excel spreadsheet Click or drop a PDF here Choose a PDF Max 99 MB per file Convert to .xlsx",
   "seoWords": 361,
   "about": {
    "heading": "About PDF to Excel",
@@ -10425,14 +10425,14 @@
   "desc": "PDF to PDF/A converts your PDF for long-term archiving — PDF/A-1b, 2b, 3b, 2u, 3u, and 2a or 3a for tagged PDFs — then validates it with veraPDF: you only get a file back if it's verified compliant.",
   "h1": "PDF to PDF/A",
   "uiWords": 92,
-  "ui": "PDF to PDF/A Convert to PDF/A for long-term archiving, verified compliant by veraPDF Files up to 4 MB. Your file is uploaded to our conversion service for processing — see below for what that means. Click or drop a PDF here Choose a PDF PDF/A conformance: PDF/A-1b (basic, oldest) PDF/A-2b (basic) PDF/A-3b (basic, attachments allowed) PDF/A-2u (basic + all text in Unicode) PDF/A-3u (basic + all text in Unicode) PDF/A-2a (accessible: needs a tagged PDF) PDF/A-3a (accessible: needs a tagged PDF) Convert to PDF/A-2b",
+  "ui": "PDF to PDF/A Convert to PDF/A for long-term archiving, verified compliant by veraPDF Files up to 44 MB. Your file is uploaded to our conversion service for processing — see below for what that means. Click or drop a PDF here Choose a PDF PDF/A conformance: PDF/A-1b (basic, oldest) PDF/A-2b (basic) PDF/A-3b (basic, attachments allowed) PDF/A-2u (basic + all text in Unicode) PDF/A-3u (basic + all text in Unicode) PDF/A-2a (accessible: needs a tagged PDF) PDF/A-3a (accessible: needs a tagged PDF) Convert to PDF/A-2b",
   "seoWords": 1072,
   "about": {
    "heading": "About PDF to PDF/A",
    "text": "PDF to PDF/A converts your document into the ISO-standardized PDF/A archival format — levels 1b, 2b, 3b, 2u, 3u, and for tagged PDFs 2a and 3a — then validates the result with veraPDF — the industry-reference validator built for the PDF Association's own conformance testing. This is the core guarantee: you only get a file back if it's verified compliant. If the conversion doesn't pass validation, you get an explicit error naming which PDF/A rule failed and how many times, not a file that merely claims to be PDF/A — unless you allowed the closest lower level, in which case the page says plainly which level you got and why. For the b and u levels, a PDF that already meets the level keeps its pages as they are (only what PDF/A requires is added: archive metadata, a colour profile, annotation and font details); otherwise Ghostscript rewrites it. Either way the result is delivered only if its text is exactly your PDF's text, checked character by character with two independent text readers — when Ghostscript would alter letters (ligatures such as “fi”, accents, Greek or other scripts), you get an explanation instead of a file whose search and copy-paste would be wrong (u adds the check that every character maps to Unicode text); the a levels keep your PDF's own structure tags, which Ghostscript would drop, so they need a PDF that is already tagged (exported from Word, LibreOffice or Google Docs with accessibility tags). Like the other server tools named in our privacy policy (most tools on this site run in your browser), this one sends your file to a server: it's uploaded securely over HTTPS to our conversion service, and deleted immediately after processing — never stored, logged, or kept around."
   },
   "howto": [
-   "Click the upload area and select a PDF file, up to 4 MB.",
+   "Click the upload area and select a PDF file, up to 44 MB.",
    "Choose a PDF/A conformance level: 1b, 2b, 3b, 2u, 3u, or 2a / 3a when your PDF is tagged (the page checks your file before sending it). 2b is the most commonly required for archiving.",
    "Click 'Convert'. Your file uploads with a real progress bar; a working Cancel button is available the whole time.",
    "If the result passes veraPDF validation, download it. If not, you'll see exactly which rule failed instead of a silently non-compliant file."
@@ -10497,7 +10497,7 @@
   "desc": "Convert each page of a PDF into an editable PowerPoint slide (.pptx). Free, no signup, files up to 99 MB.",
   "h1": "PDF to PowerPoint",
   "uiWords": 31,
-  "ui": "PDF to PowerPoint Turn each page of a PDF into an editable PowerPoint slide Click or drop a PDF here Choose a PDF Max 4 MB per file Convert to .pptx",
+  "ui": "PDF to PowerPoint Turn each page of a PDF into an editable PowerPoint slide Click or drop a PDF here Choose a PDF Max 99 MB per file Convert to .pptx",
   "seoWords": 294,
   "about": {
    "heading": "About PDF to PowerPoint",
@@ -10549,7 +10549,7 @@
   "desc": "PDF to Word converts a PDF to an editable .docx, .doc (Word 97-2003) or .rtf. In our tests on Word-exported PDFs, headings, tables, columns and lists were kept; scanned PDFs are not supported.",
   "h1": "PDF to Word",
   "uiWords": 62,
-  "ui": "PDF to Word Convert PDF files to an editable Word document: .docx, .doc (Word 97-2003) or .rtf In our tests on PDFs exported from Word, headings, tables, columns and lists were kept. Scanned PDFs are not supported. Click or drop a PDF here Choose a PDF Max 4 MB per file Word (.docx) Word 97-2003 (.doc) Rich Text (.rtf) Convert to .docx",
+  "ui": "PDF to Word Convert PDF files to an editable Word document: .docx, .doc (Word 97-2003) or .rtf In our tests on PDFs exported from Word, headings, tables, columns and lists were kept. Scanned PDFs are not supported. Click or drop a PDF here Choose a PDF Max 99 MB per file Word (.docx) Word 97-2003 (.doc) Rich Text (.rtf) Convert to .docx",
   "seoWords": 652,
   "about": {
    "heading": "About PDF to Word",
@@ -10784,7 +10784,7 @@
   "desc": "PowerPoint to PDF converts your .pptx or .ppt file to PDF using LibreOffice. In our tests layout, images, gradients and tables carried over; a text box narrower than its text can wrap.",
   "h1": "PowerPoint to PDF",
   "uiWords": 79,
-  "ui": "PowerPoint to PDF Convert .pptx, .ppt, slide shows (.ppsx, .pps), templates and OpenDocument .odp to PDF using LibreOffice In our tests, layout, images, gradients, tables and charts carried over. A text box narrower than its text can wrap and be partly hidden, and Wingdings and Webdings icon fonts can't legally be reproduced and will appear blank. Click or drop a PowerPoint or OpenDocument presentation here Choose a PowerPoint or OpenDocument presentation Max 4 MB per file Convert to PDF",
+  "ui": "PowerPoint to PDF Convert .pptx, .ppt, slide shows (.ppsx, .pps), templates and OpenDocument .odp to PDF using LibreOffice In our tests, layout, images, gradients, tables and charts carried over. A text box narrower than its text can wrap and be partly hidden, and Wingdings and Webdings icon fonts can't legally be reproduced and will appear blank. Click or drop a PowerPoint or OpenDocument presentation here Choose a PowerPoint or OpenDocument presentation Max 100 MB per file Convert to PDF",
   "seoWords": 726,
   "about": {
    "heading": "About PowerPoint to PDF",
@@ -10908,7 +10908,7 @@
   "desc": "Word to PDF converts your .docx or .doc file to PDF. In our tests .docx output matched two other online converters; a table of contents is not recalculated.",
   "h1": "Word to PDF",
   "uiWords": 54,
-  "ui": "Word to PDF Convert .docx, .doc, .odt, .rtf and other word-processor files to PDF In our tests, .docx fonts, tables, columns, headers and footers matched two other online converters. Click or drop a Word, OpenDocument or RTF file here Choose a Word, OpenDocument or RTF file Max 4 MB per file Convert to PDF",
+  "ui": "Word to PDF Convert .docx, .doc, .odt, .rtf and other word-processor files to PDF In our tests, .docx fonts, tables, columns, headers and footers matched two other online converters. Click or drop a Word, OpenDocument or RTF file here Choose a Word, OpenDocument or RTF file Max 100 MB per file Convert to PDF",
   "seoWords": 671,
   "about": {
    "heading": "About Word to PDF",
@@ -12276,48 +12276,51 @@
   "title": "Video Compressor — Compress Videos Online Free",
   "desc": "Video Compressor shrinks your video with the H.264 encoder on our own server, so it works in every browser including Safari and iPhone, and gives an MP4 that plays everywhere. Files up to 1 GB, deleted after download.",
   "h1": "Video Compressor",
-  "uiWords": 20,
-  "ui": "Video Compressor Compress video files Click or drop a video file here Choose a video file Quality: 50% Compress Video",
-  "seoWords": 461,
+  "uiWords": 60,
+  "ui": "Video Compressor Compress video files — any browser, up to 1 GB Files up to 1 GB · MP4, MOV, MKV, WebM, AVI, WMV, FLV and more · works in every browser, including Safari and iPhone · files are deleted from our server as soon as you have downloaded the result Click or drop a video file here Choose a video file Compress Video",
+  "seoWords": 533,
   "about": {
    "heading": "About Video Compressor",
-   "text": "Video Compressor re-records your video at a lower bitrate using the browser's native MediaRecorder API, entirely client-side. Output is always WebM. The target bitrate is calculated from your source file's own bitrate (size ÷ duration) scaled by the quality slider, not a fixed number — so the output is sized relative to how compressed your original already is. Note: since it works by playing and re-recording your video in real time, processing takes as long as the video's actual duration."
+   "text": "Video Compressor shrinks video files with the encoders used by professional tools — H.264, or H.265 and AV1 (in our tests on camera video, 40 to 50 % smaller at the same quality) — on our server, so it works in any browser (including Safari and iPhone) and runs faster than the video plays. Choose a compression level and an optional resolution limit, watch real progress, and download an MP4. Your file is deleted from our server as soon as you have downloaded the result."
   },
   "howto": [
-   "Click the upload area and select a video file.",
-   "Set your target quality using the slider (10%–100%) — lower values target a smaller fraction of your source's own bitrate.",
-   "Click \"Compress Video\" — the video plays through once while it's re-recorded at the new bitrate.",
-   "Compare the before/after size, then download the result."
+   "Select or drop a video file (MP4, MOV, MKV, WebM, AVI, WMV, FLV and more, up to 1 GB).",
+   "Pick a compression level and, if you want, a maximum resolution.",
+   "Click \"Compress Video\" and follow the real progress: upload, waiting line if the service is busy, then compression.",
+   "Compare the before and after size, preview the result, and download the MP4."
   ],
   "howtoHeading": "How to use Video Compressor",
   "faq": [
    {
-    "q": "What output format do I get?",
-    "a": "Always WebM, regardless of your original format."
+    "q": "How large a video can I compress?",
+    "a": "Up to 1 GB per file. The file goes straight to our video service in pieces, so a dropped connection resumes instead of starting over."
    },
    {
-    "q": "Is audio preserved?",
-    "a": "Yes, audio is captured along with the video track, at a bitrate that scales with the quality slider too."
+    "q": "What do I get?",
+    "a": "An MP4 with AAC sound and, by default, H.264 video, the format that plays on every phone, computer and browser. You can choose H.265 (HEVC) or AV1. In our tests on 1080p camera footage, at the same visual quality (VMAF) as H.264, H.265 files were about 40 % smaller and AV1 files about 50 % smaller; most phones and recent computers play H.265, while AV1 plays in current Chrome, Firefox and Edge and on recent devices."
    },
    {
-    "q": "How long does compression take?",
-    "a": "As long as the video's full duration, since it works by playing and re-recording it in real time rather than processing frames instantly."
+    "q": "Can I set the exact quality?",
+    "a": "Yes: type a CRF value (lower = better and bigger; 0-51 for H.264 and H.265, 0-63 for AV1). The video is then encoded once at exactly that value — even if the result comes out larger than the original, since that was your choice."
    },
    {
-    "q": "Is my file uploaded anywhere?",
-    "a": "No, everything happens locally using your browser's MediaRecorder API."
+    "q": "Is my video kept?",
+    "a": "No. The original is deleted the moment compression ends, and the result is deleted right after your download (or after 15 minutes if you never download it). Nothing about your file is logged."
    },
    {
-    "q": "Can the output ever end up larger than my original file?",
-    "a": "It's possible, though uncommon, on a source that's already efficiently compressed (e.g. re-compressing a file you already ran through this tool, or a professionally-encoded video with little redundancy left). The target bitrate is always calculated below your source's own bitrate, but MediaRecorder does single-pass, real-time encoding with no look-ahead, so its rate control can overshoot the target on some content — most noticeable near the 90-100% quality setting, where there's the least headroom to begin with. If a file doesn't shrink, try a lower quality setting; a source that's already very compressed may simply have little left to gain."
+    "q": "Why is this not done in the browser?",
+    "a": "Compressing on a server is several times faster than real time and works on iPhone and Safari, where in-browser video recording is not available."
+   },
+   {
+    "q": "Can the result be larger than the original?",
+    "a": "No. The compressor is given a size ceiling taken from your own file. If a result still is not smaller, it automatically tries one stronger setting, and if that is not smaller either it tells you your video is already well compressed instead of handing you a bigger file. To go smaller in that case, lower the resolution."
    }
   ],
   "tips": [
-   "Lower quality settings produce smaller files but more visible compression artifacts — start around 50% and adjust from there.",
-   "Don't close or minimize the tab while compressing, since the video needs to actively play through for the recording to capture it.",
-   "For very long videos, expect compression to take just as long as watching the video.",
-   "If you need MP4 output instead of WebM, convert the compressed file afterward with a dedicated converter.",
-   "If a source video is already heavily compressed, even 10% quality may only shave off a modest amount — there's a limit to how much redundancy any encoder can squeeze out a second time."
+   "Balanced is right for most videos; use Strong for messaging apps and email limits.",
+   "Limiting the resolution to 720p usually shrinks a phone video far more than a higher compression level.",
+   "Keep the tab open while it works; you can cancel at any time.",
+   "iPhone videos (.mov) are accepted directly."
   ],
   "tipsHeading": "Tips & Tricks",
   "related": [
@@ -12335,43 +12338,59 @@
   "title": "Video Converter — Convert Video to MP4, MOV, GIF, MP3 & More Online Free",
   "desc": "Video Converter turns almost any video into MP4, MOV, MKV, WebM, AVI, GIF and 22 video formats, or extracts the audio as MP3, WAV and more, on our own server. Any browser, files up to 1 GB, deleted after download.",
   "h1": "Video Converter",
-  "uiWords": 22,
-  "ui": "Video Converter Convert video files to WebM format Click or drop a video file here Choose a video file Convert to WebM",
-  "seoWords": 302,
+  "uiWords": 68,
+  "ui": "Video Converter Convert video to MP4, MOV, MKV, WebM, AVI, GIF, MP3 and more — any browser, up to 1 GB Files up to 1 GB · MP4, MOV, MKV, WebM, AVI, WMV, FLV and more · works in every browser, including Safari and iPhone · files are deleted from our server as soon as you have downloaded the result Click or drop a video file here Choose a video file Convert",
+  "seoWords": 669,
   "about": {
    "heading": "About Video Converter",
-   "text": "Video Converter re-encodes your video to WebM using the browser's native MediaRecorder API, entirely client-side. Note: WebM is the only output format — there's no selector for MP4, AVI, MOV, or other targets — and since it works by playing and re-recording the video in real time, conversion takes as long as the video's actual duration."
+   "text": "Video Converter turns almost any video into MP4, H.265 (HEVC), AV1, MOV, MKV, WebM, AVI, WMV, FLV, MPEG, VOB, TS, M2TS, 3GP, 3G2 and more (22 video formats) or an animated GIF, and extracts the audio as MP3, M4A, AAC, WAV, AIFF, OGG, Opus, FLAC, WMA, AC3 or AMR. It runs on our server, so it works in any browser including Safari and iPhone, handles files up to 1 GB, and shows real progress. Your file is deleted from our server as soon as you have downloaded the result."
   },
   "howto": [
-   "Click the upload area and select a video file.",
-   "Click \"Convert to WebM\" — the video plays through once while it's re-recorded.",
-   "Wait for the process to finish (roughly the length of the video).",
-   "Preview and download the resulting WebM file."
+   "Select or drop a video file (up to 1 GB).",
+   "Choose the output format, the quality, and an optional maximum resolution.",
+   "Click \"Convert\" and follow the real progress: upload, waiting line if the service is busy, then conversion.",
+   "Preview the result and download it — the file name always carries the real extension."
   ],
   "howtoHeading": "How to use Video Converter",
   "faq": [
    {
-    "q": "What formats can I convert to?",
-    "a": "WebM only — despite the tool's name, there's no format selector for MP4, AVI, MOV, or other targets."
+    "q": "Which formats can I convert to?",
+    "a": "Video: MP4 (H.264), H.265 / HEVC, AV1, MOV, MKV, WebM, AVI, AVI (XviD), WMV, ASF, FLV, F4V, MPG, MPEG, VOB, TS, M2TS, MTS, 3GP, 3G2, M4V, OGV. Animated GIF. Audio only: MP3, M4A, AAC, WAV, AIFF, OGG, Opus, FLAC, WMA, AC3, AMR."
    },
    {
-    "q": "Is there quality loss?",
-    "a": "Yes, some — this re-encodes your video through the browser's WebM encoder, so it isn't a lossless conversion."
+    "q": "Can the converted video be larger than the original?",
+    "a": "Not by design: the encoder is given a size ceiling taken from your own file, so a converted video does not exceed the original. The one exception is the MPEG-2 family (MPG, MPEG, VOB), an old codec that needs about twice the data of H.264 for the same picture; on demanding footage it can come out a few percent larger. The page always shows the real before and after sizes."
    },
    {
-    "q": "How long does conversion take?",
-    "a": "Roughly as long as the source video's duration, since it plays and re-records the video in real time."
+    "q": "Which format should I pick: H.265 or AV1?",
+    "a": "H.265 (HEVC) and AV1 are newer codecs designed to give smaller files than H.264 at similar quality, and they take longer to encode. H.265 plays on most phones and recent computers; AV1 plays in current Chrome, Firefox and Edge, while older devices and many TVs cannot play it. When in doubt, choose MP4 (H.264), which plays everywhere."
    },
    {
-    "q": "Is my file uploaded anywhere?",
-    "a": "No, conversion runs entirely in your browser using the MediaRecorder API."
+    "q": "Can I change the speed, mirror the video or fade it in and out?",
+    "a": "Yes, for MP4 (H.264, H.265 or AV1), MOV and M4V results: \"More options\" sets the speed (0.25× to 4×, the sound keeps its pitch), a mirror (left-right, top-bottom or both), the volume (0 to 300 %), a fade in and a fade out of up to 10 seconds (sound, and the picture too if you tick it), and an exact quality value (CRF) instead of the three quality levels."
+   },
+   {
+    "q": "Which formats can I convert from?",
+    "a": "Any video or audio file that ffmpeg can read: MP4, MOV (including iPhone videos), MKV, WebM, AVI, WMV, FLV, MPEG, TS, 3GP, OGV and many more."
+   },
+   {
+    "q": "How large a file can I convert?",
+    "a": "Up to 1 GB. The file is uploaded in pieces, straight to the video service, and resumes after a dropped connection."
+   },
+   {
+    "q": "Is my video kept?",
+    "a": "No. The original is deleted the moment conversion ends, and the result is deleted right after your download (or after 15 minutes if you never download it). Nothing about your file is logged."
+   },
+   {
+    "q": "Why can some conversions take longer?",
+    "a": "H.265, AV1, WebM (VP9) and OGV (Theora) are far slower to encode than MP4, because they squeeze more out of every byte. The progress bar shows the real percentage, and a very long file may be stopped by our time limit."
    }
   ],
   "tips": [
-   "Keep the browser tab open and active while converting, since the video needs to play through for the recording to work.",
-   "If you need a format other than WebM, use this to get a WebM file first, then convert that with a dedicated format-specific converter.",
-   "Test the converted WebM file in your target player before deleting the original, since some older devices have limited WebM support.",
-   "For long source videos, expect the conversion itself to take about as long as the video runs."
+   "MP4 (H.264) is the safest choice for sharing: it plays on every device.",
+   "Use \"Small file\" or a lower resolution when the result must fit an email or chat limit.",
+   "To keep just the sound of a video, pick MP3 or M4A.",
+   "Keep the tab open while it works; you can cancel at any time."
   ],
   "tipsHeading": "Tips & Tricks",
   "related": [

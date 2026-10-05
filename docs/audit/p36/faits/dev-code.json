@@ -1,0 +1,1428 @@
+[
+ {
+  "path": "/tools/developer-tools/json-to-csharp",
+  "task": "Génère des classes C# (une par objet imbriqué) avec attributs System.Text.Json à partir d'un exemple JSON.",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "JSON (texte collé ; objet ou tableau ; BOM retiré)"
+   ],
+   "ref": "app/tools/developer-tools/json-to-csharp/page.jsx:25 ; app/lib/jsonCodegen.js:51-52"
+  },
+  "outputs": {
+   "formats": [
+    "C# (fichier Model.cs) : namespace App, classes `public partial class`, propriétés PascalCase avec [JsonPropertyName(\"clé\")], long/double/string/bool, T[] pour les tableaux, `?` nullable + [JsonIgnore(Condition = WhenWritingNull)] pour champs facultatifs"
+   ],
+   "ref": "app/tools/developer-tools/json-to-csharp/page.jsx:14 ; app/lib/jsonCodegen.js:21"
+  },
+  "controls": [
+   {
+    "label": "JSON Input",
+    "ref": "app/tools/developer-tools/json-to-csharp/page.jsx:25"
+   },
+   {
+    "label": "C# Output",
+    "ref": "app/tools/developer-tools/json-to-csharp/page.jsx:26"
+   },
+   {
+    "label": "Convert",
+    "ref": "app/tools/developer-tools/json-to-csharp/page.jsx:31"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/json-to-csharp/page.jsx:32"
+   },
+   {
+    "label": "Ligne de téléchargement « Model.cs » + bouton « Download » (iPhone/iPad : + « Save / Share »), visible quand il y a un résultat",
+    "ref": "app/tools/developer-tools/json-to-csharp/page.jsx:27 ; app/components/FileDownload.jsx:200-219,278-282"
+   }
+  ],
+  "steps": [
+   "coller le JSON dans « JSON Input » → bouton « Convert » (actif dès qu'il y a du texte) → le code apparaît dans « C# Output » → bouton « Copy » ou « Download » (Model.cs)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage (pas une limite) : au-delà, la zone ne montre que les 20 000 premiers caractères et l'outil traite tout le texte",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18,47-76"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par quicktype-core 26.0.0 (package.json:62), chargé par import() au premier clic (app/lib/jsonCodegen.js:53-70). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/json-to-csharp/page.jsx:16 (setError → app/lib/useToolError.js:98-131) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139).",
+   "ref": "app/lib/jsonCodegen.js:53-70"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "Safari : le message JSON.parse ne donne pas de position (app/lib/jsonText.js:60, commentaire) — l'erreur affichée est « Invalid JSON: » + message brut du navigateur (app/tools/developer-tools/json-to-csharp/page.jsx:16). iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": null,
+  "notes": "Moteur quicktype, options : app/lib/jsonCodegen.js:17-24 ; pas d'énumérations, dates, UUID ni booléens/entiers déduits des chaînes (jsonCodegen.js:63-69). Un nombre écrit avec point ou exposant reste décimal (10.0 → double/float64/f64 ; jsonCodegen.js:26-44). Un entier au-delà de 64 bits : note ajoutée en tête du code (jsonCodegen.js:72-74). Tableau en entrée : tous les éléments sont fusionnés ; un champ absent de certains éléments devient facultatif. Toute erreur (même interne à quicktype) est affichée « Invalid JSON: … » (page.jsx:16). Vérifié le 05/10 par exécution locale des mêmes options. C# vérifié : un champ null dans TOUS les exemples → `public object X` (non nullable) ; champ parfois absent → `string?` + JsonIgnore WhenWritingNull ; tableau en entrée → la classe de l'élément s'appelle Root ; usings System.Text.Json(.Serialization) inclus."
+ },
+ {
+  "path": "/tools/developer-tools/json-to-go",
+  "task": "Génère des types struct Go (un par objet imbriqué) avec tags json à partir d'un exemple JSON.",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "JSON (texte collé ; objet ou tableau ; BOM retiré)"
+   ],
+   "ref": "app/tools/developer-tools/json-to-go/page.jsx:25 ; app/lib/jsonCodegen.js:51-52"
+  },
+  "outputs": {
+   "formats": [
+    "Go (fichier model.go) : `type X struct` par objet, champs FirstName avec tag `json:\"clé\"`, int64/float64/string/bool, []T, pointeurs *T + `,omitempty` pour champs facultatifs ; sans ligne package (just-types)"
+   ],
+   "ref": "app/tools/developer-tools/json-to-go/page.jsx:14 ; app/lib/jsonCodegen.js:20"
+  },
+  "controls": [
+   {
+    "label": "JSON Input",
+    "ref": "app/tools/developer-tools/json-to-go/page.jsx:25"
+   },
+   {
+    "label": "Go Struct Output",
+    "ref": "app/tools/developer-tools/json-to-go/page.jsx:26"
+   },
+   {
+    "label": "Convert",
+    "ref": "app/tools/developer-tools/json-to-go/page.jsx:31"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/json-to-go/page.jsx:32"
+   },
+   {
+    "label": "Ligne de téléchargement « model.go » + bouton « Download » (iPhone/iPad : + « Save / Share »), visible quand il y a un résultat",
+    "ref": "app/tools/developer-tools/json-to-go/page.jsx:27 ; app/components/FileDownload.jsx:200-219,278-282"
+   }
+  ],
+  "steps": [
+   "coller le JSON dans « JSON Input » → bouton « Convert » (actif dès qu'il y a du texte) → le code apparaît dans « Go Struct Output » → bouton « Copy » ou « Download » (model.go)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage (pas une limite) : au-delà, la zone ne montre que les 20 000 premiers caractères et l'outil traite tout le texte",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18,47-76"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par quicktype-core 26.0.0 (package.json:62), chargé par import() au premier clic (app/lib/jsonCodegen.js:53-70). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/json-to-go/page.jsx:16 (setError → app/lib/useToolError.js:98-131) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139).",
+   "ref": "app/lib/jsonCodegen.js:53-70"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "Safari : le message JSON.parse ne donne pas de position (app/lib/jsonText.js:60, commentaire) — l'erreur affichée est « Invalid JSON: » + message brut du navigateur (app/tools/developer-tools/json-to-go/page.jsx:16). iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": null,
+  "notes": "Moteur quicktype, options : app/lib/jsonCodegen.js:17-24 ; pas d'énumérations, dates, UUID ni booléens/entiers déduits des chaînes (jsonCodegen.js:63-69). Un nombre écrit avec point ou exposant reste décimal (10.0 → double/float64/f64 ; jsonCodegen.js:26-44). Un entier au-delà de 64 bits : note ajoutée en tête du code (jsonCodegen.js:72-74). Tableau en entrée : tous les éléments sont fusionnés ; un champ absent de certains éléments devient facultatif. Toute erreur (même interne à quicktype) est affichée « Invalid JSON: … » (page.jsx:16). Vérifié le 05/10 par exécution locale des mêmes options. Go vérifié : tableau en entrée → `type Root []RootElement` ; champ null dans tous les exemples → interface{} ; champ parfois null → *int64 (sans omitempty) ; parfois absent → *T + omitempty. Le code n'a pas de ligne `package` (option just-types, jsonCodegen.js:20)."
+ },
+ {
+  "path": "/tools/developer-tools/json-to-php",
+  "task": "Convertit un JSON en tableau PHP littéral (les données) ou en classes PHP 8 typées (la structure).",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "JSON (texte collé ; BOM retiré)"
+   ],
+   "ref": "app/tools/developer-tools/json-to-php/page.jsx:26 ; app/lib/jsonLossless.js:37-39"
+  },
+  "outputs": {
+   "formats": [
+    "PHP array (défaut) : `<?php` puis `$data = [ 'clé' => valeur, … ];` syntaxe courte, 4 espaces, entiers > PHP_INT_MAX en chaîne avec commentaire",
+    "PHP classes (PHP 8.0+) : `final class Root` + une classe par objet imbriqué, propriétés promues typées, ?type pour champs facultatifs, fromArray(array $data), commentaire « // Usage: … »"
+   ],
+   "ref": "app/tools/developer-tools/json-to-php/page.jsx:12,15 ; app/lib/jsonToPhp.js:57-65,126-202"
+  },
+  "controls": [
+   {
+    "label": "JSON Input",
+    "ref": "app/tools/developer-tools/json-to-php/page.jsx:26"
+   },
+   {
+    "label": "PHP Output",
+    "ref": "app/tools/developer-tools/json-to-php/page.jsx:27"
+   },
+   {
+    "label": "PHP array (the data, as json_decode($json, true) returns it)",
+    "ref": "app/tools/developer-tools/json-to-php/page.jsx:31"
+   },
+   {
+    "label": "PHP classes (typed, PHP 8+)",
+    "ref": "app/tools/developer-tools/json-to-php/page.jsx:32"
+   },
+   {
+    "label": "Convert",
+    "ref": "app/tools/developer-tools/json-to-php/page.jsx:36"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/json-to-php/page.jsx:37"
+   },
+   {
+    "label": "Ligne de téléchargement « data.php » + bouton « Download » (iPhone/iPad : + « Save / Share »), visible quand il y a un résultat",
+    "ref": "app/tools/developer-tools/json-to-php/page.jsx:28 ; app/components/FileDownload.jsx:200-219,278-282"
+   }
+  ],
+  "steps": [
+   "coller le JSON dans « JSON Input » → choisir « PHP array (…) » (coché par défaut) ou « PHP classes (typed, PHP 8+) » → bouton « Convert » → bouton « Copy » ou « Download » (data.php)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage (pas une limite) : au-delà, la zone ne montre que les 20 000 premiers caractères et l'outil traite tout le texte",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18,47-76"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par app/lib/jsonToPhp.js (code du site, aucune bibliothèque externe), chargé par import() au premier clic (app/lib/jsonToPhp.js:57,126). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/json-to-php/page.jsx:17 (setError → app/lib/useToolError.js:98-131) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139).",
+   "ref": "app/lib/jsonToPhp.js:57,126"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "Safari : message JSON.parse sans position (app/lib/jsonText.js:60) — erreur affichée « Invalid JSON: » + message brut (page.jsx:17). iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": null,
+  "notes": "Mode classes refusé si le JSON n'est pas un objet ou un tableau d'objets : message « A PHP class needs a JSON object (or an array of objects). For other JSON, use the \"PHP array\" output. » (jsonToPhp.js:131-133). Noms de propriétés en camelCase (« first-name » → firstName), mots réservés évités (jsonToPhp.js:69,79-85,136). Champ null dans tous les exemples → `mixed` sans `?` (jsonToPhp.js:141,173, vérifié). Nombres écrits comme dans la source (1.10 reste 1.10, jsonToPhp.js:37) ; entier au-delà de PHP_INT_MAX → chaîne + commentaire (jsonToPhp.js:23-30) ; flottant hors plage → chaîne (jsonToPhp.js:33-35). Le tableau PHP n'est PAS un `return [...]` mais `$data = [...]` (jsonToPhp.js:64). Classes : `// Requires PHP 8.0+ (constructor promotion, named arguments).` (jsonToPhp.js:201)."
+ },
+ {
+  "path": "/tools/developer-tools/json-to-python",
+  "task": "Génère des classes Python @dataclass (une par objet imbriqué) à partir d'un exemple JSON — la structure, pas les données.",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "JSON (texte collé ; objet ou tableau ; BOM retiré)"
+   ],
+   "ref": "app/tools/developer-tools/json-to-python/page.jsx:25 ; app/lib/jsonCodegen.js:51-52"
+  },
+  "outputs": {
+   "formats": [
+    "Python 3.7+ (fichier model.py) : `from dataclasses import dataclass`, `from typing import List, Optional`, une @dataclass par objet, champs snake_case typés int/float/str/bool/List[T], `Optional[T] = None` pour champs facultatifs"
+   ],
+   "ref": "app/tools/developer-tools/json-to-python/page.jsx:14 ; app/lib/jsonCodegen.js:19"
+  },
+  "controls": [
+   {
+    "label": "JSON Input",
+    "ref": "app/tools/developer-tools/json-to-python/page.jsx:25"
+   },
+   {
+    "label": "Python Output",
+    "ref": "app/tools/developer-tools/json-to-python/page.jsx:26"
+   },
+   {
+    "label": "Convert",
+    "ref": "app/tools/developer-tools/json-to-python/page.jsx:31"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/json-to-python/page.jsx:32"
+   },
+   {
+    "label": "Ligne de téléchargement « model.py » + bouton « Download » (iPhone/iPad : + « Save / Share »), visible quand il y a un résultat",
+    "ref": "app/tools/developer-tools/json-to-python/page.jsx:27 ; app/components/FileDownload.jsx:200-219,278-282"
+   }
+  ],
+  "steps": [
+   "coller le JSON dans « JSON Input » → bouton « Convert » (actif dès qu'il y a du texte) → le code apparaît dans « Python Output » → bouton « Copy » ou « Download » (model.py)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage (pas une limite) : au-delà, la zone ne montre que les 20 000 premiers caractères et l'outil traite tout le texte",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18,47-76"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par quicktype-core 26.0.0 (package.json:62), chargé par import() au premier clic (app/lib/jsonCodegen.js:53-70). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/json-to-python/page.jsx:16 (setError → app/lib/useToolError.js:98-131) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139).",
+   "ref": "app/lib/jsonCodegen.js:53-70"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "Safari : le message JSON.parse ne donne pas de position (app/lib/jsonText.js:60, commentaire) — l'erreur affichée est « Invalid JSON: » + message brut du navigateur (app/tools/developer-tools/json-to-python/page.jsx:16). iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": null,
+  "notes": "Moteur quicktype, options : app/lib/jsonCodegen.js:17-24 ; pas d'énumérations, dates, UUID ni booléens/entiers déduits des chaînes (jsonCodegen.js:63-69). Un nombre écrit avec point ou exposant reste décimal (10.0 → double/float64/f64 ; jsonCodegen.js:26-44). Un entier au-delà de 64 bits : note ajoutée en tête du code (jsonCodegen.js:72-74). Tableau en entrée : tous les éléments sont fusionnés ; un champ absent de certains éléments devient facultatif. Toute erreur (même interne à quicktype) est affichée « Invalid JSON: … » (page.jsx:16). Vérifié le 05/10 par exécution locale des mêmes options. Python vérifié : champ null dans tous les exemples → `x: None = None` (pas Optional[…]) ; tableau en entrée → classe RootElement (pas de Root) ; clés en collision ou mots réservés préfixés (`lastName` + `last-name` → root_last_name / last_name ; `class` → root_class). DÉFAUT DE CODE : avec un entier > 64 bits la première ligne est `// Note: …` (jsonCodegen.js:73-74), ce qui rend le fichier Python invalide."
+ },
+ {
+  "path": "/tools/developer-tools/json-to-rust",
+  "task": "Génère des structs Rust pour serde (une par objet imbriqué) à partir d'un exemple JSON.",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "JSON (texte collé ; objet ou tableau ; BOM retiré)"
+   ],
+   "ref": "app/tools/developer-tools/json-to-rust/page.jsx:25 ; app/lib/jsonCodegen.js:51-52"
+  },
+  "outputs": {
+   "formats": [
+    "Rust (fichier model.rs) : `use serde::{Serialize, Deserialize};`, `#[derive(Debug, Clone, Serialize, Deserialize)]`, champs snake_case avec #[serde(rename_all = \"camelCase\")] ou #[serde(rename = \"…\")], i64/f64/String/bool/Vec<T>, Option<T> + #[serde(skip_serializing_if = \"Option::is_none\")]"
+   ],
+   "ref": "app/tools/developer-tools/json-to-rust/page.jsx:14 ; app/lib/jsonCodegen.js:22"
+  },
+  "controls": [
+   {
+    "label": "JSON Input",
+    "ref": "app/tools/developer-tools/json-to-rust/page.jsx:25"
+   },
+   {
+    "label": "Rust Struct Output",
+    "ref": "app/tools/developer-tools/json-to-rust/page.jsx:26"
+   },
+   {
+    "label": "Convert",
+    "ref": "app/tools/developer-tools/json-to-rust/page.jsx:31"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/json-to-rust/page.jsx:32"
+   },
+   {
+    "label": "Ligne de téléchargement « model.rs » + bouton « Download » (iPhone/iPad : + « Save / Share »), visible quand il y a un résultat",
+    "ref": "app/tools/developer-tools/json-to-rust/page.jsx:27 ; app/components/FileDownload.jsx:200-219,278-282"
+   }
+  ],
+  "steps": [
+   "coller le JSON dans « JSON Input » → bouton « Convert » (actif dès qu'il y a du texte) → le code apparaît dans « Rust Struct Output » → bouton « Copy » ou « Download » (model.rs)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage (pas une limite) : au-delà, la zone ne montre que les 20 000 premiers caractères et l'outil traite tout le texte",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18,47-76"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par quicktype-core 26.0.0 (package.json:62), chargé par import() au premier clic (app/lib/jsonCodegen.js:53-70). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/json-to-rust/page.jsx:16 (setError → app/lib/useToolError.js:98-131) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139).",
+   "ref": "app/lib/jsonCodegen.js:53-70"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "Safari : le message JSON.parse ne donne pas de position (app/lib/jsonText.js:60, commentaire) — l'erreur affichée est « Invalid JSON: » + message brut du navigateur (app/tools/developer-tools/json-to-rust/page.jsx:16). iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": null,
+  "notes": "Moteur quicktype, options : app/lib/jsonCodegen.js:17-24 ; pas d'énumérations, dates, UUID ni booléens/entiers déduits des chaînes (jsonCodegen.js:63-69). Un nombre écrit avec point ou exposant reste décimal (10.0 → double/float64/f64 ; jsonCodegen.js:26-44). Un entier au-delà de 64 bits : note ajoutée en tête du code (jsonCodegen.js:72-74). Tableau en entrée : tous les éléments sont fusionnés ; un champ absent de certains éléments devient facultatif. Toute erreur (même interne à quicktype) est affichée « Invalid JSON: … » (page.jsx:16). Vérifié le 05/10 par exécution locale des mêmes options. Rust vérifié : tableau en entrée → `pub type Root = Vec<RootElement>;` ; champ null dans tous les exemples → Option<serde_json::Value> (nécessite serde_json) ; `for` → root_for + rename."
+ },
+ {
+  "path": "/tools/developer-tools/json-to-typescript",
+  "task": "Génère des interfaces TypeScript (une par objet imbriqué) à partir d'un exemple JSON.",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "JSON (texte collé ; objet ou tableau ; BOM retiré)"
+   ],
+   "ref": "app/tools/developer-tools/json-to-typescript/page.jsx:25 ; app/lib/jsonCodegen.js:51-52"
+  },
+  "outputs": {
+   "formats": [
+    "TypeScript (fichier types.ts) : `export interface X` par objet, champs `?:` si absents de certains éléments, `T | null` si null, clés non identifiantes entre guillemets, unions préférées (prefer-unions)"
+   ],
+   "ref": "app/tools/developer-tools/json-to-typescript/page.jsx:14 ; app/lib/jsonCodegen.js:18"
+  },
+  "controls": [
+   {
+    "label": "JSON Input",
+    "ref": "app/tools/developer-tools/json-to-typescript/page.jsx:25"
+   },
+   {
+    "label": "TypeScript Output",
+    "ref": "app/tools/developer-tools/json-to-typescript/page.jsx:26"
+   },
+   {
+    "label": "Convert",
+    "ref": "app/tools/developer-tools/json-to-typescript/page.jsx:31"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/json-to-typescript/page.jsx:32"
+   },
+   {
+    "label": "Ligne de téléchargement « types.ts » + bouton « Download » (iPhone/iPad : + « Save / Share »), visible quand il y a un résultat",
+    "ref": "app/tools/developer-tools/json-to-typescript/page.jsx:27 ; app/components/FileDownload.jsx:200-219,278-282"
+   }
+  ],
+  "steps": [
+   "coller le JSON dans « JSON Input » → bouton « Convert » (actif dès qu'il y a du texte) → le code apparaît dans « TypeScript Output » → bouton « Copy » ou « Download » (types.ts)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage (pas une limite) : au-delà, la zone ne montre que les 20 000 premiers caractères et l'outil traite tout le texte",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18,47-76"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par quicktype-core 26.0.0 (package.json:62), chargé par import() au premier clic (app/lib/jsonCodegen.js:53-70). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/json-to-typescript/page.jsx:16 (setError → app/lib/useToolError.js:98-131) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139).",
+   "ref": "app/lib/jsonCodegen.js:53-70"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "Safari : le message JSON.parse ne donne pas de position (app/lib/jsonText.js:60, commentaire) — l'erreur affichée est « Invalid JSON: » + message brut du navigateur (app/tools/developer-tools/json-to-typescript/page.jsx:16). iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": null,
+  "notes": "Moteur quicktype, options : app/lib/jsonCodegen.js:17-24 ; pas d'énumérations, dates, UUID ni booléens/entiers déduits des chaînes (jsonCodegen.js:63-69). Un nombre écrit avec point ou exposant reste décimal (10.0 → double/float64/f64 ; jsonCodegen.js:26-44). Un entier au-delà de 64 bits : note ajoutée en tête du code (jsonCodegen.js:72-74). Tableau en entrée : tous les éléments sont fusionnés ; un champ absent de certains éléments devient facultatif. Toute erreur (même interne à quicktype) est affichée « Invalid JSON: … » (page.jsx:16). Vérifié le 05/10 par exécution locale des mêmes options. TypeScript vérifié : null → `number | null` (pas `?`) ; champ null partout → `x: null` ; tableau en entrée → l'interface de l'élément s'appelle Root (pas d'alias tableau, just-types). Le bouton Download existe (page.jsx:27) contrairement à la FAQ actuelle."
+ },
+ {
+  "path": "/tools/developer-tools/typescript-to-js",
+  "task": "Retire la syntaxe TypeScript (types, interfaces, génériques, modificateurs, as/satisfies, !) et rend du JavaScript ; les enum deviennent du JavaScript.",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "TypeScript (texte collé)",
+    "TSX seulement si le texte contient une balise ET « return <» / « return (<» (heuristique)"
+   ],
+   "ref": "app/tools/developer-tools/typescript-to-js/page.jsx:13,22"
+  },
+  "outputs": {
+   "formats": [
+    "JavaScript (fichier script.js), mise en forme et commentaires d'origine conservés pour l'essentiel, syntaxe moderne non transpilée (disableESTransforms), JSX laissé tel quel (jsxRuntime preserve)"
+   ],
+   "ref": "app/lib/codeTools.js:68-71"
+  },
+  "controls": [
+   {
+    "label": "TypeScript Input",
+    "ref": "app/tools/developer-tools/typescript-to-js/page.jsx:22"
+   },
+   {
+    "label": "JavaScript Output",
+    "ref": "app/tools/developer-tools/typescript-to-js/page.jsx:23"
+   },
+   {
+    "label": "Convert",
+    "ref": "app/tools/developer-tools/typescript-to-js/page.jsx:27"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/typescript-to-js/page.jsx:28"
+   },
+   {
+    "label": "Ligne de téléchargement « script.js » + bouton « Download » (iPhone/iPad : + « Save / Share »), visible quand il y a un résultat",
+    "ref": "app/tools/developer-tools/typescript-to-js/page.jsx:24 ; app/components/FileDownload.jsx:200-219,278-282"
+   }
+  ],
+  "steps": [
+   "coller le TypeScript dans « TypeScript Input » → bouton « Convert » → JavaScript dans « JavaScript Output » (ou « Error: … » à la place) → « Copy » ou « Download » (script.js)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage (pas une limite) : au-delà, la zone ne montre que les 20 000 premiers caractères et l'outil traite tout le texte",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18,47-76"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par Sucrase 3.35.1 (package.json:70), transforms ['typescript'] ou ['typescript','jsx'], chargé par import() au premier clic (app/lib/codeTools.js:68-71). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/typescript-to-js/page.jsx:13 (reportShownMessage(e)) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139).",
+   "ref": "app/lib/codeTools.js:68-71"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": "/tools/developer-tools/code-minifier (mode TS : même fonction typescriptToJs, sans JSX, puis Terser — code-minifier/page.jsx:18)",
+  "notes": "Erreur affichée dans la zone de sortie : « Error: » + message Sucrase avec position, ex. « Unexpected token (1:8) » (page.jsx:13 ; vérifié). Vérifié : enum → IIFE `var Color; (function (Color) {…})(Color || (Color = {}));` sur une ligne ; `import type` supprimé ; imports inutilisés supprimés (keepUnusedImports: false, codeTools.js:70) ; paramètres de constructeur `private x` → `this.x = x` ; décorateurs laissés tels quels ; `namespace N { export const a = 1; }` → SORTIE VIDE sans message ; TSX avec `=> <div>` → « Unexpected token, expected \";\" (1:28) ». Pas de vérification de types."
+ },
+ {
+  "path": "/tools/developer-tools/scss-to-css",
+  "task": "Compile du SCSS en CSS avec Dart Sass.",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "SCSS (texte collé) — syntaxe indentée .sass non acceptée (syntax 'scss' fixe)"
+   ],
+   "ref": "app/tools/developer-tools/scss-to-css/page.jsx:14,23 ; app/lib/codeTools.js:73"
+  },
+  "outputs": {
+   "formats": [
+    "CSS expanded ou compressed (fichier styles.css)"
+   ],
+   "ref": "app/lib/codeTools.js:73-76 ; app/tools/developer-tools/scss-to-css/page.jsx:12,28"
+  },
+  "controls": [
+   {
+    "label": "SCSS Input",
+    "ref": "app/tools/developer-tools/scss-to-css/page.jsx:23"
+   },
+   {
+    "label": "CSS Output",
+    "ref": "app/tools/developer-tools/scss-to-css/page.jsx:24"
+   },
+   {
+    "label": "Output style (liste : Expanded / Compressed ; libellé seulement aria-label, non affiché)",
+    "ref": "app/tools/developer-tools/scss-to-css/page.jsx:28"
+   },
+   {
+    "label": "Convert",
+    "ref": "app/tools/developer-tools/scss-to-css/page.jsx:29"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/scss-to-css/page.jsx:30"
+   },
+   {
+    "label": "Ligne de téléchargement « styles.css » + bouton « Download » (iPhone/iPad : + « Save / Share »), visible quand il y a un résultat",
+    "ref": "app/tools/developer-tools/scss-to-css/page.jsx:25 ; app/components/FileDownload.jsx:200-219,278-282"
+   }
+  ],
+  "steps": [
+   "coller le SCSS dans « SCSS Input » → choisir Expanded (défaut) ou Compressed → bouton « Convert » → CSS dans « CSS Output » (ou « Error: » + message Sass) → « Copy » ou « Download » (styles.css)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage (pas une limite) : au-delà, la zone ne montre que les 20 000 premiers caractères et l'outil traite tout le texte",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18,47-76"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par Dart Sass 1.105.0 (package.json:67), sass.compileString, chargé par import() au premier clic (app/lib/codeTools.js:73-76). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/scss-to-css/page.jsx:14 (reportShownMessage(e)) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139). Attention : le message Sass cite la ligne de code fautive (vérifié « 1 │ .a { color: $nope; } ») ; non entre guillemets, elle passe le nettoyage et peut donc être envoyée.",
+   "ref": "app/lib/codeTools.js:73-76"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": null,
+  "notes": "Vérifié : variables, imbrication + &, @mixin/@include, @extend, @each, #{} et @use \"sass:math\" compilés. @import \"foo\" / @use \"other\" → « Can't find stylesheet to import. » avec ligne/colonne (aucun importeur de fichiers). Variable indéfinie → « Undefined variable. » + extrait + « 1:13 root stylesheet ». @import affiche aussi un avertissement de dépréciation dans la console seulement."
+ },
+ {
+  "path": "/tools/developer-tools/code-formatter",
+  "task": "Met en forme du code en 13 langages, langage détecté automatiquement ou choisi.",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "JavaScript",
+    "TypeScript",
+    "JSX (React)",
+    "JSON",
+    "HTML",
+    "XML",
+    "CSS",
+    "SCSS",
+    "LESS",
+    "SQL (20 dialectes)",
+    "YAML",
+    "Markdown",
+    "GraphQL"
+   ],
+   "ref": "app/lib/codeFormat.js:17-31,35-56"
+  },
+  "outputs": {
+   "formats": [
+    "même langage, fichier formatted.<ext> : js, ts, jsx, json, html, xml, css, scss, less, sql, yaml, md, graphql"
+   ],
+   "ref": "app/lib/codeFormat.js:17-31 ; app/tools/developer-tools/code-formatter/page.jsx:79"
+  },
+  "controls": [
+   {
+    "label": "Language (liste : Auto-detect, JavaScript, TypeScript, JSX (React), JSON, HTML, XML, CSS, SCSS, LESS, SQL, YAML, Markdown, GraphQL)",
+    "ref": "app/tools/developer-tools/code-formatter/page.jsx:58-62 ; app/lib/codeFormat.js:17-31"
+   },
+   {
+    "label": "SQL dialect (visible seulement si SQL choisi ou détecté ; 20 choix : Standard SQL, MySQL, MariaDB, PostgreSQL, SQLite, SQL Server (T-SQL), Oracle (PL/SQL), BigQuery, Snowflake, Amazon Redshift, ClickHouse, DuckDB, Trino / Presto, Spark SQL, Hive, IBM Db2, IBM Db2 for i, SingleStore, TiDB, N1QL (Couchbase))",
+    "ref": "app/tools/developer-tools/code-formatter/page.jsx:64-71 ; app/lib/codeFormat.js:35-56"
+   },
+   {
+    "label": "Input",
+    "ref": "app/tools/developer-tools/code-formatter/page.jsx:74"
+   },
+   {
+    "label": "Output",
+    "ref": "app/tools/developer-tools/code-formatter/page.jsx:75"
+   },
+   {
+    "label": "ligne d'état « Formatting… » / « Formatted as <langage> (<dialecte>) (detected) » / « Read as … » en cas d'erreur",
+    "ref": "app/tools/developer-tools/code-formatter/page.jsx:76-78"
+   },
+   {
+    "label": "Format",
+    "ref": "app/tools/developer-tools/code-formatter/page.jsx:82"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/code-formatter/page.jsx:83"
+   },
+   {
+    "label": "Ligne de téléchargement « formatted.<ext> » + « Download » (absente si erreur)",
+    "ref": "app/tools/developer-tools/code-formatter/page.jsx:79 ; app/components/FileDownload.jsx:200-219"
+   }
+  ],
+  "steps": [
+   "coller le code dans « Input » → laisser « Auto-detect » ou choisir le langage (et le dialecte si SQL) → bouton « Format » → résultat + « Formatted as … » → « Copy » ou « Download » (formatted.<ext>)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage de la SORTIE seulement (l'entrée est un <textarea> simple, non limité)",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18 ; app/tools/developer-tools/code-formatter/page.jsx:74-75"
+   },
+   {
+    "what": "détection du langage : lit les 4 000 premiers caractères",
+    "value": "4000 caractères",
+    "constant": null,
+    "ref": "app/lib/codeFormat.js:85"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par Prettier 3.9.9 + plugins (babel, estree, typescript, postcss, html, yaml, markdown, graphql), @prettier/plugin-xml 3.4.2, sql-formatter 15.9.0 ; JSON par le ré-indenteur du site (jsonText.js), chargé par import() au premier clic (app/lib/codeFormat.js:175-200,252-273). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/code-formatter/page.jsx:33,42 (première ligne du message seulement) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139).",
+   "ref": "app/lib/codeFormat.js:175-200,252-273"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "XML : bonne forme vérifiée par DOMParser du navigateur, messages lus pour Chromium/WebKit et Firefox (app/lib/codeFormat.js:204-215). Champ d'entrée non contrôlé par React pour Safari/WebDriver (page.jsx:19-25). iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": "/tools/developer-tools/json-formatter (JSON), /tools/developer-tools/sql-formatter (SQL, 12 dialectes), /tools/developer-tools/html-formatter, css-formatter, javascript-formatter (moteur js-beautify, différent : ici Prettier), /tools/developer-tools/xml-formatter (moteur maison, ici Prettier XML)",
+  "notes": "Langage non reconnu → « Error: The language could not be recognised. Choose it in the Language list. » (page.jsx:32). Erreur de syntaxe → « Error: Line L, column C: message » + lignes autour avec ^ (codeFormat.js:150-163,276-281) ; sans position fournie par le moteur, pas de ligne (codeFormat.js:214,241,270). JSON : retrait 2 espaces fixe (codeFormat.js:255), nombres et échappements conservés, BOM retiré (codeFormat.js:253). Prettier : printWidth 80, tabWidth 2 (codeFormat.js:266) ; XML : xmlWhitespaceSensitivity 'preserve' (codeFormat.js:199). SQL : mots-clés en majuscules, retrait 2 (codeFormat.js:259). Message JSON spécifique si le texte ressemble à du JavaScript (codeFormat.js:228)."
+ },
+ {
+  "path": "/tools/developer-tools/code-minifier",
+  "task": "Minifie du JavaScript, du TypeScript (rendu en JavaScript), du CSS ou du HTML.",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "JS",
+    "TS (sans TSX)",
+    "CSS",
+    "HTML"
+   ],
+   "ref": "app/tools/developer-tools/code-minifier/page.jsx:13,17-20,30"
+  },
+  "outputs": {
+   "formats": [
+    "JS minifié (Terser)",
+    "TS → JS minifié (Sucrase puis Terser)",
+    "CSS minifié (CSSO)",
+    "HTML minifié (code du site)"
+   ],
+   "ref": "app/tools/developer-tools/code-minifier/page.jsx:17-20 ; app/lib/codeTools.js:20-29,68-71 ; app/lib/htmlMinify.js:52-133"
+  },
+  "controls": [
+   {
+    "label": "JS",
+    "ref": "app/tools/developer-tools/code-minifier/page.jsx:30"
+   },
+   {
+    "label": "TS",
+    "ref": "app/tools/developer-tools/code-minifier/page.jsx:30"
+   },
+   {
+    "label": "CSS",
+    "ref": "app/tools/developer-tools/code-minifier/page.jsx:30"
+   },
+   {
+    "label": "HTML",
+    "ref": "app/tools/developer-tools/code-minifier/page.jsx:30"
+   },
+   {
+    "label": "Input",
+    "ref": "app/tools/developer-tools/code-minifier/page.jsx:32"
+   },
+   {
+    "label": "Output",
+    "ref": "app/tools/developer-tools/code-minifier/page.jsx:33"
+   },
+   {
+    "label": "Minify",
+    "ref": "app/tools/developer-tools/code-minifier/page.jsx:37"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/code-minifier/page.jsx:38"
+   },
+   {
+    "label": "Saved N characters",
+    "ref": "app/tools/developer-tools/code-minifier/page.jsx:40"
+   },
+   {
+    "label": "Ligne de téléchargement « minified.js / minified.ts / minified.css / minified.html » + bouton « Download » (iPhone/iPad : + « Save / Share »), visible quand il y a un résultat",
+    "ref": "app/tools/developer-tools/code-minifier/page.jsx:34 ; app/components/FileDownload.jsx:200-219,278-282"
+   }
+  ],
+  "steps": [
+   "choisir JS (défaut), TS, CSS ou HTML → coller le code dans « Input » → bouton « Minify » → résultat + « Saved N characters » → « Copy » ou « Download » (minified.<langage>)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage (pas une limite) : au-delà, la zone ne montre que les 20 000 premiers caractères et l'outil traite tout le texte",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18,47-76"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par Terser 5.51.2, Sucrase 3.35.1, CSSO 5.0.5 (non déclaré dans package.json, présent via svgo) ou le minifieur HTML du site, chargé par import() au premier clic (app/lib/codeTools.js:20-29,68-71 ; app/lib/htmlMinify.js:52-133). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/code-minifier/page.jsx:22 (reportShownMessage(e)) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139).",
+   "ref": "app/lib/codeTools.js:20-29,68-71 ; app/lib/htmlMinify.js:52-133"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": "/tools/developer-tools/js-minifier (= mode JS), /tools/developer-tools/css-formatter bouton Minify (= mode CSS), /tools/developer-tools/javascript-formatter bouton Minify (= mode JS)",
+  "notes": "Terser : module false, compress, mangle, commentaires retirés (codeTools.js:22) — vérifié : variables locales renommées, globales gardées, code mort supprimé, `return\\n42` traité selon l'ASI, import/export acceptés. Erreur JS : « Error: » + message Terser SANS position (ex. « Name expected »). CSS (CSSO) : aucune erreur signalée ; vérifié `}}} a{{ ` → sortie vide, `a { color: red` → `a{color:red}`, règles identiques fusionnées, #ff0000 → red. HTML : commentaires retirés, chaque suite d'espaces → un espace (htmlMinify.js:81-90), contenu de <pre>, <textarea>, <script>, <style> recopié tel quel (htmlMinify.js:8,118-127), espaces dans les valeurs d'attribut entre guillemets conservés (htmlMinify.js:40-50) ; ne signale jamais d'erreur. TS : pas de JSX ; namespace avec code supprimé sans message. Défauts : fichier `minified.ts` pour une sortie JavaScript (page.jsx:34) ; « Saved N characters » calculé aussi sur « Error: … » (page.jsx:40)."
+ },
+ {
+  "path": "/tools/developer-tools/css-formatter",
+  "task": "Met en forme (Format) ou minifie (Minify) du CSS.",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "CSS (texte collé)"
+   ],
+   "ref": "app/tools/developer-tools/css-formatter/page.jsx:25"
+  },
+  "outputs": {
+   "formats": [
+    "CSS indenté 2 espaces (js-beautify)",
+    "CSS minifié (CSSO)"
+   ],
+   "ref": "app/lib/codeTools.js:26-35 ; app/tools/developer-tools/css-formatter/page.jsx:12-17"
+  },
+  "controls": [
+   {
+    "label": "Input",
+    "ref": "app/tools/developer-tools/css-formatter/page.jsx:25"
+   },
+   {
+    "label": "Output",
+    "ref": "app/tools/developer-tools/css-formatter/page.jsx:26"
+   },
+   {
+    "label": "Format",
+    "ref": "app/tools/developer-tools/css-formatter/page.jsx:30"
+   },
+   {
+    "label": "Minify",
+    "ref": "app/tools/developer-tools/css-formatter/page.jsx:31"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/css-formatter/page.jsx:32"
+   },
+   {
+    "label": "Ligne de téléchargement « formatted.css » + bouton « Download » (iPhone/iPad : + « Save / Share »), visible quand il y a un résultat",
+    "ref": "app/tools/developer-tools/css-formatter/page.jsx:27 ; app/components/FileDownload.jsx:200-219,278-282"
+   }
+  ],
+  "steps": [
+   "coller le CSS dans « Input » → bouton « Format » ou « Minify » → résultat dans « Output » → « Copy » ou « Download » (formatted.css, même après Minify)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage (pas une limite) : au-delà, la zone ne montre que les 20 000 premiers caractères et l'outil traite tout le texte",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18,47-76"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par js-beautify 2.0.3 (Format) ou CSSO 5.0.5 (Minify), chargé par import() au premier clic (app/lib/codeTools.js:26-35). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/css-formatter/page.jsx:13,16 (reportShownMessage(e)) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139).",
+   "ref": "app/lib/codeTools.js:26-35"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": "/tools/developer-tools/code-formatter (CSS via Prettier), /tools/developer-tools/code-minifier (mode CSS = même CSSO)",
+  "notes": "Format : indent 2, lignes vides conservées (au plus une à la suite, max_preserve_newlines 2), pas de retour final (codeTools.js:34). Vérifié : url(data:…;base64,…) et chaînes intactes ; commentaires conservés au formatage ; CSS invalide jamais signalé (js-beautify le formate tel quel ; CSSO jette ce qu'il ne lit pas : `}}} a{{ ` → vide). Minify : fusion des règles identiques, couleurs raccourcies, 0px → 0 (vérifié)."
+ },
+ {
+  "path": "/tools/developer-tools/html-formatter",
+  "task": "Ré-indente du HTML (y compris le CSS et le JavaScript intégrés).",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "HTML (document complet ou fragment, texte collé)"
+   ],
+   "ref": "app/tools/developer-tools/html-formatter/page.jsx:22"
+  },
+  "outputs": {
+   "formats": [
+    "HTML indenté 2 espaces (fichier formatted.html)"
+   ],
+   "ref": "app/lib/codeTools.js:31-36"
+  },
+  "controls": [
+   {
+    "label": "Input",
+    "ref": "app/tools/developer-tools/html-formatter/page.jsx:22"
+   },
+   {
+    "label": "Output",
+    "ref": "app/tools/developer-tools/html-formatter/page.jsx:23"
+   },
+   {
+    "label": "Format",
+    "ref": "app/tools/developer-tools/html-formatter/page.jsx:27"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/html-formatter/page.jsx:28"
+   },
+   {
+    "label": "Ligne de téléchargement « formatted.html » + bouton « Download » (iPhone/iPad : + « Save / Share »), visible quand il y a un résultat",
+    "ref": "app/tools/developer-tools/html-formatter/page.jsx:24 ; app/components/FileDownload.jsx:200-219,278-282"
+   }
+  ],
+  "steps": [
+   "coller le HTML dans « Input » → bouton « Format » → résultat dans « Output » → « Copy » ou « Download » (formatted.html)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage (pas une limite) : au-delà, la zone ne montre que les 20 000 premiers caractères et l'outil traite tout le texte",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18,47-76"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par js-beautify 2.0.3 (html), chargé par import() au premier clic (app/lib/codeTools.js:31-36). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/html-formatter/page.jsx:13 (reportShownMessage(e)) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139).",
+   "ref": "app/lib/codeTools.js:31-36"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": "/tools/developer-tools/code-formatter (HTML via Prettier, autre moteur)",
+  "notes": "Options : indent 2, wrap_line_length 0 (aucun retour forcé), indent_inner_html true (contenu de <head>/<body> indenté), lignes vides au plus une à la suite (codeTools.js:34,36). Vérifié : <pre> et <textarea> intacts ; <script>/<style> reformatés en JS/CSS ; <br>, <img>, <input> sans niveau d'indentation ; attribut contenant > géré ; une ligne vide ajoutée autour de <head>/<body>. HTML invalide jamais signalé (js-beautify ne lève pas d'erreur)."
+ },
+ {
+  "path": "/tools/developer-tools/javascript-formatter",
+  "task": "Met en forme (Format, js-beautify) ou minifie (Minify, Terser) du JavaScript.",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "JavaScript (texte collé)"
+   ],
+   "ref": "app/tools/developer-tools/javascript-formatter/page.jsx:25"
+  },
+  "outputs": {
+   "formats": [
+    "JavaScript indenté 2 espaces",
+    "JavaScript minifié"
+   ],
+   "ref": "app/lib/codeTools.js:20-24,31-37"
+  },
+  "controls": [
+   {
+    "label": "Input",
+    "ref": "app/tools/developer-tools/javascript-formatter/page.jsx:25"
+   },
+   {
+    "label": "Output",
+    "ref": "app/tools/developer-tools/javascript-formatter/page.jsx:26"
+   },
+   {
+    "label": "Format",
+    "ref": "app/tools/developer-tools/javascript-formatter/page.jsx:30"
+   },
+   {
+    "label": "Minify",
+    "ref": "app/tools/developer-tools/javascript-formatter/page.jsx:31"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/javascript-formatter/page.jsx:32"
+   },
+   {
+    "label": "Ligne de téléchargement « formatted.js » + bouton « Download » (iPhone/iPad : + « Save / Share »), visible quand il y a un résultat",
+    "ref": "app/tools/developer-tools/javascript-formatter/page.jsx:27 ; app/components/FileDownload.jsx:200-219,278-282"
+   }
+  ],
+  "steps": [
+   "coller le JavaScript dans « Input » → bouton « Format » ou « Minify » → résultat (ou « Error: … » en Minify) → « Copy » ou « Download » (formatted.js, même après Minify)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage (pas une limite) : au-delà, la zone ne montre que les 20 000 premiers caractères et l'outil traite tout le texte",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18,47-76"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par js-beautify 2.0.3 (Format) ou Terser 5.51.2 (Minify), chargé par import() au premier clic (app/lib/codeTools.js:20-24,31-37). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/javascript-formatter/page.jsx:13,16 (reportShownMessage(e)) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139).",
+   "ref": "app/lib/codeTools.js:20-24,31-37"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": "/tools/developer-tools/js-minifier (= bouton Minify), /tools/developer-tools/code-formatter (JS via Prettier)",
+  "notes": "Format : indent 2, au plus UNE ligne vide à la suite (max_preserve_newlines 2, vérifié), espaces ajoutés autour des opérateurs (vérifié `var a=1` → `var a = 1`), chaînes, gabarits, regex et commentaires intacts ; code invalide formaté sans erreur (vérifié `function ( { ` → `function({`). Minify : Terser comme JS Minifier ; erreur = « Error: » + message sans position (ex. « Name expected »)."
+ },
+ {
+  "path": "/tools/developer-tools/js-minifier",
+  "task": "Minifie du JavaScript avec Terser.",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "JavaScript ES2015+ (scripts et modules import/export)"
+   ],
+   "ref": "app/tools/developer-tools/js-minifier/page.jsx:22 ; app/lib/codeTools.js:20-24"
+  },
+  "outputs": {
+   "formats": [
+    "JavaScript minifié (fichier minified.js)"
+   ],
+   "ref": "app/lib/codeTools.js:20-24"
+  },
+  "controls": [
+   {
+    "label": "Input",
+    "ref": "app/tools/developer-tools/js-minifier/page.jsx:22"
+   },
+   {
+    "label": "Minified Output",
+    "ref": "app/tools/developer-tools/js-minifier/page.jsx:23"
+   },
+   {
+    "label": "Minify",
+    "ref": "app/tools/developer-tools/js-minifier/page.jsx:27"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/js-minifier/page.jsx:28"
+   },
+   {
+    "label": "Saved N characters",
+    "ref": "app/tools/developer-tools/js-minifier/page.jsx:30"
+   },
+   {
+    "label": "Ligne de téléchargement « minified.js » + bouton « Download » (iPhone/iPad : + « Save / Share »), visible quand il y a un résultat",
+    "ref": "app/tools/developer-tools/js-minifier/page.jsx:24 ; app/components/FileDownload.jsx:200-219,278-282"
+   }
+  ],
+  "steps": [
+   "coller le JavaScript dans « Input » → bouton « Minify » → code dans « Minified Output » + « Saved N characters » (ou « Error: … ») → « Copy » ou « Download » (minified.js)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage (pas une limite) : au-delà, la zone ne montre que les 20 000 premiers caractères et l'outil traite tout le texte",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18,47-76"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par Terser 5.51.2 (package.json:72), chargé par import() au premier clic (app/lib/codeTools.js:20-24). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/js-minifier/page.jsx:13 (reportShownMessage(e)) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139).",
+   "ref": "app/lib/codeTools.js:20-24"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": "/tools/developer-tools/code-minifier (mode JS identique), /tools/developer-tools/javascript-formatter (bouton Minify identique)",
+  "notes": "Options : module false, compress true, mangle true, comments false (codeTools.js:22). Vérifié : `let a = 1\\nlet b = 2\\nconsole.log(a - -b)` → `let a=1,b=2;console.log(a- -b);` ; `return\\n42` → `function f(){}` ; variables locales renommées, `var globalVar` gardé ; `if (false) {…}` supprimé ; classes à champs privés, ?. , ?? et BigInt acceptés ; import/export acceptés. Erreur : « Error: » + message Terser sans position (« Name expected ») — la position (e.line/e.col) n'est pas affichée. « Saved N characters » = différence de longueur, affichée aussi après une erreur (page.jsx:30). Pas de TypeScript (renvoi vers TypeScript to JS)."
+ },
+ {
+  "path": "/tools/developer-tools/json-formatter",
+  "task": "Valide un JSON et le ré-indente (2 espaces, 4 espaces ou tabulation) ou le met sur une ligne, en option avec les clés triées.",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "JSON (texte collé ; BOM non retiré → « Invalid JSON »)"
+   ],
+   "ref": "app/tools/developer-tools/json-formatter/page.jsx:20-21,38 ; app/lib/jsonText.js:15-17"
+  },
+  "outputs": {
+   "formats": [
+    "JSON indenté ou minifié (fichier formatted.json, même après Minify)"
+   ],
+   "ref": "app/tools/developer-tools/json-formatter/page.jsx:21,29-30,40 ; app/lib/jsonText.js:20-58"
+  },
+  "controls": [
+   {
+    "label": "Input",
+    "ref": "app/tools/developer-tools/json-formatter/page.jsx:38"
+   },
+   {
+    "label": "Output",
+    "ref": "app/tools/developer-tools/json-formatter/page.jsx:39"
+   },
+   {
+    "label": "Indent (liste : 2 spaces / 4 spaces / Tab)",
+    "ref": "app/tools/developer-tools/json-formatter/page.jsx:45"
+   },
+   {
+    "label": "Sort keys A-Z",
+    "ref": "app/tools/developer-tools/json-formatter/page.jsx:46"
+   },
+   {
+    "label": "Format",
+    "ref": "app/tools/developer-tools/json-formatter/page.jsx:49"
+   },
+   {
+    "label": "Minify",
+    "ref": "app/tools/developer-tools/json-formatter/page.jsx:50"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/json-formatter/page.jsx:51"
+   },
+   {
+    "label": "message « Invalid JSON at line L, column C: … » + bloc « Error location » avec ^",
+    "ref": "app/tools/developer-tools/json-formatter/page.jsx:22-26,42-43"
+   },
+   {
+    "label": "Ligne de téléchargement « formatted.json » + bouton « Download » (iPhone/iPad : + « Save / Share »), visible quand il y a un résultat",
+    "ref": "app/tools/developer-tools/json-formatter/page.jsx:40 ; app/components/FileDownload.jsx:200-219,278-282"
+   }
+  ],
+  "steps": [
+   "coller le JSON dans « Input » → choisir Indent (2 spaces par défaut) et cocher ou non « Sort keys A-Z » → bouton « Format » (ou « Minify ») → résultat, ou « Invalid JSON at line L, column C: … » + la ligne avec ^ (sortie vidée) → « Copy » ou « Download » (formatted.json)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage (pas une limite) : au-delà, la zone ne montre que les 20 000 premiers caractères et l'outil traite tout le texte",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18,47-76"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par JSON.parse du navigateur (validation) + ré-indenteur du site (app/lib/jsonText.js) ; tri des clés par app/lib/jsonLossless.js, chargé par import() au premier clic (app/lib/jsonText.js:15-58,96-106). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/json-formatter/page.jsx:26 (setError → app/lib/useToolError.js:98-131) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139).",
+   "ref": "app/lib/jsonText.js:15-58,96-106"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "Safari : JSON.parse ne donne pas de position ; la page la calcule elle-même (app/lib/jsonText.js:60-94 ; page.jsx:24-26). iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": "/tools/developer-tools/json-minifier (= bouton Minify, sans tri), /tools/developer-tools/code-formatter (JSON, retrait 2 fixe)",
+  "notes": "Sans tri : le texte d'origine est ré-indenté, nombres (20 chiffres, 1.10, 1e21), échappements et ordre des clés intacts (jsonText.js:20-58) ; {} et [] vides restent sur une ligne (jsonText.js:40-44). Avec « Sort keys A-Z » : nombres intacts mais chaînes réécrites par JSON.stringify (`\\u00e9\\/` → `é/`, vérifié), clé en double → dernière valeur seulement, ordre par code de caractère (majuscules avant minuscules : B, a, b — vérifié) (jsonText.js:97-106). Erreur : sortie vidée (page.jsx:23). Pas de vue arborescente ni coloration. Traitement synchrone (pas de Worker)."
+ },
+ {
+  "path": "/tools/developer-tools/json-minifier",
+  "task": "Valide un JSON et retire les espaces et retours à la ligne hors chaînes, sans toucher aux valeurs.",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "JSON (texte collé ; BOM retiré)"
+   ],
+   "ref": "app/tools/developer-tools/json-minifier/page.jsx:13,21 ; app/lib/jsonLossless.js"
+  },
+  "outputs": {
+   "formats": [
+    "JSON sur une ligne (fichier minified.json)"
+   ],
+   "ref": "app/tools/developer-tools/json-minifier/page.jsx:13,23 ; app/lib/jsonText.js:20-58"
+  },
+  "controls": [
+   {
+    "label": "Input",
+    "ref": "app/tools/developer-tools/json-minifier/page.jsx:21"
+   },
+   {
+    "label": "Minified Output",
+    "ref": "app/tools/developer-tools/json-minifier/page.jsx:22"
+   },
+   {
+    "label": "Minify",
+    "ref": "app/tools/developer-tools/json-minifier/page.jsx:27"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/json-minifier/page.jsx:28"
+   },
+   {
+    "label": "Saved N characters (P%)",
+    "ref": "app/tools/developer-tools/json-minifier/page.jsx:30"
+   },
+   {
+    "label": "Ligne de téléchargement « minified.json » + bouton « Download » (iPhone/iPad : + « Save / Share »), visible quand il y a un résultat",
+    "ref": "app/tools/developer-tools/json-minifier/page.jsx:23 ; app/components/FileDownload.jsx:200-219,278-282"
+   }
+  ],
+  "steps": [
+   "coller le JSON dans « Input » → bouton « Minify » → JSON sur une ligne + « Saved N characters (P%) », ou « Invalid JSON: … » → « Copy » ou « Download » (minified.json)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage (pas une limite) : au-delà, la zone ne montre que les 20 000 premiers caractères et l'outil traite tout le texte",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18,47-76"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par JSON.parse du navigateur (validation) + ré-indenteur du site (app/lib/jsonText.js, retrait 0), chargé par import() au premier clic (app/lib/jsonText.js:15-58). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/json-minifier/page.jsx:13 (setError → app/lib/useToolError.js:98-131) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139).",
+   "ref": "app/lib/jsonText.js:15-58"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "Safari : message « Invalid JSON: » + message JSON.parse sans position (page.jsx:13 ; app/lib/jsonText.js:60). iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": "/tools/developer-tools/json-formatter (bouton Minify identique, sans retrait du BOM)",
+  "notes": "Nombres, échappements et ordre des clés intacts (copie caractère par caractère, jsonText.js:28-56). « Saved N characters (P%) » = différence de longueur en caractères (page.jsx:30). En cas d'erreur, la sortie précédente et la ligne « Saved… » restent affichées (page.jsx:13 ne vide pas output). Traitement synchrone."
+ },
+ {
+  "path": "/tools/developer-tools/sql-formatter",
+  "task": "Met en forme une requête SQL (mots-clés en majuscules, retrait 2 espaces) selon l'un des 12 dialectes proposés.",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "SQL : Standard SQL, MySQL, MariaDB, PostgreSQL, SQL Server, Oracle PL/SQL, SQLite, BigQuery, Snowflake, Redshift, Spark, Db2"
+   ],
+   "ref": "app/tools/developer-tools/sql-formatter/page.jsx:29"
+  },
+  "outputs": {
+   "formats": [
+    "SQL formaté (fichier formatted.sql)"
+   ],
+   "ref": "app/lib/codeTools.js:40-43 ; app/tools/developer-tools/sql-formatter/page.jsx:25"
+  },
+  "controls": [
+   {
+    "label": "Input",
+    "ref": "app/tools/developer-tools/sql-formatter/page.jsx:23"
+   },
+   {
+    "label": "Output",
+    "ref": "app/tools/developer-tools/sql-formatter/page.jsx:24"
+   },
+   {
+    "label": "SQL dialect (liste ; aria-label seulement, pas de libellé visible ; 12 choix, Standard SQL par défaut)",
+    "ref": "app/tools/developer-tools/sql-formatter/page.jsx:12,28-30"
+   },
+   {
+    "label": "Format",
+    "ref": "app/tools/developer-tools/sql-formatter/page.jsx:31"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/sql-formatter/page.jsx:32"
+   },
+   {
+    "label": "Ligne de téléchargement « formatted.sql » + bouton « Download » (iPhone/iPad : + « Save / Share »), visible quand il y a un résultat",
+    "ref": "app/tools/developer-tools/sql-formatter/page.jsx:25 ; app/components/FileDownload.jsx:200-219,278-282"
+   }
+  ],
+  "steps": [
+   "choisir le dialecte (Standard SQL par défaut) → coller la requête dans « Input » → bouton « Format » → SQL formaté (ou « Error: » + message brut de sql-formatter) → « Copy » ou « Download » (formatted.sql)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage (pas une limite) : au-delà, la zone ne montre que les 20 000 premiers caractères et l'outil traite tout le texte",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18,47-76"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par sql-formatter 15.9.0 (package.json:69), chargé par import() au premier clic (app/lib/codeTools.js:40-43). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/sql-formatter/page.jsx:14 (reportShownMessage(e)) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139).",
+   "ref": "app/lib/codeTools.js:40-43"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": "/tools/developer-tools/code-formatter (SQL, 20 dialectes, messages d'erreur résumés)",
+  "notes": "Options : keywordCase 'upper', tabWidth 2 (codeTools.js:42). Vérifié : virgules dans COUNT(a, b) et chaînes 'x, y' intactes, commentaires -- et /* */ intacts, :: de PostgreSQL reconnu ; les 12 valeurs (dont 'tsql') sont acceptées par la version installée. Erreur affichée brute : peut faire des dizaines de lignes (vérifié pour une parenthèse non fermée), et pour Standard SQL sql-formatter ajoute « This likely happens because you're using the default \"sql\" dialect… »."
+ },
+ {
+  "path": "/tools/developer-tools/xml-formatter",
+  "task": "Vérifie que le XML est bien formé puis le ré-indente de 2 espaces par niveau.",
+  "inputs": {
+   "accept": null,
+   "formats": [
+    "XML (texte collé ; BOM ignoré pour la validation)"
+   ],
+   "ref": "app/tools/developer-tools/xml-formatter/page.jsx:77,103"
+  },
+  "outputs": {
+   "formats": [
+    "XML ré-indenté 2 espaces (fichier formatted.xml)"
+   ],
+   "ref": "app/tools/developer-tools/xml-formatter/page.jsx:83-92,105"
+  },
+  "controls": [
+   {
+    "label": "Input",
+    "ref": "app/tools/developer-tools/xml-formatter/page.jsx:103"
+   },
+   {
+    "label": "Output",
+    "ref": "app/tools/developer-tools/xml-formatter/page.jsx:104"
+   },
+   {
+    "label": "Format",
+    "ref": "app/tools/developer-tools/xml-formatter/page.jsx:109"
+   },
+   {
+    "label": "Copy",
+    "ref": "app/tools/developer-tools/xml-formatter/page.jsx:110"
+   },
+   {
+    "label": "message « Invalid XML (line L, column C): … » ou « Error formatting XML »",
+    "ref": "app/tools/developer-tools/xml-formatter/page.jsx:80,94"
+   },
+   {
+    "label": "Ligne de téléchargement « formatted.xml » + bouton « Download » (iPhone/iPad : + « Save / Share »), visible quand il y a un résultat",
+    "ref": "app/tools/developer-tools/xml-formatter/page.jsx:105 ; app/components/FileDownload.jsx:200-219,278-282"
+   }
+  ],
+  "steps": [
+   "coller le XML dans « Input » → bouton « Format » → si mal formé : « Invalid XML (line L, column C): … » et pas de sortie ; sinon XML ré-indenté → « Copy » ou « Download » (formatted.xml)"
+  ],
+  "limits": [
+   {
+    "what": "taille max du texte (ordinateur)",
+    "value": "NON TROUVÉ — aucune constante de taille dans page.jsx, app/lib/*, app/components/TextArea.jsx",
+    "constant": null,
+    "ref": "app/components/TextArea.jsx:17"
+   },
+   {
+    "what": "seuil d'affichage (pas une limite) : au-delà, la zone ne montre que les 20 000 premiers caractères et l'outil traite tout le texte",
+    "value": "1 000 000 caractères (aperçu 20 000)",
+    "constant": "LIMIT / PREVIEW",
+    "ref": "app/components/TextArea.jsx:17-18,47-76"
+   },
+   {
+    "what": "taille max sur iPhone/Android",
+    "value": "NON TROUVÉ — aucun code propre au téléphone (pas de deviceLimits importé)",
+    "constant": null,
+    "ref": null
+   }
+  ],
+  "processing": {
+   "where": "browser",
+   "detail": "Le texte collé est traité dans le navigateur par fast-xml-parser 5.11.1 XMLValidator (validation) + découpe/indentation du site (page.jsx:15-66,83-91), chargé par import() au premier clic (app/tools/developer-tools/xml-formatter/page.jsx:76-91). Rien n'est envoyé pour le traitement. Exception : un message d'erreur affiché est envoyé (≤ 300 caractères, nettoyé : URL, e-mails, chemins, noms de fichiers, passages entre guillemets, nombres ≥ 7 chiffres remplacés) à /api/report-error (app/tools/developer-tools/xml-formatter/page.jsx:80,94 (setError → app/lib/useToolError.js:98-131) → app/lib/reportError.js:72-121,133-171), jamais depuis un navigateur piloté par robot (reportError.js:139).",
+   "ref": "app/tools/developer-tools/xml-formatter/page.jsx:76-91"
+  },
+  "quota": "aucune — aucun appel réseau pour le traitement (pas de fetch vers une route d'outil ; lib/quota/guard.js jamais appelé) ; seul envoi : rapport d'erreur vers /api/report-error, plafonné à 5 par outil et par onglet (app/lib/reportError.js:16-21,133-171) et par lib/quota/toolErrorRateLimit.js côté serveur (cité reportError.js:18-20)",
+  "signup": "aucune inscription demandée (vérifié : la page n'importe aucun composant de compte et n'appelle aucune route ; seul import réseau = reportError via useToolError/reportShownMessage)",
+  "watermark": "sans objet (sortie texte)",
+  "browsers": "iPhone/iPad : bouton « Save / Share » en plus de « Download » (app/components/FileDownload.jsx:91-96,213-217) ; tout navigateur : question « Leave page? » tant que le résultat n'a été ni copié ni téléchargé (FileDownload.jsx:24-30,69-81)",
+  "twin": "/tools/developer-tools/code-formatter (XML via Prettier plugin-xml, validation par DOMParser)",
+  "notes": "Retour à la ligne inséré seulement entre `>` et `<` collés, jamais dans un CDATA, un commentaire ou une valeur d'attribut entre guillemets (page.jsx:15-66). Puis chaque ligne est trim() et indentée (page.jsx:84-86) — y compris les lignes intérieures d'un CDATA/commentaire multi-ligne (vérifié `   keep  ` → `  keep`). Indentation décalée (vérifié) si une balise ouvrante tient sur plusieurs lignes ou si un attribut contient `>` (regex page.jsx:89). Déclaration <?xml?>, <!DOCTYPE>, commentaires et balises auto-fermantes n'ouvrent pas de niveau (page.jsx:89). Validation fast-xml-parser : balises non fermées/croisées et texte nu refusés (vérifié), plusieurs éléments racine ACCEPTÉS (vérifié `<a>x</a><b/>` → valide), pas de DTD/XSD. Retrait 2 espaces fixe."
+ }
+]

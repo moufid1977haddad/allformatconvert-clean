@@ -874,8 +874,6 @@
     "/tools/gif-tools/gif-to-mp4",
     "/tools/pdf-tools/epub-to-pdf",
     "/tools/pdf-tools/mobi-to-pdf",
-    "/tools/video-tools/video-compressor",
-    "/tools/video-tools/video-converter",
     "/tools/video-tools/video-filter",
     "/tools/video-tools/video-merger",
     "/tools/video-tools/video-metadata",
@@ -1276,27 +1274,6 @@
    ]
   },
   {
-   "s": "click the upload area and select a video file",
-   "pages": [
-    "/tools/video-tools/video-compressor",
-    "/tools/video-tools/video-converter",
-    "/tools/video-tools/video-rotator",
-    "/tools/video-tools/video-screenshot",
-    "/tools/video-tools/video-to-audio",
-    "/tools/video-tools/video-trimmer"
-   ]
-  },
-  {
-   "s": "what output format do i get",
-   "pages": [
-    "/tools/audio-tools/audio-booster",
-    "/tools/audio-tools/audio-compressor",
-    "/tools/video-tools/video-compressor",
-    "/tools/video-tools/video-resizer",
-    "/tools/video-tools/video-trimmer"
-   ]
-  },
-  {
    "s": "is there a size limit",
    "pages": [
     "/tools/audio-tools/audio-metadata",
@@ -1507,6 +1484,15 @@
    ]
   },
   {
+   "s": "what output format do i get",
+   "pages": [
+    "/tools/audio-tools/audio-booster",
+    "/tools/audio-tools/audio-compressor",
+    "/tools/video-tools/video-resizer",
+    "/tools/video-tools/video-trimmer"
+   ]
+  },
+  {
    "s": "yes, it's completely free with no signup and no limits",
    "pages": [
     "/tools/converter-tools/unit-converter",
@@ -1630,6 +1616,15 @@
     "/tools/pdf-tools/pdf-merge",
     "/tools/pdf-tools/pdf-repair",
     "/tools/pdf-tools/pdf-to-pdfa"
+   ]
+  },
+  {
+   "s": "click the upload area and select a video file",
+   "pages": [
+    "/tools/video-tools/video-rotator",
+    "/tools/video-tools/video-screenshot",
+    "/tools/video-tools/video-to-audio",
+    "/tools/video-tools/video-trimmer"
    ]
   },
   {

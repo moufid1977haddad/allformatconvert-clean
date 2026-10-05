@@ -1,0 +1,472 @@
+[
+  {
+    "path": "/tools/image-tools/bmp-to-png",
+    "task": "Convertit une image BMP en PNG dans le navigateur.",
+    "inputs": {"accept": ".bmp", "formats": ["BMP"], "ref": "app/tools/image-tools/bmp-to-png/page.jsx:37"},
+    "outputs": {"formats": ["PNG"], "ref": "app/tools/image-tools/bmp-to-png/page.jsx:25 (encodeRaster(out, 'image/png'))"},
+    "controls": [
+      {"label": "Click or drop an image here (souris) / Choose an image (tactile)", "ref": "app/tools/image-tools/bmp-to-png/page.jsx:36 + app/components/UploadPrompt.jsx:10-11"},
+      {"label": "Convert", "ref": "app/tools/image-tools/bmp-to-png/page.jsx:40"},
+      {"label": "Download (+ Save / Share sur iPhone/iPad)", "ref": "app/tools/image-tools/bmp-to-png/page.jsx:41 + app/components/FileDownload.jsx:211,216"}
+    ],
+    "steps": ["choisir ou déposer un fichier .bmp (aperçu affiché)", "bouton « Convert »", "aperçu du PNG", "bouton « Download »"],
+    "limits": [
+      {"what": "pixels par image (tous appareils)", "value": "268 435 456 px (268 Mpx), refus avec message", "constant": "RASTER_MAX_PIXELS", "ref": "app/lib/imageOutput.js:77-82"},
+      {"what": "taille de fichier", "value": "aucune constante", "constant": null, "ref": "app/tools/image-tools/bmp-to-png/page.jsx:17-28 (aucun contrôle de taille)"},
+      {"what": "nombre de fichiers", "value": "1 (input sans multiple)", "constant": null, "ref": "app/tools/image-tools/bmp-to-png/page.jsx:37"}
+    ],
+    "processing": {"where": "browser", "detail": "Décodage par le navigateur (createImageBitmap, orientation EXIF appliquée), encodage PNG par le canvas ; sur iPhone/iPad au-delà de 16,7 Mpx, décodage par bandes et PNG écrit par l'écrivain du site (CompressionStream). Rien n'est envoyé ; seul un rapport d'erreur anonymisé (sans fichier ni nom) part vers /api/report-error si un message d'erreur s'affiche.", "ref": "app/lib/imageOutput.js:73-89,129-143; app/lib/bigImage.js:72-116,294-303; app/lib/useToolError.js:15-21; app/lib/reportError.js:3-10,16"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel /api hors /api/report-error, aucune occurrence quota/guard/login dans le dossier de l'outil)",
+    "watermark": "aucun filigrane ajouté (vérifié : le blob encodé est livré tel quel, app/lib/imageOutput.js:147-149)",
+    "browsers": "iPhone/iPad : images > 16,7 Mpx traitées par bandes (app/lib/bigImage.js:72-104) ; bouton Save / Share en plus (app/components/FileDownload.jsx:91-95). Un BMP que le navigateur ne sait pas ouvrir donne « Could not load this image… » ou la raison exacte (app/lib/imageOutput.js:84-88, app/lib/fileChecks.js:203-214).",
+    "twin": "/tools/image-tools/image-converter (BMP → PNG, en lot)",
+    "notes": "Nom rendu = nom d'origine en .png (app/lib/imageOutput.js:147-149, app/lib/download.js:108-111). Avertissement avant de quitter la page si le résultat n'a pas été téléchargé (app/components/FileDownload.jsx:24,79)."
+  },
+  {
+    "path": "/tools/image-tools/gif-to-png",
+    "task": "Convertit un GIF en PNG (première image) ou extrait toutes les images d'un GIF animé en PNG dans un ZIP.",
+    "inputs": {"accept": ".gif", "formats": ["GIF"], "ref": "app/tools/image-tools/gif-to-png/page.jsx:65"},
+    "outputs": {"formats": ["PNG (première image)", "ZIP de PNG (toutes les images composées)"], "ref": "app/tools/image-tools/gif-to-png/page.jsx:42-56 (PNG), 21-41 (ZIP gif-frames.zip, fichiers frame_01.png…)"},
+    "controls": [
+      {"label": "Click or drop an image here / Choose an image", "ref": "app/tools/image-tools/gif-to-png/page.jsx:64"},
+      {"label": "Convert", "ref": "app/tools/image-tools/gif-to-png/page.jsx:68"},
+      {"label": "Extract all frames (ZIP of PNGs) (pendant le travail : Extracting frames...)", "ref": "app/tools/image-tools/gif-to-png/page.jsx:70"},
+      {"label": "Download", "ref": "app/tools/image-tools/gif-to-png/page.jsx:69,71 + app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir un .gif", "bouton « Convert » → PNG de la première image → « Download »", "ou bouton « Extract all frames (ZIP of PNGs) » → « Download » du fichier gif-frames.zip"],
+    "limits": [
+      {"what": "extraction des images sur iPhone/iPad", "value": "16 777 216 px par image du GIF, refus avec message", "constant": "IOS_CANVAS_MAX_PIXELS", "ref": "app/lib/gifFrames.js:18-19; app/lib/canvasLimit.js:11,20-23"},
+      {"what": "extraction sur ordinateur", "value": "268 435 456 px", "constant": "maxCanvasPixels()", "ref": "app/lib/canvasLimit.js:22"},
+      {"what": "Convert (première image)", "value": "aucune constante ; iPhone > 16,7 Mpx : bandes", "constant": null, "ref": "app/tools/image-tools/gif-to-png/page.jsx:48; app/lib/imageOutput.js:255-273"},
+      {"what": "nombre de fichiers", "value": "1", "constant": null, "ref": "app/tools/image-tools/gif-to-png/page.jsx:65"}
+    ],
+    "processing": {"where": "browser", "detail": "Convert : <img> du navigateur dessiné puis encodé en PNG. Extraction : gifuct-js décode chaque image, composition avec transparence et méthodes de disposition 2 et 3, PNG par canvas, ZIP par fflate sans compression (level 0). Rien n'est envoyé.", "ref": "app/tools/image-tools/gif-to-png/page.jsx:21-56; app/lib/gifFrames.js:1-41"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel /api)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "iPhone/iPad : extraction refusée au-delà de 16,7 Mpx (« Use a computer for this file », app/lib/gifFrames.js:19).",
+    "twin": "/tools/gif-tools/gif-to-apng (même décodeur d'images, app/lib/gifFrames.js:1)",
+    "notes": "Message d'échec de lecture : « Could not load this image. The file may be corrupted or in an unsupported format. » (page.jsx:53). Échec d'extraction : « Could not extract the frames: … » (page.jsx:39). Numérotation complétée de zéros selon le nombre d'images (page.jsx:31,36)."
+  },
+  {
+    "path": "/tools/image-tools/heic-to-jpg",
+    "task": "Convertit une photo HEIC/HEIF en JPG avec une qualité réglable.",
+    "inputs": {"accept": ".heic,.heif", "formats": ["HEIC", "HEIF"], "ref": "app/tools/image-tools/heic-to-jpg/page.jsx:56"},
+    "outputs": {"formats": ["JPG"], "ref": "app/tools/image-tools/heic-to-jpg/page.jsx:33-37,69"},
+    "controls": [
+      {"label": "Click or drop a HEIC file here / Choose a HEIC file", "ref": "app/tools/image-tools/heic-to-jpg/page.jsx:55"},
+      {"label": "Quality: 85% (curseur 10-100, aria-label Quality (%))", "ref": "app/tools/image-tools/heic-to-jpg/page.jsx:12,59-60"},
+      {"label": "Convert to JPG (pendant : Converting...)", "ref": "app/tools/image-tools/heic-to-jpg/page.jsx:63"},
+      {"label": "Download", "ref": "app/tools/image-tools/heic-to-jpg/page.jsx:69"}
+    ],
+    "steps": ["choisir un .heic/.heif", "régler « Quality » (85 % par défaut)", "bouton « Convert to JPG »", "aperçu puis « Download »"],
+    "limits": [
+      {"what": "pixels (chemin Safari)", "value": "268 Mpx, refus avec message", "constant": "RASTER_MAX_PIXELS", "ref": "app/tools/image-tools/heic-to-jpg/page.jsx:33; app/lib/imageOutput.js:77-82"},
+      {"what": "pixels (chemin heic2any, autres navigateurs)", "value": "NON TROUVÉ (aucune constante ; cherché dans page.jsx et node_modules/heic2any/dist/heic2any.js)", "constant": null, "ref": "app/tools/image-tools/heic-to-jpg/page.jsx:35-36"},
+      {"what": "nombre de fichiers", "value": "1", "constant": null, "ref": "app/tools/image-tools/heic-to-jpg/page.jsx:56"}
+    ],
+    "processing": {"where": "browser", "detail": "Si le navigateur ouvre le HEIC (Safari iPhone/iPad/Mac) : décodage natif, pleine taille, par bandes au-delà de 16,7 Mpx, encodage JPEG canvas ou MozJPEG WebAssembly. Sinon : bibliothèque heic2any 0.0.4 (libheif) dans la page. Rien n'est envoyé ; en cas d'erreur, rapport anonymisé.", "ref": "app/tools/image-tools/heic-to-jpg/page.jsx:29-44; package.json:42"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "Safari : décodage natif (24 et 48 Mpx compris) ; Chrome/Firefox/Edge : heic2any (page.jsx:29-31).",
+    "twin": "/tools/image-tools/image-converter (HEIC → JPG en lot) ; /tools/image-tools/heic-to-png",
+    "notes": "Nom rendu : nom du fichier avec .heic/.heif remplacé par .jpg (page.jsx:69). Erreur affichée « Error: <message> » (page.jsx:43). Pas de suivi de progression."
+  },
+  {
+    "path": "/tools/image-tools/heic-to-png",
+    "task": "Convertit une photo HEIC/HEIF en PNG.",
+    "inputs": {"accept": ".heic,.heif", "formats": ["HEIC", "HEIF"], "ref": "app/tools/image-tools/heic-to-png/page.jsx:55"},
+    "outputs": {"formats": ["PNG"], "ref": "app/tools/image-tools/heic-to-png/page.jsx:32-36,64"},
+    "controls": [
+      {"label": "Click or drop a HEIC file here / Choose a HEIC file", "ref": "app/tools/image-tools/heic-to-png/page.jsx:54"},
+      {"label": "Convert to PNG (pendant : Converting...)", "ref": "app/tools/image-tools/heic-to-png/page.jsx:58"},
+      {"label": "Download", "ref": "app/tools/image-tools/heic-to-png/page.jsx:64"}
+    ],
+    "steps": ["choisir un .heic/.heif", "bouton « Convert to PNG »", "aperçu", "« Download »"],
+    "limits": [
+      {"what": "pixels (chemin Safari)", "value": "268 Mpx, refus avec message", "constant": "RASTER_MAX_PIXELS", "ref": "app/tools/image-tools/heic-to-png/page.jsx:32; app/lib/imageOutput.js:77-82"},
+      {"what": "pixels (chemin heic2any)", "value": "NON TROUVÉ (aucune constante)", "constant": null, "ref": "app/tools/image-tools/heic-to-png/page.jsx:34-35"},
+      {"what": "nombre de fichiers", "value": "1", "constant": null, "ref": "app/tools/image-tools/heic-to-png/page.jsx:55"}
+    ],
+    "processing": {"where": "browser", "detail": "Safari : décodage natif puis PNG (canvas, ou écrivain PNG du site au-delà de 16,7 Mpx sur iPhone). Autres navigateurs : heic2any. Rien n'est envoyé.", "ref": "app/tools/image-tools/heic-to-png/page.jsx:28-36; app/lib/imageOutput.js:129-143"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "Safari : décodage natif ; autres : heic2any (page.jsx:28-31).",
+    "twin": "/tools/image-tools/image-converter ; /tools/image-tools/heic-to-jpg",
+    "notes": "Nom rendu : .heic/.heif → .png (page.jsx:64). Erreur « Error: <message> » (page.jsx:42)."
+  },
+  {
+    "path": "/tools/image-tools/ico-to-png",
+    "task": "Convertit une icône ICO en PNG : la plus grande taille, ou chaque taille contenue dans l'icône.",
+    "inputs": {"accept": ".ico", "formats": ["ICO"], "ref": "app/tools/image-tools/ico-to-png/page.jsx:65"},
+    "outputs": {"formats": ["PNG (une taille)", "PNG par taille + ZIP <nom>-sizes.zip"], "ref": "app/tools/image-tools/ico-to-png/page.jsx:42-56,27-41,74"},
+    "controls": [
+      {"label": "Click or drop an image here / Choose an image", "ref": "app/tools/image-tools/ico-to-png/page.jsx:64"},
+      {"label": "Convert", "ref": "app/tools/image-tools/ico-to-png/page.jsx:68"},
+      {"label": "Every size in this icon", "ref": "app/tools/image-tools/ico-to-png/page.jsx:70"},
+      {"label": "Download / Download all (N files, ZIP)", "ref": "app/tools/image-tools/ico-to-png/page.jsx:69,74-78; app/components/FileDownload.jsx:211,264"}
+    ],
+    "steps": ["choisir un .ico", "« Convert » → PNG de la plus grande image → « Download »", "ou « Every size in this icon » → une ligne par taille (« 16 × 16, 32-bit »…) → « Download » ou « Download all (N files, ZIP) »"],
+    "limits": [
+      {"what": "taille / pixels", "value": "aucune constante ; iPhone > 16,7 Mpx : bandes", "constant": null, "ref": "app/tools/image-tools/ico-to-png/page.jsx:48; app/lib/imageOutput.js:255-273"},
+      {"what": "nombre de fichiers", "value": "1", "constant": null, "ref": "app/tools/image-tools/ico-to-png/page.jsx:65"}
+    ],
+    "processing": {"where": "browser", "detail": "Convert : <img> du navigateur (qui montre la plus grande image de l'icône, vérifié Chromium/Firefox/WebKit selon le commentaire) redessinée en PNG. Every size : répertoire de l'icône lu ; une entrée PNG est livrée octet pour octet, une entrée BMP est isolée dans un ICO d'une image et décodée par le navigateur. Rien n'est envoyé.", "ref": "app/lib/icoEntries.js:1-37; app/tools/image-tools/ico-to-png/page.jsx:18-41"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": "/tools/image-tools/png-to-ico (sens inverse)",
+    "notes": "Noms : <nom>-<L>x<H>-<bits>bit.png, suffixe -n si deux entrées de même taille (page.jsx:36). Message : « N images in this icon — K could not be read and are left out. PNG images inside the icon are given as they are, byte for byte. » (page.jsx:73). Erreurs : « This is not an ICO file (its header is not an icon directory). », « This icon file holds no image. » (app/lib/icoEntries.js:9,11)."
+  },
+  {
+    "path": "/tools/image-tools/image-converter",
+    "task": "Convertit une ou plusieurs images (y compris HEIC, TIFF, PSD, SVG et RAW d'appareil photo) vers WebP, PNG, JPG, AVIF, GIF, BMP, TIFF, ICO ou PDF.",
+    "inputs": {"accept": "image/*,.heic,.heif,.tif,.tiff,.psd,.psb,.svg,.cr2,.cr3,.crw,.nef,.nrw,.arw,.srf,.sr2,.dng,.orf,.rw2,.rwl,.raf,.pef,.srw,.3fr,.iiq,.erf,.kdc,.dcr,.mrw,.mef,.mos,.x3f", "formats": ["PNG", "JPG", "WebP", "AVIF", "GIF", "BMP", "TIFF", "HEIC/HEIF", "PSD/PSB", "SVG", "RAW : CR2 CR3 CRW NEF NRW ARW SRF SR2 DNG ORF RW2 RWL RAF PEF SRW 3FR IIQ ERF KDC DCR MRW MEF MOS (X3F accepté pour être refusé)"], "ref": "app/tools/image-tools/image-converter/page.tsx:267; app/lib/specialImageDecode.js:12-13; app/lib/rawFormats.js:3-9"},
+    "outputs": {"formats": ["WebP", "PNG", "JPG", "AVIF", "GIF", "BMP", "TIFF", "ICO", "PDF"], "ref": "app/tools/image-tools/image-converter/page.tsx:313-321"},
+    "controls": [
+      {"label": "Drop your images here / or click to browse — PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, HEIC/HEIF, PSD, SVG and camera RAW (CR2, CR3, NEF, ARW, DNG, ORF, RW2, RAF…)", "ref": "app/tools/image-tools/image-converter/page.tsx:275-276"},
+      {"label": "✕ (retirer un fichier)", "ref": "app/tools/image-tools/image-converter/page.tsx:295"},
+      {"label": "Output format (WebP, PNG, JPG, AVIF, GIF, BMP, TIFF, ICO (favicon, 16–256 px), PDF)", "ref": "app/tools/image-tools/image-converter/page.tsx:305-322"},
+      {"label": "Quality: 80% (curseur 10-100, seulement JPG/WebP/AVIF/PDF ; PDF : « (photos without transparency) »)", "ref": "app/tools/image-tools/image-converter/page.tsx:20,36,338-351"},
+      {"label": "<FORMAT> has no quality setting here: it is written without loss. / it is written with 256 colours (the GIF limit).", "ref": "app/tools/image-tools/image-converter/page.tsx:353-355"},
+      {"label": "Convert N file(s) to <FORMAT>", "ref": "app/tools/image-tools/image-converter/page.tsx:370"},
+      {"label": "Cancel (pendant la conversion, barre « Converting… »)", "ref": "app/tools/image-tools/image-converter/page.tsx:360-364"},
+      {"label": "Download / Download all (N files, ZIP) (converted-images.zip)", "ref": "app/tools/image-tools/image-converter/page.tsx:382-396; app/components/FileDownload.jsx:211,264"}
+    ],
+    "steps": ["déposer ou choisir une ou plusieurs images", "choisir « Output format »", "régler « Quality » si JPG/WebP/AVIF/PDF", "bouton « Convert N files to FORMAT » (barre de progression, « Cancel »)", "« Download » par fichier, ou « Download all (N files, ZIP) » à partir de 2 résultats ; sous chaque résultat : poids avant/après, et une ligne qui explique si le fichier a grossi"],
+    "limits": [
+      {"what": "pixels par image sur ordinateur", "value": "100 Mpx", "constant": "MAX_MEGAPIXELS", "ref": "app/tools/image-tools/image-converter/config.ts:28; imageConverter.worker.js:66-69"},
+      {"what": "pixels par image sur téléphone et iPad (isMobileDevice)", "value": "50 Mpx", "constant": "MOBILE_MAX_MEGAPIXELS", "ref": "app/tools/image-tools/image-converter/config.ts:30; page.tsx:65; app/lib/isMobileDevice.js:3-11"},
+      {"what": "taille de fichier (ordinateur et téléphone)", "value": "100 MB, fichier écarté avec message", "constant": "MAX_FILE_SIZE_BYTES / MOBILE_MAX_FILE_SIZE_BYTES", "ref": "app/tools/image-tools/image-converter/config.ts:36-40; page.tsx:72-81"},
+      {"what": "nombre de fichiers", "value": "aucune limite (traités un par un)", "constant": null, "ref": "app/tools/image-tools/image-converter/imageConverter.worker.js:164-178"},
+      {"what": "WebP", "value": "16 383 px de côté au plus (libwebp) ; WebP natif du navigateur jusqu'à 30 Mpx, au-delà libwebp WebAssembly", "constant": "WEBP_MAX_SIDE / NATIVE_WEBP_MAX_PIXELS", "ref": "app/lib/bigImage.js:221-224; app/tools/image-tools/image-converter/config.ts:21; imageConverter.worker.js:146-154"},
+      {"what": "silence du worker avant arrêt", "value": "20 s (allongé selon la taille pendant les encodages WebAssembly : 3 s/Mpx extra, 6 s/Mpx WebP, 20 s/Mpx AVIF, 10 s/Mpx RAW)", "constant": "TIFF_DECODE_TIMEOUT_MS", "ref": "app/lib/tiffDecode.js:238; page.tsx:175-188; imageConverter.worker.js:51,80,144-157"},
+      {"what": "PDF : qualité", "value": "plancher 50 % (une valeur plus basse du curseur est ignorée)", "constant": null, "ref": "app/tools/image-tools/image-converter/extraFormats.js:159"}
+    ],
+    "processing": {"where": "browser", "detail": "Décodage et encodage dans un Web Worker ; PSD, SVG et HEIC (hors Safari, par heic2any) ouverts d'abord sur la page. RAW développé par LibRaw 0.22.2 compilé en WebAssembly (0,9 Mo, 0,35 Mo compressé, téléchargé depuis /wasm/ au premier RAW). AVIF : libavif WebAssembly (3,5 Mo, 1,1 Mo transférés). WebP : encodeur du navigateur, sinon libwebp WebAssembly. GIF : palette 256 couleurs (Wu) + tramage Floyd-Steinberg ; BMP 24 bits aplati sur blanc ; ICO 16-256 px ; TIFF non compressé RGBA ; PDF une page à la taille de l'image à 72 dpi (JPEG si opaque, PNG si transparent). Rien n'est envoyé ; rapports d'erreur anonymisés.", "ref": "app/tools/image-tools/image-converter/page.tsx:118-163; imageConverter.worker.js:8-27,53-162; extraFormats.js:1-181; app/lib/rawDecode.js:5-7,19; app/lib/specialImageDecode.js:20-52"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié ; seul le TIFF porte l'étiquette Software « onlineconvertools.com », extraFormats.js:150)",
+    "browsers": "Safari : pas d'encodeur WebP natif → libwebp WebAssembly, note « a few seconds per photo, and the first use downloads about 0.3 MB » (page.tsx:323-327). iPhone/iPad : > 16,7 Mpx décodé par bandes. Sans OffscreenCanvas (vieux WebKit) : « This browser cannot process images in the background (it needs Safari 16.4 or later…) » (imageConverter.worker.js:55-57). HEIC : natif dans Safari, heic2any ailleurs (page.tsx:118-120).",
+    "twin": "Les 16 convertisseurs à format fixe de ce lot ; /tools/image-tools/image-compressor",
+    "notes": "Résultat nommé d'après le type réel produit (page.tsx:385). Note par fichier : « RAW developed (<appareil>): camera white balance, sRGB, full size », « transparency flattened onto white (BMP) », « reduced to 256 colours with dithering (GIF limit) », « icon sizes 16, 32… px » (imageConverter.worker.js:89; extraFormats.js:174-176). TIFF : planaire et CMYK 16 bits refusés (app/lib/tiffDecode.js:191-208). X3F refusé avec message (app/lib/rawDecode.js:64). PSD sans « Maximize compatibility » refusé (app/lib/specialImageDecode.js:41-43). Les cartes « 100% Private / Instant / Batch » sont en page.tsx:403-415."
+  },
+  {
+    "path": "/tools/image-tools/image-to-base64",
+    "task": "Encode un fichier image en Base64 (data URI, Base64 seul, balise img, CSS ou JSON).",
+    "inputs": {"accept": "image/*", "formats": ["tout fichier image (lu octet pour octet, sans décodage)"], "ref": "app/tools/image-tools/image-to-base64/page.jsx:60,37-50"},
+    "outputs": {"formats": ["Data URI", "Plain Base64", "HTML <img> tag", "CSS background-image", "JSON", "fichier <nom>.base64.txt"], "ref": "app/tools/image-tools/image-to-base64/page.jsx:19-23,63"},
+    "controls": [
+      {"label": "Click or drop an image here / Choose an image", "ref": "app/tools/image-tools/image-to-base64/page.jsx:59"},
+      {"label": "Output (Data URI (data:image/…;base64,…) / Plain Base64 / HTML <img> tag / CSS background-image / JSON)", "ref": "app/tools/image-tools/image-to-base64/page.jsx:63"},
+      {"label": "Copy Base64", "ref": "app/tools/image-tools/image-to-base64/page.jsx:63"},
+      {"label": "Download (fichier .base64.txt)", "ref": "app/tools/image-tools/image-to-base64/page.jsx:63; app/components/FileDownload.jsx:278-281"}
+    ],
+    "steps": ["choisir une image : l'encodage est immédiat, sans bouton", "choisir la forme dans « Output »", "« Copy Base64 » (copie la forme choisie) ou « Download »"],
+    "limits": [
+      {"what": "taille de fichier", "value": "aucune constante", "constant": null, "ref": "app/tools/image-tools/image-to-base64/page.jsx:25-51"},
+      {"what": "aperçu dans la boîte", "value": "100 000 premiers caractères (Copy et Download donnent tout)", "constant": "PREVIEW_CHARS", "ref": "app/tools/image-tools/image-to-base64/page.jsx:10-14,63"},
+      {"what": "nombre de fichiers", "value": "1", "constant": null, "ref": "app/tools/image-tools/image-to-base64/page.jsx:60"}
+    ],
+    "processing": {"where": "browser", "detail": "FileReader.readAsDataURL ; si le navigateur ne donne pas de type, il est lu dans les premiers octets (PNG, JPEG, GIF, TIFF, BMP, WebP, ICO, HEIC, AVIF, SVG). Rien n'est envoyé.", "ref": "app/tools/image-tools/image-to-base64/page.jsx:33-50"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "WebKit figeait la page avec une boîte de 2,6 millions de caractères (mesure P23) : d'où l'aperçu limité (page.jsx:10-13).",
+    "twin": "/tools/file-tools/base64-encoder (« File to Base64 ») ; /tools/developer-tools/base64-encoder (texte)",
+    "notes": "Fichier vide : « This file is empty (0 bytes): there is nothing to encode. Choose the file again. » (page.jsx:31; app/lib/fileChecks.js:100-102). Type non reconnu : « This file's type could not be recognized as an image; the data URI below says application/octet-stream. » (page.jsx:45). Copier marque le résultat « Copied ✓ » (app/components/FileDownload.jsx:40-44,204)."
+  },
+  {
+    "path": "/tools/image-tools/jpg-to-png",
+    "task": "Convertit une image JPG en PNG.",
+    "inputs": {"accept": ".jpg,.jpeg", "formats": ["JPG", "JPEG"], "ref": "app/tools/image-tools/jpg-to-png/page.jsx:37"},
+    "outputs": {"formats": ["PNG"], "ref": "app/tools/image-tools/jpg-to-png/page.jsx:25"},
+    "controls": [
+      {"label": "Click or drop an image here / Choose an image", "ref": "app/tools/image-tools/jpg-to-png/page.jsx:36"},
+      {"label": "Convert", "ref": "app/tools/image-tools/jpg-to-png/page.jsx:39"},
+      {"label": "Download", "ref": "app/tools/image-tools/jpg-to-png/page.jsx:41"}
+    ],
+    "steps": ["choisir un .jpg/.jpeg", "« Convert »", "aperçu", "« Download »"],
+    "limits": [
+      {"what": "pixels par image", "value": "268 Mpx", "constant": "RASTER_MAX_PIXELS", "ref": "app/tools/image-tools/jpg-to-png/page.jsx:23; app/lib/imageOutput.js:77-82"},
+      {"what": "nombre de fichiers", "value": "1", "constant": null, "ref": "app/tools/image-tools/jpg-to-png/page.jsx:37"}
+    ],
+    "processing": {"where": "browser", "detail": "Décodage navigateur (orientation EXIF appliquée), PNG par canvas ; iPhone > 16,7 Mpx : bandes + écrivain PNG du site. Rien n'est envoyé.", "ref": "app/lib/imageOutput.js:73-89,129-143"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "iPhone/iPad > 16,7 Mpx : bandes (app/lib/bigImage.js:72-104).",
+    "twin": "/tools/image-tools/image-converter",
+    "notes": "Nom rendu = même nom en .png (app/lib/imageOutput.js:147-149). Les métadonnées EXIF ne sont pas recopiées (nouvelle image encodée, app/lib/imageOutput.js:132)."
+  },
+  {
+    "path": "/tools/image-tools/jpg-to-webp",
+    "task": "Convertit une image JPG en WebP, avec qualité réglable ou en mode sans perte.",
+    "inputs": {"accept": ".jpg,.jpeg", "formats": ["JPG", "JPEG"], "ref": "app/tools/image-tools/jpg-to-webp/page.jsx:42"},
+    "outputs": {"formats": ["WebP"], "ref": "app/tools/image-tools/jpg-to-webp/page.jsx:29"},
+    "controls": [
+      {"label": "Click or drop an image here / Choose an image", "ref": "app/tools/image-tools/jpg-to-webp/page.jsx:41"},
+      {"label": "Lossless (pixel-exact for an opaque image; larger file)", "ref": "app/tools/image-tools/jpg-to-webp/page.jsx:45"},
+      {"label": "Quality: 80 (curseur 1-100, caché en mode Lossless)", "ref": "app/tools/image-tools/jpg-to-webp/page.jsx:17,46-47"},
+      {"label": "Convert", "ref": "app/tools/image-tools/jpg-to-webp/page.jsx:49"},
+      {"label": "<x> KB → <y> KB puis Download", "ref": "app/tools/image-tools/jpg-to-webp/page.jsx:51"}
+    ],
+    "steps": ["choisir un .jpg", "cocher « Lossless » ou régler « Quality » (80 par défaut)", "« Convert »", "poids avant → après, aperçu, « Download »"],
+    "limits": [
+      {"what": "pixels par image", "value": "268 Mpx", "constant": "RASTER_MAX_PIXELS", "ref": "app/lib/imageOutput.js:77-82"},
+      {"what": "côté maximal (format WebP)", "value": "16 383 px", "constant": "WEBP_MAX_SIDE", "ref": "app/lib/bigImage.js:221-224"},
+      {"what": "nombre de fichiers", "value": "1", "constant": null, "ref": "app/tools/image-tools/jpg-to-webp/page.jsx:42"}
+    ],
+    "processing": {"where": "browser", "detail": "Avec perte : encodeur WebP du navigateur (canvas) ; Safari ou image hors canvas : libwebp en WebAssembly (/wasm/webp_enc.wasm). Sans perte : toujours libwebp (lossless, exact). Rien n'est envoyé.", "ref": "app/tools/image-tools/jpg-to-webp/page.jsx:20,29; app/lib/imageOutput.js:129-143; app/lib/bigImage.js:179-196,221-229"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "Safari n'a pas d'encodeur WebP : libwebp WebAssembly (page.jsx:20 ; app/lib/imageOutput.js:138).",
+    "twin": "/tools/image-tools/png-to-webp (code identique hors accept et note animée) ; /tools/image-tools/image-converter",
+    "notes": "Nom rendu = même nom en .webp (app/lib/imageOutput.js:145-149). Erreur WebP trop grand : « WebP cannot be wider or taller than 16383 pixels (a limit of the format). Choose JPG, PNG or AVIF for this image. » (app/lib/bigImage.js:224)."
+  },
+  {
+    "path": "/tools/image-tools/png-to-ico",
+    "task": "Construit un fichier ICO multi-tailles (favicon) à partir d'un PNG.",
+    "inputs": {"accept": ".png", "formats": ["PNG"], "ref": "app/tools/image-tools/png-to-ico/page.jsx:131"},
+    "outputs": {"formats": ["ICO (entrées PNG 32 bits)"], "ref": "app/tools/image-tools/png-to-ico/page.jsx:34-65,107,149"},
+    "controls": [
+      {"label": "Click or drop a PNG file here / Choose a PNG file", "ref": "app/tools/image-tools/png-to-ico/page.jsx:130"},
+      {"label": "Sizes to include (a real multi-resolution ICO) : 16x16 24x24 32x32 48x48 64x64 128x128 256x256 (16, 32, 48, 256 cochés par défaut)", "ref": "app/tools/image-tools/png-to-ico/page.jsx:11-12,134-138"},
+      {"label": "Image that is not square : Fit (whole image, transparent margins) / Fill (cropped to the square, centred)", "ref": "app/tools/image-tools/png-to-ico/page.jsx:141-142"},
+      {"label": "Convert to ICO", "ref": "app/tools/image-tools/png-to-ico/page.jsx:143"},
+      {"label": "Done! puis Download (favicon.ico)", "ref": "app/tools/image-tools/png-to-ico/page.jsx:148-149"}
+    ],
+    "steps": ["choisir un .png", "choisir les tailles (16, 32, 48, 256 par défaut)", "choisir Fit ou Fill pour une image non carrée", "« Convert to ICO »", "« Download » de favicon.ico"],
+    "limits": [
+      {"what": "taille de fichier / pixels", "value": "aucune constante", "constant": null, "ref": "app/tools/image-tools/png-to-ico/page.jsx:92-121"},
+      {"what": "tailles d'icône", "value": "16 à 256 px, 7 choix", "constant": "ALL_SIZES", "ref": "app/tools/image-tools/png-to-ico/page.jsx:11"},
+      {"what": "nombre de fichiers", "value": "1", "constant": null, "ref": "app/tools/image-tools/png-to-ico/page.jsx:131"}
+    ],
+    "processing": {"where": "browser", "detail": "Chaque taille dessinée sur un canvas carré (ajustée ou recadrée, jamais étirée), encodée en PNG, puis assemblée dans un conteneur ICONDIR/ICONDIRENTRY écrit par le site. Rien n'est envoyé.", "ref": "app/tools/image-tools/png-to-ico/page.jsx:14-65,92-121"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": "/tools/image-tools/image-converter (sortie « ICO (favicon, 16–256 px) ») ; /tools/image-tools/ico-to-png",
+    "notes": "Fichier toujours nommé favicon.ico (page.jsx:149). Entrées PNG dans l'ICO : lues par Windows depuis Vista (commentaire page.jsx:34-38). Une petite image est agrandie jusqu'à la taille choisie (page.jsx:24-28). Fichier vide : « This file is empty (0 bytes): there is no picture in it. Choose the image again. » (page.jsx:84)."
+  },
+  {
+    "path": "/tools/image-tools/png-to-jpg",
+    "task": "Convertit une image PNG en JPG, avec qualité et couleur de fond des zones transparentes au choix.",
+    "inputs": {"accept": ".png", "formats": ["PNG"], "ref": "app/tools/image-tools/png-to-jpg/page.jsx:41"},
+    "outputs": {"formats": ["JPG"], "ref": "app/tools/image-tools/png-to-jpg/page.jsx:29"},
+    "controls": [
+      {"label": "Click or drop an image here / Choose an image", "ref": "app/tools/image-tools/png-to-jpg/page.jsx:40"},
+      {"label": "JPG quality: 92 (curseur 10-100)", "ref": "app/tools/image-tools/png-to-jpg/page.jsx:18,44-45"},
+      {"label": "Transparent areas become (sélecteur de couleur, blanc par défaut, aria-label Background colour)", "ref": "app/tools/image-tools/png-to-jpg/page.jsx:19,47-48"},
+      {"label": "Convert", "ref": "app/tools/image-tools/png-to-jpg/page.jsx:51"},
+      {"label": "Download", "ref": "app/tools/image-tools/png-to-jpg/page.jsx:54"}
+    ],
+    "steps": ["choisir un .png", "régler « JPG quality » (92) et la couleur « Transparent areas become » (blanc)", "« Convert »", "aperçu, « Download »"],
+    "limits": [
+      {"what": "pixels par image", "value": "268 Mpx", "constant": "RASTER_MAX_PIXELS", "ref": "app/lib/imageOutput.js:77-82"},
+      {"what": "nombre de fichiers", "value": "1", "constant": null, "ref": "app/tools/image-tools/png-to-jpg/page.jsx:41"}
+    ],
+    "processing": {"where": "browser", "detail": "Fond de la couleur choisie peint sous l'image puis JPEG par canvas ; iPhone > 16,7 Mpx : MozJPEG WebAssembly avec la même couleur de fond. Rien n'est envoyé.", "ref": "app/lib/imageOutput.js:128-143; app/lib/bigImage.js:214-219"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "iPhone/iPad > 16,7 Mpx : MozJPEG WebAssembly (app/lib/imageOutput.js:140).",
+    "twin": "/tools/image-tools/webp-to-jpg (même code de réglages) ; /tools/image-tools/image-converter",
+    "notes": "PNG animé (APNG) : note « This APNG is animated: the result will hold its first frame only, as a still image. » (page.jsx:52; app/components/AnimatedImageNote.jsx:17-19; app/lib/animatedImage.js:33). Nom rendu .jpg (app/lib/imageOutput.js:145-149)."
+  },
+  {
+    "path": "/tools/image-tools/png-to-webp",
+    "task": "Convertit une image PNG en WebP, avec qualité réglable ou en mode sans perte, transparence gardée.",
+    "inputs": {"accept": ".png", "formats": ["PNG"], "ref": "app/tools/image-tools/png-to-webp/page.jsx:43"},
+    "outputs": {"formats": ["WebP"], "ref": "app/tools/image-tools/png-to-webp/page.jsx:30"},
+    "controls": [
+      {"label": "Click or drop an image here / Choose an image", "ref": "app/tools/image-tools/png-to-webp/page.jsx:42"},
+      {"label": "Lossless (pixel-exact for an opaque image; larger file)", "ref": "app/tools/image-tools/png-to-webp/page.jsx:46"},
+      {"label": "Quality: 80 (curseur 1-100)", "ref": "app/tools/image-tools/png-to-webp/page.jsx:47-48"},
+      {"label": "Convert", "ref": "app/tools/image-tools/png-to-webp/page.jsx:50"},
+      {"label": "<x> KB → <y> KB puis Download", "ref": "app/tools/image-tools/png-to-webp/page.jsx:53"}
+    ],
+    "steps": ["choisir un .png", "« Lossless » ou « Quality » (80)", "« Convert »", "poids avant → après, aperçu, « Download »"],
+    "limits": [
+      {"what": "pixels par image", "value": "268 Mpx", "constant": "RASTER_MAX_PIXELS", "ref": "app/lib/imageOutput.js:77-82"},
+      {"what": "côté maximal WebP", "value": "16 383 px", "constant": "WEBP_MAX_SIDE", "ref": "app/lib/bigImage.js:221-224"},
+      {"what": "nombre de fichiers", "value": "1", "constant": null, "ref": "app/tools/image-tools/png-to-webp/page.jsx:43"}
+    ],
+    "processing": {"where": "browser", "detail": "Identique à JPG to WebP : encodeur du navigateur ou libwebp WebAssembly (Safari, sans perte). Rien n'est envoyé.", "ref": "app/lib/imageOutput.js:129-143; app/lib/bigImage.js:221-229"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "Safari : libwebp WebAssembly.",
+    "twin": "/tools/image-tools/jpg-to-webp ; /tools/image-tools/image-converter",
+    "notes": "PNG animé : note « first frame only » (page.jsx:51; app/components/AnimatedImageNote.jsx:17-19)."
+  },
+  {
+    "path": "/tools/image-tools/svg-to-png",
+    "task": "Rend un fichier SVG en image PNG à la taille en pixels choisie, fond transparent ou coloré.",
+    "inputs": {"accept": ".svg", "formats": ["SVG"], "ref": "app/tools/image-tools/svg-to-png/page.jsx:96"},
+    "outputs": {"formats": ["PNG"], "ref": "app/tools/image-tools/svg-to-png/page.jsx:71-72"},
+    "controls": [
+      {"label": "Click or drop an SVG file here / Choose an SVG file", "ref": "app/tools/image-tools/svg-to-png/page.jsx:95"},
+      {"label": "Width (px)", "ref": "app/tools/image-tools/svg-to-png/page.jsx:99"},
+      {"label": "Height (px)", "ref": "app/tools/image-tools/svg-to-png/page.jsx:100"},
+      {"label": "Keep the SVG's proportions (coché par défaut)", "ref": "app/tools/image-tools/svg-to-png/page.jsx:24,102"},
+      {"label": "Background : Transparent / Colour (+ sélecteur, blanc au départ)", "ref": "app/tools/image-tools/svg-to-png/page.jsx:104-107"},
+      {"label": "512 px wide / 1024 px wide / 2048 px wide", "ref": "app/tools/image-tools/svg-to-png/page.jsx:108"},
+      {"label": "Convert to PNG", "ref": "app/tools/image-tools/svg-to-png/page.jsx:110"},
+      {"label": "Download", "ref": "app/tools/image-tools/svg-to-png/page.jsx:115"}
+    ],
+    "steps": ["choisir un .svg (la taille part des width/height ou viewBox du SVG, plus grand côté 512 px)", "régler largeur/hauteur ou cliquer 512/1024/2048 px wide ; fond Transparent ou Colour", "« Convert to PNG »", "« Download »"],
+    "limits": [
+      {"what": "taille de sortie", "value": "32 767 px de côté et 268 435 456 px au plus, refus avec message", "constant": "CANVAS_MAX_SIDE / CANVAS_MAX_AREA", "ref": "app/tools/image-tools/svg-to-png/page.jsx:60-61; app/lib/mediaSupport.js:55-67"},
+      {"what": "taille du fichier SVG", "value": "aucune constante", "constant": null, "ref": "app/tools/image-tools/svg-to-png/page.jsx:27-51"},
+      {"what": "nombre de fichiers", "value": "1", "constant": null, "ref": "app/tools/image-tools/svg-to-png/page.jsx:96"}
+    ],
+    "processing": {"where": "browser", "detail": "Le SVG est chargé comme image par le navigateur et dessiné à la taille choisie (par bandes sur iPhone au-delà de 16,7 Mpx), puis PNG. Rien n'est envoyé.", "ref": "app/tools/image-tools/svg-to-png/page.jsx:57-86; app/lib/imageOutput.js:255-273"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "iPhone/iPad > 16,7 Mpx de sortie : bandes (page.jsx:69).",
+    "twin": "/tools/image-tools/image-converter (SVG → PNG à la taille propre du SVG)",
+    "notes": "DÉFAUT DE CODE : l'aperçu après conversion utilise src={result} (objet) au lieu de result.url (page.jsx:114) → image cassée ; « Download » fonctionne (page.jsx:115). Erreurs : « Error: please enter valid width and height (positive numbers). » (page.jsx:59), « Error: could not render SVG as an image » (page.jsx:78). Les boutons 512/1024/2048 gardent toujours les proportions, même décochées (page.jsx:108)."
+  },
+  {
+    "path": "/tools/image-tools/tiff-to-jpg",
+    "task": "Convertit une page d'un TIFF (au choix pour un TIFF de plusieurs pages) en JPG.",
+    "inputs": {"accept": ".tiff,.tif", "formats": ["TIFF"], "ref": "app/tools/image-tools/tiff-to-jpg/page.jsx:148"},
+    "outputs": {"formats": ["JPG"], "ref": "app/tools/image-tools/tiff-to-jpg/tiffToJpg.worker.js:37-42; page.jsx:174"},
+    "controls": [
+      {"label": "Click or drop a TIFF file here / Choose a TIFF file", "ref": "app/tools/image-tools/tiff-to-jpg/page.jsx:147"},
+      {"label": "Quality: 90% (curseur 10-100)", "ref": "app/tools/image-tools/tiff-to-jpg/page.jsx:18,150"},
+      {"label": "Transparent areas become (couleur, blanc par défaut)", "ref": "app/tools/image-tools/tiff-to-jpg/page.jsx:19,151"},
+      {"label": "Convert to JPG / Converting… / Cancel", "ref": "app/tools/image-tools/tiff-to-jpg/page.jsx:152-159"},
+      {"label": "This TIFF has N pages: page X was converted. Page [n] — then convert again.", "ref": "app/tools/image-tools/tiff-to-jpg/page.jsx:167-171"},
+      {"label": "Download", "ref": "app/tools/image-tools/tiff-to-jpg/page.jsx:174"}
+    ],
+    "steps": ["choisir un .tif/.tiff", "régler « Quality » (90 %) et la couleur des zones transparentes", "« Convert to JPG » (« Cancel » possible)", "TIFF de plusieurs pages : choisir le numéro de page puis reconvertir", "aperçu, « Download »"],
+    "limits": [
+      {"what": "décodage", "value": "arrêt après 20 s, message dédié", "constant": "TIFF_DECODE_TIMEOUT_MS", "ref": "app/lib/tiffDecode.js:216-242; page.jsx:76-81"},
+      {"what": "encodage", "value": "max(20 s, 8 s par mégapixel) puis arrêt", "constant": null, "ref": "app/tools/image-tools/tiff-to-jpg/page.jsx:85-94"},
+      {"what": "taille de fichier / pixels", "value": "NON TROUVÉ (aucune constante ; cherché dans page.jsx, tiffToJpg.worker.js, app/lib/tiffDecode.js)", "constant": null, "ref": "app/tools/image-tools/tiff-to-jpg/tiffToJpg.worker.js:23-42"},
+      {"what": "nombre de fichiers", "value": "1", "constant": null, "ref": "app/tools/image-tools/tiff-to-jpg/page.jsx:148"}
+    ],
+    "processing": {"where": "browser", "detail": "Web Worker : en-tête vérifié (sinon message « not a TIFF »), décodage utif2 4.1.0 (UTIF.js de Photopea), profondeurs 2-32 bits ramenées à 8 bits, CMYK 8 bits converti, orientation appliquée, transparence aplatie sur la couleur choisie, JPEG par OffscreenCanvas (≤ 16,7 Mpx) ou MozJPEG WebAssembly. Rien n'est envoyé.", "ref": "app/tools/image-tools/tiff-to-jpg/tiffToJpg.worker.js:1-54; app/lib/tiffDecode.js:1-214; node_modules/utif2/package.json:3-4,13"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "Le worker suppose OffscreenCanvas pour ≤ 16,7 Mpx (tiffToJpg.worker.js:38-41) alors que le worker PNG prévoit son absence (tiffToPng.worker.js:37-38).",
+    "twin": "/tools/image-tools/tiff-to-png ; /tools/image-tools/image-converter (même décodeur)",
+    "notes": "Refus : TIFF planaire (« This TIFF uses planar color storage… »), CMYK non 8 bits (app/lib/tiffDecode.js:191-208). Profil couleur non appliqué, signalé : « This TIFF carries a colour profile (for example Adobe RGB), which is not applied here… » (page.jsx:173). Vignettes (NewSubfileType) ignorées comme pages (tiffDecode.js:181-183). Nom rendu <nom>.jpg (page.jsx:174)."
+  },
+  {
+    "path": "/tools/image-tools/tiff-to-png",
+    "task": "Convertit une page d'un TIFF (au choix pour un TIFF de plusieurs pages) en PNG.",
+    "inputs": {"accept": ".tiff,.tif", "formats": ["TIFF"], "ref": "app/tools/image-tools/tiff-to-png/page.jsx:146"},
+    "outputs": {"formats": ["PNG"], "ref": "app/tools/image-tools/tiff-to-png/tiffToPng.worker.js:35-42; page.jsx:170"},
+    "controls": [
+      {"label": "Click or drop a TIFF file here / Choose a TIFF file", "ref": "app/tools/image-tools/tiff-to-png/page.jsx:145"},
+      {"label": "Convert to PNG / Converting… / Cancel", "ref": "app/tools/image-tools/tiff-to-png/page.jsx:148-155"},
+      {"label": "This TIFF has N pages: page X was converted. Page [n] — then convert again.", "ref": "app/tools/image-tools/tiff-to-png/page.jsx:163-167"},
+      {"label": "Download", "ref": "app/tools/image-tools/tiff-to-png/page.jsx:170"}
+    ],
+    "steps": ["choisir un .tif/.tiff", "« Convert to PNG » (« Cancel » possible)", "TIFF de plusieurs pages : choisir la page puis reconvertir", "aperçu, « Download »"],
+    "limits": [
+      {"what": "décodage", "value": "arrêt après 20 s", "constant": "TIFF_DECODE_TIMEOUT_MS", "ref": "app/lib/tiffDecode.js:238"},
+      {"what": "encodage", "value": "max(20 s, 8 s par mégapixel)", "constant": null, "ref": "app/tools/image-tools/tiff-to-png/page.jsx:83-92"},
+      {"what": "taille de fichier / pixels", "value": "NON TROUVÉ (aucune constante ; cherché dans page.jsx, tiffToPng.worker.js, app/lib/tiffDecode.js)", "constant": null, "ref": "app/tools/image-tools/tiff-to-png/tiffToPng.worker.js:23-42"},
+      {"what": "nombre de fichiers", "value": "1", "constant": null, "ref": "app/tools/image-tools/tiff-to-png/page.jsx:146"}
+    ],
+    "processing": {"where": "browser", "detail": "Web Worker : utif2, profondeurs ramenées à 8 bits par étirement min-max, CMYK converti, orientation appliquée, transparence gardée ; PNG par OffscreenCanvas (≤ 16,7 Mpx et si présent) sinon écrivain PNG du site. Rien n'est envoyé.", "ref": "app/tools/image-tools/tiff-to-png/tiffToPng.worker.js; app/lib/tiffDecode.js:36-117,135-214"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "Sans OffscreenCanvas dans le worker (certains WebKit) : PNG écrit sans canvas (tiffToPng.worker.js:37-38).",
+    "twin": "/tools/image-tools/tiff-to-jpg ; /tools/image-tools/image-converter",
+    "notes": "Mêmes refus et même note de profil couleur que TIFF to JPG (page.jsx:169 ; app/lib/tiffDecode.js:191-208). Un TIFF 16 bits n'est pas recopié tel quel : réduit à 8 bits (tiffDecode.js:18-27)."
+  },
+  {
+    "path": "/tools/image-tools/webp-to-jpg",
+    "task": "Convertit une image WebP en JPG, avec qualité et couleur des zones transparentes au choix.",
+    "inputs": {"accept": ".webp", "formats": ["WebP"], "ref": "app/tools/image-tools/webp-to-jpg/page.jsx:49"},
+    "outputs": {"formats": ["JPG"], "ref": "app/tools/image-tools/webp-to-jpg/page.jsx:37"},
+    "controls": [
+      {"label": "Click or drop an image here / Choose an image", "ref": "app/tools/image-tools/webp-to-jpg/page.jsx:48"},
+      {"label": "JPG quality: 92 (curseur 10-100)", "ref": "app/tools/image-tools/webp-to-jpg/page.jsx:52-53"},
+      {"label": "Transparent areas become (couleur, blanc par défaut)", "ref": "app/tools/image-tools/webp-to-jpg/page.jsx:55-56"},
+      {"label": "Convert", "ref": "app/tools/image-tools/webp-to-jpg/page.jsx:59"},
+      {"label": "Download", "ref": "app/tools/image-tools/webp-to-jpg/page.jsx:62"}
+    ],
+    "steps": ["choisir un .webp", "régler « JPG quality » (92) et la couleur des zones transparentes", "« Convert »", "aperçu, « Download »"],
+    "limits": [
+      {"what": "pixels par image", "value": "268 Mpx", "constant": "RASTER_MAX_PIXELS", "ref": "app/lib/imageOutput.js:77-82"},
+      {"what": "nombre de fichiers", "value": "1", "constant": null, "ref": "app/tools/image-tools/webp-to-jpg/page.jsx:49"}
+    ],
+    "processing": {"where": "browser", "detail": "Comme PNG to JPG : canvas, ou MozJPEG WebAssembly sur iPhone > 16,7 Mpx. Rien n'est envoyé.", "ref": "app/lib/imageOutput.js:128-143"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "iPhone/iPad > 16,7 Mpx : MozJPEG WebAssembly.",
+    "twin": "/tools/image-tools/png-to-jpg ; /tools/image-tools/image-converter",
+    "notes": "WebP animé : « This WebP is animated: the JPG will contain its first frame only (JPG has no animation). For every frame, convert it to GIF. » (page.jsx:20-29,60)."
+  },
+  {
+    "path": "/tools/image-tools/webp-to-png",
+    "task": "Convertit une image WebP en PNG, transparence gardée.",
+    "inputs": {"accept": ".webp", "formats": ["WebP"], "ref": "app/tools/image-tools/webp-to-png/page.jsx:47"},
+    "outputs": {"formats": ["PNG"], "ref": "app/tools/image-tools/webp-to-png/page.jsx:35"},
+    "controls": [
+      {"label": "Click or drop an image here / Choose an image", "ref": "app/tools/image-tools/webp-to-png/page.jsx:46"},
+      {"label": "Convert", "ref": "app/tools/image-tools/webp-to-png/page.jsx:49"},
+      {"label": "Download", "ref": "app/tools/image-tools/webp-to-png/page.jsx:52"}
+    ],
+    "steps": ["choisir un .webp", "« Convert »", "aperçu", "« Download »"],
+    "limits": [
+      {"what": "pixels par image", "value": "268 Mpx", "constant": "RASTER_MAX_PIXELS", "ref": "app/lib/imageOutput.js:77-82"},
+      {"what": "nombre de fichiers", "value": "1", "constant": null, "ref": "app/tools/image-tools/webp-to-png/page.jsx:47"}
+    ],
+    "processing": {"where": "browser", "detail": "Décodage navigateur, PNG par canvas ; iPhone > 16,7 Mpx : bandes + écrivain PNG du site. Rien n'est envoyé.", "ref": "app/lib/imageOutput.js:129-143"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": "/tools/image-tools/image-converter",
+    "notes": "WebP animé : « This WebP is animated: the PNG will contain its first frame only (PNG has no animation). For every frame, convert it to GIF, or split it with an animation tool. » (page.jsx:18-26,51)."
+  },
+  {
+    "path": "/tools/image-tools/image-compressor",
+    "task": "Compresse jusqu'à 20 images en gardant leur format (JPG, PNG, WebP, AVIF, SVG), par qualité ou vers une taille cible.",
+    "inputs": {"accept": "image/jpeg,image/png,image/webp,image/avif,.avif,image/svg+xml,.svg,image/*", "formats": ["JPG", "PNG", "WebP", "AVIF", "SVG", "autres images lisibles par le navigateur (BMP, GIF fixe…) → JPG"], "ref": "app/tools/image-tools/image-compressor/page.jsx:271; compress.worker.js:274-300"},
+    "outputs": {"formats": ["JPG", "PNG", "WebP", "AVIF", "SVG"], "ref": "app/tools/image-tools/image-compressor/page.jsx:35; compress.worker.js:265-300"},
+    "controls": [
+      {"label": "Click or drop images here (up to 20) / Choose images (up to 20)", "ref": "app/tools/image-tools/image-compressor/page.jsx:270"},
+      {"label": "By quality / To a size of [100] KB", "ref": "app/tools/image-tools/image-compressor/page.jsx:105,276-278"},
+      {"label": "Quality: 78% (curseur 10-100 ; « (PNG: lossless) » à 100 ; « (used for PNG only) » en mode taille)", "ref": "app/tools/image-tools/image-compressor/page.jsx:98,280-282"},
+      {"label": "Lower = smaller file. 78% is our recommended balance.", "ref": "app/tools/image-tools/image-compressor/page.jsx:282"},
+      {"label": "Reduce to 48 MP then compress (téléphone) / Reduce to 140 MP then compress (ordinateur)", "ref": "app/tools/image-tools/image-compressor/page.jsx:284-293"},
+      {"label": "Compress image / Compress N images (pendant : Compressing…)", "ref": "app/tools/image-tools/image-compressor/page.jsx:295-297"},
+      {"label": "Download / Download all (N files, ZIP) (compressed-images.zip)", "ref": "app/tools/image-tools/image-compressor/page.jsx:299,320"}
+    ],
+    "steps": ["choisir jusqu'à 20 images (taille lue tout de suite ; une image trop grande est signalée avec le bouton « Reduce to … MP then compress »)", "« By quality » (78 %) ou « To a size of » N KB", "« Compress image » / « Compress N images »", "par image : avant → après (−x %) et note ; « Download » ou « Download all (N files, ZIP) »"],
+    "limits": [
+      {"what": "nombre d'images par lot", "value": "20 (les suivantes écartées avec message)", "constant": "MAX_FILES", "ref": "app/tools/image-tools/image-compressor/page.jsx:36,118-119"},
+      {"what": "pixels par image sur ordinateur", "value": "140 Mpx", "constant": "MAX_MP", "ref": "app/tools/image-tools/image-compressor/page.jsx:25,157-160"},
+      {"what": "pixels par image sur téléphone/iPad (isMobileDevice)", "value": "48 771 072 px (8064 × 6048, « 48 MP »)", "constant": "PHONE_MAX_MP / PHONE_MAX_PIXELS", "ref": "app/lib/reduceImage.js:19-24; page.jsx:161-164; app/lib/isMobileDevice.js:3-11"},
+      {"what": "réduction proposée", "value": "48 Mpx téléphone, 140 Mpx ordinateur", "constant": "PHONE_REDUCE_MP / MAX_MP", "ref": "app/tools/image-tools/image-compressor/page.jsx:129"},
+      {"what": "arrêt sans réponse", "value": "60 s + 1,5 s par mégapixel", "constant": null, "ref": "app/tools/image-tools/image-compressor/page.jsx:169-178"},
+      {"what": "taille cible", "value": "qualité cherchée entre 10 et 95 % (8 essais) ; JPG, WebP, AVIF seulement ; dimensions jamais réduites", "constant": null, "ref": "app/tools/image-tools/image-compressor/compress.worker.js:279-290"},
+      {"what": "taille de fichier", "value": "NON TROUVÉ (aucune constante en octets ; cherché dans page.jsx et compress.worker.js)", "constant": null, "ref": "app/tools/image-tools/image-compressor/page.jsx:114-127"}
+    ],
+    "processing": {"where": "browser", "detail": "Web Worker : JPEG → MozJPEG (trellis) ; PNG → plus petite palette (Wu, image-q) qui tient la cible de qualité puis OxiPNG, ou OxiPNG seul à 100 % / si aucune palette ne suffit ; WebP → libwebp ; AVIF → libavif ; SVG → SVGO 4.1 (deux réglages), le résultat n'est proposé que s'il est plus petit et dessine pareil (comparaison sur la page, tolérance 64 niveaux avec voisinage 3×3) ; autres images → JPG sur blanc. Encodeurs WebAssembly téléchargés depuis /wasm/. Rien n'est envoyé.", "ref": "app/tools/image-tools/image-compressor/compress.worker.js:1-308; page.jsx:37-95,187-203; app/lib/avifEncode.js:1-31"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "iPhone/iPad : note « a photo picked from Photo Library reaches this page converted by iOS (HEIC becomes JPEG)… Save to Files… Choose Files » (page.jsx:268; app/components/IosOriginalNote.jsx:8-21) ; plafond 48 Mpx appliqué aussi à l'iPad ; > 16,7 Mpx décodé par bandes. Sans OffscreenCanvas/createImageBitmap : « This browser cannot process images in the background (it needs Safari 16.4 or later…) » (compress.worker.js:73-75).",
+    "twin": "/tools/gif-tools/gif-compressor (GIF animés) ; /tools/pdf-tools/pdf-compress (PDF)",
+    "notes": "Jamais plus gros que l'original : « Already well compressed: at Q% the result would be X, not smaller than Y. Nothing to download — lower the quality to shrink it further. » (page.jsx:204-207,314) ; JPEG/WebP : qualité abaissée d'au plus 2 × 8 points, jamais sous 50, et dit (compress.worker.js:291-298). Refus : GIF animé, APNG, WebP animé (compress.worker.js:245-259). SVG : « still vector, checked to draw the same » / « This SVG is already optimised… » / « …could not be made smaller without changing how it looks… » (page.jsx:199-201,315-316). EXIF non recopié (réencodage). Mesures publiées : MozJPEG q78 209 692 o / 43,67 dB contre iLoveIMG 209 154 o / 43,72 dB (docs/audit/RAPPORT-ecarts-marche.md:116) ; Tux.svg SVGO 35 969 o contre iLoveIMG 35 973 o (docs/audit/RAPPORT-licence-et-ameliorations.md:78)."
+  }
+]

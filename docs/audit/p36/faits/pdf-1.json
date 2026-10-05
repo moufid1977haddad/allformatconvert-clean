@@ -1,0 +1,531 @@
+[
+  {
+    "path": "/tools/pdf-tools/word-to-pdf",
+    "task": "Convertit un document de traitement de texte (Word, OpenDocument, RTF, WordPerfect) en PDF sur nos serveurs ; .docx via ConvertAPI, les autres via LibreOffice (Gotenberg).",
+    "inputs": {"accept": ".docx,.doc,.odt,.ott,.rtf,.docm,.dotx,.dotm,.dot,.wpd", "formats": ["DOCX", "DOC", "ODT", "OTT", "RTF", "DOCM", "DOTX", "DOTM", "DOT", "WPD"], "ref": "app/tools/pdf-tools/word-to-pdf/page.jsx:97 ; app/api/convert-to-pdf/route.ts:36"},
+    "outputs": {"formats": ["PDF"], "ref": "app/tools/pdf-tools/word-to-pdf/page.jsx:72 ; app/api/convert-to-pdf/route.ts:250-254,435-447"},
+    "controls": [
+      {"label": "Click or drop a Word, OpenDocument or RTF file here (ordinateur) / Choose a Word, OpenDocument or RTF file (écran tactile)", "ref": "app/tools/pdf-tools/word-to-pdf/page.jsx:96 ; app/components/UploadPrompt.jsx:10-11"},
+      {"label": "Max {N} MB per file", "ref": "app/tools/pdf-tools/word-to-pdf/page.jsx:99"},
+      {"label": "Convert to PDF (pendant : Uploading N% / Converting... / Downloading N% / Preparing...)", "ref": "app/tools/pdf-tools/word-to-pdf/page.jsx:104 ; app/lib/officeUpload.js:29-35"},
+      {"label": "PDF ready", "ref": "app/tools/pdf-tools/word-to-pdf/page.jsx:111"},
+      {"label": "Download (+ Save / Share sur iOS)", "ref": "app/components/DownloadReady.jsx:25 ; app/components/FileDownload.jsx:8,20"}
+    ],
+    "steps": ["choisir ou déposer un fichier → (contrôle de taille immédiat) → bouton « Convert to PDF » → « PDF ready » → bouton « Download »"],
+    "limits": [
+      {"what": "taille max par fichier (ordinateur et téléphone, même valeur)", "value": "100 Mo si NEXT_PUBLIC_MEDIA_SERVICE_URL est défini au build, sinon 4 Mo", "constant": "MAX_OFFICE_STAGED_BYTES / MAX_PLATFORM_UPLOAD_BYTES", "ref": "lib/quota/limits.js:53,64 ; app/lib/officeUpload.js:16-17"},
+      {"what": ".docx côté ConvertAPI (jamais atteint, 100 Mo s'applique avant)", "value": "150 Mo", "constant": "MAX_CONVERTAPI_FILE_BYTES", "ref": "lib/quota/limits.js:41 ; app/api/convert-to-pdf/route.ts:201-204"},
+      {"what": "délai de conversion LibreOffice", "value": "30 s + 3 s par Mio, au plus 250 s", "constant": null, "ref": "app/api/convert-to-pdf/route.ts:19-22"},
+      {"what": "seuil du chemin par morceaux", "value": "> 4 Mio", "constant": "OFFICE_STAGED_THRESHOLD_BYTES", "ref": "lib/quota/limits.js:82 ; app/lib/officeUpload.js:46"}
+    ],
+    "processing": {"where": "mixed", "detail": ".docx : navigateur → notre fonction Vercel → ConvertAPI (StoreFile=false) ; si ConvertAPI est indisponible, repli annoncé sur notre LibreOffice (message « Made by our backup converter… »). Autres formats : notre Gotenberg/LibreOffice (Railway). ≤ 4 Mio : requête directe ; > 4 Mio : envoi par morceaux vers notre service media-processing, la source est supprimée à la fin du traitement, le PDF reste sur le service jusqu'au premier téléchargement complet ou jusqu'à MEDIA_JOB_TTL_SECONDS. Journal d'erreur : extension et tranche de taille seulement, jamais le nom ni le contenu.", "ref": "app/api/convert-to-pdf/route.ts:46-57,177-183,206-309,314-448 ; lib/providers/convertApi.js:168-170 ; app/tools/pdf-tools/word-to-pdf/page.jsx:68,113-117 ; services/media-processing/app/jobs.py:7-10 ; lib/reportError.js:72-85"},
+    "quota": ".docx : limite par réseau heure/jour (guard, seau partagé avec tous les outils payants) + plafond mensuel du site ; tout fichier > 4 Mio : limite par réseau heure/jour (ticket media, seau office_rate) ; autres formats ≤ 4 Mio : aucune",
+    "signup": "aucune inscription demandée (vérifié : aucune lecture de session dans convert-to-pdf/route.ts, guard.js, ipRateLimit.js, media/ticket/route.js)",
+    "watermark": "aucun filigrane ajouté (vérifié : la route renvoie le PDF du moteur tel quel, route.ts:251-254,447)",
+    "browsers": "iOS : bouton Save / Share en plus de Download (FileDownload.jsx:15-21)",
+    "twin": null,
+    "notes": "Polices Wingdings/Webdings détectées → avertissement « Heads up: this file uses … icon font… » (page.jsx:118-122, route.ts:331-334,444-446). Table des matières non recalculée (rapport RAPPORT-fidelite-office.md:48). .wps refusé (route.ts:31-35). Messages d'erreur réels : « This file is X MB but this tool accepts files up to N MB — Larger files are not supported. » (officeUpload.js:25) ; « Word to PDF is temporarily unavailable for .docx files… » (route.ts:193) ; « Unsupported file type. Allowed: … » (route.ts:159). Mesures citées valables : RAPPORT-fidelite-office.md (01/02.docx), FreeConvert + Online2PDF."
+  },
+  {
+    "path": "/tools/pdf-tools/excel-to-pdf",
+    "task": "Convertit un classeur (Excel, CSV, OpenDocument) en PDF avec LibreOffice (Gotenberg) sur notre serveur.",
+    "inputs": {"accept": ".xlsx,.xls,.csv,.ods,.ots,.xlsm,.xlsb,.xltx,.xltm,.xlt", "formats": ["XLSX", "XLS", "CSV", "ODS", "OTS", "XLSM", "XLSB", "XLTX", "XLTM", "XLT"], "ref": "app/tools/pdf-tools/excel-to-pdf/page.jsx:74 ; app/api/convert-to-pdf/route.ts:37"},
+    "outputs": {"formats": ["PDF"], "ref": "app/tools/pdf-tools/excel-to-pdf/page.jsx:49"},
+    "controls": [
+      {"label": "Click or drop an Excel file here / Choose an Excel file", "ref": "app/tools/pdf-tools/excel-to-pdf/page.jsx:73"},
+      {"label": "Max {N} MB per file", "ref": "app/tools/pdf-tools/excel-to-pdf/page.jsx:76"},
+      {"label": "Fit each sheet on one page (a wide sheet is not cut over several pages)", "ref": "app/tools/pdf-tools/excel-to-pdf/page.jsx:77"},
+      {"label": "Convert to PDF", "ref": "app/tools/pdf-tools/excel-to-pdf/page.jsx:82"},
+      {"label": "PDF ready / Download", "ref": "app/tools/pdf-tools/excel-to-pdf/page.jsx:89-90"}
+    ],
+    "steps": ["choisir un classeur → option « Fit each sheet on one page » → bouton « Convert to PDF » → « PDF ready » → « Download »"],
+    "limits": [
+      {"what": "taille max par fichier", "value": "60 Mo si NEXT_PUBLIC_MEDIA_SERVICE_URL est défini, sinon 4 Mo", "constant": "MAX_SPREADSHEET_STAGED_BYTES", "ref": "lib/quota/limits.js:80 ; app/tools/pdf-tools/excel-to-pdf/page.jsx:28,76 ; app/api/convert-to-pdf/route.ts:167-174"},
+      {"what": "raison du plafond", "value": "temps de conversion LibreOffice (240 s côté Gotenberg ; 69,8 Mo passe, 97,2 Mo coupé)", "constant": null, "ref": "lib/quota/limits.js:75-79"},
+      {"what": "« une page par feuille » sur feuille très longue", "value": "testé jusqu'à 30 000 lignes, aucune ligne perdue, texte très petit", "constant": null, "ref": "docs/audit/RAPPORT-p24-couverture-03-10.md:438"}
+    ],
+    "processing": {"where": "our-server", "detail": "Navigateur → fonction Vercel → notre Gotenberg/LibreOffice (Railway). .xlsx : polices sans nom renommées avant conversion. > 4 Mio : envoi par morceaux (service media), PDF conservé jusqu'au premier téléchargement complet ou au TTL.", "ref": "app/api/convert-to-pdf/route.ts:314-448,343-350 ; services/media-processing/app/jobs.py:7-10"},
+    "quota": "≤ 4 Mio : aucune ; > 4 Mio : limite par réseau heure/jour (ticket media, seau office_rate)",
+    "signup": "aucune inscription demandée (vérifié : convert-to-pdf/route.ts, media/ticket/route.js)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Macros non exécutées (non mesuré mais LibreOffice ne les lance pas : à dire « not run » seulement si FAQ actuelle conservée). Mesures citées valables : RAPPORT-fidelite-office.md lignes 50-51,64,100-101 (formules recalculées, échelle de couleurs, graphique différent, gras en Caladea D1). Option envoyée : singlePageSheets uniquement (route.ts:147-151)."
+  },
+  {
+    "path": "/tools/pdf-tools/ppt-to-pdf",
+    "task": "Convertit une présentation (PowerPoint, diaporama, modèle, OpenDocument) en PDF avec LibreOffice (Gotenberg) sur notre serveur.",
+    "inputs": {"accept": ".pptx,.ppt,.odp,.otp,.pptm,.ppsx,.ppsm,.pps,.potx,.potm,.pot", "formats": ["PPTX", "PPT", "ODP", "OTP", "PPTM", "PPSX", "PPSM", "PPS", "POTX", "POTM", "POT"], "ref": "app/tools/pdf-tools/ppt-to-pdf/page.jsx:71 ; app/api/convert-to-pdf/route.ts:38"},
+    "outputs": {"formats": ["PDF"], "ref": "app/tools/pdf-tools/ppt-to-pdf/page.jsx:46"},
+    "controls": [
+      {"label": "Click or drop a PowerPoint or OpenDocument presentation here / Choose a PowerPoint or OpenDocument presentation", "ref": "app/tools/pdf-tools/ppt-to-pdf/page.jsx:70"},
+      {"label": "Max {N} MB per file", "ref": "app/tools/pdf-tools/ppt-to-pdf/page.jsx:73"},
+      {"label": "Convert to PDF", "ref": "app/tools/pdf-tools/ppt-to-pdf/page.jsx:78"},
+      {"label": "PDF ready / Download", "ref": "app/tools/pdf-tools/ppt-to-pdf/page.jsx:85-86"}
+    ],
+    "steps": ["choisir une présentation → bouton « Convert to PDF » → « PDF ready » → « Download »"],
+    "limits": [
+      {"what": "taille max par fichier", "value": "100 Mo si NEXT_PUBLIC_MEDIA_SERVICE_URL est défini, sinon 4 Mo", "constant": "MAX_OFFICE_STAGED_BYTES", "ref": "lib/quota/limits.js:64 ; app/lib/officeUpload.js:16"},
+      {"what": "délai de conversion", "value": "30 s + 3 s par Mio, au plus 250 s", "constant": null, "ref": "app/api/convert-to-pdf/route.ts:19-22"}
+    ],
+    "processing": {"where": "our-server", "detail": "Navigateur → fonction Vercel → notre Gotenberg/LibreOffice (Railway). > 4 Mio : envoi par morceaux, PDF conservé jusqu'au premier téléchargement complet ou au TTL.", "ref": "app/api/convert-to-pdf/route.ts:314-448 ; services/media-processing/app/jobs.py:7-10"},
+    "quota": "≤ 4 Mio : aucune ; > 4 Mio : limite par réseau heure/jour (seau office_rate)",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Segoe UI remplacée par Selawik (services/gotenberg/fonts/selawik, RAPPORT-fidelite-corrections.md §3). Zone de texte « ne pas renvoyer » plus étroite que son texte : retour à la ligne et texte masqué (RAPPORT-fidelite-office.md:56-60). Diapositives masquées et notes : non testées (RAPPORT-p24-couverture-03-10.md:368). Mesure valable : 05/06.pptx contre FreeConvert et Online2PDF (RAPPORT-fidelite-office.md:52-53,102-103)."
+  },
+  {
+    "path": "/tools/pdf-tools/html-to-pdf",
+    "task": "Imprime en PDF une page web (par son adresse), un fichier HTML ou du code HTML collé, avec Chromium (Gotenberg) sur notre serveur, scripts désactivés.",
+    "inputs": {"accept": ".html,.htm", "formats": ["HTML", "HTM", "adresse http(s) publique", "code HTML collé"], "ref": "app/tools/pdf-tools/html-to-pdf/page.jsx:119-148"},
+    "outputs": {"formats": ["PDF"], "ref": "app/tools/pdf-tools/html-to-pdf/page.jsx:52,99"},
+    "controls": [
+      {"label": "From URL", "ref": "app/tools/pdf-tools/html-to-pdf/page.jsx:119"},
+      {"label": "Upload File", "ref": "app/tools/pdf-tools/html-to-pdf/page.jsx:120"},
+      {"label": "Paste Code", "ref": "app/tools/pdf-tools/html-to-pdf/page.jsx:121"},
+      {"label": "https://example.com/page (champ, aria-label « Web page address »)", "ref": "app/tools/pdf-tools/html-to-pdf/page.jsx:125-127"},
+      {"label": "Page size : As in the document / A4 / Letter / Legal / A3 / A5", "ref": "app/components/PageSetup.jsx:14-15 ; app/lib/pageSetup.js:4"},
+      {"label": "Orientation : Portrait / Landscape", "ref": "app/components/PageSetup.jsx:16-17"},
+      {"label": "Margins : As in the document / None / Small (10 mm) / Normal (20 mm) / Big (30 mm)", "ref": "app/components/PageSetup.jsx:18-19 ; app/lib/pageSetup.js:5"},
+      {"label": "Screen size : Large desktop (1920 px) / Desktop (1440 px) / Laptop / tablet landscape (1024 px) / Tablet (768 px) / Phone (390 px) / Paper width (no scaling)", "ref": "app/tools/pdf-tools/html-to-pdf/page.jsx:130-134"},
+      {"label": "One long page", "ref": "app/tools/pdf-tools/html-to-pdf/page.jsx:136"},
+      {"label": "Use the site's print style", "ref": "app/tools/pdf-tools/html-to-pdf/page.jsx:137"},
+      {"label": "Click or drop an HTML file here / Choose an HTML file", "ref": "app/tools/pdf-tools/html-to-pdf/page.jsx:144"},
+      {"label": "Paste your HTML code here... (zone de texte)", "ref": "app/tools/pdf-tools/html-to-pdf/page.jsx:148"},
+      {"label": "Max {N} MB of HTML", "ref": "app/tools/pdf-tools/html-to-pdf/page.jsx:151"},
+      {"label": "Convert to PDF (pendant, mode URL : Fetching the page and converting…)", "ref": "app/tools/pdf-tools/html-to-pdf/page.jsx:155"},
+      {"label": "PDF ready / Download", "ref": "app/tools/pdf-tools/html-to-pdf/page.jsx:162-164"}
+    ],
+    "steps": [
+      "mode « From URL » : taper l'adresse → Page size / Orientation / Margins (défaut A4, portrait, 10 mm) → Screen size (défaut Desktop 1440 px) → cases « One long page », « Use the site's print style » → « Convert to PDF » (ou Entrée) → « PDF ready » → « Download »",
+      "mode « Upload File » ou « Paste Code » : fichier ou code → Page size / Orientation / Margins (défaut « As in the document ») → « Convert to PDF » → « Download »"
+    ],
+    "limits": [
+      {"what": "HTML fichier/code", "value": "100 Mo si NEXT_PUBLIC_MEDIA_SERVICE_URL est défini, sinon 4 Mo", "constant": "MAX_HTML_STAGED_BYTES", "ref": "lib/quota/limits.js:68 ; app/api/convert-html-to-pdf/route.ts:18,50-55"},
+      {"what": "mode URL : conversions par visiteur", "value": "20 par heure, 60 par jour (UTC) ; 300 par heure pour tous les visiteurs ; IPv6 compté par /56", "constant": "URL_PDF_RATE_LIMIT_PER_HOUR / URL_PDF_RATE_LIMIT_PER_DAY / URL_PDF_GLOBAL_PER_HOUR", "ref": "lib/quota/config.js:40-44 ; lib/quota/urlPdfRateLimit.js:10-38"},
+      {"what": "mode URL : page récupérée", "value": "HTML 5 Mo, 3 Mo par ressource, 25 Mo au total, 150 ressources, page 15 s, budget 40 s", "constant": "LIMITS", "ref": "lib/urlFetch/snapshot.mjs:28"},
+      {"what": "mode URL : adresse", "value": "http/https, ports 80 et 443 seulement, pas d'identifiant dans l'adresse, adresses privées refusées, 5 redirections max, 2 048 caractères", "constant": "MAX_REDIRECTS / ALLOWED_PORTS", "ref": "lib/urlFetch/safeFetch.js:4,19-20,80 ; app/api/convert-url-to-pdf/route.ts:42"}
+    ],
+    "processing": {"where": "our-server", "detail": "Fichier/code : le HTML (règle @page ajoutée) va à notre Gotenberg/Chromium (Railway, Chromium isolé), JavaScript désactivé, PDF renvoyé ; > 4 Mio par morceaux (résultat conservé jusqu'au téléchargement ou TTL). URL : notre serveur récupère la page et ses ressources lui-même (pas Gotenberg), puis l'imprime ; scripts non exécutés ; avertissement si la page semble construite en JavaScript ou si des ressources manquent.", "ref": "app/api/convert-html-to-pdf/route.ts:57-77 ; app/api/convert-url-to-pdf/route.ts:51-76,135-136 ; app/tools/pdf-tools/html-to-pdf/page.jsx:47-51,101-103 ; services/gotenberg/Dockerfile:116-152"},
+    "quota": "URL : limite chiffrée 20/heure, 60/jour par visiteur + 300/heure pour tous ; fichier/code ≤ 4 Mio : aucune ; > 4 Mio : limite par réseau heure/jour (seau office_rate)",
+    "signup": "aucune inscription demandée (vérifié : convert-html-to-pdf, convert-url-to-pdf)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Mesure valable : page de test (grille, flexbox, dégradé, tableau, SVG, @media print, accents) = impression de Chrome, Georgia → Liberation Serif (RAPPORT-fidelite-office.md:182-189). En mode fichier/code, une image en chemin relatif ne se charge pas (seul index.html est envoyé, route.ts:60). Pas d'en-têtes/pieds de page. Nom du fichier : nom du fichier HTML, ou « document.pdf », ou l'hôte pour une URL (page.jsx:52,99)."
+  },
+  {
+    "path": "/tools/pdf-tools/epub-to-pdf",
+    "task": "Lit un livre EPUB dans le navigateur (chapitres, images, styles, couverture) et en fait un PDF imprimé par notre Chromium (Gotenberg).",
+    "inputs": {"accept": ".epub", "formats": ["EPUB (non protégé par DRM)"], "ref": "app/tools/pdf-tools/epub-to-pdf/page.jsx:239"},
+    "outputs": {"formats": ["PDF"], "ref": "app/tools/pdf-tools/epub-to-pdf/page.jsx:217"},
+    "controls": [
+      {"label": "Click or drop an EPUB file here / Choose an EPUB file", "ref": "app/tools/pdf-tools/epub-to-pdf/page.jsx:238"},
+      {"label": "Max {N} MB of prepared content per book — image-heavy books count for more than their file size.", "ref": "app/tools/pdf-tools/epub-to-pdf/page.jsx:241"},
+      {"label": "Convert to PDF (pendant : Parsing EPUB file... / Rendering PDF... / Uploading N% …)", "ref": "app/tools/pdf-tools/epub-to-pdf/page.jsx:165,207,246"},
+      {"label": "PDF ready / Download", "ref": "app/tools/pdf-tools/epub-to-pdf/page.jsx:254-255"}
+    ],
+    "steps": ["choisir un .epub → « Convert to PDF » (analyse locale puis envoi du HTML préparé) → « PDF ready » → « Download »"],
+    "limits": [
+      {"what": "taille du contenu préparé (HTML + images en ligne), pas du fichier EPUB", "value": "100 Mo si NEXT_PUBLIC_MEDIA_SERVICE_URL est défini, sinon 4 Mo", "constant": "MAX_HTML_STAGED_BYTES", "ref": "app/tools/pdf-tools/epub-to-pdf/page.jsx:211-213 ; lib/quota/limits.js:68"},
+      {"what": "durée max de l'analyse du livre", "value": "60 s", "constant": null, "ref": "app/tools/pdf-tools/epub-to-pdf/page.jsx:175-178"},
+      {"what": "taille du fichier EPUB lui-même", "value": "NON TROUVÉ (aucun contrôle ; cherché dans page.jsx handleFile/convert et officeUpload.js)", "constant": null, "ref": "app/tools/pdf-tools/epub-to-pdf/page.jsx:149-157"}
+    ],
+    "processing": {"where": "mixed", "detail": "Le fichier EPUB reste dans le navigateur (@lingo-reader/epub-parser + JSZip) ; seul le HTML préparé (texte, images, styles, couverture en data:) part vers notre Gotenberg/Chromium (Railway). > 4 Mio : envoi par morceaux, PDF conservé sur le service media jusqu'au téléchargement complet ou au TTL.", "ref": "app/tools/pdf-tools/epub-to-pdf/page.jsx:174-215 ; app/lib/ebookHtml.js:34-60 ; app/api/convert-html-to-pdf/route.ts:57-77"},
+    "quota": "HTML préparé ≤ 4 Mio : aucune ; > 4 Mio : limite par réseau heure/jour (seau office_rate)",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": "/tools/pdf-tools/mobi-to-pdf (même assemblage HTML et même rendu, app/lib/ebookHtml.js)",
+    "notes": "Messages réels : « This file is empty (0 bytes). Choose the EPUB again. », « This is not an EPUB book: an EPUB is a ZIP package… » (page.jsx:171-173), « This EPUB could not be read (its contents are damaged or not standard). » (177), « No readable chapters found in this file. » (182,196), « N chapter(s) of this book could not be read … and is/are missing from the PDF. » (251), « This book is X once prepared for conversion (images included), but this tool accepts up to N MB. » (212). Police imposée Georgia → remplacée par Liberation Serif sur le serveur. Couverture ajoutée sauf si la 1re page la montre déjà (204). Chaque chapitre commence sur une nouvelle page (126). Aucun test de fidélité EPUB dans docs/audit. Pas de détection DRM dans le code."
+  },
+  {
+    "path": "/tools/pdf-tools/mobi-to-pdf",
+    "task": "Lit un livre Kindle (.mobi, .azw, .azw3) dans le navigateur et en fait un PDF imprimé par notre Chromium (Gotenberg).",
+    "inputs": {"accept": ".mobi,.azw,.azw3", "formats": ["MOBI", "AZW", "AZW3 (non protégés par DRM)"], "ref": "app/tools/pdf-tools/mobi-to-pdf/page.jsx:250"},
+    "outputs": {"formats": ["PDF"], "ref": "app/tools/pdf-tools/mobi-to-pdf/page.jsx:228"},
+    "controls": [
+      {"label": "Click or drop a MOBI file here / Choose a MOBI file", "ref": "app/tools/pdf-tools/mobi-to-pdf/page.jsx:249"},
+      {"label": "Max {N} MB of prepared content per book — image-heavy books count for more than their file size.", "ref": "app/tools/pdf-tools/mobi-to-pdf/page.jsx:252"},
+      {"label": "Convert to PDF (pendant : Parsing MOBI file... / Rendering PDF... …)", "ref": "app/tools/pdf-tools/mobi-to-pdf/page.jsx:176,218,257"},
+      {"label": "PDF ready / Download", "ref": "app/tools/pdf-tools/mobi-to-pdf/page.jsx:265-266"}
+    ],
+    "steps": ["choisir un .mobi/.azw/.azw3 → « Convert to PDF » → « PDF ready » → « Download »"],
+    "limits": [
+      {"what": "taille du contenu préparé", "value": "100 Mo si NEXT_PUBLIC_MEDIA_SERVICE_URL est défini, sinon 4 Mo", "constant": "MAX_HTML_STAGED_BYTES", "ref": "app/tools/pdf-tools/mobi-to-pdf/page.jsx:222-224 ; lib/quota/limits.js:68"},
+      {"what": "taille du fichier MOBI lui-même", "value": "NON TROUVÉ (aucun contrôle ; cherché dans page.jsx et fileChecks.mobiFileProblem)", "constant": null, "ref": "app/lib/fileChecks.js:116-121"}
+    ],
+    "processing": {"where": "mixed", "detail": "Fichier décodé dans le navigateur (@lingo-reader/mobi-parser, MOBI6 ou KF8 : essai selon l'extension puis l'autre) ; seul le HTML préparé part vers notre Gotenberg/Chromium. > 4 Mio : envoi par morceaux, PDF conservé jusqu'au téléchargement ou TTL.", "ref": "app/tools/pdf-tools/mobi-to-pdf/page.jsx:90-97,184-226"},
+    "quota": "HTML préparé ≤ 4 Mio : aucune ; > 4 Mio : limite par réseau heure/jour (seau office_rate)",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": "/tools/pdf-tools/epub-to-pdf (même chaîne) ; même analyseur que /tools/converter-tools/mobi-to-epub (app/tools/converter-tools/mobi-to-epub/page.jsx:247-279)",
+    "notes": "Refus d'un fichier non MOBI : « This is not a MOBI / AZW ebook: it may be damaged, or another kind of file renamed. (Kindle books bought from Amazon are usually DRM-protected: no converter can read those.) » (fileChecks.js:120). Couverture : getCoverImage puis lecture directe de l'en-tête EXTH (page.jsx:23-84,207-212). Astuce actuelle conseillant de « remove the DRM » : à retirer (risque juridique). Aucun test MOBI→PDF dans docs/audit."
+  },
+  {
+    "path": "/tools/pdf-tools/markdown-to-pdf",
+    "task": "Transforme un fichier ou un texte Markdown en HTML dans le navigateur (marked + DOMPurify) puis l'imprime en PDF avec notre Chromium (Gotenberg).",
+    "inputs": {"accept": ".md,.markdown,.txt", "formats": ["MD", "MARKDOWN", "TXT", "texte collé"], "ref": "app/tools/pdf-tools/markdown-to-pdf/page.jsx:110,113"},
+    "outputs": {"formats": ["PDF"], "ref": "app/tools/pdf-tools/markdown-to-pdf/page.jsx:89"},
+    "controls": [
+      {"label": "Upload File", "ref": "app/tools/pdf-tools/markdown-to-pdf/page.jsx:104"},
+      {"label": "Paste Text", "ref": "app/tools/pdf-tools/markdown-to-pdf/page.jsx:105"},
+      {"label": "Click or drop a .md file here / Choose a .md file", "ref": "app/tools/pdf-tools/markdown-to-pdf/page.jsx:109"},
+      {"label": "Paste your Markdown here... (zone, aria-label « Markdown »)", "ref": "app/tools/pdf-tools/markdown-to-pdf/page.jsx:113"},
+      {"label": "Max {N} MB of Markdown", "ref": "app/tools/pdf-tools/markdown-to-pdf/page.jsx:115"},
+      {"label": "Page size / Orientation / Margins (mêmes options que HTML to PDF)", "ref": "app/tools/pdf-tools/markdown-to-pdf/page.jsx:116 ; app/lib/pageSetup.js:4-5"},
+      {"label": "Convert to PDF", "ref": "app/tools/pdf-tools/markdown-to-pdf/page.jsx:118"},
+      {"label": "PDF ready / Download (+ Save / Share sur iOS)", "ref": "app/tools/pdf-tools/markdown-to-pdf/page.jsx:123-124"}
+    ],
+    "steps": ["« Upload File » ou « Paste Text » → Page size / Orientation / Margins (défaut : A4, marges 18 × 16 mm de la feuille de style) → « Convert to PDF » → « PDF ready » → « Download »"],
+    "limits": [
+      {"what": "taille", "value": "100 Mo de HTML si NEXT_PUBLIC_MEDIA_SERVICE_URL est défini, sinon 4 Mo", "constant": "MAX_HTML_STAGED_BYTES", "ref": "app/tools/pdf-tools/markdown-to-pdf/page.jsx:85-86,117"}
+    ],
+    "processing": {"where": "mixed", "detail": "Markdown → HTML (CommonMark + GFM) et nettoyage DOMPurify dans le navigateur ; le HTML part vers notre Gotenberg/Chromium (JavaScript désactivé). > 4 Mio : par morceaux, résultat conservé jusqu'au téléchargement ou TTL.", "ref": "app/tools/pdf-tools/markdown-to-pdf/page.jsx:47-51,83-89"},
+    "quota": "≤ 4 Mio : aucune ; > 4 Mio : limite par réseau heure/jour (seau office_rate)",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "iOS : Save / Share (FileDownload)",
+    "twin": null,
+    "notes": "Défaut A4 via @page (page.jsx:20). Lignes de tableau non coupées (tr page-break-inside: avoid, page.jsx:37) ; blocs de code non coupés (31). Images : adresse web complète nécessaire (fichier local inaccessible au serveur). Lecture du fichier dans son encodage (decodedText). Fichier non texte refusé (textFileProblem, page.jsx:71-72)."
+  },
+  {
+    "path": "/tools/pdf-tools/text-to-pdf",
+    "task": "Met du texte brut (collé ou fichier .txt) dans un PDF avec retour à la ligne et pages automatiques, polices Noto, dans le navigateur ou, pour les emoji et certaines écritures, par notre Chromium.",
+    "inputs": {"accept": ".txt", "formats": ["TXT", "texte collé"], "ref": "app/tools/pdf-tools/text-to-pdf/page.jsx:79,83"},
+    "outputs": {"formats": ["PDF"], "ref": "app/tools/pdf-tools/text-to-pdf/page.jsx:112"},
+    "controls": [
+      {"label": "Paste Text", "ref": "app/tools/pdf-tools/text-to-pdf/page.jsx:75"},
+      {"label": "Upload File", "ref": "app/tools/pdf-tools/text-to-pdf/page.jsx:76"},
+      {"label": "Paste your text here...", "ref": "app/tools/pdf-tools/text-to-pdf/page.jsx:79"},
+      {"label": "Click or drop a .txt file here / Choose a .txt file", "ref": "app/tools/pdf-tools/text-to-pdf/page.jsx:82"},
+      {"label": "Page size : A4 / Letter / Legal / A5", "ref": "app/tools/pdf-tools/text-to-pdf/page.jsx:88-91"},
+      {"label": "Orientation : Portrait / Landscape", "ref": "app/tools/pdf-tools/text-to-pdf/page.jsx:92-95"},
+      {"label": "Text size : 9 / 10 / 11 / 12 / 14 / 16 / 18 / 24 pt", "ref": "app/tools/pdf-tools/text-to-pdf/page.jsx:96-99"},
+      {"label": "Margins : Narrow / Normal / Wide", "ref": "app/tools/pdf-tools/text-to-pdf/page.jsx:100-103"},
+      {"label": "Convert to PDF", "ref": "app/tools/pdf-tools/text-to-pdf/page.jsx:106"},
+      {"label": "Done! / Download", "ref": "app/tools/pdf-tools/text-to-pdf/page.jsx:111-112"},
+      {"label": "Avis : « Your text has emoji or a script drawn by our PDF service … it is sent there to make the PDF, then deleted. »", "ref": "app/tools/pdf-tools/text-to-pdf/page.jsx:86"}
+    ],
+    "steps": ["« Paste Text » ou « Upload File » → Page size / Orientation / Text size / Margins (défaut A4, portrait, 12 pt, Normal) → « Convert to PDF » → « Done! » → « Download »"],
+    "limits": [
+      {"what": "taille du texte (chemin navigateur)", "value": "NON TROUVÉ (aucun contrôle ; cherché dans page.jsx et app/lib/textPdf.js)", "constant": null, "ref": "app/tools/pdf-tools/text-to-pdf/page.jsx:41-58"},
+      {"what": "taille du HTML (chemin serveur)", "value": "100 Mo si NEXT_PUBLIC_MEDIA_SERVICE_URL est défini, sinon 4 Mo", "constant": "MAX_HTML_STAGED_BYTES", "ref": "app/tools/pdf-tools/text-to-pdf/page.jsx:51-52"}
+    ],
+    "processing": {"where": "mixed", "detail": "Navigateur (pdf-lib + fontkit, polices Noto servies par le site ; tranches CJK téléchargées depuis cdn.jsdelivr.net, sans le texte) pour Latin, grec, cyrillique, arabe, hébreu, devanagari, tamoul, thaï, CJK. Emoji, bengali et tout caractère hors des plages locales (ex. flèches, coches, symboles) : le texte en HTML part vers notre Gotenberg/Chromium.", "ref": "app/lib/textPdf.js:14-23,53-70,121 ; app/tools/pdf-tools/text-to-pdf/page.jsx:23,48-58 ; app/privacy/page.jsx:103"},
+    "quota": "chemin navigateur : aucune ; chemin serveur ≤ 4 Mio : aucune ; > 4 Mio : limite par réseau heure/jour (seau office_rate)",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "iOS : Save / Share (FileDownload)",
+    "twin": null,
+    "notes": "Écritures mesurées côté serveur : bengali, gurmukhi, gujarati, télougou, kannada, malayalam, odia, cingalais, birman, khmer, lao, éthiopien, géorgien, arménien, emoji en couleur (textPdf.js:46-52). Polices sous-ensemble (subset: true, textPdf.js:121). Pas de champ titre. Fichier non texte refusé (page.jsx:31-32)."
+  },
+  {
+    "path": "/tools/pdf-tools/image-to-pdf",
+    "task": "Assemble une ou plusieurs images (JPG, PNG, HEIC, WebP, GIF, BMP, TIFF, AVIF) en un PDF, dans le navigateur, avec pdf-lib.",
+    "inputs": {"accept": "image/*,.heic,.heif,.tif,.tiff", "formats": ["JPG", "PNG", "HEIC/HEIF", "WebP", "GIF (1re image)", "BMP", "TIFF (toutes les pages)", "AVIF"], "ref": "app/tools/pdf-tools/image-to-pdf/page.jsx:72 ; app/lib/pdfImages.js:61-92,85-86,265"},
+    "outputs": {"formats": ["PDF"], "ref": "app/tools/pdf-tools/image-to-pdf/page.jsx:51-53,95"},
+    "controls": [
+      {"label": "Click or drop images here (JPG, PNG, HEIC, WebP, GIF, BMP, TIFF, AVIF) / Choose images (…)", "ref": "app/tools/pdf-tools/image-to-pdf/page.jsx:71"},
+      {"label": "✕ (aria-label « Remove {nom} »)", "ref": "app/tools/pdf-tools/image-to-pdf/page.jsx:80"},
+      {"label": "Page size : Fit to each picture / A4 / US Letter / US Legal / A5", "ref": "app/components/ImagePageLayout.jsx:13-20"},
+      {"label": "Orientation : Automatic (follows each picture) / Portrait / Landscape (inactif en « Fit to each picture »)", "ref": "app/components/ImagePageLayout.jsx:22-28"},
+      {"label": "Margin : None / Small (10 mm) / Big (20 mm) (inactif en « Fit to each picture »)", "ref": "app/components/ImagePageLayout.jsx:29-35"},
+      {"label": "Reduce to 48 MP then convert to PDF (téléphone/tablette, image trop grande)", "ref": "app/components/SizePreflight.jsx:21-24"},
+      {"label": "Convert to PDF", "ref": "app/tools/pdf-tools/image-to-pdf/page.jsx:88"},
+      {"label": "Done! / Download", "ref": "app/tools/pdf-tools/image-to-pdf/page.jsx:93-95"}
+    ],
+    "steps": ["choisir des images (plusieurs envois s'ajoutent, ordre d'ajout) → retirer avec ✕ → Page size / Orientation / Margin → « Convert to PDF » (ou « Reduce to 48 MP then convert to PDF ») → « Done! » → « Download »"],
+    "limits": [
+      {"what": "JPEG (non décodé)", "value": "aucune borne ; mesuré jusqu'à 200 MP / 103 Mo sous WebKit", "constant": null, "ref": "app/lib/pdfImages.js:136-147 ; docs/audit/RAPPORT-p33-redact-ocr-05-10.md"},
+      {"what": "autres formats sur ordinateur", "value": "268 mégapixels par image", "constant": "MAX_DECODED_MP_COMPUTER", "ref": "app/lib/pdfImages.js:148"},
+      {"what": "autres formats sur téléphone ET tablette (isMobileDevice, iPad compris)", "value": "48 mégapixels par image (réduction proposée)", "constant": "PHONE_MAX_MP", "ref": "app/lib/reduceImage.js:19 ; app/lib/pdfImages.js:149 ; app/lib/isMobileDevice.js:5-9"},
+      {"what": "taille de page max", "value": "14 400 points par côté (image mise à l'échelle, pixels gardés)", "constant": "MAX_PAGE_POINTS", "ref": "app/lib/pdfImages.js:102-107"},
+      {"what": "nombre d'images", "value": "NON TROUVÉ (aucune borne ; cherché dans page.jsx et pdfImages.js) — mémoire de l'appareil", "constant": null, "ref": "app/tools/pdf-tools/image-to-pdf/page.jsx:44-50"}
+    ],
+    "processing": {"where": "browser", "detail": "Tout dans le navigateur : pdf-lib, exifr (orientation), heic2any pour HEIC là où le navigateur ne le décode pas, décodeur TIFF du site (worker). Rien n'est envoyé.", "ref": "app/tools/pdf-tools/image-to-pdf/page.jsx:42-53 ; app/lib/pdfImages.js:61-92"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau vers nos routes)",
+    "watermark": "aucun filigrane ajouté (vérifié : seules les images sont dessinées, pdfImages.js:104-131)",
+    "browsers": "iOS : décodage en bandes au-delà de 16,7 MP (pdfImages.js:25-26) ; HEIC décodé nativement par Safari ; tablettes traitées comme téléphones (48 MP)",
+    "twin": "/tools/pdf-tools/jpg-to-pdf (même addImagePage, mêmes formats, mêmes options ; différence : ici les sélections s'ajoutent et ✕ retire une image)",
+    "notes": "Une image illisible est nommée dans l'erreur, jamais sautée (page.jsx:57-58 ; pdfImages.js:220,273). En « Fit to each picture » : 1 pixel = 1 point. Avec A4/Letter/Legal/A5 : image centrée, réduite pour tenir, jamais agrandie ni rognée (pdfImages.js:110-131). Note après réduction : « {nom}: reduced from W × H to w × h pixels » (pdfImages.js:238). Nom du fichier : « {1re image}-and-N-more.pdf » (page.jsx:95)."
+  },
+  {
+    "path": "/tools/pdf-tools/jpg-to-pdf",
+    "task": "Assemble une sélection d'images (JPG et autres) en un PDF, dans le navigateur, avec pdf-lib.",
+    "inputs": {"accept": "image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.bmp,.avif,.heic,.heif,.tif,.tiff", "formats": ["JPG/JPEG/JFIF", "PNG", "WebP", "GIF (1re image)", "BMP", "AVIF", "HEIC/HEIF", "TIFF"], "ref": "app/tools/pdf-tools/jpg-to-pdf/page.jsx:61"},
+    "outputs": {"formats": ["PDF"], "ref": "app/tools/pdf-tools/jpg-to-pdf/page.jsx:41-43,74"},
+    "controls": [
+      {"label": "Back to PDF Tools (lien)", "ref": "app/tools/pdf-tools/jpg-to-pdf/page.jsx:53"},
+      {"label": "Click or drop images here (JPG, PNG, HEIC, WebP, GIF, BMP, TIFF, AVIF) / Choose images (…) ; puis « N image(s) selected »", "ref": "app/tools/pdf-tools/jpg-to-pdf/page.jsx:59"},
+      {"label": "Page size / Orientation / Margin (mêmes options qu'Image to PDF)", "ref": "app/tools/pdf-tools/jpg-to-pdf/page.jsx:67 ; app/components/ImagePageLayout.jsx:13-35"},
+      {"label": "Reduce to 48 MP then convert to PDF", "ref": "app/components/SizePreflight.jsx:23"},
+      {"label": "Convert to PDF", "ref": "app/tools/pdf-tools/jpg-to-pdf/page.jsx:70"},
+      {"label": "Download", "ref": "app/tools/pdf-tools/jpg-to-pdf/page.jsx:74"}
+    ],
+    "steps": ["choisir des images en une fois (une nouvelle sélection remplace la précédente) → Page size / Orientation / Margin → « Convert to PDF » → « Download »"],
+    "limits": [
+      {"what": "JPEG", "value": "aucune borne (non décodé)", "constant": null, "ref": "app/lib/pdfImages.js:136-147"},
+      {"what": "autres formats, ordinateur", "value": "268 MP", "constant": "MAX_DECODED_MP_COMPUTER", "ref": "app/lib/pdfImages.js:148"},
+      {"what": "autres formats, téléphone et tablette", "value": "48 MP (réduction proposée)", "constant": "PHONE_MAX_MP", "ref": "app/lib/reduceImage.js:19 ; app/lib/isMobileDevice.js:5-9"},
+      {"what": "taille de page max", "value": "14 400 points par côté", "constant": "MAX_PAGE_POINTS", "ref": "app/lib/pdfImages.js:102"}
+    ],
+    "processing": {"where": "browser", "detail": "Comme image-to-pdf : tout dans le navigateur, rien n'est envoyé.", "ref": "app/tools/pdf-tools/jpg-to-pdf/page.jsx:33-44"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "comme image-to-pdf",
+    "twin": "/tools/pdf-tools/image-to-pdf",
+    "notes": "Sélection remplacée à chaque choix (page.jsx:22) ; pas de bouton de retrait ni de réordonnancement. Message d'erreur : « Conversion failed: {nom}: this image could not be read (…). » (page.jsx:45). FAQ 3 et 4 identiques à image-to-pdf : à différencier."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-to-word",
+    "task": "Convertit un PDF en document Word modifiable (.docx ou .rtf par ConvertAPI ; .doc fait ensuite par notre LibreOffice).",
+    "inputs": {"accept": ".pdf", "formats": ["PDF"], "ref": "app/tools/pdf-tools/pdf-to-word/page.jsx:75 ; app/api/pdf-to-word/route.ts:126-129"},
+    "outputs": {"formats": ["DOCX", "DOC", "RTF"], "ref": "app/tools/pdf-tools/pdf-to-word/page.jsx:79 ; app/api/pdf-to-word/route.ts:158-160,197-229"},
+    "controls": [
+      {"label": "Click or drop a PDF here / Choose a PDF", "ref": "app/tools/pdf-tools/pdf-to-word/page.jsx:74"},
+      {"label": "Max {N} MB per file", "ref": "app/tools/pdf-tools/pdf-to-word/page.jsx:77"},
+      {"label": "Word (.docx) / Word 97-2003 (.doc) / Rich Text (.rtf) (boutons radio, groupe « Output format »)", "ref": "app/tools/pdf-tools/pdf-to-word/page.jsx:78-82"},
+      {"label": "Convert to .docx / Convert to .doc / Convert to .rtf", "ref": "app/tools/pdf-tools/pdf-to-word/page.jsx:88"},
+      {"label": "Word document ready / Download", "ref": "app/tools/pdf-tools/pdf-to-word/page.jsx:95-98"}
+    ],
+    "steps": ["choisir un PDF → format (.docx par défaut) → « Convert to .docx » → « Word document ready » → « Download »"],
+    "limits": [
+      {"what": "taille max par fichier", "value": "99 Mo si NEXT_PUBLIC_MEDIA_SERVICE_URL est défini, sinon 4 Mo", "constant": "MAX_PDF_TO_WORD_STAGED_BYTES", "ref": "lib/quota/limits.js:74 ; app/tools/pdf-tools/pdf-to-word/page.jsx:31,77 ; app/api/pdf-to-word/route.ts:138-141"},
+      {"what": "délai ConvertAPI", "value": "30 s + 3 s par Mio, au plus 240 s", "constant": "CONVERTAPI_BASE_TIMEOUT_MS", "ref": "lib/providers/convertApi.js:34-38"}
+    ],
+    "processing": {"where": "third-party", "detail": "Navigateur → notre fonction Vercel → ConvertAPI (Lituanie, StoreFile=false). Pour .doc : le .docx passe ensuite par notre pdf-tools (LibreOffice, Railway) ; si cette étape échoue, le .docx payé est remis avec un message. > 4 Mio : envoi par morceaux (résultat conservé sur le service media jusqu'au téléchargement ou TTL). Outil coupé si PDF_TO_WORD_CONVERTAPI_ENABLED ≠ true : « PDF to Word is temporarily unavailable. Please try again later. »", "ref": "app/api/pdf-to-word/route.ts:78-87,143-229 ; lib/providers/docFromDocx.js:3,28-35 ; app/privacy/page.jsx:48,58"},
+    "quota": "limite par réseau heure/jour (guard, seau commun aux outils payants) + plafond mensuel du site ; > 4 Mio : aussi la limite du ticket media (office_rate)",
+    "signup": "aucune inscription demandée (vérifié : pdf-to-word/route.ts, guard.js)",
+    "watermark": "aucun filigrane ajouté par le site (vérifié : route renvoie l'octet ConvertAPI tel quel, route.ts:227-231)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Messages : « .doc is made from the .docx by LibreOffice. Text placed in fixed-size text boxes can be cut… » (page.jsx:83) ; « The .doc could not be made from this document, so here is the Word (.docx) version… » (96) ; « This document has N text box(es)… » (97). PDF scanné : aucun contrôle ni mesure (l'affirmation « not supported » est INVÉRIFIABLE). Le site a PDF OCR (/tools/pdf-tools/pdf-ocr). Mesure valable : aller-retour de fidelite-01/02.pdf (RAPPORT-fidelite-office.md:167-176) ; .doc rouvert dans Word 16 et LibreOffice (RAPPORT-p26-railway-03-10.md:153-187)."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-to-excel",
+    "task": "Convertit les tableaux d'un PDF en classeur .xlsx (ConvertAPI) ; sans tableau, le texte est mis ligne par ligne dans le navigateur.",
+    "inputs": {"accept": ".pdf,application/pdf", "formats": ["PDF"], "ref": "app/tools/pdf-tools/pdf-to-excel/page.jsx:74 ; lib/pdfToOfficeRoute.ts:40"},
+    "outputs": {"formats": ["XLSX"], "ref": "app/tools/pdf-tools/pdf-to-excel/page.jsx:46,54"},
+    "controls": [
+      {"label": "Click or drop a PDF here / Choose a PDF", "ref": "app/tools/pdf-tools/pdf-to-excel/page.jsx:73"},
+      {"label": "Max {N} MB per file", "ref": "app/tools/pdf-tools/pdf-to-excel/page.jsx:76"},
+      {"label": "Convert to .xlsx", "ref": "app/tools/pdf-tools/pdf-to-excel/page.jsx:79"},
+      {"label": "Excel file ready / Download", "ref": "app/tools/pdf-tools/pdf-to-excel/page.jsx:84-86"}
+    ],
+    "steps": ["choisir un PDF → « Convert to .xlsx » → « Excel file ready » (+ note si aucun tableau) → « Download »"],
+    "limits": [
+      {"what": "taille max par fichier", "value": "99 Mo si NEXT_PUBLIC_MEDIA_SERVICE_URL est défini, sinon 4 Mo (l'instantané affiche 4 Mo)", "constant": "MAX_PDF_TO_WORD_STAGED_BYTES", "ref": "app/tools/pdf-tools/pdf-to-excel/page.jsx:5,27,76 ; lib/pdfToOfficeRoute.ts:42-44"}
+    ],
+    "processing": {"where": "mixed", "detail": "Navigateur → fonction Vercel → ConvertAPI (pdf/to/xlsx, StoreFile=false). Si ConvertAPI ne trouve aucun tableau (codes 5001/5004), la feuille est construite dans le navigateur avec pdf.js : une feuille par page, une ligne par ligne de texte, nouvelle cellule sur un grand écart. > 4 Mio : envoi par morceaux.", "ref": "lib/pdfToOfficeRoute.ts:40-100 ; lib/pdfNoTables.js ; app/lib/pdfTextToSheet.js:1-46 ; app/tools/pdf-tools/pdf-to-excel/page.jsx:49-58"},
+    "quota": "limite par réseau heure/jour (guard) + plafond mensuel du site ; > 4 Mio : aussi office_rate",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Messages : « No table was found in this PDF, so its text was placed in the sheet line by line (N rows, one sheet per page). » (page.jsx:55) ; « This PDF has no text to put in a sheet — it looks like a scanned image. Run it through PDF OCR first… » (53) ; « This PDF could not be read. It may be damaged or password-protected. » (57). Mesure valable : identique à iLovePDF sur 2 PDF (RAPPORT-ecarts-marche.md:20 §5). Feuilles nommées « Page N » (pdfTextToSheet.js:41)."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-to-ppt",
+    "task": "Convertit chaque page d'un PDF en diapositive PowerPoint modifiable (.pptx) via ConvertAPI.",
+    "inputs": {"accept": ".pdf,application/pdf", "formats": ["PDF"], "ref": "app/tools/pdf-tools/pdf-to-ppt/page.jsx:58"},
+    "outputs": {"formats": ["PPTX"], "ref": "app/tools/pdf-tools/pdf-to-ppt/page.jsx:41"},
+    "controls": [
+      {"label": "Click or drop a PDF here / Choose a PDF", "ref": "app/tools/pdf-tools/pdf-to-ppt/page.jsx:57"},
+      {"label": "Max {N} MB per file", "ref": "app/tools/pdf-tools/pdf-to-ppt/page.jsx:60"},
+      {"label": "Convert to .pptx", "ref": "app/tools/pdf-tools/pdf-to-ppt/page.jsx:63"},
+      {"label": "PowerPoint file ready / Download", "ref": "app/tools/pdf-tools/pdf-to-ppt/page.jsx:68-69"}
+    ],
+    "steps": ["choisir un PDF → « Convert to .pptx » → « PowerPoint file ready » → « Download »"],
+    "limits": [
+      {"what": "taille max par fichier", "value": "99 Mo si NEXT_PUBLIC_MEDIA_SERVICE_URL est défini, sinon 4 Mo", "constant": "MAX_PDF_TO_WORD_STAGED_BYTES", "ref": "app/tools/pdf-tools/pdf-to-ppt/page.jsx:32,60 ; lib/pdfToOfficeRoute.ts:42-44"}
+    ],
+    "processing": {"where": "third-party", "detail": "Navigateur → fonction Vercel → ConvertAPI (pdf/to/pptx, StoreFile=false). > 4 Mio : envoi par morceaux (résultat conservé jusqu'au téléchargement ou TTL).", "ref": "app/api/pdf-to-ppt/route.ts ; lib/pdfToOfficeRoute.ts:40-100 ; lib/providers/convertApi.js:30"},
+    "quota": "limite par réseau heure/jour (guard) + plafond mensuel du site ; > 4 Mio : aussi office_rate",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Mesure valable : identique à iLovePDF (RAPPORT-ecarts-marche.md:20). Service occupé : message convertApiBusyMessage(« PDF to PowerPoint ») (pdfToOfficeRoute.ts:95) ; indisponible : convertApiUnavailableMessage (96). Rien n'est dit aujourd'hui sur PDF scanné ou protégé."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-to-html",
+    "task": "Extrait le texte de chaque page d'un PDF (pdf.js) et l'écrit dans une page HTML simple, dans le navigateur.",
+    "inputs": {"accept": ".pdf", "formats": ["PDF"], "ref": "app/tools/pdf-tools/pdf-to-html/page.jsx:89"},
+    "outputs": {"formats": ["HTML"], "ref": "app/tools/pdf-tools/pdf-to-html/page.jsx:70-72,98"},
+    "controls": [
+      {"label": "Click or drop a PDF here / Choose a PDF", "ref": "app/tools/pdf-tools/pdf-to-html/page.jsx:88"},
+      {"label": "Convert to HTML", "ref": "app/tools/pdf-tools/pdf-to-html/page.jsx:92"},
+      {"label": "Done! / Download", "ref": "app/tools/pdf-tools/pdf-to-html/page.jsx:97-98"}
+    ],
+    "steps": ["choisir un PDF → « Convert to HTML » → « Done! » → « Download » (fichier .html)"],
+    "limits": [
+      {"what": "taille du PDF", "value": "NON TROUVÉ (aucun contrôle ; cherché dans page.jsx et app/lib/pdfjs)", "constant": null, "ref": "app/tools/pdf-tools/pdf-to-html/page.jsx:44-79"}
+    ],
+    "processing": {"where": "browser", "detail": "pdf.js dans le navigateur ; texte échappé, lignes et paragraphes gardés ; rien n'est envoyé.", "ref": "app/tools/pdf-tools/pdf-to-html/page.jsx:10-35,58-72"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": null,
+    "notes": "Pages sans texte listées : « No text found on page(s) N (a scan or an image has no text layer: run PDF OCR first). » (page.jsx:73). Ni images, ni polices, ni couleurs, ni tableaux reconstruits. PDF protégé : message brut « Error: … » de pdf.js (75-76), pas de message dédié."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-to-image",
+    "task": "Transforme les pages d'un PDF en images (PNG, JPG, WebP, TIFF, BMP) ou extrait les images qu'il contient, dans le navigateur (repli serveur sur iPhone/iPad).",
+    "inputs": {"accept": ".pdf,application/pdf", "formats": ["PDF"], "ref": "app/components/PdfToImages.jsx:212"},
+    "outputs": {"formats": ["PNG", "JPG", "WebP", "TIFF", "BMP", "ZIP (Download all)"], "ref": "app/tools/pdf-tools/pdf-to-image/page.jsx:15 ; app/components/PdfToImages.jsx:24-28,251 ; app/components/FileDownload.jsx:264"},
+    "controls": [
+      {"label": "Back to PDF Tools", "ref": "app/tools/pdf-tools/pdf-to-image/page.jsx:12"},
+      {"label": "Click or drop a PDF here / Choose a PDF", "ref": "app/components/PdfToImages.jsx:211"},
+      {"label": "Mode : Pages to images (every page as a picture) / Extract images (the pictures inside the PDF)", "ref": "app/components/PdfToImages.jsx:215-219"},
+      {"label": "Format : PNG (lossless) / JPG / WebP / TIFF / BMP (défaut PNG)", "ref": "app/components/PdfToImages.jsx:24-28,221-225"},
+      {"label": "Resolution : Normal — 150 dpi (recommended) / High — 300 dpi (print) / Screen — 72 dpi (smallest) (mode pages seulement)", "ref": "app/components/PdfToImages.jsx:30,226-231"},
+      {"label": "Quality : High (92) / Medium (80) — smaller files (JPG et WebP seulement)", "ref": "app/components/PdfToImages.jsx:87,233-239"},
+      {"label": "Pages (leave empty for all, or e.g. 1-3, 5) — placeholder « All pages »", "ref": "app/components/PdfToImages.jsx:241-243"},
+      {"label": "Convert pages / Extract images", "ref": "app/components/PdfToImages.jsx:246"},
+      {"label": "Download (par image) / Download all (N files, ZIP)", "ref": "app/components/FileDownload.jsx:264 ; app/components/PdfToImages.jsx:251-257"}
+    ],
+    "steps": ["choisir un PDF → Mode → Format → Resolution → (Quality) → Pages → « Convert pages » ou « Extract images » → « Download » par image ou « Download all (N files, ZIP) »"],
+    "limits": [
+      {"what": "temps par page (ordinateur, Android)", "value": "60 s, puis message", "constant": "PAGE_TIME_LIMIT", "ref": "app/components/PdfToImages.jsx:36-37"},
+      {"what": "iPhone/iPad : délai avant repli serveur", "value": "20 s par page", "constant": "LOCAL_PAGE_LIMIT_MS", "ref": "app/lib/serverPageRender.js:29-30"},
+      {"what": "iPhone/iPad : pages dessinées par notre service", "value": "300 par heure et 1 000 par jour par visiteur ; 3 000 par heure pour tous", "constant": "PDF_RENDER_PAGES_PER_HOUR / PDF_RENDER_PAGES_PER_DAY / PDF_RENDER_GLOBAL_PER_HOUR", "ref": "lib/quota/config.js:48-51 ; app/api/pdf-render/route.ts:14"},
+      {"what": "iPhone/iPad : taille du PDF pour le repli serveur", "value": "envoi direct jusqu'à 4 Mio − 64 Kio, par morceaux jusqu'à 44 Mo", "constant": "DIRECT_MAX_BYTES / STAGED_MAX_BYTES", "ref": "app/lib/serverPageRender.js:17-19"},
+      {"what": "surface de dessin iPhone/iPad", "value": "16,7 MP (dpi réduit et dit si la page est trop grande)", "constant": null, "ref": "app/components/PdfToImages.jsx:118-119,190"},
+      {"what": "taille du PDF sur ordinateur", "value": "NON TROUVÉ (aucun contrôle ; cherché dans PdfToImages.jsx)", "constant": null, "ref": "app/components/PdfToImages.jsx:95-108"},
+      {"what": "images extraites ignorées", "value": "moins de 16 px de côté", "constant": null, "ref": "app/components/PdfToImages.jsx:171"}
+    ],
+    "processing": {"where": "mixed", "detail": "Ordinateur et Android : tout dans le navigateur (pdf.js). iPhone/iPad seulement, mode « Pages to images » : une page non dessinée en 20 s est dessinée par notre pdf-tools (pdftoppm, Railway) via /api/pdf-render ; le PDF y est envoyé puis supprimé (close() efface la copie par morceaux). « Extract images » reste toujours dans le navigateur.", "ref": "app/lib/serverPageRender.js:1-30 ; app/components/PdfToImages.jsx:95,124-155,248"},
+    "quota": "ordinateur : aucune ; iPhone/iPad (repli) : limite chiffrée 300 pages/heure, 1 000/jour par visiteur, 3 000/heure pour tous",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "iPhone/iPad : repli serveur après 20 s, surface 16,7 MP ; TIFF : pas d'aperçu à l'écran (PdfToImages.jsx:254)",
+    "twin": "/tools/pdf-tools/pdf-to-jpg (même composant PdfToImages, format JPG seul)",
+    "notes": "Message mot de passe : « This PDF is protected by a password. Remove the password with our PDF Unlock tool (you need to know it), then convert the unlocked file. » (PdfToImages.jsx:105). Aucune image trouvée : « No pictures were found in these pages… » (188). Avis iPhone : « On iPhone and iPad, a page your device cannot draw within 20 seconds is drawn by our own PDF service instead: your PDF is sent there, then deleted. » (248). WebP et BMP refaits dans le navigateur depuis le PNG du service (SERVER_FORMAT, 45,152)."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-to-jpg",
+    "task": "Transforme les pages d'un PDF en JPG ou extrait ses images en JPG, dans le navigateur (repli serveur sur iPhone/iPad).",
+    "inputs": {"accept": ".pdf,application/pdf", "formats": ["PDF"], "ref": "app/components/PdfToImages.jsx:212"},
+    "outputs": {"formats": ["JPG", "ZIP (Download all)"], "ref": "app/tools/pdf-tools/pdf-to-jpg/page.jsx:15"},
+    "controls": [
+      {"label": "Back to PDF Tools", "ref": "app/tools/pdf-tools/pdf-to-jpg/page.jsx:12"},
+      {"label": "Mode : Pages to images (every page as a picture) / Extract images (the pictures inside the PDF)", "ref": "app/components/PdfToImages.jsx:215-219"},
+      {"label": "Format : JPG (une seule option)", "ref": "app/tools/pdf-tools/pdf-to-jpg/page.jsx:15 ; app/components/PdfToImages.jsx:221-225"},
+      {"label": "Resolution : Normal — 150 dpi (recommended) / High — 300 dpi (print) / Screen — 72 dpi (smallest)", "ref": "app/components/PdfToImages.jsx:30"},
+      {"label": "Quality : High (92) / Medium (80) — smaller files", "ref": "app/components/PdfToImages.jsx:233-239"},
+      {"label": "Pages (leave empty for all, or e.g. 1-3, 5)", "ref": "app/components/PdfToImages.jsx:241"},
+      {"label": "Convert pages / Extract images", "ref": "app/components/PdfToImages.jsx:246"},
+      {"label": "Download / Download all (N files, ZIP)", "ref": "app/components/FileDownload.jsx:264"}
+    ],
+    "steps": ["choisir un PDF → Mode → Resolution → Quality → Pages → « Convert pages » ou « Extract images » → « Download » ou « Download all (N files, ZIP) »"],
+    "limits": [
+      {"what": "identiques à pdf-to-image", "value": "60 s par page ; iPhone/iPad : 20 s puis serveur, 300 pages/heure, 1 000/jour, 3 000/heure pour tous, PDF ≤ 44 Mo pour le repli", "constant": "PAGE_TIME_LIMIT / LOCAL_PAGE_LIMIT_MS / PDF_RENDER_*", "ref": "app/components/PdfToImages.jsx:36 ; app/lib/serverPageRender.js:17-30 ; lib/quota/config.js:48-51"}
+    ],
+    "processing": {"where": "mixed", "detail": "Comme pdf-to-image.", "ref": "app/lib/serverPageRender.js:1-30"},
+    "quota": "ordinateur : aucune ; iPhone/iPad (repli) : 300 pages/heure, 1 000/jour par visiteur, 3 000/heure pour tous",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": "comme pdf-to-image",
+    "twin": "/tools/pdf-tools/pdf-to-image",
+    "notes": "Le menu Format n'a qu'une option (JPG) : l'étape « Pick the format » est fausse ici. Nom des fichiers : {nom}-page-N.jpg ou {nom}-page-N-image-K.jpg (PdfToImages.jsx:155,183)."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-to-pdfa",
+    "task": "Convertit un PDF en PDF/A (1b, 2b, 3b, 2u, 3u, 2a, 3a) sur notre service pdf-tools et ne le rend que si veraPDF le valide et si son texte est identique.",
+    "inputs": {"accept": ".pdf", "formats": ["PDF"], "ref": "app/tools/pdf-tools/pdf-to-pdfa/page.jsx:162"},
+    "outputs": {"formats": ["PDF/A-1b", "PDF/A-2b", "PDF/A-3b", "PDF/A-2u", "PDF/A-3u", "PDF/A-2a", "PDF/A-3a"], "ref": "app/tools/pdf-tools/pdf-to-pdfa/page.jsx:16-24,147"},
+    "controls": [
+      {"label": "Files up to {N} MB. Your file is uploaded to our conversion service for processing — see below for what that means.", "ref": "app/tools/pdf-tools/pdf-to-pdfa/page.jsx:155-157"},
+      {"label": "Click or drop a PDF here / Choose a PDF", "ref": "app/tools/pdf-tools/pdf-to-pdfa/page.jsx:161"},
+      {"label": "PDF/A conformance: PDF/A-1b (basic, oldest) / PDF/A-2b (basic) / PDF/A-3b (basic, attachments allowed) / PDF/A-2u (basic + all text in Unicode) / PDF/A-3u (…) / PDF/A-2a (accessible: needs a tagged PDF) / PDF/A-3a (…) (défaut 2b)", "ref": "app/tools/pdf-tools/pdf-to-pdfa/page.jsx:16-24,45,166-169"},
+      {"label": "If PDF/A-{niveau} can't be reached, give me the closest lower level (…) — you'll be told which (coché par défaut, niveaux u et a)", "ref": "app/tools/pdf-tools/pdf-to-pdfa/page.jsx:47,181-186"},
+      {"label": "Convert to PDF/A-{niveau}", "ref": "app/tools/pdf-tools/pdf-to-pdfa/page.jsx:197"},
+      {"label": "Uploading… (barre) / Cancel", "ref": "app/tools/pdf-tools/pdf-to-pdfa/page.jsx:192-193"},
+      {"label": "Verified compliant with PDF/A-{niveau} by veraPDF. / Not compliant with PDF/A-{niveau} — no file was returned.", "ref": "app/tools/pdf-tools/pdf-to-pdfa/page.jsx:204-206"},
+      {"label": "veraPDF validation detail (N failed rule(s))", "ref": "app/tools/pdf-tools/pdf-to-pdfa/page.jsx:215"},
+      {"label": "Done! / Download", "ref": "app/tools/pdf-tools/pdf-to-pdfa/page.jsx:228-229"}
+    ],
+    "steps": ["choisir un PDF (vérification des balises dans le navigateur jusqu'à 20 Mo) → PDF/A conformance → case de niveau inférieur → « Convert to PDF/A-2b » (Cancel possible) → verdict veraPDF → « Download »"],
+    "limits": [
+      {"what": "taille max par fichier", "value": "44 Mo si NEXT_PUBLIC_MEDIA_SERVICE_URL est défini, sinon 4 Mo", "constant": "MAX_PDFTOOLS_STAGED_BYTES", "ref": "lib/quota/limits.js:93 ; app/lib/officeUpload.js:111-120 ; app/api/pdf-to-pdfa/route.ts:19,66-70"},
+      {"what": "vérification des balises dans le navigateur", "value": "jusqu'à 20 Mo (au-delà le service vérifie)", "constant": "TAG_CHECK_MAX_BYTES", "ref": "app/tools/pdf-tools/pdf-to-pdfa/page.jsx:29-31"},
+      {"what": "durée max de la route", "value": "300 s", "constant": "maxDuration", "ref": "app/api/pdf-to-pdfa/route.ts:9"}
+    ],
+    "processing": {"where": "our-server", "detail": "Navigateur → fonction Vercel → notre pdf-tools (Railway : Ghostscript, veraPDF, texte relu par Ghostscript txtwrite et Poppler pdftotext). Dossier temporaire par requête supprimé ensuite. > 4 Mio : envoi par morceaux, PDF/A conservé sur le service media jusqu'au téléchargement ou TTL.", "ref": "app/api/pdf-to-pdfa/route.ts:26-30,88 ; services/pdf-tools/src/pdfa.js:142-192 ; services/pdf-tools/src/tempfiles.js:15-17 ; app/tools/pdf-tools/pdf-to-pdfa/page.jsx:91-104"},
+    "quota": "≤ 4 Mio : aucune ; > 4 Mio : limite par réseau heure/jour (seau office_rate)",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "aucun filigrane ajouté (vérifié)",
+    "browsers": null,
+    "twin": null,
+    "notes": "PDF non balisé : niveaux a désactivés avec la note « This PDF is not tagged … PDF/A-2a and 3a can't be made from it… » (page.jsx:172-174). Abaissement dit : « You asked for PDF/A-X; it couldn't be reached (…), so this file is PDF/A-Y. » (209-211). 1a non proposé : aucun outil libre ne l'atteint (RAPPORT-p25-decisions-03-10.md:182-190). Nom : {nom}-pdfa-{niveau}.pdf (147). « most commonly required / widely accepted » et « industry-reference » : aucune preuve."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-translate",
+    "task": "Traduit un PDF : le PDF entier en nouveau PDF mis en page (Google Cloud Translation, si le service est configuré) ou le texte des 5 premières pages (OpenAI gpt-4o-mini) affiché à l'écran.",
+    "inputs": {"accept": ".pdf", "formats": ["PDF"], "ref": "app/tools/pdf-tools/pdf-translate/page.jsx:113"},
+    "outputs": {"formats": ["PDF (mode Whole PDF)", "texte à l'écran + TXT translation.txt (mode Text only)"], "ref": "app/tools/pdf-tools/pdf-translate/page.jsx:51,129,134-135"},
+    "controls": [
+      {"label": "Back to PDF Tools", "ref": "app/tools/pdf-tools/pdf-translate/page.jsx:94"},
+      {"label": "Click or drop a PDF file here / Choose a PDF file", "ref": "app/tools/pdf-tools/pdf-translate/page.jsx:99"},
+      {"label": "Whole PDF (layout kept) / Text only (seulement si le service le dit disponible)", "ref": "app/tools/pdf-tools/pdf-translate/page.jsx:101-107"},
+      {"label": "Target Language (Whole PDF : 133 langues ; Text only : English, French, Spanish, German, Arabic, Chinese, Japanese, Portuguese, Italian, Russian, défaut French)", "ref": "app/tools/pdf-tools/pdf-translate/page.jsx:24,30,115-123 ; app/lib/translateLanguages.js:5"},
+      {"label": "Translate PDF (pendant : Translating... ou Uploading N% …)", "ref": "app/tools/pdf-tools/pdf-translate/page.jsx:127"},
+      {"label": "Download (PDF traduit)", "ref": "app/tools/pdf-tools/pdf-translate/page.jsx:129"},
+      {"label": "Translation (first 5 pages) / Download (translation.txt) / Copy Translation", "ref": "app/tools/pdf-tools/pdf-translate/page.jsx:133-136"}
+    ],
+    "steps": [
+      "Whole PDF (si disponible, choisi par défaut) : choisir un PDF → Target Language → « Translate PDF » → « Download »",
+      "Text only : choisir un PDF → Target Language (10) → « Translate PDF » → texte affiché → « Download » (translation.txt) ou « Copy Translation »"
+    ],
+    "limits": [
+      {"what": "Text only : pages lues", "value": "5 premières pages", "constant": "MAX_PDF_TRANSLATE_PAGES", "ref": "app/tools/pdf-tools/pdf-translate/page.jsx:25,68"},
+      {"what": "Text only : caractères envoyés", "value": "3 000", "constant": "MAX_PDF_TRANSLATE_CHARS", "ref": "app/tools/pdf-tools/pdf-translate/page.jsx:26,73,79"},
+      {"what": "Text only : longueur de la réponse", "value": "1 000 jetons (une longue traduction peut être coupée)", "constant": null, "ref": "app/api/ai/route.ts:35"},
+      {"what": "Whole PDF : pages par PDF", "value": "20", "constant": "PDF_TRANSLATE_MAX_PAGES", "ref": "lib/quota/pdfTranslate.js:19 ; app/api/pdf-translate-document/route.ts:74"},
+      {"what": "Whole PDF : pages par jour par visiteur", "value": "20 (IPv6 compté par /64)", "constant": "PDF_TRANSLATE_PAGES_PER_IP_PER_DAY", "ref": "lib/quota/pdfTranslate.js:18,32-37"},
+      {"what": "Whole PDF : taille", "value": "20 Mo", "constant": "MAX_BYTES", "ref": "app/api/pdf-translate-document/route.ts:20,49,71"},
+      {"what": "Whole PDF : budget mensuel propre", "value": "30 $", "constant": "PDF_TRANSLATE_MONTHLY_BUDGET_MICROS", "ref": "lib/quota/pdfTranslate.js:20"}
+    ],
+    "processing": {"where": "third-party", "detail": "Text only : texte extrait dans le navigateur (pdf.js), envoyé à notre route /api/ai puis à OpenAI gpt-4o-mini ; le fichier ne part pas. Whole PDF : le PDF part toujours par morceaux vers notre service media, notre route le lit et l'envoie à Google Cloud Translation (translateDocument), le PDF traduit est déposé sur le service media puis téléchargé (supprimé après téléchargement complet ou TTL). Mode Whole PDF proposé seulement si GOOGLE_TRANSLATE_SERVICE_ACCOUNT et NEXT_PUBLIC_MEDIA_SERVICE_URL sont définis.", "ref": "app/tools/pdf-tools/pdf-translate/page.jsx:40-55,59-89 ; app/api/ai/route.ts:23-41 ; app/api/pdf-translate-document/route.ts:14-27 ; app/lib/officeUpload.js:44-46 ; app/privacy/page.jsx:59-61"},
+    "quota": "Text only : limite par réseau heure/jour (guard, seau commun) + plafond mensuel du site ; Whole PDF : limite chiffrée 20 pages/jour/visiteur + budget propre 30 $/mois",
+    "signup": "aucune inscription demandée (vérifié : ai/route.ts, pdf-translate-document/route.ts)",
+    "watermark": "aucun filigrane ajouté par le site (non vérifiable pour la sortie de Google ; aucune étape d'ajout dans route.ts)",
+    "browsers": null,
+    "twin": null,
+    "notes": "Le HTML servi (rendu serveur) montre TOUJOURS la version Text only (docMode null avant la réponse du GET, page.jsx:35,143-178) : titre, méta et FAQ servis décrivent le mode texte. Disponibilité réelle du mode Whole PDF en production : NON TROUVÉ (dépend de variables d'environnement, à constater sur www). Messages : « This PDF has N pages; whole-document translation takes up to 20 pages at a time… » (route.ts:74), « This PDF is password-protected. Remove the password first (our Unlock PDF tool)… » (61), « Whole-document translation takes PDFs up to 20 MB. » (49). PDF scanné en mode texte : aucun message dédié (le texte vide est envoyé)."
+  },
+  {
+    "path": "/tools/pdf-tools/pdf-ai-summary",
+    "task": "Extrait le texte d'un PDF dans le navigateur et en fait résumer jusqu'à 8 000 caractères par OpenAI gpt-4o-mini.",
+    "inputs": {"accept": ".pdf", "formats": ["PDF (avec couche de texte)"], "ref": "app/tools/pdf-tools/pdf-ai-summary/page.jsx:81"},
+    "outputs": {"formats": ["texte à l'écran", "TXT ({nom}-summary.txt)"], "ref": "app/tools/pdf-tools/pdf-ai-summary/page.jsx:90-92"},
+    "controls": [
+      {"label": "Back to PDF Tools", "ref": "app/tools/pdf-tools/pdf-ai-summary/page.jsx:74"},
+      {"label": "Click or drop a PDF file here / Choose a PDF file", "ref": "app/tools/pdf-tools/pdf-ai-summary/page.jsx:79"},
+      {"label": "Summarize PDF (pendant : Summarizing...)", "ref": "app/tools/pdf-tools/pdf-ai-summary/page.jsx:83"},
+      {"label": "Summary + note de couverture", "ref": "app/tools/pdf-tools/pdf-ai-summary/page.jsx:88-90"},
+      {"label": "Copy Summary", "ref": "app/tools/pdf-tools/pdf-ai-summary/page.jsx:91"},
+      {"label": "Download ({nom}-summary.txt)", "ref": "app/tools/pdf-tools/pdf-ai-summary/page.jsx:92"}
+    ],
+    "steps": ["choisir un PDF → « Summarize PDF » → résumé + « This summary covers … » → « Copy Summary » ou « Download »"],
+    "limits": [
+      {"what": "texte envoyé", "value": "8 000 caractères", "constant": "MAX_PROMPT_CHARS", "ref": "lib/quota/limits.js:5 ; app/tools/pdf-tools/pdf-ai-summary/page.jsx:38,48-49"},
+      {"what": "longueur du résumé", "value": "1 000 jetons", "constant": null, "ref": "app/api/ai/route.ts:35"},
+      {"what": "taille du PDF", "value": "NON TROUVÉ (aucun contrôle ; cherché dans page.jsx)", "constant": null, "ref": "app/tools/pdf-tools/pdf-ai-summary/page.jsx:23-47"}
+    ],
+    "processing": {"where": "third-party", "detail": "Le PDF reste dans le navigateur (pdf.js) ; seul le texte extrait (≤ 8 000 caractères) va à notre route /api/ai puis à OpenAI gpt-4o-mini (consigne fixée côté serveur).", "ref": "app/tools/pdf-tools/pdf-ai-summary/page.jsx:32-62 ; app/api/ai/route.ts:23-41 ; lib/ai/toolPrompts.js:77-79"},
+    "quota": "limite par réseau heure/jour (guard, seau commun à tous les outils payants) + plafond mensuel du site",
+    "signup": "aucune inscription demandée (vérifié : ai/route.ts, guard.js)",
+    "watermark": "sans objet",
+    "browsers": null,
+    "twin": "/tools/ai-tools/text-summarizer (même route /api/ai, consigne différente : lib/ai/toolPrompts.js:74-76)",
+    "notes": "Couverture dite : « This summary covers the first 8,000 characters of text (about N of M pages). » ou « This summary covers the whole document (N pages). » (page.jsx:52-54). Messages : « No text was found in this PDF — it is probably a scanned image. Run it through PDF OCR first… » (44) ; mot de passe : « …this PDF needs a password to open. Remove it first with PDF Unlock… » (34). Le titre et la méta actuels disent à tort que le fichier est envoyé."
+  }
+]

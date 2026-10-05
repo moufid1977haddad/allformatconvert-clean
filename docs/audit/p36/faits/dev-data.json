@@ -1,0 +1,414 @@
+[
+  {
+    "path": "/tools/developer-tools/csv-to-excel",
+    "task": "Construit un classeur Excel (.xlsx ou .xls, une feuille « Sheet1 ») à partir d'un fichier CSV ou d'un texte CSV collé.",
+    "inputs": {"accept": ".csv,text/csv", "formats": ["CSV (fichier .csv)", "texte CSV collé"], "ref": "app/tools/developer-tools/csv-to-excel/page.jsx:195,197-212"},
+    "outputs": {"formats": ["XLSX (converted.xlsx)", "XLS (converted.xls)"], "ref": "app/tools/developer-tools/csv-to-excel/page.jsx:161,238-239; csvToExcel.worker.js:13-16,92-94"},
+    "controls": [
+      {"label": "Click or drop a .csv file here (souris) / Choose a .csv file (écran tactile)", "ref": "app/tools/developer-tools/csv-to-excel/page.jsx:194; app/components/UploadPrompt.jsx:73-74"},
+      {"label": "...or paste CSV here (texte indicatif de la zone de collage)", "ref": "app/tools/developer-tools/csv-to-excel/page.jsx:199"},
+      {"label": "Delimiter: (Auto-detected: …, Comma (,), Semicolon (;), Tab, Pipe (|))", "ref": "app/tools/developer-tools/csv-to-excel/page.jsx:219-228; app/lib/csvParser.js:16-21"},
+      {"label": "Output format: (.xlsx (Excel 2007+), .xls (legacy Excel 97-2003))", "ref": "app/tools/developer-tools/csv-to-excel/page.jsx:231-240"},
+      {"label": "Encoding: (Auto-detected: …, UTF-8, Western European (Windows-1252, Excel \"CSV\"), … 17 choix) — seulement après le choix d'un fichier", "ref": "app/components/CsvReadOptions.jsx:11-18; app/lib/csvEncoding.js:20-38; page.jsx:245"},
+      {"label": "Numbers as number cells (case cochée par défaut)", "ref": "app/tools/developer-tools/csv-to-excel/page.jsx:90,245"},
+      {"label": "Convert to .xlsx / Convert to .xls", "ref": "app/tools/developer-tools/csv-to-excel/page.jsx:256"},
+      {"label": "Cancel (pendant la conversion)", "ref": "app/tools/developer-tools/csv-to-excel/page.jsx:253"},
+      {"label": "Download (+ Save / Share sur iPhone/iPad)", "ref": "app/components/FileDownload.jsx:211,216; app/components/DownloadReady.jsx:59"}
+    ],
+    "steps": ["choisir ou déposer un fichier .csv, ou coller du texte CSV", "vérifier « Delimiter: » (et « Encoding: » pour un fichier)", "choisir « Output format: » .xlsx ou .xls", "laisser ou décocher « Numbers as number cells »", "bouton « Convert to .xlsx » (ou « Convert to .xls »)", "bouton « Download » (converted.xlsx / converted.xls)"],
+    "limits": [
+      {"what": "lignes max (en-tête compris), ordinateur", "value": "200,000", "constant": "MAX_ROWS", "ref": "app/tools/developer-tools/csv-to-excel/config.js:21"},
+      {"what": "lignes max (en-tête compris), téléphone et tablette (iPad compris)", "value": "20,000", "constant": "MOBILE_MAX_ROWS", "ref": "app/tools/developer-tools/csv-to-excel/config.js:34; page.jsx:99; app/lib/isMobileDevice.js:1-11"},
+      {"what": "taille max du fichier, tout appareil", "value": "250 MB", "constant": "MAX_FILE_SIZE_BYTES (local à la page)", "ref": "app/tools/developer-tools/csv-to-excel/page.jsx:29-30,109"},
+      {"what": "texte collé", "value": "même plafond de lignes que le fichier (20,000 / 200,000) ; pas de plafond propre", "constant": "effectiveMaxRows", "ref": "app/tools/developer-tools/csv-to-excel/page.jsx:99,183"},
+      {"what": "sortie .xls", "value": "65,536 lignes et 256 colonnes max (message qui propose .xlsx)", "constant": null, "ref": "app/tools/developer-tools/csv-to-excel/csvToExcel.worker.js:73-77"},
+      {"what": "longueur d'une cellule", "value": "32,767 caractères max (message « Row r, column c holds … characters; an Excel cell holds at most 32,767. »)", "constant": null, "ref": "app/tools/developer-tools/csv-to-excel/csvToExcel.worker.js:78-80"}
+    ],
+    "processing": {"where": "browser", "detail": "Lecture en flux et analyse dans un Web Worker (TextDecoderStream avec l'encodage choisi), classeur écrit par la bibliothèque xlsx (SheetJS 0.18.5) dans le worker ; rien n'est envoyé. Seul un message d'erreur affiché part, nettoyé, vers /api/report-error.", "ref": "app/tools/developer-tools/csv-to-excel/page.jsx:152,183; csvToExcel.worker.js:31-52,56-96; app/lib/useToolError.js:28-29; app/lib/reportError.js:16"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun fetch / /api/ dans le dossier de l'outil ; seule la remontée d'erreur /api/report-error)",
+    "watermark": "sans objet (classeur de données, rien n'est ajouté)",
+    "browsers": "Téléphones/tablettes détectés par isMobileDevice (iPad = mobile) → plafond 20,000 lignes ; sur iPhone/iPad un bouton « Save / Share » s'ajoute à « Download » ; worker de type module + File.stream() + TextDecoderStream.",
+    "twin": null,
+    "notes": "Délimiteur deviné sur les 10 premières lignes non vides (8 Ko), repli virgule (csvParser.js:81-100, page.jsx:20). Encodage : BOM, sinon UTF-8 valide, sinon page de code d'après la langue du navigateur, sur les 512 premiers Ko (csvEncoding.js:86-104) ; le collage n'a pas de menu d'encodage. Nombres : seulement les colonnes entièrement numériques (ligne 1 exclue), virgule décimale lue si le séparateur n'est pas la virgule ; zéro de tête ou plus de 15 chiffres significatifs → texte (csvEncoding.js:120-166 ; worker:62-70). Messages réels : « This file is … over the 250 MB limit… » (page.jsx:110), « This CSV has more than N rows, counting the header row as row 1 … » (page.jsx:169), fichier vide / binaire / classeur renommé .csv refusés avec une phrase (app/lib/fileChecks.js:58-71). Message de fin : « Excel file ready: N rows. » + colonnes lues comme nombres (page.jsx:165 ; CsvReadOptions.jsx:31-34). Estimation « Estimated conversion time: … » affichée avant conversion (page.jsx:213-215). Une ligne vide du CSV compte comme une ligne ; un retour chariot seul (vieux Mac) n'est pas une fin de ligne (csvParser.js:166-172)."
+  },
+  {
+    "path": "/tools/developer-tools/csv-to-json",
+    "task": "Convertit un fichier CSV ou un texte CSV collé en JSON : tableau d'objets (clés = ligne d'en-tête), tableau de tableaux ou JSON Lines.",
+    "inputs": {"accept": ".csv,text/csv", "formats": ["CSV (fichier .csv)", "texte CSV collé"], "ref": "app/tools/developer-tools/csv-to-json/page.jsx:205,209-225"},
+    "outputs": {"formats": ["JSON tableau d'objets (converted.json)", "JSON tableau de tableaux (converted.json)", "JSON Lines (converted.jsonl)", "texte dans « JSON Output » pour un collage"], "ref": "app/tools/developer-tools/csv-to-json/page.jsx:168,171,262-267; csvToJson.worker.js:72-75"},
+    "controls": [
+      {"label": "Click or drop a .csv file here / Choose a .csv file", "ref": "app/tools/developer-tools/csv-to-json/page.jsx:204"},
+      {"label": "...or paste CSV Input (texte indicatif « name,age,city... »)", "ref": "app/tools/developer-tools/csv-to-json/page.jsx:209,212"},
+      {"label": "JSON Output", "ref": "app/tools/developer-tools/csv-to-json/page.jsx:228-229"},
+      {"label": "Delimiter: (Auto-detected: …, Comma (,), Semicolon (;), Tab, Pipe (|))", "ref": "app/tools/developer-tools/csv-to-json/page.jsx:237-246"},
+      {"label": "Encoding: (fichier seulement)", "ref": "app/components/CsvReadOptions.jsx:11-18; page.jsx:250"},
+      {"label": "Numbers as numbers (cochée par défaut)", "ref": "app/tools/developer-tools/csv-to-json/page.jsx:88,250"},
+      {"label": "Output (Array of objects (one per row) / Array of arrays (header row first) / JSON Lines (one object per line))", "ref": "app/tools/developer-tools/csv-to-json/page.jsx:262-267"},
+      {"label": "Convert", "ref": "app/tools/developer-tools/csv-to-json/page.jsx:269"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/csv-to-json/page.jsx:270"},
+      {"label": "Cancel", "ref": "app/tools/developer-tools/csv-to-json/page.jsx:258"},
+      {"label": "Download (fichier seulement) + Save / Share sur iPhone/iPad", "ref": "app/tools/developer-tools/csv-to-json/page.jsx:168,274; app/components/FileDownload.jsx:211,216"}
+    ],
+    "steps": ["choisir ou déposer un .csv, ou coller du CSV dans « ...or paste CSV Input »", "vérifier « Delimiter: » (et « Encoding: » pour un fichier)", "choisir « Output » (objets / tableaux / JSON Lines) et « Numbers as numbers »", "bouton « Convert »", "fichier : bouton « Download » (converted.json ou converted.jsonl) ; collage : résultat dans « JSON Output », bouton « Copy »"],
+    "limits": [
+      {"what": "lignes d'un fichier (en-tête compris), ordinateur", "value": "500,000", "constant": "MAX_ROWS", "ref": "app/tools/developer-tools/csv-to-json/config.js:12"},
+      {"what": "lignes d'un fichier, téléphone/tablette", "value": "70,000", "constant": "MOBILE_MAX_ROWS", "ref": "app/tools/developer-tools/csv-to-json/config.js:19; page.jsx:97"},
+      {"what": "lignes d'un texte collé, tout appareil", "value": "70,000", "constant": "PASTE_MAX_ROWS", "ref": "app/tools/developer-tools/csv-to-json/config.js:28; page.jsx:153"},
+      {"what": "taille max du fichier, tout appareil", "value": "150 MB", "constant": "MAX_FILE_SIZE_BYTES (local)", "ref": "app/tools/developer-tools/csv-to-json/page.jsx:29-30,108"}
+    ],
+    "processing": {"where": "browser", "detail": "Web Worker : lecture en flux, analyse, construction JSON ; rien n'est envoyé (sauf le texte d'une erreur affichée, nettoyé, vers /api/report-error).", "ref": "app/tools/developer-tools/csv-to-json/page.jsx:155,193; csvToJson.worker.js:13-85; app/lib/useToolError.js:28-29"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié : aucun appel réseau dans le dossier de l'outil)",
+    "watermark": "sans objet",
+    "browsers": "Plafond fichier 70,000 lignes sur téléphone/tablette (iPad compris) ; Save / Share sur iPhone/iPad ; au-delà de 1,000,000 caractères la zone de texte affiche un extrait et « Edit here anyway (slow) » (app/components/TextArea.jsx:17-18,67).",
+    "twin": null,
+    "notes": "En-têtes : en double → name_2, vide → column_N, valeurs au-delà du dernier en-tête → column_N, chaque cas annoncé dans le message (csvToJson.worker.js:47-59) ; en mode « Array of arrays » la ligne d'en-tête est gardée telle quelle (worker:70-73). Cellule manquante → \"\" (worker:65). CSV vide → « Conversion failed: Empty CSV » (worker:46 ; page.jsx:183). Message de fin « Converted N rows. » / « Converted! N rows. » (page.jsx:169,172) — N compte l'en-tête. Encodage et nombres comme csv-to-excel (csvEncoding.js:86-166). Exemple de la page vérifié par lecture du code : 02134 reste texte (parseLocaleNumber zéro de tête, csvEncoding.js:144)."
+  },
+  {
+    "path": "/tools/developer-tools/csv-to-sql",
+    "task": "Génère une instruction CREATE TABLE et un INSERT par ligne à partir d'un fichier CSV ou d'un texte CSV collé, pour SQL standard, MySQL/MariaDB ou SQL Server.",
+    "inputs": {"accept": ".csv,text/csv", "formats": ["CSV (fichier .csv)", "texte CSV collé"], "ref": "app/tools/developer-tools/csv-to-sql/page.jsx:212,216-232"},
+    "outputs": {"formats": ["SQL (converted.sql) pour un fichier", "texte dans « SQL Output » pour un collage"], "ref": "app/tools/developer-tools/csv-to-sql/page.jsx:165,168; csvToSql.worker.js:93-105"},
+    "controls": [
+      {"label": "Database (Standard SQL — PostgreSQL, SQLite (\"quoted\" names) / MySQL / MariaDB (`backticks`, backslashes escaped) / SQL Server ([brackets], N'unicode' strings))", "ref": "app/tools/developer-tools/csv-to-sql/page.jsx:201-206"},
+      {"label": "Table Name (défaut my_table ; vide → my_table)", "ref": "app/tools/developer-tools/csv-to-sql/page.jsx:71,207-208; csvToSql.worker.js:66"},
+      {"label": "Click or drop a .csv file here / Choose a .csv file", "ref": "app/tools/developer-tools/csv-to-sql/page.jsx:211"},
+      {"label": "...or paste CSV Input", "ref": "app/tools/developer-tools/csv-to-sql/page.jsx:216"},
+      {"label": "SQL Output", "ref": "app/tools/developer-tools/csv-to-sql/page.jsx:235-236"},
+      {"label": "Delimiter:", "ref": "app/tools/developer-tools/csv-to-sql/page.jsx:244-253"},
+      {"label": "Encoding: (fichier seulement)", "ref": "app/components/CsvReadOptions.jsx:11-18"},
+      {"label": "Numeric columns as INTEGER / DECIMAL (cochée par défaut)", "ref": "app/tools/developer-tools/csv-to-sql/page.jsx:85,257"},
+      {"label": "Convert", "ref": "app/tools/developer-tools/csv-to-sql/page.jsx:269"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/csv-to-sql/page.jsx:270"},
+      {"label": "Cancel", "ref": "app/tools/developer-tools/csv-to-sql/page.jsx:265"},
+      {"label": "Download (fichier seulement)", "ref": "app/tools/developer-tools/csv-to-sql/page.jsx:165,274"}
+    ],
+    "steps": ["choisir « Database »", "saisir « Table Name » (ou garder my_table)", "choisir/déposer un .csv ou coller du CSV", "vérifier « Delimiter: » / « Encoding: »", "bouton « Convert »", "fichier : « Download » (converted.sql) ; collage : « SQL Output » puis « Copy »"],
+    "limits": [
+      {"what": "lignes d'un fichier (en-tête compris), ordinateur", "value": "400,000", "constant": "MAX_ROWS", "ref": "app/tools/developer-tools/csv-to-sql/config.js:11"},
+      {"what": "lignes d'un fichier, téléphone/tablette", "value": "65,000", "constant": "MOBILE_MAX_ROWS", "ref": "app/tools/developer-tools/csv-to-sql/config.js:18; page.jsx:94"},
+      {"what": "lignes d'un texte collé, tout appareil", "value": "65,000", "constant": "PASTE_MAX_ROWS", "ref": "app/tools/developer-tools/csv-to-sql/config.js:25; page.jsx:150"},
+      {"what": "taille max du fichier", "value": "150 MB", "constant": "MAX_FILE_SIZE_BYTES (local)", "ref": "app/tools/developer-tools/csv-to-sql/page.jsx:26-27,105"}
+    ],
+    "processing": {"where": "browser", "detail": "Web Worker ; rien n'est envoyé (sauf le texte d'une erreur affichée, nettoyé, vers /api/report-error).", "ref": "app/tools/developer-tools/csv-to-sql/page.jsx:152,190; csvToSql.worker.js:31-106"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "Plafonds téléphone/tablette ; Save / Share sur iPhone/iPad.",
+    "twin": null,
+    "notes": "Noms de table et de colonnes TOUJOURS quotés selon la base : \"…\" (\" doublé), `…` (` doublé), […] (] doublé) (worker:12-16,93-94). Chaînes : ' doublé ; MySQL double aussi les barres obliques inverses ; SQL Server préfixe N (worker:13-15). Types (worker:76-88) : entiers ≤ 9 chiffres INTEGER, ≤ 18 BIGINT, au-delà DECIMAL(n, 0) (max 38) ; décimaux DECIMAL(p, s) exacts ; notation exponentielle → DOUBLE PRECISION / DOUBLE / FLOAT ; texte VARCHAR(longueur max, min 1) — NVARCHAR pour SQL Server ; au-delà de 10,485,760 (standard) / 16,383 (MySQL) / 4,000 (SQL Server) → TEXT / LONGTEXT / NVARCHAR(MAX). Nombres écrits tels quels, jamais via un double (worker:17-21). Vide dans une colonne numérique → NULL ; dans une colonne texte → '' (worker:89-92). Pas de dédoublonnage des en-têtes ; en-tête vide → nom \"\" (worker:67). Message de fin « Converted N rows. » (N = lignes de données, worker:102)."
+  },
+  {
+    "path": "/tools/developer-tools/csv-to-tsv",
+    "task": "Convertit un texte CSV (virgule, point-virgule ou barre verticale) collé ou lu d'un fichier en valeurs séparées par des tabulations.",
+    "inputs": {"accept": ".csv,.txt,text/csv", "formats": ["CSV", "TXT", "texte collé"], "ref": "app/tools/developer-tools/csv-to-tsv/page.jsx:85,88"},
+    "outputs": {"formats": ["TSV (<nom du fichier>.tsv ou converted.tsv)"], "ref": "app/tools/developer-tools/csv-to-tsv/page.jsx:106"},
+    "controls": [
+      {"label": "Click or drop a .csv file here (up to 50 MB), or paste below / Choose a .csv file (up to 50 MB), or paste below", "ref": "app/tools/developer-tools/csv-to-tsv/page.jsx:84"},
+      {"label": "CSV Input (texte indicatif « Paste CSV here... »)", "ref": "app/tools/developer-tools/csv-to-tsv/page.jsx:88"},
+      {"label": "TSV Output", "ref": "app/tools/developer-tools/csv-to-tsv/page.jsx:89"},
+      {"label": "Delimiter:", "ref": "app/tools/developer-tools/csv-to-tsv/page.jsx:93-97"},
+      {"label": "Encoding: (après chargement d'un fichier ; un changement relit le fichier)", "ref": "app/tools/developer-tools/csv-to-tsv/page.jsx:61-67,100"},
+      {"label": "Convert", "ref": "app/tools/developer-tools/csv-to-tsv/page.jsx:103"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/csv-to-tsv/page.jsx:104"},
+      {"label": "Download", "ref": "app/tools/developer-tools/csv-to-tsv/page.jsx:106; app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["choisir/déposer un .csv ou .txt (son texte s'affiche dans « CSV Input »), ou coller du CSV", "vérifier « Delimiter: » (et « Encoding: » pour un fichier)", "bouton « Convert »", "« Copy » ou « Download » (.tsv)"],
+    "limits": [
+      {"what": "taille max du fichier, tout appareil", "value": "50 MB", "constant": "MAX_FILE_BYTES", "ref": "app/tools/developer-tools/csv-to-tsv/page.jsx:19,48"},
+      {"what": "lignes", "value": "aucun plafond", "constant": null, "ref": "app/tools/developer-tools/csv-to-tsv/page.jsx:69-73"},
+      {"what": "affichage dans la zone de texte", "value": "au-delà de 1,000,000 caractères : extrait de 20,000 caractères + « Edit here anyway (slow) » / « Clear » (l'outil travaille sur tout le texte)", "constant": "LIMIT / PREVIEW", "ref": "app/components/TextArea.jsx:17-18,67-71"}
+    ],
+    "processing": {"where": "browser", "detail": "Fichier lu en entier (arrayBuffer) et décodé dans la page, conversion sur le fil principal (pas de worker) ; rien n'est envoyé.", "ref": "app/tools/developer-tools/csv-to-tsv/page.jsx:52-57,69-73"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "Save / Share sur iPhone/iPad (FileDownload.jsx:91-96).",
+    "twin": null,
+    "notes": "Une valeur contenant tabulation, retour à la ligne ou commençant par un guillemet est mise entre guillemets (guillemets internes doublés) ; les autres sont écrites telles quelles (page.jsx:21-27). BOM retiré (page.jsx:71). Lignes de sortie séparées par \\n (page.jsx:72). Message fichier trop gros : « This file is N MB; this tool reads files up to 50 MB. » (page.jsx:48). Fichier vide/binaire/classeur refusé (fileChecks.js:58-71). Un fichier UTF-16 sans BOM passe le contrôle mais est décodé en UTF-8 (detectEncoding ne regarde que le BOM pour l'UTF-16, csvEncoding.js:87-92) — cas rare, à ne pas promettre."
+  },
+  {
+    "path": "/tools/developer-tools/excel-to-csv",
+    "task": "Convertit chaque feuille d'un classeur .xlsx, .xls ou .ods en CSV (un .csv pour une feuille, un .zip d'un .csv par feuille sinon).",
+    "inputs": {"accept": ".xlsx,.xls,.ods", "formats": ["XLSX", "XLS (y compris les .xls qui sont en fait du HTML, du SpreadsheetML 2003 ou du texte tabulé)", "ODS"], "ref": "app/tools/developer-tools/excel-to-csv/page.jsx:180; app/lib/fileChecks.js:84-97"},
+    "outputs": {"formats": ["CSV (converted.csv) pour une feuille", "ZIP (converted.zip) d'un .csv par feuille"], "ref": "app/tools/developer-tools/excel-to-csv/page.jsx:138; excelToCsv.worker.js:125-145"},
+    "controls": [
+      {"label": "Separator (Comma , / Semicolon ; (Excel in most of Europe) / Tab / Pipe |)", "ref": "app/tools/developer-tools/excel-to-csv/page.jsx:170-173"},
+      {"label": "Decimal comma (3,14 — with the semicolon, for Excel in Europe)", "ref": "app/tools/developer-tools/excel-to-csv/page.jsx:175"},
+      {"label": "Add a UTF-8 BOM (Excel then reads accents correctly)", "ref": "app/tools/developer-tools/excel-to-csv/page.jsx:176"},
+      {"label": "Click or drop an Excel or ODS file here / Choose an Excel or ODS file", "ref": "app/tools/developer-tools/excel-to-csv/page.jsx:179"},
+      {"label": "Cancel", "ref": "app/tools/developer-tools/excel-to-csv/page.jsx:196"},
+      {"label": "Download (+ Save / Share sur iPhone/iPad)", "ref": "app/tools/developer-tools/excel-to-csv/page.jsx:200"}
+    ],
+    "steps": ["régler « Separator », « Decimal comma », « Add a UTF-8 BOM » AVANT de choisir le fichier", "choisir/déposer le classeur : la conversion démarre seule (aucun bouton Convert)", "si plusieurs feuilles : cadre « N sheets detected: … »", "bouton « Download » (converted.csv ou converted.zip)"],
+    "limits": [
+      {"what": "lignes, toutes feuilles cumulées, ordinateur", "value": "150,000", "constant": "MAX_ROWS", "ref": "app/tools/developer-tools/excel-to-csv/config.js:20"},
+      {"what": "taille du fichier, ordinateur", "value": "90 MB", "constant": "MAX_FILE_SIZE_BYTES", "ref": "app/tools/developer-tools/excel-to-csv/config.js:21-22"},
+      {"what": "lignes, téléphone/tablette", "value": "50,000", "constant": "MOBILE_MAX_ROWS", "ref": "app/tools/developer-tools/excel-to-csv/config.js:34"},
+      {"what": "taille du fichier, téléphone/tablette", "value": "30 MB", "constant": "MOBILE_MAX_FILE_SIZE_BYTES", "ref": "app/tools/developer-tools/excel-to-csv/config.js:35-36"}
+    ],
+    "processing": {"where": "browser", "detail": "Web Worker : lecture du fichier, xlsx (SheetJS 0.18.5) avec cellNF, dates en ISO, nombres « General » en 15 chiffres, ZIP par jszip 3.10.1 ; rien n'est envoyé.", "ref": "app/tools/developer-tools/excel-to-csv/page.jsx:124,159; excelToCsv.worker.js:96-146"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "Plafonds téléphone/tablette (iPad = mobile) ; Save / Share sur iPhone/iPad.",
+    "twin": null,
+    "notes": "Toutes les feuilles sont converties, feuilles masquées comprises (workbook.SheetNames, worker:111,119). Noms des .csv dans le ZIP = nom de la feuille, caractères \\ / : * ? \" < > | remplacés par _, nom vide → SheetN, doublons « (2) » (worker:17-34,139). Formules → résultat calculé enregistré (sheet_to_csv, worker:119). Dates → texte ISO 8601 (2024-01-15 ou 2024-02-29T13:45:00), système de dates 1904 pris en compte (app/lib/sheetDates.js:1-7,42). Nombres au format « General » écrits sur 15 chiffres significatifs (un EAN-13 n'est plus 4.00638E+12) ; nombres avec format propre (monnaie, %) gardent leur texte formaté (sheetDates.js:28-31). Émojis écrits par openpyxl/pandas rétablis (app/lib/xlsxSupplementaryChars.js:1-10). Virgule décimale : seulement les cellules nombre, littéraux du format gardés, texte ODS laissé tel quel (worker:64-95). Messages : « This file is … over the 90 MB limit… » (page.jsx:88), « This workbook has more than N rows across all sheets… » (page.jsx:147), « CSV ready: N rows. » / « ZIP ready: N sheets zipped as separate CSVs, M rows total. » (page.jsx:139-143). Comptage des lignes = lignes non vides du CSV produit (worker:121)."
+  },
+  {
+    "path": "/tools/developer-tools/excel-to-json",
+    "task": "Convertit chaque feuille d'un classeur .xlsx, .xls, .ods (ou d'un .csv) en tableau d'objets JSON, regroupés dans un objet dont les clés sont les noms de feuilles.",
+    "inputs": {"accept": ".xlsx,.xls,.csv,.ods", "formats": ["XLSX", "XLS", "ODS", "CSV"], "ref": "app/tools/developer-tools/excel-to-json/page.jsx:165"},
+    "outputs": {"formats": ["JSON (converted.json)"], "ref": "app/tools/developer-tools/excel-to-json/page.jsx:132; excelToJson.worker.js:75-78"},
+    "controls": [
+      {"label": "Click or drop an Excel, ODS, or CSV file here / Choose an Excel, ODS, or CSV file", "ref": "app/tools/developer-tools/excel-to-json/page.jsx:164"},
+      {"label": "Cancel", "ref": "app/tools/developer-tools/excel-to-json/page.jsx:181"},
+      {"label": "Download (+ Save / Share sur iPhone/iPad)", "ref": "app/tools/developer-tools/excel-to-json/page.jsx:185"}
+    ],
+    "steps": ["choisir/déposer le fichier : la conversion démarre seule", "si plusieurs feuilles : cadre « N sheets detected: … — each will be a key in the JSON output. »", "bouton « Download » (converted.json)"],
+    "limits": [
+      {"what": "lignes, toutes feuilles cumulées (une ligne d'en-tête comptée par feuille), ordinateur", "value": "150,000", "constant": "MAX_ROWS", "ref": "app/tools/developer-tools/excel-to-json/config.js:10; excelToJson.worker.js:64-73"},
+      {"what": "taille du fichier, ordinateur", "value": "90 MB", "constant": "MAX_FILE_SIZE_BYTES", "ref": "app/tools/developer-tools/excel-to-json/config.js:11-12"},
+      {"what": "lignes, téléphone/tablette", "value": "50,000", "constant": "MOBILE_MAX_ROWS", "ref": "app/tools/developer-tools/excel-to-json/config.js:14"},
+      {"what": "taille du fichier, téléphone/tablette", "value": "30 MB", "constant": "MOBILE_MAX_FILE_SIZE_BYTES", "ref": "app/tools/developer-tools/excel-to-json/config.js:15-16"}
+    ],
+    "processing": {"where": "browser", "detail": "Web Worker, xlsx (SheetJS 0.18.5) ; rien n'est envoyé.", "ref": "app/tools/developer-tools/excel-to-json/page.jsx:118,153; excelToJson.worker.js:41-79"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "Plafonds téléphone/tablette ; Save / Share sur iPhone/iPad.",
+    "twin": null,
+    "notes": "Première ligne de chaque feuille = noms de propriétés ; cellule vide → clé présente avec null (defval: null, worker:67-69) ; dates → texte ISO 8601 (worker:66 ; sheetDates.js:1-7) ; formules → valeur calculée ; émojis openpyxl rétablis. Un .csv (ou tout fichier qui n'est pas ZIP/OLE/XML/HTML) est lu en texte brut : toutes les valeurs restent du texte (« 007 » gardé), clé de feuille « Sheet1 » (worker:51-52). Vérifié en exécutant xlsx 0.18.5 avec ces options : virgule, point-virgule et tabulation reconnus dans un .csv ; lignes entièrement vides ignorées ; en-têtes en double → « name », « name_1 ». Feuilles masquées incluses. Pas d'option pour choisir ou fusionner des feuilles. Messages : « This file is … over the 90 MB limit… » (page.jsx:84), « This workbook has more than N rows across all sheets… » (page.jsx:141), « JSON ready: N rows. » / « JSON ready: N sheets, M rows total. » (page.jsx:133-137). JSON indenté de 2 espaces (worker:75)."
+  },
+  {
+    "path": "/tools/developer-tools/json-to-csv",
+    "task": "Convertit un tableau JSON d'objets (ou un objet seul, ou un tableau de valeurs simples) collé en texte CSV, objets imbriqués aplatis en colonnes à points.",
+    "inputs": {"accept": null, "formats": ["JSON collé"], "ref": "app/tools/developer-tools/json-to-csv/page.jsx:27"},
+    "outputs": {"formats": ["CSV (texte, data.csv)"], "ref": "app/tools/developer-tools/json-to-csv/page.jsx:28-29"},
+    "controls": [
+      {"label": "JSON Input (texte indicatif [{\"name\":\"John\",\"age\":30}])", "ref": "app/tools/developer-tools/json-to-csv/page.jsx:27"},
+      {"label": "CSV Output", "ref": "app/tools/developer-tools/json-to-csv/page.jsx:28"},
+      {"label": "Convert", "ref": "app/tools/developer-tools/json-to-csv/page.jsx:33"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/json-to-csv/page.jsx:34"},
+      {"label": "Download (data.csv)", "ref": "app/tools/developer-tools/json-to-csv/page.jsx:29; app/components/FileDownload.jsx:211"}
+    ],
+    "steps": ["coller le JSON dans « JSON Input »", "bouton « Convert »", "« Copy » ou « Download » (data.csv)"],
+    "limits": [
+      {"what": "taille du texte", "value": "aucun plafond ; au-delà de 1,000,000 caractères la zone affiche un extrait", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "JSON.parse comme validateur puis analyseur sans perte (nombres gardés tels qu'écrits) ; rien n'est envoyé.", "ref": "app/lib/jsonToCsv.js:35-56; app/lib/jsonLossless.js:9-12,37-39"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "Save / Share sur iPhone/iPad.",
+    "twin": null,
+    "notes": "Colonnes = union des clés dans l'ordre de première apparition ; objet imbriqué → a.b, tableau → t.0, t.1 ; {} et [] vides écrits « {} » / « [] » ; valeur simple dans le tableau → colonne « value » ; null/absent → cellule vide ; une valeur avec virgule, guillemet, retour à la ligne ou espace en tête/fin est mise entre guillemets (jsonToCsv.js:13-55). Séparateur toujours la virgule, lignes séparées par \\n (jsonToCsv.js:35). Erreurs : « The JSON must be an array of objects, or a single object. », « The JSON array is empty: there is no row to convert. » (jsonToCsv.js:40-41), sinon message du navigateur (ex. « Expected ',' or '}' after property value in JSON at position 6 (line 1 column 7) », vérifié sous Node)."
+  },
+  {
+    "path": "/tools/developer-tools/json-to-xml",
+    "task": "Convertit un JSON collé en document XML indenté, enveloppé dans un élément <root>.",
+    "inputs": {"accept": null, "formats": ["JSON collé"], "ref": "app/tools/developer-tools/json-to-xml/page.jsx:63"},
+    "outputs": {"formats": ["XML (texte, data.xml) avec déclaration <?xml version=\"1.0\" encoding=\"UTF-8\"?>"], "ref": "app/tools/developer-tools/json-to-xml/page.jsx:51-52,65"},
+    "controls": [
+      {"label": "JSON Input (texte indicatif « Paste JSON here... »)", "ref": "app/tools/developer-tools/json-to-xml/page.jsx:63"},
+      {"label": "XML Output", "ref": "app/tools/developer-tools/json-to-xml/page.jsx:64"},
+      {"label": "Convert", "ref": "app/tools/developer-tools/json-to-xml/page.jsx:69"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/json-to-xml/page.jsx:70"},
+      {"label": "Download (data.xml)", "ref": "app/tools/developer-tools/json-to-xml/page.jsx:65"}
+    ],
+    "steps": ["coller le JSON", "bouton « Convert »", "« Copy » ou « Download » (data.xml)"],
+    "limits": [{"what": "taille du texte", "value": "aucun plafond ; extrait au-delà de 1,000,000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}],
+    "processing": {"where": "browser", "detail": "fast-xml-parser 5.11.1 (XMLBuilder, chargé au clic) ; rien n'est envoyé.", "ref": "app/tools/developer-tools/json-to-xml/page.jsx:41-52"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "Save / Share sur iPhone/iPad.",
+    "twin": null,
+    "notes": "Racine toujours <root> ; tableau au premier niveau → un <item> par entrée sous <root> ; tableau sous une clé → balises sœurs répétées du même nom ; clé « @_x » → attribut x ; clé « #text » → texte de l'élément ; null → élément vide <n/> ; & et < échappés (&amp; &lt;) ; nombres gardés tels qu'écrits (vérifié avec XMLBuilder 5.11.1, page.jsx:34-51). Nom invalide (doit commencer par une lettre ou _, puis lettres, chiffres, _ . - :) → message « The key \"…\" (in …) can't be an XML element name: … Rename it and convert again. » (page.jsx:11-26). Toute autre erreur → « Invalid JSON: … » (page.jsx:54)."
+  },
+  {
+    "path": "/tools/developer-tools/json-to-yaml",
+    "task": "Convertit un JSON collé en YAML (style bloc), nombres écrits exactement comme dans le JSON.",
+    "inputs": {"accept": null, "formats": ["JSON collé"], "ref": "app/tools/developer-tools/json-to-yaml/page.jsx:25"},
+    "outputs": {"formats": ["YAML (texte, data.yaml)"], "ref": "app/tools/developer-tools/json-to-yaml/page.jsx:26-27"},
+    "controls": [
+      {"label": "JSON Input (texte indicatif {\"name\": \"John\"})", "ref": "app/tools/developer-tools/json-to-yaml/page.jsx:25"},
+      {"label": "YAML Output", "ref": "app/tools/developer-tools/json-to-yaml/page.jsx:26"},
+      {"label": "Convert", "ref": "app/tools/developer-tools/json-to-yaml/page.jsx:31"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/json-to-yaml/page.jsx:32"},
+      {"label": "Download (data.yaml)", "ref": "app/tools/developer-tools/json-to-yaml/page.jsx:27"}
+    ],
+    "steps": ["coller le JSON", "bouton « Convert »", "« Copy » ou « Download » (data.yaml)"],
+    "limits": [{"what": "taille du texte", "value": "aucun plafond ; extrait au-delà de 1,000,000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}],
+    "processing": {"where": "browser", "detail": "js-yaml 4.1.1 (dump, lineWidth -1, noRefs) avec nombres remis à l'identique ; rien n'est envoyé.", "ref": "app/lib/yamlJson.js:46-51"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "Save / Share sur iPhone/iPad.",
+    "twin": null,
+    "notes": "Vérifié en exécutant jsonToYaml : 12345678901234567890 et 1.10 gardés ; chaînes 'yes', 'no', 'on', 'off', 'y', 'null', '123', '2024-01-01', 'Note: important' et la clé 'n' écrites entre apostrophes ; [] et {} vides en style en ligne ; lignes jamais coupées. Erreur → « Invalid JSON: <message du navigateur> » (page.jsx:16)."
+  },
+  {
+    "path": "/tools/developer-tools/json-to-toml",
+    "task": "Convertit un objet JSON collé en TOML (tables, tableaux de tables), le premier niveau devant être un objet.",
+    "inputs": {"accept": null, "formats": ["JSON collé (objet au premier niveau)"], "ref": "app/tools/developer-tools/json-to-toml/page.jsx:37-40,53"},
+    "outputs": {"formats": ["TOML (texte, data.toml)"], "ref": "app/tools/developer-tools/json-to-toml/page.jsx:42,54-55"},
+    "controls": [
+      {"label": "JSON Input (texte indicatif « Paste JSON here... »)", "ref": "app/tools/developer-tools/json-to-toml/page.jsx:53"},
+      {"label": "TOML Output", "ref": "app/tools/developer-tools/json-to-toml/page.jsx:54"},
+      {"label": "Convert", "ref": "app/tools/developer-tools/json-to-toml/page.jsx:60"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/json-to-toml/page.jsx:61"},
+      {"label": "Download (data.toml)", "ref": "app/tools/developer-tools/json-to-toml/page.jsx:55"}
+    ],
+    "steps": ["coller un objet JSON", "bouton « Convert »", "lire l'avis éventuel sur les nombres trop grands", "« Copy » ou « Download » (data.toml)"],
+    "limits": [
+      {"what": "entiers", "value": "jusqu'à 9,223,372,036,854,775,807 (64 bits) ; au-delà écrits en texte entre guillemets, avec un avis", "constant": "LIMIT (local)", "ref": "app/tools/developer-tools/json-to-toml/page.jsx:21-24,58"},
+      {"what": "flottants", "value": "jusqu'à ~1.8e308 ; au-delà (1e400, 1e-400) écrits en texte, avec un avis", "constant": null, "ref": "app/tools/developer-tools/json-to-toml/page.jsx:25-27,58"},
+      {"what": "taille du texte", "value": "aucun plafond ; extrait au-delà de 1,000,000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}
+    ],
+    "processing": {"where": "browser", "detail": "smol-toml 1.8.0 (stringify) après lecture sans perte ; rien n'est envoyé.", "ref": "app/tools/developer-tools/json-to-toml/page.jsx:3-4,15-45"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "Save / Share sur iPhone/iPad.",
+    "twin": null,
+    "notes": "Vérifié en exécutant smol-toml 1.8.0 : objets imbriqués → [a.b] ; tableau d'objets → [[arr]] ; null sur une clé → clé omise ; null dans un tableau → erreur « arrays cannot contain null or undefined values » ; une chaîne date ISO reste une chaîne entre guillemets (PAS de date TOML) ; un nombre JSON 1.0 devient l'entier 1. Erreurs : JSON invalide → « Invalid JSON » sans détail (page.jsx:36) ; premier niveau non objet → « TOML documents are key/value tables at the top level -- wrap your JSON in an object (e.g. { \"items\": ... }) before converting. » (page.jsx:37-39)."
+  },
+  {
+    "path": "/tools/developer-tools/toml-to-json",
+    "task": "Analyse un texte TOML collé et l'écrit en JSON indenté (tables imbriquées, tableaux de tables, dates en texte ISO 8601).",
+    "inputs": {"accept": null, "formats": ["TOML collé"], "ref": "app/tools/developer-tools/toml-to-json/page.jsx:41"},
+    "outputs": {"formats": ["JSON (texte, data.json)"], "ref": "app/tools/developer-tools/toml-to-json/page.jsx:42-43"},
+    "controls": [
+      {"label": "TOML Input (texte indicatif « Paste TOML here... »)", "ref": "app/tools/developer-tools/toml-to-json/page.jsx:41"},
+      {"label": "JSON Output", "ref": "app/tools/developer-tools/toml-to-json/page.jsx:42"},
+      {"label": "Convert", "ref": "app/tools/developer-tools/toml-to-json/page.jsx:48"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/toml-to-json/page.jsx:49"},
+      {"label": "Download (data.json)", "ref": "app/tools/developer-tools/toml-to-json/page.jsx:43"}
+    ],
+    "steps": ["coller le TOML", "bouton « Convert »", "« Copy » ou « Download » (data.json)"],
+    "limits": [{"what": "taille du texte", "value": "aucun plafond ; extrait au-delà de 1,000,000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}],
+    "processing": {"where": "browser", "detail": "smol-toml 1.8.0 parse avec integersAsBigInt: 'asNeeded' ; écriture JSON maison ; rien n'est envoyé.", "ref": "app/tools/developer-tools/toml-to-json/page.jsx:17-33"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "Save / Share sur iPhone/iPad.",
+    "twin": null,
+    "notes": "Entiers de toute taille 64 bits écrits chiffre pour chiffre (9007199254740993 vérifié) ; inf / nan écrits null avec l'avis « JSON has no infinity or NaN: … written as null. » (page.jsx:19,30). Dates (vérifié) : 1979-05-27T07:32:00Z → \"1979-05-27T07:32:00.000Z\", décalage gardé (-07:00), date locale → \"1979-05-27\", heure locale → \"07:32:00.000\", microsecondes tronquées à la milliseconde. Flottants : 1.10 → 1.1. Erreur : « Invalid TOML: Invalid TOML document: … » suivi des lignes numérotées autour de l'erreur (page.jsx:32 ; vérifié). JSON indenté de 2 espaces (page.jsx:21-22)."
+  },
+  {
+    "path": "/tools/developer-tools/tsv-to-csv",
+    "task": "Convertit un texte TSV (tabulations) collé en CSV (virgules), en mettant entre guillemets les valeurs qui l'exigent.",
+    "inputs": {"accept": null, "formats": ["TSV collé (aucun fichier)"], "ref": "app/tools/developer-tools/tsv-to-csv/page.jsx:54"},
+    "outputs": {"formats": ["CSV (texte, data.csv)"], "ref": "app/tools/developer-tools/tsv-to-csv/page.jsx:55-56"},
+    "controls": [
+      {"label": "TSV Input (texte indicatif « Paste TSV here... »)", "ref": "app/tools/developer-tools/tsv-to-csv/page.jsx:54"},
+      {"label": "CSV Output", "ref": "app/tools/developer-tools/tsv-to-csv/page.jsx:55"},
+      {"label": "Convert", "ref": "app/tools/developer-tools/tsv-to-csv/page.jsx:59"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/tsv-to-csv/page.jsx:60"},
+      {"label": "Download (data.csv)", "ref": "app/tools/developer-tools/tsv-to-csv/page.jsx:56"}
+    ],
+    "steps": ["coller le TSV (ex. cellules copiées depuis Excel / Google Sheets / LibreOffice)", "bouton « Convert »", "« Copy » ou « Download » (data.csv)"],
+    "limits": [{"what": "taille du texte", "value": "aucun plafond ; extrait au-delà de 1,000,000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}],
+    "processing": {"where": "browser", "detail": "Analyse maison sur le fil principal ; rien n'est envoyé.", "ref": "app/tools/developer-tools/tsv-to-csv/page.jsx:26-46"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "Save / Share sur iPhone/iPad. Pas de zone de fichier : un fichier déposé n'est pas pris (aucun input file sur la page, FileDropBridge.jsx:16-25).",
+    "twin": "/tools/file-tools/file-converter (sortie CSV : lignes tabulées → CSV RFC 4180, app/tools/file-tools/file-converter/page.jsx:31-36,81)",
+    "notes": "Fins de ligne CRLF, CR ou LF lues ; champ commençant par un guillemet (export Excel) lu comme champ entre guillemets pouvant contenir tabulations, retours à la ligne et \"\" ; guillemet au milieu d'un champ gardé tel quel ; guillemet ouvrant jamais fermé → relu comme texte (page.jsx:22-45). Sortie : valeur avec virgule, guillemet ou retour à la ligne entre guillemets (page.jsx:13-17) ; lignes séparées par CRLF (page.jsx:46). BOM retiré (page.jsx:31). Aucun message d'erreur possible."
+  },
+  {
+    "path": "/tools/developer-tools/xml-to-json",
+    "task": "Convertit un XML collé en JSON indenté, attributs gardés en clés « @_ » et texte en « #text », valeurs gardées en texte.",
+    "inputs": {"accept": null, "formats": ["XML collé"], "ref": "app/tools/developer-tools/xml-to-json/page.jsx:57"},
+    "outputs": {"formats": ["JSON (texte, data.json)"], "ref": "app/tools/developer-tools/xml-to-json/page.jsx:36,58-59"},
+    "controls": [
+      {"label": "XML Input (texte indicatif « Paste XML here... »)", "ref": "app/tools/developer-tools/xml-to-json/page.jsx:57"},
+      {"label": "JSON Output", "ref": "app/tools/developer-tools/xml-to-json/page.jsx:58"},
+      {"label": "Convert (« Converting… » pendant le chargement)", "ref": "app/tools/developer-tools/xml-to-json/page.jsx:64"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/xml-to-json/page.jsx:65"},
+      {"label": "Download (data.json)", "ref": "app/tools/developer-tools/xml-to-json/page.jsx:59"}
+    ],
+    "steps": ["coller le XML", "bouton « Convert »", "lire l'avis éventuel sur le texte mêlé aux balises", "« Copy » ou « Download » (data.json)"],
+    "limits": [{"what": "taille du texte", "value": "aucun plafond ; extrait au-delà de 1,000,000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}],
+    "processing": {"where": "browser", "detail": "fast-xml-parser 5.11.1 (XMLValidator + XMLParser, chargé au clic) ; rien n'est envoyé.", "ref": "app/tools/developer-tools/xml-to-json/page.jsx:20-36"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "Save / Share sur iPhone/iPad.",
+    "twin": null,
+    "notes": "Options : ignoreAttributes false, préfixe @_, textNodeName #text, déclaration <?xml?> retirée, parseTagValue false (0612345678, 01234, 1.10 gardés) (page.jsx:25-34). Vérifié : éléments frères répétés → tableau ; CDATA fusionné dans le texte ; élément vide <e/> → \"\" ; attributs en texte (\"007\" gardé). Texte mêlé aux balises → avis « <p> mixes text and tags: JSON keeps the text parts joined in \"#text\", without their place among the tags (and without the spaces around them). » (page.jsx:38-43). Erreur : « Invalid XML: <message du validateur> », ex. « Expected closing tag 'b' (opened in line 1, col 4) instead of closing tag 'a'. » (page.jsx:21-23,45 ; vérifié)."
+  },
+  {
+    "path": "/tools/developer-tools/yaml-to-json",
+    "task": "Analyse un YAML collé (schéma noyau YAML 1.2) et l'écrit en JSON indenté ; plusieurs documents --- donnent un tableau JSON.",
+    "inputs": {"accept": null, "formats": ["YAML collé"], "ref": "app/tools/developer-tools/yaml-to-json/page.jsx:25"},
+    "outputs": {"formats": ["JSON (texte, data.json)"], "ref": "app/tools/developer-tools/yaml-to-json/page.jsx:26-27"},
+    "controls": [
+      {"label": "YAML Input (texte indicatif « name: John / age: 30 » sur deux lignes)", "ref": "app/tools/developer-tools/yaml-to-json/page.jsx:25"},
+      {"label": "JSON Output", "ref": "app/tools/developer-tools/yaml-to-json/page.jsx:26"},
+      {"label": "Convert", "ref": "app/tools/developer-tools/yaml-to-json/page.jsx:31"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/yaml-to-json/page.jsx:32"},
+      {"label": "Download (data.json)", "ref": "app/tools/developer-tools/yaml-to-json/page.jsx:27"}
+    ],
+    "steps": ["coller le YAML", "bouton « Convert »", "« Copy » ou « Download » (data.json)"],
+    "limits": [{"what": "taille du texte", "value": "aucun plafond ; extrait au-delà de 1,000,000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}],
+    "processing": {"where": "browser", "detail": "js-yaml 4.1.1 loadAll avec schéma FAILSAFE + null, bool, entiers exacts, float, merge ; rien n'est envoyé.", "ref": "app/lib/yamlJson.js:53-91"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "Save / Share sur iPhone/iPad.",
+    "twin": null,
+    "notes": "Vérifié en exécutant yamlToJson : entiers exacts au-delà de 2^53 ; 0x1F → 31 ; 1_000 → 1000 ; MAIS flottants via double : 1.10 → 1.1, 3.141592653589793238 → 3.141592653589793, 1e3 → 1000 ; 0012 → 12. yes / NO restent du texte ; True → true ; ~ → null ; 2024-01-01 reste du texte ; ancres / alias résolus ; clé de fusion <<: *base appliquée ; | multi-ligne → une chaîne. Refusés (« Invalid YAML: unknown tag … (ligne:colonne) ») : !Ref, !Sub, !!binary, !!timestamp ; !!str accepté. .inf / .nan → erreur « a is .inf, which JSON cannot represent. Replace it with a number, a string or null. » (yamlJson.js:73-81). Erreur de syntaxe avec ligne:colonne, ex. « missed comma between flow collection entries (2:1) ». Texte vide → null."
+  },
+  {
+    "path": "/tools/developer-tools/sql-to-csv",
+    "task": "Extrait les lignes des instructions INSERT INTO … VALUES (…) d'un texte SQL collé et les écrit en CSV, une table à la fois.",
+    "inputs": {"accept": null, "formats": ["texte SQL collé (INSERT)"], "ref": "app/tools/developer-tools/sql-to-csv/page.jsx:28"},
+    "outputs": {"formats": ["CSV (texte, data.csv)"], "ref": "app/tools/developer-tools/sql-to-csv/page.jsx:29-30"},
+    "controls": [
+      {"label": "SQL Input (texte indicatif « INSERT INTO... »)", "ref": "app/tools/developer-tools/sql-to-csv/page.jsx:28"},
+      {"label": "CSV Output", "ref": "app/tools/developer-tools/sql-to-csv/page.jsx:29"},
+      {"label": "Convert table <nom> (un bouton par table quand le SQL en vise plusieurs)", "ref": "app/tools/developer-tools/sql-to-csv/page.jsx:33"},
+      {"label": "Convert", "ref": "app/tools/developer-tools/sql-to-csv/page.jsx:35"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/sql-to-csv/page.jsx:36"},
+      {"label": "Download (data.csv)", "ref": "app/tools/developer-tools/sql-to-csv/page.jsx:30"}
+    ],
+    "steps": ["coller le SQL", "bouton « Convert »", "si plusieurs tables : bouton « Convert table <nom> »", "« Copy » ou « Download » (data.csv)"],
+    "limits": [{"what": "taille du texte", "value": "aucun plafond ; extrait au-delà de 1,000,000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}],
+    "processing": {"where": "browser", "detail": "Analyse maison (sqlToCsv.js) ; le SQL n'est pas envoyé ; un message d'erreur affiché est envoyé nettoyé à /api/report-error et peut contenir des noms de tables/colonnes non masqués.", "ref": "app/tools/developer-tools/sql-to-csv/sqlToCsv.js:70-114; page.jsx:13,19; app/lib/useToolError.js:28-29; app/lib/reportError.js:115-117"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "Save / Share sur iPhone/iPad.",
+    "twin": null,
+    "notes": "Lit INSERT et INSERT IGNORE, noms en `…`, \"…\", […], schema.table (sqlToCsv.js:64-67) ; INSERT multi-lignes VALUES (…), (…) (:102-110) ; sans liste de colonnes → en-têtes column_1, column_2… (:95). Valeurs : NULL → champ VIDE (:56, vérifié) ; '' et \\' → ' ; chaînes MySQL \"…\" lues ; autres séquences \\ gardées (C:\\temp\\new intact, vérifié) ; appels de fonction NOW() gardés en texte « NOW() » (vérifié) ; virgule / parenthèse dans une chaîne gardées (:20-49). Sortie : virgule seule, champs avec virgule/guillemet/retour à la ligne entre guillemets, lignes \\n (:10-14,114). Erreurs : « No INSERT statements found » (:113) ; « This SQL inserts into N tables (a, b); a CSV holds one table. Choose the table to convert. » (:77) ; « The INSERT statements for t list their columns in different orders or sets (…): the rows would not line up. » (:99). Exemple de la page vérifié identique à la sortie réelle."
+  },
+  {
+    "path": "/tools/developer-tools/env-to-json",
+    "task": "Convertit le contenu d'un fichier .env collé en objet JSON, et un objet JSON en lignes .env, selon les règles de la bibliothèque dotenv.",
+    "inputs": {"accept": null, "formats": ["texte .env collé", "objet JSON collé (sens inverse)"], "ref": "app/tools/developer-tools/env-to-json/page.jsx:35"},
+    "outputs": {"formats": ["JSON (texte)", ".env (texte)", "fichier env.json (même nom dans les deux sens)"], "ref": "app/tools/developer-tools/env-to-json/page.jsx:16-26,36-37"},
+    "controls": [
+      {"label": "Input (texte indicatif « KEY=value... »)", "ref": "app/tools/developer-tools/env-to-json/page.jsx:35"},
+      {"label": "Output", "ref": "app/tools/developer-tools/env-to-json/page.jsx:36"},
+      {"label": "Convert numbers, true/false and null to JSON types", "ref": "app/tools/developer-tools/env-to-json/page.jsx:40"},
+      {"label": "Expand ${VAR} references", "ref": "app/tools/developer-tools/env-to-json/page.jsx:41"},
+      {"label": ".env to JSON", "ref": "app/tools/developer-tools/env-to-json/page.jsx:46"},
+      {"label": "JSON to .env", "ref": "app/tools/developer-tools/env-to-json/page.jsx:47"},
+      {"label": "Copy", "ref": "app/tools/developer-tools/env-to-json/page.jsx:48"},
+      {"label": "Download (env.json)", "ref": "app/tools/developer-tools/env-to-json/page.jsx:37"}
+    ],
+    "steps": ["coller le .env (ou un objet JSON)", "cocher au besoin « Convert numbers, true/false and null to JSON types » et « Expand ${VAR} references » (sens .env → JSON seulement)", "bouton « .env to JSON » ou « JSON to .env »", "« Copy » ou « Download »"],
+    "limits": [{"what": "taille du texte", "value": "aucun plafond ; extrait au-delà de 1,000,000 caractères", "constant": "LIMIT", "ref": "app/components/TextArea.jsx:17-18"}],
+    "processing": {"where": "browser", "detail": "app/lib/dotenv.js (expression de ligne reprise de dotenv lib/main.js, licence MIT) ; rien n'est envoyé.", "ref": "app/lib/dotenv.js:12-17,69-111"},
+    "quota": "aucune",
+    "signup": "aucune inscription demandée (vérifié)",
+    "watermark": "sans objet",
+    "browsers": "Save / Share sur iPhone/iPad.",
+    "twin": null,
+    "notes": "Égalité avec dotenv.parse / dotenv-expand vérifiée par le dépôt (docs/audit/RAPPORT-qualite-29-09.md:51,136). Lu : export KEY=, KEY=value, KEY: value, apostrophes littérales, guillemets avec \\n et \\r, accents graves, valeurs multi-lignes entre guillemets, # hors guillemets = commentaire (dotenv.js:12-45). Note après conversion : « N variables — lines a, b are not KEY=value and were skipped » (page.jsx:19). Doublon : la dernière définition gagne (dotenv.js:76-78). Types (option) : true, false, null, nombres qui se réécrivent à l'identique ; 007 et 1.10 restent texte (dotenv.js:49-55). Expansion (option) : ${VAR}, ${VAR:-défaut}, $VAR depuis les variables déjà définies, \\$ = dollar littéral (dotenv.js:57-67) ; vérifié : une valeur entre apostrophes est AUSSI développée quand l'option est cochée ('lit $A' → « lit 1 ») — à confronter à dotenv-expand avant de l'écrire. JSON → .env : guillemets choisis pour une relecture identique, null → vide, objet/tableau imbriqué → texte JSON, nombres exacts (dotenv.js:83-100) ; erreurs « The JSON must be an object of KEY: value pairs. », « \"k\" is not a valid .env variable name (letters, digits, _ . - only). », « A value contains single quotes, double quotes, backslashes and backticks together; no .env quoting can represent it exactly. » (dotenv.js:99,104,107) ; JSON invalide → « Invalid JSON: … » (page.jsx:26). Défaut de code à signaler : le fichier téléchargé s'appelle env.json même quand la sortie est du .env (page.jsx:37)."
+  }
+]

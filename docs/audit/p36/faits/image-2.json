@@ -1,0 +1,1890 @@
+[
+  {
+    "path": "/tools/image-tools/add-border-to-image",
+    "task": "Ajoute une bordure de couleur unie autour d'une image, qui agrandit l'image de la largeur choisie de chaque côté.",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "toute image que le navigateur sait ouvrir (JPG, PNG, WebP, GIF, BMP, AVIF ; HEIC et TIFF seulement dans Safari)",
+        "animée (GIF/APNG/WebP) : première image seulement, annoncé"
+      ],
+      "ref": "app/tools/image-tools/add-border-to-image/page.jsx:61; app/lib/fileChecks.js:203-215; app/components/AnimatedImageNote.jsx:5-20"
+    },
+    "outputs": {
+      "formats": [
+        "JPG si JPG en entrée (qualité 92)",
+        "WebP si WebP en entrée (qualité 92 ; libwebp WebAssembly sur Safari)",
+        "PNG pour un PNG et pour tout autre type (GIF, BMP, AVIF, HEIC/TIFF ouverts par Safari…)"
+      ],
+      "ref": "app/tools/image-tools/add-border-to-image/page.jsx:48; app/lib/imageOutput.js:120-142"
+    },
+    "controls": [
+      {
+        "label": "Click or drop an image here (ordinateur) / Choose an image (écran tactile)",
+        "ref": "app/tools/image-tools/add-border-to-image/page.jsx:60; app/components/UploadPrompt.jsx:32-33"
+      },
+      {
+        "label": "Border Width: {n}px (curseur 1-100, défaut 10)",
+        "ref": "app/tools/image-tools/add-border-to-image/page.jsx:16,65"
+      },
+      {
+        "label": "Border Color (sélecteur de couleur, défaut #000000)",
+        "ref": "app/tools/image-tools/add-border-to-image/page.jsx:17,66"
+      },
+      {
+        "label": "Add Border",
+        "ref": "app/tools/image-tools/add-border-to-image/page.jsx:67"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "choisir une image",
+      "régler « Border Width » et « Border Color »",
+      "bouton « Add Border »",
+      "aperçu puis bouton « Download »"
+    ],
+    "limits": [
+      {
+        "what": "taille max par image (ordinateur)",
+        "value": "268 435 456 pixels (268 Mpx) : refus avec message avant décodage",
+        "constant": "RASTER_MAX_PIXELS",
+        "ref": "app/lib/imageOutput.js:77-81"
+      },
+      {
+        "what": "taille max par image sur iPhone/iPad",
+        "value": "même plafond de 268 Mpx dans le code ; au-delà de 16 777 216 px (limite de canvas iOS) l'image est traitée par bandes au lieu d'être refusée ; 24 et 48 Mpx testés en simulation iPhone (42/42) ; aucune limite mémoire propre au téléphone dans le code",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/lib/bigImage.js:1-19; app/lib/imageOutput.js:98-118,160-195; docs/audit/RAPPORT-p16-photos-iphone-30-09.md:95"
+      },
+      {
+        "what": "taille max sur Android",
+        "value": "NON TROUVÉ — aucune règle propre à Android ; le test du canvas 4097×4097 décide du découpage en bandes (cherché : app/lib/bigImage.js, app/lib/imageOutput.js, app/lib/isMobileDevice.js non importé)",
+        "constant": null,
+        "ref": "app/lib/bigImage.js:118-138"
+      },
+      {
+        "what": "sortie WebP",
+        "value": "16 383 px de côté au plus (limite du format)",
+        "constant": "WEBP_MAX_SIDE",
+        "ref": "app/lib/bigImage.js:221-224"
+      },
+      {
+        "what": "poids max du fichier en octets",
+        "value": "NON TROUVÉ — aucune limite en octets (cherché : page.jsx, app/lib/imageOutput.js, app/lib/bigImage.js, app/lib/fileChecks.js)",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:77-89"
+      },
+      {
+        "what": "nombre d'images / d'utilisations",
+        "value": "une image à la fois, aucun quota",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:78"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Tout est calculé dans la page (canvas, et WebAssembly pour certains encodages) ; le fichier n'est envoyé à aucun serveur. Seul le TEXTE d'un message d'erreur affiché part vers /api/report-error (sans fichier ni nom de fichier). Les encodeurs MozJPEG/libwebp sont téléchargés depuis /wasm/ du site quand il le faut (WebP sous Safari, image de plus de 16,7 Mpx sur iPhone). Le résultat est une adresse blob: locale ; rien n'est conservé après fermeture de la page.",
+      "ref": "app/lib/useToolError.js:38-43,55-66; app/lib/reportError.js:16,163-169; app/lib/bigImage.js:179-196; app/lib/imageOutput.js:147-149"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : le rendu ne dessine que la bordure et l'image, page.jsx:40-47)",
+    "browsers": "iPhone/iPad : au-delà de 16,7 Mpx l'image est décodée et traitée par bandes (app/lib/bigImage.js:1-19, app/lib/imageOutput.js:160-195) ; écriture d'un grand PNG sans canvas : CompressionStream requis (Safari 16.4+, app/lib/bigImage.js:246) ; Safari n'encode pas le WebP : libwebp WebAssembly (app/lib/imageOutput.js:120-141) ; bouton « Save / Share » en plus de « Download » sur iPhone/iPad (app/components/FileDownload.jsx:91-96,213-218) ; le navigateur demande confirmation avant de quitter tant que le résultat n'a pas été pris (app/components/FileDownload.jsx:69-81)",
+    "twin": "/tools/image-tools/image-editor (onglet Decorate, « Border Width » 0-20 px tracée À L'INTÉRIEUR de l'image, image-editor/page.tsx:168-172,313)",
+    "notes": "Image finale = (largeur + 2×bordure) × (hauteur + 2×bordure) (page.jsx:40) ; les zones transparentes restent transparentes, seule la bande de bordure est peinte (page.jsx:41-46). fichier résultat nommé <nom d'origine>-border.<jpg|webp|png> (app/lib/download.js:108-111). Un clic repart toujours du fichier d'origine. Message d'erreur générique : « Could not process this image. » (page.jsx:49)."
+  },
+  {
+    "path": "/tools/image-tools/add-noise",
+    "task": "Ajoute un grain aléatoire (bruit uniforme) à chaque pixel, monochrome ou couleur.",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "toute image que le navigateur sait ouvrir (JPG, PNG, WebP, GIF, BMP, AVIF ; HEIC et TIFF seulement dans Safari)",
+        "animée (GIF/APNG/WebP) : première image seulement, annoncé"
+      ],
+      "ref": "app/tools/image-tools/add-noise/page.jsx:72; app/lib/fileChecks.js:203-215; app/components/AnimatedImageNote.jsx:5-20"
+    },
+    "outputs": {
+      "formats": [
+        "JPG si JPG en entrée (qualité 92)",
+        "WebP si WebP en entrée (qualité 92 ; libwebp WebAssembly sur Safari)",
+        "PNG pour un PNG et pour tout autre type (GIF, BMP, AVIF, HEIC/TIFF ouverts par Safari…)"
+      ],
+      "ref": "app/tools/image-tools/add-noise/page.jsx:59; app/lib/imageOutput.js:120-142"
+    },
+    "controls": [
+      {
+        "label": "Click or drop an image here (ordinateur) / Choose an image (écran tactile)",
+        "ref": "app/tools/image-tools/add-noise/page.jsx:71; app/components/UploadPrompt.jsx:32-33"
+      },
+      {
+        "label": "Intensity: {n} (curseur 1-100, défaut 30)",
+        "ref": "app/tools/image-tools/add-noise/page.jsx:16,76"
+      },
+      {
+        "label": "Colour noise (each colour channel its own grain) (case, décochée par défaut)",
+        "ref": "app/tools/image-tools/add-noise/page.jsx:17,77"
+      },
+      {
+        "label": "Add Noise",
+        "ref": "app/tools/image-tools/add-noise/page.jsx:78"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "choisir une image",
+      "régler « Intensity », cocher éventuellement « Colour noise »",
+      "bouton « Add Noise »",
+      "aperçu puis « Download »"
+    ],
+    "limits": [
+      {
+        "what": "taille max par image (ordinateur)",
+        "value": "268 435 456 pixels (268 Mpx) : refus avec message avant décodage",
+        "constant": "RASTER_MAX_PIXELS",
+        "ref": "app/lib/imageOutput.js:77-81"
+      },
+      {
+        "what": "taille max par image sur iPhone/iPad",
+        "value": "même plafond de 268 Mpx dans le code ; au-delà de 16 777 216 px (limite de canvas iOS) l'image est traitée par bandes au lieu d'être refusée ; 24 et 48 Mpx testés en simulation iPhone (42/42) ; aucune limite mémoire propre au téléphone dans le code",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/lib/bigImage.js:1-19; app/lib/imageOutput.js:98-118,160-195; docs/audit/RAPPORT-p16-photos-iphone-30-09.md:95"
+      },
+      {
+        "what": "taille max sur Android",
+        "value": "NON TROUVÉ — aucune règle propre à Android ; le test du canvas 4097×4097 décide du découpage en bandes (cherché : app/lib/bigImage.js, app/lib/imageOutput.js, app/lib/isMobileDevice.js non importé)",
+        "constant": null,
+        "ref": "app/lib/bigImage.js:118-138"
+      },
+      {
+        "what": "sortie WebP",
+        "value": "16 383 px de côté au plus (limite du format)",
+        "constant": "WEBP_MAX_SIDE",
+        "ref": "app/lib/bigImage.js:221-224"
+      },
+      {
+        "what": "poids max du fichier en octets",
+        "value": "NON TROUVÉ — aucune limite en octets (cherché : page.jsx, app/lib/imageOutput.js, app/lib/bigImage.js, app/lib/fileChecks.js)",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:77-89"
+      },
+      {
+        "what": "nombre d'images / d'utilisations",
+        "value": "une image à la fois, aucun quota",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:78"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Tout est calculé dans la page (canvas, et WebAssembly pour certains encodages) ; le fichier n'est envoyé à aucun serveur. Seul le TEXTE d'un message d'erreur affiché part vers /api/report-error (sans fichier ni nom de fichier). Les encodeurs MozJPEG/libwebp sont téléchargés depuis /wasm/ du site quand il le faut (WebP sous Safari, image de plus de 16,7 Mpx sur iPhone). Le résultat est une adresse blob: locale ; rien n'est conservé après fermeture de la page.",
+      "ref": "app/lib/useToolError.js:38-43,55-66; app/lib/reportError.js:16,163-169; app/lib/bigImage.js:179-196; app/lib/imageOutput.js:147-149"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:39-58)",
+    "browsers": "iPhone/iPad : au-delà de 16,7 Mpx l'image est décodée et traitée par bandes (app/lib/bigImage.js:1-19, app/lib/imageOutput.js:160-195) ; écriture d'un grand PNG sans canvas : CompressionStream requis (Safari 16.4+, app/lib/bigImage.js:246) ; Safari n'encode pas le WebP : libwebp WebAssembly (app/lib/imageOutput.js:120-141) ; bouton « Save / Share » en plus de « Download » sur iPhone/iPad (app/components/FileDownload.jsx:91-96,213-218) ; le navigateur demande confirmation avant de quitter tant que le résultat n'a pas été pris (app/components/FileDownload.jsx:69-81)",
+    "twin": "/tools/image-tools/image-editor (onglet Effects, « Noise / Grain » 0-50, image-editor/page.tsx:136-143,306)",
+    "notes": "Bruit entier uniforme entre −intensité et +intensité (générateur xorshift32 amorcé par crypto.getRandomValues), même valeur sur R, G, B en monochrome, un tirage par canal en couleur (page.jsx:42-56) ; alpha inchangé. Pas de gaussien ni de sel-et-poivre. fichier résultat nommé <nom d'origine>-noise.<jpg|webp|png> (app/lib/download.js:108-111)."
+  },
+  {
+    "path": "/tools/image-tools/add-text-to-image",
+    "task": "Écrit un texte d'une ou plusieurs lignes sur une image, avec police, taille, couleur, position, opacité, rotation, contour et ombre.",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "toute image que le navigateur sait ouvrir (JPG, PNG, WebP, GIF, BMP, AVIF ; HEIC et TIFF seulement dans Safari)",
+        "animée (GIF/APNG/WebP) : première image seulement, annoncé"
+      ],
+      "ref": "app/tools/image-tools/add-text-to-image/page.jsx:95; app/lib/fileChecks.js:203-215; app/components/AnimatedImageNote.jsx:5-20"
+    },
+    "outputs": {
+      "formats": [
+        "JPG si JPG en entrée (qualité 92)",
+        "WebP si WebP en entrée (qualité 92 ; libwebp WebAssembly sur Safari)",
+        "PNG pour un PNG et pour tout autre type (GIF, BMP, AVIF, HEIC/TIFF ouverts par Safari…)"
+      ],
+      "ref": "app/tools/image-tools/add-text-to-image/page.jsx:82; app/lib/imageOutput.js:120-142"
+    },
+    "controls": [
+      {
+        "label": "Click or drop an image here (ordinateur) / Choose an image (écran tactile)",
+        "ref": "app/tools/image-tools/add-text-to-image/page.jsx:94; app/components/UploadPrompt.jsx:32-33"
+      },
+      {
+        "label": "Text (Enter for a new line) (zone de texte, défaut « Hello World »)",
+        "ref": "app/tools/image-tools/add-text-to-image/page.jsx:27,99"
+      },
+      {
+        "label": "Font Size: {n}px (10-800, défaut 40, en pixels de l'image réelle)",
+        "ref": "app/tools/image-tools/add-text-to-image/page.jsx:28,101"
+      },
+      {
+        "label": "Color (défaut #ffffff)",
+        "ref": "app/tools/image-tools/add-text-to-image/page.jsx:29,102"
+      },
+      {
+        "label": "X Position: {n}% / Y Position: {n}% (0-100, défaut 50)",
+        "ref": "app/tools/image-tools/add-text-to-image/page.jsx:105-106"
+      },
+      {
+        "label": "Font : Arial / Helvetica, Impact (memes), Georgia / Times (serif), Courier (typewriter), Verdana, Comic Sans",
+        "ref": "app/tools/image-tools/add-text-to-image/page.jsx:16-23,110"
+      },
+      {
+        "label": "Bold (coché par défaut), Italic, Shadow",
+        "ref": "app/tools/image-tools/add-text-to-image/page.jsx:33-34,39,112-114"
+      },
+      {
+        "label": "Opacity: {n}% (10-100 %)",
+        "ref": "app/tools/image-tools/add-text-to-image/page.jsx:116"
+      },
+      {
+        "label": "Rotation: {n}° (−180 à 180)",
+        "ref": "app/tools/image-tools/add-text-to-image/page.jsx:117"
+      },
+      {
+        "label": "Outline: {n}px (0-30) + Outline colour (affiché si > 0, défaut #000000)",
+        "ref": "app/tools/image-tools/add-text-to-image/page.jsx:118-119"
+      },
+      {
+        "label": "Apply Text",
+        "ref": "app/tools/image-tools/add-text-to-image/page.jsx:121"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "choisir une image",
+      "taper le texte (Entrée = nouvelle ligne), régler police, taille, couleur, gras/italique, ombre, opacité, rotation, contour",
+      "placer avec « X Position » / « Y Position » (centre du texte)",
+      "bouton « Apply Text »",
+      "aperçu puis « Download »"
+    ],
+    "limits": [
+      {
+        "what": "taille max par image (ordinateur)",
+        "value": "268 435 456 pixels (268 Mpx) : refus avec message avant décodage",
+        "constant": "RASTER_MAX_PIXELS",
+        "ref": "app/lib/imageOutput.js:77-81"
+      },
+      {
+        "what": "taille max par image sur iPhone/iPad",
+        "value": "même plafond de 268 Mpx dans le code ; au-delà de 16 777 216 px (limite de canvas iOS) l'image est traitée par bandes au lieu d'être refusée ; 24 et 48 Mpx testés en simulation iPhone (42/42) ; aucune limite mémoire propre au téléphone dans le code",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/lib/bigImage.js:1-19; app/lib/imageOutput.js:98-118,160-195; docs/audit/RAPPORT-p16-photos-iphone-30-09.md:95"
+      },
+      {
+        "what": "taille max sur Android",
+        "value": "NON TROUVÉ — aucune règle propre à Android ; le test du canvas 4097×4097 décide du découpage en bandes (cherché : app/lib/bigImage.js, app/lib/imageOutput.js, app/lib/isMobileDevice.js non importé)",
+        "constant": null,
+        "ref": "app/lib/bigImage.js:118-138"
+      },
+      {
+        "what": "sortie WebP",
+        "value": "16 383 px de côté au plus (limite du format)",
+        "constant": "WEBP_MAX_SIDE",
+        "ref": "app/lib/bigImage.js:221-224"
+      },
+      {
+        "what": "poids max du fichier en octets",
+        "value": "NON TROUVÉ — aucune limite en octets (cherché : page.jsx, app/lib/imageOutput.js, app/lib/bigImage.js, app/lib/fileChecks.js)",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:77-89"
+      },
+      {
+        "what": "nombre d'images / d'utilisations",
+        "value": "une image à la fois, aucun quota",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:78"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Tout est calculé dans la page (canvas, et WebAssembly pour certains encodages) ; le fichier n'est envoyé à aucun serveur. Seul le TEXTE d'un message d'erreur affiché part vers /api/report-error (sans fichier ni nom de fichier). Les encodeurs MozJPEG/libwebp sont téléchargés depuis /wasm/ du site quand il le faut (WebP sous Safari, image de plus de 16,7 Mpx sur iPhone). Le résultat est une adresse blob: locale ; rien n'est conservé après fermeture de la page.",
+      "ref": "app/lib/useToolError.js:38-43,55-66; app/lib/reportError.js:16,163-169; app/lib/bigImage.js:179-196; app/lib/imageOutput.js:147-149"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : seul le texte de l'utilisateur est dessiné, page.jsx:62-81)",
+    "browsers": "iPhone/iPad : au-delà de 16,7 Mpx l'image est décodée et traitée par bandes (app/lib/bigImage.js:1-19, app/lib/imageOutput.js:160-195) ; écriture d'un grand PNG sans canvas : CompressionStream requis (Safari 16.4+, app/lib/bigImage.js:246) ; Safari n'encode pas le WebP : libwebp WebAssembly (app/lib/imageOutput.js:120-141) ; bouton « Save / Share » en plus de « Download » sur iPhone/iPad (app/components/FileDownload.jsx:91-96,213-218) ; le navigateur demande confirmation avant de quitter tant que le résultat n'a pas été pris (app/components/FileDownload.jsx:69-81) ; polices = polices du système avec repli : une police absente de l'appareil est remplacée par une voisine (page.jsx:14-15)",
+    "twin": "/tools/image-tools/image-editor (onglet Decorate, « Text » une ligne, Arial 12-72 px, en haut à gauche, image-editor/page.tsx:173-176,315-317)",
+    "notes": "Un seul bloc de texte : un nouveau clic repart de l'original (pas d'empilement). Pas d'aperçu en direct (rendu au clic). Bouton désactivé si le texte est vide (page.jsx:121). Interligne 1,2 × taille, texte centré sur le point X/Y (page.jsx:66,72). Ombre : noir 60 %, flou taille/8, décalage taille/16 (page.jsx:70). fichier résultat nommé <nom d'origine>-text.<jpg|webp|png> (app/lib/download.js:108-111)."
+  },
+  {
+    "path": "/tools/image-tools/add-vignette",
+    "task": "Assombrit les bords d'une image par un dégradé radial noir, avec une zone centrale intacte réglable.",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "toute image que le navigateur sait ouvrir (JPG, PNG, WebP, GIF, BMP, AVIF ; HEIC et TIFF seulement dans Safari)",
+        "animée (GIF/APNG/WebP) : première image seulement, annoncé"
+      ],
+      "ref": "app/tools/image-tools/add-vignette/page.jsx:62; app/lib/fileChecks.js:203-215; app/components/AnimatedImageNote.jsx:5-20"
+    },
+    "outputs": {
+      "formats": [
+        "JPG si JPG en entrée (qualité 92)",
+        "WebP si WebP en entrée (qualité 92 ; libwebp WebAssembly sur Safari)",
+        "PNG pour un PNG et pour tout autre type (GIF, BMP, AVIF, HEIC/TIFF ouverts par Safari…)"
+      ],
+      "ref": "app/tools/image-tools/add-vignette/page.jsx:50; app/lib/imageOutput.js:120-142"
+    },
+    "controls": [
+      {
+        "label": "Click or drop an image here (ordinateur) / Choose an image (écran tactile)",
+        "ref": "app/tools/image-tools/add-vignette/page.jsx:61; app/components/UploadPrompt.jsx:32-33"
+      },
+      {
+        "label": "Intensity: {n}% (1-100, défaut 50)",
+        "ref": "app/tools/image-tools/add-vignette/page.jsx:15,66"
+      },
+      {
+        "label": "Clear centre: {n}% (0-90, défaut 0)",
+        "ref": "app/tools/image-tools/add-vignette/page.jsx:16,67"
+      },
+      {
+        "label": "Add Vignette",
+        "ref": "app/tools/image-tools/add-vignette/page.jsx:68"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "choisir une image",
+      "régler « Intensity » et « Clear centre »",
+      "bouton « Add Vignette »",
+      "aperçu puis « Download »"
+    ],
+    "limits": [
+      {
+        "what": "taille max par image (ordinateur)",
+        "value": "268 435 456 pixels (268 Mpx) : refus avec message avant décodage",
+        "constant": "RASTER_MAX_PIXELS",
+        "ref": "app/lib/imageOutput.js:77-81"
+      },
+      {
+        "what": "taille max par image sur iPhone/iPad",
+        "value": "même plafond de 268 Mpx dans le code ; au-delà de 16 777 216 px (limite de canvas iOS) l'image est traitée par bandes au lieu d'être refusée ; 24 et 48 Mpx testés en simulation iPhone (42/42) ; aucune limite mémoire propre au téléphone dans le code",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/lib/bigImage.js:1-19; app/lib/imageOutput.js:98-118,160-195; docs/audit/RAPPORT-p16-photos-iphone-30-09.md:95"
+      },
+      {
+        "what": "taille max sur Android",
+        "value": "NON TROUVÉ — aucune règle propre à Android ; le test du canvas 4097×4097 décide du découpage en bandes (cherché : app/lib/bigImage.js, app/lib/imageOutput.js, app/lib/isMobileDevice.js non importé)",
+        "constant": null,
+        "ref": "app/lib/bigImage.js:118-138"
+      },
+      {
+        "what": "sortie WebP",
+        "value": "16 383 px de côté au plus (limite du format)",
+        "constant": "WEBP_MAX_SIDE",
+        "ref": "app/lib/bigImage.js:221-224"
+      },
+      {
+        "what": "poids max du fichier en octets",
+        "value": "NON TROUVÉ — aucune limite en octets (cherché : page.jsx, app/lib/imageOutput.js, app/lib/bigImage.js, app/lib/fileChecks.js)",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:77-89"
+      },
+      {
+        "what": "nombre d'images / d'utilisations",
+        "value": "une image à la fois, aucun quota",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:78"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Tout est calculé dans la page (canvas, et WebAssembly pour certains encodages) ; le fichier n'est envoyé à aucun serveur. Seul le TEXTE d'un message d'erreur affiché part vers /api/report-error (sans fichier ni nom de fichier). Les encodeurs MozJPEG/libwebp sont téléchargés depuis /wasm/ du site quand il le faut (WebP sous Safari, image de plus de 16,7 Mpx sur iPhone). Le résultat est une adresse blob: locale ; rien n'est conservé après fermeture de la page.",
+      "ref": "app/lib/useToolError.js:38-43,55-66; app/lib/reportError.js:16,163-169; app/lib/bigImage.js:179-196; app/lib/imageOutput.js:147-149"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:37-49)",
+    "browsers": "iPhone/iPad : au-delà de 16,7 Mpx l'image est décodée et traitée par bandes (app/lib/bigImage.js:1-19, app/lib/imageOutput.js:160-195) ; écriture d'un grand PNG sans canvas : CompressionStream requis (Safari 16.4+, app/lib/bigImage.js:246) ; Safari n'encode pas le WebP : libwebp WebAssembly (app/lib/imageOutput.js:120-141) ; bouton « Save / Share » en plus de « Download » sur iPhone/iPad (app/components/FileDownload.jsx:91-96,213-218) ; le navigateur demande confirmation avant de quitter tant que le résultat n'a pas été pris (app/components/FileDownload.jsx:69-81)",
+    "twin": "/tools/image-tools/image-editor (onglet Effects, « Vignette » 0-100 %, image-editor/page.tsx:144-156,307)",
+    "notes": "Dégradé radial du centre (transparent) à un rayon de max(largeur, hauteur)/2 (noir à intensité %) ; « Clear centre » place un arrêt transparent à size % (plafonné à 95 %) (page.jsx:39-42). Dessiné seulement sur les pixels non transparents (source-atop, page.jsx:44-48) : un logo transparent n'a pas de halo. fichier résultat nommé <nom d'origine>-vignette.<jpg|webp|png> (app/lib/download.js:108-111)."
+  },
+  {
+    "path": "/tools/image-tools/brightness-contrast",
+    "task": "Règle la luminosité, le contraste et la saturation d'une image.",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "toute image que le navigateur sait ouvrir (JPG, PNG, WebP, GIF, BMP, AVIF ; HEIC et TIFF seulement dans Safari)",
+        "animée (GIF/APNG/WebP) : première image seulement, annoncé"
+      ],
+      "ref": "app/tools/image-tools/brightness-contrast/page.jsx:57; app/lib/fileChecks.js:203-215; app/components/AnimatedImageNote.jsx:5-20"
+    },
+    "outputs": {
+      "formats": [
+        "JPG si JPG en entrée (qualité 92)",
+        "WebP si WebP en entrée (qualité 92 ; libwebp WebAssembly sur Safari)",
+        "PNG pour un PNG et pour tout autre type (GIF, BMP, AVIF, HEIC/TIFF ouverts par Safari…)"
+      ],
+      "ref": "app/tools/image-tools/brightness-contrast/page.jsx:45; app/lib/imageOutput.js:120-142"
+    },
+    "controls": [
+      {
+        "label": "Click or drop an image here (ordinateur) / Choose an image (écran tactile)",
+        "ref": "app/tools/image-tools/brightness-contrast/page.jsx:56; app/components/UploadPrompt.jsx:32-33"
+      },
+      {
+        "label": "Brightness: {n}% (0-200, défaut 100)",
+        "ref": "app/tools/image-tools/brightness-contrast/page.jsx:16,61"
+      },
+      {
+        "label": "Contrast: {n}% (0-200, défaut 100)",
+        "ref": "app/tools/image-tools/brightness-contrast/page.jsx:17,62"
+      },
+      {
+        "label": "Saturation: {n}% (0-200, défaut 100)",
+        "ref": "app/tools/image-tools/brightness-contrast/page.jsx:18,63"
+      },
+      {
+        "label": "Apply",
+        "ref": "app/tools/image-tools/brightness-contrast/page.jsx:64"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "choisir une image",
+      "régler Brightness, Contrast, Saturation (100 % = inchangé)",
+      "bouton « Apply »",
+      "aperçu puis « Download »"
+    ],
+    "limits": [
+      {
+        "what": "taille max par image (ordinateur)",
+        "value": "268 435 456 pixels (268 Mpx) : refus avec message avant décodage",
+        "constant": "RASTER_MAX_PIXELS",
+        "ref": "app/lib/imageOutput.js:77-81"
+      },
+      {
+        "what": "taille max par image sur iPhone/iPad",
+        "value": "même plafond de 268 Mpx dans le code ; au-delà de 16 777 216 px (limite de canvas iOS) l'image est traitée par bandes au lieu d'être refusée ; 24 et 48 Mpx testés en simulation iPhone (42/42) ; aucune limite mémoire propre au téléphone dans le code",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/lib/bigImage.js:1-19; app/lib/imageOutput.js:98-118,160-195; docs/audit/RAPPORT-p16-photos-iphone-30-09.md:95"
+      },
+      {
+        "what": "taille max sur Android",
+        "value": "NON TROUVÉ — aucune règle propre à Android ; le test du canvas 4097×4097 décide du découpage en bandes (cherché : app/lib/bigImage.js, app/lib/imageOutput.js, app/lib/isMobileDevice.js non importé)",
+        "constant": null,
+        "ref": "app/lib/bigImage.js:118-138"
+      },
+      {
+        "what": "sortie WebP",
+        "value": "16 383 px de côté au plus (limite du format)",
+        "constant": "WEBP_MAX_SIDE",
+        "ref": "app/lib/bigImage.js:221-224"
+      },
+      {
+        "what": "poids max du fichier en octets",
+        "value": "NON TROUVÉ — aucune limite en octets (cherché : page.jsx, app/lib/imageOutput.js, app/lib/bigImage.js, app/lib/fileChecks.js)",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:77-89"
+      },
+      {
+        "what": "nombre d'images / d'utilisations",
+        "value": "une image à la fois, aucun quota",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:78"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Tout est calculé dans la page (canvas, et WebAssembly pour certains encodages) ; le fichier n'est envoyé à aucun serveur. Seul le TEXTE d'un message d'erreur affiché part vers /api/report-error (sans fichier ni nom de fichier). Les encodeurs MozJPEG/libwebp sont téléchargés depuis /wasm/ du site quand il le faut (WebP sous Safari, image de plus de 16,7 Mpx sur iPhone). Le résultat est une adresse blob: locale ; rien n'est conservé après fermeture de la page.",
+      "ref": "app/lib/useToolError.js:38-43,55-66; app/lib/reportError.js:16,163-169; app/lib/bigImage.js:179-196; app/lib/imageOutput.js:147-149"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:31-44)",
+    "browsers": "iPhone/iPad : au-delà de 16,7 Mpx l'image est décodée et traitée par bandes (app/lib/bigImage.js:1-19, app/lib/imageOutput.js:160-195) ; écriture d'un grand PNG sans canvas : CompressionStream requis (Safari 16.4+, app/lib/bigImage.js:246) ; Safari n'encode pas le WebP : libwebp WebAssembly (app/lib/imageOutput.js:120-141) ; bouton « Save / Share » en plus de « Download » sur iPhone/iPad (app/components/FileDownload.jsx:91-96,213-218) ; le navigateur demande confirmation avant de quitter tant que le résultat n'a pas été pris (app/components/FileDownload.jsx:69-81) ; navigateur sans ctx.filter (Safari) : mêmes formules CSS calculées pixel par pixel (page.jsx:32-43, app/lib/canvasFilters.js:1-34)",
+    "twin": "/tools/image-tools/image-editor (onglet Adjust, curseurs −100 à 100, formules différentes, image-editor/page.tsx:106-119,289-291) ; /tools/video-tools/video-filter pour la vidéo",
+    "notes": "Formules des fonctions CSS brightness(), contrast(), saturate() (app/lib/canvasFilters.js:9,25-34 ; page.jsx:37-41). Pas d'aperçu en direct : il faut « Apply ». Chaque « Apply » repart de l'original. fichier résultat nommé <nom d'origine>-adjusted.<jpg|webp|png> (app/lib/download.js:108-111)."
+  },
+  {
+    "path": "/tools/image-tools/duplicate-image-finder",
+    "task": "Compare plusieurs images et liste les paires identiques octet pour octet et les paires montrant la même image (redimensionnée, recompressée, convertie).",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "plusieurs images à la fois (attribut multiple)",
+        "image illisible par le navigateur ou de plus de 268 Mpx : comparée seulement en copie exacte",
+        "fichier vide : écarté avec message"
+      ],
+      "ref": "app/tools/image-tools/duplicate-image-finder/page.jsx:32-40,80"
+    },
+    "outputs": {
+      "formats": [
+        "aucun fichier : liste à l'écran « Identical files » (rouge) et « Same picture (N/64 matching) » (ambre)"
+      ],
+      "ref": "app/tools/image-tools/duplicate-image-finder/page.jsx:93-94"
+    },
+    "controls": [
+      {
+        "label": "Click or drop several images here / Choose several images",
+        "ref": "app/tools/image-tools/duplicate-image-finder/page.jsx:79; app/components/UploadPrompt.jsx:32-33"
+      },
+      {
+        "label": "Same picture when : Strict — nearly identical (61/64 matching or more) / Normal — resized or re-compressed copies (58/64) (défaut) / Loose — also lightly edited copies (54/64; more false matches)",
+        "ref": "app/tools/image-tools/duplicate-image-finder/page.jsx:23,85-86"
+      },
+      {
+        "label": "Find Duplicates (« Comparing… » pendant le calcul ; actif à partir de 2 images)",
+        "ref": "app/tools/image-tools/duplicate-image-finder/page.jsx:92"
+      }
+    ],
+    "steps": [
+      "choisir plusieurs images (une nouvelle sélection remplace la précédente)",
+      "choisir « Same picture when » (Normal par défaut)",
+      "bouton « Find Duplicates »",
+      "lire la liste : rouge = fichiers identiques, ambre = même image avec le nombre de bits sur 64 qui concordent",
+      "supprimer soi-même les copies sur son appareil (l'outil ne supprime rien)"
+    ],
+    "limits": [
+      {
+        "what": "image décodée pour le hash perceptuel",
+        "value": "268 435 456 pixels ; au-delà : comparaison en copie exacte seulement, dit à l'écran",
+        "constant": "CANVAS_MAX_AREA",
+        "ref": "app/tools/image-tools/duplicate-image-finder/page.jsx:9-11,37-38,61; app/lib/mediaSupport.js:56"
+      },
+      {
+        "what": "nombre d'images",
+        "value": "NON TROUVÉ — aucune limite dans le code (comparaison de toutes les paires, app/lib/imageSimilarity.js:38-49)",
+        "constant": null,
+        "ref": "app/lib/imageSimilarity.js:38-49"
+      },
+      {
+        "what": "limite propre au téléphone",
+        "value": "NON TROUVÉ — aucune (cherché dans page.jsx et app/lib/imageSimilarity.js)",
+        "constant": null,
+        "ref": "app/tools/image-tools/duplicate-image-finder/page.jsx:57-64"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "SHA-256 du fichier (crypto.subtle) et dHash 9×8 en niveaux de gris (canvas) dans la page ; rien n'est envoyé, hors texte d'erreur vers /api/report-error.",
+      "ref": "app/tools/image-tools/duplicate-image-finder/page.jsx:57-65; app/lib/imageSimilarity.js:8-27; app/lib/useToolError.js:38-43"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "sans objet (aucun fichier produit)",
+    "browsers": "Un format que le navigateur ne sait pas ouvrir (HEIC hors Safari, TIFF…) est signalé et comparé en copie exacte seulement (page.jsx:45-50,62,66).",
+    "twin": "/tools/file-tools/file-comparator (comparaison de deux fichiers, partiel)",
+    "notes": "Seuils : au plus 3 / 6 / 10 bits différents sur 64 (page.jsx:21-23). Transparence comptée comme blanc dans le hash (app/lib/imageSimilarity.js:20). Pas d'affichage du poids ni des dimensions des fichiers ; vignettes 4 par ligne avec nom (page.jsx:87-91). Message si aucune paire : « No duplicates or near-duplicates among these N images. » (page.jsx:93). Avec 1 image : « Add at least one more image to compare. » (page.jsx:84)."
+  },
+  {
+    "path": "/tools/image-tools/grayscale-converter",
+    "task": "Convertit une image en niveaux de gris selon une méthode au choix, ou en noir et blanc pur avec un seuil.",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "toute image que le navigateur sait ouvrir (JPG, PNG, WebP, GIF, BMP, AVIF ; HEIC et TIFF seulement dans Safari)",
+        "animée (GIF/APNG/WebP) : première image seulement, annoncé"
+      ],
+      "ref": "app/tools/image-tools/grayscale-converter/page.jsx:70; app/lib/fileChecks.js:203-215; app/components/AnimatedImageNote.jsx:5-20"
+    },
+    "outputs": {
+      "formats": [
+        "JPG si JPG en entrée (qualité 92)",
+        "WebP si WebP en entrée (qualité 92 ; libwebp WebAssembly sur Safari)",
+        "PNG pour un PNG et pour tout autre type (GIF, BMP, AVIF, HEIC/TIFF ouverts par Safari…)"
+      ],
+      "ref": "app/tools/image-tools/grayscale-converter/page.jsx:58; app/lib/imageOutput.js:120-142"
+    },
+    "controls": [
+      {
+        "label": "Click or drop an image here (ordinateur) / Choose an image (écran tactile)",
+        "ref": "app/tools/image-tools/grayscale-converter/page.jsx:69; app/components/UploadPrompt.jsx:32-33"
+      },
+      {
+        "label": "Method : Luminance (Rec. 709, as CSS and image editors) [défaut] / Luminance (Rec. 601, older TV / JPEG weights) / Average of red, green and blue / Lightness ((brightest + darkest) / 2) / Red channel only / Green channel only / Blue channel only",
+        "ref": "app/tools/image-tools/grayscale-converter/page.jsx:14-20,35,75-76"
+      },
+      {
+        "label": "Pure black and white (threshold) (case)",
+        "ref": "app/tools/image-tools/grayscale-converter/page.jsx:77"
+      },
+      {
+        "label": "Threshold: {n} (1-254, défaut 128, visible si la case est cochée)",
+        "ref": "app/tools/image-tools/grayscale-converter/page.jsx:37,78"
+      },
+      {
+        "label": "Convert to Grayscale",
+        "ref": "app/tools/image-tools/grayscale-converter/page.jsx:80"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "choisir une image",
+      "choisir « Method » (facultatif) ou cocher « Pure black and white (threshold) » et régler « Threshold »",
+      "bouton « Convert to Grayscale »",
+      "aperçu puis « Download »"
+    ],
+    "limits": [
+      {
+        "what": "taille max par image (ordinateur)",
+        "value": "268 435 456 pixels (268 Mpx) : refus avec message avant décodage",
+        "constant": "RASTER_MAX_PIXELS",
+        "ref": "app/lib/imageOutput.js:77-81"
+      },
+      {
+        "what": "taille max par image sur iPhone/iPad",
+        "value": "même plafond de 268 Mpx dans le code ; au-delà de 16 777 216 px (limite de canvas iOS) l'image est traitée par bandes au lieu d'être refusée ; 24 et 48 Mpx testés en simulation iPhone (42/42) ; aucune limite mémoire propre au téléphone dans le code",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/lib/bigImage.js:1-19; app/lib/imageOutput.js:98-118,160-195; docs/audit/RAPPORT-p16-photos-iphone-30-09.md:95"
+      },
+      {
+        "what": "taille max sur Android",
+        "value": "NON TROUVÉ — aucune règle propre à Android ; le test du canvas 4097×4097 décide du découpage en bandes (cherché : app/lib/bigImage.js, app/lib/imageOutput.js, app/lib/isMobileDevice.js non importé)",
+        "constant": null,
+        "ref": "app/lib/bigImage.js:118-138"
+      },
+      {
+        "what": "sortie WebP",
+        "value": "16 383 px de côté au plus (limite du format)",
+        "constant": "WEBP_MAX_SIDE",
+        "ref": "app/lib/bigImage.js:221-224"
+      },
+      {
+        "what": "poids max du fichier en octets",
+        "value": "NON TROUVÉ — aucune limite en octets (cherché : page.jsx, app/lib/imageOutput.js, app/lib/bigImage.js, app/lib/fileChecks.js)",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:77-89"
+      },
+      {
+        "what": "nombre d'images / d'utilisations",
+        "value": "une image à la fois, aucun quota",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:78"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Tout est calculé dans la page (canvas, et WebAssembly pour certains encodages) ; le fichier n'est envoyé à aucun serveur. Seul le TEXTE d'un message d'erreur affiché part vers /api/report-error (sans fichier ni nom de fichier). Les encodeurs MozJPEG/libwebp sont téléchargés depuis /wasm/ du site quand il le faut (WebP sous Safari, image de plus de 16,7 Mpx sur iPhone). Le résultat est une adresse blob: locale ; rien n'est conservé après fermeture de la page.",
+      "ref": "app/lib/useToolError.js:38-43,55-66; app/lib/reportError.js:16,163-169; app/lib/bigImage.js:179-196; app/lib/imageOutput.js:147-149"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:46-57)",
+    "browsers": "iPhone/iPad : au-delà de 16,7 Mpx l'image est décodée et traitée par bandes (app/lib/bigImage.js:1-19, app/lib/imageOutput.js:160-195) ; écriture d'un grand PNG sans canvas : CompressionStream requis (Safari 16.4+, app/lib/bigImage.js:246) ; Safari n'encode pas le WebP : libwebp WebAssembly (app/lib/imageOutput.js:120-141) ; bouton « Save / Share » en plus de « Download » sur iPhone/iPad (app/components/FileDownload.jsx:91-96,213-218) ; le navigateur demande confirmation avant de quitter tant que le résultat n'a pas été pris (app/components/FileDownload.jsx:69-81)",
+    "twin": "/tools/image-tools/image-editor (case « Grayscale », poids Rec. 601, image-editor/page.tsx:120-123,292) ; /tools/video-tools/video-filter pour la vidéo",
+    "notes": "Formules : Rec. 709 0,2126/0,7152/0,0722 ; Rec. 601 0,299/0,587/0,114 ; moyenne ; (max+min)/2 ; un canal (page.jsx:21-27). Seuil : valeur ≥ seuil → blanc, sinon noir (page.jsx:53). Alpha inchangé ; l'image reste en RVB (3 canaux égaux). fichier résultat nommé <nom d'origine>-grayscale.<jpg|webp|png> (app/lib/download.js:108-111)."
+  },
+  {
+    "path": "/tools/image-tools/image-blur",
+    "task": "Applique un flou gaussien uniforme à toute l'image, en pleine résolution.",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "toute image que le navigateur sait ouvrir (JPG, PNG, WebP, GIF, BMP, AVIF ; HEIC et TIFF seulement dans Safari)",
+        "animée (GIF/APNG/WebP) : première image seulement, annoncé"
+      ],
+      "ref": "app/tools/image-tools/image-blur/page.jsx:73; app/lib/fileChecks.js:203-215; app/components/AnimatedImageNote.jsx:5-20"
+    },
+    "outputs": {
+      "formats": [
+        "JPG si JPG en entrée (qualité 92)",
+        "WebP si WebP en entrée (qualité 92 ; libwebp WebAssembly sur Safari)",
+        "PNG pour un PNG et pour tout autre type (GIF, BMP, AVIF, HEIC/TIFF ouverts par Safari…)"
+      ],
+      "ref": "app/tools/image-tools/image-blur/page.jsx:61; app/lib/imageOutput.js:120-142"
+    },
+    "controls": [
+      {
+        "label": "Click or drop an image here (ordinateur) / Choose an image (écran tactile)",
+        "ref": "app/tools/image-tools/image-blur/page.jsx:72; app/components/UploadPrompt.jsx:32-33"
+      },
+      {
+        "label": "Blur: {n}px (1-20, défaut 5 ; écart-type du flou gaussien)",
+        "ref": "app/tools/image-tools/image-blur/page.jsx:18,38,77"
+      },
+      {
+        "label": "Apply Blur",
+        "ref": "app/tools/image-tools/image-blur/page.jsx:78"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "choisir une image",
+      "régler « Blur »",
+      "bouton « Apply Blur »",
+      "aperçu puis « Download »"
+    ],
+    "limits": [
+      {
+        "what": "taille max par image (ordinateur)",
+        "value": "268 435 456 pixels (268 Mpx) : refus avec message avant décodage",
+        "constant": "RASTER_MAX_PIXELS",
+        "ref": "app/lib/imageOutput.js:77-81"
+      },
+      {
+        "what": "taille max par image sur iPhone/iPad",
+        "value": "même plafond de 268 Mpx dans le code ; au-delà de 16 777 216 px (limite de canvas iOS) l'image est traitée par bandes au lieu d'être refusée ; 24 et 48 Mpx testés en simulation iPhone (42/42) ; aucune limite mémoire propre au téléphone dans le code",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/lib/bigImage.js:1-19; app/lib/imageOutput.js:98-118,160-195; docs/audit/RAPPORT-p16-photos-iphone-30-09.md:95"
+      },
+      {
+        "what": "taille max sur Android",
+        "value": "NON TROUVÉ — aucune règle propre à Android ; le test du canvas 4097×4097 décide du découpage en bandes (cherché : app/lib/bigImage.js, app/lib/imageOutput.js, app/lib/isMobileDevice.js non importé)",
+        "constant": null,
+        "ref": "app/lib/bigImage.js:118-138"
+      },
+      {
+        "what": "sortie WebP",
+        "value": "16 383 px de côté au plus (limite du format)",
+        "constant": "WEBP_MAX_SIDE",
+        "ref": "app/lib/bigImage.js:221-224"
+      },
+      {
+        "what": "poids max du fichier en octets",
+        "value": "NON TROUVÉ — aucune limite en octets (cherché : page.jsx, app/lib/imageOutput.js, app/lib/bigImage.js, app/lib/fileChecks.js)",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:77-89"
+      },
+      {
+        "what": "nombre d'images / d'utilisations",
+        "value": "une image à la fois, aucun quota",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:78"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Tout est calculé dans la page (canvas, et WebAssembly pour certains encodages) ; le fichier n'est envoyé à aucun serveur. Seul le TEXTE d'un message d'erreur affiché part vers /api/report-error (sans fichier ni nom de fichier). Les encodeurs MozJPEG/libwebp sont téléchargés depuis /wasm/ du site quand il le faut (WebP sous Safari, image de plus de 16,7 Mpx sur iPhone). Le résultat est une adresse blob: locale ; rien n'est conservé après fermeture de la page. Le flou est calculé sur le processeur graphique (WebGL2), sinon sur tous les cœurs (Workers) — le filtre blur() du navigateur n'est jamais utilisé (const native = false).",
+      "ref": "app/tools/image-tools/image-blur/page.jsx:37,46,56; docs/audit/RAPPORT-p17-30-09.md:124-127; app/lib/useToolError.js:38-43,55-66; app/lib/reportError.js:16,163-169; app/lib/bigImage.js:179-196; app/lib/imageOutput.js:147-149"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:30-61)",
+    "browsers": "iPhone/iPad : au-delà de 16,7 Mpx l'image est décodée et traitée par bandes (app/lib/bigImage.js:1-19, app/lib/imageOutput.js:160-195) ; écriture d'un grand PNG sans canvas : CompressionStream requis (Safari 16.4+, app/lib/bigImage.js:246) ; Safari n'encode pas le WebP : libwebp WebAssembly (app/lib/imageOutput.js:120-141) ; bouton « Save / Share » en plus de « Download » sur iPhone/iPad (app/components/FileDownload.jsx:91-96,213-218) ; le navigateur demande confirmation avant de quitter tant que le résultat n'a pas été pris (app/components/FileDownload.jsx:69-81) ; iPhone au-delà de 16,7 Mpx : pixels floutés directement, sans bandes de canvas (page.jsx:42-47) ; mesures 12/24/48 Mpx : docs/audit/RAPPORT-p17-30-09.md:141,206-208",
+    "twin": null,
+    "notes": "Même flou dans tous les navigateurs : trois flous en boîte (approximation gaussienne), alpha prémultiplié, bords répétés (pas de cadre clair) (page.jsx:33-36 ; app/lib/canvasFilters.js:1-11). Pas de flou d'une zone. fichier résultat nommé <nom d'origine>-blurred.<jpg|webp|png> (app/lib/download.js:108-111)."
+  },
+  {
+    "path": "/tools/image-tools/image-comparison",
+    "task": "Affiche deux images superposées avec une séparation réglable, et calcule une image des pixels qui diffèrent.",
+    "inputs": {
+      "accept": "image/* (deux champs : Image 1 (Before), Image 2 (After))",
+      "formats": [
+        "toute image que le navigateur sait ouvrir ; message d'erreur citant JPG, PNG, WebP ou GIF"
+      ],
+      "ref": "app/tools/image-tools/image-comparison/page.jsx:33,68-73"
+    },
+    "outputs": {
+      "formats": [
+        "PNG de la vue Differences, nommé differences.png"
+      ],
+      "ref": "app/tools/image-tools/image-comparison/page.jsx:53,86"
+    },
+    "controls": [
+      {
+        "label": "Image 1 (Before)",
+        "ref": "app/tools/image-tools/image-comparison/page.jsx:68"
+      },
+      {
+        "label": "Image 2 (After)",
+        "ref": "app/tools/image-tools/image-comparison/page.jsx:72"
+      },
+      {
+        "label": "Slider / Differences (boutons de vue, Slider par défaut)",
+        "ref": "app/tools/image-tools/image-comparison/page.jsx:13,78"
+      },
+      {
+        "label": "Slider: {n}% (curseur 0-100, défaut 50 ; le trait vertical lui-même ne se tire pas)",
+        "ref": "app/tools/image-tools/image-comparison/page.jsx:12,96-100"
+      },
+      {
+        "label": "Before / After (légendes sous le curseur)",
+        "ref": "app/tools/image-tools/image-comparison/page.jsx:101"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "cliquer « Image 1 (Before) » et choisir la première image",
+      "cliquer « Image 2 (After) » et choisir la seconde",
+      "vue « Slider » : déplacer le curseur « Slider » pour découvrir l'une ou l'autre",
+      "bouton « Differences » : pixels changés en rouge sur une copie pâlie de l'image 1, avec le nombre et le % de pixels",
+      "« Download » de differences.png"
+    ],
+    "limits": [
+      {
+        "what": "taille max par image (ordinateur et téléphone)",
+        "value": "100 000 000 pixels (100 Mpx) par image : refus avec message",
+        "constant": null,
+        "ref": "app/tools/image-tools/image-comparison/page.jsx:30"
+      },
+      {
+        "what": "fichier vide",
+        "value": "refusé avec message",
+        "constant": null,
+        "ref": "app/tools/image-tools/image-comparison/page.jsx:25"
+      },
+      {
+        "what": "limite propre au téléphone",
+        "value": "NON TROUVÉ — aucune autre ; au-delà de 16,7 Mpx sur iPhone le calcul se fait par bandes (drawToRaster)",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/tools/image-tools/image-comparison/page.jsx:42-45; app/lib/imageOutput.js:255-273"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Comparaison et image des différences calculées dans la page ; rien n'est envoyé, hors texte d'erreur vers /api/report-error.",
+      "ref": "app/tools/image-tools/image-comparison/page.jsx:36-56; app/lib/useToolError.js:38-43"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:46-53)",
+    "browsers": "Image de différences écrite en PNG par CompressionStream si plus de 16,7 Mpx sur iPhone (app/lib/imageOutput.js:142, app/lib/bigImage.js:246) ; bouton « Save / Share » sur iPhone/iPad (app/components/FileDownload.jsx:213-218).",
+    "twin": null,
+    "notes": "Un pixel diffère si un canal (ou l'alpha) varie de plus de 16/255 (page.jsx:49-50). Image 2 mise à l'échelle de l'image 1 si les tailles diffèrent, et dit (page.jsx:45,84). Vue Slider : images entières (object-contain) dans un cadre de 300 px de haut (page.jsx:91-94). Message identique : « The two images are identical (no pixel differs by more than 16/255). » (page.jsx:84). Pas d'export de la vue Slider."
+  },
+  {
+    "path": "/tools/image-tools/image-cropper",
+    "task": "Recadre une image sur un rectangle défini en pixels réels ou par un ratio prédéfini centré.",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "toute image que le navigateur sait afficher",
+        "fichier vide ou illisible : message précis"
+      ],
+      "ref": "app/tools/image-tools/image-cropper/page.jsx:39-40,58-63,94"
+    },
+    "outputs": {
+      "formats": [
+        "JPG si JPG en entrée (qualité 92)",
+        "WebP si WebP en entrée (qualité 92 ; libwebp WebAssembly sur Safari)",
+        "PNG pour un PNG et pour tout autre type (GIF, BMP, AVIF, HEIC/TIFF ouverts par Safari…)"
+      ],
+      "ref": "app/tools/image-tools/image-cropper/page.jsx:83; app/lib/imageOutput.js:120-142"
+    },
+    "controls": [
+      {
+        "label": "Click or drop an image here (ordinateur) / Choose an image (écran tactile)",
+        "ref": "app/tools/image-tools/image-cropper/page.jsx:93; app/components/UploadPrompt.jsx:32-33"
+      },
+      {
+        "label": "Aspect ratio : Free / 1:1 (square) / 4:3 / 3:2 / 16:9 / 9:16 (story) / 4:5 (portrait post) / 2:1",
+        "ref": "app/tools/image-tools/image-cropper/page.jsx:21,98-99"
+      },
+      {
+        "label": "Image: W × H px · Crop: w × h px (indication)",
+        "ref": "app/tools/image-tools/image-cropper/page.jsx:100"
+      },
+      {
+        "label": "X: {n}px / Y: {n}px / Width: {n}px / Height: {n}px (curseurs, pixels réels)",
+        "ref": "app/tools/image-tools/image-cropper/page.jsx:105-108"
+      },
+      {
+        "label": "Crop Image",
+        "ref": "app/tools/image-tools/image-cropper/page.jsx:111"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "choisir une image (le cadre couvre d'abord toute l'image)",
+      "facultatif : « Aspect ratio » pose le plus grand cadre centré de ce ratio",
+      "régler X, Y, Width, Height (le cadre bleu sur l'aperçu suit)",
+      "bouton « Crop Image »",
+      "aperçu puis « Download »"
+    ],
+    "limits": [
+      {
+        "what": "taille max",
+        "value": "NON TROUVÉ — pas de contrôle RASTER_MAX_PIXELS ici (l'image est ouverte par <img>, pas par loadRaster) ; cherché dans page.jsx et app/lib/imageOutput.js:255-273",
+        "constant": null,
+        "ref": "app/tools/image-tools/image-cropper/page.jsx:47-57,82"
+      },
+      {
+        "what": "iPhone/iPad",
+        "value": "recadrage de plus de 16,7 Mpx dessiné par bandes",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/tools/image-tools/image-cropper/page.jsx:78-82; app/lib/imageOutput.js:255-273"
+      },
+      {
+        "what": "sortie WebP",
+        "value": "16 383 px de côté au plus",
+        "constant": "WEBP_MAX_SIDE",
+        "ref": "app/lib/bigImage.js:221-224"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Tout est calculé dans la page (canvas, et WebAssembly pour certains encodages) ; le fichier n'est envoyé à aucun serveur. Seul le TEXTE d'un message d'erreur affiché part vers /api/report-error (sans fichier ni nom de fichier). Les encodeurs MozJPEG/libwebp sont téléchargés depuis /wasm/ du site quand il le faut (WebP sous Safari, image de plus de 16,7 Mpx sur iPhone). Le résultat est une adresse blob: locale ; rien n'est conservé après fermeture de la page.",
+      "ref": "app/lib/useToolError.js:38-43,55-66; app/lib/reportError.js:16,163-169; app/lib/bigImage.js:179-196; app/lib/imageOutput.js:147-149"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:82)",
+    "browsers": "iPhone/iPad : au-delà de 16,7 Mpx l'image est décodée et traitée par bandes (app/lib/bigImage.js:1-19, app/lib/imageOutput.js:160-195) ; écriture d'un grand PNG sans canvas : CompressionStream requis (Safari 16.4+, app/lib/bigImage.js:246) ; Safari n'encode pas le WebP : libwebp WebAssembly (app/lib/imageOutput.js:120-141) ; bouton « Save / Share » en plus de « Download » sur iPhone/iPad (app/components/FileDownload.jsx:91-96,213-218) ; le navigateur demande confirmation avant de quitter tant que le résultat n'a pas été pris (app/components/FileDownload.jsx:69-81)",
+    "twin": "/tools/pdf-tools/pdf-crop (pour le PDF, pas pour l'image)",
+    "notes": "Pas de poignées à tirer sur l'image ; pas de champs de saisie (curseurs seulement). Après un ratio, les curseurs ne verrouillent pas ce ratio (page.jsx:22-28,105-108). Pas d'avertissement « animated » sur cette page. Erreur hors image : « Crop area is outside the image bounds. Adjust X/Y/Width/Height. » (page.jsx:75). fichier résultat nommé <nom d'origine>-cropped.<jpg|webp|png> (app/lib/download.js:108-111)."
+  },
+  {
+    "path": "/tools/image-tools/image-editor",
+    "task": "Éditeur simple : luminosité, contraste, saturation, gris, négatif, rotation par quarts de tour, miroir, pixellisation, grain, vignette, coins arrondis, bordure et texte, sur aperçu, puis enregistrement en pleine taille.",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "toute image que le navigateur sait afficher ; message d'erreur citant JPG, PNG, WebP ou GIF",
+        "fichier vide refusé"
+      ],
+      "ref": "app/tools/image-tools/image-editor/page.tsx:49,65,268"
+    },
+    "outputs": {
+      "formats": [
+        "format de la photo (JPG qualité 92, WebP qualité 92, sinon PNG)",
+        "PNG dès que « Corner Radius » > 0"
+      ],
+      "ref": "app/tools/image-tools/image-editor/page.tsx:223-225"
+    },
+    "controls": [
+      {
+        "label": "Click or drop an image here (texte fixe, même sur téléphone)",
+        "ref": "app/tools/image-tools/image-editor/page.tsx:266"
+      },
+      {
+        "label": "Onglets Adjust / Transform / Effects / Decorate",
+        "ref": "app/tools/image-tools/image-editor/page.tsx:249-254"
+      },
+      {
+        "label": "Adjust : Brightness (−100 à 100), Contrast (−100 à 100), Saturation (−100 à 100), Grayscale, Invert Colors",
+        "ref": "app/tools/image-tools/image-editor/page.tsx:289-293"
+      },
+      {
+        "label": "Transform : Rotation (0-360 par pas de 90°), Flip Horizontal, Flip Vertical, Pixelate (0-20 px)",
+        "ref": "app/tools/image-tools/image-editor/page.tsx:298-301"
+      },
+      {
+        "label": "Effects : Noise / Grain (0-50), Vignette (0-100 %)",
+        "ref": "app/tools/image-tools/image-editor/page.tsx:306-307"
+      },
+      {
+        "label": "Decorate : Corner Radius (0-100 px), Border Width (0-20 px), Border Color, Text (une ligne, « Your text »), Text Color, Text Size (12-72 px)",
+        "ref": "app/tools/image-tools/image-editor/page.tsx:312-317"
+      },
+      {
+        "label": "Apply",
+        "ref": "app/tools/image-tools/image-editor/page.tsx:323"
+      },
+      {
+        "label": "Reset",
+        "ref": "app/tools/image-tools/image-editor/page.tsx:324"
+      },
+      {
+        "label": "Save image",
+        "ref": "app/tools/image-tools/image-editor/page.tsx:325"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "choisir une image (affichée dans un canvas)",
+      "régler dans les onglets Adjust / Transform / Effects / Decorate",
+      "bouton « Apply » pour mettre l'aperçu à jour",
+      "bouton « Save image »",
+      "ligne de téléchargement « full size » : « Download » (et « Save / Share » sur iPhone/iPad)"
+    ],
+    "limits": [
+      {
+        "what": "taille max par image (ordinateur et téléphone)",
+        "value": "100 000 000 pixels (100 Mpx) : refus avec message",
+        "constant": null,
+        "ref": "app/tools/image-tools/image-editor/page.tsx:54-55"
+      },
+      {
+        "what": "iPhone/iPad au-delà de 16,7 Mpx",
+        "value": "aperçu réduit, enregistrement en pleine taille par bandes",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/tools/image-tools/image-editor/page.tsx:77-81,188-194,206-222"
+      },
+      {
+        "what": "sortie WebP",
+        "value": "16 383 px de côté au plus",
+        "constant": "WEBP_MAX_SIDE",
+        "ref": "app/lib/bigImage.js:221-224"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Tout est calculé dans la page (canvas, et WebAssembly pour certains encodages) ; le fichier n'est envoyé à aucun serveur. Seul le TEXTE d'un message d'erreur affiché part vers /api/report-error (sans fichier ni nom de fichier). Les encodeurs MozJPEG/libwebp sont téléchargés depuis /wasm/ du site quand il le faut (WebP sous Safari, image de plus de 16,7 Mpx sur iPhone). Le résultat est une adresse blob: locale ; rien n'est conservé après fermeture de la page.",
+      "ref": "app/lib/useToolError.js:38-43,55-66; app/lib/reportError.js:16,163-169; app/lib/bigImage.js:179-196; app/lib/imageOutput.js:147-149"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : paint() ne dessine que les réglages de l'utilisateur, page.tsx:82-180)",
+    "browsers": "iPhone/iPad : au-delà de 16,7 Mpx l'image est décodée et traitée par bandes (app/lib/bigImage.js:1-19, app/lib/imageOutput.js:160-195) ; écriture d'un grand PNG sans canvas : CompressionStream requis (Safari 16.4+, app/lib/bigImage.js:246) ; Safari n'encode pas le WebP : libwebp WebAssembly (app/lib/imageOutput.js:120-141) ; bouton « Save / Share » en plus de « Download » sur iPhone/iPad (app/components/FileDownload.jsx:91-96,213-218) ; le navigateur demande confirmation avant de quitter tant que le résultat n'a pas été pris (app/components/FileDownload.jsx:69-81)",
+    "twin": "regroupe en version réduite : brightness-contrast, grayscale-converter, image-inverter, image-rotate (quarts de tour), image-flip, image-pixelator, add-noise, add-vignette, round-corners, add-border-to-image, add-text-to-image (tous dans /tools/image-tools/)",
+    "notes": "Pas de recadrage, pas de flou, pas de sépia. Texte : une ligne, Arial, position fixe (20 px, taille+20 px) en haut à gauche (page.tsx:173-176). Bordure tracée à l'intérieur de l'image, en rectangle droit APRÈS l'arrondi des coins (angles carrés sur les coins transparents) (page.tsx:159-172). Coins en px de l'image réelle. « Save image » sur ordinateur enregistre l'aperçu tel que rendu au dernier « Apply » (page.tsx:206) ; sur iPhone au-delà de 16,7 Mpx il repeint avec les réglages courants (page.tsx:207-221). Gris = poids Rec. 601 (page.tsx:121). Résultat nommé <nom>-edited.<ext> (page.tsx:225)."
+  },
+  {
+    "path": "/tools/image-tools/image-flip",
+    "task": "Retourne une image en miroir horizontal, vertical ou les deux (demi-tour).",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "toute image que le navigateur sait ouvrir (JPG, PNG, WebP, GIF, BMP, AVIF ; HEIC et TIFF seulement dans Safari)",
+        "animée (GIF/APNG/WebP) : première image seulement, annoncé"
+      ],
+      "ref": "app/tools/image-tools/image-flip/page.jsx:47; app/lib/fileChecks.js:203-215; app/components/AnimatedImageNote.jsx:5-20"
+    },
+    "outputs": {
+      "formats": [
+        "JPG si JPG en entrée (qualité 92)",
+        "WebP si WebP en entrée (qualité 92 ; libwebp WebAssembly sur Safari)",
+        "PNG pour un PNG et pour tout autre type (GIF, BMP, AVIF, HEIC/TIFF ouverts par Safari…)"
+      ],
+      "ref": "app/tools/image-tools/image-flip/page.jsx:35; app/lib/imageOutput.js:120-142"
+    },
+    "controls": [
+      {
+        "label": "Click or drop an image here (ordinateur) / Choose an image (écran tactile)",
+        "ref": "app/tools/image-tools/image-flip/page.jsx:46; app/components/UploadPrompt.jsx:32-33"
+      },
+      {
+        "label": "Flip Horizontal",
+        "ref": "app/tools/image-tools/image-flip/page.jsx:52"
+      },
+      {
+        "label": "Flip Vertical",
+        "ref": "app/tools/image-tools/image-flip/page.jsx:53"
+      },
+      {
+        "label": "Flip Both Ways",
+        "ref": "app/tools/image-tools/image-flip/page.jsx:54"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "choisir une image",
+      "bouton « Flip Horizontal », « Flip Vertical » ou « Flip Both Ways » (le traitement part au clic)",
+      "aperçu puis « Download »"
+    ],
+    "limits": [
+      {
+        "what": "taille max par image (ordinateur)",
+        "value": "268 435 456 pixels (268 Mpx) : refus avec message avant décodage",
+        "constant": "RASTER_MAX_PIXELS",
+        "ref": "app/lib/imageOutput.js:77-81"
+      },
+      {
+        "what": "taille max par image sur iPhone/iPad",
+        "value": "même plafond de 268 Mpx dans le code ; au-delà de 16 777 216 px (limite de canvas iOS) l'image est traitée par bandes au lieu d'être refusée ; 24 et 48 Mpx testés en simulation iPhone (42/42) ; aucune limite mémoire propre au téléphone dans le code",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/lib/bigImage.js:1-19; app/lib/imageOutput.js:98-118,160-195; docs/audit/RAPPORT-p16-photos-iphone-30-09.md:95"
+      },
+      {
+        "what": "taille max sur Android",
+        "value": "NON TROUVÉ — aucune règle propre à Android ; le test du canvas 4097×4097 décide du découpage en bandes (cherché : app/lib/bigImage.js, app/lib/imageOutput.js, app/lib/isMobileDevice.js non importé)",
+        "constant": null,
+        "ref": "app/lib/bigImage.js:118-138"
+      },
+      {
+        "what": "sortie WebP",
+        "value": "16 383 px de côté au plus (limite du format)",
+        "constant": "WEBP_MAX_SIDE",
+        "ref": "app/lib/bigImage.js:221-224"
+      },
+      {
+        "what": "poids max du fichier en octets",
+        "value": "NON TROUVÉ — aucune limite en octets (cherché : page.jsx, app/lib/imageOutput.js, app/lib/bigImage.js, app/lib/fileChecks.js)",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:77-89"
+      },
+      {
+        "what": "nombre d'images / d'utilisations",
+        "value": "une image à la fois, aucun quota",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:78"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Tout est calculé dans la page (canvas, et WebAssembly pour certains encodages) ; le fichier n'est envoyé à aucun serveur. Seul le TEXTE d'un message d'erreur affiché part vers /api/report-error (sans fichier ni nom de fichier). Les encodeurs MozJPEG/libwebp sont téléchargés depuis /wasm/ du site quand il le faut (WebP sous Safari, image de plus de 16,7 Mpx sur iPhone). Le résultat est une adresse blob: locale ; rien n'est conservé après fermeture de la page.",
+      "ref": "app/lib/useToolError.js:38-43,55-66; app/lib/reportError.js:16,163-169; app/lib/bigImage.js:179-196; app/lib/imageOutput.js:147-149"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:28-34)",
+    "browsers": "iPhone/iPad : au-delà de 16,7 Mpx l'image est décodée et traitée par bandes (app/lib/bigImage.js:1-19, app/lib/imageOutput.js:160-195) ; écriture d'un grand PNG sans canvas : CompressionStream requis (Safari 16.4+, app/lib/bigImage.js:246) ; Safari n'encode pas le WebP : libwebp WebAssembly (app/lib/imageOutput.js:120-141) ; bouton « Save / Share » en plus de « Download » sur iPhone/iPad (app/components/FileDownload.jsx:91-96,213-218) ; le navigateur demande confirmation avant de quitter tant que le résultat n'a pas été pris (app/components/FileDownload.jsx:69-81)",
+    "twin": "/tools/image-tools/image-editor (cases Flip Horizontal / Flip Vertical) ; /tools/image-tools/image-rotate (180° = Flip Both Ways)",
+    "notes": "Les clics ne se cumulent pas : chaque bouton repart du fichier d'origine (page.jsx:26) — Horizontal puis Vertical donne seulement Vertical ; utiliser « Flip Both Ways ». Retournement exact (pixels déplacés). fichier résultat nommé <nom d'origine>-flipped.<jpg|webp|png> (app/lib/download.js:108-111)."
+  },
+  {
+    "path": "/tools/image-tools/image-inverter",
+    "task": "Inverse les couleurs d'une image (négatif : 255 moins chaque valeur rouge, verte, bleue), transparence conservée.",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "toute image que le navigateur sait ouvrir (JPG, PNG, WebP, GIF, BMP, AVIF ; HEIC et TIFF seulement dans Safari)",
+        "animée (GIF/APNG/WebP) : première image seulement, annoncé"
+      ],
+      "ref": "app/tools/image-tools/image-inverter/page.jsx:49; app/lib/fileChecks.js:203-215; app/components/AnimatedImageNote.jsx:5-20"
+    },
+    "outputs": {
+      "formats": [
+        "JPG si JPG en entrée (qualité 92)",
+        "WebP si WebP en entrée (qualité 92 ; libwebp WebAssembly sur Safari)",
+        "PNG pour un PNG et pour tout autre type (GIF, BMP, AVIF, HEIC/TIFF ouverts par Safari…)"
+      ],
+      "ref": "app/tools/image-tools/image-inverter/page.jsx:37; app/lib/imageOutput.js:120-142"
+    },
+    "controls": [
+      {
+        "label": "Click or drop an image here (ordinateur) / Choose an image (écran tactile)",
+        "ref": "app/tools/image-tools/image-inverter/page.jsx:48; app/components/UploadPrompt.jsx:32-33"
+      },
+      {
+        "label": "Invert Colors",
+        "ref": "app/tools/image-tools/image-inverter/page.jsx:51"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "choisir une image",
+      "bouton « Invert Colors »",
+      "aperçu puis « Download »"
+    ],
+    "limits": [
+      {
+        "what": "taille max par image (ordinateur)",
+        "value": "268 435 456 pixels (268 Mpx) : refus avec message avant décodage",
+        "constant": "RASTER_MAX_PIXELS",
+        "ref": "app/lib/imageOutput.js:77-81"
+      },
+      {
+        "what": "taille max par image sur iPhone/iPad",
+        "value": "même plafond de 268 Mpx dans le code ; au-delà de 16 777 216 px (limite de canvas iOS) l'image est traitée par bandes au lieu d'être refusée ; 24 et 48 Mpx testés en simulation iPhone (42/42) ; aucune limite mémoire propre au téléphone dans le code",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/lib/bigImage.js:1-19; app/lib/imageOutput.js:98-118,160-195; docs/audit/RAPPORT-p16-photos-iphone-30-09.md:95"
+      },
+      {
+        "what": "taille max sur Android",
+        "value": "NON TROUVÉ — aucune règle propre à Android ; le test du canvas 4097×4097 décide du découpage en bandes (cherché : app/lib/bigImage.js, app/lib/imageOutput.js, app/lib/isMobileDevice.js non importé)",
+        "constant": null,
+        "ref": "app/lib/bigImage.js:118-138"
+      },
+      {
+        "what": "sortie WebP",
+        "value": "16 383 px de côté au plus (limite du format)",
+        "constant": "WEBP_MAX_SIDE",
+        "ref": "app/lib/bigImage.js:221-224"
+      },
+      {
+        "what": "poids max du fichier en octets",
+        "value": "NON TROUVÉ — aucune limite en octets (cherché : page.jsx, app/lib/imageOutput.js, app/lib/bigImage.js, app/lib/fileChecks.js)",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:77-89"
+      },
+      {
+        "what": "nombre d'images / d'utilisations",
+        "value": "une image à la fois, aucun quota",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:78"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Tout est calculé dans la page (canvas, et WebAssembly pour certains encodages) ; le fichier n'est envoyé à aucun serveur. Seul le TEXTE d'un message d'erreur affiché part vers /api/report-error (sans fichier ni nom de fichier). Les encodeurs MozJPEG/libwebp sont téléchargés depuis /wasm/ du site quand il le faut (WebP sous Safari, image de plus de 16,7 Mpx sur iPhone). Le résultat est une adresse blob: locale ; rien n'est conservé après fermeture de la page.",
+      "ref": "app/lib/useToolError.js:38-43,55-66; app/lib/reportError.js:16,163-169; app/lib/bigImage.js:179-196; app/lib/imageOutput.js:147-149"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:27-36)",
+    "browsers": "iPhone/iPad : au-delà de 16,7 Mpx l'image est décodée et traitée par bandes (app/lib/bigImage.js:1-19, app/lib/imageOutput.js:160-195) ; écriture d'un grand PNG sans canvas : CompressionStream requis (Safari 16.4+, app/lib/bigImage.js:246) ; Safari n'encode pas le WebP : libwebp WebAssembly (app/lib/imageOutput.js:120-141) ; bouton « Save / Share » en plus de « Download » sur iPhone/iPad (app/components/FileDownload.jsx:91-96,213-218) ; le navigateur demande confirmation avant de quitter tant que le résultat n'a pas été pris (app/components/FileDownload.jsx:69-81)",
+    "twin": "/tools/image-tools/image-editor (case « Invert Colors ») ; /tools/video-tools/video-filter (Invert) pour la vidéo",
+    "notes": "Alpha inchangé (page.jsx:30-34). Aucun réglage. fichier résultat nommé <nom d'origine>-inverted.<jpg|webp|png> (app/lib/download.js:108-111)."
+  },
+  {
+    "path": "/tools/image-tools/image-metadata",
+    "task": "Affiche les propriétés du fichier et les métadonnées intégrées (EXIF, GPS, IPTC, XMP, ICC) d'une image, et peut produire une copie sans métadonnées pour JPG, PNG et WebP.",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "métadonnées lues par exifr : JPEG, HEIC/HEIF, TIFF, PNG, WebP, AVIF",
+        "propriétés de base pour toute image",
+        "suppression : JPG, PNG, WebP seulement"
+      ],
+      "ref": "app/tools/image-tools/image-metadata/page.jsx:9-11,49,72; app/lib/stripMetadata.js:1-5,119-125"
+    },
+    "outputs": {
+      "formats": [
+        "copie sans métadonnées dans le même format (JPG, PNG ou WebP), octets d'image inchangés, nommée <nom>-no-metadata.<ext>"
+      ],
+      "ref": "app/tools/image-tools/image-metadata/page.jsx:76,81; app/lib/stripMetadata.js:1-5"
+    },
+    "controls": [
+      {
+        "label": "Click or drop an image here (ordinateur) / Choose an image (écran tactile)",
+        "ref": "app/tools/image-tools/image-metadata/page.jsx:71; app/components/UploadPrompt.jsx:32-33"
+      },
+      {
+        "label": "Remove metadata (affiché seulement si des métadonnées intégrées sont trouvées)",
+        "ref": "app/tools/image-tools/image-metadata/page.jsx:75-77"
+      },
+      {
+        "label": "name / size / type / width / height / lastModified (propriétés)",
+        "ref": "app/tools/image-tools/image-metadata/page.jsx:41"
+      },
+      {
+        "label": "groupes EXIF, GPS, IPTC, XMP, ICC, INTEROP… et « GPS location — visible to anyone you send this file to »",
+        "ref": "app/tools/image-tools/image-metadata/page.jsx:50-57,89"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "choisir une image (lecture immédiate, pas de bouton)",
+      "lire les propriétés du fichier",
+      "parcourir les groupes de métadonnées (la position GPS est mise en tête)",
+      "facultatif : bouton « Remove metadata » puis « Download » de la copie"
+    ],
+    "limits": [
+      {
+        "what": "taille max",
+        "value": "NON TROUVÉ — aucune limite dans la page ni dans app/lib/stripMetadata.js",
+        "constant": null,
+        "ref": "app/tools/image-tools/image-metadata/page.jsx:29-63"
+      },
+      {
+        "what": "fichier vide",
+        "value": "message « This file is empty (0 bytes): it holds no picture and no metadata. »",
+        "constant": null,
+        "ref": "app/tools/image-tools/image-metadata/page.jsx:46"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Lecture par la bibliothèque exifr (chargée avec la page) et suppression par réécriture des octets dans la page ; rien n'est envoyé, hors texte d'erreur vers /api/report-error.",
+      "ref": "app/tools/image-tools/image-metadata/page.jsx:48-49,76; app/lib/stripMetadata.js:1-5; app/lib/useToolError.js:38-43"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : seuls des blocs de métadonnées sont retirés, app/lib/stripMetadata.js:26-60)",
+    "browsers": "Image que le navigateur ne sait pas afficher (HEIC hors Safari…) : « This browser cannot display this image; embedded metadata is still read below. » (page.jsx:43). Bouton « Save / Share » sur iPhone/iPad (app/components/FileDownload.jsx:213-218).",
+    "twin": "/tools/file-tools/file-metadata (métadonnées de tout fichier, partiel)",
+    "notes": "Non lus : IFD1 (vignette) — ifd1:false (page.jsx:49). « lastModified » = date de modification du fichier, pas la prise de vue (page.jsx:41). La suppression garde le profil ICC et l'orientation (EXIF minimal), retire EXIF, XMP, IPTC, commentaires, MPF, blocs APPn, données après la fin de l'image (app/lib/stripMetadata.js:1-5,26-60) ; message affiché : « Removed: … The picture itself is unchanged (not re-encoded); its colour profile and orientation are kept. » (page.jsx:80). HEIC/TIFF : renvoi à Image Converter (app/lib/stripMetadata.js:125)."
+  },
+  {
+    "path": "/tools/image-tools/image-pixelator",
+    "task": "Pixellise toute l'image en blocs carrés dont la couleur est la moyenne des pixels du bloc.",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "toute image que le navigateur sait ouvrir (JPG, PNG, WebP, GIF, BMP, AVIF ; HEIC et TIFF seulement dans Safari)",
+        "animée (GIF/APNG/WebP) : première image seulement, annoncé"
+      ],
+      "ref": "app/tools/image-tools/image-pixelator/page.jsx:62; app/lib/fileChecks.js:203-215; app/components/AnimatedImageNote.jsx:5-20"
+    },
+    "outputs": {
+      "formats": [
+        "JPG si JPG en entrée (qualité 92)",
+        "WebP si WebP en entrée (qualité 92 ; libwebp WebAssembly sur Safari)",
+        "PNG pour un PNG et pour tout autre type (GIF, BMP, AVIF, HEIC/TIFF ouverts par Safari…)"
+      ],
+      "ref": "app/tools/image-tools/image-pixelator/page.jsx:49; app/lib/imageOutput.js:120-142"
+    },
+    "controls": [
+      {
+        "label": "Click or drop an image here (ordinateur) / Choose an image (écran tactile)",
+        "ref": "app/tools/image-tools/image-pixelator/page.jsx:61; app/components/UploadPrompt.jsx:32-33"
+      },
+      {
+        "label": "In pixels / % of the picture (boutons radio, pixels par défaut)",
+        "ref": "app/tools/image-tools/image-pixelator/page.jsx:18,64"
+      },
+      {
+        "label": "Pixel Size: {n}px (2-50, défaut 10)",
+        "ref": "app/tools/image-tools/image-pixelator/page.jsx:16,66"
+      },
+      {
+        "label": "Block size: {n}% of the shorter side (1-20, défaut 2 ; bloc d'au moins 2 px)",
+        "ref": "app/tools/image-tools/image-pixelator/page.jsx:19,44,65"
+      },
+      {
+        "label": "Apply Pixelate",
+        "ref": "app/tools/image-tools/image-pixelator/page.jsx:68"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "choisir une image",
+      "choisir l'unité (« In pixels » ou « % of the picture ») et la taille de bloc",
+      "bouton « Apply Pixelate »",
+      "aperçu puis « Download »"
+    ],
+    "limits": [
+      {
+        "what": "taille max par image (ordinateur)",
+        "value": "268 435 456 pixels (268 Mpx) : refus avec message avant décodage",
+        "constant": "RASTER_MAX_PIXELS",
+        "ref": "app/lib/imageOutput.js:77-81"
+      },
+      {
+        "what": "taille max par image sur iPhone/iPad",
+        "value": "même plafond de 268 Mpx dans le code ; au-delà de 16 777 216 px (limite de canvas iOS) l'image est traitée par bandes au lieu d'être refusée ; 24 et 48 Mpx testés en simulation iPhone (42/42) ; aucune limite mémoire propre au téléphone dans le code",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/lib/bigImage.js:1-19; app/lib/imageOutput.js:98-118,160-195; docs/audit/RAPPORT-p16-photos-iphone-30-09.md:95"
+      },
+      {
+        "what": "taille max sur Android",
+        "value": "NON TROUVÉ — aucune règle propre à Android ; le test du canvas 4097×4097 décide du découpage en bandes (cherché : app/lib/bigImage.js, app/lib/imageOutput.js, app/lib/isMobileDevice.js non importé)",
+        "constant": null,
+        "ref": "app/lib/bigImage.js:118-138"
+      },
+      {
+        "what": "sortie WebP",
+        "value": "16 383 px de côté au plus (limite du format)",
+        "constant": "WEBP_MAX_SIDE",
+        "ref": "app/lib/bigImage.js:221-224"
+      },
+      {
+        "what": "poids max du fichier en octets",
+        "value": "NON TROUVÉ — aucune limite en octets (cherché : page.jsx, app/lib/imageOutput.js, app/lib/bigImage.js, app/lib/fileChecks.js)",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:77-89"
+      },
+      {
+        "what": "nombre d'images / d'utilisations",
+        "value": "une image à la fois, aucun quota",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:78"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Tout est calculé dans la page (canvas, et WebAssembly pour certains encodages) ; le fichier n'est envoyé à aucun serveur. Seul le TEXTE d'un message d'erreur affiché part vers /api/report-error (sans fichier ni nom de fichier). Les encodeurs MozJPEG/libwebp sont téléchargés depuis /wasm/ du site quand il le faut (WebP sous Safari, image de plus de 16,7 Mpx sur iPhone). Le résultat est une adresse blob: locale ; rien n'est conservé après fermeture de la page.",
+      "ref": "app/lib/useToolError.js:38-43,55-66; app/lib/reportError.js:16,163-169; app/lib/bigImage.js:179-196; app/lib/imageOutput.js:147-149"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:43-48)",
+    "browsers": "iPhone/iPad : au-delà de 16,7 Mpx l'image est décodée et traitée par bandes (app/lib/bigImage.js:1-19, app/lib/imageOutput.js:160-195) ; écriture d'un grand PNG sans canvas : CompressionStream requis (Safari 16.4+, app/lib/bigImage.js:246) ; Safari n'encode pas le WebP : libwebp WebAssembly (app/lib/imageOutput.js:120-141) ; bouton « Save / Share » en plus de « Download » sur iPhone/iPad (app/components/FileDownload.jsx:91-96,213-218) ; le navigateur demande confirmation avant de quitter tant que le résultat n'a pas été pris (app/components/FileDownload.jsx:69-81)",
+    "twin": "/tools/image-tools/image-editor (« Pixelate » 0-20 px, onglet Transform)",
+    "notes": "Moyenne pondérée par l'alpha (app/lib/imageOutput.js:32-51) ; blocs partiels sur les bords droit et bas. Toute l'image, pas de zone. fichier résultat nommé <nom d'origine>-pixelated.<jpg|webp|png> (app/lib/download.js:108-111)."
+  },
+  {
+    "path": "/tools/image-tools/image-resizer",
+    "task": "Redimensionne une image en pixels (proportions verrouillées par défaut) ou la réduit de 25, 50 ou 75 %, dans son format ou en JPG, PNG ou WebP.",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "JPG, PNG, WebP gardés tels quels par défaut",
+        "GIF, BMP, AVIF… acceptés, enregistrés en PNG avec une note",
+        "animé : première image, dit"
+      ],
+      "ref": "app/tools/image-tools/image-resizer/page.jsx:17,108-110,131"
+    },
+    "outputs": {
+      "formats": [
+        "Same format as the original (JPG/PNG/WebP ; autres → PNG)",
+        "JPG",
+        "PNG",
+        "WebP"
+      ],
+      "ref": "app/tools/image-tools/image-resizer/page.jsx:110-111,156-163; app/lib/imageOutput.js:122-142"
+    },
+    "controls": [
+      {
+        "label": "Click or drop an image here (ordinateur) / Choose an image (écran tactile)",
+        "ref": "app/tools/image-tools/image-resizer/page.jsx:129; app/components/UploadPrompt.jsx:32-33"
+      },
+      {
+        "label": "W×H px · poids (sous l'aperçu)",
+        "ref": "app/tools/image-tools/image-resizer/page.jsx:130"
+      },
+      {
+        "label": "By pixels / By percentage",
+        "ref": "app/tools/image-tools/image-resizer/page.jsx:134-135"
+      },
+      {
+        "label": "Width (px) / Height (px) (champs numériques)",
+        "ref": "app/tools/image-tools/image-resizer/page.jsx:141-142"
+      },
+      {
+        "label": "Keep proportions (coché par défaut)",
+        "ref": "app/tools/image-tools/image-resizer/page.jsx:28,144"
+      },
+      {
+        "label": "25% smaller / 50% smaller / 75% smaller (50 % par défaut)",
+        "ref": "app/tools/image-tools/image-resizer/page.jsx:16,30,148-150"
+      },
+      {
+        "label": "Do not enlarge if the image is smaller (coché par défaut)",
+        "ref": "app/tools/image-tools/image-resizer/page.jsx:29,153"
+      },
+      {
+        "label": "Save as : Same format as the original / JPG / PNG / WebP",
+        "ref": "app/tools/image-tools/image-resizer/page.jsx:156-163"
+      },
+      {
+        "label": "Quality: {n} (10-100, défaut 92 ; affiché pour JPG/WebP)",
+        "ref": "app/tools/image-tools/image-resizer/page.jsx:35,164-167"
+      },
+      {
+        "label": "Resize",
+        "ref": "app/tools/image-tools/image-resizer/page.jsx:170"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "choisir une image",
+      "« By pixels » : taper la largeur (la hauteur suit) ou la hauteur ; ou « By percentage » : 25 / 50 / 75 % smaller",
+      "facultatif : « Save as » et « Quality »",
+      "bouton « Resize » (nouvelle taille et poids affichés)",
+      "« Download »"
+    ],
+    "limits": [
+      {
+        "what": "taille du résultat",
+        "value": "32 767 px de côté et 268 435 456 px au plus",
+        "constant": "CANVAS_MAX_SIDE / CANVAS_MAX_AREA",
+        "ref": "app/tools/image-tools/image-resizer/page.jsx:76-77; app/lib/mediaSupport.js:54-66"
+      },
+      {
+        "what": "iPhone/iPad",
+        "value": "résultat de plus de 16,7 Mpx dessiné par bandes",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/tools/image-tools/image-resizer/page.jsx:82-104"
+      },
+      {
+        "what": "sortie WebP",
+        "value": "16 383 px de côté au plus",
+        "constant": "WEBP_MAX_SIDE",
+        "ref": "app/lib/bigImage.js:221-224"
+      },
+      {
+        "what": "taille de l'image d'entrée",
+        "value": "NON TROUVÉ — pas de contrôle loadRaster ici ; l'image est ouverte par <img> (cherché dans page.jsx)",
+        "constant": null,
+        "ref": "app/tools/image-tools/image-resizer/page.jsx:47-51,79-81"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Tout est calculé dans la page (canvas, et WebAssembly pour certains encodages) ; le fichier n'est envoyé à aucun serveur. Seul le TEXTE d'un message d'erreur affiché part vers /api/report-error (sans fichier ni nom de fichier). Les encodeurs MozJPEG/libwebp sont téléchargés depuis /wasm/ du site quand il le faut (WebP sous Safari, image de plus de 16,7 Mpx sur iPhone). Le résultat est une adresse blob: locale ; rien n'est conservé après fermeture de la page.",
+      "ref": "app/lib/useToolError.js:38-43,55-66; app/lib/reportError.js:16,163-169; app/lib/bigImage.js:179-196; app/lib/imageOutput.js:147-149"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:86-104)",
+    "browsers": "iPhone/iPad : au-delà de 16,7 Mpx l'image est décodée et traitée par bandes (app/lib/bigImage.js:1-19, app/lib/imageOutput.js:160-195) ; écriture d'un grand PNG sans canvas : CompressionStream requis (Safari 16.4+, app/lib/bigImage.js:246) ; Safari n'encode pas le WebP : libwebp WebAssembly (app/lib/imageOutput.js:120-141) ; bouton « Save / Share » en plus de « Download » sur iPhone/iPad (app/components/FileDownload.jsx:91-96,213-218) ; le navigateur demande confirmation avant de quitter tant que le résultat n'a pas été pris (app/components/FileDownload.jsx:69-81) ; WebP sous Safari encodé par libwebp WebAssembly : le WebP reste WebP (page.jsx:105)",
+    "twin": "/tools/ai-tools/image-upscaler (agrandissement par IA, cité en FAQ) ; /tools/video-tools/video-resizer pour la vidéo",
+    "notes": "Pourcentage = réduction seulement (3 valeurs). « Do not enlarge » réduit proportionnellement une taille plus grande que l'original (page.jsx:64-67). Note JPG : « JPG has no transparency: transparent areas, if any, are white. » (page.jsx:114). Nom : <nom>-<L>x<H>.<ext> (page.jsx:115). Champs désactivés tant que la taille de l'image n'est pas connue (page.jsx:44-46,141-142)."
+  },
+  {
+    "path": "/tools/image-tools/image-rotate",
+    "task": "Fait tourner une image dans le sens horaire de 90, 180, 270° ou d'un angle libre, avec fond transparent ou coloré pour les angles libres.",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "toute image que le navigateur sait ouvrir (JPG, PNG, WebP, GIF, BMP, AVIF ; HEIC et TIFF seulement dans Safari)",
+        "animée (GIF/APNG/WebP) : première image seulement, annoncé"
+      ],
+      "ref": "app/tools/image-tools/image-rotate/page.jsx:47; app/lib/fileChecks.js:203-215; app/components/AnimatedImageNote.jsx:5-20"
+    },
+    "outputs": {
+      "formats": [
+        "90/180/270° : format de l'original (JPG/WebP qualité 92, sinon PNG)",
+        "angle libre + Transparent : PNG",
+        "angle libre + Colour : format de l'original"
+      ],
+      "ref": "app/tools/image-tools/image-rotate/page.jsx:32-35; app/lib/imageOutput.js:120-142"
+    },
+    "controls": [
+      {
+        "label": "Click or drop an image here (ordinateur) / Choose an image (écran tactile)",
+        "ref": "app/tools/image-tools/image-rotate/page.jsx:46; app/components/UploadPrompt.jsx:32-33"
+      },
+      {
+        "label": "90° / 180° / 270° (préréglages, 90 par défaut)",
+        "ref": "app/tools/image-tools/image-rotate/page.jsx:15,49"
+      },
+      {
+        "label": "Custom angle: {n}° (curseur 0-360)",
+        "ref": "app/tools/image-tools/image-rotate/page.jsx:50"
+      },
+      {
+        "label": "Angle (degrees, clockwise) (champ −360 à 360, pas de 0,5)",
+        "ref": "app/tools/image-tools/image-rotate/page.jsx:52-53"
+      },
+      {
+        "label": "Background (any angle other than 90° steps) : Transparent (PNG) / Colour (fills the corners and any transparency; keeps the format) + couleur (défaut #ffffff)",
+        "ref": "app/tools/image-tools/image-rotate/page.jsx:17-18,54-57"
+      },
+      {
+        "label": "Rotate",
+        "ref": "app/tools/image-tools/image-rotate/page.jsx:60"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "choisir une image",
+      "choisir 90°, 180°, 270°, ou un angle au curseur ou au clavier",
+      "angle libre : choisir le fond (transparent ou couleur)",
+      "bouton « Rotate »",
+      "aperçu puis « Download »"
+    ],
+    "limits": [
+      {
+        "what": "taille max par image (ordinateur)",
+        "value": "268 435 456 pixels (268 Mpx) : refus avec message avant décodage",
+        "constant": "RASTER_MAX_PIXELS",
+        "ref": "app/lib/imageOutput.js:77-81"
+      },
+      {
+        "what": "taille max par image sur iPhone/iPad",
+        "value": "même plafond de 268 Mpx dans le code ; au-delà de 16 777 216 px (limite de canvas iOS) l'image est traitée par bandes au lieu d'être refusée ; 24 et 48 Mpx testés en simulation iPhone (42/42) ; aucune limite mémoire propre au téléphone dans le code",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/lib/bigImage.js:1-19; app/lib/imageOutput.js:98-118,160-195; docs/audit/RAPPORT-p16-photos-iphone-30-09.md:95"
+      },
+      {
+        "what": "taille max sur Android",
+        "value": "NON TROUVÉ — aucune règle propre à Android ; le test du canvas 4097×4097 décide du découpage en bandes (cherché : app/lib/bigImage.js, app/lib/imageOutput.js, app/lib/isMobileDevice.js non importé)",
+        "constant": null,
+        "ref": "app/lib/bigImage.js:118-138"
+      },
+      {
+        "what": "sortie WebP",
+        "value": "16 383 px de côté au plus (limite du format)",
+        "constant": "WEBP_MAX_SIDE",
+        "ref": "app/lib/bigImage.js:221-224"
+      },
+      {
+        "what": "poids max du fichier en octets",
+        "value": "NON TROUVÉ — aucune limite en octets (cherché : page.jsx, app/lib/imageOutput.js, app/lib/bigImage.js, app/lib/fileChecks.js)",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:77-89"
+      },
+      {
+        "what": "nombre d'images / d'utilisations",
+        "value": "une image à la fois, aucun quota",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:78"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Tout est calculé dans la page (canvas, et WebAssembly pour certains encodages) ; le fichier n'est envoyé à aucun serveur. Seul le TEXTE d'un message d'erreur affiché part vers /api/report-error (sans fichier ni nom de fichier). Les encodeurs MozJPEG/libwebp sont téléchargés depuis /wasm/ du site quand il le faut (WebP sous Safari, image de plus de 16,7 Mpx sur iPhone). Le résultat est une adresse blob: locale ; rien n'est conservé après fermeture de la page.",
+      "ref": "app/lib/useToolError.js:38-43,55-66; app/lib/reportError.js:16,163-169; app/lib/bigImage.js:179-196; app/lib/imageOutput.js:147-149"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:30-35)",
+    "browsers": "iPhone/iPad : au-delà de 16,7 Mpx l'image est décodée et traitée par bandes (app/lib/bigImage.js:1-19, app/lib/imageOutput.js:160-195) ; écriture d'un grand PNG sans canvas : CompressionStream requis (Safari 16.4+, app/lib/bigImage.js:246) ; Safari n'encode pas le WebP : libwebp WebAssembly (app/lib/imageOutput.js:120-141) ; bouton « Save / Share » en plus de « Download » sur iPhone/iPad (app/components/FileDownload.jsx:91-96,213-218) ; le navigateur demande confirmation avant de quitter tant que le résultat n'a pas été pris (app/components/FileDownload.jsx:69-81) ; iPhone au-delà de 16,7 Mpx et angle libre : rééchantillonnage bilinéaire calculé sur les pixels (app/lib/imageOutput.js:221-240)",
+    "twin": "/tools/image-tools/image-editor (Rotation par pas de 90°) ; /tools/image-tools/image-flip (Flip Both Ways = 180°)",
+    "notes": "Quarts de tour exacts (pixels déplacés, pas de rééchantillonnage) ; autres angles : toile agrandie pour contenir l'image tournée, rééchantillonnage bilinéaire (app/lib/imageOutput.js:197-219). Le fond coloré remplit aussi la transparence d'origine (page.jsx:33,56). fichier résultat nommé <nom d'origine>-rotated.<jpg|webp|png> (app/lib/download.js:108-111)."
+  },
+  {
+    "path": "/tools/image-tools/round-corners",
+    "task": "Arrondit les quatre coins d'une image, coins transparents (PNG) ou d'une couleur choisie.",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "toute image que le navigateur sait ouvrir (JPG, PNG, WebP, GIF, BMP, AVIF ; HEIC et TIFF seulement dans Safari)",
+        "animée (GIF/APNG/WebP) : première image seulement, annoncé"
+      ],
+      "ref": "app/tools/image-tools/round-corners/page.jsx:66; app/lib/fileChecks.js:203-215; app/components/AnimatedImageNote.jsx:5-20"
+    },
+    "outputs": {
+      "formats": [
+        "PNG (coins transparents, ou coins colorés pour tout format autre que JPG)",
+        "JPG qualité 92 si l'original est un JPG et les coins colorés"
+      ],
+      "ref": "app/tools/image-tools/round-corners/page.jsx:52-53"
+    },
+    "controls": [
+      {
+        "label": "Click or drop an image here (ordinateur) / Choose an image (écran tactile)",
+        "ref": "app/tools/image-tools/round-corners/page.jsx:65; app/components/UploadPrompt.jsx:32-33"
+      },
+      {
+        "label": "Corner Radius: {n}% (1-50, défaut 20)",
+        "ref": "app/tools/image-tools/round-corners/page.jsx:15,68"
+      },
+      {
+        "label": "Transparent corners (PNG) (défaut)",
+        "ref": "app/tools/image-tools/round-corners/page.jsx:70"
+      },
+      {
+        "label": "Corners in + couleur (défaut #ffffff) « (a JPG then stays a JPG) »",
+        "ref": "app/tools/image-tools/round-corners/page.jsx:71-73"
+      },
+      {
+        "label": "Apply Round Corners",
+        "ref": "app/tools/image-tools/round-corners/page.jsx:75"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "choisir une image",
+      "régler « Corner Radius »",
+      "choisir « Transparent corners (PNG) » ou « Corners in » une couleur",
+      "bouton « Apply Round Corners »",
+      "aperçu puis « Download »"
+    ],
+    "limits": [
+      {
+        "what": "taille max par image (ordinateur)",
+        "value": "268 435 456 pixels (268 Mpx) : refus avec message avant décodage",
+        "constant": "RASTER_MAX_PIXELS",
+        "ref": "app/lib/imageOutput.js:77-81"
+      },
+      {
+        "what": "taille max par image sur iPhone/iPad",
+        "value": "même plafond de 268 Mpx dans le code ; au-delà de 16 777 216 px (limite de canvas iOS) l'image est traitée par bandes au lieu d'être refusée ; 24 et 48 Mpx testés en simulation iPhone (42/42) ; aucune limite mémoire propre au téléphone dans le code",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/lib/bigImage.js:1-19; app/lib/imageOutput.js:98-118,160-195; docs/audit/RAPPORT-p16-photos-iphone-30-09.md:95"
+      },
+      {
+        "what": "taille max sur Android",
+        "value": "NON TROUVÉ — aucune règle propre à Android ; le test du canvas 4097×4097 décide du découpage en bandes (cherché : app/lib/bigImage.js, app/lib/imageOutput.js, app/lib/isMobileDevice.js non importé)",
+        "constant": null,
+        "ref": "app/lib/bigImage.js:118-138"
+      },
+      {
+        "what": "sortie WebP",
+        "value": "16 383 px de côté au plus (limite du format)",
+        "constant": "WEBP_MAX_SIDE",
+        "ref": "app/lib/bigImage.js:221-224"
+      },
+      {
+        "what": "poids max du fichier en octets",
+        "value": "NON TROUVÉ — aucune limite en octets (cherché : page.jsx, app/lib/imageOutput.js, app/lib/bigImage.js, app/lib/fileChecks.js)",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:77-89"
+      },
+      {
+        "what": "nombre d'images / d'utilisations",
+        "value": "une image à la fois, aucun quota",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:78"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Tout est calculé dans la page (canvas, et WebAssembly pour certains encodages) ; le fichier n'est envoyé à aucun serveur. Seul le TEXTE d'un message d'erreur affiché part vers /api/report-error (sans fichier ni nom de fichier). Les encodeurs MozJPEG/libwebp sont téléchargés depuis /wasm/ du site quand il le faut (WebP sous Safari, image de plus de 16,7 Mpx sur iPhone). Le résultat est une adresse blob: locale ; rien n'est conservé après fermeture de la page.",
+      "ref": "app/lib/useToolError.js:38-43,55-66; app/lib/reportError.js:16,163-169; app/lib/bigImage.js:179-196; app/lib/imageOutput.js:147-149"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:42-51)",
+    "browsers": "iPhone/iPad : au-delà de 16,7 Mpx l'image est décodée et traitée par bandes (app/lib/bigImage.js:1-19, app/lib/imageOutput.js:160-195) ; écriture d'un grand PNG sans canvas : CompressionStream requis (Safari 16.4+, app/lib/bigImage.js:246) ; Safari n'encode pas le WebP : libwebp WebAssembly (app/lib/imageOutput.js:120-141) ; bouton « Save / Share » en plus de « Download » sur iPhone/iPad (app/components/FileDownload.jsx:91-96,213-218) ; le navigateur demande confirmation avant de quitter tant que le résultat n'a pas été pris (app/components/FileDownload.jsx:69-81)",
+    "twin": "/tools/image-tools/image-editor (« Corner Radius » 0-100 px, résultat PNG)",
+    "notes": "Rayon = % × moitié du petit côté (page.jsx:41) : 50 % = un quart du petit côté, jamais un cercle. Arcs circulaires vrais (app/lib/imageOutput.js:53-63). Même rayon aux quatre coins. Un WebP en entrée sort toujours en PNG. fichier résultat nommé <nom d'origine>-rounded.<jpg|webp|png> (app/lib/download.js:108-111)."
+  },
+  {
+    "path": "/tools/image-tools/sepia-filter",
+    "task": "Donne à une image un ton sépia (matrice de la fonction CSS sepia()) avec une intensité réglable.",
+    "inputs": {
+      "accept": "image/*",
+      "formats": [
+        "toute image que le navigateur sait ouvrir (JPG, PNG, WebP, GIF, BMP, AVIF ; HEIC et TIFF seulement dans Safari)",
+        "animée (GIF/APNG/WebP) : première image seulement, annoncé"
+      ],
+      "ref": "app/tools/image-tools/sepia-filter/page.jsx:52; app/lib/fileChecks.js:203-215; app/components/AnimatedImageNote.jsx:5-20"
+    },
+    "outputs": {
+      "formats": [
+        "JPG si JPG en entrée (qualité 92)",
+        "WebP si WebP en entrée (qualité 92 ; libwebp WebAssembly sur Safari)",
+        "PNG pour un PNG et pour tout autre type (GIF, BMP, AVIF, HEIC/TIFF ouverts par Safari…)"
+      ],
+      "ref": "app/tools/image-tools/sepia-filter/page.jsx:40; app/lib/imageOutput.js:120-142"
+    },
+    "controls": [
+      {
+        "label": "Click or drop an image here (ordinateur) / Choose an image (écran tactile)",
+        "ref": "app/tools/image-tools/sepia-filter/page.jsx:51; app/components/UploadPrompt.jsx:32-33"
+      },
+      {
+        "label": "Intensity: {n}% (0-100, défaut 100)",
+        "ref": "app/tools/image-tools/sepia-filter/page.jsx:15,54"
+      },
+      {
+        "label": "Apply Sepia",
+        "ref": "app/tools/image-tools/sepia-filter/page.jsx:55"
+      },
+      {
+        "label": "Download",
+        "ref": "app/components/FileDownload.jsx:211"
+      },
+      {
+        "label": "Save / Share (iPhone/iPad seulement)",
+        "ref": "app/components/FileDownload.jsx:213-218"
+      }
+    ],
+    "steps": [
+      "choisir une image",
+      "régler « Intensity »",
+      "bouton « Apply Sepia »",
+      "aperçu puis « Download »"
+    ],
+    "limits": [
+      {
+        "what": "taille max par image (ordinateur)",
+        "value": "268 435 456 pixels (268 Mpx) : refus avec message avant décodage",
+        "constant": "RASTER_MAX_PIXELS",
+        "ref": "app/lib/imageOutput.js:77-81"
+      },
+      {
+        "what": "taille max par image sur iPhone/iPad",
+        "value": "même plafond de 268 Mpx dans le code ; au-delà de 16 777 216 px (limite de canvas iOS) l'image est traitée par bandes au lieu d'être refusée ; 24 et 48 Mpx testés en simulation iPhone (42/42) ; aucune limite mémoire propre au téléphone dans le code",
+        "constant": "CANVAS_MAX_PIXELS",
+        "ref": "app/lib/bigImage.js:1-19; app/lib/imageOutput.js:98-118,160-195; docs/audit/RAPPORT-p16-photos-iphone-30-09.md:95"
+      },
+      {
+        "what": "taille max sur Android",
+        "value": "NON TROUVÉ — aucune règle propre à Android ; le test du canvas 4097×4097 décide du découpage en bandes (cherché : app/lib/bigImage.js, app/lib/imageOutput.js, app/lib/isMobileDevice.js non importé)",
+        "constant": null,
+        "ref": "app/lib/bigImage.js:118-138"
+      },
+      {
+        "what": "sortie WebP",
+        "value": "16 383 px de côté au plus (limite du format)",
+        "constant": "WEBP_MAX_SIDE",
+        "ref": "app/lib/bigImage.js:221-224"
+      },
+      {
+        "what": "poids max du fichier en octets",
+        "value": "NON TROUVÉ — aucune limite en octets (cherché : page.jsx, app/lib/imageOutput.js, app/lib/bigImage.js, app/lib/fileChecks.js)",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:77-89"
+      },
+      {
+        "what": "nombre d'images / d'utilisations",
+        "value": "une image à la fois, aucun quota",
+        "constant": null,
+        "ref": "app/lib/imageOutput.js:78"
+      }
+    ],
+    "processing": {
+      "where": "browser",
+      "detail": "Tout est calculé dans la page (canvas, et WebAssembly pour certains encodages) ; le fichier n'est envoyé à aucun serveur. Seul le TEXTE d'un message d'erreur affiché part vers /api/report-error (sans fichier ni nom de fichier). Les encodeurs MozJPEG/libwebp sont téléchargés depuis /wasm/ du site quand il le faut (WebP sous Safari, image de plus de 16,7 Mpx sur iPhone). Le résultat est une adresse blob: locale ; rien n'est conservé après fermeture de la page.",
+      "ref": "app/lib/useToolError.js:38-43,55-66; app/lib/reportError.js:16,163-169; app/lib/bigImage.js:179-196; app/lib/imageOutput.js:147-149"
+    },
+    "quota": "aucune (aucun appel à une route app/api hormis /api/report-error pour le texte des erreurs ; vérifié par recherche de fetch dans la page et ses modules)",
+    "signup": "aucune inscription demandée (vérifié : aucune route appelée, aucun contrôle de compte dans la page)",
+    "watermark": "aucun filigrane ajouté (vérifié : page.jsx:28-39)",
+    "browsers": "iPhone/iPad : au-delà de 16,7 Mpx l'image est décodée et traitée par bandes (app/lib/bigImage.js:1-19, app/lib/imageOutput.js:160-195) ; écriture d'un grand PNG sans canvas : CompressionStream requis (Safari 16.4+, app/lib/bigImage.js:246) ; Safari n'encode pas le WebP : libwebp WebAssembly (app/lib/imageOutput.js:120-141) ; bouton « Save / Share » en plus de « Download » sur iPhone/iPad (app/components/FileDownload.jsx:91-96,213-218) ; le navigateur demande confirmation avant de quitter tant que le résultat n'a pas été pris (app/components/FileDownload.jsx:69-81)",
+    "twin": "/tools/video-tools/video-filter (Sepia, pour la vidéo) ; pas de sépia dans image-editor",
+    "notes": "Coefficients 0,393/0,769/0,189 ; 0,349/0,686/0,168 ; 0,272/0,534/0,131 interpolés avec l'identité selon l'intensité (page.jsx:31-36) ; 0 % = image inchangée ; alpha inchangé. fichier résultat nommé <nom d'origine>-sepia.<jpg|webp|png> (app/lib/download.js:108-111)."
+  }
+]
