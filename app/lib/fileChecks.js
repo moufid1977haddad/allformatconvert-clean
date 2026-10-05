@@ -167,6 +167,19 @@ function headerPixels(b) {
       if (width && height) return { width, height };
     }
   }
+  // P33 (05/10): HEIC / HEIF / AVIF (ISO-BMFF "ftyp"): the size of each image item is an 'ispe' box (20 bytes) in the
+  // 'meta' box at the start of the file. An iPhone photo is a grid of 512 × 512 tiles plus a thumbnail, each with its
+  // own 'ispe': the largest one is the picture itself (the grid). The phone bound was never applied to a HEIC or AVIF
+  // picture before: its size was unknown here (a 63 MP HEIC panorama passed silently).
+  if (b.length >= 12 && b[4] === 0x66 && b[5] === 0x74 && b[6] === 0x79 && b[7] === 0x70) {
+    let best = null;
+    for (let i = 4; i + 16 <= b.length; i++) {
+      if (b[i] !== 0x69 || b[i + 1] !== 0x73 || b[i + 2] !== 0x70 || b[i + 3] !== 0x65 || v.getUint32(i - 4) !== 20) continue;
+      const width = v.getUint32(i + 8), height = v.getUint32(i + 12);
+      if (width && height && (!best || width * height > best.width * best.height)) best = { width, height };
+    }
+    if (best) return best;
+  }
   if (b[0] === 0xff && b[1] === 0xd8) {
     for (let i = 2; i + 9 < b.length;) {
       if (b[i] !== 0xff) { i++; continue; }

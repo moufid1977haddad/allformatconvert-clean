@@ -12,10 +12,11 @@
 // the browser can display (WebP, GIF, BMP, AVIF, HEIC in Safari…) are drawn
 // upright on a canvas first. Anything the browser cannot decode is reported.
 // pdf-lib is loaded when an image page is added, not with the tool page (30/09/2026, Lighthouse).
-import { imageDims, decodeToRaster, hasAlpha, encodePngRGBA, encodeJpegWasm } from './bigImage';
+import { imageDims, decodeToRaster, hasAlpha, encodePngRGBA, encodeJpegWasm, CANVAS_MAX_PIXELS, canvasBeyondSafariCap } from './bigImage';
 import { checkedBlob } from './mediaSupport';
 import { imageHeaderSize } from './fileChecks';
 import { isMobileDevice } from './isMobileDevice';
+import { PHONE_MAX_MP, PHONE_REDUCE_MP, overPhoneBound, reducedSize } from './reduceImage';
 
 const isJpeg = (b) => b[0] === 0xff && b[1] === 0xd8;
 const isPng = (b) => b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47;
@@ -41,6 +42,17 @@ export async function uprightImage(file) {
   return { kind: 'jpg', bytes: new Uint8Array(await blob.arrayBuffer()) };
 }
 async function embedUpright(pdfDoc, file) {
+  // P33 (05/10): on a phone whose canvas cannot hold the picture (iOS: over 16.7 MP), the same band decode and the same
+  // 4:2:0 JPEG / PNG as below, but in the worker of "Reduce to 48 MP" at full size: measured (scripts/p33/pdf-reduce.mjs,
+  // Firefox, simulated iPhone) a 48 MP WebP took the tab to 1,150 MB on the page (the decoded pixels and MozJPEG's
+  // memory kept by the page), above the 961 MB of the 48 MP photo proven on the owner's iPhone; in the worker 964-969 MB. Same result file.
+  if (isMobileDevice()) {
+    const dims = await imageDims(file);
+    if (dims && dims.width * dims.height > CANVAS_MAX_PIXELS && !(await canvasBeyondSafariCap())) {
+      const r = await pictureInWorker(file, dims, dims, () => {});
+      return r.kind === 'png' ? pdfDoc.embedPng(r.bytes) : pdfDoc.embedJpg(r.bytes);
+    }
+  }
   const u = await uprightImage(file);
   return u.kind === 'png' ? pdfDoc.embedPng(u.bytes) : pdfDoc.embedJpg(u.bytes);
 }
@@ -127,33 +139,75 @@ function placedPage(pdfDoc, img, { size, orientation = 'auto', marginMm = 0 }, e
 // 24 MP 0.51 GB, 48 MP 0.70 GB, 100 MP 1.65 GB, 200 MP 3.0 GB (done, on a computer). A phone browser reloads a tab
 // around 1.5 GB: 90 MP on a phone (a 63 MP panorama passes, a 108 / 200 MP Android picture does not), 268 on a computer.
 // JPEG photos are not decoded: no bound for them on any device.
-export const PHONE_MAX_DECODED_MP = 90;
+// P33 (05/10): the phone bound is now the site's one phone number, 48 MP (lib/reduceImage.js PHONE_MAX_PIXELS: the
+// owner's 48 MP iPhone photo, the only size proven on a real iPhone). P32 measured the 63 MP panorama as WebP (the path
+// of HEIC, AVIF, BMP, GIF and mirrored JPEGs too) at 1,467 MB for the tab, above the 961 MB of that proven photo: 90 MP
+// was not true on a phone. Over it, the picture is named at selection and can be reduced to 48 MP in the same gesture
+// as the conversion ("Reduce to 48 MP then convert to PDF", reduceForPdf.worker.js), as in Image Compressor.
+export { PHONE_MAX_MP };
 export const MAX_DECODED_MP_COMPUTER = 268;
-const MAX_DECODED_MP = () => (isMobileDevice() ? PHONE_MAX_DECODED_MP : MAX_DECODED_MP_COMPUTER);
-async function assertDecodable(original, file) {
+const overDecodeBound = (w, h) => (isMobileDevice() ? overPhoneBound(w, h) : (w * h) / 1e6 > MAX_DECODED_MP_COMPUTER);
+// TIFF is decoded whole by our own decoder before anything else could reduce it: no "Reduce" for it, only the bound.
+const reducible = (head) => isMobileDevice() && !isTiffBytes(head);
+const sizeSentence = (name, size) => `${name} is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round((size.width * size.height) / 1e6)} megapixels)`;
+function overBoundSentence(name, size, canReduce) {
+  if (!isMobileDevice()) return `${sizeSentence(name, size)}: more than a browser can turn into a PDF page (${MAX_DECODED_MP_COMPUTER} megapixels at most on a computer). Use a smaller version of the image (Image Resizer), or a JPEG.`;
+  const head = `${sizeSentence(name, size)}: on a phone the limit is ${PHONE_MAX_MP} megapixels for images other than JPEG photos, because turning it into a PDF page would need more memory than a phone browser gives a page.`;
+  if (!canReduce) return `${head} Use a computer, a smaller version of the image (Image Resizer), or a JPEG.`;
+  const r = reducedSize(size.width, size.height, PHONE_REDUCE_MP);
+  return `${head} It can be reduced to ${r.width.toLocaleString('en-US')} × ${r.height.toLocaleString('en-US')} (${Math.round((r.width * r.height) / 1e6 * 10) / 10} MP, the size of a 48 MP phone photo) first.`;
+}
+async function assertDecodable(original, file, canReduce = false) {
   const size = await imageHeaderSize(file).catch(() => null);
-  const mp = size ? (size.width * size.height) / 1e6 : 0;
-  if (mp > MAX_DECODED_MP()) throw new SizeError(`${original.name}: this image is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round(mp)} megapixels), more than a browser can turn into a PDF page (${MAX_DECODED_MP()} megapixels at most${isMobileDevice() ? ` on a phone, ${MAX_DECODED_MP_COMPUTER} on a computer` : ''}). Use a smaller version of the image, or a JPEG.`);
+  if (size && overDecodeBound(size.width, size.height)) throw new SizeError(overBoundSentence(original.name, size, canReduce));
 }
 class SizeError extends Error {}
 /**
  * P31 (03/10): the same bound, said as soon as the files are chosen (header only, nothing decoded), before the
- * Convert button. Resolves to the sentences for the images over it (JPEG photos are never decoded: never listed).
+ * Convert button. Resolves to { message, reducible } for each image over it (JPEG photos are never decoded: never
+ * listed). P33: reducible = "Reduce to 48 MP then convert to PDF" can take it (a phone, not a TIFF).
  */
 export async function decodedSizeProblems(files) {
   const out = [];
   for (const f of files) {
-    const head = new Uint8Array(await f.slice(0, 3).arrayBuffer().catch(() => new ArrayBuffer(0)));
+    const head = new Uint8Array(await f.slice(0, 4).arrayBuffer().catch(() => new ArrayBuffer(0)));
     if (head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff) continue; // a JPEG: embedded as it is
     const size = await imageHeaderSize(f).catch(() => null);
-    const mp = size ? (size.width * size.height) / 1e6 : 0;
-    if (mp > MAX_DECODED_MP()) out.push(`${f.name}: this image is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round(mp)} megapixels), more than a browser can turn into a PDF page (${MAX_DECODED_MP()} megapixels at most${isMobileDevice() ? ` on a phone, ${MAX_DECODED_MP_COMPUTER} on a computer` : ''}). Use a smaller version of the image (Image Resizer), or a JPEG.`);
+    if (!size || !overDecodeBound(size.width, size.height)) continue;
+    const canReduce = reducible(head);
+    out.push({ message: overBoundSentence(f.name, size, canReduce), reducible: canReduce });
   }
   return out;
 }
 
+// P33 (05/10): the picture reduced to 48 MP in a worker (reduceForPdf.worker.js), as Image Compressor does (to = dims:
+// the same band decode at full size, see embedUpright). A worker
+// that dies (out of memory) sends nothing: without progress for a generous time for the picture's size (Image
+// Compressor's watchdog: 60 s + 1.5 s per megapixel), the conversion stops with a message instead of waiting for ever.
+function pictureInWorker(file, dims, to, onProgress, { png = false } = {}) {
+  return new Promise((resolve, reject) => {
+    const worker = new Worker(new URL('./reduceForPdf.worker.js', import.meta.url), { type: 'module' });
+    let watchdog = null;
+    const end = (fn, v) => { clearTimeout(watchdog); worker.terminate(); fn(v); };
+    const arm = () => {
+      clearTimeout(watchdog);
+      watchdog = setTimeout(() => end(reject, new Error('the reduction stopped without an answer (usually: an image too large for the memory this browser gives a page); nothing was produced')), 60_000 + Math.round((dims.width * dims.height / 1e6) * 1500));
+    };
+    worker.onmessage = ({ data }) => {
+      if (data.type === 'progress') { arm(); onProgress(data.pct); return; }
+      if (data.type === 'done') end(resolve, { kind: data.kind, bytes: data.bytes });
+      else end(reject, new Error(data.message));
+    };
+    worker.onerror = (e) => { e.preventDefault?.(); end(reject, new Error(`the reduction stopped (${e.message || 'the image engine could not start'})`)); };
+    arm();
+    worker.postMessage({ file, dims, to, png });
+  });
+}
+
 // Adds a page to pdfDoc; throws Error(`${file.name}: …`) when the file can't be used.
-export async function addImagePage(pdfDoc, original, layout = null) {
+// P33 (05/10): options.reduce (the visitor chose "Reduce to 48 MP then convert to PDF"): a picture over the phone bound
+// is reduced to 48 MP first instead of being refused. Resolves to a note ("reduced from … to …") when it was.
+export async function addImagePage(pdfDoc, original, layout = null, { reduce = false, onProgress = () => {} } = {}) {
   const placed = !!(layout && layout.size && layout.size !== 'fit');
   const { degrees } = await import('pdf-lib');
   let file = original;
@@ -166,6 +220,24 @@ export async function addImagePage(pdfDoc, original, layout = null) {
     throw new Error(`${original.name}: this image could not be read (${e.message}).`);
   }
   try {
+    // P33: reduced to 48 MP first (phone, the visitor's choice). The TIFF case was refused above (decoded whole first).
+    if (reduce && isMobileDevice() && !isTiffBytes(bytes)) {
+      const size = await imageHeaderSize(file).catch(() => null);
+      let mirrored = false;
+      if (isJpeg(bytes)) {
+        try { mirrored = [2, 4, 5, 7].includes((await (await import('exifr')).default.orientation(bytes)) || 1); } catch { mirrored = false; }
+      }
+      if (size && overPhoneBound(size.width, size.height) && (!isJpeg(bytes) || mirrored)) {
+        const dims = await imageDims(file); // as displayed (EXIF / HEIC rotation applied): the band reader works in it
+        if (!dims) throw new Error('this browser cannot open this image');
+        const to = reducedSize(dims.width, dims.height, PHONE_REDUCE_MP);
+        // a PNG stays PNG (lossless, as it came; and lighter: measured, Firefox, tab working set: the panorama reduced to PNG
+        // 728-755 MB, reduced to JPEG 987-988 MB, not reduced 844 MB (P32)) -- other pictures become JPEG unless transparent, as in uprightImage
+        const r = await pictureInWorker(file, dims, to, onProgress, { png: isPng(bytes) });
+        fullPage(pdfDoc, r.kind === 'png' ? await pdfDoc.embedPng(r.bytes) : await pdfDoc.embedJpg(r.bytes), layout);
+        return `${original.name}: reduced from ${dims.width.toLocaleString('en-US')} × ${dims.height.toLocaleString('en-US')} to ${to.width.toLocaleString('en-US')} × ${to.height.toLocaleString('en-US')} pixels`;
+      }
+    }
     if (isJpeg(bytes)) {
       let orientation = 1;
       try {
@@ -173,7 +245,7 @@ export async function addImagePage(pdfDoc, original, layout = null) {
         orientation = (await exifr.orientation(bytes)) || 1;
       } catch { orientation = 1; } // no readable EXIF: stored as displayed
       if ([2, 4, 5, 7].includes(orientation)) { // mirrored: drawn upright first
-        await assertDecodable(original, file);
+        await assertDecodable(original, file, isMobileDevice());
         fullPage(pdfDoc, await embedUpright(pdfDoc, file), layout);
         return;
       }
@@ -187,7 +259,7 @@ export async function addImagePage(pdfDoc, original, layout = null) {
       else pdfDoc.addPage([W, H]).drawImage(img, { x: 0, y: 0, width: W, height: H });
       return;
     }
-    await assertDecodable(original, file);
+    await assertDecodable(original, file, isMobileDevice());
     const png = isPng(bytes) ? await pdfDoc.embedPng(bytes) : await embedUpright(pdfDoc, file);
     fullPage(pdfDoc, png, layout);
     for (const more of file.morePages || []) fullPage(pdfDoc, await pdfDoc.embedPng(new Uint8Array(await more.arrayBuffer())), layout);
