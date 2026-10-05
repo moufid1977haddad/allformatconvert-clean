@@ -165,3 +165,65 @@ contactés par le navigateur ; territoires), 6 territoires français hors UE ajo
 de test limité à l'exécution sur Vercel. **Note pour plus tard** : activer AdSense rouvre la question (le message de
 consentement d'AdSense voudra activer Analytics que ce lot bloque en Europe ; une seule liste de régions à partager) —
 au plan.
+
+**Mise en ligne du lot 2** :
+- **Préversion, une seule fois** (`onlineconvertools-r0z8mwt4j` = `d932fc59`, relais `vercel-preview-proxy`, en-tête de test
+  `x-oct-test-country`) : FR, FR avec d'anciens `_ga`, DE, GB, CH, RE → 0 requête Google Analytics, aucun `_ga`, réponse
+  `false` ; CA, US → Analytics comme avant ; `XX`, `T1`, valeur illisible → `false`. Le cas « pays inconnu » sans en-tête
+  ne se simule pas sur une préversion : Vercel y pose le vrai pays (ici CA, réponse `true`, attendu) ; il est couvert en
+  local et par `XX`.
+- **Production** : master `d932fc59` → Vercel **`onlineconvertools-hj3yae3it`** ; www-light **29/29** ; sur www :
+  `/api/analytics-consent` `private, no-store`, **l'en-tête de test est ignoré** (FR demandé → `true`, le vrai pays CA),
+  la page d'accueil ne contient plus de balise googletagmanager, `/privacy` « Last updated: October 6, 2026 ». La
+  vérification depuis un vrai pays européen sur www demande un accès depuis l'Europe (non disponible ici) : mini-test au
+  plan pour le propriétaire (VPN ou un proche en Europe, outils de développement → onglet Réseau : aucune requête
+  google-analytics). Retour arrière prêt : promouvoir `onlineconvertools-jccwufjem` (lot 1).
+
+## Lot 3 — SEO technique S1, S2, S3
+
+Mesuré par `scripts/p34/seo-audit.mjs` (243 pages, HTML brut sans JavaScript) sur la construction de production locale ;
+« avant » = audit du lot C (même outil, même code que www le 05/10).
+
+| Mesure | Avant | Après |
+|---|---|---|
+| Titres cassés (« — Be a … », « Free … Online Free », nom doublé) | **8** + `/about` doublé + `/tools` | **0** |
+| Titres en double / descriptions en double | 0 / 0 | 0 / 0 |
+| Titres > 60 caractères | 21 | 21 (les 8 nouveaux titres font 48 à 59 caractères) |
+| Canonical absent ou faux | 2 (`/`, `/about`) | **0** |
+| Pages avec un nombre de H1 ≠ 1 | 1 (accueil : 2) | **0** |
+| Liens contextuels vers d'autres outils par page d'outil | 0 sur 215 pages, 4 sur 10 | **4 à 6 sur 225** (médiane 5, 1 123 liens) |
+| Pages d'outil avec données structurées | 10 / 225 | **225 / 225** (WebApplication + BreadcrumbList + FAQPage) |
+| Erreurs du validateur schema.org (Google, validator.schema.org) | — | **0 erreur, 0 avertissement** sur 25 pages tirées sur tout le site |
+
+### S1 — titres, canonical, H1
+**Marché** : motif « X to Y — verbe … Free » déjà le nôtre ; aucun ton nouveau (S4 reste au propriétaire). Nouveaux titres,
+tirés de la description de chaque page : JPG to PDF — Combine Images Into One PDF Online Free ; SCSS to CSS — Lightweight
+SCSS to CSS Transform Online Free ; JSON to YAML — Convert JSON to Indented YAML Online Free ; Image Editor — Free Photo
+Editor in Your Browser ; Subtitle Generator — Build SRT Subtitles Online Free ; Find and Replace — Find and Replace Text
+Online Free ; Lorem Ipsum Generator — Placeholder Text Online Free ; Text Truncator — Cut Text to a Set Length Online
+Free ; `/about` → « About | OnlineConverTools » ; `/tools` → « All Tools — Browse 225 Free File Converters Online ».
+Canonical : `/about` et l'accueil (la page d'accueil, composant client, passe dans `app/HomeClient.jsx` ; `app/page.jsx`
+ne fait qu'héberger ses métadonnées). Accueil : le second titre « All Tools » devient un `h2` aux mêmes classes (aucun
+changement visible).
+
+### S2 — « Related tools » sur chaque page d'outil
+**Marché** : Smallpdf (≈ 20 liens par outil), FreeConvert et iLoveIMG (autres formats) lient leurs outils voisins ; nous
+n'en avions aucun sur 215 pages. **Fait** : `app/lib/relatedTools.js` (carte choisie à la main par un sous-agent : 4 à 6
+voisins par outil — conversion inverse, même famille, étape suivante logique ; 372 paires réciproques, 262 liens vers une
+autre catégorie ; outils à voisinage mince listés au rapport du sous-agent : MOBI to EPUB, Sticky Notes, Cron, Regex
+Tester, Color Picker…), vérifiée par `scripts/p35/related-tools-check.mjs` (225 outils, aucune page en noindex, aucun lien
+vers soi ni vers un homonyme). Chaque `layout.tsx` d'outil (225) enveloppe la page dans `ToolSeo` (composant serveur : la
+carte entière reste sur le serveur, seuls les 4 à 6 liens de la page partent au navigateur) ; `SeoContent` affiche le bloc
+**dans le HTML serveur**, au même style que ses autres cartes, après les astuces. Les 10 pages du 29/09 gardent leurs
+liens annotés en tête, complétés jusqu'à 4-6. Le nom de chaque lien = le titre visible de l'outil. Seul changement
+visible du lot ; 390 et 1280 px : aucun débordement, aucune erreur de console.
+
+### S3 — données structurées
+`SeoContent` rend un JSON-LD **construit à partir des textes qu'il affiche** : `WebApplication` (nom = titre de la page,
+description = paragraphe « About », `offers` à 0, gratuit), `BreadcrumbList` (Accueil > catégorie > outil) et `FAQPage`
+**seulement si la FAQ est sur la page** (elle l'est sur les 225). Les 10 pages du 29/09 avaient une description de
+balisage = leur méta-description, **absente de la page** : remplacée par le même modèle (l'ancien composant
+`ToolJsonLd` est supprimé). `scripts/p35/seo-lot3-check.mjs` vérifie sur les 225 pages : JSON valide, prix 0, fil
+d'Ariane, chaque nom, description, question et réponse **présents dans le texte visible**, FAQPage ⇔ FAQ visible : **ALL
+PASS**. **Aucun gain promis** : Google limite l'affichage des FAQ enrichies aux sites d'autorité (gouvernement, santé)
+depuis août 2023 ; le fil d'Ariane et le type d'application sont les seuls effets probables.
