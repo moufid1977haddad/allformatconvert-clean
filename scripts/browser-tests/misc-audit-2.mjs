@@ -1,6 +1,7 @@
 // File tools and MOBI to EPUB, audit of 29/09 (second pass): each check states the CORRECT behaviour; run against
 // the build before the fixes it shows the defects, after them it must pass.
 // Usage: node scripts/browser-tests/misc-audit-2.mjs <origin> [--browser=chromium|firefox|webkit] [--only=<name>]
+// P34: since P31 a result link gets its (retyped) address a moment after it appears; reading it earlier fetched the page
 import { chromium, firefox, webkit } from '@playwright/test';
 import fs from 'node:fs';
 import JSZip from 'jszip';
@@ -23,7 +24,7 @@ await T('mobi-to-epub', async () => {
   await open('/tools/converter-tools/mobi-to-epub');
   await page.locator('input[type="file"]').first().setInputFiles('scripts/audit/fixtures/files/sample.mobi');
   await page.getByRole('button', { name: /Convert/ }).first().click();
-  const href = await page.locator('a[download$=".epub"]').first().getAttribute('href', { timeout: 60000 });
+  const href = await page.locator('a[download$=".epub"]').and(page.locator('[href]')).first().getAttribute('href', { timeout: 60000 });
   const zip = await JSZip.loadAsync(await hrefBytes(href));
   const missing = [], blobs = [];
   let refs = 0;
@@ -63,7 +64,7 @@ await T('mobi-to-epub image', async () => {
   await open('/tools/converter-tools/mobi-to-epub');
   await page.locator('input[type="file"]').first().setInputFiles({ name: 'pictures.mobi', mimeType: 'application/x-mobipocket-ebook', buffer: mobiWithImage() });
   await page.getByRole('button', { name: /Convert/ }).first().click();
-  const href = await page.locator('a[download$=".epub"]').first().getAttribute('href', { timeout: 60000 });
+  const href = await page.locator('a[download$=".epub"]').and(page.locator('[href]')).first().getAttribute('href', { timeout: 60000 });
   const zip = await JSZip.loadAsync(await hrefBytes(href));
   const imgs = [];
   for (const p of Object.keys(zip.files).filter((f) => /text\/.*\.xhtml$/.test(f))) {

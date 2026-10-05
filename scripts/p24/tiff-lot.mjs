@@ -45,7 +45,7 @@ fs.writeFileSync(file, tiff([{ w: 4, h: 2, rgb: [255, 0, 0], orientation: 6 }, {
 
 const b = await { chromium, firefox, webkit }[name].launch();
 const ctx = await b.newContext({ acceptDownloads: true });
-const grab = async (p) => p.locator('a[download], [data-file-download] a').first().evaluate(async (a) => { const blob = await (await fetch(a.href)).blob(); return await new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(String(fr.result).split(',')[1]); fr.readAsDataURL(blob); }); }).then((s) => Buffer.from(s, 'base64'));
+const grab = async (p) => p.locator('a[download][href], [data-file-download] a[href]').first().evaluate(async (a) => { const blob = await (await fetch(a.href)).blob(); return await new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(String(fr.result).split(',')[1]); fr.readAsDataURL(blob); }); }).then((s) => Buffer.from(s, 'base64'));
 {
   const p = await ctx.newPage();
   await p.goto(`${origin}/tools/image-tools/tiff-to-png`, { waitUntil: 'load' }); await p.waitForTimeout(800);

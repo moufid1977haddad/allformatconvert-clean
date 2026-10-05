@@ -32,7 +32,7 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-2 text-neutral-800">Privacy Policy</h1>
-        <p className="text-neutral-500 text-center mb-10">Last updated: October 3, 2026</p>
+        <p className="text-neutral-500 text-center mb-10">Last updated: October 5, 2026</p>
         <div className="space-y-6">
 
           <div className={card}>

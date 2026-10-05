@@ -24,9 +24,9 @@ await p.locator('input[type=file]').first().setInputFiles(anim);
 await p.locator('#gc-colors').selectOption('16');
 await p.locator('#gc-scale').selectOption('50');
 await p.getByRole('button', { name: /^Compress/ }).click();
-const ok = await p.locator('[data-file-download] [data-download]').first().waitFor({ timeout: 120000 }).then(() => true).catch(() => false);
+const ok = await p.locator('[data-file-download] [data-download][href]').first().waitFor({ timeout: 120000 }).then(() => true).catch(() => false);
 if (!ok) check('gif-compressor: result', false, (await p.locator('main').innerText()).slice(0, 200)); else {
-  const b64 = await p.locator('[data-file-download] [data-download]').first().evaluate(async (a) => { const u = new Uint8Array(await (await fetch(a.href)).arrayBuffer()); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s); });
+  const b64 = await p.locator('[data-file-download] [data-download][href]').first().evaluate(async (a) => { const u = new Uint8Array(await (await fetch(a.href)).arrayBuffer()); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s); });
   const out = Buffer.from(b64, 'base64'); const m = await sharp(out, { animated: true }).metadata();
   const first = await sharp(out).raw().toBuffer(); const colours = new Set(); for (let i = 0; i < first.length; i += m.channels || 3) colours.add(`${first[i]},${first[i + 1]},${first[i + 2]}`);
   check('gif-compressor: 16 colours and 50% → 100 px wide, still 6 frames, at most 16 colours', m.width === 100 && m.pages === 6 && colours.size <= 16, `${m.width}px ${m.pages} frames ${colours.size} colours ${out.length} B`);
@@ -40,7 +40,7 @@ await sharp(raw, { raw: { width: w, height: h * n, channels: 3, pageHeight: h } 
   const plays = async (file) => {
     await q.locator('input[type=file]').first().setInputFiles(file);
     await q.getByRole('button', { name: /Convert/ }).first().click();
-    const a = q.locator('a[download]').first(); await a.waitFor({ timeout: 60000 });
+    const a = q.locator('a[download][href]').first(); await a.waitFor({ timeout: 60000 });
     const href = await a.getAttribute('href');
     const bytes = Buffer.from(await q.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href));
     const i = bytes.indexOf('acTL'); const v = i > 0 ? bytes.readUInt32BE(i + 8) : -1;

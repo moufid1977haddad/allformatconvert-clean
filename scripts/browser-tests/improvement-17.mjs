@@ -107,15 +107,15 @@ const dl = async (p, sel) => { const [d] = await Promise.all([p.waitForEvent('do
     check('camera result is a link: "Open link" offered, with the warning', (await p.getByRole('link', { name: 'Open link' }).getAttribute('href')) === QR_TEXT);
   } else if (isWk) {
     // Playwright's WebKit on Windows has no camera device: the page must say so clearly (real Safari: owner's pass).
-    await Promise.race([p.getByRole('button', { name: 'Stop camera' }).waitFor({ timeout: 20000 }), p.locator('[role=status]').filter({ hasText: /refused|No camera|camera/i }).waitFor({ timeout: 20000 })]).catch(() => {});
-    const st = await p.locator('[role=status]').textContent().catch(() => '');
+    await Promise.race([p.getByRole('button', { name: 'Stop camera' }).waitFor({ timeout: 20000 }), p.locator('[role=status]').filter({ hasText: /\S/ }).first().filter({ hasText: /refused|No camera|camera/i }).waitFor({ timeout: 20000 })]).catch(() => {});
+    const st = await p.locator('[role=status]').filter({ hasText: /\S/ }).first().textContent().catch(() => '');
     const running = await p.getByRole('button', { name: 'Stop camera' }).count();
     if (running) { await p.getByRole('button', { name: 'Stop camera' }).click(); check('WebKit: camera starts and stops', await p.evaluate(() => !document.querySelector('video')?.srcObject)); }
     else check('WebKit without a camera: a clear message, upload suggested', /refused|No camera|does not give web pages access/.test(st) && /photo/.test(st) && !/secure https/.test(st), st);
   } else {
     await p.getByRole('button', { name: 'Stop camera' }).waitFor({ timeout: 20000 });
     await p.waitForTimeout(2000);
-    const st = await p.locator('[role=status]').textContent().catch(() => '');
+    const st = await p.locator('[role=status]').filter({ hasText: /\S/ }).first().textContent().catch(() => '');
     check('Firefox fake camera: camera starts, keeps scanning, no false read', /Point the camera/.test(st) && (await p.locator('[data-text]').count()) === 0, st);
     await p.getByRole('button', { name: 'Stop camera' }).click();
     check('Stop camera: stream released', await p.evaluate(() => !document.querySelector('video')?.srcObject));
@@ -147,8 +147,8 @@ if (!isFx && !isWk) { // camera refused: says so (Chromium only)
   const b2 = await chromium.launch(); const c2 = await b2.newContext(); const p = await c2.newPage();
   await p.goto(origin + '/tools/qr-barcodes-tools/qr-scanner', { waitUntil: 'networkidle' });
   await p.getByRole('button', { name: 'Scan with camera' }).click();
-  await p.locator('[role=status]').waitFor({ timeout: 15000 });
-  const st = await p.locator('[role=status]').textContent();
+  await p.locator('[role=status]').filter({ hasText: /\S/ }).first().waitFor({ timeout: 15000 });
+  const st = await p.locator('[role=status]').filter({ hasText: /\S/ }).first().textContent();
   check('no camera / refused: a clear message, upload suggested', /refused|No camera/.test(st) && /photo/.test(st), st);
   await b2.close();
 }

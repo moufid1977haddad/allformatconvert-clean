@@ -107,7 +107,8 @@ if (run('legal')) {
   for (const w of ['Pangram', 'ConvertAPI', 'Video Rotator', 'Background Remover', 'Google Analytics', 'googtrans', 'Railway', 'Resend', 'Supabase']) check(`privacy names ${w}`, t.includes(w));
   check('privacy has no Advertising section while ads are off', !/\d+\. Advertising/.test(t));
   // Date bumped on 01/10 (P18: Markdown to PDF now uses our server, listed in the policy).
-  check('privacy says it was updated on October 1, 2026', t.includes('Last updated: October 1, 2026'));
+  // P34: P32 (04/10, pages drawn by our service) and P33 (05/10, OCR by our service) changed the policy: date bumped
+  check('privacy says it was updated on October 5, 2026', t.includes('Last updated: October 5, 2026'));
   await p.close();
   const terms = await open('/terms');
   const tt = await terms.p.locator('main').innerText();

@@ -43,10 +43,10 @@ async function run(slug, opts) {
   await p.goto(`${origin}/tools/pdf-tools/${slug}`, { waitUntil: 'load' });
   await p.waitForTimeout(1000);
   await p.locator('input[type=file]').first().setInputFiles(opts.file || pdfPath);
-  if (opts.mode) await p.getByLabel('Mode').selectOption(opts.mode);
+  if (opts.mode) await p.getByLabel('Mode', { exact: true }).selectOption(opts.mode);
   if (opts.format) await p.getByLabel('Format').selectOption(opts.format);
   if (opts.dpi) await p.getByLabel('Resolution').selectOption(String(opts.dpi));
-  if (opts.range !== undefined) await p.getByLabel('Pages').fill(opts.range);
+  if (opts.range !== undefined) await p.getByLabel('Pages', { exact: true }).fill(opts.range);
   await p.getByRole('button', { name: opts.mode === 'images' ? 'Extract images' : 'Convert pages' }).click();
   const done = await Promise.race([
     p.locator('[data-file-download]').first().waitFor({ timeout: 240000 }).then(() => 'rows'),

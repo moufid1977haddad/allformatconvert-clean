@@ -3,6 +3,7 @@
 // (exact, no encoder involved); outputs are read back from the page (canvas pixels) or decoded with a native ffmpeg.
 // Usage: node scripts/browser-tests/av-audit-2.mjs <origin> [--browser=chromium|firefox] [--ffmpeg=<path>] [--only=<name>]
 // (Playwright's WebKit on Windows has no AudioContext.)
+// P34: since P31 a result link gets its (retyped) address a moment after it appears; reading it earlier fetched the page
 import { chromium, firefox, webkit } from '@playwright/test';
 
 const origin = new URL(process.argv.slice(2).find((a) => !a.startsWith('--'))).origin;
@@ -52,7 +53,7 @@ await T('audio-booster', async () => {
   await page.locator('input[type="range"]').first().fill('4');
   await page.locator('select').filter({ has: page.locator('option[value="wav"]') }).first().selectOption('wav');
   await page.getByRole('button', { name: 'Boost Audio' }).click();
-  const href = await page.locator('a[download$=".wav"]').first().getAttribute('href', { timeout: 120000 });
+  const href = await page.locator('a[download$=".wav"]').and(page.locator('[href]')).first().getAttribute('href', { timeout: 120000 });
   const out = Buffer.from(await page.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href));
   const s = pcm16(out).slice(4410, -4410); // steady part
   const clipped = s.filter((v) => Math.abs(v) >= 0.999).length / s.length;
@@ -83,7 +84,7 @@ if (FF) {
       await page.evaluate(() => document.querySelector('video').pause());
       await page.waitForTimeout(1500);
       await page.evaluate(() => document.querySelector('video').play());
-      const href = await page.locator('a[download^="rotated."], a[download^="filtered"], a[download^="resized"], a[download]').filter({ hasText: /Download/ }).first().getAttribute('href', { timeout: 30000 });
+      const href = await page.locator('a[download^="rotated."], a[download^="filtered"], a[download^="resized"], a[download]').filter({ hasText: /Download/ }).and(page.locator('[href]')).first().getAttribute('href', { timeout: 30000 });
       const out = path.join(tmp, `${tool}.webm`);
       fs.writeFileSync(out, Buffer.from(await page.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href)));
       // Distinct pictures in the last second of the source's timeline: one frame per 0.1 s, compared by MD5.
@@ -113,7 +114,7 @@ if (FF) await T('video-watermark', async () => {
   await page.locator('input[type="range"]').first().fill('1');
   await page.getByRole('button', { name: 'bottom-right', exact: true }).click();
   await page.getByRole('button', { name: 'Add Watermark' }).click();
-  const href = await page.locator('a[download$="-watermarked.mp4"]').first().getAttribute('href', { timeout: 180000 });
+  const href = await page.locator('a[download$="-watermarked.mp4"]').and(page.locator('[href]')).first().getAttribute('href', { timeout: 180000 });
   const out = path.join(tmp, 'out.mp4');
   fs.writeFileSync(out, Buffer.from(await page.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href)));
   // One frame as a player shows it (ffmpeg applies the display matrix by default), gray.
@@ -139,7 +140,7 @@ if (FF) await T('video-watermark-white', async () => {
   await page.waitForTimeout(1500);
   await page.locator('input[type="text"]:visible').last().fill('WM');
   await page.getByRole('button', { name: 'Add Watermark' }).click();
-  const href = await page.locator('a[download$="-watermarked.mp4"]').first().getAttribute('href', { timeout: 180000 });
+  const href = await page.locator('a[download$="-watermarked.mp4"]').and(page.locator('[href]')).first().getAttribute('href', { timeout: 180000 });
   const out = path.join(tmp, 'out.mp4');
   fs.writeFileSync(out, Buffer.from(await page.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href)));
   const g = execFileSync(FF, ['-v', 'error', '-i', out, '-frames:v', '1', '-f', 'rawvideo', '-pix_fmt', 'gray', '-'], { maxBuffer: 1 << 24 });

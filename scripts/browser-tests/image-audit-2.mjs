@@ -39,10 +39,14 @@ const read = async (href) => page.evaluate(async (u) => {
   const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
   const x = c.getContext('2d'); x.drawImage(img, 0, 0);
   const d = x.getImageData(0, 0, c.width, c.height).data;
-  return { type: blob.type, w: c.width, h: c.height, data: Array.from(d) };
+  // P34: since P31 every download is typed application/octet-stream on purpose (iOS): the format is read from the bytes
+  const head = new Uint8Array(await blob.slice(0, 4).arrayBuffer());
+  const type = head[0] === 0xff && head[1] === 0xd8 ? 'image/jpeg' : head[0] === 0x89 && head[1] === 0x50 ? 'image/png' : head[0] === 0x52 && head[1] === 0x49 ? 'image/webp' : blob.type;
+  return { type, w: c.width, h: c.height, data: Array.from(d) };
 }, href);
 const px = (r, x, y) => { const i = (y * r.w + x) * 4; return r.data.slice(i, i + 4); };
-const resultHref = async (sel) => page.locator(sel).first().getAttribute('href', { timeout: 20000 });
+// P34: since P31 a result link gets its (retyped) address a moment after it appears; reading it earlier fetched the page
+const resultHref = async (sel) => page.locator(sel).and(page.locator('[href]')).first().getAttribute('href', { timeout: 20000 });
 const only = (process.argv.find((a) => a.startsWith('--only=')) || '').slice(7);
 const T = async (n, fn) => { if (only && !n.startsWith(only)) return; try { await fn(); } catch (e) { fails++; console.log('FAIL', `${name} ${n}`, String(e.message).split('\n')[0].slice(0, 200)); } finally { if (page) await page.close().catch(() => {}); page = null; } };
 

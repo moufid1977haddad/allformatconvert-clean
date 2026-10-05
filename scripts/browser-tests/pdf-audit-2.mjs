@@ -21,7 +21,8 @@ const open = async (p) => { page = await ctx.newPage(); page.on('pageerror', (e)
 const T = async (n, fn) => { if (only && !n.startsWith(only)) return; try { await fn(); } catch (e) { fails++; console.log('FAIL', `${name} ${n}`, String(e.message).split('\n')[0].slice(0, 200)); } finally { if (page) await page.close().catch(() => {}); page = null; } };
 const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
 const pageTexts = async (bytes) => { const d = await pdfjs.getDocument({ data: new Uint8Array(bytes), verbosity: 0 }).promise; const out = []; for (let i = 1; i <= d.numPages; i++) out.push((await (await d.getPage(i)).getTextContent()).items.map((t) => t.str).join(' ')); return out; };
-const linkBytes = async (sel, timeout = 60000) => { const href = await page.locator(sel).first().getAttribute('href', { timeout }); return Buffer.from(await page.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href)); };
+// P34: the link gets its (retyped) address a moment after it appears (P31): wait for the href, else fetch(null) read the page
+const linkBytes = async (sel, timeout = 60000) => { const href = await page.locator(`${sel}[href]`).first().getAttribute('href', { timeout }); return Buffer.from(await page.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href)); };
 // Every object of the file as text, streams decompressed (content streams, form appearances, values...).
 function allText(doc) {
   let s = '';

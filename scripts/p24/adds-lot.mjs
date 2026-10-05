@@ -29,7 +29,8 @@ if (process.argv.includes('--cors-shim')) {
   });
 }
 const open = async (slug) => { const p = await ctx.newPage(); await p.goto(`${origin}/tools/${slug}`, { waitUntil: 'load' }); await p.waitForTimeout(800); return p; };
-const bytesOf = (p, a) => a.evaluate(async (el) => { const u = new Uint8Array(await (await fetch(el.href)).arrayBuffer()); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s); }).then((s) => Buffer.from(s, 'base64'));
+// P34: since P31 a result link gets its (retyped) address a moment after it appears; reading it earlier fetched the page
+const bytesOf = async (p, a) => (await a.and(p.locator('[href]')).first().waitFor({ timeout: 60000 }).catch(() => {}), a.evaluate(async (el) => { const u = new Uint8Array(await (await fetch(el.href)).arrayBuffer()); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s); }).then((s) => Buffer.from(s, 'base64')));
 
 if (name === 'webkit') console.log('SKIP webkit image-compressor: Playwright WebKit for Windows has no OffscreenCanvas in workers (the page says so)');
 else { // Image Compressor: to a target size

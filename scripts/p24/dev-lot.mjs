@@ -104,13 +104,13 @@ const main = (p) => p.locator('main').innerText();
   await p.locator('[data-file-download]').nth(2).waitFor({ timeout: 20000 });
   const parts = [];
   for (let i = 0; i < 3; i++) {
-    const b64 = await p.locator('[data-file-download] [data-download]').nth(i).evaluate(async (a) => { const u = new Uint8Array(await (await fetch(a.href)).arrayBuffer()); let s = ''; for (const x of u) s += String.fromCharCode(x); return btoa(s); });
+    const b64 = await p.locator('[data-file-download] [data-download][href]').nth(i).evaluate(async (a) => { const u = new Uint8Array(await (await fetch(a.href)).arrayBuffer()); let s = ''; for (const x of u) s += String.fromCharCode(x); return btoa(s); });
     const f = path.join(dir, `data.bin.part${i + 1}`); fs.writeFileSync(f, Buffer.from(b64, 'base64')); parts.push(f);
   }
   await p.getByRole('radio', { name: 'Join parts' }).click();
   await p.locator('input[type=file][multiple]').setInputFiles([parts[2], parts[0], parts[1]]); // out of order on purpose
   await p.locator('[data-file-download]').first().waitFor({ timeout: 20000 });
-  const b64 = await p.locator('[data-file-download] [data-download]').first().evaluate(async (a) => { const u = new Uint8Array(await (await fetch(a.href)).arrayBuffer()); let s = ''; for (const x of u) s += String.fromCharCode(x); return btoa(s); });
+  const b64 = await p.locator('[data-file-download] [data-download][href]').first().evaluate(async (a) => { const u = new Uint8Array(await (await fetch(a.href)).arrayBuffer()); let s = ''; for (const x of u) s += String.fromCharCode(x); return btoa(s); });
   check('file-splitter: 3 equal parts, joined back (chosen out of order) to the identical file', Buffer.from(b64, 'base64').equals(bytes) && parts.every((f) => Math.abs(fs.statSync(f).size - 10007 / 3) <= 1));
   await p.locator('input[type=file][multiple]').setInputFiles([parts[0], parts[2]]);
   check('file-splitter: a missing part is said', /Part 2 is missing/.test(await main(p)));
@@ -417,7 +417,7 @@ const main = (p) => p.locator('main').innerText();
   await f.locator('input[type=file]').first().setInputFiles(path.join(dir, 'cafe.txt'));
   await f.getByLabel('Convert to').selectOption('json');
   await f.getByRole('button', { name: 'Convert', exact: true }).click();
-  const a = f.locator('a[download]').first(); await a.waitFor({ timeout: 15000 });
+  const a = f.locator('a[download][href]').first(); await a.waitFor({ timeout: 15000 });
   const got = await f.evaluate(async (u) => (await fetch(u)).text(), await a.getAttribute('href'));
   check('file-converter: a Windows-1252 text read as such ("café 1€", not "caf\uFFFD")', /café 1€/.test(got), got.replace(/\s+/g, ' '));
   await f.close();
@@ -428,7 +428,7 @@ const main = (p) => p.locator('main').innerText();
   const e = await open('developer-tools/excel-to-csv');
   await e.locator('input[type=file]').first().setInputFiles(path.join(dir, 'book.xlsx'));
   if (await e.getByRole('button', { name: /^Convert/ }).count()) await e.getByRole('button', { name: /^Convert/ }).first().click(); // this page converts on file choice
-  const ea = e.locator('a[download]').first(); await ea.waitFor({ timeout: 30000 });
+  const ea = e.locator('a[download][href]').first(); await ea.waitFor({ timeout: 30000 });
   const csv = await e.evaluate(async (u) => (await fetch(u)).text(), await ea.getAttribute('href'));
   check('excel-to-csv: EAN-13 in full, 1/3 to 15 digits, date in ISO (it wrote 4.00638E+12, 0.333333333)', /4006381333931,0\.333333333333333,2024-01-02/.test(csv), csv.split('\n')[1]);
   await e.close();

@@ -312,7 +312,7 @@ await T('png-to-jpg transparency', async () => {
   const png = await page.evaluate(async () => { const c = document.createElement('canvas'); c.width = 4; c.height = 4; const b = await new Promise((r) => c.toBlob(r, 'image/png')); return Array.from(new Uint8Array(await b.arrayBuffer())); });
   await page.locator('input[type="file"]').setInputFiles({ name: 't.png', mimeType: 'image/png', buffer: Buffer.from(png) });
   await page.getByRole('button', { name: 'Convert' }).click();
-  const src = await page.locator('a[download$=".jpg"]').getAttribute('href', { timeout: 20000 });
+  const src = await page.locator('a[download$=".jpg"][href]').getAttribute('href', { timeout: 20000 });
   const px = await page.evaluate(async (u) => { const bmp = await createImageBitmap(await (await fetch(u)).blob()); const c = new OffscreenCanvas(bmp.width, bmp.height); const x = c.getContext('2d'); x.drawImage(bmp, 0, 0); return Array.from(x.getImageData(1, 1, 1, 1).data); }, src).catch(async () => page.evaluate(async (u) => { const img = new Image(); img.src = u; await img.decode(); const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const x = c.getContext('2d'); x.drawImage(img, 0, 0); return Array.from(x.getImageData(1, 1, 1, 1).data); }, src));
   check('transparent -> white', px[0] > 245 && px[1] > 245 && px[2] > 245, JSON.stringify(px));
 });
@@ -321,7 +321,7 @@ await T('text-to-pdf', async () => {
   await open('/tools/pdf-tools/text-to-pdf');
   await ta().fill('Line one\r\n\tindented café €\r\nLine three');
   await page.getByRole('button', { name: 'Convert to PDF' }).click();
-  const href = await page.locator('a[download="document.pdf"]').getAttribute('href', { timeout: 20000 });
+  const href = await page.locator('a[download="document.pdf"][href]').getAttribute('href', { timeout: 20000 });
   const head = await page.evaluate(async (u) => new TextDecoder().decode((await (await fetch(u)).arrayBuffer()).slice(0, 5)), href);
   check('text-to-pdf CRLF + tab -> PDF', head === '%PDF-', head);
   await ta().fill('я 😀');
@@ -485,7 +485,7 @@ await T('code-minifier css/html', async () => {
   await page.getByRole('button', { name: 'HTML', exact: true }).click();
   await ta().fill('<p>a   b</p>\n<pre>  x\n  y</pre><!-- c -->');
   await click('Minify');
-  check('code-minifier html keeps pre', (await waitOut((x) => x.includes('<pre>'))) === '<p>a b</p><pre>  x\n  y</pre>', await outTa().inputValue());
+  check('code-minifier html keeps pre', (await waitOut((x) => x.includes('<pre>'))) === '<p>a b</p> <pre>  x\n  y</pre>' /* P34: one space kept between two tags since P24 ("Helloworld") */, await outTa().inputValue());
 });
 await T('file-converter csv/html', async () => {
   await open('/tools/file-tools/file-converter');

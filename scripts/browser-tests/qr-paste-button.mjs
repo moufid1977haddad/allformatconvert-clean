@@ -42,7 +42,7 @@ if (name === 'chromium') {
   // text in the clipboard: a clear message
   execFileSync('powershell', ['-NoProfile', '-STA', '-Command', "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Clipboard]::SetText('just text')"]);
   await p.getByRole('button', { name: 'Paste image' }).click();
-  const st = await p.locator('[role=status]').textContent({ timeout: 10000 }).catch(() => '');
+  const st = await p.locator('[role=status]').filter({ hasText: /\S/ }).first().textContent({ timeout: 10000 }).catch(() => '');
   check('Paste image with text in the clipboard: says so', /no image/i.test(st), st);
 }
 await b.close(); console.log(fails ? `${fails} FAILED` : 'all passed', `(${name})`); process.exit(fails ? 1 : 0);

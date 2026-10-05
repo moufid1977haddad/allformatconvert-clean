@@ -289,7 +289,7 @@ export default function CsvToSqlPage() {
         related={SEO.related}
         tips={[
           "Values are escaped for SQL, but the table name and column headers are inserted as-is — avoid spaces, quotes, or reserved SQL keywords in the Table Name field or your CSV header row.",
-          "Whole numeric columns become INTEGER or DECIMAL(18,6) and the rest VARCHAR(255); adjust the CREATE TABLE statement afterward if you need date or other column types.",
+          "Whole numeric columns become INTEGER (or BIGINT) and decimal ones DECIMAL sized to the data; the rest VARCHAR as long as the longest value. Adjust the CREATE TABLE statement afterward if you need date or other column types.",
           "Wrap a value in double quotes if it contains a comma (e.g. \"Smith, John\") — quoted fields are parsed correctly and stay as a single value.",
           "The delimiter dropdown shows what was auto-detected — double check it on unusual files, and switch it manually if a column split looks wrong.",
           "Always review generated SQL — and test it on a development database — before running it against production."

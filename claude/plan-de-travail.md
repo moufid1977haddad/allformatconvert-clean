@@ -23,14 +23,28 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
    rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
 
-## 📱 P33 — 05/10 : PDF Redact, PDF OCR, limites téléphone (`docs/audit/RAPPORT-p33-redact-ocr-05-10.md`, repère `restauration-avant-p33-05-10` = `57f7f977`) — **en production : Vercel `onlineconvertools-6j94la1q7` = `81c98da8` (05/10), pdf-tools `82579ade` (Tesseract, 102 langues), www 29/29 ; retour arrière : `onlineconvertools-4wlsf2hp8` (ou `-l0fs94z0x`)**
+## 🧪 P34 — 05/10 (nuit, lot B) : non-régression de tous les outils en local (`docs/audit/RAPPORT-p34-non-regression-05-10.md`)
+
+Fournisseurs simulés (`scripts/p34/fake-all-providers.mjs` : aucun appel payant, rien dans Supabase, aucune alerte), ≈ 190
+lancements : **aucune régression d'outil** ; solidité 522/522 ×3 moteurs, toutes les pages ×3 + Safari 16.4, téléchargements
+iPhone/iPad, RAW, mise en page. **Corrigé** : exemple et réponses de CSV to SQL (typage et guillemets d'avant P24), date de la
+politique de confidentialité (contenu changé les 04 et 05/10, date restée au 3). ≈ 20 bancs corrigés côté banc (lien lu
+avant son adresse — P31 —, libellés ambigus, attentes dépassées).
+
+| Reste | Priorité |
+|---|---|
+| 4 bancs obsolètes à réécrire sur `FileDownload` (`ios-download`, `data-url-downloads`, `image-tools-big`, `image-editor-big`) ; `qualite-29-09` (emoji maintenant dessiné) et `image-tools-rest-big` (aperçu Base64) à aligner | P3 |
+| ffprobe/ffmpeg locaux pour rouvrir ≈ 20 bancs audio/vidéo | P3 |
+| WebKit de Playwright (Windows) sans AudioContext ni OffscreenCanvas : outils audio et réduction d'Image Compressor non exercés en WebKit local | P3 (passes iPhone réelles) |
+
+## 📱 P33 — 05/10 : PDF Redact, PDF OCR, limites téléphone (`docs/audit/RAPPORT-p33-redact-ocr-05-10.md`, repère `restauration-avant-p33-05-10` = `57f7f977`) — **en production : Vercel `onlineconvertools-f2vxs809j` = `a90439d1` (05/10, après la relecture n° 3 de Redact), pdf-tools `b23235c9` (Tesseract, 102 langues), www 29/29 ; retour arrière : `onlineconvertools-6j94la1q7` (ou `-4wlsf2hp8`, `-l0fs94z0x`)**
 
 **Règle (P21/P31/P32, permanente)** : statut maximal « corrigé, à confirmer sur iPhone ». Mini-passe iPhone de 4 vérifications : rapport §6.
 
 | Point | État | Reste (priorité) |
 |---|---|---|
 | 1 PDF to JPG (qui a dessiné ?) | ✅ **le téléphone** : aucune requête de rendu (Vercel + journaux pdf-tools, méthode validée sur l'appel P32 de 23 h 50) ; secours gardé tel quel | — |
-| 2 PDF Redact | corrigé, à confirmer : panne non reproduite ; progression par page, étape bloquée nommée (+ `tool_errors`), « No match found for … », résultat ramené à l'écran ; **21 fuites de vraie suppression trouvées par 2 relectures indépendantes, toutes présentes en production avant P33, corrigées** (source neutralisée avant copie, élagage en liste blanche, contrôle du fichier fini — sinon aucun fichier) ; 31 PDF piégés verts | **P1** propriétaire : mini-passe §6 n° 1-2 ; P2 : garder le texte sélectionnable des pages noircies (couche invisible des mots non noircis, comme Acrobat) — voir décisions ; P3 : confirmation avant envoi pour le secours de rendu (reporté de P32) |
+| 2 PDF Redact | corrigé, à confirmer : panne non reproduite ; progression par page, étape bloquée nommée (+ `tool_errors`), « No match found for … », résultat ramené à l'écran ; **24 fuites de vraie suppression + 1 faux refus (PDF à sommaire) trouvés par 3 relectures indépendantes, toutes présentes en production avant P33, corrigées** (source neutralisée avant copie, élagage en liste blanche, contrôle du fichier fini — sinon aucun fichier) ; 31 PDF piégés verts | **P1** propriétaire : mini-passe §6 n° 1-2 ; P2 : garder le texte sélectionnable des pages noircies (couche invisible des mots non noircis, comme Acrobat) — voir décisions ; P3 : confirmation avant envoi pour le secours de rendu (reporté de P32) |
 | 3 PDF OCR | corrigé, à confirmer : une seule liste avec recherche (1-3 langues, langue du navigateur) ; iPhone/iPad : 20 s sans progrès ou échec → `/api/pdf-ocr` (Tesseract sur pdf-tools, 102 langues, mêmes limites que P32) ; revue de sécurité GO avec conditions, appliquées (1 OCR à la fois, 12 Mpx, copies staged ≤ 4) | **P1** propriétaire : mini-passe §6 n° 3 ; P2 : décisions OCR ci-dessous ; P3 : sur un PDF qui a déjà du texte, la couche OCR double le texte copié (comportement d'avant, les deux chemins) |
 | 3f Autres OCR navigateur | ✅ aucun autre outil | — |
 | 4 Limites téléphone | corrigé, à confirmer : 48 Mpx partout + « Reduce to 48 MP » dans JPG/Image to PDF ; HEIC/AVIF bornés ; JPEG « measured up to 200 megapixels » | P1 : §6 n° 4 ; P3 : AVIF dans Firefox au-dessus de la référence en mémoire vive ; temps de réduction sur iPhone non mesuré |

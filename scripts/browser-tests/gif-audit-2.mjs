@@ -4,6 +4,7 @@
 // read against the GIF89a specification: transparent colour index, disposal method, NETSCAPE2.0 loop count.
 // GIF to MP4 is checked with a native ffmpeg/ffprobe (--ffmpeg=<path to ffmpeg.exe>; skipped without it).
 // Usage: node scripts/browser-tests/gif-audit-2.mjs <origin> [--browser=chromium|firefox|webkit] [--ffmpeg=<path>] [--no-vercel-toolbar]
+// P34: since P31 a result link gets its (retyped) address a moment after it appears; reading it earlier fetched the page
 import { chromium, firefox, webkit } from '@playwright/test';
 import UPNG from 'upng-js';
 import { parseGIF, decompressFrames } from 'gifuct-js';
@@ -68,7 +69,7 @@ function decodeGif(bytes) {
 const near = (p, q) => p.every((v, i) => Math.abs(v - q[i]) <= 3);
 const px = (r, fr, x, y) => { const i = (y * r.w + x) * 4; return Array.from(r.frames[fr].rgba.slice(i, i + 4)); };
 const gifFromLink = async (sel) => {
-  const href = await page.locator(sel).first().getAttribute('href', { timeout: 30000 });
+  const href = await page.locator(sel).and(page.locator('[href]')).first().getAttribute('href', { timeout: 30000 });
   return decodeGif(Buffer.from(await page.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href)));
 };
 const makePng = (kind) => page.evaluate(async (k) => {
@@ -123,7 +124,7 @@ if (FF) await T('gif-to-mp4', async () => {
   await open('/tools/gif-tools/gif-to-mp4');
   await page.locator('input[type="file"]').first().setInputFiles({ name: 'anim.gif', mimeType: 'image/gif', buffer: transparentGif() });
   await page.getByRole('button', { name: /Convert/ }).click();
-  const href = await page.locator('a[download$=".mp4"]').first().getAttribute('href', { timeout: 120000 });
+  const href = await page.locator('a[download$=".mp4"]').and(page.locator('[href]')).first().getAttribute('href', { timeout: 120000 });
   const bytes = Buffer.from(await page.evaluate(async (u) => Array.from(new Uint8Array(await (await fetch(u)).arrayBuffer())), href));
   const f = path.join(os.tmpdir(), `gif-audit-${process.pid}.mp4`); fs.writeFileSync(f, bytes);
   const FP = FF.replace(/ffmpeg(\.exe)?$/i, 'ffprobe$1');

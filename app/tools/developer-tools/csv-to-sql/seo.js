@@ -6,6 +6,9 @@ import { MAX_ROWS, MOBILE_MAX_ROWS, PASTE_MAX_ROWS } from './config';
 // the pages ranked first (TableConvert, CodeShack, ConvertCSV: CREATE TABLE + INSERT, type inference, dialects,
 // worked example). Corrected on the way: an answer said every column was VARCHAR(255) while the tool types whole
 // numeric columns as INTEGER or DECIMAL (csvToSql.worker.js) — the page contradicted itself.
+// P34 (05/10): the example, two answers and a tip still described the types and the unquoted names of before the
+// P24 review (03/10: identifiers quoted per database, VARCHAR / DECIMAL sized to the data) — the example's output was
+// not what the tool gives (scripts/browser-tests/seo-pages-29-09.mjs). Rewritten from csvToSql.worker.js.
 const n = (v) => v.toLocaleString('en-US');
 
 export const SEO = {
@@ -17,8 +20,8 @@ export const SEO = {
   description: 'Convert a CSV file to SQL: a CREATE TABLE with INTEGER, DECIMAL or VARCHAR columns and one INSERT per row. Delimiter and Excel encoding detected, values escaped. Runs in your browser, nothing uploaded.',
   faqs: [
     { q: 'Is CSV to SQL free to use?', a: "Yes, it's completely free with no signup required." },
-    { q: 'What data types does the CREATE TABLE statement use?', a: 'A column whose every value is a whole number becomes INTEGER; a column of numbers with decimals becomes DECIMAL(18,6), written with a dot even when the file uses decimal commas (12,5 → 12.5); every other column is VARCHAR(255). Numbers with a leading zero, such as phone numbers or postal codes, stay text. Untick "Numeric columns as INTEGER / DECIMAL" to get VARCHAR(255) everywhere.' },
-    { q: 'Which databases can run the generated SQL?', a: 'The output is plain standard SQL — CREATE TABLE with INTEGER, DECIMAL and VARCHAR, and INSERT INTO … VALUES with single-quoted strings — which MySQL, MariaDB, PostgreSQL, SQLite and SQL Server all accept. Table and column names are written as they are, without quotes, so keep them free of spaces and reserved words.' },
+    { q: 'What data types does the CREATE TABLE statement use?', a: 'Types are sized to your data. A column whose every value is a whole number becomes INTEGER (BIGINT past 9 digits); a column of numbers with decimals becomes DECIMAL with exactly the digits it needs (12.5 → DECIMAL(3, 1)), written with a dot even when the file uses decimal commas (12,5 → 12.5); every other column is VARCHAR as long as its longest value (NVARCHAR for SQL Server), or the database\'s long-text type beyond its VARCHAR limit. Numbers with a leading zero, such as phone numbers or postal codes, stay text. Untick "Numeric columns as INTEGER / DECIMAL" to get text columns everywhere.' },
+    { q: 'Which databases can run the generated SQL?', a: 'Choose the database: Standard SQL (PostgreSQL, SQLite and most others) quotes table and column names with "double quotes", MySQL / MariaDB with `backticks` (and escapes backslashes), SQL Server with [brackets] and N\'…\' strings — so names with spaces or reserved words such as "order" still work.' },
     { q: 'Are values safely escaped in the generated SQL?', a: "Yes — quotes inside values are doubled following standard SQL string escaping, so values containing an apostrophe (like a name such as O'Brien) produce valid, safe SQL rather than broken or exploitable statements." },
     { q: 'What happens to empty cells?', a: 'An empty cell in a numeric column becomes NULL; in a text column it becomes an empty string (\'\').' },
     { q: 'Does it support file upload, or only pasted text?', a: 'Both — upload a .csv file, or paste CSV text directly into the box.' },
@@ -31,7 +34,7 @@ export const SEO = {
     inputLabel: 'CSV',
     input: "id,name,price\n1,Ann,12.5\n2,O'Brien,8",
     outputLabel: 'SQL',
-    output: "CREATE TABLE my_table (\n  id INTEGER,\n  name VARCHAR(255),\n  price DECIMAL(18,6)\n);\n\nINSERT INTO my_table (id, name, price) VALUES (1, 'Ann', 12.5);\nINSERT INTO my_table (id, name, price) VALUES (2, 'O''Brien', 8);",
+    output: "CREATE TABLE \"my_table\" (\n  \"id\" INTEGER,\n  \"name\" VARCHAR(7),\n  \"price\" DECIMAL(3, 1)\n);\n\nINSERT INTO \"my_table\" (\"id\", \"name\", \"price\") VALUES (1, 'Ann', 12.5);\nINSERT INTO \"my_table\" (\"id\", \"name\", \"price\") VALUES (2, 'O''Brien', 8);",
   },
   related: [
     { href: '/tools/developer-tools/sql-to-csv', label: 'SQL to CSV', note: 'the other way: INSERT statements back to CSV rows.' },

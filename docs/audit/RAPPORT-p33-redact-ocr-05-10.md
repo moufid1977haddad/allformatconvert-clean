@@ -193,3 +193,21 @@ Aucun autre outil : Data Extractor, PDF Extract Text, PDF to Word… lisent la c
 | 4 | Image to PDF | `kit-iphone-p19/photo-48mpx.heic` | Choisir le fichier ; **Convert to PDF** | Aucun message ambre (48 Mpx est la limite téléphone) ; un PDF d'une page ; la page ne se recharge pas |
 
 ## 7. Relecture finale de Redact (tour 3)
+
+Tour 3 (sur `81c98da8`, en production à ce moment) : **GO avec 2 conditions bloquantes**.
+1. **Faux refus sur des PDF ordinaires** : un lien interne vers une page **gardée** (sommaire Word / LibreOffice) recopiait
+   cette page une seconde fois en orpheline et le contrôle final refusait le fichier entier — 10 refus à tort sur
+   `scripts/p27/pdfa-corpus/site-fidelite-01_docx.pdf` (244 rédactions sur 35 PDF réels, aucun autre refus). **Corrigé** :
+   la cible devient son numéro de page avant la copie, puis la page copiée après (`relinkDestinations`) ; le lien du sommaire
+   pointe bien sur la page du fichier produit.
+2. **Apparences gardées** : un lien dont l'apparence dessinait le terme (visible), une case à cocher dont l'état « coché »
+   le dessinait, un bouton dont l'état « enfoncé » le dessinait. **Corrigé** : apparence retirée des liens ; un champ ne
+   garde que l'état affiché.
+3. Limite ajoutée au résumé : un texte dessiné dans un **motif de remplissage** n'est pas trouvé (comme une image).
+- Vérifié sur une préversion (`onlineconvertools-765nely91`, commit `a90439d1`) : h1-h4 et le document Word réel acceptés et
+  sans fuite (h4 : seule l'apparence retirée change le texte de la page gardée), kit 12/12, PDF difficile 35/35 (WebKit
+  iPhone), f1 et g2b, audit PDF n° 2 Redact 5/5 Chromium et WebKit.
+- **En production** : master `a90439d1` → Vercel **`onlineconvertools-f2vxs809j`** (05/10, ≈ 04 h 45 UTC), pdf-tools
+  `b23235c9` (même service), www-light **29/29**. Retour arrière : `onlineconvertools-6j94la1q7`.
+- Entre 04 h 05 et 04 h 45 UTC, la version en ligne refusait (honnêtement, sans fichier faux) les PDF à sommaire.
+
