@@ -23,6 +23,21 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
    rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
 
+## 🔎 Lot C — 05/10 : audit référencement Google + préparation AdSense, LECTURE SEULE (`docs/audit/AUDIT-SEO-ADSENSE-05-10.md`) — **document de décision, rien de changé en ligne**
+
+Constat : sitemap 243/243 en 200, aucune page morte, 404 réels ; **8 titres cassés** (JPG to PDF « — Be a One-shot Batch
+Converter: Select Your »…) ; **aucun lien entre outils voisins** sur 215 pages ; JSON-LD sur 10 pages seulement ; canonical
+absent sur `/` et `/about`, 2 H1 sur l'accueil ; 49 descriptions > 160 caractères ; médiane 380 mots par outil (40 < 300) ;
+`lastmod` = heure du build ; Lighthouse mobile 84-89, LCP ≈ 3,2 s ; 0 hreflang (gelé). AdSense : **pas de CMP certifiée et
+Analytics posé sans consentement** (risque déjà présent pour l'UE), `/privacy` sans section publicité, pas d'`ads.txt`.
+
+**Décisions du propriétaire (chiffrées dans le document §2)** : S1 titres cassés + canonical + H1 (≈ 1 h, technique — à faire
+en premier), S2 bloc « outils liés » (≈ 1 jour), S3 JSON-LD sur toutes les pages (≈ ½ jour), S4 titres/descriptions au motif
+du marché (1-2 jours, ton et marque), S5 pages par format (≈ 1 semaine), S6 enrichir les 40 outils < 300 mots, S7 `lastmod`
+réel + redirection en 1 saut, S8 note réelle, S9 guides, S10 internationalisation (gelée), S11 LCP mobile, **A1 CMP + Consent
+Mode v2 (≈ ½ jour, utile dès maintenant)**, A2 pages légales + ads.txt au moment de la demande AdSense. Le fichier
+`claude/decision-internationalisation.md` cité par le prompt n'existe pas dans le dépôt.
+
 ## 🧪 P34 — 05/10 (nuit, lot B) : non-régression de tous les outils en local (`docs/audit/RAPPORT-p34-non-regression-05-10.md`) — **en production : `onlineconvertools-h9vbm07hj` = `6887a0b1`, www 29/29 ; retour arrière : `onlineconvertools-f2vxs809j`**
 
 Fournisseurs simulés (`scripts/p34/fake-all-providers.mjs` : aucun appel payant, rien dans Supabase, aucune alerte), ≈ 190
