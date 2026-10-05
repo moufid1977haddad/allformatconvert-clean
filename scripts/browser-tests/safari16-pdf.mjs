@@ -51,7 +51,9 @@ async function open(slug) {
 }
 // The first file offered for download: its bytes, read in the page.
 async function offered(p, re, timeout = 60000) {
-  await p.waitForFunction((src) => [...document.querySelectorAll('[data-file-download]')].some((el) => new RegExp(src).test(el.dataset.name || '')), re.source, { timeout });
+  // P33: since P31 the row's link gets its (retyped) address a moment after the row appears: wait for it, or the
+  // fetch below read the page itself
+  await p.waitForFunction((src) => [...document.querySelectorAll('[data-file-download]')].some((el) => new RegExp(src).test(el.dataset.name || '') && el.querySelector('a[data-download][href]')), re.source, { timeout });
   const [nm, bytes] = await p.evaluate(async (src) => {
     const row = [...document.querySelectorAll('[data-file-download]')].find((el) => new RegExp(src).test(el.dataset.name || ''));
     const buf = await (await fetch(row.querySelector('a[data-download]').href)).arrayBuffer();

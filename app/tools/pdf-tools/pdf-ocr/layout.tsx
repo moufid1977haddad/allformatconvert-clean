@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "PDF OCR — Extract Text from Scanned PDFs Online" },
-  description: "Runs real OCR (Tesseract.js) on scanned PDFs and photographed pages of text, entirely in your browser in any of 100+ supported languages — your file is never uploaded. Works best on a straight, clean scan; skewed or low-quality images will need proofreading.",
+  description: "Runs real OCR (Tesseract) on scanned PDFs and photographed pages of text in 100+ languages, up to three at once, and gives the text plus a searchable PDF. In your browser on a computer; on iPhone or iPad, a page the device cannot read goes to our own OCR service, then is deleted.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-ocr" },
   openGraph: {
     title: "PDF OCR — Extract Text from Scanned PDFs Online",
-    description: "Runs real OCR (Tesseract.js) on scanned PDFs and photographed pages of text, entirely in your browser in any of 100+ supported languages — your file is never uploaded. Works best on a straight, clean scan; skewed or low-quality images will need proofreading.",
+    description: "Runs real OCR (Tesseract) on scanned PDFs and photographed pages of text in 100+ languages, up to three at once, and gives the text plus a searchable PDF. In your browser on a computer; on iPhone or iPad, a page the device cannot read goes to our own OCR service, then is deleted.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-ocr",
   },
 };

@@ -9,14 +9,16 @@ import { FileDownload, DownloadGroup } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
 import { isMobileDevice } from '../../../lib/isMobileDevice';
-import { reducedSize } from '../../../lib/reduceImage';
+import { reducedSize, PHONE_MAX_MP, PHONE_REDUCE_MP, overPhoneBound } from '../../../lib/reduceImage';
 
 // P27 (phase 7): a phone bound, measured. Memory this page needs (peak of the tab, Chromium, scripts/p27/
 // phone-bound-memory.mjs, a noisy photo-like 24 MP JPEG scaled up): 24 MP 0.86 GB, 48 MP 1.4 GB, 100 MP 2.4 GB -- about 22-30 MB per megapixel.
 // A phone browser reloads a tab far below a computer (iOS Safari around 1.5-2 GB on recent iPhones, Android Chrome
 // in the same range on a 4 GB phone): 50 MP keeps a 48 MP iPhone or 50 MP Android photo working and stops the
 // 108 / 200 MP ones, which would end in a reloaded page instead of a message. Computers: MAX_MP below.
-const PHONE_MAX_MP = 50;
+// P33 (05/10): 48 MP, the site's one phone number (lib/reduceImage.js PHONE_MAX_MP / PHONE_MAX_PIXELS): the bound is the
+// pixel count of the owner's 48 MP iPhone photo (8064 × 6048 = 48.77 MP, the one size proven on a real iPhone), so that
+// photo passes with no word; the page said 50 while it reduced to 48. PHONE_MAX_MP and PHONE_REDUCE_MP come from there.
 // Computers: measured (P27) on the same images, the JPEG engine (mozjpeg in WebAssembly, 2 GB of memory at most) compresses
 // 140 MP and runs out of memory at 150 MP -- its worker then died without a word and the page said "Compressing… 5%"
 // for ever. The bound is declared before the work, and a watchdog (below) turns any silent stop into a message.
@@ -25,7 +27,6 @@ const MAX_MP = 140;
 // measured in Node: 4.0 × the RGBA size; tab peaks: scripts/p32/compressor-peak-memory.mjs), and the one size proven on the owner's iPhone is
 // a 48 MP photo (8064 × 6048 = 48.8 MP, compressed fine). 50 MP would need 2-3 % more than that proof; 48 MP needs less,
 // so the reduced panorama is never heavier than a photo the phone is known to handle. Computers: reduced to MAX_MP.
-const PHONE_REDUCE_MP = 48;
 // A fresh worker for any image over this (the iPhone canvas limit): the previous image's encoder memory goes with the
 // old worker instead of adding to the next one's.
 const FRESH_WORKER_MP = 16.7;
@@ -124,17 +125,17 @@ export default function ImageCompressorPage() {
       imageHeaderSize(it.file).then((size) => { if (size) update(it.id, { size }); }).catch(() => {});
     }
   };
-  const limitMp = () => (isMobileDevice() ? PHONE_MAX_MP : MAX_MP);
+  const overBound = (w, h) => (isMobileDevice() ? overPhoneBound(w, h) : (w * h) / 1e6 > MAX_MP);
   const reduceMp = () => (isMobileDevice() ? PHONE_REDUCE_MP : MAX_MP);
-  const overLimit = items.filter((it) => it.size && it.status === 'ready' && (it.size.width * it.size.height) / 1e6 > limitMp());
+  const overLimit = items.filter((it) => it.size && it.status === 'ready' && overBound(it.size.width, it.size.height));
 
   // P31: "Reduce to … MP then compress", in one gesture (the market's resize-then-compress, e.g. iLoveIMG's two
   // tools, in one step here). P32 (04/10): each image over the bound is reduced INSIDE the compressor's worker, its
   // pixels handed straight to the encoder (lib/reduceImage.js) -- the page no longer encodes an intermediate JPEG.
   const reduceThenCompress = async () => {
-    const limit = limitMp(), target = reduceMp();
+    const target = reduceMp();
     const list = items.filter((it) => it.status === 'ready').map((it) => {
-      if (!(it.size && (it.size.width * it.size.height) / 1e6 > limit)) return it;
+      if (!(it.size && overBound(it.size.width, it.size.height))) return it;
       update(it.id, { reduceMp: target });
       return { ...it, reduceMp: target };
     });
@@ -157,7 +158,7 @@ export default function ImageCompressorPage() {
       update(it.id, { status: 'error', message: `This image is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round(mp)} megapixels), more than the ${MAX_MP} megapixels this in-browser compressor can hold in memory. Use a smaller version of the image.` });
       return;
     }
-    if (mp > PHONE_MAX_MP && isMobileDevice()) {
+    if (isMobileDevice() && overPhoneBound(size.width, size.height)) {
       update(it.id, { status: 'error', message: `This image is ${Math.round(mp)} megapixels: on a phone the limit is ${PHONE_MAX_MP} megapixels, because compressing it would need more memory than a phone browser gives a page (it would reload). Use a computer, or a smaller version of the image.` });
       return;
     }
@@ -262,7 +263,7 @@ export default function ImageCompressorPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Image Compressor</h1>
         <p className="text-neutral-500 text-center mb-2">Compress JPG, PNG, WebP, AVIF and SVG in your browser — the format is kept, your images never leave your device</p>
-        <p className="text-neutral-500 text-xs text-center mb-8">Up to {MAX_FILES} images at a time, each up to {MAX_MP} megapixels on a computer and {PHONE_MAX_MP} on a phone (a 48 MP phone photo fits).</p>
+        <p className="text-neutral-500 text-xs text-center mb-8">Up to {MAX_FILES} images at a time, each up to {MAX_MP} megapixels on a computer and {PHONE_MAX_MP} on a phone (48 MP phone photos fit; a larger image can be reduced to {PHONE_REDUCE_MP} MP first).</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote kind="photo" />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => !busy && inputRef.current.click()}>
@@ -345,6 +346,7 @@ export default function ImageCompressorPage() {
           { q: "Does it keep transparency?", a: "Yes for PNG and WebP. Transparent areas of other formats become white, since they are saved as JPG." },
           { q: "Can I compress an image to a given size, like 100 KB?", a: "Yes, for JPG, WebP and AVIF: choose 'To a size of' and type the size. The highest quality that fits is found automatically. The picture keeps its dimensions: if even the lowest quality is too big, the page says so and you can make it smaller first with Image Resizer. A PNG is compressed at the quality you set." },
           { q: "How are SVG files compressed?", a: "They stay vector: SVGO, the standard SVG optimiser, removes editor metadata, shortens numbers and ids and merges what can be merged — the same method the leading online compressor uses (in our test on the Tux SVG: 48.8 KB → 35.1 KB, identical to theirs within 4 bytes). Before offering the file, the tool draws both versions and compares them pixel by pixel; if they differ, it tries a more cautious setting, and if that still differs it keeps your original. The quality slider does not apply to SVG." },
+          { q: "Is there a size limit?", a: `Each image can be up to ${MAX_MP} megapixels on a computer and ${PHONE_MAX_MP} on a phone (48 MP phone photos fit). A phone browser reloads a page that needs more memory than it gives, so a larger image (a panorama, a 108 MP photo) is named as soon as you choose it, and one button reduces it to ${PHONE_REDUCE_MP} MP (${MAX_MP} MP on a computer) and compresses it in the same step.` },
           { q: "Can I compress multiple images at once?", a: `Yes, up to ${MAX_FILES} at a time, then download them one by one or together as a ZIP.` },
           { q: "Are my images uploaded?", a: "No. Everything runs in your browser, in a background worker; your images never leave your device." }
         ]}

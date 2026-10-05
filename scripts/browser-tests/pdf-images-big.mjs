@@ -2,7 +2,7 @@
 // 24 MP JPEG with a mirrored EXIF orientation (2) went through ONE canvas the size of the photo, which iOS refuses
 // past 16.7 MP. With window.__forceSafariCanvasCap (the iPhone path: bands), the PDF must hold one page per image,
 // the size of the image as displayed, with the picture right (marker position), embedded as JPEG (opaque photo).
-// Usage: node scripts/browser-tests/pdf-images-big.mjs <origin> [--browser=firefox|webkit]
+// Usage: node scripts/browser-tests/pdf-images-big.mjs <origin> [--browser=firefox|webkit] [--iphone]
 import { chromium, firefox, webkit } from '@playwright/test';
 import sharp from 'sharp';
 import { PDFDocument } from 'pdf-lib';
@@ -19,14 +19,17 @@ for (let y = 0; y < H / 8; y++) for (let x = 0; x < W / 8; x++) { const i = (y *
 const webp = path.join(dir, 'IMG_A.webp'); fs.writeFileSync(webp, await sharp(raw, { raw: { width: W, height: H, channels: 3 } }).webp({ quality: 85 }).toBuffer());
 const mirrored = path.join(dir, 'IMG_B.jpg'); fs.writeFileSync(mirrored, await sharp(raw, { raw: { width: W, height: H, channels: 3 } }).jpeg({ quality: 90 }).withMetadata({ orientation: 2 }).toBuffer());
 const b = await engine.launch();
-const ctx = await b.newContext({ acceptDownloads: true });
+// P33 (05/10): --iphone = an iPhone user agent too: the pictures then go through the phone's worker (pdfImages.js
+// embedUpright -> reduceForPdf.worker.js at full size) instead of the page
+const IPHONE_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
+const ctx = await b.newContext({ acceptDownloads: true, ...(process.argv.includes('--iphone') ? { userAgent: IPHONE_UA, hasTouch: true } : {}) });
 await applyIosCanvasCap(ctx); // P16: the iPhone's canvas limit, always (lib/ios-canvas-cap.mjs)
 // P16: Chromium too (its wrong EXIF crop now falls back to one ImageBitmap copied band by band, lib/bigImage.js)
 const p = await ctx.newPage();
 await p.goto(origin + '/tools/pdf-tools/image-to-pdf', { waitUntil: 'networkidle' });
 await p.locator('input[type=file]').first().setInputFiles([webp, mirrored]);
 await p.getByRole('button', { name: /Convert|Create PDF/ }).first().click();
-const link = p.getByRole('link', { name: /Download PDF/ });
+const link = p.locator('[data-file-download] a[data-download]').first(); // P33: the FileDownload link (P18), not 'Download PDF' any more
 await link.waitFor({ timeout: 300000 });
 const [d] = await Promise.all([p.waitForEvent('download'), link.click()]);
 const f = path.join(dir, d.suggestedFilename()); await d.saveAs(f);

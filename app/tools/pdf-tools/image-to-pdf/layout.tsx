@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: { absolute: "Image to PDF — Turn Any Mix Online Free" },
-  description: "Image to PDF turns any mix of JPG and PNG files into one downloadable PDF, processed locally with the pdf-lib library so nothing ever reaches a server.",
+  description: "Image to PDF turns any mix of JPG, PNG, HEIC, WebP and other images into one downloadable PDF, processed locally with the pdf-lib library so nothing ever reaches a server.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/image-to-pdf" },
   openGraph: {
     title: "Image to PDF — Turn Any Mix Online Free",
-    description: "Image to PDF turns any mix of JPG and PNG files into one downloadable PDF, processed locally with the pdf-lib library so nothing ever reaches a server.",
+    description: "Image to PDF turns any mix of JPG, PNG, HEIC, WebP and other images into one downloadable PDF, processed locally with the pdf-lib library so nothing ever reaches a server.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/image-to-pdf",
   },
 };

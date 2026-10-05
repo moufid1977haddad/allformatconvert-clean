@@ -5,7 +5,10 @@
 // Now the page's text is searched as one string, ignoring spaces and line breaks, case-insensitive (NFKC, so
 // ligatures and full-width forms match), and each match is mapped back to the character range it covers in every item.
 
-const norm = (s) => s.normalize('NFKC').toLowerCase().replace(/\s+/g, '');
+// P33 (independent review 05/10): accents are dropped (NFKD, combining marks and the spacing accents TeX draws as their
+// own glyph: "u" + "¨" is "u"), and so are hyphens and dashes ("ZORG-" at a line end + "LUB-77" was not found as
+// "ZORGLUB-77"). Both sides are folded the same way: "Muller" also finds "Müller" — over-redaction is the safe side.
+const norm = (s) => s.normalize('NFKD').replace(/[\p{M}¨´ˆ-˝`¯¸]/gu, '').toLowerCase().replace(/\s+/g, '').replace(/[-­‐-―−]/g, '');
 
 // strs: the items' strings, in order. Returns [{ k: item index, c0, c1 (exclusive), m: match id }], one entry per
 // item per match.
@@ -30,9 +33,15 @@ export function matchSpans(strs, keyword) {
   return spans;
 }
 
-// Text a pdf.js annotation carries (form field value, comment, alternate text).
+// Text a pdf.js annotation carries (form field value, comment, alternate text; P33: a link's address too — a
+// "Contact me" link to mailto:jane@… on a page whose text does not hold the address was copied as it was, address
+// included).
+const decoded = (u) => { try { return typeof u === 'string' ? decodeURIComponent(u) : null; } catch { return null; } };
 export function annotationText(a) {
-  const parts = [a.fieldValue, a.contentsObj && a.contentsObj.str, a.contents, a.alternativeText, a.textContent && [].concat(a.textContent).join(' ')];
+  // P33 review: rich text (/RC), subject, an attached file's name, JavaScript actions too
+  const actions = a.actions && typeof a.actions === 'object' ? Object.values(a.actions).flat() : [];
+  const parts = [a.fieldValue, a.contentsObj && a.contentsObj.str, a.contents, a.alternativeText, a.textContent && [].concat(a.textContent).join(' '), a.url, a.unsafeUrl, decoded(a.unsafeUrl), a.titleObj && a.titleObj.str,
+    a.richText && a.richText.str, a.subject, a.subjectObj && a.subjectObj.str, a.file && a.file.filename, ...actions, a.options && [].concat(a.options).map((o) => o && (o.displayValue || o.exportValue))];
   return parts.flat().filter((v) => typeof v === 'string').join(' ');
 }
 
