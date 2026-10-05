@@ -117,3 +117,14 @@ alphabets que Helvetica ne sait pas écrire (grec, cyrillique, arabe, asiatique,
 - `scripts/p33/ocr-fallback.mjs` WebKit iPhone (route réelle + pdf-tools local) : **21/21** (non-régression P33).
 - `scripts/p35/ocr-line-browser.mjs` (WebKit iPhone, 6 visiteurs devant) : 3/3 ; `ocr-text-layer.mjs` 5/5.
 - `npm run build` et ses gardes verts.
+
+### Lot 1 — mise en ligne
+- **Préversion, une seule fois** : `onlineconvertools-2e77vjplb` (= `3324ed50`), par le relais `vercel-preview-proxy` (jeton
+  en mémoire), route réelle et **pdf-tools de production** : file d'attente `scripts/p35/ocr-line-deployed.mjs` **3/3**
+  (une page à la fois pour un même visiteur, les deux autres reçoivent leur place puis leur texte) ; Redact kit WebKit
+  iPhone 12/12 ; couche de texte 7/7 ; PDF OCR WebKit iPhone 21/21.
+- **Production** : master `3324ed50` (avance rapide) → Vercel **`onlineconvertools-jccwufjem`** ; www-light **29/29** ;
+  `ocr-line-deployed` sur www **3/3** ; pdf-tools reconstruit sur master, `/health` ok, `MEDIA_SERVICE_URL` toujours
+  privée. **Aucun retour arrière.** Retour arrière prêt : promouvoir `onlineconvertools-2lg294nt3` (site de P34) ;
+  pdf-tools : annuler `c92b907b` par un commit ; D2 : `scripts/p35/media-url-switch.mjs rollback` (ancienne valeur gardée
+  hors dépôt).
