@@ -14,6 +14,7 @@ const { docxToDoc } = require('./docConvert');
 const { runProcess } = require('./runProcess');
 const compress = require('./compress');
 const { parseRenderParams, renderPage } = require('./render');
+const { parseOcrParams, ocrPage, installedLanguages } = require('./ocr');
 
 sweepStaleTempDirs();
 
@@ -94,7 +95,10 @@ app.get('/health', async (_req, res) => {
   // soffice (P26, .doc only) is reported but does not decide the service's health: a LibreOffice problem must not
   // mark repair, PDF/A and compression down (nor block a deploy on Railway's health check).
   const allOk = Object.entries(binaries).every(([name, b]) => name === 'soffice' || b.ok);
-  res.status(allOk ? 200 : 503).json({ ok: allOk, binaries });
+  // P33: the OCR models installed (codes only), so the site's language list can be checked against them
+  let ocrLanguages = null;
+  try { ocrLanguages = [...(await installedLanguages())].sort(); } catch { /* reported by binaries.tesseract */ }
+  res.status(allOk ? 200 : 503).json({ ok: allOk, binaries, ocrLanguages });
 });
 
 // P28: repair reads the text of the damaged file and of every candidate (two readers each) and can try four methods,
@@ -404,6 +408,65 @@ app.post('/v1/render-page-staged', requireApiKey, express.json({ limit: '4kb' })
   if (!r.ok) return res.status(r.status).json({ ok: false, error: r.error });
   return sendRender(res, r);
 }, config.RENDER_TIMEOUT_MS)));
+
+// ---- /v1/ocr-page (P33): one PDF page -> its text + Tesseract's text-only PDF of it (src/ocr.js) ---------------------
+// For an iPhone / iPad whose browser could not recognize the page. Multipart: file + page, lang ("eng", "eng+fra", at
+// most 3), dpi. Answer: JSON {ok, text, pdf (base64), dpi, reduced, pages}. Nothing is kept (withTempDir).
+// the fields are checked BEFORE a staged file is fetched (a malformed request costs nothing)
+async function ocrParams(req, res) {
+  let langs;
+  try {
+    langs = await installedLanguages();
+  } catch (e) {
+    console.error('[ocr-page] tesseract unavailable:', e?.message || e);
+    res.status(503).json({ ok: false, error: 'Our OCR service is not available right now.' });
+    return null;
+  }
+  const p = parseOcrParams(req.body || {}, langs);
+  if (!p.ok) { res.status(p.status || 400).json({ ok: false, error: p.error }); return null; }
+  return p;
+}
+
+async function ocrRequest(req, res, p, signal, endpoint, bytesIn) {
+  const startedAt = Date.now();
+  const r = await ocrPage(req.tempDir, p, signal);
+  logMetric({ apiKeyName: req.apiKey.name, endpoint, bytesIn, bytesOut: r.ok ? r.pdf.length : null, durationMs: Date.now() - startedAt, verdict: r.ok ? `ocr_${r.reduced ? 'reduced' : 'full'}` : signal.aborted ? 'timeout' : `failed_${r.status}` });
+  if (!r.ok) return res.status(r.status).json({ ok: false, error: r.error });
+  res.setHeader('Cache-Control', 'no-store');
+  return res.status(200).json({ ok: true, text: r.text, pdf: r.pdf.toString('base64'), dpi: r.dpi, reduced: r.reduced, pages: r.pages });
+}
+
+app.post('/v1/ocr-page', requireApiKey, withTempDir(withTimeout(async (req, res, signal) => {
+  try {
+    await runUpload(req, res);
+  } catch (err) {
+    if (err.message !== 'handled') throw err;
+    return;
+  }
+  if (!req.file) return res.status(400).json({ ok: false, error: 'No file provided.' });
+  if (req.file.size > config.MAX_RENDER_INPUT_BYTES) return res.status(413).json({ ok: false, error: `Files up to ${Math.floor(config.MAX_RENDER_INPUT_BYTES / 1048576)} MB are accepted.` });
+  const p = await ocrParams(req, res);
+  if (!p) return;
+  return ocrRequest(req, res, p, signal, '/v1/ocr-page', req.file.size);
+}, config.OCR_TIMEOUT_MS)));
+
+// ---- /v1/ocr-page-staged (P33): same, the PDF is on the media service (files above the Vercel body ceiling) -------
+app.post('/v1/ocr-page-staged', requireApiKey, express.json({ limit: '4kb' }), withTempDir(withTimeout(async (req, res, signal) => {
+  if (!config.MEDIA_SERVICE_URL) {
+    console.error('[ocr-page-staged] MEDIA_SERVICE_URL is not set');
+    return res.status(503).json({ ok: false, error: 'Large-file recognition is not available right now.' });
+  }
+  const { jid, ticket } = req.body || {};
+  if (typeof jid !== 'string' || !/^[0-9a-zA-Z]{16,64}$/.test(jid) || typeof ticket !== 'string' || ticket.length > 2048) {
+    return res.status(400).json({ ok: false, error: 'Invalid request.' });
+  }
+  const p = await ocrParams(req, res);
+  if (!p) return;
+  const src = await compress.fetchSource(req.tempDir, jid, ticket, signal, config.MAX_RENDER_INPUT_BYTES);
+  if (!src.ok) return res.status(src.status).json({ ok: false, error: src.error });
+  const bytesIn = fs.statSync(require('path').join(req.tempDir, compress.INPUT_NAME)).size;
+  return ocrRequest(req, res, p, signal, '/v1/ocr-page-staged', bytesIn);
+}, config.OCR_TIMEOUT_MS)));
 
 app.listen(config.PORT, () => {
   console.log(`pdf-tools-service listening on :${config.PORT}`);

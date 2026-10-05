@@ -61,4 +61,14 @@ module.exports = {
   // address space of one pdfinfo / pdftoppm (Linux only, via prlimit): a 40 MP page takes ~160 MB in Splash
   RENDER_MEMORY_LIMIT_BYTES: process.env.RENDER_MEMORY_LIMIT_BYTES === undefined ? 1536 * 1024 * 1024 : Number(process.env.RENDER_MEMORY_LIMIT_BYTES),
   PRLIMIT_BIN: process.env.PRLIMIT_BIN || 'prlimit',
+  // /v1/ocr-page (P33, src/ocr.js): one page recognized by Tesseract for an iPhone / iPad whose browser could not.
+  // The Dockerfile installs tesseract-ocr and one model per language the site offers. The site waits 55 s.
+  TESSERACT_BIN: process.env.TESSERACT_BIN || 'tesseract',
+  OCR_TIMEOUT_MS: Number(process.env.OCR_TIMEOUT_MS) || 50_000,
+  // an A4 page at 300 dpi is 8.7 MP; a larger page is recognized at the density that fits (and the answer says so)
+  OCR_MAX_PIXELS: Number(process.env.OCR_MAX_PIXELS) || 25_000_000,
+  // Tesseract's text-only PDF of one page (an invisible text layer, a few KB to a few hundred) and the text, as JSON
+  MAX_OCR_OUTPUT_BYTES: Number(process.env.MAX_OCR_OUTPUT_BYTES) || 2_500_000,
+  OCR_CONCURRENCY: Number(process.env.OCR_CONCURRENCY) || 2,
+  OCR_QUEUE_MS: Number(process.env.OCR_QUEUE_MS) || 20_000,
 };
