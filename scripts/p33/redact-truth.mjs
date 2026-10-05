@@ -4,7 +4,9 @@
 //   2. PDF.js (node, legacy build) getTextContent of every page + annotations: no term left;
 //   3. the raw file: every stream inflated (zlib), searched for the term (as text, hex-encoded and UTF-16BE);
 //   4. the redacted page drawn by pdftoppm at 300 dpi and read by Tesseract (this machine): no term left in the picture
-//      (and the control: Tesseract DOES read it on the original page).
+//      (and the control: Tesseract DOES read it on the original page); P33 review: EVERY page of the output is read too
+//      (a stamp on an untouched page showed the term);
+//   5. P33 review: no /Type /Page object outside the page tree with anything in it (an orphan copy of a redacted page).
 // Also says what is kept: text of the other pages, links, file size.
 //   node scripts/p33/redact-truth.mjs <origin> [--browser=webkit|chromium] [--device=iphone|desktop]
 //        [--pdf=…] [--terms="photo-2"] [--force-server] (iPhone: __localPageLimitMs=1, needs --route-origin)
@@ -109,6 +111,22 @@ const ocrPage = (f, pg, name) => {
   execFileSync(TESS, [`${base}.png`, base, '-l', 'eng'], { stdio: 'ignore' });
   return fs.readFileSync(`${base}.txt`, 'utf8');
 };
+// every page of the output, read as a picture (an untouched page can show the term in an annotation)
+for (let pg = 1; pg <= pages; pg++) {
+  const seen = ocrPage(out, pg, `all-p${pg}`);
+  for (const t of terms) check(`page ${pg} of the output, read by Tesseract: "${t}" not visible`, !norm(seen).includes(norm(t)), seen.slice(0, 160));
+}
+// ---- 5. orphan page objects ----
+{
+  const { PDFDocument: D, PDFName: PN, PDFDict: PDct } = await import('pdf-lib');
+  const od = await D.load(fs.readFileSync(out), { updateMetadata: false });
+  const tree = new Set(od.getPages().map((x) => x.ref.toString()));
+  const orphans = [];
+  for (const [ref, obj] of od.context.enumerateIndirectObjects()) {
+    if (obj instanceof PDct && obj.get(PN.of('Type'))?.decodeText?.() === 'Page' && !tree.has(ref.toString())) orphans.push({ ref: ref.toString(), empty: !obj.get(PN.of('Annots')) && !(obj.lookupMaybe(PN.of('Resources'), PDct)?.keys().length) });
+  }
+  check(`no page object outside the tree with anything in it (${orphans.length} orphan shell(s))`, orphans.every((o) => o.empty), JSON.stringify(orphans));
+}
 for (const pg of hitPages) {
   const before = ocrPage(PDF, pg, `orig-p${pg}`);
   const after = ocrPage(out, pg, `red-p${pg}`);

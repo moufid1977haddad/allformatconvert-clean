@@ -13,6 +13,7 @@ import TextArea from '@/app/components/TextArea';
 import { withActualTextUnicode } from '../../../lib/pdfActualText';
 import { fitScale, withTimeout, StepTimeout } from '../../../lib/canvasLimit'; // P31: one canvas cap for iPhone / iPad
 import { serverRenderAvailable, ServerPageRenderer, LOCAL_PAGE_LIMIT_MS, LOCAL_PAGE_LIMIT_LABEL, listPages } from '../../../lib/serverPageRender';
+import { sanitizeForCopy, verifyRedacted, UNREADABLE_ANNOTATIONS } from '../../../lib/redactSanitize';
 
 // P32 (04/10): a page drawn by our PDF service comes with the page's /Rotate applied (pdftoppm); the redaction works
 // on the unrotated page (rotation 0 viewport, rotation set back on the new page), so the image is turned back here.
@@ -71,7 +72,8 @@ export default function Page() {
     const limit = STEP_LIMIT_MS();
     const step = (promise, what, onTimeout) => withTimeout(promise, limit, `${what} made no progress for ${Math.round(limit / 1000)} seconds on this device. Try again; if it happens again, use a computer for this PDF.`, onTimeout);
     try {
-      const { PDFDocument, degrees } = await import('pdf-lib');
+      const lib = await import('pdf-lib');
+      const { PDFDocument, degrees } = lib;
       const pdfjsLib = await loadPdfjs();
       const arrayBuffer = await file.arrayBuffer();
       const srcDoc = await step(PDFDocument.load(await openablePdfBytes(arrayBuffer)), 'Opening the PDF');
@@ -87,8 +89,12 @@ export default function Page() {
       let totalMatches = 0;
       const pagesHit = [];
       const perPage = []; // [page, occurrences]
+      const found = new Map(); // page index → { page, content, items, spans, boxes }
       const measure = document.createElement('canvas').getContext('2d');
+      const textMatches = (strs, eols) => terms.some((t) => matchSpans(strs, t).length) || patternSpans(strs, kinds, eols).length > 0;
 
+      // Pass 1 (P33): every page is searched BEFORE anything is copied — the pages without a match are then copied from
+      // a source in which the redacted pages are empty shells (app/lib/redactSanitize.js, independent review 05/10).
       for (let i = 0; i < pdf.numPages; i++) {
         const where = `Page ${i + 1} of ${pdf.numPages}`;
         setProgress(`${where}: reading its text...`);
@@ -96,24 +102,46 @@ export default function Page() {
         const content = await step(page.getTextContent(), `${where}: reading its text`);
         const items = content.items.filter((it) => typeof it.str === 'string');
         const strs = items.map((it) => it.str);
+        const eols = items.map((it) => !!it.hasEOL);
         const spans = [
           ...terms.flatMap((t, ti) => matchSpans(strs, t).map((sp) => ({ ...sp, m: `t${ti}:${sp.m}` }))),
-          ...patternSpans(strs, kinds, items.map((it) => !!it.hasEOL)),
+          ...patternSpans(strs, kinds, eols),
         ];
-        // Form field values and comments are searched too: they are part of the page's annotations, which are
-        // copied as they are on a page without a match in its text (29/09).
-        const annots = (await step(page.getAnnotations(), `${where}: reading its form fields and comments`)).filter((an) => an.rect && annotationMatches(annotationText(an), terms, kinds));
-
-        if (spans.length === 0 && annots.length === 0) {
-          const [copied] = await outDoc.copyPages(srcDoc, [i]);
-          outDoc.addPage(copied);
-          continue;
-        }
+        // Form field values, comments, link addresses… are searched too (29/09, P33).
+        const all = await step(page.getAnnotations(), `${where}: reading its form fields and comments`);
+        const annots = all.filter((an) => an.rect && annotationMatches(annotationText(an), terms, kinds));
+        if (spans.length === 0 && annots.length === 0) continue;
+        // on a redacted page, an annotation whose content cannot be read (a stamp, an attached file…) is blacked out too
+        const opaque = all.filter((an) => an.rect && UNREADABLE_ANNOTATIONS.has(an.subtype) && !annots.includes(an));
         const here = new Set(spans.map((sp) => sp.m)).size + annots.length;
         totalMatches += here;
         pagesHit.push(i + 1);
         perPage.push([i + 1, here]);
-        setProgress(`${where}: blacking out ${here} occurrence${here > 1 ? 's' : ''}...`);
+        found.set(i, { page, content, items, spans, boxes: [...annots, ...opaque] });
+      }
+
+      if (totalMatches === 0) {
+        // no file is made: nothing would be removed (P33: the terms are named back, as the market's tools do)
+        const asked = [terms.length ? quoteTerms(terms) : '', ...kinds.map((k) => PATTERNS[k].label.toLowerCase())].filter(Boolean).join(', ');
+        setError(`No match found for ${asked} in this PDF's text (${pdf.numPages} page${pdf.numPages > 1 ? 's' : ''} searched). Text that is part of a picture (a scan) cannot be found: run PDF OCR first.`);
+        setLoading(false);
+        setProgress('');
+        return;
+      }
+      const removed = sanitizeForCopy(srcDoc, [...found.keys()], lib);
+
+      // Pass 2: the pages without a match are copied (from the made-safe source); each page with one is rebuilt from a
+      // picture of itself with the matches blacked out.
+      for (let i = 0; i < pdf.numPages; i++) {
+        const where = `Page ${i + 1} of ${pdf.numPages}`;
+        const hit = found.get(i);
+        if (!hit) {
+          const [copied] = await outDoc.copyPages(srcDoc, [i]);
+          outDoc.addPage(copied);
+          continue;
+        }
+        const { page, content, items, spans, boxes } = hit;
+        setProgress(`${where}: blacking out ${perPage.find(([pg]) => pg === i + 1)[1]} occurrence(s)...`);
 
         // A black rectangle drawn on top of the page still leaves the
         // original text operators in the content stream, so the "hidden"
@@ -166,10 +194,15 @@ export default function Page() {
         ctx.fillStyle = '#000000';
         const poly = (pts) => { ctx.beginPath(); pts.forEach(([x, y], n) => { const [vx, vy] = viewport.convertToViewportPoint(x, y); if (n) ctx.lineTo(vx, vy); else ctx.moveTo(vx, vy); }); ctx.closePath(); ctx.fill(); };
         // Only the matched characters are covered (as Adobe Acrobat and PDF24 do), not the whole text run. Their
-        // position inside the run is measured with the run's font (the font pdf.js loaded for it once the page is
-        // rendered, else its fallback family); the box is widened by 15 % of the font size, plus 4 % of the text
-        // before the match when only the fallback font could be used, so a measuring error over-covers rather
-        // than leaves part of a character visible. Rotated text is handled (the box follows the text direction).
+        // position inside the run is measured with the run's font (the font pdf.js loaded for it, else its fallback
+        // family); the box is widened by 15 % of the font size, plus 4 % of the text before the match when only the
+        // fallback font could be used. P33 (review 05/10): document.fonts.check() said "true" for a family that is not
+        // loaded at all (the specification's answer), so the margin was never added; and character / word spacing
+        // (Tc, Tw) made the measured position wrong — the end of "SECRET" stayed visible. Now the font counts as real
+        // only if a loaded FontFace has its name, and when the measured run differs from the PDF's own width by more
+        // than 3 %, the WHOLE run is covered (over-redaction is the safe side). Rotated text is handled.
+        const loadedFaces = new Set();
+        if (document.fonts && document.fonts.forEach) document.fonts.forEach((f) => { if (f.status === 'loaded') loadedFaces.add(f.family.replace(/^["']|["']$/g, '')); });
         for (const sp of spans) {
           const it = items[sp.k];
           const [ta, tb, tc, td, tx, ty] = it.transform;
@@ -179,20 +212,23 @@ export default function Page() {
           const style = content.styles[it.fontName] || {};
           let x0 = 0, x1 = it.width || fs * it.str.length * 0.6, extra = 0;
           if (!style.vertical && it.str.length > 1) {
-            const real = document.fonts && document.fonts.check(`10px "${it.fontName}"`);
+            const real = loadedFaces.has(it.fontName);
             measure.font = `100px ${real ? `"${it.fontName}", ` : ''}${style.fontFamily || 'sans-serif'}`;
             const all = measure.measureText(it.str).width || 1;
             const pre = measure.measureText(it.str.slice(0, sp.c0)).width, upto = measure.measureText(it.str.slice(0, sp.c1)).width;
             const W = it.width || all * fs / 100;
-            x0 = W * pre / all; x1 = W * upto / all;
-            if (!real) extra = 0.04 * x0 + 0.04 * (x1 - x0);
+            if (it.width && Math.abs(all * fs / 100 - it.width) > 0.03 * it.width) { x0 = 0; x1 = W; } // spacing the measure cannot follow: whole run
+            else {
+              x0 = W * pre / all; x1 = W * upto / all;
+              if (!real) extra = 0.04 * x0 + 0.04 * (x1 - x0);
+            }
           }
           const pad = 0.15 * fs + extra;
           const lo = x0 - pad, hi = x1 + pad, dn = -0.3 * fs, up = 1.05 * fs;
           const P = (u, v) => [tx + ux[0] * u + uy[0] * v, ty + ux[1] * u + uy[1] * v];
           poly([P(lo, dn), P(hi, dn), P(hi, up), P(lo, up)]);
         }
-        for (const an of annots) {
+        for (const an of boxes) {
           const [ax0, ay0, ax1, ay1] = an.rect;
           poly([[ax0, ay0], [ax1, ay0], [ax1, ay1], [ax0, ay1]]);
         }
@@ -207,22 +243,23 @@ export default function Page() {
         if (rotation) newPage.setRotation(degrees(rotation));
       }
 
-      if (totalMatches === 0) {
-        // no file is made: nothing would be removed (P33: the terms are named back, as the market's tools do)
-        const asked = [terms.length ? quoteTerms(terms) : '', ...kinds.map((k) => PATTERNS[k].label.toLowerCase())].filter(Boolean).join(', ');
-        setError(`No match found for ${asked} in this PDF's text (${pdf.numPages} page${pdf.numPages > 1 ? 's' : ''} searched). Text that is part of a picture (a scan) cannot be found: run PDF OCR first.`);
+      setProgress('Saving the redacted PDF...');
+      const pdfBytes = await step(outDoc.save(), 'Saving the redacted PDF');
+      // P33: the finished file is read again; a file in which a term can still be found is not handed over
+      setProgress('Checking the redacted PDF...');
+      const check = await step(verifyRedacted(pdfBytes, { terms, textMatches, annotMatches: (t) => annotationMatches(t, terms, kinds), annotText: annotationText, pdfjsLib, lib, pageCount: pdf.numPages }), 'Checking the redacted PDF');
+      if (!check.ok) {
+        setError(`This PDF could not be redacted safely: after blacking out, ${check.reason}. No file is given. Please tell us about it through the contact page (without the file), or redact it in a desktop tool.${sentToServer ? ' Your PDF was sent to our own PDF service for this attempt, then deleted.' : ''}`);
         setLoading(false);
         setProgress('');
         return;
       }
-
-      setProgress('Saving the redacted PDF...');
-      const pdfBytes = await step(outDoc.save(), 'Saving the redacted PDF');
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setResult(URL.createObjectURL(blob));
       const byServer = drawnByServer.length ? ` This device could not draw ${drawnByServer.length > 1 ? 'pages' : 'page'} ${listPages(drawnByServer)}, so our own PDF service drew ${drawnByServer.length > 1 ? 'them' : 'it'} before the blacking out: your PDF was sent there, then deleted.` : '';
+      const dropped = removed.annotations + removed.links ? ` On the other pages, ${[removed.annotations ? `${removed.annotations} stamp${removed.annotations > 1 ? 's' : ''} or attachment${removed.annotations > 1 ? 's' : ''} (content this tool cannot check)` : '', removed.links ? `${removed.links} link${removed.links > 1 ? 's' : ''} to a redacted page or running a script` : ''].filter(Boolean).join(' and ')} ${removed.annotations + removed.links > 1 ? 'were' : 'was'} removed.` : '';
       const detail = perPage.map(([pg, n]) => `page ${pg}: ${n}`).join(', ');
-      setSummary(`Blacked out ${totalMatches} occurrence${totalMatches > 1 ? 's' : ''} (${detail}). ${pagesHit.length > 1 ? 'These pages are' : 'This page is'} now a flattened image: the blacked-out text no longer exists in the file. Check the result before sharing it: text drawn as an image (a scan) cannot be found.${byServer}`);
+      setSummary(`Blacked out ${totalMatches} occurrence${totalMatches > 1 ? 's' : ''} (${detail}). ${pagesHit.length > 1 ? 'These pages are' : 'This page is'} now a flattened image, and the finished file was checked: the blacked-out text no longer exists in it.${dropped} Check the result before sharing it: text drawn as an image (a scan) cannot be found.${byServer}`);
       } finally {
         if (renderer) renderer.close();
       }
@@ -276,7 +313,9 @@ export default function Page() {
         ]}
         faqs={[
           { q: "Is PDF Redact free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does this tool truly remove sensitive text from the PDF, or just cover it up?", a: "It truly removes it. Any page with a match is rendered to a flattened image with the matched text blacked out in the pixels, and that image replaces the page's content — the underlying text is gone, not just hidden, so it can't be recovered by selecting or extracting text from that page." },
+          { q: "Does this tool truly remove sensitive text from the PDF, or just cover it up?", a: "It truly removes it. Any page with a match is rendered to a flattened image with the matched text blacked out in the pixels, and that image replaces the page's content — the underlying text is gone, not just hidden, so it can't be recovered by selecting or extracting text from that page. The pages without a match are copied without anything that could still lead to a redacted page (links to it, shared resources, form-field links), and the finished file is read again before it is given to you: if a term could still be found in it, no file is given." },
+          { q: "What changes on the pages without a match?", a: "Their text, images and links stay as they are. Removed from them: stamps, file attachments and media (this tool cannot check what they contain), links that jump to a redacted page or run a script, and private application data. The summary says how many were removed." },
+          { q: "Does the search ignore accents and hyphens?", a: "Yes. Searching for Muller also finds Müller, and a word split by a hyphen at the end of a line is found too; a little more may be blacked out than you typed, never less." },
           { q: "Does this affect other text on the same page that I didn't ask to redact?", a: "Yes — a matched page is flattened entirely, so all text on that page becomes a static image and loses selectability and searchability, not just the redacted word. Pages with no match are left as original, fully searchable text." },
           { q: "Can I visually select an area to redact, or preview matches first?", a: "No — there's no click-to-select or highlighting interface. You list words or phrases and tick automatic patterns; every page containing a match is processed automatically, and the tool lists the pages it changed so you can check them." },
           { q: "What do the automatic patterns find?", a: "E-mail addresses; phone numbers of 9 to 15 digits written with spaces, dots, dashes, brackets or a +country code (dates like 2026-10-02 are left alone); card numbers of 13 to 19 digits that pass the Luhn check every real card number passes. A number of another kind with as many digits can be covered too: check the listed pages." },
