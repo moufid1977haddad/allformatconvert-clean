@@ -221,6 +221,10 @@ export default function Page() {
             else {
               x0 = W * pre / all; x1 = W * upto / all;
               if (!real) extra = 0.04 * x0 + 0.04 * (x1 - x0);
+              // a match that reaches the start or the end of the run is covered to that edge (second review: the
+              // last letter of "Müller", drawn after a separate accent glyph, stayed visible)
+              if (sp.c0 === 0) x0 = 0;
+              if (sp.c1 >= it.str.length) x1 = W;
             }
           }
           const pad = 0.15 * fs + extra;

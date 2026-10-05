@@ -23,7 +23,6 @@
 
 // annotation kinds whose content PDF Redact cannot read: removed from the copied pages, blacked out on redacted ones
 export const UNREADABLE_ANNOTATIONS = new Set(['Stamp', 'FileAttachment', 'Sound', 'Movie', 'Screen', 'RichMedia', '3D', 'Watermark', 'PrinterMark', 'TrapNet', 'Redact', 'Projection']);
-const PAGE_PRIVATE = ['PieceInfo', 'AA', 'Metadata', 'Thumb', 'B', 'SeparationInfo', 'PresSteps'];
 const MAX_DEPTH = 8;
 
 function bytesOf(lib, stream) {
@@ -35,12 +34,26 @@ function bytesOf(lib, stream) {
 }
 const latin1 = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return s; };
 
-// names an operator list uses: /Name Do (XObjects), /Name scn|SCN (patterns), /Name sh (shadings)
+// Names an operator list uses, per resource category (P33, second review: EVERY category is kept by what the content
+// names — an ExtGState's soft mask or a /Properties ActualText used only by the redacted page came back otherwise).
+// Escapes (#xx) are decoded: "/Im#31 Do" uses "Im1" (pdf-lib gives the resource keys decoded).
+const NAME = String.raw`/([^\s/[\]<>(){}%]+)`;
+const OPS = [
+  ['XObject', new RegExp(`${NAME}\\s+Do\\b`, 'g')],
+  ['Pattern', new RegExp(`${NAME}\\s+(?:scn|SCN)\\b`, 'g')],
+  ['Shading', new RegExp(`${NAME}\\s+sh\\b`, 'g')],
+  ['ExtGState', new RegExp(`${NAME}\\s+gs\\b`, 'g')],
+  ['ColorSpace', new RegExp(`${NAME}\\s+(?:cs|CS)\\b`, 'g')],
+  ['Font', new RegExp(`${NAME}\\s+[-+\\d.]+\\s+Tf\\b`, 'g')],
+  ['Properties', new RegExp(`/[^\\s/[\\]<>(){}%]+\\s+${NAME}\\s+(?:BDC|DP)\\b`, 'g')],
+];
+const unescapeName = (n) => n.replace(/#([0-9A-Fa-f]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
 function usedNames(text) {
-  const out = { xo: new Set(), pat: new Set() };
   if (text == null) return null;
-  for (const m of text.matchAll(/\/([^\s/[\]<>(){}%]+)\s+Do\b/g)) out.xo.add('/' + m[1]);
-  for (const m of text.matchAll(/\/([^\s/[\]<>(){}%]+)\s+(?:scn|SCN)\b/g)) out.pat.add('/' + m[1]);
+  const out = {};
+  for (const [cat, re] of OPS) { out[cat] = new Set(); for (const m of text.matchAll(re)) out[cat].add(unescapeName(m[1])); }
+  // a colour space can also be named by a pattern or an image; images and patterns are kept by name above, their own
+  // colour spaces travel inside them
   return out;
 }
 
@@ -56,38 +69,50 @@ function contentText(lib, ctx, contents) {
   return b == null ? null : latin1(b);
 }
 
-// a NEW /Resources dictionary holding only what `text` uses (forms and tiling patterns pruned the same way, recursively)
+// a NEW /Resources dictionary holding only what `text` names, category by category (allow-list: an unknown category
+// is dropped); forms, tiling patterns and soft-mask groups pruned the same way by their own content, recursively
 function prunedResources(lib, ctx, res, text, depth, seen) {
   const { PDFName, PDFDict } = lib;
   const used = usedNames(text);
   if (!res) return ctx.obj({});
   if (!used) return res; // the content could not be decoded: kept as it is (verifyRedacted still checks the file)
   const out = ctx.obj({});
+  const pruneStream = (ref) => {
+    const target = ctx.lookup(ref);
+    const id = ref && ref.toString();
+    if (!target || !target.dict || depth >= MAX_DEPTH || seen.has(id)) return;
+    seen.add(id);
+    const own = target.dict.lookupMaybe(PDFName.of('Resources'), PDFDict);
+    if (!own) return;
+    const b = bytesOf(lib, target);
+    target.dict.set(PDFName.of('Resources'), ctx.register(prunedResources(lib, ctx, own, b == null ? null : latin1(b), depth + 1, seen)));
+  };
   for (const [k, v] of res.entries()) {
     const key = k.decodeText();
-    if (key !== 'XObject' && key !== 'Pattern') { out.set(k, v); continue; }
+    if (key === 'ProcSet') { out.set(k, v); continue; }
+    if (!used[key]) continue;
     const sub = res.lookupMaybe(k, PDFDict);
     if (!sub) continue;
     const kept = ctx.obj({});
     for (const [name, ref] of sub.entries()) {
-      if (!(key === 'XObject' ? used.xo : used.pat).has(name.asString())) continue;
+      if (!used[key].has(name.decodeText())) continue;
       kept.set(name, ref);
-      const target = ctx.lookup(ref);
-      const id = ref.toString();
-      if (target && target.dict && depth < MAX_DEPTH && !seen.has(id)) {
-        seen.add(id);
-        const isForm = key === 'XObject' ? target.dict.get(PDFName.of('Subtype'))?.decodeText?.() === 'Form' : true;
-        const own = target.dict.lookupMaybe(PDFName.of('Resources'), PDFDict);
-        if (isForm && own) {
-          const b = bytesOf(lib, target);
-          target.dict.set(PDFName.of('Resources'), ctx.register(prunedResources(lib, ctx, own, b == null ? null : latin1(b), depth + 1, seen)));
-        }
+      if (key === 'XObject' || key === 'Pattern') pruneStream(ref);
+      if (key === 'ExtGState') {
+        const gs = ctx.lookupMaybe(ref, PDFDict);
+        const mask = gs && gs.lookupMaybe(PDFName.of('SMask'), PDFDict);
+        if (mask && mask.get(PDFName.of('G'))) pruneStream(mask.get(PDFName.of('G')));
       }
     }
     out.set(k, kept);
   }
   return out;
 }
+
+// keys an annotation kept on a copied page may carry (second review: /DV, /NM… held the term)
+const ANNOT_KEYS = new Set(['Type', 'Subtype', 'Rect', 'AP', 'AS', 'F', 'Border', 'BS', 'C', 'IC', 'CA', 'Contents', 'QuadPoints', 'A', 'Dest', 'H', 'FT', 'T', 'TU', 'V', 'Ff', 'DA', 'Q', 'MK', 'Opt', 'MaxLen', 'Name', 'Open', 'Popup', 'L', 'LE', 'Vertices', 'InkList', 'BE', 'RD']);
+// keys a copied page may carry
+const PAGE_KEYS = new Set(['Type', 'Parent', 'MediaBox', 'CropBox', 'BleedBox', 'TrimBox', 'ArtBox', 'Rotate', 'Contents', 'Resources', 'Annots', 'Group', 'UserUnit', 'Tabs']);
 
 const destPage = (lib, ctx, d) => {
   const arr = d instanceof lib.PDFRef ? ctx.lookup(d) : d;
@@ -120,7 +145,9 @@ export function sanitizeForCopy(doc, hit, lib) {
   pages.forEach((page, i) => {
     if (hitSet.has(i)) return;
     const node = page.node;
-    for (const k of PAGE_PRIVATE) node.delete(N(k));
+    // inherited attributes made explicit first (MediaBox, CropBox, Rotate, Resources may live on /Pages)
+    for (const k of ['MediaBox', 'CropBox', 'Rotate']) { const v = node.getInheritableAttribute(N(k)); if (v && !node.get(N(k))) node.set(N(k), v); }
+    for (const k of node.keys()) if (!PAGE_KEYS.has(k.decodeText())) node.delete(k);
     // 2. resources: only what this page's content uses (a fresh dictionary: a shared one is never edited in place)
     const text = contentText(lib, ctx, node.get(N('Contents')));
     node.set(N('Resources'), ctx.register(prunedResources(lib, ctx, node.Resources(), text, 0, seen)));
@@ -134,7 +161,10 @@ export function sanitizeForCopy(doc, hit, lib) {
       if (!d) continue;
       const sub = d.get(N('Subtype'))?.decodeText?.() || '';
       if (UNREADABLE_ANNOTATIONS.has(sub)) { removed.annotations++; continue; }
-      for (const k of ['AA', 'P', 'IRT', 'Parent']) d.delete(N(k));
+      for (const k of d.keys()) if (!ANNOT_KEYS.has(k.decodeText())) d.delete(k);
+      // an appearance this tool cannot read is drawn by viewers from the annotation's own properties instead (second
+      // review: a Square whose /AP drew the term); form fields and links keep theirs (their text is searched)
+      if (sub !== 'Widget' && sub !== 'Link') d.delete(N('AP'));
       const act = d.lookupMaybe(N('A'), PDFDict);
       if (act) {
         const s = act.get(N('S'))?.decodeText?.() || '';
@@ -152,7 +182,39 @@ export function sanitizeForCopy(doc, hit, lib) {
   return removed;
 }
 
-const norm = (s) => s.normalize('NFKD').replace(/[\p{M}¨´ˆ-˝`¯¸]/gu, '').toLowerCase().replace(/\s+/g, '').replace(/[-­‐-―−]/g, '');
+// the strings written in a content stream: (literal) with its escapes, and <hex> (read as bytes and as UTF-16BE)
+function stringOperands(t) {
+  const out = [];
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (c === '%') { while (i < t.length && t[i] !== '\n' && t[i] !== '\r') i++; continue; }
+    if (c === '(') {
+      let depth = 1, s = '';
+      for (i++; i < t.length && depth; i++) {
+        const d = t[i];
+        if (d === '\\') { const e = t[++i]; if (/[0-7]/.test(e)) { let v = e; while (v.length < 3 && /[0-7]/.test(t[i + 1])) v += t[++i]; s += String.fromCharCode(parseInt(v, 8) & 255); } else s += ({ n: '\n', r: '\r', t: '\t', b: '\b', f: '\f' })[e] ?? e; }
+        else if (d === '(') { depth++; s += d; } else if (d === ')') { depth--; if (depth) s += d; } else s += d;
+      }
+      i--;
+      out.push(s);
+      if (s.length >= 2 && s.charCodeAt(0) === 0xfe && s.charCodeAt(1) === 0xff) out.push(Array.from({ length: (s.length - 2) >> 1 }, (_, k) => String.fromCharCode((s.charCodeAt(2 + 2 * k) << 8) | s.charCodeAt(3 + 2 * k))).join(''));
+      continue;
+    }
+    if (c === '<' && t[i + 1] !== '<') {
+      const j = t.indexOf('>', i);
+      if (j < 0) break;
+      const h = t.slice(i + 1, j).replace(/\s+/g, '');
+      if (/^[0-9a-fA-F]*$/.test(h)) {
+        const bytes = h.match(/../g) || [];
+        out.push(bytes.map((x) => String.fromCharCode(parseInt(x, 16))).join(''));
+        out.push(Array.from({ length: bytes.length >> 1 }, (_, k) => String.fromCharCode(parseInt(bytes[2 * k] + bytes[2 * k + 1], 16))).join(''));
+      }
+      i = j;
+    } else if (c === '<') i++;
+  }
+  return out;
+}
+
 
 /**
  * Reads the finished file again. terms: the visitor's terms; textMatches(strs, eols) / annotMatches(text): the page's
@@ -174,31 +236,45 @@ export async function verifyRedacted(bytes, { terms, textMatches, annotMatches, 
   } finally {
     doc.destroy();
   }
-  // b. the objects themselves: every decodable stream that is not a picture or a font, as bytes; the page objects
-  const { PDFName, PDFDict, PDFRawStream } = lib;
+  // b. the objects themselves (second review): every string of every dictionary and array, and the string operands of
+  // every content-like stream (never names or operators, never a CMap or a font program: "/Registry (Adobe)" of any
+  // embedded font refused a search for "Adobe"); the document information dictionary (Producer: pdf-lib) is skipped
+  const { PDFName, PDFDict, PDFArray, PDFRawStream, PDFString, PDFHexString } = lib;
   const out = await lib.PDFDocument.load(bytes, { updateMetadata: false });
   const inTree = new Set(out.getPages().map((p) => p.ref.toString()));
-  const needles = terms.filter((t) => norm(t).length >= 4).map((t) => {
-    const low = t.toLowerCase();
-    return [low, Array.from(new TextEncoder().encode(low), (b) => b.toString(16).padStart(2, '0')).join(''), Array.from(low, (c) => c.charCodeAt(0).toString(16).padStart(4, '0')).join('')];
-  });
+  const info = out.context.trailerInfo.Info ? out.context.trailerInfo.Info.toString() : null;
+  const SKIP_KEYS = new Set(['Registry', 'Ordering', 'BaseFont', 'FontName', 'FontFamily', 'Producer', 'Creator']);
+  // a PDF date (D:2026…) is not a phone number
+  const strHit = (str) => !!str && !/^D:\d{4}/.test(str) && annotMatches(str);
+  const walk = (o, depth) => {
+    if (!o || depth > 12) return false;
+    if (o instanceof PDFString || o instanceof PDFHexString) { try { return strHit(o.decodeText()); } catch { return false; } }
+    if (o instanceof PDFArray) { for (let i = 0; i < o.size(); i++) if (walk(o.get(i), depth + 1)) return true; return false; }
+    if (o instanceof PDFDict) {
+      const t = o.get(PDFName.of('Type'))?.decodeText?.();
+      if (t === 'Font' || t === 'FontDescriptor') return false;
+      for (const [k, v] of o.entries()) if (!SKIP_KEYS.has(k.decodeText()) && walk(v, depth + 1)) return true;
+    }
+    return false;
+  };
   for (const [ref, obj] of out.context.enumerateIndirectObjects()) {
+    if (ref.toString() === info) continue;
     const dict = obj instanceof PDFDict ? obj : obj && obj.dict;
-    if (!dict) continue;
+    if (!dict) { if (walk(obj, 0)) return { ok: false, reason: 'a term is still in the file\'s data' }; continue; }
     const type = dict.get(PDFName.of('Type'))?.decodeText?.();
     if (type === 'Page' && !inTree.has(ref.toString())) {
       const empty = !dict.get(PDFName.of('Annots')) && !(dict.lookupMaybe(PDFName.of('Resources'), PDFDict)?.keys().length);
       if (!empty) return { ok: false, reason: 'a copy of a page is left outside the document' };
     }
-    if (!(obj instanceof PDFRawStream) || !needles.length) continue;
+    if (walk(dict, 0)) return { ok: false, reason: 'a term is still in the file\'s data' };
+    if (!(obj instanceof PDFRawStream)) continue;
     const sub = dict.get(PDFName.of('Subtype'))?.decodeText?.();
-    if (sub === 'Image' || dict.get(PDFName.of('Length1')) || dict.get(PDFName.of('Length2')) || sub === 'Type1C' || sub === 'CIDFontType0C' || sub === 'OpenType' || dict.get(PDFName.of('N'))) continue;
+    if (sub === 'Image' || type === 'CMap' || type === 'Metadata' || dict.get(PDFName.of('Length1')) || dict.get(PDFName.of('Length2')) || sub === 'Type1C' || sub === 'CIDFontType0C' || sub === 'OpenType' || dict.get(PDFName.of('N'))) continue;
     const b = bytesOf(lib, obj);
     if (!b) continue;
-    const s = latin1(b).toLowerCase();
-    // hex strings only (<…>, not dictionaries): the digits of numbers elsewhere must not be read as hex text
-    const hex = Array.from(s.matchAll(/<([0-9a-f\s]+)>/g), (m) => m[1].replace(/\s+/g, '')).join('|');
-    if (needles.some(([low, h8, h16]) => s.includes(low) || hex.includes(h8) || hex.includes(h16))) return { ok: false, reason: 'a term is still in the file\'s data' };
+    const text = latin1(b);
+    if (/begincmap/.test(text.slice(0, 4000))) continue;
+    for (const str of stringOperands(text)) if (strHit(str)) return { ok: false, reason: 'a term is still in the file\'s data' };
   }
   return { ok: true };
 }
