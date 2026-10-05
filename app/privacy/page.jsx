@@ -37,7 +37,7 @@ export default function PrivacyPage() {
 
           <div className={card}>
             <h2 className={h2}>{num()}. Introduction</h2>
-            <p className={p}>OnlineConverTools ("we", "us", or "our") operates the website www.onlineconvertools.com. This policy explains what information we collect, what each tool does with your files, which services we rely on, and your rights. The short version: <strong>most tools never send your file anywhere</strong> — it is processed by your own browser, on your device. The tools that need a server are listed by name below.</p>
+            <p className={p}>OnlineConverTools ("we", "us", or "our") operates the website www.onlineconvertools.com. This policy explains what information we collect, what each tool does with your files, which services we rely on, and your rights. The short version: <strong>most tools never send your file anywhere</strong> — it is processed by your own browser, on your device. The tools that need a server are listed by name below. OnlineConverTools is run by its founder, Moufid Haddad, in Québec, Canada, who is responsible for this site and for the protection of your personal information (see "Contact us" below).</p>
           </div>
 
           <div className={card}>
@@ -81,7 +81,9 @@ export default function PrivacyPage() {
             <ul className={ul}>
               <li><strong>Google Analytics</strong> (<code>_ga</code>, <code>_ga_&lt;id&gt;</code>): visit statistics, up to 2 years — only outside the European Economic Area, the United Kingdom and Switzerland (Section 3).</li>
               <li><strong>Google Translate</strong> (<code>googtrans</code>): set only if you choose a language in the menu, to keep the page translated. Google's translation script is loaded when you open the language menu. While a translation is on, the text shown on the page — including results a tool displays — is sent to Google to be translated; files themselves are never sent.</li>
-              {ads && <li><strong>Advertising</strong> (Google AdSense and its partners): see Section 6. In the European Economic Area, the United Kingdom and Switzerland, advertising cookies are used only if you agree in the consent message.</li>}
+              {ads
+                ? <li><strong>Advertising</strong> (Google AdSense and its partners, for example <code>__gads</code>, <code>__gpi</code> and <code>IDE</code>): see Section 6. In the European Economic Area, the United Kingdom and Switzerland, advertising cookies are used only if you agree in the consent message.</li>
+                : <li><strong>Advertising:</strong> the site shows no ads at present and sets no advertising cookie. If we start showing ads (Google AdSense), this policy will describe them, with their cookies and how to refuse them, before they appear.</li>}
               <li><strong>Local storage in your browser</strong> (never sent to us): your light/dark mode choice, notes and settings you save in some tools, and — if you sign in — your session.</li>
             </ul>
             <p className={`${p} mt-3`}>You can delete cookies and local storage at any time in your browser's settings{ads ? ', and change your advertising choices with the "Privacy choices" link at the bottom of every page' : ''}.</p>
@@ -112,6 +114,8 @@ export default function PrivacyPage() {
                 <li>Third-party vendors, including Google, use cookies to serve ads based on your prior visits to this website or other websites.</li>
                 <li>Google's use of advertising cookies enables it and its partners to serve ads to you based on your visits to this site and/or other sites on the Internet.</li>
                 <li>You may opt out of personalised advertising by visiting <Ext href="https://www.google.com/settings/ads">Google Ads Settings</Ext>, or opt out of some third-party vendors' use of cookies for personalised advertising at <Ext href="https://www.aboutads.info/choices/">www.aboutads.info</Ext>.</li>
+                <li>Third-party vendors and ad networks that may serve ads through Google on this site are listed by Google in its <Ext href="https://support.google.com/adsense/answer/9012903">list of ad technology providers</Ext>; each one's website explains how to opt out of its personalised-ad cookies.</li>
+                <li>Google Analytics stays off in the European Economic Area, the United Kingdom and Switzerland, whatever you answer to the consent message (Section 3).</li>
                 <li>In the European Economic Area, the United Kingdom and Switzerland, a consent message (Google's certified consent platform, IAB Transparency &amp; Consent Framework) asks for your choice before any advertising cookie is used; you can change it at any time with the "Privacy choices" link at the bottom of every page. Without consent, only non-personalised or limited ads are shown.</li>
               </ul>
             </div>

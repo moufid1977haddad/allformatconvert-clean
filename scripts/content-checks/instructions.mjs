@@ -20,7 +20,7 @@ const TOOLS = path.join(ROOT, 'app', 'tools');
 const verbose = process.argv.includes('--verbose');
 
 const parse = (file) => ts.createSourceFile(file, fs.readFileSync(file, 'utf8').replace(/^﻿/, ''), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-const INSTR = new Set(['howTo', 'tips', 'faqs']);
+const INSTR = new Set(['howTo', 'tips', 'faqs', 'specs', 'privacy']); // specs, privacy: P36
 const nameOf = (n) => (n.name && (ts.isIdentifier(n.name) || ts.isStringLiteral(n.name)) ? n.name.text : null);
 
 // All text pieces of a subtree (string literals, template pieces, JSX text).

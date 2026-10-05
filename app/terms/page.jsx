@@ -1,4 +1,6 @@
-﻿export const metadata = {
+import { adsEnabled } from '@/app/lib/ads';
+
+export const metadata = {
   title: { absolute: "OnlineConverTools Terms of Service" },
   description: "The Terms of Service for OnlineConverTools: acceptable use, free file conversion tools, and the rules that govern your use of the service.",
   alternates: { canonical: "https://www.onlineconvertools.com/terms" },
@@ -10,16 +12,17 @@
 };
 
 export default function TermsPage() {
+  const ads = adsEnabled();
   return (
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-2 text-neutral-800">Terms of Service</h1>
-        <p className="text-neutral-500 text-center mb-10">Last updated: September 30, 2026</p>
+        <p className="text-neutral-500 text-center mb-10">Last updated: October 6, 2026</p>
         <div className="space-y-6">
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">1. Acceptance of Terms</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">By accessing and using OnlineConverTools ("Service"), you confirm that you are at least 13 years of age and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our service.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">OnlineConverTools ("Service") is operated by Moufid Haddad, Québec, Canada. By accessing and using the Service, you confirm that you are at least 13 years of age and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our service.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
@@ -52,7 +55,9 @@ export default function TermsPage() {
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">6. Advertising</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">OnlineConverTools may display advertisements provided by Google AdSense to keep the service free. Where the law requires your consent for advertising cookies (for example in the European Economic Area, the United Kingdom and Switzerland), personalised ads are shown only if you give it in the consent message, and you can change your choice at any time; see our <a href="/privacy" className="text-indigo-600 underline hover:no-underline">Privacy Policy</a>.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">{ads
+              ? <>OnlineConverTools displays advertisements provided by Google AdSense to keep the service free. Ads are never placed inside a tool's working area. Where the law requires your consent for advertising cookies (in the European Economic Area, the United Kingdom and Switzerland), personalised ads are shown only if you give it in the consent message, and you can change your choice at any time with the "Privacy choices" link at the bottom of every page; see our <a href="/privacy" className="text-indigo-600 underline hover:no-underline">Privacy Policy</a>.</>
+              : <>OnlineConverTools shows no advertisements at present. If we start showing ads to keep the service free (Google AdSense), these terms and our <a href="/privacy" className="text-indigo-600 underline hover:no-underline">Privacy Policy</a> will be updated first; where the law requires your consent for advertising cookies (in the European Economic Area, the United Kingdom and Switzerland), personalised ads will be shown only if you give it, and you will be able to change your choice at any time.</>}</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">

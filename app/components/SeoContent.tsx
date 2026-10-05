@@ -21,6 +21,14 @@ type SeoContentProps = {
   // pass them render exactly as before.
   example?: { caption: string; inputLabel: string; input: string; outputLabel: string; output: string };
   related?: { href: string; label: string; note?: string }[];
+  // P36 (06/10): optional, so pages not yet rewritten render exactly as before. howToTitle: the steps' heading with the
+  // tool's real task ("How to convert PDF to Word"); specs: formats and limits read in the code (label / value);
+  // privacy: where the file or text is processed and what happens to it, exactly as the code does it.
+  howToTitle?: string;
+  specs?: { label: string; value: string }[];
+  specsTitle?: string;
+  privacy?: string;
+  privacyTitle?: string;
 };
 
 // P35 (lot 3, S3): the tool's structured data — WebApplication (free: offers at 0), BreadcrumbList, and FAQPage only
@@ -55,7 +63,7 @@ function toolJsonLd(tool: ToolInfo, title: string, description: string, faqs?: {
   return JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c');
 }
 
-export default function SeoContent({ title, description, howTo, faqs, tips, example, related }: SeoContentProps) {
+export default function SeoContent({ title, description, howTo, faqs, tips, example, related, howToTitle, specs, specsTitle, privacy, privacyTitle }: SeoContentProps) {
   // P35 (lot 3, S2): the hand-chosen neighbours from the tool's layout (app/components/ToolSeo.tsx); the ten pages of
   // 29/09 keep their own links (with their notes) first, completed from the same list up to 4-6
   const tool = useContext(ToolContext) as ToolInfo | null;
@@ -88,7 +96,7 @@ export default function SeoContent({ title, description, howTo, faqs, tips, exam
       )}
       {howTo && howTo.length > 0 && (
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use {title}</h2>
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">{howToTitle || `How to use ${title}`}</h2>
           <ol className="space-y-2">
             {howTo.map((step, i) => (
               <li key={i} className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400">
@@ -97,6 +105,25 @@ export default function SeoContent({ title, description, howTo, faqs, tips, exam
               </li>
             ))}
           </ol>
+        </div>
+      )}
+      {specs && specs.length > 0 && (
+        <div data-seo-specs className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">{specsTitle || 'Formats and limits'}</h2>
+          <dl className="space-y-3">
+            {specs.map((row, i) => (
+              <div key={i} className="sm:flex sm:gap-4 text-sm">
+                <dt className="font-semibold text-neutral-800 dark:text-white sm:w-40 shrink-0">{row.label}</dt>
+                <dd className="text-neutral-600 dark:text-neutral-400 min-w-0">{row.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
+      {privacy && (
+        <div data-seo-privacy className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">{privacyTitle || 'Where your file is processed'}</h2>
+          <p className="text-neutral-600 dark:text-neutral-400 text-sm leading-relaxed">{privacy}</p>
         </div>
       )}
       {faqs && faqs.length > 0 && (

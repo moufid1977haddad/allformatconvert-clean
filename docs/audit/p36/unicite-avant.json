@@ -1,0 +1,1916 @@
+{
+ "pages": 225,
+ "max": 0.84,
+ "over": [
+  {
+   "a": "/tools/gif-tools/avi-to-gif",
+   "b": "/tools/gif-tools/webm-to-gif",
+   "shared": 21,
+   "ratio": 0.84
+  },
+  {
+   "a": "/tools/gif-tools/avi-to-gif",
+   "b": "/tools/gif-tools/mov-to-gif",
+   "shared": 20,
+   "ratio": 0.833
+  },
+  {
+   "a": "/tools/gif-tools/mov-to-gif",
+   "b": "/tools/gif-tools/webm-to-gif",
+   "shared": 20,
+   "ratio": 0.833
+  },
+  {
+   "a": "/tools/gif-tools/avi-to-gif",
+   "b": "/tools/gif-tools/mp4-to-gif",
+   "shared": 19,
+   "ratio": 0.76
+  },
+  {
+   "a": "/tools/gif-tools/mp4-to-gif",
+   "b": "/tools/gif-tools/webm-to-gif",
+   "shared": 19,
+   "ratio": 0.76
+  },
+  {
+   "a": "/tools/gif-tools/mov-to-gif",
+   "b": "/tools/gif-tools/mp4-to-gif",
+   "shared": 18,
+   "ratio": 0.75
+  },
+  {
+   "a": "/tools/pdf-tools/pdf-to-image",
+   "b": "/tools/pdf-tools/pdf-to-jpg",
+   "shared": 22,
+   "ratio": 0.688
+  },
+  {
+   "a": "/tools/gif-tools/mp4-to-gif",
+   "b": "/tools/gif-tools/video-to-gif",
+   "shared": 15,
+   "ratio": 0.6
+  },
+  {
+   "a": "/tools/gif-tools/avi-to-gif",
+   "b": "/tools/gif-tools/video-to-gif",
+   "shared": 14,
+   "ratio": 0.56
+  },
+  {
+   "a": "/tools/gif-tools/video-to-gif",
+   "b": "/tools/gif-tools/webm-to-gif",
+   "shared": 14,
+   "ratio": 0.56
+  },
+  {
+   "a": "/tools/developer-tools/markdown-editor",
+   "b": "/tools/developer-tools/markdown-previewer",
+   "shared": 10,
+   "ratio": 0.556
+  },
+  {
+   "a": "/tools/gif-tools/mov-to-gif",
+   "b": "/tools/gif-tools/video-to-gif",
+   "shared": 13,
+   "ratio": 0.542
+  },
+  {
+   "a": "/tools/pdf-tools/epub-to-pdf",
+   "b": "/tools/pdf-tools/mobi-to-pdf",
+   "shared": 11,
+   "ratio": 0.478
+  },
+  {
+   "a": "/tools/developer-tools/json-to-csharp",
+   "b": "/tools/developer-tools/json-to-go",
+   "shared": 8,
+   "ratio": 0.471
+  },
+  {
+   "a": "/tools/audio-tools/audio-metadata",
+   "b": "/tools/video-tools/video-metadata",
+   "shared": 10,
+   "ratio": 0.455
+  },
+  {
+   "a": "/tools/pdf-tools/pdf-to-excel",
+   "b": "/tools/pdf-tools/pdf-to-ppt",
+   "shared": 8,
+   "ratio": 0.444
+  },
+  {
+   "a": "/tools/developer-tools/cron-expression",
+   "b": "/tools/developer-tools/cron-expression-builder",
+   "shared": 8,
+   "ratio": 0.421
+  },
+  {
+   "a": "/tools/gif-tools/video-to-gif",
+   "b": "/tools/video-tools/video-to-gif",
+   "shared": 10,
+   "ratio": 0.417
+  },
+  {
+   "a": "/tools/developer-tools/json-to-csharp",
+   "b": "/tools/developer-tools/json-to-python",
+   "shared": 7,
+   "ratio": 0.412
+  },
+  {
+   "a": "/tools/developer-tools/json-to-go",
+   "b": "/tools/developer-tools/json-to-python",
+   "shared": 7,
+   "ratio": 0.389
+  },
+  {
+   "a": "/tools/pdf-tools/image-to-pdf",
+   "b": "/tools/pdf-tools/jpg-to-pdf",
+   "shared": 10,
+   "ratio": 0.37
+  },
+  {
+   "a": "/tools/developer-tools/csv-to-json",
+   "b": "/tools/developer-tools/csv-to-sql",
+   "shared": 13,
+   "ratio": 0.333
+  },
+  {
+   "a": "/tools/developer-tools/json-to-go",
+   "b": "/tools/developer-tools/json-to-rust",
+   "shared": 6,
+   "ratio": 0.333
+  },
+  {
+   "a": "/tools/image-tools/tiff-to-jpg",
+   "b": "/tools/image-tools/tiff-to-png",
+   "shared": 7,
+   "ratio": 0.318
+  },
+  {
+   "a": "/tools/image-tools/gif-to-png",
+   "b": "/tools/image-tools/jpg-to-png",
+   "shared": 6,
+   "ratio": 0.316
+  }
+ ],
+ "top": [
+  {
+   "a": "/tools/gif-tools/avi-to-gif",
+   "b": "/tools/gif-tools/webm-to-gif",
+   "shared": 21,
+   "ratio": 0.84
+  },
+  {
+   "a": "/tools/gif-tools/avi-to-gif",
+   "b": "/tools/gif-tools/mov-to-gif",
+   "shared": 20,
+   "ratio": 0.833
+  },
+  {
+   "a": "/tools/gif-tools/mov-to-gif",
+   "b": "/tools/gif-tools/webm-to-gif",
+   "shared": 20,
+   "ratio": 0.833
+  },
+  {
+   "a": "/tools/gif-tools/avi-to-gif",
+   "b": "/tools/gif-tools/mp4-to-gif",
+   "shared": 19,
+   "ratio": 0.76
+  },
+  {
+   "a": "/tools/gif-tools/mp4-to-gif",
+   "b": "/tools/gif-tools/webm-to-gif",
+   "shared": 19,
+   "ratio": 0.76
+  },
+  {
+   "a": "/tools/gif-tools/mov-to-gif",
+   "b": "/tools/gif-tools/mp4-to-gif",
+   "shared": 18,
+   "ratio": 0.75
+  },
+  {
+   "a": "/tools/pdf-tools/pdf-to-image",
+   "b": "/tools/pdf-tools/pdf-to-jpg",
+   "shared": 22,
+   "ratio": 0.688
+  },
+  {
+   "a": "/tools/gif-tools/mp4-to-gif",
+   "b": "/tools/gif-tools/video-to-gif",
+   "shared": 15,
+   "ratio": 0.6
+  },
+  {
+   "a": "/tools/gif-tools/avi-to-gif",
+   "b": "/tools/gif-tools/video-to-gif",
+   "shared": 14,
+   "ratio": 0.56
+  },
+  {
+   "a": "/tools/gif-tools/video-to-gif",
+   "b": "/tools/gif-tools/webm-to-gif",
+   "shared": 14,
+   "ratio": 0.56
+  },
+  {
+   "a": "/tools/developer-tools/markdown-editor",
+   "b": "/tools/developer-tools/markdown-previewer",
+   "shared": 10,
+   "ratio": 0.556
+  },
+  {
+   "a": "/tools/gif-tools/mov-to-gif",
+   "b": "/tools/gif-tools/video-to-gif",
+   "shared": 13,
+   "ratio": 0.542
+  },
+  {
+   "a": "/tools/pdf-tools/epub-to-pdf",
+   "b": "/tools/pdf-tools/mobi-to-pdf",
+   "shared": 11,
+   "ratio": 0.478
+  },
+  {
+   "a": "/tools/developer-tools/json-to-csharp",
+   "b": "/tools/developer-tools/json-to-go",
+   "shared": 8,
+   "ratio": 0.471
+  },
+  {
+   "a": "/tools/audio-tools/audio-metadata",
+   "b": "/tools/video-tools/video-metadata",
+   "shared": 10,
+   "ratio": 0.455
+  },
+  {
+   "a": "/tools/pdf-tools/pdf-to-excel",
+   "b": "/tools/pdf-tools/pdf-to-ppt",
+   "shared": 8,
+   "ratio": 0.444
+  },
+  {
+   "a": "/tools/developer-tools/cron-expression",
+   "b": "/tools/developer-tools/cron-expression-builder",
+   "shared": 8,
+   "ratio": 0.421
+  },
+  {
+   "a": "/tools/gif-tools/video-to-gif",
+   "b": "/tools/video-tools/video-to-gif",
+   "shared": 10,
+   "ratio": 0.417
+  },
+  {
+   "a": "/tools/developer-tools/json-to-csharp",
+   "b": "/tools/developer-tools/json-to-python",
+   "shared": 7,
+   "ratio": 0.412
+  },
+  {
+   "a": "/tools/developer-tools/json-to-go",
+   "b": "/tools/developer-tools/json-to-python",
+   "shared": 7,
+   "ratio": 0.389
+  },
+  {
+   "a": "/tools/pdf-tools/image-to-pdf",
+   "b": "/tools/pdf-tools/jpg-to-pdf",
+   "shared": 10,
+   "ratio": 0.37
+  },
+  {
+   "a": "/tools/developer-tools/csv-to-json",
+   "b": "/tools/developer-tools/csv-to-sql",
+   "shared": 13,
+   "ratio": 0.333
+  },
+  {
+   "a": "/tools/developer-tools/json-to-go",
+   "b": "/tools/developer-tools/json-to-rust",
+   "shared": 6,
+   "ratio": 0.333
+  },
+  {
+   "a": "/tools/image-tools/tiff-to-jpg",
+   "b": "/tools/image-tools/tiff-to-png",
+   "shared": 7,
+   "ratio": 0.318
+  },
+  {
+   "a": "/tools/image-tools/gif-to-png",
+   "b": "/tools/image-tools/jpg-to-png",
+   "shared": 6,
+   "ratio": 0.316
+  },
+  {
+   "a": "/tools/developer-tools/css-formatter",
+   "b": "/tools/developer-tools/javascript-formatter",
+   "shared": 5,
+   "ratio": 0.294
+  },
+  {
+   "a": "/tools/developer-tools/json-to-csharp",
+   "b": "/tools/developer-tools/json-to-rust",
+   "shared": 5,
+   "ratio": 0.294
+  },
+  {
+   "a": "/tools/developer-tools/json-to-csharp",
+   "b": "/tools/developer-tools/json-to-typescript",
+   "shared": 5,
+   "ratio": 0.294
+  },
+  {
+   "a": "/tools/developer-tools/json-to-go",
+   "b": "/tools/developer-tools/json-to-typescript",
+   "shared": 5,
+   "ratio": 0.278
+  },
+  {
+   "a": "/tools/developer-tools/json-to-xml",
+   "b": "/tools/developer-tools/json-to-yaml",
+   "shared": 5,
+   "ratio": 0.278
+  },
+  {
+   "a": "/tools/image-tools/jpg-to-png",
+   "b": "/tools/image-tools/jpg-to-webp",
+   "shared": 5,
+   "ratio": 0.278
+  },
+  {
+   "a": "/tools/image-tools/jpg-to-webp",
+   "b": "/tools/image-tools/png-to-webp",
+   "shared": 5,
+   "ratio": 0.278
+  },
+  {
+   "a": "/tools/developer-tools/csv-to-excel",
+   "b": "/tools/developer-tools/csv-to-json",
+   "shared": 9,
+   "ratio": 0.273
+  },
+  {
+   "a": "/tools/developer-tools/csv-to-excel",
+   "b": "/tools/developer-tools/csv-to-sql",
+   "shared": 9,
+   "ratio": 0.273
+  },
+  {
+   "a": "/tools/developer-tools/css-formatter",
+   "b": "/tools/developer-tools/markdown-to-html",
+   "shared": 4,
+   "ratio": 0.267
+  },
+  {
+   "a": "/tools/developer-tools/html-formatter",
+   "b": "/tools/developer-tools/markdown-to-html",
+   "shared": 4,
+   "ratio": 0.267
+  },
+  {
+   "a": "/tools/developer-tools/javascript-formatter",
+   "b": "/tools/developer-tools/markdown-to-html",
+   "shared": 4,
+   "ratio": 0.267
+  },
+  {
+   "a": "/tools/developer-tools/markdown-to-html",
+   "b": "/tools/developer-tools/typescript-to-js",
+   "shared": 4,
+   "ratio": 0.267
+  },
+  {
+   "a": "/tools/developer-tools/json-to-python",
+   "b": "/tools/developer-tools/json-to-rust",
+   "shared": 5,
+   "ratio": 0.263
+  },
+  {
+   "a": "/tools/developer-tools/json-to-python",
+   "b": "/tools/developer-tools/json-to-typescript",
+   "shared": 5,
+   "ratio": 0.263
+  },
+  {
+   "a": "/tools/developer-tools/json-to-rust",
+   "b": "/tools/developer-tools/json-to-typescript",
+   "shared": 5,
+   "ratio": 0.263
+  },
+  {
+   "a": "/tools/image-tools/add-border-to-image",
+   "b": "/tools/image-tools/add-vignette",
+   "shared": 5,
+   "ratio": 0.263
+  },
+  {
+   "a": "/tools/image-tools/add-noise",
+   "b": "/tools/image-tools/image-pixelator",
+   "shared": 5,
+   "ratio": 0.263
+  },
+  {
+   "a": "/tools/image-tools/add-vignette",
+   "b": "/tools/image-tools/image-inverter",
+   "shared": 5,
+   "ratio": 0.263
+  },
+  {
+   "a": "/tools/image-tools/brightness-contrast",
+   "b": "/tools/image-tools/image-pixelator",
+   "shared": 5,
+   "ratio": 0.263
+  },
+  {
+   "a": "/tools/image-tools/grayscale-converter",
+   "b": "/tools/image-tools/image-inverter",
+   "shared": 5,
+   "ratio": 0.263
+  },
+  {
+   "a": "/tools/image-tools/ico-to-png",
+   "b": "/tools/image-tools/jpg-to-png",
+   "shared": 5,
+   "ratio": 0.263
+  },
+  {
+   "a": "/tools/developer-tools/css-formatter",
+   "b": "/tools/developer-tools/html-formatter",
+   "shared": 4,
+   "ratio": 0.25
+  },
+  {
+   "a": "/tools/developer-tools/html-formatter",
+   "b": "/tools/developer-tools/javascript-formatter",
+   "shared": 4,
+   "ratio": 0.25
+  },
+  {
+   "a": "/tools/developer-tools/html-formatter",
+   "b": "/tools/developer-tools/typescript-to-js",
+   "shared": 4,
+   "ratio": 0.25
+  },
+  {
+   "a": "/tools/text-tools/duplicate-remover",
+   "b": "/tools/text-tools/text-truncator",
+   "shared": 4,
+   "ratio": 0.25
+  },
+  {
+   "a": "/tools/text-tools/text-encryptor",
+   "b": "/tools/text-tools/text-truncator",
+   "shared": 4,
+   "ratio": 0.25
+  },
+  {
+   "a": "/tools/developer-tools/css-formatter",
+   "b": "/tools/developer-tools/typescript-to-js",
+   "shared": 4,
+   "ratio": 0.235
+  },
+  {
+   "a": "/tools/developer-tools/html-encoder",
+   "b": "/tools/developer-tools/html-entity-decoder",
+   "shared": 4,
+   "ratio": 0.235
+  },
+  {
+   "a": "/tools/developer-tools/javascript-formatter",
+   "b": "/tools/developer-tools/js-minifier",
+   "shared": 4,
+   "ratio": 0.235
+  },
+  {
+   "a": "/tools/developer-tools/javascript-formatter",
+   "b": "/tools/developer-tools/typescript-to-js",
+   "shared": 4,
+   "ratio": 0.235
+  },
+  {
+   "a": "/tools/image-tools/tiff-to-jpg",
+   "b": "/tools/image-tools/webp-to-jpg",
+   "shared": 4,
+   "ratio": 0.235
+  },
+  {
+   "a": "/tools/image-tools/webp-to-jpg",
+   "b": "/tools/image-tools/webp-to-png",
+   "shared": 4,
+   "ratio": 0.235
+  },
+  {
+   "a": "/tools/audio-tools/audio-booster",
+   "b": "/tools/audio-tools/audio-compressor",
+   "shared": 5,
+   "ratio": 0.227
+  },
+  {
+   "a": "/tools/image-tools/bmp-to-png",
+   "b": "/tools/image-tools/gif-to-png",
+   "shared": 4,
+   "ratio": 0.222
+  },
+  {
+   "a": "/tools/image-tools/bmp-to-png",
+   "b": "/tools/image-tools/ico-to-png",
+   "shared": 4,
+   "ratio": 0.222
+  },
+  {
+   "a": "/tools/image-tools/bmp-to-png",
+   "b": "/tools/image-tools/jpg-to-png",
+   "shared": 4,
+   "ratio": 0.222
+  },
+  {
+   "a": "/tools/image-tools/heic-to-jpg",
+   "b": "/tools/image-tools/tiff-to-jpg",
+   "shared": 4,
+   "ratio": 0.222
+  },
+  {
+   "a": "/tools/image-tools/jpg-to-png",
+   "b": "/tools/image-tools/webp-to-png",
+   "shared": 4,
+   "ratio": 0.222
+  },
+  {
+   "a": "/tools/audio-tools/audio-compressor",
+   "b": "/tools/audio-tools/audio-splitter",
+   "shared": 5,
+   "ratio": 0.217
+  },
+  {
+   "a": "/tools/gif-tools/gif-maker",
+   "b": "/tools/gif-tools/image-to-gif",
+   "shared": 5,
+   "ratio": 0.217
+  },
+  {
+   "a": "/tools/developer-tools/xml-to-json",
+   "b": "/tools/developer-tools/yaml-to-json",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/add-border-to-image",
+   "b": "/tools/image-tools/image-inverter",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/add-noise",
+   "b": "/tools/image-tools/image-inverter",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/add-noise",
+   "b": "/tools/image-tools/sepia-filter",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/add-text-to-image",
+   "b": "/tools/image-tools/sepia-filter",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/add-vignette",
+   "b": "/tools/image-tools/grayscale-converter",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/add-vignette",
+   "b": "/tools/image-tools/round-corners",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/brightness-contrast",
+   "b": "/tools/image-tools/image-blur",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/brightness-contrast",
+   "b": "/tools/image-tools/image-inverter",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/brightness-contrast",
+   "b": "/tools/image-tools/sepia-filter",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/gif-to-png",
+   "b": "/tools/image-tools/ico-to-png",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/image-blur",
+   "b": "/tools/image-tools/image-cropper",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/image-blur",
+   "b": "/tools/image-tools/image-flip",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/image-blur",
+   "b": "/tools/image-tools/image-pixelator",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/image-cropper",
+   "b": "/tools/image-tools/image-pixelator",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/image-flip",
+   "b": "/tools/image-tools/image-pixelator",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/image-inverter",
+   "b": "/tools/image-tools/image-pixelator",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/image-inverter",
+   "b": "/tools/image-tools/round-corners",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/image-inverter",
+   "b": "/tools/image-tools/sepia-filter",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/image-tools/image-pixelator",
+   "b": "/tools/image-tools/sepia-filter",
+   "shared": 4,
+   "ratio": 0.211
+  },
+  {
+   "a": "/tools/developer-tools/excel-to-csv",
+   "b": "/tools/developer-tools/excel-to-json",
+   "shared": 5,
+   "ratio": 0.2
+  },
+  {
+   "a": "/tools/developer-tools/js-minifier",
+   "b": "/tools/developer-tools/markdown-to-html",
+   "shared": 3,
+   "ratio": 0.2
+  },
+  {
+   "a": "/tools/developer-tools/json-to-php",
+   "b": "/tools/developer-tools/json-to-python",
+   "shared": 4,
+   "ratio": 0.2
+  },
+  {
+   "a": "/tools/developer-tools/markdown-to-html",
+   "b": "/tools/developer-tools/scss-to-css",
+   "shared": 3,
+   "ratio": 0.2
+  },
+  {
+   "a": "/tools/developer-tools/markdown-to-html",
+   "b": "/tools/developer-tools/sql-formatter",
+   "shared": 3,
+   "ratio": 0.2
+  },
+  {
+   "a": "/tools/image-tools/add-noise",
+   "b": "/tools/image-tools/brightness-contrast",
+   "shared": 4,
+   "ratio": 0.2
+  },
+  {
+   "a": "/tools/image-tools/brightness-contrast",
+   "b": "/tools/image-tools/image-cropper",
+   "shared": 4,
+   "ratio": 0.2
+  },
+  {
+   "a": "/tools/image-tools/brightness-contrast",
+   "b": "/tools/image-tools/image-flip",
+   "shared": 4,
+   "ratio": 0.2
+  },
+  {
+   "a": "/tools/image-tools/image-cropper",
+   "b": "/tools/image-tools/image-flip",
+   "shared": 4,
+   "ratio": 0.2
+  },
+  {
+   "a": "/tools/text-tools/ascii-art",
+   "b": "/tools/text-tools/lorem-ipsum",
+   "shared": 3,
+   "ratio": 0.2
+  },
+  {
+   "a": "/tools/text-tools/character-counter",
+   "b": "/tools/text-tools/lorem-ipsum",
+   "shared": 3,
+   "ratio": 0.2
+  },
+  {
+   "a": "/tools/text-tools/duplicate-remover",
+   "b": "/tools/text-tools/lorem-ipsum",
+   "shared": 3,
+   "ratio": 0.2
+  },
+  {
+   "a": "/tools/text-tools/duplicate-remover",
+   "b": "/tools/text-tools/text-encryptor",
+   "shared": 4,
+   "ratio": 0.2
+  },
+  {
+   "a": "/tools/text-tools/lorem-ipsum",
+   "b": "/tools/text-tools/text-comparator",
+   "shared": 3,
+   "ratio": 0.2
+  }
+ ],
+ "repeated": [
+  {
+   "s": "yes, it's completely free with no signup required",
+   "pages": [
+    "/tools/audio-tools/audio-booster",
+    "/tools/audio-tools/audio-trimmer",
+    "/tools/converter-tools/currency-converter",
+    "/tools/converter-tools/mobi-to-epub",
+    "/tools/developer-tools/api-tester",
+    "/tools/developer-tools/aspect-ratio",
+    "/tools/developer-tools/base64-encoder",
+    "/tools/developer-tools/code-formatter",
+    "/tools/developer-tools/code-minifier",
+    "/tools/developer-tools/color-picker",
+    "/tools/developer-tools/cron-expression",
+    "/tools/developer-tools/cron-expression-builder",
+    "/tools/developer-tools/css-formatter",
+    "/tools/developer-tools/csv-to-sql",
+    "/tools/developer-tools/diff-viewer",
+    "/tools/developer-tools/env-to-json",
+    "/tools/developer-tools/hex-to-text",
+    "/tools/developer-tools/html-encoder",
+    "/tools/developer-tools/html-entity-decoder",
+    "/tools/developer-tools/html-formatter",
+    "/tools/developer-tools/javascript-formatter",
+    "/tools/developer-tools/js-minifier",
+    "/tools/developer-tools/json-formatter",
+    "/tools/developer-tools/json-minifier",
+    "/tools/developer-tools/json-to-csharp",
+    "/tools/developer-tools/json-to-csv",
+    "/tools/developer-tools/json-to-go",
+    "/tools/developer-tools/json-to-php",
+    "/tools/developer-tools/json-to-python",
+    "/tools/developer-tools/json-to-rust",
+    "/tools/developer-tools/json-to-toml",
+    "/tools/developer-tools/json-to-typescript",
+    "/tools/developer-tools/json-to-xml",
+    "/tools/developer-tools/json-to-yaml",
+    "/tools/developer-tools/markdown-editor",
+    "/tools/developer-tools/markdown-previewer",
+    "/tools/developer-tools/markdown-to-html",
+    "/tools/developer-tools/password-generator",
+    "/tools/developer-tools/scss-to-css",
+    "/tools/developer-tools/sql-formatter",
+    "/tools/developer-tools/timestamp-converter",
+    "/tools/developer-tools/toml-to-json",
+    "/tools/developer-tools/typescript-to-js",
+    "/tools/file-tools/file-encryptor",
+    "/tools/file-tools/zip-creator",
+    "/tools/gif-tools/gif-maker",
+    "/tools/gif-tools/gif-to-mp4",
+    "/tools/image-tools/duplicate-image-finder",
+    "/tools/image-tools/image-converter",
+    "/tools/image-tools/image-metadata",
+    "/tools/math-tools/fraction-calculator",
+    "/tools/math-tools/roman-numeral-converter",
+    "/tools/math-tools/scientific-calculator",
+    "/tools/math-tools/statistics-calculator",
+    "/tools/pdf-tools/epub-to-pdf",
+    "/tools/pdf-tools/excel-to-pdf",
+    "/tools/pdf-tools/jpg-to-pdf",
+    "/tools/pdf-tools/mobi-to-pdf",
+    "/tools/pdf-tools/pdf-compare",
+    "/tools/pdf-tools/pdf-crop",
+    "/tools/pdf-tools/pdf-delete-pages",
+    "/tools/pdf-tools/pdf-extract-text",
+    "/tools/pdf-tools/pdf-forms",
+    "/tools/pdf-tools/pdf-number-pages",
+    "/tools/pdf-tools/pdf-organize",
+    "/tools/pdf-tools/pdf-redact",
+    "/tools/pdf-tools/pdf-reorder-pages",
+    "/tools/pdf-tools/pdf-rotate",
+    "/tools/pdf-tools/pdf-sign",
+    "/tools/pdf-tools/pdf-split",
+    "/tools/pdf-tools/pdf-to-html",
+    "/tools/pdf-tools/pdf-to-word",
+    "/tools/pdf-tools/pdf-watermark",
+    "/tools/pdf-tools/ppt-to-pdf",
+    "/tools/pdf-tools/text-to-pdf",
+    "/tools/pdf-tools/word-to-pdf",
+    "/tools/text-tools/ascii-art",
+    "/tools/text-tools/character-counter",
+    "/tools/text-tools/duplicate-remover",
+    "/tools/text-tools/lorem-ipsum",
+    "/tools/text-tools/sticky-notes",
+    "/tools/text-tools/text-comparator",
+    "/tools/text-tools/text-encryptor",
+    "/tools/text-tools/text-repeater",
+    "/tools/text-tools/text-sorter",
+    "/tools/text-tools/text-truncator",
+    "/tools/text-tools/whitespace-remover",
+    "/tools/video-tools/media-player",
+    "/tools/video-tools/screen-recorder",
+    "/tools/video-tools/subtitle-generator",
+    "/tools/video-tools/video-screenshot",
+    "/tools/video-tools/video-to-audio"
+   ]
+  },
+  {
+   "s": "is my file uploaded anywhere",
+   "pages": [
+    "/tools/audio-tools/audio-booster",
+    "/tools/audio-tools/audio-compressor",
+    "/tools/audio-tools/audio-converter",
+    "/tools/audio-tools/audio-equalizer",
+    "/tools/audio-tools/audio-metadata",
+    "/tools/audio-tools/audio-splitter",
+    "/tools/audio-tools/audio-trimmer",
+    "/tools/audio-tools/audio-waveform",
+    "/tools/converter-tools/mobi-to-epub",
+    "/tools/file-tools/base64-encoder",
+    "/tools/file-tools/file-converter",
+    "/tools/file-tools/file-metadata",
+    "/tools/gif-tools/apng-to-gif",
+    "/tools/gif-tools/gif-compressor",
+    "/tools/gif-tools/gif-to-apng",
+    "/tools/gif-tools/gif-to-mp4",
+    "/tools/pdf-tools/epub-to-pdf",
+    "/tools/pdf-tools/mobi-to-pdf",
+    "/tools/video-tools/video-compressor",
+    "/tools/video-tools/video-converter",
+    "/tools/video-tools/video-filter",
+    "/tools/video-tools/video-merger",
+    "/tools/video-tools/video-metadata",
+    "/tools/video-tools/video-resizer",
+    "/tools/video-tools/video-rotator",
+    "/tools/video-tools/video-screenshot",
+    "/tools/video-tools/video-to-audio",
+    "/tools/video-tools/video-trimmer",
+    "/tools/video-tools/video-watermark"
+   ]
+  },
+  {
+   "s": "is my data private",
+   "pages": [
+    "/tools/audio-tools/audio-merger",
+    "/tools/converter-tools/color-converter",
+    "/tools/converter-tools/currency-converter",
+    "/tools/converter-tools/unit-converter",
+    "/tools/file-tools/file-comparator",
+    "/tools/file-tools/file-splitter",
+    "/tools/gif-tools/gif-maker",
+    "/tools/gif-tools/image-to-gif",
+    "/tools/qr-barcodes-tools/barcode-generator",
+    "/tools/qr-barcodes-tools/qr-generator",
+    "/tools/qr-barcodes-tools/qr-scanner",
+    "/tools/text-tools/case-converter",
+    "/tools/text-tools/find-replace",
+    "/tools/text-tools/text-repeater",
+    "/tools/text-tools/text-reverser",
+    "/tools/text-tools/text-to-list",
+    "/tools/text-tools/whitespace-remover"
+   ]
+  },
+  {
+   "s": "click the upload area and select a pdf file from your device",
+   "pages": [
+    "/tools/pdf-tools/pdf-ai-summary",
+    "/tools/pdf-tools/pdf-compress",
+    "/tools/pdf-tools/pdf-crop",
+    "/tools/pdf-tools/pdf-editor",
+    "/tools/pdf-tools/pdf-extract-text",
+    "/tools/pdf-tools/pdf-number-pages",
+    "/tools/pdf-tools/pdf-ocr",
+    "/tools/pdf-tools/pdf-protect",
+    "/tools/pdf-tools/pdf-redact",
+    "/tools/pdf-tools/pdf-rotate",
+    "/tools/pdf-tools/pdf-sign",
+    "/tools/pdf-tools/pdf-to-excel",
+    "/tools/pdf-tools/pdf-to-html",
+    "/tools/pdf-tools/pdf-to-ppt",
+    "/tools/pdf-tools/pdf-to-word",
+    "/tools/pdf-tools/pdf-translate",
+    "/tools/pdf-tools/pdf-watermark"
+   ]
+  },
+  {
+   "s": "it accepts common formats your browser can open, such as jpg, png, and webp",
+   "pages": [
+    "/tools/image-tools/add-border-to-image",
+    "/tools/image-tools/add-noise",
+    "/tools/image-tools/add-text-to-image",
+    "/tools/image-tools/add-vignette",
+    "/tools/image-tools/brightness-contrast",
+    "/tools/image-tools/grayscale-converter",
+    "/tools/image-tools/image-blur",
+    "/tools/image-tools/image-comparison",
+    "/tools/image-tools/image-cropper",
+    "/tools/image-tools/image-flip",
+    "/tools/image-tools/image-inverter",
+    "/tools/image-tools/image-pixelator",
+    "/tools/image-tools/image-rotate",
+    "/tools/image-tools/round-corners",
+    "/tools/image-tools/sepia-filter"
+   ]
+  },
+  {
+   "s": "click the upload area and select an image from your device",
+   "pages": [
+    "/tools/ai-tools/image-captioner",
+    "/tools/image-tools/add-border-to-image",
+    "/tools/image-tools/add-noise",
+    "/tools/image-tools/add-text-to-image",
+    "/tools/image-tools/add-vignette",
+    "/tools/image-tools/brightness-contrast",
+    "/tools/image-tools/image-blur",
+    "/tools/image-tools/image-cropper",
+    "/tools/image-tools/image-flip",
+    "/tools/image-tools/image-inverter",
+    "/tools/image-tools/image-pixelator",
+    "/tools/image-tools/image-rotate",
+    "/tools/image-tools/round-corners",
+    "/tools/image-tools/sepia-filter"
+   ]
+  },
+  {
+   "s": "is my data uploaded to a server",
+   "pages": [
+    "/tools/developer-tools/csv-to-excel",
+    "/tools/developer-tools/csv-to-json",
+    "/tools/developer-tools/csv-to-tsv",
+    "/tools/developer-tools/env-to-json",
+    "/tools/developer-tools/json-formatter",
+    "/tools/developer-tools/json-minifier",
+    "/tools/developer-tools/json-to-csharp",
+    "/tools/developer-tools/json-to-go",
+    "/tools/developer-tools/json-to-python",
+    "/tools/developer-tools/json-to-toml",
+    "/tools/developer-tools/tsv-to-csv",
+    "/tools/developer-tools/url-encoder",
+    "/tools/developer-tools/xml-to-json",
+    "/tools/developer-tools/yaml-to-json"
+   ]
+  },
+  {
+   "s": "is my file uploaded to a server",
+   "pages": [
+    "/tools/developer-tools/excel-to-csv",
+    "/tools/developer-tools/excel-to-json",
+    "/tools/pdf-tools/pdf-ai-summary",
+    "/tools/pdf-tools/pdf-crop",
+    "/tools/pdf-tools/pdf-editor",
+    "/tools/pdf-tools/pdf-organize",
+    "/tools/pdf-tools/pdf-redact",
+    "/tools/pdf-tools/pdf-reorder-pages",
+    "/tools/pdf-tools/pdf-repair",
+    "/tools/pdf-tools/pdf-rotate",
+    "/tools/pdf-tools/pdf-to-pdfa",
+    "/tools/pdf-tools/pdf-unlock",
+    "/tools/video-tools/media-player"
+   ]
+  },
+  {
+   "s": "yes, it's completely free with no registration required",
+   "pages": [
+    "/tools/converter-tools/color-converter",
+    "/tools/developer-tools/unicode-converter",
+    "/tools/image-tools/brightness-contrast",
+    "/tools/image-tools/heic-to-jpg",
+    "/tools/image-tools/image-blur",
+    "/tools/image-tools/image-compressor",
+    "/tools/image-tools/image-cropper",
+    "/tools/image-tools/image-flip",
+    "/tools/image-tools/image-pixelator",
+    "/tools/image-tools/image-rotate",
+    "/tools/image-tools/webp-to-jpg",
+    "/tools/image-tools/webp-to-png"
+   ]
+  },
+  {
+   "s": "the result keeps your image's format: a jpg stays a jpg, a png stays a png (transparency included), a webp stays a webp",
+   "pages": [
+    "/tools/image-tools/add-border-to-image",
+    "/tools/image-tools/add-noise",
+    "/tools/image-tools/add-text-to-image",
+    "/tools/image-tools/add-vignette",
+    "/tools/image-tools/brightness-contrast",
+    "/tools/image-tools/grayscale-converter",
+    "/tools/image-tools/image-blur",
+    "/tools/image-tools/image-cropper",
+    "/tools/image-tools/image-flip",
+    "/tools/image-tools/image-inverter",
+    "/tools/image-tools/image-pixelator",
+    "/tools/image-tools/sepia-filter"
+   ]
+  },
+  {
+   "s": "is my text uploaded to a server",
+   "pages": [
+    "/tools/developer-tools/markdown-editor",
+    "/tools/developer-tools/unicode-converter",
+    "/tools/pdf-tools/text-to-pdf",
+    "/tools/text-tools/ascii-art",
+    "/tools/text-tools/character-counter",
+    "/tools/text-tools/duplicate-remover",
+    "/tools/text-tools/lorem-ipsum",
+    "/tools/text-tools/text-comparator",
+    "/tools/text-tools/text-encryptor",
+    "/tools/text-tools/text-sorter",
+    "/tools/text-tools/text-truncator"
+   ]
+  },
+  {
+   "s": "preview the converted image",
+   "pages": [
+    "/tools/image-tools/bmp-to-png",
+    "/tools/image-tools/gif-to-png",
+    "/tools/image-tools/heic-to-png",
+    "/tools/image-tools/ico-to-png",
+    "/tools/image-tools/jpg-to-png",
+    "/tools/image-tools/jpg-to-webp",
+    "/tools/image-tools/png-to-webp",
+    "/tools/image-tools/tiff-to-png",
+    "/tools/image-tools/webp-to-jpg",
+    "/tools/image-tools/webp-to-png"
+   ]
+  },
+  {
+   "s": "is my code uploaded to a server",
+   "pages": [
+    "/tools/developer-tools/code-formatter",
+    "/tools/developer-tools/css-formatter",
+    "/tools/developer-tools/html-formatter",
+    "/tools/developer-tools/javascript-formatter",
+    "/tools/developer-tools/js-minifier",
+    "/tools/developer-tools/markdown-to-html",
+    "/tools/developer-tools/scss-to-css",
+    "/tools/developer-tools/sql-formatter",
+    "/tools/developer-tools/typescript-to-js"
+   ]
+  },
+  {
+   "s": "no — everything runs in your browser; the engine is downloaded once when you first click",
+   "pages": [
+    "/tools/developer-tools/css-formatter",
+    "/tools/developer-tools/html-formatter",
+    "/tools/developer-tools/javascript-formatter",
+    "/tools/developer-tools/js-minifier",
+    "/tools/developer-tools/markdown-to-html",
+    "/tools/developer-tools/scss-to-css",
+    "/tools/developer-tools/sql-formatter",
+    "/tools/developer-tools/typescript-to-js"
+   ]
+  },
+  {
+   "s": "there's no fixed size limit — processing happens locally in your browser, so it's limited only by your device's available memory",
+   "pages": [
+    "/tools/image-tools/add-border-to-image",
+    "/tools/image-tools/add-vignette",
+    "/tools/image-tools/grayscale-converter",
+    "/tools/image-tools/image-inverter",
+    "/tools/image-tools/jpg-to-webp",
+    "/tools/image-tools/png-to-webp",
+    "/tools/image-tools/round-corners",
+    "/tools/image-tools/tiff-to-png"
+   ]
+  },
+  {
+   "s": "click the download button to save your png file",
+   "pages": [
+    "/tools/image-tools/bmp-to-png",
+    "/tools/image-tools/gif-to-png",
+    "/tools/image-tools/heic-to-png",
+    "/tools/image-tools/ico-to-png",
+    "/tools/image-tools/jpg-to-png",
+    "/tools/image-tools/svg-to-png",
+    "/tools/image-tools/tiff-to-png",
+    "/tools/image-tools/webp-to-png"
+   ]
+  },
+  {
+   "s": "yes, it's 100% free with no registration required",
+   "pages": [
+    "/tools/image-tools/bmp-to-png",
+    "/tools/image-tools/gif-to-png",
+    "/tools/image-tools/ico-to-png",
+    "/tools/image-tools/jpg-to-png",
+    "/tools/image-tools/png-to-jpg",
+    "/tools/image-tools/png-to-webp",
+    "/tools/image-tools/tiff-to-jpg",
+    "/tools/image-tools/tiff-to-png"
+   ]
+  },
+  {
+   "s": "no — everything happens in your browser",
+   "pages": [
+    "/tools/text-tools/ascii-art",
+    "/tools/text-tools/character-counter",
+    "/tools/text-tools/duplicate-remover",
+    "/tools/text-tools/lorem-ipsum",
+    "/tools/text-tools/text-comparator",
+    "/tools/text-tools/text-encryptor",
+    "/tools/text-tools/text-sorter",
+    "/tools/text-tools/text-truncator"
+   ]
+  },
+  {
+   "s": "click the upload area and select an audio file",
+   "pages": [
+    "/tools/audio-tools/audio-booster",
+    "/tools/audio-tools/audio-compressor",
+    "/tools/audio-tools/audio-converter",
+    "/tools/audio-tools/audio-equalizer",
+    "/tools/audio-tools/audio-splitter",
+    "/tools/audio-tools/audio-trimmer",
+    "/tools/audio-tools/audio-waveform"
+   ]
+  },
+  {
+   "s": "no, only one file can be converted at a time — there's no batch upload",
+   "pages": [
+    "/tools/image-tools/gif-to-png",
+    "/tools/image-tools/heic-to-jpg",
+    "/tools/image-tools/jpg-to-png",
+    "/tools/image-tools/jpg-to-webp",
+    "/tools/image-tools/svg-to-png",
+    "/tools/image-tools/tiff-to-jpg",
+    "/tools/image-tools/webp-to-jpg"
+   ]
+  },
+  {
+   "s": "yes, it's free with no signup required",
+   "pages": [
+    "/tools/pdf-tools/pdf-ai-summary",
+    "/tools/pdf-tools/pdf-compress",
+    "/tools/pdf-tools/pdf-protect",
+    "/tools/pdf-tools/pdf-to-excel",
+    "/tools/pdf-tools/pdf-to-ppt",
+    "/tools/pdf-tools/pdf-translate",
+    "/tools/pdf-tools/pdf-unlock"
+   ]
+  },
+  {
+   "s": "is there a file size limit",
+   "pages": [
+    "/tools/audio-tools/audio-compressor",
+    "/tools/audio-tools/audio-splitter",
+    "/tools/developer-tools/hash-generator",
+    "/tools/file-tools/file-splitter",
+    "/tools/file-tools/tar-extractor",
+    "/tools/pdf-tools/pdf-ocr"
+   ]
+  },
+  {
+   "s": "click 'copy' to copy the result",
+   "pages": [
+    "/tools/developer-tools/base64-encoder",
+    "/tools/developer-tools/code-minifier",
+    "/tools/developer-tools/env-to-json",
+    "/tools/developer-tools/sql-formatter",
+    "/tools/developer-tools/unicode-converter",
+    "/tools/developer-tools/url-encoder"
+   ]
+  },
+  {
+   "s": "click 'copy' to copy it to your clipboard",
+   "pages": [
+    "/tools/developer-tools/hex-to-text",
+    "/tools/developer-tools/html-encoder",
+    "/tools/developer-tools/html-entity-decoder",
+    "/tools/developer-tools/json-to-csv",
+    "/tools/developer-tools/password-generator",
+    "/tools/developer-tools/tsv-to-csv"
+   ]
+  },
+  {
+   "s": "click 'copy' to copy the code into your project",
+   "pages": [
+    "/tools/developer-tools/json-to-csharp",
+    "/tools/developer-tools/json-to-go",
+    "/tools/developer-tools/json-to-php",
+    "/tools/developer-tools/json-to-python",
+    "/tools/developer-tools/json-to-rust",
+    "/tools/developer-tools/json-to-typescript"
+   ]
+  },
+  {
+   "s": "is my video uploaded",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/video-to-gif",
+    "/tools/gif-tools/webm-to-gif",
+    "/tools/video-tools/video-to-gif"
+   ]
+  },
+  {
+   "s": "480 px and 10 fps is a good balance for sharing in chats and on social media",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/video-to-gif",
+    "/tools/gif-tools/webm-to-gif",
+    "/tools/video-tools/video-to-gif"
+   ]
+  },
+  {
+   "s": "play the video above to find the exact second where your clip should start",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/video-to-gif",
+    "/tools/gif-tools/webm-to-gif",
+    "/tools/video-tools/video-to-gif"
+   ]
+  },
+  {
+   "s": "your image is never uploaded to a server",
+   "pages": [
+    "/tools/image-tools/add-noise",
+    "/tools/image-tools/brightness-contrast",
+    "/tools/image-tools/grayscale-converter",
+    "/tools/image-tools/image-inverter",
+    "/tools/image-tools/image-pixelator",
+    "/tools/image-tools/sepia-filter"
+   ]
+  },
+  {
+   "s": "click the upload area and select a video file",
+   "pages": [
+    "/tools/video-tools/video-compressor",
+    "/tools/video-tools/video-converter",
+    "/tools/video-tools/video-rotator",
+    "/tools/video-tools/video-screenshot",
+    "/tools/video-tools/video-to-audio",
+    "/tools/video-tools/video-trimmer"
+   ]
+  },
+  {
+   "s": "what output format do i get",
+   "pages": [
+    "/tools/audio-tools/audio-booster",
+    "/tools/audio-tools/audio-compressor",
+    "/tools/video-tools/video-compressor",
+    "/tools/video-tools/video-resizer",
+    "/tools/video-tools/video-trimmer"
+   ]
+  },
+  {
+   "s": "is there a size limit",
+   "pages": [
+    "/tools/audio-tools/audio-metadata",
+    "/tools/file-tools/zip-creator",
+    "/tools/file-tools/zip-extractor",
+    "/tools/image-tools/image-compressor",
+    "/tools/video-tools/video-metadata"
+   ]
+  },
+  {
+   "s": "click 'copy' to copy it",
+   "pages": [
+    "/tools/developer-tools/css-formatter",
+    "/tools/developer-tools/html-formatter",
+    "/tools/developer-tools/javascript-formatter",
+    "/tools/developer-tools/markdown-to-html",
+    "/tools/developer-tools/typescript-to-js"
+   ]
+  },
+  {
+   "s": "paste your json into the input box",
+   "pages": [
+    "/tools/developer-tools/json-formatter",
+    "/tools/developer-tools/json-minifier",
+    "/tools/developer-tools/json-to-php",
+    "/tools/developer-tools/json-to-xml",
+    "/tools/developer-tools/json-to-yaml"
+   ]
+  },
+  {
+   "s": "paste a json object or array (an api response, a config file) into the input box",
+   "pages": [
+    "/tools/developer-tools/json-to-csharp",
+    "/tools/developer-tools/json-to-go",
+    "/tools/developer-tools/json-to-python",
+    "/tools/developer-tools/json-to-rust",
+    "/tools/developer-tools/json-to-typescript"
+   ]
+  },
+  {
+   "s": "click 'convert': one named type is generated for every nested object, and the fields of every element of an array are merged",
+   "pages": [
+    "/tools/developer-tools/json-to-csharp",
+    "/tools/developer-tools/json-to-go",
+    "/tools/developer-tools/json-to-python",
+    "/tools/developer-tools/json-to-rust",
+    "/tools/developer-tools/json-to-typescript"
+   ]
+  },
+  {
+   "s": "review the output — fields missing from some elements or holding null are marked optional",
+   "pages": [
+    "/tools/developer-tools/json-to-csharp",
+    "/tools/developer-tools/json-to-go",
+    "/tools/developer-tools/json-to-python",
+    "/tools/developer-tools/json-to-rust",
+    "/tools/developer-tools/json-to-typescript"
+   ]
+  },
+  {
+   "s": "yes, completely free with no registration required",
+   "pages": [
+    "/tools/developer-tools/url-parser",
+    "/tools/developer-tools/uuid-generator",
+    "/tools/developer-tools/xml-formatter",
+    "/tools/developer-tools/xml-to-json",
+    "/tools/developer-tools/yaml-to-json"
+   ]
+  },
+  {
+   "s": "pick where the clip starts, how long it lasts (up to 60 seconds), the width and the frame rate",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/video-to-gif",
+    "/tools/gif-tools/webm-to-gif",
+    "/tools/video-tools/video-to-gif"
+   ]
+  },
+  {
+   "s": "your file is deleted from our server as soon as you have downloaded the gif",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/video-to-gif",
+    "/tools/gif-tools/webm-to-gif"
+   ]
+  },
+  {
+   "s": "set the start time and the length of the clip (up to 60 seconds)",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/video-to-gif",
+    "/tools/gif-tools/webm-to-gif"
+   ]
+  },
+  {
+   "s": "choose the width and frames per second — smaller values make a lighter gif",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/video-to-gif",
+    "/tools/gif-tools/webm-to-gif"
+   ]
+  },
+  {
+   "s": "click \"make gif\", preview it, then download",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/video-to-gif",
+    "/tools/gif-tools/webm-to-gif"
+   ]
+  },
+  {
+   "s": "yes, free with no signup and no watermark",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/video-to-gif",
+    "/tools/gif-tools/webm-to-gif"
+   ]
+  },
+  {
+   "s": "why is my gif large",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/video-to-gif",
+    "/tools/gif-tools/webm-to-gif"
+   ]
+  },
+  {
+   "s": "lower the width (e.g",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/video-to-gif",
+    "/tools/gif-tools/webm-to-gif"
+   ]
+  },
+  {
+   "s": "320 px), the frame rate (e.g",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/video-to-gif",
+    "/tools/gif-tools/webm-to-gif"
+   ]
+  },
+  {
+   "s": "8–10) or the length to make it much lighter",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/video-to-gif",
+    "/tools/gif-tools/webm-to-gif"
+   ]
+  },
+  {
+   "s": "yes, to our own server (not a third party), and deleted as soon as you have downloaded the result",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/video-to-gif",
+    "/tools/gif-tools/webm-to-gif"
+   ]
+  },
+  {
+   "s": "click 'convert' to render it to png",
+   "pages": [
+    "/tools/image-tools/bmp-to-png",
+    "/tools/image-tools/gif-to-png",
+    "/tools/image-tools/ico-to-png",
+    "/tools/image-tools/jpg-to-png",
+    "/tools/image-tools/webp-to-png"
+   ]
+  },
+  {
+   "s": "convert one file at a time and download each result before starting the next",
+   "pages": [
+    "/tools/image-tools/jpg-to-png",
+    "/tools/image-tools/jpg-to-webp",
+    "/tools/image-tools/svg-to-png",
+    "/tools/image-tools/webp-to-jpg",
+    "/tools/image-tools/webp-to-png"
+   ]
+  },
+  {
+   "s": "click 'convert to pdf'",
+   "pages": [
+    "/tools/pdf-tools/excel-to-pdf",
+    "/tools/pdf-tools/html-to-pdf",
+    "/tools/pdf-tools/markdown-to-pdf",
+    "/tools/pdf-tools/ppt-to-pdf",
+    "/tools/pdf-tools/word-to-pdf"
+   ]
+  },
+  {
+   "s": "yes, it's completely free with no signup and no limits",
+   "pages": [
+    "/tools/converter-tools/unit-converter",
+    "/tools/text-tools/text-reverser",
+    "/tools/text-tools/text-to-list",
+    "/tools/text-tools/url-encoder"
+   ]
+  },
+  {
+   "s": "does it support file upload, or only pasted text",
+   "pages": [
+    "/tools/developer-tools/csv-to-excel",
+    "/tools/developer-tools/csv-to-json",
+    "/tools/developer-tools/csv-to-sql",
+    "/tools/developer-tools/tsv-to-csv"
+   ]
+  },
+  {
+   "s": "review the result in the output box",
+   "pages": [
+    "/tools/developer-tools/html-encoder",
+    "/tools/developer-tools/html-entity-decoder",
+    "/tools/developer-tools/json-to-csv",
+    "/tools/developer-tools/tsv-to-csv"
+   ]
+  },
+  {
+   "s": "click 'copy' to copy the result to your clipboard",
+   "pages": [
+    "/tools/developer-tools/json-formatter",
+    "/tools/developer-tools/json-to-toml",
+    "/tools/developer-tools/json-to-xml",
+    "/tools/developer-tools/json-to-yaml"
+   ]
+  },
+  {
+   "s": "does it handle nested json objects",
+   "pages": [
+    "/tools/developer-tools/json-to-php",
+    "/tools/developer-tools/json-to-python",
+    "/tools/developer-tools/json-to-xml",
+    "/tools/developer-tools/json-to-yaml"
+   ]
+  },
+  {
+   "s": "do i need to install any software",
+   "pages": [
+    "/tools/file-tools/tar-extractor",
+    "/tools/image-tools/heic-to-jpg",
+    "/tools/image-tools/ico-to-png",
+    "/tools/qr-barcodes-tools/qr-scanner"
+   ]
+  },
+  {
+   "s": "can i convert only part of my video",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/webm-to-gif"
+   ]
+  },
+  {
+   "s": "yes: set the start time and the length (up to 60 seconds)",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/webm-to-gif"
+   ]
+  },
+  {
+   "s": "gif has no real video compression",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/webm-to-gif"
+   ]
+  },
+  {
+   "s": "will a vertical video be squashed",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/webm-to-gif"
+   ]
+  },
+  {
+   "s": "only the width is set; the height follows the video, so it keeps its proportions",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/mp4-to-gif",
+    "/tools/gif-tools/webm-to-gif"
+   ]
+  },
+  {
+   "s": "is there a file size limit for uploading images",
+   "pages": [
+    "/tools/image-tools/add-vignette",
+    "/tools/image-tools/grayscale-converter",
+    "/tools/image-tools/image-inverter",
+    "/tools/image-tools/round-corners"
+   ]
+  },
+  {
+   "s": "click the download button to save your jpg file",
+   "pages": [
+    "/tools/image-tools/heic-to-jpg",
+    "/tools/image-tools/png-to-jpg",
+    "/tools/image-tools/tiff-to-jpg",
+    "/tools/image-tools/webp-to-jpg"
+   ]
+  },
+  {
+   "s": "yes, completely free with no signup required",
+   "pages": [
+    "/tools/pdf-tools/pdf-editor",
+    "/tools/pdf-tools/pdf-merge",
+    "/tools/pdf-tools/pdf-repair",
+    "/tools/pdf-tools/pdf-to-pdfa"
+   ]
+  },
+  {
+   "s": "what image formats are supported",
+   "pages": [
+    "/tools/ai-tools/image-captioner",
+    "/tools/image-tools/add-text-to-image",
+    "/tools/image-tools/sepia-filter"
+   ]
+  },
+  {
+   "s": "for every format except opus, no: processing happens in your browser via ffmpeg.wasm",
+   "pages": [
+    "/tools/audio-tools/audio-booster",
+    "/tools/audio-tools/audio-compressor",
+    "/tools/audio-tools/audio-splitter"
+   ]
+  },
+  {
+   "s": "for opus, the processed audio is sent to our own server (not a third party), encoded with the reference libopus encoder (the in-browser one is not as good), and deleted as soon as you have downloaded the result",
+   "pages": [
+    "/tools/audio-tools/audio-booster",
+    "/tools/audio-tools/audio-compressor",
+    "/tools/audio-tools/audio-splitter"
+   ]
+  },
+  {
+   "s": "yes, it's completely free with no signup",
+   "pages": [
+    "/tools/audio-tools/audio-converter",
+    "/tools/pdf-tools/html-to-pdf",
+    "/tools/pdf-tools/markdown-to-pdf"
+   ]
+  },
+  {
+   "s": "what information does it show",
+   "pages": [
+    "/tools/audio-tools/audio-metadata",
+    "/tools/file-tools/file-metadata",
+    "/tools/video-tools/video-metadata"
+   ]
+  },
+  {
+   "s": "what file types can i upload",
+   "pages": [
+    "/tools/converter-tools/mobi-to-epub",
+    "/tools/pdf-tools/mobi-to-pdf",
+    "/tools/pdf-tools/text-to-pdf"
+   ]
+  },
+  {
+   "s": "review the result",
+   "pages": [
+    "/tools/developer-tools/css-formatter",
+    "/tools/developer-tools/javascript-formatter",
+    "/tools/text-tools/text-sorter"
+   ]
+  },
+  {
+   "s": "click the upload area and select a .csv file, or paste csv text directly into the box below it",
+   "pages": [
+    "/tools/developer-tools/csv-to-excel",
+    "/tools/developer-tools/csv-to-json",
+    "/tools/developer-tools/csv-to-sql"
+   ]
+  },
+  {
+   "s": "the delimiter is detected automatically — check the dropdown and correct it if needed",
+   "pages": [
+    "/tools/developer-tools/csv-to-excel",
+    "/tools/developer-tools/csv-to-json",
+    "/tools/developer-tools/csv-to-sql"
+   ]
+  },
+  {
+   "s": "both — upload a .csv file, or paste csv text directly into the box",
+   "pages": [
+    "/tools/developer-tools/csv-to-excel",
+    "/tools/developer-tools/csv-to-json",
+    "/tools/developer-tools/csv-to-sql"
+   ]
+  },
+  {
+   "s": "yes — the delimiter (comma, semicolon, tab, or pipe) is auto-detected from the file, which matters for european csvs that commonly use semicolons",
+   "pages": [
+    "/tools/developer-tools/csv-to-excel",
+    "/tools/developer-tools/csv-to-json",
+    "/tools/developer-tools/csv-to-sql"
+   ]
+  },
+  {
+   "s": "a dropdown lets you override the detected delimiter if it's ever wrong",
+   "pages": [
+    "/tools/developer-tools/csv-to-excel",
+    "/tools/developer-tools/csv-to-json",
+    "/tools/developer-tools/csv-to-sql"
+   ]
+  },
+  {
+   "s": "wrap a value in double quotes if it contains a comma (e.g",
+   "pages": [
+    "/tools/developer-tools/csv-to-excel",
+    "/tools/developer-tools/csv-to-json",
+    "/tools/developer-tools/csv-to-sql"
+   ]
+  },
+  {
+   "s": "the delimiter dropdown shows what was auto-detected — double check it on unusual files, and switch it manually if a column split looks wrong",
+   "pages": [
+    "/tools/developer-tools/csv-to-excel",
+    "/tools/developer-tools/csv-to-json",
+    "/tools/developer-tools/csv-to-sql"
+   ]
+  },
+  {
+   "s": "what file formats does it support",
+   "pages": [
+    "/tools/developer-tools/excel-to-csv",
+    "/tools/developer-tools/excel-to-json",
+    "/tools/pdf-tools/pdf-extract-text"
+   ]
+  },
+  {
+   "s": "no, generation happens entirely in your browser",
+   "pages": [
+    "/tools/developer-tools/json-to-csharp",
+    "/tools/developer-tools/json-to-go",
+    "/tools/developer-tools/json-to-python"
+   ]
+  },
+  {
+   "s": "does it convert json arrays correctly",
+   "pages": [
+    "/tools/developer-tools/json-to-toml",
+    "/tools/developer-tools/json-to-xml",
+    "/tools/developer-tools/json-to-yaml"
+   ]
+  },
+  {
+   "s": "click 'convert' to parse it into json",
+   "pages": [
+    "/tools/developer-tools/toml-to-json",
+    "/tools/developer-tools/xml-to-json",
+    "/tools/developer-tools/yaml-to-json"
+   ]
+  },
+  {
+   "s": "copy the result or download it as a file; nothing is saved on a server, and leaving the page before either asks first",
+   "pages": [
+    "/tools/developer-tools/tsv-to-csv",
+    "/tools/developer-tools/xml-formatter",
+    "/tools/developer-tools/xml-to-json"
+   ]
+  },
+  {
+   "s": "yes, it's completely free with no signup and no limit on how many files you can process",
+   "pages": [
+    "/tools/gif-tools/apng-to-gif",
+    "/tools/gif-tools/gif-compressor",
+    "/tools/gif-tools/gif-to-apng"
+   ]
+  },
+  {
+   "s": "it runs on our server with ffmpeg, which builds an optimised 256-colour palette for your clip, so it works in every browser including safari and iphone",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/webm-to-gif"
+   ]
+  },
+  {
+   "s": "other video formats work too",
+   "pages": [
+    "/tools/gif-tools/avi-to-gif",
+    "/tools/gif-tools/mov-to-gif",
+    "/tools/gif-tools/webm-to-gif"
+   ]
+  },
+  {
+   "s": "click the upload area and select a gif file from your device",
+   "pages": [
+    "/tools/gif-tools/gif-to-apng",
+    "/tools/gif-tools/gif-to-mp4",
+    "/tools/image-tools/gif-to-png"
+   ]
+  },
+  {
+   "s": "there's no fixed size limit — processing happens locally, so it's limited only by your device's available memory",
+   "pages": [
+    "/tools/image-tools/bmp-to-png",
+    "/tools/image-tools/tiff-to-jpg",
+    "/tools/image-tools/webp-to-jpg"
+   ]
+  },
+  {
+   "s": "can i convert multiple images at once",
+   "pages": [
+    "/tools/image-tools/grayscale-converter",
+    "/tools/image-tools/jpg-to-png",
+    "/tools/image-tools/jpg-to-webp"
+   ]
+  },
+  {
+   "s": "click the upload area and select a png file from your device",
+   "pages": [
+    "/tools/image-tools/png-to-ico",
+    "/tools/image-tools/png-to-jpg",
+    "/tools/image-tools/png-to-webp"
+   ]
+  },
+  {
+   "s": "what is the maximum file size i can convert",
+   "pages": [
+    "/tools/image-tools/svg-to-png",
+    "/tools/image-tools/tiff-to-jpg",
+    "/tools/image-tools/webp-to-jpg"
+   ]
+  },
+  {
+   "s": "once the pdf is ready, click 'download'",
+   "pages": [
+    "/tools/pdf-tools/epub-to-pdf",
+    "/tools/pdf-tools/html-to-pdf",
+    "/tools/pdf-tools/mobi-to-pdf"
+   ]
+  },
+  {
+   "s": "open the downloaded pdf to confirm it looks right",
+   "pages": [
+    "/tools/pdf-tools/epub-to-pdf",
+    "/tools/pdf-tools/html-to-pdf",
+    "/tools/pdf-tools/mobi-to-pdf"
+   ]
+  },
+  {
+   "s": "will the text in my pdf be selectable",
+   "pages": [
+    "/tools/pdf-tools/epub-to-pdf",
+    "/tools/pdf-tools/mobi-to-pdf",
+    "/tools/pdf-tools/word-to-pdf"
+   ]
+  },
+  {
+   "s": "your file is uploaded securely for conversion; once the pdf is ready, click 'download'",
+   "pages": [
+    "/tools/pdf-tools/excel-to-pdf",
+    "/tools/pdf-tools/ppt-to-pdf",
+    "/tools/pdf-tools/word-to-pdf"
+   ]
+  },
+  {
+   "s": "save the resulting pdf file to your device",
+   "pages": [
+    "/tools/pdf-tools/excel-to-pdf",
+    "/tools/pdf-tools/ppt-to-pdf",
+    "/tools/pdf-tools/word-to-pdf"
+   ]
+  },
+  {
+   "s": "is my pdf uploaded to a server",
+   "pages": [
+    "/tools/pdf-tools/pdf-compress",
+    "/tools/pdf-tools/pdf-number-pages",
+    "/tools/pdf-tools/pdf-to-html"
+   ]
+  },
+  {
+   "s": "no, it works directly in your web browser",
+   "pages": [
+    "/tools/pdf-tools/pdf-to-word",
+    "/tools/pdf-tools/ppt-to-pdf",
+    "/tools/pdf-tools/word-to-pdf"
+   ]
+  },
+  {
+   "s": "copy the result",
+   "pages": [
+    "/tools/text-tools/duplicate-remover",
+    "/tools/text-tools/text-encryptor",
+    "/tools/text-tools/text-truncator"
+   ]
+  }
+ ]
+}

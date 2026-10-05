@@ -138,6 +138,16 @@ for (const slug of serverSlugs) {
 if (!/sent to google to be translated/.test(privacy)) fail('app/privacy/page.jsx', 'Google Translate: the page text sent to Google is not disclosed', '');
 if (!/the page&apos;s text is sent to Google/.test(fs.readFileSync(path.join(ROOT, 'app', 'components', 'Navbar.jsx'), 'utf8'))) fail('app/components/Navbar.jsx', 'language menu does not say the text goes to Google', '');
 
+// ---- 6: the About page's figures (P36) -- app/lib/serverToolCount.json must be what this check measures ------------
+const countFile = path.join(ROOT, 'app', 'lib', 'serverToolCount.json');
+// "server" = tools that send data in at least one case: the ones above, plus the iPhone / iPad fallbacks that draw or
+// recognize a page on our PDF service (app/lib/serverPageRender.js, serverPageOcr.js), found through the page's imports.
+const FALLBACK = /serverPageRender|serverPageOcr|\/api\/pdf-(render|ocr)/;
+const fallbackSlugs = toolPages().filter(({ slug, file }) => !serverSlugs.includes(slug) && FALLBACK.test(readPage(file).code)).map((p) => p.slug);
+const measured = { total: toolPages().length, server: serverSlugs.length + fallbackSlugs.length, iosFallbackOnly: fallbackSlugs.length };
+const stored = fs.existsSync(countFile) ? JSON.parse(fs.readFileSync(countFile, 'utf8')) : null;
+if (!stored || stored.total !== measured.total || stored.server !== measured.server || stored.iosFallbackOnly !== measured.iosFallbackOnly) fail('app/lib/serverToolCount.json', 'About page figures out of date', `stored ${JSON.stringify(stored)}, measured ${JSON.stringify(measured)} -- write the measured values`);
+
 for (const f of failures) console.log(`FAIL ${f.where} — ${f.what}${verbose || f.what !== 'x' ? `\n    “${f.sentence.slice(0, 300)}”` : ''}`);
 console.log(`${serverSlugs.length} tools send data (read from the code); ${failures.length} failure(s)`);
 if (verbose) console.log(serverSlugs.join('\n'));
