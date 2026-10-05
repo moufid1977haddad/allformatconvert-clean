@@ -67,12 +67,21 @@ module.exports = {
   OCR_TIMEOUT_MS: Number(process.env.OCR_TIMEOUT_MS) || 50_000,
   // an A4 page at 300 dpi is 8.7 MP; a larger page is recognized at the density that fits (and the answer says so).
   // Security review 05/10: Tesseract measured ~0.7 GB resident on a dense 25 MP page (eng), ~1 GB with three
-  // languages, in a container shared with LibreOffice, Ghostscript and the renders: 12 MP, one recognition at a time.
+  // languages, in a container shared with LibreOffice, Ghostscript and the renders: 12 MP (two at a time since P35).
   OCR_MAX_PIXELS: Number(process.env.OCR_MAX_PIXELS) || 12_000_000,
   // Tesseract's text-only PDF of one page (an invisible text layer, a few KB to a few hundred) and the text, as JSON
   MAX_OCR_OUTPUT_BYTES: Number(process.env.MAX_OCR_OUTPUT_BYTES) || 2_500_000,
-  OCR_CONCURRENCY: Number(process.env.OCR_CONCURRENCY) || 1,
+  // P35 (owner's decision D1, 06/10): two recognitions at a time on the service, one per visitor (src/ocrQueue.js)
+  OCR_CONCURRENCY: Number(process.env.OCR_CONCURRENCY) || 2,
+  // a caller that does not ask for the line (no X-OCR-Stream: the site before P35) waits at most this long, as before
   OCR_QUEUE_MS: Number(process.env.OCR_QUEUE_MS) || 20_000,
+  // the line of the site's streamed requests (X-OCR-Stream: 1): places told to the page as they change. 200 s in line
+  // + 50 s of recognition stay under the site's 300 s function limit (app/api/pdf-ocr/route.ts).
+  OCR_QUEUE_MAX_WAIT_MS: Number(process.env.OCR_QUEUE_MAX_WAIT_MS) || 200_000,
+  OCR_QUEUE_MAX_WAITING: Number(process.env.OCR_QUEUE_MAX_WAITING) || 20,
+  OCR_QUEUE_MAX_WAITING_PER_CLIENT: Number(process.env.OCR_QUEUE_MAX_WAITING_PER_CLIENT) || 2,
+  // a line repeated this often while a request waits or is recognized, so that no proxy closes a quiet connection
+  OCR_LINE_HEARTBEAT_MS: Number(process.env.OCR_LINE_HEARTBEAT_MS) || 10_000,
   // the whole JSON answer (text + base64 layer) must come back through a Vercel function (~4.5 MB)
   MAX_OCR_ANSWER_BYTES: Number(process.env.MAX_OCR_ANSWER_BYTES) || 4_200_000,
   // staged sources (render and OCR) copied from the media service at the same time (security review 05/10: each copy

@@ -3,6 +3,7 @@ const path = require('path');
 const { runProcess } = require('./runProcess');
 const config = require('./config');
 const { pageInfo } = require('./render');
+const { OcrQueue } = require('./ocrQueue');
 
 // P33 (05/10): one PDF page -> its text, recognized by Tesseract (Apache-2.0, Debian's tesseract-ocr 5.3 and the
 // tesseract-ocr-<lang> models, used unmodified as a separate program). Called by the site's /api/pdf-ocr ONLY when an
@@ -18,7 +19,7 @@ const { pageInfo } = require('./render');
 //
 // Bounds (the page comes from an untrusted PDF): one page per request; the page drawn in grey by pdftoppm at the asked
 // density, at most OCR_MAX_PIXELS (density lowered and said above that); OCR_CONCURRENCY recognitions at a time on
-// this service, a request that cannot start within OCR_QUEUE_MS gets 503; every child process under the same address-
+// this service and one per visitor, the others wait in line (src/ocrQueue.js, P35); every child process under the same address-
 // space ceiling as the renders (prlimit, Linux); Tesseract on one thread (OMP_THREAD_LIMIT=1); the request's temp dir
 // is deleted by server.js on every path; no file name, no text in the logs.
 
@@ -55,21 +56,8 @@ function parseOcrParams(src, langs) {
   return { ok: true, page, dpi, lang: codes.join('+') };
 }
 
-// at most OCR_CONCURRENCY recognitions at a time on this service (separate from the renders: an OCR holds its slot
-// for seconds, a render for a fraction of one)
-let running = 0;
-const waiting = [];
-function acquire(ms) {
-  if (running < config.OCR_CONCURRENCY) { running++; return Promise.resolve(true); }
-  return new Promise((resolve) => {
-    const entry = { resolve, timer: setTimeout(() => { const i = waiting.indexOf(entry); if (i >= 0) waiting.splice(i, 1); resolve(false); }, ms) };
-    waiting.push(entry);
-  });
-}
-function release() {
-  const next = waiting.shift();
-  if (next) { clearTimeout(next.timer); next.resolve(true); } else running--;
-}
+// the OCR slots: OCR_CONCURRENCY at a time, one per visitor, a line with places beyond (src/ocrQueue.js, P35 D1)
+const queue = new OcrQueue({ max: config.OCR_CONCURRENCY, maxWaiting: config.OCR_QUEUE_MAX_WAITING, maxWaitingPerKey: config.OCR_QUEUE_MAX_WAITING_PER_CLIENT });
 
 function run(bin, args, opts) {
   if (process.platform === 'linux' && config.RENDER_MEMORY_LIMIT_BYTES > 0) {
@@ -79,18 +67,9 @@ function run(bin, args, opts) {
 }
 
 /**
- * Recognizes page `p.page` of <workDir>/input.pdf. Returns {ok, text, pdf (Buffer, text-only page), dpi, reduced,
- * pages} or {ok:false, status, error}.
+ * Recognizes page `p.page` of <workDir>/input.pdf; the caller holds an OCR slot (queue.acquire). Returns {ok, text, pdf
+ * (Buffer, text-only page), dpi, reduced, pages} or {ok:false, status, error}.
  */
-async function ocrPage(workDir, p, signal) {
-  if (!(await acquire(config.OCR_QUEUE_MS))) return { ok: false, status: 503, error: 'Our OCR service is busy right now. Please try again in a minute.' };
-  try {
-    return await ocrAcquired(workDir, p, signal);
-  } finally {
-    release();
-  }
-}
-
 async function ocrAcquired(workDir, p, signal) {
   const info = await pageInfo(workDir, p.page, signal);
   if (!info.ok) return info;
@@ -119,4 +98,4 @@ async function ocrAcquired(workDir, p, signal) {
   return { ok: true, text, pdf, dpi, reduced, pages: info.pages };
 }
 
-module.exports = { parseOcrParams, ocrPage, installedLanguages, MAX_LANGS };
+module.exports = { parseOcrParams, ocrAcquired, queue, installedLanguages, MAX_LANGS };

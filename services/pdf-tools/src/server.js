@@ -14,7 +14,7 @@ const { docxToDoc } = require('./docConvert');
 const { runProcess } = require('./runProcess');
 const compress = require('./compress');
 const { parseRenderParams, renderPage } = require('./render');
-const { parseOcrParams, ocrPage, installedLanguages } = require('./ocr');
+const { parseOcrParams, ocrAcquired, queue: ocrQueue, installedLanguages } = require('./ocr');
 
 sweepStaleTempDirs();
 
@@ -100,7 +100,8 @@ app.get('/health', async (_req, res) => {
   // P33: the OCR models installed (codes only), so the site's language list can be checked against them
   let ocrLanguages = null;
   try { ocrLanguages = [...(await installedLanguages())].sort(); } catch { /* reported by binaries.tesseract */ }
-  res.status(allOk ? 200 : 503).json({ ok: allOk, binaries, ocrLanguages });
+  // P35: the OCR slots (how many at a time; the line exists) — no count of visitors
+  res.status(allOk ? 200 : 503).json({ ok: allOk, binaries, ocrLanguages, ocr: { concurrency: config.OCR_CONCURRENCY, line: true } });
 });
 
 // P28: repair reads the text of the damaged file and of every candidate (two readers each) and can try four methods,
@@ -432,6 +433,22 @@ app.post('/v1/render-page-staged', requireApiKey, express.json({ limit: '4kb' })
 // ---- /v1/ocr-page (P33): one PDF page -> its text + Tesseract's text-only PDF of it (src/ocr.js) ---------------------
 // For an iPhone / iPad whose browser could not recognize the page. Multipart: file + page, lang ("eng", "eng+fra", at
 // most 3), dpi. Answer: JSON {ok, text, pdf (base64), dpi, reduced, pages}. Nothing is kept (withTempDir).
+//
+// P35 (owner's decision D1): OCR_CONCURRENCY (2) recognitions at a time, ONE per visitor (header X-Client-Key: the hash
+// of the visitor's IP, computed by the site — never the IP itself, never logged), the others wait in line
+// (src/ocrQueue.js). With X-OCR-Stream: 1 (the site since P35), a request that has to wait gets a stream of JSON lines:
+// {"queued":true,"position":n} each time its place in line changes (repeated every 10 s, so that no proxy closes a
+// quiet connection), {"started":true} when its recognition starts, then ONE last line, the result: {ok:true, …} or
+// {ok:false, status, error}. A request that starts at once gets the plain JSON answer of P33. Without the header (the
+// site before P35), the request waits at most OCR_QUEUE_MS and the answer is P33's JSON, unchanged.
+const OCR_LINE_ERRORS = {
+  line_full: { status: 503, error: 'Our OCR service has too many pages waiting right now. Please try again in a few minutes, or use a computer for this PDF.' },
+  visitor_line_full: { status: 429, error: 'Pages from your connection are already waiting for our OCR service. Please let them finish first.' },
+  timeout: { status: 503, error: 'Our OCR service is still busy with other pages. Please try again in a few minutes, or use a computer for this PDF.' },
+  aborted: { status: 499, error: 'Cancelled.' },
+};
+const CLIENT_KEY = /^[0-9a-f]{64}$/;
+
 // the fields are checked BEFORE a staged file is fetched (a malformed request costs nothing)
 async function ocrParams(req, res) {
   let langs;
@@ -447,16 +464,89 @@ async function ocrParams(req, res) {
   return p;
 }
 
-async function ocrRequest(req, res, p, signal, endpoint, bytesIn) {
+/**
+ * Waits for an OCR slot, then runs `work(signal)` (fetch of a staged source, recognition) and answers. `outerSignal`:
+ * the endpoint's deadline; with the line, the recognition keeps its own OCR_TIMEOUT_MS from the moment it starts.
+ */
+async function ocrRequest(req, res, outerSignal, endpoint, work) {
   const startedAt = Date.now();
-  const r = await ocrPage(req.tempDir, p, signal);
-  logMetric({ apiKeyName: req.apiKey.name, endpoint, bytesIn, bytesOut: r.ok ? r.pdf.length : null, durationMs: Date.now() - startedAt, verdict: r.ok ? `ocr_${r.reduced ? 'reduced' : 'full'}` : signal.aborted ? 'timeout' : `failed_${r.status}` });
-  if (!r.ok) return res.status(r.status).json({ ok: false, error: r.error });
-  res.setHeader('Cache-Control', 'no-store');
-  return res.status(200).json({ ok: true, text: r.text, pdf: r.pdf.toString('base64'), dpi: r.dpi, reduced: r.reduced, pages: r.pages });
+  const stream = req.get('x-ocr-stream') === '1';
+  const key = CLIENT_KEY.test(req.get('x-client-key') || '') ? req.get('x-client-key') : null;
+  // the visitor leaving (page closed, request cancelled) takes the request out of the line / stops Tesseract
+  const gone = new AbortController();
+  const onClose = () => { if (!res.writableFinished) gone.abort(); };
+  res.on('close', onClose);
+  const lineSignal = AbortSignal.any([outerSignal, gone.signal]);
+  let beat = null;
+  let lastPosition = 0;
+  const writeLine = (obj) => { if (!res.writableEnded && !res.destroyed) res.write(`${JSON.stringify(obj)}\n`); };
+  const startStream = () => {
+    if (res.headersSent) return;
+    res.status(200);
+    res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders();
+    beat = setInterval(() => writeLine({ queued: true, position: lastPosition }), config.OCR_LINE_HEARTBEAT_MS);
+  };
+  const finish = (status, body) => {
+    clearInterval(beat);
+    if (res.headersSent) { writeLine(body.ok ? body : { ...body, status }); res.end(); return undefined; }
+    if (body.ok) res.setHeader('Cache-Control', 'no-store');
+    return res.status(status).json(body);
+  };
+  try {
+    const slot = await ocrQueue.acquire(key, {
+      maxWaitMs: stream ? config.OCR_QUEUE_MAX_WAIT_MS : config.OCR_QUEUE_MS,
+      signal: lineSignal,
+      onPosition: stream ? (n) => { lastPosition = n; startStream(); writeLine({ queued: true, position: n }); } : undefined,
+    });
+    if (!slot.ok) {
+      logMetric({ apiKeyName: req.apiKey.name, endpoint, durationMs: Date.now() - startedAt, verdict: `line_${slot.reason}` });
+      if (gone.signal.aborted || res.destroyed) return undefined;
+      const e = OCR_LINE_ERRORS[slot.reason];
+      // a caller without the line keeps P33's sentence for a busy service
+      return finish(e.status, { ok: false, reason: slot.reason, error: !stream && slot.reason === 'timeout' ? 'Our OCR service is busy right now. Please try again in a minute.' : e.error });
+    }
+    let r;
+    try {
+      // with the line, the recognition has its own deadline from the moment it starts (a long wait does not shorten
+      // it); a caller without the line keeps P33's single deadline from the request's start (outerSignal)
+      const signal = stream ? AbortSignal.any([lineSignal, AbortSignal.timeout(config.OCR_TIMEOUT_MS)]) : lineSignal;
+      if (res.headersSent) {
+        // from now on the keep-alive line says "started" (review 06/10: repeating the last place would show the visitor
+        // "number 2 in line" while the page is being recognized)
+        clearInterval(beat);
+        writeLine({ started: true });
+        beat = setInterval(() => writeLine({ started: true }), config.OCR_LINE_HEARTBEAT_MS);
+      }
+      try {
+        r = await work(signal);
+      } catch (err) {
+        // review 06/10: once the stream has started, withTempDir can no longer answer — the error goes in the last line
+        console.error(`Unhandled error in ${endpoint}:`, err?.message || err);
+        r = { ok: false, status: 500, error: 'Internal error while processing the file.' };
+      }
+    } finally {
+      slot.release();
+    }
+    logMetric({ apiKeyName: req.apiKey.name, endpoint, bytesIn: r.bytesIn ?? null, bytesOut: r.ok ? r.pdf.length : null, durationMs: Date.now() - startedAt, verdict: r.ok ? `ocr_${r.reduced ? 'reduced' : 'full'}${slot.waited ? '_after_line' : ''}` : lineSignal.aborted ? 'timeout' : `failed_${r.status}` });
+    if (gone.signal.aborted || res.destroyed) return undefined;
+    if (!r.ok) return finish(r.status, { ok: false, error: r.error });
+    return finish(200, { ok: true, text: r.text, pdf: r.pdf.toString('base64'), dpi: r.dpi, reduced: r.reduced, pages: r.pages });
+  } finally {
+    clearInterval(beat);
+    res.off('close', onClose);
+  }
 }
 
+// the endpoints' deadline covers the longest wait in line plus the recognition; a caller without the line is held to
+// P33's single OCR_TIMEOUT_MS from the request's start (legacyDeadline)
+const OCR_ENDPOINT_MS = config.OCR_QUEUE_MAX_WAIT_MS + config.OCR_TIMEOUT_MS + 5_000;
+const legacyDeadline = (req, signal) => (req.get('x-ocr-stream') === '1' ? signal : AbortSignal.any([signal, AbortSignal.timeout(config.OCR_TIMEOUT_MS)]));
+
 app.post('/v1/ocr-page', requireApiKey, withTempDir(withTimeout(async (req, res, signal) => {
+  const deadline = legacyDeadline(req, signal);
   try {
     await runUpload(req, res);
   } catch (err) {
@@ -467,11 +557,14 @@ app.post('/v1/ocr-page', requireApiKey, withTempDir(withTimeout(async (req, res,
   if (req.file.size > config.MAX_RENDER_INPUT_BYTES) return res.status(413).json({ ok: false, error: `Files up to ${Math.floor(config.MAX_RENDER_INPUT_BYTES / 1048576)} MB are accepted.` });
   const p = await ocrParams(req, res);
   if (!p) return;
-  return ocrRequest(req, res, p, signal, '/v1/ocr-page', req.file.size);
-}, config.OCR_TIMEOUT_MS)));
+  const bytesIn = req.file.size;
+  return ocrRequest(req, res, deadline, '/v1/ocr-page', async (s) => ({ ...(await ocrAcquired(req.tempDir, p, s)), bytesIn }));
+}, OCR_ENDPOINT_MS)));
 
 // ---- /v1/ocr-page-staged (P33): same, the PDF is on the media service (files above the Vercel body ceiling) -------
+// P35: the staged copy is fetched once the OCR slot is obtained (a request waiting in line holds no copy in /tmp)
 app.post('/v1/ocr-page-staged', requireApiKey, express.json({ limit: '4kb' }), withTempDir(withTimeout(async (req, res, signal) => {
+  const deadline = legacyDeadline(req, signal);
   if (!config.MEDIA_SERVICE_URL) {
     console.error('[ocr-page-staged] MEDIA_SERVICE_URL is not set');
     return res.status(503).json({ ok: false, error: 'Large-file recognition is not available right now.' });
@@ -482,11 +575,13 @@ app.post('/v1/ocr-page-staged', requireApiKey, express.json({ limit: '4kb' }), w
   }
   const p = await ocrParams(req, res);
   if (!p) return;
-  const src = await fetchStagedBounded(req.tempDir, jid, ticket, signal, config.MAX_RENDER_INPUT_BYTES);
-  if (!src.ok) return res.status(src.status).json({ ok: false, error: src.error });
-  const bytesIn = fs.statSync(require('path').join(req.tempDir, compress.INPUT_NAME)).size;
-  return ocrRequest(req, res, p, signal, '/v1/ocr-page-staged', bytesIn);
-}, config.OCR_TIMEOUT_MS)));
+  return ocrRequest(req, res, deadline, '/v1/ocr-page-staged', async (s) => {
+    const src = await fetchStagedBounded(req.tempDir, jid, ticket, s, config.MAX_RENDER_INPUT_BYTES);
+    if (!src.ok) return src;
+    const bytesIn = fs.statSync(require('path').join(req.tempDir, compress.INPUT_NAME)).size;
+    return { ...(await ocrAcquired(req.tempDir, p, s)), bytesIn };
+  });
+}, OCR_ENDPOINT_MS)));
 
 app.listen(config.PORT, () => {
   console.log(`pdf-tools-service listening on :${config.PORT}`);
