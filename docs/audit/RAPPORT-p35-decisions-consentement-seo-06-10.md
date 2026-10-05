@@ -128,3 +128,40 @@ alphabets que Helvetica ne sait pas écrire (grec, cyrillique, arabe, asiatique,
   privée. **Aucun retour arrière.** Retour arrière prêt : promouvoir `onlineconvertools-2lg294nt3` (site de P34) ;
   pdf-tools : annuler `c92b907b` par un commit ; D2 : `scripts/p35/media-url-switch.mjs rollback` (ancienne valeur gardée
   hors dépôt).
+
+## Lot 2 — consentement Europe (audit A1)
+
+**Constat** (audit lot C) : `gtag` `G-7GFHW05JLH` chargé pour tous, sans `gtag('consent', …)` : cookies `_ga` posés sans
+consentement pour les visiteurs de l'UE. **Marché** : Smallpdf, iLovePDF et PDF24 affichent une bannière de consentement
+(CMP) aux visiteurs européens (connaissance générale, non revérifiée depuis l'Europe) ; ne rien charger du tout en Europe
+est plus strict qu'une bannière et ne demande aucun compte.
+
+**Fait** :
+- `app/lib/analyticsRegion.js` : Analytics **seulement si le pays est connu et hors** EEE (27 + Islande, Liechtenstein,
+  Norvège), Royaume-Uni, Suisse — plus leurs territoires à code propre (Åland, régions ultrapériphériques et territoires
+  français hors UE, îles Anglo-Normandes, île de Man, Gibraltar). **Pays inconnu** (absent, `XX`, `EU`, `T1`, illisible)
+  = Europe.
+- `app/api/analytics-consent/route.js` : le **serveur** décide à partir de `x-vercel-ip-country` (posé par Vercel) ;
+  réponse `private, no-store` (jamais servie à un autre pays par un cache), le pays n'est pas renvoyé. Sur une
+  **préversion exécutée sur Vercel seulement**, l'en-tête `x-oct-test-country` remplace celui de Vercel (tests) ; la
+  production ne le lit jamais (un serveur local avec `VERCEL_ENV=preview` venu du `.env` non plus).
+- `app/components/Analytics.jsx` remplace les deux `<Script>` du `<head>` : rien de Google n'est demandé avant la
+  réponse ; réponse négative ou absente = rien ; sinon `gtag` comme avant (après le chargement, navigateur au repos).
+  Réponse négative : les cookies `_ga` laissés par une visite antérieure sont **supprimés**.
+- Aucun autre traceur sur le site (relecture : seuls tiers contactés au chargement en Europe = taux de change de Currency
+  Converter ; Google Translate seulement si le visiteur choisit une langue ; polices servies par le site).
+- `/privacy` (daté du 6 octobre) : Analytics seulement hors EEE / Royaume-Uni / Suisse (territoires compris), « not
+  loaded at all » là (aucun cookie, rien envoyé, anciens cookies supprimés), pays inconnu idem, pays tiré de l'IP par
+  Vercel et non conservé ; ligne ajoutée pour les fournisseurs que le navigateur contacte lui-même (taux de change,
+  cdn.jsdelivr.net pour le moteur d'OCR, le modèle d'Upscaler et les polices de Text to PDF).
+
+**Tests (local, en-tête de pays simulé)** : `scripts/p35/analytics-region.test.mjs` 11/11 ; `scripts/p35/consent-check.mjs`
+**33/33** : FR, FR avec d'anciens `_ga`, DE, GB, CH, RE, pays inconnu → **0 requête** vers googletagmanager /
+google-analytics, **aucun cookie `_ga`** (seul `oct_automation`, marqueur de robot de test jamais posé chez un visiteur),
+réponse `false` ; CA et US → gtag chargé, `/g/collect` envoyé, `_ga` posé (inchangé).
+
+**Relecture de conformité** (sous-agent) : **GO avec conditions**, aucune bloquante ; appliqué : politique complétée (tiers
+contactés par le navigateur ; territoires), 6 territoires français hors UE ajoutés, suppression des anciens `_ga`, en-tête
+de test limité à l'exécution sur Vercel. **Note pour plus tard** : activer AdSense rouvre la question (le message de
+consentement d'AdSense voudra activer Analytics que ce lot bloque en Europe ; une seule liste de régions à partager) —
+au plan.

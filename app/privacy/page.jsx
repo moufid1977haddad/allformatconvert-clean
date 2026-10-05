@@ -32,7 +32,7 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-2 text-neutral-800">Privacy Policy</h1>
-        <p className="text-neutral-500 text-center mb-10">Last updated: October 5, 2026</p>
+        <p className="text-neutral-500 text-center mb-10">Last updated: October 6, 2026</p>
         <div className="space-y-6">
 
           <div className={card}>
@@ -67,7 +67,7 @@ export default function PrivacyPage() {
           <div className={card}>
             <h2 className={h2}>{num()}. Other information we collect</h2>
             <ul className={ul}>
-              <li><strong>Visit statistics:</strong> we use Google Analytics to count visits and see which pages are used (pages viewed, approximate location from your IP address, browser and device type, time of visit). Google Analytics sets cookies (Section 4).</li>
+              <li><strong>Visit statistics:</strong> outside the European Economic Area, the United Kingdom and Switzerland, we use Google Analytics to count visits and see which pages are used (pages viewed, approximate location from your IP address, browser and device type, time of visit). Google Analytics sets cookies (Section 4). <strong>In the European Economic Area, the United Kingdom and Switzerland (including their territories, such as the French overseas territories, the Channel Islands, the Isle of Man and Gibraltar), Google Analytics is not loaded at all</strong>: no Analytics cookie is set, nothing is sent to Google Analytics, and Analytics cookies set by an earlier visit are deleted. The same applies when your country cannot be determined. Your country is the one our hosting provider (Vercel) derives from your IP address for each request; we use it only for this choice and do not store it.</li>
               <li><strong>Server logs:</strong> our hosting provider (Vercel) keeps technical logs of requests, including IP addresses, for security and operation.</li>
               <li><strong>Usage metrics and abuse limits:</strong> to stay within our providers' budgets and prevent abuse, we record which paid or server tool was used, when, and an estimated processing cost. For per-visitor limits we record a one-way cryptographic hash of your IP address, never the address itself. We never record file contents or the text you submit.</li>
               <li><strong>Failure reports:</strong> when a tool fails or shows an error message, we record an anonymous report so we can fix it: the tool's name, the file extension, a coarse size range (e.g. "1-10MB"), the error type and a cleaned error message (file names, paths, quoted text, web addresses, e-mail addresses and long numbers are removed from it), a coarse browser name and version (e.g. "Chrome 129"), and the time. Never your file, its content, its real name, the text you typed, or your IP address. Nothing is sent when a tool succeeds.</li>
@@ -79,7 +79,7 @@ export default function PrivacyPage() {
           <div className={card}>
             <h2 className={h2}>{num()}. Cookies and local storage</h2>
             <ul className={ul}>
-              <li><strong>Google Analytics</strong> (<code>_ga</code>, <code>_ga_&lt;id&gt;</code>): visit statistics, up to 2 years.</li>
+              <li><strong>Google Analytics</strong> (<code>_ga</code>, <code>_ga_&lt;id&gt;</code>): visit statistics, up to 2 years — only outside the European Economic Area, the United Kingdom and Switzerland (Section 3).</li>
               <li><strong>Google Translate</strong> (<code>googtrans</code>): set only if you choose a language in the menu, to keep the page translated. Google's translation script is loaded when you open the language menu. While a translation is on, the text shown on the page — including results a tool displays — is sent to Google to be translated; files themselves are never sent.</li>
               {ads && <li><strong>Advertising</strong> (Google AdSense and its partners): see Section 6. In the European Economic Area, the United Kingdom and Switzerland, advertising cookies are used only if you agree in the consent message.</li>}
               <li><strong>Local storage in your browser</strong> (never sent to us): your light/dark mode choice, notes and settings you save in some tools, and — if you sign in — your session.</li>
@@ -98,6 +98,7 @@ export default function PrivacyPage() {
               <li><strong>Google Cloud Translation</strong>: <Ext href="https://cloud.google.com/translate/data-usage">Cloud Translation data usage</Ext>.</li>
               <li><strong>Supabase</strong> (database and accounts): <Ext href="https://supabase.com/privacy">Supabase Privacy Policy</Ext>.</li>
               <li><strong>Resend</strong> (email): <Ext href="https://resend.com/legal/privacy-policy">Resend Privacy Policy</Ext>.</li>
+              <li><strong>Downloaded by your browser from other providers</strong> (they see your IP address, like any website you load; no cookie, no file of yours): exchange rates in Currency Converter (open.er-api.com, frankfurter.dev), and code, language data and fonts for some in-browser tools, such as PDF OCR's recognition engine, AI Image Upscaler's on-device model and the fonts of Text to PDF (cdn.jsdelivr.net).</li>
               <li><strong>Google</strong> (Analytics, Translate{ads ? ', AdSense' : ''}): <Ext href="https://policies.google.com/privacy">Google Privacy Policy</Ext> and <Ext href="https://policies.google.com/technologies/partner-sites">how Google uses information from sites that use its services</Ext>.</li>
             </ul>
             <p className={`${p} mt-3`}>Some of these providers are located outside your country, including in the United States; they process data only to provide their service to us.</p>

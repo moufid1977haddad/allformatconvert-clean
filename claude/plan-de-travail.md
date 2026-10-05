@@ -32,6 +32,14 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 | 1 — D3 Redact texte sélectionnable | ✅ couche invisible des mots hors des boîtes ; 31 PDF piégés : 0 fuite ; 252 rédactions réelles : 0 refus |
 | 1 — D4 confirmation avant envoi | décidé : **non** (marché : aucun ne confirme ; avis avant/après déjà affiché) |
 | 1 — P33 P3 texte OCR doublé | ✅ une page qui a déjà son texte ne reçoit plus la couche OCR (OCRmyPDF `--skip-text`, Acrobat) |
+| 2 — Consentement Europe (A1) | ✅ Google Analytics **jamais chargé** dans l'EEE, au Royaume-Uni, en Suisse (territoires compris) ni pour un pays inconnu ; décision serveur (`x-vercel-ip-country`), anciens `_ga` supprimés ; `/privacy` du 6 octobre ; relecture GO avec conditions, appliquées |
+
+**Décisions du propriétaire — P35**
+
+| # | Décision | Options chiffrées | Recommandation |
+|---|---|---|---|
+| P35-1 | **Choix d'une bannière de consentement certifiée Google (CMP, IAB TCF), à décider au moment de la demande AdSense** — d'ici là, Analytics reste coupé en Europe | options gratuites : **Google Privacy & messaging** (dans le compte AdSense, 0 $), **CookieScript**, **CookieYes**, **Cookiebot** (offres gratuites limitées en pages / visites) ; ≈ ½ jour d'intégration + Consent Mode v2 ; aucun compte créé par Claude | Google Privacy & messaging (gratuit, livré par le script AdSense déjà préparé, `app/lib/ads.js`) ; alors : une seule liste de régions pour Analytics et Consent Mode, et décider si Analytics redevient possible en Europe **avec** consentement |
+| P35-2 | Activer AdSense : rouvre le lot 2 (le message de consentement voudrait activer Analytics, que `app/components/Analytics.jsx` bloque en Europe quel que soit le choix) | relecture + ≈ 2 h | à faire avec P35-1 |
 
 **Pièges notés (P35)** : (1) heredoc bash : `python - <<'EOF'` échoue encore sur certains contenus (apostrophes multiples) → scripts Python écrits par l'outil d'écriture ; (2) `railway status --json` donne `targetPort`, `limitOverride`, l'état des déploiements sans aucune valeur de variable ; (3) `railway variables --set` : passer la valeur par une variable d'environnement du processus (`%P35_VALUE%` sous Windows) pour que `${{…}}` arrive intact ; (4) le `.env.local` contient `VERCEL_ENV=preview` : un serveur local se croit en préversion — tout test « préversion seulement » doit aussi exiger l'exécution sur Vercel (`VERCEL_REGION`).
 
@@ -223,7 +231,7 @@ l'instance isolée qui fait tourner Chromium** : mêmes bancs (`scripts/p27/gote
 
 ## 🧮 P28 — 04/10 : Gotenberg 8.37, équations Word, PDF Repair (`docs/audit/RAPPORT-p28-gotenberg-04-10.md`, repère `restauration-avant-p28-04-10` = `6a8af4be`)
 
-**Décisions du propriétaire (prompt P28, 04/10)** : **Google Analytics reste chargé comme aujourd'hui** (les statistiques
+**Décisions du propriétaire (prompt P28, 04/10)** : *(P35, 06/10 : Analytics n'est plus chargé en Europe — voir P35)* **Google Analytics reste chargé comme aujourd'hui** (les statistiques
 complètes priment sur 1-2 points de vitesse) — sujet clos ; **le panorama iPhone de 63 Mpx est dans sa passe iPhone
 (test 26)**.
 

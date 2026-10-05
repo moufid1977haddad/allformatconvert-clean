@@ -10,6 +10,7 @@ import FileDropBridge from "./components/FileDropBridge";
 import A11yBridge from "./components/A11yBridge";
 import GoogleTranslateLoader from "./components/GoogleTranslateLoader";
 import AdsScripts from "./components/AdsScripts";
+import Analytics from "./components/Analytics";
 import ToolFooterAd from "./components/AdSlot";
 import Script from "next/script";
 import { getToolCounts } from "@/lib/toolCounts";
@@ -106,15 +107,9 @@ export default function RootLayout({
         <ToolFooterAd />
         <Footer />
         <AdsScripts />
-        {/* Analytics loads once the page has finished loading and the browser is idle (lazyOnload): it no longer
-            competes with the tool's own code for the network and the main thread on a phone (≈ 180 KB, ≈ 0.3 s). */}
-        <Script src="https://www.googletagmanager.com/gtag/js?id=G-7GFHW05JLH" strategy="lazyOnload" />
-        <Script id="google-analytics" strategy="lazyOnload" dangerouslySetInnerHTML={{ __html: `
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-7GFHW05JLH');
-        `}} />
+        {/* Google Analytics: never in the EEA, the UK and Switzerland (nor for an unknown country) — the server decides
+            from Vercel's country header; elsewhere, loaded once the page has loaded and the browser is idle (P35). */}
+        <Analytics />
         {/* Google Translate: loaded on demand (language menu) or when a translation is already active. */}
         <GoogleTranslateLoader />
         <NewVersionBanner />
