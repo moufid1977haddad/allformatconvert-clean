@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import ToolJsonLd from '../../../components/ToolJsonLd';
 import { SEO } from './seo';
+import ToolSeo from '@/app/components/ToolSeo';
 
-// Title, description and structured data come from seo.js, the same object the page renders its FAQ from.
+// Title and description come from seo.js, the same object the page renders its FAQ from.
 const url = 'https://www.onlineconvertools.com' + SEO.path;
 
 export const metadata: Metadata = {
@@ -12,13 +12,12 @@ export const metadata: Metadata = {
   openGraph: { title: SEO.title, description: SEO.description, url },
 };
 
-// The page is a 'use client' component and can't export metadata itself; this layout hosts it and adds the
-// JSON-LD script. It has no effect on rendering or behavior.
+// The page is a 'use client' component and can't export metadata itself; this layout hosts it. Its structured data is
+// rendered by SeoContent from the page's visible texts since P35 (ToolSeo: related tools + JSON-LD).
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <ToolJsonLd seo={SEO} />
-      {children}
+      <ToolSeo path="/tools/developer-tools/hash-generator">{children}</ToolSeo>
     </>
   );
 }

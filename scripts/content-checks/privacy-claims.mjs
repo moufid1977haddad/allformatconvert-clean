@@ -107,8 +107,8 @@ for (const { slug, file } of pages) {
 const ABSOLUTE = /\b(no data stored|nothing is stored|we (never|don'?t) store|every tool runs|all (our |the )?tools run|everything (runs|happens) in your browser|never leaves your device|100 ?% private|completely private|works in your browser)\b/i;
 // Surface sentences that are true as written. File and start of the sentence, with the reason (01/10, P20).
 const SURFACE_ALLOW = [
-  ['app/page.jsx', 'We only read the file type', "home page drop zone: it reads file.name only and suggests a tool"],
-  ['app/page.jsx', 'Your file stays on your device', 'same drop zone'],
+  ['app/HomeClient.jsx', 'We only read the file type', "home page drop zone: it reads file.name only and suggests a tool"],
+  ['app/HomeClient.jsx', 'Your file stays on your device', 'same drop zone'],
 ];
 const SCOPED = /\b(most|many|some|except|exception|unless|the others|these|this tool|for those|the tools that|such as|instead|when your browser)\b/i;
 const SURFACES = /^app\/(page\.jsx|layout\.tsx|about\/|components\/(Footer|Navbar)|tools\/[^/]+\/page\.jsx|tools\/page\.jsx)/;

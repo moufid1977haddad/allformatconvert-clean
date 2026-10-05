@@ -2,8 +2,9 @@ import Link from 'next/link';
 import { getToolCounts } from '@/lib/toolCounts';
 
 export const metadata = {
-  title: 'About - OnlineConverTools',
+  title: 'About',
   description: 'Learn more about OnlineConverTools - your all-in-one free online tools platform.',
+  alternates: { canonical: 'https://www.onlineconvertools.com/about' },
 };
 
 export default function AboutPage() {

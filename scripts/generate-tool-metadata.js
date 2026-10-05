@@ -12,7 +12,7 @@
  *  - tool pages:      the <SeoContent title="..." description="..."/> props
  *                      already written on that tool's own page.jsx/tsx
  *  - category pages:  the short `description` field already in
- *                      app/page.jsx's `categories` array (title source) and
+ *                      app/HomeClient.jsx's `categories` array (title source) and
  *                      the "About {Category}" paragraph on the category's
  *                      own page.jsx (meta-description source)
  *  - the /tools index: the live tool count from lib/toolCounts.js
@@ -259,10 +259,10 @@ function extractCategoryAbout(filePath) {
   return m ? unescapeHtml(m[1]) : null;
 }
 
-// Reads app/page.jsx's own `categories` array (already-existing registry:
+// Reads app/HomeClient.jsx's own `categories` array (already-existing registry:
 // title, short description, slug, tool count) instead of retyping it.
 function extractCategoriesRegistry() {
-  const src = fs.readFileSync(path.join(ROOT, 'app', 'page.jsx'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'app', 'HomeClient.jsx'), 'utf8');
   const block = src.match(/const categories = \[([\s\S]*?)\n\];/)[1];
   const entries = [];
   const re = /title:\s*'([^']*)',\s*description:\s*'([^']*)',\s*href:\s*'([^']*)',\s*slug:\s*'([^']*)',[\s\S]*?count:\s*(\d+)/g;

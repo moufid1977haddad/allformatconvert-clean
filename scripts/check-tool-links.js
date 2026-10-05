@@ -82,7 +82,7 @@ for (const cat of categories) {
   realTotal += realCounts[cat];
 }
 const COUNT_SOURCES = [
-  { file: path.join(__dirname, '..', 'app', 'page.jsx'), re: /href: '\/tools\/([a-z-]+)',[^\n]*?count: (\d+)/g },
+  { file: path.join(__dirname, '..', 'app', 'HomeClient.jsx'), re: /href: '\/tools\/([a-z-]+)',[^\n]*?count: (\d+)/g },
   { file: path.join(__dirname, '..', 'app', 'tools', 'page.jsx'), re: /href: '\/tools\/([a-z-]+)',[^\n]*?count: (\d+)/g },
   { file: path.join(__dirname, '..', 'app', 'lib', 'toolsRegistry.js'), re: /'([a-z-]+)':\s*\{[^}]*count: (\d+)/g },
 ];
@@ -99,7 +99,7 @@ for (const { file, re } of COUNT_SOURCES) {
 const homeSrc = fs.readFileSync(COUNT_SOURCES[0].file, 'utf8');
 const defaultTotal = Number((/DEFAULT_TOOL_COUNT = (\d+)/.exec(homeSrc) || [])[1]);
 if (defaultTotal !== realTotal) {
-  issues.push(`app/page.jsx: DEFAULT_TOOL_COUNT is ${defaultTotal}, but there are ${realTotal} working tools`);
+  issues.push(`app/HomeClient.jsx: DEFAULT_TOOL_COUNT is ${defaultTotal}, but there are ${realTotal} working tools`);
 }
 
 // public/og-image.png has the tool count drawn into it; the generator records

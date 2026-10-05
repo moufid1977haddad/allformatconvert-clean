@@ -6,11 +6,11 @@ import { getToolCounts } from "@/lib/toolCounts";
 const { total: totalTools } = getToolCounts();
 
 export const metadata: Metadata = {
-  title: { absolute: `All Tools — Browse ${totalTools} Free File Converters Online Free` },
+  title: { absolute: `All Tools — Browse ${totalTools} Free File Converters Online` },
   description: `Browse all ${totalTools} free online tools on OnlineConverTools, organized by category: PDF, image, video, audio, GIF, developer, AI, and more.`,
   alternates: { canonical: "https://www.onlineconvertools.com/tools" },
   openGraph: {
-    title: `All Tools — Browse ${totalTools} Free File Converters Online Free`,
+    title: `All Tools — Browse ${totalTools} Free File Converters Online`,
     description: `Browse all ${totalTools} free online tools on OnlineConverTools, organized by category: PDF, image, video, audio, GIF, developer, AI, and more.`,
     url: "https://www.onlineconvertools.com/tools",
   },
