@@ -18,7 +18,7 @@ et poussé avec sa partie de ce rapport avant le suivant.
   rédactions le couvre) ; aucune passe Firefox pour Redact.
 - **Dépense : 0 $** (aucun fournisseur payant appelé ; Vercel Pro : 3 préversions + 5 constructions de production
   dont 2 sans changement de site ; Railway : 4 reconstructions de pdf-tools ; validateur schema.org gratuit).
-- **Sous-agents** : 5 (Redact D3, carte des outils liés, 2 relectures : sécurité D1, conformité lot 2) ; règles des secrets
+- **Sous-agents** : 4 (Redact D3, carte des outils liés, 2 relectures : sécurité D1, conformité lot 2) ; règles des secrets
   copiées dans chaque consigne ; aucun n'a lu de fichier de secrets.
 
 ## Lot 1 — décisions P33 tranchées par le propriétaire
