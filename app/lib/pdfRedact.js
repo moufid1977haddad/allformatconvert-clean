@@ -116,3 +116,159 @@ export function annotationMatches(text, terms, kinds) {
   if (terms.some((t) => matchesText(text, t))) return true;
   return kinds.some((kind) => { const { re, ok } = PATTERNS[kind]; re.lastIndex = 0; for (let m; (m = re.exec(text));) if (ok(m[0])) return true; return false; });
 }
+
+// ---- P35 (05/10): the black boxes of a redacted page, and its invisible text layer ----
+// Decision D3 of the owner: on a page rebuilt from its picture, the words OUTSIDE the black boxes stay selectable, as in
+// Adobe Acrobat. Both are computed here from the pdf.js text items of pass 1, in the page's own coordinates (PDF user
+// space, before the view box and the rotation), so the page and the benches run the same code.
+// measureOf(item, style) → { width(str) → width at a 100-unit font size, real: the run's own font was used }.
+
+// P35: a run in one of the standard PDF fonts that is not embedded (Helvetica-Bold, Times-Roman…, common in generated
+// PDFs) is measured with that font's own published widths (pdf-lib's AFM metrics) — the browser's fallback family is
+// regular-weight Arial or similar, and put "PDF avec images" in Helvetica-Bold 4 pt off. font: the pdf.js font object
+// (page.commonObjs.get(item.fontName)). Returns width(str) at a 100-unit size (null when a character has no width
+// there), or null when the run is not in such a font.
+const STANDARD_FONTS = new Set(['Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique', 'Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique', 'Helvetica-BoldOblique', 'Times-Roman', 'Times-Bold', 'Times-Italic', 'Times-BoldItalic']);
+const standardEmbedders = new Map();
+export function standardWidthOf(font, lib) {
+  if (!font || !font.missingFile || typeof font.name !== 'string') return null;
+  const name = font.name.replace(/^[A-Z]{6}\+/, '');
+  if (!STANDARD_FONTS.has(name) || !lib.StandardFontEmbedder) return null;
+  if (!standardEmbedders.has(name)) standardEmbedders.set(name, lib.StandardFontEmbedder.for(name));
+  const e = standardEmbedders.get(name);
+  return (s) => { try { return e.widthOfTextAtSize(s, 100); } catch { return null; } };
+}
+
+function runGeom(it) {
+  const [ta, tb, tc, td, tx, ty] = it.transform;
+  const fs = Math.hypot(tc, td) || it.height || 12;
+  const dl = Math.hypot(ta, tb) || 1;
+  const ux = [ta / dl, tb / dl], uy = [tc / (Math.hypot(tc, td) || 1), td / (Math.hypot(tc, td) || 1)];
+  return { fs, dl, ux, uy, tx, ty };
+}
+const quadOf = (g, lo, hi, dn, up) => {
+  const P = (u, v) => [g.tx + g.ux[0] * u + g.uy[0] * v, g.ty + g.ux[1] * u + g.uy[1] * v];
+  return [P(lo, dn), P(hi, dn), P(hi, up), P(lo, up)];
+};
+
+// Where characters c0..c1 (exclusive) of a run lie along its baseline. box: the range a black box covers ({x0, x1,
+// extra}); at: the measured position (for the text layer), null when it is not known. Only the matched characters are
+// covered (as Adobe Acrobat and PDF24 do), not the whole text run. Their position inside the run is measured with the
+// run's font (the font pdf.js loaded for it, else its fallback family); the box is widened by 15 % of the font size,
+// plus 4 % of the text before the match when only the fallback font could be used. P33 (review 05/10): when the
+// measured run differs from the PDF's own width by more than 3 % (character / word spacing Tc, Tw), the box is the
+// WHOLE run (over-redaction is the safe side).
+function runRange(it, style, c0, c1, measureOf, g) {
+  let x0 = 0, x1 = it.width || g.fs * it.str.length * 0.6, extra = 0, at = null;
+  if (!style.vertical && it.str.length > 1) {
+    const m = measureOf(it, style);
+    const all = m.width(it.str) || 1;
+    const pre = m.width(it.str.slice(0, c0)), upto = m.width(it.str.slice(0, c1));
+    const W = it.width || all * g.fs / 100;
+    at = { x0: W * pre / all, x1: W * upto / all };
+    if (it.width && Math.abs(all * g.fs / 100 - it.width) > 0.03 * it.width) { x0 = 0; x1 = W; } // spacing the measure cannot follow: whole run
+    else {
+      x0 = at.x0; x1 = at.x1;
+      if (!m.real) extra = 0.04 * x0 + 0.04 * (x1 - x0);
+      // a match that reaches the start or the end of the run is covered to that edge (second review: the last letter
+      // of "Müller", drawn after a separate accent glyph, stayed visible)
+      if (c0 === 0) x0 = 0;
+      if (c1 >= it.str.length) x1 = W;
+    }
+  } else if (!style.vertical) at = { x0, x1 };
+  return { x0, x1, extra, at };
+}
+// the box of characters c0..c1 of a run, padded as a black box is
+function paddedQuad(it, style, c0, c1, measureOf, g = runGeom(it)) {
+  const { x0, x1, extra } = runRange(it, style, c0, c1, measureOf, g);
+  const pad = 0.15 * g.fs + extra;
+  return quadOf(g, x0 - pad, x1 + pad, -0.3 * g.fs, 1.05 * g.fs);
+}
+
+/** The black boxes of a page: a quadrilateral (4 [x, y] points, PDF user space) per matched span and per box rect. */
+export function redactionQuads(items, styles, spans, rects, measureOf) {
+  const quads = spans.map((sp) => { const it = items[sp.k]; return paddedQuad(it, styles[it.fontName] || {}, sp.c0, sp.c1, measureOf); });
+  for (const [ax0, ay0, ax1, ay1] of rects) quads.push([[ax0, ay0], [ax1, ay0], [ax1, ay1], [ax0, ay1]]);
+  return quads;
+}
+
+// two convex quadrilaterals overlap or touch (separating axis test)
+function quadsMeet(a, b) {
+  for (const poly of [a, b]) {
+    for (let i = 0; i < 4; i++) {
+      const [x1, y1] = poly[i], [x2, y2] = poly[(i + 1) % 4];
+      const nx = y2 - y1, ny = x1 - x2;
+      if (!nx && !ny) continue;
+      let amin = Infinity, amax = -Infinity, bmin = Infinity, bmax = -Infinity;
+      for (const [x, y] of a) { const d = nx * x + ny * y; amin = Math.min(amin, d); amax = Math.max(amax, d); }
+      for (const [x, y] of b) { const d = nx * x + ny * y; bmin = Math.min(bmin, d); bmax = Math.max(bmax, d); }
+      if (amax < bmin || bmax < amin) return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * The words of a redacted page that may stay selectable: [{ str, transform: [a, b, c, d, x, y] (the run's matrix moved
+ * to the word's start, PDF user space), width (along the baseline, user space units) }], in the page's text order.
+ * Left out: every word touched by a matched span; every word whose box, padded as a black box is (the whole run's box
+ * when the run's spacing cannot be measured), meets a black box (text spans and annotation boxes); vertical text; a run
+ * with a degenerate matrix or no width. spansOf(strs) is the page's own matching (terms and patterns): it is run again
+ * on the words kept, joined with nothing in between, and the words of any match it finds are dropped too, until none is
+ * left (two kept words around a removed one must not make a term).
+ */
+export function textLayerWords(items, styles, spans, quads, measureOf, spansOf) {
+  const touched = new Map(); // item → [[c0, c1], …]
+  for (const sp of spans) { if (!touched.has(sp.k)) touched.set(sp.k, []); touched.get(sp.k).push([sp.c0, sp.c1]); }
+  const words = [];
+  items.forEach((it, k) => {
+    const style = styles[it.fontName] || {};
+    if (style.vertical || !it.str || !/\S/.test(it.str) || !Array.isArray(it.transform)) return;
+    const [ta, tb, tc, td] = it.transform;
+    if (!(Math.abs(ta * td - tb * tc) > 1e-9) || !(it.width > 0)) return;
+    const g = runGeom(it);
+    const hits = touched.get(k) || [];
+    for (const m of it.str.matchAll(/\S+/g)) {
+      const c0 = m.index, c1 = m.index + m[0].length;
+      if (hits.some(([h0, h1]) => h0 < c1 && c0 < h1)) continue;
+      if (quads.some((q) => quadsMeet(paddedQuad(it, style, c0, c1, measureOf, g), q))) continue;
+      const { at } = runRange(it, style, c0, c1, measureOf, g);
+      if (!at || !(at.x1 - at.x0 > 0)) continue;
+      words.push({ str: m[0], transform: [ta, tb, tc, td, g.tx + g.ux[0] * at.x0,g.ty + g.ux[1] * at.x0], width: at.x1 - at.x0 });
+    }
+  });
+  for (let kept = words; ;) {
+    const found = spansOf(kept.map((w) => w.str));
+    if (!found.length) return kept;
+    const drop = new Set(found.map((sp) => sp.k));
+    kept = kept.filter((_, n) => !drop.has(n));
+  }
+}
+
+/**
+ * Writes `words` on `page` (pdf-lib) as invisible text (rendering mode 3) in Helvetica, each word stretched (Tz) to
+ * its width. toPage([x, y]) maps a point of the source page's user space to the new page. A word Helvetica (WinAnsi)
+ * cannot write, even after NFKC (ligatures, full-width forms), is skipped. Returns the number of words written.
+ */
+export function drawInvisibleWords(page, font, words, toPage, lib) {
+  const { pushGraphicsState, popGraphicsState, beginText, endText, setFontAndSize, setTextRenderingMode, TextRenderingMode, setCharacterSqueeze, setTextMatrix, showText } = lib;
+  const ops = [];
+  let key = null;
+  for (const w of words) {
+    let str = w.str, hex = null;
+    for (const s of [w.str, w.str.normalize('NFKC')]) { try { hex = font.encodeText(s); str = s; break; } catch { /* a character outside WinAnsi */ } }
+    if (!hex) continue;
+    const hw = font.widthOfTextAtSize(str, 1);
+    const [a, b, c, d, x, y] = w.transform;
+    const o = toPage([x, y]), ex = toPage([x + a, y + b]), ey = toPage([x + c, y + d]);
+    const A = ex[0] - o[0], B = ex[1] - o[1], C = ey[0] - o[0], D = ey[1] - o[1];
+    const dl = Math.hypot(A, B);
+    if (!(hw > 0) || !(dl > 0)) continue;
+    const squeeze = (100 * w.width) / ((Math.hypot(a, b) || 1) * hw);
+    if (!Number.isFinite(squeeze) || squeeze <= 0) continue;
+    if (!key) key = page.node.newFontDictionary(font.name, font.ref);
+    ops.push(setTextMatrix(A, B, C, D, o[0], o[1]), setCharacterSqueeze(squeeze), showText(hex));
+  }
+  if (ops.length) page.pushOperators(pushGraphicsState(), beginText(), setFontAndSize(key, 1), setTextRenderingMode(TextRenderingMode.Invisible), ...ops, endText(), popGraphicsState());
+  return ops.length / 3;
+}

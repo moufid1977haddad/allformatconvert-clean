@@ -23,6 +23,18 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
    rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
 
+## ⚖️ P35 — 06/10 : décisions P33, consentement Europe, SEO S1-S3 (`docs/audit/RAPPORT-p35-decisions-consentement-seo-06-10.md`, repère `restauration-avant-p35-06-10` = `739aad96`)
+
+| Lot | État |
+|---|---|
+| 1 — D1 OCR serveur | ✅ 2 à la fois, 1 par visiteur (HMAC de l'IPv4 / du /64 IPv6), file d'attente côté serveur avec la place affichée (« yours is number 3 in line »), bornes 20 / 2 par visiteur / 200 s ; relecture de sécurité GO avec conditions, appliquées ; pdf-tools `c92b907b` en production |
+| 1 — D2 `MEDIA_SERVICE_URL` | ✅ était publique → **privée** (`http://${{media-processing.RAILWAY_PRIVATE_DOMAIN}}:8080`), pdf-tools `fa232a69` ; chemin gros PDF sur www 7/7 avant et après |
+| 1 — D3 Redact texte sélectionnable | ✅ couche invisible des mots hors des boîtes ; 31 PDF piégés : 0 fuite ; 252 rédactions réelles : 0 refus |
+| 1 — D4 confirmation avant envoi | décidé : **non** (marché : aucun ne confirme ; avis avant/après déjà affiché) |
+| 1 — P33 P3 texte OCR doublé | ✅ une page qui a déjà son texte ne reçoit plus la couche OCR (OCRmyPDF `--skip-text`, Acrobat) |
+
+**Pièges notés (P35)** : (1) heredoc bash : `python - <<'EOF'` échoue encore sur certains contenus (apostrophes multiples) → scripts Python écrits par l'outil d'écriture ; (2) `railway status --json` donne `targetPort`, `limitOverride`, l'état des déploiements sans aucune valeur de variable ; (3) `railway variables --set` : passer la valeur par une variable d'environnement du processus (`%P35_VALUE%` sous Windows) pour que `${{…}}` arrive intact ; (4) le `.env.local` contient `VERCEL_ENV=preview` : un serveur local se croit en préversion — tout test « préversion seulement » doit aussi exiger l'exécution sur Vercel (`VERCEL_REGION`).
+
 ## 🔎 Lot C — 05/10 : audit référencement Google + préparation AdSense, LECTURE SEULE (`docs/audit/AUDIT-SEO-ADSENSE-05-10.md`) — **document de décision, rien de changé en ligne**
 
 Constat : sitemap 243/243 en 200, aucune page morte, 404 réels ; **8 titres cassés** (JPG to PDF « — Be a One-shot Batch
@@ -73,7 +85,7 @@ mot entre guillemets droits d'une FAQ comme un libellé de bouton ; (4) un banc 
 l'outil d'écriture ; (7) Railway : les journaux HTTP de pdf-tools sont vides par la CLI, mais `logMetric` donne une ligne par
 requête dans les journaux du déploiement.
 
-## 🧑‍⚖️ Décisions du propriétaire — P33 (05/10)
+## 🧑‍⚖️ Décisions du propriétaire — P33 (05/10) — ✅ TRANCHÉES par le propriétaire le 06/10, faites par P35 (D1 2 créneaux + 1 par IP + file ; D2 basculé en privé ; D3 couche de texte ; D4 non)
 
 | # | Décision | Options chiffrées | Recommandation |
 |---|---|---|---|

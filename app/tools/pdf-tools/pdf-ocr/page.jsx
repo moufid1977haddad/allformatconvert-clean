@@ -54,6 +54,7 @@ export default function Page() {
   const [totalPages, setTotalPages] = useState(0);
   const [stage, setStage] = useState('');
   const [serverNote, setServerNote] = useState('');
+  const [textNote, setTextNote] = useState('');
   const fileRef = useRef();
   // P33: the notice of the iPhone / iPad fallback, read after mounting (the server render does not know the device)
   const onAppleTouch = useSyncExternalStore(noSubscribe, serverRenderAvailable, () => false);
@@ -72,6 +73,7 @@ export default function Page() {
     setOutput('');
     setError('');
     setServerNote('');
+    setTextNote('');
   };
 
   const ocr = async () => {
@@ -81,6 +83,7 @@ export default function Page() {
     setOutput('');
     setPdfUrl(null);
     setServerNote('');
+    setTextNote('');
     setDownloadPct(0);
     setDownloadLabel('');
     setPagePct(0);
@@ -96,6 +99,7 @@ export default function Page() {
     let useServer = false;
     let sentToServer = false;
     const byServer = [];
+    const alreadyText = []; // P35: pages with their own text layer (no OCR layer added)
     let fullText = '';
     let kick = () => {};
     try {
@@ -209,7 +213,12 @@ export default function Page() {
           setPagePct(0);
           let r;
           try {
-            r = await remote.recognize({ page: i, lang });
+            // P35 (D1): when our service is busy with other visitors' pages, the page waits in its line and says where
+            r = await remote.recognize({
+              page: i, lang,
+              onLine: (n) => setStage(`Waiting for our OCR service, which is busy with other pages: ${n === 1 ? 'yours is next' : `yours is number ${n} in line`}. It starts by itself; keep this page open.`),
+              onStarted: () => setStage('Recognizing it on our OCR service...'),
+            });
           } catch (e2) {
             const err = new Error(`Page ${i} of ${pdf.numPages} could not be recognized on this device, and our OCR service could not recognize it either: ${e2.message}`);
             err.name = 'OcrPageError';
@@ -221,7 +230,21 @@ export default function Page() {
           setPagePct(100);
         }
         fullText += `--- Page ${i} ---\n${text.trim()}\n\n`;
+        // P35 (P33 decision left open, decided on the market): a page that already has selectable text does not get
+        // the OCR layer too — its text would be copied twice. OCRmyPDF skips such pages by default (--skip-text) and
+        // Adobe Acrobat refuses to recognize them ("renderable text"); the recognized text is still shown above.
+        let hasText = false;
         if (layer && text.trim()) {
+          try {
+            const tc = await withTimeout((await withTimeout(pdf.getPage(i), limit, 'timeout')).getTextContent(), limit, 'timeout');
+            // "already has text" = its own text is at least half as long as what was recognized: a scan with only a
+            // stamp or a header in text ("Scanned by …") still gets the layer
+            const own = tc.items.reduce((n, it) => n + (typeof it.str === 'string' ? it.str.replace(/\s+/g, '').length : 0), 0);
+            hasText = own > 0 && own >= 0.5 * text.replace(/\s+/g, '').length;
+          } catch { /* not read in time: the layer is added, as before */ }
+          if (hasText) alreadyText.push(i);
+        }
+        if (layer && text.trim() && !hasText) {
           const [embedded] = await outDoc.embedPdf(layer, [0]);
           const target = outDoc.getPage(i - 1);
           const box = target.getCropBox();
@@ -235,6 +258,7 @@ export default function Page() {
         const bytes = await outDoc.save();
         setPdfUrl(URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' })));
       }
+      if (alreadyText.length) setTextNote(`${alreadyText.length > 1 ? 'Pages' : 'Page'} ${listPages(alreadyText)} already had selectable text: in the searchable PDF, the recognized text was not added to ${alreadyText.length > 1 ? 'them' : 'it'}, so ${alreadyText.length > 1 ? 'their' : 'its'} text is not doubled.`);
       if (byServer.length) setServerNote(`This device could not recognize ${byServer.length > 1 ? 'pages' : 'page'} ${listPages(byServer)}, so our own OCR service recognized ${byServer.length > 1 ? 'them' : 'it'}: your PDF was sent there, then deleted.`);
 
       setOutput(fullText.trim() ? fullText.trim() : 'No text was recognized in this PDF.');
@@ -300,6 +324,7 @@ export default function Page() {
           {onAppleTouch && <p className="text-xs text-neutral-600 text-center" data-server-render-note>On iPhone and iPad, a page your device cannot recognize within {LOCAL_OCR_LIMIT_LABEL} is recognized by our own OCR service instead: your PDF is sent there, then deleted.</p>}
           {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
           {serverNote && <p className="text-xs text-neutral-600 text-center" data-ocr-server-note>{serverNote}</p>}
+          {textNote && <p className="text-xs text-neutral-600 text-center" data-ocr-text-note>{textNote}</p>}
           {output && (
             <div className="space-y-2">
               <label className="block text-sm text-neutral-500">Recognized Text</label>
@@ -324,7 +349,7 @@ export default function Page() {
           { q: "Does this actually perform OCR now?", a: "Yes. Every page is rendered to a canvas and recognized as an image using Tesseract -- it no longer just reads an existing text layer, so scanned and photographed pages work." },
           { q: "Which languages are supported?", a: "All 100+ languages that Tesseract itself supports, from Afrikaans to Yiddish, in one searchable list (English or native name, or the code). A document mixing languages can use up to three at once; only the selected languages' data is downloaded. Our OCR service on iPhone and iPad has every language of the list." },
           { q: "How accurate is the text recognition?", a: "It's real OCR, not a flawless one -- expect a meaningful error rate (roughly 4-16% of characters, depending on scan quality), especially on skewed, angled, or low-contrast images. Some errors are visibly garbled, others are plausible (a 3 read instead of an 8), so proofread numbers, names and amounts before relying on them." },
-          { q: "Can I get a searchable PDF?", a: "Yes — after recognition, the file ending in -searchable.pdf gives your original PDF with the recognized text added as an invisible layer on each page, placed as the page is displayed (crop and rotation included). The pages themselves are not re-compressed or changed." },
+          { q: "Can I get a searchable PDF?", a: "Yes — after recognition, the file ending in -searchable.pdf gives your original PDF with the recognized text added as an invisible layer on each page, placed as the page is displayed (crop and rotation included). The pages themselves are not re-compressed or changed. A page that already had selectable text does not get the layer (its text would be doubled when copied); its recognized text is still shown." },
           { q: "Why is the first run slower than later ones?", a: "The first OCR run on a given language downloads the Tesseract engine and that language's training data. Your browser caches both, so later runs are faster." },
           { q: "Is there a file size limit?", a: "There's no fixed limit on a computer -- it's bound by your browser's available memory, and multi-page PDFs will simply take longer since each page is recognized in turn. When our OCR service takes over on an iPhone or iPad, it accepts PDFs up to 44 MB." },
           { q: "Is my PDF uploaded?", a: "Not on a computer: everything happens locally in your browser. On an iPhone or iPad, if the device cannot recognize a page within 20 seconds (or fails), that page and the next ones are recognized by our own OCR service: your PDF is sent there, then deleted, nothing is kept, and the page tells you before and after." }

@@ -37,5 +37,7 @@ http.createServer(async (req, res) => {
   const outHeaders = { ...cors };
   out.headers.forEach((v, k) => { outHeaders[k] = v; });
   res.writeHead(out.status, outHeaders);
-  res.end(Buffer.from(await out.arrayBuffer()));
+  // P35: the OCR line answers as a stream of JSON lines — passed on as they come
+  if (out.body) { const reader = out.body.getReader(); for (;;) { const { value, done } = await reader.read(); if (done) break; res.write(Buffer.from(value)); } }
+  res.end();
 }).listen(Number(port), '127.0.0.1', () => console.log(`local routes on :${port} → ${serviceUrl}`));

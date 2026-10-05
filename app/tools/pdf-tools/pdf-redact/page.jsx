@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
-import { matchSpans, annotationText, patternSpans, annotationMatches, termsOf, PATTERNS } from '../../../lib/pdfRedact';
+import { matchSpans, annotationText, patternSpans, annotationMatches, termsOf, PATTERNS, redactionQuads, textLayerWords, drawInvisibleWords, standardWidthOf } from '../../../lib/pdfRedact';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
@@ -92,6 +92,9 @@ export default function Page() {
       const found = new Map(); // page index → { page, content, items, spans, boxes }
       const measure = document.createElement('canvas').getContext('2d');
       const textMatches = (strs, eols) => terms.some((t) => matchSpans(strs, t).length) || patternSpans(strs, kinds, eols).length > 0;
+      // P35: the matches among the words kept on a redacted page, read as one line (no line end: the most matches)
+      const spansOf = (strs) => [...terms.flatMap((t) => matchSpans(strs, t)), ...patternSpans(strs, kinds)];
+      let helvetica = null;
 
       // Pass 1 (P33): every page is searched BEFORE anything is copied — the pages without a match are then copied from
       // a source in which the redacted pages are empty shells (app/lib/redactSanitize.js, independent review 05/10).
@@ -151,8 +154,9 @@ export default function Page() {
         // existing content stream. So instead: rasterize this page to a
         // bitmap, black out the matched regions in the pixels themselves,
         // and rebuild the page from that image with no vector content
-        // underneath at all -- there is no text left to extract because the
-        // page no longer contains any text objects, matched or not.
+        // underneath at all. P35 (05/10, decision D3): the words outside the
+        // black boxes are then written back over the picture as invisible
+        // text, from the text read in pass 1 (never the blacked-out ones).
         const rotation = page.rotate;
         const unit = page.getViewport({ scale: 1, rotation: 0 });
         const viewport = page.getViewport({ scale: fitScale(unit.width, unit.height, scale), rotation: 0 });
@@ -193,49 +197,23 @@ export default function Page() {
 
         ctx.fillStyle = '#000000';
         const poly = (pts) => { ctx.beginPath(); pts.forEach(([x, y], n) => { const [vx, vy] = viewport.convertToViewportPoint(x, y); if (n) ctx.lineTo(vx, vy); else ctx.moveTo(vx, vy); }); ctx.closePath(); ctx.fill(); };
-        // Only the matched characters are covered (as Adobe Acrobat and PDF24 do), not the whole text run. Their
-        // position inside the run is measured with the run's font (the font pdf.js loaded for it, else its fallback
-        // family); the box is widened by 15 % of the font size, plus 4 % of the text before the match when only the
-        // fallback font could be used. P33 (review 05/10): document.fonts.check() said "true" for a family that is not
-        // loaded at all (the specification's answer), so the margin was never added; and character / word spacing
-        // (Tc, Tw) made the measured position wrong — the end of "SECRET" stayed visible. Now the font counts as real
-        // only if a loaded FontFace has its name, and when the measured run differs from the PDF's own width by more
-        // than 3 %, the WHOLE run is covered (over-redaction is the safe side). Rotated text is handled.
+        // Only the matched characters are covered (app/lib/pdfRedact.js, redactionQuads). P33 (review 05/10):
+        // document.fonts.check() said "true" for a family that is not loaded at all (the specification's answer), so
+        // the margin was never added; now the font counts as real only if a loaded FontFace has its name.
         const loadedFaces = new Set();
         if (document.fonts && document.fonts.forEach) document.fonts.forEach((f) => { if (f.status === 'loaded') loadedFaces.add(f.family.replace(/^["']|["']$/g, '')); });
-        for (const sp of spans) {
-          const it = items[sp.k];
-          const [ta, tb, tc, td, tx, ty] = it.transform;
-          const fs = Math.hypot(tc, td) || it.height || 12;
-          const dl = Math.hypot(ta, tb) || 1;
-          const ux = [ta / dl, tb / dl], uy = [tc / (Math.hypot(tc, td) || 1), td / (Math.hypot(tc, td) || 1)];
-          const style = content.styles[it.fontName] || {};
-          let x0 = 0, x1 = it.width || fs * it.str.length * 0.6, extra = 0;
-          if (!style.vertical && it.str.length > 1) {
-            const real = loadedFaces.has(it.fontName);
-            measure.font = `100px ${real ? `"${it.fontName}", ` : ''}${style.fontFamily || 'sans-serif'}`;
-            const all = measure.measureText(it.str).width || 1;
-            const pre = measure.measureText(it.str.slice(0, sp.c0)).width, upto = measure.measureText(it.str.slice(0, sp.c1)).width;
-            const W = it.width || all * fs / 100;
-            if (it.width && Math.abs(all * fs / 100 - it.width) > 0.03 * it.width) { x0 = 0; x1 = W; } // spacing the measure cannot follow: whole run
-            else {
-              x0 = W * pre / all; x1 = W * upto / all;
-              if (!real) extra = 0.04 * x0 + 0.04 * (x1 - x0);
-              // a match that reaches the start or the end of the run is covered to that edge (second review: the
-              // last letter of "Müller", drawn after a separate accent glyph, stayed visible)
-              if (sp.c0 === 0) x0 = 0;
-              if (sp.c1 >= it.str.length) x1 = W;
-            }
-          }
-          const pad = 0.15 * fs + extra;
-          const lo = x0 - pad, hi = x1 + pad, dn = -0.3 * fs, up = 1.05 * fs;
-          const P = (u, v) => [tx + ux[0] * u + uy[0] * v, ty + ux[1] * u + uy[1] * v];
-          poly([P(lo, dn), P(hi, dn), P(hi, up), P(lo, up)]);
-        }
-        for (const an of boxes) {
-          const [ax0, ay0, ax1, ay1] = an.rect;
-          poly([[ax0, ay0], [ax1, ay0], [ax1, ay1], [ax0, ay1]]);
-        }
+        // P35: the fallback measure takes the font's weight and slant, and a non-embedded standard font its own widths
+        const fontObj = (name) => { try { return page.commonObjs.has(name) ? page.commonObjs.get(name) : null; } catch { return null; } };
+        const measureOf = (it, style) => {
+          const real = loadedFaces.has(it.fontName);
+          const f = fontObj(it.fontName);
+          const std = standardWidthOf(f, lib);
+          if (std && std(it.str) != null) return { real, width: (s) => std(s) ?? 0 };
+          const font = `${f && f.italic ? 'italic ' : ''}${f && (f.bold || f.black) ? 'bold ' : ''}100px ${real ? `"${it.fontName}", ` : ''}${style.fontFamily || 'sans-serif'}`;
+          return { real, width: (s) => { measure.font = font; return measure.measureText(s).width; } };
+        };
+        const quads = redactionQuads(items, content.styles, spans, boxes.map((an) => an.rect), measureOf);
+        for (const q of quads) poly(q);
 
         const blob = await step(new Promise((resolve) => canvas.toBlob(resolve, 'image/png')), `${where}: making the blacked-out image`);
         if (!blob) throw new Error(`${where}: this device could not make the blacked-out image.`);
@@ -244,6 +222,12 @@ export default function Page() {
         const { width: pw, height: ph } = page.getViewport({ scale: 1, rotation: 0 });
         const newPage = outDoc.addPage([pw, ph]);
         newPage.drawImage(embeddedImg, { x: 0, y: 0, width: pw, height: ph });
+        // P35 (D3): the words outside the black boxes stay selectable, as invisible text over the picture (the page's
+        // point (x, y) is where the scale-1, rotation-0 view puts it, the new page's y axis going up)
+        if (!helvetica) helvetica = await outDoc.embedFont(lib.StandardFonts.Helvetica);
+        const words = textLayerWords(items, content.styles, spans, quads, measureOf, spansOf);
+        const toPage = ([x, y]) => { const [vx, vy] = unit.convertToViewportPoint(x, y); return [vx, ph - vy]; };
+        drawInvisibleWords(newPage, helvetica, words, toPage, lib);
         if (rotation) newPage.setRotation(degrees(rotation));
       }
 
@@ -264,7 +248,7 @@ export default function Page() {
       const byServer = drawnByServer.length ? ` This device could not draw ${drawnByServer.length > 1 ? 'pages' : 'page'} ${listPages(drawnByServer)}, so our own PDF service drew ${drawnByServer.length > 1 ? 'them' : 'it'} before the blacking out: your PDF was sent there, then deleted.` : '';
       const dropped = removed.annotations + removed.links ? ` On the other pages, ${[removed.annotations ? `${removed.annotations} stamp${removed.annotations > 1 ? 's' : ''} or attachment${removed.annotations > 1 ? 's' : ''} (content this tool cannot check)` : '', removed.links ? `${removed.links} link${removed.links > 1 ? 's' : ''} to a redacted page or running a script` : ''].filter(Boolean).join(' and ')} ${removed.annotations + removed.links > 1 ? 'were' : 'was'} removed.` : '';
       const detail = perPage.map(([pg, n]) => `page ${pg}: ${n}`).join(', ');
-      setSummary(`Blacked out ${totalMatches} occurrence${totalMatches > 1 ? 's' : ''} (${detail}). ${pagesHit.length > 1 ? 'These pages are' : 'This page is'} now a flattened image, and the finished file was checked: the blacked-out text no longer exists in it.${dropped} Check the result before sharing it: text drawn as an image (a scan) or inside a fill pattern cannot be found.${byServer}`);
+      setSummary(`Blacked out ${totalMatches} occurrence${totalMatches > 1 ? 's' : ''} (${detail}). ${pagesHit.length > 1 ? 'These pages are' : 'This page is'} now a picture of the page with an invisible text layer holding the words outside the black boxes (so they can still be selected and searched; words next to a black box, vertical text, and words with letters our text font cannot write — Greek, Cyrillic, Arabic, Asian scripts and some accented letters — are not kept), and the finished file was checked: the blacked-out text no longer exists in it.${dropped} Check the result before sharing it: text drawn as an image (a scan) or inside a fill pattern cannot be found.${byServer}`);
       } finally {
         if (renderer) renderer.close();
       }
@@ -309,19 +293,19 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Redact"
-        description="PDF Redact searches your PDF's text for the words or phrases you list (one per line) and, if you tick them, every e-mail address, phone number (9 to 15 digits) and card number (checked with the Luhn formula), using PDF.js — ignoring case, spaces and line breaks, so a phrase is found even when it wraps onto the next line or changes font mid-way — as well as form field values and comments. It then permanently destroys the matches rather than just covering them: any page containing a match is rendered to a flattened image with only the matched words blacked out in the pixels themselves (the rest of the line stays readable), and that image replaces the page's original content entirely — so there are no text objects left on that page to select, copy, or extract. Pages with no match are left untouched, keeping their original selectable, searchable text. On a computer, everything runs locally in your browser and your file is not uploaded. On an iPhone or iPad, a page with a match that the device cannot draw within 20 seconds is drawn by our own PDF service (not a third party) before the blacking out, which is still done in your browser: the PDF is sent there, then deleted, and the page tells you."
+        description="PDF Redact searches your PDF's text for the words or phrases you list (one per line) and, if you tick them, every e-mail address, phone number (9 to 15 digits) and card number (checked with the Luhn formula), using PDF.js — ignoring case, spaces and line breaks, so a phrase is found even when it wraps onto the next line or changes font mid-way — as well as form field values and comments. It then permanently destroys the matches rather than just covering them: any page containing a match is rendered to a flattened image with only the matched words blacked out in the pixels themselves (the rest of the line stays readable), and that image replaces the page's original content entirely. Over the image, the words outside the black boxes are written back as invisible text, so they can still be selected, copied and searched; the blacked-out words, the words right next to a black box, vertical text and words with letters our text font cannot write (Greek, Cyrillic, Arabic, Asian scripts and some accented letters) are not. Pages with no match are left untouched, keeping their original selectable, searchable text. On a computer, everything runs locally in your browser and your file is not uploaded. On an iPhone or iPad, a page with a match that the device cannot draw within 20 seconds is drawn by our own PDF service (not a third party) before the blacking out, which is still done in your browser: the PDF is sent there, then deleted, and the page tells you."
         howTo={[
           "Click the upload area and select a PDF file from your device.",
           "Type each word or phrase to redact on its own line, and/or tick e-mail addresses, phone numbers or card numbers.",
-          "Click 'Redact PDF' — pages containing a match are flattened to an image with the matched words permanently blacked out; the tool tells you how many occurrences it covered and on which pages.",
+          "Click 'Redact PDF' — pages containing a match are flattened to an image with the matched words permanently blacked out, and the words outside the black boxes stay selectable as invisible text; the tool tells you how many occurrences it covered and on which pages.",
           "Click 'Download' next to redacted.pdf to save the result."
         ]}
         faqs={[
           { q: "Is PDF Redact free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does this tool truly remove sensitive text from the PDF, or just cover it up?", a: "It truly removes it. Any page with a match is rendered to a flattened image with the matched text blacked out in the pixels, and that image replaces the page's content — the underlying text is gone, not just hidden, so it can't be recovered by selecting or extracting text from that page. The pages without a match are copied without anything that could still lead to a redacted page (links to it, shared resources, form-field links), and the finished file is read again before it is given to you: if a term could still be found in it, no file is given." },
+          { q: "Does this tool truly remove sensitive text from the PDF, or just cover it up?", a: "It truly removes it. Any page with a match is rendered to a flattened image with the matched text blacked out in the pixels, and that image replaces the page's content — the underlying text is gone, not just hidden, so it can't be recovered by selecting or extracting text from that page. The only text put back on that page is an invisible layer of the words outside the black boxes. The pages without a match are copied without anything that could still lead to a redacted page (links to it, shared resources, form-field links), and the finished file is read again before it is given to you: if a term could still be found in it, no file is given." },
           { q: "What changes on the pages without a match?", a: "Their text, images and links stay as they are. Removed from them: stamps, file attachments and media (this tool cannot check what they contain), links that jump to a redacted page or run a script, and private application data. The summary says how many were removed." },
           { q: "Does the search ignore accents and hyphens?", a: "Yes. Searching for Muller also finds Müller, and a word split by a hyphen at the end of a line is found too; a little more may be blacked out than you typed, never less." },
-          { q: "Does this affect other text on the same page that I didn't ask to redact?", a: "Yes — a matched page is flattened entirely, so all text on that page becomes a static image and loses selectability and searchability, not just the redacted word. Pages with no match are left as original, fully searchable text." },
+          { q: "Does this affect other text on the same page that I didn't ask to redact?", a: "Yes — a matched page is flattened entirely into an image, and its text is replaced by an invisible text layer of the words outside the black boxes: they can still be selected and searched, but not edited, and their font and layout are now those of the picture. Not kept selectable: the words right next to a black box (a safety margin), vertical text, and words with letters our text font cannot write (Greek, Cyrillic, Arabic, Asian scripts and some accented letters). Links and form fields on that page are gone. Pages with no match are left as original, fully searchable text." },
           { q: "Can I visually select an area to redact, or preview matches first?", a: "No — there's no click-to-select or highlighting interface. You list words or phrases and tick automatic patterns; every page containing a match is processed automatically, and the tool lists the pages it changed so you can check them." },
           { q: "What do the automatic patterns find?", a: "E-mail addresses; phone numbers of 9 to 15 digits written with spaces, dots, dashes, brackets or a +country code (dates like 2026-10-02 are left alone); card numbers of 13 to 19 digits that pass the Luhn check every real card number passes. A number of another kind with as many digits can be covered too: check the listed pages." },
           { q: "Are form fields and comments redacted?", a: "Yes — a form field value or a comment containing the phrase is blacked out too, and the page is flattened, so the field and its value no longer exist in the file." },
@@ -329,9 +313,9 @@ export default function Page() {
           { q: "Is my file uploaded to a server?", a: "Not on a computer: matching and redaction both happen locally in your browser. On an iPhone or iPad, if the device cannot draw a page that has a match within 20 seconds, our own PDF service draws that page (your PDF is sent there, then deleted; the page tells you), and the matches are still found and blacked out in your browser." }
         ]}
         tips={[
-          "Because matched pages are fully flattened to images, expect some loss of text searchability and a larger file size for those pages — that trade-off is what makes the redaction genuinely irreversible.",
+          "Because matched pages are fully flattened to images, expect a larger file size for those pages, and only the words outside the black boxes (minus those next to one) kept as invisible, selectable text — that trade-off is what makes the redaction genuinely irreversible.",
           "Search terms are matched as a case-insensitive substring that ignores spaces and line breaks, so short or common keywords can over-match and flatten more pages than intended — use a specific phrase rather than a short fragment.",
-          "After downloading, try selecting or searching for the redacted text in a PDF reader — it should no longer be selectable or found on that page.",
+          "After downloading, try selecting or searching for the redacted text in a PDF reader — it should no longer be selectable or found on that page, while the other words of the page still are.",
           "Pages that don't contain your search term are left completely untouched, preserving their original text quality and searchability."
         ]}
       />
