@@ -5,6 +5,7 @@ import { GLOBAL_SPEND_CAP_MICROS, TOOL_ERROR_ALERT_THRESHOLD_PER_DAY, TOOL_MESSA
 import { currentUtcMonthKey, currentUtcDayKey } from "@/lib/quota/period";
 import { checkStateTransition } from "@/lib/quota/alertState";
 import { AI_DETECT_MONTHLY_BUDGET_MICROS } from "@/lib/quota/aiDetect";
+import { CERT_HOSTS, checkCertificate } from "@/lib/certCheck";
 
 export const maxDuration = 30;
 
@@ -248,6 +249,8 @@ export async function GET(request: NextRequest) {
     "supabase-auth": await checkSupabaseAuth(),
     "pdf-tools": await checkPdfTools(),
   };
+  // P36: the HTTPS certificate of www and of the bare domain (chain, expiry < 14 days, issuer, name).
+  for (const host of CERT_HOSTS) checks[`certificate:${host}`] = await checkCertificate(host);
 
   // P30: what each dependency answered (statuses only), readable in the function log after a manual run.
   console.log("[health-check]", Object.entries(checks).map(([k, v]) => `${k}=${v.ok ? "ok" : "FAIL"}:${v.detail}`).join(" "));
