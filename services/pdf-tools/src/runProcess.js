@@ -6,7 +6,8 @@ const { spawn } = require('child_process');
 // (or after temp files it's holding open get deleted out from under it).
 // killGroup (P26, LibreOffice): start the tool in its own process group and kill the whole group on abort --
 // soffice is a launcher that forks soffice.bin, which a kill of the launcher alone would leave running.
-function runProcess(bin, args, { cwd, signal, killGroup = false } = {}) {
+// env (P33): the child's environment (Tesseract on one thread); the service's own by default.
+function runProcess(bin, args, { cwd, signal, killGroup = false, env } = {}) {
   return new Promise((resolve, reject) => {
     // Already aborted (e.g. a request that waited its whole time for a slot): never start the tool. Before P26
     // this case returned before any listener was attached, so the promise never settled.
@@ -17,7 +18,7 @@ function runProcess(bin, args, { cwd, signal, killGroup = false } = {}) {
     // script and never hits this branch.
     const needsShell = process.platform === 'win32' && /\.(bat|cmd)$/i.test(bin);
     const group = killGroup && process.platform !== 'win32';
-    const child = spawn(bin, args, { cwd, windowsHide: true, shell: needsShell, detached: group });
+    const child = spawn(bin, args, { cwd, windowsHide: true, shell: needsShell, detached: group, ...(env ? { env } : {}) });
     let stdout = '';
     let stderr = '';
     let settled = false;

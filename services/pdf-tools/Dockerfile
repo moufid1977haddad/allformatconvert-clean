@@ -25,6 +25,35 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # (Helvetica, Times… the 14 standard fonts, as in the iPhone kit's pdf-avec-images.pdf) is drawn with the URW base-35
 # metric clones (fonts-urw-base35, already Ghostscript's own fonts), found by fontconfig under the standard names.
 
+# /v1/ocr-page (P33): Tesseract (Debian's tesseract-ocr 5.3, Apache-2.0) and one model per language PDF OCR offers
+# (lib/ocrLanguageCodes.js -- 102 codes; Debian's tesseract-lang 4.1.0 models, Apache-2.0). Kept equal to the
+# site's list by scripts/p33/ocr-languages.test.mjs; the service also reports what is installed on /health.
+RUN apt-get update && apt-get install -y --no-install-recommends tesseract-ocr \
+      tesseract-ocr-afr tesseract-ocr-sqi tesseract-ocr-amh tesseract-ocr-ara tesseract-ocr-asm \
+      tesseract-ocr-aze tesseract-ocr-aze-cyrl tesseract-ocr-eus tesseract-ocr-bel tesseract-ocr-ben \
+      tesseract-ocr-bos tesseract-ocr-bul tesseract-ocr-mya tesseract-ocr-cat tesseract-ocr-ceb \
+      tesseract-ocr-khm tesseract-ocr-chr tesseract-ocr-chi-sim tesseract-ocr-chi-tra tesseract-ocr-hrv \
+      tesseract-ocr-ces tesseract-ocr-dan tesseract-ocr-nld tesseract-ocr-dzo tesseract-ocr-eng \
+      tesseract-ocr-enm tesseract-ocr-epo tesseract-ocr-est tesseract-ocr-fin tesseract-ocr-fra \
+      tesseract-ocr-frm tesseract-ocr-glg tesseract-ocr-kat tesseract-ocr-kat-old tesseract-ocr-deu \
+      tesseract-ocr-frk tesseract-ocr-grc tesseract-ocr-ell tesseract-ocr-guj tesseract-ocr-hat \
+      tesseract-ocr-heb tesseract-ocr-hin tesseract-ocr-hun tesseract-ocr-isl tesseract-ocr-ind \
+      tesseract-ocr-iku tesseract-ocr-gle tesseract-ocr-ita tesseract-ocr-ita-old tesseract-ocr-jpn \
+      tesseract-ocr-jav tesseract-ocr-kan tesseract-ocr-kaz tesseract-ocr-kir tesseract-ocr-kor \
+      tesseract-ocr-kmr tesseract-ocr-lao tesseract-ocr-lat tesseract-ocr-lav tesseract-ocr-lit \
+      tesseract-ocr-mkd tesseract-ocr-msa tesseract-ocr-mal tesseract-ocr-mlt tesseract-ocr-mar \
+      tesseract-ocr-nep tesseract-ocr-nor tesseract-ocr-ori tesseract-ocr-pan tesseract-ocr-fas \
+      tesseract-ocr-pol tesseract-ocr-por tesseract-ocr-pus tesseract-ocr-ron tesseract-ocr-rus \
+      tesseract-ocr-san tesseract-ocr-srp tesseract-ocr-srp-latn tesseract-ocr-sin tesseract-ocr-slk \
+      tesseract-ocr-slv tesseract-ocr-spa tesseract-ocr-spa-old tesseract-ocr-swa tesseract-ocr-swe \
+      tesseract-ocr-syr tesseract-ocr-fil tesseract-ocr-tgk tesseract-ocr-tam tesseract-ocr-tel \
+      tesseract-ocr-tha tesseract-ocr-bod tesseract-ocr-tir tesseract-ocr-tur tesseract-ocr-uig \
+      tesseract-ocr-ukr tesseract-ocr-urd tesseract-ocr-uzb tesseract-ocr-uzb-cyrl tesseract-ocr-vie \
+      tesseract-ocr-cym tesseract-ocr-yid \
+    && rm -rf /var/lib/apt/lists/* \
+    && tesseract --version \
+    && test "$(tesseract --list-langs 2>/dev/null | grep -vc -e '^List of' -e '^osd$')" -ge 102
+
 # /v1/docx-to-doc (P26, E1): LibreOffice Writer without its GUI, Debian's own package (MPL-2.0), started per
 # request by src/docConvert.js -- it writes the Word 97-2003 .doc that ConvertAPI cannot. From Debian's official
 # backports (25.2, security-supported), not bookworm's 7.4: measured on a real ConvertAPI document, 7.4 wrote a
