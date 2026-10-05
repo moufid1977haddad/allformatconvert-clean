@@ -13,7 +13,7 @@ import TextArea from '@/app/components/TextArea';
 import { withActualTextUnicode } from '../../../lib/pdfActualText';
 import { fitScale, withTimeout, StepTimeout } from '../../../lib/canvasLimit'; // P31: one canvas cap for iPhone / iPad
 import { serverRenderAvailable, ServerPageRenderer, LOCAL_PAGE_LIMIT_MS, LOCAL_PAGE_LIMIT_LABEL, listPages } from '../../../lib/serverPageRender';
-import { sanitizeForCopy, verifyRedacted, UNREADABLE_ANNOTATIONS } from '../../../lib/redactSanitize';
+import { sanitizeForCopy, verifyRedacted, relinkDestinations, UNREADABLE_ANNOTATIONS } from '../../../lib/redactSanitize';
 
 // P32 (04/10): a page drawn by our PDF service comes with the page's /Rotate applied (pdftoppm); the redaction works
 // on the unrotated page (rotation 0 viewport, rotation set back on the new page), so the image is turned back here.
@@ -247,6 +247,7 @@ export default function Page() {
         if (rotation) newPage.setRotation(degrees(rotation));
       }
 
+      relinkDestinations(outDoc, lib);
       setProgress('Saving the redacted PDF...');
       const pdfBytes = await step(outDoc.save(), 'Saving the redacted PDF');
       // P33: the finished file is read again; a file in which a term can still be found is not handed over
@@ -263,7 +264,7 @@ export default function Page() {
       const byServer = drawnByServer.length ? ` This device could not draw ${drawnByServer.length > 1 ? 'pages' : 'page'} ${listPages(drawnByServer)}, so our own PDF service drew ${drawnByServer.length > 1 ? 'them' : 'it'} before the blacking out: your PDF was sent there, then deleted.` : '';
       const dropped = removed.annotations + removed.links ? ` On the other pages, ${[removed.annotations ? `${removed.annotations} stamp${removed.annotations > 1 ? 's' : ''} or attachment${removed.annotations > 1 ? 's' : ''} (content this tool cannot check)` : '', removed.links ? `${removed.links} link${removed.links > 1 ? 's' : ''} to a redacted page or running a script` : ''].filter(Boolean).join(' and ')} ${removed.annotations + removed.links > 1 ? 'were' : 'was'} removed.` : '';
       const detail = perPage.map(([pg, n]) => `page ${pg}: ${n}`).join(', ');
-      setSummary(`Blacked out ${totalMatches} occurrence${totalMatches > 1 ? 's' : ''} (${detail}). ${pagesHit.length > 1 ? 'These pages are' : 'This page is'} now a flattened image, and the finished file was checked: the blacked-out text no longer exists in it.${dropped} Check the result before sharing it: text drawn as an image (a scan) cannot be found.${byServer}`);
+      setSummary(`Blacked out ${totalMatches} occurrence${totalMatches > 1 ? 's' : ''} (${detail}). ${pagesHit.length > 1 ? 'These pages are' : 'This page is'} now a flattened image, and the finished file was checked: the blacked-out text no longer exists in it.${dropped} Check the result before sharing it: text drawn as an image (a scan) or inside a fill pattern cannot be found.${byServer}`);
       } finally {
         if (renderer) renderer.close();
       }

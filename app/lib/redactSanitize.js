@@ -80,7 +80,8 @@ function prunedResources(lib, ctx, res, text, depth, seen) {
   const pruneStream = (ref) => {
     const target = ctx.lookup(ref);
     const id = ref && ref.toString();
-    if (!target || !target.dict || depth >= MAX_DEPTH || seen.has(id)) return;
+    // a stream only (PDFDict also has an internal .dict map: a shading pattern is a plain dictionary)
+    if (!(target instanceof lib.PDFStream) || depth >= MAX_DEPTH || seen.has(id)) return;
     seen.add(id);
     const own = target.dict.lookupMaybe(PDFName.of('Resources'), PDFDict);
     if (!own) return;
@@ -132,6 +133,17 @@ export function sanitizeForCopy(doc, hit, lib) {
   const hitSet = new Set(hit);
   const hitRefs = new Set(hit.map((i) => pages[i].ref.toString()));
   const removed = { annotations: 0, links: 0 };
+  const pageIndex = new Map(pages.map((p, i) => [p.ref.toString(), i]));
+  const byNumber = (holder, key) => {
+    const v = holder.get(key);
+    const arr = v instanceof lib.PDFRef ? ctx.lookup(v) : v;
+    if (!(arr instanceof PDFArray) || !arr.size() || !(arr.get(0) instanceof lib.PDFRef)) return;
+    const n = pageIndex.get(arr.get(0).toString());
+    if (n === undefined) return;
+    const items = [ctx.obj(n)];
+    for (let i = 1; i < arr.size(); i++) items.push(arr.get(i));
+    holder.set(key, ctx.obj(items));
+  };
 
   // 1. redacted pages of the source: empty shells
   for (const i of hit) {
@@ -163,8 +175,23 @@ export function sanitizeForCopy(doc, hit, lib) {
       if (UNREADABLE_ANNOTATIONS.has(sub)) { removed.annotations++; continue; }
       for (const k of d.keys()) if (!ANNOT_KEYS.has(k.decodeText())) d.delete(k);
       // an appearance this tool cannot read is drawn by viewers from the annotation's own properties instead (second
-      // review: a Square whose /AP drew the term); form fields and links keep theirs (their text is searched)
-      if (sub !== 'Widget' && sub !== 'Link') d.delete(N('AP'));
+      // review: a Square whose /AP drew the term; third review: a link's /AP too). A form field keeps only the
+      // appearance it shows now: its other states (a check box's "on", a button's "pressed") could draw anything.
+      if (sub !== 'Widget') d.delete(N('AP'));
+      else {
+        const ap = d.lookupMaybe(N('AP'), PDFDict);
+        if (ap) {
+          ap.delete(N('D'));
+          ap.delete(N('R'));
+          const nObj = ap.get(N('N')) && ctx.lookup(ap.get(N('N')));
+          const states = nObj instanceof PDFDict ? nObj : null; // a dictionary of states, not one appearance stream
+          if (states) {
+            const as = d.get(N('AS'));
+            const current = as && states.get(as);
+            ap.set(N('N'), current ? ctx.obj({ [as.decodeText()]: current }) : ctx.obj({}));
+          }
+        }
+      }
       const act = d.lookupMaybe(N('A'), PDFDict);
       if (act) {
         const s = act.get(N('S'))?.decodeText?.() || '';
@@ -175,11 +202,41 @@ export function sanitizeForCopy(doc, hit, lib) {
         }
       }
       if (d.get(N('Dest')) && hitRefs.has(destPage(lib, ctx, d.get(N('Dest'))))) { removed.links++; continue; }
+      // third review: copyPages() of each page on its own copied the TARGET of a jump to another kept page (a table
+      // of contents) a second time, as an orphan — the check then refused ordinary Word / LibreOffice files. The target
+      // becomes its page number here, and the copied page's own reference after the copy (relinkDestinations).
+      byNumber(d, N('Dest'));
+      const a2 = d.lookupMaybe(N('A'), PDFDict);
+      if (a2 && a2.get(N('S'))?.decodeText?.() === 'GoTo') byNumber(a2, N('D'));
       keep.push(ref);
     }
     node.set(N('Annots'), ctx.obj(keep));
   });
   return removed;
+}
+
+/** After the copy: a jump written as a page number by sanitizeForCopy points at that page of the new document. */
+export function relinkDestinations(out, lib) {
+  const { PDFName, PDFDict, PDFArray, PDFNumber } = lib;
+  const N = (s) => PDFName.of(s);
+  const pages = out.getPages();
+  const fix = (holder, key) => {
+    const arr = holder && holder.get(key);
+    if (!(arr instanceof PDFArray) || !arr.size() || !(arr.get(0) instanceof PDFNumber)) return;
+    const n = arr.get(0).asNumber();
+    if (Number.isInteger(n) && n >= 0 && n < pages.length) arr.set(0, pages[n].ref);
+  };
+  for (const page of pages) {
+    const annots = page.node.lookupMaybe(N('Annots'), PDFArray);
+    if (!annots) continue;
+    for (let i = 0; i < annots.size(); i++) {
+      const d = out.context.lookupMaybe(annots.get(i), PDFDict);
+      if (!d) continue;
+      fix(d, N('Dest'));
+      const a = d.lookupMaybe(N('A'), PDFDict);
+      if (a) fix(a, N('D'));
+    }
+  }
 }
 
 // the strings written in a content stream: (literal) with its escapes, and <hex> (read as bytes and as UTF-16BE)
