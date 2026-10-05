@@ -23,6 +23,36 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
    rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
 
+## 📱 P33 — 05/10 : PDF Redact, PDF OCR, limites téléphone (`docs/audit/RAPPORT-p33-redact-ocr-05-10.md`, repère `restauration-avant-p33-05-10` = `57f7f977`) — **en production : Vercel `onlineconvertools-6j94la1q7` = `81c98da8` (05/10), pdf-tools `82579ade` (Tesseract, 102 langues), www 29/29 ; retour arrière : `onlineconvertools-4wlsf2hp8` (ou `-l0fs94z0x`)**
+
+**Règle (P21/P31/P32, permanente)** : statut maximal « corrigé, à confirmer sur iPhone ». Mini-passe iPhone de 4 vérifications : rapport §6.
+
+| Point | État | Reste (priorité) |
+|---|---|---|
+| 1 PDF to JPG (qui a dessiné ?) | ✅ **le téléphone** : aucune requête de rendu (Vercel + journaux pdf-tools, méthode validée sur l'appel P32 de 23 h 50) ; secours gardé tel quel | — |
+| 2 PDF Redact | corrigé, à confirmer : panne non reproduite ; progression par page, étape bloquée nommée (+ `tool_errors`), « No match found for … », résultat ramené à l'écran ; **21 fuites de vraie suppression trouvées par 2 relectures indépendantes, toutes présentes en production avant P33, corrigées** (source neutralisée avant copie, élagage en liste blanche, contrôle du fichier fini — sinon aucun fichier) ; 31 PDF piégés verts | **P1** propriétaire : mini-passe §6 n° 1-2 ; P2 : garder le texte sélectionnable des pages noircies (couche invisible des mots non noircis, comme Acrobat) — voir décisions ; P3 : confirmation avant envoi pour le secours de rendu (reporté de P32) |
+| 3 PDF OCR | corrigé, à confirmer : une seule liste avec recherche (1-3 langues, langue du navigateur) ; iPhone/iPad : 20 s sans progrès ou échec → `/api/pdf-ocr` (Tesseract sur pdf-tools, 102 langues, mêmes limites que P32) ; revue de sécurité GO avec conditions, appliquées (1 OCR à la fois, 12 Mpx, copies staged ≤ 4) | **P1** propriétaire : mini-passe §6 n° 3 ; P2 : décisions OCR ci-dessous ; P3 : sur un PDF qui a déjà du texte, la couche OCR double le texte copié (comportement d'avant, les deux chemins) |
+| 3f Autres OCR navigateur | ✅ aucun autre outil | — |
+| 4 Limites téléphone | corrigé, à confirmer : 48 Mpx partout + « Reduce to 48 MP » dans JPG/Image to PDF ; HEIC/AVIF bornés ; JPEG « measured up to 200 megapixels » | P1 : §6 n° 4 ; P3 : AVIF dans Firefox au-dessus de la référence en mémoire vive ; temps de réduction sur iPhone non mesuré |
+
+**Pièges notés (P33)** : (1) `next start` lancé pendant qu'un autre écoute déjà sur le port **échoue en silence** et l'ancien serveur
+sert un `.next` à moitié reconstruit (page non hydratée, bouton inactif) — tuer le PID avant chaque relance ; (2) pdf-lib :
+`dict.lookup(clé, Type)` **lève une exception** si la clé manque — `lookupMaybe` ; (3) la garde `instructions` du build lit tout
+mot entre guillemets droits d'une FAQ comme un libellé de bouton ; (4) un banc qui appelle `127.0.0.1` depuis une page
+`localhost` est « cross-site » : les routes le refusent (le banc local retire l'en-tête) ; (5) Next a un second `role=alert`
+(annonceur de routes) : viser `p[role=alert]` ; (6) heredoc bash : encore des échecs de guillemets — scripts Python écrits par
+l'outil d'écriture ; (7) Railway : les journaux HTTP de pdf-tools sont vides par la CLI, mais `logMetric` donne une ligne par
+requête dans les journaux du déploiement.
+
+## 🧑‍⚖️ Décisions du propriétaire — P33 (05/10)
+
+| # | Décision | Options chiffrées | Recommandation |
+|---|---|---|---|
+| D1 | OCR serveur : une même IP peut occuper l'unique créneau OCR avec des pages très denses (≈ 50 s chacune, sous les 300 pages/h) — revue de sécurité | (a) verrou « 1 OCR en cours par IP » (compteur court Supabase, ≈ 1 h de code + test) ; (b) `OCR_CONCURRENCY=2` si la mémoire du service pdf-tools ≥ 4 Go (à lire au tableau de bord Railway, 0 $ de code, coût mémoire Railway ≈ +1 Go en pointe) ; (c) accepter comme pour P32 | (a), puis (b) si la mémoire le permet |
+| D2 | `MEDIA_SERVICE_URL` de pdf-tools passe-t-il par `*.railway.internal` (pas de trafic sortant facturé) ? | lecture d'une variable : interdite à Claude sans accord (règle) | le propriétaire regarde la variable dans Railway |
+| D3 | Redact : garder le texte sélectionnable des pages noircies (couche invisible des mots non noircis, comme Acrobat / iLovePDF) | ≈ 1 jour + une nouvelle relecture indépendante ; risque : réintroduire une fuite | attendre la mini-passe iPhone, puis décider |
+| D4 | Redact (reporté de P32) : demander une confirmation avant d'envoyer la page au service de rendu sur iPhone | ≈ 1 h | non nécessaire (l'avis permanent est déjà affiché) |
+
 ## 📱 P32 — 04/10 : deux pannes iPhone restantes + essai BRIA + interligne arabe (`docs/audit/RAPPORT-p32-iphone-bria-04-10.md`, repère `restauration-avant-p32-04-10` = `39e4ff69`) — **en production : Vercel `onlineconvertools-l0fs94z0x` = `8a6137e7` (04/10), pdf-tools `43106653`, www 29/29 ; retour arrière : `onlineconvertools-cs2bhpt77`**
 
 **Règle (P21/P31, permanente)** : statut maximal « corrigé, à confirmer sur iPhone ». Mini-passe iPhone de 5 vérifications : rapport §6.
