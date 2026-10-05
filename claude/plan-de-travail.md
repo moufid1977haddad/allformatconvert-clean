@@ -33,6 +33,7 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 | 1 — D4 confirmation avant envoi | décidé : **non** (marché : aucun ne confirme ; avis avant/après déjà affiché) |
 | 1 — P33 P3 texte OCR doublé | ✅ une page qui a déjà son texte ne reçoit plus la couche OCR (OCRmyPDF `--skip-text`, Acrobat) |
 | 2 — Consentement Europe (A1) | ✅ Google Analytics **jamais chargé** dans l'EEE, au Royaume-Uni, en Suisse (territoires compris) ni pour un pays inconnu ; décision serveur (`x-vercel-ip-country`), anciens `_ga` supprimés ; `/privacy` du 6 octobre ; relecture GO avec conditions, appliquées |
+| 3 — SEO S1-S3 | ✅ 8 titres cassés + `/about` + `/tools` corrigés, canonical `/` et `/about`, 1 H1 sur l'accueil ; « Related tools » serveur sur 225 outils (4-6 voisins, `app/lib/relatedTools.js`) ; JSON-LD WebApplication + BreadcrumbList + FAQPage depuis les textes visibles sur 225 pages, 0 erreur au validateur ; **aucun gain promis pour la FAQ** |
 
 **Décisions du propriétaire — P35**
 
@@ -40,10 +41,12 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 |---|---|---|---|
 | P35-1 | **Choix d'une bannière de consentement certifiée Google (CMP, IAB TCF), à décider au moment de la demande AdSense** — d'ici là, Analytics reste coupé en Europe | options gratuites : **Google Privacy & messaging** (dans le compte AdSense, 0 $), **CookieScript**, **CookieYes**, **Cookiebot** (offres gratuites limitées en pages / visites) ; ≈ ½ jour d'intégration + Consent Mode v2 ; aucun compte créé par Claude | Google Privacy & messaging (gratuit, livré par le script AdSense déjà préparé, `app/lib/ads.js`) ; alors : une seule liste de régions pour Analytics et Consent Mode, et décider si Analytics redevient possible en Europe **avec** consentement |
 | P35-2 | Activer AdSense : rouvre le lot 2 (le message de consentement voudrait activer Analytics, que `app/components/Analytics.jsx` bloque en Europe quel que soit le choix) | relecture + ≈ 2 h | à faire avec P35-1 |
+| P35-3 | Vérifier depuis l'Europe qu'Analytics ne part pas (VPN ou proche en Europe : outils de développement → Réseau, aucune requête google-analytics ; cookies : aucun `_ga`) | 5 min | à faire une fois |
+| P35-4 | Décisions stratégiques de l'audit SEO (S10 langues, S4 titres au motif du marché, S5 pages par format, S6 contenu des 40 outils minces, S9 guides, S8 notes réelles, A2 pages AdSense) — détail chiffré au rapport P35 §« Décisions STRATÉGIQUES » | voir rapport | après le relevé Search Console de novembre |
 
 **Pièges notés (P35)** : (1) heredoc bash : `python - <<'EOF'` échoue encore sur certains contenus (apostrophes multiples) → scripts Python écrits par l'outil d'écriture ; (2) `railway status --json` donne `targetPort`, `limitOverride`, l'état des déploiements sans aucune valeur de variable ; (3) `railway variables --set` : passer la valeur par une variable d'environnement du processus (`%P35_VALUE%` sous Windows) pour que `${{…}}` arrive intact ; (4) le `.env.local` contient `VERCEL_ENV=preview` : un serveur local se croit en préversion — tout test « préversion seulement » doit aussi exiger l'exécution sur Vercel (`VERCEL_REGION`).
 
-## 🔎 Lot C — 05/10 : audit référencement Google + préparation AdSense, LECTURE SEULE (`docs/audit/AUDIT-SEO-ADSENSE-05-10.md`) — **document de décision, rien de changé en ligne**
+## 🔎 Lot C — 05/10 : audit référencement Google + préparation AdSense, LECTURE SEULE (`docs/audit/AUDIT-SEO-ADSENSE-05-10.md`) — **document de décision ; S1, S2, S3 et A1 (Analytics) faits par P35 le 06/10**
 
 Constat : sitemap 243/243 en 200, aucune page morte, 404 réels ; **8 titres cassés** (JPG to PDF « — Be a One-shot Batch
 Converter: Select Your »…) ; **aucun lien entre outils voisins** sur 215 pages ; JSON-LD sur 10 pages seulement ; canonical

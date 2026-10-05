@@ -4,6 +4,23 @@ Propriétaire absent (retour 18 h, UTC-4) ; aucune question posée ; ce qui lui 
 section P35). Branche `p35`, repère de restauration `restauration-avant-p35-06-10` = `739aad96`. Chaque lot est commité
 et poussé avec sa partie de ce rapport avant le suivant.
 
+## Résumé (06/10)
+- **Production** : Vercel `onlineconvertools-gbnnrjftd` = `206684a1` (lots 1, 2, 3) ; pdf-tools `c92b907b` (+ reconstructions
+  sur les poussées de master, même service), `MEDIA_SERVICE_URL` privée. Trois cycles préversion → production, **aucun
+  retour arrière**, www-light 29/29 après chacun.
+- **Lot 1** : OCR serveur 2 à la fois / 1 par visiteur / file avec la place affichée ; réseau privé Railway pour pdf-tools →
+  média ; Redact garde le texte hors des zones noircies (31 PDF piégés : 0 fuite, Chromium et WebKit) ; PDF OCR ne double
+  plus le texte ; D4 : pas de confirmation.
+- **Lot 2** : Google Analytics plus du tout chargé dans l'EEE, au Royaume-Uni, en Suisse ni pour un pays inconnu.
+- **Lot 3** : 0 titre cassé, canonical et H1 justes, « Related tools » et JSON-LD sur les 225 pages d'outil.
+- **Échecs / limites** : aucun déploiement en échec ; non vérifiable d'ici : Analytics vu depuis un vrai pays européen
+  sur www (P35-3) ; banc « mot le plus fréquent » de Redact sur le corpus fait à 6/35 (le balayage Node de 252
+  rédactions le couvre) ; aucune passe Firefox pour Redact.
+- **Dépense : 0 $** (aucun fournisseur payant appelé ; Vercel Pro : 3 préversions + 5 constructions de production
+  dont 2 sans changement de site ; Railway : 4 reconstructions de pdf-tools ; validateur schema.org gratuit).
+- **Sous-agents** : 5 (Redact D3, carte des outils liés, 2 relectures : sécurité D1, conformité lot 2) ; règles des secrets
+  copiées dans chaque consigne ; aucun n'a lu de fichier de secrets.
+
 ## Lot 1 — décisions P33 tranchées par le propriétaire
 
 ### D1 — OCR serveur : 2 à la fois, 1 par visiteur, file d'attente avec la place
@@ -227,3 +244,34 @@ balisage = leur méta-description, **absente de la page** : remplacée par le m�
 d'Ariane, chaque nom, description, question et réponse **présents dans le texte visible**, FAQPage ⇔ FAQ visible : **ALL
 PASS**. **Aucun gain promis** : Google limite l'affichage des FAQ enrichies aux sites d'autorité (gouvernement, santé)
 depuis août 2023 ; le fil d'Ariane et le type d'application sont les seuls effets probables.
+
+**Mise en ligne du lot 3** :
+- **Préversion, une seule fois** (`onlineconvertools-3vw17vjk8` = `206684a1`) : `seo-lot3-check` **ALL PASS** (225 pages :
+  bloc 4-6 liens, JSON-LD valide et identique au texte visible) ; audit des 243 pages : 0 page en erreur, 0 canonical
+  faux, 0 page à H1 ≠ 1, 0 titre en double ; 390 et 1280 px : aucun débordement, aucune erreur de console ; Redact
+  (page fonctionnelle sous la nouvelle enveloppe) 7/7.
+- **Production** : master `206684a1` → Vercel **`onlineconvertools-gbnnrjftd`** ; www-light **29/29** ; sur www, PDF to
+  Word et JPG to PDF : bloc présent, 1 JSON-LD, 1 H1, canonical juste, nouveau titre ; accueil : 1 H1, canonical.
+  Retour arrière prêt : promouvoir `onlineconvertools-hj3yae3it` (lot 2).
+
+## Contexte stratégique — internationalisation (pour mémoire, rien construit)
+
+Décision du projet du 11/09/2026, **à trancher par le propriétaire** : site en anglais seul, widget Google Translate non
+indexé ; recommandation : sous-répertoires `/fr/`, `/es/`, `/de/`, **3 langues choisies sur les volumes réels**,
+traduction relue des chaînes communes et des **20 outils les plus porteurs**, retrait du widget sur les pages traduites,
+mesure dans la Search Console après 6 à 8 semaines. Le plan garde S10 **gelé jusqu'à un trafic organique réel** (relevé
+de novembre des 10 pages travaillées) ; ce lot n'y change rien.
+
+## Décisions STRATÉGIQUES de l'audit qui attendent le propriétaire (effet attendu ; effort)
+
+| # | Décision | Effet attendu | Effort |
+|---|---|---|---|
+| S10 | Langues : dégeler l'internationalisation (`/fr/ /es/ /de/`, 3 langues sur volumes réels, 20 outils) | le plus fort potentiel (tous les concurrents sauf CloudConvert ont 14 à 25 langues indexées) | plusieurs semaines |
+| S4 | Titres et méta-descriptions au motif du marché (« X to Y Converter — … Free », ≤ 155 caractères, bénéfices) sur les 50 outils les plus demandés — ton et marque | moyen à fort (clics par impression), à mesurer après le relevé de novembre | 1-2 jours |
+| S5 | Pages d'atterrissage par format (compress-jpg, mp3-converter, wav-to-mp3…), texte propre à chaque format | fort sur la longue traîne ; risque « pages minces » si bâclées | ≈ 1 semaine pour ~40 pages |
+| S6 | Contenu à écrire : enrichir les 40 outils < 300 mots (texte, image, développeur) avec exemple réel et vraies questions | moyen, et condition AdSense « faible valeur » | 2-3 jours |
+| S9 | Pages à créer : guides de blog liés depuis les outils | moyen à long terme | continu |
+| S8 | Note réelle (vote après un résultat, AggregateRating au-delà d'un seuil de vrais votes) | moyen à terme (étoiles) | ≈ 1 jour + collecte |
+| A1/P35-1 | AdSense : choix de la CMP certifiée (Google Privacy & messaging recommandé, gratuit) au moment de la demande | conformité ; Analytics pourrait revenir en Europe **avec** consentement | ≈ ½ jour |
+| A2 | AdSense : section « Advertising » de `/privacy`, `/terms` §6, `/about` enrichi (éditeur, Québec), `ads.txt` après l'ID | condition d'approbation | ≈ 2 h |
+| S11 / S7 | Techniques restantes, sans décision de fond : LCP mobile 3,2 s → < 2,5 s (≈ 450 Ko de JS par page) ; `lastmod` réel et redirection en 1 saut | faible à moyen / faible | 1-2 jours / 2 h |
