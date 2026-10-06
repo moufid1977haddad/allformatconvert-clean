@@ -47,15 +47,19 @@ fs.writeFileSync(path.join(OUT, 'site-text-to-pdf.pdf'), await textToPdf(LINES.j
 console.log('written', path.join(OUT, 'site-text-to-pdf.pdf'));
 
 const SOFFICE = process.env.SOFFICE || 'C:\\Program Files\\LibreOffice\\program\\soffice.com';
-for (const font of ['Noto Naskh Arabic', 'Arial', 'Tahoma', 'Times New Roman', 'Segoe UI']) {
-  const tag = font.replace(/ /g, '');
+// P37 second review (N5): names a lam-alef reading must not touch — "سالم" (Salem) next to "السلام", "فالح" (Faleh)
+// next to "الفلاح" — in lo-Arial-names.pdf
+export const NAMES = ['زارنا سالم أمس في المكتب', 'وقال السلام عليكم للجميع', 'وصل المهندس فالح اليوم', 'نجاح الفلاح في العمل'];
+fs.writeFileSync(path.join(OUT, 'names.json'), JSON.stringify(NAMES, null, 1));
+for (const [font, tag0, lines] of [...['Noto Naskh Arabic', 'Arial', 'Tahoma', 'Times New Roman', 'Segoe UI'].map((fn) => [fn, null, LINES]), ['Arial', 'Arial-names', NAMES]]) {
+  const tag = tag0 || font.replace(/ /g, '');
   const fodt = path.join(OUT, `lo-${tag}.fodt`);
   fs.writeFileSync(fodt, `<?xml version="1.0" encoding="UTF-8"?>
 <office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" office:version="1.3" office:mimetype="application/vnd.oasis.opendocument.text">
 <office:font-face-decls><style:font-face style:name="F" svg:font-family="'${font}'"/></office:font-face-decls>
 <office:automatic-styles><style:style style:name="P" style:family="paragraph"><style:paragraph-properties fo:text-align="start" style:writing-mode="rl-tb" fo:margin-bottom="0.25cm"/><style:text-properties style:font-name="F" fo:font-size="14pt" style:font-name-complex="F" style:font-size-complex="14pt" style:language-complex="ar" style:country-complex="SA"/></style:style></office:automatic-styles>
 <office:body><office:text>
-${LINES.map((l) => `<text:p text:style-name="P">${esc(l)}</text:p>`).join('\n')}
+${lines.map((l) => `<text:p text:style-name="P">${esc(l)}</text:p>`).join('\n')}
 </office:text></office:body></office:document>`);
   try {
     const profile = `file:///${path.join(os.tmpdir(), 'p37-lo-profile').replace(/\\/g, '/')}`;

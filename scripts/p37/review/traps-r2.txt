@@ -1,0 +1,4 @@
+# P37 review n2: Arabic phrase across PDF.js items (pdf TAB term)
+ar2/two-pages.pdf	السلام
+ar2/two-pages.pdf	وبركاته لا إله إلا الله
+ocr-red/times12-ocr-under-image.pdf	photography

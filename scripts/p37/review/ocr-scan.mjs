@@ -19,7 +19,7 @@ const NEW = await import(from('app/lib/pdfRedact.js'));
 const OLD = await import(pathToFileURL(path.join(os.tmpdir(), 'p37-review-redact', 'pdfRedact.head.mjs')).href);
 const SFD = path.join(ROOT, 'node_modules/pdfjs-dist/standard_fonts/').replace(/\\/g, '/');
 const TESS = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe';
-const OUT = path.join(os.tmpdir(), 'p37-review-redact', 'ocr');
+const OUT = path.join(os.tmpdir(), 'p37-review-redact', process.env.RED ? 'ocr-red' : 'ocr');
 fs.mkdirSync(OUT, { recursive: true });
 const lit = (s) => `(${s.replace(/[\\()]/g, (c) => `\\${c}`)})`;
 
@@ -35,7 +35,7 @@ async function vector(c, mode) {
   const f = await d.embedFont(c.font);
   const page = d.addPage([612, 792]);
   const lines = c.sub ? [c.sub, ...c.lines.slice(1)] : c.lines;
-  let body = '0 g';
+  let body = process.env.RED ? '1 0 0 rg' : '0 g';
   lines.forEach(([a, b, z], n) => {
     const tm = mode === 'others' ? 3 : 0, to = mode === 'match' ? 3 : 0;
     body += ` BT /F1 ${c.size} Tf 72 ${600 - n * c.size * 1.3} Td ${to} Tr ${lit(a)} Tj ${tm} Tr ${lit(b)} Tj ${to} Tr ${lit(z)} Tj ET`;
@@ -77,7 +77,7 @@ async function quads(impl, file, term) {
 
 for (const c of CASES) {
   const files = {}; for (const m of ['full', 'match', 'others']) files[m] = await vector(c, m);
-  execFileSync('pdftoppm', ['-r', '300', '-gray', '-png', '-singlefile', files.full, path.join(OUT, `${c.id}-scan`)], { stdio: 'ignore' });
+  execFileSync('pdftoppm', ['-r', '300', ...(process.env.RED ? [] : ['-gray']), '-png', '-singlefile', files.full, path.join(OUT, `${c.id}-scan`)], { stdio: 'ignore' });
   execFileSync(TESS, [path.join(OUT, `${c.id}-scan.png`), path.join(OUT, `${c.id}-ocr`), '--dpi', '300', '-l', 'eng', 'pdf'], { stdio: 'ignore' });
   const ocrPdf = path.join(OUT, `${c.id}-ocr.pdf`);
   const m = pgm(files.match, 288);

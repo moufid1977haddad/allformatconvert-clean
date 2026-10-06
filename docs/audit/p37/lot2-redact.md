@@ -137,3 +137,37 @@ PDF arabes de Chrome : PDF.js mélange l'ordre du dessin et l'ordre de lecture d
 - `node scripts/p37/redact-real-page.mjs <origin> --browser=chromium` et `--browser=webkit --device=iphone` : attendu 15 + 4 PASS.
 - `node scripts/p35/redact-bench.mjs <origin> --list=scripts/p37/review-traps.txt --root=%TEMP%\p37-review-redact --browser=chromium --ocr` (puis `--browser=webkit`) : attendu 5 ok, 0 fuite.
 - Sans build : `node scripts/p37/redact-canvas-check.mjs --browser=chromium` puis `--browser=webkit`.
+
+## 9. Relecture n° 2 (9cdaf2a5 : GO avec conditions) — corrections N1 à N5
+
+Chaque point a un test qui échoue avant et passe après. « Avant » = 9cdaf2a5, soit les chiffres de la relecture, soit une copie de ses fichiers rejouée par mon test (`--harness` / `--impl`).
+
+| Défaut | Correction (`app/lib/pdfRedact.js`, page, banc Node) | Test : avant → après |
+|---|---|---|
+| N1 couche OCR cachée autrement que par le mode 3 | (1) L'opacité `ca` / `CA` de `setGState` est suivie. Un texte rempli avec `ca 0` (ou en contour avec `CA 0`) est invisible. (2) Un glyphe recouvert ensuite par une image (`paintImageXObject`, image en ligne, masque…, rectangle de l'image par le CTM) est marqué invisible. Pour les variantes « répétées » ou « groupées », tous les glyphes déjà dessinés le sont (côté sûr). Un glyphe invisible a une encre inconnue, d'où l'ancienne marge. | `review/ocr-variants.mjs` : under-image et alpha-0, 94,7 % (vraie page, relecture) → **100 %** (Node, et navigateur Chromium et WebKit via `redact-canvas-check.mjs --review`) |
+| N2 canvasInk mesure une police de repli | Renvoie null si `font.disableFontFace`, si la face (hors police système) n'est pas « loaded » dans `document.fonts`, ou si un caractère visible ne dessine rien (seul un espace peut être vide). `inkOf` reçoit le texte du glyphe. | `review/canvas-ink-fallback.mjs` : face non chargée, avant [0,12, -0,01, 0,66, 0,64] → **null** en Chromium et en WebKit ; Helvetica système inchangée |
+| N3 Type 3, /FontBBox fausse non nulle | Encre = union de la FontBBox et des bornes d1 du glyphe (PDF.js le découpe à ces bornes). Sans d1 (d0) : ligne entière. | `fit-adversarial --only=type3-bbox-too-small` : 800 px (Node), 850 px (vraie page) → **0** |
+| N4 phrase arabe (fuite silencieuse) | (1) `termVariants` donne d'abord la forme lue par PDF.js et son envers, puis les mélanges (64 au plus). (2) Les termes sont aussi cherchés dans les glyphes dessinés dès la passe 1 (`pageGlyphs` + `glyphTermMatches`, 20 s par page). Une page trouvée par les glyphes seuls est noircie et comptée, et ses glyphes sont réutilisés en passe 2. (3) `verifyRedacted` refuse aussi un fichier dont une page dessine encore un terme (`glyphHit`). | `redact-review2.test.mjs` : « وبركاته لا إله إلا الله » seule : nomatch → **ok, absente** ; avec « مارس » : ok mais pdftotext la lisait → **absente** ; forme PDF.js dans les 2 premières : FAIL → PASS |
+| N5 sur-noircissement par les formes permutées | Le texte est cherché avec le terme tel que tapé (`matchSpans(…, { forms: 'exact' })`). Les formes lues de travers ne sont trouvées que dans les glyphes, là où le dessin les montre : le terme, et son envers s'il est de droite à gauche, sur le texte des glyphes dans l'ordre du dessin ou avec chaque grappe inversée. Toutes les formes restent dans le contrôle final, la couche invisible et les annotations. | Même test, nouveau PDF `lo-Arial-names.pdf` : « سلام » noircissait « سالم » → **plus** ; « فلاح » noircissait « فالح » → **plus** ; « السلام » et « الفلاح » restent noircis |
+
+### Effet en plus
+Les PDF arabes faits par Chrome sont maintenant noircis : la recherche par glyphes trouve « مارس » (avant : « No match found »). Contrôle Node : « مارس » absent de pdftotext, de PDF.js et des flux bruts, pour les 3 polices Chrome. La couche invisible de ces PDF reste pauvre : PDF.js lit leur texte en désordre.
+
+### Relances (code final)
+- `redact-review-fixes.test.mjs` tout PASS ; `redact-review2.test.mjs` tout PASS (9cdaf2a5 : 5 FAIL).
+- box-fit 15/15 ; `review/fit-adversarial.mjs` 19/19 ; `review/ocr-scan.mjs` et `ocr-variants.mjs` 100 %.
+- Arabe 4/4 notées.
+- 31 pièges avec OCR : 31 ok, 0 fuite (seul signal : r2/g5, faux positif connu). `review/traps-r2.txt` 3/3 ok, 0 fuite. `review-traps.txt` 5/5.
+- Navigateur, sans build : `redact-canvas-check.mjs --review` (mes 15 fixtures et les 21 fixtures rouges de la relecture, avec le code de la page) → **Chromium tout PASS, WebKit tout PASS**.
+- content-verify 0 ; instructions 0 ; privacy-claims 0 ; ESLint 0 erreur. Texte de la page inchangé : la ligne « Black boxes » (« invisible text over a scan ») couvre aussi ces cas.
+
+### Risques restants
+- Le contrôle final garde toutes les formes (demande de la relecture). Un fichier dont une page non noircie contient « سالم » sera donc REFUSÉ si l'on noircit « سلام ». C'est le côté sûr : aucun fichier n'est donné, et le message le dit. Pour éviter ces refus, il faudrait limiter le contrôle final au terme exact plus la recherche par glyphes : décision du propriétaire.
+- Recherche par glyphes en passe 1 : une liste d'opérations de plus par page, donc plus lent sur les gros PDF (20 s au plus par page). En cas d'échec, le contrôle final la refait.
+- Les motifs automatiques (e-mail, téléphone, carte) ne sont pas cherchés dans les glyphes.
+- Pas de vrai PDF « texte sous l'image » (ABBYY, scanner) testé : seulement la fixture construite par la relecture.
+
+### Commandes pour le contrôleur (après rebuild)
+- `RED=1` fixtures (déjà dans %TEMP%) ; `node scripts/p37/review/real-page-review.mjs <origin> --browser=chromium` et `--browser=webkit --device=iphone` : attendu **21/21**.
+- `node scripts/p35/redact-bench.mjs <origin> --list=scripts/p37/review/traps-r2.txt --root=%TEMP%\p37-review-redact --browser=chromium` (puis webkit) : attendu 3 ok, 0 fuite.
+- Puis les commandes des §6 et §8 (real-page 15 + 4, 31 pièges, review-traps).

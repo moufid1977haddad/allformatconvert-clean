@@ -19,7 +19,7 @@ const pdfjsLib = await import(from('node_modules/pdfjs-dist/legacy/build/pdf.mjs
 const { pageGeometry, redact } = await import(from('scripts/p35/harness.mjs'));
 const fontkit = await import(from('node_modules/@pdf-lib/fontkit/dist/fontkit.umd.js')).then((m) => m.default || m);
 const NEW = await import(from('app/lib/pdfRedact.js'));
-const OUT = path.join(os.tmpdir(), 'p37-review-redact', 'fit');
+const OUT = path.join(os.tmpdir(), 'p37-review-redact', process.env.RED ? 'fit-red' : 'fit');
 fs.mkdirSync(OUT, { recursive: true });
 const OLDF = path.join(os.tmpdir(), 'p37-review-redact', 'pdfRedact.head.mjs');
 const OLD = fs.existsSync(OLDF) ? await import(pathToFileURL(OLDF).href) : null;
@@ -48,6 +48,9 @@ F.push({ id: 'ligature-calibri', ttf: 'C:/Windows/Fonts/calibri.ttf', words: ['t
 F.push({ id: 'italic-ttf-overhang', ttf: 'C:/Windows/Fonts/timesi.ttf', words: ['Nom : ', 'fjfjf', ' suite'], term: 'fjfjf', size: 24 });
 // Type 3 font: each glyph draws a box wider than its advance (overhang 25 % of the em on the right, 10 % on the left)
 F.push({ id: 'type3-overhang', type3: { w: 500, x0: -100, x1: 750 }, body: (m, o) => `BT /F1 14 Tf 72 400 Td ${line("Image : ", 'photo-2', '.jpg suite')(m, o)} ET` });
+F.push({ id: 'type3-bbox-too-small', type3: { w: 500, x0: -100, x1: 750, bbox: [0, 0, 500, 700] }, body: (m, o) => `BT /F1 14 Tf 72 400 Td ${line('Image : ', 'photo-2', '.jpg suite')(m, o)} ET` });
+F.push({ id: 'type3-bbox-zero', type3: { w: 500, x0: -100, x1: 750, bbox: [0, 0, 0, 0] }, body: (m, o) => `BT /F1 14 Tf 72 400 Td ${line('Image : ', 'photo-2', '.jpg suite')(m, o)} ET` });
+F.push({ id: 'form-sets-tr3-then-visible', font: std('Helvetica'), body: (m, o) => `q BT 3 Tr ET Q BT /F1 14 Tf 72 400 Td ${line('Image : ', 'photo-2', '.jpg suite')(m, o)} ET` });
 F.push({ id: 'type3-big-matrix-size1', type3: { w: 500, x0: 0, x1: 500, fm: 0.014 }, body: (m, o) => `BT /F1 1 Tf 72 400 Td ${line("Image : ", 'photo-2', '.jpg suite')(m, o)} ET` });
 
 async function type3Font(d, t) {
@@ -61,7 +64,7 @@ async function type3Font(d, t) {
   const first = Math.min(...codes), last = Math.max(...codes);
   const widths = []; for (let c = first; c <= last; c++) widths.push(t.w * unit);
   const cp = d.context.obj({}); for (const [n, r] of Object.entries(procs)) cp.set(lib.PDFName.of(n), r);
-  return d.context.register(d.context.obj({ Type: 'Font', Subtype: 'Type3', FontBBox: [t.x0 * unit, -200 * unit, t.x1 * unit, 900 * unit], FontMatrix: [fm, 0, 0, fm, 0, 0], CharProcs: cp, Encoding: d.context.obj({ Type: 'Encoding', Differences: diffs }), FirstChar: first, LastChar: last, Widths: widths, Resources: d.context.obj({}) }));
+  return d.context.register(d.context.obj({ Type: 'Font', Subtype: 'Type3', FontBBox: t.bbox ? t.bbox.map((v) => v * unit) : [t.x0 * unit, -200 * unit, t.x1 * unit, 900 * unit], FontMatrix: [fm, 0, 0, fm, 0, 0], CharProcs: cp, Encoding: d.context.obj({ Type: 'Encoding', Differences: diffs }), FirstChar: first, LastChar: last, Widths: widths, Resources: d.context.obj({}) }));
 }
 
 async function build(v, mode) {
@@ -89,6 +92,7 @@ async function build(v, mode) {
     }
   } else { fontRef = await v.font(d); body = v.body(tm, to); }
   page.node.set(lib.PDFName.of('Resources'), d.context.obj({ Font: { F1: fontRef } }));
+  if (process.env.RED) body = '1 0 0 rg 1 0 0 RG ' + body.replace(/\b0 0 0 (rg|RG)\b/g, '1 0 0 $1').replace(/\b0\.6 g\b/g, '1 0.6 0.6 rg').replace(/(^|\s)0 g\b/g, '$1 1 0 0 rg');
   page.node.set(lib.PDFName.of('Contents'), d.context.register(d.context.stream(body)));
   const f = path.join(OUT, `${v.id}-${mode}.pdf`);
   fs.writeFileSync(f, await d.save({ updateFieldAppearances: false }));

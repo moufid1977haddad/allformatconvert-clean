@@ -27,6 +27,16 @@ fs.mkdirSync(OUT, { recursive: true });
 // fixtures: id → { dir, fontSize, term }
 const jobs = [];
 if (fs.existsSync(path.join(BOX, 'variants.json'))) for (const [id, v] of Object.entries(JSON.parse(fs.readFileSync(path.join(BOX, 'variants.json'), 'utf8')))) jobs.push({ id, dir: BOX, ...v });
+// --review: the second review's red fixtures (RED=1 scripts/p37/review/fit-adversarial.mjs, ocr-scan.mjs, ocr-variants.mjs;
+// %TEMP%\p37-review-redact\fit-red and ocr-red), as scripts/p37/review/real-page-review.mjs runs them on the real page:
+// the match's ink must be black (coverage only)
+const RV = path.join(os.tmpdir(), 'p37-review-redact');
+if (process.argv.includes('--review')) {
+  const FIT = ['stroke-tr2-w2-24', 'stroke-tr1-w3-36', 'stroke-tr2-w1-12', 'negative-font-size', 'flipped-ctm-generator', 'shear-synthetic-italic', 'shadow-offset-2pt', 'fake-bold-double-0.4', 'tz-300-tc-neg', 'rise-inside-match', 'type0-narrow-widths', 'type0-accents-stacked', 'ligature-calibri', 'italic-ttf-overhang', 'type3-overhang', 'type3-bbox-too-small', 'type3-bbox-zero'];
+  const TERM = { 'type0-accents-stacked': 'ỄỂỆphô', 'ligature-calibri': 'fice', 'italic-ttf-overhang': 'fjfjf' };
+  for (const id of FIT) jobs.push({ id: `review-${id}`, full: path.join(RV, 'fit-red', `${id}-full.pdf`), match: path.join(RV, 'fit-red', `${id}-match.pdf`), term: TERM[id] || 'photo-2' });
+  for (const [id, full, match, term] of [['ocr-times12', 'times12-ocr', 'times12-match', 'photography'], ['ocr-times12-sub', 'times12-sub-ocr', 'times12-sub-match', 'graph'], ['ocr-under-image', 'times12-ocr-under-image', 'times12-match', 'photography'], ['ocr-alpha-0', 'times12-ocr-alpha-0', 'times12-match', 'photography']]) jobs.push({ id: `review-${id}`, full: path.join(RV, 'ocr-red', `${full}.pdf`), match: path.join(RV, 'ocr-red', `${match}.pdf`), term });
+}
 const only = arg('only') ? arg('only').split(',') : null;
 
 const types = { '.mjs': 'text/javascript', '.js': 'text/javascript', '.html': 'text/html', '.pdf': 'application/pdf', '.pfb': 'application/octet-stream', '.ttf': 'font/ttf', '.wasm': 'application/wasm' };
@@ -63,7 +73,7 @@ const server = http.createServer((q, r) => {
   if (u === '/') { r.writeHead(200, { 'content-type': 'text/html' }); r.end(PAGE); return; }
   if (u.startsWith('/nm/pdfjs-dist/')) f = path.join(ROOT, 'node_modules', u.slice(4));
   else if (u === '/lib/pdfRedact.js') f = path.join(ROOT, 'app/lib/pdfRedact.js');
-  else if (u.startsWith('/fx/')) { const [, , d, name] = u.split('/'); if (d === 'box') f = path.join(BOX, name); }
+  else if (u.startsWith('/fx/')) { const [, , d, name] = u.split('/'); if (d === 'box') f = path.join(BOX, name); else if (d === 'rv') f = path.join(RV, decodeURIComponent(name)); }
   if (!f || !fs.existsSync(f)) { r.writeHead(404); r.end(); return; }
   r.writeHead(200, { 'content-type': types[path.extname(f)] || 'application/octet-stream' });
   r.end(fs.readFileSync(f));
@@ -90,7 +100,7 @@ await p.waitForFunction(() => window.run);
 let fails = 0;
 for (const j of jobs.filter((x) => !only || only.includes(x.id))) {
   const name = j.id;
-  const r = await p.evaluate(([u, t]) => window.run(u, t), [`/fx/box/${name}-full.pdf`, j.term]);
+  const r = await p.evaluate(([u, t]) => window.run(u, t), [j.full ? `/fx/rv/${encodeURIComponent(path.relative(RV, j.full))}` : `/fx/box/${name}-full.pdf`, j.term]);
   const d = await lib.PDFDocument.create();
   const img = await d.embedPng(Buffer.from(r.png.split(',')[1], 'base64'));
   const pg = d.addPage([r.w, r.h]);
@@ -98,13 +108,13 @@ for (const j of jobs.filter((x) => !only || only.includes(x.id))) {
   if (r.rotate) pg.setRotation(lib.degrees(r.rotate));
   const out = path.join(OUT, `${j.id.replace(/\//g, '_')}-boxes.pdf`);
   fs.writeFileSync(out, await d.save());
-  const res = picture(out, true), m = picture(path.join(j.dir, `${name}-match.pdf`), false), o = picture(path.join(j.dir, `${name}-others.pdf`), false);
+  const res = picture(out, true), m = picture(j.match || path.join(j.dir, `${name}-match.pdf`), false), o = j.full ? null : picture(path.join(j.dir, `${name}-others.pdf`), false);
   if (res.w !== m.w || res.h !== m.h) { fails++; console.log(`FAIL ${engine} ${j.id}: picture sizes differ`); continue; }
   const black = (i) => res.px[3 * i] < 90 && res.px[3 * i + 1] < 90 && res.px[3 * i + 2] < 90;
   let ink = 0, uncovered = 0, nb = 0, deep = 0, where = null;
   for (let i = 0; i < m.w * m.h; i++) {
     if (m.px[i] < 128) { ink++; if (!black(i)) uncovered++; }
-    if (o.px[i] < 128 && black(i)) {
+    if (o && o.px[i] < 128 && black(i)) {
       nb++;
       const x = i % m.w, y = (i / m.w) | 0;
       let dd = 40;
@@ -112,7 +122,7 @@ for (const j of jobs.filter((x) => !only || only.includes(x.id))) {
       if (dd / 4 > deep) { deep = dd / 4; where = [x / 4, y / 4]; }
     }
   }
-  const allowed = Math.max(0.02 * j.fontSize, 0.5) + 0.5;
+  const allowed = Math.max(0.02 * (j.fontSize || 12), 0.5) + 0.5;
   const ok = ink > 0 && uncovered === 0 && deep <= allowed;
   if (!ok) fails++;
   console.log(`${ok ? 'PASS' : 'FAIL'} ${engine} ${j.id}: spans ${r.spans} (exact ${r.exact}); match ink ${ink} px, not black ${uncovered}; neighbour ink blackened ${nb} px, deepest ${deep.toFixed(2)} pt (allowed ${allowed.toFixed(2)})${where ? ` at ${where.map((v) => v.toFixed(1)).join(',')}` : ''}`);

@@ -79,3 +79,70 @@ Couche invisible : aucun mot partiel, aucun terme dans pdftotext sur ces 16 fixt
 - Fixture OCR (D1) : `%TEMP%\p37-review-redact\ocr\times12-ocr.pdf`, terme « photography ». Attendu après correctif : 100 % de l'encre du scan couverte.
 - `%TEMP%\p37-review-redact\fit\stroke-tr1-w3-36-full.pdf` et `type3-overhang-full.pdf`, terme « photo-2 ».
 - `%TEMP%\p37-review-redact\ar2\two-pages.pdf`, termes « مارس » et « السلام » (D4).
+
+---
+
+# Relecture n° 2 — commit 9cdaf2a5 (corrections D1-D6, canvasInk)
+
+Date : 06/10/2026. Même rôle, mêmes règles. Vraie page : build de production sur http://localhost:3137 (servi par le contrôleur, je ne l'ai ni lancé ni arrêté).
+Nouveaux scripts : `scripts/p37/review/ocr-variants.mjs`, `real-page-review.mjs`, `canvas-ink-fallback.mjs`, `traps-r2.txt`. `fit-adversarial.mjs`, `ocr-scan.mjs` et `ocr-variants.mjs` acceptent `RED=1` (texte rouge, pour juger le noir sur la vraie page).
+
+## Verdict : GO avec conditions
+
+D1 à D6 sont corrigés et vérifiés, en Node et sur la vraie page (Chromium et WebKit iPhone). Avant la mise en ligne, il faut corriger N1 et N2 : ce sont deux petits correctifs, sur la même famille que D1. N4 est préexistant : à planifier avant d'annoncer l'arabe.
+
+## 1. Corrections vérifiées
+| Défaut | Ma preuve | Résultat |
+|---|---|---|
+| D1 couche OCR (mode 3) | `ocr-scan.mjs` (Node) ; `real-page-review.mjs` ocr-times12, ocr-times12-sub | 100 % couvert en Node. Vraie page : 0 px non noir en Chromium et en WebKit iPhone |
+| D2 contour | stroke-tr2-w2-24, stroke-tr1-w3-36, stroke-tr2-w1-12 | 0 px, en Node et sur la vraie page (2 moteurs) |
+| D3 Type 3 | type3-overhang, type3-bbox-zero (nouvelle) | 0 px (FontBBox nulle : ligne entière) |
+| D4 lam-alef, un mot | `arabic-terms.mjs two-pages.pdf "مارس" + "السلام"` ; bench vraie page `traps-r2.txt` | pdftotext : « السلام » absent. Vraie page : ok, 0 fuite |
+| D5, D6 | `redact-review-fixes.test.mjs` | 10/10 PASS |
+
+- Non-régression : box-fit 15/15. Arabe 4/4. 31 pièges avec `--ocr` : 31 ok (seul signal : r2/g5, connu). Mes 19 fixtures en Node : 18 PASS (seul échec : N3).
+- `redact-real-page.mjs` sur localhost:3137 en Chromium : 15/15 boîtes et 4/4 arabe PASS. Les 3 échecs vus sur dbf86202 sont corrigés (canvasInk).
+- Mode suivi à travers q/Q et formulaires : le mode fait partie de l'état empilé (`push`/`pop`), comme dans le PDF. Tr 7 est traité comme invisible (marge élargie, côté sûr). Fixture form-sets-tr3-then-visible : PASS.
+
+## 2. Nouveaux défauts
+
+### N1 — MOYENNE (même famille que D1, non couverte) : texte OCR caché autrement que par le mode 3
+- Repro : `node scripts/p37/review/ocr-variants.mjs` après `ocr-scan.mjs` (avec `RED=1` pour la vraie page). Même couche Tesseract, cachée autrement :
+  - « under-image » : texte en mode 0, dessiné AVANT le scan, que l'image opaque recouvre (mode « texte sous l'image » de certains logiciels d'OCR et scanners) ;
+  - « alpha-0 » : texte en mode 0 avec un ExtGState `/ca 0`.
+- Résultat : 105 px de l'encre du mot non noircis, sur la vraie page, en Chromium ET en WebKit iPhone (94,7 %). Les queues des jambages sont visibles. Statut « ok », aucun signal. HEAD P35 : 100 %.
+- Cause : `glyphsOfOperatorList` ne regarde que `Tr`. Les cas « opacité de remplissage 0 » et « image peinte plus tard par-dessus » laissent `invisible = false`, d'où une boîte serrée sur des glyphes que personne ne voit.
+- Correctif : (1) suivre `ca` dans `setGState`, et traiter `ca == 0` comme invisible ; (2) marquer invisible un glyphe recouvert par une image peinte après lui (`paintImageXObject`, `paintInlineImageXObject`, `paintImageMaskXObject`… dont le rectangle, par le CTM courant, contient le glyphe). Variante plus simple : sur une page qui peint une image après du texte, garder l'ancienne marge pour ce texte.
+- À confirmer sur un vrai PDF « texte sous l'image » (ABBYY, scanner multifonction) : je n'en ai pas.
+
+### N2 — FAIBLE-MOYENNE : canvasInk mesure avec une police de repli sans le dire
+- Repro : `node scripts/p37/review/canvas-ink-fallback.mjs --browser=chromium` (et `webkit`). Pour une face non chargée (`g_d0_f9`), canvasInk ne renvoie pas null. Il renvoie l'encre de la police de repli : caractère privé → [0,12, -0,01, 0,66, 0,64] en Chromium, et une autre boîte en WebKit.
+- Quand : PDF.js met `font.disableFontFace = true` quand le navigateur refuse la police (pdf.mjs l. 7850-7851). Il dessine alors le glyphe comme un chemin (l. 11674), avec sa vraie forme. La mesure, elle, porte sur un autre glyphe. L'encre réelle (dépassement italique, accent haut) peut sortir de la boîte. Pour une police re-mesurée, l'avance mesurée (5e valeur) est fausse aussi : le décalage D5 est alors mal calculé.
+- La version dbf86202 exigeait que la face soit chargée (`loadedFaces.has(loadedName)`). Cette garde a disparu.
+- Aussi : un dessin vide (`x1 < 0`) donne une encre nulle acceptée (`canvasInk`). Un canvas épuisé (mémoire sur iPhone) produirait cela pour chaque glyphe.
+- Correctif : renvoyer null si `font.disableFontFace`, ou si la face (`loadedName`, hors police système) n'est pas dans `document.fonts` à l'état « loaded ». Renvoyer null aussi pour un dessin vide d'un caractère qui n'est pas un espace.
+
+### N3 — FAIBLE : Type 3 dont la /FontBBox est fausse (non nulle mais trop petite)
+- Repro : `fit-adversarial.mjs --only=type3-bbox-too-small`. Node : 800 px non couverts. Vraie page : 850 px, en Chromium et en WebKit.
+- Cause : la FontBBox est prise pour vraie (`glyphRects`, branche Type 3). Une boîte nulle donne la ligne entière, mais une boîte fausse non nulle passe. C'est une erreur du producteur, mais HEAD couvrait ce cas.
+- Correctif : réunir la FontBBox et la boîte d1 de chaque glyphe (`charProcOperatorList`), ou les limites des chemins de la procédure. Sinon, ligne entière.
+
+### N4 — ÉLEVÉE, PRÉEXISTANTE (reste de D4) : phrase arabe
+- Le plafond de 64 formes écarte justement la forme lue par PDF.js. Pour « السلام عليكم ورحمة الله وبركاته لا إله إلا الله », `termVariants` donne 64 formes, sans celle de PDF.js. La forme « tout inversé » est générée en dernier (`mask` maximal), puis coupée par `slice(0, 64)`. Sans compter `if (forms.size > 32) break`, qui saute la deuxième substitution.
+- Plus large : PDF.js découpe une longue ligne arabe en morceaux dans le désordre (« كاتهالالهاالهللا » + « السالمعليكمورحمةهللاوبر »). Une phrase à cheval sur ces morceaux n'est trouvée sous aucune forme.
+- Conséquence : vraie page, phrase « وبركاته لا إله إلا الله » seule → « No match found », alors qu'elle est dans le fichier. Node, avec « مارس » en plus (sur une autre page) : statut **ok**, fichier livré, **pdftotext lit encore la phrase** (fuite silencieuse, comme D4).
+- Correctif : (1) générer d'abord la forme tout inversée et son envers, puis les mélanges ; (2) chercher aussi les termes dans les glyphes dès la passe 1 (liste d'opérations par page), pour qu'une page trouvée par les glyphes seuls soit noircie et comptée ; (3) faire de même dans `verifyRedacted`, ou y ajouter une lecture triée par position.
+
+### N5 — FAIBLE (sur-noircissement, visible) : les variantes touchent d'autres mots
+- `matchSpans` avec variantes : « سلام » noircit aussi « سالم » (Salem, un autre nom propre) ; « سلامة » → « سالمة » ; « فلاح » → « فالح » ; « علي » → « يلع » (forme inversée, possible à cheval sur deux mots, car les espaces sont ignorés).
+- Pas de fuite, mais de vrais mots effacés et comptés comme des occurrences. C'est grave dans un acte où « سالم » est une autre personne.
+- Correctif : n'accepter une forme permutée que là où la géométrie le justifie (glyphe lam-alef à plusieurs caractères, ou run lu dans l'ordre du dessin). Garder toutes les formes pour `verifyRedacted`, où le sur-signalement est sans danger.
+
+## 3. Points vérifiés sans défaut
+- Le plafond de 64 laisse passer la forme de PDF.js pour un mot seul (jusqu'à 4 lam-alef : 32 formes, forme incluse).
+- `glyphTermQuads` : un glyphe n'est couvert qu'une fois ; « unbounded » couvre l'opération de texte entière.
+- canvasInk avec une police système (Helvetica) : même encre en Chromium et en WebKit ([0,04, -0,22, 0,53, 0,55]).
+
+## 4. À ajouter aux bancs
+- `RED=1` pour fabriquer les fixtures, puis `node scripts/p37/review/real-page-review.mjs <origin> --browser=chromium` et `--browser=webkit --device=iphone`. Attendu après N1 et N3 : 21/21 (aujourd'hui 18/21 dans les deux moteurs).
+- `node scripts/p35/redact-bench.mjs <origin> --list=scripts/p37/review/traps-r2.txt --root=%TEMP%\p37-review-redact --browser=chromium`.

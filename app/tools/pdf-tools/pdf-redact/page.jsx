@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
-import { matchSpans, annotationText, patternSpans, annotationMatches, termsOf, PATTERNS, redactionQuads, textLayerWords, drawInvisibleWords, standardWidthOf, glyphTermQuads, invisibleTextFont, hasArabic, pageGlyphGeometry, canvasInk } from '../../../lib/pdfRedact';
+import { matchSpans, annotationText, patternSpans, annotationMatches, termsOf, PATTERNS, redactionQuads, textLayerWords, drawInvisibleWords, standardWidthOf, glyphTermQuads, glyphTermMatches, invisibleTextFont, hasArabic, pageGlyphGeometry, pageGlyphs, itemGeometry, canvasInk } from '../../../lib/pdfRedact';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
@@ -121,21 +121,29 @@ export default function Page() {
         const items = content.items.filter((it) => typeof it.str === 'string');
         const strs = items.map((it) => it.str);
         const eols = items.map((it) => !!it.hasEOL);
+        // P37 second review (N5): the text is searched for the terms as typed; the forms PDF.js misreads (a lam-alef
+        // reversed, a right-to-left run in drawing order) are found in the glyphs below, where the drawing shows them
         const spans = [
-          ...terms.flatMap((t, ti) => matchSpans(strs, t).map((sp) => ({ ...sp, m: `t${ti}:${sp.m}` }))),
+          ...terms.flatMap((t, ti) => matchSpans(strs, t, { forms: 'exact' }).map((sp) => ({ ...sp, m: `t${ti}:${sp.m}` }))),
           ...patternSpans(strs, kinds, eols),
         ];
         // Form field values, comments, link addresses… are searched too (29/09, P33).
         const all = await step(page.getAnnotations(), `${where}: reading its form fields and comments`);
         const annots = all.filter((an) => an.rect && annotationMatches(annotationText(an), terms, kinds));
-        if (spans.length === 0 && annots.length === 0) continue;
+        // P37 second review (N4): the terms are also searched in the glyphs the page draws (PDF.js can read a right-to-
+        // left phrase out of order, or its lam-alef reversed). Not read within 20 s: the final check reads it again.
+        let glyphs = null, drawnHits = 0;
+        if (terms.length) {
+          try { glyphs = await withTimeout(pageGlyphs(page, pdfjsLib), 20000, 'timeout'); drawnHits = glyphTermMatches(glyphs, terms).length; } catch (e) { console.warn(`[pdf-redact] page ${i + 1}: glyphs not read (${e?.message})`); }
+        }
+        if (spans.length === 0 && annots.length === 0 && drawnHits === 0) continue;
         // on a redacted page, an annotation whose content cannot be read (a stamp, an attached file…) is blacked out too
         const opaque = all.filter((an) => an.rect && UNREADABLE_ANNOTATIONS.has(an.subtype) && !annots.includes(an));
-        const here = new Set(spans.map((sp) => sp.m)).size + annots.length;
+        const here = Math.max(new Set(spans.map((sp) => sp.m)).size, drawnHits) + annots.length;
         totalMatches += here;
         pagesHit.push(i + 1);
         perPage.push([i + 1, here]);
-        found.set(i, { page, content, items, spans, boxes: [...annots, ...opaque] });
+        found.set(i, { page, content, items, spans, boxes: [...annots, ...opaque], glyphs });
       }
 
       if (totalMatches === 0) {
@@ -158,7 +166,7 @@ export default function Page() {
           outDoc.addPage(copied);
           continue;
         }
-        const { page, content, items, spans, boxes } = hit;
+        const { page, content, items, spans, boxes, glyphs } = hit;
         setProgress(`${where}: blacking out ${perPage.find(([pg]) => pg === i + 1)[1]} occurrence(s)...`);
 
         // A black rectangle drawn on top of the page still leaves the
@@ -238,7 +246,7 @@ export default function Page() {
         // searched in the glyphs drawn, and those glyphs covered. Without the glyphs (no answer in 20 s), the padded
         // estimate is used for every match, as before.
         let geo = null;
-        try { geo = await withTimeout(pageGlyphGeometry(page, pdfjsLib, items, content.styles, inkOf), 20000, 'timeout'); } catch (e) { console.warn(`[pdf-redact] page ${i + 1}: glyph positions not read (${e?.message}); padded boxes used`); }
+        try { geo = glyphs ? { glyphs, geometry: itemGeometry(items, content.styles, glyphs, inkOf) } : await withTimeout(pageGlyphGeometry(page, pdfjsLib, items, content.styles, inkOf), 20000, 'timeout'); } catch (e) { console.warn(`[pdf-redact] page ${i + 1}: glyph positions not read (${e?.message}); padded boxes used`); }
         const px = 1 / viewport.scale;
         const quads = [...redactionQuads(items, content.styles, spans, boxes.map((an) => an.rect), measureOf, geo && geo.geometry, px), ...(geo ? glyphTermQuads(geo.glyphs, terms, inkOf, px) : [])];
         for (const q of quads) poly(q);
@@ -269,7 +277,7 @@ export default function Page() {
       const pdfBytes = await step(outDoc.save(), 'Saving the redacted PDF');
       // P33: the finished file is read again; a file in which a term can still be found is not handed over
       setProgress('Checking the redacted PDF...');
-      const check = await step(verifyRedacted(pdfBytes, { terms, textMatches, annotMatches: (t) => annotationMatches(t, terms, kinds), annotText: annotationText, pdfjsLib, lib, pageCount: pdf.numPages }), 'Checking the redacted PDF');
+      const check = await step(verifyRedacted(pdfBytes, { terms, textMatches, annotMatches: (t) => annotationMatches(t, terms, kinds), annotText: annotationText, pdfjsLib, lib, pageCount: pdf.numPages, glyphHit: terms.length ? async (pg) => glyphTermMatches(await pageGlyphs(pg, pdfjsLib), terms).length > 0 : null }), 'Checking the redacted PDF');
       if (!check.ok) {
         setError(`This PDF could not be redacted safely: after blacking out, ${check.reason}. No file is given. Please tell us about it through the contact page (without the file), or redact it in a desktop tool.${sentToServer ? ' Your PDF was sent to our own PDF service for this attempt, then deleted.' : ''}`);
         setLoading(false);
