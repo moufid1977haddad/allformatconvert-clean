@@ -24,7 +24,7 @@ else {
   const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 60000 }), p.locator('[data-file-download] a').first().click({ noWaitAfter: true })]);
   await dl.saveAs(out);
   const txt = execFileSync('pdftotext', ['-enc', 'UTF-8', out, '-']).toString();
-  console.log(`${engine}: summary: ${(await p.locator('[data-summary]').innerText()).slice(0, 90)}`);
+  console.log(`${engine}: summary: ${(await p.locator("[data-summary]").innerText()).slice(0, 2000)}`);
   for (const t of terms) console.log(`  ${t}: pdftotext ${N(txt).includes(N(t)) ? 'LEAK' : 'absent'}`);
 }
 await b.close();

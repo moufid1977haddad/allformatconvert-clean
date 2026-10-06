@@ -375,3 +375,49 @@ Condition de mise en ligne (S1) : une fuite **visible** et silencieuse reste pos
 - s-latin (Chromium, même page, « شركة Microsoft ») : refusé, pas de fuite. Le contrôle a vu le terme par les glyphes invisibles de la couche (« drawn »), ce qui est fragile : si la couche n'avait pas gardé ces mots, ce cas fuirait comme S1.
 - s-lowrap et s-lolatin (LibreOffice, même page) : le terme est trouvé par le texte et noirci. Pas de fuite.
 - Pages illisibles : le signal attrape wb-ok-content, pas les Bulletins marocains (lettres perdues sans caractère illisible, déjà noté au round 6).
+
+
+---
+
+# Relecture n° 8 (dernière) — commit eb12175d (S1 : visibleTermLeft)
+
+Date : 06/10/2026. Même rôle, mêmes règles. Vraie page : build de production de eb12175d sur http://localhost:3137.
+Critère du contrôleur : ne sont bloquants que (1) un terme encore lisible (texte, pixels, couche) dans un fichier LIVRÉ, et (2) un plantage ou un faux refus sur les PDF réels des corpus (37 + 24).
+
+## Verdict : GO avec conditions — une décision du propriétaire sur L5
+
+S1 est corrigé et vérifié sur la vraie page, en Chromium et en WebKit. Aucun plantage, aucun faux refus sur les corpus. Un seul cas répond encore au critère (1) : **L5**. Il est connu depuis le round 6 et vient de la façon dont le PDF code son texte : aucune recherche dans le texte ne peut le trouver. Il faut soit l'accepter comme limite écrite, soit faire le chantier OCR (§12, 3 à 3,5 jours).
+
+## 1. S1 vérifié
+| Fixture (même page que « مارس ») | Node | Vraie page Chromium | Vraie page WebKit |
+|---|---|---|---|
+| ar5\s-wrap « شهر أبريل » | REFUSED « can still be read on page 1 » | REFUSED | REFUSED |
+| ar5\s-latin « شركة Microsoft » | REFUSED | REFUSED | REFUSED |
+| ar5\s-harakat « المدير العام » | ok, noirci | ok, noirci | ok, noirci |
+| ar5\s-mixed « السلام 2025 » (Chromium) | ok, noirci (image vérifiée) | — | — |
+| ar3\s-tatweel, ar3\s-mixed-lo, ar3\wrap15 (LibreOffice) | ok, noircis | — | — |
+
+- Le contrôle passe avant l'enregistrement, avant le contrôle final et avant tout retrait de couche : le trou de la relecture n° 7 est fermé.
+
+## 2. Plantages et faux refus (corpus)
+- `corpus-words.mjs` (pages copiées, contrôle en ordre de lecture) sur les 37 PDF arabes : 1 249 mots, **0 faux refus**.
+- `corpus-visible.mjs` de l'auteur (pages noircies, contrôle des glyphes visibles), relancé par moi :
+  - 37 PDF arabes : 1 205 mots, 3 refus. Ce sont de vraies occurrences laissées sans boîte : emro-rc67 « لمنظمة », who-a65div4 « الصحة » et « العمل » écrits avec tatweel. Refuser est juste.
+  - 24 PDF p27 : 0.
+- Plus de plantage `/SMask /None`. Les 32 pièges `--ocr` : 32 ok.
+
+## 3. Ce qui reste lisible dans un fichier livré
+### L5 — texte que PDF.js lit faux (préexistant, connu depuis le round 6)
+- Repro, **vraie page Chromium** : `scripts/audit/results/arabe-corpus/pdfs/ma-bo-7116.pdf` (Bulletin officiel du Maroc), termes « ISSN » et « السنة الحادية عشرة ».
+  - Résultat : « Blacked out 1 occurrence (page 1: 1) », fichier livré.
+  - En haut à droite de l'image, **« السنة الحادية عشرة بعد المائة » reste lisible**. Le résumé ne nomme aucune page « illisible » : ce PDF perd des lettres (« السنة » lu « النة ») sans caractère de contrôle, donc `unreadableShare` ne le voit pas.
+  - Même schéma : ma-bo-6279. wb-ok-content est, lui, signalé dans le résumé (non silencieux).
+- Cause : PDF.js donne aux glyphes un texte faux. La passe 1, le contrôle des glyphes visibles et le contrôle final lisent tous ce même texte : aucun ne peut voir le terme.
+- Options (décision du propriétaire) :
+  1. Accepter la limite. Elle est écrite dans la FAQ « Can it miss a word that is in the PDF? », mais le résumé ne la signale pas pour ces PDF.
+  2. Faire le chantier OCR des pages suspectes (§12). Il faudrait alors aussi un signal pour les pages sans caractère illisible : par exemple des mots arabes que l'OCR lit autrement que PDF.js.
+
+## 4. Notes non bloquantes
+- ar5\s-harakat : sous la boîte de « المدير العام », un ou deux points de « ي » ou une kasra dépassent de quelques pixels, en Chromium et en WebKit (`%TEMP%\p37-review-redact\sharakat-full.png`). Le mot n'est pas lisible. Cause probable : une marque dessinée avec un décalage vertical hors de la boîte de son glyphe.
+- Les motifs automatiques (e-mail, téléphone, carte) ne passent pas par le contrôle des glyphes visibles : seulement par le texte, comme avant.
+- Le refus (S1, L2, L4) ne donne pas de fichier : pas de fuite, mais pas de résultat. Noircir ces cas reste le chantier estimé au §12.
